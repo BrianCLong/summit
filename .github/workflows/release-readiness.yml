@@ -237,3 +237,41 @@ jobs:
                 body: commentBody,
               });
             }
+
+  release-readiness-dashboard:
+    name: Release Readiness Dashboard
+    runs-on: ubuntu-latest
+    needs: release-readiness
+    if: always()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        # version is read from package.json packageManager field
+
+      - name: Install Dependencies
+        run: |
+          pnpm install --frozen-lockfile
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Generate Dashboard
+        run: |
+          pnpm tsx scripts/ci/build_release_readiness_dashboard.ts
+
+      - name: Upload Dashboard Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-readiness-dashboard
+          path: dist/readiness/
+          retention-days: 30
