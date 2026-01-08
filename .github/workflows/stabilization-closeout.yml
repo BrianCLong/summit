@@ -1,0 +1,95 @@
+name: Stabilization Closeout
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 1 * * 1' # Run Monday at 1 AM
+
+jobs:
+  dashboard:
+    name: Generate Stabilization Dashboard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # In a real scenario, we would download artifacts from previous workflows here.
+      # For now, we will create dummy artifacts if they don't exist to verify the script.
+      # This step should be replaced by actual artifact download/generation in production.
+      - name: Ensure Artifacts Directory Exists
+        run: mkdir -p artifacts/stabilization/scorecard artifacts/stabilization/snapshots artifacts/stabilization/validate
+
+      - name: Create Dummy Artifacts (If Missing)
+        run: |
+          if [ ! -f artifacts/stabilization/status.md ]; then
+            echo "# Weekly Status Placeholder" > artifacts/stabilization/status.md
+          fi
+          if [ ! -f artifacts/stabilization/escalation.json ]; then
+            echo '{"total_overdue": 0, "overdue_items": []}' > artifacts/stabilization/escalation.json
+          fi
+          # Check for scorecard files using shell glob expansion safely
+          if ! ls artifacts/stabilization/scorecard/scorecard_*.json >/dev/null 2>&1; then
+            echo '{"risk_index": "UNKNOWN", "on_time_rate": 0, "done_count": 0}' > artifacts/stabilization/scorecard/scorecard_dummy.json
+          fi
+          if ! ls artifacts/stabilization/snapshots/diff_*.json >/dev/null 2>&1; then
+             echo '{"current_snapshot_hash": "dummy", "added": [], "removed": [], "modified": []}' > artifacts/stabilization/snapshots/diff_dummy.json
+          fi
+
+      - name: Generate LATEST.json
+        run: |
+          # Dynamically find the latest files
+          STATUS_FILE=$(ls artifacts/stabilization/status.* | head -n 1)
+          SCORECARD_FILE=$(ls -t artifacts/stabilization/scorecard/scorecard_*.json 2>/dev/null | head -n 1)
+          DIFF_FILE=$(ls -t artifacts/stabilization/snapshots/diff_*.json 2>/dev/null | head -n 1)
+          ESCALATION_FILE="artifacts/stabilization/escalation.json"
+          VALIDATE_FILE="artifacts/stabilization/validate/report.json"
+
+          # Handle missing files gracefully in the JSON
+          [ -z "$SCORECARD_FILE" ] && SCORECARD_FILE="null" || SCORECARD_FILE="\"$SCORECARD_FILE\""
+          [ -z "$DIFF_FILE" ] && DIFF_FILE="null" || DIFF_FILE="\"$DIFF_FILE\""
+
+          # Generate LATEST.json
+          cat <<EOF > artifacts/stabilization/LATEST.json
+          {
+            "date": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "sha": "${{ github.sha }}",
+            "paths": {
+              "status": "$STATUS_FILE",
+              "scorecard": $SCORECARD_FILE,
+              "escalation": "$ESCALATION_FILE",
+              "diff": $DIFF_FILE,
+              "validate": "$VALIDATE_FILE"
+            }
+          }
+          EOF
+
+          echo "Generated LATEST.json:"
+          cat artifacts/stabilization/LATEST.json
+
+      - name: Generate Dashboard
+        run: node scripts/releases/generate_stabilization_dashboard.mjs
+
+      - name: Upload Dashboard Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stabilization-dashboard
+          path: artifacts/stabilization/dashboard/
+
+      - name: Upload LATEST Pointer
+        uses: actions/upload-artifact@v4
+        with:
+          name: stabilization-latest-pointer
+          path: artifacts/stabilization/LATEST.json
+
+      - name: Job Summary
+        if: always()
+        run: |
+          if [ -f artifacts/stabilization/dashboard/STABILIZATION_DASHBOARD.md ]; then
+            cat artifacts/stabilization/dashboard/STABILIZATION_DASHBOARD.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Dashboard generation failed or produced no output." >> $GITHUB_STEP_SUMMARY
+          fi
