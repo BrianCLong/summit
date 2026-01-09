@@ -1,0 +1,63 @@
+version: 1
+last_updated: 2026-01-10
+summary: >-
+  Summit tenant profiles define customer-specific governance overlays, GA posture,
+  and rollout guardrails without forking the codebase. Default behavior aligns to
+  the generic Summit baseline.
+profiles:
+  natsec_high_security:
+    status: ready
+    description: National security / classified-like environments with elevated guardrails.
+    data_classification: secret_like
+    risk_envelope_ref: policies/tenants/natsec_high_security.yml#risk
+    ga_policy_ref: policies/tenants/natsec_high_security.yml#ga
+    incident_ruleset_ref: policies/tenants/natsec_high_security.yml#incident
+    allowed_integrations:
+      - stix_taxii
+      - mft_sftp
+      - on_prem_object_store
+    observability_requirements:
+      logs: exhaustive
+      metrics: high_granularity
+      traces: full
+    default_deploy_channels:
+      - airgapped
+      - staging
+      - prod
+  enterprise_f100:
+    status: ready
+    description: Fortune 100 enterprise posture with stricter GA and incident gates.
+    data_classification: confidential
+    risk_envelope_ref: policies/tenants/enterprise_f100.yml#risk
+    ga_policy_ref: policies/tenants/enterprise_f100.yml#ga
+    incident_ruleset_ref: policies/tenants/enterprise_f100.yml#incident
+    allowed_integrations:
+      - sso_oidc
+      - crm_salesforce
+      - data_warehouse
+    observability_requirements:
+      logs: enhanced
+      metrics: high_granularity
+      traces: sampled
+    default_deploy_channels:
+      - preview
+      - staging
+      - prod
+  newsroom_osint:
+    status: experimental
+    description: Newsroom OSINT teams needing faster iteration with controlled guardrails.
+    data_classification: public
+    risk_envelope_ref: policies/tenants/newsroom_osint.yml#risk
+    ga_policy_ref: policies/tenants/newsroom_osint.yml#ga
+    incident_ruleset_ref: policies/tenants/newsroom_osint.yml#incident
+    allowed_integrations:
+      - rss_atom
+      - social_scrape
+      - public_web
+    observability_requirements:
+      logs: standard
+      metrics: standard
+      traces: sampled
+    default_deploy_channels:
+      - preview
+      - staging

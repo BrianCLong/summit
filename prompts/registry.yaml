@@ -79,3 +79,45 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: summit-customer-programs-tenant-profiles
+    version: v1
+    path: prompts/tenants/summit-customer-programs-tenant-profiles.md
+    sha256: c82c46b8f94be68a2d0294298b82555ab28a840c3318cd6ed6ed8d5f39781714
+    description: Define tenant profiles, policy overlays, and onboarding/operations wiring for Summit customer programs.
+    scope:
+      paths:
+        - configs/tenants/
+        - policies/tenants/
+        - scripts/tenants/
+        - scripts/risk/validate_change_risk.mjs
+        - scripts/release/plan_ga_cut.mjs
+        - scripts/ops/rollback_drill.js
+        - compose/tenants/
+        - Makefile
+        - docs/tenants/
+        - docs/releases/
+        - GA_READINESS_REPORT.md
+        - RUNBOOKS/
+        - artifacts/tenants/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/tenants/
+        - prompts/registry.yaml
+        - .gitignore
+      domains:
+        - governance
+        - operations
+        - deployment
+        - risk
+        - incident
+        - ga-readiness
+        - documentation
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 1
+    allowed_operations:
+      - create
+      - edit

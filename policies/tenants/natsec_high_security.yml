@@ -1,0 +1,53 @@
+policy_overlay: natsec_high_security
+risk:
+  thresholds:
+    low: 15
+    medium: 30
+    high: 50
+    critical: 70
+  block_on_high_risk_for_channel:
+    prod: Medium
+    staging: High
+    preview: High
+    airgapped: Medium
+  forbidden_modules:
+    - experimental-labs
+    - unrestricted-data-export
+    - public-share-links
+  escalation_requirements:
+    require_governance_log: true
+    require_security_review_on_high: true
+    require_dual_control: true
+ga:
+  readiness_tier: hardened
+  evidence_requirements:
+    - ga-verify
+    - release-notes
+    - rollback-plan
+    - evidence-pack
+    - manual-ops-signoff
+  manual_signoff_required: true
+  required_signoffs:
+    - release-captain
+    - security-council
+    - compliance-lead
+  stabilization_window_days: 21
+incident:
+  drill_cadence_days: 14
+  rto_hours: 2
+  rpo_hours: 4
+  rollback_slo_minutes: 10
+integrations:
+  allowed_integrations:
+    - stix_taxii
+    - mft_sftp
+    - on_prem_object_store
+observability:
+  logs: exhaustive
+  metrics: high_granularity
+  traces: full
+deploy:
+  default_channels:
+    - airgapped
+    - staging
+    - prod

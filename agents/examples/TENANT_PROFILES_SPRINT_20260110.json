@@ -1,0 +1,68 @@
+{
+  "task_id": "TENANT_PROFILES_SPRINT_20260110",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "summit-customer-programs-tenant-profiles",
+    "version": "v1",
+    "sha256": "c82c46b8f94be68a2d0294298b82555ab28a840c3318cd6ed6ed8d5f39781714",
+    "path": "prompts/tenants/summit-customer-programs-tenant-profiles.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "configs/tenants/",
+      "policies/tenants/",
+      "scripts/tenants/",
+      "scripts/risk/validate_change_risk.mjs",
+      "scripts/release/plan_ga_cut.mjs",
+      "scripts/ops/rollback_drill.js",
+      "compose/tenants/",
+      "Makefile",
+      "docs/tenants/",
+      "docs/releases/",
+      "GA_READINESS_REPORT.md",
+      "RUNBOOKS/",
+      "artifacts/tenants/",
+      "docs/roadmap/STATUS.json",
+      "prompts/tenants/",
+      "prompts/registry.yaml",
+      "agents/examples/",
+      ".gitignore"
+    ],
+    "domains": [
+      "governance",
+      "operations",
+      "deployment",
+      "risk",
+      "incident",
+      "ga-readiness",
+      "documentation"
+    ]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "artifacts/tenants/RESOLVED_POLICIES_natsec_high_security.json",
+      "artifacts/tenants/RESOLVED_POLICIES_newsroom_osint.json",
+      "artifacts/tenants/ga-cut-plan-natsec.json",
+      "artifacts/tenants/ga-cut-plan-newsroom.json",
+      "artifacts/tenants/risk-validation-natsec.json",
+      "artifacts/tenants/risk-validation-newsroom.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 1
+  },
+  "success_criteria": [
+    "Tenant profile catalog and overlays are defined without code forks.",
+    "Tenant-aware policy resolution, risk validation, GA planning, and incident drill support are available.",
+    "Onboarding and profile change runbooks exist for tenant governance.",
+    "Resolved policy artifacts exist for at least two tenant profiles."
+  ],
+  "stop_conditions": [
+    "CI failure in main.",
+    "Detection of PII in output.",
+    "Sandbox violation alert."
+  ]
+}

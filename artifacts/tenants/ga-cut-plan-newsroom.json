@@ -1,0 +1,36 @@
+{
+  "tenant_profile": "newsroom_osint",
+  "generated_at": "2026-01-09T22:55:59.129Z",
+  "dry_run": true,
+  "overlays": {
+    "policy_overlay": "policies/tenants/newsroom_osint.yml",
+    "base_files": ["policies/tenants/base.yml"]
+  },
+  "ga_requirements": {
+    "readiness_tier": "newsroom",
+    "evidence_requirements": ["ga-verify", "release-notes", "rollback-plan"],
+    "manual_signoff_required": false,
+    "required_signoffs": ["release-captain"],
+    "stabilization_window_days": 5
+  },
+  "risk_requirements": {
+    "block_on_high_risk_for_channel": {
+      "prod": "High",
+      "staging": "Critical",
+      "preview": "High"
+    },
+    "thresholds": {
+      "low": 22,
+      "medium": 45,
+      "high": 65,
+      "critical": 85
+    }
+  },
+  "incident_requirements": {
+    "drill_cadence_days": 30,
+    "rto_hours": 12,
+    "rpo_hours": 24,
+    "rollback_slo_minutes": 45
+  },
+  "deploy_channels": ["preview", "staging"]
+}

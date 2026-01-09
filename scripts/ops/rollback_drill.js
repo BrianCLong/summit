@@ -14,6 +14,42 @@ if (!fs.existsSync(EVIDENCE_DIR)) {
 
 console.log('--- Starting Simulated Rollback Drill ---');
 
+function parseArgs() {
+  const args = process.argv.slice(2);
+  const options = {};
+
+  for (let i = 0; i < args.length; i += 1) {
+    const [key, value] = args[i].split('=');
+    const normalizedKey = key.replace(/^--/, '');
+    if (value === undefined) {
+      options[normalizedKey] = args[i + 1];
+      i += 1;
+    } else {
+      options[normalizedKey] = value;
+    }
+  }
+
+  return {
+    tenantProfile: options['tenant-profile'] ?? options.tenantProfile,
+  };
+}
+
+function loadResolvedPolicy(tenantProfile) {
+  if (!tenantProfile) return null;
+  const resolvedPath = path.join(
+    __dirname,
+    '../../artifacts/tenants',
+    `RESOLVED_POLICIES_${tenantProfile}.json`,
+  );
+  if (!fs.existsSync(resolvedPath)) return null;
+  const raw = fs.readFileSync(resolvedPath, 'utf8');
+  return JSON.parse(raw);
+}
+
+const { tenantProfile } = parseArgs();
+const resolvedPolicy = loadResolvedPolicy(tenantProfile);
+const incidentProfile = resolvedPolicy?.policy?.incident ?? null;
+
 // 1. Simulate Trigger
 console.log('Step 1: Simulating Alert Trigger (High Error Rate)...');
 const triggerEvent = {
@@ -54,6 +90,8 @@ const evidence = {
   type: 'rollback-drill',
   status: 'success',
   details: {
+    tenant_profile: tenantProfile ?? 'default',
+    incident_profile: incidentProfile,
     trigger: triggerEvent,
     from_version: currentVersion,
     to_version: targetVersion,

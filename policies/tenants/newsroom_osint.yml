@@ -1,0 +1,45 @@
+policy_overlay: newsroom_osint
+risk:
+  thresholds:
+    low: 22
+    medium: 45
+    high: 65
+    critical: 85
+  block_on_high_risk_for_channel:
+    prod: High
+    staging: Critical
+    preview: High
+  forbidden_modules:
+    - experimental-labs
+  escalation_requirements:
+    require_governance_log: true
+    require_security_review_on_high: false
+    require_editorial_review_on_public: true
+ga:
+  readiness_tier: newsroom
+  evidence_requirements:
+    - ga-verify
+    - release-notes
+    - rollback-plan
+  manual_signoff_required: false
+  required_signoffs:
+    - release-captain
+  stabilization_window_days: 5
+incident:
+  drill_cadence_days: 30
+  rto_hours: 12
+  rpo_hours: 24
+  rollback_slo_minutes: 45
+integrations:
+  allowed_integrations:
+    - rss_atom
+    - social_scrape
+    - public_web
+observability:
+  logs: standard
+  metrics: standard
+  traces: sampled
+deploy:
+  default_channels:
+    - preview
+    - staging

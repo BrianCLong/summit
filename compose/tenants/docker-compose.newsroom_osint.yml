@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  gateway:
+    environment:
+      TENANT_PROFILE: newsroom_osint
+      OBSERVABILITY_LEVEL: standard
+      LOG_LEVEL: info
+  prov-ledger:
+    environment:
+      TENANT_PROFILE: newsroom_osint
+  policy-compiler:
+    environment:
+      TENANT_PROFILE: newsroom_osint
+  zk-tx:
+    profiles: ["disabled"]

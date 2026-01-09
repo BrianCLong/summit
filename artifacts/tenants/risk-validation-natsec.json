@@ -1,0 +1,12 @@
+{
+  "tenant_profile": "natsec_high_security",
+  "channel": "prod",
+  "risk_band": "Low",
+  "block_threshold": "Medium",
+  "blocked": false,
+  "evaluated_at": "2026-01-09T22:58:11.136Z",
+  "source": {
+    "resolved_policy": "artifacts/tenants/RESOLVED_POLICIES_natsec_high_security.json",
+    "risk_report": "artifacts/tenants/sample-risk-input.json"
+  }
+}

@@ -1,0 +1,47 @@
+version: 1
+policy_set: summit_tenant_base
+risk:
+  thresholds:
+    low: 20
+    medium: 40
+    high: 60
+    critical: 80
+  block_on_high_risk_for_channel:
+    prod: High
+    staging: Critical
+    preview: none
+  forbidden_modules:
+    - experimental-labs
+    - unrestricted-data-export
+  escalation_requirements:
+    require_governance_log: true
+    require_security_review_on_high: true
+ga:
+  readiness_tier: standard
+  evidence_requirements:
+    - ga-verify
+    - release-notes
+    - rollback-plan
+  manual_signoff_required: false
+  required_signoffs:
+    - release-captain
+  stabilization_window_days: 7
+incident:
+  drill_cadence_days: 30
+  rto_hours: 8
+  rpo_hours: 24
+  rollback_slo_minutes: 30
+integrations:
+  allowed_integrations:
+    - sso_oidc
+    - webhooks
+    - standard_export
+observability:
+  logs: standard
+  metrics: standard
+  traces: sampled
+deploy:
+  default_channels:
+    - preview
+    - staging
+    - prod

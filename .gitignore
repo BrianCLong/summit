@@ -277,6 +277,9 @@ pr-dashboard.html
 pr-backlog-stats.json
 tests/e2e/auth-state.json
 artifacts/
+!artifacts/
+!artifacts/tenants/
+!artifacts/tenants/**
 /dist
 .env
 sbom.json

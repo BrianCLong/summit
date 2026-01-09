@@ -1,0 +1,12 @@
+{
+  "tenant_profile": "newsroom_osint",
+  "channel": "prod",
+  "risk_band": "Low",
+  "block_threshold": "High",
+  "blocked": false,
+  "evaluated_at": "2026-01-09T22:58:16.113Z",
+  "source": {
+    "resolved_policy": "artifacts/tenants/RESOLVED_POLICIES_newsroom_osint.json",
+    "risk_report": "artifacts/tenants/sample-risk-input.json"
+  }
+}

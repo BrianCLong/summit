@@ -12,6 +12,9 @@ include Makefile.merge-train
 .PHONY: demo demo-down demo-check demo-seed demo-smoke
 
 COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
+TENANT_PROFILE ?=
+COMPOSE_TENANT_FILE ?= compose/tenants/docker-compose.$(TENANT_PROFILE).yml
+COMPOSE_FILES = -f $(COMPOSE_DEV_FILE) $(if $(TENANT_PROFILE),-f $(COMPOSE_TENANT_FILE),)
 DEV_ENV_FILE ?= .env
 SHELL_SERVICE ?= gateway
 VENV_DIR ?= .venv
@@ -25,26 +28,29 @@ IMAGE ?= $(IMAGE_NAME):$(IMAGE_TAG)
 # --- Docker Compose Controls ---
 
 up:     ## Run dev stack
-	docker compose -f $(COMPOSE_DEV_FILE) up --build -d
+	@if [ -n "$(TENANT_PROFILE)" ] && [ ! -f "$(COMPOSE_TENANT_FILE)" ]; then echo "Missing tenant compose overlay: $(COMPOSE_TENANT_FILE)"; exit 1; fi
+	TENANT_PROFILE=$(TENANT_PROFILE) docker compose $(COMPOSE_FILES) up --build -d
 
 down:   ## Stop dev stack
-	docker compose -f $(COMPOSE_DEV_FILE) down -v
+	@if [ -n "$(TENANT_PROFILE)" ] && [ ! -f "$(COMPOSE_TENANT_FILE)" ]; then echo "Missing tenant compose overlay: $(COMPOSE_TENANT_FILE)"; exit 1; fi
+	TENANT_PROFILE=$(TENANT_PROFILE) docker compose $(COMPOSE_FILES) down -v
 
 dev-prereqs:
 	@command -v docker >/dev/null 2>&1 || { echo "Docker CLI not found. Install Docker Desktop/Engine."; exit 1; }
 	@docker info >/dev/null 2>&1 || { echo "Docker daemon is not running or accessible."; exit 1; }
 	@docker compose version >/dev/null 2>&1 || { echo "Docker Compose plugin (v2) is missing. Install it to continue."; exit 1; }
 	@[ -f "$(COMPOSE_DEV_FILE)" ] || { echo "$(COMPOSE_DEV_FILE) not found. Run from repo root or set COMPOSE_DEV_FILE."; exit 1; }
+	@if [ -n "$(TENANT_PROFILE)" ] && [ ! -f "$(COMPOSE_TENANT_FILE)" ]; then echo "Missing tenant compose overlay: $(COMPOSE_TENANT_FILE)"; exit 1; fi
 	@[ -f "$(DEV_ENV_FILE)" ] || { echo "$(DEV_ENV_FILE) missing. Copy from .env.example before starting (cp .env.example $(DEV_ENV_FILE))."; exit 1; }
 	@command -v curl >/dev/null 2>&1 || { echo "curl not found. Install curl for smoke checks."; exit 1; }
 
 dev-up: dev-prereqs ## Validate prereqs then start dev stack
 	@echo "Starting dev stack with $(COMPOSE_DEV_FILE)..."
-	docker compose -f $(COMPOSE_DEV_FILE) up --build -d
+	TENANT_PROFILE=$(TENANT_PROFILE) docker compose $(COMPOSE_FILES) up --build -d
 
 dev-down: dev-prereqs ## Stop dev stack and remove volumes
 	@echo "Stopping dev stack defined in $(COMPOSE_DEV_FILE)..."
-	docker compose -f $(COMPOSE_DEV_FILE) down -v
+	TENANT_PROFILE=$(TENANT_PROFILE) docker compose $(COMPOSE_FILES) down -v
 
 dev-smoke: dev-prereqs ## Minimal smoke checks for local dev
 	@echo "Running dev smoke checks..."
@@ -58,10 +64,10 @@ dev-smoke: dev-prereqs ## Minimal smoke checks for local dev
 restart: down up
 
 logs:
-	docker compose -f $(COMPOSE_DEV_FILE) logs -f
+	TENANT_PROFILE=$(TENANT_PROFILE) docker compose $(COMPOSE_FILES) logs -f
 
 shell:
-	docker compose -f $(COMPOSE_DEV_FILE) exec $(SHELL_SERVICE) /bin/sh
+	TENANT_PROFILE=$(TENANT_PROFILE) docker compose $(COMPOSE_FILES) exec $(SHELL_SERVICE) /bin/sh
 
 clean:
 	docker system prune -f
@@ -142,6 +148,15 @@ rollback: ## Rollback deployment (Usage: make rollback v=v3.0.0 env=prod)
 	@echo "Rolling back $(env) to version $(v)..."
 	@chmod +x scripts/rollback.sh
 	@./scripts/rollback.sh $(v) $(env)
+
+up-natsec: ## Run dev stack with natsec_high_security profile
+	@$(MAKE) up TENANT_PROFILE=natsec_high_security
+
+up-enterprise: ## Run dev stack with enterprise_f100 profile
+	@$(MAKE) up TENANT_PROFILE=enterprise_f100
+
+up-newsroom: ## Run dev stack with newsroom_osint profile
+	@$(MAKE) up TENANT_PROFILE=newsroom_osint
 
 # ---- IntelGraph S25 Merge Orchestrator (Legacy/Specific) ---------------------
 

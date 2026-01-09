@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  gateway:
+    environment:
+      TENANT_PROFILE: natsec_high_security
+      OBSERVABILITY_LEVEL: exhaustive
+      LOG_LEVEL: info
+  prov-ledger:
+    environment:
+      TENANT_PROFILE: natsec_high_security
+  policy-compiler:
+    environment:
+      TENANT_PROFILE: natsec_high_security
+  ai-nlq:
+    profiles: ["disabled"]
+  predictd:
+    profiles: ["disabled"]
+  audit-sink:
+    image: alpine:3.20
+    command: ['sh', '-c', 'tail -f /var/log/audit/tenant-audit.log']
+    volumes:
+      - audit_logs:/var/log/audit
+
+volumes:
+  audit_logs: {}

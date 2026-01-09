@@ -1,0 +1,43 @@
+{
+  "tenant_profile": "natsec_high_security",
+  "generated_at": "2026-01-09T22:55:55.469Z",
+  "dry_run": true,
+  "overlays": {
+    "policy_overlay": "policies/tenants/natsec_high_security.yml",
+    "base_files": ["policies/tenants/base.yml"]
+  },
+  "ga_requirements": {
+    "readiness_tier": "hardened",
+    "evidence_requirements": [
+      "ga-verify",
+      "release-notes",
+      "rollback-plan",
+      "evidence-pack",
+      "manual-ops-signoff"
+    ],
+    "manual_signoff_required": true,
+    "required_signoffs": ["release-captain", "security-council", "compliance-lead"],
+    "stabilization_window_days": 21
+  },
+  "risk_requirements": {
+    "block_on_high_risk_for_channel": {
+      "prod": "Medium",
+      "staging": "High",
+      "preview": "High",
+      "airgapped": "Medium"
+    },
+    "thresholds": {
+      "low": 15,
+      "medium": 30,
+      "high": 50,
+      "critical": 70
+    }
+  },
+  "incident_requirements": {
+    "drill_cadence_days": 14,
+    "rto_hours": 2,
+    "rpo_hours": 4,
+    "rollback_slo_minutes": 10
+  },
+  "deploy_channels": ["airgapped", "staging", "prod"]
+}
