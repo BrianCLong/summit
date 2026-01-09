@@ -296,8 +296,8 @@ for exc in "${EXCEPTION_ALLOW_EXTRA[@]}"; do
     TARGET_CHECKS+=("$exc")
 done
 
-# Clean up empty entries and sort
-TARGET_CHECKS=($(printf '%s\n' "${TARGET_CHECKS[@]}" | grep -v '^$' | sort -u))
+# Clean up empty entries and sort (preserve spaces in check names)
+mapfile -t TARGET_CHECKS < <(printf '%s\n' "${TARGET_CHECKS[@]}" | grep -v '^$' | sort -u)
 
 # --- Step 6: Generate outputs ---
 log "Generating reconciliation plan..."
@@ -311,9 +311,21 @@ TARGET_JSON=$(printf '%s\n' "${TARGET_CHECKS[@]}" | jq -R -s 'split("\n") | map(
 POLICY_JSON_ARRAY=$(echo "$POLICY_CHECKS" | jq -R -s 'split("\n") | map(select(length > 0))')
 GITHUB_JSON_ARRAY=$(echo "$GITHUB_CHECKS" | jq -R -s 'split("\n") | map(select(length > 0))')
 
-NEEDS_RECONCILIATION=false
-if [[ ${#ADD_CHECKS[@]} -gt 0 || ${#REMOVE_CHECKS[@]} -gt 0 ]]; then
+# Determine reconciliation status
+# "unknown" when API is inaccessible, true/false when we can compute diff
+if [[ "$API_ACCESSIBLE" == "false" ]]; then
+    NEEDS_RECONCILIATION="unknown"
+elif [[ ${#ADD_CHECKS[@]} -gt 0 || ${#REMOVE_CHECKS[@]} -gt 0 ]]; then
     NEEDS_RECONCILIATION=true
+else
+    NEEDS_RECONCILIATION=false
+fi
+
+# Format needs_reconciliation for JSON (string "unknown" or boolean)
+if [[ "$NEEDS_RECONCILIATION" == "unknown" ]]; then
+    NEEDS_RECONCILIATION_JSON='"unknown"'
+else
+    NEEDS_RECONCILIATION_JSON="$NEEDS_RECONCILIATION"
 fi
 
 # JSON output
@@ -327,7 +339,7 @@ cat > "$OUT_DIR/branch_protection_reconcile_plan.json" << EOF
   "mode": "$MODE",
   "api_accessible": $API_ACCESSIBLE,
   "api_error": $(jq -n --arg err "$API_ERROR" 'if $err == "" then null else $err end'),
-  "needs_reconciliation": $NEEDS_RECONCILIATION,
+  "needs_reconciliation": $NEEDS_RECONCILIATION_JSON,
   "summary": {
     "add_count": ${#ADD_CHECKS[@]},
     "remove_count": ${#REMOVE_CHECKS[@]},
@@ -499,6 +511,26 @@ EOF
 **Warning:** Apply mode requires admin access and will modify branch protection settings.
 
 EOF
+elif [[ "$NEEDS_RECONCILIATION" == "unknown" ]]; then
+    cat >> "$OUT_DIR/branch_protection_reconcile_plan.md" << EOF
+---
+
+## Status: Unable to Determine
+
+Cannot determine reconciliation status because branch protection settings
+could not be read from GitHub API.
+
+**Recommended Actions:**
+1. Verify branch protection is enabled for \`$BRANCH\`
+2. Check that you have read access to branch protection settings
+3. If branch protection should be enabled, create it via GitHub UI or API first
+
+**Policy requires these checks:**
+EOF
+    for check in "${TARGET_CHECKS[@]}"; do
+        echo "- \`$check\`" >> "$OUT_DIR/branch_protection_reconcile_plan.md"
+    done
+    echo "" >> "$OUT_DIR/branch_protection_reconcile_plan.md"
 else
     cat >> "$OUT_DIR/branch_protection_reconcile_plan.md" << EOF
 ---
@@ -617,6 +649,8 @@ log_info "  Markdown: $OUT_DIR/branch_protection_reconcile_plan.md"
 
 if [[ "$NEEDS_RECONCILIATION" == "true" ]]; then
     log_warn "Reconciliation needed: ${#ADD_CHECKS[@]} to add, ${#REMOVE_CHECKS[@]} to remove"
+elif [[ "$NEEDS_RECONCILIATION" == "unknown" ]]; then
+    log_warn "Unable to determine reconciliation status - branch protection API not accessible"
 else
     log_info "No reconciliation needed - branch protection matches policy"
 fi
