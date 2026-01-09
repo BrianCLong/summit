@@ -3,8 +3,8 @@ import { RateLimiter } from '../../src/services/RateLimiter';
 
 // Mock deps
 const mockRedis = {
-  eval: jest.fn(),
-  call: jest.fn(),
+  eval: jest.fn() as jest.Mock,
+  call: jest.fn() as jest.Mock,
 };
 
 jest.mock('../../src/config/database.js', () => ({
