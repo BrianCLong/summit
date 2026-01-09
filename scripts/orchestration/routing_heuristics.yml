@@ -1,0 +1,150 @@
+classifications:
+  governance/infra/platform:
+    keywords:
+      - governance
+      - policy
+      - compliance
+      - security
+      - infra
+      - workflow
+      - pipeline
+  feature/UX:
+    keywords:
+      - feature
+      - enhancement
+      - ux
+      - ui
+      - frontend
+      - web
+  tech-debt/cleanup:
+    keywords:
+      - tech-debt
+      - debt
+      - refactor
+      - cleanup
+      - optimize
+  docs/runbooks:
+    keywords:
+      - docs
+      - documentation
+      - runbook
+      - guide
+  tests/coverage/reliability:
+    keywords:
+      - test
+      - testing
+      - coverage
+      - reliability
+      - smoke
+
+agents:
+  jules:
+    keywords:
+      - governance
+      - policy
+      - workflow
+      - infra
+      - release
+      - orchestration
+    labels:
+      - governance
+      - infra
+      - policy
+      - release
+  codex:
+    keywords:
+      - feature
+      - ux
+      - refactor
+      - cleanup
+      - test
+    labels:
+      - feature
+      - enhancement
+      - tech-debt
+      - tests
+  human_review:
+    keywords:
+      - security
+      - compliance
+      - privacy
+      - data-plane
+      - breaking
+    labels:
+      - security
+      - compliance
+      - privacy
+      - breaking-change
+
+modules:
+  - name: governance
+    paths:
+      - docs/governance/
+      - policies/
+      - policy/
+      - governance/
+      - .github/workflows/
+    keywords:
+      - governance
+      - policy
+      - compliance
+  - name: orchestration
+    paths:
+      - scripts/orchestration/
+      - orchestration/
+      - orchestrations/
+    keywords:
+      - orchestration
+      - routing
+      - backlog
+  - name: server
+    paths:
+      - server/
+    keywords:
+      - server
+      - api
+      - backend
+  - name: web
+    paths:
+      - apps/web/
+      - client/
+      - frontend/
+    keywords:
+      - web
+      - frontend
+      - ui
+  - name: docs
+    paths:
+      - docs/
+      - runbooks/
+    keywords:
+      - docs
+      - runbook
+  - name: infrastructure
+    paths:
+      - infra/
+      - terraform/
+      - helm/
+      - k8s/
+    keywords:
+      - infra
+      - terraform
+      - helm
+      - k8s
+
+stack_hints:
+  ts_node:
+    extensions:
+      - .ts
+      - .tsx
+      - .js
+      - .mjs
+      - .cjs
+  python:
+    extensions:
+      - .py
+  infra:
+    extensions:
+      - .yml
+      - .yaml
+      - .tf

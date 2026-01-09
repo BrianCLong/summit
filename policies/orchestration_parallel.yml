@@ -1,0 +1,15 @@
+orchestration_parallel:
+  enabled: true
+  plan_only: true
+  max_parallel: 3
+  allow_agents:
+    jules: true
+    codex: true
+  exclude_modules:
+    - security
+    - privacy
+    - zero-trust
+    - core data-plane
+  label:
+    parallel_candidate: "parallel-candidate"
+  labeling_enabled: false

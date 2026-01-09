@@ -79,3 +79,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: development-velocity-unleashed
+    version: v1
+    path: prompts/governance/development-velocity-unleashed.md
+    sha256: 02e33a2b709478f2e1fa4f4ddc222a85a4625fc16cad4dfbb277741547ba02bf
+    description: Conflict-aware orchestration tooling for backlog routing and velocity tracking.
+    scope:
+      paths:
+        - scripts/orchestration/
+        - policies/orchestration_parallel.yml
+        - docs/orchestration/
+        - .github/workflows/orchestration-*.yml
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/governance/development-velocity-unleashed.md
+        - prompts/registry.yaml
+      domains:
+        - orchestration
+        - governance
+        - ci
+        - documentation
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

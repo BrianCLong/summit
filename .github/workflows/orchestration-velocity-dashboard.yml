@@ -1,0 +1,50 @@
+name: Orchestration Velocity Dashboard
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 7 * * 1"
+
+jobs:
+  velocity-dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Generate velocity dashboard
+        run: node scripts/orchestration/generate_velocity_dashboard.mjs
+
+      - name: Upload orchestration artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: orchestration-velocity-dashboard
+          path: artifacts/orchestration/
+
+      - name: Publish job summary
+        run: |
+          {
+            echo '## Velocity Dashboard Summary'
+            echo ''
+            if [ -f artifacts/orchestration/VELOCITY_DASHBOARD.md ]; then
+              cat artifacts/orchestration/VELOCITY_DASHBOARD.md
+            else
+              echo 'Intentionally constrained: VELOCITY_DASHBOARD.md not generated.'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

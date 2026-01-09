@@ -1,0 +1,46 @@
+{
+  "task_id": "DEV_VELOCITY_UNLEASHED_20260110",
+  "agent_id": "Jules",
+  "prompt_ref": {
+    "id": "development-velocity-unleashed",
+    "version": "v1",
+    "sha256": "02e33a2b709478f2e1fa4f4ddc222a85a4625fc16cad4dfbb277741547ba02bf",
+    "path": "prompts/governance/development-velocity-unleashed.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "scripts/orchestration/",
+      "policies/orchestration_parallel.yml",
+      "docs/orchestration/",
+      ".github/workflows/orchestration-*.yml",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/",
+      "prompts/governance/development-velocity-unleashed.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["orchestration", "governance", "ci", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "artifacts/orchestration/backlog_analysis.json",
+      "artifacts/orchestration/routing_plan.md",
+      "artifacts/orchestration/VELOCITY_DASHBOARD.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Backlog analysis and routing scripts produce policy-aware plan-only outputs",
+    "Velocity dashboard generation produces baseline throughput metrics",
+    "Orchestration policies and documentation are updated"
+  ],
+  "stop_conditions": [
+    "CI failure in main",
+    "Policy violation detected by governance gates",
+    "Sandbox violation alert"
+  ]
+}

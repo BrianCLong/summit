@@ -1,0 +1,53 @@
+name: Orchestration Routing Dry Run
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+jobs:
+  routing-dryrun:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Analyze backlog
+        run: node scripts/orchestration/analyze_backlog.mjs
+
+      - name: Generate routing plan
+        run: node scripts/orchestration/parallel_task_router.mjs --plan-only
+
+      - name: Upload orchestration artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: orchestration-routing
+          path: artifacts/orchestration/
+
+      - name: Publish job summary
+        run: |
+          {
+            echo '## Routing Plan Summary'
+            echo ''
+            if [ -f artifacts/orchestration/routing_plan.md ]; then
+              cat artifacts/orchestration/routing_plan.md
+            else
+              echo 'Intentionally constrained: routing_plan.md not generated.'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
