@@ -3,14 +3,8 @@ name: CI
 on:
   pull_request:
     branches: [main]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
   push:
     branches: [main]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -273,3 +267,83 @@ jobs:
     steps:
       - name: Emit metrics
         run: echo "Emitting workflow metrics..."
+
+  ga_gate:
+    name: ga / gate
+    needs:
+      - format-check
+      - lint
+      - verify
+      - test
+      - golden-path
+      - reproducible-build
+      - governance
+      - provenance
+      - schema-diff
+      - ecosystem-exports
+      - security
+      - ga-risk-gate
+      - build-server-image
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: GA Gate Logic
+        run: |
+          # Define results map
+          declare -A RESULTS
+          RESULTS["Format Check"]="${{ needs.format-check.result }}"
+          RESULTS["Lint"]="${{ needs.lint.result }}"
+          RESULTS["Verification Suite"]="${{ needs.verify.result }}"
+          RESULTS["Test"]="${{ needs.test.result }}"
+          RESULTS["Golden Path"]="${{ needs.golden-path.result }}"
+          RESULTS["Reproducible Build"]="${{ needs.reproducible-build.result }}"
+          RESULTS["Governance"]="${{ needs.governance.result }}"
+          RESULTS["Provenance"]="${{ needs.provenance.result }}"
+          RESULTS["Schema Diff"]="${{ needs.schema-diff.result }}"
+          RESULTS["Ecosystem Export Verification"]="${{ needs.ecosystem-exports.result }}"
+          RESULTS["Security"]="${{ needs.security.result }}"
+          RESULTS["GA Risk Gate"]="${{ needs.ga-risk-gate.result }}"
+          RESULTS["Build Server Image"]="${{ needs.build-server-image.result }}"
+
+          echo "### GA Gate Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Result | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|---|" >> $GITHUB_STEP_SUMMARY
+
+          FAILURES=0
+
+          # List of jobs for ordering
+          JOBS=(
+            "Format Check"
+            "Lint"
+            "Verification Suite"
+            "Test"
+            "Golden Path"
+            "Reproducible Build"
+            "Governance"
+            "Provenance"
+            "Schema Diff"
+            "Ecosystem Export Verification"
+            "Security"
+            "GA Risk Gate"
+            "Build Server Image"
+          )
+
+          for JOB in "${JOBS[@]}"; do
+            RESULT="${RESULTS[$JOB]}"
+            ICON="✅"
+            if [[ "$RESULT" != "success" ]]; then
+              ICON="❌"
+              FAILURES=$((FAILURES + 1))
+            fi
+            echo "| $JOB | $RESULT | $ICON |" >> $GITHUB_STEP_SUMMARY
+            echo "Checking $JOB: $RESULT"
+          done
+
+          if [[ $FAILURES -gt 0 ]]; then
+            echo "::error::GA Gate failed. $FAILURES critical job(s) did not succeed."
+            echo "The following jobs must pass for GA readiness (success or continue-on-error=true accepted):"
+            echo "format-check, lint, verify, test, golden-path, reproducible-build, governance, provenance, schema-diff, ecosystem-exports, security, ga-risk-gate, build-server-image"
+            exit 1
+          else
+            echo "GA Gate Passed: All signals green."
+          fi

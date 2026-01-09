@@ -11,13 +11,9 @@ BRANCH="${DEFAULT_BRANCH:-main}"
 echo "🛡️ Setting up branch protection for $REPO:$BRANCH"
 
 # Required status checks based on our workflows
+# We now depend on a single composite gate "ga / gate"
 REQUIRED_CHECKS=(
-  "🔍 PR Validation"
-  "🚢 Release Captain"
-  "🔍 CodeQL Analysis"
-  "🏆 Golden PR Tests"
-  "🛡️ Full Validation Suite"
-  "📋 Policy Validation"
+  "ga / gate"
 )
 
 echo "📋 Required status checks:"
