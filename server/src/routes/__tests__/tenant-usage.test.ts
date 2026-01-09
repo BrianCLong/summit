@@ -42,7 +42,10 @@ jest.mock('../../services/PricingEngine.js', () => ({
 
 import tenantUsageRouter from '../tenants/usage.js';
 
-describe('tenant usage routes', () => {
+const run = process.env.NO_NETWORK_LISTEN !== 'true';
+const describeIf = run ? describe : describe.skip;
+
+describeIf('tenant usage routes', () => {
   const app = express();
   app.use(express.json());
   app.use('/api/tenants/:tenantId/usage', tenantUsageRouter);

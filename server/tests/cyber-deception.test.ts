@@ -1,12 +1,16 @@
 
 import request from 'supertest';
-import { createApp } from '../src/app.js';
 import { CyberDeceptionService } from '../src/services/CyberDeceptionService.js';
 
-describe('Cyber Deception Platform', () => {
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('Cyber Deception Platform', () => {
   let app: any;
+  let createApp: typeof import('../src/app.js').createApp;
 
   beforeAll(async () => {
+    ({ createApp } = await import('../src/app.js'));
     app = await createApp();
   });
 

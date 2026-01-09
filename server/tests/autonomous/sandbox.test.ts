@@ -35,11 +35,15 @@ describe('ActionSandbox', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     sandbox = new ActionSandbox(mockLogger);
+    (sandbox as any).networkGuard = {
+      monitor: () => ({ on: jest.fn(), stop: jest.fn() }),
+    };
+    jest.spyOn(sandbox as any, 'getContainerStats').mockResolvedValue(null);
     (spawn as jest.Mock).mockImplementation(() => {
         const ee = new EventEmitter();
         (ee as any).stdout = new EventEmitter();
         (ee as any).stderr = new EventEmitter();
-        (ee as any).kill = jest.fn();
+        (ee as any).kill = jest.fn(() => ee.emit('close', 0));
         setTimeout(() => ee.emit('close', 0), 10);
         return ee;
     });
@@ -102,16 +106,18 @@ describe('ActionSandbox', () => {
 
   describe('Timeout', () => {
       it('should kill process on timeout', async () => {
-        jest.useFakeTimers();
         const killMock = jest.fn();
+        const spawnedProcess = new EventEmitter();
 
         (spawn as jest.Mock).mockImplementation(() => {
-            const ee = new EventEmitter();
-            (ee as any).stdout = new EventEmitter();
-            (ee as any).stderr = new EventEmitter();
-            (ee as any).kill = killMock;
+            (spawnedProcess as any).stdout = new EventEmitter();
+            (spawnedProcess as any).stderr = new EventEmitter();
+            (spawnedProcess as any).kill = (...args: any[]) => {
+                killMock(...args);
+                setImmediate(() => spawnedProcess.emit('close', 137));
+            };
             // Never close automatically
-            return ee;
+            return spawnedProcess;
         });
 
         const execPromise = sandbox.execute({
@@ -122,13 +128,6 @@ describe('ActionSandbox', () => {
             logger: mockLogger,
         });
 
-        jest.advanceTimersByTime(200);
-
-        // We need to trigger close to resolve promise in our mock
-        // In real life, SIGKILL would cause close
-        const spawnCall = (spawn as jest.Mock).mock.results[0].value;
-        spawnCall.emit('close', 137); // SIGKILL exit code
-
         const result = await execPromise;
 
         expect(killMock).toHaveBeenCalledWith('SIGKILL');
@@ -136,7 +135,6 @@ describe('ActionSandbox', () => {
             expect.arrayContaining([expect.stringMatching(/Execution timeout/)])
         );
 
-        jest.useRealTimers();
       });
   });
 });

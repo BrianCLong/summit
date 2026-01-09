@@ -46,7 +46,11 @@ describe('SecretManager', () => {
     const secretFile = path.join(fileBasePath, 'secret.json');
     fs.writeFileSync(secretFile, JSON.stringify({ token: 'file-secret', nested: { value: 'nested' } }));
 
-    const manager = new SecretManager({ fileBasePath, rotationIntervalSeconds: 0 });
+    const manager = new SecretManager({
+      fileBasePath,
+      rotationIntervalSeconds: 0,
+      providerPreference: ['file'],
+    });
 
     const resolved = manager.resolveConfig({ secret: 'file://secret.json#token' }) as { secret: string };
     expect(resolved.secret).toBe('file-secret');

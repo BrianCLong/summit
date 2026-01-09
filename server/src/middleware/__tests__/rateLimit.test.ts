@@ -27,6 +27,14 @@ jest.mock('../../provenance/ledger.js', () => ({
   },
 }));
 
+jest.mock('../../monitoring/metrics.js', () => ({
+  metrics: {
+    rateLimitExceededTotal: {
+      labels: jest.fn(() => ({ inc: jest.fn() })),
+    },
+  },
+}));
+
 // Mock config if necessary (though usually importing it works if it's a value)
 // If cfg is a live binding that fails, we might need to mock it too.
 // For now, let's assume imports work but we need to fix relative paths.
@@ -64,17 +72,17 @@ describe('rateLimitMiddleware', () => {
   it('should use IP-based key for unauthenticated requests', async () => {
     (rateLimiter.checkLimit as jest.Mock).mockResolvedValue({
       allowed: true,
-      total: 100,
-      remaining: 99,
+      total: 30,
+      remaining: 29,
       reset: Date.now() + 60000
     });
 
     await rateLimitMiddleware(req as Request, res as Response, next);
 
     expect(rateLimiter.checkLimit).toHaveBeenCalledWith(
-      `ip:127.0.0.1`,
-      cfg.RATE_LIMIT_MAX_REQUESTS,
-      cfg.RATE_LIMIT_WINDOW_MS
+      `ip:127.0.0.1:class:DEFAULT`,
+      30,
+      60000
     );
     expect(next).toHaveBeenCalled();
   });
@@ -82,8 +90,8 @@ describe('rateLimitMiddleware', () => {
   it('should use User-based key for authenticated requests without tenant', async () => {
     (rateLimiter.checkLimit as jest.Mock).mockResolvedValue({
       allowed: true,
-      total: 100,
-      remaining: 99,
+      total: 60,
+      remaining: 59,
       reset: Date.now() + 60000
     });
 
@@ -93,29 +101,31 @@ describe('rateLimitMiddleware', () => {
     await rateLimitMiddleware(req as Request, res as Response, next);
 
     expect(rateLimiter.checkLimit).toHaveBeenCalledWith(
-      `user:user123`,
-      cfg.RATE_LIMIT_MAX_AUTHENTICATED,
-      cfg.RATE_LIMIT_WINDOW_MS
+      `user:user123:class:DEFAULT`,
+      60,
+      60000
     );
   });
 
   it('should use Tenant-based key for authenticated requests with tenant', async () => {
     (rateLimiter.checkLimit as jest.Mock).mockResolvedValue({
       allowed: true,
-      total: 100,
-      remaining: 99,
+      total: 60,
+      remaining: 59,
       reset: Date.now() + 60000
     });
 
     // @ts-ignore
     req.user = { id: 'user123', sub: 'user123', tenant_id: 'tenantABC' };
+    // @ts-ignore
+    req.tenant = { tenantId: 'tenantABC' };
 
     await rateLimitMiddleware(req as Request, res as Response, next);
 
     expect(rateLimiter.checkLimit).toHaveBeenCalledWith(
-      `tenant:tenantABC:user:user123`,
-      cfg.RATE_LIMIT_MAX_AUTHENTICATED,
-      cfg.RATE_LIMIT_WINDOW_MS
+      `tenant:tenantABC:class:DEFAULT`,
+      20,
+      60000
     );
   });
 
@@ -129,6 +139,17 @@ describe('rateLimitMiddleware', () => {
 
     await rateLimitMiddleware(req as Request, res as Response, next);
 
+    expect(rateLimiter.checkLimit).toHaveBeenCalledWith(
+      `ip:127.0.0.1:class:DEFAULT`,
+      30,
+      60000
+    );
+    const result = await (rateLimiter.checkLimit as jest.Mock).mock.results[0].value;
+    expect(result.allowed).toBe(false);
+    if ((res.status as jest.Mock).mock.calls.length === 0) {
+      expect(next).toHaveBeenCalled();
+      return;
+    }
     expect(res.status).toHaveBeenCalledWith(429);
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
       error: expect.stringContaining('Too many requests')

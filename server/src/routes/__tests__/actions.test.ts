@@ -35,7 +35,10 @@ const buildApp = () => {
   return app;
 };
 
-describe('actions router', () => {
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('actions router', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     nock.cleanAll();
@@ -102,7 +105,7 @@ describe('actions router', () => {
     const query = jest.fn();
     const preflightRequest: PreflightRequest = {
       action: 'ROTATE_KEYS',
-      actor: { id: 'user-1', tenantId: 'tenant-1' },
+      actor: { id: 'user-1', tenantId: 'tenant-1', role: 'ADMIN' },
       payload: { scope: 'tenant' },
       approvers: ['approver-a', 'approver-b'],
     };
@@ -140,17 +143,22 @@ describe('actions router', () => {
   });
 
   it('rejects execution when the preflight window has expired', async () => {
+    const preflightRequest: PreflightRequest = {
+      action: 'EXPORT_CASE',
+      actor: { id: 'user-1', tenantId: 'tenant-1', role: 'ADMIN' },
+    };
+    const requestHash = calculateRequestHash(preflightRequest);
     const query = jest.fn().mockResolvedValue({
       rows: [
         {
           decision_id: 'pf-expired',
           policy_name: 'actions',
           decision: 'ALLOW',
-          resource_id: 'stale-hash',
+          resource_id: requestHash,
           reason: JSON.stringify({
             reason: 'dual_control_satisfied',
             obligations: [{ type: 'dual_control', satisfied: true }],
-            requestHash: 'stale-hash',
+            requestHash,
             expiresAt: '2000-01-01T00:00:00Z',
           }),
         },
