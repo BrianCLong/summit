@@ -29,7 +29,10 @@ describe('securityHeaders middleware', () => {
 
     expect(res.headers['x-content-type-options']).toBe('nosniff');
     expect(res.headers['x-frame-options']).toBe('DENY');
-    expect(res.headers['referrer-policy']).toBe('no-referrer');
+    expect(res.headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
+    expect(res.headers['permissions-policy']).toBe(
+      'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()'
+    );
   });
 
   it('can be disabled via SECURITY_HEADERS_ENABLED=false', async () => {
@@ -39,6 +42,7 @@ describe('securityHeaders middleware', () => {
     expect(res.headers['x-content-type-options']).toBeUndefined();
     expect(res.headers['x-frame-options']).toBeUndefined();
     expect(res.headers['referrer-policy']).toBeUndefined();
+    expect(res.headers['permissions-policy']).toBeUndefined();
   });
 
   it('supports CSP report-only mode when enabled', async () => {

@@ -26,10 +26,10 @@ export function securityHeaders({
 
   const connectSrc = ["'self'", ...allowedOrigins, 'https://api.intelgraph.example'];
 
-  return helmet({
+  const helmetMiddleware = helmet({
     frameguard: { action: 'deny' },
     noSniff: true, // X-Content-Type-Options: nosniff
-    referrerPolicy: { policy: 'no-referrer' },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' }, // Improved from 'no-referrer'
     crossOriginEmbedderPolicy: false,
     crossOriginOpenerPolicy: { policy: 'same-origin' },
     crossOriginResourcePolicy: { policy: 'same-origin' },
@@ -53,4 +53,14 @@ export function securityHeaders({
       }
       : false,
   });
+
+  return (req, res, next) => {
+    // Add Permissions-Policy header to restrict sensitive browser features
+    res.setHeader(
+      'Permissions-Policy',
+      'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()'
+    );
+
+    helmetMiddleware(req, res, next);
+  };
 }
