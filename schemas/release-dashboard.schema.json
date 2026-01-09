@@ -1,0 +1,139 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.com/schemas/release-dashboard.schema.json",
+  "title": "Release Dashboard Feed",
+  "description": "A minimal, non-sensitive summary of a release/build for internal dashboards.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Semver-like version of this schema (e.g. 1.0.0)"
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository name (e.g. owner/repo)"
+    },
+    "branch": {
+      "type": "string",
+      "description": "Git branch name"
+    },
+    "commit_sha": {
+      "type": "string",
+      "description": "Full Git commit SHA"
+    },
+    "commit_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of the commit"
+    },
+    "workflow_run_id": {
+      "type": "string",
+      "description": "GitHub Actions workflow run ID"
+    },
+    "workflow_run_url": {
+      "type": "string",
+      "description": "URL to the workflow run"
+    },
+    "evidence_bundle": {
+      "type": "object",
+      "properties": {
+        "artifact_name": {
+          "type": "string",
+          "description": "Name of the evidence bundle artifact"
+        },
+        "sha256": {
+          "type": "string",
+          "description": "SHA256 hash of the evidence bundle"
+        },
+        "signature_ref": {
+          "type": "string",
+          "description": "Reference to the signature file or verification proof"
+        },
+        "verified": {
+          "type": "boolean",
+          "description": "Whether the bundle signature was verified"
+        }
+      },
+      "required": ["artifact_name", "sha256", "verified"]
+    },
+    "gate_status": {
+      "type": "object",
+      "properties": {
+        "typecheck": { "$ref": "#/definitions/gateResult" },
+        "lint": { "$ref": "#/definitions/gateResult" },
+        "build": { "$ref": "#/definitions/gateResult" },
+        "unit_tests": { "$ref": "#/definitions/gateResult" },
+        "integration_tests": { "$ref": "#/definitions/gateResult" },
+        "workflow_lint": { "$ref": "#/definitions/gateResult" },
+        "filter_safety": { "$ref": "#/definitions/gateResult" }
+      },
+      "additionalProperties": { "$ref": "#/definitions/gateResult" }
+    },
+    "dependency_delta_summary": {
+      "type": "object",
+      "properties": {
+        "upgraded": { "type": "integer", "minimum": 0 },
+        "downgraded": { "type": "integer", "minimum": 0 },
+        "added": { "type": "integer", "minimum": 0 },
+        "removed": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["upgraded", "downgraded", "added", "removed"]
+    },
+    "sbom_summary": {
+      "type": "object",
+      "properties": {
+        "total_components": { "type": "integer", "minimum": 0 },
+        "total_licenses": { "type": "integer", "minimum": 0 },
+        "top_license_families": {
+          "type": "object",
+          "additionalProperties": { "type": "integer" }
+        }
+      },
+      "required": ["total_components", "total_licenses"]
+    },
+    "policy_snapshots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "hash": { "type": "string" }
+        },
+        "required": ["id", "hash"]
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Human-readable notes about the release"
+    }
+  },
+  "required": [
+    "schema_version",
+    "repo",
+    "branch",
+    "commit_sha",
+    "commit_date",
+    "evidence_bundle",
+    "gate_status",
+    "dependency_delta_summary",
+    "sbom_summary",
+    "policy_snapshots"
+  ],
+  "definitions": {
+    "gateResult": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["pass", "fail", "skipped", "unknown"]
+        },
+        "duration_seconds": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": ["status"]
+    }
+  }
+}

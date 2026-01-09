@@ -1,0 +1,71 @@
+name: Release Dashboard
+
+on:
+  push:
+    branches:
+      - main
+      - 'release/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dashboard:
+    name: Generate Release Dashboard
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Evidence Bundle
+        run: |
+          node scripts/generate-evidence-bundle.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Release Dashboard
+        run: |
+          npx tsx scripts/release/generate_release_dashboard.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify Dashboard Output
+        run: |
+          ls -l dist/release-dashboard/release-dashboard.json
+          cat dist/release-dashboard/release-dashboard.json
+
+      - name: Upload Dashboard Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-dashboard
+          path: dist/release-dashboard/release-dashboard.json
+          retention-days: 90
+
+      - name: Add to Workflow Summary
+        if: always()
+        run: |
+          DASHBOARD_FILE="dist/release-dashboard/release-dashboard.json"
+          if [ -f "$DASHBOARD_FILE" ]; then
+             BUNDLE_HASH=$(jq -r .evidence_bundle.sha256 "$DASHBOARD_FILE")
+             VERSION=$(jq -r .schema_version "$DASHBOARD_FILE")
+
+             echo "## 📊 Release Dashboard" >> $GITHUB_STEP_SUMMARY
+             echo "" >> $GITHUB_STEP_SUMMARY
+             echo "**Schema Version:** $VERSION" >> $GITHUB_STEP_SUMMARY
+             echo "**Bundle Hash:** \`$BUNDLE_HASH\`" >> $GITHUB_STEP_SUMMARY
+             echo "" >> $GITHUB_STEP_SUMMARY
+             echo "### Gate Status" >> $GITHUB_STEP_SUMMARY
+             echo "| Gate | Status |" >> $GITHUB_STEP_SUMMARY
+             echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+             jq -r '.gate_status | to_entries[] | "| \(.key) | \(.value.status) |"' "$DASHBOARD_FILE" >> $GITHUB_STEP_SUMMARY
+          fi
