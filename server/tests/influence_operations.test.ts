@@ -2,52 +2,55 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { InfluenceOperationsService } from '../src/services/InfluenceOperationsService.js';
 import { CIBDetectionService } from '../src/services/CIBDetectionService.js';
 import { NarrativeAnalysisService } from '../src/services/NarrativeAnalysisService.js';
+import Neo4jGraphAnalyticsService from '../src/services/GraphAnalyticsService.js';
 
 // Mock dependencies
 jest.mock('../src/services/CIBDetectionService.js');
 jest.mock('../src/services/NarrativeAnalysisService.js');
 
-// Mock GraphAnalyticsService which is a CommonJS module
-const mockCalculatePageRank = jest.fn();
-const mockCalculateCentralityMeasures = jest.fn();
-const mockDetectCommunities = jest.fn();
+const mockCentrality = jest.fn();
+const mockCommunities = jest.fn();
+const mockGraphService = {
+  centrality: mockCentrality,
+  communities: mockCommunities,
+};
 
-jest.mock('../src/services/GraphAnalyticsService.js', () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      calculatePageRank: mockCalculatePageRank,
-      calculateCentralityMeasures: mockCalculateCentralityMeasures,
-      detectCommunities: mockDetectCommunities,
-      calculateBasicMetrics: jest.fn().mockResolvedValue({ nodeCount: 100, edgeCount: 50, avgDegree: 2, density: 0.1, clusteringCoefficient: 0 })
-    };
-  });
-});
+jest.mock('../src/services/GraphAnalyticsService.js', () => ({
+  __esModule: true,
+  default: {
+    getInstance: jest.fn(() => mockGraphService),
+  },
+}));
 jest.mock('../src/services/CrossPlatformAttributionService.js');
 
 // Mock specific method returns for CIBDetectionService
 const mockDetectCIB = jest.fn();
-(CIBDetectionService as any).mockImplementation(() => {
-  return {
-    detectCIB: mockDetectCIB
-  };
-});
 
 // Mock specific method returns for NarrativeAnalysisService
 const mockTakeSnapshot = jest.fn();
 const mockGetNarrativeEvolution = jest.fn();
-(NarrativeAnalysisService as any).mockImplementation(() => {
-  return {
-    takeSnapshot: mockTakeSnapshot,
-    getNarrativeEvolution: mockGetNarrativeEvolution
-  };
-});
 
 
 describe('InfluenceOperationsService', () => {
-  let service;
+  let service: InfluenceOperationsService;
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    (Neo4jGraphAnalyticsService as any).getInstance = jest
+      .fn()
+      .mockReturnValue(mockGraphService);
+    (CIBDetectionService as any).mockImplementation(() => {
+      return {
+        detectCIB: mockDetectCIB,
+      };
+    });
+    (NarrativeAnalysisService as any).mockImplementation(() => {
+      return {
+        takeSnapshot: mockTakeSnapshot,
+        getNarrativeEvolution: mockGetNarrativeEvolution,
+      };
+    });
 
     // Clear the instance so a new one is created
     (InfluenceOperationsService as any).instance = null;
@@ -57,24 +60,24 @@ describe('InfluenceOperationsService', () => {
   it('should detect influence operations correctly', async () => {
     const campaignId = 'camp-123';
 
-    mockDetectCIB.mockResolvedValue({
+    mockDetectCIB.mockImplementation(async () => ({
       campaignId: 'camp-123',
       identifiedBotClusters: [],
       anomalies: [],
       precisionScore: 0.88,
       timestamp: new Date()
-    });
+    }));
 
-    mockTakeSnapshot.mockResolvedValue({
+    mockTakeSnapshot.mockImplementation(async () => ({
       timestamp: new Date(),
       narrativeId: campaignId,
       metrics: { nodeCount: 100 },
       topTopics: [],
       amplificationVelocity: 10
-    });
+    }));
 
-    mockCalculatePageRank.mockResolvedValue([
-        { nodeId: 'node1', score: 0.5 }
+    mockCentrality.mockImplementation(async () => [
+      { nodeId: 'node1', score: 0.5 },
     ]);
 
     const result = await service.detectInfluenceOperations(campaignId);
@@ -83,7 +86,11 @@ describe('InfluenceOperationsService', () => {
     expect(result.cib.precisionScore).toBe(0.88);
     expect(result.narrative.metrics.nodeCount).toBe(100);
 
-    expect(mockCalculatePageRank).toHaveBeenCalledWith(campaignId);
+    expect(mockCentrality).toHaveBeenCalledWith({
+      tenantId: 'system',
+      scope: { investigationId: campaignId },
+      algorithm: 'pageRank',
+    });
 
     expect(mockDetectCIB).toHaveBeenCalled();
     expect(mockTakeSnapshot).toHaveBeenCalledWith(campaignId);
@@ -92,7 +99,7 @@ describe('InfluenceOperationsService', () => {
   it('should get narrative timeline', async () => {
     const narrativeId = 'narr-1';
     const mockTimeline = [{ timestamp: new Date(), metrics: {} }];
-    mockGetNarrativeEvolution.mockResolvedValue(mockTimeline);
+    mockGetNarrativeEvolution.mockImplementation(async () => mockTimeline);
 
     const timeline = await service.getNarrativeTimeline(narrativeId);
     expect(timeline).toBe(mockTimeline);
@@ -101,15 +108,15 @@ describe('InfluenceOperationsService', () => {
 
   it('should get influence network', async () => {
     const narrativeId = 'narr-1';
-    const mockCentrality = { degreeCentrality: [] };
-    const mockCommunities = [{ id: 1, size: 10 }];
+    const mockCentralityResult = { degreeCentrality: [] };
+    const mockCommunitiesResult = [{ id: 1, size: 10 }];
 
-    mockCalculateCentralityMeasures.mockResolvedValue(mockCentrality);
-    mockDetectCommunities.mockResolvedValue(mockCommunities);
+    mockCentrality.mockImplementation(async () => mockCentralityResult);
+    mockCommunities.mockImplementation(async () => mockCommunitiesResult);
 
     const network = await service.getInfluenceNetwork(narrativeId);
 
-    expect(network.centrality).toBe(mockCentrality);
-    expect(network.communities).toBe(mockCommunities);
+    expect(network.centrality).toBe(mockCentralityResult);
+    expect(network.communities).toBe(mockCommunitiesResult);
   });
 });

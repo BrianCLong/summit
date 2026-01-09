@@ -58,7 +58,9 @@ describe('SubscriptionEngine', () => {
     const batches: string[][] = [];
     const consumer = (async () => {
       for await (const batch of iterator as any) {
-        batches.push(batch.map((event) => event.payload.id));
+        batches.push(
+          batch.map((event: { payload: { id: string } }) => event.payload.id),
+        );
         if (batches.length === 2) break;
       }
     })();

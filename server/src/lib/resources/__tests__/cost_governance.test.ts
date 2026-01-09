@@ -19,6 +19,7 @@ describe('Cost Governance & FinOps', () => {
       period: 'daily',
       currency: 'USD',
       alertThresholds: [0.5, 1.0],
+      hardStop: true,
     });
 
     // 2. Spend within budget
@@ -35,7 +36,9 @@ describe('Cost Governance & FinOps', () => {
 
   it('should calculate spending forecast', () => {
      const tenantIdForecast = 'test-tenant-forecast';
-     const now = new Date();
+     jest.useFakeTimers();
+     const start = new Date('2024-01-01T00:00:00Z');
+     jest.setSystemTime(start);
 
      // Set budget
      budgetTracker.setBudget(tenantIdForecast, {
@@ -44,10 +47,12 @@ describe('Cost Governance & FinOps', () => {
         period: 'monthly',
         currency: 'USD',
         alertThresholds: [],
+        hardStop: false,
       });
 
       // Simulate spending: $10 spent in the first hour of a 30-day period
       // This is a huge burn rate, should forecast massive overspend.
+      jest.setSystemTime(new Date(start.getTime() + 60 * 60 * 1000));
       budgetTracker.trackCost(tenantIdForecast, CostDomain.AGENT_RUNS, 10.0);
 
       const budget = budgetTracker.getDomainBudget(tenantIdForecast, CostDomain.AGENT_RUNS);
@@ -55,6 +60,7 @@ describe('Cost Governance & FinOps', () => {
       // Forecast should be roughly: (10 / elapsed) * total_period
       // Since execution is fast, elapsed is tiny, so forecast is huge.
       expect(budget!.forecastedSpending).toBeGreaterThan(100.0);
+      jest.useRealTimers();
   });
 
   it('should emit alerts on thresholds', (done) => {
@@ -66,9 +72,10 @@ describe('Cost Governance & FinOps', () => {
       period: 'daily',
       currency: 'USD',
       alertThresholds: [0.5],
+      hardStop: false,
     });
 
-    budgetTracker.once('threshold_reached', (payload) => {
+    budgetTracker.once('threshold_reached', (payload: { tenantId: string; threshold: number }) => {
       try {
         expect(payload.tenantId).toBe(tenantIdAlert);
         expect(payload.threshold).toBe(0.5);

@@ -22,7 +22,10 @@ jest.mock('ioredis', () => {
 
 type FetchMock = jest.MockedFunction<typeof fetch>;
 
-describe('statusRouter contract', () => {
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('statusRouter contract', () => {
   const allowedServices = [
     'neo4j',
     'postgres',

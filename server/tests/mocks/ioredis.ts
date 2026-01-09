@@ -1,28 +1,206 @@
 
-export default class Redis {
-    options: any;
-    keyPrefix: string;
-    status: string;
+const mockRedisStorage = new Map<string, string>();
+const mockRedisSets = new Map<string, Set<string>>();
+const mockRedisStreams = new Map<string, Array<[string, string[]]>>();
+let mockStreamIdCounter = 0;
 
-    constructor() {
-        console.log('Mock Redis initialized');
-        this.status = 'ready';
-        this.options = { keyPrefix: 'summit:' };
-        this.keyPrefix = 'summit:';
+export const resetMockRedis = () => {
+  mockRedisStorage.clear();
+  mockRedisSets.clear();
+  mockRedisStreams.clear();
+  mockStreamIdCounter = 0;
+};
+
+export default class Redis {
+  options: any;
+  keyPrefix: string;
+  status: string;
+
+  constructor() {
+    this.status = 'ready';
+    this.options = { keyPrefix: 'summit:' };
+    this.keyPrefix = 'summit:';
+  }
+
+  on(event: string, callback: () => void) {
+    if (event === 'connect' || event === 'ready') {
+      setTimeout(() => callback && callback(), 10);
     }
-    on(event, callback) {
-        if (event === 'connect' || event === 'ready') {
-            setTimeout(() => callback && callback(), 10);
-        }
+    return this;
+  }
+
+  async connect() {
+    return Promise.resolve();
+  }
+
+  async ping() {
+    return 'PONG';
+  }
+
+  async get(key: string) {
+    return mockRedisStorage.get(key) || null;
+  }
+
+  async set(key: string, value: string) {
+    mockRedisStorage.set(key, value);
+    return 'OK';
+  }
+
+  async setex(key: string, _ttlSeconds: number, value: string) {
+    mockRedisStorage.set(key, value);
+    return 'OK';
+  }
+
+  async del(...keys: string[]) {
+    let count = 0;
+    for (const key of keys) {
+      if (mockRedisStorage.delete(key)) {
+        count += 1;
+      }
+    }
+    return count;
+  }
+
+  async keys(pattern: string) {
+    const regex = new RegExp(pattern.replace('*', '.*'));
+    return Array.from(mockRedisStorage.keys()).filter((k) => regex.test(k));
+  }
+
+  async expire() {
+    return 1;
+  }
+
+  async incr() {
+    return 1;
+  }
+
+  async decr() {
+    return 0;
+  }
+
+  async incrbyfloat() {
+    return '0';
+  }
+
+  async hmget() {
+    return ['0', '0'];
+  }
+
+  async sadd(key: string, ...values: string[]) {
+    if (!mockRedisSets.has(key)) mockRedisSets.set(key, new Set());
+    values.forEach((v) => mockRedisSets.get(key)!.add(v));
+    return values.length;
+  }
+
+  async smembers(key: string) {
+    return Array.from(mockRedisSets.get(key) || []);
+  }
+
+  async zadd(key: string, _score: number, value: string) {
+    if (!mockRedisSets.has(key)) mockRedisSets.set(key, new Set());
+    mockRedisSets.get(key)!.add(value);
+    return 1;
+  }
+
+  async zrange(key: string, _start: number, _stop: number) {
+    return Array.from(mockRedisSets.get(key) || []);
+  }
+
+  async zrevrange(key: string, _start: number, _stop: number) {
+    return Array.from(mockRedisSets.get(key) || []);
+  }
+
+  async zremrangebyrank(key: string, _start: number, _stop: number) {
+    if (!mockRedisSets.has(key)) return 0;
+    const items = Array.from(mockRedisSets.get(key) || []);
+    if (items.length === 0) return 0;
+    mockRedisSets.set(key, new Set());
+    return items.length;
+  }
+
+  async xgroup() {
+    return 'OK';
+  }
+
+  async xadd(stream: string, ...args: any[]) {
+    if (!mockRedisStreams.has(stream)) mockRedisStreams.set(stream, []);
+    const id = `${Date.now()}-${mockStreamIdCounter++}`;
+    const starIndex = args.indexOf('*');
+    const fields = (starIndex >= 0 ? args.slice(starIndex + 1) : args) as string[];
+    mockRedisStreams.get(stream)!.push([id, fields]);
+    return id;
+  }
+
+  async xrange(stream: string, _start: string, _end: string, ...args: any[]) {
+    const entries = mockRedisStreams.get(stream) || [];
+    const countIndex = args.indexOf('COUNT');
+    const count = countIndex >= 0 ? Number(args[countIndex + 1]) : entries.length;
+    return entries.slice(0, count);
+  }
+
+  async xrevrange(stream: string, _start: string, _end: string, ...args: any[]) {
+    const entries = mockRedisStreams.get(stream) || [];
+    const countIndex = args.indexOf('COUNT');
+    const count = countIndex >= 0 ? Number(args[countIndex + 1]) : entries.length;
+    return [...entries].reverse().slice(0, count);
+  }
+
+  async xreadgroup(..._args: any[]) {
+    return [];
+  }
+
+  async xack(_stream: string, _group: string, ..._ids: string[]) {
+    return 1;
+  }
+
+  async xinfo() {
+    return [
+      'length',
+      10,
+      'first-entry',
+      ['123-0', ['data', 'test']],
+      'last-entry',
+      ['456-0', ['data', 'test']],
+      'groups',
+      1,
+      'last-generated-id',
+      '456-0',
+    ];
+  }
+
+  pipeline() {
+    const queued: Array<() => void> = [];
+    return {
+      xadd: (...args: any[]) => {
+        queued.push(() => {
+          void this.xadd(args[0], ...args.slice(1));
+        });
         return this;
+      },
+      exec: async () => queued.map(() => [null, 'OK']),
+    };
+  }
+
+  disconnect() {}
+
+  async quit() {
+    return Promise.resolve();
+  }
+
+  duplicate() {
+    return this;
+  }
+
+  defineCommand(name?: string) {
+    if (name && !(this as any)[name]) {
+      (this as any)[name] = async () => [1, 100, 0];
     }
-    async connect() { return Promise.resolve(); }
-    async ping() { return 'PONG'; }
-    async get() { return null; }
-    async set() { return 'OK'; }
-    async del() { return 1; }
-    disconnect() { }
-    quit() { }
-    duplicate() { return this; }
+    return this;
+  }
+
+  async consumeTokenBucket() {
+    return [1, 100, 0];
+  }
 }
+
 export { Redis };

@@ -39,6 +39,7 @@ export class CanaryOrchestrator {
   private rollbackEngine: RollbackEngine;
   // Allow overriding monitoring for tests
   public _monitoringService = mockMonitoringService;
+  public _loadBalancer = mockLoadBalancer;
 
   constructor(config: CanaryConfig, rollbackEngine?: RollbackEngine) {
     this.config = config;
@@ -56,7 +57,22 @@ export class CanaryOrchestrator {
         actionType: 'CANARY_START',
         resourceType: 'Deployment',
         resourceId: this.config.serviceName,
+        timestamp: new Date(),
         payload: {
+          mutationType: 'CREATE',
+          entityId: this.config.serviceName,
+          entityType: 'Deployment',
+          newState: {
+            id: this.config.serviceName,
+            type: 'Deployment',
+            version: 1,
+            data: {
+              stableVersion: this.config.stableVersion,
+              canaryVersion: this.config.canaryVersion,
+              steps: this.config.trafficSteps,
+            },
+            metadata: {},
+          },
           stableVersion: this.config.stableVersion,
           canaryVersion: this.config.canaryVersion,
           steps: this.config.trafficSteps
@@ -93,8 +109,8 @@ export class CanaryOrchestrator {
 
   private async shiftTraffic(percentage: number): Promise<void> {
     console.log(`Shifting traffic to ${percentage}% for canary version ${this.config.canaryVersion}.`);
-    await mockLoadBalancer.setTrafficPercentage(this.config.serviceName, this.config.canaryVersion, percentage);
-    await mockLoadBalancer.setTrafficPercentage(this.config.serviceName, this.config.stableVersion, 100 - percentage);
+    await this._loadBalancer.setTrafficPercentage(this.config.serviceName, this.config.canaryVersion, percentage);
+    await this._loadBalancer.setTrafficPercentage(this.config.serviceName, this.config.stableVersion, 100 - percentage);
   }
 
   private async validateHealth(): Promise<boolean> {
@@ -121,7 +137,26 @@ export class CanaryOrchestrator {
           actionType: 'SLO_BREACH',
           resourceType: 'Deployment',
           resourceId: this.config.serviceName,
+          timestamp: new Date(),
           payload: {
+            mutationType: 'CREATE',
+            entityId: this.config.serviceName,
+            entityType: 'Deployment',
+            newState: {
+              id: this.config.serviceName,
+              type: 'Deployment',
+              version: 1,
+              data: {
+                errorRate,
+                latency,
+                thresholds: {
+                  errorRate: this.config.errorRateThreshold,
+                  latency: this.config.latencyThreshold,
+                },
+                reason: failureReason,
+              },
+              metadata: {},
+            },
             errorRate,
             latency,
             thresholds: {
@@ -156,14 +191,14 @@ export class CanaryOrchestrator {
       migrationSteps: 0 // Assume no DB migration for canary rollback usually
     });
 
-    await mockLoadBalancer.setTrafficPercentage(this.config.serviceName, this.config.canaryVersion, 0);
-    await mockLoadBalancer.setTrafficPercentage(this.config.serviceName, this.config.stableVersion, 100);
+    await this._loadBalancer.setTrafficPercentage(this.config.serviceName, this.config.canaryVersion, 0);
+    await this._loadBalancer.setTrafficPercentage(this.config.serviceName, this.config.stableVersion, 100);
     console.log('Rollback complete.');
   }
 
   private async promote(): Promise<void> {
-    await mockLoadBalancer.setTrafficPercentage(this.config.serviceName, this.config.canaryVersion, 100);
-    await mockLoadBalancer.setTrafficPercentage(this.config.serviceName, this.config.stableVersion, 0);
+    await this._loadBalancer.setTrafficPercentage(this.config.serviceName, this.config.canaryVersion, 100);
+    await this._loadBalancer.setTrafficPercentage(this.config.serviceName, this.config.stableVersion, 0);
 
     try {
         await provenanceLedger.appendEntry({
@@ -173,7 +208,20 @@ export class CanaryOrchestrator {
           actionType: 'CANARY_PROMOTE',
           resourceType: 'Deployment',
           resourceId: this.config.serviceName,
+          timestamp: new Date(),
           payload: {
+            mutationType: 'CREATE',
+            entityId: this.config.serviceName,
+            entityType: 'Deployment',
+            newState: {
+              id: this.config.serviceName,
+              type: 'Deployment',
+              version: 1,
+              data: {
+                version: this.config.canaryVersion,
+              },
+              metadata: {},
+            },
             version: this.config.canaryVersion
           },
           metadata: {

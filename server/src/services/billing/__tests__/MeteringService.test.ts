@@ -35,12 +35,13 @@ describe('MeteringService', () => {
       query: jest.fn(),
       release: jest.fn(),
     };
-    (pool.connect as jest.Mock).mockResolvedValue(mockClient);
+    (pool.connect as jest.Mock).mockImplementation(async () => mockClient);
     meteringService = MeteringService.getInstance();
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (pool.connect as jest.Mock).mockImplementation(async () => mockClient);
   });
 
   it('should record usage and log to provenance ledger', async () => {
@@ -83,10 +84,13 @@ describe('MeteringService', () => {
       idempotencyKey: 'key-1',
     };
 
-    // Mock DB insert unique violation
-    mockClient.query.mockImplementationOnce(() => Promise.reject({ code: '23505' }));
+    // BEGIN succeeds, INSERT throws unique violation, ROLLBACK succeeds
+    mockClient.query
+      .mockResolvedValueOnce(undefined as any)
+      .mockRejectedValueOnce({ code: '23505' })
+      .mockResolvedValueOnce(undefined as any);
     // Mock fetch existing
-    (pool.query as jest.Mock).mockResolvedValue({ rows: [{ id: 'evt-existing' }] });
+    (pool.query as jest.Mock).mockImplementation(async () => ({ rows: [{ id: 'evt-existing' }] }));
 
     const receipt = await meteringService.recordUsage(event);
 
@@ -102,7 +106,7 @@ describe('MeteringService', () => {
       { kind: 'read_query', total_quantity: '100', unit: 'query' },
       { kind: 'planning_run', total_quantity: '5', unit: 'run' }
     ];
-    (pool.query as jest.Mock).mockResolvedValue({ rows });
+    (pool.query as jest.Mock).mockImplementation(async () => ({ rows }));
 
     const preview = await meteringService.getUsagePreview('tenant-1', new Date(), new Date());
 

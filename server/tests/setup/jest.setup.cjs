@@ -11,6 +11,26 @@ require('dotenv').config({ path: './.env.test' });
 // Global test timeout
 jest.setTimeout(30000);
 
+const sanitizeForConsole = (value, seen = new WeakSet()) => {
+  if (typeof value === 'bigint') return value.toString();
+  if (Array.isArray(value)) return value.map((item) => sanitizeForConsole(item, seen));
+  if (value && typeof value === 'object') {
+    if (seen.has(value)) return '[Circular]';
+    seen.add(value);
+    return Object.fromEntries(
+      Object.entries(value).map(([key, val]) => [key, sanitizeForConsole(val, seen)]),
+    );
+  }
+  return value;
+};
+
+const wrapConsole = (method) => (...args) => method(...args.map((arg) => sanitizeForConsole(arg)));
+['log', 'info', 'warn', 'error'].forEach((name) => {
+  if (typeof console[name] === 'function') {
+    console[name] = wrapConsole(console[name].bind(console));
+  }
+});
+
 // Use Zero Footprint mode to avoid real DB connections by default
 process.env.ZERO_FOOTPRINT = 'true';
 
@@ -66,10 +86,57 @@ jest.mock('apollo-server-express', () => ({
   gql: (strings) => strings.join(''),
 }));
 
+// Mock pg globally to avoid real database connections
+jest.mock('pg', () => {
+  const { EventEmitter } = require('events');
+  class MockClient extends EventEmitter {
+    connect() { return Promise.resolve(); }
+    query() { return Promise.resolve({ rows: [], rowCount: 0 }); }
+    end() { return Promise.resolve(); }
+  }
+  class MockPool extends EventEmitter {
+    connect() {
+      return Promise.resolve({
+        query: jest.fn().mockResolvedValue({ rows: [] }),
+        release: jest.fn(),
+      });
+    }
+    query() { return Promise.resolve({ rows: [] }); }
+    end() { return Promise.resolve(); }
+    on() { return this; }
+  }
+  return { Client: MockClient, Pool: MockPool };
+});
+
+// Mock neo4j-driver globally to prevent real driver initialization
+jest.mock('neo4j-driver', () => {
+  const mockSession = () => ({
+    run: jest.fn().mockResolvedValue({ records: [] }),
+    close: jest.fn().mockResolvedValue(undefined),
+  });
+  const mockDriver = () => ({
+    session: jest.fn(() => mockSession()),
+    close: jest.fn().mockResolvedValue(undefined),
+  });
+  return {
+    __esModule: true,
+    default: {
+      driver: jest.fn(() => mockDriver()),
+      auth: { basic: jest.fn() },
+      int: (value) => value,
+    },
+    driver: jest.fn(() => mockDriver()),
+    auth: { basic: jest.fn() },
+    int: (value) => value,
+  };
+});
+
 // Mock IORedis globally to prevent connection errors
 jest.mock('ioredis', () => {
   const EventEmitter = require('events');
   const subscribers = new Map();
+  const streams = new Map();
+  let streamIdCounter = 0;
 
   class MockRedis extends EventEmitter {
     constructor() {
@@ -83,8 +150,57 @@ jest.mock('ioredis', () => {
     async quit() { return Promise.resolve(); }
     async get() { return null; }
     async set() { return 'OK'; }
+    async setex() { return 'OK'; }
     async del() { return 1; }
+    async exists() { return 0; }
     async info() { return 'redis_version:7.0.0'; }
+    async smembers() { return []; }
+    async zadd() { return 1; }
+    async zrange() { return []; }
+    async zrevrange() { return []; }
+    async zremrangebyrank() { return 0; }
+    async xgroup() { return 'OK'; }
+    async xadd(stream, ...args) {
+      if (!streams.has(stream)) streams.set(stream, []);
+      const id = `${Date.now()}-${streamIdCounter++}`;
+      const starIndex = args.indexOf('*');
+      const fields = starIndex >= 0 ? args.slice(starIndex + 1) : args;
+      streams.get(stream).push([id, fields]);
+      return id;
+    }
+    async xrange(stream, _start, _end, ...args) {
+      const entries = streams.get(stream) || [];
+      const countIndex = args.indexOf('COUNT');
+      const count = countIndex >= 0 ? Number(args[countIndex + 1]) : entries.length;
+      return entries.slice(0, count);
+    }
+    async xrevrange(stream, _start, _end, ...args) {
+      const entries = streams.get(stream) || [];
+      const countIndex = args.indexOf('COUNT');
+      const count = countIndex >= 0 ? Number(args[countIndex + 1]) : entries.length;
+      return [...entries].reverse().slice(0, count);
+    }
+    async xreadgroup() { return []; }
+    async xack() { return 1; }
+    async xinfo() {
+      return [
+        'length', 10,
+        'first-entry', ['123-0', ['data', 'test']],
+        'last-entry', ['456-0', ['data', 'test']],
+        'groups', 1,
+        'last-generated-id', '456-0',
+      ];
+    }
+    pipeline() {
+      const queued = [];
+      return {
+        xadd: (...args) => {
+          queued.push(() => this.xadd(args[0], ...args.slice(1)));
+          return this;
+        },
+        exec: async () => queued.map(() => [null, 'OK']),
+      };
+    }
     async publish(channel, message) {
       if (subscribers.has(channel)) {
         subscribers.get(channel).forEach(client => {
@@ -117,6 +233,7 @@ jest.mock('ioredis', () => {
   return {
     __esModule: true,
     default: MockRedis,
+    Redis: MockRedis,
   };
 });
 
@@ -265,6 +382,7 @@ jest.mock('bullmq', () => {
       this.opts = opts;
     }
     async add() { return { id: 'mock-job-id' }; }
+    async count() { return 0; }
     async getJobCounts() { return { waiting: 0, active: 0, completed: 0, failed: 0 }; }
     async close() { return Promise.resolve(); }
     async obliterate() { return Promise.resolve(); }
@@ -457,13 +575,27 @@ jest.mock('ws', () => {
 // Mock prom-client to prevent metric registration conflicts
 jest.mock('prom-client', () => {
   const mockMetric = {
-    inc: jest.fn(),
-    dec: jest.fn(),
-    set: jest.fn(),
-    observe: jest.fn(),
-    reset: jest.fn(),
-    labels: jest.fn().mockReturnThis(),
-    startTimer: jest.fn().mockReturnValue(jest.fn()),
+    __value: 0,
+    inc(value = 1) {
+      this.__value += value;
+    },
+    dec(value = 1) {
+      this.__value -= value;
+    },
+    set(value) {
+      this.__value = value;
+    },
+    observe() {},
+    reset() {
+      this.__value = 0;
+    },
+    get() {
+      return { values: [{ value: this.__value }] };
+    },
+    labels() {
+      return this;
+    },
+    startTimer: () => () => {},
   };
 
   class MockCounter {
@@ -488,6 +620,7 @@ jest.mock('prom-client', () => {
     metrics() { return ''; }
     clear() { }
     setDefaultLabels() { }
+    resetMetrics() { }
   }
 
   return {

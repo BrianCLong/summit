@@ -37,6 +37,8 @@ export * from './executors/index.js';
 export {
   RapidAttributionRunbook,
   createRapidAttributionRunbook,
+  validateRapidAttributionInput,
+  rapidAttributionExampleInput,
 } from './rapid-attribution-runbook.js';
 
 // API Routes

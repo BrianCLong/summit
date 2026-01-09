@@ -1,0 +1,81 @@
+# Test Quarantine Policy
+# Configures automatic quarantine of flaky tests
+#
+# This policy file is read by scripts/release/manage_test_quarantine.sh
+# See docs/ci/TEST_QUARANTINE.md for full documentation.
+
+version: "1.0.0"
+
+# Quarantine criteria
+criteria:
+  # Number of failures in time window to trigger quarantine
+  failure_threshold: 3
+
+  # Time window for counting failures (hours)
+  failure_window_hours: 24
+
+  # Minimum test runs before quarantine can apply
+  min_runs: 5
+
+  # Flakiness rate threshold (failures/total)
+  flakiness_threshold: 0.3
+
+# Test patterns to never quarantine (critical tests)
+protected_patterns:
+  - "**/security/**"
+  - "**/auth/**"
+  - "**/critical/**"
+  - "**/*.critical.test.*"
+  - "**/smoke/**"
+
+# Auto-quarantine settings
+auto_quarantine:
+  enabled: true
+
+  # Create issue when test is quarantined
+  create_issue: true
+  issue_labels:
+    - "quarantine"
+    - "flaky-test"
+    - "tech-debt"
+
+  # Maximum tests to quarantine per run
+  max_per_run: 5
+
+  # Notify on quarantine
+  notify:
+    enabled: false
+    # slack_channel: "#ci-alerts"
+
+# Quarantine management
+management:
+  # Auto-unquarantine after consecutive passes
+  auto_unquarantine:
+    enabled: true
+    required_passes: 5
+    time_window_hours: 48
+
+  # Maximum quarantine duration before escalation
+  max_quarantine_days: 14
+
+  # Escalate stale quarantined tests
+  escalate_stale: true
+  escalation_label: "needs-attention"
+
+# Quarantine file location
+quarantine_file: "test-quarantine.json"
+
+# State tracking
+state:
+  path: "docs/releases/_state/quarantine_state.json"
+
+# Reporting
+reporting:
+  # Include in daily digest
+  include_in_digest: true
+
+  # Weekly quarantine report
+  weekly_report:
+    enabled: true
+    day: "monday"
+    time: "09:00"

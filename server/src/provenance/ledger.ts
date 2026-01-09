@@ -224,7 +224,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
             );
           }
 
-          const client = await pool.connect();
+          const client = await this.pool.connect();
 
           try {
             await client.query('BEGIN');
@@ -452,7 +452,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
         const results: ProvenanceEntry[] = [];
 
         try {
-          const client = await pool.connect();
+          const client = await this.pool.connect();
 
           try {
             await client.query('BEGIN');
@@ -597,7 +597,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
     tenantId: string,
     client?: any,
   ): Promise<ProvenanceEntry | null> {
-    const queryClient = client || pool;
+    const queryClient = client || this.pool;
 
     const result = await queryClient.query(
       `SELECT * FROM provenance_ledger_v2 
@@ -642,8 +642,8 @@ export class ProvenanceLedgerV2 extends EventEmitter {
         `;
 
           const result = tenantId
-            ? await pool.query(query, [tenantId])
-            : await pool.query(query);
+            ? await this.pool.query(query, [tenantId])
+            : await this.pool.query(query);
 
           verification.totalEntries = result.rows.length;
 
@@ -782,7 +782,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
       )
     `;
 
-    const rangeResult = await pool.query(rangeQuery, [tenantId]);
+    const rangeResult = await this.pool.query(rangeQuery, [tenantId]);
     const range = rangeResult.rows[0];
 
     if (!range.start_seq) {
@@ -797,7 +797,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
       ORDER BY sequence_number
     `;
 
-    const entriesResult = await pool.query(entriesQuery, [
+    const entriesResult = await this.pool.query(entriesQuery, [
       tenantId,
       range.start_seq,
       range.end_seq,
@@ -821,7 +821,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
     };
 
     // Store the signed root
-    await pool.query(
+    await this.pool.query(
       `
       INSERT INTO provenance_ledger_roots (
         id, tenant_id, root_hash, start_sequence, end_sequence,
@@ -1088,7 +1088,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
   }
 
   async getEntryById(id: string): Promise<ProvenanceEntry | null> {
-    const result = await pool.query(
+    const result = await this.pool.query(
       `SELECT * FROM provenance_ledger_v2 WHERE id = $1`,
       [id]
     );

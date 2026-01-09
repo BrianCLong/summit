@@ -4,11 +4,30 @@ import {
   listApprovals,
   rejectApproval,
 } from '../approvals.js';
-import {
+jest.mock('../../monitoring/metrics.js', () => {
+  const createMetric = () => {
+    let value = 0;
+    return {
+      inc: (amount: number = 1) => { value += amount; },
+      dec: (amount: number = 1) => { value -= amount; },
+      set: (amount: number) => { value = amount; },
+      reset: () => { value = 0; },
+      get: () => ({ values: [{ value }] }),
+    };
+  };
+
+  return {
+    approvalsPending: createMetric(),
+    approvalsApprovedTotal: createMetric(),
+    approvalsRejectedTotal: createMetric(),
+  };
+});
+
+const {
   approvalsApprovedTotal,
   approvalsPending,
   approvalsRejectedTotal,
-} from '../../monitoring/metrics.js';
+} = require('../../monitoring/metrics.js');
 
 const approvalsStore: any[] = [];
 
@@ -17,7 +36,7 @@ jest.mock('../../db/postgres.js', () => {
 
   return {
     getPostgresPool: () => ({
-      query: jest.fn<(text: string, params?: any[]) => Promise<{ rows: any[] }>>(async (text: string, params: any[] = []) => {
+      query: jest.fn(async (text: string, params: any[] = []) => {
         if (text.startsWith('INSERT INTO approvals')) {
           const approval = {
             id: `app-${approvalsStore.length + 1}`,

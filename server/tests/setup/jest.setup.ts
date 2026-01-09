@@ -42,6 +42,11 @@ jest.mock('ioredis', () => {
 // Mock pg globally to avoid connection errors in tests that don't need real DB
 jest.mock('pg', () => {
   const { EventEmitter } = require('events');
+  class MockClient extends EventEmitter {
+    connect() { return Promise.resolve(); }
+    query() { return Promise.resolve({ rows: [], rowCount: 0 }); }
+    end() { return Promise.resolve(); }
+  }
   class MockPool extends EventEmitter {
     connect() {
       return Promise.resolve({
@@ -53,7 +58,7 @@ jest.mock('pg', () => {
     end() { return Promise.resolve(); }
     on() { return this; }
   }
-  return { Pool: MockPool };
+  return { Pool: MockPool, Client: MockClient };
 });
 
 // Mock fluent-ffmpeg globally

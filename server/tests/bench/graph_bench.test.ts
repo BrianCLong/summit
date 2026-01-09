@@ -1,55 +1,100 @@
 import { describe, it, expect, jest, beforeAll, afterAll } from '@jest/globals';
 import { Neo4jGraphAnalyticsService } from '../../src/services/GraphAnalyticsService';
 
-// Define the mock delay and delay function
-const MOCK_DB_DELAY_MS = 10;
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const mockGetDriver = jest.fn(() => ({
+  session: () => ({
+    run: async () => ({
+      records: [
+        {
+          get: (key: string) => {
+            if (key === 'p') {
+              return {
+                length: 1,
+                segments: [
+                  {
+                    start: { properties: { id: '1' } },
+                    end: { properties: { id: '2' } },
+                    relationship: { type: 'RELATED', properties: { id: 'r1' } },
+                  },
+                ],
+              };
+            }
+            return null;
+          },
+        },
+      ],
+    }),
+    close: async () => {},
+  }),
+}));
+
+const mockRunCypher = jest.fn(async () => [
+  {
+    nodes: [{ id: '1', labels: ['Entity'], properties: {} }],
+    edges: [
+      {
+        id: 'e1',
+        type: 'RELATED',
+        properties: {},
+        fromEntityId: '1',
+        toEntityId: '2',
+      },
+    ],
+  },
+]);
 
 describe('Graph Analytics Benchmark', () => {
   let service: Neo4jGraphAnalyticsService;
 
-  beforeAll(() => {
+  beforeEach(() => {
     console.log('Setup: Getting instance');
+    (Neo4jGraphAnalyticsService as any).instance = undefined;
     service = Neo4jGraphAnalyticsService.getInstance();
 
-    // Inject mocks directly
-    const mockGetDriver = jest.fn(() => ({
+    mockGetDriver.mockImplementation(() => ({
       session: () => ({
-        run: async () => {
-          // console.log('Mock Session Run');
-          await delay(MOCK_DB_DELAY_MS);
-          return {
-            records: [{
+        run: async () => ({
+          records: [
+            {
               get: (key: string) => {
                 if (key === 'p') {
                   return {
                     length: 1,
-                    segments: [{
-                      start: { properties: { id: '1' } },
-                      end: { properties: { id: '2' } },
-                      relationship: { type: 'RELATED', properties: { id: 'r1' } }
-                    }]
+                    segments: [
+                      {
+                        start: { properties: { id: '1' } },
+                        end: { properties: { id: '2' } },
+                        relationship: { type: 'RELATED', properties: { id: 'r1' } },
+                      },
+                    ],
                   };
                 }
                 return null;
-              }
-            }]
-          };
-        },
-        close: async () => {}
-      })
+              },
+            },
+          ],
+        }),
+        close: async () => {},
+      }),
     }));
 
-    const mockRunCypher = jest.fn(async () => {
-      // console.log('Mock Run Cypher');
-      await delay(MOCK_DB_DELAY_MS);
-      return [{
+    mockRunCypher.mockImplementation(async () => [
+      {
         nodes: [{ id: '1', labels: ['Entity'], properties: {} }],
-        edges: [{ id: 'e1', type: 'RELATED', properties: {}, fromEntityId: '1', toEntityId: '2' }]
-      }];
-    });
+        edges: [
+          {
+            id: 'e1',
+            type: 'RELATED',
+            properties: {},
+            fromEntityId: '1',
+            toEntityId: '2',
+          },
+        ],
+      },
+    ]);
 
-    service._setMocks(mockGetDriver, mockRunCypher);
+    (service as any).deps.getDriver = mockGetDriver;
+    (service as any).deps.runCypher = mockRunCypher;
   });
 
   it('Benchmarking shortestPath and kHopNeighborhood', async () => {

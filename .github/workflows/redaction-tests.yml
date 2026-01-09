@@ -1,0 +1,136 @@
+name: Redaction Layer Tests
+
+# Tests the redaction layer to ensure forbidden patterns are removed
+# and sensitive sections are collapsed correctly. Runs on PRs that
+# modify the redaction policy, scripts, or Pages workflow.
+#
+# Authority: docs/ci/RELEASE_OPS_REDACTION.md
+
+on:
+  pull_request:
+    paths:
+      # Redaction policy and scripts
+      - "docs/ci/REDACTION_POLICY.yml"
+      - "scripts/release/redact_release_ops_content.sh"
+      - "scripts/release/build_release_ops_site.sh"
+      - "scripts/release/render_release_ops_single_page_html.*"
+      - "scripts/release/generate_release_ops_single_page.sh"
+      # Pages publishing
+      - ".github/workflows/publish-release-ops-pages.yml"
+      - "docs/ci/PAGES_PUBLISH_ALLOWLIST.md"
+      # Test fixtures and scripts
+      - "scripts/release/tests/**"
+
+  # Allow manual runs for debugging
+  workflow_dispatch:
+
+concurrency:
+  group: redaction-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  redaction-tests:
+    name: Redaction Layer Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install marked (for HTML rendering)
+        run: npm install marked@16
+
+      - name: Make Scripts Executable
+        run: |
+          chmod +x scripts/release/*.sh
+          chmod +x scripts/release/tests/*.sh
+
+      - name: Run Redaction Tests
+        id: tests
+        run: |
+          echo "=== Running Redaction Layer Tests ==="
+          scripts/release/tests/redaction_layer.test.sh --verbose
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## Redaction Layer Tests" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ steps.tests.outcome }}" == "success" ]]; then
+            echo "**Status:** :white_check_mark: PASSED" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "All forbidden patterns are correctly redacted." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Status:** :x: FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Redaction layer tests failed. See logs for details." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Action Required:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Review the test output for specific failures" >> $GITHUB_STEP_SUMMARY
+            echo "- Update redaction patterns or fix the sanitizer" >> $GITHUB_STEP_SUMMARY
+            echo "- Do NOT merge until tests pass" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Files Tested" >> $GITHUB_STEP_SUMMARY
+          echo "- Policy: \`docs/ci/REDACTION_POLICY.yml\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Script: \`scripts/release/redact_release_ops_content.sh\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Fixtures: \`scripts/release/tests/fixtures/\`" >> $GITHUB_STEP_SUMMARY
+
+  verify-policy-syntax:
+    name: Verify Policy Syntax
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate YAML Syntax
+        run: |
+          echo "Validating REDACTION_POLICY.yml..."
+
+          # Check YAML syntax with Python
+          python3 -c "
+          import yaml
+          import sys
+
+          try:
+              with open('docs/ci/REDACTION_POLICY.yml', 'r') as f:
+                  policy = yaml.safe_load(f)
+
+              # Basic structure validation
+              required_keys = ['version', 'modes', 'sections', 'forbidden_patterns']
+              for key in required_keys:
+                  if key not in policy:
+                      print(f'ERROR: Missing required key: {key}')
+                      sys.exit(1)
+
+              # Validate forbidden patterns have required fields
+              for pattern in policy.get('forbidden_patterns', []):
+                  if 'pattern' not in pattern:
+                      print(f'ERROR: Pattern missing \"pattern\" field: {pattern}')
+                      sys.exit(1)
+
+              print('Policy syntax valid')
+              print(f'  Version: {policy[\"version\"]}')
+              print(f'  Forbidden patterns: {len(policy.get(\"forbidden_patterns\", []))}')
+              print(f'  Allowed links: {len(policy.get(\"allowed_links\", []))}')
+          except yaml.YAMLError as e:
+              print(f'YAML parse error: {e}')
+              sys.exit(1)
+          "
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Policy Validation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Validated \`docs/ci/REDACTION_POLICY.yml\` syntax and structure." >> $GITHUB_STEP_SUMMARY

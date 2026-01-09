@@ -34,10 +34,12 @@ jest.unstable_mockModule('../../src/repos/RelationshipRepo.js', () => ({
     search: jest.fn(),
     findById: jest.fn(),
     findByEntityId: jest.fn(),
-    getEntityRelationshipCount: jest.fn().mockResolvedValue({
-      incoming: 0,
-      outgoing: 0,
-    }),
+    getEntityRelationshipCount: jest.fn(() =>
+      Promise.resolve({
+        incoming: 0,
+        outgoing: 0,
+      }),
+    ),
   })),
 }));
 

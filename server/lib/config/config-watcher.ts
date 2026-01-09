@@ -18,7 +18,7 @@ export class ConfigWatcher {
   }
 
   private watch(): fs.FSWatcher {
-    return fs.watch(this.filePath, { persistent: false }, (eventType) => {
+    return fs.watch(this.filePath, { persistent: false }, (eventType: string) => {
       if (eventType === 'change') {
         console.log(`Configuration file ${this.filePath} changed. Attempting to reload...`);
         try {

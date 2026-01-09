@@ -1,16 +1,41 @@
-import { IntentService, IntentOp } from '../intents.js';
-import { ShardManager } from '../../graph/partition/ShardManager.js';
-import { provenanceLedger } from '../../provenance/ledger.js';
-import { jobManager } from '../../jobs/job.manager.js';
+import { jest } from '@jest/globals';
+import type { IntentOp } from '../intents.js';
+import { IntentService } from '../intents.js';
 
-// Mock dependencies
-jest.mock('../../graph/partition/ShardManager.js');
-jest.mock('../../provenance/ledger.js');
-jest.mock('../../jobs/job.manager.js');
+jest.mock('../../jobs/job.manager.js', () => ({
+  jobManager: { getQueue: jest.fn() },
+}));
+
+jest.mock('../../provenance/ledger.js', () => ({
+  provenanceLedger: { appendEntry: jest.fn() },
+}));
+
+jest.mock('../../graph/partition/ShardManager.js', () => {
+  const mockShardManager = { getDriver: jest.fn() };
+  return {
+    ShardManager: {
+      getInstance: jest.fn(() => mockShardManager),
+    },
+    __mockShardManager: mockShardManager,
+  };
+});
+
+const { jobManager } = jest.requireMock('../../jobs/job.manager.js') as {
+  jobManager: { getQueue: jest.Mock };
+};
+const { provenanceLedger } = jest.requireMock('../../provenance/ledger.js') as {
+  provenanceLedger: { appendEntry: jest.Mock };
+};
+const { ShardManager, __mockShardManager } = jest.requireMock('../../graph/partition/ShardManager.js') as {
+  ShardManager: { getInstance: jest.Mock };
+  __mockShardManager: { getDriver: jest.Mock };
+};
+
+const mockShardManager = __mockShardManager;
+const mockQueue = { add: jest.fn(() => Promise.resolve({ id: 'job-123' })) };
 
 describe('IntentService', () => {
-  let service: IntentService;
-  let mockQueue: any;
+  let service: ReturnType<typeof IntentService.getInstance>;
   let mockDriver: any;
   let mockSession: any;
 
@@ -19,30 +44,28 @@ describe('IntentService', () => {
     jest.clearAllMocks();
 
     // Setup JobManager mock
-    mockQueue = {
-      add: jest.fn().mockResolvedValue({ id: 'job-123' }),
-    };
-    (jobManager.getQueue as jest.Mock).mockReturnValue(mockQueue);
+    mockQueue.add.mockClear();
+    jobManager.getQueue.mockReturnValue(mockQueue);
 
     // Setup ShardManager mock
+    ShardManager.getInstance.mockReturnValue(mockShardManager);
+    const mockRun = jest.fn(() => Promise.resolve({ records: [] }));
     mockSession = {
-        executeWrite: jest.fn().mockImplementation(async (callback) => {
-            return await callback({
-                run: jest.fn().mockResolvedValue({ records: [] }),
-            });
-        }),
-        close: jest.fn().mockResolvedValue(undefined),
+      executeWrite: jest.fn(async (callback: any) => {
+        return await callback({
+          run: mockRun,
+        });
+      }),
+      close: jest.fn(() => Promise.resolve()),
     };
     mockDriver = {
-        session: jest.fn().mockReturnValue(mockSession),
+      session: jest.fn().mockReturnValue(mockSession),
     };
 
-    (ShardManager.getInstance as jest.Mock).mockReturnValue({
-        getDriver: jest.fn().mockReturnValue(mockDriver),
-    });
+    mockShardManager.getDriver.mockReturnValue(mockDriver);
 
     // Setup Provenance mock
-    (provenanceLedger.appendEntry as jest.Mock).mockResolvedValue(true);
+    provenanceLedger.appendEntry.mockClear();
 
     // Get Service Instance
     service = IntentService.getInstance();
@@ -71,7 +94,7 @@ describe('IntentService', () => {
     });
 
     it('should throw if queue not found', async () => {
-      (jobManager.getQueue as jest.Mock).mockReturnValue(undefined);
+      jobManager.getQueue.mockReturnValue(undefined);
       await expect(service.enqueueIntent(
         'shard-01',
         'user-123',
@@ -128,9 +151,7 @@ describe('IntentService', () => {
     });
 
     it('should throw if shard not found', async () => {
-       (ShardManager.getInstance as jest.Mock).mockReturnValue({
-            getDriver: jest.fn().mockReturnValue(undefined),
-       });
+       mockShardManager.getDriver.mockReturnValue(undefined);
 
        const intent = {
         id: 'intent-3',
@@ -142,7 +163,7 @@ describe('IntentService', () => {
         policyTags: []
       };
 
-      await expect(service.applyIntent(intent)).rejects.toThrow('Shard missing-shard not found');
+      await expect(service.applyIntent(intent)).rejects.toThrow(/Shard missing-shard not found/);
     });
   });
 });

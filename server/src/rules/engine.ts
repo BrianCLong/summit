@@ -58,11 +58,19 @@ export function dedupeAlerts(
     return [...alerts, newAlert];
   }
 
+  const newTime = createdAt.getTime();
+  const newTimeInvalid = Number.isNaN(newTime);
+
   const isDuplicate = alerts.some((alert) => {
     if (!alert.createdAt) return false;
     if (alert.ruleId !== newAlert.ruleId) return false;
     if (alert.entityId !== newAlert.entityId) return false;
-    const diff = Math.abs(alert.createdAt.getTime() - createdAt.getTime());
+    const existingTime = alert.createdAt.getTime();
+    const existingInvalid = Number.isNaN(existingTime);
+    if (newTimeInvalid || existingInvalid) {
+      return newTimeInvalid && existingInvalid;
+    }
+    const diff = Math.abs(existingTime - newTime);
     return diff <= windowMs;
   });
 

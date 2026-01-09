@@ -3,7 +3,10 @@ import ioClient from 'socket.io-client';
 import { initRealtime } from '../src/realtime/collab';
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 
-describe('realtime collaboration basics', () => {
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('realtime collaboration basics', () => {
   let server: http.Server;
   let url: string;
   let io: any;

@@ -1,12 +1,16 @@
-import { jest } from '@jest/globals';
 import request from 'supertest';
-import { createApp } from '../src/app.js';
-import { edgeFleetService } from '../src/services/EdgeFleetService.js';
 
-describe('Edge Assurance Operations', () => {
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('Edge Assurance Operations', () => {
   let app: any;
+  let edgeFleetService: typeof import('../src/services/EdgeFleetService.js').edgeFleetService;
+  let createApp: typeof import('../src/app.js').createApp;
 
   beforeAll(async () => {
+    ({ createApp } = await import('../src/app.js'));
+    ({ edgeFleetService } = await import('../src/services/EdgeFleetService.js'));
     app = await createApp();
   });
 
