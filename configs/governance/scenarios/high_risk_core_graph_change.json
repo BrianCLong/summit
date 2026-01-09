@@ -1,0 +1,23 @@
+{
+  "files": [
+    "server/src/intelgraph/core/engine.ts",
+    "server/src/security/crypto.ts",
+    "server/src/graph/traversal.ts",
+    "configs/data-plane/policies.yaml",
+    "server/src/auth/permissions.ts",
+    "server/src/security/firewall.ts",
+    "server/src/auth/mfa.ts",
+    "package.json",
+    "yarn.lock"
+  ],
+  "change_class": "contract-affecting",
+  "channel": "ga",
+  "linesAdded": 5000,
+  "linesRemoved": 1000,
+  "title": "feat(core): rewrite graph engine traversal",
+  "description": "Major rewrite of the graph traversal engine for performance. Includes security updates. SECURITY: This changes authentication flows.",
+  "commits": [
+    { "message": "feat(core): rewrite graph engine" },
+    { "message": "refactor: update security modules" }
+  ]
+}

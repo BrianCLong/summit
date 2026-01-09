@@ -1,0 +1,83 @@
+# Summit Governance Proving Ground - Scenario Catalog
+# This file defines synthetic governance scenarios used to regression-test policies.
+
+scenarios:
+  - id: low_risk_ui_change
+    description: "A minor UI change in a frontend app."
+    tenant_profile: generic_tenant
+    deployment_profile: standard_web
+    expected_outcomes:
+      risk_level: low
+      ga_gate: pass
+      incident_readiness: ok
+      notes: "Should auto-pass most gates."
+
+  - id: medium_risk_backend_change
+    description: "Backend API and DB migration."
+    tenant_profile: enterprise_f100
+    deployment_profile: ha_backend
+    expected_outcomes:
+      risk_level: medium
+      ga_gate: requires_approval
+      incident_readiness: ok
+      notes: "Requires standard approvals."
+
+  - id: high_risk_core_graph_change
+    description: "Deep changes to the core IntelGraph engine."
+    tenant_profile: natsec_high_security
+    deployment_profile: airgapped_core
+    expected_outcomes:
+      risk_level: high
+      ga_gate: blocked
+      incident_readiness: drill_required
+      notes: "Should trigger enhanced scrutiny and drills."
+
+  - id: security_sensitive_config_change
+    description: "Changes to data plane configuration."
+    tenant_profile: natsec_profile
+    deployment_profile: secure_data_plane
+    expected_outcomes:
+      risk_level: medium
+      ga_gate: requires_waiver
+      incident_readiness: ok
+      notes: "Config changes in sensitive paths are high risk."
+
+  - id: incident_drill_required
+    description: "Change to incident runbooks triggering verification."
+    tenant_profile: internal_ops
+    deployment_profile: ops_tools
+    expected_outcomes:
+      risk_level: low
+      ga_gate: pass
+      incident_readiness: drill_required
+      notes: "Modifying runbooks should verify they work."
+
+  - id: lab_only_experiment
+    description: "Experimental ML code in the lab."
+    tenant_profile: research_lab
+    deployment_profile: sandbox_ml
+    expected_outcomes:
+      risk_level: low
+      ga_gate: pass
+      incident_readiness: ok
+      notes: "Sandbox changes should be low risk if isolated."
+
+  - id: high_value_natsec_change
+    description: "Critical update to active measures module."
+    tenant_profile: natsec_high_security
+    deployment_profile: mission_critical
+    expected_outcomes:
+      risk_level: high
+      ga_gate: blocked
+      incident_readiness: drill_required
+      notes: "Mission critical changes require full drills."
+
+  - id: benign_observer_change
+    description: "Documentation or observer-only change."
+    tenant_profile: newsroom_osint
+    deployment_profile: readonly_observer
+    expected_outcomes:
+      risk_level: low
+      ga_gate: pass
+      incident_readiness: ok
+      notes: "Observer changes should be frictionless."

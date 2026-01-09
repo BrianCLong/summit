@@ -1,0 +1,15 @@
+{
+  "files": [
+    "docs/README.md",
+    "docs/getting-started.md"
+  ],
+  "change_class": "additive",
+  "channel": "ga",
+  "linesAdded": 5,
+  "linesRemoved": 2,
+  "title": "docs: update readme",
+  "description": "Fixes typos in the README.",
+  "commits": [
+    { "message": "docs: update readme" }
+  ]
+}

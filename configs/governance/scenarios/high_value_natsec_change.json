@@ -1,0 +1,17 @@
+{
+  "files": [
+    "server/src/active-measures-module/logic.ts",
+    "server/src/active-measures-module/targeting.ts",
+    "server/src/security/access.ts",
+    "package.json"
+  ],
+  "change_class": "behavior-changing",
+  "channel": "ga",
+  "linesAdded": 3000,
+  "linesRemoved": 500,
+  "title": "feat(psyops): update targeting logic",
+  "description": "Critical update to the active measures targeting logic. SECURITY: high risk update.",
+  "commits": [
+    { "message": "feat(psyops): update targeting logic" }
+  ]
+}

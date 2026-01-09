@@ -1,0 +1,15 @@
+{
+  "files": [
+    "apps/web/src/components/Button.tsx",
+    "apps/web/src/styles/main.css"
+  ],
+  "change_class": "additive",
+  "channel": "ga",
+  "linesAdded": 20,
+  "linesRemoved": 5,
+  "title": "feat(ui): update button styles",
+  "description": "Updates the primary button style.",
+  "commits": [
+    { "message": "feat(ui): update button styles" }
+  ]
+}

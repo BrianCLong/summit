@@ -1,0 +1,15 @@
+{
+  "files": [
+    "docs/runbooks/incident_response.md",
+    "docs/runbooks/rollback.md"
+  ],
+  "change_class": "additive",
+  "channel": "ga",
+  "linesAdded": 50,
+  "linesRemoved": 10,
+  "title": "docs(ops): update incident runbooks",
+  "description": "Updates the incident response procedures.",
+  "commits": [
+    { "message": "docs(ops): update incident runbooks" }
+  ]
+}

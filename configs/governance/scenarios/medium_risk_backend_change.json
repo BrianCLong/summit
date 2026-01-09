@@ -1,0 +1,16 @@
+{
+  "files": [
+    "server/src/api/users.ts",
+    "server/migrations/20250501_add_user_field.sql",
+    "server/config/database.ts"
+  ],
+  "change_class": "behavior-changing",
+  "channel": "ga",
+  "linesAdded": 200,
+  "linesRemoved": 50,
+  "title": "feat(api): add user preferences",
+  "description": "Adds user preferences to the API and database.",
+  "commits": [
+    { "message": "feat(api): add user preferences" }
+  ]
+}

@@ -1,0 +1,40 @@
+name: Governance Proving Ground
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 1' # Weekly on Monday
+
+jobs:
+  proving-ground:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install --no-frozen-lockfile
+
+      - name: Run Governance Proving Ground
+        run: node scripts/governance/run_proving_ground.mjs
+        env:
+          NODE_ENV: test
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-report
+          path: artifacts/governance/proving_ground/
+
+      - name: Job Summary
+        if: always()
+        run: |
+          if [ -f artifacts/governance/proving_ground/RESULTS_*.md ]; then
+            cat artifacts/governance/proving_ground/RESULTS_*.md >> $GITHUB_STEP_SUMMARY
+          fi

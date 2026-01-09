@@ -1,0 +1,15 @@
+{
+  "files": [
+    "configs/data-plane/config.yaml",
+    "server/src/security/auth.ts"
+  ],
+  "change_class": "behavior-changing",
+  "channel": "ga",
+  "linesAdded": 10,
+  "linesRemoved": 10,
+  "title": "fix(security): update auth config",
+  "description": "Updates sensitive authentication configuration. KEYWORD: secret, password.",
+  "commits": [
+    { "message": "fix(security): update auth config" }
+  ]
+}

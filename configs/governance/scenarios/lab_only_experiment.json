@@ -1,0 +1,15 @@
+{
+  "files": [
+    "server/src/ml/experiment_v2.py",
+    "configs/lab/model_params.json"
+  ],
+  "change_class": "additive",
+  "channel": "experimental",
+  "linesAdded": 50,
+  "linesRemoved": 0,
+  "title": "feat(ml): add experimental model",
+  "description": "Adds a new experimental model to the lab environment.",
+  "commits": [
+    { "message": "feat(ml): add experimental model" }
+  ]
+}
