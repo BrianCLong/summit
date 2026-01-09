@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Promotion Decision Record",
+  "type": "object",
+  "required": [
+    "release_manifest_id",
+    "target_environment",
+    "policy_version",
+    "evaluation_result",
+    "timestamp",
+    "workflow_metadata"
+  ],
+  "properties": {
+    "release_manifest_id": {
+      "type": "object",
+      "required": ["commit_sha", "version"],
+      "properties": {
+        "commit_sha": { "type": "string" },
+        "version": { "type": "string" }
+      }
+    },
+    "target_environment": { "type": "string" },
+    "policy_version": { "type": "string" },
+    "evaluation_result": {
+      "type": "object",
+      "required": ["verdict", "reasons"],
+      "properties": {
+        "verdict": { "type": "string", "enum": ["ALLOW", "DENY"] },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["code", "message"],
+            "properties": {
+              "code": { "type": "string" },
+              "message": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "approvers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "user": { "type": "string" },
+          "role": { "type": "string" },
+          "approved_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "override_details": {
+      "type": "object",
+      "properties": {
+        "active": { "type": "boolean" },
+        "justification": { "type": "string" },
+        "approvers": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "workflow_metadata": {
+      "type": "object",
+      "properties": {
+        "run_id": { "type": "string" },
+        "actor": { "type": "string" },
+        "url": { "type": "string" }
+      }
+    }
+  }
+}

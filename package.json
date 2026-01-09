@@ -109,6 +109,8 @@
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
     "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
+    "policy:promotion:validate": "npx ajv validate -s policies/schemas/promotion-policy.schema.json -d policies/promotion-policy.yml",
+    "policy:promotion:evaluate": "npx tsx scripts/policy/evaluate_promotion_policy.ts",
     "prepare": "husky"
   },
   "keywords": [
@@ -146,6 +148,7 @@
     "@typescript-eslint/eslint-plugin": "^8.50.1",
     "@typescript-eslint/parser": "^8.50.1",
     "ajv": "^8.17.1",
+    "ajv-cli": "^5.0.0",
     "ajv-formats": "^3.0.1",
     "body-parser": "^2.2.1",
     "commander": "^12.1.0",

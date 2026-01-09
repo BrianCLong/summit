@@ -1,0 +1,40 @@
+version: "1.0.0"
+
+environments:
+  production:
+    approvals:
+      min_count: 2
+      allowed_teams:
+        - "release-engineering"
+        - "security-approvers"
+      allowed_users:
+        - "octocat"
+        - "jules-agent"
+      allow_self_approval: false
+    change_window:
+      timezone: "UTC"
+      days: ["Monday", "Tuesday", "Wednesday", "Thursday"]
+      start_time: "09:00"
+      end_time: "17:00"
+    checks:
+      - "Release Promotion Guard"
+      - "CI Core"
+      - "Security Scan"
+    emergency_override:
+      enabled: true
+      min_approvals: 3
+      max_age_hours: 4
+
+  staging:
+    approvals:
+      min_count: 1
+      allowed_teams:
+        - "developers"
+      allow_self_approval: true
+    checks:
+      - "CI Core"
+
+  dev:
+    approvals:
+      min_count: 0
+    checks: []

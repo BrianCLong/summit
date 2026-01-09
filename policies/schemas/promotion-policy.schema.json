@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Promotion Policy",
+  "description": "Policy defining requirements for release promotion",
+  "type": "object",
+  "required": ["version", "environments"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Policy version"
+    },
+    "environments": {
+      "type": "object",
+      "description": "Environment-specific rules",
+      "properties": {
+        "production": { "$ref": "#/definitions/environmentRules" },
+        "staging": { "$ref": "#/definitions/environmentRules" },
+        "dev": { "$ref": "#/definitions/environmentRules" }
+      },
+      "additionalProperties": false
+    },
+    "global_exclusions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Global exclusions (e.g., users who can never promote)"
+    }
+  },
+  "definitions": {
+    "environmentRules": {
+      "type": "object",
+      "required": ["approvals", "checks"],
+      "properties": {
+        "approvals": {
+          "type": "object",
+          "required": ["min_count"],
+          "properties": {
+            "min_count": { "type": "integer", "minimum": 0 },
+            "allowed_teams": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "allowed_users": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "allow_self_approval": { "type": "boolean", "default": false }
+          }
+        },
+        "change_window": {
+          "type": "object",
+          "properties": {
+            "timezone": { "type": "string" },
+            "days": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+              }
+            },
+            "start_time": { "type": "string", "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$" },
+            "end_time": { "type": "string", "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$" }
+          }
+        },
+        "checks": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of checks/contexts that must be green (e.g. CI workflow names)"
+        },
+        "emergency_override": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "min_approvals": { "type": "integer" },
+            "max_age_hours": { "type": "integer" }
+          }
+        }
+      }
+    }
+  }
+}
