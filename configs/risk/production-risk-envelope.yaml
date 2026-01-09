@@ -1,0 +1,44 @@
+channels:
+  staging:
+    description: "Pre-production environment for integration testing"
+    allowed_change_classes: ["*"]
+    risk_tolerance: "high"
+  preview:
+    description: "Ephemeral environments for PR validation"
+    allowed_change_classes: ["*"]
+    risk_tolerance: "high"
+  ga:
+    description: "General Availability production environment"
+    allowed_change_classes:
+      - "ui-only"
+      - "config-only"
+      - "additive-schema"
+      - "additive-api"
+      - "performance-tuning"
+      - "security-patch"
+    risk_tolerance: "low"
+
+guardrails:
+  max_blast_radius:
+    high: 5 # max modules touched for high risk
+    medium: 10
+
+  required_preconditions:
+    high_risk:
+      - "ga-gate"
+      - "dry-run"
+      - "evidence-bundle"
+      - "war-room"
+    medium_risk:
+      - "ga-gate"
+      - "dry-run"
+    low_risk:
+      - "ga-gate"
+
+  exclusions:
+    high_risk_modules:
+      - "security"
+      - "core-data-plane"
+      - "osint-intel-flow"
+      - "provenance-ledger"
+      - "auth-service"

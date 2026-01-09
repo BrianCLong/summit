@@ -1,0 +1,63 @@
+name: Incident Drill
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: 'Drill Scenario (latency, stall)'
+        required: true
+        default: 'latency'
+        type: choice
+        options:
+          - latency
+          - stall
+      mode:
+        description: 'Execution Mode'
+        required: true
+        default: 'dry-run'
+        type: choice
+        options:
+          - dry-run
+          - simulate
+      environment:
+        description: 'Target Environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+
+jobs:
+  drill:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 18
+
+      - name: Run Incident Drill
+        run: |
+          node scripts/incidents/run_incident_drill.mjs \
+            --scenario ${{ inputs.scenario }} \
+            --mode ${{ inputs.mode }} \
+            --env ${{ inputs.environment }}
+
+      - name: Upload Drill Artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: drill-artifacts-${{ inputs.scenario }}-${{ github.run_id }}
+          path: artifacts/incidents/drills/
+          retention-days: 90
+
+      - name: Job Summary
+        if: always()
+        run: |
+          echo "## Incident Drill Summary" >> $GITHUB_STEP_SUMMARY
+          echo "See artifacts for detailed logs." >> $GITHUB_STEP_SUMMARY
+          if [ -d "artifacts/incidents/drills" ]; then
+             cat artifacts/incidents/drills/*.md >> $GITHUB_STEP_SUMMARY || true
+          fi

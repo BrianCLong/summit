@@ -158,7 +158,38 @@ record_check "Deep Health Check" "check_detailed_health" || { generate_report; e
 # We run `make smoke`. It calls bootstrap+up, but up should be fast/noop if already running.
 record_check "Smoke Test" "make smoke" || { generate_report; exit 1; }
 
-# 7. Security Checks
+# 7. Risk Evaluation
+check_change_risk() {
+    echo "Running production risk validation..."
+    # Generate list of changed files for current branch vs main (or just all tracked files if in detached state/CI?)
+    # For GA gate running locally or in CI, we want to check changes.
+    # If running locally, diff against main or HEAD~1?
+    # Let's assume git diff against main if available, else HEAD^
+
+    local base_ref="main"
+    if ! git show-ref --verify --quiet refs/heads/main; then
+        base_ref="HEAD^"
+    fi
+
+    git diff --name-only $base_ref...HEAD > .changes.txt || git diff --name-only HEAD^ > .changes.txt
+
+    if [ -s .changes.txt ]; then
+        if node scripts/risk/validate_change_risk.mjs --files .changes.txt --channel ga; then
+            echo "✅ Risk validation passed"
+            return 0
+        else
+            echo "❌ Risk validation failed (Blocked or High Risk)"
+            # For GA gate, we might want to fail on blocked changes
+            return 1
+        fi
+    else
+        echo "ℹ️ No changes detected to validate."
+        return 0
+    fi
+}
+record_check "Risk Evaluation" "check_change_risk" || { generate_report; exit 1; }
+
+# 8. Security Checks
 security_gate() {
     make sbom || echo "⚠️ SBOM generation failed (non-critical if tool missing)"
 

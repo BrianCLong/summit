@@ -1,0 +1,17 @@
+risk_evaluation:
+  enabled: true
+  block_on_high_risk_for_channel:
+    ga: true
+    staging: false
+    preview: false
+  default_channel: staging
+  observability_required_for_incident_drill: true
+
+incident_drills:
+  required_frequency_days: 30
+  environments:
+    production:
+      allowed: false
+      requires_force: true
+    staging:
+      allowed: true

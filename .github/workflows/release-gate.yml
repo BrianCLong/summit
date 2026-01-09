@@ -33,6 +33,12 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Risk Validation
+        run: |
+          echo "Running production risk validation..."
+          git diff --name-only origin/main...HEAD > changed_files.txt
+          node scripts/risk/validate_change_risk.mjs --files changed_files.txt --channel ga
+
       - name: Run Targeted Tests
         run: |
           echo "Running release script tests..."
