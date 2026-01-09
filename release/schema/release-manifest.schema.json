@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Release Manifest",
+  "description": "Source of truth for a release, containing immutable references to artifacts, evidence, and attestations.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "gitSha",
+    "buildTimestamp",
+    "artifacts",
+    "sbomReference",
+    "evidenceReference",
+    "attestation"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "description": "Version of this schema (e.g. 1.0.0)"
+    },
+    "gitSha": {
+      "type": "string",
+      "description": "Full Git SHA of the commit built"
+    },
+    "buildTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of the build"
+    },
+    "artifacts": {
+      "type": "array",
+      "description": "List of build artifacts (images, binaries)",
+      "items": {
+        "type": "object",
+        "required": ["name", "type", "digest"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the artifact (e.g. image name)"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["docker-image", "binary", "archive", "other"],
+            "description": "Type of artifact"
+          },
+          "digest": {
+            "type": "string",
+            "description": "Immutable digest (e.g. sha256:...)"
+          },
+          "uri": {
+            "type": "string",
+            "description": "Location URI (e.g. docker://ghcr.io/...)"
+          }
+        }
+      }
+    },
+    "sbomReference": {
+      "type": "object",
+      "required": ["uri"],
+      "properties": {
+        "uri": {
+          "type": "string",
+          "description": "URI or path to the SBOM file in the artifact bundle"
+        },
+        "digest": {
+          "type": "string",
+          "description": "Digest of the SBOM file"
+        }
+      }
+    },
+    "evidenceReference": {
+      "type": "object",
+      "required": ["uri"],
+      "properties": {
+        "uri": {
+          "type": "string",
+          "description": "URI or path to the evidence bundle"
+        },
+        "digest": {
+          "type": "string",
+          "description": "Digest of the evidence bundle"
+        }
+      }
+    },
+    "attestation": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["enabled", "disabled"],
+          "description": "Status of signing/attestation"
+        },
+        "signatures": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "artifact": { "type": "string" },
+              "signatureUri": { "type": "string" },
+              "keyId": { "type": "string" }
+            }
+          }
+        },
+        "issueLink": {
+          "type": "string",
+          "description": "Link to issue tracking enablement if disabled"
+        }
+      }
+    },
+    "promotionHistory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["environment", "timestamp", "actor"],
+        "properties": {
+          "environment": { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "actor": { "type": "string" },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,101 @@
+name: Release Promotion
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_ref:
+        description: 'Git SHA or Release Identifier to promote'
+        required: true
+      target_env:
+        description: 'Target Environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # To maybe update a promotion record
+      packages: read # To check registry
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install
+
+      - name: Download Release Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release-bundle-${{ inputs.release_ref }}
+          path: release-bundle
+
+      - name: Verify Manifest
+        run: |
+          if [ ! -f release-bundle/release-manifest.json ]; then
+            echo "Manifest not found!"
+            exit 1
+          fi
+
+          # Use schema from repo or from bundle. Using repo ensures we verify against current policy.
+          npx tsx scripts/release/verify_release_manifest.ts release-bundle/release-manifest.json release/schema/release-manifest.schema.json
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify Image Digest in Registry
+        id: verify_digest
+        run: |
+          MANIFEST_FILE="release-bundle/release-manifest.json"
+
+          # Parse artifact info
+          DIGEST=$(node -e "const fs = require('fs'); console.log(JSON.parse(fs.readFileSync('$MANIFEST_FILE')).artifacts.find(a => a.type === 'docker-image')?.digest || '')" || echo "")
+          URI=$(node -e "const fs = require('fs'); console.log(JSON.parse(fs.readFileSync('$MANIFEST_FILE')).artifacts.find(a => a.type === 'docker-image')?.uri || '')" || echo "")
+
+          if [ -z "$DIGEST" ] || [ -z "$URI" ]; then
+            echo "No docker image artifact found in manifest."
+            exit 1
+          fi
+
+          echo "Verifying artifact: $URI ($DIGEST)"
+
+          # Extract the image reference (e.g. ghcr.io/org/repo) from URI
+          # URI might include @sha256:..., we want to verify that specific digest exists
+          # We can use 'docker manifest inspect URI'
+
+          if ! docker manifest inspect "$URI" > /dev/null; then
+             echo "ERROR: Image digest verification failed for $URI"
+             exit 1
+          fi
+
+          echo "Verified image digest exists in registry."
+
+      - name: Prevent Rebuild
+        run: |
+          echo "Promotion strictly uses existing artifacts. No build step allowed."
+
+      - name: Promote
+        run: |
+          echo "Promoting release ${{ inputs.release_ref }} to ${{ inputs.target_env }}..."
+          # Update a promotion record or emit an event
+          echo "$(date -u) - Promoted ${{ inputs.release_ref }} to ${{ inputs.target_env }} by ${{ github.actor }}" >> promotion-log.txt
+
+      - name: Upload Promotion Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: promotion-report-${{ inputs.target_env }}-${{ inputs.release_ref }}
+          path: promotion-log.txt

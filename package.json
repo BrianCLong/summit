@@ -90,6 +90,8 @@
     "release:schema:validate": "node scripts/release/validate-bundle-schemas.mjs --dir dist/release --strict",
     "release:verify": "node scripts/release/verify-release-bundle.mjs",
     "release:diff": "node scripts/release/diff-bundles.mjs",
+    "release:manifest:generate": "npx tsx scripts/release/generate_release_manifest.ts",
+    "release:manifest:verify": "npx tsx scripts/release/verify_release_manifest.ts",
     "precommit": "lint-staged",
     "db:prisma:diff": "prisma migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema.prisma",
     "db:knex:smoke": "knex migrate:down && knex migrate:up",
