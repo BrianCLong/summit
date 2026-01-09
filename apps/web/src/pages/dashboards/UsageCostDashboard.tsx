@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import {
-  Bar,
   BarChart,
   CartesianGrid,
   Line,
@@ -10,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import { Bar } from 'recharts/es6/cartesian/Bar.js'
 import { Download } from 'lucide-react'
 import { useTenant } from '@/contexts/TenantContext'
 import {

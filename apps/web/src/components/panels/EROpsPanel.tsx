@@ -8,11 +8,11 @@ import {
   ResponsiveContainer,
   CartesianGrid,
   BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
 } from 'recharts'
+import { Bar } from 'recharts/es6/cartesian/Bar.js'
 import { Badge } from '@/components/ui/Badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Skeleton } from '@/components/ui/Skeleton'

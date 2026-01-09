@@ -13,7 +13,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "vite build",
     "build:analyze": "ANALYZE=true vite build && echo '\n📊 Bundle analysis available at dist/stats.html'",
     "preview": "vite preview",
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint .",

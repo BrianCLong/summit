@@ -22,8 +22,8 @@ import {
   Tooltip,
   ResponsiveContainer,
   BarChart,
-  Bar,
 } from 'recharts'
+import { Bar } from 'recharts/es6/cartesian/Bar.js'
 import { useTenant } from '../../../contexts/TenantContext'
 import { useNotification } from '../../../contexts/NotificationContext'
 import { DataIntegrityNotice } from '../../../components/common/DataIntegrityNotice'

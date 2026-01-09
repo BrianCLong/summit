@@ -1,14 +1,20 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import $ from 'jquery';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/components/ui/use-toast';
+import { Badge } from '@/components/ui/Badge';
+import { useToast } from '@/hooks/use-toast';
 import { Play, RotateCcw, AlertTriangle, CheckCircle, Code, BookOpen } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/Dialog';
 
 // Define types locally if not available globally
 interface TranslationResult {
