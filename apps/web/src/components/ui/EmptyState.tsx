@@ -12,6 +12,10 @@ interface EmptyStateProps {
     onClick: () => void
     variant?: 'default' | 'outline'
   }
+  quickActions?: {
+    label: string
+    onClick: () => void
+  }[]
   className?: string
 }
 
@@ -27,6 +31,7 @@ export function EmptyState({
   title,
   description,
   action,
+  quickActions,
   className,
 }: EmptyStateProps) {
   const IconComponent = typeof icon === 'string' ? iconMap[icon] : null
@@ -50,6 +55,21 @@ export function EmptyState({
         <p className="mb-4 text-sm text-muted-foreground max-w-sm">
           {description}
         </p>
+      )}
+      {quickActions && quickActions.length > 0 && (
+        <div className="flex flex-wrap justify-center gap-2 mb-4">
+          {quickActions.map(qa => (
+            <Button
+              key={qa.label}
+              variant="outline"
+              size="sm"
+              onClick={qa.onClick}
+              className="rounded-full"
+            >
+              {qa.label}
+            </Button>
+          ))}
+        </div>
       )}
       {action && (
         <Button onClick={action.onClick} variant={action.variant || 'default'}>

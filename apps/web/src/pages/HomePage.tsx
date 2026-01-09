@@ -177,6 +177,10 @@ export default function HomePage() {
               icon="chart"
               title="No live metrics"
               description="Connect a data source to populate KPI metrics."
+              quickActions={[
+                { label: 'Connect AWS', onClick: () => navigate('/settings/integrations/aws') },
+                { label: 'Import CSV', onClick: () => navigate('/settings/import') },
+              ]}
             />
           </div>
         )}
