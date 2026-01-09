@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-09T16:00:00Z",
-  "revision_note": "Added scaffolded INSLAW/PROMIS affidavit demo artifacts for provenance-first ingestion",
+  "last_updated": "2026-01-09T19:00:00Z",
+  "revision_note": "Added public trust snapshot generation and GA trust-snapshot artifact automation",
   "initiatives": [
     {
       "id": "A",

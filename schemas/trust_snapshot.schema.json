@@ -1,0 +1,149 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.example.com/schemas/trust_snapshot.schema.json",
+  "title": "Public Trust Snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "snapshot_version",
+    "git_sha",
+    "workflow_run_id",
+    "generated_at_utc",
+    "tool_versions",
+    "ga_gate",
+    "smoke",
+    "governance",
+    "sbom",
+    "reproducible_build",
+    "provenance",
+    "schema_integrity"
+  ],
+  "properties": {
+    "snapshot_version": {
+      "type": "string"
+    },
+    "git_sha": {
+      "type": "string",
+      "pattern": "^(unknown|[a-f0-9]{40})$"
+    },
+    "workflow_run_id": {
+      "type": "string",
+      "pattern": "^(unknown|[0-9]+)$"
+    },
+    "generated_at_utc": {
+      "anyOf": [{ "type": "string", "format": "date-time" }, { "const": "unknown" }]
+    },
+    "tool_versions": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "ga_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "duration_seconds"],
+      "properties": {
+        "status": { "type": "string", "enum": ["pass", "fail", "unknown"] },
+        "duration_seconds": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }] }
+      }
+    },
+    "smoke": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "duration_seconds"],
+      "properties": {
+        "status": { "type": "string", "enum": ["pass", "fail", "unknown"] },
+        "duration_seconds": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }] }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_version", "status", "controls_satisfied"],
+      "properties": {
+        "policy_version": { "type": "string" },
+        "status": { "type": "string", "enum": ["pass", "fail", "unknown"] },
+        "controls_satisfied": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "sbom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["package_count", "top_packages", "licenses"],
+      "properties": {
+        "package_count": { "type": "integer", "minimum": 0 },
+        "top_packages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string" },
+              "version": { "type": "string" }
+            }
+          }
+        },
+        "licenses": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "vulns": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["critical", "high", "medium", "low", "cves"],
+      "properties": {
+        "critical": { "type": "integer", "minimum": 0 },
+        "high": { "type": "integer", "minimum": 0 },
+        "medium": { "type": "integer", "minimum": 0 },
+        "low": { "type": "integer", "minimum": 0 },
+        "cves": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "reproducible_build": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "digest_summary"],
+      "properties": {
+        "status": { "type": "string", "enum": ["pass", "fail", "unknown"] },
+        "digest_summary": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["artifact", "sha256"],
+            "properties": {
+              "artifact": { "type": "string" },
+              "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+            }
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attestation_present", "digests"],
+      "properties": {
+        "attestation_present": { "type": "boolean" },
+        "digests": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "schema_integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_hash", "schema_hash_algo"],
+      "properties": {
+        "schema_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "schema_hash_algo": { "type": "string", "enum": ["sha256"] }
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

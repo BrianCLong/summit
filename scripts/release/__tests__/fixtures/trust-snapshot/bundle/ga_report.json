@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-01-09T12:00:00Z",
+  "commit_sha": "9ed06ffd41937de92865e0f90079f69dd5db84e7",
+  "environment": "ci",
+  "total_duration_seconds": 120,
+  "checks": [
+    { "name": "Lint and Test", "status": "PASS", "duration_seconds": 40 },
+    { "name": "Smoke Test", "status": "PASS", "duration_seconds": 30 },
+    { "name": "Security Check", "status": "PASS", "duration_seconds": 15 }
+  ]
+}

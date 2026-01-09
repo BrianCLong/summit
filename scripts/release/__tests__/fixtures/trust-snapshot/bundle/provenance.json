@@ -1,0 +1,10 @@
+{
+  "subject": [
+    {
+      "name": "artifact.tar.gz",
+      "digest": {
+        "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    }
+  ]
+}

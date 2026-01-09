@@ -1,0 +1,47 @@
+{
+  "task_id": "PUBLIC_TRUST_SNAPSHOT",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "public-trust-snapshot",
+    "version": "v1",
+    "sha256": "00a41e0c6915a108900b4fe572fc7a9717edf7671407d7fb48d1d0e39e82579b",
+    "path": "prompts/release/public-trust-snapshot.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/release/",
+      "docs/roadmap/STATUS.json",
+      "schemas/",
+      "scripts/release/",
+      ".github/workflows/ga-gate.yml",
+      "agents/examples/public-trust-snapshot.task.json",
+      "prompts/release/public-trust-snapshot.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["release", "governance", "ci", "compliance", "security"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "trust_snapshot.json",
+      "trust_snapshot.md",
+      "trust-snapshot_<sha>_<runid>.zip",
+      "scripts/release/__tests__/generate-trust-snapshot.test.mjs"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "GA Gate workflow produces trust snapshot artifacts on success",
+    "Snapshot output is schema-validated and redaction-safe",
+    "Deterministic snapshot output verified by golden tests"
+  ],
+  "stop_conditions": [
+    "Redaction scanner detects disallowed content",
+    "Schema validation fails",
+    "GA Gate fails"
+  ]
+}

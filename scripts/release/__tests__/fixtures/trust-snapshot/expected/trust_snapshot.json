@@ -1,0 +1,71 @@
+{
+  "snapshot_version": "1.0.0",
+  "git_sha": "9ed06ffd41937de92865e0f90079f69dd5db84e7",
+  "workflow_run_id": "1234567890",
+  "generated_at_utc": "2026-01-09T12:00:00Z",
+  "tool_versions": {
+    "node": "v20.11.1",
+    "pnpm": "10.0.0"
+  },
+  "ga_gate": {
+    "status": "pass",
+    "duration_seconds": 120
+  },
+  "smoke": {
+    "status": "pass",
+    "duration_seconds": 30
+  },
+  "governance": {
+    "policy_version": "1.0.0",
+    "status": "pass",
+    "controls_satisfied": ["DEPENDENCY_AUDIT_POLICY", "TYPE_SAFETY_POLICY"]
+  },
+  "sbom": {
+    "package_count": 3,
+    "top_packages": [
+      {
+        "name": "axios",
+        "version": "1.0.0"
+      },
+      {
+        "name": "lodash",
+        "version": "4.17.21"
+      },
+      {
+        "name": "react",
+        "version": "18.0.0"
+      }
+    ],
+    "licenses": {
+      "MIT": 3
+    }
+  },
+  "vulns": {
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 1,
+    "cves": ["CVE-2020-9999", "CVE-2022-0002"]
+  },
+  "reproducible_build": {
+    "status": "pass",
+    "digest_summary": [
+      {
+        "artifact": "artifact.json",
+        "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      {
+        "artifact": "artifact.tar.gz",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    ]
+  },
+  "provenance": {
+    "attestation_present": true,
+    "digests": ["cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"]
+  },
+  "schema_integrity": {
+    "schema_hash": "a102ad0859db2a487f3f81399ca5c2314dab0d1c4972d447ab9d829cb388cec5",
+    "schema_hash_algo": "sha256"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "metadata": {
+    "vulnerabilities": {
+      "critical": 1,
+      "high": 2,
+      "moderate": 1,
+      "low": 0
+    }
+  },
+  "advisories": {
+    "100": {
+      "cves": ["CVE-2021-0001"]
+    }
+  }
+}

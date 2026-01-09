@@ -79,3 +79,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: public-trust-snapshot
+    version: v1
+    path: prompts/release/public-trust-snapshot.md
+    sha256: 00a41e0c6915a108900b4fe572fc7a9717edf7671407d7fb48d1d0e39e82579b
+    description: Generate a public trust snapshot from GA evidence bundles and wire it into GA Gate CI.
+    scope:
+      paths:
+        - docs/release/
+        - docs/roadmap/STATUS.json
+        - schemas/
+        - scripts/release/
+        - .github/workflows/ga-gate.yml
+        - agents/examples/
+        - prompts/release/public-trust-snapshot.md
+        - prompts/registry.yaml
+      domains:
+        - release
+        - governance
+        - ci
+        - compliance
+        - security
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

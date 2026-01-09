@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0.0",
+  "files": [
+    { "path": "snapshot/docs/ci/TYPE_SAFETY_POLICY.yml" },
+    { "path": "snapshot/docs/ci/DEPENDENCY_AUDIT_POLICY.yml" }
+  ]
+}

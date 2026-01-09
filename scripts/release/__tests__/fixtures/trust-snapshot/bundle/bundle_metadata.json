@@ -1,0 +1,9 @@
+{
+  "git_sha": "9ed06ffd41937de92865e0f90079f69dd5db84e7",
+  "workflow_run_id": "1234567890",
+  "generated_at_utc": "2026-01-09T12:00:00Z",
+  "tool_versions": {
+    "node": "v20.11.1",
+    "pnpm": "10.0.0"
+  }
+}

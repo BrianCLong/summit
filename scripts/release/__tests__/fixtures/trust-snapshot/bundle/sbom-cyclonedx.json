@@ -1,0 +1,21 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "components": [
+    {
+      "name": "axios",
+      "version": "1.0.0",
+      "licenses": [{ "license": { "id": "MIT" } }]
+    },
+    {
+      "name": "lodash",
+      "version": "4.17.21",
+      "licenses": [{ "license": { "id": "MIT" } }]
+    },
+    {
+      "name": "react",
+      "version": "18.0.0",
+      "licenses": [{ "license": { "id": "MIT" } }]
+    }
+  ]
+}
