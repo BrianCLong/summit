@@ -51,7 +51,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ inputs.commit_sha || 'main' }}
@@ -81,12 +81,12 @@ jobs:
           echo "Base Version: ${VERSION}"
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
           version: 8
 
@@ -181,7 +181,7 @@ jobs:
           fi
 
       - name: Upload RC Bundle Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ steps.prepare.outputs.artifact_name }}
           path: ${{ steps.prepare.outputs.artifact_dir }}

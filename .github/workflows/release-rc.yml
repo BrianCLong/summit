@@ -80,7 +80,7 @@ jobs:
           echo "✅ Valid RC tag format: ${TAG}"
 
       - name: Checkout at tagged commit
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ steps.params.outputs.tag }}
           fetch-depth: 0
@@ -97,7 +97,7 @@ jobs:
           echo "Resolved commit: ${COMMIT}"
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
 
@@ -134,7 +134,7 @@ jobs:
 
     steps:
       - name: Checkout at tagged commit
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.verify.outputs.tag }}
           fetch-depth: 0
@@ -195,7 +195,7 @@ jobs:
           fi
 
       - name: Upload Verification Output
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: verification-output
           path: artifacts/verification/
@@ -229,13 +229,13 @@ jobs:
 
     steps:
       - name: Checkout at tagged commit
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.verify.outputs.tag }}
           fetch-depth: 0
 
       - name: Download Verification Output
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: verification-output
           path: staging/verification
@@ -389,7 +389,7 @@ jobs:
           ls -la "${BUNDLE_DIR}/"
 
       - name: Upload RC Pipeline Bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: rc-pipeline-bundle-${{ needs.verify.outputs.tag }}
           path: ${{ steps.assemble.outputs.bundle_dir }}

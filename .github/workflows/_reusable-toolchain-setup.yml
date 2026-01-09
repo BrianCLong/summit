@@ -40,7 +40,7 @@ jobs:
       pnpm: ${{ steps.resolve-pnpm.outputs.pnpm }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Detect Node.js version
         id: detect
@@ -96,7 +96,7 @@ jobs:
           run_install: ${{ inputs.install-deps }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ steps.detect.outputs.version }}
           cache: "pnpm"
