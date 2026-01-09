@@ -233,6 +233,7 @@
     "ioredis": "^5.8.2",
     "jest-extended": "^4.0.2",
     "neo4j-driver": "^5.28.1",
+    "node-cron": "^4.2.1",
     "pg": "^8.16.3",
     "pino": "^10.1.0",
     "pino-pretty": "^13.1.3",
