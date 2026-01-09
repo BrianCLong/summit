@@ -32,6 +32,7 @@ class MockPool {
   async query(text: string, params: any[] = []): Promise<{ rows: MockRow[]; rowCount: number }> {
     const trimmed = text.trim();
     const upper = trimmed.toUpperCase();
+    const normalized = upper.replace(/\s+/g, ' ');
 
     if (upper.startsWith('BEGIN') || upper.startsWith('COMMIT') || upper.startsWith('ROLLBACK')) {
       return { rows: [], rowCount: 0 };
@@ -45,7 +46,7 @@ class MockPool {
       ] = params;
 
       const row = {
-        id, tenant_id, sequence_number: BigInt(sequence_number), previous_hash, current_hash,
+        id, tenant_id, sequence_number: Number(sequence_number), previous_hash, current_hash,
         timestamp, action_type, resource_type, resource_id,
         actor_id, actor_type, payload, metadata, signature, attestation
       };
@@ -60,7 +61,9 @@ class MockPool {
        ] = params;
 
        const row = {
-        id, tenant_id, root_hash, start_sequence, end_sequence,
+        id, tenant_id, root_hash,
+        start_sequence: Number(start_sequence),
+        end_sequence: Number(end_sequence),
         entry_count, timestamp, signature, cosign_bundle, merkle_proof
        };
        this.roots.push(row);
@@ -74,18 +77,18 @@ class MockPool {
           filtered = filtered.filter(r => r.tenant_id === tenantId);
       }
 
-      if (upper.includes('ORDER BY SEQUENCE_NUMBER DESC LIMIT 1')) {
-        if (filtered.length === 0) return { rows: [], rowCount: 0 };
-        const sorted = [...filtered].sort((a, b) => Number(b.sequence_number - a.sequence_number));
-        return { rows: [sorted[0]], rowCount: 1 };
-      }
+    if (normalized.includes('ORDER BY SEQUENCE_NUMBER DESC LIMIT 1')) {
+      if (filtered.length === 0) return { rows: [], rowCount: 0 };
+      const sorted = [...filtered].sort((a, b) => Number(b.sequence_number - a.sequence_number));
+      return { rows: [sorted[0]], rowCount: 1 };
+    }
 
-      if (upper.includes('ORDER BY TENANT_ID, SEQUENCE_NUMBER')) {
-         const sorted = [...filtered].sort((a, b) => {
-             if (a.tenant_id !== b.tenant_id) return a.tenant_id.localeCompare(b.tenant_id);
-             return Number(a.sequence_number - b.sequence_number);
-         });
-         return { rows: sorted, rowCount: sorted.length };
+    if (normalized.includes('ORDER BY TENANT_ID, SEQUENCE_NUMBER')) {
+       const sorted = [...filtered].sort((a, b) => {
+           if (a.tenant_id !== b.tenant_id) return a.tenant_id.localeCompare(b.tenant_id);
+           return Number(a.sequence_number - b.sequence_number);
+       });
+       return { rows: sorted, rowCount: sorted.length };
       }
 
       return { rows: filtered, rowCount: filtered.length };

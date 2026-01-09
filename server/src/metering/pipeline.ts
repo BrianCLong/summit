@@ -17,10 +17,15 @@ export class MeteringPipeline {
   private processedKeys = new Set<string>();
   private deadLetters: DeadLetter[] = [];
   private rollups = new Map<string, TenantUsageDailyRow>();
+  private cleanupTimer?: NodeJS.Timeout;
 
   constructor() {
     // Periodically clean up cache to avoid memory leak
-    setInterval(() => this.cleanupCache(), 1000 * 60 * 60); // Every hour
+    this.cleanupTimer = setInterval(
+      () => this.cleanupCache(),
+      1000 * 60 * 60,
+    ); // Every hour
+    this.cleanupTimer.unref?.();
   }
 
   private cleanupCache() {

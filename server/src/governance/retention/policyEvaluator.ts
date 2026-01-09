@@ -236,7 +236,7 @@ export class PolicyEvaluator {
     const resourceTags = resource.metadata?.tags ?? [];
     const recordTags = record.metadata.tags;
 
-    return resourceTags.some((tag) => recordTags.includes(tag));
+    return resourceTags.some((tag: string) => recordTags.includes(tag));
   }
 
   /**

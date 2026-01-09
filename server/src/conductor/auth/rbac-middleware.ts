@@ -44,8 +44,14 @@ class RBACManager {
   private permissionCache: Map<string, Set<string>> = new Map();
 
   constructor() {
+    const enabledEnv = process.env.RBAC_ENABLED;
+    const enabled =
+      enabledEnv === undefined
+        ? true
+        : !['false', '0', 'no'].includes(enabledEnv.toLowerCase());
+
     this.config = {
-      enabled: process.env.RBAC_ENABLED === 'true' || true,
+      enabled,
       rolesClaim: process.env.RBAC_ROLES_CLAIM || 'groups',
       defaultRole: process.env.RBAC_DEFAULT_ROLE || 'viewer',
       roles: {
@@ -351,6 +357,10 @@ export function authenticateUser(
 export function requirePermission(permission: string) {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
+      if (!rbacManager.getConfig().enabled) {
+        return next();
+      }
+
       const user = (req as AuthenticatedRequest).user;
 
       if (!user) {
@@ -402,6 +412,10 @@ export function requirePermission(permission: string) {
 export function requireAnyPermission(...permissions: string[]) {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
+      if (!rbacManager.getConfig().enabled) {
+        return next();
+      }
+
       const user = (req as AuthenticatedRequest).user;
 
       if (!user) {

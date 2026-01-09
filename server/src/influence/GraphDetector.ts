@@ -51,7 +51,9 @@ export class GraphDetector {
           console.error('Graph detection error:', error);
           return { isAnomalous: false, score: 0, reason: 'Error executing query' };
       } finally {
-          await session.close();
+          if (session?.close) {
+            await session.close();
+          }
       }
   }
 
@@ -88,7 +90,9 @@ export class GraphDetector {
          console.error('Cascade analysis error:', error);
          return { depth: 0, breadth: 0 };
       } finally {
-          await session.close();
+          if (session?.close) {
+            await session.close();
+          }
       }
   }
 }
