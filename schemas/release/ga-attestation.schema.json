@@ -1,0 +1,155 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/BrianCLong/summit/schemas/release/ga-attestation.schema.json",
+  "title": "GA Release Attestation",
+  "description": "Schema for GA release verification attestation",
+  "type": "object",
+  "required": [
+    "version",
+    "attestation_type",
+    "ga_tag",
+    "commit_sha",
+    "run_id",
+    "generated_at_utc",
+    "verification",
+    "attestation_status"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "attestation_type": {
+      "type": "string",
+      "const": "ga-release-verification",
+      "description": "Type of attestation"
+    },
+    "ga_tag": {
+      "type": "string",
+      "description": "GA release tag (e.g., v4.1.2)",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$"
+    },
+    "rc_tag": {
+      "type": "string",
+      "description": "Originating RC tag (e.g., v4.1.2-rc.1)",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+-rc\\.\\d+$"
+    },
+    "commit_sha": {
+      "type": "string",
+      "description": "Git commit SHA",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "run_id": {
+      "type": "integer",
+      "description": "GitHub Actions workflow run ID"
+    },
+    "run_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to the workflow run"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when attestation was generated"
+    },
+    "repository": {
+      "type": "string",
+      "description": "GitHub repository (owner/repo)"
+    },
+    "verification": {
+      "type": "object",
+      "description": "Verification results",
+      "required": ["evidence_bundle", "trust_snapshot"],
+      "properties": {
+        "evidence_bundle": {
+          "type": "object",
+          "required": ["present", "manifest_valid"],
+          "properties": {
+            "present": {
+              "type": "boolean"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            "manifest_valid": {
+              "type": "boolean"
+            }
+          }
+        },
+        "trust_snapshot": {
+          "type": "object",
+          "required": ["present", "schema_valid"],
+          "properties": {
+            "present": {
+              "type": "boolean"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            "schema_valid": {
+              "type": "boolean"
+            }
+          }
+        },
+        "signatures": {
+          "type": "object",
+          "properties": {
+            "present": {
+              "type": "boolean"
+            },
+            "verified": {
+              "type": "string",
+              "enum": ["true", "false", "skipped", "unknown"]
+            }
+          }
+        },
+        "provenance": {
+          "type": "object",
+          "properties": {
+            "present": {
+              "type": "boolean"
+            },
+            "valid": {
+              "type": "boolean"
+            },
+            "slsa_level": {
+              "type": "string"
+            }
+          }
+        },
+        "cross_check": {
+          "type": "object",
+          "properties": {
+            "digests_matched": {
+              "type": "string",
+              "enum": ["true", "false", "unknown"]
+            }
+          }
+        }
+      }
+    },
+    "policy_versions": {
+      "type": "object",
+      "properties": {
+        "promotion_policy": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "required_checks_contract": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        }
+      }
+    },
+    "attestation_status": {
+      "type": "string",
+      "enum": ["PASS", "FAIL"],
+      "description": "Overall attestation status"
+    }
+  },
+  "additionalProperties": false
+}
