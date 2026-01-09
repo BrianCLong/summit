@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-06T04:47:39Z",
-  "revision_note": "Reconciled A1–C2 statuses with merge evidence and file references",
+  "last_updated": "2026-01-09T16:00:00Z",
+  "revision_note": "Added scaffolded INSLAW/PROMIS affidavit demo artifacts for provenance-first ingestion",
   "initiatives": [
     {
       "id": "A",
