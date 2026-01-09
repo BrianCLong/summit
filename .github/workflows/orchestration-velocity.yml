@@ -1,0 +1,45 @@
+name: Orchestration Velocity Dashboard
+
+on:
+  schedule:
+    - cron: '0 0 * * 1' # Run at midnight every Monday
+  workflow_dispatch: # Allow manual runs
+
+jobs:
+  generate-dashboard:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install -w
+
+      - name: Generate Dashboard
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/orchestration/generate_velocity_dashboard.mjs
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add artifacts/orchestration/velocity_dashboard.md
+          if ! git diff --staged --quiet; then
+            git commit -m "docs(orchestration): update velocity dashboard"
+            git push
+          else
+            echo "No changes to commit."
+          fi
