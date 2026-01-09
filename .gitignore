@@ -276,7 +276,11 @@ pr-dashboard-report.json
 pr-dashboard.html
 pr-backlog-stats.json
 tests/e2e/auth-state.json
-artifacts/
+artifacts/*
+!artifacts/observer/
+!artifacts/observer/briefs/
+!artifacts/observer/briefs/*.md
+!artifacts/observer/briefs/*.json
 /dist
 .env
 sbom.json

@@ -1,0 +1,9 @@
+{
+  "slug": "competitive-landscape-example",
+  "generated_at": "2026-01-09T22:38:39.864Z",
+  "source_path": "docs/observer/scenarios/INVESTIGATION_competitive_landscape_brief.md",
+  "dataset_ids": ["GOLDEN/datasets/sum_news.jsonl"],
+  "tags": ["observer", "competitive-landscape"],
+  "git_sha": "6bb2e0f68e7bcdd96e5ffc114429f57f98938acd",
+  "query_log_path": null
+}

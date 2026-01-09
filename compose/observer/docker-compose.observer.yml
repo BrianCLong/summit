@@ -1,0 +1,229 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: summit-observer-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: observer
+      POSTGRES_USER: observer
+      POSTGRES_PASSWORD: observer-dev-password
+    ports:
+      - '5432:5432'
+    volumes:
+      - observer_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U observer -d observer']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - observer
+
+  redis:
+    image: redis:7-alpine
+    container_name: summit-observer-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - observer_redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - observer
+
+  neo4j:
+    image: neo4j:5-community
+    container_name: summit-observer-neo4j
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: neo4j/observer-dev-password
+      NEO4J_dbms_security_procedures_unrestricted: gds.*,apoc.*
+      NEO4J_PLUGINS: '["apoc","graph-data-science"]'
+    ports:
+      - '7474:7474'
+      - '7687:7687'
+    volumes:
+      - observer_neo4j_data:/data
+      - observer_neo4j_logs:/logs
+    healthcheck:
+      test:
+        ['CMD-SHELL', 'cypher-shell -u neo4j -p observer-dev-password "RETURN 1"']
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    networks:
+      - observer
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: summit-observer-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - cluster.name=summit-observer-search
+      - node.name=summit-observer-search-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=false
+      - ELASTIC_PASSWORD=observer-dev-password
+      - xpack.security.enrollment.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - '9200:9200'
+    volumes:
+      - observer_elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fsS http://localhost:9200 >/dev/null || exit 1']
+      interval: 20s
+      timeout: 10s
+      retries: 10
+    networks:
+      - observer
+
+  maestro:
+    image: python:3.11-slim
+    container_name: summit-observer-maestro
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command:
+      [
+        "/bin/sh",
+        "-c",
+        "pip install --no-cache-dir -r maestro/requirements.txt && python -m uvicorn maestro.app:app --host 0.0.0.0 --port 8001",
+      ]
+    ports:
+      - '8001:8001'
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8001/docs')",
+        ]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+    networks:
+      - observer
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    container_name: summit-observer-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      DATABASE_URL: postgresql://observer:observer-dev-password@postgres:5432/observer
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USERNAME: neo4j
+      NEO4J_PASSWORD: observer-dev-password
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: observer-dev-password
+      CORS_ORIGIN: http://localhost:3000
+      RATE_LIMIT_MAX: 600
+      RATE_LIMIT_WINDOW_MS: 60000
+    ports:
+      - '4000:4000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:4000/health/ready']
+      interval: 15s
+      timeout: 30s
+      retries: 20
+    networks:
+      - observer
+
+  websocket-server:
+    build:
+      context: ./services/websocket-server
+      dockerfile: Dockerfile
+    command: node dist/index.js
+    container_name: summit-observer-websocket
+    restart: unless-stopped
+    environment:
+      PORT: 9001
+      HOST: 0.0.0.0
+      NODE_ENV: development
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: observer-dev-secret
+      JWT_ALGORITHM: HS256
+      CORS_ORIGIN: http://localhost:3000
+      CORS_CREDENTIALS: 'true'
+      CLUSTERING_ENABLED: 'false'
+      PERSISTENCE_ENABLED: 'true'
+      PERSISTENCE_TTL: '3600'
+      HEARTBEAT_INTERVAL: '30000'
+      HEARTBEAT_TIMEOUT: '60000'
+    ports:
+      - '9001:9001'
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'node', '-e', 'require("http").get("http://localhost:9001/health/live", (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })']
+      interval: 15s
+      timeout: 10s
+      retries: 3
+    networks:
+      - observer
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile.dev
+    container_name: summit-observer-web
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://api:4000/graphql
+      VITE_WS_URL: ws://api:4000/graphql
+      VITE_WEBSOCKET_URL: ws://websocket-server:9001
+      VITE_PORT: 3000
+    ports:
+      - '3000:3000'
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000']
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    networks:
+      - observer
+
+networks:
+  observer:
+    name: summit-observer
+
+volumes:
+  observer_postgres_data:
+  observer_redis_data:
+  observer_neo4j_data:
+  observer_neo4j_logs:
+  observer_elasticsearch_data:

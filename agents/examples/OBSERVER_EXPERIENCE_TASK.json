@@ -1,0 +1,49 @@
+{
+  "task_id": "OBSERVER_EXPERIENCE_20260109",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "summit-observer-experience",
+    "version": "v1",
+    "sha256": "d48b54cf48645ac80d2a47cb036a7eecba99bf3bdd84e60dce3d643560bfe76b",
+    "path": "prompts/observer/summit-observer-experience.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/observer/",
+      "compose/observer/",
+      "scripts/observer/",
+      "artifacts/observer/",
+      "README.md",
+      "docs/ARCHITECTURE.md",
+      "Makefile",
+      "docs/roadmap/STATUS.json",
+      "prompts/observer/",
+      "prompts/registry.yaml",
+      "agents/examples/OBSERVER_EXPERIENCE_TASK.json"
+    ],
+    "domains": ["observer-experience", "documentation", "operations"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "artifacts/observer/briefs/BRIEF_competitive-landscape-example_20260109T223839Z.md",
+      "artifacts/observer/briefs/BRIEF_competitive-landscape-example_20260109T223839Z.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Observer golden path documentation exists and references observer commands.",
+    "Observer compose stack and Make targets support sandbox up/down/smoke.",
+    "Investigation template, scenario, and brief export script are available.",
+    "Sample brief artifact is generated and stored under artifacts/observer/briefs."
+  ],
+  "stop_conditions": [
+    "CI indicates prompt integrity mismatch or missing metadata.",
+    "PII detected in generated artifacts.",
+    "Observer flow requires editing code or using pnpm/yarn."
+  ]
+}

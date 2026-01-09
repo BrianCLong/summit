@@ -26,6 +26,8 @@ make up
 make smoke
 ```
 
+Observer mode (analysts / OSINT operators): see `docs/observer/OBSERVER_GOLDEN_PATH.md`.
+
 ### GA Gate (Pre-Flight)
 
 Before submitting PRs or deploying:

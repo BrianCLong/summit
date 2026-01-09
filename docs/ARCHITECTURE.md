@@ -64,6 +64,17 @@ Lint + Verify + Tests + Smoke + Security]
   class PG,NEO,TS,REDIS store;
 ```
 
+## Observer deployment (reduced-surface, analysis-first)
+
+Observer mode is a sandboxed, read-mostly deployment designed for analysts and OSINT operators. It
+starts only the core services required for IntelGraph investigations (frontend, API, graph, and
+local data stores), with external connectors disabled by default. The intent is to keep the
+workflow analysis-first and safe for training or first-contact sessions.
+
+- Entry point: `docs/observer/OBSERVER_GOLDEN_PATH.md`
+- Stack definition: `compose/observer/docker-compose.observer.yml`
+- Lifecycle commands: `make observer-up`, `make observer-down`, `make observer-smoke`
+
 ## Repository “codemap” architecture (what lives where)
 
 This is the view that helps new contributors answer “where is the thing?” quickly, based on real top-level directories in the repo:

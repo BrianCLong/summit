@@ -1,5 +1,36 @@
 version: 1
 prompts:
+  - id: summit-observer-experience
+    version: v1
+    path: prompts/observer/summit-observer-experience.md
+    sha256: d48b54cf48645ac80d2a47cb036a7eecba99bf3bdd84e60dce3d643560bfe76b
+    description: Observer-focused golden path for IntelGraph investigations and brief export.
+    scope:
+      paths:
+        - docs/observer/
+        - compose/observer/
+        - scripts/observer/
+        - artifacts/observer/
+        - README.md
+        - docs/ARCHITECTURE.md
+        - Makefile
+        - docs/roadmap/STATUS.json
+        - prompts/observer/
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - documentation
+        - operations
+        - observer-experience
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: agent-native-loop-n4
     version: v1
     path: prompts/governance/agent-native-loop-n4.md

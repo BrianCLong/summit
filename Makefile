@@ -10,8 +10,10 @@ include Makefile.merge-train
 .PHONY: bootstrap
 .PHONY: dev-prereqs dev-up dev-down dev-smoke
 .PHONY: demo demo-down demo-check demo-seed demo-smoke
+.PHONY: observer-prereqs observer-up observer-down observer-smoke
 
 COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
+COMPOSE_OBSERVER_FILE ?= compose/observer/docker-compose.observer.yml
 DEV_ENV_FILE ?= .env
 SHELL_SERVICE ?= gateway
 VENV_DIR ?= .venv
@@ -54,6 +56,37 @@ dev-smoke: dev-prereqs ## Minimal smoke checks for local dev
 	@echo "Checking Gateway health at http://localhost:8080/health ..."
 	@curl -sSf http://localhost:8080/health > /dev/null || { echo "Gateway health endpoint not responding on port 8080."; exit 1; }
 	@echo "Dev smoke checks passed."
+
+observer-prereqs:
+	@command -v docker >/dev/null 2>&1 || { echo "Docker CLI not found. Install Docker Desktop/Engine."; exit 1; }
+	@docker info >/dev/null 2>&1 || { echo "Docker daemon is not running or accessible."; exit 1; }
+	@docker compose version >/dev/null 2>&1 || { echo "Docker Compose plugin (v2) is missing. Install it to continue."; exit 1; }
+	@[ -f "$(COMPOSE_OBSERVER_FILE)" ] || { echo "$(COMPOSE_OBSERVER_FILE) not found. Run from repo root."; exit 1; }
+	@command -v curl >/dev/null 2>&1 || { echo "curl not found. Install curl for smoke checks."; exit 1; }
+
+observer-up: observer-prereqs ## Start observer stack (minimal services)
+	@echo "Starting observer stack with $(COMPOSE_OBSERVER_FILE)..."
+	docker compose -f $(COMPOSE_OBSERVER_FILE) up --build -d
+	@echo "Observer stack is launching. Endpoints:"
+	@echo "  Frontend: http://localhost:3000"
+	@echo "  GraphQL API: http://localhost:4000/graphql"
+	@echo "  Neo4j Browser: http://localhost:7474"
+	@echo "  Maestro API: http://localhost:8001"
+
+observer-down: observer-prereqs ## Stop observer stack and remove volumes
+	@echo "Stopping observer stack defined in $(COMPOSE_OBSERVER_FILE)..."
+	docker compose -f $(COMPOSE_OBSERVER_FILE) down -v
+
+observer-smoke: observer-prereqs ## Minimal smoke checks for observer mode
+	@echo "Running observer smoke checks..."
+	@docker compose -f $(COMPOSE_OBSERVER_FILE) ps
+	@echo "Checking UI at http://localhost:3000 ..."
+	@curl -sSf http://localhost:3000 > /dev/null || { echo "Observer UI not responding on port 3000. Run 'make observer-up' and wait for the web container."; exit 1; }
+	@echo "Checking API readiness at http://localhost:4000/health/ready ..."
+	@curl -sSf http://localhost:4000/health/ready > /dev/null || { echo "Observer API not ready on port 4000. Check 'docker compose -f $(COMPOSE_OBSERVER_FILE) logs api'."; exit 1; }
+	@echo "Checking Neo4j graph query ..."
+	@docker compose -f $(COMPOSE_OBSERVER_FILE) exec -T neo4j cypher-shell -u neo4j -p observer-dev-password "RETURN 1" > /dev/null || { echo "Neo4j query failed. Check 'docker compose -f $(COMPOSE_OBSERVER_FILE) logs neo4j'."; exit 1; }
+	@echo "Observer smoke checks passed."
 
 restart: down up
 
