@@ -1,0 +1,153 @@
+version: 1
+owner: summit-agent-orchestrator
+last_updated: "2026-01-09"
+source_of_truth:
+  readiness_assertion: docs/SUMMIT_READINESS_ASSERTION.md
+  governance_constitution: docs/governance/CONSTITUTION.md
+sprints:
+  - id: assessor_dry_run
+    title: Assessor Dry Run
+    description: |
+      Execute a governed dry run of the external assessor workflow with full evidence capture.
+      Establish a baseline checklist, inputs, and verification artifacts so the readiness narrative is enforced
+      by the same sources of truth used in GA reviews.
+    owner_agent: jules
+    category: ga_governance
+    prerequisites: []
+    priority: 1
+    status: planned
+    prompt_path: .agentic-prompts/roadmap/assessor_dry_run.md
+  - id: reviewer_onboarding
+    title: Reviewer Onboarding
+    description: |
+      Codify the reviewer onboarding path for governance and audit teams with explicit decision trails.
+      Align reviewer expectations, evidence handoffs, and escalation pathways to the authority files.
+    owner_agent: jules
+    category: ga_governance
+    prerequisites:
+      - assessor_dry_run
+    priority: 2
+    status: planned
+    prompt_path: .agentic-prompts/roadmap/reviewer_onboarding.md
+  - id: stabilization_roadmap_handoff
+    title: Stabilization Roadmap Handoff
+    description: |
+      Convert stabilization efforts into an explicit handoff sequence with measurable exit criteria.
+      Ensure every stabilization action is linked to governance authority files and readiness evidence.
+    owner_agent: mixed
+    category: ga_governance
+    prerequisites:
+      - reviewer_onboarding
+    priority: 2
+    status: planned
+    prompt_path: .agentic-prompts/roadmap/stabilization_roadmap_handoff.md
+  - id: development_velocity_unleashed
+    title: Development Velocity Unleashed
+    description: |
+      Unlock sustained delivery speed by reducing friction in planning, handoffs, and verification loops.
+      Deliver an execution model that preserves governance while compressing cycle time.
+    owner_agent: codex
+    category: velocity
+    prerequisites:
+      - stabilization_roadmap_handoff
+    priority: 3
+    status: planned
+    prompt_path: .agentic-prompts/roadmap/development_velocity_unleashed.md
+  - id: production_risk_incident_readiness
+    title: Production Risk & Incident Readiness
+    description: |
+      Establish a governed incident readiness posture with explicit triggers, roles, and evidence capture.
+      Tie incident readiness to GA policy coverage and proof of enforcement.
+    owner_agent: jules
+    category: ga_governance
+    prerequisites:
+      - stabilization_roadmap_handoff
+    priority: 1
+    status: planned
+    prompt_path: .agentic-prompts/roadmap/production_risk_incident_readiness.md
+  - id: summit_observer_experience
+    title: Summit Observer Experience
+    description: |
+      Deliver the observer-facing workflow enhancements that align with GA governance and evidence practices.
+      Ensure observer journeys remain deployable-first and aligned to authoritative definitions.
+    owner_agent: mixed
+    category: observer
+    prerequisites:
+      - stabilization_roadmap_handoff
+    priority: 3
+    status: planned
+    prompt_path: .agentic-prompts/roadmap/summit_observer_experience.md
+  - id: summit_intelligence_lab
+    title: Summit Intelligence Lab
+    description: |
+      Stand up the intelligence lab sprint that operationalizes experimentation into governed backlog items.
+      Convert lab outcomes into roadmap-ready initiatives with explicit policy alignment.
+    owner_agent: mixed
+    category: lab
+    prerequisites:
+      - summit_observer_experience
+    priority: 4
+    status: planned
+    prompt_path: .agentic-prompts/roadmap/summit_intelligence_lab.md
+  - id: agent_mesh_governance
+    title: Agent Mesh Governance
+    description: |
+      Define the governance model for agent mesh operations, including permissions, auditability,
+      and escalation rules that bind to GA governance sources.
+    owner_agent: jules
+    category: governance
+    prerequisites:
+      - production_risk_incident_readiness
+    priority: 3
+    status: planned
+    prompt_path: .agentic-prompts/roadmap/agent_mesh_governance.md
+  - id: ga_cut_launch_playbook
+    title: GA Cut Launch Playbook
+    description: |
+      Produce the GA cut launch playbook with deterministic gates, evidence mapping, and owner signoffs.
+      Integrate readiness assertions to ensure no launch step diverges from governance authority.
+    owner_agent: jules
+    category: ga_governance
+    prerequisites:
+      - production_risk_incident_readiness
+      - reviewer_onboarding
+    priority: 1
+    status: planned
+    prompt_path: .agentic-prompts/roadmap/ga_cut_launch_playbook.md
+  - id: tenant_profiles
+    title: Tenant Profiles
+    description: |
+      Establish tenant profile definitions and governance tags for deployment configuration.
+      Ensure deployment-ready defaults are tied to policy-as-code controls.
+    owner_agent: codex
+    category: deployment
+    prerequisites:
+      - ga_cut_launch_playbook
+    priority: 4
+    status: planned
+    prompt_path: .agentic-prompts/roadmap/tenant_profiles.md
+  - id: field_deployment_playbooks
+    title: Field Deployment Playbooks
+    description: |
+      Deliver the field deployment playbooks that guide production rollouts with governance alignment.
+      Incorporate tenant profiles, incident readiness, and verified checklists.
+    owner_agent: mixed
+    category: deployment
+    prerequisites:
+      - tenant_profiles
+      - ga_cut_launch_playbook
+    priority: 5
+    status: planned
+    prompt_path: .agentic-prompts/roadmap/field_deployment_playbooks.md
+  - id: governance_proving_ground
+    title: Governance Proving Ground
+    description: |
+      Execute the proving ground for governance enforcement, using policy-as-code and audit artifacts
+      to validate compliance workflows under load.
+    owner_agent: jules
+    category: governance
+    prerequisites:
+      - assessor_dry_run
+    priority: 2
+    status: planned
+    prompt_path: .agentic-prompts/roadmap/governance_proving_ground.md

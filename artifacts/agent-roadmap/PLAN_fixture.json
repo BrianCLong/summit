@@ -1,0 +1,32 @@
+{
+  "generated_at": "2026-01-09T22:57:02.403Z",
+  "filters": {
+    "agent": "jules",
+    "focus": "ga_governance",
+    "include_status": [
+      "planned"
+    ]
+  },
+  "max_recommendations": 3,
+  "candidates": [
+    {
+      "rank": 1,
+      "id": "assessor_dry_run",
+      "title": "Assessor Dry Run",
+      "owner_agent": "jules",
+      "category": "ga_governance",
+      "priority": 1,
+      "status": "planned",
+      "prompt_path": ".agentic-prompts/roadmap/assessor_dry_run.md",
+      "prerequisites": [],
+      "reasons": [
+        "priority=1",
+        "status=planned",
+        "category=ga_governance",
+        "agent=jules",
+        "focus=ga_governance"
+      ],
+      "recommended": true
+    }
+  ]
+}

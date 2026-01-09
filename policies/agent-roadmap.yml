@@ -1,0 +1,7 @@
+agent_roadmap:
+  enabled: true
+  default_agent: jules
+  default_focus: ga_governance
+  max_recommendations: 3
+  include_status:
+    - planned

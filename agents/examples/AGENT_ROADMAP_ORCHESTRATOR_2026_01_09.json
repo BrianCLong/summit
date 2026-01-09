@@ -1,0 +1,48 @@
+{
+  "task_id": "AGENT_ROADMAP_ORCHESTRATOR_2026_01_09",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "agent-roadmap-orchestrator",
+    "version": "v1",
+    "sha256": "08350824cee7880beb7316c8891f804a719834a63136b534d608de0f30c2350f",
+    "path": "prompts/roadmap/agent-roadmap-orchestrator@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "configs/agent-roadmap/",
+      ".agentic-prompts/roadmap/",
+      "scripts/agent-roadmap/",
+      "policies/agent-roadmap.yml",
+      "docs/agent-roadmap/",
+      "docs/roadmap/STATUS.json",
+      ".github/workflows/agent-roadmap-lint.yml",
+      "artifacts/agent-roadmap/",
+      "artifacts/agent-runs/",
+      "prompts/roadmap/",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["roadmap", "governance", "orchestration", "documentation", "ci"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "artifacts/agent-roadmap/PLAN_fixture.json",
+      "artifacts/agent-runs/AGENT_ROADMAP_ORCHESTRATOR_2026_01_09.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Agent roadmap catalog and prompt index are present and aligned.",
+    "Planner script emits ranked sprint recommendations and artifacts.",
+    "Roadmap validation workflow passes with unique ids and prompt paths."
+  ],
+  "stop_conditions": [
+    "CI failure on main branch.",
+    "Detection of PII in output.",
+    "Sandbox violation alert."
+  ]
+}

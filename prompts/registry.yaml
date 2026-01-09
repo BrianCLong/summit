@@ -79,3 +79,36 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: agent-roadmap-orchestrator
+    version: v1
+    path: prompts/roadmap/agent-roadmap-orchestrator@v1.md
+    sha256: 08350824cee7880beb7316c8891f804a719834a63136b534d608de0f30c2350f
+    description: Catalog the agent roadmap, prompts, planner script, and validation workflow.
+    scope:
+      paths:
+        - configs/agent-roadmap/
+        - .agentic-prompts/roadmap/
+        - scripts/agent-roadmap/
+        - policies/agent-roadmap.yml
+        - docs/agent-roadmap/
+        - docs/roadmap/STATUS.json
+        - .github/workflows/agent-roadmap-lint.yml
+        - artifacts/agent-roadmap/
+        - artifacts/agent-runs/
+        - prompts/roadmap/
+        - prompts/registry.yaml
+      domains:
+        - roadmap
+        - governance
+        - orchestration
+        - documentation
+        - ci
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
