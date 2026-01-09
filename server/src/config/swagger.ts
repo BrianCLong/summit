@@ -55,4 +55,14 @@ const options: Options = {
   apis: ['./src/routes/*.ts', './src/routes/*.js', './src/http/*.ts'], // Path to the API docs
 };
 
-export const swaggerSpec = swaggerJsdoc(options);
+export const swaggerSpec =
+  process.env.DISABLE_SWAGGER === 'true'
+    ? {
+        openapi: '3.0.0',
+        info: {
+          title: 'IntelGraph API',
+          version: '1.0.0',
+          description: 'Swagger disabled for test environment',
+        },
+      }
+    : swaggerJsdoc(options);

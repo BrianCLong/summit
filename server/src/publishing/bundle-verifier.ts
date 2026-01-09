@@ -314,8 +314,8 @@ export class BundleVerifier {
     if (this.config.revocationListPaths) {
       for (const path of this.config.revocationListPaths) {
         try {
-          const content = await fs.readFile(path, 'utf8');
-          const list = JSON.parse(content);
+          const content = await fs.readFile(path, { encoding: 'utf8' });
+          const list = JSON.parse(String(content));
 
           if (list.revokedBundles && list.revokedBundles.includes(bundleId)) {
             const record = list.revocations.find(
@@ -512,7 +512,9 @@ export async function quickVerify(
   manifestPath: string,
   options: VerifierConfig = {}
 ): Promise<VerificationResult> {
-  const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8'));
+  const manifest = JSON.parse(
+    String(await fs.readFile(manifestPath, { encoding: 'utf8' })),
+  );
   const verifier = new BundleVerifier(options);
   return verifier.verifyBundle(manifest);
 }
@@ -524,7 +526,9 @@ export async function verifyWalletFile(
   walletPath: string,
   options: VerifierConfig = {}
 ): Promise<VerificationResult> {
-  const wallet = JSON.parse(await fs.readFile(walletPath, 'utf8'));
+  const wallet = JSON.parse(
+    String(await fs.readFile(walletPath, { encoding: 'utf8' })),
+  );
   const verifier = new BundleVerifier(options);
   return verifier.verifyWallet(wallet);
 }
