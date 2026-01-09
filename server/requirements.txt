@@ -21,7 +21,7 @@ insightface==0.7.3
 
 # OCR (Optical Character Recognition)
 pytesseract==0.3.10
-paddleocr==2.7.3
+paddleocr==3.3.2
 easyocr==1.7.0
 paddlepaddle==2.6.2
 # Speech Processing
