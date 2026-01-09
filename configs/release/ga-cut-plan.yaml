@@ -1,0 +1,71 @@
+name: "Summit GA Cut Plan"
+description: "Configuration for Summit GA Cut & Launch Playbook"
+
+# Inputs that must be provided to the plan script
+inputs:
+  target_sha:
+    description: "The commit SHA to release"
+    required: true
+  channel:
+    description: "Release channel (ga or rc)"
+    allowed_values: ["ga", "rc"]
+    required: true
+  environment:
+    description: "Target environment"
+    allowed_values: ["staging", "prod"]
+    default: "prod"
+
+# Stages of the GA cut process
+stages:
+  verify:
+    description: "Verification gates including GA Gate, tests, and smoke tests"
+    required: true
+    blocking: true
+    allowed_in_dry_run: true
+    artifacts:
+      - "artifacts/verification/REQUIRED_CHECKS.txt"
+      - "artifacts/release/release-status.json"
+
+  evidence_bundle:
+    description: "Generation of the evidence bundle (SBOMs, signatures, provenance)"
+    required: true
+    blocking: true
+    allowed_in_dry_run: true
+    artifacts:
+      - "release-assets/evidence.tar.gz"
+      - "release-assets/approval_record.json"
+
+  decision:
+    description: "Governance decision and waivers"
+    required: true
+    blocking: true
+    allowed_in_dry_run: true
+    artifacts:
+      - "artifacts/release/decision.json"
+
+  tagging:
+    description: "Git tagging and branch operations"
+    required: true
+    blocking: true
+    allowed_in_dry_run: false # Mutations not allowed in dry-run
+
+  deployment:
+    description: "Triggering deployment workflows"
+    required: true
+    blocking: true
+    allowed_in_dry_run: false
+
+  notifications:
+    description: "Documentation updates and external notifications"
+    required: false
+    blocking: false
+    allowed_in_dry_run: false
+
+# Preconditions that must be met before starting the cut
+preconditions:
+  risk_envelope:
+    description: "Change risk must be within acceptable limits"
+    script: "scripts/risk/validate_change_risk.mjs" # Placeholder
+  incident_readiness:
+    description: "Incident readiness baseline must pass"
+    script: "scripts/ops/check_incident_readiness.mjs" # Placeholder
