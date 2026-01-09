@@ -1,0 +1,34 @@
+name: Governance Policy Enforcement
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/governance-policy.yml'
+      - 'scripts/setup-branch-protection.sh'
+      - 'scripts/ga/verify_branch_protection.sh'
+  schedule:
+    - cron: '0 8 * * *' # Daily at 8am
+  workflow_dispatch:
+
+jobs:
+  enforce-branch-protection:
+    name: Enforce Branch Protection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify Branch Protection Policy
+        run: ./scripts/ga/verify_branch_protection.sh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Use GITHUB_TOKEN which has read access to repo by default in most setups.
+          # If branch protection is private, might need a PAT, but for this repo verification
+          # usually works with GITHUB_TOKEN if permissions are set correctly.
+          # We check for 403/404 handling in the script.
+
+      - name: Upload Audit Evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: branch-protection-audit
+          path: branch-protection-audit.json
