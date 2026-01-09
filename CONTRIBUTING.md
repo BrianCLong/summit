@@ -63,9 +63,10 @@ We welcome contributions from AI agents and automated systems. To reduce frictio
 ### For AI Agents & Bots
 
 1.  **Read the Instructions**: You **MUST** read and adhere to [`AGENTS.md`](AGENTS.md). It contains specific directives for code generation, architectural boundaries, and prohibited actions.
-2.  **Sign Your Work**: All commits must be signed.
-3.  **Context Awareness**: Do not hallucinate dependencies or APIs. Verify existence before importing.
-4.  **No-Op Changes**: If you need to force a review on an existing file without functional changes, add a non-breaking comment or whitespace change to trigger the diff.
+2.  **Honor the Quality Charter**: Follow the Agent Quality Charter (in `AGENTS.md`)—no debug print statements or commented-out code; run `pnpm format:check` and `pnpm lint` (treat warnings as failures) locally before opening a PR.
+3.  **Sign Your Work**: All commits must be signed.
+4.  **Context Awareness**: Do not hallucinate dependencies or APIs. Verify existence before importing.
+5.  **No-Op Changes**: If you need to force a review on an existing file without functional changes, add a non-breaking comment or whitespace change to trigger the diff.
 
 ### Co-authoring
 
