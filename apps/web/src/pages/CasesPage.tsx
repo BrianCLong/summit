@@ -186,13 +186,17 @@ export default function CasesPage() {
                 value={searchQuery}
                 onChange={setSearchQuery}
                 placeholder="Search cases by title, description, or tags..."
+                ariaLabel="Search cases"
                 className="w-full"
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-1 block">Status</label>
+              <label htmlFor="case-status" className="text-sm font-medium mb-1 block">
+                Status
+              </label>
               <select
+                id="case-status"
                 value={filterStatus}
                 onChange={e => setFilterStatus(e.target.value as CaseStatus | 'all')}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -206,8 +210,11 @@ export default function CasesPage() {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-1 block">Priority</label>
+              <label htmlFor="case-priority" className="text-sm font-medium mb-1 block">
+                Priority
+              </label>
               <select
+                id="case-priority"
                 value={filterPriority}
                 onChange={e => setFilterPriority(e.target.value as Priority | 'all')}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"

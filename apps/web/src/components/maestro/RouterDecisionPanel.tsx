@@ -4,6 +4,14 @@ import {
   ExclamationTriangleIcon,
   CheckCircleIcon,
 } from '@heroicons/react/24/outline'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from '@/components/ui/Dialog'
 
 interface RouterCandidate {
   model: string
@@ -157,12 +165,72 @@ export function RouterDecisionPanel({
             Export Audit
           </button>
           {decision.canOverride && (
-            <button
-              onClick={() => setShowOverrideDialog(true)}
-              className="text-sm bg-orange-100 text-orange-700 hover:bg-orange-200 px-3 py-1 rounded"
-            >
-              Override
-            </button>
+            <Dialog open={showOverrideDialog} onOpenChange={setShowOverrideDialog}>
+              <DialogTrigger asChild>
+                <button
+                  className="text-sm bg-orange-100 text-orange-700 hover:bg-orange-200 px-3 py-1 rounded"
+                >
+                  Override
+                </button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Override Router Decision</DialogTitle>
+                  <DialogDescription>
+                    Provide a justification before applying a manual override.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="override-model" className="block text-sm font-medium text-gray-700 mb-1">
+                      Select Model
+                    </label>
+                    <select
+                      id="override-model"
+                      value={selectedOverrideModel}
+                      onChange={e => setSelectedOverrideModel(e.target.value)}
+                      className="w-full border border-gray-300 rounded px-3 py-2"
+                    >
+                      <option value="">Choose a model...</option>
+                      {decision.candidates.map(candidate => (
+                        <option key={candidate.model} value={candidate.model}>
+                          {candidate.model}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="override-justification" className="block text-sm font-medium text-gray-700 mb-1">
+                      Justification
+                    </label>
+                    <textarea
+                      id="override-justification"
+                      value={overrideReason}
+                      onChange={e => setOverrideReason(e.target.value)}
+                      placeholder="Explain why you're overriding the router decision..."
+                      className="w-full border border-gray-300 rounded px-3 py-2 h-20"
+                    />
+                  </div>
+
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => setShowOverrideDialog(false)}
+                      className="px-4 py-2 text-gray-700 border border-gray-300 rounded hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleOverride}
+                      disabled={!selectedOverrideModel || !overrideReason.trim()}
+                      className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50"
+                    >
+                      Override Decision
+                    </button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           )}
         </div>
       </div>
@@ -265,62 +333,6 @@ export function RouterDecisionPanel({
         Decision made: {new Date(decision.timestamp).toLocaleString()}
       </div>
 
-      {/* Override Dialog */}
-      {showOverrideDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">
-              Override Router Decision
-            </h3>
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Select Model
-              </label>
-              <select
-                value={selectedOverrideModel}
-                onChange={e => setSelectedOverrideModel(e.target.value)}
-                className="w-full border border-gray-300 rounded px-3 py-2"
-              >
-                <option value="">Choose a model...</option>
-                {decision.candidates.map(candidate => (
-                  <option key={candidate.model} value={candidate.model}>
-                    {candidate.model}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Justification
-              </label>
-              <textarea
-                value={overrideReason}
-                onChange={e => setOverrideReason(e.target.value)}
-                placeholder="Explain why you're overriding the router decision..."
-                className="w-full border border-gray-300 rounded px-3 py-2 h-20"
-              />
-            </div>
-
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setShowOverrideDialog(false)}
-                className="px-4 py-2 text-gray-700 border border-gray-300 rounded hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleOverride}
-                disabled={!selectedOverrideModel || !overrideReason.trim()}
-                className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50"
-              >
-                Override Decision
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

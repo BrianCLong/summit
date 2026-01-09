@@ -67,22 +67,41 @@ import { CommandStatusProvider } from '@/features/internal-command/CommandStatus
 import { DemoIndicator } from '@/components/common/DemoIndicator'
 import { DemoModeGate } from '@/components/common/DemoModeGate'
 import { isDemoModeEnabled } from '@/lib/demoMode'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from '@/components/ui/Dialog'
 
 function App() {
-  const [showPalette, setShowPalette] = React.useState(false);
-  const [showExplain, setShowExplain] = React.useState(false);
+  const [showPalette, setShowPalette] = React.useState(false)
+  const [showExplain, setShowExplain] = React.useState(false)
+  const lastFocusRef = React.useRef<HTMLElement | null>(null)
   const demoModeEnabled = isDemoModeEnabled()
 
-  React.useEffect(()=>{
-    const onKey=(e:KeyboardEvent)=>{
-      if((e.key==='k' || e.key==='K') && (e.ctrlKey||e.metaKey)){
-        e.preventDefault();
-        setShowPalette(true);
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.key === 'k' || e.key === 'K') && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault()
+        lastFocusRef.current = document.activeElement as HTMLElement | null
+        setShowExplain(false)
+        setShowPalette(true)
       }
-    };
-    window.addEventListener('keydown', onKey);
-    return ()=>window.removeEventListener('keydown', onKey);
-  },[]);
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  const handlePaletteOpenChange = (open: boolean) => {
+    if (!open) {
+      setShowPalette(false)
+      setShowExplain(false)
+      lastFocusRef.current?.focus()
+    }
+  }
 
   return (
     <ApolloProvider client={apolloClient}>
@@ -106,18 +125,49 @@ function App() {
                       </div>
                     }
                   >
-                    {/* Explain overlay stub */}
-                    {showPalette && (
-                       <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={()=>setShowPalette(false)}>
-                         <div className="bg-white p-4 rounded shadow-lg w-96" onClick={e=>e.stopPropagation()}>
-                           <input type="text" placeholder="Command..." className="w-full border p-2 mb-2" autoFocus />
-                           <button onClick={()=>{ setShowPalette(false); setShowExplain(true); }} className="block w-full text-left p-2 hover:bg-gray-100">
-                             Explain this view
-                           </button>
-                         </div>
-                       </div>
-                    )}
-                    {showExplain && <Explain facts={["Linked via shared IP (1.2.3.4)", "Match score: 0.98"]} />}
+                    {/* Command palette */}
+                    <Dialog open={showPalette} onOpenChange={handlePaletteOpenChange}>
+                      <DialogContent className="max-w-md">
+                        <DialogHeader>
+                          <DialogTitle className="sr-only">Global Command Menu</DialogTitle>
+                          <DialogDescription className="sr-only">
+                            Run a command or open quick actions.
+                          </DialogDescription>
+                        </DialogHeader>
+                        {!showExplain ? (
+                          <div className="space-y-3">
+                            <input
+                              type="text"
+                              placeholder="Command..."
+                              className="w-full border p-2 rounded"
+                              autoFocus
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowExplain(true)}
+                              className="block w-full text-left p-2 rounded hover:bg-gray-100"
+                            >
+                              Explain this view
+                            </button>
+                          </div>
+                        ) : (
+                          <Explain
+                            facts={[
+                              'Linked via shared IP (1.2.3.4)',
+                              'Match score: 0.98',
+                            ]}
+                            onClose={() => setShowExplain(false)}
+                          />
+                        )}
+                        <div className="flex justify-end pt-2">
+                          <DialogClose asChild>
+                            <button className="text-sm text-muted-foreground hover:text-foreground">
+                              Close
+                            </button>
+                          </DialogClose>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
 
                     <Routes>
                       {/* Auth routes */}

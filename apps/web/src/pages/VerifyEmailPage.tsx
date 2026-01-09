@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useSearchParams, Link, Navigate } from 'react-router-dom'
-import { CheckCircle, XCircle, AlertCircle, ArrowRight } from 'lucide-react'
+import { CheckCircle, XCircle, ArrowRight } from 'lucide-react'
 import {
   Card,
   CardContent,
@@ -52,7 +52,11 @@ export default function VerifyEmailPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 p-4">
+    <main
+      role="main"
+      aria-label="Verify email"
+      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 p-4"
+    >
       <Card className="glass-morphism border-blue-500/20 w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mx-auto w-16 h-16 flex items-center justify-center mb-4">
@@ -104,6 +108,6 @@ export default function VerifyEmailPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </main>
   )
 }

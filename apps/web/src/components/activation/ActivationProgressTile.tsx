@@ -67,9 +67,12 @@ export const ActivationProgressTile: React.FC = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <ol
+            className="grid grid-cols-1 md:grid-cols-4 gap-4"
+            aria-label="Setup checklist"
+          >
             {steps.map((step, idx) => (
-              <div key={step.id} className="flex items-center space-x-2">
+              <li key={step.id} className="flex items-center space-x-2">
                 {step.completed ? (
                   <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
                 ) : (
@@ -80,9 +83,9 @@ export const ActivationProgressTile: React.FC = () => {
                 <span className={`text-sm ${step.completed ? 'text-slate-900 font-medium' : 'text-slate-500'}`}>
                   {step.label}
                 </span>
-              </div>
+              </li>
             ))}
-          </div>
+          </ol>
 
           {nextStep && (
             <div className="flex justify-end pt-2">

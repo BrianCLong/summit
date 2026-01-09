@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { Download, RefreshCw } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Table } from '@/components/ui/Table'
 import { Skeleton } from '@/components/ui/Skeleton'
-import { EmptyState } from '@/components/ui/EmptyState'
+import { StateTriplet } from '@/components/ui/StateTriplet'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { KPIStrip } from '@/components/panels/KPIStrip'
 import { ConnectionStatus } from '@/components/ConnectionStatus'
 import { DataIntegrityNotice } from '@/components/common/DataIntegrityNotice'
 import { useDemoMode } from '@/components/common/DemoIndicator'
+import { useNavigate } from 'react-router-dom'
 import {
   useAlerts,
   useAlertUpdates,
@@ -20,6 +21,7 @@ import mockData from '@/mock/data.json'
 import type { Alert, KPIMetric, AlertStatus } from '@/types'
 
 export default function AlertsPage() {
+  const navigate = useNavigate()
   // GraphQL hooks
   const {
     data: alertsData,
@@ -38,6 +40,19 @@ export default function AlertsPage() {
   const [selectedStatus, setSelectedStatus] = useState<string>('')
   const isDemoMode = useDemoMode()
 
+  const loadMockAlerts = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      await new Promise(resolve => setTimeout(resolve, 800))
+      setAlerts(mockData.alerts as Alert[])
+    } catch (err) {
+      setError(err as Error)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
   // Load data - prefer GraphQL over mock data in demo mode only
   useEffect(() => {
     if (alertsData?.alerts) {
@@ -53,21 +68,9 @@ export default function AlertsPage() {
         )
         return
       }
-      // Fallback to demo data
-      const loadMockData = async () => {
-        try {
-          setLoading(true)
-          await new Promise(resolve => setTimeout(resolve, 800))
-          setAlerts(mockData.alerts as Alert[])
-        } catch (err) {
-          setError(err as Error)
-        } finally {
-          setLoading(false)
-        }
-      }
-      loadMockData()
+      loadMockAlerts()
     }
-  }, [alertsData, alertsLoading, alertsError, isDemoMode])
+  }, [alertsData, alertsLoading, alertsError, isDemoMode, loadMockAlerts])
 
   // Handle real-time alert updates
   useEffect(() => {
@@ -77,55 +80,70 @@ export default function AlertsPage() {
   }, [alertUpdates])
 
   // Filter alerts
-  const filteredAlerts = alerts.filter(alert => {
-    if (selectedSeverity && alert.severity !== selectedSeverity) {return false}
-    if (selectedStatus && alert.status !== selectedStatus) {return false}
-    if (
-      searchQuery &&
-      !alert.title.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-      {return false}
-    return true
-  })
+  const filteredAlerts = useMemo(
+    () =>
+      alerts.filter(alert => {
+        if (selectedSeverity && alert.severity !== selectedSeverity) {return false}
+        if (selectedStatus && alert.status !== selectedStatus) {return false}
+        if (
+          searchQuery &&
+          !alert.title.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+          {return false}
+        return true
+      }),
+    [alerts, searchQuery, selectedSeverity, selectedStatus]
+  )
 
   // Calculate KPIs (do not show change deltas in demo-only mode)
-  const kpiMetrics: KPIMetric[] = [
-    {
-      id: 'critical',
-      title: 'Critical Alerts',
-      value: alerts.filter(a => a.severity === 'critical').length,
-      format: 'number',
-      status:
-        alerts.filter(a => a.severity === 'critical').length > 0
-          ? 'error'
-          : 'success',
-      ...(alertsData ? { change: { value: 12, direction: 'up', period: 'last hour' } } : {}),
-    },
-    {
-      id: 'active',
-      title: 'Active Alerts',
-      value: alerts.filter(a => a.status === 'open').length,
-      format: 'number',
-      status: 'warning',
-      ...(alertsData ? { change: { value: 5, direction: 'down', period: 'last hour' } } : {}),
-    },
-    {
-      id: 'resolved',
-      title: 'Resolved Today',
-      value: alerts.filter(a => a.status === 'resolved').length,
-      format: 'number',
-      status: 'success',
-      ...(alertsData ? { change: { value: 23, direction: 'up', period: 'yesterday' } } : {}),
-    },
-    {
-      id: 'response',
-      title: 'Avg Response Time',
-      value: 156,
-      format: 'duration',
-      status: 'neutral',
-      ...(alertsData ? { change: { value: 8, direction: 'down', period: 'last week' } } : {}),
-    },
-  ]
+  const kpiMetrics: KPIMetric[] = useMemo(
+    () => [
+      {
+        id: 'critical',
+        title: 'Critical Alerts',
+        value: alerts.filter(a => a.severity === 'critical').length,
+        format: 'number',
+        status:
+          alerts.filter(a => a.severity === 'critical').length > 0
+            ? 'error'
+            : 'success',
+        ...(alertsData
+          ? { change: { value: 12, direction: 'up', period: 'last hour' } }
+          : {}),
+      },
+      {
+        id: 'active',
+        title: 'Active Alerts',
+        value: alerts.filter(a => a.status === 'open').length,
+        format: 'number',
+        status: 'warning',
+        ...(alertsData
+          ? { change: { value: 5, direction: 'down', period: 'last hour' } }
+          : {}),
+      },
+      {
+        id: 'resolved',
+        title: 'Resolved Today',
+        value: alerts.filter(a => a.status === 'resolved').length,
+        format: 'number',
+        status: 'success',
+        ...(alertsData
+          ? { change: { value: 23, direction: 'up', period: 'yesterday' } }
+          : {}),
+      },
+      {
+        id: 'response',
+        title: 'Avg Response Time',
+        value: 156,
+        format: 'duration',
+        status: 'neutral',
+        ...(alertsData
+          ? { change: { value: 8, direction: 'down', period: 'last week' } }
+          : {}),
+      },
+    ],
+    [alerts, alertsData]
+  )
 
   const handleStatusChange = async (
     alertId: string,
@@ -157,12 +175,25 @@ export default function AlertsPage() {
 
   const handleRefresh = async () => {
     if (alertsData) {
-      await refetch()
-    } else {
       setLoading(true)
-      await new Promise(resolve => setTimeout(resolve, 800))
+      await refetch()
       setLoading(false)
+    } else if (isDemoMode) {
+      await loadMockAlerts()
     }
+  }
+
+  const handleRetry = async () => {
+    setError(null)
+    if (alertsData || alertsError) {
+      await refetch()
+      return
+    }
+    if (isDemoMode) {
+      await loadMockAlerts()
+      return
+    }
+    await refetch()
   }
 
   const getSeverityColor = (severity: string) => {
@@ -193,14 +224,36 @@ export default function AlertsPage() {
     }
   }
 
+  const isInitialLoading = loading && alerts.length === 0
+
   if (error) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <EmptyState
+      <div className="h-full flex items-center justify-center p-6">
+        <StateTriplet
+          status="error"
           icon="alert"
           title="Failed to load alerts"
           description={error.message}
-          action={{ label: 'Retry', onClick: () => window.location.reload() }}
+          actions={[
+            { label: 'Retry', onClick: handleRetry },
+            {
+              label: 'Back to Home',
+              onClick: () => navigate('/'),
+              variant: 'outline',
+            },
+          ]}
+        />
+      </div>
+    )
+  }
+
+  if (isInitialLoading) {
+    return (
+      <div className="h-full flex items-center justify-center p-6">
+        <StateTriplet
+          status="loading"
+          title="Loading alerts"
+          loadingMessage="Syncing the latest security signals."
         />
       </div>
     )
@@ -220,6 +273,7 @@ export default function AlertsPage() {
             placeholder="Search alerts..."
             value={searchQuery}
             onChange={setSearchQuery}
+            ariaLabel="Search alerts"
             className="w-80"
           />
 
@@ -255,8 +309,11 @@ export default function AlertsPage() {
       {/* Filters */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">Severity:</span>
+          <label htmlFor="alert-severity" className="text-sm font-medium">
+            Severity:
+          </label>
           <select
+            id="alert-severity"
             value={selectedSeverity}
             onChange={e => setSelectedSeverity(e.target.value)}
             className="px-3 py-1 border rounded-md text-sm"
@@ -270,8 +327,11 @@ export default function AlertsPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">Status:</span>
+          <label htmlFor="alert-status" className="text-sm font-medium">
+            Status:
+          </label>
           <select
+            id="alert-status"
             value={selectedStatus}
             onChange={e => setSelectedStatus(e.target.value)}
             className="px-3 py-1 border rounded-md text-sm"
@@ -309,18 +369,26 @@ export default function AlertsPage() {
               ))}
             </div>
           ) : filteredAlerts.length === 0 ? (
-            <EmptyState
+            <StateTriplet
+              status="empty"
               icon="search"
               title="No alerts found"
-              description="Try adjusting your filters or search criteria"
-              action={{
-                label: 'Clear Filters',
-                onClick: () => {
-                  setSearchQuery('')
-                  setSelectedSeverity('')
-                  setSelectedStatus('')
+              description="Try adjusting your filters or search criteria."
+              actions={[
+                {
+                  label: 'Clear Filters',
+                  onClick: () => {
+                    setSearchQuery('')
+                    setSelectedSeverity('')
+                    setSelectedStatus('')
+                  },
                 },
-              }}
+                {
+                  label: 'Back to Home',
+                  onClick: () => navigate('/'),
+                  variant: 'outline',
+                },
+              ]}
             />
           ) : (
             <Table>

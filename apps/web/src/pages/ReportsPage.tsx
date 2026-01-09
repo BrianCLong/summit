@@ -9,7 +9,7 @@
  * - Export to HTML and PDF
  */
 
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Plus,
@@ -27,7 +27,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { SearchBar } from '@/components/ui/SearchBar'
-import { EmptyState } from '@/components/ui/EmptyState'
+import { StateTriplet } from '@/components/ui/StateTriplet'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from '@/components/ui/Dialog'
 
 interface Report {
   id: string
@@ -118,23 +126,59 @@ const STATUS_COLORS = {
 
 export default function ReportsPage() {
   const navigate = useNavigate()
-  const [reports] = useState<Report[]>(generateMockReports())
+  const [reports, setReports] = useState<Report[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState<string>('all')
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [showComposer, setShowComposer] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+  const composerFocusRef = useRef<HTMLElement | null>(null)
 
-  const filteredReports = reports.filter(r => {
-    const matchesSearch =
-      searchQuery === '' ||
-      r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.author.toLowerCase().includes(searchQuery.toLowerCase())
+  const loadReports = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      await new Promise(resolve => setTimeout(resolve, 500))
+      setReports(generateMockReports())
+    } catch (err) {
+      setError(err as Error)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
-    const matchesStatus = filterStatus === 'all' || r.status === filterStatus
+  const handleComposerOpenChange = (open: boolean) => {
+    setShowComposer(open)
+    if (!open) {
+      composerFocusRef.current?.focus()
+    }
+  }
 
-    return matchesSearch && matchesStatus
-  })
+  const openComposer = () => {
+    composerFocusRef.current = document.activeElement as HTMLElement | null
+    setShowComposer(true)
+  }
+
+  useEffect(() => {
+    loadReports()
+  }, [loadReports])
+
+  const filteredReports = useMemo(
+    () =>
+      reports.filter(r => {
+        const matchesSearch =
+          searchQuery === '' ||
+          r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          r.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          r.author.toLowerCase().includes(searchQuery.toLowerCase())
+
+        const matchesStatus =
+          filterStatus === 'all' || r.status === filterStatus
+
+        return matchesSearch && matchesStatus
+      }),
+    [filterStatus, reports, searchQuery]
+  )
 
   const handleExportHTML = (report: Report) => {
     console.log('Exporting report to HTML:', report.id)
@@ -148,44 +192,49 @@ export default function ReportsPage() {
     alert(`Generating PDF for "${report.title}". This will call the backend PDF service.`)
   }
 
-  const handleCreateReport = () => {
-    setShowComposer(true)
-  }
-
   // Report Composer Modal
   const ReportComposer = () => (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-6">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-auto">
-        <CardHeader className="border-b">
-          <div className="flex items-center justify-between">
-            <CardTitle>Create Intelligence Report</CardTitle>
-            <Button variant="ghost" onClick={() => setShowComposer(false)}>
-              Close
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
+    <Dialog open={showComposer} onOpenChange={handleComposerOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+        <DialogHeader className="border-b pb-4">
+          <DialogTitle>Create Intelligence Report</DialogTitle>
+          <DialogDescription>
+            Draft a new report, attach snapshots, and set classification.
+          </DialogDescription>
+        </DialogHeader>
+        <CardContent className="p-0 pt-6 space-y-6">
           {/* Report Metadata */}
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium block mb-1">Report Title</label>
+              <label htmlFor="report-title" className="text-sm font-medium block mb-1">
+                Report Title
+              </label>
               <input
+                id="report-title"
                 type="text"
                 placeholder="e.g., APT Campaign Analysis - Q4 2025"
                 className="w-full px-3 py-2 rounded-md border border-input bg-background"
               />
             </div>
             <div>
-              <label className="text-sm font-medium block mb-1">Description</label>
+              <label htmlFor="report-description" className="text-sm font-medium block mb-1">
+                Description
+              </label>
               <textarea
+                id="report-description"
                 placeholder="Brief overview of the report content..."
                 className="w-full px-3 py-2 rounded-md border border-input bg-background min-h-[80px] resize-none"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium block mb-1">Classification</label>
-                <select className="w-full px-3 py-2 rounded-md border border-input bg-background">
+                <label htmlFor="report-classification" className="text-sm font-medium block mb-1">
+                  Classification
+                </label>
+                <select
+                  id="report-classification"
+                  className="w-full px-3 py-2 rounded-md border border-input bg-background"
+                >
                   <option value="unclassified">Unclassified</option>
                   <option value="confidential">Confidential</option>
                   <option value="secret">Secret</option>
@@ -193,8 +242,13 @@ export default function ReportsPage() {
                 </select>
               </div>
               <div>
-                <label className="text-sm font-medium block mb-1">Link to Case (Optional)</label>
-                <select className="w-full px-3 py-2 rounded-md border border-input bg-background">
+                <label htmlFor="report-linked-case" className="text-sm font-medium block mb-1">
+                  Link to Case (Optional)
+                </label>
+                <select
+                  id="report-linked-case"
+                  className="w-full px-3 py-2 rounded-md border border-input bg-background"
+                >
                   <option value="">None</option>
                   <option value="case-1">APT Group Infrastructure Analysis</option>
                   <option value="case-2">Phishing Campaign Investigation</option>
@@ -300,10 +354,51 @@ export default function ReportsPage() {
               </Button>
             </div>
           </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <DialogClose asChild>
+              <Button variant="outline">Close</Button>
+            </DialogClose>
+            <Button>Create Report Draft</Button>
+          </div>
         </CardContent>
-      </Card>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
+
+  const isInitialLoading = loading && reports.length === 0
+
+  if (error) {
+    return (
+      <div className="h-full flex items-center justify-center p-6">
+        <StateTriplet
+          status="error"
+          icon="alert"
+          title="Unable to load reports"
+          description={error.message}
+          actions={[
+            { label: 'Retry', onClick: loadReports },
+            {
+              label: 'Back to Home',
+              onClick: () => navigate('/'),
+              variant: 'outline',
+            },
+          ]}
+        />
+      </div>
+    )
+  }
+
+  if (isInitialLoading) {
+    return (
+      <div className="h-full flex items-center justify-center p-6">
+        <StateTriplet
+          status="loading"
+          title="Loading reports"
+          loadingMessage="Fetching your latest intelligence briefs."
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -315,7 +410,7 @@ export default function ReportsPage() {
             Create, manage, and export intelligence reports and briefing documents
           </p>
         </div>
-        <Button onClick={handleCreateReport} className="gap-2">
+        <Button onClick={openComposer} className="gap-2">
           <Plus className="h-4 w-4" />
           New Report
         </Button>
@@ -330,12 +425,16 @@ export default function ReportsPage() {
                 value={searchQuery}
                 onChange={setSearchQuery}
                 placeholder="Search reports by title, description, or author..."
+                ariaLabel="Search reports"
                 className="w-full"
               />
             </div>
             <div>
-              <label className="text-sm font-medium mb-1 block">Status</label>
+              <label htmlFor="report-status" className="text-sm font-medium mb-1 block">
+                Status
+              </label>
               <select
+                id="report-status"
                 value={filterStatus}
                 onChange={e => setFilterStatus(e.target.value)}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -353,10 +452,19 @@ export default function ReportsPage() {
 
       {/* Reports List */}
       {filteredReports.length === 0 ? (
-        <EmptyState
+        <StateTriplet
+          status="empty"
+          icon="file"
           title="No reports found"
           description="Create your first intelligence report to get started."
-          icon="file"
+          actions={[
+            { label: 'Create Report', onClick: openComposer },
+            {
+              label: 'Back to Home',
+              onClick: () => navigate('/'),
+              variant: 'outline',
+            },
+          ]}
         />
       ) : (
         <div className="grid gap-4">
@@ -494,7 +602,7 @@ export default function ReportsPage() {
       </div>
 
       {/* Report Composer Modal */}
-      {showComposer && <ReportComposer />}
+      <ReportComposer />
     </div>
   )
 }

@@ -1,8 +1,7 @@
 // =============================================
 // Router Decision What-If Dialog
 // =============================================
-import React, { useRef, useState } from 'react'
-import useFocusTrap from '../../hooks/useFocusTrap'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   ResponsiveContainer,
   BarChart,
@@ -12,6 +11,14 @@ import {
   Tooltip,
 } from 'recharts'
 import { XMarkIcon } from '@heroicons/react/24/outline'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from '@/components/ui/Dialog'
 
 // Mock API functions (would come from maestroApi)
 const mockRoutePreview = async (_task: string) => {
@@ -79,9 +86,7 @@ export default function WhatIfRoutingDialog({
   route = 'codegen',
   defaultModel = 'gpt-4o-mini',
 }: WhatIfRoutingDialogProps) {
-  const root = useRef<HTMLDivElement>(null)
-  useFocusTrap(root, open)
-
+  const lastFocusRef = useRef<HTMLElement | null>(null)
   const [task, setTask] = useState(
     "Summarize today's top three developments on ACME Corp."
   )
@@ -92,6 +97,12 @@ export default function WhatIfRoutingDialog({
   const [previewData, setPreviewData] = useState<any>(null)
   const [executeData, setExecuteData] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (open) {
+      lastFocusRef.current = document.activeElement as HTMLElement | null
+    }
+  }, [open])
 
   const handlePreview = async () => {
     setLoading(true)
@@ -136,46 +147,37 @@ export default function WhatIfRoutingDialog({
     onClose()
   }
 
-  if (!open) return null
-
   const totalCost =
     previewData?.candidates
       ?.filter((c: any) => selected.includes(c.id))
       ?.reduce((sum: number, c: any) => sum + c.cost_est, 0) || 0
 
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="whatif-title"
-      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-    >
-      <div
-        ref={root}
-        className="bg-white rounded-2xl shadow-xl w-[min(860px,95vw)] max-h-[90vh] overflow-y-auto"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 id="whatif-title" className="text-lg font-semibold">
-            What-If: Router Decision
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-            aria-label="Close dialog"
-          >
-            <XMarkIcon className="h-6 w-6" />
-          </button>
-        </div>
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      onClose()
+      lastFocusRef.current?.focus()
+    }
+  }
 
-        <div className="p-6 space-y-6">
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="border-b pb-4">
+          <DialogTitle>What-If: Router Decision</DialogTitle>
+          <DialogDescription>
+            Simulate routing changes before applying them to the run.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6 pt-4">
           {/* Input Controls */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="whatif-task" className="block text-sm font-medium text-gray-700 mb-1">
                 Task Description
               </label>
               <input
+                id="whatif-task"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={task}
                 onChange={e => setTask(e.target.value)}
@@ -184,10 +186,11 @@ export default function WhatIfRoutingDialog({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="whatif-model" className="block text-sm font-medium text-gray-700 mb-1">
                 Model
               </label>
               <input
+                id="whatif-model"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={model}
                 onChange={e => setModel(e.target.value)}
@@ -195,10 +198,11 @@ export default function WhatIfRoutingDialog({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="whatif-tokens" className="block text-sm font-medium text-gray-700 mb-1">
                 Tokens
               </label>
               <input
+                id="whatif-tokens"
                 type="number"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={tokens}
@@ -298,7 +302,7 @@ export default function WhatIfRoutingDialog({
                       <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                       <YAxis />
                       <Tooltip
-                        formatter={(value) => [
+                        formatter={value => [
                           `${Number(value).toFixed(2)}`,
                           'Score',
                         ]}
@@ -414,16 +418,31 @@ export default function WhatIfRoutingDialog({
           )}
         </div>
 
-        {/* Footer */}
-        <div className="flex justify-end space-x-3 p-6 border-t border-gray-200">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-          >
-            Close
-          </button>
+        <div className="flex justify-between items-center pt-6 border-t">
+          <DialogClose asChild>
+            <button className="inline-flex items-center gap-2 px-4 py-2 text-gray-700 border border-gray-300 rounded hover:bg-gray-50">
+              <XMarkIcon className="h-4 w-4" />
+              Close
+            </button>
+          </DialogClose>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handlePreview}
+              disabled={loading}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+            >
+              {loading ? 'Loading...' : 'Simulate'}
+            </button>
+            <button
+              onClick={handleExecute}
+              disabled={loading || selected.length === 0}
+              className="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 disabled:opacity-50"
+            >
+              Execute
+            </button>
+          </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }

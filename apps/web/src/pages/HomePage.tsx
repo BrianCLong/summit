@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import {
   ArrowRight,
   Search,
@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { KPIStrip } from '@/components/panels/KPIStrip'
 import { Skeleton } from '@/components/ui/Skeleton'
-import { EmptyState } from '@/components/ui/EmptyState'
+import { StateTriplet } from '@/components/ui/StateTriplet'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { ActivationProgressTile } from '@/components/activation/ActivationProgressTile'
@@ -35,71 +35,77 @@ export default function HomePage() {
   >([])
   const [recentAlerts, setRecentAlerts] = useState<Alert[]>([])
   const [recentCases, setRecentCases] = useState<Case[]>([])
+  const [error, setError] = useState<Error | null>(null)
   const isDemoMode = useDemoMode()
 
-  useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        setLoading(true)
+  const loadDashboardData = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
 
-        if (!isDemoMode) {
-          setKpiMetrics([])
-          setRecentInvestigations([])
-          setRecentAlerts([])
-          setRecentCases([])
-          return
-        }
-
-        // Simulate API calls
-        await new Promise(resolve => setTimeout(resolve, 1000))
-
-        setKpiMetrics(mockData.kpiMetrics as KPIMetric[])
-        setRecentInvestigations(
-          mockData.investigations.slice(0, 3) as Investigation[]
-        )
-        setRecentAlerts(mockData.alerts.slice(0, 4) as Alert[])
-        setRecentCases(mockData.cases.slice(0, 2) as Case[])
-      } catch (error) {
-        console.error('Failed to load dashboard data:', error)
-      } finally {
-        setLoading(false)
+      if (!isDemoMode) {
+        setKpiMetrics([])
+        setRecentInvestigations([])
+        setRecentAlerts([])
+        setRecentCases([])
+        return
       }
-    }
 
-    loadDashboardData()
+      // Simulate API calls
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      setKpiMetrics(mockData.kpiMetrics as KPIMetric[])
+      setRecentInvestigations(
+        mockData.investigations.slice(0, 3) as Investigation[]
+      )
+      setRecentAlerts(mockData.alerts.slice(0, 4) as Alert[])
+      setRecentCases(mockData.cases.slice(0, 2) as Case[])
+    } catch (err) {
+      console.error('Failed to load dashboard data:', err)
+      setError(err as Error)
+    } finally {
+      setLoading(false)
+    }
   }, [isDemoMode])
 
-  const quickActions = [
-    {
-      title: 'Start Investigation',
-      description: 'Create a new investigation',
-      icon: Search,
-      href: '/explore',
-      color: 'bg-blue-500',
-    },
-    {
-      title: 'Review Alerts',
-      description: 'Review security alerts and triage status',
-      icon: AlertTriangle,
-      href: '/alerts',
-      color: 'bg-red-500',
-      badge: isDemoMode ? '3' : undefined,
-    },
-    {
-      title: 'View Cases',
-      description: 'Manage active cases',
-      icon: FileText,
-      href: '/cases',
-      color: 'bg-green-500',
-    },
-    {
-      title: 'Command Center',
-      description: 'Real-time operations dashboard',
-      icon: BarChart3,
-      href: '/dashboards/command-center',
-      color: 'bg-purple-500',
-    },
-  ]
+  useEffect(() => {
+    loadDashboardData()
+  }, [loadDashboardData])
+
+  const quickActions = useMemo(
+    () => [
+      {
+        title: 'Start Investigation',
+        description: 'Create a new investigation',
+        icon: Search,
+        href: '/explore',
+        color: 'bg-blue-500',
+      },
+      {
+        title: 'Review Alerts',
+        description: 'Review security alerts and triage status',
+        icon: AlertTriangle,
+        href: '/alerts',
+        color: 'bg-red-500',
+        badge: isDemoMode ? '3' : undefined,
+      },
+      {
+        title: 'View Cases',
+        description: 'Manage active cases',
+        icon: FileText,
+        href: '/cases',
+        color: 'bg-green-500',
+      },
+      {
+        title: 'Command Center',
+        description: 'Real-time operations dashboard',
+        icon: BarChart3,
+        href: '/dashboards/command-center',
+        color: 'bg-purple-500',
+      },
+    ],
+    [isDemoMode]
+  )
 
   const getSeverityBadgeVariant = (severity: string) => {
     switch (severity) {
@@ -131,6 +137,47 @@ export default function HomePage() {
     }
   }
 
+  const hasData =
+    kpiMetrics.length > 0 ||
+    recentInvestigations.length > 0 ||
+    recentAlerts.length > 0 ||
+    recentCases.length > 0
+
+  if (loading && !hasData) {
+    return (
+      <div className="p-6">
+        <StateTriplet
+          status="loading"
+          title="Loading intelligence overview"
+          loadingMessage="Preparing your operational dashboard."
+        />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <StateTriplet
+          status="error"
+          icon="alert"
+          title="We couldn't load the dashboard"
+          description={error.message}
+          actions={[
+            { label: 'Retry', onClick: loadDashboardData },
+            {
+              label: 'Connect data sources',
+              onClick: () => navigate('/data/sources'),
+              variant: 'outline',
+            },
+          ]}
+        />
+      </div>
+    )
+  }
+
+  const showEmptyState = !loading && !hasData
+
   return (
     <div className="p-6 space-y-6">
       {/* Welcome Header */}
@@ -160,27 +207,37 @@ export default function HomePage() {
 
       <ActivationProgressTile />
 
-      {/* KPI Metrics */}
-      <div>
-        <h2 className="text-lg font-semibold mb-4">Key Metrics</h2>
-        <KPIStrip
-          data={kpiMetrics}
-          loading={loading}
-          onSelect={metric => {
-            if (metric.id === 'threats') {navigate('/alerts')}
-            else if (metric.id === 'investigations') {navigate('/explore')}
-          }}
+      {showEmptyState ? (
+        <StateTriplet
+          status="empty"
+          icon="file"
+          title="No live intelligence yet"
+          description="Connect a data source or start an investigation to populate your overview."
+          actions={[
+            {
+              label: 'Connect data sources',
+              onClick: () => navigate('/data/sources'),
+            },
+            {
+              label: 'Start an investigation',
+              onClick: () => navigate('/explore'),
+              variant: 'outline',
+            },
+          ]}
         />
-        {!loading && kpiMetrics.length === 0 && (
-          <div className="mt-4">
-            <EmptyState
-              icon="chart"
-              title="No live metrics"
-              description="Connect a data source to populate KPI metrics."
-            />
-          </div>
-        )}
-      </div>
+      ) : (
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Key Metrics</h2>
+          <KPIStrip
+            data={kpiMetrics}
+            loading={loading}
+            onSelect={metric => {
+              if (metric.id === 'threats') {navigate('/alerts')}
+              else if (metric.id === 'investigations') {navigate('/explore')}
+            }}
+          />
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div>
@@ -189,12 +246,13 @@ export default function HomePage() {
           {quickActions.map(action => {
             const Icon = action.icon
             return (
-              <Card
+              <button
                 key={action.title}
-                className="cursor-pointer hover:shadow-md transition-shadow"
+                type="button"
                 onClick={() => navigate(action.href)}
+                className="rounded-lg border bg-card text-card-foreground shadow-sm w-full text-left hover:shadow-md transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
-                <CardContent className="p-6">
+                <div className="p-6">
                   <div className="flex items-center gap-3">
                     <div
                       className={`p-2 rounded-lg ${action.color} text-white`}
@@ -216,17 +274,17 @@ export default function HomePage() {
                     </div>
                     <ArrowRight className="h-4 w-4 text-muted-foreground" />
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </button>
             )
           })}
         </div>
       </div>
 
-      {/* Recent Activity Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {/* Recent Investigations */}
-        <Card>
+      {!showEmptyState && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {/* Recent Investigations */}
+          <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Search className="h-4 w-4" />
@@ -288,10 +346,10 @@ export default function HomePage() {
               <ArrowRight className="h-3 w-3 ml-1" />
             </Button>
           </CardContent>
-        </Card>
+          </Card>
 
-        {/* Recent Alerts */}
-        <Card>
+          {/* Recent Alerts */}
+          <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <AlertTriangle className="h-4 w-4" />
@@ -344,10 +402,10 @@ export default function HomePage() {
               <ArrowRight className="h-3 w-3 ml-1" />
             </Button>
           </CardContent>
-        </Card>
+          </Card>
 
-        {/* Recent Cases */}
-        <Card>
+          {/* Recent Cases */}
+          <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <FileText className="h-4 w-4" />
@@ -403,8 +461,9 @@ export default function HomePage() {
               <ArrowRight className="h-3 w-3 ml-1" />
             </Button>
           </CardContent>
-        </Card>
-      </div>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }
