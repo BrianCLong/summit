@@ -1,0 +1,42 @@
+{
+  "task_id": "STABILIZATION_RETRO_ROADMAP_LOOP_20260110",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "stabilization-retro-roadmap-loop",
+    "version": "v1",
+    "sha256": "e79ddaa031daddc41422fa83d7bfb221ae5fb5180523ffb19fcecacd2049b54a",
+    "path": "prompts/releases/stabilization-retro-roadmap-loop.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "scripts/releases/",
+      ".github/workflows/stabilization-retrospective.yml",
+      "docs/releases/",
+      "artifacts/stabilization/",
+      "release-policy.yml",
+      "docs/roadmap/STATUS.json",
+      "prompts/registry.yaml",
+      "prompts/releases/stabilization-retro-roadmap-loop.md",
+      "agents/examples/STABILIZATION_RETRO_ROADMAP_LOOP.json"
+    ],
+    "domains": ["release", "governance", "roadmap", "stabilization"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "artifacts/stabilization/retrospective/retro_*.json",
+      "artifacts/stabilization/roadmap-handoff/digest.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Monthly retrospective generates deterministic JSON and markdown outputs.",
+    "Roadmap handoff produces no more than five deduplicated draft candidates.",
+    "Issue creation remains gated behind policy mode apply."
+  ],
+  "stop_conditions": ["CI failures in main.", "Policy or compliance violations detected."]
+}

@@ -1,0 +1,100 @@
+name: Stabilization Retrospective & Roadmap Handoff
+
+on:
+  schedule:
+    - cron: "0 13 1-7 * *"
+  workflow_dispatch:
+
+jobs:
+  retrospective:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check first business day gate
+        id: business-day
+        if: github.event_name == 'schedule'
+        run: |
+          set -euo pipefail
+          year=$(date -u +%Y)
+          month=$(date -u +%m)
+          first_business_day=""
+          for day in 01 02 03 04 05 06 07; do
+            weekday=$(date -u -d "${year}-${month}-${day}" +%u)
+            if [ "$weekday" -le 5 ]; then
+              first_business_day="$day"
+              break
+            fi
+          done
+          today=$(date -u +%d)
+          if [ "$today" != "$first_business_day" ]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "run=true" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Node
+        if: github.event_name != 'schedule' || steps.business-day.outputs.run == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        if: github.event_name != 'schedule' || steps.business-day.outputs.run == 'true'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        if: github.event_name != 'schedule' || steps.business-day.outputs.run == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate stabilization retrospective
+        if: github.event_name != 'schedule' || steps.business-day.outputs.run == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node scripts/releases/generate_stabilization_retrospective.mjs \
+            --weeks=4 \
+            --out-dir=artifacts/stabilization/retrospective \
+            --source=ci
+
+      - name: Derive roadmap candidates
+        if: github.event_name != 'schedule' || steps.business-day.outputs.run == 'true'
+        run: |
+          RETRO_JSON=$(ls artifacts/stabilization/retrospective/retro_*.json | sort | tail -n 1)
+          node scripts/releases/derive_stabilization_roadmap_candidates.mjs \
+            --retrospective "$RETRO_JSON" \
+            --policy release-policy.yml \
+            --out artifacts/stabilization/roadmap-handoff/candidates.json
+
+      - name: Generate roadmap drafts
+        if: github.event_name != 'schedule' || steps.business-day.outputs.run == 'true'
+        run: |
+          RETRO_JSON=$(ls artifacts/stabilization/retrospective/retro_*.json | sort | tail -n 1)
+          node scripts/releases/sync_stabilization_roadmap_handoff.mjs \
+            --candidates artifacts/stabilization/roadmap-handoff/candidates.json \
+            --retrospective "$RETRO_JSON" \
+            --policy release-policy.yml \
+            --out-dir artifacts/stabilization/roadmap-handoff
+
+      - name: Upload artifacts
+        if: github.event_name != 'schedule' || steps.business-day.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: stabilization-retrospective-${{ github.run_id }}
+          path: artifacts/stabilization
+
+      - name: Job summary
+        if: github.event_name != 'schedule' || steps.business-day.outputs.run == 'true'
+        run: |
+          RETRO_JSON=$(ls artifacts/stabilization/retrospective/retro_*.json | sort | tail -n 1)
+          echo "## Stabilization Retrospective Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Risk index trend" >> "$GITHUB_STEP_SUMMARY"
+          jq -r '.metrics.series[] | "- \(.week_ending): \(.risk_index)"' "$RETRO_JSON" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Top focus recommendations" >> "$GITHUB_STEP_SUMMARY"
+          jq -r '.focus_themes[:3][] | "- \(.theme): \(.rationale)"' "$RETRO_JSON" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Candidate slugs" >> "$GITHUB_STEP_SUMMARY"
+          jq -r '.candidates[]? | "- \(.slug): \(.reason)"' artifacts/stabilization/roadmap-handoff/candidates.json >> "$GITHUB_STEP_SUMMARY"

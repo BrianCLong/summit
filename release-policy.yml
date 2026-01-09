@@ -33,3 +33,18 @@ channels:
     allowed_from:
       - series-branch
     require_evidence: false
+
+stabilization_roadmap_handoff:
+  enabled: true
+  mode: draft
+  max_candidates: 5
+  thresholds:
+    recurring_overdue_weeks: 2
+    min_risk_index_avg: 30
+    evidence_compliance_min: 0.95
+  labels:
+    base:
+      - roadmap
+      - stabilization
+    triage:
+      - needs-triage

@@ -1,0 +1,211 @@
+{
+  "window": {
+    "weeks_requested": 4,
+    "weeks_included": 4,
+    "start": "2025-12-13",
+    "end": "2026-01-03"
+  },
+  "metrics": {
+    "series": [
+      {
+        "week_ending": "2025-12-13",
+        "risk_index": 38,
+        "done_p0": 4,
+        "done_p1": 6,
+        "on_time_rate": 0.78,
+        "overdue_load": 4,
+        "overdue_load_p0": 2,
+        "evidence_compliance": 0.93,
+        "issuance_completeness": 0.92,
+        "blocked_unissued": 1
+      },
+      {
+        "week_ending": "2025-12-20",
+        "risk_index": 36,
+        "done_p0": 5,
+        "done_p1": 7,
+        "on_time_rate": 0.8,
+        "overdue_load": 3,
+        "overdue_load_p0": 1,
+        "evidence_compliance": 0.94,
+        "issuance_completeness": 0.93,
+        "blocked_unissued": 1
+      },
+      {
+        "week_ending": "2025-12-27",
+        "risk_index": 34,
+        "done_p0": 6,
+        "done_p1": 8,
+        "on_time_rate": 0.82,
+        "overdue_load": 2,
+        "overdue_load_p0": 1,
+        "evidence_compliance": 0.91,
+        "issuance_completeness": 0.94,
+        "blocked_unissued": 2
+      },
+      {
+        "week_ending": "2026-01-03",
+        "risk_index": 31,
+        "done_p0": 6,
+        "done_p1": 9,
+        "on_time_rate": 0.84,
+        "overdue_load": 2,
+        "overdue_load_p0": 1,
+        "evidence_compliance": 0.94,
+        "issuance_completeness": 0.95,
+        "blocked_unissued": 1
+      }
+    ],
+    "averages": {
+      "risk_index": 34.75,
+      "done_p0": 5.25,
+      "done_p1": 7.5,
+      "on_time_rate": 0.8099999999999999,
+      "overdue_load": 2.75,
+      "overdue_load_p0": 1.25,
+      "evidence_compliance": 0.93,
+      "issuance_completeness": 0.935,
+      "blocked_unissued": 1.25
+    }
+  },
+  "improvements": [
+    {
+      "metric": "risk_index",
+      "delta": -7,
+      "from": 38,
+      "to": 31
+    },
+    {
+      "metric": "done_p0",
+      "delta": 2,
+      "from": 4,
+      "to": 6
+    },
+    {
+      "metric": "done_p1",
+      "delta": 3,
+      "from": 6,
+      "to": 9
+    },
+    {
+      "metric": "on_time_rate",
+      "delta": 0.05999999999999994,
+      "from": 0.78,
+      "to": 0.84
+    },
+    {
+      "metric": "overdue_load",
+      "delta": -2,
+      "from": 4,
+      "to": 2
+    },
+    {
+      "metric": "overdue_load_p0",
+      "delta": -1,
+      "from": 2,
+      "to": 1
+    },
+    {
+      "metric": "evidence_compliance",
+      "delta": 0.009999999999999898,
+      "from": 0.93,
+      "to": 0.94
+    },
+    {
+      "metric": "issuance_completeness",
+      "delta": 0.029999999999999916,
+      "from": 0.92,
+      "to": 0.95
+    }
+  ],
+  "regressions": [],
+  "recurring_offenders": {
+    "items": [
+      {
+        "id": "P0-123",
+        "area": "auth",
+        "owner": "core",
+        "weeks": 4
+      },
+      {
+        "id": "P1-456",
+        "area": "api",
+        "owner": "platform",
+        "weeks": 2
+      },
+      {
+        "id": "P1-789",
+        "area": "observability",
+        "owner": "sre",
+        "weeks": 2
+      }
+    ],
+    "areas": [
+      {
+        "area": "auth",
+        "count": 4
+      },
+      {
+        "area": "api",
+        "count": 2
+      },
+      {
+        "area": "observability",
+        "count": 2
+      }
+    ],
+    "owners": [
+      {
+        "owner": "core",
+        "count": 4
+      },
+      {
+        "owner": "platform",
+        "count": 2
+      },
+      {
+        "owner": "sre",
+        "count": 2
+      }
+    ]
+  },
+  "focus_themes": [
+    {
+      "theme": "Resolve recurring overdue items",
+      "rationale": "3 items breached in 2+ weeks; prioritize systemic unblockers."
+    }
+  ],
+  "data_quality": {
+    "weeks_included": 4,
+    "missing_artifacts": [],
+    "notes": []
+  },
+  "sources": [
+    {
+      "week_ending": "2025-12-13",
+      "scorecard": "artifacts/stabilization/weekly/2025-12-13/scorecard.json",
+      "escalation": "artifacts/stabilization/weekly/2025-12-13/escalation.json",
+      "diff": "artifacts/stabilization/weekly/2025-12-13/diff.json"
+    },
+    {
+      "week_ending": "2025-12-20",
+      "scorecard": "artifacts/stabilization/weekly/2025-12-20/scorecard.json",
+      "escalation": "artifacts/stabilization/weekly/2025-12-20/escalation.json",
+      "diff": "artifacts/stabilization/weekly/2025-12-20/diff.json"
+    },
+    {
+      "week_ending": "2025-12-27",
+      "scorecard": "artifacts/stabilization/weekly/2025-12-27/scorecard.json",
+      "escalation": "artifacts/stabilization/weekly/2025-12-27/escalation.json",
+      "diff": "artifacts/stabilization/weekly/2025-12-27/diff.json"
+    },
+    {
+      "week_ending": "2026-01-03",
+      "scorecard": "artifacts/stabilization/weekly/2026-01-03/scorecard.json",
+      "escalation": "artifacts/stabilization/weekly/2026-01-03/escalation.json",
+      "diff": "artifacts/stabilization/weekly/2026-01-03/diff.json"
+    }
+  ],
+  "generated_at": "2026-01-03T00:00:00Z",
+  "generated_from_sha": null
+}

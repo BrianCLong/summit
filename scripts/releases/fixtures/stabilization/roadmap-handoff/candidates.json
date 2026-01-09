@@ -1,0 +1,52 @@
+{
+  "generated_at": "2026-01-03T00:00:00Z",
+  "generated_from_sha": null,
+  "window": {
+    "weeks_requested": 4,
+    "weeks_included": 4,
+    "start": "2025-12-13",
+    "end": "2026-01-03"
+  },
+  "policy": {
+    "max_candidates": 5,
+    "thresholds": {
+      "recurring_overdue_weeks": 2,
+      "min_risk_index_avg": 30,
+      "evidence_compliance_min": 0.95
+    }
+  },
+  "candidates": [
+    {
+      "slug": "systemic-risk-reduction",
+      "title": "Systemic risk reduction program",
+      "reason": "risk_index_avg 34.8 >= 30.",
+      "weeks_triggered": 4,
+      "severity": 57.38,
+      "area_label": "risk"
+    },
+    {
+      "slug": "issuance-hygiene",
+      "title": "Issuance hygiene enforcement",
+      "reason": "blocked_unissued > 0 in 4 week(s).",
+      "weeks_triggered": 4,
+      "severity": 50,
+      "area_label": "release"
+    },
+    {
+      "slug": "p0-sla-adherence",
+      "title": "P0 SLA adherence enforcement",
+      "reason": "overdue_load_p0 > 0 in 4 week(s).",
+      "weeks_triggered": 4,
+      "severity": 50,
+      "area_label": "reliability"
+    },
+    {
+      "slug": "evidence-compliance",
+      "title": "Evidence compliance recovery",
+      "reason": "evidence_compliance < 0.95 in 4 week(s).",
+      "weeks_triggered": 4,
+      "severity": 40.2,
+      "area_label": "governance"
+    }
+  ]
+}

@@ -30,6 +30,34 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: stabilization-retro-roadmap-loop
+    version: v1
+    path: prompts/releases/stabilization-retro-roadmap-loop.md
+    sha256: e79ddaa031daddc41422fa83d7bfb221ae5fb5180523ffb19fcecacd2049b54a
+    description: Monthly stabilization retrospective with rule-based roadmap handoff drafts.
+    scope:
+      paths:
+        - scripts/releases/
+        - .github/workflows/
+        - docs/releases/
+        - artifacts/stabilization/
+        - release-policy.yml
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+      domains:
+        - release
+        - governance
+        - roadmap
+        - stabilization
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md
