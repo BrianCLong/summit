@@ -1,7 +1,8 @@
 // @ts-nocheck
 /**
  * Correlation ID Middleware
- * Ensures every request has a unique ID for tracking across logs, metrics, and traces
+ * Ensures every request has a unique ID for tracking across logs, metrics, and traces.
+ * Standardizes on x-correlation-id for propagation.
  */
 
 import { Request, Response, NextFunction } from 'express';
@@ -72,6 +73,7 @@ export function correlationIdMiddleware(
 
   // Inject correlation ID into response headers
   res.setHeader(CORRELATION_ID_HEADER, correlationId);
+  // Also set x-request-id for compatibility
   res.setHeader(REQUEST_ID_HEADER, correlationId);
 
   // Add trace ID to response if available (for debugging)

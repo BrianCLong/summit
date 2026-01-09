@@ -78,6 +78,14 @@ export class IntelGraphTracer {
             endpoint: this.config.jaegerEndpoint,
           });
           logger.info(`Jaeger exporter configured: ${this.config.jaegerEndpoint}`);
+      } else {
+          logger.info('No trace exporter configured (Minimal Tracing Mode)');
+          // No exporter = no-op or console if explicit
+          // NodeSDK will default to ConsoleSpanExporter if traceExporter is undefined in some versions,
+          // but we can leave it undefined if we want standard behavior (often console).
+          // To be strictly "minimal" and silent unless configured, we might want a NoOp,
+          // but OpenTelemetry's default is often "do nothing" if no exporter.
+          // However, to satisfy "no external collector required", undefined is fine.
       }
 
       let metricReader;
@@ -107,7 +115,9 @@ export class IntelGraphTracer {
                   enabled: true,
                   requestHook: (span, request) => {
                     // Add custom HTTP span attributes
-                    span.setAttribute('http.client_ip', request.socket.remoteAddress || 'unknown');
+                    if (request.socket) {
+                        span.setAttribute('http.client_ip', request.socket.remoteAddress || 'unknown');
+                    }
                   },
                 },
                 '@opentelemetry/instrumentation-express': {
@@ -377,4 +387,3 @@ export function traced(operationName?: string) {
 }
 
 export { SpanKind, SpanStatusCode };
-// Forced update for review context

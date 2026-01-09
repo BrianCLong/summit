@@ -1,8 +1,14 @@
 // @ts-nocheck
 import pino from 'pino';
-import { correlationEngine } from '../lib/telemetry/correlation-engine';
+import { correlationEngine } from '../lib/telemetry/correlation-engine.js';
+import { cfg } from '../config.js';
+import { AsyncLocalStorage } from 'async_hooks';
+
+// AsyncLocalStorage for correlation ID propagation - enables distributed tracing correlation in logs
+export const correlationStorage = new AsyncLocalStorage<Map<string, string>>();
 
 // Custom stream that intercepts logs for the Correlation Engine and passes them to stdout
+// Also handles pretty printing if enabled
 const stream = {
   write: (msg: string) => {
     // Optimization: avoid parsing JSON on every log line unless it looks like JSON
@@ -10,6 +16,17 @@ const stream = {
     if (msg.trim().startsWith('{')) {
         try {
           const logEntry = JSON.parse(msg);
+          // If pretty print is enabled and we are in dev, use a simple pretty printer
+          // (Note: pino-pretty is preferred but we implement a basic one to avoid heavy deps if missing)
+          if (process.env.LOG_PRETTY === 'true' && process.env.NODE_ENV !== 'production') {
+             const time = logEntry.time || new Date().toISOString();
+             const level = logEntry.level || 'INFO';
+             const cid = logEntry.correlationId ? `[${logEntry.correlationId}] ` : '';
+             const msgText = logEntry.msg || logEntry.message || '';
+             const duration = logEntry.durationMs ? `(${logEntry.durationMs}ms)` : '';
+             process.stdout.write(`${time} ${level} ${cid}${msgText} ${duration}\n`);
+             return;
+          }
           correlationEngine.ingestLog(logEntry);
         } catch (e: any) {
           // If parsing fails, ignore for correlation but still print
@@ -18,11 +35,6 @@ const stream = {
     process.stdout.write(msg);
   },
 };
-import { cfg } from '../config';
-import { AsyncLocalStorage } from 'async_hooks';
-
-// AsyncLocalStorage for correlation ID propagation - enables distributed tracing correlation in logs
-export const correlationStorage = new AsyncLocalStorage<Map<string, string>>();
 
 // Configuration for redaction of sensitive data
 const REDACT_PATHS = [
@@ -97,8 +109,6 @@ export const logger = (pino as any)({
     req: (pino as any).stdSerializers.req,
     res: (pino as any).stdSerializers.res,
   },
-  // Remove pino-pretty transport for production readiness
-  // In production, logs should be structured JSON for log aggregation
 }, stream);
 
 export default logger;

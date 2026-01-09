@@ -17,6 +17,7 @@
     "test:quarantine": "jest --config jest.quarantine.config.cjs --passWithNoTests",
     "test:integration": "jest --config jest.config.ts --testPathPattern=integration --passWithNoTests",
     "test:unit": "jest --config jest.config.ts --testPathIgnorePatterns=integration --passWithNoTests",
+    "test:ops": "jest --config jest.ops.config.ts",
     "test:marketplace": "tsx --test tests/plugins/marketplace.sandbox.test.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
