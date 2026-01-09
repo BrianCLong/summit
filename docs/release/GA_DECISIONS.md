@@ -1,9 +1,40 @@
 # GA Release Decisions
 
-**Last Updated**: 2026-01-04
+**Last Updated**: 2026-01-09
 **Release Target**: v4.1.0 GA
 
 ## Deferred Items
+
+### Temporary Merge Guardrails While CI Jobs Are Non-Blocking
+
+**Decision**: Enforce local deterministic verification while CI test/governance/provenance jobs
+remain `continue-on-error: true`.
+
+**Date**: 2026-01-09
+
+**Reason**:
+CI gates are explicitly non-blocking due to ESM/TypeScript infrastructure issues. Merge safety is
+maintained by mandatory local verification runs until required checks are restored.
+
+**Requirements**:
+
+- `pnpm lint`
+- `pnpm verify`
+- `pnpm test:unit`
+- `pnpm test:integration` (only when integration surfaces are touched)
+- `make smoke` for runtime, infra, deployment, or build surface changes
+
+**Expiry Date**: 2026-02-15 or when required checks are restored, whichever is sooner.
+
+**Follow-up Actions**:
+
+1. [ ] Re-enable blocking CI for test/governance/provenance jobs.
+2. [ ] Remove temporary guardrail language from PR templates once gates are restored.
+3. [ ] Document restored enforcement in this log.
+
+**Owner**: Release Engineering
+
+---
 
 ### Integration Tests Made Non-Blocking
 
@@ -70,6 +101,20 @@ Multiple integration test files have TypeScript errors (missing type exports, im
 All Bucket A PRs (19 PRs) are approved for GA merge once CI is unblocked.
 
 Bucket B PRs (8 PRs) require feature review before GA inclusion.
+
+---
+
+## Merge Train Closeout
+
+**Date**: 2026-01-09
+
+**Status**: Merge train plan recorded; execution deferred pending GH CLI availability and branch
+protection restoration. Guardrail enforcement remains active until CI blocking is restored.
+
+**Summary**:
+
+- Lane definitions and stop criteria published in `docs/release/MERGE_TRAIN_PLAN.md`.
+- Temporary guardrails captured for non-blocking CI jobs.
 
 ---
 

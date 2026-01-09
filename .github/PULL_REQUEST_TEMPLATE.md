@@ -53,3 +53,13 @@
 - [ ] Tests executed and linked in evidence
 - [ ] Documentation updated (if applicable)
 - [ ] Debt plan honored (budget respected or retired)
+
+## Temporary Merge Guardrails (CI Non-Blocking Only)
+
+_Complete when CI test/governance/provenance jobs are `continue-on-error: true`._
+
+- [ ] `CI=1 TZ=UTC pnpm lint`
+- [ ] `CI=1 TZ=UTC pnpm verify`
+- [ ] `CI=1 TZ=UTC pnpm test:unit`
+- [ ] `CI=1 TZ=UTC pnpm test:integration` (only if integration surfaces were touched)
+- [ ] `CI=1 TZ=UTC make smoke` (required for runtime, infra, deployment, or build changes)
