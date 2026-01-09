@@ -1,0 +1,674 @@
+[
+  {
+    "version": "1.0.0",
+    "captured_at": "2026-01-01T12:00:00Z",
+    "repository": "summit/repo",
+    "branch": "main",
+    "commit_sha": "0000000000000000000000000000000000000003",
+    "commit_timestamp": "2026-01-01T11:30:00Z",
+    "candidate": {
+      "type": "main",
+      "tag": "main",
+      "promotable_state": "success"
+    },
+    "releasable": true,
+    "time_to_green_minutes": 18,
+    "flake_count": 0,
+    "gates": [
+      {
+        "name": "lint",
+        "required": "always",
+        "status": "success",
+        "conclusion": "SUCCESS",
+        "duration_minutes": 10,
+        "rerun_count": 0,
+        "workflow_run_ids": [3]
+      }
+    ],
+    "evidence": {
+      "dashboard_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "dashboard_path": "fixtures/dashboard.json",
+      "workflow_runs": [
+        {
+          "id": 3,
+          "name": "lint",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "run_started_at": "2026-01-01T11:30:00Z",
+          "updated_at": "2026-01-01T11:40:00Z",
+          "duration_minutes": 10
+        }
+      ]
+    },
+    "policy_drift": {
+      "soft_gate_violations": 0,
+      "branch_protection_mismatches": 0,
+      "status": "intentionally_constrained"
+    }
+  },
+  {
+    "version": "1.0.0",
+    "captured_at": "2026-01-02T12:00:00Z",
+    "repository": "summit/repo",
+    "branch": "main",
+    "commit_sha": "0000000000000000000000000000000000000004",
+    "commit_timestamp": "2026-01-02T11:30:00Z",
+    "candidate": {
+      "type": "main",
+      "tag": "main",
+      "promotable_state": "success"
+    },
+    "releasable": true,
+    "time_to_green_minutes": 18,
+    "flake_count": 0,
+    "gates": [
+      {
+        "name": "lint",
+        "required": "always",
+        "status": "success",
+        "conclusion": "SUCCESS",
+        "duration_minutes": 10,
+        "rerun_count": 0,
+        "workflow_run_ids": [4]
+      }
+    ],
+    "evidence": {
+      "dashboard_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "dashboard_path": "fixtures/dashboard.json",
+      "workflow_runs": [
+        {
+          "id": 4,
+          "name": "lint",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "run_started_at": "2026-01-02T11:30:00Z",
+          "updated_at": "2026-01-02T11:40:00Z",
+          "duration_minutes": 10
+        }
+      ]
+    },
+    "policy_drift": {
+      "soft_gate_violations": 0,
+      "branch_protection_mismatches": 0,
+      "status": "intentionally_constrained"
+    }
+  },
+  {
+    "version": "1.0.0",
+    "captured_at": "2026-01-03T12:00:00Z",
+    "repository": "summit/repo",
+    "branch": "main",
+    "commit_sha": "0000000000000000000000000000000000000005",
+    "commit_timestamp": "2026-01-03T11:30:00Z",
+    "candidate": {
+      "type": "main",
+      "tag": "main",
+      "promotable_state": "success"
+    },
+    "releasable": true,
+    "time_to_green_minutes": 18,
+    "flake_count": 0,
+    "gates": [
+      {
+        "name": "lint",
+        "required": "always",
+        "status": "success",
+        "conclusion": "SUCCESS",
+        "duration_minutes": 10,
+        "rerun_count": 0,
+        "workflow_run_ids": [5]
+      }
+    ],
+    "evidence": {
+      "dashboard_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "dashboard_path": "fixtures/dashboard.json",
+      "workflow_runs": [
+        {
+          "id": 5,
+          "name": "lint",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "run_started_at": "2026-01-03T11:30:00Z",
+          "updated_at": "2026-01-03T11:40:00Z",
+          "duration_minutes": 10
+        }
+      ]
+    },
+    "policy_drift": {
+      "soft_gate_violations": 0,
+      "branch_protection_mismatches": 0,
+      "status": "intentionally_constrained"
+    }
+  },
+  {
+    "version": "1.0.0",
+    "captured_at": "2026-01-04T12:00:00Z",
+    "repository": "summit/repo",
+    "branch": "main",
+    "commit_sha": "0000000000000000000000000000000000000006",
+    "commit_timestamp": "2026-01-04T11:30:00Z",
+    "candidate": {
+      "type": "main",
+      "tag": "main",
+      "promotable_state": "success"
+    },
+    "releasable": true,
+    "time_to_green_minutes": 18,
+    "flake_count": 0,
+    "gates": [
+      {
+        "name": "lint",
+        "required": "always",
+        "status": "success",
+        "conclusion": "SUCCESS",
+        "duration_minutes": 10,
+        "rerun_count": 0,
+        "workflow_run_ids": [6]
+      }
+    ],
+    "evidence": {
+      "dashboard_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "dashboard_path": "fixtures/dashboard.json",
+      "workflow_runs": [
+        {
+          "id": 6,
+          "name": "lint",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "run_started_at": "2026-01-04T11:30:00Z",
+          "updated_at": "2026-01-04T11:40:00Z",
+          "duration_minutes": 10
+        }
+      ]
+    },
+    "policy_drift": {
+      "soft_gate_violations": 0,
+      "branch_protection_mismatches": 0,
+      "status": "intentionally_constrained"
+    }
+  },
+  {
+    "version": "1.0.0",
+    "captured_at": "2026-01-05T12:00:00Z",
+    "repository": "summit/repo",
+    "branch": "main",
+    "commit_sha": "0000000000000000000000000000000000000007",
+    "commit_timestamp": "2026-01-05T11:30:00Z",
+    "candidate": {
+      "type": "main",
+      "tag": "main",
+      "promotable_state": "success"
+    },
+    "releasable": true,
+    "time_to_green_minutes": 18,
+    "flake_count": 0,
+    "gates": [
+      {
+        "name": "lint",
+        "required": "always",
+        "status": "success",
+        "conclusion": "SUCCESS",
+        "duration_minutes": 10,
+        "rerun_count": 0,
+        "workflow_run_ids": [7]
+      }
+    ],
+    "evidence": {
+      "dashboard_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "dashboard_path": "fixtures/dashboard.json",
+      "workflow_runs": [
+        {
+          "id": 7,
+          "name": "lint",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "run_started_at": "2026-01-05T11:30:00Z",
+          "updated_at": "2026-01-05T11:40:00Z",
+          "duration_minutes": 10
+        }
+      ]
+    },
+    "policy_drift": {
+      "soft_gate_violations": 0,
+      "branch_protection_mismatches": 0,
+      "status": "intentionally_constrained"
+    }
+  },
+  {
+    "version": "1.0.0",
+    "captured_at": "2026-01-06T12:00:00Z",
+    "repository": "summit/repo",
+    "branch": "main",
+    "commit_sha": "0000000000000000000000000000000000000008",
+    "commit_timestamp": "2026-01-06T11:30:00Z",
+    "candidate": {
+      "type": "main",
+      "tag": "main",
+      "promotable_state": "success"
+    },
+    "releasable": true,
+    "time_to_green_minutes": 18,
+    "flake_count": 0,
+    "gates": [
+      {
+        "name": "lint",
+        "required": "always",
+        "status": "success",
+        "conclusion": "SUCCESS",
+        "duration_minutes": 10,
+        "rerun_count": 0,
+        "workflow_run_ids": [8]
+      }
+    ],
+    "evidence": {
+      "dashboard_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "dashboard_path": "fixtures/dashboard.json",
+      "workflow_runs": [
+        {
+          "id": 8,
+          "name": "lint",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "run_started_at": "2026-01-06T11:30:00Z",
+          "updated_at": "2026-01-06T11:40:00Z",
+          "duration_minutes": 10
+        }
+      ]
+    },
+    "policy_drift": {
+      "soft_gate_violations": 0,
+      "branch_protection_mismatches": 0,
+      "status": "intentionally_constrained"
+    }
+  },
+  {
+    "version": "1.0.0",
+    "captured_at": "2026-01-07T12:00:00Z",
+    "repository": "summit/repo",
+    "branch": "main",
+    "commit_sha": "0000000000000000000000000000000000000009",
+    "commit_timestamp": "2026-01-07T11:30:00Z",
+    "candidate": {
+      "type": "main",
+      "tag": "main",
+      "promotable_state": "success"
+    },
+    "releasable": true,
+    "time_to_green_minutes": 18,
+    "flake_count": 0,
+    "gates": [
+      {
+        "name": "lint",
+        "required": "always",
+        "status": "success",
+        "conclusion": "SUCCESS",
+        "duration_minutes": 10,
+        "rerun_count": 0,
+        "workflow_run_ids": [9]
+      }
+    ],
+    "evidence": {
+      "dashboard_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "dashboard_path": "fixtures/dashboard.json",
+      "workflow_runs": [
+        {
+          "id": 9,
+          "name": "lint",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "run_started_at": "2026-01-07T11:30:00Z",
+          "updated_at": "2026-01-07T11:40:00Z",
+          "duration_minutes": 10
+        }
+      ]
+    },
+    "policy_drift": {
+      "soft_gate_violations": 0,
+      "branch_protection_mismatches": 0,
+      "status": "intentionally_constrained"
+    }
+  },
+  {
+    "version": "1.0.0",
+    "captured_at": "2026-01-08T12:00:00Z",
+    "repository": "summit/repo",
+    "branch": "main",
+    "commit_sha": "0000000000000000000000000000000000000010",
+    "commit_timestamp": "2026-01-08T11:30:00Z",
+    "candidate": {
+      "type": "main",
+      "tag": "main",
+      "promotable_state": "success"
+    },
+    "releasable": true,
+    "time_to_green_minutes": 40,
+    "flake_count": 0,
+    "gates": [
+      {
+        "name": "lint",
+        "required": "always",
+        "status": "success",
+        "conclusion": "SUCCESS",
+        "duration_minutes": 22,
+        "rerun_count": 0,
+        "workflow_run_ids": [10]
+      }
+    ],
+    "evidence": {
+      "dashboard_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "dashboard_path": "fixtures/dashboard.json",
+      "workflow_runs": [
+        {
+          "id": 10,
+          "name": "lint",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "run_started_at": "2026-01-08T11:30:00Z",
+          "updated_at": "2026-01-08T11:52:00Z",
+          "duration_minutes": 22
+        }
+      ]
+    },
+    "policy_drift": {
+      "soft_gate_violations": 0,
+      "branch_protection_mismatches": 0,
+      "status": "intentionally_constrained"
+    }
+  },
+  {
+    "version": "1.0.0",
+    "captured_at": "2026-01-09T12:00:00Z",
+    "repository": "summit/repo",
+    "branch": "main",
+    "commit_sha": "0000000000000000000000000000000000000011",
+    "commit_timestamp": "2026-01-09T11:30:00Z",
+    "candidate": {
+      "type": "main",
+      "tag": "main",
+      "promotable_state": "success"
+    },
+    "releasable": true,
+    "time_to_green_minutes": 40,
+    "flake_count": 0,
+    "gates": [
+      {
+        "name": "lint",
+        "required": "always",
+        "status": "success",
+        "conclusion": "SUCCESS",
+        "duration_minutes": 22,
+        "rerun_count": 0,
+        "workflow_run_ids": [11]
+      }
+    ],
+    "evidence": {
+      "dashboard_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "dashboard_path": "fixtures/dashboard.json",
+      "workflow_runs": [
+        {
+          "id": 11,
+          "name": "lint",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "run_started_at": "2026-01-09T11:30:00Z",
+          "updated_at": "2026-01-09T11:52:00Z",
+          "duration_minutes": 22
+        }
+      ]
+    },
+    "policy_drift": {
+      "soft_gate_violations": 0,
+      "branch_protection_mismatches": 0,
+      "status": "intentionally_constrained"
+    }
+  },
+  {
+    "version": "1.0.0",
+    "captured_at": "2026-01-10T12:00:00Z",
+    "repository": "summit/repo",
+    "branch": "main",
+    "commit_sha": "0000000000000000000000000000000000000012",
+    "commit_timestamp": "2026-01-10T11:30:00Z",
+    "candidate": {
+      "type": "main",
+      "tag": "main",
+      "promotable_state": "success"
+    },
+    "releasable": true,
+    "time_to_green_minutes": 40,
+    "flake_count": 0,
+    "gates": [
+      {
+        "name": "lint",
+        "required": "always",
+        "status": "success",
+        "conclusion": "SUCCESS",
+        "duration_minutes": 22,
+        "rerun_count": 0,
+        "workflow_run_ids": [12]
+      }
+    ],
+    "evidence": {
+      "dashboard_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "dashboard_path": "fixtures/dashboard.json",
+      "workflow_runs": [
+        {
+          "id": 12,
+          "name": "lint",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "run_started_at": "2026-01-10T11:30:00Z",
+          "updated_at": "2026-01-10T11:52:00Z",
+          "duration_minutes": 22
+        }
+      ]
+    },
+    "policy_drift": {
+      "soft_gate_violations": 0,
+      "branch_protection_mismatches": 0,
+      "status": "intentionally_constrained"
+    }
+  },
+  {
+    "version": "1.0.0",
+    "captured_at": "2026-01-11T12:00:00Z",
+    "repository": "summit/repo",
+    "branch": "main",
+    "commit_sha": "0000000000000000000000000000000000000013",
+    "commit_timestamp": "2026-01-11T11:30:00Z",
+    "candidate": {
+      "type": "main",
+      "tag": "main",
+      "promotable_state": "success"
+    },
+    "releasable": true,
+    "time_to_green_minutes": 40,
+    "flake_count": 0,
+    "gates": [
+      {
+        "name": "lint",
+        "required": "always",
+        "status": "success",
+        "conclusion": "SUCCESS",
+        "duration_minutes": 22,
+        "rerun_count": 0,
+        "workflow_run_ids": [13]
+      }
+    ],
+    "evidence": {
+      "dashboard_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "dashboard_path": "fixtures/dashboard.json",
+      "workflow_runs": [
+        {
+          "id": 13,
+          "name": "lint",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "run_started_at": "2026-01-11T11:30:00Z",
+          "updated_at": "2026-01-11T11:52:00Z",
+          "duration_minutes": 22
+        }
+      ]
+    },
+    "policy_drift": {
+      "soft_gate_violations": 0,
+      "branch_protection_mismatches": 0,
+      "status": "intentionally_constrained"
+    }
+  },
+  {
+    "version": "1.0.0",
+    "captured_at": "2026-01-12T12:00:00Z",
+    "repository": "summit/repo",
+    "branch": "main",
+    "commit_sha": "0000000000000000000000000000000000000014",
+    "commit_timestamp": "2026-01-12T11:30:00Z",
+    "candidate": {
+      "type": "main",
+      "tag": "main",
+      "promotable_state": "success"
+    },
+    "releasable": true,
+    "time_to_green_minutes": 40,
+    "flake_count": 0,
+    "gates": [
+      {
+        "name": "lint",
+        "required": "always",
+        "status": "success",
+        "conclusion": "SUCCESS",
+        "duration_minutes": 22,
+        "rerun_count": 0,
+        "workflow_run_ids": [14]
+      }
+    ],
+    "evidence": {
+      "dashboard_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "dashboard_path": "fixtures/dashboard.json",
+      "workflow_runs": [
+        {
+          "id": 14,
+          "name": "lint",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "run_started_at": "2026-01-12T11:30:00Z",
+          "updated_at": "2026-01-12T11:52:00Z",
+          "duration_minutes": 22
+        }
+      ]
+    },
+    "policy_drift": {
+      "soft_gate_violations": 0,
+      "branch_protection_mismatches": 0,
+      "status": "intentionally_constrained"
+    }
+  },
+  {
+    "version": "1.0.0",
+    "captured_at": "2026-01-13T12:00:00Z",
+    "repository": "summit/repo",
+    "branch": "main",
+    "commit_sha": "0000000000000000000000000000000000000015",
+    "commit_timestamp": "2026-01-13T11:30:00Z",
+    "candidate": {
+      "type": "main",
+      "tag": "main",
+      "promotable_state": "success"
+    },
+    "releasable": true,
+    "time_to_green_minutes": 40,
+    "flake_count": 0,
+    "gates": [
+      {
+        "name": "lint",
+        "required": "always",
+        "status": "success",
+        "conclusion": "SUCCESS",
+        "duration_minutes": 22,
+        "rerun_count": 0,
+        "workflow_run_ids": [15]
+      }
+    ],
+    "evidence": {
+      "dashboard_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "dashboard_path": "fixtures/dashboard.json",
+      "workflow_runs": [
+        {
+          "id": 15,
+          "name": "lint",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "run_started_at": "2026-01-13T11:30:00Z",
+          "updated_at": "2026-01-13T11:52:00Z",
+          "duration_minutes": 22
+        }
+      ]
+    },
+    "policy_drift": {
+      "soft_gate_violations": 0,
+      "branch_protection_mismatches": 0,
+      "status": "intentionally_constrained"
+    }
+  },
+  {
+    "version": "1.0.0",
+    "captured_at": "2026-01-14T12:00:00Z",
+    "repository": "summit/repo",
+    "branch": "main",
+    "commit_sha": "0000000000000000000000000000000000000016",
+    "commit_timestamp": "2026-01-14T11:30:00Z",
+    "candidate": {
+      "type": "main",
+      "tag": "main",
+      "promotable_state": "success"
+    },
+    "releasable": true,
+    "time_to_green_minutes": 40,
+    "flake_count": 0,
+    "gates": [
+      {
+        "name": "lint",
+        "required": "always",
+        "status": "success",
+        "conclusion": "SUCCESS",
+        "duration_minutes": 22,
+        "rerun_count": 0,
+        "workflow_run_ids": [16]
+      }
+    ],
+    "evidence": {
+      "dashboard_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "dashboard_path": "fixtures/dashboard.json",
+      "workflow_runs": [
+        {
+          "id": 16,
+          "name": "lint",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "run_started_at": "2026-01-14T11:30:00Z",
+          "updated_at": "2026-01-14T11:52:00Z",
+          "duration_minutes": 22
+        }
+      ]
+    },
+    "policy_drift": {
+      "soft_gate_violations": 0,
+      "branch_protection_mismatches": 0,
+      "status": "intentionally_constrained"
+    }
+  }
+]

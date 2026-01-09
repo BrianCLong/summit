@@ -79,3 +79,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: release-slo-metrics-report
+    version: v1
+    path: prompts/release/release-slo-metrics-report.md
+    sha256: ae2c9953bbdf4794309f46e123a201a616eda0033e251d09b289532f9bfbebc5
+    description: Define Release SLOs, extract CI metrics from release dashboard artifacts, and generate a weekly SLO report.
+    scope:
+      paths:
+        - docs/release/
+        - release/
+        - schemas/
+        - scripts/release/
+        - .github/workflows/
+        - agents/examples/
+        - docs/roadmap/STATUS.json
+        - prompts/release/
+        - prompts/registry.yaml
+      domains:
+        - release
+        - ci
+        - observability
+        - governance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/release-slo.schema.json",
+  "title": "Release SLO Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "updated_at",
+    "authority",
+    "measurement_windows",
+    "slos",
+    "definitions",
+    "data_sources",
+    "reporting",
+    "governed_exceptions"
+  ],
+  "properties": {
+    "version": { "type": "string" },
+    "updated_at": { "type": "string" },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["readiness_assertion", "governance"],
+      "properties": {
+        "readiness_assertion": { "type": "string" },
+        "governance": { "type": "string" }
+      }
+    },
+    "measurement_windows": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "days"],
+        "properties": {
+          "id": { "type": "string" },
+          "days": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "slos": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "indicator",
+          "description",
+          "window",
+          "target",
+          "alert",
+          "error_budget",
+          "unit"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "indicator": { "type": "string" },
+          "description": { "type": "string" },
+          "window": { "type": "string" },
+          "target": { "type": "number" },
+          "alert": { "type": "number" },
+          "error_budget": { "type": "number" },
+          "unit": { "type": "string" }
+        }
+      }
+    },
+    "definitions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["releasable_main", "time_to_green", "flake", "gate_duration", "policy_drift"],
+      "properties": {
+        "releasable_main": { "type": "string" },
+        "time_to_green": { "type": "string" },
+        "flake": { "type": "string" },
+        "gate_duration": { "type": "string" },
+        "policy_drift": { "type": "string" }
+      }
+    },
+    "data_sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dashboard_artifact", "workflow_metadata", "evidence_hashes"],
+      "properties": {
+        "dashboard_artifact": { "type": "string" },
+        "workflow_metadata": { "type": "string" },
+        "evidence_hashes": { "type": "string" }
+      }
+    },
+    "reporting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["default_window_days", "trend_window_days"],
+      "properties": {
+        "default_window_days": { "type": "integer", "minimum": 1 },
+        "trend_window_days": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "governed_exceptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "description", "status", "retirement"],
+        "properties": {
+          "id": { "type": "string" },
+          "description": { "type": "string" },
+          "status": { "type": "string" },
+          "retirement": { "type": "string" }
+        }
+      }
+    }
+  }
+}

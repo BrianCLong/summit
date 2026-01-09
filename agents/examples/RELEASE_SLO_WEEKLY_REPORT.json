@@ -1,0 +1,52 @@
+{
+  "task_id": "RELEASE_SLO_WEEKLY_REPORT",
+  "agent_id": "Jules",
+  "prompt_ref": {
+    "id": "release-slo-metrics-report",
+    "version": "v1",
+    "sha256": "ae2c9953bbdf4794309f46e123a201a616eda0033e251d09b289532f9bfbebc5",
+    "path": "prompts/release/release-slo-metrics-report.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/release/RELEASE_SLO.md",
+      "release/RELEASE_SLO.yml",
+      "schemas/release-slo.schema.json",
+      "schemas/release-metrics.schema.json",
+      "scripts/release/extract_release_metrics.mjs",
+      "scripts/release/generate_release_slo_report.mjs",
+      "scripts/release/lib/release-metrics.mjs",
+      "scripts/release/__tests__/release-metrics.test.mjs",
+      "scripts/release/__tests__/fixtures/release-metrics/",
+      ".github/workflows/release-slo-report.yml",
+      "docs/roadmap/STATUS.json",
+      "prompts/release/release-slo-metrics-report.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["release", "ci", "observability", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "dist/release-metrics/release-metrics.jsonl",
+      "dist/release-slo/weekly-report.md",
+      "dist/release-slo/weekly-report.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Release SLO specification and schema are versioned",
+    "Metrics extraction produces schema-validated JSONL with evidence hashes",
+    "Weekly report workflow publishes sanitized Markdown and JSON artifacts",
+    "Redaction denylist fails closed and is covered by tests"
+  ],
+  "stop_conditions": [
+    "CI failure on main",
+    "Detection of PII or sensitive URLs in outputs",
+    "Schema validation failure"
+  ]
+}

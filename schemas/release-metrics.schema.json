@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/release-metrics.schema.json",
+  "title": "Release Metrics Entry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "captured_at",
+    "repository",
+    "branch",
+    "commit_sha",
+    "candidate",
+    "releasable",
+    "gates",
+    "evidence",
+    "policy_drift"
+  ],
+  "properties": {
+    "version": { "type": "string" },
+    "captured_at": { "type": "string" },
+    "repository": { "type": "string" },
+    "branch": { "type": "string" },
+    "commit_sha": { "type": "string" },
+    "commit_timestamp": { "type": ["string", "null"] },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "tag", "promotable_state"],
+      "properties": {
+        "type": { "type": "string" },
+        "tag": { "type": "string" },
+        "promotable_state": { "type": "string" }
+      }
+    },
+    "releasable": { "type": "boolean" },
+    "time_to_green_minutes": { "type": ["number", "null"] },
+    "flake_count": { "type": "integer", "minimum": 0 },
+    "gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "required",
+          "status",
+          "conclusion",
+          "duration_minutes",
+          "rerun_count",
+          "workflow_run_ids"
+        ],
+        "properties": {
+          "name": { "type": "string" },
+          "required": { "type": "string" },
+          "status": { "type": "string" },
+          "conclusion": { "type": "string" },
+          "duration_minutes": { "type": ["number", "null"] },
+          "rerun_count": { "type": "integer", "minimum": 0 },
+          "workflow_run_ids": { "type": "array", "items": { "type": "integer" } }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dashboard_sha256", "dashboard_path", "workflow_runs"],
+      "properties": {
+        "dashboard_sha256": { "type": "string" },
+        "dashboard_path": { "type": "string" },
+        "workflow_runs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "name",
+              "run_attempt",
+              "status",
+              "conclusion",
+              "run_started_at",
+              "updated_at",
+              "duration_minutes"
+            ],
+            "properties": {
+              "id": { "type": "integer" },
+              "name": { "type": "string" },
+              "run_attempt": { "type": "integer" },
+              "status": { "type": "string" },
+              "conclusion": { "type": ["string", "null"] },
+              "run_started_at": { "type": ["string", "null"] },
+              "updated_at": { "type": ["string", "null"] },
+              "duration_minutes": { "type": ["number", "null"] }
+            }
+          }
+        }
+      }
+    },
+    "policy_drift": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["soft_gate_violations", "branch_protection_mismatches", "status"],
+      "properties": {
+        "soft_gate_violations": { "type": "integer", "minimum": 0 },
+        "branch_protection_mismatches": { "type": "integer", "minimum": 0 },
+        "status": { "type": "string" }
+      }
+    }
+  }
+}

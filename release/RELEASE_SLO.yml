@@ -1,0 +1,74 @@
+version: 1.0.0
+updated_at: 2026-01-09
+authority:
+  readiness_assertion: docs/SUMMIT_READINESS_ASSERTION.md
+  governance: docs/governance/CONSTITUTION.md
+measurement_windows:
+  - id: 7d
+    days: 7
+  - id: 30d
+    days: 30
+slos:
+  - id: SLO-1
+    name: Releasable main availability
+    indicator: releasable_main_percent_days
+    description: Percentage of days where main is promotable (Release Train dashboard shows main in success).
+    window: 30d
+    target: 0.98
+    alert: 0.95
+    error_budget: 0.02
+    unit: ratio
+  - id: SLO-2
+    name: Time-to-green after merge
+    indicator: time_to_green_minutes
+    description: Minutes from merge commit timestamp to final required gate success for main.
+    window: 7d
+    target: 45
+    alert: 60
+    error_budget: 15
+    unit: minutes
+  - id: SLO-3
+    name: Flake rate
+    indicator: flake_rate_per_gate
+    description: Ratio of gate runs requiring a rerun or multiple attempts for the same commit.
+    window: 30d
+    target: 0.02
+    alert: 0.04
+    error_budget: 0.02
+    unit: ratio
+  - id: SLO-4
+    name: Gate duration budgets
+    indicator: gate_duration_minutes
+    description: p50/p95 duration budgets for key gates (typecheck, lint, build, tests).
+    window: 30d
+    target: 30
+    alert: 40
+    error_budget: 10
+    unit: minutes
+  - id: SLO-5
+    name: Policy drift
+    indicator: policy_drift_count
+    description: Soft-gate violations and branch protection mismatches over the window.
+    window: 30d
+    target: 0
+    alert: 1
+    error_budget: 1
+    unit: count
+definitions:
+  releasable_main: Main is releasable when Release Train dashboard marks candidate_type=main as promotable_state=success.
+  time_to_green: Minutes between merge commit timestamp and last required gate success for that commit.
+  flake: A gate is flaky if it required multiple runs or attempts for the same commit before success.
+  gate_duration: Gate runtime derived from GitHub Actions run started_at to updated_at for matched workflows.
+  policy_drift: Count of soft gate violations and branch protection mismatches (intentionally constrained until governance feed wired).
+data_sources:
+  dashboard_artifact: artifacts/release-train/dashboard.json
+  workflow_metadata: GitHub Actions runs filtered by head_sha
+  evidence_hashes: SHA-256 computed per dashboard artifact
+reporting:
+  default_window_days: 7
+  trend_window_days: 30
+governed_exceptions:
+  - id: governance-signature
+    description: Artifact integrity uses GitHub artifact provenance with SHA-256 verification until signed provenance feed is integrated.
+    status: active
+    retirement: Replace with signed evidence feed once policy engine emits provenance receipts.
