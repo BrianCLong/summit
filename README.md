@@ -30,6 +30,15 @@ make smoke
 
 Before submitting PRs or deploying:
 
+### Field Deployments
+
+For production or field deployments, please refer to our deployment guides:
+
+- **Overview:** [docs/deploy/FIELD_DEPLOYMENTS_OVERVIEW.md](docs/deploy/FIELD_DEPLOYMENTS_OVERVIEW.md)
+- **Runbooks:** See the `RUNBOOKS/` directory for detailed, profile-specific playbooks.
+
+The quickstart (`make up`) is intended for local development and testing only. Field deployments use hardened, tenant-aware profiles.
+
 ```bash
 make ga
 ```

@@ -1,0 +1,13 @@
+# This file contains values for the onprem_enterprise deployment profile.
+# It is intended to be used with the summit Helm chart.
+# helm upgrade --install summit charts/summit -f charts/summit/values.yaml -f charts/summit/values.onprem_enterprise.yaml
+
+env:
+  TENANT_PROFILE: "enterprise_f100"
+  DEPLOYMENT_PROFILE: "onprem_enterprise"
+
+# For on-prem deployments, we might use a NodePort service
+service:
+  type: NodePort
+  port: 80
+  targetPort: 4000

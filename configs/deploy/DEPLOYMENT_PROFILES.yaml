@@ -1,0 +1,30 @@
+profiles:
+  - name: cloud_standard
+    infra_type: cloud
+    primary_orchestration: docker-compose
+    tenant_profile: enterprise_f100
+    required_integrations:
+      - none
+    observability_stack: basic
+    backup_strategy_ref: "docs/ops/BACKUP_RESTORE.md#cloud-standard"
+    rollback_strategy_ref: "RUNBOOKS/ROLLBACK_PRODUCTION.md#docker-compose"
+
+  - name: onprem_enterprise
+    infra_type: onprem
+    primary_orchestration: helm
+    tenant_profile: enterprise_f100
+    required_integrations:
+      - internal-only
+    observability_stack: full
+    backup_strategy_ref: "docs/ops/BACKUP_RESTORE.md#on-prem-enterprise"
+    rollback_strategy_ref: "RUNBOOKS/ROLLBACK_PRODUCTION.md#helm"
+
+  - name: airgapped_natsec
+    infra_type: airgapped
+    primary_orchestration: helm
+    tenant_profile: natsec_high_security
+    required_integrations:
+      - none
+    observability_stack: basic
+    backup_strategy_ref: "docs/ops/BACKUP_RESTORE.md#airgapped-natsec"
+    rollback_strategy_ref: "RUNBOOKS/ROLLBACK_PRODUCTION.md#helm"

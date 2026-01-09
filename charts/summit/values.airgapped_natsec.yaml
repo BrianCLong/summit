@@ -1,0 +1,17 @@
+# This file contains values for the airgapped_natsec deployment profile.
+# It is intended to be used with the summit Helm chart.
+# helm upgrade --install summit charts/summit -f charts/summit/values.yaml -f charts/summit/values.airgapped_natsec.yaml
+
+env:
+  TENANT_PROFILE: "natsec_high_security"
+  DEPLOYMENT_PROFILE: "airgapped_natsec"
+
+# Ingress might be disabled in an airgapped environment
+ingress:
+  enabled: false
+
+# Autoscaling might be disabled in favor of fixed resource allocation
+autoscaling:
+  enabled: false
+
+replicaCount: 2

@@ -1,0 +1,8 @@
+version: '3.9'
+# This file is an overlay for the base docker-compose.yml
+# It is used for the cloud_standard deployment profile.
+services:
+  mc:
+    environment:
+      - TENANT_PROFILE=enterprise_f100
+      - DEPLOYMENT_PROFILE=cloud_standard

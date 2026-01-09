@@ -1,0 +1,36 @@
+name: Deploy Plan Smoke Test
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'configs/deploy/DEPLOYMENT_PROFILES.yaml'
+      - 'scripts/deploy/plan_deploy.mjs'
+
+jobs:
+  plan-smoke-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        profile: [cloud_standard, onprem_enterprise, airgapped_natsec]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run plan_deploy.mjs in dry-run mode
+        run: ./scripts/deploy/plan_deploy.mjs --profile ${{ matrix.profile }} --mode dry-run
+
+      - name: Upload plan artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: deployment-plans-${{ matrix.profile }}
+          path: artifacts/deploy/PLAN_${{ matrix.profile }}_*.md
