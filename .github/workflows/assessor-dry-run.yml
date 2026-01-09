@@ -1,0 +1,57 @@
+# .github/workflows/assessor-dry-run.yml
+name: Assessor Dry-Run
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - 'docs/review-pack/**'
+      - 'scripts/review-pack/**'
+      - '.github/workflows/assessor-dry-run.yml'
+  schedule:
+    - cron: '0 0 * * 1' # Run every Monday at midnight
+  workflow_dispatch:
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run Assessor Dry-Run Script
+        id: dry-run
+        run: |
+          output=$(./scripts/review-pack/dry-run.sh)
+          echo "log_file=/tmp/assessor-dryrun.log" >> $GITHUB_OUTPUT
+          echo "$output" >> $GITHUB_OUTPUT
+
+      - name: Upload Rehearsal Log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: assessor-dryrun-log
+          path: ${{ steps.dry-run.outputs.log_file }}
+
+      - name: Upload Rehearsal Bundle
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: assessor-rehearsal-bundle
+          path: ${{ steps.dry-run.outputs.bundle_dir }}

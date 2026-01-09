@@ -47,6 +47,15 @@ This runs the enforced readiness sequence:
 - **GA Checklist:** `docs/release/GA_CHECKLIST.md` (operator runbook for build, test, security, and rollback)
 - **Readiness Report:** `docs/release/GA_READINESS_REPORT.md` (current go/no-go posture and remaining actions)
 - **Evidence Index:** `docs/release/GA_EVIDENCE_INDEX.md` (commands run with logs and artifact pointers)
+- **Assessor Walkthrough**: `docs/review-pack/WALKTHROUGH.md` (step-by-step guide for external reviewers)
+
+---
+
+## Assessor Dry-Run
+
+To ensure a smooth and reproducible experience for external assessors, this repository includes an automated "dry-run" process. This process, executed via GitHub Actions, follows the `docs/review-pack/WALKTHROUGH.md` to produce a rehearsal bundle.
+
+This helps identify and fix friction points, such as missing prerequisites or ambiguous commands, before an external review.
 
 ---
 
