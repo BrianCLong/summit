@@ -431,15 +431,15 @@ function emitMetrics(
 ): void {
   [...bloat.tables, ...bloat.indexes].forEach((estimate) => {
     metrics.bloatPct
-      .labels(estimate.schema, estimate.name, estimate.kind)
-      .set(estimate.bloatPct);
+      ?.labels?.(estimate.schema, estimate.name, estimate.kind)
+      ?.set?.(estimate.bloatPct);
   });
 
   autovacuum.stats.forEach((stat) => {
     metrics.vacuumDebt
-      .labels(stat.schema, stat.name)
-      .set(Math.max(stat.vacuumDebt, 0));
-    metrics.xidAge.labels(stat.schema, stat.name).set(stat.xidAge);
+      ?.labels?.(stat.schema, stat.name)
+      ?.set?.(Math.max(stat.vacuumDebt, 0));
+    metrics.xidAge?.labels?.(stat.schema, stat.name)?.set?.(stat.xidAge);
   });
 }
 

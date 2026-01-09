@@ -207,6 +207,11 @@ export class SecretManager {
       const optional = url.searchParams.get('optional') === 'true';
       const defaultValue = url.searchParams.get('default') ?? undefined;
       const ttl = url.searchParams.get('ttl');
+      const rawKey = `${url.hostname}${url.pathname}`.replace(/\/+/g, '/');
+      const normalizedKey =
+        value.startsWith('file://') && !url.hostname
+          ? rawKey
+          : rawKey.replace(/^\//, '');
       return {
         protocol: value.startsWith('vault://')
           ? 'vault'
@@ -215,7 +220,7 @@ export class SecretManager {
             : value.startsWith('file://')
               ? 'file'
               : 'env',
-        key: `${url.hostname}${url.pathname}`.replace(/\/+/g, '/').replace(/^\//, ''),
+        key: normalizedKey.replace(/\/+$/, ''),
         field: url.hash ? url.hash.replace('#', '') : undefined,
         raw: value,
         optional,
