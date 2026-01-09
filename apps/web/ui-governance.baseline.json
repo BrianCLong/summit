@@ -1,0 +1,12 @@
+{
+  "$schema": "./scripts/ui-governance.baseline.schema.json",
+  "version": "1.0.0",
+  "description": "Baseline of known UI governance violations. New violations above this count will fail CI.",
+  "generatedAt": "2026-01-09T22:54:03.093Z",
+  "baseline": {
+    "no-inline-color-styles": 4,
+    "no-hardcoded-colors": 143,
+    "prefer-button-primitive": 11
+  },
+  "totalViolations": 158
+}

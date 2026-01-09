@@ -25,7 +25,8 @@
     "test:ui": "vitest --ui",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "analyze:bundle": "vite build && echo 'Bundle analysis available at dist/stats.html'"
+    "analyze:bundle": "vite build && echo 'Bundle analysis available at dist/stats.html'",
+    "verify:ui": "node scripts/verify_ui_governance.mjs"
   },
   "dependencies": {
     "@apollo/client": "4.0.11",

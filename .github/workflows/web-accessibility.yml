@@ -37,3 +37,7 @@ jobs:
       - name: Accessibility smoke test
         working-directory: apps/web
         run: pnpm run test -- --run src/__tests__/accessibility/landmarkKeyboardFlow.test.tsx
+
+      - name: UI governance check
+        working-directory: apps/web
+        run: pnpm run verify:ui

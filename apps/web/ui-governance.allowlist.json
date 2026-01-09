@@ -1,0 +1,6 @@
+{
+  "$schema": "./scripts/ui-governance.allowlist.schema.json",
+  "version": "1.0.0",
+  "description": "UI governance waivers. Each entry must have an owner and expiration date.",
+  "waivers": []
+}
