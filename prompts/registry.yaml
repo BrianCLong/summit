@@ -55,6 +55,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ga-gate-composite-check
+    version: v1
+    path: prompts/governance/ga-gate-composite-check.md
+    sha256: a2a0706c05eb51dad94d49716b22e3892c5669b67c7b3f02db3e11883fe6d0c7
+    description: Composite GA gate aggregation and branch protection alignment.
+    scope:
+      paths:
+        - .github/
+        - docs/ci/
+        - docs/release/
+        - docs/roadmap/STATUS.json
+        - scripts/release/
+        - scripts/release/tests/
+        - scripts/release/tests/fixtures/
+      domains:
+        - governance
+        - ci
+        - release
+    verification:
+      tiers_required:
+        - A
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md

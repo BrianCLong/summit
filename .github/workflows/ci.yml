@@ -3,14 +3,8 @@ name: CI
 on:
   pull_request:
     branches: [main]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
   push:
     branches: [main]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -46,6 +40,19 @@ jobs:
         run: pnpm lint:cjs
       - run: cd server && npx tsx scripts/check-error-codes-doc.ts
 
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+
   verify:
     name: Verification Suite
     needs: lint
@@ -73,10 +80,6 @@ jobs:
     name: Test (${{ matrix.test-suite }})
     needs: [lint, verify]
     runs-on: ubuntu-latest
-    # Both unit and integration tests are non-blocking until TypeScript/ESM issues are resolved
-    # EXPIRY: 2026-01-15 - Must fix underlying TypeScript errors in test files
-    # TICKET: See docs/release/GA_DECISIONS.md for follow-up plan
-    continue-on-error: true
     strategy:
       matrix:
         test-suite: [unit, integration]
@@ -146,8 +149,6 @@ jobs:
     name: Governance
     needs: test
     runs-on: ubuntu-latest
-    # Non-blocking until ESM test infrastructure is resolved
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -165,8 +166,6 @@ jobs:
     name: Provenance
     needs: test
     runs-on: ubuntu-latest
-    # Non-blocking until ESM test infrastructure is resolved
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -181,8 +180,6 @@ jobs:
     name: Schema Diff
     needs: test
     runs-on: ubuntu-latest
-    # Non-blocking until graphql-inspector loader issues are resolved
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
         with:
@@ -273,3 +270,68 @@ jobs:
     steps:
       - name: Emit metrics
         run: echo "Emitting workflow metrics..."
+
+  ga_gate:
+    name: ga / gate
+    if: ${{ always() }}
+    needs:
+      - format-check
+      - lint
+      - typecheck
+      - verify
+      - test
+      - governance
+      - provenance
+      - schema-diff
+      - reproducible-build
+      - golden-path
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summarize GA gate dependencies
+        env:
+          FORMAT_CHECK_RESULT: ${{ needs['format-check'].result }}
+          LINT_RESULT: ${{ needs.lint.result }}
+          TYPECHECK_RESULT: ${{ needs.typecheck.result }}
+          VERIFY_RESULT: ${{ needs.verify.result }}
+          TEST_RESULT: ${{ needs.test.result }}
+          GOVERNANCE_RESULT: ${{ needs.governance.result }}
+          PROVENANCE_RESULT: ${{ needs.provenance.result }}
+          SCHEMA_DIFF_RESULT: ${{ needs['schema-diff'].result }}
+          REPRODUCIBLE_BUILD_RESULT: ${{ needs['reproducible-build'].result }}
+          GOLDEN_PATH_RESULT: ${{ needs['golden-path'].result }}
+        run: |
+          set -euo pipefail
+          checks=(
+            "Format Check|${FORMAT_CHECK_RESULT:-missing}"
+            "Lint|${LINT_RESULT:-missing}"
+            "Typecheck|${TYPECHECK_RESULT:-missing}"
+            "Verification Suite|${VERIFY_RESULT:-missing}"
+            "Tests (unit + integration)|${TEST_RESULT:-missing}"
+            "Governance|${GOVERNANCE_RESULT:-missing}"
+            "Provenance|${PROVENANCE_RESULT:-missing}"
+            "Schema Diff|${SCHEMA_DIFF_RESULT:-missing}"
+            "Reproducible Build|${REPRODUCIBLE_BUILD_RESULT:-missing}"
+            "Golden Path|${GOLDEN_PATH_RESULT:-missing}"
+          )
+
+          {
+            echo "## GA Gate Dependency Results"
+            echo ""
+            echo "| Check | Result |"
+            echo "| --- | --- |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          failure=0
+          for entry in "${checks[@]}"; do
+            name="${entry%%|*}"
+            result="${entry#*|}"
+            echo "| ${name} | ${result} |" >> "$GITHUB_STEP_SUMMARY"
+            if [[ "${result}" != "success" ]]; then
+              failure=1
+            fi
+          done
+
+          if [[ "${failure}" -ne 0 ]]; then
+            echo "::error::ga / gate blocked: one or more required checks failed or were missing"
+            exit 1
+          fi
