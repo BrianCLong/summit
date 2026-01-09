@@ -1,4 +1,4 @@
-import { describe, it, expect, jest, beforeAll, beforeEach } from '@jest/globals';
+import { describe, it, expect, jest, beforeAll, beforeEach, afterEach } from '@jest/globals';
 import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
@@ -61,6 +61,12 @@ describe('Disaster recovery restore validation', () => {
     mockRedisGet.mockImplementation(async () => null);
     delete process.env.BACKUP_ROOT_DIR;
   });
+  afterEach(async () => {
+    if (process.env.BACKUP_ROOT_DIR) {
+      await fs.rm(process.env.BACKUP_ROOT_DIR, { recursive: true, force: true });
+      delete process.env.BACKUP_ROOT_DIR;
+    }
+  });
 
   it('records a failed drill when backups are missing', async () => {
     const service = new DisasterRecoveryService();
@@ -90,6 +96,6 @@ describe('Disaster recovery restore validation', () => {
     const errorMessage = recordSpy.mock.calls[0]?.[2];
     expect(errorMessage).toBeUndefined();
     expect(result).toBe(true);
-    expect(recordSpy).toHaveBeenCalledWith(true, expect.any(Number), undefined);
+    expect(recordSpy).toHaveBeenCalledWith(true, expect.any(Number));
   });
 });

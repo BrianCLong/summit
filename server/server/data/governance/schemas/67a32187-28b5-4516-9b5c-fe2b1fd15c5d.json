@@ -6,7 +6,7 @@
     "edges": []
   },
   "changelog": "Activation test",
-  "status": "ACTIVE",
+  "status": "DEPRECATED",
   "createdAt": "2026-01-08T15:21:13.341Z",
   "createdBy": "tester",
   "approvedBy": "admin",
