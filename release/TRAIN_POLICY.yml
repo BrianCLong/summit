@@ -1,0 +1,74 @@
+version: "1.0.0"
+owner: "Release Engineering"
+last_updated: "2026-01-09"
+
+schedules:
+  - name: "daily-readiness"
+    cron: "0 7 * * *"
+    timezone: "UTC"
+
+allowed_windows:
+  - name: "weekday-window"
+    days:
+      - "Mon"
+      - "Tue"
+      - "Wed"
+      - "Thu"
+      - "Fri"
+    start: "06:00"
+    end: "18:00"
+
+labels:
+  - "release-train"
+  - "automated"
+
+assignees:
+  - "acme/platform-core"
+reviewers:
+  - "acme/platform-core"
+
+train_pr:
+  branch: "release/train"
+  title: "chore(release): release train"
+  summary_issue_title: "Release Train Readiness"
+  required_check_policy: "docs/ci/REQUIRED_CHECKS_POLICY.yml"
+  readiness_gate: "Release Readiness Gate"
+  allowed_changes:
+    dependency_bumps:
+      enabled: false
+      description: "Batched dependency updates using the workspace package manager."
+      commands:
+        - "pnpm -w update --latest"
+    workflow_maintenance:
+      enabled: false
+      description: "Workflow hygiene fixes that keep required checks intact."
+      commands:
+        - "node scripts/ci/validate-workflow-filters.sh"
+    lint_fixes:
+      enabled: false
+      description: "Mechanical lint/format fixes for low-risk drift."
+      commands:
+        - "pnpm format"
+
+  sanity_checks:
+    - "pnpm lint"
+    - "pnpm typecheck"
+
+forbidden_paths:
+  - "release/TRAIN_POLICY.yml"
+  - "release/PROMOTION_POLICY.yml"
+  - "release/HOTFIX_POLICY.yml"
+  - "docs/ci/REQUIRED_CHECKS_POLICY.yml"
+  - "docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml"
+  - "docs/ci/RELEASE_READINESS.md"
+  - "docs/ci/REQUIRED_CHECKS.md"
+  - "scripts/release/verify-green-for-tag.sh"
+  - "scripts/release/check_branch_protection_drift.sh"
+  - "scripts/release/verify_release_bundle.sh"
+  - "scripts/release/sign_governance_lockfile.sh"
+  - "agent-contract.json"
+  - "ATTESTATION_SCOPE.md"
+  - "cosign-verify.txt"
+  - "security/**"
+  - "docs/ga/**"
+
