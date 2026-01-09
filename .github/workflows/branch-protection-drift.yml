@@ -17,6 +17,7 @@ on:
   pull_request:
     paths:
       - "docs/ci/REQUIRED_CHECKS_POLICY.yml"
+      - "docs/release/REQUIRED_CHECKS_CONTRACT.md"
 
   # Manual trigger
   workflow_dispatch:

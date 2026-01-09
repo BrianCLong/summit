@@ -1,30 +1,55 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "1.0.0",
-  "description": "Canonical policy for MVP-4 Stabilization release gate requirements",
-  "last_updated": "2026-01-07",
+  "version": "3.0.0",
+  "description": "Canonical policy for required check enforcement",
+  "last_updated": "2026-01-09",
   "owner": "Platform Engineering",
 
   "always_required": [
     {
-      "name": "Release Readiness Gate",
-      "workflow": "release-readiness.yml",
-      "rationale": "Comprehensive release readiness verification - runs on every change"
+      "name": "ci / build",
+      "workflow": "ci.yml",
+      "rationale": "Deterministic build and artifact validation"
     },
     {
-      "name": "GA Gate",
-      "workflow": "ga-gate.yml",
-      "rationale": "Official GA verification entrypoint with make ga"
+      "name": "ci / governance",
+      "workflow": "ci.yml",
+      "rationale": "Governance compliance verification"
     },
     {
-      "name": "Unit Tests & Coverage",
-      "workflow": "unit-test-coverage.yml",
-      "rationale": "Test suite and coverage gates must pass for all code changes"
+      "name": "ci / lint",
+      "workflow": "ci.yml",
+      "rationale": "Lint and code hygiene enforcement"
     },
     {
-      "name": "CI Core (Primary Gate)",
-      "workflow": "ci-core.yml",
-      "rationale": "Primary blocking gate - lint, typecheck, tests, build"
+      "name": "ci / provenance",
+      "workflow": "ci.yml",
+      "rationale": "Provenance unit checks"
+    },
+    {
+      "name": "ci / schema",
+      "workflow": "ci.yml",
+      "rationale": "Schema compatibility validation"
+    },
+    {
+      "name": "ci / security",
+      "workflow": "ci.yml",
+      "rationale": "Security scanning and compliance gates"
+    },
+    {
+      "name": "ci / smoke",
+      "workflow": "ci.yml",
+      "rationale": "Golden path smoke verification"
+    },
+    {
+      "name": "ci / test",
+      "workflow": "ci.yml",
+      "rationale": "Aggregated test suite gate"
+    },
+    {
+      "name": "ci / typecheck",
+      "workflow": "ci.yml",
+      "rationale": "TypeScript type safety enforcement"
     }
   ],
 

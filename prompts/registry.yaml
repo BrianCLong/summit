@@ -79,3 +79,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: required-checks-contract
+    version: v1
+    path: prompts/ci/required-checks-contract.md
+    sha256: 05aca222ea891a28c44b12e0041bae48f7c00ef56b179f4497aa270228bd1822
+    description: Stabilize required checks contract, CI job names, and branch protection alignment.
+    scope:
+      paths:
+        - .github/protection-rules.yml
+        - .github/workflows/
+        - docs/ci/
+        - docs/release/
+        - docs/roadmap/STATUS.json
+        - scripts/release/
+        - prompts/ci/required-checks-contract.md
+        - prompts/registry.yaml
+      domains:
+        - ci
+        - governance
+        - release
+        - policy
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

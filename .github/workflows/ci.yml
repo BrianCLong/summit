@@ -1,4 +1,4 @@
-name: CI
+name: ci
 
 on:
   pull_request:
@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   format-check:
-    name: Format Check
+    name: format-check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,7 +31,7 @@ jobs:
       - run: pnpm format:check
 
   lint:
-    name: Lint
+    name: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -46,9 +46,22 @@ jobs:
         run: pnpm lint:cjs
       - run: cd server && npx tsx scripts/check-error-codes-doc.ts
 
+  typecheck:
+    name: typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+
   verify:
-    name: Verification Suite
-    needs: lint
+    name: verification
+    needs: [lint, typecheck]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -69,9 +82,9 @@ jobs:
             server/scripts/verify-*.log
           retention-days: 7
 
-  test:
-    name: Test (${{ matrix.test-suite }})
-    needs: [lint, verify]
+  test-matrix:
+    name: test (${{ matrix.test-suite }})
+    needs: [lint, typecheck, verify]
     runs-on: ubuntu-latest
     # Both unit and integration tests are non-blocking until TypeScript/ESM issues are resolved
     # EXPIRY: 2026-01-15 - Must fix underlying TypeScript errors in test files
@@ -96,9 +109,25 @@ jobs:
         if: matrix.test-suite == 'integration'
         run: pnpm --filter @intelgraph/api test
 
-  golden-path:
-    name: Golden Path
-    needs: test
+  test:
+    name: test
+    needs: [test-matrix]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate matrix result
+        run: |
+          echo "=== Test Matrix Result ==="
+          echo "Test Matrix: ${{ needs.test-matrix.result }}"
+          if [[ "${{ needs.test-matrix.result }}" != "success" ]]; then
+            echo "::error::Test matrix failed"
+            exit 1
+          fi
+
+  smoke:
+    name: smoke
+    needs: [test]
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -113,9 +142,10 @@ jobs:
       - run: make down
         if: always()
 
-  reproducible-build:
-    name: Reproducible Build
-    needs: test
+  build:
+    name: build
+    needs: [test]
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -143,8 +173,9 @@ jobs:
           fi
 
   governance:
-    name: Governance
-    needs: test
+    name: governance
+    needs: [test]
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     # Non-blocking until ESM test infrastructure is resolved
     continue-on-error: true
@@ -162,8 +193,9 @@ jobs:
         run: npx tsx scripts/governance/audit_ci.ts
 
   provenance:
-    name: Provenance
-    needs: test
+    name: provenance
+    needs: [test]
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     # Non-blocking until ESM test infrastructure is resolved
     continue-on-error: true
@@ -177,9 +209,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: npm test -- --testPathPattern="provenance" --bail
 
-  schema-diff:
-    name: Schema Diff
-    needs: test
+  schema:
+    name: schema
+    needs: [test]
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     # Non-blocking until graphql-inspector loader issues are resolved
     continue-on-error: true
@@ -196,8 +229,9 @@ jobs:
       - run: npm run graphql:schema:check
 
   ecosystem-exports:
-    name: Ecosystem Export Verification
-    needs: test
+    name: ecosystem-exports
+    needs: [test]
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -243,14 +277,15 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
 
   security:
-    name: Security
-    needs: golden-path
+    name: security
+    needs: [smoke]
+    if: ${{ always() }}
     uses: ./.github/workflows/ci-security.yml
     secrets:
       snyk_token: ${{ secrets.SNYK_TOKEN }}
 
   ga-risk-gate:
-    name: GA Risk Gate
+    name: ga-risk-gate
     needs: [lint] # Run early to fail fast
     uses: ./.github/workflows/ga-risk-gate.yml
     with:
@@ -258,8 +293,9 @@ jobs:
     secrets: inherit
 
   build-server-image:
-    name: Build Server Image (Governance)
-    needs: test
+    name: build-server-image
+    needs: [test]
+    if: ${{ always() }}
     uses: ./.github/workflows/reusable-golden-path.yml
     with:
       service_path: server
@@ -267,8 +303,9 @@ jobs:
     secrets: inherit
 
   observability:
-    name: Observability
-    needs: [security, reproducible-build, build-server-image]
+    name: observability
+    needs: [security, build, build-server-image]
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
       - name: Emit metrics

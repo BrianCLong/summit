@@ -4,8 +4,8 @@
 # Both RC and GA pipelines derive required checks from this file.
 #
 # Authority: Platform Engineering
-# Last Updated: 2026-01-08
-# Version: 2.0.0
+# Last Updated: 2026-01-09
+# Version: 3.0.0
 #
 # How to add/remove checks safely:
 # 1. Create PR modifying this file
@@ -16,9 +16,9 @@
 # IMPORTANT: Do not add new always_required checks without
 # verifying they run on EVERY commit to main.
 
-version: "2.0.0"
-description: "Canonical policy for release gate requirements"
-last_updated: "2026-01-08"
+version: "3.0.0"
+description: "Canonical policy for required check enforcement"
+last_updated: "2026-01-09"
 owner: "Platform Engineering"
 
 # Always Required Checks
@@ -26,21 +26,41 @@ owner: "Platform Engineering"
 # These checks MUST pass for every commit, regardless of what changed.
 # They are blocking for both RC and GA promotion.
 always_required:
-  - name: "Release Readiness Gate"
-    workflow: "release-readiness.yml"
-    rationale: "Comprehensive release readiness verification - runs on every change"
+  - name: "ci / build"
+    workflow: "ci.yml"
+    rationale: "Deterministic build and artifact validation"
 
-  - name: "GA Gate"
-    workflow: "ga-gate.yml"
-    rationale: "Official GA verification entrypoint with make ga"
+  - name: "ci / governance"
+    workflow: "ci.yml"
+    rationale: "Governance compliance verification"
 
-  - name: "Unit Tests & Coverage"
-    workflow: "unit-test-coverage.yml"
-    rationale: "Test suite and coverage gates must pass for all code changes"
+  - name: "ci / lint"
+    workflow: "ci.yml"
+    rationale: "Lint and code hygiene enforcement"
 
-  - name: "CI Core (Primary Gate)"
-    workflow: "ci-core.yml"
-    rationale: "Primary blocking gate - lint, typecheck, tests, build"
+  - name: "ci / provenance"
+    workflow: "ci.yml"
+    rationale: "Provenance unit checks"
+
+  - name: "ci / schema"
+    workflow: "ci.yml"
+    rationale: "Schema compatibility validation"
+
+  - name: "ci / security"
+    workflow: "ci.yml"
+    rationale: "Security scanning and compliance gates"
+
+  - name: "ci / smoke"
+    workflow: "ci.yml"
+    rationale: "Golden path smoke verification"
+
+  - name: "ci / test"
+    workflow: "ci.yml"
+    rationale: "Aggregated test suite gate"
+
+  - name: "ci / typecheck"
+    workflow: "ci.yml"
+    rationale: "TypeScript type safety enforcement"
 
 # Conditional Required Checks
 # ---------------------------
@@ -192,6 +212,7 @@ evaluation_rules:
 # ---------------------
 notes:
   - "This file is the authoritative source for required checks"
+  - "Contract alignment is defined in docs/release/REQUIRED_CHECKS_CONTRACT.md"
   - "Both release-rc-pipeline.yml and release-ga-pipeline.yml use this policy"
   - "The verify-green-for-tag.sh script loads this file at runtime"
   - "To add a new required check:"

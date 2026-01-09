@@ -73,4 +73,52 @@ Bucket B PRs (8 PRs) require feature review before GA inclusion.
 
 ---
 
+## Required Checks Contract Migration
+
+**Decision**: Stabilize branch protection required check names using the Required Checks Contract.
+
+**Date**: 2026-01-09
+
+**Old Required Check Set**:
+
+- `setup`
+- `lint-and-typecheck`
+- `unit-integration-tests`
+- `security-gates`
+- `build-and-attestation`
+- `merge-readiness`
+- `schema-api-validation` (conditional/optional)
+
+**New Required Check Set** (Contract):
+
+- `ci / build`
+- `ci / governance`
+- `ci / lint`
+- `ci / provenance`
+- `ci / schema`
+- `ci / security`
+- `ci / smoke`
+- `ci / test`
+- `ci / typecheck`
+
+**Migration Plan**:
+
+1. **Add new umbrella checks** via `.github/workflows/ci.yml` with stable job names.
+2. **Update policy-as-code** (`docs/ci/REQUIRED_CHECKS_POLICY.yml`) to reference the contract names.
+3. **Switch branch protection** to the contract list using `.github/protection-rules.yml`.
+4. **Verify enforcement** using the required checks validator and drift detection scripts.
+5. **Retire deprecated checks** after one successful merge cycle with the contract enforced.
+
+**Verification**:
+
+- `./scripts/release/validate_required_checks_contract.sh`
+- `./scripts/release/check_branch_protection_drift.sh --branch main`
+
+**Rollback**:
+
+If migration must be reverted, restore the old check names in branch protection, revert the policy
+file to the prior revision, and re-run the verification commands to confirm alignment.
+
+---
+
 _Documented by GA Release Commander_

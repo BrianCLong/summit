@@ -2,13 +2,13 @@
 
 **Status:** Active (MVP-4)
 **Owner:** Platform Engineering
-**Last Updated:** 2026-01-08
+**Last Updated:** 2026-01-09
 
 ---
 
 ## Overview
 
-Branch Protection Drift Detection ensures that your policy-as-code (`REQUIRED_CHECKS_POLICY.yml`) stays in sync with GitHub's actual branch protection enforcement. This prevents a common "silent failure" where the repo's documented policy differs from what GitHub actually enforces.
+Branch Protection Drift Detection ensures that your policy-as-code (`REQUIRED_CHECKS_POLICY.yml`) stays in sync with the Required Checks Contract and GitHub's actual branch protection enforcement. This prevents a common "silent failure" where the repo's documented policy differs from what GitHub actually enforces.
 
 ### The Problem
 
@@ -23,9 +23,10 @@ Without drift detection:
 Automated daily comparison that:
 
 1. Extracts always-required checks from policy
-2. Queries GitHub branch protection API
-3. Reports mismatches with remediation steps
-4. Creates/updates deduped issues when drift exists
+2. Validates contract checks exist in workflows
+3. Queries GitHub branch protection API
+4. Reports mismatches with remediation steps
+5. Creates/updates deduped issues when drift exists
 
 ---
 
@@ -41,9 +42,9 @@ The `extract_required_checks_from_policy.sh` script reads `REQUIRED_CHECKS_POLIC
 
 # Output:
 {
-  "always_required": ["Release Readiness Gate", "GA Gate", "Unit Tests & Coverage", "CI Core (Primary Gate)"],
-  "policy_version": "2.0.0",
-  "count": 4
+  "always_required": ["ci / build", "ci / governance", "ci / lint", "ci / provenance", "ci / schema", "ci / security", "ci / smoke", "ci / test", "ci / typecheck"],
+  "policy_version": "3.0.0",
+  "count": 9
 }
 ```
 
@@ -52,9 +53,10 @@ The `extract_required_checks_from_policy.sh` script reads `REQUIRED_CHECKS_POLIC
 The `check_branch_protection_drift.sh` script:
 
 1. Extracts policy requirements
-2. Queries GitHub API for branch protection
-3. Compares the two sets
-4. Generates a report
+2. Validates contract checks exist in workflows
+3. Queries GitHub API for branch protection
+4. Compares the sets
+5. Generates a report
 
 ```bash
 # Check for drift
