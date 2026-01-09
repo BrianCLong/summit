@@ -1,6 +1,4 @@
 
-import { auditFirstMiddleware } from '../src/middleware/audit-first.js';
-import { provenanceLedger } from '../src/provenance/ledger.js';
 // @ts-ignore
 import { getMockReq, getMockRes } from '@jest-mock/express';
 
@@ -11,13 +9,24 @@ jest.mock('../src/provenance/ledger.js', () => ({
 }));
 
 jest.mock('../src/config/logger.js', () => ({
-  child: () => ({
-    debug: jest.fn(),
-    error: jest.fn(),
-  }),
+  __esModule: true,
+  default: {
+    child: () => ({
+      debug: jest.fn(),
+      error: jest.fn(),
+    }),
+  },
 }));
 
+let auditFirstMiddleware: typeof import('../src/middleware/audit-first.js').auditFirstMiddleware;
+let provenanceLedger: typeof import('../src/provenance/ledger.js').provenanceLedger;
+
 describe('AuditFirstMiddleware', () => {
+  beforeAll(async () => {
+    ({ auditFirstMiddleware } = await import('../src/middleware/audit-first.js'));
+    ({ provenanceLedger } = await import('../src/provenance/ledger.js'));
+  });
+
   it('should call next for non-sensitive routes', () => {
     const req = getMockReq({ method: 'GET', path: '/public' });
     const { res, next } = getMockRes();
@@ -38,8 +47,10 @@ describe('AuditFirstMiddleware', () => {
 
     auditFirstMiddleware(req, res, next);
 
-    // Simulate finish
-    res.emit('finish');
+    const finishHandler = (res.on as jest.Mock).mock.calls.find(
+      ([event]) => event === 'finish',
+    )?.[1];
+    finishHandler?.();
 
     // Wait for async operations
     await new Promise(resolve => setTimeout(resolve, 10));
@@ -60,8 +71,10 @@ describe('AuditFirstMiddleware', () => {
 
       auditFirstMiddleware(req, res, next);
 
-      // Simulate finish
-      res.emit('finish');
+      const finishHandler = (res.on as jest.Mock).mock.calls.find(
+        ([event]) => event === 'finish',
+      )?.[1];
+      finishHandler?.();
 
       // Wait for async operations
       await new Promise(resolve => setTimeout(resolve, 10));

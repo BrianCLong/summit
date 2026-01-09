@@ -3,6 +3,9 @@ import request from 'supertest';
 import * as fs from 'fs';
 import * as path from 'path';
 
+const describeNetwork =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Use unstable_mockModule for ESM mocking support
 jest.unstable_mockModule('../src/workers/trustScoreWorker', () => ({
   startTrustWorker: jest.fn(),
@@ -302,7 +305,7 @@ jest.unstable_mockModule('dompurify', () => ({
 }));
 
 
-describe('Golden Path Guardrails - Negative Tests', () => {
+describeNetwork('Golden Path Guardrails - Negative Tests', () => {
   let app: any;
   let server: any;
   let authToken: string;

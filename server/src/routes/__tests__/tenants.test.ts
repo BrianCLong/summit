@@ -28,6 +28,11 @@ jest.mock('../../services/TenantService.js', () => ({
       parse: (v: any) => v,
     }),
   },
+  createTenantBaseSchema: {
+    extend: () => ({
+      parse: (v: any) => v,
+    }),
+  },
 }));
 
 jest.mock('../../services/TenantUsageService.js', () => ({
@@ -69,7 +74,10 @@ jest.mock('../../repos/ProvenanceRepo.js', () => ({
 
 const tenantsRouter = require('../tenants.js').default;
 
-describe('tenants routes', () => {
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('tenants routes', () => {
   const app = express();
   app.use(express.json());
   app.use('/api/tenants', tenantsRouter);

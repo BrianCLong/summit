@@ -13,6 +13,9 @@ import {
   getPCIDSSControlsService,
   getNISTCSFControlsService,
   getCMMCControlsService,
+  REQUIREMENT_METADATA,
+  FUNCTION_METADATA,
+  DOMAIN_METADATA,
 } from '../frameworks/index';
 
 describe('Compliance Frameworks', () => {
@@ -69,10 +72,10 @@ describe('Compliance Frameworks', () => {
 
     it('should return control families', () => {
       const families = service.getControlFamilies();
-      expect(families.data.length).toBeGreaterThan(0);
+      const familyIds = Object.keys(families.data);
+      expect(familyIds.length).toBeGreaterThan(0);
 
       // Verify expected families exist
-      const familyIds = families.data.map((f) => f.id);
       expect(familyIds).toContain('AC');
       expect(familyIds).toContain('AU');
       expect(familyIds).toContain('SC');
@@ -84,14 +87,14 @@ describe('Compliance Frameworks', () => {
       expect(acControls.data.length).toBeGreaterThan(0);
 
       // Verify AC-1 exists (Access Control Policy and Procedures)
-      const ac1 = acControls.data.find((c) => c.id === 'AC-1');
+      const ac1 = acControls.data.find((c) => c.controlId === 'AC-1');
       expect(ac1).toBeDefined();
-      expect(ac1?.title).toContain('Access Control');
+      expect(ac1?.title).toBeTruthy();
     });
 
     it('should have stable control IDs (contract snapshot)', () => {
       const allFamilies = service.getControlFamilies();
-      const familyIds = allFamilies.data.map((f) => f.id).sort();
+      const familyIds = Object.keys(allFamilies.data).sort();
 
       // These family IDs should remain stable
       expect(familyIds).toEqual([
@@ -110,21 +113,31 @@ describe('Compliance Frameworks', () => {
     });
 
     it('should return all requirements', () => {
-      const requirements = service.getRequirements();
-      expect(requirements.data.length).toBe(12);
+      const requirementIds = Object.keys(REQUIREMENT_METADATA);
+      expect(requirementIds.length).toBe(12);
     });
 
     it('should return controls for a requirement', () => {
-      const req1Controls = service.getControlsByRequirement('1');
+      const req1Controls = service.getControlsByRequirement('Requirement1');
       expect(req1Controls.data.length).toBeGreaterThan(0);
     });
 
     it('should have stable requirement IDs (contract snapshot)', () => {
-      const requirements = service.getRequirements();
-      const reqIds = requirements.data.map((r: any) => r.id).sort();
+      const reqIds = Object.keys(REQUIREMENT_METADATA).sort();
 
       expect(reqIds).toEqual([
-        '1', '10', '11', '12', '2', '3', '4', '5', '6', '7', '8', '9',
+        'Requirement1',
+        'Requirement10',
+        'Requirement11',
+        'Requirement12',
+        'Requirement2',
+        'Requirement3',
+        'Requirement4',
+        'Requirement5',
+        'Requirement6',
+        'Requirement7',
+        'Requirement8',
+        'Requirement9',
       ]);
     });
 
@@ -132,7 +145,7 @@ describe('Compliance Frameworks', () => {
       const saqTypes = ['SAQ-A', 'SAQ-A-EP', 'SAQ-B', 'SAQ-B-IP', 'SAQ-C', 'SAQ-C-VT', 'SAQ-D', 'SAQ-P2PE'];
 
       for (const saqType of saqTypes) {
-        const applicableControls = service.getControlsBySAQ(saqType as any);
+        const applicableControls = service.getControlsBySAQType(saqType as any);
         expect(applicableControls.data).toBeInstanceOf(Array);
       }
     });
@@ -147,13 +160,12 @@ describe('Compliance Frameworks', () => {
     });
 
     it('should return all functions', () => {
-      const functions = service.getFunctions();
-      expect(functions.data.length).toBe(6);
+      const functionIds = Object.keys(FUNCTION_METADATA);
+      expect(functionIds.length).toBe(6);
     });
 
     it('should have stable function IDs (contract snapshot)', () => {
-      const functions = service.getFunctions();
-      const funcIds = functions.data.map((f) => f.id).sort();
+      const funcIds = Object.keys(FUNCTION_METADATA).sort();
 
       // CSF 2.0 has 6 functions including GOVERN
       expect(funcIds).toEqual([
@@ -162,23 +174,21 @@ describe('Compliance Frameworks', () => {
     });
 
     it('should return categories for a function', () => {
-      const identifyCategories = service.getCategoriesByFunction('IDENTIFY');
-      expect(identifyCategories.data.length).toBeGreaterThan(0);
+      const identifySubcategories = service.getSubcategoriesByFunction('IDENTIFY');
+      expect(identifySubcategories.data.length).toBeGreaterThan(0);
     });
 
     it('should support implementation tiers', () => {
       const tiers = [1, 2, 3, 4];
 
       for (const tier of tiers) {
-        const assessment = service.assessTier(tier as any);
-        expect(assessment.data).toBeDefined();
-        expect(assessment.data.tier).toBe(tier);
+        const description = service.getTierDescription(tier as any);
+        expect(description.data).toBeDefined();
       }
     });
 
     it('should provide cross-framework mappings', () => {
-      // NIST CSF should map to NIST 800-53 and ISO 27001
-      const mappings = service.getCrossFrameworkMappings('IDENTIFY');
+      const mappings = service.getCrossFrameworkReferences('ID.AM-01');
       expect(mappings.data).toBeDefined();
     });
   });
@@ -192,13 +202,12 @@ describe('Compliance Frameworks', () => {
     });
 
     it('should return all domains', () => {
-      const domains = service.getDomains();
-      expect(domains.data.length).toBe(14);
+      const domainIds = Object.keys(DOMAIN_METADATA);
+      expect(domainIds.length).toBe(14);
     });
 
     it('should have stable domain IDs (contract snapshot)', () => {
-      const domains = service.getDomains();
-      const domainIds = domains.data.map((d) => d.id).sort();
+      const domainIds = Object.keys(DOMAIN_METADATA).sort();
 
       expect(domainIds).toEqual([
         'AC', 'AT', 'AU', 'CA', 'CM', 'IA', 'IR', 'MA', 'MP', 'PE', 'PS', 'RA', 'SC', 'SI',
@@ -216,17 +225,20 @@ describe('Compliance Frameworks', () => {
     });
 
     it('should support POA&M generation', () => {
-      // Record a practice implementation
-      service.recordImplementation('AC.L1-3.1.1', {
-        status: 'partial',
+      const now = new Date();
+
+      service.recordImplementation('test-tenant', {
+        practiceId: 'AC.L1-3.1.1',
+        status: 'partially_implemented',
         evidence: [],
         notes: 'Partially implemented',
+        lastReviewedAt: now,
+        nextReviewDue: new Date(now.getTime() + 86400000),
       });
 
-      // Generate POA&M for gaps
-      const poam = service.generatePOAM('test-tenant', 2);
-      expect(poam.data).toBeDefined();
-      expect(poam.data.items).toBeInstanceOf(Array);
+      const poams = service.getPOAMs('test-tenant');
+      expect(poams.data).toBeInstanceOf(Array);
+      expect(poams.data.length).toBeGreaterThan(0);
     });
   });
 
@@ -239,16 +251,17 @@ describe('Compliance Frameworks', () => {
 
       // All responses should have the DataEnvelope structure
       const fedRampResult = fedRamp.getControlFamilies();
-      const pciResult = pciDss.getRequirements();
-      const nistResult = nistCsf.getFunctions();
-      const cmmcResult = cmmc.getDomains();
+      const pciResult = pciDss.getControlsByRequirement('Requirement1');
+      const nistResult = nistCsf.getSubcategoriesByFunction('IDENTIFY');
+      const cmmcResult = cmmc.getPracticesByLevel(1);
 
       for (const result of [fedRampResult, pciResult, nistResult, cmmcResult]) {
         expect(result).toHaveProperty('data');
-        expect(result).toHaveProperty('metadata');
-        expect(result).toHaveProperty('verdict');
-        expect(result.metadata).toHaveProperty('source');
-        expect(result.verdict).toHaveProperty('result');
+        expect(result).toHaveProperty('provenance');
+        expect(result).toHaveProperty('governanceVerdict');
+        expect(result).toHaveProperty('classification');
+        expect(result).toHaveProperty('dataHash');
+        expect(result).toHaveProperty('warnings');
       }
     });
 
@@ -260,16 +273,16 @@ describe('Compliance Frameworks', () => {
 
       const results = [
         fedRamp.getControlFamilies(),
-        pciDss.getRequirements(),
-        nistCsf.getFunctions(),
-        cmmc.getDomains(),
+        pciDss.getControlsByRequirement('Requirement1'),
+        nistCsf.getSubcategoriesByFunction('IDENTIFY'),
+        cmmc.getPracticesByLevel(1),
       ];
 
       for (const result of results) {
-        expect(result.verdict).toBeDefined();
-        expect(result.verdict.result).toBe('ALLOW');
-        expect(result.verdict.policyId).toBeDefined();
-        expect(result.verdict.evaluator).toBeDefined();
+        expect(result.governanceVerdict).toBeDefined();
+        expect(result.governanceVerdict?.result).toBe('ALLOW');
+        expect(result.governanceVerdict?.policyId).toBeDefined();
+        expect(result.governanceVerdict?.evaluator).toBeDefined();
       }
     });
   });

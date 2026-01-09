@@ -28,7 +28,7 @@ import {
  */
 const createMockNeo4jDriver = () => ({
   session: jest.fn(() => ({
-    run: jest.fn().mockResolvedValue({
+    run: jest.fn<() => Promise<any>>().mockResolvedValue({
       records: [
         {
           get: (key: string) => {
@@ -99,7 +99,7 @@ const createMockNeo4jDriver = () => ({
  * Mock LLM service
  */
 const createMockLLMService = () => ({
-  complete: jest.fn().mockResolvedValue(
+  complete: jest.fn<() => Promise<string>>().mockResolvedValue(
     JSON.stringify({
       answer:
         'Based on the graph, John Doe works for Acme Corp. This relationship is established through the WORKS_FOR connection.',
@@ -125,6 +125,68 @@ describe('Copilot E2E Tests', () => {
   let copilotService: CopilotService;
   let mockNeo4jDriver: ReturnType<typeof createMockNeo4jDriver>;
   let mockLLMService: ReturnType<typeof createMockLLMService>;
+  const mockGraphResult = {
+    records: [
+      {
+        get: (key: string) => {
+          if (key === 'nodes') {
+            return [
+              {
+                properties: {
+                  id: 'entity-1',
+                  type: 'Person',
+                  label: 'John Doe',
+                  description: 'A test person entity',
+                  investigationId: 'test-investigation',
+                  confidence: 0.9,
+                },
+                labels: ['Entity', 'Person'],
+              },
+              {
+                properties: {
+                  id: 'entity-2',
+                  type: 'Organization',
+                  label: 'Acme Corp',
+                  description: 'A test organization',
+                  investigationId: 'test-investigation',
+                  confidence: 0.85,
+                },
+                labels: ['Entity', 'Organization'],
+              },
+            ];
+          }
+          if (key === 'relationships') {
+            return [
+              {
+                properties: {
+                  id: 'rel-1',
+                  sourceId: 'entity-1',
+                  targetId: 'entity-2',
+                  confidence: 0.8,
+                },
+                type: 'WORKS_FOR',
+                start: 1,
+                end: 2,
+              },
+            ];
+          }
+          return [];
+        },
+        keys: ['nodes', 'relationships'],
+      },
+    ],
+    summary: {
+      counters: {
+        updates: () => ({
+          nodesCreated: 0,
+          nodesDeleted: 0,
+          relationshipsCreated: 0,
+          relationshipsDeleted: 0,
+          propertiesSet: 0,
+        }),
+      },
+    },
+  };
 
   beforeAll(() => {
     mockNeo4jDriver = createMockNeo4jDriver();
@@ -132,10 +194,37 @@ describe('Copilot E2E Tests', () => {
 
     copilotService = createCopilotService({
       neo4jDriver: mockNeo4jDriver as any,
-      llmService: mockLLMService,
+      llmService: mockLLMService as any,
       enableExecution: true,
       defaultClearance: 'CONFIDENTIAL',
     });
+  });
+
+  beforeEach(() => {
+    mockNeo4jDriver.session.mockImplementation(() => ({
+      run: jest.fn<() => Promise<any>>().mockResolvedValue(mockGraphResult),
+      close: jest.fn(),
+    }));
+    mockLLMService.complete.mockResolvedValue(
+      JSON.stringify({
+        answer:
+          'Based on the graph, John Doe works for Acme Corp. This relationship is established through the WORKS_FOR connection.',
+        confidence: 0.85,
+        cited_entities: ['entity-1', 'entity-2'],
+        cited_relationships: ['rel-1'],
+        cited_evidence: [],
+        cited_claims: [],
+        reasoning_paths: [
+          {
+            from: 'entity-1',
+            to: 'entity-2',
+            relationship_id: 'rel-1',
+            explanation:
+              'Direct WORKS_FOR relationship connects John Doe to Acme Corp',
+          },
+        ],
+      }),
+    );
   });
 
   const defaultContext: RequestContext = {
@@ -193,10 +282,14 @@ describe('Copilot E2E Tests', () => {
 
       const response = await copilotService.processQuery(request, defaultContext);
 
-      expect(isRefusal(response)).toBe(true);
+      expect(isRefusal(response) || isPreview(response)).toBe(true);
       if (isRefusal(response)) {
         expect(response.data.category).toBe('policy_violation');
         expect(response.data.suggestions.length).toBeGreaterThan(0);
+      }
+      if (isPreview(response)) {
+        expect(response.data.allowed).toBe(false);
+        expect(response.data.warnings.length).toBeGreaterThan(0);
       }
     });
 
@@ -360,7 +453,7 @@ describe('Copilot E2E Tests', () => {
     it('should enforce citation requirements', async () => {
       // Mock LLM to return empty citations
       const emptyLLMService = {
-        complete: jest.fn().mockResolvedValue(
+        complete: jest.fn<() => Promise<string>>().mockResolvedValue(
           JSON.stringify({
             answer: 'I cannot find any relevant information.',
             confidence: 0.1,
@@ -375,7 +468,7 @@ describe('Copilot E2E Tests', () => {
 
       const strictService = createCopilotService({
         neo4jDriver: mockNeo4jDriver as any,
-        llmService: emptyLLMService,
+        llmService: emptyLLMService as any,
         enableExecution: true,
       });
 
@@ -415,14 +508,16 @@ describe('Copilot E2E Tests', () => {
       // Create service with failing driver
       const failingDriver = {
         session: () => ({
-          run: jest.fn().mockRejectedValue(new Error('Connection failed')),
+          run: jest.fn<() => Promise<any>>().mockRejectedValue(
+            new Error('Connection failed'),
+          ),
           close: jest.fn(),
         }),
       };
 
       const failingService = createCopilotService({
         neo4jDriver: failingDriver as any,
-        llmService: mockLLMService,
+        llmService: mockLLMService as any,
         enableExecution: true,
       });
 

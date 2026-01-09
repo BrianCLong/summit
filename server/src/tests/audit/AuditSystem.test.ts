@@ -1,12 +1,17 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { AdvancedAuditSystem } from '../../audit/advanced-audit-system.js';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
 import pino from 'pino';
 
+type AdvancedAuditSystem =
+  import('../../audit/advanced-audit-system.ts').AdvancedAuditSystem;
+
 // Mock dependencies
+const mockQuery = jest.fn() as jest.MockedFunction<
+  (...args: any[]) => Promise<{ rows: any[] }>
+>;
 const mockPool = {
-  query: jest.fn(),
+  query: mockQuery,
 } as unknown as Pool;
 
 const mockRedis = {
@@ -19,27 +24,31 @@ describe('AdvancedAuditSystem', () => {
   let auditSystem: AdvancedAuditSystem;
   const signingKey = 'test-signing-key';
   const encryptionKey = 'test-encryption-key';
+  const { AdvancedAuditSystem } = jest.requireActual(
+    '../../audit/advanced-audit-system.ts',
+  ) as typeof import('../../audit/advanced-audit-system.ts');
 
   beforeEach(() => {
     jest.clearAllMocks();
-    auditSystem = new AdvancedAuditSystem(
-      mockPool,
-      mockRedis,
-      mockLogger,
+    mockQuery.mockResolvedValue({ rows: [] } as any);
+    auditSystem = AdvancedAuditSystem.createForTest({
+      db: mockPool,
+      redis: mockRedis,
+      logger: mockLogger,
       signingKey,
-      encryptionKey
-    );
+      encryptionKey,
+    });
   });
 
   afterEach(async () => {
-    // Manually stop intervals to prevent open handles
-    // Access private properties via casting to any if needed, or rely on gracefulShutdown
-    // But since gracefulShutdown uses logger and internal state, we can just let it be GC'd or call shutdown
-    await (auditSystem as any).gracefulShutdown();
+    await auditSystem.shutdown();
   });
 
-  it('should initialize schema on startup', () => {
-    expect(mockPool.query).toHaveBeenCalledWith(expect.stringContaining('CREATE TABLE IF NOT EXISTS audit_events'));
+  it('should initialize schema on startup', async () => {
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(mockPool.query).toHaveBeenCalledWith(
+      expect.stringContaining('CREATE TABLE IF NOT EXISTS audit_events'),
+    );
   });
 
   it('should record an audit event successfully', async () => {
@@ -52,6 +61,7 @@ describe('AdvancedAuditSystem', () => {
       serviceId: 'auth-service',
       message: 'User logged in',
       level: 'info' as const,
+      details: {},
       complianceRelevant: true,
       complianceFrameworks: ['SOC2' as const],
     };
@@ -66,26 +76,30 @@ describe('AdvancedAuditSystem', () => {
 
   it('should validate event data', async () => {
     const invalidEvent = {
-        // Missing required fields
-        eventType: 'user_login' as const
+      // Missing required fields
+      eventType: 'user_login' as const,
     };
 
-    // In non-prod it warns but returns empty string or throws depending on config.
-    // The code currently catches error and logs it, returning ''
-    const eventId = await auditSystem.recordEvent(invalidEvent as any);
-    expect(eventId).toBe('');
+    await expect(auditSystem.recordEvent(invalidEvent as any)).rejects.toThrow(
+      /Invalid audit event/,
+    );
   });
 
   it('should query events', async () => {
-    (mockPool.query as jest.Mock).mockResolvedValueOnce({
-      rows: [
-        {
-          id: 'event-1',
-          event_type: 'user_login',
-          timestamp: new Date(),
-          // ... other fields mapped by deserializeEvent
-        }
-      ]
+    mockQuery.mockImplementation((query: any) => {
+      if (typeof query === 'string' && query.includes('SELECT * FROM audit_events')) {
+        return Promise.resolve({
+          rows: [
+            {
+              id: 'event-1',
+              event_type: 'user_login',
+              timestamp: new Date(),
+              // ... other fields mapped by deserializeEvent
+            },
+          ],
+        });
+      }
+      return Promise.resolve({ rows: [] });
     });
 
     const events = await auditSystem.queryEvents({

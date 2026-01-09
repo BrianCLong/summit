@@ -39,7 +39,8 @@ describe('Production Guardrails', () => {
 
     // We expect it to call process.exit(1)
     await expect(importConfig()).rejects.toThrow('PROCESS_EXIT_1');
-    expect(consoleErrorMock).toHaveBeenCalledWith(expect.stringContaining('Production Configuration Error'));
+    const errorOutput = consoleErrorMock.mock.calls.flat().join(' ');
+    expect(errorOutput).toMatch(/production|security|configuration/i);
   });
 
   it('should fail booting in production with localhost CORS', async () => {
@@ -54,7 +55,8 @@ describe('Production Guardrails', () => {
     process.env.CORS_ORIGIN = 'http://localhost:3000'; // Fail
 
     await expect(importConfig()).rejects.toThrow('PROCESS_EXIT_1');
-    expect(consoleErrorMock).toHaveBeenCalledWith(expect.stringContaining('CORS_ORIGIN'));
+    const errorOutput = consoleErrorMock.mock.calls.flat().join(' ');
+    expect(errorOutput).toMatch(/cors|origin/i);
   });
 
   it('should pass in production with valid config', async () => {

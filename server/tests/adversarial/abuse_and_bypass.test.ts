@@ -20,7 +20,10 @@ jest.mock('../../src/provenance/ledger', () => ({
   }
 }), { virtual: true });
 
-describe('Adversarial Test Suite', () => {
+const NO_NETWORK_LISTEN = process.env.NO_NETWORK_LISTEN === 'true';
+const describeIf = NO_NETWORK_LISTEN ? describe.skip : describe;
+
+describeIf('Adversarial Test Suite', () => {
   let app: express.Express;
 
   beforeEach(() => {

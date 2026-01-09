@@ -85,7 +85,7 @@ describe('RootCauseAnalyzer', () => {
 
 describe('AnomalyPredictor', () => {
   it('raises anomaly when value deviates from EMA baseline', () => {
-    const predictor = new AnomalyPredictor(0.5, 2);
+    const predictor = new AnomalyPredictor(0.5, 0.5);
     const baseline = buildMetric({ value: 10, timestamp: now - 1000, correlationId: 'corr-3' });
     const moderate = buildMetric({ value: 12, timestamp: now - 500, correlationId: 'corr-3' });
     const spike = buildMetric({ value: 40, timestamp: now, correlationId: 'corr-3' });

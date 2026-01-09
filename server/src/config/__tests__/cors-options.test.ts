@@ -4,6 +4,8 @@ import request from 'supertest';
 
 import { buildCorsOptions } from '../cors-options.js';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const createApp = (originConfig: string, nodeEnv: string) => {
   const corsOptions = buildCorsOptions({
     CORS_ORIGIN: originConfig,
@@ -12,12 +14,12 @@ const createApp = (originConfig: string, nodeEnv: string) => {
 
   const app = express();
   app.use(cors(corsOptions));
-  app.options('*', cors(corsOptions));
+  app.options(/.*/, cors(corsOptions));
   app.get('/ping', (_req, res) => res.json({ ok: true }));
   return app;
 };
 
-describe('buildCorsOptions', () => {
+describeIf('buildCorsOptions', () => {
   it('allows configured origins in production and sets headers', async () => {
     const app = createApp('https://allowed.example,https://cdn.allowed', 'production');
 
@@ -56,4 +58,3 @@ describe('buildCorsOptions', () => {
     expect(res.status).toBe(500);
   });
 });
-

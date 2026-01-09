@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
-import {
-  DeploymentGateService,
+import type {
+  DeploymentGateService as DeploymentGateServiceType,
   DeploymentGateAdapters,
   DeploymentValidationContext,
   MaintainerApproval,
@@ -9,7 +9,22 @@ import {
   ApiChange,
 } from '../conductor/deployment/deploymentGateService';
 
+let DeploymentGateService: typeof DeploymentGateServiceType;
+
 describe('DeploymentGateService', () => {
+  beforeAll(async () => {
+    jest.unstable_mockModule('../../../logger', () => ({
+      logger: {
+        info: jest.fn(),
+        warn: jest.fn(),
+        error: jest.fn(),
+      },
+    }));
+
+    ({ DeploymentGateService } = await import(
+      '../conductor/deployment/deploymentGateService'
+    ));
+  });
   const buildContext: DeploymentValidationContext = {
     buildId: 'build-123',
     environment: 'pre-production',
@@ -108,7 +123,7 @@ describe('DeploymentGateService', () => {
     expect(report.checks).toHaveLength(7);
     expect(report.checks.every((check) => check.status === 'pass')).toBe(true);
     expect(adapters.slack.notify).not.toHaveBeenCalled();
-    expect(adapters.logger.info).toHaveBeenCalledWith(
+    expect(adapters.logger!.info).toHaveBeenCalledWith(
       expect.objectContaining({
         event: 'deployment_gate_completed',
         status: 'pass',
@@ -156,7 +171,7 @@ describe('DeploymentGateService', () => {
         failures: expect.any(Array),
       }),
     );
-    expect(adapters.logger.error).not.toHaveBeenCalledWith(
+    expect(adapters.logger!.error).not.toHaveBeenCalledWith(
       expect.objectContaining({
         event: 'deployment_gate_slack_notification_failed',
       }),
