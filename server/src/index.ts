@@ -18,7 +18,6 @@ import { subscriptionEngine } from './graphql/subscriptionEngine.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
-import { initTelemetry } from '@intelgraph/telemetry-config';
 import { streamingRateLimiter } from './routes/streaming.js';
 import { startOSINTWorkers } from './services/OSINTQueueService.js';
 import { ingestionService } from './services/IngestionService.js';
@@ -29,9 +28,12 @@ const __dirname = path.dirname(__filename);
 import { bootstrapSecrets } from './bootstrap-secrets.js';
 import { logger } from './config/logger.js';
 import './monitoring/metrics.js'; // Initialize Prometheus metrics collection
+import { initializeTracing } from './observability/tracer.js';
 
 const startServer = async () => {
-  const sdk = initTelemetry('intelgraph-server');
+  // Initialize OpenTelemetry Tracing (replaces legacy initTelemetry)
+  const tracer = initializeTracing();
+  await tracer.initialize();
 
   // Optional Kafka consumer import - only when AI services enabled
   let startKafkaConsumer: any = null;

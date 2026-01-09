@@ -1,5 +1,6 @@
 /**
  * Prometheus metrics collection for IntelGraph Platform
+ * Integrated with OpenTelemetry and Grafana
  */
 import * as client from 'prom-client';
 

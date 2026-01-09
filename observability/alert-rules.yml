@@ -1,5 +1,6 @@
 groups:
   - name: summit-alerts
+    # Rules synchronized with server/src/monitoring/metrics.ts
     rules:
       # HTTP Availability & Latency
       - alert: HighHttpErrorRate

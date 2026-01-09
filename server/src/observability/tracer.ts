@@ -261,8 +261,7 @@ export class IntelGraphTracer {
     database: string,
     operation: string,
     query: string,
-    fn: () => Promise<T>,
-  ): Promise<T> {
+    fn: () => Promise<T>,  ): Promise<T> {
     return this.withSpan(
       `db.${database}.${operation}`,
       async (span: any) => {
