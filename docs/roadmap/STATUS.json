@@ -9,23 +9,26 @@
         {
           "id": "A1",
           "name": "Local Vector Store",
-          "status": "rc-ready",
+          "status": "deferred",
           "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/lib/data-platform/ingest/service.ts (embedding ingestion + PGVector formatting), server/src/lib/data-platform/retrieval/service.ts (vector retrieval), server/src/memory/repositories/pageRepository.ts (pgvector storage)"
+          "evidence": "Deferred pending merge verification: default-branch history does not include cdfacf7e",
+          "blockers": ["Missing default-branch merge evidence for cdfacf7e"]
         },
         {
           "id": "A2",
           "name": "RAG Ingestion Pipeline",
-          "status": "rc-ready",
+          "status": "deferred",
           "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/lib/data-platform/rag/service.ts (RAG orchestration), server/src/lib/data-platform/ingest/service.ts (embedding ingest), server/src/maestro/graphrag-service.ts (GraphRAG assistant pipeline)"
+          "evidence": "Deferred pending merge verification: default-branch history does not include cdfacf7e",
+          "blockers": ["Missing default-branch merge evidence for cdfacf7e"]
         },
         {
           "id": "A3",
           "name": "Copilot Query Service",
-          "status": "rc-ready",
+          "status": "deferred",
           "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/services/CopilotIntegrationService.ts and server/src/services/CopilotNLQueryService.ts"
+          "evidence": "Deferred pending merge verification: default-branch history does not include cdfacf7e",
+          "blockers": ["Missing default-branch merge evidence for cdfacf7e"]
         }
       ]
     },
@@ -69,17 +72,19 @@
         {
           "id": "C1",
           "name": "Policy-as-Code Engine",
-          "status": "rc-ready",
+          "status": "deferred",
           "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/data-governance/policy/PolicyEngine.ts and server/src/middleware/opa.ts (OPA integration)",
-          "notes": "Policy re-evaluation at execute time added 2025-12-30"
+          "evidence": "Deferred pending merge verification: default-branch history does not include cdfacf7e",
+          "notes": "Policy re-evaluation at execute time added 2025-12-30",
+          "blockers": ["Missing default-branch merge evidence for cdfacf7e"]
         },
         {
           "id": "C2",
           "name": "Immutable Audit Log",
-          "status": "rc-ready",
+          "status": "deferred",
           "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/security/zero-trust/ImmutableAuditService.ts (immutable audit ledger), server/src/federal/worm-audit-chain.ts (WORM segments), server/src/provenance/ledger.ts (hash-chained provenance)"
+          "evidence": "Deferred pending merge verification: default-branch history does not include cdfacf7e",
+          "blockers": ["Missing default-branch merge evidence for cdfacf7e"]
         },
         {
           "id": "C3",
