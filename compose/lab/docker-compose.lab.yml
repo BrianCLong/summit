@@ -1,0 +1,105 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: lab-postgres
+    environment:
+      POSTGRES_DB: intelgraph_lab
+      POSTGRES_USER: intelgraph
+      POSTGRES_PASSWORD: lab-password
+    ports:
+      - '5434:5432'
+    volumes:
+      - lab_postgres_data:/var/lib/postgresql/data
+      - ./server/db/seeds/postgres/00_enable_extensions.sql:/docker-entrypoint-initdb.d/00_enable_extensions.sql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U intelgraph -d intelgraph_lab']
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  neo4j:
+    image: neo4j:5-community
+    container_name: lab-neo4j
+    ports:
+      - '7475:7474'
+      - '7688:7687'
+    volumes:
+      - lab_neo4j_data:/data
+    environment:
+      NEO4J_AUTH: neo4j/lab-password
+    healthcheck:
+      test: ['CMD', 'cypher-shell', '-u', 'neo4j', '-p', 'lab-password', 'RETURN 1']
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  redis:
+    image: redis:6.2-alpine
+    container_name: lab-redis
+    ports:
+      - '6380:6379'
+    volumes:
+      - lab_redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  gateway:
+    build:
+      context: .
+      dockerfile: apps/gateway/Dockerfile
+    container_name: lab-gateway
+    ports:
+      - '8082:8080'
+    environment:
+      LAB_PROFILE: 'lab'
+      LAB_ISOLATED: 'true'
+      FEATURE_LAC_ENFORCE: 'true'
+      COPILOT_NLQ: 'false'
+      POLICY_COMPILER_URL: 'http://policy-compiler:8080'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  conductor:
+    build:
+      context: .
+      dockerfile: services/conductor/Dockerfile
+    container_name: lab-conductor
+    environment:
+      LAB_PROFILE: 'lab'
+      LAB_ISOLATED: 'true'
+      CONDUCTOR_PORT: '8090'
+    ports:
+      - '8090:8090'
+    depends_on:
+      gateway:
+        condition: service_started
+
+  policy-compiler:
+    build: ./services/policy-compiler
+    container_name: lab-policy-compiler
+    ports:
+      - '8108:8080'
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: lab-prometheus
+    ports:
+      - '9095:9090'
+    volumes:
+      - ./compose/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+volumes:
+  lab_postgres_data:
+  lab_neo4j_data:
+  lab_redis_data:

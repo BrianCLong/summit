@@ -1,0 +1,49 @@
+{
+  "id": "COMPETITIVE_LANDSCAPE_V1",
+  "title": "Competitive Landscape Baseline",
+  "scenario": "Map a crowded market by linking competitor signals, product mentions, and partner overlaps to identify adjacency opportunities.",
+  "description": "Baseline recipe for competitive intelligence using curated news and QA datasets.",
+  "datasetReferences": ["GOLDEN/datasets/sum_news.jsonl", "GOLDEN/datasets/qa_short.jsonl"],
+  "pipelines": [
+    {
+      "id": "entity-extract",
+      "description": "Extract organization and product entities from the dataset fixtures.",
+      "query": "MATCH (d:Document) RETURN d LIMIT 25",
+      "expectedOutputs": ["organization_entities", "product_entities"]
+    },
+    {
+      "id": "competitive-graph",
+      "description": "Build relationships between competitor mentions and partner references.",
+      "query": "MATCH (o:Org)-[r:MENTIONS]->(p:Product) RETURN o, r, p LIMIT 50",
+      "expectedOutputs": ["competitor_clusters", "partner_overlap"]
+    }
+  ],
+  "evaluationMetrics": [
+    {
+      "id": "graph_coverage",
+      "description": "Percent of target entities linked into the graph.",
+      "type": "coverage",
+      "target": "0.7"
+    },
+    {
+      "id": "alert_yield",
+      "description": "Signals that meet competitive alert thresholds.",
+      "type": "alert_yield"
+    }
+  ],
+  "successCriteria": [
+    "Identify core competitors and adjacency clusters with minimal false positives.",
+    "Surface actionable partner overlap signals for analyst review."
+  ],
+  "runParameters": {
+    "profile": "lab",
+    "limits": {
+      "maxNodes": 2000,
+      "maxEdges": 4000,
+      "timeoutSeconds": 900
+    },
+    "seed": 17,
+    "notes": "Run against curated GOLDEN fixtures only."
+  },
+  "tags": ["competitive", "baseline"]
+}

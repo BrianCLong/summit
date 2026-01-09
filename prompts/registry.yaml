@@ -1,5 +1,40 @@
 version: 1
 prompts:
+  - id: summit-intelligence-lab
+    version: v1
+    path: prompts/lab/summit-intelligence-lab.md
+    sha256: 873b0d0b323d96732f085b34764152e9d39b4415ead1663d39f578f05b5c9fc4
+    description: Establish the Summit Intelligence Lab recipes, runner, and dashboard scaffolding.
+    scope:
+      paths:
+        - docs/lab/
+        - lab/recipes/
+        - scripts/lab/
+        - compose/lab/
+        - policies/lab.yml
+        - artifacts/lab/
+        - artifacts/agent-runs/
+        - agents/examples/
+        - docs/roadmap/STATUS.json
+        - Makefile
+        - .github/workflows/
+        - prompts/lab/
+        - prompts/registry.yaml
+      domains:
+        - lab
+        - experimentation
+        - documentation
+        - ops
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: agent-native-loop-n4
     version: v1
     path: prompts/governance/agent-native-loop-n4.md

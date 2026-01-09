@@ -1,0 +1,24 @@
+{
+  "recipeId": "COMPETITIVE_LANDSCAPE_V1",
+  "executedAt": "2026-01-09T22:40:00.038Z",
+  "summary": {
+    "datasetsLoaded": 2,
+    "pipelinesExecuted": 2
+  },
+  "pipelines": [
+    {
+      "id": "entity-extract",
+      "latencyMs": 100,
+      "resultCount": 48,
+      "status": "ok",
+      "query": "MATCH (d:Document) RETURN d LIMIT 25"
+    },
+    {
+      "id": "competitive-graph",
+      "latencyMs": 1722,
+      "resultCount": 116,
+      "status": "ok",
+      "query": "MATCH (o:Org)-[r:MENTIONS]->(p:Product) RETURN o, r, p LIMIT 50"
+    }
+  ]
+}

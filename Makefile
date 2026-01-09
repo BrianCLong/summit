@@ -5,6 +5,7 @@ include Makefile.merge-train
 
 .PHONY: up down restart logs shell clean
 .PHONY: dev test lint build format ci
+.PHONY: lab-up lab-down lab-smoke
 .PHONY: db-migrate db-seed sbom k6
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
 .PHONY: bootstrap
@@ -12,6 +13,7 @@ include Makefile.merge-train
 .PHONY: demo demo-down demo-check demo-seed demo-smoke
 
 COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
+LAB_COMPOSE_FILE ?= compose/lab/docker-compose.lab.yml
 DEV_ENV_FILE ?= .env
 SHELL_SERVICE ?= gateway
 VENV_DIR ?= .venv
@@ -54,6 +56,23 @@ dev-smoke: dev-prereqs ## Minimal smoke checks for local dev
 	@echo "Checking Gateway health at http://localhost:8080/health ..."
 	@curl -sSf http://localhost:8080/health > /dev/null || { echo "Gateway health endpoint not responding on port 8080."; exit 1; }
 	@echo "Dev smoke checks passed."
+
+lab-up: ## Start lab-only profile
+	@echo "Starting lab profile with $(LAB_COMPOSE_FILE)..."
+	docker compose -f $(LAB_COMPOSE_FILE) up --build -d
+	@echo "Lab endpoints:"
+	@echo "  Gateway: http://localhost:8082"
+	@echo "  Neo4j: http://localhost:7475"
+	@echo "  Prometheus: http://localhost:9095"
+
+lab-down: ## Stop lab-only profile
+	@echo "Stopping lab profile defined in $(LAB_COMPOSE_FILE)..."
+	docker compose -f $(LAB_COMPOSE_FILE) down -v
+
+lab-smoke: ## Smoke test lab profile with a sample recipe run
+	@echo "Running lab smoke checks..."
+	@node scripts/lab/run_recipe.mjs --recipe=COMPETITIVE_LANDSCAPE_V1
+	@echo "Lab smoke checks passed."
 
 restart: down up
 

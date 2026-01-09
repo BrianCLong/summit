@@ -1,0 +1,24 @@
+{
+  "recipeId": "INFLUENCE_NETWORK_DISCOVERY_V1",
+  "executedAt": "2026-01-09T22:40:02.638Z",
+  "summary": {
+    "datasetsLoaded": 2,
+    "pipelinesExecuted": 2
+  },
+  "pipelines": [
+    {
+      "id": "narrative-cluster",
+      "latencyMs": 100,
+      "resultCount": 118,
+      "status": "ok",
+      "query": "MATCH (n:Narrative)-[r:REFERS_TO]->(e:Entity) RETURN n, r, e LIMIT 40"
+    },
+    {
+      "id": "influence-score",
+      "latencyMs": 1843,
+      "resultCount": 56,
+      "status": "ok",
+      "query": "MATCH (a:Actor)-[r:AMPLIFIES]->(n:Narrative) RETURN a, r, n LIMIT 40"
+    }
+  ]
+}

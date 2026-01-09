@@ -1,0 +1,7 @@
+lab:
+  enabled: true
+  default_profile: lab
+  allow_live_connectors: false
+  max_run_duration_minutes: 30
+  default_datasets:
+    - GOLDEN/datasets/*

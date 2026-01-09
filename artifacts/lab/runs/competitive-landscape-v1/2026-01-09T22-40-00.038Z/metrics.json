@@ -1,0 +1,45 @@
+{
+  "runId": "2026-01-09T22:40:00.037Z",
+  "recipeId": "COMPETITIVE_LANDSCAPE_V1",
+  "profile": "lab",
+  "datasets": [
+    {
+      "dataset": "GOLDEN/datasets/sum_news.jsonl",
+      "bytes": 215
+    },
+    {
+      "dataset": "GOLDEN/datasets/qa_short.jsonl",
+      "bytes": 211
+    }
+  ],
+  "pipelineMetrics": [
+    {
+      "id": "entity-extract",
+      "latencyMs": 100,
+      "resultCount": 48,
+      "status": "ok",
+      "query": "MATCH (d:Document) RETURN d LIMIT 25"
+    },
+    {
+      "id": "competitive-graph",
+      "latencyMs": 1722,
+      "resultCount": 116,
+      "status": "ok",
+      "query": "MATCH (o:Org)-[r:MENTIONS]->(p:Product) RETURN o, r, p LIMIT 50"
+    }
+  ],
+  "evaluationMetrics": [
+    {
+      "id": "graph_coverage",
+      "type": "coverage",
+      "target": "0.7",
+      "value": 0.43
+    },
+    {
+      "id": "alert_yield",
+      "type": "alert_yield",
+      "target": null,
+      "value": 0.78
+    }
+  ]
+}

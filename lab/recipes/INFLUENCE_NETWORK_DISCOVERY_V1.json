@@ -1,0 +1,53 @@
+{
+  "id": "INFLUENCE_NETWORK_DISCOVERY_V1",
+  "title": "Influence Network Discovery",
+  "scenario": "Reveal coordinated influence activity by correlating narrative echoes, shared entities, and cross-platform references.",
+  "description": "Exploratory recipe for influence network discovery with lab-safe fixtures.",
+  "datasetReferences": [
+    "GOLDEN/datasets/safety_pii.jsonl",
+    "GOLDEN/datasets/copilot_summary.jsonl"
+  ],
+  "pipelines": [
+    {
+      "id": "narrative-cluster",
+      "description": "Cluster narratives by shared entities and messaging overlap.",
+      "query": "MATCH (n:Narrative)-[r:REFERS_TO]->(e:Entity) RETURN n, r, e LIMIT 40",
+      "expectedOutputs": ["narrative_clusters", "echo_scores"]
+    },
+    {
+      "id": "influence-score",
+      "description": "Score influence patterns based on cross-entity propagation signals.",
+      "query": "MATCH (a:Actor)-[r:AMPLIFIES]->(n:Narrative) RETURN a, r, n LIMIT 40",
+      "expectedOutputs": ["influence_scores", "coordination_flags"]
+    }
+  ],
+  "evaluationMetrics": [
+    {
+      "id": "precision_proxy",
+      "description": "Proxy precision based on high-confidence entity matches.",
+      "type": "precision_proxy",
+      "target": ">=0.6"
+    },
+    {
+      "id": "latency_budget",
+      "description": "Median query latency per pipeline step.",
+      "type": "latency",
+      "target": "<=1.2s"
+    }
+  ],
+  "successCriteria": [
+    "Detect coordinated narrative clusters with repeatable entity overlap.",
+    "Keep median query latency within the defined latency budget."
+  ],
+  "runParameters": {
+    "profile": "lab",
+    "limits": {
+      "maxNodes": 1500,
+      "maxEdges": 3000,
+      "timeoutSeconds": 900
+    },
+    "seed": 29,
+    "notes": "Keep lab-only; no live connectors without opt-in."
+  },
+  "tags": ["influence", "experimental"]
+}

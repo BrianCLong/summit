@@ -1,0 +1,75 @@
+name: Lab Dashboard
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 1"
+
+jobs:
+  generate-dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate lab dashboard
+        run: node scripts/lab/generate_lab_dashboard.mjs
+
+      - name: Summarize lab dashboard
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = 'artifacts/lab/runs';
+          let runCount = 0;
+          if (fs.existsSync(path)) {
+            for (const recipe of fs.readdirSync(path)) {
+              const recipePath = `${path}/${recipe}`;
+              if (fs.statSync(recipePath).isDirectory()) {
+                const runs = fs
+                  .readdirSync(recipePath)
+                  .filter((entry) => fs.statSync(`${recipePath}/${entry}`).isDirectory());
+                runCount += runs.length;
+              }
+            }
+          }
+          const dashboard = fs.readFileSync('artifacts/lab/LAB_DASHBOARD.md', 'utf8');
+          const lines = dashboard.split('\n');
+          const tableStart = lines.findIndex((line) => line.startsWith('| Recipe | Last Run'));
+          const recipes = [];
+          if (tableStart >= 0) {
+            for (let i = tableStart + 2; i < lines.length; i += 1) {
+              const line = lines[i];
+              if (!line.startsWith('|')) {
+                break;
+              }
+              const cells = line
+                .split('|')
+                .map((cell) => cell.trim())
+                .filter(Boolean);
+              if (cells.length >= 1) {
+                recipes.push(cells[0]);
+              }
+              if (recipes.length >= 3) {
+                break;
+              }
+            }
+          }
+          const summary = [
+            '### Lab Dashboard Summary',
+            `- Top recipes: ${recipes.join(', ') || 'n/a'}`,
+            `- Run count: ${runCount}`,
+            '',
+          ].join('\n');
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
+          NODE
+
+      - name: Upload dashboard
+        uses: actions/upload-artifact@v4
+        with:
+          name: lab-dashboard
+          path: artifacts/lab/LAB_DASHBOARD.md

@@ -1,0 +1,45 @@
+{
+  "runId": "2026-01-09T22:40:02.637Z",
+  "recipeId": "INFLUENCE_NETWORK_DISCOVERY_V1",
+  "profile": "lab",
+  "datasets": [
+    {
+      "dataset": "GOLDEN/datasets/safety_pii.jsonl",
+      "bytes": 246
+    },
+    {
+      "dataset": "GOLDEN/datasets/copilot_summary.jsonl",
+      "bytes": 418
+    }
+  ],
+  "pipelineMetrics": [
+    {
+      "id": "narrative-cluster",
+      "latencyMs": 100,
+      "resultCount": 118,
+      "status": "ok",
+      "query": "MATCH (n:Narrative)-[r:REFERS_TO]->(e:Entity) RETURN n, r, e LIMIT 40"
+    },
+    {
+      "id": "influence-score",
+      "latencyMs": 1843,
+      "resultCount": 56,
+      "status": "ok",
+      "query": "MATCH (a:Actor)-[r:AMPLIFIES]->(n:Narrative) RETURN a, r, n LIMIT 40"
+    }
+  ],
+  "evaluationMetrics": [
+    {
+      "id": "precision_proxy",
+      "type": "precision_proxy",
+      "target": ">=0.6",
+      "value": 0.63
+    },
+    {
+      "id": "latency_budget",
+      "type": "latency",
+      "target": "<=1.2s",
+      "value": 0.59
+    }
+  ]
+}

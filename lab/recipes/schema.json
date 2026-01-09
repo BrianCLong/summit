@@ -1,0 +1,106 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.example.com/lab/recipe.schema.json",
+  "title": "Summit Intelligence Lab Recipe",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "scenario",
+    "datasetReferences",
+    "pipelines",
+    "evaluationMetrics",
+    "runParameters",
+    "successCriteria"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Z0-9_]+$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3
+    },
+    "scenario": {
+      "type": "string",
+      "minLength": 10
+    },
+    "description": {
+      "type": "string"
+    },
+    "datasetReferences": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 3
+      }
+    },
+    "pipelines": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "description", "query"],
+        "properties": {
+          "id": { "type": "string" },
+          "description": { "type": "string" },
+          "query": { "type": "string" },
+          "expectedOutputs": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "evaluationMetrics": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "description", "type"],
+        "properties": {
+          "id": { "type": "string" },
+          "description": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["coverage", "precision_proxy", "alert_yield", "latency", "custom"]
+          },
+          "target": { "type": "string" }
+        }
+      }
+    },
+    "successCriteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "runParameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile"],
+      "properties": {
+        "profile": { "type": "string" },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "maxNodes": { "type": "integer", "minimum": 1 },
+            "maxEdges": { "type": "integer", "minimum": 1 },
+            "timeoutSeconds": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "seed": { "type": "integer" },
+        "notes": { "type": "string" }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

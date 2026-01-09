@@ -1,0 +1,48 @@
+{
+  "task_id": "SUMMIT_INTELLIGENCE_LAB_20260110",
+  "agent_id": "jules",
+  "prompt_ref": {
+    "id": "summit-intelligence-lab",
+    "version": "v1",
+    "sha256": "873b0d0b323d96732f085b34764152e9d39b4415ead1663d39f578f05b5c9fc4",
+    "path": "prompts/lab/summit-intelligence-lab.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/lab/",
+      "lab/recipes/",
+      "scripts/lab/",
+      "compose/lab/",
+      "policies/lab.yml",
+      "artifacts/lab/",
+      "artifacts/agent-runs/",
+      "agents/examples/",
+      "docs/roadmap/STATUS.json",
+      "Makefile",
+      ".github/workflows/"
+    ],
+    "domains": ["lab", "experimentation", "documentation", "ops", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "artifacts/lab/runs",
+      "artifacts/lab/LAB_DASHBOARD.md",
+      "artifacts/agent-runs/SUMMIT_INTELLIGENCE_LAB_20260110.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Lab recipes validate against schema and produce run artifacts.",
+    "Lab profile compose stack and make targets are documented.",
+    "Lab dashboard summarizes latest runs and metrics."
+  ],
+  "stop_conditions": [
+    "Lab policy disabled or non-lab profile detected.",
+    "Evidence artifacts cannot be generated."
+  ]
+}
