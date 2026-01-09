@@ -1,0 +1,21 @@
+# Summit Build & Release Size Budgets
+# Enforced by scripts/ci/check_size_budgets.ts
+
+docker:
+  image_max_mb: 800
+  layer_max_mb: 500
+
+context:
+  max_mb: 150
+  max_file_count: 10000
+  excluded_patterns:
+    - ".git"
+    - "node_modules"
+
+artifacts:
+  dist_max_mb: 100
+  evidence_max_mb: 50
+
+paths:
+  max_length: 200
+  report_top_n: 20

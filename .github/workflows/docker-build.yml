@@ -18,6 +18,8 @@ on:
       - "package.json"
       - "pnpm-lock.yaml"
       - ".github/workflows/docker-build.yml"
+      - "ci/size-budgets.yml"
+      - "scripts/ci/check_size_budgets.ts"
   schedule:
     - cron: "0 0 * * 0" # Weekly security scan
   workflow_dispatch:
@@ -40,7 +42,7 @@ jobs:
 
     strategy:
       matrix:
-        platform: [linux/amd64, linux/arm64]
+        platform: [linux/amd64] # Keeping just amd64 for CI speed, arm64 on release
 
     steps:
       - name: Checkout code
@@ -88,6 +90,25 @@ jobs:
           build-args: |
             BUILD_DATE=${{ github.event.head_commit.timestamp }}
             VCS_REF=${{ github.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: npm install -g pnpm@10.0.0 && pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Check Size Budgets
+        run: npx tsx scripts/ci/check_size_budgets.ts ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+
+      - name: Upload Size Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build-size-report
+          path: build-size-report.json
 
       - name: Run Trivy vulnerability scanner
         if: github.event_name != 'pull_request'

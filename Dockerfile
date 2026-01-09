@@ -1,39 +1,52 @@
 # Multi-stage build for IntelGraph
 FROM node:22-alpine AS base
 WORKDIR /app
-# Use pnpm for package management (version must match package.json packageManager field)
+# Use pnpm for package management (version matches local repo)
 RUN npm install -g pnpm@10.0.0
-COPY package.json pnpm-lock.yaml turbo.json .pnpmfile.cjs ./
-RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 
-FROM node:22-alpine AS build
+FROM base AS builder
 WORKDIR /app
-RUN npm install -g pnpm@10.0.0
-# Copy all source files first, then install dependencies
-# This ensures all workspace package.json files are present for proper dependency resolution
+
+# 1. Fetch dependencies (this layer is cached until pnpm-lock.yaml changes)
+COPY pnpm-lock.yaml ./
+RUN pnpm fetch
+
+# 2. Copy workspace config and source
+COPY package.json turbo.json .pnpmfile.cjs ./
 COPY . .
-RUN pnpm install --frozen-lockfile --ignore-scripts
+
+# 3. Install dependencies from virtual store (offline)
+RUN pnpm install --offline --frozen-lockfile --ignore-scripts
+
 ARG API_BASE_URL
 ENV API_BASE_URL=$API_BASE_URL
 ARG GRAPHQL_SCHEMA_URL
 ENV GRAPHQL_SCHEMA_URL=$GRAPHQL_SCHEMA_URL
+
+# Build the application
 RUN pnpm run build
 
-FROM node:22-alpine AS runtime
+FROM base AS runtime
 WORKDIR /app
-# Copy production node_modules
-COPY --from=base /app/node_modules ./node_modules
-# Copy built server
-COPY --from=build /app/server/dist ./server/dist
-COPY --from=build /app/server/package.json ./server/
-# Copy built packages (workspace dependencies)
-COPY --from=build /app/packages ./packages
-# Copy root config files
-COPY --from=build /app/package.json ./
-COPY --from=build /app/turbo.json ./
-COPY --from=build /app/pnpm-workspace.yaml ./
+
+# Create non-root user for security
+RUN addgroup --system --gid 1001 summit && \
+    adduser --system --uid 1001 --ingroup summit summit
+
+# Copy production dependencies (pruned)
+# Note: In a monorepo, pruning is complex without 'turbo prune'.
+# We will copy from builder where everything is installed.
+COPY --from=builder --chown=summit:summit /app/node_modules ./node_modules
+COPY --from=builder --chown=summit:summit /app/server/dist ./server/dist
+COPY --from=builder --chown=summit:summit /app/server/package.json ./server/
+COPY --from=builder --chown=summit:summit /app/packages ./packages
+COPY --from=builder --chown=summit:summit /app/package.json ./
+COPY --from=builder --chown=summit:summit /app/turbo.json ./
+COPY --from=builder --chown=summit:summit /app/pnpm-workspace.yaml ./
+
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3000/healthz || exit 1
-USER 1000
+
+USER summit
 CMD ["node", "server/dist/src/index.js"]

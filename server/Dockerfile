@@ -24,16 +24,24 @@ RUN apk add --no-cache \
     libjpeg-turbo-dev \
     freetype-dev
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@8 --activate
+# Install pnpm (aligned with repo version)
+RUN npm install -g pnpm@10.0.0
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json pnpm-lock.yaml ./
+# 1. Fetch dependencies (cached layer)
+COPY pnpm-lock.yaml ./
+RUN pnpm fetch
 
-# Install all dependencies (including dev for build)
-RUN pnpm install --frozen-lockfile
+# 2. Copy source
+COPY package.json .pnpmfile.cjs ./
+COPY pnpm-workspace.yaml turbo.json ./
+# Copy server package.json to ensure we can filter or install just what's needed
+COPY server/package.json ./server/package.json
+COPY . .
+
+# 3. Install dependencies from virtual store (offline)
+RUN pnpm install --offline --frozen-lockfile --ignore-scripts
 
 # -----------------------------------------------------------------------------
 # Stage 2: Builder
@@ -41,15 +49,12 @@ RUN pnpm install --frozen-lockfile
 FROM node:20-alpine AS builder
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@8 --activate
+RUN npm install -g pnpm@10.0.0
 
 WORKDIR /app
 
-# Copy dependencies from deps stage
-COPY --from=deps /app/node_modules ./node_modules
-
-# Copy source files
-COPY . .
+# Copy everything from deps (which already has source and node_modules)
+COPY --from=deps /app ./
 
 # Build arguments
 ARG VERSION=4.0.0
@@ -62,10 +67,7 @@ ENV BUILD_DATE=${BUILD_DATE}
 ENV GIT_SHA=${GIT_SHA}
 
 # Build the application
-RUN pnpm build
-
-# Prune dev dependencies
-RUN pnpm prune --prod
+RUN pnpm --filter intelgraph-server run build
 
 # -----------------------------------------------------------------------------
 # Stage 3: Production Runner
@@ -90,13 +92,14 @@ RUN addgroup --system --gid 1001 summit && \
 
 WORKDIR /app
 
-# Copy built application
-COPY --from=builder --chown=summit:summit /app/dist ./dist
+# Copy built application and deps
 COPY --from=builder --chown=summit:summit /app/node_modules ./node_modules
+COPY --from=builder --chown=summit:summit /app/server/dist ./server/dist
+COPY --from=builder --chown=summit:summit /app/server/package.json ./server/
 COPY --from=builder --chown=summit:summit /app/package.json ./
 
 # Copy runtime assets if any
-COPY --from=builder --chown=summit:summit /app/prisma ./prisma
+COPY --from=builder --chown=summit:summit /app/server/prisma ./server/prisma
 
 # Build arguments for labels
 ARG VERSION=4.0.0
@@ -133,4 +136,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
 ENTRYPOINT ["/sbin/tini", "--"]
 
 # Start the application
-CMD ["node", "dist/index.js"]
+CMD ["node", "server/dist/src/index.js"]

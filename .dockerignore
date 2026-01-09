@@ -122,6 +122,15 @@ venv/
 **/*.mp4
 **/*.avi
 **/*.mov
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.gif
+**/*.webp
+**/*.pdf
+**/*.zip
+**/*.tar.gz
+**/*.tgz
 
 # Development
 uploads/
@@ -131,3 +140,12 @@ downloads/
 sboms/
 vulnerability-reports/
 release-evidence/
+
+# Specific large directories
+.maestro/
+.orchestrator/
+.security/
+.vale/
+evidence/
+evidence-bundles/
+release-artifacts/
