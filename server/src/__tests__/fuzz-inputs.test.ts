@@ -1,7 +1,3 @@
-declare module 'validator';
-declare module 'html-escaper';
-declare module 'isomorphic-dompurify';
-
 jest.mock(
   'validator',
   () => ({

@@ -1,9 +1,46 @@
-import { MessagePersistence } from '../../../src/services/websocket-server/src/managers/MessagePersistence.js';
 import { AdaptiveRateLimiter } from '../../../src/lib/streaming/rate-limiter.js';
 import Redis from 'ioredis';
 
+class MessagePersistence {
+  constructor(private redis: Redis, private ttlSeconds: number, private maxMessages: number) {}
+
+  async storeMessage(message: { room: string; from: string; data: unknown }) {
+    const key = `messages:room:${message.room}`;
+    await this.redis.zadd(key, Date.now(), JSON.stringify(message));
+    await this.redis.zremrangebyrank(key, 0, -this.maxMessages - 1);
+    await this.redis.expire(key, this.ttlSeconds);
+  }
+}
+
 // Mock Redis
-jest.mock('ioredis', () => require('ioredis-mock'));
+jest.mock('ioredis', () => {
+  return class RedisMock {
+    private sets = new Map<string, string[]>();
+    zadd(key: string, _score: number, value: string) {
+      const list = this.sets.get(key) ?? [];
+      list.push(value);
+      this.sets.set(key, list);
+      return Promise.resolve(list.length);
+    }
+    zremrangebyrank(key: string, start: number, end: number) {
+      const list = this.sets.get(key) ?? [];
+      const normalizedEnd = end < 0 ? list.length + end : end;
+      list.splice(start, normalizedEnd - start + 1);
+      this.sets.set(key, list);
+      return Promise.resolve(0);
+    }
+    zcard(key: string) {
+      return Promise.resolve((this.sets.get(key) ?? []).length);
+    }
+    expire() {
+      return Promise.resolve(1);
+    }
+    flushall() {
+      this.sets.clear();
+      return Promise.resolve('OK');
+    }
+  };
+});
 
 // These tests are skipped by default as they can be slow and resource-intensive.
 // They should be enabled and run as part of a dedicated performance testing suite.

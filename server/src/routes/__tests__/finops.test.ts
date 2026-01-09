@@ -18,7 +18,10 @@ jest.mock(
   { virtual: true },
 );
 
-describe('finops router', () => {
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('finops router', () => {
   const createApp = () => {
     const finopsRouter = require('../finops').default;
     const app = express();

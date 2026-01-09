@@ -9,14 +9,35 @@
  */
 
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import { XAIOverlayService } from '../XAIOverlayService.js';
-import { externalVerifier } from '../ExternalVerifier.js';
 import { FeatureVector } from '../../../risk/RiskEngine.js';
 
-describe('XAI Overlay Service', () => {
-  let xaiService: XAIOverlayService;
+jest.mock('../../../federal/dual-notary.js', () => ({
+  __esModule: true,
+  dualNotary: {
+    notarizeRoot: jest.fn(async () => ({
+      rootHash: 'mock-root',
+      hsmSignature: 'mock-signature',
+      tsaResponse: 'mock-tsa',
+      notarizedBy: 'mock-notary',
+      timestamp: new Date().toISOString(),
+    })),
+    verifyNotarizedRoot: jest.fn(async () => ({ valid: true })),
+    healthCheck: jest.fn(async () => ({ status: 'ok' })),
+  },
+}));
 
-  beforeEach(() => {
+let XAIOverlayService: typeof import('../XAIOverlayService.js').XAIOverlayService;
+let externalVerifier: typeof import('../ExternalVerifier.js').externalVerifier;
+
+describe('XAI Overlay Service', () => {
+  let xaiService: any;
+
+  beforeEach(async () => {
+    if (!XAIOverlayService) {
+      ({ XAIOverlayService } = await import('../XAIOverlayService.js'));
+      ({ externalVerifier } = await import('../ExternalVerifier.js'));
+    }
+    (XAIOverlayService as any).instance = undefined;
     xaiService = XAIOverlayService.getInstance({
       enableSigning: false, // Disable for tests (no HSM available)
       enableTamperDetection: true,
@@ -101,7 +122,7 @@ describe('XAI Overlay Service', () => {
 
       // Depending on sensitivity, might not be reproducible
       const scoreDiff = reproducibilityCheck.differences.find(
-        d => d.field === 'riskScore',
+        (d: any) => d.field === 'riskScore',
       );
       expect(scoreDiff).toBeDefined();
       expect(scoreDiff!.difference).toBeGreaterThan(0);
@@ -224,8 +245,8 @@ describe('XAI Overlay Service', () => {
       const tamperResult = await xaiService.detectTampering(tamperedTrace);
 
       expect(tamperResult.isTampered).toBe(true);
-      expect(tamperResult.verificationErrors).toContain(
-        expect.stringContaining('Digest mismatch'),
+      expect(tamperResult.verificationErrors).toEqual(
+        expect.arrayContaining([expect.stringContaining('Digest mismatch')]),
       );
     });
 
@@ -291,7 +312,7 @@ describe('XAI Overlay Service', () => {
       const trace = await xaiService.computeRiskWithExplanation(features, '24h');
 
       const totalPercent = trace.saliencyExplanations.reduce(
-        (sum, exp) => sum + exp.contributionPercent,
+        (sum: number, exp: any) => sum + exp.contributionPercent,
         0,
       );
 
@@ -344,7 +365,7 @@ describe('XAI Overlay Service', () => {
       expect(trace.intermediateSteps.length).toBeGreaterThan(0);
 
       // Check for expected steps
-      const stepNames = trace.intermediateSteps.map(s => s.step);
+      const stepNames = trace.intermediateSteps.map((s: any) => s.step);
       expect(stepNames).toContain('feature_extraction');
       expect(stepNames).toContain('weighted_sum');
       expect(stepNames).toContain('sigmoid_activation');
@@ -367,13 +388,16 @@ describe('XAI Overlay Service', () => {
     });
 
     it('should respect cache size limits', async () => {
+      (XAIOverlayService as any).instance = undefined;
       const smallService = XAIOverlayService.getInstance({
-        maxCacheSize: 5,
+        maxCacheSize: 100,
         cacheExplanations: true,
+        enableSigning: false,
+        enableTamperDetection: true,
       });
 
       // Generate more traces than cache size
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 110; i++) {
         await smallService.computeRiskWithExplanation(
           { transaction_frequency: i / 10 },
           '24h',
@@ -381,7 +405,7 @@ describe('XAI Overlay Service', () => {
       }
 
       const stats = smallService.getCacheStatistics();
-      expect(stats.size).toBeLessThanOrEqual(5);
+      expect(stats.size).toBeLessThanOrEqual(100);
     });
 
     it('should clear cache on demand', async () => {
@@ -403,9 +427,13 @@ describe('XAI Overlay Service', () => {
 });
 
 describe('External Verifier', () => {
-  let xaiService: XAIOverlayService;
+  let xaiService: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    if (!XAIOverlayService) {
+      ({ XAIOverlayService } = await import('../XAIOverlayService.js'));
+      ({ externalVerifier } = await import('../ExternalVerifier.js'));
+    }
     xaiService = XAIOverlayService.getInstance({
       enableSigning: false,
       enableTamperDetection: true,

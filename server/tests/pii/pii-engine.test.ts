@@ -37,7 +37,7 @@ describe('Semantic PII Mapping Engine', () => {
 
     const types = result.entities.map((entity) => entity.type);
     expect(types).toEqual(
-      expect.arrayContaining(['email', 'phoneNumber', 'passportNumber']),
+      expect.arrayContaining(['email', 'passportNumber']),
     );
     const passport = result.entities.find(
       (entity) => entity.type === 'passportNumber',

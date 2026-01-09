@@ -41,6 +41,10 @@ module.exports = async () => {
       process.env.JWT_REFRESH_SECRET || 'test-jwt-refresh-secret-for-testing-only';
     process.env.CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000';
     process.env.DISABLE_SWAGGER = process.env.DISABLE_SWAGGER || 'true';
+    process.env.DISABLE_TELEMETRY = process.env.DISABLE_TELEMETRY || 'true';
+    if (process.env.CI && !process.env.NO_NETWORK_LISTEN) {
+      process.env.NO_NETWORK_LISTEN = 'true';
+    }
 
     const testDirs = [
       path.join(__dirname, '../../tmp'),

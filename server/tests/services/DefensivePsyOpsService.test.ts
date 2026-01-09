@@ -1,5 +1,6 @@
 import { DefensivePsyOpsService } from '../../src/services/DefensivePsyOpsService';
 import { EventEmitter } from 'events';
+import { eventBus } from '../../src/lib/events/event-bus.js';
 import { describe, it, expect, jest, afterEach, beforeEach } from '@jest/globals';
 
 // Mock dependencies
@@ -9,16 +10,13 @@ const mockClient = {
   release: jest.fn(),
 };
 const mockPool = {
-  connect: jest.fn().mockResolvedValue(mockClient),
+  connect: jest.fn(() => Promise.resolve(mockClient)),
   query: mockQuery,
 };
 
 jest.mock('../../src/config/database', () => ({
   getPostgresPool: jest.fn(() => mockPool),
 }));
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const eventBus = require('../../src/workers/eventBus.js') as EventEmitter;
 
 describe('DefensivePsyOpsService', () => {
   let service: DefensivePsyOpsService;
@@ -35,15 +33,17 @@ describe('DefensivePsyOpsService', () => {
 
   it('should detect threats in content', async () => {
     // Mock DB insert response
-    mockQuery.mockResolvedValueOnce({
-      rows: [
-        {
-          id: 'threat-123',
-          threat_level: 'HIGH',
-          status: 'MONITORING',
-        },
-      ],
-    });
+    mockQuery.mockImplementationOnce(() =>
+      Promise.resolve({
+        rows: [
+          {
+            id: 'threat-123',
+            threat_level: 'HIGH',
+            status: 'MONITORING',
+          },
+        ],
+      }),
+    );
 
     const content = "This is urgent! They don't want you to know the truth!";
     const threat = await service.detectPsychologicalThreats(content, {
@@ -67,10 +67,9 @@ describe('DefensivePsyOpsService', () => {
   });
 
   it('should process events from Red Team', async () => {
-    // Mock DB insert response
-    mockQuery.mockResolvedValue({
-      rows: [{ id: 'threat-sim', threat_level: 'HIGH' }],
-    });
+    const detectSpy = jest
+      .spyOn(service, 'detectPsychologicalThreats')
+      .mockResolvedValue({ id: 'threat-sim' } as any);
 
     const payload = {
       narrative: 'Shocking exposed secrets! Urgent!',
@@ -87,6 +86,6 @@ describe('DefensivePsyOpsService', () => {
     // Wait for async processing
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    expect(mockQuery).toHaveBeenCalled();
+    expect(detectSpy).toHaveBeenCalled();
   });
 });

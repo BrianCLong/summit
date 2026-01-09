@@ -17,7 +17,10 @@ jest.mock('../../src/middleware/correlation-id', () => ({
   }),
 }));
 
-describe('Maestro API routes', () => {
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('Maestro API routes', () => {
   const maestroRunPipeline = jest.fn();
   const queriesGetRunResponse = jest.fn();
   const queriesGetTaskWithArtifacts = jest.fn();

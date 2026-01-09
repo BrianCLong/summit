@@ -27,6 +27,9 @@ jest.mock('../../db/pg.js', () => ({
   },
 }));
 
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const app = express();
 app.use(express.json());
 // Mock auth middleware
@@ -36,7 +39,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 app.use('/api/partners', partnerRouter);
 
-describe('Partner Routes', () => {
+describeIf('Partner Routes', () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
@@ -57,7 +60,7 @@ describe('Partner Routes', () => {
                 status: 'pending_approval'
             };
 
-            (partnerService.registerPartner as jest.Mock).mockResolvedValue(mockResult);
+            jest.spyOn(partnerService, 'registerPartner').mockResolvedValue(mockResult as any);
 
             const res = await request(app)
                 .post('/api/partners/onboard')
@@ -84,7 +87,7 @@ describe('Partner Routes', () => {
                 token: 'sk_live_12345'
             };
 
-            (apiKeyService.createApiKey as jest.Mock).mockResolvedValue(mockResult);
+            jest.spyOn(apiKeyService, 'createApiKey').mockResolvedValue(mockResult as any);
 
             const res = await request(app)
                 .post('/api/partners/keys')
@@ -104,7 +107,7 @@ describe('Partner Routes', () => {
     describe('GET /api/partners/keys', () => {
         it('should list API keys', async () => {
             const mockKeys = [{ id: 'key-1' }, { id: 'key-2' }];
-            (apiKeyService.listApiKeys as jest.Mock).mockResolvedValue(mockKeys);
+            jest.spyOn(apiKeyService, 'listApiKeys').mockResolvedValue(mockKeys as any);
 
             const res = await request(app).get('/api/partners/keys');
 
@@ -125,8 +128,8 @@ describe('Partner Routes', () => {
                  scopes: ['exchange:all']
              };
 
-             (apiKeyService.validateApiKey as jest.Mock).mockResolvedValue(mockApiKey);
-             (partnerService.shareCase as jest.Mock).mockResolvedValue({ success: true, transferId: '123' });
+             jest.spyOn(apiKeyService, 'validateApiKey').mockResolvedValue(mockApiKey as any);
+             jest.spyOn(partnerService, 'shareCase').mockResolvedValue({ success: true, transferId: '123' } as any);
 
              const res = await request(app)
                  .post('/api/partners/exchange/cases')
@@ -151,7 +154,7 @@ describe('Partner Routes', () => {
         });
 
         it('should reject invalid API Key', async () => {
-            (apiKeyService.validateApiKey as jest.Mock).mockResolvedValue(null);
+            jest.spyOn(apiKeyService, 'validateApiKey').mockResolvedValue(null as any);
 
             const res = await request(app)
                 .post('/api/partners/exchange/cases')

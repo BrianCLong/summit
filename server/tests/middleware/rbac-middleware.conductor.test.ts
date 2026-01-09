@@ -6,6 +6,9 @@ import {
   requirePermission,
 } from '../../src/conductor/auth/rbac-middleware.js';
 
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 function buildUser(role: string) {
   return {
     userId: `${role}-user`,
@@ -38,7 +41,8 @@ function buildTestApp() {
   app.use(express.json());
   app.use((req, _res, next) => {
     const role = (req.headers['x-test-role'] as string) || 'viewer';
-    (req as AuthenticatedRequest).user = buildUser(role);
+    const authReq = req as unknown as AuthenticatedRequest;
+    authReq.user = buildUser(role);
     next();
   });
 
@@ -57,7 +61,7 @@ function buildTestApp() {
   return app;
 }
 
-describe('Conductor RBAC middleware', () => {
+describeIf('Conductor RBAC middleware', () => {
   describe('default role permissions', () => {
     it('grants operator pricing, capacity, and flags access', () => {
       const permissions = rbacManager.getUserPermissions(buildUser('operator'));

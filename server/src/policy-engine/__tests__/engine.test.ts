@@ -1,14 +1,13 @@
-import { test } from 'node:test';
-import assert from 'node:assert';
+import { describe, it, expect } from '@jest/globals';
 import { ProposalEngine, DenyRateRule, BurstRule } from '../engine.js';
 import { SecurityEvidence } from '../proposal-types.js';
 
-test('Policy Auto-Tuning Engine', async (t) => {
+describe('Policy Auto-Tuning Engine', () => {
   const engine = new ProposalEngine();
   engine.registerRule(new DenyRateRule());
   engine.registerRule(new BurstRule());
 
-  await t.test('DenyRateRule generates proposal for high denials', () => {
+  it('DenyRateRule generates proposal for high denials', () => {
     const evidence: SecurityEvidence = {
       id: 'ev-1',
       type: 'deny_spike',
@@ -24,13 +23,17 @@ test('Policy Auto-Tuning Engine', async (t) => {
     };
 
     const proposal = engine.generateProposal(evidence);
-    assert.ok(proposal, 'Should generate a proposal');
-    assert.strictEqual(proposal?.rationale, 'High volume of denials (100) detected for service-a. Proposing explicit block to mitigate potential attack.');
-    assert.strictEqual(proposal?.proposedChanges[0].target, 'policy/governance-config.yaml');
-    assert.strictEqual(proposal?.proposedChanges[0].operation, 'add');
+    expect(proposal).toBeTruthy();
+    expect(proposal?.rationale).toBe(
+      'High volume of denials (100) detected for service-a. Proposing explicit block to mitigate potential attack.',
+    );
+    expect(proposal?.proposedChanges[0].target).toBe(
+      'policy/governance-config.yaml',
+    );
+    expect(proposal?.proposedChanges[0].operation).toBe('add');
   });
 
-  await t.test('BurstRule generates proposal for high RPS', () => {
+  it('BurstRule generates proposal for high RPS', () => {
     const evidence: SecurityEvidence = {
       id: 'ev-2',
       type: 'burst_behavior',
@@ -44,12 +47,16 @@ test('Policy Auto-Tuning Engine', async (t) => {
     };
 
     const proposal = engine.generateProposal(evidence);
-    assert.ok(proposal, 'Should generate a proposal');
-    assert.strictEqual(proposal?.rationale, 'Tenant tenant-x exceeded burst thresholds (150 RPS). Proposing specific quota limit.');
-    assert.strictEqual(proposal?.proposedChanges[0].target, 'policy/governance-config.yaml');
+    expect(proposal).toBeTruthy();
+    expect(proposal?.rationale).toBe(
+      'Tenant tenant-x exceeded burst thresholds (150 RPS). Proposing specific quota limit.',
+    );
+    expect(proposal?.proposedChanges[0].target).toBe(
+      'policy/governance-config.yaml',
+    );
   });
 
-  await t.test('Engine is deterministic', () => {
+  it('Engine is deterministic', () => {
      const evidence: SecurityEvidence = {
       id: 'ev-fixed',
       type: 'deny_spike',
@@ -67,6 +74,6 @@ test('Policy Auto-Tuning Engine', async (t) => {
     const p1 = engine.generateProposal(evidence);
     const p2 = engine.generateProposal(evidence);
 
-    assert.strictEqual(p1?.id, p2?.id, 'IDs should be identical for identical inputs');
+    expect(p1?.id).toBe(p2?.id);
   });
 });

@@ -15,10 +15,11 @@ jest.mock('../../utils/logger', () => ({
 
 jest.mock('../../workers/eventBus', () => {
   const EventEmitter = require('events');
-  return new EventEmitter();
+  const eventBus = new EventEmitter();
+  return { __esModule: true, default: eventBus };
 });
 
-const eventBus = require('../../workers/eventBus');
+const eventBus = require('../../workers/eventBus').default;
 
 // Mock SimulationEngineService as a class that extends EventEmitter
 class MockSimulationEngineService extends EventEmitter {
