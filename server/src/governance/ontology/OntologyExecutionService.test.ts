@@ -1,6 +1,6 @@
 
-import { test, describe, it, beforeEach } from 'node:test';
-import assert from 'node:assert';
+import { describe, it, beforeEach } from '@jest/globals';
+import assert from 'node:assert/strict';
 import { OntologyExecutionService } from './OntologyExecutionService.js';
 import { SchemaVersion, OntologyAssertion } from './models.js';
 

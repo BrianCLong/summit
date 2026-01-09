@@ -1,8 +1,5 @@
 // Standalone test for depth limit validation
-// Uses Node.js built-in test runner instead of Jest
-
-const test = require('node:test');
-const assert = require('node:assert');
+// Uses Jest to align with CI runner
 
 // Mock the GraphQL validation system since we can't import ES modules easily
 const mockDepthLimit = (maxDepth = 10) => {
@@ -59,9 +56,9 @@ test('depth limit validation logic', () => {
   // Level 4 - should trigger error
   visitor.SelectionSet.enter();
 
-  assert.strictEqual(errors.length, 1);
-  assert.ok(errors[0].message.includes('Query is too deep'));
-  assert.ok(errors[0].message.includes('depth 4 > 3'));
+  expect(errors).toHaveLength(1);
+  expect(errors[0].message).toContain('Query is too deep');
+  expect(errors[0].message).toContain('depth 4 > 3');
 });
 
 test('depth limit allows queries within limit', () => {
@@ -81,7 +78,5 @@ test('depth limit allows queries within limit', () => {
   visitor.SelectionSet.leave();
   visitor.SelectionSet.leave();
 
-  assert.strictEqual(errors.length, 0);
+  expect(errors).toHaveLength(0);
 });
-
-console.log('✅ Depth limit validation tests passed');

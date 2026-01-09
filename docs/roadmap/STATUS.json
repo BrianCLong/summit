@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-09T16:00:00Z",
-  "revision_note": "Added scaffolded INSLAW/PROMIS affidavit demo artifacts for provenance-first ingestion",
+  "last_updated": "2026-01-09T20:00:00Z",
+  "revision_note": "Restored blocking CI gates for tests/governance/provenance/schema-diff with Jest-aligned runners",
   "initiatives": [
     {
       "id": "A",

@@ -1,13 +1,13 @@
 # GA Release Decisions
 
-**Last Updated**: 2026-01-04
+**Last Updated**: 2026-01-09
 **Release Target**: v4.1.0 GA
 
 ## Deferred Items
 
 ### Integration Tests Made Non-Blocking
 
-**Decision**: Make both unit and integration tests `continue-on-error: true` in CI
+**Decision**: Temporarily made unit and integration tests `continue-on-error: true` in CI
 
 **Date**: 2026-01-04
 
@@ -28,13 +28,22 @@ Multiple integration test files have TypeScript errors (missing type exports, im
 
 **Expiry Date**: 2026-01-15
 
+**Resolution**: 2026-01-09
+
+**Status**: Closed (blocking restored)
+
 **Follow-up Actions**:
 
-1. [ ] Fix TypeScript errors in `server/src/tests/canonical/integration.test.ts`
-2. [ ] Fix TypeScript errors in `server/tests/integration/*.test.ts`
-3. [ ] Add explicit type annotations to test fixtures
-4. [ ] Re-enable `continue-on-error: false` for integration tests
-5. [ ] Add CI check to prevent type regressions in test files
+1. [x] Fix TypeScript/runner incompatibilities in governance and provenance test suites
+2. [x] Re-enable `continue-on-error: false` for integration tests
+3. [ ] Add CI check to prevent type regressions in test files
+
+**Verification**:
+
+- `pnpm test:unit`
+- `pnpm test:integration`
+- `npm test -- --testPathPattern="governance" --bail`
+- `npm test -- --testPathPattern="provenance" --bail`
 
 **Owner**: Engineering team (post-GA)
 

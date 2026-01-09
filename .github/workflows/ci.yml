@@ -73,10 +73,6 @@ jobs:
     name: Test (${{ matrix.test-suite }})
     needs: [lint, verify]
     runs-on: ubuntu-latest
-    # Both unit and integration tests are non-blocking until TypeScript/ESM issues are resolved
-    # EXPIRY: 2026-01-15 - Must fix underlying TypeScript errors in test files
-    # TICKET: See docs/release/GA_DECISIONS.md for follow-up plan
-    continue-on-error: true
     strategy:
       matrix:
         test-suite: [unit, integration]
@@ -146,8 +142,6 @@ jobs:
     name: Governance
     needs: test
     runs-on: ubuntu-latest
-    # Non-blocking until ESM test infrastructure is resolved
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -165,8 +159,6 @@ jobs:
     name: Provenance
     needs: test
     runs-on: ubuntu-latest
-    # Non-blocking until ESM test infrastructure is resolved
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -181,8 +173,6 @@ jobs:
     name: Schema Diff
     needs: test
     runs-on: ubuntu-latest
-    # Non-blocking until graphql-inspector loader issues are resolved
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
         with:

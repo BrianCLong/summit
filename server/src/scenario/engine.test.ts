@@ -1,5 +1,5 @@
-import { describe, it } from 'node:test';
-import assert from 'node:assert';
+import { describe, it } from '@jest/globals';
+import assert from 'node:assert/strict';
 import { ScenarioEngine } from './engine';
 import { ScenarioDefinition, SimulationState } from './types';
 

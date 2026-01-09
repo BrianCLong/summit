@@ -1,13 +1,7 @@
-import {
-  test as nodeTest,
-  describe as nodeDescribe,
-  beforeEach as nodeBeforeEach,
-} from 'node:test';
-import assert from 'node:assert';
-import { describe as jestDescribe, it as jestIt, expect as jestExpect } from '@jest/globals';
+import { beforeEach, describe, expect, it } from '@jest/globals';
 import { MarketplaceService } from '../../src/marketplace/service';
 import { runPlugin } from '../../src/plugins/index';
-import { PluginStatus, PluginPackage, PluginManifest } from '../../src/plugins/types';
+import { PluginPackage, PluginManifest } from '../../src/plugins/types';
 import { TrustTier } from '../../src/marketplace/types';
 import { randomUUID } from 'crypto';
 
@@ -33,21 +27,15 @@ const dependencies = {
   tracer: mockTracer,
 };
 
-const isJest = Boolean(process.env.JEST_WORKER_ID);
-
-if (isJest) {
-  jestDescribe('Plugin Sandbox & Marketplace Isolation (Node Test)', () => {
-    jestIt('skipped under jest', () => {
-      jestExpect(true).toBe(true);
-    });
-  });
-} else {
-  nodeDescribe('Plugin Sandbox & Marketplace Isolation (Node Test)', () => {
+describe('Plugin Sandbox & Marketplace Isolation', () => {
   const marketplace = MarketplaceService.getInstance();
   const testPluginId = 'test-plugin-' + randomUUID();
 
   // Helper to create a package
-  const createPackage = (code: string, capabilities: any[] = []): PluginPackage => ({
+  const createPackage = (
+    code: string,
+    capabilities: PluginManifest['capabilities'] = [],
+  ): PluginPackage => ({
     manifest: {
       id: testPluginId,
       version: '1.0.0',
@@ -62,12 +50,12 @@ if (isJest) {
     signature: 'valid-sig' // mocked
   });
 
-  nodeBeforeEach(() => {
+  beforeEach(() => {
     // Reset kill switch
     marketplace.disableKillSwitch('test-setup');
   });
 
-  nodeTest('Should execute valid plugin with no side effects', async () => {
+  it('should execute valid plugin with no side effects', async () => {
     const pkg = createPackage(`return inputs.x + 1;`);
 
     await marketplace.submitPlugin(pkg, 'tester');
@@ -75,10 +63,10 @@ if (isJest) {
     await marketplace.approvePlugin(testPluginId, 'approver');
 
     const result = await runPlugin(testPluginId, { x: 1 }, { dependencies });
-    assert.strictEqual(result, 2);
+    expect(result).toBe(2);
   });
 
-  nodeTest('Should fail if plugin attempts network access without capability', async () => {
+  it('should fail if plugin attempts network access without capability', async () => {
     const pkg = createPackage(`return await fetch('https://google.com');`);
 
     const id = 'network-fail-' + randomUUID();
@@ -88,13 +76,12 @@ if (isJest) {
     await marketplace.reviewPlugin(id, 'reviewer', 'APPROVE_FOR_TESTING');
     await marketplace.approvePlugin(id, 'approver');
 
-    await assert.rejects(
-        async () => await runPlugin(id, {}, { dependencies }),
-        { message: "Capability 'network.outbound' missing" }
+    await expect(runPlugin(id, {}, { dependencies })).rejects.toThrow(
+      "Capability 'network.outbound' missing",
     );
   });
 
-  nodeTest('Should allow network access with capability', async () => {
+  it('should allow network access with capability', async () => {
     // Mock global fetch
     const originalFetch = global.fetch;
     global.fetch = async () => 'ok' as any;
@@ -107,13 +94,15 @@ if (isJest) {
     await marketplace.reviewPlugin(id, 'reviewer', 'APPROVE_FOR_TESTING');
     await marketplace.approvePlugin(id, 'approver');
 
-    const result = await runPlugin(id, {}, { dependencies });
-    assert.strictEqual(result, 'ok');
-
-    global.fetch = originalFetch;
+    try {
+      const result = await runPlugin(id, {}, { dependencies });
+      expect(result).toBe('ok');
+    } finally {
+      global.fetch = originalFetch;
+    }
   });
 
-  nodeTest('Should fail if plugin attempts to access process.env', async () => {
+  it('should fail if plugin attempts to access process.env', async () => {
     const pkg = createPackage(`return process.env.SECRET;`);
     const id = 'env-fail-' + randomUUID();
     pkg.manifest.id = id;
@@ -122,13 +111,12 @@ if (isJest) {
     await marketplace.reviewPlugin(id, 'reviewer', 'APPROVE_FOR_TESTING');
     await marketplace.approvePlugin(id, 'approver');
 
-    await assert.rejects(
-        async () => await runPlugin(id, {}, { dependencies }),
-        /process is not defined/
+    await expect(runPlugin(id, {}, { dependencies })).rejects.toThrow(
+      /process is not defined/,
     );
   });
 
-  nodeTest('Should fail if execution times out', async () => {
+  it('should fail if execution times out', async () => {
     const pkg = createPackage(`while(true) {}`);
     const id = 'timeout-fail-' + randomUUID();
     pkg.manifest.id = id;
@@ -137,13 +125,12 @@ if (isJest) {
     await marketplace.reviewPlugin(id, 'reviewer', 'APPROVE_FOR_TESTING');
     await marketplace.approvePlugin(id, 'approver');
 
-    await assert.rejects(
-        async () => await runPlugin(id, {}, { dependencies }),
-        /timed out/
+    await expect(runPlugin(id, {}, { dependencies })).rejects.toThrow(
+      /timed out/,
     );
   });
 
-  nodeTest('Should not run if not approved', async () => {
+  it('should not run if not approved', async () => {
     const pkg = createPackage(`return 1;`);
     const id = 'unapproved-' + randomUUID();
     pkg.manifest.id = id;
@@ -151,13 +138,12 @@ if (isJest) {
     await marketplace.submitPlugin(pkg, 'tester');
     // Only submitted, not approved
 
-    await assert.rejects(
-        async () => await runPlugin(id, {}, { dependencies }),
-        /not approved/
+    await expect(runPlugin(id, {}, { dependencies })).rejects.toThrow(
+      /not approved/,
     );
   });
 
-  nodeTest('Should not run any plugin if global kill switch is active', async () => {
+  it('should not run any plugin if global kill switch is active', async () => {
     // Create package with unique ID for kill switch test
     const id = 'kill-switch-test-' + randomUUID();
     const pkg = createPackage(`return inputs.x + 1;`); // Corrected code to match expectation
@@ -170,15 +156,13 @@ if (isJest) {
     // Activate Kill Switch
     marketplace.enableKillSwitch('Test Emergency', 'admin');
 
-    await assert.rejects(
-        async () => await runPlugin(id, { x: 1 }, { dependencies }),
-        /Global Kill Switch/
+    await expect(runPlugin(id, { x: 1 }, { dependencies })).rejects.toThrow(
+      /Global Kill Switch/,
     );
 
     // Deactivate
     marketplace.disableKillSwitch('admin');
     const result = await runPlugin(id, { x: 1 }, { dependencies });
-    assert.strictEqual(result, 2);
+    expect(result).toBe(2);
   });
-  });
-}
+});

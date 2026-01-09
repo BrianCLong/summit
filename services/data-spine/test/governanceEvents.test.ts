@@ -1,6 +1,7 @@
-const test = require('node:test');
-const assert = require('node:assert');
-const { GovernanceEventEmitter, EVENT_TYPES, createEnvelope } = require('../src/governanceEvents');
+import assert from 'node:assert/strict';
+import governanceEvents from '../src/governanceEvents.js';
+
+const { GovernanceEventEmitter, EVENT_TYPES, createEnvelope } = governanceEvents;
 
 test('createEnvelope creates valid event envelope', () => {
   const envelope = createEnvelope(
