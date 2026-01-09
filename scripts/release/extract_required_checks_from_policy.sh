@@ -88,7 +88,14 @@ if command -v yq &> /dev/null; then
     POLICY_VERSION=$(yq -r '.version // "unknown"' "$POLICY_FILE")
 
     # Extract check names as JSON array
-    CHECKS=$(yq -r '[.always_required[].name]' "$POLICY_FILE" 2>/dev/null || echo "[]")
+    # Note: yq v4 (mikefarah) outputs YAML by default; -o=json ensures valid JSON for jq
+    CHECKS=$(yq -o=json '[.always_required[].name]' "$POLICY_FILE" 2>/dev/null || echo "[]")
+
+    # Validate CHECKS is valid JSON before proceeding
+    if ! echo "$CHECKS" | jq empty 2>/dev/null; then
+        log "yq output was not valid JSON, falling back to empty array"
+        CHECKS="[]"
+    fi
 else
     log "yq not found, using fallback parsing"
 
