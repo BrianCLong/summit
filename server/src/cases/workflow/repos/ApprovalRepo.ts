@@ -315,7 +315,7 @@ export class ApprovalRepo {
 
   // ==================== MAPPERS ====================
 
-  private mapApprovalRow(row): CaseApproval {
+  private mapApprovalRow(row: any): CaseApproval {
     return {
       id: row.id,
       caseId: row.case_id,
@@ -333,7 +333,7 @@ export class ApprovalRepo {
     };
   }
 
-  private mapVoteRow(row): CaseApprovalVote {
+  private mapVoteRow(row: any): CaseApprovalVote {
     return {
       id: row.id,
       approvalId: row.approval_id,
