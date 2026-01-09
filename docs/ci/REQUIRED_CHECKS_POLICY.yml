@@ -4,7 +4,7 @@
 # Both RC and GA pipelines derive required checks from this file.
 #
 # Authority: Platform Engineering
-# Last Updated: 2026-01-08
+# Last Updated: 2026-01-09
 # Version: 2.0.0
 #
 # How to add/remove checks safely:
@@ -18,7 +18,7 @@
 
 version: "2.0.0"
 description: "Canonical policy for release gate requirements"
-last_updated: "2026-01-08"
+last_updated: "2026-01-09"
 owner: "Platform Engineering"
 
 # Always Required Checks
@@ -33,6 +33,10 @@ always_required:
   - name: "GA Gate"
     workflow: "ga-gate.yml"
     rationale: "Official GA verification entrypoint with make ga"
+
+  - name: "ga / gate"
+    workflow: "ga-gate.yml"
+    rationale: "Composite GA gate status required for branch protection enforcement"
 
   - name: "Unit Tests & Coverage"
     workflow: "unit-test-coverage.yml"

@@ -1,0 +1,37 @@
+{
+  "task_id": "GA_GATE_BRANCH_PROTECTION_20260109",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "ci-ga-gate-branch-protection",
+    "version": "v1",
+    "sha256": "b83df2dabc83bb19549b429f9fe587d03d42d6cdeff70adb6eb77cbfdcd9cefb",
+    "path": "prompts/ci/ga-gate-branch-protection.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ci/REQUIRED_CHECKS_POLICY.yml",
+      "docs/ci/REQUIRED_CHECKS_POLICY.json",
+      ".github/protection-rules.yml",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/GA_GATE_BRANCH_PROTECTION_20260109.json",
+      "prompts/ci/ga-gate-branch-protection.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["governance", "ci", "release"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "A",
+    "artifacts": ["artifacts/release-train/branch_protection_drift_report.json"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Required checks policy includes ga / gate composite check",
+    "Branch protection rules include ga / gate in required status checks",
+    "Branch protection drift script executed to validate alignment"
+  ],
+  "stop_conditions": ["PII detected in output", "Sandbox violation alert", "CI failure on main"]
+}

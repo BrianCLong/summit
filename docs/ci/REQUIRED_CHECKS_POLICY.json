@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": "1.0.0",
   "description": "Canonical policy for MVP-4 Stabilization release gate requirements",
-  "last_updated": "2026-01-07",
+  "last_updated": "2026-01-09",
   "owner": "Platform Engineering",
 
   "always_required": [
@@ -15,6 +15,11 @@
       "name": "GA Gate",
       "workflow": "ga-gate.yml",
       "rationale": "Official GA verification entrypoint with make ga"
+    },
+    {
+      "name": "ga / gate",
+      "workflow": "ga-gate.yml",
+      "rationale": "Composite GA gate status required for branch protection enforcement"
     },
     {
       "name": "Unit Tests & Coverage",

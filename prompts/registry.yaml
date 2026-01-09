@@ -79,3 +79,29 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ci-ga-gate-branch-protection
+    version: v1
+    path: prompts/ci/ga-gate-branch-protection.md
+    sha256: b83df2dabc83bb19549b429f9fe587d03d42d6cdeff70adb6eb77cbfdcd9cefb
+    description: Align required checks policy and branch protection rules with GA composite gate requirements.
+    scope:
+      paths:
+        - docs/ci/
+        - .github/protection-rules.yml
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/ci/ga-gate-branch-protection.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - ci
+        - release
+    verification:
+      tiers_required:
+        - A
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-09T16:00:00Z",
-  "revision_note": "Added scaffolded INSLAW/PROMIS affidavit demo artifacts for provenance-first ingestion",
+  "last_updated": "2026-01-09T23:14:05Z",
+  "revision_note": "Aligned branch protection policy with ga / gate composite check requirement",
   "initiatives": [
     {
       "id": "A",
