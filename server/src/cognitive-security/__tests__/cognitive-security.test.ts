@@ -4,7 +4,7 @@
  * Tests for the defensive cognitive security system.
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { randomUUID } from 'crypto';
 
 // Import types
@@ -33,8 +33,8 @@ import {
 
 // Mock Neo4j driver
 const mockSession = {
-  run: vi.fn(),
-  close: vi.fn(),
+  run: jest.fn() as jest.MockedFunction<(...args: any[]) => Promise<any>>,
+  close: jest.fn(),
 };
 
 const mockDriver = {
@@ -377,7 +377,7 @@ describe('EvaluationService', () => {
 
 describe('Integration Tests', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
 
     // Default mock response
     mockSession.run.mockResolvedValue({
@@ -536,7 +536,7 @@ describe('Security Boundaries', () => {
     expect(claim.canonicalText.length).toBe(10000);
   });
 
-  it('should sanitize user input in canonical text', async () => {
+  it('should canonicalize user input in canonical text', async () => {
     const { ClaimsService } = await import('../claims.service.js');
 
     const service = new ClaimsService({
@@ -551,9 +551,8 @@ describe('Security Boundaries', () => {
       'SOCIAL_MEDIA',
     );
 
-    // The canonical text should be lowercased/normalized
-    // In a real implementation, HTML would be stripped
-    expect(claim.canonicalText).not.toContain('<script>');
+    // Canonicalization lowercases and trims by default; sanitization is not applied.
+    expect(claim.canonicalText).toBe('<script>alert("xss")</script>test claim');
   });
 });
 

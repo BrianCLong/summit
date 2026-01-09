@@ -59,6 +59,7 @@
     "typecheck:server": "cd server && tsc --noEmit",
     "typecheck:client": "cd client && tsc --noEmit",
     "format": "prettier -w . && ruff format",
+    "format:check": "prettier --check AGENTS.md CONTRIBUTING.md docs/roadmap/STATUS.json .github/workflows/ci.yml package.json",
     "pr:triage": "npx tsx scripts/triage/pr-triage.ts",
     "ci:cluster": "npx tsx scripts/triage/ci-signature-cluster.ts",
     "pr:risk": "node scripts/pr-risk-score.js",
@@ -107,6 +108,7 @@
     "ga:verify": "pnpm typecheck && pnpm lint && pnpm build && pnpm --filter intelgraph-server test:unit && pnpm ga:smoke",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
     "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
+    "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
     "prepare": "husky"
   },
   "keywords": [

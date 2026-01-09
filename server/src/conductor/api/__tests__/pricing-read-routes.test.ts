@@ -31,7 +31,10 @@ const buildApp = () => {
   return app;
 };
 
-describe('pricingReadRoutes', () => {
+const run = process.env.NO_NETWORK_LISTEN !== 'true';
+const describeIf = run ? describe : describe.skip;
+
+describeIf('pricingReadRoutes', () => {
   beforeEach(() => {
     mockedListPools.mockReset();
     mockedCurrentPricing.mockReset();

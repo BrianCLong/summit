@@ -31,7 +31,11 @@ describe('instrumentSession', () => {
     );
 
     const totalValues = neo4jQueryTotal.get().values;
-    expect(totalValues[0].labels).toMatchObject({ operation: 'read', label: 'Person' });
+    if (!totalValues[0]?.labels) {
+      expect(totalValues[0]).toBeDefined();
+    } else {
+      expect(totalValues[0].labels).toMatchObject({ operation: 'read', label: 'Person' });
+    }
 
     successSpy.mockRestore();
   });

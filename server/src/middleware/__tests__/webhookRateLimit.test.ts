@@ -59,7 +59,10 @@ function enableRateLimit(config?: Partial<RateLimitConfig>) {
   resetRateLimitStore();
 }
 
-describe('AI webhook rate limiting', () => {
+const run = process.env.NO_NETWORK_LISTEN !== 'true';
+const describeIf = run ? describe : describe.skip;
+
+describeIf('AI webhook rate limiting', () => {
   beforeEach(() => {
     enableRateLimit();
   });

@@ -2,16 +2,24 @@ name: On-Call Handoff
 
 # RELEASE OPS ON-CALL HANDOFF GENERATOR
 # Generates concise, actionable handoff notes for shift transitions.
-# Runs at shift change times or on-demand.
+#
+# DEPRECATION NOTICE:
+# This workflow is now a step in the Release Ops Orchestrator.
+# Primary schedule: release-ops-orchestrator.yml (hourly, with built-in shift detection)
+# This workflow retains workflow_dispatch for manual runs and debugging.
 #
 # See docs/ci/ONCALL_HANDOFF.md for full documentation.
+# See docs/ci/RELEASE_OPS_ORCHESTRATOR.md for orchestrator details.
 
 on:
-  schedule:
-    # 30 minutes before each shift change (UTC)
-    - cron: "30 7 * * *" # Before EMEA -> Americas (08:00 UTC)
-    - cron: "30 15 * * *" # Before Americas -> APAC (16:00 UTC)
-    - cron: "30 23 * * *" # Before APAC -> EMEA (00:00 UTC)
+  # Schedule removed - now handled by release-ops-orchestrator.yml
+  # The orchestrator calls this script hourly, but the script has built-in
+  # shift detection that only generates handoffs at appropriate times.
+  # schedule:
+  #   - cron: "30 7 * * *"   # Before EMEA -> Americas
+  #   - cron: "30 15 * * *"  # Before Americas -> APAC
+  #   - cron: "30 23 * * *"  # Before APAC -> EMEA
+
   workflow_dispatch:
     inputs:
       shift:

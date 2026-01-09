@@ -1,0 +1,217 @@
+name: Publish Release Ops Internal
+
+# Produces a FULL (non-redacted) Release Ops package for maintainers.
+# This is NOT published to Pages - only available as a workflow artifact.
+#
+# Use this when you need the complete blocker details, issue bodies,
+# and internal links that are redacted from the public Pages site.
+#
+# Authority: docs/ci/RELEASE_OPS_REDACTION.md
+
+on:
+  # Manual trigger only - this produces sensitive content
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Orchestrator run ID to build from (leave empty for latest)"
+        type: string
+        required: false
+      include_state:
+        description: "Include state files in package (for debugging)"
+        type: boolean
+        default: false
+
+# Only one internal build at a time
+concurrency:
+  group: release-ops-internal
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build-internal:
+    name: Build Internal Package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Find Orchestrator Run
+        id: find-run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [[ -n "${{ inputs.run_id }}" ]]; then
+            echo "run_id=${{ inputs.run_id }}" >> $GITHUB_OUTPUT
+            echo "Using provided run ID: ${{ inputs.run_id }}"
+          else
+            # Find latest successful orchestrator run
+            LATEST_RUN=$(gh run list \
+              --workflow=release-ops-orchestrator.yml \
+              --status=success \
+              --limit=1 \
+              --json databaseId \
+              -q '.[0].databaseId' \
+              --repo ${{ github.repository }})
+
+            if [[ -z "${LATEST_RUN}" ]]; then
+              echo "::error::No successful orchestrator run found"
+              exit 1
+            fi
+
+            echo "run_id=${LATEST_RUN}" >> $GITHUB_OUTPUT
+            echo "Found latest run: ${LATEST_RUN}"
+          fi
+
+      - name: Download Orchestrator Artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RUN_ID="${{ steps.find-run.outputs.run_id }}"
+          ARTIFACT_NAME="release-ops-cycle-${RUN_ID}"
+
+          mkdir -p artifacts/release-train
+          gh run download "${RUN_ID}" \
+            --name "${ARTIFACT_NAME}" \
+            --dir artifacts/release-train \
+            --repo ${{ github.repository }} || {
+              echo "::error::Failed to download artifact ${ARTIFACT_NAME}"
+              exit 1
+            }
+
+          echo "Downloaded artifacts:"
+          ls -la artifacts/release-train/
+
+      - name: Make Scripts Executable
+        run: chmod +x scripts/release/*.sh
+
+      - name: Build Full Internal Package
+        run: |
+          mkdir -p internal-package
+
+          echo "=== Building FULL (non-redacted) internal package ==="
+
+          # Copy all markdown files without redaction
+          for file in artifacts/release-train/*.md; do
+            [[ -f "${file}" ]] || continue
+            cp "${file}" internal-package/
+            echo "Copied: $(basename "${file}")"
+          done
+
+          # Copy full dashboard.json (not just summary)
+          if [[ -f "artifacts/release-train/dashboard.json" ]]; then
+            cp artifacts/release-train/dashboard.json internal-package/
+            echo "Copied: dashboard.json (full)"
+          fi
+
+          # Copy full blocked issues report
+          if [[ -f "artifacts/release-train/blocked_issues_report.md" ]]; then
+            cp artifacts/release-train/blocked_issues_report.md internal-package/
+            echo "Copied: blocked_issues_report.md"
+          fi
+
+          # Copy routing and escalation reports
+          for report in routing_report.md escalation_report.md; do
+            if [[ -f "artifacts/release-train/${report}" ]]; then
+              cp "artifacts/release-train/${report}" internal-package/
+              echo "Copied: ${report}"
+            fi
+          done
+
+          # Generate full HTML from full markdown (not redacted)
+          if [[ -f "internal-package/release_ops_single_page.md" ]]; then
+            if [[ -x "scripts/release/render_release_ops_single_page_html.sh" ]]; then
+              scripts/release/render_release_ops_single_page_html.sh \
+                internal-package/release_ops_single_page.md \
+                internal-package/release_ops_single_page_full.html || {
+                  echo "::warning::HTML rendering failed"
+                }
+            fi
+          fi
+
+          # Optionally include state files
+          if [[ "${{ inputs.include_state }}" == "true" ]]; then
+            echo ""
+            echo "Including state files (debug mode)..."
+            mkdir -p internal-package/state
+
+            for state_file in artifacts/release-train/*_state.json; do
+              [[ -f "${state_file}" ]] || continue
+              cp "${state_file}" internal-package/state/
+              echo "Copied state: $(basename "${state_file}")"
+            done
+
+            if [[ -d "artifacts/release-train/state-snapshot" ]]; then
+              cp -r artifacts/release-train/state-snapshot internal-package/
+              echo "Copied: state-snapshot/"
+            fi
+          fi
+
+          # Create package manifest
+          cat > internal-package/MANIFEST.md <<EOF
+          # Release Ops Internal Package
+
+          **Type:** Full (non-redacted)
+          **Source Run:** ${{ steps.find-run.outputs.run_id }}
+          **Generated:** $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          **Include State:** ${{ inputs.include_state }}
+
+          ## Contents
+
+          This package contains the FULL Release Ops output including:
+          - Complete blocker details with issue bodies
+          - All internal links and references
+          - Full dashboard with check failure messages
+          - Escalation and routing reports
+
+          **WARNING:** This content may contain sensitive information.
+          Do not share outside the maintainer team.
+
+          ## Files
+
+          $(ls -la internal-package/)
+          EOF
+
+          echo ""
+          echo "=== Internal Package Contents ==="
+          ls -la internal-package/
+
+      - name: Upload Internal Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-ops-internal-${{ steps.find-run.outputs.run_id }}
+          path: internal-package/
+          retention-days: 30
+
+      - name: Upload as Latest
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-ops-internal-latest
+          path: internal-package/
+          retention-days: 7
+
+      - name: Summary
+        run: |
+          echo "## Release Ops Internal Package" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Source Run:** ${{ steps.find-run.outputs.run_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Include State:** ${{ inputs.include_state }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- \`release-ops-internal-${{ steps.find-run.outputs.run_id }}\` (30 day retention)" >> $GITHUB_STEP_SUMMARY
+          echo "- \`release-ops-internal-latest\` (7 day retention)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Contents" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -la internal-package/ >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** This package contains non-redacted content. Do not share externally." >> $GITHUB_STEP_SUMMARY

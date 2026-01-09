@@ -3,7 +3,9 @@ import { KafkaProducerWrapper } from '../../src/streaming/KafkaProducer.js';
 import { MockSchemaRegistry } from '../../src/streaming/SchemaRegistry.js';
 import { Kafka } from 'kafkajs';
 
-jest.mock('kafkajs');
+jest.mock('kafkajs', () => ({
+  Kafka: jest.fn(),
+}));
 
 describe('KafkaProducerWrapper', () => {
   let producerWrapper: KafkaProducerWrapper;

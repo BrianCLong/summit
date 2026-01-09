@@ -14,32 +14,49 @@ This document serves as the central index for all Release Operations tooling and
 
 ### Workflows at a Glance
 
-| Workflow                                              | Schedule   | Trigger       | Purpose                       |
-| ----------------------------------------------------- | ---------- | ------------- | ----------------------------- |
-| [Release GA](../releases/TWO_PERSON_APPROVAL.md)      | Manual     | Tag push      | GA promotion with approval    |
-| [Hotfix Release](../releases/HOTFIX_OVERRIDE.md)      | Manual     | Dispatch      | Emergency hotfix path         |
-| [Blocker Escalation](BLOCKER_ESCALATION.md)           | Hourly     | `:15`         | Escalate aging blockers       |
-| [Release Ops Digest](RELEASE_OPS_DIGEST.md)           | Daily      | `08:00 UTC`   | Consolidated status summary   |
-| [On-Call Handoff](ONCALL_HANDOFF.md)                  | 3x/day     | Shift change  | Shift transition notes        |
-| [Auto-Triage](AUTO_TRIAGE_ROUTING.md)                 | Event      | Issue labeled | Route blockers to teams       |
-| [Auto-Remediation](AUTO_REMEDIATION.md)               | Event + 4h | Issue labeled | Automated fixes               |
-| [Release Train Dashboard](RELEASE_TRAIN_DASHBOARD.md) | 2-hourly   | Events        | Visual pipeline status        |
-| [Test Quarantine](TEST_QUARANTINE.md)                 | Event      | Test failure  | Quarantine flaky tests        |
-| [Changelog Generator](CHANGELOG_GENERATOR.md)         | Event      | Tag/release   | Generate release notes        |
-| [Dependency Audit](DEPENDENCY_AUDIT.md)               | Daily      | `06:00 UTC`   | Security vulnerability scan   |
-| [Type Safety Audit](TYPE_SAFETY_AUDIT.md)             | Daily      | `07:00 UTC`   | TypeScript any detection      |
-| [API Determinism](API_DETERMINISM.md)                 | Daily      | `08:00 UTC`   | Response consistency check    |
-| [Pre-Release Health](PRE_RELEASE_HEALTH.md)           | On tag     | `05:00 UTC`   | Unified release gate          |
-| [Evidence Collection](EVIDENCE_COLLECTION.md)         | Daily      | `04:00 UTC`   | Capture compliance evidence   |
-| [Stabilization Report](STABILIZATION_REPORT.md)       | Daily      | `09:00 UTC`   | Progress tracking report      |
-| [Dependency Freeze](DEPENDENCY_FREEZE.md)             | Event      | PR lockfile   | Prevent RC dep changes        |
-| [Schema Compatibility](SCHEMA_COMPATIBILITY.md)       | Event      | PR schema     | Prevent breaking API changes  |
-| [Release Rollback](ROLLBACK_AUTOMATION.md)            | Manual     | Dispatch      | Safe GA rollback automation   |
-| [Release RC Pipeline](RELEASE_RC_PIPELINE.md)         | Event      | RC tag push   | Canonical RC tag workflow     |
-| [Tag Verification](TAG_VERIFICATION.md)               | Manual     | Dispatch      | Verify green (manual only)    |
-| [Promotion Bundle](PROMOTION_BUNDLE.md)               | Manual     | Dispatch      | Generate bundle (manual only) |
-| [RC Preparation](RC_PREPARATION.md)                   | Manual     | Dispatch/CLI  | Create stabilization RC tags  |
-| [Postmortem Enforcer](../releases/HOTFIX_OVERRIDE.md) | Daily      | `09:00 UTC`   | Ensure hotfix postmortems     |
+| Workflow                                                                     | Schedule     | Trigger       | Purpose                       |
+| ---------------------------------------------------------------------------- | ------------ | ------------- | ----------------------------- |
+| [Release GA](../releases/TWO_PERSON_APPROVAL.md)                             | Manual       | Tag push      | GA promotion with approval    |
+| [Hotfix Release](../releases/HOTFIX_OVERRIDE.md)                             | Manual       | Dispatch      | Emergency hotfix path         |
+| [Blocker Escalation](BLOCKER_ESCALATION.md)                                  | Hourly       | `:15`         | Escalate aging blockers       |
+| [Release Ops Digest](RELEASE_OPS_DIGEST.md)                                  | Daily        | `08:00 UTC`   | Consolidated status summary   |
+| [On-Call Handoff](ONCALL_HANDOFF.md)                                         | 3x/day       | Shift change  | Shift transition notes        |
+| [Auto-Triage](AUTO_TRIAGE_ROUTING.md)                                        | Event        | Issue labeled | Route blockers to teams       |
+| [Auto-Remediation](AUTO_REMEDIATION.md)                                      | Event + 4h   | Issue labeled | Automated fixes               |
+| [Release Train Dashboard](RELEASE_TRAIN_DASHBOARD.md)                        | 2-hourly     | Events        | Visual pipeline status        |
+| [Test Quarantine](TEST_QUARANTINE.md)                                        | Event        | Test failure  | Quarantine flaky tests        |
+| [Changelog Generator](CHANGELOG_GENERATOR.md)                                | Event        | Tag/release   | Generate release notes        |
+| [Dependency Audit](DEPENDENCY_AUDIT.md)                                      | Daily        | `06:00 UTC`   | Security vulnerability scan   |
+| [Type Safety Audit](TYPE_SAFETY_AUDIT.md)                                    | Daily        | `07:00 UTC`   | TypeScript any detection      |
+| [API Determinism](API_DETERMINISM.md)                                        | Daily        | `08:00 UTC`   | Response consistency check    |
+| [Pre-Release Health](PRE_RELEASE_HEALTH.md)                                  | On tag       | `05:00 UTC`   | Unified release gate          |
+| [Evidence Collection](EVIDENCE_COLLECTION.md)                                | Daily        | `04:00 UTC`   | Capture compliance evidence   |
+| [Stabilization Report](STABILIZATION_REPORT.md)                              | Daily        | `09:00 UTC`   | Progress tracking report      |
+| [Dependency Freeze](DEPENDENCY_FREEZE.md)                                    | Event        | PR lockfile   | Prevent RC dep changes        |
+| [Schema Compatibility](SCHEMA_COMPATIBILITY.md)                              | Event        | PR schema     | Prevent breaking API changes  |
+| [Release Rollback](ROLLBACK_AUTOMATION.md)                                   | Manual       | Dispatch      | Safe GA rollback automation   |
+| [Release RC Pipeline](RELEASE_RC_PIPELINE.md)                                | Event        | RC tag push   | Canonical RC tag workflow     |
+| [Release GA Pipeline](RELEASE_GA_PIPELINE.md)                                | Event        | GA tag push   | Canonical GA tag workflow     |
+| [Tag Verification](TAG_VERIFICATION.md)                                      | Manual       | Dispatch      | Verify green (manual only)    |
+| [Promotion Bundle](PROMOTION_BUNDLE.md)                                      | Manual       | Dispatch      | Generate bundle (manual only) |
+| [RC Preparation](RC_PREPARATION.md)                                          | Manual       | Dispatch/CLI  | Create stabilization RC tags  |
+| [Postmortem Enforcer](../releases/HOTFIX_OVERRIDE.md)                        | Daily        | `09:00 UTC`   | Ensure hotfix postmortems     |
+| [Release Policy Tests](REQUIRED_CHECKS.md#testing-policy-changes)            | Event        | Policy change | Tests for policy engine       |
+| [Release Ops Orchestrator](RELEASE_OPS_ORCHESTRATOR.md)                      | Hourly       | Schedule      | Primary Release Ops cycle     |
+| [Release Ops Pages](RELEASE_OPS_PAGES.md)                                    | Event        | Orchestrator  | Publish to GitHub Pages       |
+| [Release Ops Internal](RELEASE_OPS_REDACTION.md#workflows)                   | Manual       | Dispatch      | Internal full package         |
+| [Redaction Tests](RELEASE_OPS_REDACTION.md#ci-testing)                       | Event        | PR paths      | Test redaction layer          |
+| [Redaction Trend Alerts](REDACTION_TREND_ALERTS.md)                          | Event        | Pages publish | Trend-based incident routing  |
+| [Release Ops SLO Issue](RELEASE_OPS_SLO.md)                                  | Monthly      | 1st @ 09:00   | Monthly SLO summary issue     |
+| [Error Budget Alerts](ERROR_BUDGET.md)                                       | Event        | Pages publish | Budget exhaustion alerting    |
+| [Release Override](CHANGE_FREEZE_MODE.md)                                    | Manual       | Dispatch      | Temporary freeze override     |
+| [Branch Protection Drift](BRANCH_PROTECTION_DRIFT.md)                        | Daily + PR   | 10:00 UTC     | Policy vs GitHub drift check  |
+| [Branch Protection Reconcile](BRANCH_PROTECTION_RECONCILIATION.md)           | Manual       | Dispatch      | Generate reconciliation plans |
+| [Required Checks Exceptions](REQUIRED_CHECKS_EXCEPTIONS.md)                  | PR + Push    | On change     | Validate exception file       |
+| [Governance Drift Check](GOVERNANCE_LOCKFILE.md#governance-hash-correlation) | Daily + Push | 11:00 UTC     | Monitor policy drift          |
+| [Governance Policy Validation](GOVERNANCE_LOCKFILE.md)                       | PR + Push    | On change     | Validate policy syntax        |
+| [Governance Dashboard Publish](GOVERNANCE_LOCKFILE.md)                       | Daily + Push | 12:00 UTC     | Publish dashboard to Pages    |
+| [Governance Lockfile Verify](GOVERNANCE_LOCKFILE.md)                         | PR + Push    | On change     | Verify lockfile integrity     |
 
 ---
 
@@ -47,19 +64,26 @@ This document serves as the central index for all Release Operations tooling and
 
 ### Governance Features
 
-| Feature                | Status    | Documentation                                                                |
-| ---------------------- | --------- | ---------------------------------------------------------------------------- |
-| Two-Person Approval    | ✅ Active | [TWO_PERSON_APPROVAL.md](../releases/TWO_PERSON_APPROVAL.md)                 |
-| Environment Gates      | ✅ Active | Requires `ga-release` environment                                            |
-| Hotfix Override        | ✅ Active | [HOTFIX_OVERRIDE.md](../releases/HOTFIX_OVERRIDE.md)                         |
-| Postmortem Enforcement | ✅ Active | [HOTFIX_OVERRIDE.md](../releases/HOTFIX_OVERRIDE.md#postmortem-requirements) |
-| Dependency Freeze      | ✅ Active | [DEPENDENCY_FREEZE.md](DEPENDENCY_FREEZE.md)                                 |
-| Schema Compatibility   | ✅ Active | [SCHEMA_COMPATIBILITY.md](SCHEMA_COMPATIBILITY.md)                           |
-| Rollback Automation    | ✅ Active | [ROLLBACK_AUTOMATION.md](ROLLBACK_AUTOMATION.md)                             |
-| Release RC Pipeline    | ✅ Active | [RELEASE_RC_PIPELINE.md](RELEASE_RC_PIPELINE.md)                             |
-| Tag Verification       | ✅ Active | [TAG_VERIFICATION.md](TAG_VERIFICATION.md) (manual only)                     |
-| Promotion Bundle       | ✅ Active | [PROMOTION_BUNDLE.md](PROMOTION_BUNDLE.md) (manual only)                     |
-| RC Preparation         | ✅ Active | [RC_PREPARATION.md](RC_PREPARATION.md)                                       |
+| Feature                     | Status    | Documentation                                                                |
+| --------------------------- | --------- | ---------------------------------------------------------------------------- |
+| Two-Person Approval         | ✅ Active | [TWO_PERSON_APPROVAL.md](../releases/TWO_PERSON_APPROVAL.md)                 |
+| Environment Gates           | ✅ Active | Requires `ga-release` environment                                            |
+| Hotfix Override             | ✅ Active | [HOTFIX_OVERRIDE.md](../releases/HOTFIX_OVERRIDE.md)                         |
+| Postmortem Enforcement      | ✅ Active | [HOTFIX_OVERRIDE.md](../releases/HOTFIX_OVERRIDE.md#postmortem-requirements) |
+| Dependency Freeze           | ✅ Active | [DEPENDENCY_FREEZE.md](DEPENDENCY_FREEZE.md)                                 |
+| Schema Compatibility        | ✅ Active | [SCHEMA_COMPATIBILITY.md](SCHEMA_COMPATIBILITY.md)                           |
+| Rollback Automation         | ✅ Active | [ROLLBACK_AUTOMATION.md](ROLLBACK_AUTOMATION.md)                             |
+| Release RC Pipeline         | ✅ Active | [RELEASE_RC_PIPELINE.md](RELEASE_RC_PIPELINE.md)                             |
+| Release GA Pipeline         | ✅ Active | [RELEASE_GA_PIPELINE.md](RELEASE_GA_PIPELINE.md)                             |
+| Tag Verification            | ✅ Active | [TAG_VERIFICATION.md](TAG_VERIFICATION.md) (manual only)                     |
+| Promotion Bundle            | ✅ Active | [PROMOTION_BUNDLE.md](PROMOTION_BUNDLE.md) (manual only)                     |
+| RC Preparation              | ✅ Active | [RC_PREPARATION.md](RC_PREPARATION.md)                                       |
+| Change Freeze Mode          | ✅ Active | [CHANGE_FREEZE_MODE.md](CHANGE_FREEZE_MODE.md)                               |
+| Branch Protection Drift     | ✅ Active | [BRANCH_PROTECTION_DRIFT.md](BRANCH_PROTECTION_DRIFT.md)                     |
+| Branch Protection Reconcile | ✅ Active | [BRANCH_PROTECTION_RECONCILIATION.md](BRANCH_PROTECTION_RECONCILIATION.md)   |
+| Required Checks Exceptions  | ✅ Active | [REQUIRED_CHECKS_EXCEPTIONS.md](REQUIRED_CHECKS_EXCEPTIONS.md)               |
+| Governance Lockfile         | ✅ Active | [GOVERNANCE_LOCKFILE.md](GOVERNANCE_LOCKFILE.md)                             |
+| Governance Hash Correlation | ✅ Active | Embedded in markers/SLO reports                                              |
 
 ### Monitoring Features
 
@@ -69,6 +93,9 @@ This document serves as the central index for all Release Operations tooling and
 | Daily Digest       | ✅ Active | [RELEASE_OPS_DIGEST.md](RELEASE_OPS_DIGEST.md)           |
 | On-Call Handoff    | ✅ Active | [ONCALL_HANDOFF.md](ONCALL_HANDOFF.md)                   |
 | Release Dashboard  | ✅ Active | [RELEASE_TRAIN_DASHBOARD.md](RELEASE_TRAIN_DASHBOARD.md) |
+| Trend Alerting     | ✅ Active | [REDACTION_TREND_ALERTS.md](REDACTION_TREND_ALERTS.md)   |
+| SLO Reporting      | ✅ Active | [RELEASE_OPS_SLO.md](RELEASE_OPS_SLO.md)                 |
+| Error Budget       | ✅ Active | [ERROR_BUDGET.md](ERROR_BUDGET.md)                       |
 
 ### Automation Features
 
@@ -209,66 +236,117 @@ This document serves as the central index for all Release Operations tooling and
 
 ### Policy Files
 
-| File                            | Purpose               | Location   |
-| ------------------------------- | --------------------- | ---------- |
-| `BLOCKER_ESCALATION_POLICY.yml` | Escalation thresholds | `docs/ci/` |
-| `RELEASE_OPS_DIGEST_POLICY.yml` | Digest configuration  | `docs/ci/` |
-| `ONCALL_HANDOFF_POLICY.yml`     | Shift schedules       | `docs/ci/` |
-| `TRIAGE_ROUTING_POLICY.yml`     | Team routing rules    | `docs/ci/` |
-| `REMEDIATION_PLAYBOOKS.yml`     | Playbook definitions  | `docs/ci/` |
-| `TEST_QUARANTINE_POLICY.yml`    | Quarantine rules      | `docs/ci/` |
-| `CHANGELOG_POLICY.yml`          | Changelog categories  | `docs/ci/` |
-| `DEPENDENCY_AUDIT_POLICY.yml`   | Audit thresholds      | `docs/ci/` |
-| `TYPE_SAFETY_POLICY.yml`        | Any type limits       | `docs/ci/` |
-| `API_DETERMINISM_POLICY.yml`    | Endpoint checks       | `docs/ci/` |
+| File                               | Purpose                      | Location   |
+| ---------------------------------- | ---------------------------- | ---------- |
+| `REQUIRED_CHECKS_POLICY.yml`       | Required CI checks           | `docs/ci/` |
+| `BLOCKER_ESCALATION_POLICY.yml`    | Escalation thresholds        | `docs/ci/` |
+| `RELEASE_OPS_DIGEST_POLICY.yml`    | Digest configuration         | `docs/ci/` |
+| `ONCALL_HANDOFF_POLICY.yml`        | Shift schedules              | `docs/ci/` |
+| `TRIAGE_ROUTING_POLICY.yml`        | Team routing rules           | `docs/ci/` |
+| `REMEDIATION_PLAYBOOKS.yml`        | Playbook definitions         | `docs/ci/` |
+| `TEST_QUARANTINE_POLICY.yml`       | Quarantine rules             | `docs/ci/` |
+| `CHANGELOG_POLICY.yml`             | Changelog categories         | `docs/ci/` |
+| `DEPENDENCY_AUDIT_POLICY.yml`      | Audit thresholds             | `docs/ci/` |
+| `TYPE_SAFETY_POLICY.yml`           | Any type limits              | `docs/ci/` |
+| `API_DETERMINISM_POLICY.yml`       | Endpoint checks              | `docs/ci/` |
+| `REDACTION_POLICY.yml`             | Content redaction            | `docs/ci/` |
+| `REDACTION_TREND_ALERT_POLICY.yml` | Trend alert thresholds       | `docs/ci/` |
+| `RELEASE_OPS_SLO_POLICY.yml`       | SLO targets/windows          | `docs/ci/` |
+| `ERROR_BUDGET_POLICY.yml`          | Budget allocations           | `docs/ci/` |
+| `REQUIRED_CHECKS_EXCEPTIONS.yml`   | Branch protection exceptions | `docs/ci/` |
 
 ### State Files
 
-| File                              | Purpose              | Location                |
-| --------------------------------- | -------------------- | ----------------------- |
-| `blockers_state.json`             | Escalation state     | `docs/releases/_state/` |
-| `digest_state.json`               | Digest deduplication | `docs/releases/_state/` |
-| `handoff_state.json`              | Handoff context      | `docs/releases/_state/` |
-| `triage_state.json`               | Triage cooldowns     | `docs/releases/_state/` |
-| `remediation_state.json`          | Remediation attempts | `docs/releases/_state/` |
-| `quarantine_state.json`           | Quarantine history   | `docs/releases/_state/` |
-| `changelog_state.json`            | Generation history   | `docs/releases/_state/` |
-| `dashboard_state.json`            | Dashboard snapshots  | `docs/releases/_state/` |
-| `audit_state.json`                | Dependency audit     | `docs/releases/_state/` |
-| `type_safety_state.json`          | Type safety audit    | `docs/releases/_state/` |
-| `determinism_state.json`          | API determinism      | `docs/releases/_state/` |
-| `health_check_state.json`         | Pre-release health   | `docs/releases/_state/` |
-| `evidence_state.json`             | Evidence collection  | `docs/releases/_state/` |
-| `dependency_freeze_state.json`    | Dependency freeze    | `docs/releases/_state/` |
-| `schema_compatibility_state.json` | Schema compat        | `docs/releases/_state/` |
-| `rollback_state.json`             | Rollback history     | `docs/releases/_state/` |
+| File                                 | Purpose               | Location                |
+| ------------------------------------ | --------------------- | ----------------------- |
+| `blockers_state.json`                | Escalation state      | `docs/releases/_state/` |
+| `digest_state.json`                  | Digest deduplication  | `docs/releases/_state/` |
+| `handoff_state.json`                 | Handoff context       | `docs/releases/_state/` |
+| `triage_state.json`                  | Triage cooldowns      | `docs/releases/_state/` |
+| `remediation_state.json`             | Remediation attempts  | `docs/releases/_state/` |
+| `quarantine_state.json`              | Quarantine history    | `docs/releases/_state/` |
+| `changelog_state.json`               | Generation history    | `docs/releases/_state/` |
+| `dashboard_state.json`               | Dashboard snapshots   | `docs/releases/_state/` |
+| `audit_state.json`                   | Dependency audit      | `docs/releases/_state/` |
+| `type_safety_state.json`             | Type safety audit     | `docs/releases/_state/` |
+| `determinism_state.json`             | API determinism       | `docs/releases/_state/` |
+| `health_check_state.json`            | Pre-release health    | `docs/releases/_state/` |
+| `evidence_state.json`                | Evidence collection   | `docs/releases/_state/` |
+| `dependency_freeze_state.json`       | Dependency freeze     | `docs/releases/_state/` |
+| `schema_compatibility_state.json`    | Schema compat         | `docs/releases/_state/` |
+| `rollback_state.json`                | Rollback history      | `docs/releases/_state/` |
+| `redaction_trend_alerts_state.json`  | Alert dedup state     | `docs/releases/_state/` |
+| `slo_issues_state.json`              | Monthly SLO issues    | `docs/releases/_state/` |
+| `error_budget_state.json`            | Budget tracking       | `docs/releases/_state/` |
+| `error_budget_alerts_state.json`     | Budget alert dedup    | `docs/releases/_state/` |
+| `governance_tight_mode.json`         | Tight mode flag       | `docs/releases/_state/` |
+| `freeze_mode.json`                   | Change freeze flag    | `docs/releases/_state/` |
+| `release_override.json`              | Override state        | `docs/releases/_state/` |
+| `branch_protection_drift_state.json` | Drift detection state | `docs/releases/_state/` |
 
 ---
 
 ## Scripts
 
-| Script                             | Purpose                 | Usage                                                |
-| ---------------------------------- | ----------------------- | ---------------------------------------------------- |
-| `escalate_release_blockers.sh`     | Apply escalation labels | `./scripts/release/escalate_release_blockers.sh`     |
-| `generate_release_ops_digest.sh`   | Generate daily digest   | `./scripts/release/generate_release_ops_digest.sh`   |
-| `generate_oncall_handoff.sh`       | Generate handoff note   | `./scripts/release/generate_oncall_handoff.sh`       |
-| `auto_triage_blockers.sh`          | Route blockers to teams | `./scripts/release/auto_triage_blockers.sh`          |
-| `run_remediation.sh`               | Execute playbooks       | `./scripts/release/run_remediation.sh`               |
-| `generate_release_dashboard.sh`    | Generate dashboard      | `./scripts/release/generate_release_dashboard.sh`    |
-| `manage_test_quarantine.sh`        | Manage test quarantine  | `./scripts/release/manage_test_quarantine.sh`        |
-| `generate_changelog.sh`            | Generate changelog      | `./scripts/release/generate_changelog.sh`            |
-| `dependency_audit.sh`              | Dependency security     | `./scripts/release/dependency_audit.sh`              |
-| `type_safety_audit.sh`             | Type safety check       | `./scripts/release/type_safety_audit.sh`             |
-| `api_determinism_check.sh`         | API consistency         | `./scripts/release/api_determinism_check.sh`         |
-| `pre_release_health_check.sh`      | Unified health check    | `./scripts/release/pre_release_health_check.sh`      |
-| `collect_evidence.sh`              | Collect GA evidence     | `./scripts/release/collect_evidence.sh`              |
-| `generate_stabilization_report.sh` | Progress report         | `./scripts/release/generate_stabilization_report.sh` |
-| `verify_dependency_freeze.sh`      | Verify dep freeze       | `./scripts/release/verify_dependency_freeze.sh`      |
-| `check_schema_compatibility.sh`    | Check schema compat     | `./scripts/release/check_schema_compatibility.sh`    |
-| `rollback_release.sh`              | Rollback failed release | `./scripts/release/rollback_release.sh`              |
-| `verify-green-for-tag.sh`          | Verify green for tag    | `./scripts/release/verify-green-for-tag.sh`          |
-| `build-promotion-bundle.sh`        | Build promotion bundle  | `./scripts/release/build-promotion-bundle.sh`        |
-| `prepare-stabilization-rc.sh`      | Prepare RC tag          | `./scripts/release/prepare-stabilization-rc.sh`      |
+| Script                                      | Purpose                  | Usage                                                         |
+| ------------------------------------------- | ------------------------ | ------------------------------------------------------------- |
+| `escalate_release_blockers.sh`              | Apply escalation labels  | `./scripts/release/escalate_release_blockers.sh`              |
+| `generate_release_ops_digest.sh`            | Generate daily digest    | `./scripts/release/generate_release_ops_digest.sh`            |
+| `generate_oncall_handoff.sh`                | Generate handoff note    | `./scripts/release/generate_oncall_handoff.sh`                |
+| `auto_triage_blockers.sh`                   | Route blockers to teams  | `./scripts/release/auto_triage_blockers.sh`                   |
+| `run_remediation.sh`                        | Execute playbooks        | `./scripts/release/run_remediation.sh`                        |
+| `generate_release_train_dashboard.sh`       | Generate dashboard       | `./scripts/release/generate_release_train_dashboard.sh`       |
+| `manage_test_quarantine.sh`                 | Manage test quarantine   | `./scripts/release/manage_test_quarantine.sh`                 |
+| `generate_changelog.sh`                     | Generate changelog       | `./scripts/release/generate_changelog.sh`                     |
+| `dependency_audit.sh`                       | Dependency security      | `./scripts/release/dependency_audit.sh`                       |
+| `type_safety_audit.sh`                      | Type safety check        | `./scripts/release/type_safety_audit.sh`                      |
+| `api_determinism_check.sh`                  | API consistency          | `./scripts/release/api_determinism_check.sh`                  |
+| `pre_release_health_check.sh`               | Unified health check     | `./scripts/release/pre_release_health_check.sh`               |
+| `collect_evidence.sh`                       | Collect GA evidence      | `./scripts/release/collect_evidence.sh`                       |
+| `generate_stabilization_report.sh`          | Progress report          | `./scripts/release/generate_stabilization_report.sh`          |
+| `verify_dependency_freeze.sh`               | Verify dep freeze        | `./scripts/release/verify_dependency_freeze.sh`               |
+| `check_schema_compatibility.sh`             | Check schema compat      | `./scripts/release/check_schema_compatibility.sh`             |
+| `rollback_release.sh`                       | Rollback failed release  | `./scripts/release/rollback_release.sh`                       |
+| `verify-green-for-tag.sh`                   | Verify green for tag     | `./scripts/release/verify-green-for-tag.sh`                   |
+| `compute_base_for_commit.sh`                | Compute base reference   | `./scripts/release/compute_base_for_commit.sh`                |
+| `should_run_task.sh`                        | Cadence-aware task gate  | `./scripts/release/should_run_task.sh --task <name>`          |
+| `generate_release_ops_single_page.sh`       | Single page summary      | `./scripts/release/generate_release_ops_single_page.sh`       |
+| `render_release_ops_single_page_html.sh`    | HTML renderer            | `./scripts/release/render_release_ops_single_page_html.sh`    |
+| `generate_release_ops_bundle_index_html.sh` | Bundle index page        | `./scripts/release/generate_release_ops_bundle_index_html.sh` |
+| `build_release_ops_site.sh`                 | Build Pages site         | `./scripts/release/build_release_ops_site.sh`                 |
+| `redact_release_ops_content.sh`             | Redaction layer          | `./scripts/release/redact_release_ops_content.sh`             |
+| `tests/redaction_layer.test.sh`             | Redaction layer tests    | `./scripts/release/tests/redaction_layer.test.sh`             |
+| `compute_redaction_health.sh`               | Redaction health badge   | `./scripts/release/compute_redaction_health.sh`               |
+| `build_redaction_triage_packet.sh`          | Redaction triage packet  | `./scripts/release/build_redaction_triage_packet.sh`          |
+| `store_pages_snapshot.sh`                   | Pages snapshot storage   | `./scripts/release/store_pages_snapshot.sh`                   |
+| `write_rollback_report.sh`                  | Rollback report writer   | `./scripts/release/write_rollback_report.sh`                  |
+| `write_deployment_marker.sh`                | Deployment status marker | `./scripts/release/write_deployment_marker.sh`                |
+| `update_redaction_metrics_timeseries.sh`    | Time series collector    | `./scripts/release/update_redaction_metrics_timeseries.sh`    |
+| `render_redaction_metrics_trend.sh`         | Trend page renderer      | `./scripts/release/render_redaction_metrics_trend.sh`         |
+| `check_redaction_trends.sh`                 | Trend alert checker      | `./scripts/release/check_redaction_trends.sh`                 |
+| `compute_release_ops_slo.sh`                | SLO metrics computation  | `./scripts/release/compute_release_ops_slo.sh`                |
+| `render_release_ops_slo_report.sh`          | SLO report renderer      | `./scripts/release/render_release_ops_slo_report.sh`          |
+| `compute_error_budget.sh`                   | Error budget computation | `./scripts/release/compute_error_budget.sh`                   |
+| `render_error_budget_panel.sh`              | Error budget renderer    | `./scripts/release/render_error_budget_panel.sh`              |
+| `enforce_freeze_gate.sh`                    | Freeze mode gate         | `./scripts/release/enforce_freeze_gate.sh`                    |
+| `extract_required_checks_from_policy.sh`    | Policy check extraction  | `./scripts/release/extract_required_checks_from_policy.sh`    |
+| `check_branch_protection_drift.sh`          | Drift detection          | `./scripts/release/check_branch_protection_drift.sh`          |
+| `reconcile_branch_protection.sh`            | Reconciliation planner   | `./scripts/release/reconcile_branch_protection.sh`            |
+| `validate_required_checks_exceptions.sh`    | Exception validator      | `./scripts/release/validate_required_checks_exceptions.sh`    |
+| `generate_governance_lockfile.sh`           | Governance lockfile gen  | `./scripts/release/generate_governance_lockfile.sh`           |
+| `verify_release_bundle.sh`                  | Bundle verifier          | `./scripts/release/verify_release_bundle.sh`                  |
+| `build-promotion-bundle.sh`                 | Build promotion bundle   | `./scripts/release/build-promotion-bundle.sh`                 |
+| `prepare-stabilization-rc.sh`               | Prepare RC tag           | `./scripts/release/prepare-stabilization-rc.sh`               |
+| `verify-rc-lineage.sh`                      | Verify GA→RC lineage     | `./scripts/release/verify-rc-lineage.sh`                      |
+| `build-ga-bundle.sh`                        | Build GA release bundle  | `./scripts/release/build-ga-bundle.sh`                        |
+| `publish_guard.sh`                          | Final publish guard      | `./scripts/release/publish_guard.sh`                          |
+| `check_governance_drift.sh`                 | Governance drift check   | `./scripts/release/check_governance_drift.sh`                 |
+| `validate_governance_policies.sh`           | Policy validation        | `./scripts/release/validate_governance_policies.sh`           |
+| `render_governance_dashboard.sh`            | Governance dashboard     | `./scripts/release/render_governance_dashboard.sh`            |
+| `verify_governance_lockfile.sh`             | Lockfile verification    | `./scripts/release/verify_governance_lockfile.sh`             |
+| `compute_governance_health.sh`              | Governance health check  | `./scripts/release/compute_governance_health.sh`              |
+| `update_governance_audit_log.sh`            | Audit log update         | `./scripts/release/update_governance_audit_log.sh`            |
+| `query_governance_audit_log.sh`             | Audit log query          | `./scripts/release/query_governance_audit_log.sh`             |
 
 ### Common Flags
 
@@ -413,22 +491,54 @@ All scripts support these common flags:
 
 ## Change Log
 
-| Date       | Change                               | Author               |
-| ---------- | ------------------------------------ | -------------------- |
-| 2026-01-08 | Initial Release Ops Index            | Platform Engineering |
-| 2026-01-08 | Added all MVP-4 features             | Platform Engineering |
-| 2026-01-08 | Added Test Quarantine, Changelog Gen | Platform Engineering |
-| 2026-01-08 | Added Stabilization Audit features   | Platform Engineering |
-| 2026-01-08 | Added Evidence Collection            | Platform Engineering |
-| 2026-01-08 | Added Stabilization Report           | Platform Engineering |
-| 2026-01-08 | Added Dependency Freeze              | Platform Engineering |
-| 2026-01-08 | Added Schema Compatibility           | Platform Engineering |
-| 2026-01-08 | Added Rollback Automation            | Platform Engineering |
-| 2026-01-08 | Added Tag Verification               | Platform Engineering |
-| 2026-01-08 | Added Promotion Bundle               | Platform Engineering |
-| 2026-01-08 | Added RC Preparation                 | Platform Engineering |
-| 2026-01-08 | Added RC Preparation workflow        | Platform Engineering |
-| 2026-01-08 | Added Release RC Pipeline            | Platform Engineering |
+| Date       | Change                                            | Author               |
+| ---------- | ------------------------------------------------- | -------------------- |
+| 2026-01-08 | Initial Release Ops Index                         | Platform Engineering |
+| 2026-01-08 | Added all MVP-4 features                          | Platform Engineering |
+| 2026-01-08 | Added Test Quarantine, Changelog Gen              | Platform Engineering |
+| 2026-01-08 | Added Stabilization Audit features                | Platform Engineering |
+| 2026-01-08 | Added Evidence Collection                         | Platform Engineering |
+| 2026-01-08 | Added Stabilization Report                        | Platform Engineering |
+| 2026-01-08 | Added Dependency Freeze                           | Platform Engineering |
+| 2026-01-08 | Added Schema Compatibility                        | Platform Engineering |
+| 2026-01-08 | Added Rollback Automation                         | Platform Engineering |
+| 2026-01-08 | Added Tag Verification                            | Platform Engineering |
+| 2026-01-08 | Added Promotion Bundle                            | Platform Engineering |
+| 2026-01-08 | Added RC Preparation                              | Platform Engineering |
+| 2026-01-08 | Added RC Preparation workflow                     | Platform Engineering |
+| 2026-01-08 | Added Release RC Pipeline                         | Platform Engineering |
+| 2026-01-08 | Added Release GA Pipeline                         | Platform Engineering |
+| 2026-01-08 | Added Release Policy Tests                        | Platform Engineering |
+| 2026-01-08 | Updated to policy-driven dashboard                | Platform Engineering |
+| 2026-01-08 | Added Release Ops Orchestrator                    | Platform Engineering |
+| 2026-01-08 | Added cadence-aware execution                     | Platform Engineering |
+| 2026-01-08 | Added single page summary generator               | Platform Engineering |
+| 2026-01-08 | Added static HTML rendering                       | Platform Engineering |
+| 2026-01-08 | Added bundle index landing page                   | Platform Engineering |
+| 2026-01-08 | Added GitHub Pages publishing                     | Platform Engineering |
+| 2026-01-08 | Added redaction layer and dual-mode               | Platform Engineering |
+| 2026-01-08 | Added redaction layer CI tests                    | Platform Engineering |
+| 2026-01-08 | Added redaction health badge                      | Platform Engineering |
+| 2026-01-08 | Added redaction triage packet                     | Platform Engineering |
+| 2026-01-08 | Added automatic Pages rollback                    | Platform Engineering |
+| 2026-01-08 | Added deployment status marker                    | Platform Engineering |
+| 2026-01-08 | Added redaction metrics time series               | Platform Engineering |
+| 2026-01-08 | Added trend-based alerting system                 | Platform Engineering |
+| 2026-01-08 | Added SLO reporting and monthly issue             | Platform Engineering |
+| 2026-01-08 | Added error budget and tight mode                 | Platform Engineering |
+| 2026-01-08 | Added change freeze mode and override             | Platform Engineering |
+| 2026-01-08 | Added branch protection drift detection           | Platform Engineering |
+| 2026-01-08 | Added branch protection reconciliation            | Platform Engineering |
+| 2026-01-08 | Added required checks exception management        | Platform Engineering |
+| 2026-01-08 | Added governance lockfile and bundle verification | Platform Engineering |
+| 2026-01-08 | Added governance hash correlation to markers/SLO  | Platform Engineering |
+| 2026-01-08 | Added governance drift detection and alerting     | Platform Engineering |
+| 2026-01-08 | Added governance policy validation workflow       | Platform Engineering |
+| 2026-01-08 | Added governance summary dashboard                | Platform Engineering |
+| 2026-01-08 | Added governance dashboard publishing workflow    | Platform Engineering |
+| 2026-01-08 | Added lockfile verification script and workflow   | Platform Engineering |
+| 2026-01-08 | Added governance health checker and release gate  | Platform Engineering |
+| 2026-01-08 | Added governance audit log system                 | Platform Engineering |
 
 ---
 

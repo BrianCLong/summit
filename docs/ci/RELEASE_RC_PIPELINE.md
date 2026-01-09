@@ -38,11 +38,19 @@ Runs the canonical `release:ready` gate to verify:
 
 ### Stage 2: Promotion Guard
 
-Verifies all required CI checks using the truth table approach:
+Verifies all required CI checks using the policy-driven truth table approach:
 
+- **Policy-driven**: Loads check requirements from `docs/ci/REQUIRED_CHECKS_POLICY.yml`
+- **Deterministic base**: Computes base reference using `compute_base_for_commit.sh`
 - Always-required checks (CI Core, Unit Tests, GA Gate)
-- Conditionally-required checks (based on changed files)
+- Conditionally-required checks (based on changed files vs base)
 - Generates `REQUIRED_CHECKS.txt` snapshot
+
+The base reference for RC tags is computed as:
+
+1. Previous RC tag with same base version (e.g., v4.1.2-rc.1 for v4.1.2-rc.2)
+2. If no prior RC, previous GA tag in release line (e.g., v4.1.1)
+3. If no prior GA, merge-base with main branch
 
 ### Stage 3: Assemble Pipeline Bundle
 

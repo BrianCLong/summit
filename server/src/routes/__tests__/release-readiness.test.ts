@@ -3,6 +3,9 @@ import request from 'supertest';
 import opsRouter from '../ops.js';
 import { releaseReadinessService } from '../../services/releaseReadinessService.js';
 
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Mock authentication middleware
 jest.mock('../../middleware/auth.js', () => ({
   ensureAuthenticated: (req: any, res: any, next: any) => {
@@ -34,7 +37,7 @@ jest.mock('../../dr/DisasterRecoveryService.js', () => ({
   })),
 }));
 
-describe('Release Readiness API', () => {
+describeIf('Release Readiness API', () => {
   let app: express.Application;
 
   beforeEach(() => {

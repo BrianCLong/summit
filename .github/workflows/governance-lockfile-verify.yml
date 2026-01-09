@@ -1,0 +1,228 @@
+name: Governance Lockfile Verification
+
+# Verifies governance lockfile integrity as part of CI
+# Ensures the lockfile is valid, complete, and fresh
+#
+# Authority: docs/ci/GOVERNANCE_LOCKFILE.md
+
+on:
+  # Run on PRs that affect governance
+  pull_request:
+    branches: [main]
+    paths:
+      - "docs/ci/*.yml"
+      - "docs/ci/*.yaml"
+      - "docs/releases/_state/*.json"
+      - "scripts/release/*governance*.sh"
+
+  # Run on pushes to main
+  push:
+    branches: [main]
+    paths:
+      - "docs/releases/_state/governance_lockfile.json"
+      - "docs/releases/_state/governance_SHA256SUMS"
+
+  # Run during release workflows
+  workflow_call:
+    inputs:
+      strict_mode:
+        description: "Treat warnings as errors"
+        type: boolean
+        default: true
+      max_age_days:
+        description: "Maximum lockfile age in days"
+        type: number
+        default: 7
+
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      strict_mode:
+        description: "Treat warnings as errors"
+        type: boolean
+        default: false
+      max_age_days:
+        description: "Maximum lockfile age in days"
+        type: number
+        default: 7
+
+permissions:
+  contents: read
+
+jobs:
+  verify-lockfile:
+    name: Verify Governance Lockfile
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Make Scripts Executable
+        run: chmod +x scripts/release/*.sh
+
+      - name: Check Lockfile Exists
+        id: check-exists
+        run: |
+          if [[ -f "docs/releases/_state/governance_lockfile.json" ]]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Governance lockfile found"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "::notice::Governance lockfile not found (may be generated during release)"
+          fi
+
+      - name: Verify Lockfile
+        id: verify
+        if: steps.check-exists.outputs.exists == 'true'
+        run: |
+          ARGS="--json"
+
+          # Determine strict mode
+          STRICT="${{ inputs.strict_mode }}"
+          if [[ "${STRICT}" == "true" ]]; then
+            ARGS="${ARGS} --strict"
+          fi
+
+          # Set max age
+          MAX_AGE="${{ inputs.max_age_days }}"
+          if [[ -n "${MAX_AGE}" && "${MAX_AGE}" != "0" ]]; then
+            ARGS="${ARGS} --max-age ${MAX_AGE}"
+          fi
+
+          # Run verification
+          RESULT=$(./scripts/release/verify_governance_lockfile.sh ${ARGS} 2>&1) || EXIT_CODE=$?
+
+          echo "${RESULT}" > verification_report.json
+
+          # Parse results
+          STATUS=$(echo "${RESULT}" | jq -r '.status // "unknown"')
+          PASSED=$(echo "${RESULT}" | jq -r '.summary.checks_passed // 0')
+          FAILED=$(echo "${RESULT}" | jq -r '.summary.checks_failed // 0')
+          WARNED=$(echo "${RESULT}" | jq -r '.summary.checks_warned // 0')
+
+          echo "status=${STATUS}" >> $GITHUB_OUTPUT
+          echo "passed=${PASSED}" >> $GITHUB_OUTPUT
+          echo "failed=${FAILED}" >> $GITHUB_OUTPUT
+          echo "warned=${WARNED}" >> $GITHUB_OUTPUT
+
+          # Generate summary
+          echo "## Governance Lockfile Verification" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | ${STATUS} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Checks Passed | ${PASSED} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Checks Failed | ${FAILED} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Checks Warned | ${WARNED} |" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${STATUS}" == "fail" ]]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Failed Checks" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            echo "${RESULT}" | jq '.results[] | select(.status == "fail")' >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+          exit ${EXIT_CODE:-0}
+
+      - name: No Lockfile Summary
+        if: steps.check-exists.outputs.exists != 'true'
+        run: |
+          echo "## Governance Lockfile Verification" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ **No governance lockfile found**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "This is expected if:" >> $GITHUB_STEP_SUMMARY
+          echo "- This is a new repository" >> $GITHUB_STEP_SUMMARY
+          echo "- No release has been prepared yet" >> $GITHUB_STEP_SUMMARY
+          echo "- The lockfile is generated during release" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "To generate a lockfile:" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo './scripts/release/generate_governance_lockfile.sh --sha $(git rev-parse HEAD)' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Log to Audit Trail
+        if: always()
+        run: |
+          # Determine status based on verification results
+          EXISTS="${{ steps.check-exists.outputs.exists }}"
+          VERIFY_STATUS="${{ steps.verify.outputs.status }}"
+          FAILED="${{ steps.verify.outputs.failed }}"
+          WARNED="${{ steps.verify.outputs.warned }}"
+
+          if [[ "${EXISTS}" != "true" ]]; then
+            STATUS="warning"
+            MESSAGE="No governance lockfile present"
+          elif [[ "${VERIFY_STATUS}" == "fail" ]]; then
+            STATUS="failure"
+            MESSAGE="${FAILED} lockfile verification failure(s)"
+          elif [[ "${WARNED}" -gt 0 ]]; then
+            STATUS="warning"
+            MESSAGE="${WARNED} lockfile verification warning(s)"
+          else
+            STATUS="success"
+            MESSAGE="Lockfile verified: ${{ steps.verify.outputs.passed }} checks passed"
+          fi
+
+          # Log to audit trail
+          ./scripts/release/update_governance_audit_log.sh \
+            --event-type lockfile \
+            --status "${STATUS}" \
+            --message "${MESSAGE}" \
+            --run-id "${{ github.run_id }}" \
+            --metadata "{\"exists\": ${EXISTS:-false}, \"passed\": ${{ steps.verify.outputs.passed || 0 }}, \"failed\": ${FAILED:-0}, \"warned\": ${WARNED:-0}}" \
+            || echo "::warning::Failed to update audit log"
+
+      - name: Upload Verification Report
+        uses: actions/upload-artifact@v4
+        if: steps.check-exists.outputs.exists == 'true'
+        with:
+          name: governance-lockfile-verification-${{ github.run_number }}
+          path: verification_report.json
+          retention-days: 30
+
+      - name: PR Comment on Failure
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let report = { status: 'unknown', summary: {} };
+            try {
+              report = JSON.parse(fs.readFileSync('verification_report.json', 'utf8'));
+            } catch (e) {}
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## ❌ Governance Lockfile Verification Failed
+
+            The governance lockfile verification found issues that should be addressed.
+
+            | Metric | Value |
+            |--------|-------|
+            | Status | ${report.status} |
+            | Failed Checks | ${report.summary?.checks_failed || 'unknown'} |
+            | Warnings | ${report.summary?.checks_warned || 'unknown'} |
+
+            Please check the [workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for details.
+
+            ### Possible Solutions
+
+            1. **Regenerate the lockfile**: \`./scripts/release/generate_governance_lockfile.sh --sha $(git rev-parse HEAD)\`
+            2. **Update checksums**: Ensure SHA256SUMS matches the lockfile
+            3. **Review policy files**: Ensure all referenced policies exist
+
+            ---
+            *This comment was automatically generated by the governance lockfile verification workflow.*`
+            });
+
+      - name: Verification Passed
+        if: steps.check-exists.outputs.exists == 'true' && steps.verify.outputs.status == 'pass'
+        run: |
+          echo "## ✅ Governance Lockfile Valid" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All ${{ steps.verify.outputs.passed }} verification checks passed." >> $GITHUB_STEP_SUMMARY

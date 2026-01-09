@@ -29,8 +29,8 @@ export class ReportScheduler {
     const task = this.tasks.get(jobId);
     if (task) {
       task.stop();
-      this.tasks.delete(jobId);
     }
+    this.tasks.delete(jobId);
   }
 
   activeJobs(): string[] {

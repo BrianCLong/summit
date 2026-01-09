@@ -2,9 +2,89 @@
  * Tests for sanitize middleware
  */
 
-import sanitizeRequest from '../sanitize';
-import { requestFactory, responseFactory, nextFactory } from '../../../../tests/factories/requestFactory';
-import { describe, it, test, expect } from '@jest/globals';
+import { describe, it, test, expect, jest, beforeAll } from '@jest/globals';
+
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+
+const sanitizeValue = (input: any): any => {
+  if (typeof input === 'string') {
+    return escapeHtml(input).trim().slice(0, 10000);
+  }
+  if (Array.isArray(input)) {
+    return input.slice(0, 1000).map((item) => sanitizeValue(item));
+  }
+  if (input && typeof input === 'object') {
+    const sanitized: Record<string, any> = {};
+    for (const [key, value] of Object.entries(input)) {
+      if (Object.keys(sanitized).length >= 100) break;
+      sanitized[key] = sanitizeValue(value);
+    }
+    return sanitized;
+  }
+  return input;
+};
+
+jest.mock('../../validation/index.js', () => ({
+  SanitizationUtils: {
+    sanitizeHTML: (input: string) => escapeHtml(String(input)),
+    sanitizeUserInput: (input: any): any => sanitizeValue(input),
+  },
+}));
+
+let sanitizeRequest: typeof import('../sanitize').default;
+
+beforeAll(async () => {
+  ({ default: sanitizeRequest } = await import('../sanitize'));
+});
+
+const requestFactory = (options: Record<string, any> = {}) => {
+  return {
+    headers: {
+      'content-type': 'application/json',
+      'user-agent': 'IntelGraph-Test/1.0',
+      ...options.headers,
+    },
+    body: options.body || {},
+    query: options.query || {},
+    params: options.params || {},
+    user: options.user,
+    tenant: options.tenant,
+    cookies: options.cookies || {},
+    ip: options.ip || '127.0.0.1',
+    method: options.method || 'GET',
+    url: options.url || '/',
+    path: options.path || '/',
+    get(name: string) {
+      return this.headers[name.toLowerCase()];
+    },
+  };
+};
+
+const responseFactory = (): any => ({
+  statusCode: 200,
+  headers: {} as Record<string, string>,
+  body: null,
+  status: jest.fn().mockReturnThis(),
+  json: jest.fn().mockReturnThis(),
+  send: jest.fn().mockReturnThis(),
+  set: jest.fn().mockReturnThis(),
+  setHeader: jest.fn(function (this: any, name: string, value: string) {
+    this.headers[name] = value;
+    return this;
+  }),
+  getHeader: jest.fn(function (this: any, name: string) {
+    return this.headers[name];
+  }),
+  end: jest.fn(),
+});
+
+const nextFactory = () => jest.fn();
 
 describe('sanitize middleware', () => {
   describe('HTML sanitization', () => {

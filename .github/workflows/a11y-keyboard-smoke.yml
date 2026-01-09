@@ -2,8 +2,24 @@ name: "GA Gate: Accessibility lint + keyboard smoke"
 
 on:
   pull_request:
+    paths:
+      - "web/**"
+      - "packages/ui/**"
+      - "packages/shared/**"
+      - ".github/workflows/a11y-keyboard-smoke.yml"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
   push:
     branches: [main]
+    paths:
+      - "web/**"
+      - "packages/ui/**"
+      - "packages/shared/**"
+      - ".github/workflows/a11y-keyboard-smoke.yml"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
 
 permissions:
   contents: read

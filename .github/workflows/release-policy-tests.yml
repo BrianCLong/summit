@@ -1,0 +1,134 @@
+name: Release Policy Tests
+
+# CI enforcement for the Required Checks Policy system
+# Runs tests when control-plane files are modified to prevent regressions
+#
+# Tests:
+# - Policy engine unit tests (policy parsing + requiredness)
+# - Base computation unit tests (base selection algorithm)
+# - Verify-green contract tests (output format + exit codes)
+#
+# Authority: docs/ci/REQUIRED_CHECKS.md
+
+on:
+  pull_request:
+    paths:
+      - "docs/ci/REQUIRED_CHECKS_POLICY.yml"
+      - "docs/ci/REQUIRED_CHECKS_POLICY.json"
+      - "scripts/release/verify-green-for-tag.sh"
+      - "scripts/release/compute_base_for_commit.sh"
+      - "scripts/release/tests/**"
+      - ".github/workflows/release-policy-tests.yml"
+
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/ci/REQUIRED_CHECKS_POLICY.yml"
+      - "docs/ci/REQUIRED_CHECKS_POLICY.json"
+      - "scripts/release/verify-green-for-tag.sh"
+      - "scripts/release/compute_base_for_commit.sh"
+      - "scripts/release/tests/**"
+      - ".github/workflows/release-policy-tests.yml"
+
+  # Allow manual dispatch for debugging
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-policy-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  policy-tests:
+    name: Policy Engine Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          # jq is usually pre-installed, but ensure it's available
+          which jq || sudo apt-get install -y jq
+
+      - name: Make Scripts Executable
+        run: |
+          chmod +x scripts/release/verify-green-for-tag.sh
+          chmod +x scripts/release/compute_base_for_commit.sh
+          chmod +x scripts/release/tests/*.test.sh
+
+      - name: Run Policy Engine Tests
+        run: |
+          echo "Running Policy Engine Unit Tests..."
+          ./scripts/release/tests/policy_engine.test.sh
+
+      - name: Run Verify-Green Contract Tests
+        run: |
+          echo "Running Verify-Green Contract Tests..."
+          ./scripts/release/tests/verify_green_contract.test.sh
+
+  base-selection-tests:
+    name: Base Selection Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          which jq || sudo apt-get install -y jq
+
+      - name: Make Scripts Executable
+        run: |
+          chmod +x scripts/release/compute_base_for_commit.sh
+          chmod +x scripts/release/tests/*.test.sh
+
+      - name: Configure Git Identity
+        run: |
+          git config --global user.email "test@test.com"
+          git config --global user.name "Test User"
+
+      - name: Run Base Selection Tests
+        run: |
+          echo "Running Base Selection Unit Tests..."
+          ./scripts/release/tests/base_selection.test.sh
+
+  summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [policy-tests, base-selection-tests]
+    if: always()
+
+    steps:
+      - name: Generate Summary
+        run: |
+          echo "## Release Policy Tests Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ needs.policy-tests.result }}" == "success" ]]; then
+            echo "- ✅ Policy Engine Tests: PASSED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ Policy Engine Tests: FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [[ "${{ needs.base-selection-tests.result }}" == "success" ]]; then
+            echo "- ✅ Base Selection Tests: PASSED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ Base Selection Tests: FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "These tests ensure policy changes cannot break promotion gating." >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail if any test failed
+        if: needs.policy-tests.result != 'success' || needs.base-selection-tests.result != 'success'
+        run: |
+          echo "One or more test suites failed"
+          exit 1

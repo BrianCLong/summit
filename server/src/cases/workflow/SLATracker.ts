@@ -351,7 +351,7 @@ export class SLATracker {
   /**
    * Map database row to domain object
    */
-  private mapRow(row): CaseSLA {
+  private mapRow(row: any): CaseSLA {
     return {
       id: row.id,
       caseId: row.case_id,

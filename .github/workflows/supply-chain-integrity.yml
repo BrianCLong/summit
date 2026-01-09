@@ -1,9 +1,13 @@
 name: CI/CD Supply Chain Integrity
+# NOTE: GA tag triggers removed - now handled by release-ga-pipeline.yml
+# This workflow runs on branch pushes and PRs only.
+# See: docs/ci/RELEASE_GA_PIPELINE.md for GA release process.
 
 on:
   push:
     branches: [main, develop]
-    tags: ["v*.*.*"]
+    # Tag triggers removed - GA releases handled by release-ga-pipeline.yml
+    # tags: ["v*.*.*"]
     paths-ignore:
       - "**.md"
       - "docs/**"

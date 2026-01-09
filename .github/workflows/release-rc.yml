@@ -139,6 +139,22 @@ jobs:
           ref: ${{ needs.verify.outputs.tag }}
           fetch-depth: 0
 
+      - name: Compute Base Reference
+        id: base
+        run: |
+          TAG="${{ needs.verify.outputs.tag }}"
+          COMMIT="${{ needs.verify.outputs.commit }}"
+
+          echo "Computing base reference for RC: ${TAG}"
+
+          chmod +x scripts/release/compute_base_for_commit.sh
+
+          # Compute deterministic base
+          BASE=$(scripts/release/compute_base_for_commit.sh --tag "${TAG}" --commit "${COMMIT}" --verbose 2>&1 | tail -1 || echo "${COMMIT}^")
+
+          echo "Computed base: ${BASE}"
+          echo "base=${BASE}" >> $GITHUB_OUTPUT
+
       - name: Run Promotion Guard
         id: guard
         env:
@@ -146,20 +162,23 @@ jobs:
         run: |
           TAG="${{ needs.verify.outputs.tag }}"
           COMMIT="${{ needs.verify.outputs.commit }}"
+          BASE="${{ steps.base.outputs.base }}"
 
           echo "Running Promotion Guard for RC: ${TAG}"
           echo "Commit: ${COMMIT}"
+          echo "Base: ${BASE}"
 
           chmod +x scripts/release/verify-green-for-tag.sh
 
           mkdir -p artifacts/verification
           OUTPUT_FILE="artifacts/verification/REQUIRED_CHECKS.txt"
 
-          # Run verification - allow failure but capture result
+          # Run verification with explicit base - allow failure but capture result
           set +e
           scripts/release/verify-green-for-tag.sh \
               --tag "${TAG}" \
               --commit "${COMMIT}" \
+              --base "${BASE}" \
               --verbose 2>&1 | tee "${OUTPUT_FILE}"
           EXIT_CODE=$?
           set -e

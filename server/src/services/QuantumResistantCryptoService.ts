@@ -68,6 +68,7 @@ export class QuantumResistantCryptoService extends EventEmitter {
   private rotationPolicies: Map<PQCAlgorithm, KeyRotationPolicy> = new Map();
   private operationLog: PQCOperationResult[] = [];
   private maxOperationHistory = 10000;
+  private rotationTimer: NodeJS.Timeout | null = null;
 
   // Algorithm instances
   private kyber768: KyberKEM;
@@ -99,7 +100,12 @@ export class QuantumResistantCryptoService extends EventEmitter {
     this.initializeRotationPolicies();
 
     // Start key rotation monitor
-    setInterval(() => this.checkKeyRotations(), 3600000); // Every hour
+    if (process.env.NODE_ENV !== 'test') {
+      this.rotationTimer = setInterval(
+        () => this.checkKeyRotations(),
+        3600000,
+      ); // Every hour
+    }
 
     console.log('[PQC] Service initialized with NIST PQC algorithms');
   }

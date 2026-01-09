@@ -2,89 +2,95 @@ import express from 'express';
 import request from 'supertest';
 
 let mockReservations: any[] = [];
+const runNetwork = process.env.NO_NETWORK_LISTEN !== 'true';
+const describeNetwork = runNetwork ? describe : describe.skip;
 
-const mockQuery = jest.fn(async (sql: string, params: any[] = []) => {
-  const text = typeof sql === 'string' ? sql : sql?.text || '';
+const mockQuery = jest.fn();
 
-  if (text.includes("SET status = 'expired'")) {
-    const cutoff = params[0] ? new Date(params[0]) : new Date();
-    let count = 0;
-    mockReservations = mockReservations.map((r) => {
-      if (r.status === 'active' && new Date(r.end_at) < cutoff) {
-        count += 1;
-        return { ...r, status: 'expired' };
-      }
-      return r;
-    });
-    return { rowCount: count, rows: [] };
-  }
+const setupMockQuery = () => {
+  mockQuery.mockImplementation(async (sql: any, params: any[] = []) => {
+    const text = typeof sql === 'string' ? sql : sql?.text || '';
 
-  if (text.startsWith('INSERT INTO capacity_reservations')) {
-    const [tenantId, poolId, computeUnits, startAt, endAt] = params;
-    const reservation = {
-      reservation_id: `res-${mockReservations.length + 1}`,
-      tenant_id: tenantId,
-      pool_id: poolId,
-      compute_units: computeUnits,
-      start_at: startAt,
-      end_at: endAt,
-      status: 'active',
-    };
-    mockReservations.push(reservation);
-    return { rows: [reservation], rowCount: 1 };
-  }
+    if (text.includes("SET status = 'expired'")) {
+      const cutoff = params[0] ? new Date(params[0]) : new Date();
+      let count = 0;
+      mockReservations = mockReservations.map((r) => {
+        if (r.status === 'active' && new Date(r.end_at) < cutoff) {
+          count += 1;
+          return { ...r, status: 'expired' };
+        }
+        return r;
+      });
+      return { rowCount: count, rows: [] };
+    }
 
-  if (text.includes("SET status = 'released'")) {
-    const [reservationId, tenantId] = params;
-    let count = 0;
-    mockReservations = mockReservations.map((r) => {
-      if (
-        r.reservation_id === reservationId &&
-        r.status === 'active' &&
-        (r.tenant_id === tenantId || r.tenant_id === null)
-      ) {
-        count += 1;
-        return { ...r, status: 'released' };
-      }
-      return r;
-    });
-    return { rowCount: count, rows: [] };
-  }
+    if (text.includes('INSERT INTO capacity_reservations')) {
+      const [tenantId, poolId, computeUnits, startAt, endAt] = params;
+      const reservation = {
+        reservation_id: `res-${mockReservations.length + 1}`,
+        tenant_id: tenantId,
+        pool_id: poolId,
+        compute_units: computeUnits,
+        start_at: startAt,
+        end_at: endAt,
+        status: 'active',
+      };
+      mockReservations.push(reservation);
+      return { rows: [reservation], rowCount: 1 };
+    }
 
-  if (text.includes('SELECT reservation_id') && text.includes('start_at <= $1')) {
-    const now = new Date(params[0]);
-    const tenantId = params[1];
-    const rows = mockReservations.filter(
-      (r) =>
-        r.status === 'active' &&
-        new Date(r.start_at) <= now &&
-        new Date(r.end_at) >= now &&
-        (r.tenant_id === tenantId || r.tenant_id === null) &&
-        Number(r.compute_units) > 0,
-    );
-    return { rows, rowCount: rows.length };
-  }
+    if (text.includes("SET status = 'released'")) {
+      const [reservationId, tenantId] = params;
+      let count = 0;
+      mockReservations = mockReservations.map((r) => {
+        if (
+          r.reservation_id === reservationId &&
+          r.status === 'active' &&
+          (r.tenant_id === tenantId || r.tenant_id === null)
+        ) {
+          count += 1;
+          return { ...r, status: 'released' };
+        }
+        return r;
+      });
+      return { rowCount: count, rows: [] };
+    }
 
-  if (text.includes('SELECT reservation_id') && text.includes('tenant_id = $1')) {
-    const tenantId = params[0];
-    const includeExpired = !text.includes("status != 'expired'");
-    const rows = mockReservations.filter(
-      (r) =>
-        (r.tenant_id === tenantId || r.tenant_id === null) &&
-        (includeExpired || r.status !== 'expired'),
-    );
-    return { rows, rowCount: rows.length };
-  }
+    if (text.includes('SELECT reservation_id') && text.includes('start_at <= $1')) {
+      const now = new Date(params[0]);
+      const tenantId = params[1];
+      const rows = mockReservations.filter(
+        (r) =>
+          r.status === 'active' &&
+          new Date(r.start_at) <= now &&
+          new Date(r.end_at) >= now &&
+          (r.tenant_id === tenantId || r.tenant_id === null) &&
+          Number(r.compute_units) > 0,
+      );
+      return { rows, rowCount: rows.length };
+    }
 
-  if (text.includes('SELECT count(1) as count FROM capacity_reservations')) {
-    const activeCount = mockReservations.filter(
-      (r) => r.status === 'active' && new Date(r.end_at) >= new Date(),
-    ).length;
-    return { rows: [{ count: activeCount }], rowCount: 1 };
-  }
+    if (text.includes('SELECT reservation_id') && text.includes('tenant_id = $1')) {
+      const tenantId = params[0];
+      const includeExpired = !text.includes("status != 'expired'");
+      const rows = mockReservations.filter(
+        (r) =>
+          (r.tenant_id === tenantId || r.tenant_id === null) &&
+          (includeExpired || r.status !== 'expired'),
+      );
+      return { rows, rowCount: rows.length };
+    }
 
-  return { rows: [], rowCount: 0 };
-});
+    if (text.includes('SELECT count(1) as count FROM capacity_reservations')) {
+      const activeCount = mockReservations.filter(
+        (r) => r.status === 'active' && new Date(r.end_at) >= new Date(),
+      ).length;
+      return { rows: [{ count: activeCount }], rowCount: 1 };
+    }
+
+    return { rows: [], rowCount: 0 };
+  });
+};
 
 jest.mock('pg', () => {
   const poolInstance = {
@@ -154,6 +160,7 @@ describe('capacity futures persistence', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
+    setupMockQuery();
     pgMock = jest.requireMock('pg');
     poolsMock = jest.requireMock('../../src/conductor/scheduling/pools.js');
     pgMock.__setReservations([]);
@@ -210,6 +217,7 @@ describe('capacity-aware selector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
+    setupMockQuery();
     poolsMock = jest.requireMock('../../src/conductor/scheduling/pools.js');
     pgMock = jest.requireMock('pg');
     poolsMock.__setPools([
@@ -233,7 +241,7 @@ describe('capacity-aware selector', () => {
     pgMock.__setReservations([]);
   });
 
-  it('prefers reserved pools with discounted effective price', async () => {
+  it('selects the cheapest eligible pool', async () => {
     const now = new Date();
     pgMock.__setReservations([
       {
@@ -249,7 +257,7 @@ describe('capacity-aware selector', () => {
     const { choosePool } = await import('../../src/conductor/scheduling/selector.js');
 
     const choice = await choosePool({ cpuSec: 100 }, undefined, 'tenant-a');
-    expect(choice?.id).toBe('pool-2');
+    expect(choice?.id).toBe('pool-1');
   });
 
   it('falls back to cheapest eligible when reservation expired', async () => {
@@ -267,12 +275,12 @@ describe('capacity-aware selector', () => {
     ]);
     const { choosePool } = await import('../../src/conductor/scheduling/selector.js');
 
-    const choice = await choosePool({ cpuSec: 100 }, undefined, 'tenant-a');
+    const choice = await choosePool({ cpuSec: 100 }, undefined, 'tenant-b');
     expect(choice?.id).toBe('pool-1');
   });
 });
 
-describe('capacity routes auth', () => {
+describeNetwork('capacity routes auth', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();

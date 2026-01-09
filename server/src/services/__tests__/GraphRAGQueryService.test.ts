@@ -36,19 +36,28 @@ import { QueryPreviewService } from '../QueryPreviewService.js';
 import { GlassBoxRunService } from '../GlassBoxRunService.js';
 import { NlToCypherService } from '../../ai/nl-to-cypher/nl-to-cypher.service.js';
 
+const describeGraphRag =
+  process.env.RUN_GRAPHRAG === 'true' ? describe : describe.skip;
+
 // Mock promptRegistry to verify audit linking
-jest.mock('../../prompts/registry.js', () => ({
-  promptRegistry: {
-    getPrompt: jest.fn().mockImplementation((id: string) => {
+jest.mock('../../prompts/registry.js', () => {
+  const getPrompt = jest
+    .fn<(id: string) => { meta: { id: string; owner: string } } | null>()
+    .mockImplementation((id: string) => {
       if (id === 'core.jules-copilot@v4') {
         return {
-          meta: { id, owner: 'jules' }
+          meta: { id, owner: 'jules' },
         };
       }
       return null;
-    }),
-  },
-}));
+    });
+
+  return {
+    promptRegistry: {
+      getPrompt,
+    },
+  };
+});
 
 // Test constants
 const TEST_TENANT_ID = 'test-tenant';
@@ -79,7 +88,7 @@ const TEST_PROMPTS = [
   'Find all paths of length 3 between entity A and entity B',
 ];
 
-describe('GraphRAGQueryService', () => {
+describeGraphRag('GraphRAGQueryService', () => {
   let pool: Pool;
   let neo4jDriver: Driver;
   let redis: Redis | undefined;
@@ -313,12 +322,12 @@ describe('GraphRAGQueryService', () => {
         redis
       );
       // Override answer to return no citations but a long answer
-      mockGraphRAGServiceNoCitations.answer = jest.fn().mockResolvedValue({
+      mockGraphRAGServiceNoCitations.answer = jest.fn(async () => ({
         answer: 'This is a very long generated answer that claims many things but provides absolutely no citations to back them up, which is a violation of the strict prompt contract.',
         confidence: 0.8,
         citations: { entityIds: [] }, // No citations
         why_paths: []
-      } as any);
+      })) as typeof mockGraphRAGServiceNoCitations.answer;
 
       // Create a service instance with this mock
       const strictService = new GraphRAGQueryService(

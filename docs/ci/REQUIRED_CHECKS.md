@@ -2,7 +2,7 @@
 
 **Authority**: This document defines the canonical set of CI workflows that MUST pass before any release tag can be promoted from RC to GA.
 
-**Version**: 2.0.0
+**Version**: 3.0.0
 **Last Updated**: 2026-01-08
 **Owner**: Platform Engineering
 
@@ -51,6 +51,14 @@ This eliminates ambiguity: given the same inputs, the Promotion Guard always pro
 
 The canonical policy is defined in machine-readable format:
 
+**Primary (YAML)**:
+
+```
+docs/ci/REQUIRED_CHECKS_POLICY.yml
+```
+
+**Legacy (JSON)** - still supported:
+
 ```
 docs/ci/REQUIRED_CHECKS_POLICY.json
 ```
@@ -60,8 +68,21 @@ This file contains:
 - **always_required**: Checks that must pass for every commit
 - **conditional_required**: Checks required only when specific paths change
 - **informational**: Checks that provide signals but don't block promotion
+- **base_selection**: Rules for computing the base reference for changed file detection
 
-The Promotion Guard script reads this policy file to compute the required set.
+The Promotion Guard script (`verify-green-for-tag.sh`) reads this policy file to compute the required set. It prefers YAML format when `yq` is available, with fallback to JSON.
+
+### Base Reference Computation
+
+The base reference determines which files are considered "changed" for conditional check evaluation. This is computed by `scripts/release/compute_base_for_commit.sh`:
+
+| Tag Type | Base Selection                                              |
+| -------- | ----------------------------------------------------------- |
+| RC Tag   | Previous RC (same version) → Previous GA → merge-base main  |
+| GA Tag   | Same base as corresponding RC (ensures identical check set) |
+| Manual   | Explicit `--base` parameter required                        |
+
+Both RC and GA pipelines use identical base selection rules, ensuring consistent check evaluation across the release lifecycle.
 
 ---
 
@@ -435,9 +456,95 @@ gh workflow run release-promote-guard.yml \
 
 ---
 
+## Testing Policy Changes
+
+### CI Enforcement
+
+The policy engine is protected by automated tests in `.github/workflows/release-policy-tests.yml`:
+
+- **Triggers**: Any change to policy files, scripts, or tests
+- **Tests**:
+  - Policy engine unit tests (requiredness computation)
+  - Base selection unit tests (base computation algorithm)
+  - Verify-green contract tests (output format stability)
+
+### Run Tests Locally
+
+```bash
+# Run all tests
+./scripts/release/tests/policy_engine.test.sh
+./scripts/release/tests/base_selection.test.sh
+./scripts/release/tests/verify_green_contract.test.sh
+```
+
+### Offline Test Mode
+
+The `verify-green-for-tag.sh` script supports offline mode for deterministic testing:
+
+```bash
+# Run with offline status map (no GitHub API calls)
+./scripts/release/verify-green-for-tag.sh \
+  --tag v1.0.0-rc.1 \
+  --offline-policy-file path/to/policy.json \
+  --offline-status-file path/to/status.json \
+  --offline-changed-files path/to/changed_files.txt \
+  --base test-base \
+  --commit abc123
+```
+
+**Offline Status File Format**:
+
+```json
+{
+  "CI Core": "success",
+  "Unit Tests": "success",
+  "Workflow Lint": "failure",
+  "CodeQL": "success"
+}
+```
+
+**Changed Files Format** (one per line):
+
+```
+.github/workflows/ci.yml
+server/src/app.ts
+```
+
+### How to Add a New Conditional Check
+
+1. Edit `docs/ci/REQUIRED_CHECKS_POLICY.yml`:
+
+   ```yaml
+   conditional_required:
+     - name: "New Check Name"
+       workflow: "new-check.yml"
+       rationale: "Why this check is needed"
+       when_paths_match:
+         - "^pattern/to/match/"
+   ```
+
+2. Add test fixtures:
+   - Create `scripts/release/tests/fixtures/changed_<scenario>.txt`
+   - Update `scripts/release/tests/fixtures/status_all_success.json`
+
+3. Add test case to `policy_engine.test.sh`
+
+4. Run tests locally before pushing
+
+5. CI will enforce tests pass before merge
+
+---
+
 ## References
 
-- **Policy File**: `docs/ci/REQUIRED_CHECKS_POLICY.json`
+- **Policy File (YAML)**: `docs/ci/REQUIRED_CHECKS_POLICY.yml`
+- **Policy File (JSON)**: `docs/ci/REQUIRED_CHECKS_POLICY.json`
+- **Base Computation**: `scripts/release/compute_base_for_commit.sh`
+- **Verification Script**: `scripts/release/verify-green-for-tag.sh`
+- **Policy Tests**: `scripts/release/tests/`
+- **Test CI Workflow**: `.github/workflows/release-policy-tests.yml`
+- **RC Pipeline**: `docs/ci/RELEASE_RC_PIPELINE.md`
+- **GA Pipeline**: `docs/ci/RELEASE_GA_PIPELINE.md`
 - **Promotion Guide**: `docs/releases/MVP-4_STABILIZATION_PROMOTION.md`
 - **Tagging Guide**: `docs/releases/MVP-4_STABILIZATION_TAGGING.md`
 - **GA Definition**: `docs/GA_DEFINITION.md`
@@ -446,10 +553,12 @@ gh workflow run release-promote-guard.yml \
 
 ## Change History
 
-| Version | Date       | Changes                                         |
-| ------- | ---------- | ----------------------------------------------- |
-| 1.0.0   | 2026-01-07 | Initial version with 5 required workflows       |
-| 2.0.0   | 2026-01-08 | Add conditional required checks with path rules |
+| Version | Date       | Changes                                           |
+| ------- | ---------- | ------------------------------------------------- |
+| 1.0.0   | 2026-01-07 | Initial version with 5 required workflows         |
+| 2.0.0   | 2026-01-08 | Add conditional required checks with path rules   |
+| 3.0.0   | 2026-01-08 | Add YAML policy format, base computation section  |
+| 3.1.0   | 2026-01-08 | Add offline test mode, unit tests, CI enforcement |
 
 ---
 

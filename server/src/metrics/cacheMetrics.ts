@@ -66,23 +66,23 @@ export const cacheHitRatio = new Gauge({
 });
 
 export function recHit(store: string, op: string, tenant?: string) {
-  cacheHits.labels(store, op, tenant ?? 'unknown').inc();
+  cacheHits?.labels?.(store, op, tenant ?? 'unknown')?.inc?.();
 }
 export function recMiss(store: string, op: string, tenant?: string) {
-  cacheMisses.labels(store, op, tenant ?? 'unknown').inc();
+  cacheMisses?.labels?.(store, op, tenant ?? 'unknown')?.inc?.();
 }
 export function recSet(store: string, op: string, tenant?: string) {
-  cacheSets.labels(store, op, tenant ?? 'unknown').inc();
+  cacheSets?.labels?.(store, op, tenant ?? 'unknown')?.inc?.();
 }
 export function recInvalidation(pattern: string, tenant?: string) {
-  cacheInvalidations.labels(pattern, tenant ?? 'unknown').inc();
+  cacheInvalidations?.labels?.(pattern, tenant ?? 'unknown')?.inc?.();
 }
 
 export function recEviction(store: string, reason: string) {
-  cacheEvictions.labels(store, reason).inc();
+  cacheEvictions?.labels?.(store, reason)?.inc?.();
 }
 
 export function setHitRatio(store: string, op: string, hits: number, misses: number) {
   const total = hits + misses;
-  cacheHitRatio.labels(store, op).set(total === 0 ? 0 : hits / total);
+  cacheHitRatio?.labels?.(store, op)?.set?.(total === 0 ? 0 : hits / total);
 }

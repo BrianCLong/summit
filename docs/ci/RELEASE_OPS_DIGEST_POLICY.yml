@@ -2,11 +2,22 @@
 # Configures the daily digest generator for release operations visibility
 #
 # This policy file is read by scripts/release/generate_release_ops_digest.sh
+# Cadence gating by scripts/release/should_run_task.sh
 # See docs/ci/RELEASE_OPS_DIGEST.md for full documentation.
 
-version: "1.0.0"
+version: "1.1.0"
 
-# Rate limiting to prevent spam
+# Run window (UTC) - digest only runs within this daily window
+# The orchestrator runs hourly; this gates when digest actually executes
+run_window_utc:
+  start: "08:00"              # Start of daily window (08:00 UTC = business hours start)
+  end: "09:00"                # End of daily window (1 hour window)
+
+# Cadence hours - minimum time between digest executions
+# Combined with run_window_utc ensures once-per-day execution
+cadence_hours: 24
+
+# Rate limiting to prevent spam (legacy format, preserved for compatibility)
 cadence:
   hours: 24                    # Minimum hours between digest posts
   force_on_escalation: true    # Force digest if new P0 escalation detected

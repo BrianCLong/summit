@@ -1,9 +1,14 @@
-name: GA Release
+name: GA Release (Legacy)
+# DEPRECATED: This workflow is superseded by release-ga-pipeline.yml
+# The canonical GA pipeline owns all v*.*.* tag events.
+# This workflow is retained for manual-only dispatch compatibility.
+# See: docs/ci/RELEASE_GA_PIPELINE.md
 
 on:
-  push:
-    tags:
-      - "v*"
+  # Tag triggers removed - now handled by release-ga-pipeline.yml
+  # push:
+  #   tags:
+  #     - "v*"
   workflow_dispatch:
     inputs:
       tag:

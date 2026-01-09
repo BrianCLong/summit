@@ -4,12 +4,21 @@ name: Release Ops Digest
 # Generates a consolidated digest of all active release blockers
 # with strict rate-limiting to avoid spam.
 #
+# DEPRECATION NOTICE:
+# This workflow is now a step in the Release Ops Orchestrator.
+# Primary schedule: release-ops-orchestrator.yml (hourly, with built-in rate limiting)
+# This workflow retains workflow_dispatch for manual runs and debugging.
+#
 # See docs/ci/RELEASE_OPS_DIGEST.md for full documentation.
+# See docs/ci/RELEASE_OPS_ORCHESTRATOR.md for orchestrator details.
 
 on:
-  schedule:
-    # Run daily at 08:00 UTC (business hours start)
-    - cron: "0 8 * * *"
+  # Schedule removed - now handled by release-ops-orchestrator.yml
+  # The orchestrator calls this script hourly, but the script has built-in
+  # rate limiting that respects the daily cadence.
+  # schedule:
+  #   - cron: "0 8 * * *"
+
   workflow_dispatch:
     inputs:
       force:

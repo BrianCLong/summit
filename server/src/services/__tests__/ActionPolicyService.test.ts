@@ -1,108 +1,106 @@
-import {
-  ActionPolicyError,
-  ActionPolicyService,
-} from '../ActionPolicyService.js';
-import type { PreflightRequest } from '@intelgraph/policy-types';
+import { ActionPolicyService } from '../ActionPolicyService.js';
+import type { PreflightRequest } from '../../../../packages/policy-audit/src/types';
 
 const baseRequest: PreflightRequest = {
   action: 'DELETE_ACCOUNT',
-  subject: { id: 'user-1', tenantId: 't-1', roles: ['admin'] },
-  resource: { id: 'acc-1', tenantId: 't-1', classification: 'confidential' },
-  context: { currentAcr: 'loa2' },
+  actor: { id: 'user-1', tenantId: 't-1', role: 'admin' },
+  resource: { id: 'acc-1', type: 'account' },
+  context: { currentAcr: 'loa2' } as any,
 };
 
-function buildService(result: any, ttlSeconds: number = 60): ActionPolicyService {
-  return new ActionPolicyService({
-    ttlSeconds,
-    opaClient: {
-      post: jest.fn<() => Promise<{ data: { result: any } }>>().mockResolvedValue({ data: { result } }),
-    } as any,
-    persistDecisions: false,
-  });
-}
+const buildService = (result: any) => {
+  const store: any = {
+    saved: null,
+    saveDecision: jest.fn(async (_preflightId, requestHash, decision) => {
+      store.saved = {
+        decision,
+        requestHash,
+        policyName: decision.policyVersion || 'actions',
+      };
+    }),
+    getDecision: jest.fn(async () => store.saved),
+  };
+
+  const service = new ActionPolicyService({ store });
+  (service as any).http = {
+    post: jest.fn().mockResolvedValue({ data: { result } }),
+  };
+
+  return { service, store };
+};
 
 describe('ActionPolicyService', () => {
-  it('runs preflight and allows execution when hashes match', async () => {
-    const service = buildService({ allow: true, obligations: [] });
-
-    const preflight = await service.runPreflight(baseRequest, {
+  it('runs preflight and validates execution when hashes match', async () => {
+    const { service } = buildService({ allow: true, obligations: [] });
+    const preflight = await service.preflight(baseRequest, {
       correlationId: 'corr-1',
     });
 
-    expect(preflight.allow).toBe(true);
+    expect(preflight.decision.allow).toBe(true);
     expect(preflight.requestHash).toBeDefined();
 
-    const execution = await service.assertExecutable(
+    const execution = await service.validateExecution(
       preflight.preflightId,
       baseRequest,
-      [
-        { id: 'approver-1' },
-        { id: 'approver-2' },
-      ],
     );
 
-    expect(execution.preflightId).toBe(preflight.preflightId);
-    expect(execution.requestHash).toBe(preflight.requestHash);
+    expect(execution.status).toBe('ok');
   });
 
   it('blocks execution when preflight denied', async () => {
-    const service = buildService({ allow: false, reason: 'deny' });
+    const { service } = buildService({ allow: false, reason: 'deny' });
+    const preflight = await service.preflight(baseRequest);
 
-    const preflight = await service.runPreflight(baseRequest);
+    const execution = await service.validateExecution(
+      preflight.preflightId,
+      baseRequest,
+    );
 
-    await expect(
-      service.assertExecutable(preflight.preflightId, baseRequest),
-    ).rejects.toMatchObject({
-      code: 'preflight_denied',
-      status: 403,
-    });
+    expect(execution.status).toBe('blocked');
   });
 
-  it('rejects overlapping approvers for dual-control obligations', async () => {
-    const service = buildService({
+  it('blocks execution when obligations are unsatisfied', async () => {
+    const { service } = buildService({
       allow: true,
-      obligations: [{ type: 'dual_control' }],
+      obligations: [{ code: 'DUAL_CONTROL', satisfied: false }],
     });
+    const preflight = await service.preflight(baseRequest);
 
-    const preflight = await service.runPreflight(baseRequest);
+    const execution = await service.validateExecution(
+      preflight.preflightId,
+      baseRequest,
+    );
 
-    await expect(
-      service.assertExecutable(preflight.preflightId, baseRequest, [
-        { id: 'approver-1' },
-        { id: 'approver-1' },
-      ]),
-    ).rejects.toBeInstanceOf(ActionPolicyError);
+    expect(execution.status).toBe('blocked');
   });
 
-  it('rejects execution when request hash differs from preflight', async () => {
-    const service = buildService({ allow: true, obligations: [] });
-    const preflight = await service.runPreflight(baseRequest);
+  it('flags execution when request hash differs from preflight', async () => {
+    const { service } = buildService({ allow: true, obligations: [] });
+    const preflight = await service.preflight(baseRequest);
 
     const changedRequest = {
       ...baseRequest,
       resource: { ...baseRequest.resource, id: 'other' },
     };
 
-    await expect(
-      service.assertExecutable(preflight.preflightId, changedRequest, [
-        { id: 'approver-1' },
-        { id: 'approver-2' },
-      ]),
-    ).rejects.toMatchObject({ code: 'request_hash_mismatch' });
+    const execution = await service.validateExecution(
+      preflight.preflightId,
+      changedRequest,
+    );
+
+    expect(execution.status).toBe('hash_mismatch');
   });
 
-  it('expires preflight decisions based on TTL', async () => {
-    const service = buildService({ allow: true, obligations: [] }, 0);
-    const preflight = await service.runPreflight(baseRequest);
-    await new Promise((resolve) => setTimeout(resolve, 2));
+  it('expires preflight decisions when TTL has passed', async () => {
+    const { service, store } = buildService({ allow: true, obligations: [] });
+    const preflight = await service.preflight(baseRequest);
+    store.saved.decision.expiresAt = new Date(Date.now() - 1000).toISOString();
 
-    await expect(
-      service.assertExecutable(preflight.preflightId, baseRequest, [
-        { id: 'a' },
-        { id: 'b' },
-      ]),
-    ).rejects.toMatchObject({
-      code: 'preflight_expired',
-    });
+    const execution = await service.validateExecution(
+      preflight.preflightId,
+      baseRequest,
+    );
+
+    expect(execution.status).toBe('expired');
   });
 });
