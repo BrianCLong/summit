@@ -6,7 +6,7 @@ import {
   detectPII,
   redactPII,
 } from '../src/services/AttachmentService';
-import { createProvenanceRecord } from '../../packages/shared/provenance';
+import { createProvenanceRecord } from './mocks/provenance';
 import { describe, it, test, expect } from '@jest/globals';
 
 const TMP_DIR = path.join(__dirname, '..', '..', 'tmp-test');

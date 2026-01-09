@@ -40,6 +40,7 @@ describe('RateLimiter', () => {
       expect.stringContaining('local current'),
       1,
       expect.stringContaining('test-key'),
+      1,
       60000
     );
   });

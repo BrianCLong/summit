@@ -31,6 +31,7 @@ const config: Config = {
     '.*packages/shared/provenance(\\.js)?$': '<rootDir>/tests/mocks/provenance.ts',
     '.*logger(\\.js)?$': '<rootDir>/tests/mocks/logger.ts',
     '.*metrics/dbMetrics(\\.js)?$': '<rootDir>/tests/mocks/db-metrics.ts',
+    '.*workers/eventBus(\\.js)?$': '<rootDir>/tests/mocks/eventBus.ts',
     '.*health/aggregator(\\.js)?$': '<rootDir>/tests/mocks/health-aggregator.ts',
     '^ioredis$': '<rootDir>/tests/mocks/ioredis.ts',
     '^pg-boss$': '<rootDir>/tests/mocks/pg-boss.ts',

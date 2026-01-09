@@ -1,7 +1,7 @@
 import { RedTeamSimulator } from '../../src/services/RedTeamSimulator';
 import { EventEmitter } from 'events';
 import { describe, it, expect, jest, afterEach } from '@jest/globals';
-import { eventBus } from '../../src/lib/events/event-bus.js';
+import eventBus from '../../src/workers/eventBus';
 
 describe('RedTeamSimulator', () => {
   afterEach(() => {
