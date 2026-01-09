@@ -11,10 +11,14 @@ This checklist must be completed by the Release Captain before tagging a General
 - [ ] **Security Scan**: No critical vulnerabilities in dependencies.
 - [ ] **Change Log**: `CHANGELOG.md` is updated with all features and fixes.
 - [ ] **Versioning**: Semantic versioning rules followed (e.g., `v1.2.0`).
+- [ ] **RC Tag Created**: Latest `vX.Y.Z-rc.N` tag exists for the GA SHA.
+- [ ] **Draft RC Release**: Draft GitHub Release created for the RC tag.
+- [ ] **Evidence + Trust Snapshot**: RC draft release attaches evidence bundle and trust snapshot assets.
 
 ## 2. Evidence Collection (Automated)
 
 The release pipeline will generate the following. Verify their existence after the dry-run:
+
 - [ ] `sbom.cdx.json` (CycloneDX SBOM)
 - [ ] `vuln-report.json` (Vulnerability Report)
 - [ ] `test-summary.json` (Test Results)
@@ -32,6 +36,7 @@ The release pipeline will generate the following. Verify their existence after t
 - [ ] Push tag: `git push origin vX.Y.Z`
 - [ ] Monitor `release-ga` workflow.
 - [ ] Verify GitHub Release created with "Evidence Bundle" attached.
+- [ ] **Publish Approval Recorded**: Release publish approval logged via the `rc-release-publish` environment.
 
 ## 5. Post-Release
 

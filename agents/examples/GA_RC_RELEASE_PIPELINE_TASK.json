@@ -1,0 +1,41 @@
+{
+  "task_id": "GA_RC_RELEASE_PIPELINE",
+  "agent_id": "codex-cli",
+  "prompt_ref": {
+    "id": "ga-rc-release-pipeline",
+    "version": "v1",
+    "sha256": "a33e1001876a3ba11164166bfc7b1e5e82c42906ff0e7bc461c8e3593e01ccfc",
+    "path": "prompts/release/ga-rc-release-pipeline.md"
+  },
+  "declared_scope": {
+    "paths": [
+      ".github/workflows/",
+      "scripts/release/",
+      "docs/release/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/",
+      "prompts/release/",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["release", "governance", "ci", "provenance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "artifacts/rc/release-notes/release_notes.md",
+      "artifacts/rc/release-notes/release_notes.json",
+      "rc-release-draft"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "RC workflow tags vX.Y.Z-rc.N only after main + GA gate verification",
+    "Release notes include assurance and evidence digests",
+    "Draft GitHub Release attaches evidence bundle and trust snapshot"
+  ],
+  "stop_conditions": ["CI failure on main", "PII detected in outputs", "Sandbox violation alert"]
+}

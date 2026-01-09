@@ -1,0 +1,65 @@
+{
+  "tag": "v4.1.2-rc.1",
+  "generatedAt": "2026-01-10T00:00:00Z",
+  "targetSha": "abc123def456",
+  "previousTag": "v4.1.1",
+  "assurance": {
+    "gaGateStatus": "success",
+    "governanceVerdict": "PASS (100%)",
+    "sbomSummary": "Deferred pending trust snapshot field",
+    "vulnerabilitySummary": "Deferred pending trust snapshot field",
+    "reproducibleBuild": "Deferred pending trust snapshot field",
+    "provenancePresence": "Evidence coverage 98%",
+    "schemaHash": "schemahash"
+  },
+  "evidence": {
+    "bundleFile": "artifacts/ga/evidence.tar.gz",
+    "bundleDigest": "bundlehash",
+    "manifestFile": "artifacts/ga/manifest.json",
+    "manifestDigest": "manifesthash",
+    "trustSnapshotFile": "artifacts/ga/trust-snapshot.json",
+    "trustSnapshotDigest": "trusthash"
+  },
+  "issues": [101, 102],
+  "metadata": {
+    "repo": "example/summit",
+    "run_id": "4567"
+  },
+  "pullRequests": [
+    {
+      "number": 12,
+      "title": "feat: add search",
+      "url": "https://github.com/example/summit/pull/12",
+      "labels": ["type:feature", "release-highlight"],
+      "body": "Closes #101"
+    },
+    {
+      "number": 8,
+      "title": "fix: crash on start",
+      "url": "https://github.com/example/summit/pull/8",
+      "labels": ["bug"],
+      "body": "Fixes #102"
+    },
+    {
+      "number": 20,
+      "title": "docs: update runbook",
+      "url": "https://github.com/example/summit/pull/20",
+      "labels": ["docs"],
+      "body": ""
+    },
+    {
+      "number": 15,
+      "title": "chore: update pipeline",
+      "url": "https://github.com/example/summit/pull/15",
+      "labels": ["ci"],
+      "body": ""
+    },
+    {
+      "number": 9,
+      "title": "refactor!: api change",
+      "url": "https://github.com/example/summit/pull/9",
+      "labels": ["breaking-change"],
+      "body": "BREAKING CHANGE: api"
+    }
+  ]
+}

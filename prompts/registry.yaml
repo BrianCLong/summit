@@ -79,3 +79,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ga-rc-release-pipeline
+    version: v1
+    path: prompts/release/ga-rc-release-pipeline.md
+    sha256: a33e1001876a3ba11164166bfc7b1e5e82c42906ff0e7bc461c8e3593e01ccfc
+    description: Deterministic RC tagging, release notes, and evidence-backed draft releases.
+    scope:
+      paths:
+        - .github/workflows/
+        - scripts/release/
+        - docs/release/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/release/
+        - prompts/registry.yaml
+      domains:
+        - release
+        - governance
+        - ci
+        - provenance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

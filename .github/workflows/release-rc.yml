@@ -1,103 +1,184 @@
 name: Release RC Pipeline
 
-# Canonical RC Pipeline - Single authoritative workflow for RC tag events
-# Consolidates verification + promotion bundle into one artifact.
-#
-# This workflow:
-# 1. Runs release readiness gate on the tagged commit
-# 2. Verifies all required checks are green (truth table)
-# 3. Builds a Promotion Bundle with all materials
-# 4. Produces single rc-pipeline-bundle-{tag} artifact
-#
-# See docs/ci/RELEASE_RC_PIPELINE.md for full documentation.
-
 on:
-  push:
-    tags:
-      - "v*.*.*-rc.*"
-
-  # Manual dispatch for re-running without re-pushing tag
   workflow_dispatch:
     inputs:
-      tag:
-        description: "RC tag to process (e.g., v4.1.2-rc.1)"
-        required: true
+      version:
+        description: "Base version (e.g., 4.1.2). Defaults to package.json version."
+        required: false
+        type: string
+      rc_number:
+        description: "RC number override (e.g., 1). Auto-increments when omitted."
+        required: false
+        type: string
+      target_sha:
+        description: "Target commit SHA (defaults to main HEAD)."
+        required: false
+        type: string
+      previous_tag:
+        description: "Override previous tag for changelog range."
+        required: false
+        type: string
+      confirm_tag:
+        description: "Set true to create/push the RC tag."
+        required: false
+        default: false
+        type: boolean
+      publish:
+        description: "Publish the RC release (default: draft only)."
+        required: false
+        default: false
+        type: boolean
+      allow_non_main:
+        description: "Allow tagging commits not on main (governed exception)."
+        required: false
+        default: false
+        type: boolean
+      evidence_workflow:
+        description: "Workflow file that produced the GA evidence bundle."
+        required: false
+        default: "ga-ready.yml"
+        type: string
+      evidence_artifact:
+        description: "Artifact name containing the GA evidence bundle."
+        required: false
+        default: "ga-evidence"
+        type: string
+      trust_workflow:
+        description: "Workflow file that produced the trust snapshot."
+        required: false
+        default: "publish-trust-snapshot.yml"
+        type: string
+      trust_artifact:
+        description: "Artifact name containing the trust snapshot."
+        required: false
+        default: "trust-snapshot"
+        type: string
+      sbom_workflow:
+        description: "Workflow file that produced SBOM artifacts (optional)."
+        required: false
+        default: ""
+        type: string
+      sbom_artifact:
+        description: "Artifact name containing SBOM files (optional)."
+        required: false
+        default: ""
         type: string
 
 permissions:
-  contents: read
+  contents: write
   actions: read
 
 concurrency:
-  group: release-rc-${{ github.ref_name || inputs.tag }}
-  cancel-in-progress: false # Don't cancel release workflows
+  group: release-rc-${{ inputs.version || inputs.target_sha || github.run_id }}
+  cancel-in-progress: false
 
 jobs:
-  # ═══════════════════════════════════════════════════════════════════════════
-  # Stage 1: Release Readiness Verification
-  # Runs canonical release:ready gate on the tagged commit
-  # ═══════════════════════════════════════════════════════════════════════════
-  verify:
-    name: "1️⃣ Release Readiness"
+  resolve:
+    name: Resolve Target + Tag
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-
     outputs:
-      tag: ${{ steps.params.outputs.tag }}
-      commit: ${{ steps.params.outputs.commit }}
-      version: ${{ steps.params.outputs.version }}
+      tag: ${{ steps.tag.outputs.tag }}
+      target_sha: ${{ steps.target.outputs.sha }}
+      version: ${{ steps.tag.outputs.version }}
+      tag_exists: ${{ steps.tag.outputs.tag_exists }}
+      tag_matches: ${{ steps.tag.outputs.tag_matches }}
 
     steps:
-      - name: Determine Parameters
-        id: params
-        run: |
-          if [[ "${{ github.event_name }}" == "push" ]]; then
-            TAG="${{ github.ref_name }}"
-            COMMIT="${{ github.sha }}"
-          else
-            TAG="${{ inputs.tag }}"
-            COMMIT=""  # Will resolve from tag
-          fi
-
-          echo "tag=${TAG}" >> $GITHUB_OUTPUT
-          echo "commit=${COMMIT}" >> $GITHUB_OUTPUT
-
-          # Extract version (e.g., 4.1.2 from v4.1.2-rc.1)
-          VERSION=$(echo "${TAG}" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)-rc\.[0-9]+$/\1/')
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-
-          echo "Tag: ${TAG}"
-          echo "Commit: ${COMMIT:-'(will resolve from tag)'}"
-          echo "Version: ${VERSION}"
-
-      - name: Validate RC Tag Format
-        run: |
-          TAG="${{ steps.params.outputs.tag }}"
-          if ! [[ "${TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$ ]]; then
-            echo "::error::Invalid RC tag format: ${TAG}. Expected vX.Y.Z-rc.N"
-            exit 1
-          fi
-          echo "✅ Valid RC tag format: ${TAG}"
-
-      - name: Checkout at tagged commit
-        uses: actions/checkout@v6
+      - name: Checkout main
+        uses: actions/checkout@v4
         with:
-          ref: ${{ steps.params.outputs.tag }}
           fetch-depth: 0
 
-      - name: Resolve Commit SHA
-        id: resolve
+      - name: Fetch tags and main
         run: |
-          if [[ -z "${{ steps.params.outputs.commit }}" ]]; then
-            COMMIT=$(git rev-parse HEAD)
+          git fetch origin main --tags --prune
+
+      - name: Resolve target SHA
+        id: target
+        run: |
+          if [[ -n "${{ inputs.target_sha }}" ]]; then
+            SHA="${{ inputs.target_sha }}"
           else
-            COMMIT="${{ steps.params.outputs.commit }}"
+            SHA=$(git rev-parse origin/main)
           fi
-          echo "commit=${COMMIT}" >> $GITHUB_OUTPUT
-          echo "Resolved commit: ${COMMIT}"
+
+          echo "sha=${SHA}" >> $GITHUB_OUTPUT
+          echo "Target SHA: ${SHA}"
+
+          if [[ "${{ inputs.allow_non_main }}" != "true" ]]; then
+            if ! git merge-base --is-ancestor "${SHA}" origin/main; then
+              echo "::error::Target SHA is not on main. Governed exception required."
+              exit 1
+            fi
+          else
+            echo "Governed exception: non-main SHA allowed."
+          fi
+
+      - name: Determine RC tag
+        id: tag
+        run: |
+          VERSION_INPUT="${{ inputs.version }}"
+          if [[ -z "${VERSION_INPUT}" ]]; then
+            VERSION_INPUT=$(node -p "JSON.parse(require('fs').readFileSync('package.json','utf8')).version")
+          fi
+
+          VERSION_INPUT=${VERSION_INPUT#v}
+          BASE_VERSION=${VERSION_INPUT%%-rc.*}
+
+          RC_NUMBER="${{ inputs.rc_number }}"
+          if [[ -z "${RC_NUMBER}" ]]; then
+            LAST_RC=$(git tag -l "v${BASE_VERSION}-rc.*" --sort=-v:refname | head -n 1)
+            if [[ -n "${LAST_RC}" ]]; then
+              RC_NUMBER=$(echo "${LAST_RC}" | sed -E 's/.*-rc\.([0-9]+)$/\1/')
+              RC_NUMBER=$((RC_NUMBER + 1))
+            else
+              RC_NUMBER=1
+            fi
+          fi
+
+          TAG="v${BASE_VERSION}-rc.${RC_NUMBER}"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "version=${BASE_VERSION}" >> $GITHUB_OUTPUT
+
+          if git rev-parse "${TAG}" >/dev/null 2>&1; then
+            TAG_SHA=$(git rev-parse "${TAG}")
+            if [[ "${TAG_SHA}" == "${{ steps.target.outputs.sha }}" ]]; then
+              echo "tag_exists=true" >> $GITHUB_OUTPUT
+              echo "tag_matches=true" >> $GITHUB_OUTPUT
+              echo "Tag already exists and matches target SHA."
+            else
+              echo "::error::Tag ${TAG} already exists for ${TAG_SHA}."
+              exit 1
+            fi
+          else
+            echo "tag_exists=false" >> $GITHUB_OUTPUT
+            echo "tag_matches=false" >> $GITHUB_OUTPUT
+          fi
+
+          echo "Resolved tag: ${TAG}"
+
+  verify:
+    name: Verify Preconditions
+    runs-on: ubuntu-latest
+    needs: resolve
+    outputs:
+      ga_gate_status: ${{ steps.gate.outputs.status }}
+      ga_gate_run_id: ${{ steps.gate.outputs.run_id }}
+      evidence_bundle_zip: ${{ steps.artifacts.outputs.evidence_bundle_zip }}
+      trust_snapshot_file: ${{ steps.artifacts.outputs.trust_snapshot_file }}
+      evidence_manifest: ${{ steps.artifacts.outputs.evidence_manifest }}
+      sbom_dir: ${{ steps.artifacts.outputs.sbom_dir }}
+
+    steps:
+      - name: Checkout target SHA
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.resolve.outputs.target_sha }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
 
@@ -109,374 +190,301 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run release:ready
-        run: |
-          TAG="${{ steps.params.outputs.tag }}"
-          COMMIT="${{ steps.resolve.outputs.commit }}"
+      - name: Run release readiness gate
+        run: pnpm release:ready
 
-          echo "Running release readiness gate for RC: ${TAG}"
-          echo "Commit: ${COMMIT}"
-          pnpm release:ready
-
-  # ═══════════════════════════════════════════════════════════════════════════
-  # Stage 2: Promotion Guard Verification
-  # Verifies all required checks are green using truth table
-  # ═══════════════════════════════════════════════════════════════════════════
-  promotion-guard:
-    name: "2️⃣ Promotion Guard"
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: verify
-
-    outputs:
-      promotion_allowed: ${{ steps.guard.outputs.promotion_allowed }}
-      verification_output: ${{ steps.guard.outputs.output_file }}
-
-    steps:
-      - name: Checkout at tagged commit
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ needs.verify.outputs.tag }}
-          fetch-depth: 0
-
-      - name: Compute Base Reference
-        id: base
-        run: |
-          TAG="${{ needs.verify.outputs.tag }}"
-          COMMIT="${{ needs.verify.outputs.commit }}"
-
-          echo "Computing base reference for RC: ${TAG}"
-
-          chmod +x scripts/release/compute_base_for_commit.sh
-
-          # Compute deterministic base
-          BASE=$(scripts/release/compute_base_for_commit.sh --tag "${TAG}" --commit "${COMMIT}" --verbose 2>&1 | tail -1 || echo "${COMMIT}^")
-
-          echo "Computed base: ${BASE}"
-          echo "base=${BASE}" >> $GITHUB_OUTPUT
-
-      - name: Run Promotion Guard
-        id: guard
+      - name: Verify GA Gate status
+        id: gate
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${{ needs.verify.outputs.tag }}"
-          COMMIT="${{ needs.verify.outputs.commit }}"
-          BASE="${{ steps.base.outputs.base }}"
+          REPO="${{ github.repository }}"
+          SHA="${{ needs.resolve.outputs.target_sha }}"
+          RUN_JSON=$(gh api "repos/${REPO}/actions/workflows/ga-gate.yml/runs?head_sha=${SHA}&status=completed" --jq '.workflow_runs[0]')
 
-          echo "Running Promotion Guard for RC: ${TAG}"
-          echo "Commit: ${COMMIT}"
-          echo "Base: ${BASE}"
-
-          chmod +x scripts/release/verify-green-for-tag.sh
-
-          mkdir -p artifacts/verification
-          OUTPUT_FILE="artifacts/verification/REQUIRED_CHECKS.txt"
-
-          # Run verification with explicit base - allow failure but capture result
-          set +e
-          scripts/release/verify-green-for-tag.sh \
-              --tag "${TAG}" \
-              --commit "${COMMIT}" \
-              --base "${BASE}" \
-              --verbose 2>&1 | tee "${OUTPUT_FILE}"
-          EXIT_CODE=$?
-          set -e
-
-          echo "output_file=${OUTPUT_FILE}" >> $GITHUB_OUTPUT
-
-          if [[ ${EXIT_CODE} -eq 0 ]]; then
-            echo "promotion_allowed=true" >> $GITHUB_OUTPUT
-            echo "✅ Promotion Guard: PASSED"
-          else
-            echo "promotion_allowed=false" >> $GITHUB_OUTPUT
-            echo "⚠️ Promotion Guard: Some checks pending/failed"
-            echo "Note: Bundle will still be created for audit purposes"
+          if [[ -z "${RUN_JSON}" || "${RUN_JSON}" == "null" ]]; then
+            echo "::error::No GA Gate run found for ${SHA}."
+            exit 1
           fi
 
-      - name: Upload Verification Output
-        uses: actions/upload-artifact@v6
-        with:
-          name: verification-output
-          path: artifacts/verification/
-          retention-days: 90
+          RUN_ID=$(echo "${RUN_JSON}" | jq -r '.id')
+          CONCLUSION=$(echo "${RUN_JSON}" | jq -r '.conclusion')
 
-      - name: Promotion Guard Summary
-        if: always()
+          echo "run_id=${RUN_ID}" >> $GITHUB_OUTPUT
+          echo "status=${CONCLUSION}" >> $GITHUB_OUTPUT
+
+          if [[ "${CONCLUSION}" != "success" ]]; then
+            echo "::error::GA Gate is not green for ${SHA} (status: ${CONCLUSION})."
+            exit 1
+          fi
+
+      - name: Download evidence + trust artifacts
+        id: artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${{ needs.verify.outputs.tag }}"
-          COMMIT="${{ needs.verify.outputs.commit }}"
-          ALLOWED="${{ steps.guard.outputs.promotion_allowed }}"
+          REPO="${{ github.repository }}"
+          SHA="${{ needs.resolve.outputs.target_sha }}"
+          EVIDENCE_WORKFLOW="${{ inputs.evidence_workflow }}"
+          EVIDENCE_ARTIFACT="${{ inputs.evidence_artifact }}"
+          TRUST_WORKFLOW="${{ inputs.trust_workflow }}"
+          TRUST_ARTIFACT="${{ inputs.trust_artifact }}"
+          SBOM_WORKFLOW="${{ inputs.sbom_workflow }}"
+          SBOM_ARTIFACT="${{ inputs.sbom_artifact }}"
 
-          echo "## Promotion Guard Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| RC Tag | \`${TAG}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Commit | \`${COMMIT:0:7}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Status | ${ALLOWED} == 'true' && '✅ PASSED' || '⚠️ PENDING/FAILED' |" >> $GITHUB_STEP_SUMMARY
+          mkdir -p artifacts/rc/input
 
-  # ═══════════════════════════════════════════════════════════════════════════
-  # Stage 3: Build & Assemble RC Pipeline Bundle
-  # Creates single authoritative artifact: rc-pipeline-bundle-{tag}
-  # ═══════════════════════════════════════════════════════════════════════════
-  bundle:
-    name: "3️⃣ Assemble Pipeline Bundle"
+          download_artifact() {
+            local workflow=$1
+            local artifact=$2
+            local dest=$3
+
+            local run_id
+            run_id=$(gh api "repos/${REPO}/actions/workflows/${workflow}/runs?head_sha=${SHA}&status=completed" --jq '.workflow_runs[0].id')
+            if [[ -z "${run_id}" || "${run_id}" == "null" ]]; then
+              echo "::error::No workflow runs found for ${workflow} and ${SHA}."
+              exit 1
+            fi
+
+            local artifact_id
+            artifact_id=$(gh api "repos/${REPO}/actions/runs/${run_id}/artifacts" --jq ".artifacts[] | select(.name==\"${artifact}\") | .id" | head -n 1)
+            if [[ -z "${artifact_id}" || "${artifact_id}" == "null" ]]; then
+              echo "::error::Artifact ${artifact} not found in ${workflow} run ${run_id}."
+              exit 1
+            fi
+
+            gh api "repos/${REPO}/actions/artifacts/${artifact_id}/zip" > "${dest}.zip"
+            unzip -q "${dest}.zip" -d "${dest}"
+          }
+
+          download_artifact "${EVIDENCE_WORKFLOW}" "${EVIDENCE_ARTIFACT}" "artifacts/rc/input/${EVIDENCE_ARTIFACT}"
+          download_artifact "${TRUST_WORKFLOW}" "${TRUST_ARTIFACT}" "artifacts/rc/input/${TRUST_ARTIFACT}"
+
+          TRUST_FILE=$(find "artifacts/rc/input/${TRUST_ARTIFACT}" -type f \( -name 'trust-snapshot.json' -o -name 'trust_snapshot.json' \) | head -n 1)
+          if [[ -z "${TRUST_FILE}" ]]; then
+            echo "::error::Trust snapshot JSON not found in ${TRUST_ARTIFACT} artifact."
+            exit 1
+          fi
+
+          if [[ -n "${SBOM_WORKFLOW}" && -n "${SBOM_ARTIFACT}" ]]; then
+            download_artifact "${SBOM_WORKFLOW}" "${SBOM_ARTIFACT}" "artifacts/rc/input/${SBOM_ARTIFACT}"
+            mkdir -p artifacts/rc/input/sboms
+            cp -R "artifacts/rc/input/${SBOM_ARTIFACT}/." artifacts/rc/input/sboms/
+            echo "sbom_dir=artifacts/rc/input/sboms" >> $GITHUB_OUTPUT
+          else
+            echo "sbom_dir=" >> $GITHUB_OUTPUT
+          fi
+
+          echo "evidence_bundle_zip=artifacts/rc/input/${EVIDENCE_ARTIFACT}.zip" >> $GITHUB_OUTPUT
+          echo "trust_snapshot_file=${TRUST_FILE}" >> $GITHUB_OUTPUT
+          echo "evidence_manifest=EVIDENCE_BUNDLE.manifest.json" >> $GITHUB_OUTPUT
+
+      - name: Validate evidence manifest + trust snapshot
+        run: |
+          pnpm exec tsx scripts/release/validate_evidence_manifest.ts --manifest EVIDENCE_BUNDLE.manifest.json
+          pnpm exec tsx scripts/release/validate_trust_snapshot.ts --snapshot "${{ steps.artifacts.outputs.trust_snapshot_file }}"
+
+      - name: Upload RC input artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rc-release-inputs-${{ needs.resolve.outputs.tag }}
+          path: |
+            ${{ steps.artifacts.outputs.evidence_bundle_zip }}
+            ${{ steps.artifacts.outputs.trust_snapshot_file }}
+            ${{ steps.artifacts.outputs.sbom_dir }}
+
+  assemble:
+    name: Assemble Release Notes
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [verify, promotion-guard]
-    if: always() && needs.verify.result == 'success'
+    needs: [resolve, verify]
+    outputs:
+      release_notes_dir: ${{ steps.notes.outputs.dir }}
 
     steps:
-      - name: Checkout at tagged commit
-        uses: actions/checkout@v6
+      - name: Checkout target SHA
+        uses: actions/checkout@v4
         with:
-          ref: ${{ needs.verify.outputs.tag }}
+          fetch-depth: 0
+          ref: ${{ needs.resolve.outputs.target_sha }}
+
+      - name: Download RC input artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: rc-release-inputs-${{ needs.resolve.outputs.tag }}
+          path: artifacts/rc/input
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Assemble release notes
+        id: notes
+        run: |
+          OUT_DIR="artifacts/rc/release-notes"
+          mkdir -p "${OUT_DIR}"
+
+          EVIDENCE_ZIP="artifacts/rc/input/${{ inputs.evidence_artifact }}.zip"
+          TRUST_FILE=$(find artifacts/rc/input -type f \( -name 'trust-snapshot.json' -o -name 'trust_snapshot.json' \) | head -n 1)
+
+          if [[ -z "${TRUST_FILE}" ]]; then
+            echo "::error::Trust snapshot JSON not found in downloaded artifacts."
+            exit 1
+          fi
+
+          pnpm exec tsx scripts/release/assemble_release_notes.ts \
+            --tag "${{ needs.resolve.outputs.tag }}" \
+            --target-sha "${{ needs.resolve.outputs.target_sha }}" \
+            --previous-tag "${{ inputs.previous_tag }}" \
+            --trust-snapshot "${TRUST_FILE}" \
+            --evidence-manifest "EVIDENCE_BUNDLE.manifest.json" \
+            --evidence-bundle "${EVIDENCE_ZIP}" \
+            --output-dir "${OUT_DIR}" \
+            --repo "${{ github.repository }}" \
+            --run-id "${{ github.run_id }}" \
+            --ga-gate-status "${{ needs.verify.outputs.ga_gate_status }}"
+
+          echo "dir=${OUT_DIR}" >> $GITHUB_OUTPUT
+
+      - name: Upload release notes artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rc-release-notes-${{ needs.resolve.outputs.tag }}
+          path: ${{ steps.notes.outputs.dir }}
+
+  tag:
+    name: Tag RC
+    runs-on: ubuntu-latest
+    needs: [resolve, verify, assemble]
+    outputs:
+      tag_ready: ${{ steps.tag.outputs.tag_ready }}
+
+    steps:
+      - name: Checkout target SHA
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.resolve.outputs.target_sha }}
+
+      - name: Create RC tag
+        id: tag
+        run: |
+          TAG="${{ needs.resolve.outputs.tag }}"
+          SHA="${{ needs.resolve.outputs.target_sha }}"
+          TAG_EXISTS="${{ needs.resolve.outputs.tag_exists }}"
+
+          if [[ "${TAG_EXISTS}" == "true" ]]; then
+            echo "tag_ready=true" >> $GITHUB_OUTPUT
+            echo "Tag already exists for ${TAG}."
+            exit 0
+          fi
+
+          if [[ "${{ inputs.confirm_tag }}" != "true" ]]; then
+            echo "::error::confirm_tag is false. RC tag will not be created."
+            exit 1
+          fi
+
+          git tag -a "${TAG}" -m "Release Candidate ${TAG}" "${SHA}"
+          git push origin "${TAG}"
+          echo "tag_ready=true" >> $GITHUB_OUTPUT
+
+  release-draft:
+    name: Draft GitHub Release
+    runs-on: ubuntu-latest
+    needs: [resolve, verify, assemble, tag]
+    if: needs.tag.outputs.tag_ready == 'true'
+    outputs:
+      release_url: ${{ steps.release.outputs.url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
           fetch-depth: 0
 
-      - name: Download Verification Output
-        uses: actions/download-artifact@v7
+      - name: Download RC input artifacts
+        uses: actions/download-artifact@v4
         with:
-          name: verification-output
-          path: staging/verification
+          name: rc-release-inputs-${{ needs.resolve.outputs.tag }}
+          path: artifacts/rc/input
 
-      - name: Build Promotion Bundle
-        id: bundle
+      - name: Download release notes
+        uses: actions/download-artifact@v4
+        with:
+          name: rc-release-notes-${{ needs.resolve.outputs.tag }}
+          path: artifacts/rc/release-notes
+
+      - name: Ensure draft release
+        id: release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${{ needs.verify.outputs.tag }}"
-          COMMIT="${{ needs.verify.outputs.commit }}"
-          VERSION="${{ needs.verify.outputs.version }}"
-          GA_TAG="v${VERSION}"
+          TAG="${{ needs.resolve.outputs.tag }}"
+          NOTES_FILE="artifacts/rc/release-notes/release_notes.md"
 
-          echo "Building Promotion Bundle for RC: ${TAG}"
-
-          chmod +x scripts/release/build-promotion-bundle.sh
-
-          # Build bundle in staging area
-          STAGING_DIR="staging/promotion-bundle"
-          mkdir -p "${STAGING_DIR}"
-
-          scripts/release/build-promotion-bundle.sh \
-            --tag "${TAG}" \
-            --commit "${COMMIT}" \
-            --output "${STAGING_DIR}" || true
-
-          echo "bundle_staging=${STAGING_DIR}" >> $GITHUB_OUTPUT
-
-      - name: Assemble RC Pipeline Bundle
-        id: assemble
-        run: |
-          TAG="${{ needs.verify.outputs.tag }}"
-          COMMIT="${{ needs.verify.outputs.commit }}"
-          VERSION="${{ needs.verify.outputs.version }}"
-          GA_TAG="v${VERSION}"
-          ALLOWED="${{ needs.promotion-guard.outputs.promotion_allowed }}"
-
-          # Final bundle directory
-          BUNDLE_DIR="rc-pipeline-bundle-${TAG}"
-          mkdir -p "${BUNDLE_DIR}"
-
-          echo "Assembling RC Pipeline Bundle: ${BUNDLE_DIR}"
-
-          # Copy verification output
-          cp staging/verification/REQUIRED_CHECKS.txt "${BUNDLE_DIR}/" 2>/dev/null || true
-
-          # Copy promotion bundle contents
-          cp -r staging/promotion-bundle/* "${BUNDLE_DIR}/" 2>/dev/null || true
-
-          # Create pipeline_metadata.json using jq for proper JSON
-          PROMO_BOOL="false"
-          if [[ "${ALLOWED}" == "true" ]]; then
-            PROMO_BOOL="true"
-          fi
-
-          jq -n \
-            --arg version "1.0.0" \
-            --arg pipeline "release-rc" \
-            --arg generated_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-            --arg rc_tag "${TAG}" \
-            --arg ga_tag "${GA_TAG}" \
-            --arg base_version "${VERSION}" \
-            --arg commit_sha "${COMMIT}" \
-            --arg verification_status "${ALLOWED}" \
-            --argjson promotion_allowed "${PROMO_BOOL}" \
-            --arg run_id "${{ github.run_id }}" \
-            --arg run_number "${{ github.run_number }}" \
-            --arg run_url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            --arg actor "${{ github.actor }}" \
-            --arg event "${{ github.event_name }}" \
-            --arg verify_result "${{ needs.verify.result }}" \
-            --arg guard_result "${{ needs.promotion-guard.result }}" \
-            '{
-              version: $version,
-              pipeline: $pipeline,
-              generated_at: $generated_at,
-              rc_tag: $rc_tag,
-              ga_tag: $ga_tag,
-              base_version: $base_version,
-              commit_sha: $commit_sha,
-              verification_status: $verification_status,
-              promotion_allowed: $promotion_allowed,
-              workflow: {
-                run_id: $run_id,
-                run_number: $run_number,
-                run_url: $run_url,
-                actor: $actor,
-                event: $event
-              },
-              jobs: {
-                verify: $verify_result,
-                promotion_guard: $guard_result
-              },
-              artifacts: {
-                verification: "REQUIRED_CHECKS.txt",
-                promotion_script: "promote_to_ga.sh",
-                release_notes: "github_release.md",
-                checklist: "PROMOTION_CHECKLIST.md"
-              }
-            }' > "${BUNDLE_DIR}/pipeline_metadata.json"
-
-          # Create README using printf to avoid heredoc YAML parsing issues
-          {
-            printf '%s\n' "# RC Pipeline Bundle"
-            printf '\n'
-            printf '%s\n' "This bundle was generated by the Release RC Pipeline workflow."
-            printf '\n'
-            printf '%s\n' "## Contents"
-            printf '\n'
-            printf '%s\n' "| File | Purpose |"
-            printf '%s\n' "|------|---------|"
-            printf '%s\n' "| \`pipeline_metadata.json\` | Machine-readable pipeline metadata |"
-            printf '%s\n' "| \`REQUIRED_CHECKS.txt\` | Verification truth table output |"
-            printf '%s\n' "| \`github_release.md\` | GitHub Release description |"
-            printf '%s\n' "| \`promote_to_ga.sh\` | Script to promote RC to GA |"
-            printf '%s\n' "| \`PROMOTION_CHECKLIST.md\` | Step-by-step promotion guide |"
-            printf '\n'
-            printf '%s\n' "## Usage"
-            printf '\n'
-            printf '%s\n' "\`\`\`bash"
-            printf '%s\n' "# Review verification status"
-            printf '%s\n' "cat REQUIRED_CHECKS.txt"
-            printf '\n'
-            printf '%s\n' "# Check pipeline metadata"
-            printf '%s\n' "cat pipeline_metadata.json | jq ."
-            printf '\n'
-            printf '%s\n' "# Preview GA promotion"
-            printf '%s\n' "./promote_to_ga.sh --dry-run"
-            printf '\n'
-            printf '%s\n' "# Execute promotion (after approval)"
-            printf '%s\n' "./promote_to_ga.sh"
-            printf '%s\n' "\`\`\`"
-            printf '\n'
-            printf '%s\n' "## Verification Status"
-            printf '\n'
-            if [[ "${ALLOWED}" == "true" ]]; then
-              printf '%s\n' "✅ **PASSED** - All required checks passed. Safe to promote."
-            else
-              printf '%s\n' "⚠️ **PENDING/FAILED** - Some required checks pending or failed."
-              printf '%s\n' "Review REQUIRED_CHECKS.txt before promoting."
+          if gh release view "${TAG}" --json isDraft,isPrerelease,url >/dev/null 2>&1; then
+            DRAFT=$(gh release view "${TAG}" --json isDraft --jq '.isDraft')
+            if [[ "${DRAFT}" != "true" && "${{ inputs.publish }}" != "true" ]]; then
+              echo "::error::Release ${TAG} is already published. Draft-only mode enforced."
+              exit 1
             fi
-            printf '\n'
-            printf '%s\n' "---"
-            printf '%s\n' "Generated by [Release RC Pipeline](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-          } > "${BUNDLE_DIR}/README.md"
+            gh release edit "${TAG}" --draft --prerelease --notes-file "${NOTES_FILE}"
+          else
+            gh release create "${TAG}" --draft --prerelease --notes-file "${NOTES_FILE}"
+          fi
 
-          echo "bundle_dir=${BUNDLE_DIR}" >> $GITHUB_OUTPUT
+          URL=$(gh release view "${TAG}" --json url --jq '.url')
+          echo "url=${URL}" >> $GITHUB_OUTPUT
 
-          # List contents
-          echo ""
-          echo "Bundle contents:"
-          ls -la "${BUNDLE_DIR}/"
-
-      - name: Upload RC Pipeline Bundle
-        uses: actions/upload-artifact@v6
-        with:
-          name: rc-pipeline-bundle-${{ needs.verify.outputs.tag }}
-          path: ${{ steps.assemble.outputs.bundle_dir }}
-          retention-days: 90
-
-      - name: Cleanup Intermediate Artifacts
-        uses: geekyeggo/delete-artifact@v5
-        with:
-          name: verification-output
-          failOnError: false
-
-      - name: Generate Job Summary
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${{ needs.verify.outputs.tag }}"
-          COMMIT="${{ needs.verify.outputs.commit }}"
-          VERSION="${{ needs.verify.outputs.version }}"
-          GA_TAG="v${VERSION}"
-          ALLOWED="${{ needs.promotion-guard.outputs.promotion_allowed }}"
+          TAG="${{ needs.resolve.outputs.tag }}"
+          EVIDENCE_ZIP="artifacts/rc/input/${{ inputs.evidence_artifact }}.zip"
+          TRUST_FILE=$(find artifacts/rc/input -type f \( -name 'trust-snapshot.json' -o -name 'trust_snapshot.json' \) | head -n 1)
 
-          if [[ "${ALLOWED}" == "true" ]]; then
-            STATUS_ICON="✅"
-            STATUS_TEXT="PASSED"
-          else
-            STATUS_ICON="⚠️"
-            STATUS_TEXT="PENDING/FAILED"
+          if [[ -z "${TRUST_FILE}" ]]; then
+            echo "::error::Trust snapshot JSON not found in downloaded artifacts."
+            exit 1
           fi
 
-          echo "## ${STATUS_ICON} RC Pipeline Complete: ${TAG}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          gh release upload "${TAG}" \
+            "${EVIDENCE_ZIP}" \
+            "${TRUST_FILE}" \
+            "EVIDENCE_BUNDLE.manifest.json" \
+            "artifacts/rc/release-notes/release_notes.md" \
+            "artifacts/rc/release-notes/release_notes.json" \
+            --clobber
 
-          echo "### Pipeline Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Stage | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Release Readiness | ✅ ${{ needs.verify.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Promotion Guard | ${STATUS_ICON} ${STATUS_TEXT} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Pipeline Bundle | ✅ Assembled |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          echo "### Release Information" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| RC Tag | \`${TAG}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| GA Tag | \`${GA_TAG}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Commit | \`${COMMIT:0:7}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Version | ${VERSION} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Artifact | \`rc-pipeline-bundle-${TAG}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          echo "### Bundle Contents" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| File | Purpose |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|---------|" >> $GITHUB_STEP_SUMMARY
-          echo "| \`pipeline_metadata.json\` | Machine-readable pipeline metadata |" >> $GITHUB_STEP_SUMMARY
-          echo "| \`REQUIRED_CHECKS.txt\` | Verification truth table output |" >> $GITHUB_STEP_SUMMARY
-          echo "| \`github_release.md\` | GitHub Release description |" >> $GITHUB_STEP_SUMMARY
-          echo "| \`promote_to_ga.sh\` | Script to promote RC to GA |" >> $GITHUB_STEP_SUMMARY
-          echo "| \`PROMOTION_CHECKLIST.md\` | Step-by-step promotion guide |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [[ "${ALLOWED}" == "true" ]]; then
-            echo "### 🚀 How to Promote" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "1. Download the \`rc-pipeline-bundle-${TAG}\` artifact" >> $GITHUB_STEP_SUMMARY
-            echo "2. Extract and navigate to the bundle directory" >> $GITHUB_STEP_SUMMARY
-            echo "3. Review the checklist: \`cat PROMOTION_CHECKLIST.md\`" >> $GITHUB_STEP_SUMMARY
-            echo "4. Preview: \`./promote_to_ga.sh --dry-run\`" >> $GITHUB_STEP_SUMMARY
-            echo "5. Execute: \`./promote_to_ga.sh\`" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-            echo "# Quick promotion commands" >> $GITHUB_STEP_SUMMARY
-            echo "cd rc-pipeline-bundle-${TAG}" >> $GITHUB_STEP_SUMMARY
-            echo "./promote_to_ga.sh --dry-run  # Preview" >> $GITHUB_STEP_SUMMARY
-            echo "./promote_to_ga.sh            # Execute" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "### ⚠️ Action Required" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Some required checks are still pending or failed." >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "1. Review \`REQUIRED_CHECKS.txt\` in the bundle" >> $GITHUB_STEP_SUMMARY
-            echo "2. Wait for in-progress workflows to complete" >> $GITHUB_STEP_SUMMARY
-            echo "3. Fix any test/build/lint failures" >> $GITHUB_STEP_SUMMARY
-            echo "4. Re-verify with Tag Verification workflow" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-            echo "./scripts/release/verify-green-for-tag.sh --tag ${TAG} --commit ${COMMIT}" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          if [[ -d "artifacts/rc/input/sboms" ]]; then
+            find "artifacts/rc/input/sboms" -maxdepth 2 -type f -print0 | \
+              xargs -0 gh release upload "${TAG}" --clobber
           fi
+
+  publish:
+    name: Publish RC Release
+    runs-on: ubuntu-latest
+    needs: [resolve, release-draft]
+    if: inputs.publish == true
+    environment: rc-release-publish
+
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ needs.resolve.outputs.tag }}"
+          gh release edit "${TAG}" --draft=false --prerelease
+
+      - name: Publish summary
+        run: |
+          echo "RC release ${{ needs.resolve.outputs.tag }} published." >> $GITHUB_STEP_SUMMARY

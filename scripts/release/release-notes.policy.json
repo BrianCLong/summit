@@ -1,0 +1,12 @@
+{
+  "highlight_labels": ["release-highlight", "highlight"],
+  "breaking_labels": ["breaking", "breaking-change"],
+  "sections": {
+    "Added": ["type:feature", "feature", "enhancement", "feat", "added"],
+    "Changed": ["change", "refactor", "performance", "chore"],
+    "Fixed": ["bug", "fix", "bugfix"],
+    "Security": ["security", "sec", "vuln"],
+    "Build/CI": ["ci", "build", "devops", "infra", "release"],
+    "Docs": ["docs", "documentation"]
+  }
+}
