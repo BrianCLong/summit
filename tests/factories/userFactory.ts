@@ -12,7 +12,10 @@ export interface TestUser {
   username: string;
   role: 'admin' | 'analyst' | 'viewer' | 'user';
   tenantId: string;
+  defaultTenantId?: string;
   permissions: string[];
+  isActive: boolean;
+  scopes: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,7 +26,10 @@ export interface UserFactoryOptions {
   username?: string;
   role?: 'admin' | 'analyst' | 'viewer' | 'user';
   tenantId?: string;
+  defaultTenantId?: string;
   permissions?: string[];
+  isActive?: boolean;
+  scopes?: string[];
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -52,7 +58,10 @@ export function userFactory(options: UserFactoryOptions = {}): TestUser {
     username,
     role,
     tenantId,
+    defaultTenantId: options.defaultTenantId || tenantId,
     permissions: options.permissions || defaultPermissions[role] || [],
+    isActive: options.isActive ?? true,
+    scopes: options.scopes || [],
     createdAt: options.createdAt || now,
     updatedAt: options.updatedAt || now,
   };
