@@ -7,7 +7,7 @@
 
 import { EventEmitter } from 'events';
 import { randomUUID } from 'crypto';
-import logger from '../utils/logger.js';
+import logger from '../config/logger.js';
 import { runCypher } from '../graph/neo4j.js';
 import { cypherTemplateEngine, CypherTemplateEngine } from './CypherTemplateEngine.js';
 import { llmChainExecutor, LLMChainExecutor } from './LLMChainExecutor.js';
@@ -69,6 +69,7 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
   private llmExecutor: LLMChainExecutor;
   private remediationHooks: AutoRemediationHooks;
   private isInitialized: boolean = false;
+  private log = typeof logger?.error === 'function' ? logger : undefined;
 
   constructor() {
     super();
@@ -98,13 +99,15 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
       });
 
       this.isInitialized = true;
-      logger.info('Threat Hunting Orchestrator initialized', {
+      this.log?.info?.('Threat Hunting Orchestrator initialized', {
         templatesLoaded: this.templateEngine.getAllTemplates().length,
       });
     } catch (error: any) {
-      logger.error('Failed to initialize orchestrator', {
-        error: (error as Error).message,
-      });
+      if (this.log?.error) {
+        this.log.error('Failed to initialize orchestrator', {
+          error: (error as Error).message,
+        });
+      }
       throw error;
     }
   }
@@ -149,7 +152,9 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
 
     // Start async execution
     this.executeHunt(huntId, request.customHypotheses).catch((error) => {
-      logger.error('Hunt execution failed', { huntId, error: error.message });
+      if (this.log?.error) {
+        this.log.error('Hunt execution failed', { huntId, error: error.message });
+      }
       execution.context.status = 'failed';
       this.emitEvent('hunt_failed', { huntId, error: error.message });
     });
@@ -366,7 +371,7 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
         findingsCount: execution.enrichedFindings.length,
       });
 
-      logger.info('Hunt completed successfully', {
+      this.log?.info?.('Hunt completed successfully', {
         huntId,
         duration: execution.metrics.executionTimeMs,
         findings: execution.enrichedFindings.length,

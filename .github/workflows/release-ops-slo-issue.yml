@@ -164,7 +164,7 @@ jobs:
           # Build body
           cat > issue_body.md << 'BODY_START'
           ## Release Ops SLO Report
-BODY_START
+          BODY_START
 
           cat >> issue_body.md << HEADER_EOF
 

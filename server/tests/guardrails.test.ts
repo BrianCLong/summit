@@ -203,6 +203,33 @@ jest.unstable_mockModule('pg', () => {
   };
 });
 
+jest.unstable_mockModule('../src/db/postgres', () => {
+  const mockPool = {
+    query: (jest.fn() as any).mockResolvedValue({ rowCount: 0, rows: [] }),
+    connect: (jest.fn() as any).mockResolvedValue({
+      query: (jest.fn() as any).mockResolvedValue({ rowCount: 0, rows: [] }),
+      release: jest.fn(),
+    }),
+    end: (jest.fn() as any).mockResolvedValue(undefined),
+  };
+  return {
+    getPostgresPool: jest.fn(() => mockPool),
+    closePostgresPool: (jest.fn() as any).mockResolvedValue(undefined),
+  };
+});
+
+jest.unstable_mockModule('../src/db/postgres.js', () => ({
+  getPostgresPool: jest.fn(() => ({
+    query: (jest.fn() as any).mockResolvedValue({ rowCount: 0, rows: [] }),
+    connect: (jest.fn() as any).mockResolvedValue({
+      query: (jest.fn() as any).mockResolvedValue({ rowCount: 0, rows: [] }),
+      release: jest.fn(),
+    }),
+    end: (jest.fn() as any).mockResolvedValue(undefined),
+  })),
+  closePostgresPool: (jest.fn() as any).mockResolvedValue(undefined),
+}));
+
 jest.unstable_mockModule('../src/db/pg', () => {
   const mockUser = {
     id: 'mock-user-id',
