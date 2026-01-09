@@ -1,0 +1,45 @@
+{
+  "task_id": "STABILIZATION_RETRO_ROADMAP_HANDOFF",
+  "agent_id": "Jules",
+  "prompt_ref": {
+    "id": "stabilization-retro-roadmap-handoff",
+    "version": "v1",
+    "sha256": "dc48846b2ce394ba8de4a6a0bd05a839701c0519930efbdc0dcf65e86f370525",
+    "path": "prompts/releases/stabilization-retro-roadmap-handoff.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "scripts/releases/",
+      "docs/releases/",
+      "docs/ci/STABILIZATION_RETROSPECTIVE_POLICY.yml",
+      "docs/roadmap/STATUS.json",
+      ".github/workflows/stabilization-retrospective.yml",
+      "artifacts/stabilization/",
+      "prompts/releases/stabilization-retro-roadmap-handoff.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["governance", "releases", "roadmap", "stabilization"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "artifacts/stabilization/retrospective/RETRO_<timestamp>.md",
+      "artifacts/stabilization/roadmap-handoff/drafts/ROADMAP_<slug>.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Monthly workflow emits a retrospective and roadmap handoff artifacts.",
+    "Roadmap candidates are capped at 5 and deduped by slug.",
+    "Draft-only mode remains default unless policy applies issues."
+  ],
+  "stop_conditions": [
+    "CI failure in main.",
+    "Detection of PII in output.",
+    "Sandbox violation alert."
+  ]
+}

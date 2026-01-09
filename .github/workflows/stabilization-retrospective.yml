@@ -1,0 +1,97 @@
+name: Stabilization Retrospective
+
+on:
+  schedule:
+    - cron: "0 14 1-3 * *"
+  workflow_dispatch: {}
+
+jobs:
+  stabilization-retrospective:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Determine business day
+        id: business-day
+        run: |
+          first_day_dow=$(date -u -d "$(date -u +%Y-%m-01)" +%u)
+          first_business_day=1
+          if [ "$first_day_dow" -eq 6 ]; then
+            first_business_day=3
+          elif [ "$first_day_dow" -eq 7 ]; then
+            first_business_day=2
+          fi
+          today=$(date -u +%d | sed 's/^0//')
+          dow=$(date -u +%u)
+          if [ "$dow" -ge 6 ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Weekend detected; skipping scheduled run." >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$today" -ne "$first_business_day" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Not the first business day; skipping scheduled run." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate retrospective
+        if: steps.business-day.outputs.skip != 'true'
+        run: |
+          node scripts/releases/generate_stabilization_retrospective.mjs \
+            --weeks=4 \
+            --out-dir=artifacts/stabilization/retrospective \
+            --timestamp="${GITHUB_RUN_ID}"
+          echo "retro_json=$(ls -t artifacts/stabilization/retrospective/retro_*.json | head -1)" >> "$GITHUB_OUTPUT"
+        id: retro
+
+      - name: Derive roadmap candidates
+        if: steps.business-day.outputs.skip != 'true'
+        run: |
+          node scripts/releases/derive_stabilization_roadmap_candidates.mjs \
+            --retro "${{ steps.retro.outputs.retro_json }}" \
+            --out-dir=artifacts/stabilization/roadmap-handoff \
+            --timestamp="${GITHUB_RUN_ID}"
+
+      - name: Sync roadmap drafts
+        if: steps.business-day.outputs.skip != 'true'
+        run: |
+          node scripts/releases/sync_stabilization_roadmap_handoff.mjs \
+            --candidates artifacts/stabilization/roadmap-handoff/candidates_latest.json \
+            --out-dir artifacts/stabilization/roadmap-handoff \
+            --timestamp="${GITHUB_RUN_ID}"
+
+      - name: Upload retrospective artifacts
+        if: steps.business-day.outputs.skip != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: stabilization-retrospective-${{ github.run_id }}
+          path: artifacts/stabilization/retrospective
+
+      - name: Upload roadmap handoff artifacts
+        if: steps.business-day.outputs.skip != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: stabilization-roadmap-handoff-${{ github.run_id }}
+          path: artifacts/stabilization/roadmap-handoff
+
+      - name: Summarize outcomes
+        if: steps.business-day.outputs.skip != 'true'
+        run: |
+          node -e "const fs=require('fs');const retro=JSON.parse(fs.readFileSync('${{ steps.retro.outputs.retro_json }}','utf8'));const risk=retro.metrics_series?.risk_index||[];const trend=risk.map(r=>`${r.week_ending}: ${r.value ?? 'n/a'}`).join(' | ');const focus=(retro.focus_themes||[]).slice(0,3).map(t=>`- ${t.theme}: ${t.rationale}`).join('\\n')||'- None';const candidatesPath='artifacts/stabilization/roadmap-handoff/candidates_latest.json';let candidates='- None';if(fs.existsSync(candidatesPath)){const c=JSON.parse(fs.readFileSync(candidatesPath,'utf8'));candidates=(c.candidates||[]).map(item=>`- ${item.slug}: ${item.reason}`).join('\\n')||'- None';}const out=[`## Stabilization Retrospective Summary`,``,`**risk_index trend:** ${trend}`,``,`**Top focus recommendations**`,`${focus}`,``,`**Roadmap candidates**`,`${candidates}`,``].join('\\n');fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,out);"

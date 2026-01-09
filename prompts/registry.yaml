@@ -79,3 +79,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: stabilization-retro-roadmap-handoff
+    version: v1
+    path: prompts/releases/stabilization-retro-roadmap-handoff.md
+    sha256: dc48846b2ce394ba8de4a6a0bd05a839701c0519930efbdc0dcf65e86f370525
+    description: Monthly stabilization retrospective and roadmap handoff loop for governed fixes.
+    scope:
+      paths:
+        - scripts/releases/
+        - docs/releases/
+        - docs/ci/STABILIZATION_RETROSPECTIVE_POLICY.yml
+        - docs/roadmap/STATUS.json
+        - .github/workflows/stabilization-retrospective.yml
+        - prompts/releases/stabilization-retro-roadmap-handoff.md
+        - prompts/registry.yaml
+        - artifacts/stabilization/
+        - agents/examples/
+      domains:
+        - governance
+        - releases
+        - roadmap
+        - stabilization
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

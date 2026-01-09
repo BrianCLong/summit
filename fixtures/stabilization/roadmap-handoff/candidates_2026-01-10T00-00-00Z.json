@@ -1,0 +1,52 @@
+{
+  "generated_at": "2026-01-10T00:00:00Z",
+  "retro_path": "artifacts/stabilization/retrospective/retro_2026-01-10T00-00-00Z.json",
+  "window_weeks": 4,
+  "candidates": [
+    {
+      "slug": "issuance-hygiene",
+      "title": "Issuance hygiene reinforcement",
+      "reason": "2 week(s) with blocked unissued P0 items",
+      "severity": 50,
+      "persistence": 2,
+      "evidence": {
+        "blocked_unissued_weeks": 2
+      },
+      "marker": "<!-- stabilization-roadmap:issuance-hygiene -->"
+    },
+    {
+      "slug": "evidence-compliance",
+      "title": "Evidence compliance recovery",
+      "reason": "2 week(s) below 0.95",
+      "severity": 6,
+      "persistence": 2,
+      "evidence": {
+        "evidence_breach_weeks": 2,
+        "min_evidence": 0.93
+      },
+      "marker": "<!-- stabilization-roadmap:evidence-compliance -->"
+    },
+    {
+      "slug": "p0-sla-adherence",
+      "title": "P0 SLA adherence",
+      "reason": "2 week(s) with overdue P0 load",
+      "severity": 40,
+      "persistence": 2,
+      "evidence": {
+        "overdue_weeks": 2
+      },
+      "marker": "<!-- stabilization-roadmap:p0-sla-adherence -->"
+    },
+    {
+      "slug": "systemic-risk-reduction",
+      "title": "Systemic risk reduction",
+      "reason": "risk_index average 31.2 \u2265 30",
+      "severity": 31,
+      "persistence": 4,
+      "evidence": {
+        "risk_index_avg": 31.2
+      },
+      "marker": "<!-- stabilization-roadmap:systemic-risk-reduction -->"
+    }
+  ]
+}

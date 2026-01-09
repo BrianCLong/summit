@@ -1,0 +1,396 @@
+{
+  "generated_at": "2026-01-10T00:00:00Z",
+  "window_weeks": 4,
+  "weeks": [
+    {
+      "week_ending": "2025-12-06",
+      "metrics": {
+        "risk_index": 28,
+        "done_p0": 10,
+        "done_p1": 25,
+        "on_time_rate": 0.92,
+        "overdue_load": 1,
+        "evidence_compliance": 0.97,
+        "issuance_completeness": 0.95,
+        "blocked_unissued": 0
+      },
+      "overdue_items": [
+        {
+          "id": "OPS-441",
+          "area": "release",
+          "owner": "platform"
+        }
+      ],
+      "overdue_by_area": {
+        "release": 1
+      },
+      "overdue_by_owner": {
+        "platform": 1
+      },
+      "sources": {
+        "scorecard": "artifacts/stabilization/weekly-closeout/2025-12-06/scorecard.json",
+        "escalation": "artifacts/stabilization/weekly-closeout/2025-12-06/escalation.json",
+        "diff": "artifacts/stabilization/weekly-closeout/2025-12-06/diff.json"
+      }
+    },
+    {
+      "week_ending": "2025-12-13",
+      "metrics": {
+        "risk_index": 32,
+        "done_p0": 8,
+        "done_p1": 22,
+        "on_time_rate": 0.9,
+        "overdue_load": 2,
+        "evidence_compliance": 0.94,
+        "issuance_completeness": 0.93,
+        "blocked_unissued": 1
+      },
+      "overdue_items": [
+        {
+          "id": "OPS-441",
+          "area": "release",
+          "owner": "platform"
+        },
+        {
+          "id": "QA-119",
+          "area": "quality",
+          "owner": "qa"
+        }
+      ],
+      "overdue_by_area": {
+        "release": 1,
+        "quality": 1
+      },
+      "overdue_by_owner": {
+        "platform": 1,
+        "qa": 1
+      },
+      "sources": {
+        "scorecard": "artifacts/stabilization/weekly-closeout/2025-12-13/scorecard.json",
+        "escalation": "artifacts/stabilization/weekly-closeout/2025-12-13/escalation.json",
+        "diff": "artifacts/stabilization/weekly-closeout/2025-12-13/diff.json"
+      }
+    },
+    {
+      "week_ending": "2025-12-20",
+      "metrics": {
+        "risk_index": 35,
+        "done_p0": 9,
+        "done_p1": 20,
+        "on_time_rate": 0.88,
+        "overdue_load": 3,
+        "evidence_compliance": 0.93,
+        "issuance_completeness": 0.92,
+        "blocked_unissued": 1
+      },
+      "overdue_items": [
+        {
+          "id": "OPS-441",
+          "area": "release",
+          "owner": "platform"
+        },
+        {
+          "id": "QA-119",
+          "area": "quality",
+          "owner": "qa"
+        },
+        {
+          "id": "DATA-207",
+          "area": "data",
+          "owner": "etl"
+        }
+      ],
+      "overdue_by_area": {
+        "release": 1,
+        "quality": 1,
+        "data": 1
+      },
+      "overdue_by_owner": {
+        "platform": 1,
+        "qa": 1,
+        "etl": 1
+      },
+      "sources": {
+        "scorecard": "artifacts/stabilization/weekly-closeout/2025-12-20/scorecard.json",
+        "escalation": "artifacts/stabilization/weekly-closeout/2025-12-20/escalation.json",
+        "diff": "artifacts/stabilization/weekly-closeout/2025-12-20/diff.json"
+      }
+    },
+    {
+      "week_ending": "2025-12-27",
+      "metrics": {
+        "risk_index": 30,
+        "done_p0": 12,
+        "done_p1": 24,
+        "on_time_rate": 0.91,
+        "overdue_load": 2,
+        "evidence_compliance": 0.95,
+        "issuance_completeness": 0.94,
+        "blocked_unissued": 0
+      },
+      "overdue_items": [
+        {
+          "id": "QA-119",
+          "area": "quality",
+          "owner": "qa"
+        },
+        {
+          "id": "DATA-207",
+          "area": "data",
+          "owner": "etl"
+        }
+      ],
+      "overdue_by_area": {
+        "quality": 1,
+        "data": 1
+      },
+      "overdue_by_owner": {
+        "qa": 1,
+        "etl": 1
+      },
+      "sources": {
+        "scorecard": "artifacts/stabilization/weekly-closeout/2025-12-27/scorecard.json",
+        "escalation": "artifacts/stabilization/weekly-closeout/2025-12-27/escalation.json",
+        "diff": "artifacts/stabilization/weekly-closeout/2025-12-27/diff.json"
+      }
+    }
+  ],
+  "metrics_series": {
+    "risk_index": [
+      {
+        "week_ending": "2025-12-06",
+        "value": 28
+      },
+      {
+        "week_ending": "2025-12-13",
+        "value": 32
+      },
+      {
+        "week_ending": "2025-12-20",
+        "value": 35
+      },
+      {
+        "week_ending": "2025-12-27",
+        "value": 30
+      }
+    ],
+    "done_p0": [
+      {
+        "week_ending": "2025-12-06",
+        "value": 10
+      },
+      {
+        "week_ending": "2025-12-13",
+        "value": 8
+      },
+      {
+        "week_ending": "2025-12-20",
+        "value": 9
+      },
+      {
+        "week_ending": "2025-12-27",
+        "value": 12
+      }
+    ],
+    "done_p1": [
+      {
+        "week_ending": "2025-12-06",
+        "value": 25
+      },
+      {
+        "week_ending": "2025-12-13",
+        "value": 22
+      },
+      {
+        "week_ending": "2025-12-20",
+        "value": 20
+      },
+      {
+        "week_ending": "2025-12-27",
+        "value": 24
+      }
+    ],
+    "on_time_rate": [
+      {
+        "week_ending": "2025-12-06",
+        "value": 0.92
+      },
+      {
+        "week_ending": "2025-12-13",
+        "value": 0.9
+      },
+      {
+        "week_ending": "2025-12-20",
+        "value": 0.88
+      },
+      {
+        "week_ending": "2025-12-27",
+        "value": 0.91
+      }
+    ],
+    "overdue_load": [
+      {
+        "week_ending": "2025-12-06",
+        "value": 1
+      },
+      {
+        "week_ending": "2025-12-13",
+        "value": 2
+      },
+      {
+        "week_ending": "2025-12-20",
+        "value": 3
+      },
+      {
+        "week_ending": "2025-12-27",
+        "value": 2
+      }
+    ],
+    "evidence_compliance": [
+      {
+        "week_ending": "2025-12-06",
+        "value": 0.97
+      },
+      {
+        "week_ending": "2025-12-13",
+        "value": 0.94
+      },
+      {
+        "week_ending": "2025-12-20",
+        "value": 0.93
+      },
+      {
+        "week_ending": "2025-12-27",
+        "value": 0.95
+      }
+    ],
+    "issuance_completeness": [
+      {
+        "week_ending": "2025-12-06",
+        "value": 0.95
+      },
+      {
+        "week_ending": "2025-12-13",
+        "value": 0.93
+      },
+      {
+        "week_ending": "2025-12-20",
+        "value": 0.92
+      },
+      {
+        "week_ending": "2025-12-27",
+        "value": 0.94
+      }
+    ],
+    "blocked_unissued": [
+      {
+        "week_ending": "2025-12-06",
+        "value": 0
+      },
+      {
+        "week_ending": "2025-12-13",
+        "value": 1
+      },
+      {
+        "week_ending": "2025-12-20",
+        "value": 1
+      },
+      {
+        "week_ending": "2025-12-27",
+        "value": 0
+      }
+    ]
+  },
+  "improvements": [
+    {
+      "metric": "done_p0",
+      "delta": 2
+    },
+    {
+      "metric": "done_p1",
+      "delta": -1
+    }
+  ],
+  "regressions": [
+    {
+      "metric": "risk_index",
+      "delta": 2
+    },
+    {
+      "metric": "overdue_load",
+      "delta": 1
+    }
+  ],
+  "recurring_blockers": {
+    "recurring": [
+      {
+        "id": "OPS-441",
+        "area": "release",
+        "owner": "platform",
+        "weeks": 3
+      },
+      {
+        "id": "QA-119",
+        "area": "quality",
+        "owner": "qa",
+        "weeks": 3
+      }
+    ],
+    "topAreas": [
+      {
+        "area": "release",
+        "count": 2
+      },
+      {
+        "area": "quality",
+        "count": 3
+      },
+      {
+        "area": "data",
+        "count": 2
+      }
+    ],
+    "topOwners": [
+      {
+        "owner": "platform",
+        "count": 2
+      },
+      {
+        "owner": "qa",
+        "count": 3
+      },
+      {
+        "owner": "etl",
+        "count": 2
+      }
+    ]
+  },
+  "focus_themes": [
+    {
+      "theme": "Evidence compliance recovery",
+      "rationale": "2 week(s) below 0.95"
+    },
+    {
+      "theme": "Overdue load reduction",
+      "rationale": "3 week(s) at or above 1"
+    },
+    {
+      "theme": "Issuance hygiene",
+      "rationale": "2 week(s) with blocked-unissued items"
+    }
+  ],
+  "data_quality": {
+    "weeks_requested": 4,
+    "weeks_included": 4,
+    "missing_sources": [],
+    "missing_artifacts": [],
+    "notes": ["Fixture sample for stabilization retrospective."]
+  },
+  "sources": {
+    "repo": {
+      "owner": "BrianCLong",
+      "repo": "summit"
+    },
+    "local_dir": "artifacts/stabilization/weekly-closeout"
+  }
+}

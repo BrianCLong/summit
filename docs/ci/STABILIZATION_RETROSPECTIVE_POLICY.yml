@@ -1,0 +1,40 @@
+stabilization_retrospective:
+  weeks_default: 4
+  window:
+    week_ending_day: "FRI"
+  closeout_sources:
+    local_dir: "artifacts/stabilization/weekly-closeout"
+    artifact_name_patterns:
+      scorecard: "weekly-closeout-scorecard"
+      escalation: "weekly-closeout-escalation"
+      diff: "weekly-closeout-diff"
+    expected_files:
+      scorecard: "scorecard.json"
+      escalation: "escalation.json"
+      diff: "diff.json"
+    max_artifacts: 80
+  focus_themes:
+    max: 5
+    thresholds:
+      evidence_compliance_min: 0.95
+      risk_index_increase: 5
+      overdue_load_min: 1
+      blocked_unissued_min: 1
+      on_time_rate_min: 0.9
+
+stabilization_roadmap_handoff:
+  enabled: true
+  mode: draft
+  max_candidates: 5
+  thresholds:
+    recurring_overdue_weeks: 2
+    min_risk_index_avg: 30
+    evidence_compliance_min: 0.95
+    blocked_unissued_p0_min: 1
+    overdue_load_p0_min: 1
+  labels:
+    base:
+      - "roadmap"
+      - "stabilization"
+    triage:
+      - "needs-triage"
