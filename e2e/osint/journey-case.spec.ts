@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { test } from '../fixtures/osint-fixtures';
+import { test } from '../fixtures';
 
 test.describe('OSINT P0 journey @osint-p0 @journey', () => {
   test('login → search → view results → add to case → export bundle', async ({

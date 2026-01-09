@@ -60,10 +60,6 @@ jobs:
     name: Test (${{ matrix.test-suite }})
     needs: [lint, verify]
     runs-on: ubuntu-latest
-    # Both unit and integration tests are non-blocking until TypeScript/ESM issues are resolved
-    # EXPIRY: 2026-01-15 - Must fix underlying TypeScript errors in test files
-    # TICKET: See docs/release/GA_DECISIONS.md for follow-up plan
-    continue-on-error: true
     strategy:
       matrix:
         test-suite: [unit, integration]
@@ -82,6 +78,9 @@ jobs:
       - name: Run API authz e2e tests
         if: matrix.test-suite == 'integration'
         run: pnpm --filter @intelgraph/api test
+      - name: Run Coverage Verification
+        if: matrix.test-suite == 'unit'
+        run: pnpm coverage:verify
 
   golden-path:
     name: Golden Path
@@ -133,7 +132,6 @@ jobs:
     name: Governance
     needs: test
     runs-on: ubuntu-latest
-    # Non-blocking until ESM test infrastructure is resolved
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -152,7 +150,6 @@ jobs:
     name: Provenance
     needs: test
     runs-on: ubuntu-latest
-    # Non-blocking until ESM test infrastructure is resolved
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -168,7 +165,6 @@ jobs:
     name: Schema Diff
     needs: test
     runs-on: ubuntu-latest
-    # Non-blocking until graphql-inspector loader issues are resolved
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
