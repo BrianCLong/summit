@@ -1,0 +1,6 @@
+{
+  "version": "1.0.0",
+  "schema": "https://summit.dev/schemas/waiver-audit-log/v1",
+  "description": "Immutable audit log of all waiver state changes",
+  "entries": []
+}

@@ -1,0 +1,6 @@
+{
+  "version": "1.0.0",
+  "schema": "https://summit.dev/schemas/hotfix-waivers/v1",
+  "description": "Emergency governance waivers for hotfix releases. All waivers auto-expire.",
+  "waivers": []
+}

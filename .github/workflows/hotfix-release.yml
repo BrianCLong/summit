@@ -9,7 +9,7 @@ name: Hotfix Release
 # - Mandatory justification and ticket reference
 # - Post-mortem must be filed within 24 hours
 #
-# See docs/releases/HOTFIX_OVERRIDE.md for full documentation.
+# See docs/release/HOTFIX_LANE.md and docs/release/HOTFIX_RUNBOOK.md for full documentation.
 
 on:
   workflow_dispatch:
@@ -20,6 +20,10 @@ on:
         type: string
       commit_sha:
         description: "Exact commit SHA to release"
+        required: true
+        type: string
+      parent_tag:
+        description: "Parent GA release tag for evidence reuse (e.g., v4.1.2)"
         required: true
         type: string
       justification:
@@ -38,6 +42,10 @@ on:
           - low
           - medium
           - high
+      waiver_ids:
+        description: "Comma-separated waiver IDs if gates are waived (e.g., HW-2026-001,HW-2026-002)"
+        required: false
+        type: string
 
 concurrency:
   group: hotfix-${{ inputs.version }}
@@ -58,6 +66,8 @@ jobs:
       evidence_sha256: ${{ steps.bundle.outputs.evidence_sha256 }}
       provenance_sha256: ${{ steps.bundle.outputs.provenance_sha256 }}
       gates_passed: ${{ steps.gates.outputs.passed }}
+      parent_evidence_sha256: ${{ steps.parent.outputs.evidence_sha256 }}
+      waivers_valid: ${{ steps.waivers.outputs.valid }}
     steps:
       - name: Validate Inputs
         id: validate
@@ -125,6 +135,155 @@ jobs:
           echo ""
           git log -1 "${COMMIT_SHA}" --format="  Subject: %s%n  Author: %an%n  Date: %ci"
 
+      - name: Verify Parent Release
+        id: parent
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PARENT_TAG="${{ inputs.parent_tag }}"
+
+          echo "🔗 Verifying parent release: ${PARENT_TAG}"
+
+          # Validate parent tag format
+          if ! [[ "${PARENT_TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid parent tag format: ${PARENT_TAG}"
+            echo "Expected: vX.Y.Z (GA release tag)"
+            exit 1
+          fi
+
+          # Verify parent release exists
+          if ! gh release view "${PARENT_TAG}" --json tagName -q '.tagName' > /dev/null 2>&1; then
+            echo "::error::Parent release ${PARENT_TAG} not found"
+            exit 1
+          fi
+
+          # Get parent commit SHA
+          PARENT_SHA=$(git rev-list -n 1 "${PARENT_TAG}" 2>/dev/null || echo "")
+          if [ -z "${PARENT_SHA}" ]; then
+            echo "::error::Could not resolve parent tag ${PARENT_TAG} to commit"
+            exit 1
+          fi
+
+          # Verify hotfix commit descends from parent
+          if ! git merge-base --is-ancestor "${PARENT_SHA}" "${{ inputs.commit_sha }}"; then
+            echo "::error::Hotfix commit does not descend from parent ${PARENT_TAG}"
+            echo "The hotfix must be based on the parent release"
+            exit 1
+          fi
+
+          # Download parent evidence bundle for reuse
+          mkdir -p parent-evidence
+          gh release download "${PARENT_TAG}" \
+            --pattern "evidence*.tar.gz" \
+            --pattern "sbom*.json" \
+            --pattern "trust-snapshot.json" \
+            --dir parent-evidence 2>/dev/null || echo "Some parent artifacts not available"
+
+          # Calculate parent evidence hash if available
+          if [ -f parent-evidence/evidence.tar.gz ]; then
+            PARENT_EVIDENCE_SHA256=$(sha256sum parent-evidence/evidence.tar.gz | awk '{print $1}')
+            echo "evidence_sha256=${PARENT_EVIDENCE_SHA256}" >> $GITHUB_OUTPUT
+            echo "✅ Parent evidence downloaded: sha256:${PARENT_EVIDENCE_SHA256}"
+          elif [ -f parent-evidence/evidence-bundle.tar.gz ]; then
+            PARENT_EVIDENCE_SHA256=$(sha256sum parent-evidence/evidence-bundle.tar.gz | awk '{print $1}')
+            echo "evidence_sha256=${PARENT_EVIDENCE_SHA256}" >> $GITHUB_OUTPUT
+            echo "✅ Parent evidence downloaded: sha256:${PARENT_EVIDENCE_SHA256}"
+          else
+            echo "evidence_sha256=" >> $GITHUB_OUTPUT
+            echo "⚠️ No parent evidence bundle found - will create fresh evidence"
+          fi
+
+          echo "parent_sha=${PARENT_SHA}" >> $GITHUB_OUTPUT
+          echo ""
+          echo "Parent Release: ${PARENT_TAG}"
+          echo "Parent Commit:  ${PARENT_SHA}"
+
+      - name: Validate Waivers
+        id: waivers
+        run: |
+          WAIVER_IDS="${{ inputs.waiver_ids }}"
+          WAIVER_FILE="docs/releases/_state/hotfix_waivers.json"
+
+          echo "🔍 Validating waivers..."
+
+          # If no waivers specified, skip validation
+          if [ -z "${WAIVER_IDS}" ]; then
+            echo "valid=true" >> $GITHUB_OUTPUT
+            echo "waiver_count=0" >> $GITHUB_OUTPUT
+            echo "✅ No waivers specified"
+            exit 0
+          fi
+
+          # Check if waiver file exists
+          if [ ! -f "${WAIVER_FILE}" ]; then
+            echo "::error::Waiver file not found: ${WAIVER_FILE}"
+            echo "Create the waiver file before requesting waivers"
+            exit 1
+          fi
+
+          # Parse waiver IDs
+          IFS=',' read -ra WAIVER_ARRAY <<< "${WAIVER_IDS}"
+          VALID_COUNT=0
+          CURRENT_TIME=$(date -u +%s)
+
+          for WAIVER_ID in "${WAIVER_ARRAY[@]}"; do
+            WAIVER_ID=$(echo "${WAIVER_ID}" | tr -d ' ')
+            echo ""
+            echo "Checking waiver: ${WAIVER_ID}"
+
+            # Extract waiver from JSON
+            WAIVER=$(jq -r --arg id "${WAIVER_ID}" '.waivers[] | select(.id == $id)' "${WAIVER_FILE}")
+
+            if [ -z "${WAIVER}" ] || [ "${WAIVER}" == "null" ]; then
+              echo "::error::Waiver ${WAIVER_ID} not found in ${WAIVER_FILE}"
+              exit 1
+            fi
+
+            # Check waiver status
+            STATUS=$(echo "${WAIVER}" | jq -r '.status')
+            if [ "${STATUS}" != "active" ]; then
+              echo "::error::Waiver ${WAIVER_ID} is not active (status: ${STATUS})"
+              exit 1
+            fi
+
+            # Check expiry
+            EXPIRES_AT=$(echo "${WAIVER}" | jq -r '.expires_at')
+            EXPIRES_EPOCH=$(date -d "${EXPIRES_AT}" +%s 2>/dev/null || date -j -f "%Y-%m-%dT%H:%M:%SZ" "${EXPIRES_AT}" +%s 2>/dev/null)
+
+            if [ "${CURRENT_TIME}" -gt "${EXPIRES_EPOCH}" ]; then
+              echo "::error::Waiver ${WAIVER_ID} has expired (expired at ${EXPIRES_AT})"
+              exit 1
+            fi
+
+            # Check hotfix tag matches (if specified)
+            WAIVER_TAG=$(echo "${WAIVER}" | jq -r '.hotfix_tag // empty')
+            if [ -n "${WAIVER_TAG}" ]; then
+              if [ "${WAIVER_TAG}" != "v${{ inputs.version }}" ]; then
+                echo "::error::Waiver ${WAIVER_ID} is for tag ${WAIVER_TAG}, not v${{ inputs.version }}"
+                exit 1
+              fi
+            fi
+
+            # Check approver count
+            APPROVER_COUNT=$(echo "${WAIVER}" | jq '.approved_by | length')
+            if [ "${APPROVER_COUNT}" -lt 2 ]; then
+              echo "::error::Waiver ${WAIVER_ID} requires 2 approvers (has ${APPROVER_COUNT})"
+              exit 1
+            fi
+
+            echo "  ✅ Waiver ${WAIVER_ID} is valid"
+            echo "     Type: $(echo "${WAIVER}" | jq -r '.type')"
+            echo "     Expires: ${EXPIRES_AT}"
+            echo "     Approvers: $(echo "${WAIVER}" | jq -r '.approved_by | join(", ")')"
+
+            VALID_COUNT=$((VALID_COUNT + 1))
+          done
+
+          echo ""
+          echo "valid=true" >> $GITHUB_OUTPUT
+          echo "waiver_count=${VALID_COUNT}" >> $GITHUB_OUTPUT
+          echo "✅ All ${VALID_COUNT} waivers validated"
+
       - name: Extract Version Info
         id: version
         run: |
@@ -173,9 +332,62 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           TAG="${{ steps.version.outputs.tag }}"
           COMMIT_SHA="${{ inputs.commit_sha }}"
+          PARENT_TAG="${{ inputs.parent_tag }}"
+          PARENT_SHA="${{ steps.parent.outputs.parent_sha }}"
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-          mkdir -p hotfix-assets/sbom
+          mkdir -p hotfix-assets/sbom hotfix-assets/inherited hotfix-assets/delta
+
+          # Copy inherited evidence from parent (if available)
+          EVIDENCE_INHERITANCE="fresh"
+          if [ -d parent-evidence ]; then
+            for f in parent-evidence/*; do
+              if [ -f "$f" ]; then
+                cp "$f" hotfix-assets/inherited/
+                EVIDENCE_INHERITANCE="inherited"
+              fi
+            done
+          fi
+
+          # Generate parent linkage manifest
+          cat > hotfix-assets/parent_linkage.json <<EOF
+          {
+            "version": "1.0.0",
+            "parent": {
+              "tag": "${PARENT_TAG}",
+              "commit_sha": "${PARENT_SHA}",
+              "release_url": "${{ github.server_url }}/${{ github.repository }}/releases/tag/${PARENT_TAG}",
+              "evidence_sha256": "${{ steps.parent.outputs.evidence_sha256 }}"
+            },
+            "hotfix": {
+              "tag": "${TAG}",
+              "commit_sha": "${COMMIT_SHA}",
+              "base_commit": "${PARENT_SHA}",
+              "justification": "${{ inputs.justification }}",
+              "ticket_url": "${{ inputs.ticket_url }}"
+            },
+            "evidence_inheritance": {
+              "mode": "${EVIDENCE_INHERITANCE}",
+              "sbom": "inherited",
+              "security_scan": "delta_only",
+              "compliance": "partial",
+              "test_coverage": "delta_only"
+            }
+          }
+          EOF
+
+          # Generate delta manifest (what changed from parent)
+          cat > hotfix-assets/delta_manifest.json <<EOF
+          {
+            "version": "1.0.0",
+            "delta": {
+              "from_commit": "${PARENT_SHA}",
+              "to_commit": "${COMMIT_SHA}",
+              "timestamp": "${TIMESTAMP}"
+            },
+            "files_changed": $(git diff --name-only "${PARENT_SHA}".."${COMMIT_SHA}" 2>/dev/null | jq -R -s -c 'split("\n") | map(select(length > 0))' || echo '[]')
+          }
+          EOF
 
           # Generate provenance manifest
           cat > hotfix-assets/provenance.json <<EOF
@@ -186,6 +398,8 @@ jobs:
               "tag": "${TAG}",
               "version": "${VERSION}",
               "commit": "${COMMIT_SHA}",
+              "parent_tag": "${PARENT_TAG}",
+              "parent_commit": "${PARENT_SHA}",
               "timestamp": "${TIMESTAMP}",
               "risk_level": "${{ inputs.risk_level }}",
               "justification": "${{ inputs.justification }}",
@@ -196,7 +410,15 @@ jobs:
             },
             "verification": {
               "release_gates": "${{ steps.gates.outputs.passed }}",
-              "commit_verified": true
+              "commit_verified": true,
+              "parent_verified": true,
+              "waivers_valid": "${{ steps.waivers.outputs.valid }}",
+              "waiver_count": ${{ steps.waivers.outputs.waiver_count || 0 }},
+              "waiver_ids": "${{ inputs.waiver_ids }}"
+            },
+            "evidence_inheritance": {
+              "mode": "${EVIDENCE_INHERITANCE}",
+              "parent_evidence_sha256": "${{ steps.parent.outputs.evidence_sha256 }}"
             }
           }
           EOF
@@ -208,18 +430,24 @@ jobs:
 
           # Calculate bundle hashes
           PROVENANCE_SHA256=$(sha256sum hotfix-assets/provenance.json | awk '{print $1}')
+          LINKAGE_SHA256=$(sha256sum hotfix-assets/parent_linkage.json | awk '{print $1}')
 
           # Create evidence tarball
-          tar -czf hotfix-assets/evidence.tar.gz -C hotfix-assets provenance.json SHA256SUMS
+          tar -czf hotfix-assets/evidence.tar.gz -C hotfix-assets \
+            provenance.json parent_linkage.json delta_manifest.json SHA256SUMS \
+            inherited delta
 
           EVIDENCE_SHA256=$(sha256sum hotfix-assets/evidence.tar.gz | awk '{print $1}')
 
           echo "evidence_sha256=${EVIDENCE_SHA256}" >> $GITHUB_OUTPUT
           echo "provenance_sha256=${PROVENANCE_SHA256}" >> $GITHUB_OUTPUT
+          echo "linkage_sha256=${LINKAGE_SHA256}" >> $GITHUB_OUTPUT
 
           echo "📦 Evidence bundle created"
           echo "  Evidence SHA256: ${EVIDENCE_SHA256}"
           echo "  Provenance SHA256: ${PROVENANCE_SHA256}"
+          echo "  Linkage SHA256: ${LINKAGE_SHA256}"
+          echo "  Inheritance: ${EVIDENCE_INHERITANCE}"
 
       - name: Generate Required Checks Snapshot
         run: |
