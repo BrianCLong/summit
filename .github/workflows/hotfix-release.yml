@@ -1,140 +1,55 @@
-name: Hotfix Release
+name: Hotfix Release (From GA)
 
-# EMERGENCY HOTFIX RELEASE WORKFLOW
-# This workflow enables rapid, controlled production releases for critical fixes
-# while maintaining governance, auditability, and mandatory post-mortem requirements.
-#
-# Requirements:
-# - Requires hotfix-release environment with required reviewers
-# - Mandatory justification and ticket reference
-# - Post-mortem must be filed within 24 hours
-#
-# See docs/releases/HOTFIX_OVERRIDE.md for full documentation.
+# Controlled hotfix workflow from GA tags with deterministic cherry-picks,
+# required checks enforcement, signed evidence, and hotfix records.
 
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: "Hotfix version (e.g., 4.1.2-hotfix.1 or 4.1.3)"
+      base_tag:
+        description: "GA base tag (e.g., v4.1.1)"
         required: true
         type: string
-      commit_sha:
-        description: "Exact commit SHA to release"
+      target_version:
+        description: "Target hotfix version (e.g., 4.1.2)"
         required: true
         type: string
-      justification:
-        description: "Why is this hotfix needed? (min 50 characters)"
+      commits:
+        description: "Commit SHAs to cherry-pick (one per line, in order)"
         required: true
         type: string
-      ticket_url:
-        description: "Incident ticket URL"
+      publish:
+        description: "Publish tag and GitHub release"
         required: true
-        type: string
-      risk_level:
-        description: "Risk level assessment"
-        required: true
-        type: choice
-        options:
-          - low
-          - medium
-          - high
+        type: boolean
+        default: true
 
 concurrency:
-  group: hotfix-${{ inputs.version }}
+  group: hotfix-${{ inputs.target_version }}
   cancel-in-progress: false
 
 permissions:
   contents: write
-  packages: write
+  pull-requests: write
   id-token: write
 
+env:
+  HOTFIX_POLICY: release/HOTFIX_POLICY.yml
+
 jobs:
-  # Job 1: Validate inputs and verify the hotfix is safe to release
-  verify-hotfix:
-    name: Verify Hotfix
+  prepare-hotfix:
+    name: Prepare Hotfix Branch
     runs-on: ubuntu-latest
     outputs:
-      tag: ${{ steps.version.outputs.tag }}
-      evidence_sha256: ${{ steps.bundle.outputs.evidence_sha256 }}
-      provenance_sha256: ${{ steps.bundle.outputs.provenance_sha256 }}
-      gates_passed: ${{ steps.gates.outputs.passed }}
+      branch_name: ${{ steps.cut.outputs.branch_name }}
+      base_commit: ${{ steps.verify.outputs.base_commit }}
+      head_commit: ${{ steps.cut.outputs.head_commit }}
+      tag: ${{ steps.tag.outputs.tag }}
     steps:
-      - name: Validate Inputs
-        id: validate
-        run: |
-          VERSION="${{ inputs.version }}"
-          COMMIT_SHA="${{ inputs.commit_sha }}"
-          JUSTIFICATION="${{ inputs.justification }}"
-          TICKET_URL="${{ inputs.ticket_url }}"
-          RISK_LEVEL="${{ inputs.risk_level }}"
-
-          echo "📋 Validating hotfix inputs..."
-          echo ""
-          echo "Version: ${VERSION}"
-          echo "Commit:  ${COMMIT_SHA}"
-          echo "Risk:    ${RISK_LEVEL}"
-          echo "Ticket:  ${TICKET_URL}"
-          echo ""
-
-          # Validate version format
-          if ! [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-hotfix\.[0-9]+)?$ ]]; then
-            echo "::error::Invalid version format: ${VERSION}"
-            echo "Expected: X.Y.Z or X.Y.Z-hotfix.N"
-            exit 1
-          fi
-
-          # Validate commit SHA format
-          if ! [[ "${COMMIT_SHA}" =~ ^[a-f0-9]{40}$ ]]; then
-            echo "::error::Invalid commit SHA format: ${COMMIT_SHA}"
-            echo "Expected: 40 character hex string"
-            exit 1
-          fi
-
-          # Validate justification length
-          if [ ${#JUSTIFICATION} -lt 50 ]; then
-            echo "::error::Justification too short (${#JUSTIFICATION} chars)"
-            echo "Minimum 50 characters required for audit trail"
-            exit 1
-          fi
-
-          # Validate ticket URL
-          if ! [[ "${TICKET_URL}" =~ ^https?:// ]]; then
-            echo "::error::Invalid ticket URL: ${TICKET_URL}"
-            echo "Expected: URL starting with http:// or https://"
-            exit 1
-          fi
-
-          echo "✅ Input validation passed"
-
-      - name: Checkout at Commit
+      - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.commit_sha }}
           fetch-depth: 0
-
-      - name: Verify Commit Exists
-        run: |
-          COMMIT_SHA="${{ inputs.commit_sha }}"
-
-          if ! git cat-file -e "${COMMIT_SHA}^{commit}"; then
-            echo "::error::Commit ${COMMIT_SHA} not found in repository"
-            exit 1
-          fi
-
-          echo "✅ Commit verified: ${COMMIT_SHA}"
-          echo ""
-          git log -1 "${COMMIT_SHA}" --format="  Subject: %s%n  Author: %an%n  Date: %ci"
-
-      - name: Extract Version Info
-        id: version
-        run: |
-          VERSION="${{ inputs.version }}"
-          TAG="v${VERSION}"
-
-          echo "tag=${TAG}" >> $GITHUB_OUTPUT
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-
-          echo "📦 Hotfix Tag: ${TAG}"
 
       - uses: pnpm/action-setup@v4
 
@@ -147,295 +62,272 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Release Gates
-        id: gates
+      - name: Write Commit List
         run: |
-          echo "🔒 Running release gates..."
+          printf '%s\n' "${{ inputs.commits }}" > hotfix-commits.txt
 
-          # Create output directory
-          mkdir -p dist/hotfix
-
-          # Run release readiness check
-          if pnpm release:ready 2>&1 | tee dist/hotfix/gate-output.txt; then
-            echo "passed=true" >> $GITHUB_OUTPUT
-            echo '{"gate": "release:ready", "passed": true}' > dist/hotfix/gate-result.json
-            echo "✅ Release gates passed"
-          else
-            echo "passed=false" >> $GITHUB_OUTPUT
-            echo '{"gate": "release:ready", "passed": false}' > dist/hotfix/gate-result.json
-            echo "::error::Release gates failed"
-            exit 1
-          fi
-
-      - name: Build Evidence Bundle
-        id: bundle
+      - name: Verify Hotfix Selection
+        id: verify
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          TAG="${{ steps.version.outputs.tag }}"
-          COMMIT_SHA="${{ inputs.commit_sha }}"
-          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          node scripts/release/verify_hotfix_selection.mjs \
+            --base-tag "${{ inputs.base_tag }}" \
+            --target-version "${{ inputs.target_version }}" \
+            --commits-file hotfix-commits.txt \
+            --policy "${{ env.HOTFIX_POLICY }}" \
+            --actor "${{ github.actor }}" \
+            --output artifacts/hotfix-selection.json
 
-          mkdir -p hotfix-assets/sbom
+          echo "base_commit=$(jq -r '.base_commit' artifacts/hotfix-selection.json)" >> "$GITHUB_OUTPUT"
 
-          # Generate provenance manifest
-          cat > hotfix-assets/provenance.json <<EOF
-          {
-            "_type": "https://summit.dev/provenance/hotfix/v1",
-            "version": "1.0.0",
-            "hotfix": {
-              "tag": "${TAG}",
-              "version": "${VERSION}",
-              "commit": "${COMMIT_SHA}",
-              "timestamp": "${TIMESTAMP}",
-              "risk_level": "${{ inputs.risk_level }}",
-              "justification": "${{ inputs.justification }}",
-              "ticket_url": "${{ inputs.ticket_url }}",
-              "triggered_by": "${{ github.actor }}",
-              "workflow_run_id": "${{ github.run_id }}",
-              "workflow_run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-            },
-            "verification": {
-              "release_gates": "${{ steps.gates.outputs.passed }}",
-              "commit_verified": true
-            }
-          }
-          EOF
-
-          # Generate checksums
-          cd hotfix-assets
-          find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
-          cd ..
-
-          # Calculate bundle hashes
-          PROVENANCE_SHA256=$(sha256sum hotfix-assets/provenance.json | awk '{print $1}')
-
-          # Create evidence tarball
-          tar -czf hotfix-assets/evidence.tar.gz -C hotfix-assets provenance.json SHA256SUMS
-
-          EVIDENCE_SHA256=$(sha256sum hotfix-assets/evidence.tar.gz | awk '{print $1}')
-
-          echo "evidence_sha256=${EVIDENCE_SHA256}" >> $GITHUB_OUTPUT
-          echo "provenance_sha256=${PROVENANCE_SHA256}" >> $GITHUB_OUTPUT
-
-          echo "📦 Evidence bundle created"
-          echo "  Evidence SHA256: ${EVIDENCE_SHA256}"
-          echo "  Provenance SHA256: ${PROVENANCE_SHA256}"
-
-      - name: Generate Required Checks Snapshot
+      - name: Configure Git
         run: |
-          cat > hotfix-assets/required_checks_snapshot.txt <<EOF
-          # Hotfix Required Checks Snapshot
-          # Tag: ${{ steps.version.outputs.tag }}
-          # Commit: ${{ inputs.commit_sha }}
-          # Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-          release:ready: ${{ steps.gates.outputs.passed && 'passed' || 'failed' }}
-          input_validation: passed
-          commit_verification: passed
-          EOF
-
-      - name: Upload Hotfix Bundle
-        uses: actions/upload-artifact@v6
-        with:
-          name: hotfix-bundle-${{ steps.version.outputs.tag }}
-          path: hotfix-assets/
-          retention-days: 90
-
-      - name: Verification Summary
-        run: |
-          echo "### 🔧 Hotfix Verification Complete" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| **Version** | \`${{ steps.version.outputs.tag }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Commit** | \`${{ inputs.commit_sha }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Risk Level** | ${{ inputs.risk_level }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Gates Passed** | ${{ steps.gates.outputs.passed }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "#### Justification" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "> ${{ inputs.justification }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Ticket:** [${{ inputs.ticket_url }}](${{ inputs.ticket_url }})" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "#### ⏳ Awaiting Approval" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "The hotfix bundle is ready. Publishing requires approval from the \`hotfix-release\` environment." >> $GITHUB_STEP_SUMMARY
-
-  # Job 2: Publish hotfix (requires environment approval)
-  publish-hotfix:
-    name: Publish Hotfix
-    needs: [verify-hotfix]
-    if: needs.verify-hotfix.outputs.gates_passed == 'true'
-    runs-on: ubuntu-latest
-    # HOTFIX APPROVAL GATE
-    # Configure required reviewers in GitHub: Settings → Environments → hotfix-release
-    environment:
-      name: hotfix-release
-      url: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ needs.verify-hotfix.outputs.tag }}
-    permissions:
-      contents: write
-      packages: write
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ inputs.commit_sha }}
-
-      - name: Download Hotfix Bundle
-        uses: actions/download-artifact@v7
-        with:
-          name: hotfix-bundle-${{ needs.verify-hotfix.outputs.tag }}
-          path: hotfix-assets
-
-      - name: Verify Bundle Integrity
-        run: |
-          EXPECTED_HASH="${{ needs.verify-hotfix.outputs.evidence_sha256 }}"
-          ACTUAL_HASH=$(sha256sum hotfix-assets/evidence.tar.gz | awk '{print $1}')
-
-          echo "🔐 Verifying hotfix bundle integrity..."
-          echo "Expected: ${EXPECTED_HASH}"
-          echo "Actual:   ${ACTUAL_HASH}"
-
-          if [ "${ACTUAL_HASH}" != "${EXPECTED_HASH}" ]; then
-            echo "::error::Bundle integrity check failed!"
-            exit 1
-          fi
-
-          echo "✅ Bundle integrity verified"
-
-      - name: Generate Hotfix Record
-        run: |
-          TAG="${{ needs.verify-hotfix.outputs.tag }}"
-          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-          cat > hotfix-assets/hotfix_record.json <<EOF
-          {
-            "version": "1.0.0",
-            "hotfix": {
-              "tag": "${TAG}",
-              "commit_sha": "${{ inputs.commit_sha }}",
-              "version": "${{ inputs.version }}",
-              "risk_level": "${{ inputs.risk_level }}",
-              "justification": "${{ inputs.justification }}",
-              "ticket_url": "${{ inputs.ticket_url }}"
-            },
-            "approval": {
-              "workflow_run_id": "${{ github.run_id }}",
-              "workflow_run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-              "environment": "hotfix-release",
-              "approved_at": "${TIMESTAMP}",
-              "triggered_by": "${{ github.actor }}",
-              "repository": "${{ github.repository }}"
-            },
-            "verification": {
-              "bundle_integrity": "verified",
-              "evidence_sha256": "${{ needs.verify-hotfix.outputs.evidence_sha256 }}",
-              "provenance_sha256": "${{ needs.verify-hotfix.outputs.provenance_sha256 }}"
-            },
-            "postmortem": {
-              "required": true,
-              "deadline": "24h after release",
-              "path": "docs/releases/HOTFIX_POSTMORTEMS/${TAG}.md"
-            },
-            "audit_note": "Reviewer identity available in GitHub audit log"
-          }
-          EOF
-
-          echo "📋 Hotfix record generated"
-          cat hotfix-assets/hotfix_record.json
-
-      - name: Upload Hotfix Record
-        uses: actions/upload-artifact@v6
-        with:
-          name: hotfix-record-${{ needs.verify-hotfix.outputs.tag }}
-          path: hotfix-assets/hotfix_record.json
-          retention-days: 365
-
-      - name: Create Hotfix Tag
-        run: |
-          TAG="${{ needs.verify-hotfix.outputs.tag }}"
-          COMMIT_SHA="${{ inputs.commit_sha }}"
-
-          echo "🏷️ Creating hotfix tag: ${TAG}"
-
-          # Configure git
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Create annotated tag
-          git tag -a "${TAG}" "${COMMIT_SHA}" -m "Hotfix Release ${TAG}
-
-          Risk Level: ${{ inputs.risk_level }}
-          Ticket: ${{ inputs.ticket_url }}
-          Commit: ${COMMIT_SHA}
-
-          Justification:
-          ${{ inputs.justification }}
-
-          Post-mortem required within 24 hours.
-          See: docs/releases/HOTFIX_POSTMORTEMS/${TAG}.md
-
-          Workflow Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-
-          # Push tag
-          git push origin "${TAG}"
-
-          echo "✅ Tag created and pushed: ${TAG}"
-
-      - name: Create GitHub Release
+      - name: Cut Hotfix Branch
+        id: cut
         run: |
-          TAG="${{ needs.verify-hotfix.outputs.tag }}"
+          node scripts/release/cut_hotfix_branch.mjs \
+            --base-tag "${{ inputs.base_tag }}" \
+            --target-version "${{ inputs.target_version }}" \
+            --commits-file hotfix-commits.txt \
+            --policy "${{ env.HOTFIX_POLICY }}" \
+            --output artifacts/hotfix-cut.json
 
-          RELEASE_NOTES=$(cat <<'EOF'
-          ## 🔧 Emergency Hotfix Release
+          echo "branch_name=$(jq -r '.branch_name' artifacts/hotfix-cut.json)" >> "$GITHUB_OUTPUT"
+          echo "head_commit=$(jq -r '.head_commit' artifacts/hotfix-cut.json)" >> "$GITHUB_OUTPUT"
 
-          **Risk Level:** ${{ inputs.risk_level }}
-          **Ticket:** [${{ inputs.ticket_url }}](${{ inputs.ticket_url }})
+      - name: Push Hotfix Branch
+        run: |
+          git push origin "${{ steps.cut.outputs.branch_name }}"
 
-          ### Justification
+      - name: Tag Output
+        id: tag
+        run: |
+          echo "tag=v${{ inputs.target_version }}" >> "$GITHUB_OUTPUT"
 
-          ${{ inputs.justification }}
+      - name: Upload Preparation Artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: hotfix-prep-${{ steps.tag.outputs.tag }}
+          path: |
+            artifacts/hotfix-selection.json
+            artifacts/hotfix-cut.json
 
-          ### Verification
+  verify-hotfix:
+    name: Verify Hotfix Gates
+    needs: [prepare-hotfix]
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      evidence_sha: ${{ steps.evidence.outputs.evidence_sha }}
+      dashboard_sha: ${{ steps.dashboard.outputs.dashboard_sha }}
+    steps:
+      - name: Checkout Hotfix Branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare-hotfix.outputs.branch_name }}
+          fetch-depth: 0
 
-          - ✅ Release gates passed
-          - ✅ Bundle integrity verified
-          - ✅ Approval granted via `hotfix-release` environment
+      - name: Download Preparation Artifacts
+        uses: actions/download-artifact@v7
+        with:
+          name: hotfix-prep-${{ needs.prepare-hotfix.outputs.tag }}
+          path: .
 
-          ### Post-Mortem
+      - uses: pnpm/action-setup@v4
 
-          ⚠️ **Required within 24 hours**: `docs/releases/HOTFIX_POSTMORTEMS/${{ needs.verify-hotfix.outputs.tag }}.md`
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: "pnpm"
 
-          ---
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
 
-          **Commit:** `${{ inputs.commit_sha }}`
-          **Workflow Run:** [#${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
-          EOF
+      - name: Release Readiness Gate
+        run: pnpm release:ready
+
+      - name: Required Checks Gate
+        run: |
+          scripts/release/verify-green-for-tag.sh \
+            --commit "${{ needs.prepare-hotfix.outputs.head_commit }}" \
+            --tag "${{ needs.prepare-hotfix.outputs.tag }}" \
+            --base "${{ inputs.base_tag }}" \
+            --report-only \
+            > artifacts/hotfix-required-checks.json
+
+      - name: Generate Release Dashboard
+        run: |
+          scripts/release/generate_release_dashboard.sh \
+            --json artifacts/hotfix-dashboard/dashboard.json \
+            --out artifacts/hotfix-dashboard/dashboard.md \
+            --dry-run
+
+      - name: Build Non-Sensitive Dashboard Summary
+        id: dashboard
+        run: |
+          scripts/release/build_release_ops_site.sh \
+            --artifacts-dir artifacts/hotfix-dashboard \
+            --site-dir artifacts/hotfix-dashboard/site
+
+          jq -e . artifacts/hotfix-dashboard/site/dashboard_summary.json >/dev/null
+
+          DASHBOARD_SHA=$(sha256sum artifacts/hotfix-dashboard/site/dashboard_summary.json | awk '{print $1}')
+          echo "dashboard_sha=${DASHBOARD_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Build Signed Evidence Bundle
+        id: evidence
+        run: |
+          scripts/release/build-hotfix-evidence.sh \
+            --tag "${{ needs.prepare-hotfix.outputs.tag }}" \
+            --commit "${{ needs.prepare-hotfix.outputs.head_commit }}" \
+            --base-tag "${{ inputs.base_tag }}" \
+            --output artifacts/hotfix-evidence \
+            --policy "${{ env.HOTFIX_POLICY }}"
+
+          echo "evidence_sha=$(jq -r '.evidence_sha256' artifacts/hotfix-evidence/evidence_summary.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Write Hotfix Record
+        run: |
+          node scripts/release/write_hotfix_record.mjs \
+            --output "release/hotfix-records/${{ needs.prepare-hotfix.outputs.tag }}.json" \
+            --selection artifacts/hotfix-selection.json \
+            --evidence artifacts/hotfix-evidence/evidence_summary.json \
+            --dashboard artifacts/hotfix-dashboard/site/dashboard_summary.json \
+            --dashboard-sha "${{ steps.dashboard.outputs.dashboard_sha }}" \
+            --final-commit "${{ needs.prepare-hotfix.outputs.head_commit }}" \
+            --actor "${{ github.actor }}" \
+            --workflow-run-id "${{ github.run_id }}" \
+            --workflow-run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          node scripts/release/validate_hotfix_record.mjs \
+            --record "release/hotfix-records/${{ needs.prepare-hotfix.outputs.tag }}.json" \
+            --schema schemas/hotfix-record.schema.json
+
+      - name: Commit Hotfix Record
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "release/hotfix-records/${{ needs.prepare-hotfix.outputs.tag }}.json"
+          git commit -m "chore(release): add hotfix record ${{ needs.prepare-hotfix.outputs.tag }}"
+          git push origin "${{ needs.prepare-hotfix.outputs.branch_name }}"
+
+      - name: Create Hotfix PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh pr view "${{ needs.prepare-hotfix.outputs.branch_name }}" --json number >/dev/null 2>&1; then
+            echo "PR already exists for ${{ needs.prepare-hotfix.outputs.branch_name }}"
+            exit 0
+          fi
+
+          SELECTED_COMMITS=$(jq -r '.selected_commits[]' artifacts/hotfix-selection.json)
+          EVIDENCE_SHA=$(jq -r '.evidence_sha256' artifacts/hotfix-evidence/evidence_summary.json)
+          DASHBOARD_SHA="${{ steps.dashboard.outputs.dashboard_sha }}"
+
+          PR_BODY=$(cat <<'BODY'
+          ## Hotfix Summary
+
+          - **Base tag:** ${{ inputs.base_tag }}
+          - **Target version:** ${{ needs.prepare-hotfix.outputs.tag }}
+          - **Selected commits:**
+          $(printf '%s\n' "$SELECTED_COMMITS" | sed 's/^/- /')
+
+          ## Evidence
+
+          - **Evidence SHA256:** ${EVIDENCE_SHA}
+          - **Dashboard SHA256:** ${DASHBOARD_SHA}
+
+          ## Gates
+
+          - ✅ Release readiness (`pnpm release:ready`)
+          - ✅ Required checks (`verify-green-for-tag.sh`)
+          - ✅ Signed evidence bundle
+          - ✅ Dashboard summary validated
+          BODY
           )
 
-          gh release create "${TAG}" hotfix-assets/evidence.tar.gz \
-            --title "${TAG}" \
-            --notes "${RELEASE_NOTES}" \
-            --repo "$GITHUB_REPOSITORY"
+          gh pr create \
+            --title "chore(release): hotfix ${{ needs.prepare-hotfix.outputs.tag }}" \
+            --body "$PR_BODY" \
+            --base main \
+            --head "${{ needs.prepare-hotfix.outputs.branch_name }}" \
+            --label hotfix
 
-          echo "✅ GitHub Release created: ${TAG}"
+      - name: Upload Verification Artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: hotfix-verify-${{ needs.prepare-hotfix.outputs.tag }}
+          path: |
+            artifacts/hotfix-required-checks.json
+            artifacts/hotfix-dashboard/site/dashboard_summary.json
+            artifacts/hotfix-evidence/evidence.tar.gz
+            artifacts/hotfix-evidence/evidence_summary.json
+            release/hotfix-records/${{ needs.prepare-hotfix.outputs.tag }}.json
 
-      - name: Publish Summary
+  publish-hotfix:
+    name: Publish Hotfix
+    needs: [verify-hotfix, prepare-hotfix]
+    if: ${{ inputs.publish && needs.verify-hotfix.result == 'success' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: hotfix-release
+      url: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ needs.prepare-hotfix.outputs.tag }}
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Checkout Hotfix Branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare-hotfix.outputs.branch_name }}
+          fetch-depth: 0
+
+      - name: Download Verification Artifacts
+        uses: actions/download-artifact@v7
+        with:
+          name: hotfix-verify-${{ needs.prepare-hotfix.outputs.tag }}
+          path: hotfix-artifacts
+
+      - name: Download Preparation Artifacts
+        uses: actions/download-artifact@v7
+        with:
+          name: hotfix-prep-${{ needs.prepare-hotfix.outputs.tag }}
+          path: .
+
+      - name: Create Hotfix Tag
         run: |
-          echo "### ✅ Hotfix Published" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| **Tag** | \`${{ needs.verify-hotfix.outputs.tag }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Commit** | \`${{ inputs.commit_sha }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Risk Level** | ${{ inputs.risk_level }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Release URL** | [${{ needs.verify-hotfix.outputs.tag }}](${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ needs.verify-hotfix.outputs.tag }}) |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "#### ⚠️ Post-Mortem Required" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Create: \`docs/releases/HOTFIX_POSTMORTEMS/${{ needs.verify-hotfix.outputs.tag }}.md\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Deadline:** Within 24 hours (or next business day)" >> $GITHUB_STEP_SUMMARY
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git tag -a "${{ needs.prepare-hotfix.outputs.tag }}" "${{ needs.prepare-hotfix.outputs.head_commit }}" -m "Hotfix Release ${{ needs.prepare-hotfix.outputs.tag }}"
+          git push origin "${{ needs.prepare-hotfix.outputs.tag }}"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          EVIDENCE_SHA=$(jq -r '.evidence_sha256' hotfix-artifacts/artifacts/hotfix-evidence/evidence_summary.json)
+          DASHBOARD_SHA="${{ needs.verify-hotfix.outputs.dashboard_sha }}"
+          SELECTED_COMMITS=$(jq -r '.selected_commits[]' artifacts/hotfix-selection.json)
+
+          RELEASE_NOTES=$(cat <<'NOTES'
+          ## Hotfix Release ${{ needs.prepare-hotfix.outputs.tag }}
+
+          - **Base tag:** ${{ inputs.base_tag }}
+          - **Evidence SHA256:** ${EVIDENCE_SHA}
+          - **Dashboard SHA256:** ${DASHBOARD_SHA}
+
+          ### Cherry-picks
+          $(printf '%s\n' "$SELECTED_COMMITS" | sed 's/^/- /')
+          NOTES
+          )
+
+          gh release create "${{ needs.prepare-hotfix.outputs.tag }}" hotfix-artifacts/artifacts/hotfix-evidence/evidence.tar.gz \
+            --title "${{ needs.prepare-hotfix.outputs.tag }}" \
+            --notes "$RELEASE_NOTES"

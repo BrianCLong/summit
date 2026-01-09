@@ -1,0 +1,38 @@
+version: 1.0.0
+authority:
+  readiness_assertion: docs/SUMMIT_READINESS_ASSERTION.md
+  constitution: docs/governance/CONSTITUTION.md
+  meta_governance: docs/governance/META_GOVERNANCE.md
+allowed_base_tag_pattern: '^v\\d+\\.\\d+\\.\\d+$'
+branch:
+  template: "hotfix/v{version}"
+  pattern: '^hotfix/v\\d+\\.\\d+\\.\\d+$'
+required_checks_policy: docs/ci/REQUIRED_CHECKS_POLICY.yml
+approvals:
+  require_hotfix_label: true
+  label: hotfix-approved
+  require_merged_pr: true
+actors:
+  allowlist:
+    - release-captain
+    - platform-engineering
+    - github-actions[bot]
+allowed_source_branches:
+  - main
+allowed_merge_commits: false
+forbidden_paths:
+  - "^release/HOTFIX_POLICY.yml$"
+  - "^release/hotfix-records/"
+  - "^release/hotfix-snapshots/"
+  - "^schemas/hotfix-record.schema.json$"
+  - '^\.github/workflows/hotfix-release.yml$'
+  - "^docs/ci/REQUIRED_CHECKS_POLICY.yml$"
+allowed_paths: []
+version_files:
+  - package.json
+  - server/package.json
+  - client/package.json
+lockfiles:
+  - pnpm-lock.yaml
+  - package-lock.json
+  - npm-shrinkwrap.json

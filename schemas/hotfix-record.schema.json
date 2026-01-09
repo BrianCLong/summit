@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Hotfix Record",
+  "type": "object",
+  "required": [
+    "version",
+    "hotfix",
+    "evidence",
+    "dashboard",
+    "actor",
+    "workflow_run",
+    "recorded_at"
+  ],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "hotfix": {
+      "type": "object",
+      "required": ["tag", "version", "base_tag", "base_commit", "selected_commits", "final_commit"],
+      "properties": {
+        "tag": {
+          "type": "string",
+          "pattern": "^v\\d+\\.\\d+\\.\\d+$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "base_tag": {
+          "type": "string",
+          "pattern": "^v\\d+\\.\\d+\\.\\d+$"
+        },
+        "base_commit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "selected_commits": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{40}$"
+          }
+        },
+        "final_commit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["sha256", "signature", "signature_method"],
+      "properties": {
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "signature_method": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "object",
+          "required": ["subject", "sig_path", "cert_path", "metadata_path"],
+          "properties": {
+            "subject": { "type": "string" },
+            "sig_path": { "type": "string" },
+            "cert_path": { "type": "string" },
+            "metadata_path": { "type": "string" }
+          }
+        }
+      }
+    },
+    "dashboard": {
+      "type": "object",
+      "required": ["sha256", "summary_path"],
+      "properties": {
+        "sha256": {
+          "type": ["string", "null"],
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "summary_path": {
+          "type": "string"
+        }
+      }
+    },
+    "actor": {
+      "type": ["string", "null"]
+    },
+    "workflow_run": {
+      "type": "object",
+      "required": ["id", "url"],
+      "properties": {
+        "id": { "type": ["string", "null"] },
+        "url": { "type": ["string", "null"] }
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
