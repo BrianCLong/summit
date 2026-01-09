@@ -22,7 +22,11 @@ export class BackpressureStream<T> extends Transform {
   }
 
   private isUnderPressure(): boolean {
-    const { heap_size_limit, total_heap_size } = v8.getHeapStatistics();
+    const stats = v8.getHeapStatistics?.();
+    if (!stats) {
+      return false;
+    }
+    const { heap_size_limit, total_heap_size } = stats;
     const usage = total_heap_size / heap_size_limit;
     return usage > this.memoryThreshold;
   }
