@@ -1,0 +1,54 @@
+# branch-protection-verify.yml
+# Strict verification for branch protection enforcement
+# Authority: docs/release/BRANCH_PROTECTION_POLICY.md
+
+name: Branch Protection Verify
+
+on:
+  pull_request:
+  schedule:
+    - cron: "15 10 * * *" # 10:15 UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  administration: read
+
+env:
+  OUT_DIR: artifacts/release-train
+
+jobs:
+  verify:
+    name: branch-protection:verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Branch Protection Verification
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p "${{ env.OUT_DIR }}"
+
+          chmod +x scripts/release/check_branch_protection_drift.sh
+          chmod +x scripts/release/extract_required_checks_from_policy.sh
+
+          scripts/release/check_branch_protection_drift.sh \
+            --repo "${{ github.repository }}" \
+            --branch "main" \
+            --out-dir "${{ env.OUT_DIR }}" \
+            --strict \
+            --verbose
+
+      - name: Upload Verification Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: branch-protection-verify-report
+          path: |
+            ${{ env.OUT_DIR }}/branch_protection_drift_report.md
+            ${{ env.OUT_DIR }}/branch_protection_drift_report.json
+          retention-days: 30

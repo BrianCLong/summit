@@ -9,10 +9,10 @@ name: Release Promotion Guard
 # - Provides deterministic promotion decision
 #
 # What it guarantees:
-# 1. Target commit passed Release Readiness Gate
+# 1. Target commit passed Release Readiness Gate / Release Readiness Gate
 # 2. Target commit passed Workflow Lint
-# 3. Target commit passed GA Gate
-# 4. Target commit passed Unit Tests & Coverage
+# 3. Target commit passed GA Gate / GA Readiness Gate
+# 4. Target commit passed Unit Tests & Coverage / test
 # 5. Target commit passed CI Core
 # 6. Promotion bundle artifact is generated for audit trail
 #
@@ -230,11 +230,11 @@ jobs:
           Verified at: ${TIMESTAMP}
 
           This release has passed all required gates:
-          - Release Readiness Gate
+          - Release Readiness Gate / Release Readiness Gate
           - Workflow Lint
-          - GA Gate
-          - Unit Tests & Coverage
-          - CI Core (Primary Gate)
+          - GA Gate / GA Readiness Gate
+          - Unit Tests & Coverage / test
+          - CI Core (Primary Gate) / CI Core Gate ✅
 
           Evidence: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
              ```
@@ -301,11 +301,11 @@ jobs:
 
           All required CI workflows verified as **GREEN** ✅
 
-          - ✅ Release Readiness Gate
+          - ✅ Release Readiness Gate / Release Readiness Gate
           - ✅ Workflow Lint
-          - ✅ GA Gate
-          - ✅ Unit Tests & Coverage
-          - ✅ CI Core (Primary Gate)
+          - ✅ GA Gate / GA Readiness Gate
+          - ✅ Unit Tests & Coverage / test
+          - ✅ CI Core (Primary Gate) / CI Core Gate ✅
 
           ## Next Steps
 

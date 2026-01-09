@@ -90,13 +90,13 @@ Both RC and GA pipelines use identical base selection rules, ensuring consistent
 
 These workflows **MUST** complete with `conclusion: success` for **every** commit promoted to GA.
 
-### 1. Release Readiness Gate
+### 1. Release Readiness Gate / Release Readiness Gate
 
-| Field    | Value                                     |
-| -------- | ----------------------------------------- |
-| Workflow | `.github/workflows/release-readiness.yml` |
-| Name     | `Release Readiness Gate`                  |
-| Triggers | Every PR/push to main (NO path filters)   |
+| Field    | Value                                             |
+| -------- | ------------------------------------------------- |
+| Workflow | `.github/workflows/release-readiness.yml`         |
+| Name     | `Release Readiness Gate / Release Readiness Gate` |
+| Triggers | Every PR/push to main (NO path filters)           |
 
 **Guarantees**:
 
@@ -108,12 +108,12 @@ These workflows **MUST** complete with `conclusion: success` for **every** commi
 - All workflow files are valid (actionlint)
 - Required workflows trigger on critical changes
 
-### 2. GA Gate
+### 2. GA Gate / GA Readiness Gate
 
 | Field    | Value                                   |
 | -------- | --------------------------------------- |
 | Workflow | `.github/workflows/ga-gate.yml`         |
-| Name     | `GA Gate`                               |
+| Name     | `GA Gate / GA Readiness Gate`           |
 | Triggers | PRs/pushes to main (docs-only excluded) |
 
 **Guarantees**:
@@ -122,12 +122,12 @@ These workflows **MUST** complete with `conclusion: success` for **every** commi
 - Generates GA snapshot with CI/release metadata
 - Verifies all GA-readiness criteria
 
-### 3. Unit Tests & Coverage
+### 3. Unit Tests & Coverage / test
 
 | Field    | Value                                           |
 | -------- | ----------------------------------------------- |
 | Workflow | `.github/workflows/unit-test-coverage.yml`      |
-| Name     | `Unit Tests & Coverage`                         |
+| Name     | `Unit Tests & Coverage / test`                  |
 | Triggers | PRs/pushes to main/develop (docs-only excluded) |
 
 **Guarantees**:
@@ -136,13 +136,13 @@ These workflows **MUST** complete with `conclusion: success` for **every** commi
 - Coverage meets minimum thresholds
 - Test results are deterministic
 
-### 4. CI Core (Primary Gate)
+### 4. CI Core (Primary Gate) / CI Core Gate ✅
 
-| Field    | Value                           |
-| -------- | ------------------------------- |
-| Workflow | `.github/workflows/ci-core.yml` |
-| Name     | `CI Core (Primary Gate)`        |
-| Triggers | PRs/pushes to main, merge queue |
+| Field    | Value                                      |
+| -------- | ------------------------------------------ |
+| Workflow | `.github/workflows/ci-core.yml`            |
+| Name     | `CI Core (Primary Gate) / CI Core Gate ✅` |
+| Triggers | PRs/pushes to main, merge queue            |
 
 **Guarantees**:
 
@@ -268,10 +268,10 @@ docs/api/endpoints.md
 
 **Required checks**:
 
-- ✅ Release Readiness Gate (always required)
-- ✅ GA Gate (always required)
-- ✅ Unit Tests & Coverage (always required)
-- ✅ CI Core (Primary Gate) (always required)
+- ✅ Release Readiness Gate / Release Readiness Gate (always required)
+- ✅ GA Gate / GA Readiness Gate (always required)
+- ✅ Unit Tests & Coverage / test (always required)
+- ✅ CI Core (Primary Gate) / CI Core Gate ✅ (always required)
 - ⏭️ Workflow Lint (SKIPPED - no workflow changes)
 - ⏭️ CodeQL (SKIPPED - no code changes)
 - ⏭️ SBOM & Vulnerability Scanning (SKIPPED - no dependency changes)
@@ -287,10 +287,10 @@ docs/ci/workflow-guide.md
 
 **Required checks**:
 
-- ✅ Release Readiness Gate (always required)
-- ✅ GA Gate (always required)
-- ✅ Unit Tests & Coverage (always required)
-- ✅ CI Core (Primary Gate) (always required)
+- ✅ Release Readiness Gate / Release Readiness Gate (always required)
+- ✅ GA Gate / GA Readiness Gate (always required)
+- ✅ Unit Tests & Coverage / test (always required)
+- ✅ CI Core (Primary Gate) / CI Core Gate ✅ (always required)
 - ✅ Workflow Lint (**REQUIRED** - `.github/workflows/` changed)
 - ⏭️ CodeQL (SKIPPED - no code changes)
 - ⏭️ SBOM & Vulnerability Scanning (SKIPPED - no dependency changes)
@@ -306,10 +306,10 @@ server/tests/health.test.ts
 
 **Required checks**:
 
-- ✅ Release Readiness Gate (always required)
-- ✅ GA Gate (always required)
-- ✅ Unit Tests & Coverage (always required)
-- ✅ CI Core (Primary Gate) (always required)
+- ✅ Release Readiness Gate / Release Readiness Gate (always required)
+- ✅ GA Gate / GA Readiness Gate (always required)
+- ✅ Unit Tests & Coverage / test (always required)
+- ✅ CI Core (Primary Gate) / CI Core Gate ✅ (always required)
 - ⏭️ Workflow Lint (SKIPPED - no workflow changes)
 - ✅ CodeQL (**REQUIRED** - `server/` changed)
 - ⏭️ SBOM & Vulnerability Scanning (SKIPPED - no dependency changes)
@@ -326,10 +326,10 @@ server/package.json
 
 **Required checks**:
 
-- ✅ Release Readiness Gate (always required)
-- ✅ GA Gate (always required)
-- ✅ Unit Tests & Coverage (always required)
-- ✅ CI Core (Primary Gate) (always required)
+- ✅ Release Readiness Gate / Release Readiness Gate (always required)
+- ✅ GA Gate / GA Readiness Gate (always required)
+- ✅ Unit Tests & Coverage / test (always required)
+- ✅ CI Core (Primary Gate) / CI Core Gate ✅ (always required)
 - ⏭️ Workflow Lint (SKIPPED - no workflow changes)
 - ⏭️ CodeQL (SKIPPED - no code changes)
 - ✅ SBOM & Vulnerability Scanning (**REQUIRED** - dependency files changed)
@@ -374,10 +374,10 @@ The verification script produces a **Gate Truth Table** showing the status of ea
 
 WORKFLOW                            | REQUIRED   | STATUS      | RESULT
 ────────────────────────────────────────────────────────────────────────────────────
-Release Readiness Gate              | ALWAYS     | ✅ SUCCESS  | PASS
-GA Gate                             | ALWAYS     | ✅ SUCCESS  | PASS
-Unit Tests & Coverage               | ALWAYS     | ✅ SUCCESS  | PASS
-CI Core (Primary Gate)              | ALWAYS     | ✅ SUCCESS  | PASS
+Release Readiness Gate / Release Readiness Gate              | ALWAYS     | ✅ SUCCESS  | PASS
+GA Gate / GA Readiness Gate                             | ALWAYS     | ✅ SUCCESS  | PASS
+Unit Tests & Coverage / test               | ALWAYS     | ✅ SUCCESS  | PASS
+CI Core (Primary Gate) / CI Core Gate ✅              | ALWAYS     | ✅ SUCCESS  | PASS
 Workflow Lint                       | CONDITIONAL| ⏭️ SKIPPED  | N/A (not required)
 CodeQL                              | CONDITIONAL| ✅ SUCCESS  | PASS
 SBOM & Vulnerability Scanning       | CONDITIONAL| ⏭️ SKIPPED  | N/A (not required)

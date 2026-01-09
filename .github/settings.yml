@@ -4,14 +4,15 @@ branches:
       required_status_checks:
         strict: true
         contexts:
-          - intelgraph-ci / lint
-          - intelgraph-ci / typecheck
-          - intelgraph-ci / unit
-          - intelgraph-ci / e2e
-          - intelgraph-ci / perf-budget
-          - intelgraph-ci / sbom
+          - Release Readiness Gate / Release Readiness Gate
+          - GA Gate / GA Readiness Gate
+          - Unit Tests & Coverage / test
+          - CI Core (Primary Gate) / CI Core Gate ✅
       enforce_admins: true
       required_pull_request_reviews:
         required_approving_review_count: 1
+        dismiss_stale_reviews: true
         require_code_owner_reviews: true
+      required_conversation_resolution: true
+      required_linear_history: true
       restrictions: null

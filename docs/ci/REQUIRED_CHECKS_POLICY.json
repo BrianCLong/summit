@@ -1,28 +1,39 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "1.0.0",
-  "description": "Canonical policy for MVP-4 Stabilization release gate requirements",
-  "last_updated": "2026-01-07",
+  "version": "2.1.0",
+  "description": "Canonical policy for release gate requirements",
+  "last_updated": "2026-01-09",
   "owner": "Platform Engineering",
+  "branch_protection": {
+    "branch": "main",
+    "enforce_admins": true,
+    "require_pull_request_reviews": true,
+    "require_code_owner_reviews": true,
+    "required_approving_review_count": 1,
+    "dismiss_stale_reviews": true,
+    "require_conversation_resolution": true,
+    "require_linear_history": true,
+    "require_status_checks_strict": true
+  },
 
   "always_required": [
     {
-      "name": "Release Readiness Gate",
+      "name": "Release Readiness Gate / Release Readiness Gate",
       "workflow": "release-readiness.yml",
       "rationale": "Comprehensive release readiness verification - runs on every change"
     },
     {
-      "name": "GA Gate",
+      "name": "GA Gate / GA Readiness Gate",
       "workflow": "ga-gate.yml",
       "rationale": "Official GA verification entrypoint with make ga"
     },
     {
-      "name": "Unit Tests & Coverage",
+      "name": "Unit Tests & Coverage / test",
       "workflow": "unit-test-coverage.yml",
       "rationale": "Test suite and coverage gates must pass for all code changes"
     },
     {
-      "name": "CI Core (Primary Gate)",
+      "name": "CI Core (Primary Gate) / CI Core Gate ✅",
       "workflow": "ci-core.yml",
       "rationale": "Primary blocking gate - lint, typecheck, tests, build"
     }

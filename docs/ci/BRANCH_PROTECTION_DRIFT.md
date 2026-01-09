@@ -2,7 +2,7 @@
 
 **Status:** Active (MVP-4)
 **Owner:** Platform Engineering
-**Last Updated:** 2026-01-08
+**Last Updated:** 2026-01-09
 
 ---
 
@@ -22,7 +22,7 @@ Without drift detection:
 
 Automated daily comparison that:
 
-1. Extracts always-required checks from policy
+1. Extracts always-required checks and branch protection settings from policy
 2. Queries GitHub branch protection API
 3. Reports mismatches with remediation steps
 4. Creates/updates deduped issues when drift exists
@@ -41,8 +41,13 @@ The `extract_required_checks_from_policy.sh` script reads `REQUIRED_CHECKS_POLIC
 
 # Output:
 {
-  "always_required": ["Release Readiness Gate", "GA Gate", "Unit Tests & Coverage", "CI Core (Primary Gate)"],
-  "policy_version": "2.0.0",
+  "always_required": [
+    "Release Readiness Gate / Release Readiness Gate",
+    "GA Gate / GA Readiness Gate",
+    "Unit Tests & Coverage / test",
+    "CI Core (Primary Gate) / CI Core Gate ✅"
+  ],
+  "policy_version": "2.1.0",
   "count": 4
 }
 ```
@@ -70,10 +75,10 @@ The `check_branch_protection_drift.sh` script:
 The script queries:
 
 ```
-GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
+GET /repos/{owner}/{repo}/branches/{branch}/protection
 ```
 
-This returns the list of required status check contexts.
+This returns required status checks and branch protection settings.
 
 ---
 
@@ -94,6 +99,14 @@ Checks that are enforced by GitHub but NOT listed in policy.
 **Risk:** Documentation is inaccurate; policy doesn't reflect reality.
 
 **Remediation:** Either add to policy or remove from branch protection.
+
+### Settings Drift
+
+Branch protection toggles (enforce admins, review requirements, linear history, conversation resolution, strict status checks) diverge from policy.
+
+**Risk:** Governance bypass or inconsistent merge constraints.
+
+**Remediation:** Align branch protection settings with `branch_protection` in `docs/ci/REQUIRED_CHECKS_POLICY.yml`.
 
 ---
 
@@ -120,7 +133,12 @@ Checks that are enforced by GitHub but NOT listed in policy.
 
 ### Exit Codes
 
-The script always exits 0 (advisory mode). Check the JSON output for `drift_detected: true|false`.
+The script exits 0 in advisory mode. In strict mode it exits non-zero when drift or API access issues are detected.
+
+```bash
+# Strict mode (for CI enforcement)
+./scripts/release/check_branch_protection_drift.sh --branch main --strict
+```
 
 ---
 

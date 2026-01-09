@@ -30,6 +30,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: branch-protection-required-checks
+    version: v1
+    path: prompts/governance/branch-protection-required-checks.md
+    sha256: 9e7b3c1b6674352cfb68837a14893beb116a3fd6e83a0965747301571e89435d
+    description: Enforce main branch protection required checks and verify drift against policy.
+    scope:
+      paths:
+        - .github/
+        - docs/ci/
+        - docs/release/
+        - docs/roadmap/STATUS.json
+        - scripts/release/
+        - prompts/governance/branch-protection-required-checks.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - governance
+        - ci
+        - release
+        - documentation
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md

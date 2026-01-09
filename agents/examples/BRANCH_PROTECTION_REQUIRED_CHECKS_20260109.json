@@ -1,0 +1,43 @@
+{
+  "task_id": "BRANCH_PROTECTION_REQUIRED_CHECKS_20260109",
+  "agent_id": "codex-cli",
+  "prompt_ref": {
+    "id": "branch-protection-required-checks",
+    "version": "v1",
+    "sha256": "9e7b3c1b6674352cfb68837a14893beb116a3fd6e83a0965747301571e89435d",
+    "path": "prompts/governance/branch-protection-required-checks.md"
+  },
+  "declared_scope": {
+    "paths": [
+      ".github/",
+      "docs/ci/",
+      "docs/release/",
+      "docs/roadmap/STATUS.json",
+      "scripts/release/",
+      "agents/examples/BRANCH_PROTECTION_REQUIRED_CHECKS_20260109.json",
+      "prompts/governance/branch-protection-required-checks.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["governance", "ci", "release", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "artifacts/release-train/branch_protection_drift_report.json",
+      "artifacts/release-train/branch_protection_drift_report.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Branch protection required checks are explicitly defined and versioned in policy.",
+    "Verification job fails on drift or forbidden API access.",
+    "Documentation distinguishes verify versus apply steps."
+  ],
+  "stop_conditions": [
+    "Deferred pending admin:read access if scheduled verification cannot query branch protection."
+  ]
+}

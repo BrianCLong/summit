@@ -27,6 +27,8 @@ POLICY_FILE="${REPO_ROOT}/docs/ci/REQUIRED_CHECKS_POLICY.yml"
 EXCEPTIONS_FILE="${REPO_ROOT}/docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml"
 OUT_DIR="artifacts/release-train"
 VERBOSE=false
+STRICT=false
+WARN_ON_FORBIDDEN=false
 
 usage() {
     cat << 'EOF'
@@ -40,6 +42,8 @@ Options:
   --policy FILE       Policy file path (default: docs/ci/REQUIRED_CHECKS_POLICY.yml)
   --exceptions FILE   Exceptions file path (default: docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml)
   --out-dir DIR       Output directory (default: artifacts/release-train)
+  --strict            Exit non-zero on drift or API access issues
+  --warn-on-forbidden Exit 0 when API access is forbidden (useful for forks)
   --verbose           Enable verbose logging
   --help              Show this help
 
@@ -48,7 +52,9 @@ Outputs:
   - branch_protection_drift_report.json
 
 Exit Code:
-  Always 0 (advisory mode). Check drift_detected in JSON output.
+  0 - No drift detected (strict mode) or advisory mode
+  1 - Drift detected (strict mode)
+  2 - API access issue (strict mode)
 EOF
     exit 0
 }
@@ -93,6 +99,14 @@ while [[ $# -gt 0 ]]; do
         --out-dir)
             OUT_DIR="$2"
             shift 2
+            ;;
+        --strict)
+            STRICT=true
+            shift
+            ;;
+        --warn-on-forbidden)
+            WARN_ON_FORBIDDEN=true
+            shift
             ;;
         --verbose)
             VERBOSE=true
@@ -144,6 +158,39 @@ POLICY_COUNT=$(echo "$POLICY_JSON" | jq -r '.count')
 
 log "Policy version: $POLICY_VERSION"
 log "Policy requires $POLICY_COUNT always-required checks"
+
+# --- Step 1b: Extract branch protection expectations ---
+policy_value() {
+    local key="$1"
+    local default="$2"
+
+    if command -v yq &> /dev/null; then
+        yq -r ".branch_protection.${key} // \"${default}\"" "$POLICY_FILE"
+        return 0
+    fi
+
+    awk -v key="${key}" -v fallback="${default}" '
+        $1 == "branch_protection:" { in_block=1; next }
+        in_block && /^[^[:space:]]/ { in_block=0 }
+        in_block && $1 == key":" {
+            gsub(/"/, "", $2)
+            print $2
+            found=1
+            exit
+        }
+        END { if (!found) print fallback }
+    ' "$POLICY_FILE"
+}
+
+POLICY_BRANCH=$(policy_value "branch" "")
+POLICY_ENFORCE_ADMINS=$(policy_value "enforce_admins" "false")
+POLICY_REQUIRE_PR_REVIEWS=$(policy_value "require_pull_request_reviews" "false")
+POLICY_REQUIRE_CODE_OWNERS=$(policy_value "require_code_owner_reviews" "false")
+POLICY_APPROVAL_COUNT=$(policy_value "required_approving_review_count" "0")
+POLICY_DISMISS_STALE=$(policy_value "dismiss_stale_reviews" "false")
+POLICY_REQUIRE_CONVERSATION=$(policy_value "require_conversation_resolution" "false")
+POLICY_REQUIRE_LINEAR=$(policy_value "require_linear_history" "false")
+POLICY_STRICT_CHECKS=$(policy_value "require_status_checks_strict" "false")
 
 # --- Step 2: Load exceptions ---
 EXCEPTIONS_LOADED=false
@@ -200,11 +247,14 @@ fi
 # --- Step 3: Query GitHub branch protection ---
 log "Querying GitHub branch protection for $BRANCH..."
 
-API_ENDPOINT="repos/${REPO}/branches/${BRANCH}/protection/required_status_checks"
+API_ENDPOINT="repos/${REPO}/branches/${BRANCH}/protection"
 API_ERROR=""
 GITHUB_CHECKS=""
 GITHUB_COUNT=0
 API_ACCESSIBLE=true
+SETTINGS_MISMATCHES=()
+SETTINGS_MATCHED=()
+SETTINGS_MISMATCH_COUNT=0
 
 # Try to fetch branch protection
 set +e
@@ -218,8 +268,8 @@ if [[ $API_EXIT_CODE -ne 0 ]]; then
     if echo "$API_RESPONSE" | grep -q "404"; then
         API_ERROR="Branch protection not configured for $BRANCH"
         log_warn "$API_ERROR"
-    elif echo "$API_RESPONSE" | grep -q "403"; then
-        API_ERROR="Insufficient permissions to read branch protection (requires admin or read:org scope)"
+    elif echo "$API_RESPONSE" | grep -Eq "403|Resource not accessible by integration|Forbidden"; then
+        API_ERROR="Cannot verify protections from fork PR; run on main or scheduled workflow."
         log_warn "$API_ERROR"
     else
         API_ERROR="API error: $API_RESPONSE"
@@ -227,19 +277,51 @@ if [[ $API_EXIT_CODE -ne 0 ]]; then
     fi
 else
     # Extract required contexts (check names)
-    GITHUB_CHECKS=$(echo "$API_RESPONSE" | jq -r '.contexts[]? // empty' 2>/dev/null | sort || echo "")
+    GITHUB_CHECKS=$(echo "$API_RESPONSE" | jq -r '.required_status_checks.contexts[]? // empty' 2>/dev/null | sort || echo "")
 
     # Also try the newer 'checks' array format
     if [[ -z "$GITHUB_CHECKS" ]]; then
-        GITHUB_CHECKS=$(echo "$API_RESPONSE" | jq -r '.checks[]?.context // empty' 2>/dev/null | sort || echo "")
+        GITHUB_CHECKS=$(echo "$API_RESPONSE" | jq -r '.required_status_checks.checks[]?.context // empty' 2>/dev/null | sort || echo "")
     fi
 
     GITHUB_COUNT=$(echo "$GITHUB_CHECKS" | grep -c . || echo 0)
     log "GitHub requires $GITHUB_COUNT status checks"
+
+    API_ENFORCE_ADMINS=$(echo "$API_RESPONSE" | jq -r '.enforce_admins.enabled // false')
+    API_REQUIRE_PR_REVIEWS=$(echo "$API_RESPONSE" | jq -r 'if .required_pull_request_reviews == null then "false" else "true" end')
+    API_REQUIRE_CODE_OWNERS=$(echo "$API_RESPONSE" | jq -r '.required_pull_request_reviews.require_code_owner_reviews // false')
+    API_APPROVAL_COUNT=$(echo "$API_RESPONSE" | jq -r '.required_pull_request_reviews.required_approving_review_count // 0')
+    API_DISMISS_STALE=$(echo "$API_RESPONSE" | jq -r '.required_pull_request_reviews.dismiss_stale_reviews // false')
+    API_REQUIRE_CONVERSATION=$(echo "$API_RESPONSE" | jq -r '.required_conversation_resolution.enabled // false')
+    API_REQUIRE_LINEAR=$(echo "$API_RESPONSE" | jq -r '.required_linear_history.enabled // false')
+    API_STRICT_CHECKS=$(echo "$API_RESPONSE" | jq -r '.required_status_checks.strict // false')
+
+    compare_setting() {
+        local label="$1"
+        local expected="$2"
+        local actual="$3"
+
+        if [[ "${expected}" == "${actual}" ]]; then
+            SETTINGS_MATCHED+=("${label}")
+        else
+            SETTINGS_MISMATCHES+=("${label} (expected ${expected}, got ${actual})")
+            ((SETTINGS_MISMATCH_COUNT++)) || true
+            DRIFT_DETECTED=true
+        fi
+    }
+
+    compare_setting "enforce_admins" "${POLICY_ENFORCE_ADMINS}" "${API_ENFORCE_ADMINS}"
+    compare_setting "require_pull_request_reviews" "${POLICY_REQUIRE_PR_REVIEWS}" "${API_REQUIRE_PR_REVIEWS}"
+    compare_setting "required_approving_review_count" "${POLICY_APPROVAL_COUNT}" "${API_APPROVAL_COUNT}"
+    compare_setting "require_code_owner_reviews" "${POLICY_REQUIRE_CODE_OWNERS}" "${API_REQUIRE_CODE_OWNERS}"
+    compare_setting "dismiss_stale_reviews" "${POLICY_DISMISS_STALE}" "${API_DISMISS_STALE}"
+    compare_setting "require_conversation_resolution" "${POLICY_REQUIRE_CONVERSATION}" "${API_REQUIRE_CONVERSATION}"
+    compare_setting "require_linear_history" "${POLICY_REQUIRE_LINEAR}" "${API_REQUIRE_LINEAR}"
+    compare_setting "require_status_checks_strict" "${POLICY_STRICT_CHECKS}" "${API_STRICT_CHECKS}"
 fi
 
 # --- Step 4: Compare sets ---
-DRIFT_DETECTED=false
+DRIFT_DETECTED=${DRIFT_DETECTED:-false}
 MISSING_IN_GITHUB=()
 EXTRA_IN_GITHUB=()
 EXCEPTED_MISSING=()
@@ -301,6 +383,7 @@ cat > "$OUT_DIR/branch_protection_drift_report.json" << EOF
   "branch": "$BRANCH",
   "policy_file": "$POLICY_FILE",
   "policy_version": "$POLICY_VERSION",
+  "policy_branch": "$POLICY_BRANCH",
   "exceptions_file": "$EXCEPTIONS_FILE",
   "exceptions_loaded": $EXCEPTIONS_LOADED,
   "api_accessible": $API_ACCESSIBLE,
@@ -313,7 +396,32 @@ cat > "$OUT_DIR/branch_protection_drift_report.json" << EOF
     "extra_in_github_count": ${#EXTRA_IN_GITHUB[@]},
     "excepted_missing_count": ${#EXCEPTED_MISSING[@]},
     "excepted_extra_count": ${#EXCEPTED_EXTRA[@]},
-    "active_exception_count": $EXCEPTION_COUNT
+    "active_exception_count": $EXCEPTION_COUNT,
+    "settings_mismatch_count": $SETTINGS_MISMATCH_COUNT
+  },
+  "settings": {
+    "expected": {
+      "enforce_admins": $POLICY_ENFORCE_ADMINS,
+      "require_pull_request_reviews": $POLICY_REQUIRE_PR_REVIEWS,
+      "required_approving_review_count": $POLICY_APPROVAL_COUNT,
+      "require_code_owner_reviews": $POLICY_REQUIRE_CODE_OWNERS,
+      "dismiss_stale_reviews": $POLICY_DISMISS_STALE,
+      "require_conversation_resolution": $POLICY_REQUIRE_CONVERSATION,
+      "require_linear_history": $POLICY_REQUIRE_LINEAR,
+      "require_status_checks_strict": $POLICY_STRICT_CHECKS
+    },
+    "actual": {
+      "enforce_admins": $(jq -n --argjson val "${API_ENFORCE_ADMINS:-false}" '$val'),
+      "require_pull_request_reviews": $(jq -n --argjson val "${API_REQUIRE_PR_REVIEWS:-false}" '$val'),
+      "required_approving_review_count": $(jq -n --argjson val "${API_APPROVAL_COUNT:-0}" '$val'),
+      "require_code_owner_reviews": $(jq -n --argjson val "${API_REQUIRE_CODE_OWNERS:-false}" '$val'),
+      "dismiss_stale_reviews": $(jq -n --argjson val "${API_DISMISS_STALE:-false}" '$val'),
+      "require_conversation_resolution": $(jq -n --argjson val "${API_REQUIRE_CONVERSATION:-false}" '$val'),
+      "require_linear_history": $(jq -n --argjson val "${API_REQUIRE_LINEAR:-false}" '$val'),
+      "require_status_checks_strict": $(jq -n --argjson val "${API_STRICT_CHECKS:-false}" '$val')
+    },
+    "mismatches": $(printf '%s\n' "${SETTINGS_MISMATCHES[@]}" | jq -R -s 'split("\n") | map(select(length > 0))'),
+    "matched": $(printf '%s\n' "${SETTINGS_MATCHED[@]}" | jq -R -s 'split("\n") | map(select(length > 0))')
   },
   "policy_checks": $POLICY_JSON_ARRAY,
   "github_checks": $GITHUB_JSON_ARRAY,
@@ -348,6 +456,7 @@ cat > "$OUT_DIR/branch_protection_drift_report.md" << EOF
 | Extra in GitHub | ${#EXTRA_IN_GITHUB[@]} |
 | Excepted (Missing) | ${#EXCEPTED_MISSING[@]} |
 | Excepted (Extra) | ${#EXCEPTED_EXTRA[@]} |
+| Settings Mismatches | $SETTINGS_MISMATCH_COUNT |
 | **Drift Detected** | $DRIFT_DETECTED |
 
 ---
@@ -370,6 +479,25 @@ Unable to read branch protection settings. This could mean:
 1. Ensure branch protection is enabled for \`$BRANCH\`
 2. Verify the GitHub token has appropriate permissions
 3. If using GitHub Actions, ensure the workflow has \`contents: read\` and repository access
+
+---
+
+EOF
+fi
+
+if [[ $SETTINGS_MISMATCH_COUNT -gt 0 ]]; then
+    cat >> "$OUT_DIR/branch_protection_drift_report.md" << EOF
+## Branch Protection Settings Drift
+
+The following branch protection settings do not match policy:
+
+EOF
+
+    for mismatch in "${SETTINGS_MISMATCHES[@]}"; do
+        echo "- ${mismatch}" >> "$OUT_DIR/branch_protection_drift_report.md"
+    done
+
+    cat >> "$OUT_DIR/branch_protection_drift_report.md" << EOF
 
 ---
 
@@ -544,4 +672,22 @@ else
 fi
 
 # Always exit 0 (advisory mode)
+if [[ "$STRICT" == "true" ]]; then
+    if [[ "$API_ACCESSIBLE" == "false" ]]; then
+        if [[ "$WARN_ON_FORBIDDEN" == "true" ]]; then
+            log_warn "API access unavailable; warn-only mode enabled"
+            exit 0
+        fi
+        log_error "$API_ERROR"
+        exit 2
+    fi
+
+    if [[ "$DRIFT_DETECTED" == "true" ]]; then
+        log_error "Branch protection drift detected"
+        exit 1
+    fi
+
+    exit 0
+fi
+
 exit 0
