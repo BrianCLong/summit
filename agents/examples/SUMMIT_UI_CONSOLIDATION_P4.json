@@ -1,0 +1,43 @@
+{
+  "task_id": "SUMMIT_UI_CONSOLIDATION_P4",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "summit-ui-consolidation-p4",
+    "version": "v1",
+    "sha256": "93226194c9af3864ae26dbcd8c51e1e70481ad96b7bcda8c32f4cc52ebda4b5a",
+    "path": "prompts/ui/summit-ui-consolidation-p4.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "apps/web/src/styles/",
+      "apps/web/src/components/ui/",
+      "apps/web/src/components/Layout.tsx",
+      "apps/web/src/pages/HomePage.tsx",
+      "apps/web/src/pages/DataSourcesPage.tsx",
+      "conductor-ui/frontend/src/",
+      "docs/roadmap/STATUS.json",
+      "prompts/ui/",
+      "prompts/registry.yaml",
+      "agents/examples/"
+    ],
+    "domains": ["ui", "design-system", "frontend"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "tests: pnpm --filter @intelgraph/web test",
+      "screenshot: apps/web home or data sources"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "apps/web tokens.css defines shared color, spacing, radii, shadow, and typography tokens",
+    "primitive components consume design tokens and ship tests",
+    "Home and Data Sources pages adopt primitives"
+  ],
+  "stop_conditions": ["CI failure in main", "Detected PII in output", "Sandbox violation alert"]
+}

@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { Spinner } from './Spinner'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-[var(--ds-radius-md)] text-[var(--ds-font-size-sm)] font-[var(--ds-font-weight-medium)] leading-[var(--ds-line-height-standard)] ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       variant: {
@@ -21,10 +21,11 @@ const buttonVariants = cva(
         intel: 'bg-intel-600 text-white hover:bg-intel-700',
       },
       size: {
-        default: 'h-10 px-4 py-2',
-        sm: 'h-9 rounded-md px-3',
-        lg: 'h-11 rounded-md px-8',
-        icon: 'h-10 w-10',
+        default:
+          'h-[var(--ds-space-3xl)] px-[var(--ds-space-md)] py-[var(--ds-space-xs)]',
+        sm: 'h-[var(--ds-space-2xl)] rounded-[var(--ds-radius-sm)] px-[var(--ds-space-sm)]',
+        lg: 'h-[var(--ds-space-3xl)] rounded-[var(--ds-radius-lg)] px-[var(--ds-space-xl)] text-[var(--ds-font-size-md)]',
+        icon: 'h-[var(--ds-space-3xl)] w-[var(--ds-space-3xl)]',
       },
     },
     defaultVariants: {

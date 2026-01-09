@@ -132,7 +132,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-[var(--ds-space-xl)] space-y-[var(--ds-space-xl)]">
       {/* Welcome Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -162,7 +162,9 @@ export default function HomePage() {
 
       {/* KPI Metrics */}
       <div>
-        <h2 className="text-lg font-semibold mb-4">Key Metrics</h2>
+        <h2 className="text-lg font-semibold mb-[var(--ds-space-md)]">
+          Key Metrics
+        </h2>
         <KPIStrip
           data={kpiMetrics}
           loading={loading}
@@ -184,8 +186,10 @@ export default function HomePage() {
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <h2 className="text-lg font-semibold mb-[var(--ds-space-md)]">
+          Quick Actions
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[var(--ds-space-md)]">
           {quickActions.map(action => {
             const Icon = action.icon
             return (
@@ -194,8 +198,8 @@ export default function HomePage() {
                 className="cursor-pointer hover:shadow-md transition-shadow"
                 onClick={() => navigate(action.href)}
               >
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3">
+                <CardContent className="p-[var(--ds-space-xl)]">
+                  <div className="flex items-center gap-[var(--ds-space-sm)]">
                     <div
                       className={`p-2 rounded-lg ${action.color} text-white`}
                     >
@@ -224,7 +228,7 @@ export default function HomePage() {
       </div>
 
       {/* Recent Activity Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-[var(--ds-space-xl)]">
         {/* Recent Investigations */}
         <Card>
           <CardHeader>
@@ -233,7 +237,7 @@ export default function HomePage() {
               Recent Investigations
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-[var(--ds-space-sm)]">
             {loading
               ? [...Array(3)].map((_, i) => (
                   <div key={i} className="space-y-2">
@@ -298,7 +302,7 @@ export default function HomePage() {
               Recent Alerts
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-[var(--ds-space-sm)]">
             {loading
               ? [...Array(4)].map((_, i) => (
                   <div key={i} className="space-y-2">
@@ -354,7 +358,7 @@ export default function HomePage() {
               Active Cases
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-[var(--ds-space-sm)]">
             {loading
               ? [...Array(2)].map((_, i) => (
                   <div key={i} className="space-y-2">

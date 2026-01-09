@@ -16,10 +16,7 @@ describe('Accessibility', () => {
 
   it('Input should have no accessibility violations when labeled', async () => {
     const { container } = render(
-      <div>
-        <label htmlFor="test-input">Label</label>
-        <Input id="test-input" placeholder="Enter text" />
-      </div>
+      <Input id="test-input" label="Label" placeholder="Enter text" />
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();

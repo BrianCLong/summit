@@ -46,14 +46,14 @@ export function Layout() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="flex h-14 items-center px-6">
+        <header className="border-b border-[color:var(--ds-color-border)] bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex h-14 items-center px-[var(--ds-space-xl)]">
             <div className="flex-1">
               <h1 className="text-lg font-semibold">IntelGraph Platform</h1>
             </div>
 
             {/* Search trigger - actual search modal is rendered globally */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-[var(--ds-space-md)]">
               <SnapshotMenu />
               <div className="text-sm text-muted-foreground">
                 Welcome back, {user?.name}

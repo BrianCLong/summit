@@ -2,16 +2,21 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 export interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'destructive' | 'success' | 'warning';
+  variant?: 'default' | 'destructive' | 'success' | 'warning' | 'info';
 }
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
   ({ className, variant = 'default', ...props }, ref) => {
     const variantClasses = {
-      default: 'bg-background text-foreground border-border',
-      destructive: 'border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive',
-      success: 'border-green-500/50 text-green-700 dark:border-green-500 [&>svg]:text-green-700',
-      warning: 'border-yellow-500/50 text-yellow-700 dark:border-yellow-500 [&>svg]:text-yellow-700',
+      default:
+        'bg-[color:var(--ds-color-surface)] text-[color:var(--ds-color-foreground)] border-[color:var(--ds-color-border)]',
+      destructive:
+        'border-[color:var(--ds-color-error)] text-[color:var(--ds-color-error)] [&>svg]:text-[color:var(--ds-color-error)]',
+      success:
+        'border-[color:var(--ds-color-success)] text-[color:var(--ds-color-success)] [&>svg]:text-[color:var(--ds-color-success)]',
+      warning:
+        'border-[color:var(--ds-color-warning)] text-[color:var(--ds-color-warning)] [&>svg]:text-[color:var(--ds-color-warning)]',
+      info: 'border-[color:var(--ds-color-info)] text-[color:var(--ds-color-info)] [&>svg]:text-[color:var(--ds-color-info)]',
     };
 
     return (
@@ -19,7 +24,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         ref={ref}
         role="alert"
         className={cn(
-          'relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground',
+          'relative w-full rounded-[var(--ds-radius-lg)] border p-[var(--ds-space-md)] [&>svg~*]:pl-[var(--ds-space-xl)] [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-[var(--ds-space-md)] [&>svg]:top-[var(--ds-space-md)] [&>svg]:text-[color:var(--ds-color-foreground)]',
           variantClasses[variant],
           className
         )}
@@ -36,7 +41,10 @@ const AlertTitle = React.forwardRef<HTMLParagraphElement, AlertTitleProps>(
   ({ className, ...props }, ref) => (
     <h5
       ref={ref}
-      className={cn('mb-1 font-medium leading-none tracking-tight', className)}
+      className={cn(
+        'mb-[var(--ds-space-3xs)] font-[var(--ds-font-weight-semibold)] leading-[var(--ds-line-height-tight)] tracking-tight',
+        className
+      )}
       {...props}
     />
   )
@@ -49,7 +57,10 @@ const AlertDescription = React.forwardRef<HTMLParagraphElement, AlertDescription
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('text-sm [&_p]:leading-relaxed', className)}
+      className={cn(
+        'text-[var(--ds-font-size-sm)] [&_p]:leading-[var(--ds-line-height-relaxed)]',
+        className
+      )}
       {...props}
     />
   )

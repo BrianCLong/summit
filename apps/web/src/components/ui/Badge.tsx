@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux'
 import type { RootState } from '@/store'
 
 const badgeVariants = cva(
-  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+  'inline-flex items-center rounded-[var(--ds-radius-pill)] border px-[var(--ds-space-sm)] py-[var(--ds-space-3xs)] text-[var(--ds-font-size-xs)] font-[var(--ds-font-weight-semibold)] transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
   {
     variants: {
       variant: {
@@ -17,23 +17,23 @@ const badgeVariants = cva(
           'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
         outline: 'text-foreground',
         success:
-          'border-transparent bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+          'border-transparent bg-[color:var(--ds-color-success)] text-white',
         warning:
-          'border-transparent bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+          'border-transparent bg-[color:var(--ds-color-warning)] text-white',
         error:
-          'border-transparent bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-        info: 'border-transparent bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+          'border-transparent bg-[color:var(--ds-color-error)] text-white',
+        info: 'border-transparent bg-[color:var(--ds-color-info)] text-white',
         // IntelGraph specific variants
         'threat-low':
-          'border-transparent bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+          'border-transparent bg-[color:var(--ds-color-success)] text-white',
         'threat-medium':
-          'border-transparent bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+          'border-transparent bg-[color:var(--ds-color-warning)] text-white',
         'threat-high':
-          'border-transparent bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
+          'border-transparent bg-[color:var(--ds-color-warning)] text-white',
         'threat-critical':
-          'border-transparent bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+          'border-transparent bg-[color:var(--ds-color-error)] text-white',
         intel:
-          'border-transparent bg-intel-100 text-intel-800 dark:bg-intel-900 dark:text-intel-300',
+          'border-transparent bg-intel-600 text-white',
       },
     },
     defaultVariants: {

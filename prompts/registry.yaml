@@ -79,3 +79,29 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: summit-ui-consolidation-p4
+    version: v1
+    path: prompts/ui/summit-ui-consolidation-p4.md
+    sha256: 93226194c9af3864ae26dbcd8c51e1e70481ad96b7bcda8c32f4cc52ebda4b5a
+    description: Align Summit UI surfaces with shared tokens and minimal primitives for incremental adoption.
+    scope:
+      paths:
+        - apps/web/src/
+        - conductor-ui/frontend/src/
+        - docs/roadmap/STATUS.json
+        - prompts/ui/
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - ui
+        - design-system
+        - frontend
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

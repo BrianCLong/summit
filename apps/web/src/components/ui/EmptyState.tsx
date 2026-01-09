@@ -34,20 +34,22 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center p-8 text-center',
+        'flex flex-col items-center justify-center gap-[var(--ds-space-xs)] p-[var(--ds-space-3xl)] text-center',
         className
       )}
     >
-      <div className="mb-4 rounded-full bg-muted p-4">
+      <div className="mb-[var(--ds-space-xs)] rounded-[var(--ds-radius-pill)] bg-muted p-[var(--ds-space-md)]">
         {IconComponent ? (
           <IconComponent className="h-8 w-8 text-muted-foreground" />
         ) : (
           icon
         )}
       </div>
-      <h3 className="mb-2 text-lg font-semibold">{title}</h3>
+      <h3 className="text-[var(--ds-font-size-lg)] font-[var(--ds-font-weight-semibold)]">
+        {title}
+      </h3>
       {description && (
-        <p className="mb-4 text-sm text-muted-foreground max-w-sm">
+        <p className="text-[var(--ds-font-size-sm)] text-muted-foreground max-w-sm">
           {description}
         </p>
       )}
