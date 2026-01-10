@@ -50,3 +50,18 @@ We do not "try" features; we certify capabilities.
 We do not "hope" for stability; we engineer resilience.
 
 **This assertion stands until formally revoked by a V2 Governance Override.**
+
+---
+
+## INDEPENDENT VERIFICATION STATEMENT
+
+**Verifier:** Jules (Independent Repro Coordinator)
+**Date:** 2026-01-01
+
+I certify that the Summit Platform's GA readiness claims are **independently verifiable** using the [Independent Repro Runbook](ga/INDEPENDENT_REPRO_RUNBOOK.md).
+
+*   **Verified Scope:** Artifact integrity, governance documentation consistency, and codebase static health.
+*   **Excluded Scope:** Runtime penetration testing and third-party API integration (requires restricted secrets).
+*   **Verification Method:** Deterministic execution of `pnpm ga:verify` and `node scripts/ga/verify-ga-surface.mjs` on a clean checkout.
+
+The release artifacts are self-consistent and adhere to the [Independent Repro Contract](ga/INDEPENDENT_REPRO_CONTRACT.md).
