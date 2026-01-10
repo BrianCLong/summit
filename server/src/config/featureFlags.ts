@@ -185,6 +185,7 @@ export class FeatureFlags {
         'pdf.export': true,
         'opentelemetry.enabled': true,
         'narrative.simulation': true,
+        'ai.enabled': true,
 
         // Agent Features
         'agent.memory': true,
