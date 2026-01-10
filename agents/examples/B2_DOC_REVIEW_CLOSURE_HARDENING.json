@@ -1,0 +1,32 @@
+{
+  "task_id": "B2_DOC_REVIEW_CLOSURE_HARDENING",
+  "agent_id": "gpt-5.2-codex",
+  "prompt_ref": {
+    "id": "doc-triage-automation",
+    "version": "v1",
+    "sha256": "d86c04d15e28f3045b7edbfaedabb4303958a538b8b4e8cc2003b6d4e4ec2d8b",
+    "path": "prompts/workflow-automation.md"
+  },
+  "declared_scope": {
+    "paths": ["docs/triage/", "scripts/triage/", "docs/roadmap/STATUS.json", "agents/examples/"],
+    "domains": ["triage", "automation", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["Manual review of generated closure comment output"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 1
+  },
+  "success_criteria": [
+    "Closure comment generator retries on rate-limit exhaustion and fails fast on invalid token permissions.",
+    "Output ordering is deterministic to support bulk triage workflows.",
+    "Playbook documents token usage and deterministic output behavior."
+  ],
+  "stop_conditions": [
+    "Policy violations detected in CI or governance checks.",
+    "Changes extend beyond the prompt-declared scope."
+  ]
+}

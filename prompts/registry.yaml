@@ -28,3 +28,27 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: doc-triage-automation
+    version: v1
+    path: prompts/workflow-automation.md
+    sha256: d86c04d15e28f3045b7edbfaedabb4303958a538b8b4e8cc2003b6d4e4ec2d8b
+    description: Workflow automation prompt covering documentation triage and backlog hygiene.
+    scope:
+      paths:
+        - docs/triage/
+        - scripts/triage/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+      domains:
+        - triage
+        - automation
+        - documentation
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 1
+    allowed_operations:
+      - create
+      - edit
