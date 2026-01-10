@@ -1,5 +1,5 @@
 {
-  "last_updated": "2025-12-29T12:30:00Z",
+  "last_updated": "2026-01-10T05:30:00Z",
   "initiatives": [
     {
       "id": "A",
@@ -63,6 +63,42 @@
           "id": "C2",
           "name": "Immutable Audit Log",
           "status": "rc-ready",
+          "owner": "Jules"
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "name": "Sprint 25+ Provenance & Predictive Analytics",
+      "epics": [
+        {
+          "id": "D1",
+          "name": "Provenance & Lineage System",
+          "status": "planned",
+          "owner": "Jules"
+        },
+        {
+          "id": "D2",
+          "name": "Predictive Analytics Module",
+          "status": "planned",
+          "owner": "Jules"
+        },
+        {
+          "id": "D3",
+          "name": "Agent-Driven Test Data Generator",
+          "status": "planned",
+          "owner": "Jules"
+        },
+        {
+          "id": "D4",
+          "name": "Governance & Policy Automation",
+          "status": "planned",
+          "owner": "Jules"
+        },
+        {
+          "id": "D5",
+          "name": "Golden Path CI Enhancements",
+          "status": "planned",
           "owner": "Jules"
         }
       ]
