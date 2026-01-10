@@ -17,9 +17,48 @@
 - Waves A–C (schema drift, repo doctor, migration lint, error catalog; evidence verifier, provenance invariants, schema registry, goldens; release train skeleton, version tooling, nightly, fuzz) are assumed merged.
 - If any prior waves are not merged, produce only a **safe, non-conflicting plan**; stop execution.
 
+## Authority & allowlist references (governed)
+
+- **Allowlists are authoritative:** `prompts/registry.yaml` defines the only allowed scope paths, domains, and operations per prompt id.
+- **Execution gates:** `docs/ga/AGENT-RUN-LIFECYCLE.md` requires prompt hash registration, ATS scope declaration, and CI validation via `scripts/ci/verify-prompt-integrity.ts` and `scripts/ci/validate-pr-metadata.ts`.
+- **Failure escalation:** `docs/ga/AGENT-FAILURE-MODES.md` mandates scope/operation compliance and governance escalation on policy violations.
+
+## Merge verification gate (Deferred pending merge verification)
+
+**Deferred pending merge verification** until A–C are confirmed merged with evidence in:
+
+- `docs/roadmap/STATUS.json` and `PR_MERGE_LEDGER.md` (merge evidence), plus any A–C wave release notes if listed.
+- If evidence is missing or inconsistent, stop at a **safe, non-conflicting plan** and do not generate executable prompts.
+
 ## Mission
 
 Execute Waves **D–F** as **parallel, non-overlapping atomic PRs**. Assign work to agents **D1…F\*** with strict allowlists. Only Docs Indexer agents may touch README/docs index.
+
+## Imputed implication ladder (Orders 1–23)
+
+1. Governed allowlists bind every edit to registry scope.
+2. Prompt hashes are immutable and must match registry entries.
+3. ATS scope and allowed operations are declared before edits.
+4. CI verifies prompt integrity and diff scope for every PR.
+5. CI validates PR metadata and emits execution records.
+6. Verification tiers are enforced with zero debt budget.
+7. All changes are atomic and minimal surface area.
+8. Feature flags default OFF for any behavior change.
+9. Docs index edits are isolated to Docs Indexer only.
+10. Non-goals prevent scope creep and reduce conflict risk.
+11. Tests are deterministic and avoid flake amplification.
+12. Warn-only workflows never block PRs without evidence.
+13. Optional tests are disabled by default in PR CI.
+14. No shared docs refactors; only additive docs are allowed.
+15. Each wave has clear dependency ordering and sequencing.
+16. Conflicts are prevented by allowlist non-overlap.
+17. CI remains green by constraining runtime and scope.
+18. Governance escalation is mandatory for scope expansion.
+19. Merge choreography enforces D → E → F order.
+20. Docs index updates land last to avoid churn.
+21. Evidence artifacts are archived per governance rules.
+22. Golden path smoke remains green for production readiness.
+23. Final merge is deterministic, reproducible, and audit-ready.
 
 ## Output requirements
 
@@ -125,6 +164,7 @@ Order: **F1 first**, then remaining tasks parallel; **F-DI last**.
 - **Merge Wave E next:** E1 early (warn-only); E2–E6 can be parallel if file surfaces do not overlap; E-DI last.
 - **Merge Wave F last:** F1 first (verify command baseline), F2–F6 parallel, F-DI last.
 - **Conflict avoidance:** Only Docs Indexers touch README/docs index; each agent must keep to allowlisted paths and create new docs rather than editing shared docs.
+- **Validation workflow:** run `scripts/ci/verify-prompt-integrity.ts --prompt-hash <hash>` and `scripts/ci/validate-pr-metadata.ts --body <pr-body-path> --output artifacts/agent-runs/{task_id}.json` before merge readiness.
 
 ## Copy/paste-ready Codex prompts (one fenced block per agent)
 

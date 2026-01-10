@@ -79,3 +79,27 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: maestro-wave-d-f-governance
+    version: v1
+    path: prompts/maestro/wave-d-f-governance@v1.md
+    sha256: 6f3687d803b9432cf7bad568a8a78f9ebc90276ede1cb053f8fc467a6af932d3
+    description: Harden Maestro Wave D–F prompt packet with governance references, merge gates, and implication ladder.
+    scope:
+      paths:
+        - ga-graphai/packages/maestro-conductor/MAESTRO_WAVE_D_F_PROMPTS.md
+        - docs/roadmap/STATUS.json
+        - prompts/maestro/wave-d-f-governance@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - release
+        - orchestration
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

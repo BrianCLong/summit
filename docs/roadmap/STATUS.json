@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-09T16:00:00Z",
-  "revision_note": "Added scaffolded INSLAW/PROMIS affidavit demo artifacts for provenance-first ingestion",
+  "last_updated": "2026-01-10T03:48:06Z",
+  "revision_note": "Governed Maestro Wave D–F prompt packet now includes allowlist authority, merge verification gate, and implication ladder",
   "initiatives": [
     {
       "id": "A",
