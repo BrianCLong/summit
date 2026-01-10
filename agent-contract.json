@@ -16,7 +16,12 @@
   "verificationRules": {
     "gaCriticalWork": "Must reference Tier A/B/C artifact before merge.",
     "legacyMode": "New files cannot self-designate legacy mode; exemptions require documented issue and owner.",
-    "ciCommands": ["make ga-verify", "pnpm run test:a11y-gate"],
+    "ciCommands": [
+      "make ga-verify",
+      "pnpm coverage:gate",
+      "pnpm fuzz:api",
+      "pnpm run test:a11y-gate"
+    ],
     "provenance": "Changes must cite evidence artifacts in PR summaries."
   },
   "restrictedAreas": [

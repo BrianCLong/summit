@@ -125,13 +125,19 @@ echo "Starting GA Gate..."
 # 1. Lint and Unit
 record_check "Lint and Test" "make lint test" || { generate_report; exit 1; }
 
-# 2. Clean Environment
+# 2. Deterministic coverage gate (scoped to changed workspaces)
+record_check "Coverage Gate" "pnpm coverage:gate" || { generate_report; exit 1; }
+
+# 3. API fuzzing contracts (bounded, deterministic seed)
+record_check "API Fuzz Contracts" "pnpm fuzz:api" || { generate_report; exit 1; }
+
+# 4. Clean Environment
 record_check "Clean Environment" "make down" || { generate_report; exit 1; }
 
-# 3. Bring Up (using make up instead of dev-up for consistency with prompt, though dev-up is valid)
+# 5. Bring Up (using make up instead of dev-up for consistency with prompt, though dev-up is valid)
 record_check "Services Up" "make up" || { generate_report; exit 1; }
 
-# 4. Readiness Wait
+# 6. Readiness Wait
 wait_for_ready() {
     echo "Waiting for readiness probe (localhost:8080/health/ready)..."
     local retries=30
@@ -147,18 +153,18 @@ wait_for_ready() {
 }
 record_check "Readiness Check" "wait_for_ready" || { generate_report; exit 1; }
 
-# 5. Deep Health Check
+# 7. Deep Health Check
 check_detailed_health() {
     # Expecting /health/detailed to return 200
     curl -s -f http://localhost:8080/health/detailed > /dev/null
 }
 record_check "Deep Health Check" "check_detailed_health" || { generate_report; exit 1; }
 
-# 6. Smoke Test
+# 8. Smoke Test
 # We run `make smoke`. It calls bootstrap+up, but up should be fast/noop if already running.
 record_check "Smoke Test" "make smoke" || { generate_report; exit 1; }
 
-# 7. Security Checks
+# 9. Security Checks
 security_gate() {
     make sbom || echo "⚠️ SBOM generation failed (non-critical if tool missing)"
 

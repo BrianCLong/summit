@@ -1,6 +1,23 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "tasks": {
+  "pipeline": {
+    "lint": {
+      "outputs": [],
+      "cache": true,
+      "inputs": [
+        "src/**",
+        "tests/**",
+        "__tests__/**",
+        ".eslintrc.*",
+        "tsconfig.json",
+        "package.json"
+      ]
+    },
+    "typecheck": {
+      "outputs": [],
+      "cache": true,
+      "inputs": ["src/**", "types/**", "package.json", "tsconfig.json", "tsconfig.base.json"]
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**", ".next/**", "out/**"],
@@ -19,7 +36,7 @@
     },
     "test": {
       "dependsOn": ["build"],
-      "outputs": ["coverage/**"],
+      "outputs": ["test-results/**", "coverage/**"],
       "inputs": [
         "src/**",
         "tests/**",
@@ -30,34 +47,22 @@
       ],
       "env": ["NODE_ENV", "CI"]
     },
+    "coverage": {
+      "dependsOn": ["test"],
+      "outputs": ["coverage/**"],
+      "cache": false,
+      "env": ["NODE_ENV", "CI"]
+    },
+    "fuzz": {
+      "outputs": ["artifacts/fuzz/**"],
+      "cache": false,
+      "env": ["NODE_ENV", "CI"]
+    },
     "test:integration": {
       "dependsOn": ["build"],
       "outputs": ["test-results/**", "junit.xml", "playwright-report/**"],
       "cache": false,
       "env": ["NODE_ENV", "CI"]
-    },
-    "lint": {
-      "outputs": [],
-      "cache": true,
-      "inputs": [
-        "src/**",
-        "tests/**",
-        "__tests__/**",
-        ".eslintrc.*",
-        "tsconfig.json",
-        "package.json"
-      ]
-    },
-    "typecheck": {
-      "outputs": [],
-      "cache": true,
-      "inputs": [
-        "src/**",
-        "types/**",
-        "package.json",
-        "tsconfig.json",
-        "tsconfig.base.json"
-      ]
     },
     "smoke": {
       "dependsOn": ["build"],
