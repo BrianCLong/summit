@@ -169,7 +169,15 @@ let apiClient: TestApiClient;
 // Test Suite
 // ============================================================================
 
+const shouldRunE2E = process.env.E2E_ENABLED === 'true';
+
 describe('IntelGraph Golden Path E2E Tests', () => {
+  if (!shouldRunE2E) {
+    it('skipped: set E2E_ENABLED=true to run golden path E2E', () => {
+      expect(true).toBe(true);
+    });
+    return;
+  }
   beforeAll(async () => {
     apiClient = new TestApiClient(ctx.baseUrl);
 

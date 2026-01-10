@@ -1,4 +1,4 @@
-const AuthService = require('../../src/services/AuthService');
+const AuthService = require('../../src/services/AuthService').default;
 const { getPostgresPool } = require('../../src/config/database');
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
@@ -22,19 +22,37 @@ jest.mock('jsonwebtoken', () => ({
 
 // Mock logger to prevent console noise during tests
 jest.mock('../../src/utils/logger', () => ({
-  error: jest.fn(),
-  warn: jest.fn(),
-  info: jest.fn(),
-  debug: jest.fn(),
+  __esModule: true,
+  default: {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  },
 }));
 
 // Mock config
 jest.mock('../../src/config/index.js', () => ({
+  __esModule: true,
   default: {
     jwt: {
       secret: 'test-secret-key',
       expiresIn: '24h',
     },
+  },
+}));
+
+jest.mock('../../src/services/GAEnrollmentService.js', () => ({
+  __esModule: true,
+  default: {
+    checkUserEnrollmentEligibility: jest.fn().mockResolvedValue({ eligible: true }),
+  },
+}));
+
+jest.mock('../../src/services/SecretsService.js', () => ({
+  __esModule: true,
+  secretsService: {
+    getSecret: jest.fn().mockResolvedValue('test-secret-key'),
   },
 }));
 
@@ -50,6 +68,7 @@ describe('AuthService', () => {
     };
     mockPool = {
       connect: jest.fn(() => mockClient),
+      query: jest.fn(),
     };
     getPostgresPool.mockReturnValue(mockPool);
     authService = new AuthService();
@@ -216,6 +235,7 @@ describe('AuthService', () => {
 
     it('should return user for a valid token', async () => {
       jwt.verify.mockReturnValue(decodedPayload);
+      mockPool.query.mockResolvedValueOnce({ rows: [] }); // Blacklist check
       mockClient.query.mockResolvedValueOnce({ rows: [user] });
 
       const result = await authService.verifyToken(token);
@@ -472,7 +492,7 @@ describe('AuthService', () => {
     it('should successfully logout user and revoke all sessions', async () => {
       mockClient.query
         .mockResolvedValueOnce({}) // BEGIN
-        .mockResolvedValueOnce({}) // UPDATE user_sessions
+        .mockResolvedValueOnce({ rows: [{ tenant_id: 'tenant-123', last_login: new Date() }] }) // UPDATE user_sessions
         .mockResolvedValueOnce({}); // COMMIT
 
       mockPool.query.mockResolvedValueOnce({}); // revokeToken blacklist insert
@@ -491,7 +511,7 @@ describe('AuthService', () => {
     it('should logout without current token', async () => {
       mockClient.query
         .mockResolvedValueOnce({}) // BEGIN
-        .mockResolvedValueOnce({}) // UPDATE user_sessions
+        .mockResolvedValueOnce({ rows: [{ tenant_id: 'tenant-123', last_login: new Date() }] }) // UPDATE user_sessions
         .mockResolvedValueOnce({}); // COMMIT
 
       const result = await authService.logout(userId);

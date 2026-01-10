@@ -16,7 +16,7 @@ export class SigningService {
     if (!cfg.SIGNING_PRIVATE_KEY) {
       throw new Error('SIGNING_PRIVATE_KEY is not configured. Cannot create signatures.');
     }
-    this.privateKey = cfg.SIGNING_PRIVATE_KEY;
+    this.privateKey = String(cfg.SIGNING_PRIVATE_KEY);
 
     // Derive and store the public key for verification purposes
     try {

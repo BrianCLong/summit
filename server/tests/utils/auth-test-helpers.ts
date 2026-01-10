@@ -149,8 +149,8 @@ export function createMockRequest(options: {
   body?: any;
   query?: any;
   params?: any;
-}): Partial<Request> {
-  const req: Partial<Request> = {
+}): Partial<Request & { user?: any }> {
+  const req: Partial<Request & { user?: any }> = {
     headers: options.headers || {},
     user: options.user,
     method: options.method || 'GET',

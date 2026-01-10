@@ -79,3 +79,34 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ga-services-remediation
+    version: v1
+    path: prompts/governance/ga-services-remediation-v1.md
+    sha256: 36f249460aff558e9aa7c6c55addea7d6ec53f26415be6b5b11f1a42001b02bd
+    description: GA verification evidence capture and services remediation workflow.
+    scope:
+      paths:
+        - services/
+        - Makefile
+        - scripts/ga/
+        - scripts/ci/
+        - evidence/ga/
+        - artifacts/agent-runs/
+        - docs/roadmap/STATUS.json
+        - prompts/
+      domains:
+        - governance
+        - quality
+        - verification
+        - ci
+    verification:
+      tiers_required:
+        - A
+        - B
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

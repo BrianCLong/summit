@@ -1,6 +1,6 @@
 import { getPostgresPool } from '../config/database.js';
 import logger from '../utils/logger.js';
-import { Pool } from 'pg';
+type PostgresPool = ReturnType<typeof getPostgresPool>;
 
 export interface GAConfig {
   status: 'closed' | 'invite-only' | 'public';
@@ -32,7 +32,7 @@ export class GAEnrollmentService {
     // Lazy init pool
   }
 
-  private get pool(): Pool {
+  private get pool(): PostgresPool {
     return getPostgresPool();
   }
 

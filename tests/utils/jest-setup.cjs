@@ -10,6 +10,90 @@ if (typeof jest !== 'undefined') {
   jest.setTimeout(30000);
 }
 
+const ensureEnv = function(key, value) {
+  if (!process.env[key]) {
+    process.env[key] = value;
+  }
+};
+
+ensureEnv('DATABASE_URL', 'postgresql://user:pass@localhost:5432/db');
+ensureEnv('NEO4J_URI', 'bolt://localhost:7687');
+ensureEnv('NEO4J_USER', 'neo4j');
+ensureEnv('NEO4J_PASSWORD', 'devpassword');
+ensureEnv('JWT_SECRET', 'devsecretdevsecretdevsecretdevsecret');
+ensureEnv('JWT_REFRESH_SECRET', 'refreshsecretrefreshsecretrefreshsecret');
+
+// Mock prom-client to prevent metric registration conflicts in unit tests
+if (typeof jest !== 'undefined') {
+  jest.mock('prom-client', () => {
+    const mockMetric = {
+      __value: 0,
+      inc(value = 1) {
+        this.__value += value;
+      },
+      dec(value = 1) {
+        this.__value -= value;
+      },
+      set(value) {
+        this.__value = value;
+      },
+      observe() {},
+      reset() {
+        this.__value = 0;
+      },
+      get() {
+        return { values: [{ value: this.__value }] };
+      },
+      labels() {
+        return this;
+      },
+      startTimer: () => () => {},
+    };
+
+    class MockCounter {
+      constructor() { Object.assign(this, mockMetric); }
+    }
+    class MockGauge {
+      constructor() { Object.assign(this, mockMetric); }
+    }
+    class MockHistogram {
+      constructor() { Object.assign(this, mockMetric); }
+    }
+    class MockSummary {
+      constructor() { Object.assign(this, mockMetric); }
+    }
+    class MockRegistry {
+      registerMetric() {}
+      getSingleMetric() { return null; }
+      getMetricsAsJSON() { return []; }
+      metrics() { return ''; }
+      clear() {}
+      setDefaultLabels() {}
+      resetMetrics() {}
+    }
+
+    return {
+      __esModule: true,
+      Counter: MockCounter,
+      Gauge: MockGauge,
+      Histogram: MockHistogram,
+      Summary: MockSummary,
+      Registry: MockRegistry,
+      register: new MockRegistry(),
+      collectDefaultMetrics: jest.fn(),
+      default: {
+        Counter: MockCounter,
+        Gauge: MockGauge,
+        Histogram: MockHistogram,
+        Summary: MockSummary,
+        Registry: MockRegistry,
+        register: new MockRegistry(),
+        collectDefaultMetrics: jest.fn(),
+      },
+    };
+  });
+}
+
 // Wait for a condition to be true
 globalThis.testHelpers = {
   waitFor: async function(fn, timeout) {

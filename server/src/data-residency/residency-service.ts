@@ -198,7 +198,7 @@ export class DataResidencyService {
     const span = otelService.createSpan('data-residency.configure-kms');
 
     try {
-      const validatedConfig = KMSConfigSchema.parse(config);
+      const validatedConfig = KMSConfigSchema.parse(config) as KMSConfig;
       const pool = getPostgresPool();
       const kmsConfigId = `kms-${tenantId}-${Date.now()}`;
 

@@ -3,6 +3,19 @@ const fs = require('fs');
 // Import jest-dom for extended matchers (toBeInTheDocument, toHaveTextContent, etc.)
 require('@testing-library/jest-dom');
 
+const ensureEnv = (key, value) => {
+  if (!process.env[key]) {
+    process.env[key] = value;
+  }
+};
+
+ensureEnv('DATABASE_URL', 'postgresql://user:pass@localhost:5432/db');
+ensureEnv('NEO4J_URI', 'bolt://localhost:7687');
+ensureEnv('NEO4J_USER', 'neo4j');
+ensureEnv('NEO4J_PASSWORD', 'devpassword');
+ensureEnv('JWT_SECRET', 'devsecretdevsecretdevsecretdevsecret');
+ensureEnv('JWT_REFRESH_SECRET', 'refreshsecretrefreshsecretrefreshsecret');
+
 // Configure JSDOM environment for client tests
 if (typeof window !== 'undefined') {
   require('@testing-library/jest-dom');

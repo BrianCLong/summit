@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Pool, type PoolClient } from 'pg';
+import type { PoolClient } from 'pg';
 import { getPostgresPool } from '../config/database.js';
 import logger from '../utils/logger.js';
 
@@ -23,7 +23,7 @@ export interface RollupRefreshResult {
   weeklyBuckets: number;
 }
 
-type QueryablePool = Pick<Pool, 'query' | 'connect'>;
+type QueryablePool = Pick<ReturnType<typeof getPostgresPool>, 'query' | 'connect'>;
 
 interface AuditColumns {
   timestampColumn: string;

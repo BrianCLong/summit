@@ -56,6 +56,7 @@ import type { Driver, Session } from 'neo4j-driver';
 describe('RelationshipRepo', () => {
   let relationshipRepo: RelationshipRepo;
   let mockPgPool: jest.Mocked<Pool>;
+  let mockPgPoolQuery: jest.Mock;
   let mockPgClient: any;
   let mockNeo4jDriver: jest.Mocked<Driver>;
   let mockNeo4jSession: jest.Mocked<Session>;
@@ -72,6 +73,7 @@ describe('RelationshipRepo', () => {
       connect: jest.fn<any>().mockResolvedValue(mockPgClient),
       query: jest.fn<any>(),
     } as any;
+    mockPgPoolQuery = mockPgPool.query as jest.Mock;
 
     // Mock Neo4j session
     mockNeo4jSession = {
@@ -399,7 +401,7 @@ describe('RelationshipRepo', () => {
         created_by: 'user-456',
       };
 
-      mockPgPool.query.mockResolvedValue({ rows: [mockRelationshipRow] } as any);
+      mockPgPoolQuery.mockResolvedValue({ rows: [mockRelationshipRow] } as any);
 
       const result = await relationshipRepo.findById(relationshipId);
 
@@ -415,7 +417,7 @@ describe('RelationshipRepo', () => {
       const relationshipId = 'rel-789';
       const tenantId = 'tenant-123';
 
-      mockPgPool.query.mockResolvedValue({ rows: [] } as any);
+      mockPgPoolQuery.mockResolvedValue({ rows: [] } as any);
 
       await relationshipRepo.findById(relationshipId, tenantId);
 
@@ -426,7 +428,7 @@ describe('RelationshipRepo', () => {
     });
 
     it('should return null if relationship not found', async () => {
-      mockPgPool.query.mockResolvedValue({ rows: [] } as any);
+      mockPgPoolQuery.mockResolvedValue({ rows: [] } as any);
 
       const result = await relationshipRepo.findById('non-existent');
 
@@ -463,7 +465,7 @@ describe('RelationshipRepo', () => {
     ];
 
     it('should find outgoing relationships when direction is "outgoing"', async () => {
-      mockPgPool.query.mockResolvedValue({ rows: [mockRelationships[0]] } as any);
+      mockPgPoolQuery.mockResolvedValue({ rows: [mockRelationships[0]] } as any);
 
       const results = await relationshipRepo.findByEntityId(
         entityId,
@@ -480,7 +482,7 @@ describe('RelationshipRepo', () => {
     });
 
     it('should find incoming relationships when direction is "incoming"', async () => {
-      mockPgPool.query.mockResolvedValue({ rows: [mockRelationships[1]] } as any);
+      mockPgPoolQuery.mockResolvedValue({ rows: [mockRelationships[1]] } as any);
 
       const results = await relationshipRepo.findByEntityId(
         entityId,
@@ -497,7 +499,7 @@ describe('RelationshipRepo', () => {
     });
 
     it('should use UNION ALL for "both" direction (optimized query)', async () => {
-      mockPgPool.query.mockResolvedValue({ rows: mockRelationships } as any);
+      mockPgPoolQuery.mockResolvedValue({ rows: mockRelationships } as any);
 
       const results = await relationshipRepo.findByEntityId(
         entityId,
@@ -519,7 +521,7 @@ describe('RelationshipRepo', () => {
         mockRelationships[1],
       ];
 
-      mockPgPool.query.mockResolvedValue({ rows: duplicatedRows } as any);
+      mockPgPoolQuery.mockResolvedValue({ rows: duplicatedRows } as any);
 
       const results = await relationshipRepo.findByEntityId(
         entityId,
@@ -531,7 +533,7 @@ describe('RelationshipRepo', () => {
     });
 
     it('should default to "both" direction when not specified', async () => {
-      mockPgPool.query.mockResolvedValue({ rows: mockRelationships } as any);
+      mockPgPoolQuery.mockResolvedValue({ rows: mockRelationships } as any);
 
       const results = await relationshipRepo.findByEntityId(entityId, tenantId);
 
@@ -559,7 +561,7 @@ describe('RelationshipRepo', () => {
         },
       ];
 
-      mockPgPool.query.mockResolvedValue({ rows: mockRelationships } as any);
+      mockPgPoolQuery.mockResolvedValue({ rows: mockRelationships } as any);
 
       const results = await relationshipRepo.search({ tenantId: 'tenant-123' });
 
@@ -571,7 +573,7 @@ describe('RelationshipRepo', () => {
     });
 
     it('should filter by type when provided', async () => {
-      mockPgPool.query.mockResolvedValue({ rows: [] } as any);
+      mockPgPoolQuery.mockResolvedValue({ rows: [] } as any);
 
       await relationshipRepo.search({
         tenantId: 'tenant-123',
@@ -585,7 +587,7 @@ describe('RelationshipRepo', () => {
     });
 
     it('should filter by srcId when provided', async () => {
-      mockPgPool.query.mockResolvedValue({ rows: [] } as any);
+      mockPgPoolQuery.mockResolvedValue({ rows: [] } as any);
 
       await relationshipRepo.search({
         tenantId: 'tenant-123',
@@ -599,7 +601,7 @@ describe('RelationshipRepo', () => {
     });
 
     it('should filter by dstId when provided', async () => {
-      mockPgPool.query.mockResolvedValue({ rows: [] } as any);
+      mockPgPoolQuery.mockResolvedValue({ rows: [] } as any);
 
       await relationshipRepo.search({
         tenantId: 'tenant-123',
@@ -613,7 +615,7 @@ describe('RelationshipRepo', () => {
     });
 
     it('should combine multiple filters', async () => {
-      mockPgPool.query.mockResolvedValue({ rows: [] } as any);
+      mockPgPoolQuery.mockResolvedValue({ rows: [] } as any);
 
       await relationshipRepo.search({
         tenantId: 'tenant-123',
@@ -629,7 +631,7 @@ describe('RelationshipRepo', () => {
     });
 
     it('should respect limit and offset', async () => {
-      mockPgPool.query.mockResolvedValue({ rows: [] } as any);
+      mockPgPoolQuery.mockResolvedValue({ rows: [] } as any);
 
       await relationshipRepo.search({
         tenantId: 'tenant-123',
@@ -645,7 +647,7 @@ describe('RelationshipRepo', () => {
     });
 
     it('should cap limit at 1000 for safety', async () => {
-      mockPgPool.query.mockResolvedValue({ rows: [] } as any);
+      mockPgPoolQuery.mockResolvedValue({ rows: [] } as any);
 
       await relationshipRepo.search({
         tenantId: 'tenant-123',
@@ -657,7 +659,7 @@ describe('RelationshipRepo', () => {
     });
 
     it('should use default limit of 100', async () => {
-      mockPgPool.query.mockResolvedValue({ rows: [] } as any);
+      mockPgPoolQuery.mockResolvedValue({ rows: [] } as any);
 
       await relationshipRepo.search({
         tenantId: 'tenant-123',

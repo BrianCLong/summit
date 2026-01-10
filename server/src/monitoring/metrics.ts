@@ -6,13 +6,10 @@ import * as client from 'prom-client';
 // Create a Registry which registers the metrics
 export const register = new client.Registry();
 
-// Store the default metrics collection handle for cleanup
-let defaultMetricsInterval: ReturnType<typeof client.collectDefaultMetrics> | undefined;
-
 // Add default metrics (CPU, memory, event loop lag, etc.)
 // Only collect in production/non-test environments to avoid open handles in tests
 if (process.env.NODE_ENV !== 'test' && process.env.ZERO_FOOTPRINT !== 'true') {
-  defaultMetricsInterval = client.collectDefaultMetrics({
+  client.collectDefaultMetrics({
     register,
     gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5], // Garbage collection buckets
   });
@@ -20,9 +17,6 @@ if (process.env.NODE_ENV !== 'test' && process.env.ZERO_FOOTPRINT !== 'true') {
 
 // Cleanup function to stop metrics collection
 export function stopMetricsCollection() {
-  if (defaultMetricsInterval && typeof defaultMetricsInterval === 'object' && 'clear' in defaultMetricsInterval) {
-    (defaultMetricsInterval as any).clear();
-  }
   register.clear();
 }
 

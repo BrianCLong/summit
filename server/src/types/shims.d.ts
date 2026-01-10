@@ -46,6 +46,18 @@ declare class URL {
 
 declare class URLSearchParams {
   constructor(init?: any);
+  append(name: string, value: string): void;
+  set(name: string, value: string): void;
+  get(name: string): string | null;
+  delete(name: string): void;
+  has(name: string): boolean;
+  forEach(callback: (value: string, key: string, parent: URLSearchParams) => void): void;
+  entries(): IterableIterator<[string, string]>;
+  keys(): IterableIterator<string>;
+  values(): IterableIterator<string>;
+  sort(): void;
+  toString(): string;
+  readonly size: number;
   [key: string]: any;
 }
 
@@ -345,5 +357,4 @@ declare module '@intelgraph/feature-flags' {
   const anyExport: any;
   export default anyExport;
 }
-
 

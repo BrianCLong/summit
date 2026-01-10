@@ -52,6 +52,7 @@ describe('Authentication Security Tests', () => {
   let authService: AuthService;
   let mockPool: jest.Mocked<Pool>;
   let mockClient: jest.Mocked<{ query: jest.Mock; release: jest.Mock }>;
+  let mockPoolQuery: jest.Mock;
 
   beforeEach(() => {
     mockClient = {
@@ -63,6 +64,7 @@ describe('Authentication Security Tests', () => {
       connect: jest.fn().mockResolvedValue(mockClient),
       query: jest.fn(),
     } as unknown as jest.Mocked<Pool>;
+    mockPoolQuery = mockPool.query as jest.Mock;
 
     const { getPostgresPool } = require('../../src/config/database');
     getPostgresPool.mockReturnValue(mockPool);
@@ -97,7 +99,7 @@ describe('Authentication Security Tests', () => {
         role: 'ANALYST',
       });
 
-      mockPool.query.mockResolvedValueOnce({ rows: [] }); // Not blacklisted
+      mockPoolQuery.mockResolvedValueOnce({ rows: [] }); // Not blacklisted
       mockClient.query.mockResolvedValueOnce({
         rows: [
           {
@@ -207,7 +209,7 @@ describe('Authentication Security Tests', () => {
         role: 'ANALYST',
       });
 
-      mockPool.query.mockResolvedValueOnce({ rows: [] });
+      mockPoolQuery.mockResolvedValueOnce({ rows: [] });
       mockClient.query.mockResolvedValueOnce({
         rows: [
           {
@@ -393,7 +395,7 @@ describe('Authentication Security Tests', () => {
     it('should implement token blacklisting', async () => {
       const token = 'token-to-blacklist';
 
-      mockPool.query.mockResolvedValueOnce({});
+      mockPoolQuery.mockResolvedValueOnce({});
 
       const result = await authService.revokeToken(token);
 
@@ -408,7 +410,7 @@ describe('Authentication Security Tests', () => {
       const token = 'sensitive-token';
       const crypto = require('crypto');
 
-      mockPool.query.mockImplementationOnce((query: string, params: any[]) => {
+      mockPoolQuery.mockImplementationOnce((query: string, params: any[]) => {
         // Verify token is hashed
         expect(params[0]).not.toBe(token);
         expect(params[0]).toHaveLength(64); // SHA-256 produces 64 hex characters
@@ -510,7 +512,7 @@ describe('Authentication Security Tests', () => {
         .mockResolvedValueOnce({ rows: [{ tenant_id: 'tenant-1', last_login: new Date() }] }) // Revoke all sessions
         .mockResolvedValueOnce({}); // COMMIT
 
-      mockPool.query.mockResolvedValueOnce({});
+      mockPoolQuery.mockResolvedValueOnce({});
 
       const result = await authService.logout('user-123', 'token');
 
@@ -556,7 +558,7 @@ describe('Authentication Security Tests', () => {
         .mockResolvedValueOnce({})
         .mockResolvedValueOnce({})
         .mockResolvedValueOnce({});
-      mockPool.query.mockResolvedValueOnce({});
+      mockPoolQuery.mockResolvedValueOnce({});
 
       await authService.logout('user-123', token);
 
@@ -568,7 +570,7 @@ describe('Authentication Security Tests', () => {
         role: 'ANALYST',
       });
 
-      mockPool.query.mockResolvedValueOnce({ rows: [{ token_hash: 'hash' }] }); // Blacklisted
+      mockPoolQuery.mockResolvedValueOnce({ rows: [{ token_hash: 'hash' }] }); // Blacklisted
 
       const result = await authService.verifyToken(token);
 
@@ -696,7 +698,7 @@ describe('Authentication Security Tests', () => {
         authService.verifyToken(`token-${i}`),
       );
 
-      mockPool.query.mockResolvedValue({ rows: [{ token_hash: 'hash' }] });
+      mockPoolQuery.mockResolvedValue({ rows: [{ token_hash: 'hash' }] });
 
       const jwt = require('jsonwebtoken');
       jwt.verify = jest.fn().mockReturnValue({

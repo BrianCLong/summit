@@ -5,7 +5,6 @@
 
 import { randomUUID, createHash } from 'crypto';
 import { EventEmitter } from 'events';
-import { Pool } from 'pg';
 import Redis from 'ioredis';
 import { Logger } from 'pino';
 import { z } from 'zod';
@@ -172,7 +171,10 @@ const AuditEventSchema = z.object({
 });
 
 export class AdvancedAuditSystem extends EventEmitter {
-  private db: Pool;
+  private static instance: AdvancedAuditSystem;
+  private static readonly DEFAULT_SIGNING_KEY = 'dev-signing-key-insecure';
+  private static readonly DEFAULT_ENCRYPTION_KEY = 'dev-encryption-key-insecure';
+  private db: ReturnType<typeof getPostgresPool>;
   private redis: Redis | null;
   private logger: Logger;
   private signingKey: string;
@@ -193,10 +195,8 @@ export class AdvancedAuditSystem extends EventEmitter {
   private retentionInterval?: NodeJS.Timeout;
   private rollupService: AuditTimelineRollupService;
 
-  private static instance: AdvancedAuditSystem;
-
   private constructor(
-    db: Pool,
+    db: ReturnType<typeof getPostgresPool>,
     redis: Redis | null,
     logger: Logger,
     signingKey: string,
@@ -292,15 +292,15 @@ export class AdvancedAuditSystem extends EventEmitter {
         db,
         redis as Redis, // If null, we'll need to handle it in methods
         logger,
-        signingKey || 'dev-signing-key-insecure',
-        encryptionKey || 'dev-encryption-key-insecure'
+        signingKey || AdvancedAuditSystem.DEFAULT_SIGNING_KEY,
+        encryptionKey || AdvancedAuditSystem.DEFAULT_ENCRYPTION_KEY,
       );
     }
     return AdvancedAuditSystem.instance;
   }
 
   public static createForTest(options: {
-    db: Pool;
+    db: ReturnType<typeof getPostgresPool>;
     redis?: Redis | null;
     logger: Logger;
     signingKey?: string;

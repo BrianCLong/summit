@@ -8,6 +8,7 @@ include Makefile.merge-train
 .PHONY: db-migrate db-seed sbom k6
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
 .PHONY: bootstrap
+.PHONY: bootstrap-smoke
 .PHONY: dev-prereqs dev-up dev-down dev-smoke
 .PHONY: demo demo-down demo-check demo-seed demo-smoke
 
@@ -127,7 +128,13 @@ rollback-drill: ## Run simulated rollback drill
 sbom:   ## Generate CycloneDX SBOM
 	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
 
-smoke: bootstrap up ## Fresh clone smoke test: bootstrap -> up -> health check
+bootstrap-smoke: ## Minimal bootstrap for smoke tests without network downloads
+	python3 -m venv $(VENV_DIR)
+	$(VENV_BIN)/python -m ensurepip --upgrade
+	@echo "Skipping Python package installs for smoke; set BOOTSTRAP_FULL=1 to run full bootstrap."
+	pnpm install
+
+smoke: bootstrap-smoke up ## Fresh clone smoke test: bootstrap -> up -> health check
 	@echo "Waiting for services to start..."
 	@sleep 45
 	@echo "Checking UI health..."

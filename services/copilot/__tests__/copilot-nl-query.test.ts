@@ -313,7 +313,7 @@ const createMockDraftRepository = () => {
       return false;
     }),
 
-    getByUserId: jest.fn(async (userId: string, limit = 10) => {
+    getByUserId: jest.fn(async (userId: string, limit: number = 10) => {
       const ids = userIndex.get(userId);
       if (!ids) return [];
       const result: CopilotDraftQuery[] = [];
@@ -354,7 +354,7 @@ const createMockAuditLog = () => {
       records.push(record);
     }),
 
-    getByUserId: jest.fn(async (userId: string, limit = 100) => {
+    getByUserId: jest.fn(async (userId: string, limit: number = 100) => {
       return records.filter((r) => r.userId === userId).slice(0, limit);
     }),
 

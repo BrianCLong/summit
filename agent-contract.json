@@ -16,7 +16,7 @@
   "verificationRules": {
     "gaCriticalWork": "Must reference Tier A/B/C artifact before merge.",
     "legacyMode": "New files cannot self-designate legacy mode; exemptions require documented issue and owner.",
-    "ciCommands": ["make ga-verify", "pnpm run test:a11y-gate"],
+    "ciCommands": ["make ga-verify", "pnpm run test:a11y-gate", "pnpm run check:focused-tests"],
     "provenance": "Changes must cite evidence artifacts in PR summaries."
   },
   "restrictedAreas": [
@@ -75,7 +75,8 @@
   "requiredChecks": [
     "restricted-path-check",
     "pr-metadata-check",
-    "pii-scan"
+    "pii-scan",
+    "focused-test-guard"
   ],
   "activityTracking": {
     "ledger": "AGENT_ACTIVITY.md",
