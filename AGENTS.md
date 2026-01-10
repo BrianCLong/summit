@@ -156,9 +156,17 @@ They are **enforceable** and apply to all code under this repository.
   -> Results
 - **Production-Ready MVP**: Every commit should maintain production readiness
 
-## Sustained Velocity & Parallelism (Sprint N+6)
+## Sustained Velocity & Parallelism (Post-GA)
 
-To ensure high throughput and safe parallel execution, all Agents must adhere to the following **Parallelization Mandates**:
+**You are empowered to move fast.** The GA milestone is behind us. Your goal is now **velocity**.
+
+You do not need to seek permission for standard refactors, optimizations, or feature additions, provided you satisfy the **[Post-GA Baseline](docs/BASELINE.md)**.
+
+### The Code of Velocity
+
+1.  **Trust the Tests**: If `make smoke` passes, you are safe to proceed.
+2.  **Respect the Zones**: Stay in your lane (Server vs Web vs Docs) to avoid merge conflicts.
+3.  **No Governance Theatre**: Do not create "manifestos" or "declarations". Write code, tests, and docs.
 
 ### Safe Parallel Zones
 

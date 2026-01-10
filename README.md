@@ -7,6 +7,9 @@ Enterprise Intelligence Platform: graph analytics, real-time collaboration, and 
 Summit v2.0.0 consolidates major platform capabilities (infrastructure, AI/ML, security hardening, real-time systems).  
 See: Release Notes | Migration Guide | Roadmap.
 
+> **Status:** ✅ **Post-GA Baseline Active**
+> All contributions must adhere to the [Post-GA Baseline](docs/BASELINE.md) and [Contributing Guidelines](CONTRIBUTING.md).
+
 ---
 
 ## Quickstart (Golden Path)

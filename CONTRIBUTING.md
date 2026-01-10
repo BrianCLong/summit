@@ -4,11 +4,13 @@ Welcome to the Summit platform! We build intelligence tools for high-stakes envi
 
 Whether you are a human developer or an AI agent, this guide will help you contribute effectively.
 
-## 🌟 Core Philosophy
+## 🌟 Core Philosophy (The Baseline)
 
-1.  **Deployable-First**: The `main` branch must always be deployable. If the build breaks, fixing it is the top priority.
-2.  **The Golden Path**: We protect the core workflow: **Investigation → Entities → Relationships → Copilot → Results**.
-3.  **Provable Changes**: Every change must be verifiable via tests (`make smoke`).
+This repository operates under a strict **[Post-GA Baseline](docs/BASELINE.md)**. This is our constitution.
+
+1.  **The Golden Path is Law**: `make bootstrap && make up && make smoke` must always pass.
+2.  **Deployable-First**: The `main` branch is always production-ready. Breaking the build is an emergency.
+3.  **Velocity via Discipline**: You are empowered to move fast, *provided* you satisfy the [Baseline Invariants](docs/BASELINE.md#2-technical-invariants).
 
 ## 🚀 Getting Started
 
