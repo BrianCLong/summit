@@ -1,0 +1,41 @@
+name: GA Drift Monitor
+
+# Monitors the GA Guarantee Surface for drift.
+# Fails if:
+# - Critical files (workflows, scripts) are modified without baseline update.
+# - Environment configuration drifts.
+# - Required documentation or evidence is missing.
+#
+# Escalation: @acme/release-captains
+
+on:
+  schedule:
+    - cron: "0 8 * * *" # Daily at 08:00 UTC
+  workflow_dispatch:
+
+jobs:
+  ga-compliance-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Run GA Verification
+        run: |
+          chmod +x scripts/verify-ga.sh
+          chmod +x scripts/drift-check.sh
+          ./scripts/verify-ga.sh
+
+      - name: Failure Alert
+        if: failure()
+        run: |
+          echo "::error::GA Compliance Drift Detected! Please investigate immediately."
+          # In a real setup, we might trigger a PagerDuty alert or Slack notification here.

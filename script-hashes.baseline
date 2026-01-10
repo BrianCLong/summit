@@ -1,0 +1,5 @@
+# Script Hashes - 2026-01-10T03:10:33Z
+scripts/drift-check.sh 7aac7fad4c4634410e326c88c2b9397bbbf3003afc5c6fd050fbbcff78474c2b
+scripts/verify-ga.sh b5d6faee2e2794a1405680bffad4ca79ee5db0b0ad2328711bc377628a33257b
+scripts/verify-evidence-bundle.ts fb7dfdda276413ea1fe17117a8d70a68aa6a759a3e5240465d67c43af00827ab
+scripts/release/check_governance_drift.sh ac959670e9e1f7d9110ef56728b869e8adc50f94ced5e643dce110ddb159ea5a
