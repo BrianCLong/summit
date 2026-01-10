@@ -117,6 +117,7 @@ import cryptoIntelligenceRouter from './routes/crypto-intelligence.js';
 import demoRouter from './routes/demo.js';
 import claimsRouter from './routes/claims.js';
 import opsRouter from './routes/ops.js';
+import opsHealthRouter from './routes/ops-health.js';
 import featureFlagsRouter from './routes/feature-flags.js';
 import mlReviewRouter from './routes/ml_review.js';
 import adminFlagsRouter from './routes/admin-flags.js';
@@ -448,6 +449,7 @@ export const createApp = async () => {
   app.use('/api/evidence', evidenceRouter);
   app.use('/dr', drRouter);
   app.use('/', opsRouter);
+  app.use('/api/ops/system-health', opsHealthRouter);
   app.use('/api/reporting', reportingRouter);
   app.use('/api/mastery', masteryRouter);
   app.use('/api/crypto-intelligence', cryptoIntelligenceRouter);
