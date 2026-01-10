@@ -23,6 +23,8 @@ import { workflowRoutes } from './workflow-routes.js';
 import { workflowExecutor } from '../workflows/workflow-executor.js';
 import logger from '../../config/logger.js';
 import { pricingReadRoutes } from './pricing-read-routes.js';
+import { agentAttestationVerifier } from '../security/agent-attestation.js';
+import { detectDiffAnomalies } from '../observability/anomaly-detector.js';
 
 const router = Router();
 
@@ -631,6 +633,58 @@ router.post(
   },
 );
 
+router.post(
+  '/pull-requests/attestations',
+  requirePermission('workflow:execute'),
+  async (req: Request, res: Response) => {
+    try {
+      const { prNumber, repository, attestation, tenantId } = req.body ?? {};
+
+      if (!prNumber || !repository || !attestation || !tenantId) {
+        return res.status(400).json({
+          error: 'Missing required fields for PR attestation',
+        });
+      }
+      if (!isValidAttestation(attestation)) {
+        return res.status(400).json({
+          error: 'Invalid attestation payload for PR attestation',
+        });
+      }
+
+      await agentAttestationVerifier.verifyAndRecord({
+        tenantId,
+        taskId: `pr-${prNumber}`,
+        agentId: attestation.agentId,
+        signedPayload: attestation.signedPayload,
+        signature: attestation.signature,
+        resourceType: 'pull_request',
+        resourceRef: `${repository}#${prNumber}`,
+        humanApprover: attestation.humanApprover,
+        policyRefs: attestation.policyRefs,
+        issuedAt: attestation.issuedAt,
+      });
+
+      if (typeof attestation.diffPatch === 'string' && attestation.diffPatch) {
+        detectDiffAnomalies(attestation.diffPatch, `${repository}#${prNumber}`);
+      }
+
+      res.status(201).json({
+        status: 'recorded',
+        prNumber,
+        repository,
+      });
+    } catch (error) {
+      logger.error('Failed to record PR attestation', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      res.status(400).json({
+        error: 'Unable to verify attestation',
+        details: error instanceof Error ? error.message : String(error),
+      });
+    }
+  },
+);
+
 // Mount policy routes
 router.use('/policies', policyRoutes);
 
@@ -650,3 +704,18 @@ router.use('/', agentRoutes);
 router.use('/serving', servingRoutes);
 
 export { router as conductorRoutes };
+
+function isValidAttestation(attestation: any): boolean {
+  return (
+    typeof attestation === 'object' &&
+    typeof attestation.agentId === 'string' &&
+    typeof attestation.signedPayload === 'string' &&
+    typeof attestation.humanApprover === 'string' &&
+    typeof attestation.issuedAt === 'string' &&
+    Array.isArray(attestation.policyRefs) &&
+    typeof attestation.signature === 'object' &&
+    typeof attestation.signature.keyId === 'string' &&
+    typeof attestation.signature.signature === 'string' &&
+    typeof attestation.signature.algorithm === 'string'
+  );
+}

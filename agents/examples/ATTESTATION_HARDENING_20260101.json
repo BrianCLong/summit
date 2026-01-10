@@ -1,0 +1,37 @@
+{
+  "task_id": "ATTESTATION_HARDENING_20260101",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "agent-native-loop-n4",
+    "version": "v1",
+    "sha256": "419717c7891d6943a948ae678ae59f03092e30a699083765300081a38c30cd94",
+    "path": "prompts/governance/agent-native-loop-n4.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "server/src/conductor/**",
+      "scripts/ci/**",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/ATTESTATION_HARDENING_20260101.json"
+    ],
+    "domains": ["governance", "provenance", "observability", "ci"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "A",
+    "artifacts": ["jest-run-tests", "make-smoke", "scripts/check-boundaries.cjs"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 1
+  },
+  "success_criteria": [
+    "Agent attestation payload validation rejects mismatched payloads",
+    "Anomaly detector emits metrics without leaking sensitive evidence",
+    "High-risk diff guardrail targets added lines and records findings"
+  ],
+  "stop_conditions": [
+    "CI fails on main",
+    "Policy or compliance ambiguity requires governance escalation"
+  ]
+}
