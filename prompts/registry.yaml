@@ -28,3 +28,26 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: items-60-95-roadmap
+    version: v1
+    path: prompts/roadmap/items-60-95-plan.md
+    sha256: 6a968d4f2bde2d1e5d2db6c8aa504b12681d91f09afc71f6bb31b7f67dd2dcfa
+    description: Phased roadmap planning for items 60-95 with reporting and CI/CD gating.
+    scope:
+      paths:
+        - docs/roadmap/
+        - prompts/roadmap/
+        - agents/examples/
+      domains:
+        - roadmap
+        - governance
+        - ci
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

@@ -1,0 +1,838 @@
+{
+  "scope": "Items 60-95 roadmap with phased control alignment (Cost, Change, Security, Trust)",
+  "last_updated": "2026-01-08T00:00:00Z",
+  "reporting": {
+    "cadence": "weekly",
+    "day": "Monday",
+    "timezone": "UTC",
+    "artifacts": ["docs/roadmap/STATUS.json", "docs/roadmap/items-60-95-plan.json"],
+    "status_reports": {
+      "path_pattern": "docs/roadmap/status-reports/YYYY-WW.md",
+      "template": "docs/roadmap/status-reports/template.md",
+      "required_sections": [
+        "Highlights",
+        "Risks and burndown",
+        "CI/CD gate evidence",
+        "Upcoming checkpoints"
+      ]
+    },
+    "risk_burndown": {
+      "method": "risk points per item (0-5) tracked weekly until <=1",
+      "owner": "Jules",
+      "checkpoint_window_weeks": 4
+    },
+    "completion_policy": {
+      "states": ["planned", "in-progress", "blocked", "complete", "descoped"],
+      "drift_avoidance": "Completed or descoped items are frozen from edits except evidence URLs"
+    }
+  },
+  "phases": [
+    {
+      "name": "Cost",
+      "items": "60-68",
+      "goal": "Keep delivery within budget and quota envelopes while enabling guardrails for experimentation."
+    },
+    {
+      "name": "Change",
+      "items": "69-77",
+      "goal": "Standardize change risk, progressive delivery, and rollback readiness."
+    },
+    {
+      "name": "Security",
+      "items": "78-86",
+      "goal": "Enforce preventative and detective controls (WAF, rate limits, SBOM, zero-trust)."
+    },
+    {
+      "name": "Trust",
+      "items": "87-95",
+      "goal": "Guarantee reliability, fairness, and operator confidence through evidence and communication."
+    }
+  ],
+  "ci_cd_integration": {
+    "policy_as_code": "CI/CD gates are expressed as policy-as-code (OPA/Rego) with evidence archived per release.",
+    "budget_gates": "FinOps budget and quota validation executed pre-merge; block if projected monthly run-rate exceeds limit or quotas are missing.",
+    "rate_limit_and_waf": "Security job validates WAF policy manifests and API rate-limit settings per service before deploy.",
+    "canary_policy": "Deployments require canary release steps with automated metrics + log verification and auto-rollback criteria.",
+    "rollback_drills": "Change phase requires scheduled rollback simulations; CI asserts runbook links and last-run timestamp.",
+    "evidence_paths": ["artifacts/agent-runs/*.json", "docs/roadmap/status-reports/*.md"]
+  },
+  "items": [
+    {
+      "id": 60,
+      "name": "FinOps budget guardrails",
+      "phase": "Cost",
+      "owner": "Jules",
+      "milestone": "2026-W02",
+      "status": "planned",
+      "risk": 3,
+      "acceptance_tests": [
+        "Budget thresholds configured per environment with pass/fail CI gate",
+        "Cost anomaly alert fires in staging when synthetic overage is injected"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Budget envelopes defined; CI config stub committed" },
+        { "week": "2026-W02", "exit": "Budget gate running in CI with sample evidence" }
+      ],
+      "ci_cd_gates": {
+        "budget": "blocks if projected monthly run-rate exceeds envelope",
+        "quota": "requires quota contract file per service",
+        "canary": "cost metrics sampled during canary stage"
+      }
+    },
+    {
+      "id": 61,
+      "name": "Service quota contracts",
+      "phase": "Cost",
+      "owner": "Amp",
+      "milestone": "2026-W03",
+      "status": "planned",
+      "risk": 2,
+      "acceptance_tests": [
+        "Quota manifest exists for every critical service",
+        "CI fails if manifest missing or limits exceed platform policy"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Quota schema approved" },
+        { "week": "2026-W02", "exit": "50% services onboarded" },
+        { "week": "2026-W03", "exit": "100% coverage and CI enforcement" }
+      ],
+      "ci_cd_gates": {
+        "quota": "validate manifests",
+        "rollback": "reverts to prior manifest on failure"
+      }
+    },
+    {
+      "id": 62,
+      "name": "Cost anomaly detection",
+      "phase": "Cost",
+      "owner": "Jules",
+      "milestone": "2026-W04",
+      "status": "planned",
+      "risk": 3,
+      "acceptance_tests": [
+        "Synthetic spike triggers alert and blocks deployment",
+        "Dashboard shows 7-day anomaly history with RCA notes"
+      ],
+      "checkpoints": [
+        { "week": "2026-W02", "exit": "Detection thresholds tuned" },
+        { "week": "2026-W03", "exit": "Alert routing validated" },
+        { "week": "2026-W04", "exit": "CI gating live" }
+      ],
+      "ci_cd_gates": {
+        "budget": "uses anomaly scores to allow/deny deploy",
+        "canary": "anomaly detector runs on canary metrics"
+      }
+    },
+    {
+      "id": 63,
+      "name": "Compute right-sizing",
+      "phase": "Cost",
+      "owner": "Amp",
+      "milestone": "2026-W03",
+      "status": "planned",
+      "risk": 2,
+      "acceptance_tests": [
+        "Autoscaling policies align to target utilization bands",
+        "CI enforces resource requests/limits per workload"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Baseline utilization captured" },
+        { "week": "2026-W02", "exit": "Policies drafted" },
+        { "week": "2026-W03", "exit": "Policies enforced via pipeline" }
+      ],
+      "ci_cd_gates": {
+        "budget": "rejects configurations exceeding utilization guardrails",
+        "canary": "verifies scaling during canary window"
+      }
+    },
+    {
+      "id": 64,
+      "name": "Storage lifecycle and TTLs",
+      "phase": "Cost",
+      "owner": "Codex",
+      "milestone": "2026-W04",
+      "status": "planned",
+      "risk": 2,
+      "acceptance_tests": [
+        "TTL policies defined for logs, artifacts, and datasets",
+        "Expired objects automatically purged with audit evidence"
+      ],
+      "checkpoints": [
+        { "week": "2026-W02", "exit": "TTL matrix approved" },
+        { "week": "2026-W03", "exit": "Automation tested in staging" },
+        { "week": "2026-W04", "exit": "Production roll-out with rollback plan" }
+      ],
+      "ci_cd_gates": {
+        "quota": "storage quota validated against TTL plan",
+        "rollback": "rollback keeps prior retention config"
+      }
+    },
+    {
+      "id": 65,
+      "name": "Pre-production cost sandbox",
+      "phase": "Cost",
+      "owner": "Jules",
+      "milestone": "2026-W02",
+      "status": "planned",
+      "risk": 2,
+      "acceptance_tests": [
+        "Sandbox environment caps spend with automated shutdown",
+        "CI requires sandbox proof before enabling new services"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Sandbox quotas configured" },
+        { "week": "2026-W02", "exit": "Shutdown automation validated" }
+      ],
+      "ci_cd_gates": {
+        "budget": "sandbox budget gate precedes production",
+        "canary": "new services must pass sandbox canary"
+      }
+    },
+    {
+      "id": 66,
+      "name": "WAF cost-aware rate limits",
+      "phase": "Cost",
+      "owner": "Amp",
+      "milestone": "2026-W03",
+      "status": "planned",
+      "risk": 3,
+      "acceptance_tests": [
+        "Rate-limit tiers mapped to cost model and enforced",
+        "WAF rules deployed with canary and rollback hooks"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Rate-limit tiers defined" },
+        { "week": "2026-W02", "exit": "WAF policy validated in staging" },
+        { "week": "2026-W03", "exit": "Production enforcement with rollback" }
+      ],
+      "ci_cd_gates": {
+        "rate_limit": "policy lint + enforcement gate",
+        "rollback": "automatic rollback if latency regression detected"
+      }
+    },
+    {
+      "id": 67,
+      "name": "Canary budget coverage",
+      "phase": "Cost",
+      "owner": "Codex",
+      "milestone": "2026-W02",
+      "status": "planned",
+      "risk": 2,
+      "acceptance_tests": [
+        "Canary runs include budget/latency metrics with thresholds",
+        "Rollback triggers on budget overrun during canary"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Metrics and SLOs defined" },
+        { "week": "2026-W02", "exit": "Automation wired into deployment pipeline" }
+      ],
+      "ci_cd_gates": {
+        "canary": "budget metrics evaluated in canary stage",
+        "rollback": "auto rollback on breach"
+      }
+    },
+    {
+      "id": 68,
+      "name": "Cost rollback readiness",
+      "phase": "Cost",
+      "owner": "Jules",
+      "milestone": "2026-W03",
+      "status": "planned",
+      "risk": 2,
+      "acceptance_tests": [
+        "Rollback runbook links referenced in CI",
+        "Rollback tested quarterly with evidence artifacts"
+      ],
+      "checkpoints": [
+        { "week": "2026-W02", "exit": "Rollback criteria codified" },
+        { "week": "2026-W03", "exit": "Drill executed and logged" }
+      ],
+      "ci_cd_gates": {
+        "rollback": "block deploy without rollback evidence",
+        "budget": "reverts to prior config if budgets regress"
+      }
+    },
+    {
+      "id": 69,
+      "name": "Change request automation",
+      "phase": "Change",
+      "owner": "Amp",
+      "milestone": "2026-W02",
+      "status": "planned",
+      "risk": 2,
+      "acceptance_tests": [
+        "Change requests generated from PR metadata",
+        "CI blocks merges without approved change record"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Template finalized" },
+        { "week": "2026-W02", "exit": "Automation live in CI" }
+      ],
+      "ci_cd_gates": {
+        "change": "requires linked change record",
+        "rollback": "change record carries rollback steps"
+      }
+    },
+    {
+      "id": 70,
+      "name": "Progressive delivery rings",
+      "phase": "Change",
+      "owner": "Jules",
+      "milestone": "2026-W03",
+      "status": "planned",
+      "risk": 3,
+      "acceptance_tests": [
+        "Ring-based rollout config per service",
+        "Automated promotion when metrics stay within SLOs"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Ring definitions complete" },
+        { "week": "2026-W02", "exit": "Service selected for pilot" },
+        { "week": "2026-W03", "exit": "Promotion/rollback automation proven" }
+      ],
+      "ci_cd_gates": {
+        "canary": "ring0 canary gate",
+        "rollback": "auto rollback to previous ring on breach"
+      }
+    },
+    {
+      "id": 71,
+      "name": "Release calendar and freeze controls",
+      "phase": "Change",
+      "owner": "Codex",
+      "milestone": "2026-W02",
+      "status": "planned",
+      "risk": 1,
+      "acceptance_tests": [
+        "Release windows encoded and enforced in CI",
+        "Freeze windows block deploys and notify owners"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Calendar published" },
+        { "week": "2026-W02", "exit": "CI enforces windows" }
+      ],
+      "ci_cd_gates": {
+        "change": "calendar gate",
+        "rollback": "freeze bypass requires rollback approval"
+      }
+    },
+    {
+      "id": 72,
+      "name": "Change impact scoring",
+      "phase": "Change",
+      "owner": "Amp",
+      "milestone": "2026-W03",
+      "status": "planned",
+      "risk": 2,
+      "acceptance_tests": [
+        "Impact score calculated from diff size, services, risk inputs",
+        "High-risk changes require additional approvals"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Scoring model defined" },
+        { "week": "2026-W02", "exit": "Scoring integrated into CI" },
+        { "week": "2026-W03", "exit": "Approvals enforced" }
+      ],
+      "ci_cd_gates": {
+        "change": "score threshold gating",
+        "rollback": "impact model recommends rollback path"
+      }
+    },
+    {
+      "id": 73,
+      "name": "Post-change validation",
+      "phase": "Change",
+      "owner": "Jules",
+      "milestone": "2026-W03",
+      "status": "planned",
+      "risk": 2,
+      "acceptance_tests": [
+        "Smoke + regression suite executed post-deploy",
+        "Results stored with change record and used for rollback decision"
+      ],
+      "checkpoints": [
+        { "week": "2026-W02", "exit": "Validation suite selected" },
+        { "week": "2026-W03", "exit": "Evidence captured in CI" }
+      ],
+      "ci_cd_gates": {
+        "canary": "validation job tied to canary window",
+        "rollback": "rollback triggers if validation fails"
+      }
+    },
+    {
+      "id": 74,
+      "name": "SLO regression gating",
+      "phase": "Change",
+      "owner": "Codex",
+      "milestone": "2026-W04",
+      "status": "planned",
+      "risk": 2,
+      "acceptance_tests": [
+        "SLOs mapped to services with thresholds",
+        "CI blocks releases breaching error budget"
+      ],
+      "checkpoints": [
+        { "week": "2026-W02", "exit": "SLO catalog updated" },
+        { "week": "2026-W03", "exit": "Error budget math validated" },
+        { "week": "2026-W04", "exit": "Blocking enabled" }
+      ],
+      "ci_cd_gates": {
+        "budget": "error budget gate",
+        "rollback": "rollback on budget breach"
+      }
+    },
+    {
+      "id": 75,
+      "name": "Incident rollback drills",
+      "phase": "Change",
+      "owner": "Amp",
+      "milestone": "2026-W04",
+      "status": "planned",
+      "risk": 3,
+      "acceptance_tests": [
+        "Quarterly rollback drill logged with metrics",
+        "Time-to-restore under target threshold"
+      ],
+      "checkpoints": [
+        { "week": "2026-W02", "exit": "Drill plan approved" },
+        { "week": "2026-W03", "exit": "Pilot drill executed" },
+        { "week": "2026-W04", "exit": "Org-wide drill completed" }
+      ],
+      "ci_cd_gates": {
+        "rollback": "blocks deploy if last drill stale"
+      }
+    },
+    {
+      "id": 76,
+      "name": "Feature flag hygiene",
+      "phase": "Change",
+      "owner": "Jules",
+      "milestone": "2026-W02",
+      "status": "planned",
+      "risk": 1,
+      "acceptance_tests": [
+        "Flag TTL and owners recorded",
+        "CI fails for expired or ownerless flags"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Inventory complete" },
+        { "week": "2026-W02", "exit": "CI checks live" }
+      ],
+      "ci_cd_gates": {
+        "change": "flag lints enforced",
+        "rollback": "flag states captured for rollback"
+      }
+    },
+    {
+      "id": 77,
+      "name": "Dependency upgrade cadence",
+      "phase": "Change",
+      "owner": "Codex",
+      "milestone": "2026-W03",
+      "status": "planned",
+      "risk": 2,
+      "acceptance_tests": [
+        "Monthly upgrade window enforced",
+        "Canary + rollback scripted for major bumps"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Upgrade calendar set" },
+        { "week": "2026-W02", "exit": "Pilot dependency updated" },
+        { "week": "2026-W03", "exit": "Process standardized" }
+      ],
+      "ci_cd_gates": {
+        "canary": "upgrade canary stage",
+        "rollback": "lockfile rollback path"
+      }
+    },
+    {
+      "id": 78,
+      "name": "Standardized WAF policies",
+      "phase": "Security",
+      "owner": "Jules",
+      "milestone": "2026-W02",
+      "status": "planned",
+      "risk": 3,
+      "acceptance_tests": [
+        "WAF ruleset templated and versioned",
+        "CI blocks deploys missing WAF attachment"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Template merged" },
+        { "week": "2026-W02", "exit": "Enforcement active" }
+      ],
+      "ci_cd_gates": {
+        "rate_limit": "WAF/rate-limit validation job",
+        "rollback": "revert to previous rules on failure"
+      }
+    },
+    {
+      "id": 79,
+      "name": "API rate limit enforcement",
+      "phase": "Security",
+      "owner": "Amp",
+      "milestone": "2026-W03",
+      "status": "planned",
+      "risk": 2,
+      "acceptance_tests": [
+        "Per-endpoint rate limits defined and tested",
+        "Abuse simulation triggers throttle and logs"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Endpoints inventoried" },
+        { "week": "2026-W02", "exit": "Limits configured in staging" },
+        { "week": "2026-W03", "exit": "Production enforcement" }
+      ],
+      "ci_cd_gates": {
+        "rate_limit": "policy lint + simulation tests",
+        "rollback": "revert limits if latency impact detected"
+      }
+    },
+    {
+      "id": 80,
+      "name": "Secrets rotation automation",
+      "phase": "Security",
+      "owner": "Codex",
+      "milestone": "2026-W02",
+      "status": "planned",
+      "risk": 3,
+      "acceptance_tests": [
+        "Secrets rotated automatically with audit trail",
+        "CI rejects secrets older than rotation window"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Rotation window agreed" },
+        { "week": "2026-W02", "exit": "Automation executed in staging" }
+      ],
+      "ci_cd_gates": {
+        "security": "secret age check",
+        "rollback": "rollback to prior secret set if failure"
+      }
+    },
+    {
+      "id": 81,
+      "name": "SBOM and supply chain scanning",
+      "phase": "Security",
+      "owner": "Jules",
+      "milestone": "2026-W03",
+      "status": "planned",
+      "risk": 3,
+      "acceptance_tests": [
+        "SBOM generated per build artifact",
+        "CI fails on critical vulnerabilities or unsigned artifacts"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Tooling selected" },
+        { "week": "2026-W02", "exit": "SBOM generated in CI" },
+        { "week": "2026-W03", "exit": "Policy enforcement live" }
+      ],
+      "ci_cd_gates": {
+        "security": "sbom + vuln scan gate",
+        "rollback": "rollback on critical CVE detection"
+      }
+    },
+    {
+      "id": 82,
+      "name": "Zero-trust service auth",
+      "phase": "Security",
+      "owner": "Amp",
+      "milestone": "2026-W04",
+      "status": "planned",
+      "risk": 3,
+      "acceptance_tests": [
+        "mTLS or token-based auth enforced between services",
+        "Unauthorized call attempts denied and logged"
+      ],
+      "checkpoints": [
+        { "week": "2026-W02", "exit": "Policy and certificates issued" },
+        { "week": "2026-W03", "exit": "Pilot service migrated" },
+        { "week": "2026-W04", "exit": "100% services covered" }
+      ],
+      "ci_cd_gates": {
+        "security": "service mesh/auth policy lint",
+        "rollback": "fallback to prior trust domain if failure"
+      }
+    },
+    {
+      "id": 83,
+      "name": "Data egress controls",
+      "phase": "Security",
+      "owner": "Codex",
+      "milestone": "2026-W03",
+      "status": "planned",
+      "risk": 2,
+      "acceptance_tests": [
+        "Egress allowlists defined per environment",
+        "CI blocks changes that widen egress without approval"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Egress inventory" },
+        { "week": "2026-W02", "exit": "Allowlists enforced in staging" },
+        { "week": "2026-W03", "exit": "Prod enforcement" }
+      ],
+      "ci_cd_gates": {
+        "security": "egress diff checker",
+        "rollback": "revert egress rules on failure"
+      }
+    },
+    {
+      "id": 84,
+      "name": "Vulnerability patch SLAs",
+      "phase": "Security",
+      "owner": "Jules",
+      "milestone": "2026-W02",
+      "status": "planned",
+      "risk": 2,
+      "acceptance_tests": [
+        "Critical CVEs patched within SLA and evidenced",
+        "CI fails if SLA overdue items exist"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "SLA table defined" },
+        { "week": "2026-W02", "exit": "Automation wired into CI" }
+      ],
+      "ci_cd_gates": {
+        "security": "SLA debt checker",
+        "rollback": "rollback to last patched image if violation"
+      }
+    },
+    {
+      "id": 85,
+      "name": "Penetration test backlog",
+      "phase": "Security",
+      "owner": "Amp",
+      "milestone": "2026-W04",
+      "status": "planned",
+      "risk": 2,
+      "acceptance_tests": [
+        "Backlog prioritized with owners and dates",
+        "Findings tracked to closure with CI evidence"
+      ],
+      "checkpoints": [
+        { "week": "2026-W02", "exit": "Backlog created" },
+        { "week": "2026-W03", "exit": "Top risks tested" },
+        { "week": "2026-W04", "exit": "Remediations validated" }
+      ],
+      "ci_cd_gates": {
+        "security": "open findings gate",
+        "rollback": "block release if critical finding unresolved"
+      }
+    },
+    {
+      "id": 86,
+      "name": "Audit logging completeness",
+      "phase": "Security",
+      "owner": "Codex",
+      "milestone": "2026-W03",
+      "status": "planned",
+      "risk": 3,
+      "acceptance_tests": [
+        "All privileged actions emit structured audit logs",
+        "Tamper checks and retention policy validated in CI"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Audit model approved" },
+        { "week": "2026-W02", "exit": "Instrumentation in staging" },
+        { "week": "2026-W03", "exit": "Retention + integrity checks enforced" }
+      ],
+      "ci_cd_gates": {
+        "security": "audit log coverage gate",
+        "rollback": "rollback instrumentation if errors spike"
+      }
+    },
+    {
+      "id": 87,
+      "name": "Data quality SLAs",
+      "phase": "Trust",
+      "owner": "Jules",
+      "milestone": "2026-W02",
+      "status": "planned",
+      "risk": 2,
+      "acceptance_tests": [
+        "SLA metrics defined for completeness, accuracy, freshness",
+        "CI fails ingestion changes lacking SLA tests"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "SLA metrics approved" },
+        { "week": "2026-W02", "exit": "Validation in CI" }
+      ],
+      "ci_cd_gates": {
+        "trust": "data quality gate",
+        "rollback": "rollback feed if SLA fails"
+      }
+    },
+    {
+      "id": 88,
+      "name": "Model evaluation canaries",
+      "phase": "Trust",
+      "owner": "Amp",
+      "milestone": "2026-W03",
+      "status": "planned",
+      "risk": 3,
+      "acceptance_tests": [
+        "Model changes run canary evaluation with holdout set",
+        "Automatic rollback if quality drops beyond threshold"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Eval metrics selected" },
+        { "week": "2026-W02", "exit": "Canary harness in CI" },
+        { "week": "2026-W03", "exit": "Rollback automation wired" }
+      ],
+      "ci_cd_gates": {
+        "canary": "model eval gate",
+        "rollback": "auto rollback on metric regression"
+      }
+    },
+    {
+      "id": 89,
+      "name": "Bias and fairness checkpoints",
+      "phase": "Trust",
+      "owner": "Codex",
+      "milestone": "2026-W03",
+      "status": "planned",
+      "risk": 2,
+      "acceptance_tests": [
+        "Bias metrics computed per release",
+        "CI blocks deploy when fairness thresholds violated"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Thresholds defined" },
+        { "week": "2026-W02", "exit": "Metrics automated" },
+        { "week": "2026-W03", "exit": "Blocking enabled" }
+      ],
+      "ci_cd_gates": {
+        "trust": "fairness gate",
+        "rollback": "rollback model on violation"
+      }
+    },
+    {
+      "id": 90,
+      "name": "Observability dashboards",
+      "phase": "Trust",
+      "owner": "Jules",
+      "milestone": "2026-W02",
+      "status": "planned",
+      "risk": 1,
+      "acceptance_tests": [
+        "Dashboards for availability, latency, error budget, cost",
+        "Alerts linked to dashboards and runbooks"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Dashboard spec finalized" },
+        { "week": "2026-W02", "exit": "Dashboards live with alerts" }
+      ],
+      "ci_cd_gates": {
+        "trust": "requires dashboard links per service",
+        "rollback": "alerts trigger rollback automation"
+      }
+    },
+    {
+      "id": 91,
+      "name": "Risk burndown tracking",
+      "phase": "Trust",
+      "owner": "Amp",
+      "milestone": "2026-W02",
+      "status": "planned",
+      "risk": 1,
+      "acceptance_tests": [
+        "Weekly risk burndown graph generated",
+        "CI verifies latest report exists before release"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Risk scoring agreed" },
+        { "week": "2026-W02", "exit": "Report automation live" }
+      ],
+      "ci_cd_gates": {
+        "trust": "requires up-to-date risk report",
+        "rollback": "hold release if risk increases"
+      }
+    },
+    {
+      "id": 92,
+      "name": "User trust communications",
+      "phase": "Trust",
+      "owner": "Codex",
+      "milestone": "2026-W03",
+      "status": "planned",
+      "risk": 2,
+      "acceptance_tests": [
+        "Release notes include control posture and known risks",
+        "CI blocks release without comms artifact"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Comms template finalized" },
+        { "week": "2026-W02", "exit": "Pilot comms issued" },
+        { "week": "2026-W03", "exit": "Automation linked to releases" }
+      ],
+      "ci_cd_gates": {
+        "trust": "comms artifact required",
+        "rollback": "notify users on rollback"
+      }
+    },
+    {
+      "id": 93,
+      "name": "Disaster recovery and resilience tests",
+      "phase": "Trust",
+      "owner": "Jules",
+      "milestone": "2026-W04",
+      "status": "planned",
+      "risk": 3,
+      "acceptance_tests": [
+        "Quarterly DR tests executed with RTO/RPO evidence",
+        "CI blocks releases if last DR test older than 90 days"
+      ],
+      "checkpoints": [
+        { "week": "2026-W02", "exit": "Test scenarios defined" },
+        { "week": "2026-W03", "exit": "Staging DR run complete" },
+        { "week": "2026-W04", "exit": "Production DR drill executed" }
+      ],
+      "ci_cd_gates": {
+        "trust": "DR freshness gate",
+        "rollback": "invoke DR rollback if drill fails"
+      }
+    },
+    {
+      "id": 94,
+      "name": "Access review automation",
+      "phase": "Trust",
+      "owner": "Amp",
+      "milestone": "2026-W03",
+      "status": "planned",
+      "risk": 2,
+      "acceptance_tests": [
+        "Quarterly access reviews automated with approvals logged",
+        "CI blocks deploy if stale access detected"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Reviewer roster confirmed" },
+        { "week": "2026-W02", "exit": "Automation piloted" },
+        { "week": "2026-W03", "exit": "Enforced for production" }
+      ],
+      "ci_cd_gates": {
+        "security": "access review freshness gate",
+        "rollback": "revert permissions on anomaly"
+      }
+    },
+    {
+      "id": 95,
+      "name": "Control validation evidence",
+      "phase": "Trust",
+      "owner": "Codex",
+      "milestone": "2026-W02",
+      "status": "planned",
+      "risk": 1,
+      "acceptance_tests": [
+        "Evidence bundle generated per release with control results",
+        "CI uploads evidence and blocks if missing"
+      ],
+      "checkpoints": [
+        { "week": "2026-W01", "exit": "Evidence schema defined" },
+        { "week": "2026-W02", "exit": "Automation generating bundles" }
+      ],
+      "ci_cd_gates": {
+        "trust": "evidence bundle requirement",
+        "rollback": "rollback documented with evidence"
+      }
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "ITEMS_60_95_ROADMAP",
+  "agent_id": "gpt-5.2-codex",
+  "prompt_ref": {
+    "id": "items-60-95-roadmap",
+    "version": "v1",
+    "sha256": "6a968d4f2bde2d1e5d2db6c8aa504b12681d91f09afc71f6bb31b7f67dd2dcfa",
+    "path": "prompts/roadmap/items-60-95-plan.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/roadmap/items-60-95-plan.json",
+      "docs/roadmap/STATUS.json",
+      "docs/roadmap/status-reports/template.md",
+      "prompts/roadmap/items-60-95-plan.md",
+      "prompts/registry.yaml",
+      "agents/examples/items-60-95-roadmap.json"
+    ],
+    "domains": ["roadmap", "governance", "ci"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "docs/roadmap/items-60-95-plan.json (JSON parse)",
+      "docs/roadmap/STATUS.json (JSON parse)"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Items 60-95 plan includes phased checkpoints, owners, milestones, and CI/CD gates.",
+    "Status report template exists and is referenced in roadmap status.",
+    "STATUS.json reflects the updated reporting integration."
+  ],
+  "stop_conditions": ["Detection of PII in output", "Sandbox violation alert", "CI failure in main"]
+}
