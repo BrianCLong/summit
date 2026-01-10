@@ -1,0 +1,11 @@
+# Forbidden files that must never appear tracked or untracked in CI/release runs.
+# Keep this list minimal and defensible to avoid false positives.
+pr_numbers.txt
+.env
+.env.local
+.env.development
+.env.production
+id_rsa
+id_rsa.pub
+.DS_Store
+*.log

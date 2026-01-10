@@ -38,6 +38,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Repo hygiene gate
+        run: |
+          bash scripts/ci/check_repo_hygiene.sh
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
