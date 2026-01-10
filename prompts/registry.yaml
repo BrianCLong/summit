@@ -28,3 +28,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: continuity-guardrails
+    version: v1
+    path: prompts/governance/continuity-guardrails.md
+    sha256: 1b174a8e754812fe1f1989a556c3a7f365eb83fc6b4c3222ed918faccf850e9a
+    description: Maintain continuity doctrine and policy-as-code guardrails for succession safety.
+    scope:
+      paths:
+        - docs/continuity/
+        - doctrine/
+        - policies/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/
+      domains:
+        - governance
+        - docs
+        - policy
+        - continuity
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

@@ -1,0 +1,40 @@
+{
+  "task_id": "CONTINUITY_GUARDRAILS_2026_01_10",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "continuity-guardrails",
+    "version": "v1",
+    "sha256": "1b174a8e754812fe1f1989a556c3a7f365eb83fc6b4c3222ed918faccf850e9a",
+    "path": "prompts/governance/continuity-guardrails.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/continuity/",
+      "doctrine/",
+      "policies/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/",
+      "prompts/"
+    ],
+    "domains": ["governance", "docs", "policy", "continuity"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["scripts/check-boundaries.cjs output", "make smoke output"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Continuity policy guardrails updated with v1 syntax and explicit denials",
+    "Policy tests added for continuity allow/deny logic",
+    "Continuity doctrine changelog updated"
+  ],
+  "stop_conditions": [
+    "Prompt hash missing from registry",
+    "Scope violations detected by prompt integrity checks",
+    "Compliance conflicts with the Summit Constitution"
+  ]
+}
