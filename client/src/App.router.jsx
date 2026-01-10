@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -42,6 +42,14 @@ import {
   Settings,
   RocketLaunch,
   PendingActions,
+  MilitaryTech,
+  Notifications,
+  Extension,
+  Cable,
+  Key,
+  VerifiedUser,
+  Science,
+  Security,
 } from '@mui/icons-material';
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
@@ -53,6 +61,7 @@ import LoginPage from './components/auth/LoginPage.jsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
 import RouteAnnouncer from './components/a11y/RouteAnnouncer';
 import { useFeatureFlag } from './hooks/useFeatureFlag';
+import { buildRouteLabels, resolveDemoFlag } from './routes/routeLabels';
 
 // Lazy load heavy components for better initial load performance
 const InteractiveGraphExplorer = React.lazy(() =>
@@ -113,8 +122,7 @@ const SandboxDashboard = React.lazy(() =>
   import('./pages/Sandbox/SandboxDashboard')
 );
 
-import { MilitaryTech, Notifications, Extension, Cable, Key, VerifiedUser, Science } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
-import { Security } from '@mui/icons-material';
+// WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 
 // Demo mode components
 import DemoIndicator from './components/common/DemoIndicator';
@@ -247,15 +255,17 @@ function NavigationDrawer({ open, onClose }) {
 }
 
 // App Bar
-function AppHeader({ onMenuClick }) {
+function AppHeader({ onMenuClick, routeLabels, currentPath }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const currentPage = navigationItems.find(
-    (item) => item.path === location.pathname,
-  );
+  const activePath = currentPath || location.pathname;
+  const currentPage = navigationItems.find((item) => item.path === activePath);
+  const currentLabel =
+    routeLabels?.[activePath] || currentPage?.label || 'Unknown';
 
   // Show demo walkthrough link only in demo mode
-  const showDemoWalkthrough = import.meta.env.VITE_DEMO_MODE === '1' || import.meta.env.VITE_DEMO_MODE === 'true';
+  const demoEnv = resolveDemoFlag();
+  const showDemoWalkthrough = demoEnv === '1' || demoEnv === 'true';
 
   return (
     <AppBar position="fixed">
@@ -269,7 +279,7 @@ function AppHeader({ onMenuClick }) {
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          IntelGraph Platform - {currentPage?.label || 'Unknown'}
+          IntelGraph Platform - {currentLabel}
         </Typography>
         {showDemoWalkthrough && (
           <Button
@@ -705,24 +715,14 @@ function MainLayout() {
   const mainRef = useRef(null);
   const a11yGuardrailsEnabled = useFeatureFlag('ui.a11yGuardrails');
 
-  const routeLabels = useMemo(
-    () =>
-      navigationItems.reduce(
-        (acc, item) => {
-          acc[item.path] = item.label;
-          return acc;
-        },
-        {
-          '/': 'Home',
-          '/login': 'Login',
-        },
-      ),
-    [],
-  );
+  const routeLabels = useMemo(() => buildRouteLabels(navigationItems), []);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AppHeader onMenuClick={() => setDrawerOpen(true)} />
+      <AppHeader
+        onMenuClick={() => setDrawerOpen(true)}
+        routeLabels={routeLabels}
+      />
       <NavigationDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
@@ -860,4 +860,5 @@ function App() {
   );
 }
 
+export { AppHeader };
 export default App;

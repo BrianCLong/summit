@@ -7,6 +7,11 @@ import ErrorBoundary from './components/common/ErrorBoundary';
 
 console.log('🚀 Starting Full IntelGraph Router App...');
 
+if (typeof window !== 'undefined' && !window.__INTELGRAPH_DEMO_MODE) {
+  // Preserve demo mode flag for non-Vite consumers (e.g., tests, static renders)
+  window.__INTELGRAPH_DEMO_MODE = process.env?.VITE_DEMO_MODE || '';
+}
+
 // Global error handlers
 window.addEventListener('error', (event) => {
   console.error('🚨 GLOBAL ERROR:', event.error);
