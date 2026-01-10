@@ -7,14 +7,15 @@ import { tenantProvisioningService } from '../../services/tenants/TenantProvisio
 import { tenantIsolationGuard } from '../../tenancy/TenantIsolationGuard.js';
 import logger from '../../utils/logger.js';
 
-interface AuthenticatedRequest extends Request {
-  user?: {
-    id?: string;
-    role?: string;
-    tenantId?: string;
-    tenant_id?: string;
-  };
-}
+// Extended user type for admin routes that may have additional properties
+type AdminUser = {
+  id?: string;
+  role?: string;
+  tenantId?: string;
+  tenant_id?: string;
+};
+
+type AuthenticatedRequest = Request & { user?: AdminUser };
 
 const router = express.Router();
 

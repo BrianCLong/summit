@@ -2,6 +2,7 @@
 
 Provides predictable health/readiness/metrics endpoints with structured logging.
 """
+
 from __future__ import annotations
 
 import json
@@ -13,7 +14,6 @@ import threading
 import time
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from typing import Dict, Tuple
 
 logger = logging.getLogger("hello_mesh.stub")
 logging.basicConfig(
@@ -28,7 +28,7 @@ class _StubServerState:
         self.service_name = service_name
         self.start_time = time.time()
         self._lock = threading.Lock()
-        self._request_counts: Dict[Tuple[str, str], int] = {}
+        self._request_counts: dict[tuple[str, str], int] = {}
 
     def record(self, method: str, path: str) -> None:
         with self._lock:
@@ -59,7 +59,9 @@ def _handler_factory(state: _StubServerState):
             length = int(self.headers.get("Content-Length", "0"))
             return self.rfile.read(length) if length else b""
 
-        def _write_json(self, payload: Dict[str, object], status: HTTPStatus = HTTPStatus.OK) -> None:
+        def _write_json(
+            self, payload: dict[str, object], status: HTTPStatus = HTTPStatus.OK
+        ) -> None:
             body = json.dumps(payload).encode()
             self.send_response(status)
             self.send_header("Content-Type", "application/json")
@@ -79,7 +81,9 @@ def _handler_factory(state: _StubServerState):
             path = self.path.split("?", 1)[0]
             body = self._read_body()
             state.record(self.command, path)
-            logger.info("%s %s from %s len=%d", self.command, path, self.client_address[0], len(body))
+            logger.info(
+                "%s %s from %s len=%d", self.command, path, self.client_address[0], len(body)
+            )
 
             if path in ("/healthz", "/readyz"):
                 self._write_json({"service": state.service_name, "status": "ok"})
@@ -110,19 +114,19 @@ def _handler_factory(state: _StubServerState):
             }
             self._write_json(response)
 
-        def do_GET(self) -> None:  # noqa: N802 (http.server naming)
+        def do_GET(self) -> None:
             self._handle()
 
-        def do_POST(self) -> None:  # noqa: N802
+        def do_POST(self) -> None:
             self._handle()
 
-        def do_PUT(self) -> None:  # noqa: N802
+        def do_PUT(self) -> None:
             self._handle()
 
-        def do_DELETE(self) -> None:  # noqa: N802
+        def do_DELETE(self) -> None:
             self._handle()
 
-        def log_message(self, format: str, *args) -> None:  # noqa: A003
+        def log_message(self, format: str, *args) -> None:
             # Silence default stderr logging; we emit structured logs instead.
             return
 

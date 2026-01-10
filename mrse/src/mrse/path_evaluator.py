@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Iterable, List, Optional
+from collections.abc import Iterable
 
 from .reality_graph import RealityGraph
 from .world_state import WorldState
@@ -27,7 +27,7 @@ class PathEvaluator:
     def score_path(self, path: Iterable[WorldState]) -> float:
         return sum(self.score_state(state) for state in path)
 
-    def best_path(self, graph: RealityGraph, root_id: str) -> Optional[List[WorldState]]:
+    def best_path(self, graph: RealityGraph, root_id: str) -> list[WorldState] | None:
         paths = graph.paths_from(root_id)
         if not paths:
             return None

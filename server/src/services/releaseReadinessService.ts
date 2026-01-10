@@ -78,7 +78,7 @@ export class ReleaseReadinessService {
         }
 
         if (inTable && line.startsWith('|')) {
-          const parts = line.split('|').map(p => p.trim()).filter(p => p);
+          const parts = line.split('|').map((p: string) => p.trim()).filter((p: string) => p);
           if (parts.length >= 5) {
             const idMatch = parts[0].match(/\*\*([A-Z]+-\d+)\*\*/);
             if (idMatch) {
@@ -125,7 +125,7 @@ export class ReleaseReadinessService {
         }
 
         if (inTable && line.startsWith('|')) {
-          const parts = line.split('|').map(p => p.trim()).filter(p => p);
+          const parts = line.split('|').map((p: string) => p.trim()).filter((p: string) => p);
           if (parts.length >= 5) {
             const idMatch = parts[0].match(/\*\*([A-Z]+-\d+)\*\*/);
             if (idMatch) {

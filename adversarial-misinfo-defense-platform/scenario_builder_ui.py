@@ -203,7 +203,7 @@ class ScenarioBuilderWebUI:
                     st.success(f"Scenario '{scenario.name}' created successfully!")
                     st.balloons()
                 except Exception as e:
-                    st.error(f"Error creating scenario: {str(e)}")
+                    st.error(f"Error creating scenario: {e!s}")
             else:
                 st.warning("Please fill in all required fields (Name, Description, Objectives)")
 

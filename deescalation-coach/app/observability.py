@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+
 from prometheus_client import Counter, Histogram
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")

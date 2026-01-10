@@ -31,11 +31,13 @@ import {
   FeatureUsageStats,
 } from './types.js';
 import {
-  DataEnvelope,
-  GovernanceVerdict,
   GovernanceResult,
   DataClassification,
   createDataEnvelope,
+} from '../../types/data-envelope.js';
+import type {
+  DataEnvelope,
+  GovernanceVerdict,
 } from '../../types/data-envelope.js';
 
 /**

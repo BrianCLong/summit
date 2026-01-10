@@ -1,8 +1,9 @@
-import yaml
 import sys
 
+import yaml
+
 try:
-    with open('.github/workflows/stabilization.yml', 'r') as f:
+    with open(".github/workflows/stabilization.yml") as f:
         yaml.safe_load(f)
     print("Valid YAML")
 except Exception as e:

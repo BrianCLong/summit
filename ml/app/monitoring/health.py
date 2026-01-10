@@ -254,7 +254,7 @@ class HealthChecker:
             return {
                 "status": "healthy",
                 "gpu_info": gpu_info,
-                "details": f'GPU check completed - {gpu_info["device_count"]} devices available',
+                "details": f"GPU check completed - {gpu_info['device_count']} devices available",
             }
         except Exception as e:
             return {

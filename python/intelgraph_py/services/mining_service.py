@@ -1,9 +1,11 @@
 import logging
-from typing import Dict, Any, List
+from typing import Any
+
 from intelgraph_py.ml.extractor import ContentExtractor
 from intelgraph_py.ml.resolution import EntityResolver
 
 logger = logging.getLogger(__name__)
+
 
 class MiningService:
     _instance = None
@@ -16,7 +18,7 @@ class MiningService:
 
     def __init__(self):
         logger.info("Initializing MiningService...")
-        self.extractors = {} # Cache extractors by language
+        self.extractors = {}  # Cache extractors by language
         self.resolver = EntityResolver()
         logger.info("MiningService initialized.")
 
@@ -26,7 +28,7 @@ class MiningService:
             self.extractors[language] = ContentExtractor(language=language)
         return self.extractors[language]
 
-    def mine_content(self, text: str, source_metadata: Dict[str, Any] = None) -> Dict[str, Any]:
+    def mine_content(self, text: str, source_metadata: dict[str, Any] = None) -> dict[str, Any]:
         """
         Full pipeline: Extraction -> Resolution -> Graph Prep
         """
@@ -56,7 +58,7 @@ class MiningService:
             if src in text_to_canonical:
                 rel["source_canonical"] = text_to_canonical[src]
             else:
-                 rel["source_canonical"] = src
+                rel["source_canonical"] = src
 
             if tgt in text_to_canonical:
                 rel["target_canonical"] = text_to_canonical[tgt]
@@ -72,19 +74,21 @@ class MiningService:
             "entities": resolved_entities,
             "relationships": cleaned_relationships,
             "metadata": extraction_result["metadata"],
-            "source": source_metadata
+            "source": source_metadata,
         }
 
         return result
 
-    def persist_to_graph(self, mining_result: Dict[str, Any]):
+    def persist_to_graph(self, mining_result: dict[str, Any]):
         """
         Persist the mined data to Neo4j.
         Implements incremental updates.
         """
         # Stub for Neo4j interaction
         # Would use intelgraph_py.storage.neo4j_store
-        logger.info(f"Persisting {len(mining_result['entities'])} entities and {len(mining_result['relationships'])} relationships to Graph.")
+        logger.info(
+            f"Persisting {len(mining_result['entities'])} entities and {len(mining_result['relationships'])} relationships to Graph."
+        )
         pass
 
     def submit_feedback(self, entity_text: str, correct_label: str = None, is_correct: bool = True):
@@ -92,7 +96,9 @@ class MiningService:
         Active Learning feedback loop.
         Accepts human feedback to improve models.
         """
-        logger.info(f"Received feedback for entity '{entity_text}': Correct={is_correct}, Label={correct_label}")
+        logger.info(
+            f"Received feedback for entity '{entity_text}': Correct={is_correct}, Label={correct_label}"
+        )
         # In a real system, this would:
         # 1. Store feedback in a 'gold standard' dataset (e.g. JSONL or DB)
         # 2. Trigger a retraining pipeline (e.g. via Celery task) if enough feedback accumulates
@@ -108,5 +114,5 @@ class MiningService:
             "accuracy_estimate": "95% (target)",
             "entities_per_document_avg": 12.5,
             "relationship_density": 0.8,
-            "active_learning_samples": 0
+            "active_learning_samples": 0,
         }

@@ -1,0 +1,451 @@
+# error-budget-alerts.yml
+# Creates/updates issues when error budget is exhausted or running low
+#
+# Triggers on Pages publish completion.
+# Deduplicates issues by month to avoid spam.
+#
+# Authority: docs/ci/ERROR_BUDGET.md
+
+name: Error Budget Alerts
+
+on:
+  # Triggered after Pages publish
+  workflow_run:
+    workflows: ["Publish Release Ops Pages"]
+    types:
+      - completed
+
+  # Manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (no issue creation)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  issues: write
+  actions: read
+
+env:
+  SITE_DIR: site/release-ops
+  STATE_FILE: docs/releases/_state/error_budget_alerts_state.json
+  TIGHT_MODE_FILE: docs/releases/_state/governance_tight_mode.json
+
+jobs:
+  check-budget:
+    name: Check Error Budget
+    runs-on: ubuntu-latest
+    # Only run on successful publish (or manual trigger)
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+
+    outputs:
+      tier: ${{ steps.analyze.outputs.tier }}
+      any_exhausted: ${{ steps.analyze.outputs.any_exhausted }}
+      action: ${{ steps.dedup.outputs.action }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Site Artifact
+        id: download
+        uses: actions/download-artifact@v4
+        with:
+          name: release-ops-site
+          path: ${{ env.SITE_DIR }}
+        continue-on-error: true
+
+      - name: Fallback - Build Budget
+        if: steps.download.outcome == 'failure'
+        run: |
+          echo "::notice::Artifact not found, building budget locally"
+          mkdir -p ${{ env.SITE_DIR }}
+
+          # Initialize minimal time series if needed
+          if [[ ! -f "${{ env.SITE_DIR }}/redaction_metrics_timeseries.json" ]]; then
+            echo '{"version":"1.0","series":[]}' > "${{ env.SITE_DIR }}/redaction_metrics_timeseries.json"
+          fi
+
+          # Compute error budget
+          if [[ -x "./scripts/release/compute_error_budget.sh" ]]; then
+            ./scripts/release/compute_error_budget.sh \
+              --timeseries "${{ env.SITE_DIR }}/redaction_metrics_timeseries.json" \
+              --out "${{ env.SITE_DIR }}/error_budget.json" || true
+          fi
+
+      - name: Analyze Budget Status
+        id: analyze
+        run: |
+          BUDGET_JSON="${{ env.SITE_DIR }}/error_budget.json"
+
+          if [[ ! -f "${BUDGET_JSON}" ]]; then
+            echo "::warning::Budget JSON not found, assuming OK"
+            echo "tier=GREEN" >> $GITHUB_OUTPUT
+            echo "any_exhausted=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          TIER=$(jq -r '.tier' "${BUDGET_JSON}")
+          ANY_EXHAUSTED=$(jq -r '.exhaustion.any_exhausted' "${BUDGET_JSON}")
+          ROLLBACK_EXHAUSTED=$(jq -r '.exhaustion.rollbacks_exhausted' "${BUDGET_JSON}")
+          FAIL_EXHAUSTED=$(jq -r '.exhaustion.fails_exhausted' "${BUDGET_JSON}")
+          WARN_EXHAUSTED=$(jq -r '.exhaustion.warns_exhausted' "${BUDGET_JSON}")
+
+          echo "tier=${TIER}" >> $GITHUB_OUTPUT
+          echo "any_exhausted=${ANY_EXHAUSTED}" >> $GITHUB_OUTPUT
+          echo "rollback_exhausted=${ROLLBACK_EXHAUSTED}" >> $GITHUB_OUTPUT
+          echo "fail_exhausted=${FAIL_EXHAUSTED}" >> $GITHUB_OUTPUT
+          echo "warn_exhausted=${WARN_EXHAUSTED}" >> $GITHUB_OUTPUT
+
+          echo "Budget Tier: ${TIER}"
+          echo "Any Exhausted: ${ANY_EXHAUSTED}"
+
+          # Determine alert level
+          if [[ "${ANY_EXHAUSTED}" == "true" ]] || [[ "${TIER}" == "RED" ]]; then
+            echo "alert_level=EMERGENCY" >> $GITHUB_OUTPUT
+          elif [[ "${TIER}" == "YELLOW" ]]; then
+            echo "alert_level=WARNING" >> $GITHUB_OUTPUT
+          else
+            echo "alert_level=OK" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check Deduplication
+        id: dedup
+        if: steps.analyze.outputs.tier != 'GREEN'
+        run: |
+          PERIOD=$(date -u +"%Y-%m")
+          TIER="${{ steps.analyze.outputs.tier }}"
+          ALERT_LEVEL="${{ steps.analyze.outputs.alert_level }}"
+
+          mkdir -p "$(dirname "${{ env.STATE_FILE }}")"
+
+          if [[ ! -f "${{ env.STATE_FILE }}" ]]; then
+            echo '{"version":"1.0","issues":{}}' > "${{ env.STATE_FILE }}"
+          fi
+
+          # Check if we already have an issue for this period and level
+          DEDUP_KEY="${PERIOD}_${ALERT_LEVEL}"
+          EXISTING=$(jq -r --arg key "${DEDUP_KEY}" '.issues[$key] // empty' "${{ env.STATE_FILE }}")
+
+          if [[ -n "${EXISTING}" ]]; then
+            ISSUE_NUMBER=$(echo "${EXISTING}" | jq -r '.issue_number')
+            LAST_UPDATE=$(echo "${EXISTING}" | jq -r '.last_updated')
+
+            # Check cooldown (6 hours)
+            LAST_TS=$(date -d "${LAST_UPDATE}" +%s 2>/dev/null || echo 0)
+            NOW_TS=$(date +%s)
+            DIFF=$((NOW_TS - LAST_TS))
+
+            if [[ ${DIFF} -lt 21600 ]]; then
+              echo "::notice::Issue #${ISSUE_NUMBER} updated within 6h, skipping"
+              echo "action=skip" >> $GITHUB_OUTPUT
+            else
+              echo "action=update" >> $GITHUB_OUTPUT
+              echo "issue_number=${ISSUE_NUMBER}" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "action=create" >> $GITHUB_OUTPUT
+          fi
+
+          echo "dedup_key=${DEDUP_KEY}" >> $GITHUB_OUTPUT
+          echo "period=${PERIOD}" >> $GITHUB_OUTPUT
+
+      - name: Set Tight Mode Flag
+        if: steps.analyze.outputs.tier == 'RED' || steps.analyze.outputs.any_exhausted == 'true'
+        run: |
+          mkdir -p "$(dirname "${{ env.TIGHT_MODE_FILE }}")"
+
+          # Only set tight_mode=true, never clear it automatically
+          CURRENT_MODE="false"
+          if [[ -f "${{ env.TIGHT_MODE_FILE }}" ]]; then
+            CURRENT_MODE=$(jq -r '.tight_mode // false' "${{ env.TIGHT_MODE_FILE }}")
+          fi
+
+          if [[ "${CURRENT_MODE}" != "true" ]]; then
+            NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            cat > "${{ env.TIGHT_MODE_FILE }}" << EOF
+          {
+            "tight_mode": true,
+            "set_at": "${NOW}",
+            "reason": "error_budget_${{ steps.analyze.outputs.alert_level }}",
+            "set_by": "automation",
+            "tier": "${{ steps.analyze.outputs.tier }}",
+            "note": "Automatically set due to budget exhaustion. Manual PR required to clear."
+          }
+          EOF
+            echo "::notice::Set tight_mode=true"
+          else
+            echo "::notice::tight_mode already true, not updating"
+          fi
+
+      - name: Set Freeze Mode Flag
+        if: steps.analyze.outputs.tier == 'RED' || steps.analyze.outputs.any_exhausted == 'true'
+        env:
+          FREEZE_FILE: docs/releases/_state/freeze_mode.json
+        run: |
+          mkdir -p "$(dirname "${FREEZE_FILE}")"
+
+          # Only set freeze_mode=true, never clear it automatically
+          CURRENT_FREEZE="false"
+          if [[ -f "${FREEZE_FILE}" ]]; then
+            CURRENT_FREEZE=$(jq -r '.freeze_mode // false' "${FREEZE_FILE}")
+          fi
+
+          if [[ "${CURRENT_FREEZE}" != "true" ]]; then
+            NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            cat > "${FREEZE_FILE}" << EOF
+          {
+            "freeze_mode": true,
+            "set_at": "${NOW}",
+            "reason": "error_budget_${{ steps.analyze.outputs.alert_level }}",
+            "set_by": "automation",
+            "tier": "${{ steps.analyze.outputs.tier }}",
+            "expires_at": null,
+            "note": "Automatically set due to budget exhaustion. Manual PR required to reset. Hotfix releases remain allowed."
+          }
+          EOF
+            echo "::notice::Set freeze_mode=true"
+          else
+            echo "::notice::freeze_mode already true, not updating"
+          fi
+
+      - name: Generate Issue Body
+        id: body
+        if: steps.dedup.outputs.action == 'create' || steps.dedup.outputs.action == 'update'
+        run: |
+          BUDGET_JSON="${{ env.SITE_DIR }}/error_budget.json"
+          PERIOD="${{ steps.dedup.outputs.period }}"
+          TIER="${{ steps.analyze.outputs.tier }}"
+          ALERT_LEVEL="${{ steps.analyze.outputs.alert_level }}"
+
+          # Extract budget details
+          ROLLBACK_ALLOC=$(jq -r '.budgets.rollbacks.allocated' "${BUDGET_JSON}")
+          ROLLBACK_CONSUMED=$(jq -r '.budgets.rollbacks.consumed' "${BUDGET_JSON}")
+          ROLLBACK_REMAINING=$(jq -r '.budgets.rollbacks.remaining' "${BUDGET_JSON}")
+          ROLLBACK_EXHAUSTED=$(jq -r '.budgets.rollbacks.exhausted' "${BUDGET_JSON}")
+
+          FAIL_ALLOC=$(jq -r '.budgets.fails.allocated' "${BUDGET_JSON}")
+          FAIL_CONSUMED=$(jq -r '.budgets.fails.consumed' "${BUDGET_JSON}")
+          FAIL_REMAINING=$(jq -r '.budgets.fails.remaining' "${BUDGET_JSON}")
+          FAIL_EXHAUSTED=$(jq -r '.budgets.fails.exhausted' "${BUDGET_JSON}")
+
+          WARN_ALLOC=$(jq -r '.budgets.warns.allocated' "${BUDGET_JSON}")
+          WARN_CONSUMED=$(jq -r '.budgets.warns.consumed' "${BUDGET_JSON}")
+          WARN_REMAINING=$(jq -r '.budgets.warns.remaining' "${BUDGET_JSON}")
+          WARN_EXHAUSTED=$(jq -r '.budgets.warns.exhausted' "${BUDGET_JSON}")
+
+          DAYS_REMAINING=$(jq -r '.period.days_remaining' "${BUDGET_JSON}")
+
+          cat > issue_body.md << EOF
+          ## Error Budget Alert
+
+          **Period:** ${PERIOD}
+          **Status:** ${ALERT_LEVEL}
+          **Tier:** ${TIER}
+          **Days Remaining:** ${DAYS_REMAINING}
+
+          ---
+
+          ### Budget Status
+
+          | Budget | Allocated | Consumed | Remaining | Exhausted |
+          |--------|-----------|----------|-----------|-----------|
+          | Rollbacks | ${ROLLBACK_ALLOC} | ${ROLLBACK_CONSUMED} | ${ROLLBACK_REMAINING} | ${ROLLBACK_EXHAUSTED} |
+          | FAILs | ${FAIL_ALLOC} | ${FAIL_CONSUMED} | ${FAIL_REMAINING} | ${FAIL_EXHAUSTED} |
+          | WARNs | ${WARN_ALLOC} | ${WARN_CONSUMED} | ${WARN_REMAINING} | ${WARN_EXHAUSTED} |
+
+          ---
+
+          ### Actions Required
+
+          EOF
+
+          if [[ "${ROLLBACK_EXHAUSTED}" == "true" ]]; then
+            echo "- **Rollback budget exhausted:** Additional approval required for publishes." >> issue_body.md
+          fi
+          if [[ "${FAIL_EXHAUSTED}" == "true" ]]; then
+            echo "- **FAIL budget exhausted:** Zero tolerance for forbidden patterns." >> issue_body.md
+          fi
+          if [[ "${WARN_EXHAUSTED}" == "true" ]]; then
+            echo "- **WARN budget exhausted:** WARN thresholds tightened by 30%." >> issue_body.md
+          fi
+
+          if [[ "${TIER}" == "RED" ]]; then
+            echo "- **Tier RED:** Platform Engineering review required for all publishes." >> issue_body.md
+          fi
+
+          cat >> issue_body.md << EOF
+
+          ---
+
+          ### Governance Mode
+
+          **Tight Mode:** Active (automatically set)
+
+          To clear tight mode and reset governance:
+          1. Investigate and resolve the underlying issues
+          2. Create a PR that sets \`tight_mode: false\` in \`docs/releases/_state/governance_tight_mode.json\`
+          3. Include justification for the reset
+
+          ---
+
+          ### Links
+
+          - [Error Budget Panel](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/error_budget.html)
+          - [SLO Report](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/release_ops_slo.html)
+          - [Trend View](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/redaction_metrics_trend.html)
+
+          ---
+
+          *Updated: $(date -u +"%Y-%m-%d %H:%M UTC")*
+          EOF
+
+      - name: Create Issue
+        if: steps.dedup.outputs.action == 'create' && github.event.inputs.dry_run != 'true'
+        id: create
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('issue_body.md', 'utf8');
+            const tier = '${{ steps.analyze.outputs.tier }}';
+            const alertLevel = '${{ steps.analyze.outputs.alert_level }}';
+            const period = '${{ steps.dedup.outputs.period }}';
+
+            const title = `[Error Budget] ${alertLevel} - ${period}`;
+
+            const labels = ['release-ops', 'error-budget', 'governance'];
+            if (alertLevel === 'EMERGENCY') {
+              labels.push('priority:P1');
+            } else {
+              labels.push('priority:P2');
+            }
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: labels
+            });
+
+            console.log(`Created issue #${issue.data.number}`);
+            return issue.data.number;
+
+      - name: Update Issue
+        if: steps.dedup.outputs.action == 'update' && github.event.inputs.dry_run != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('issue_body.md', 'utf8');
+            const issueNumber = ${{ steps.dedup.outputs.issue_number || 0 }};
+
+            if (issueNumber > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: `## Budget Update (${new Date().toISOString()})\n\n${body}`
+              });
+
+              console.log(`Updated issue #${issueNumber}`);
+            }
+
+      - name: Update State
+        if: (steps.dedup.outputs.action == 'create' || steps.dedup.outputs.action == 'update') && github.event.inputs.dry_run != 'true'
+        run: |
+          DEDUP_KEY="${{ steps.dedup.outputs.dedup_key }}"
+          NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          if [[ "${{ steps.dedup.outputs.action }}" == "create" ]]; then
+            ISSUE_NUMBER="${{ steps.create.outputs.result }}"
+          else
+            ISSUE_NUMBER="${{ steps.dedup.outputs.issue_number }}"
+          fi
+
+          jq --arg key "${DEDUP_KEY}" \
+             --arg issue "${ISSUE_NUMBER}" \
+             --arg updated "${NOW}" \
+             --arg tier "${{ steps.analyze.outputs.tier }}" \
+             '.issues[$key] = {
+                issue_number: ($issue | tonumber),
+                last_updated: $updated,
+                tier: $tier
+              }' "${{ env.STATE_FILE }}" > state_tmp.json
+
+          mv state_tmp.json "${{ env.STATE_FILE }}"
+
+      - name: Commit State Changes
+        if: github.event.inputs.dry_run != 'true'
+        env:
+          FREEZE_FILE: docs/releases/_state/freeze_mode.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add "${{ env.STATE_FILE }}" "${{ env.TIGHT_MODE_FILE }}" "${FREEZE_FILE}" 2>/dev/null || true
+          git commit -m "chore: update error budget state and governance mode" || true
+          git push || echo "::warning::Could not push state update"
+
+      - name: Auto-Close Resolved Issues
+        if: steps.analyze.outputs.tier == 'GREEN' && github.event.inputs.dry_run != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Find open error budget issues and close them
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'error-budget',
+              state: 'open'
+            });
+
+            for (const issue of issues.data) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: '## Resolved\n\nError budget has returned to GREEN tier. Closing this issue.\n\n**Note:** Tight mode remains active until manually cleared via PR.'
+              });
+
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed'
+              });
+
+              console.log(`Closed issue #${issue.number}`);
+            }
+
+      - name: Dry Run Summary
+        if: github.event.inputs.dry_run == 'true'
+        run: |
+          echo "### Dry Run Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Tier:** ${{ steps.analyze.outputs.tier }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Alert Level:** ${{ steps.analyze.outputs.alert_level }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Action:** ${{ steps.dedup.outputs.action }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [[ -f issue_body.md ]]; then
+            echo "**Issue Body Preview:**" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            head -40 issue_body.md >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Generate Summary
+        run: |
+          echo "## Error Budget Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Tier:** ${{ steps.analyze.outputs.tier }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Any Exhausted:** ${{ steps.analyze.outputs.any_exhausted }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ steps.analyze.outputs.tier }}" != "GREEN" ]]; then
+            echo "**Action Taken:** ${{ steps.dedup.outputs.action }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Budget is healthy, no action needed." >> $GITHUB_STEP_SUMMARY
+          fi

@@ -1,0 +1,11 @@
+{
+  "version": "1.0.0",
+  "last_run_at": null,
+  "remediation_history": {},
+  "stats": {
+    "total_attempts": 0,
+    "successful": 0,
+    "failed": 0,
+    "by_playbook": {}
+  }
+}

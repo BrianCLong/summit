@@ -1,0 +1,144 @@
+name: Test Quarantine Manager
+
+# TEST QUARANTINE MANAGEMENT
+# Manages flaky test quarantine, including automatic quarantine
+# of persistently failing tests and recovery of stable tests.
+#
+# See docs/ci/TEST_QUARANTINE.md for full documentation.
+
+on:
+  # Run after CI completes to analyze results
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+  # Weekly quarantine report
+  schedule:
+    - cron: "0 9 * * 1" # Monday 09:00 UTC
+
+  # Manual management
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Action to perform"
+        type: choice
+        options:
+          - report
+          - sync
+          - list
+        default: report
+      test_name:
+        description: "Test name (for quarantine/unquarantine)"
+        type: string
+        required: false
+
+# Prevent concurrent runs
+concurrency:
+  group: test-quarantine
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+  actions: read
+
+jobs:
+  manage-quarantine:
+    name: Manage Quarantine
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Determine Action
+        id: action
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "action=${{ inputs.action }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "schedule" ]]; then
+            echo "action=report" >> $GITHUB_OUTPUT
+          else
+            echo "action=sync" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Quarantine Manager
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/release/manage_test_quarantine.sh
+
+          ACTION="${{ steps.action.outputs.action }}"
+
+          case "$ACTION" in
+            report)
+              ./scripts/release/manage_test_quarantine.sh report \
+                --policy docs/ci/TEST_QUARANTINE_POLICY.yml \
+                --quarantine test-quarantine.json \
+                --state docs/releases/_state/quarantine_state.json \
+                > artifacts/quarantine-report.md
+              ;;
+            sync)
+              ./scripts/release/manage_test_quarantine.sh sync \
+                --policy docs/ci/TEST_QUARANTINE_POLICY.yml \
+                --quarantine test-quarantine.json \
+                --state docs/releases/_state/quarantine_state.json
+              ;;
+            list)
+              ./scripts/release/manage_test_quarantine.sh list \
+                --quarantine test-quarantine.json
+              ;;
+          esac
+
+      - name: Check for Changes
+        id: check_changes
+        run: |
+          if git diff --quiet test-quarantine.json docs/releases/_state/quarantine_state.json 2>/dev/null; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit Changes
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add test-quarantine.json docs/releases/_state/quarantine_state.json
+
+          git commit -m "chore(tests): update quarantine state
+
+          Automated update from Test Quarantine Manager.
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          [skip ci]"
+
+          git push
+
+      - name: Upload Report
+        if: steps.action.outputs.action == 'report'
+        uses: actions/upload-artifact@v6
+        with:
+          name: quarantine-report-${{ github.run_id }}
+          path: artifacts/quarantine-report.md
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Job Summary
+        run: |
+          echo "### Test Quarantine Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ -f artifacts/quarantine-report.md ]]; then
+            cat artifacts/quarantine-report.md >> $GITHUB_STEP_SUMMARY
+          else
+            ./scripts/release/manage_test_quarantine.sh list \
+              --quarantine test-quarantine.json >> $GITHUB_STEP_SUMMARY 2>&1 || true
+          fi

@@ -4,9 +4,8 @@ from __future__ import annotations
 import argparse
 import json
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Dict, List
 
 import yaml
 
@@ -28,9 +27,9 @@ class AlertRule:
     runbook_url: str | None
 
 
-def load_alerts(alert_file: Path) -> List[AlertRule]:
+def load_alerts(alert_file: Path) -> list[AlertRule]:
     data = yaml.safe_load(alert_file.read_text()) or {}
-    alerts: List[AlertRule] = []
+    alerts: list[AlertRule] = []
 
     for group in data.get("groups", []):
         for rule in group.get("rules", []):
@@ -71,13 +70,13 @@ def write_payload(alert: AlertRule, payload_dir: Path, timestamp: str) -> Path:
 
 
 def build_catalog(
-    alerts: List[AlertRule],
-    payload_paths: Dict[str, Path],
+    alerts: list[AlertRule],
+    payload_paths: dict[str, Path],
     proposal_dir: Path,
     catalog_path: Path,
 ) -> None:
     proposal_dir.mkdir(parents=True, exist_ok=True)
-    lines: List[str] = [
+    lines: list[str] = [
         "# Generated Alert Runbooks",
         "",
         "This catalog is generated from `ops/alerts/slo-burn-rules.yml` and pairs each",
@@ -97,8 +96,7 @@ def build_catalog(
             f"--out {proposal_path.relative_to(REPO_ROOT)}"
         )
         verification_cmd = (
-            "python ops/observability-ci/scripts/check_oncall_paths.py "
-            f"--service {alert.service}"
+            f"python ops/observability-ci/scripts/check_oncall_paths.py --service {alert.service}"
         )
         lines.extend(
             [
@@ -135,11 +133,9 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     alerts = load_alerts(args.alerts_file)
-    mtime = datetime.fromtimestamp(
-        int(args.alerts_file.stat().st_mtime), timezone.utc
-    ).isoformat()
+    mtime = datetime.fromtimestamp(int(args.alerts_file.stat().st_mtime), UTC).isoformat()
 
-    payload_paths: Dict[str, Path] = {}
+    payload_paths: dict[str, Path] = {}
     for alert in alerts:
         payload_paths[alert.name] = write_payload(alert, args.payload_dir, mtime)
 

@@ -329,7 +329,7 @@ if __name__ == "__main__":
         decision_data = controller.decide(canary_metrics, baseline_metrics, budget_remaining=50.0)
 
         print(
-            f"Iteration {i+1:2d}: {decision_data['decision'].upper():<8} "
+            f"Iteration {i + 1:2d}: {decision_data['decision'].upper():<8} "
             f"(confidence: {decision_data['confidence']:.3f}) - {decision_data['reason']}"
         )
 

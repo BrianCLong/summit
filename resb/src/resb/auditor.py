@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict
 
 import numpy as np
 import pandas as pd
@@ -18,7 +17,7 @@ class LeakageAudit:
     closest_distance: float
     duplicate_count: int
 
-    def to_dict(self) -> Dict[str, float]:  # pragma: no cover - convenience helper
+    def to_dict(self) -> dict[str, float]:  # pragma: no cover - convenience helper
         return {
             "min_distance": self.min_distance,
             "closest_distance": self.closest_distance,
@@ -34,7 +33,9 @@ def audit_leakage(original: pd.DataFrame, synthetic: pd.DataFrame) -> LeakageAud
 
     shared_columns = [c for c in synthetic.columns if c in original.columns]
     orig_encoded = pd.get_dummies(original[shared_columns], drop_first=False).to_numpy(dtype=float)
-    synth_encoded = pd.get_dummies(synthetic[shared_columns], drop_first=False).to_numpy(dtype=float)
+    synth_encoded = pd.get_dummies(synthetic[shared_columns], drop_first=False).to_numpy(
+        dtype=float
+    )
 
     duplicates = pd.merge(original, synthetic, on=shared_columns, how="inner").shape[0]
 

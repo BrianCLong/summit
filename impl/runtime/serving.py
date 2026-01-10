@@ -1,10 +1,11 @@
-from typing import Any, Dict
+from typing import Any
+
 
 class ModelServingLayer:
     def __init__(self):
         print("ModelServingLayer initialized")
 
-    async def generate(self, prompt: str, options: Dict[str, Any]) -> str:
+    async def generate(self, prompt: str, options: dict[str, Any]) -> str:
         """
         Generates text using the loaded model.
         """

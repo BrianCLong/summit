@@ -85,5 +85,3 @@ def test_explanations_include_rules_and_embeddings():
 
     assert any(step.startswith("Rule:") for step in result.explanations)
     assert any("Embedding similarity" in step for step in result.explanations)
-
-

@@ -16,7 +16,7 @@ jobs:
       NODE_OPTIONS: "--max-old-space-size=3072"
       PNPM_CACHE_FOLDER: ~/.pnpm-store
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -24,7 +24,7 @@ jobs:
           run_install: false
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.11.x"
 
@@ -40,7 +40,7 @@ jobs:
 
       - name: Upload Jest results (debug)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: fast-jest-results
           path: |

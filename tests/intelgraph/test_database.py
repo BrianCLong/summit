@@ -1,9 +1,5 @@
 """Test database operations."""
 
-import json
-
-import pytest
-
 from core.database import Database
 from core.models import Claim, Decision, Entity, Source
 

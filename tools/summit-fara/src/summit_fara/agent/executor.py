@@ -1,15 +1,16 @@
 import logging
 import random
 import time
-from typing import List
-from .types import Task, Trajectory, Action, ExecutionResult
+
 from ..env.browser import BrowserEnv
 from ..env.intelgraph import IntelGraphConnector
 from ..tools.gh_cli import GitHubCLI
 from ..tools.python_sandbox import PythonSandbox
 from .model import FaraModel
+from .types import Action, ExecutionResult, Task, Trajectory
 
 log = logging.getLogger("summit-fara")
+
 
 class ExecutorAgent:
     def __init__(self, endpoint_config: str, use_intelgraph: bool):
@@ -22,17 +23,19 @@ class ExecutorAgent:
         self.intelgraph = IntelGraphConnector() if use_intelgraph else None
 
         # Initialize Model (Lazy load or immediate)
-        self.model = FaraModel(model_path=endpoint_config if "json" not in endpoint_config else "microsoft/Fara-7B")
+        self.model = FaraModel(
+            model_path=endpoint_config if "json" not in endpoint_config else "microsoft/Fara-7B"
+        )
 
         log.info(f"ExecutorAgent initialized with config: {endpoint_config}")
 
-    def run_trajectories(self, task: Task, count: int) -> List[Trajectory]:
+    def run_trajectories(self, task: Task, count: int) -> list[Trajectory]:
         """
         Runs multiple trajectories for a task to gather data for RL.
         """
         trajectories = []
         for i in range(count):
-            log.debug(f"  Trajectory {i+1}/{count}")
+            log.debug(f"  Trajectory {i + 1}/{count}")
             result = self.execute(task)
             trajectories.append(result.trajectory)
         return trajectories
@@ -47,7 +50,7 @@ class ExecutorAgent:
 
         # Simulation of the agent loop
         steps = 0
-        max_steps = 10 # 10 steps vs Fara's 16
+        max_steps = 10  # 10 steps vs Fara's 16
 
         log.info(f"Starting execution for task: {task.id}")
 
@@ -86,7 +89,11 @@ class ExecutorAgent:
                 params = {"code": "print('Hello from Sandbox')"}
             else:
                 action_type = "browser"
-                params = {"x": random.randint(0, 1920), "y": random.randint(0, 1080), "type": "click"}
+                params = {
+                    "x": random.randint(0, 1920),
+                    "y": random.randint(0, 1080),
+                    "type": "click",
+                }
 
             action = Action(type=action_type, params=params, timestamp=time.time())
             trajectory.actions.append(action)
@@ -95,7 +102,9 @@ class ExecutorAgent:
             self._execute_action(action)
 
             # Check termination (simulated)
-            if steps == max_steps or (action_type == "cli" and "pr create" in params.get("command", "")):
+            if steps == max_steps or (
+                action_type == "cli" and "pr create" in params.get("command", "")
+            ):
                 success = True
                 output = "Task completed (simulated)"
                 break
@@ -124,18 +133,18 @@ class ExecutorAgent:
         """
         Reward = Fara's (Uncertainty + Tool) + Summit Boost.
         """
-        base_reward = 0.4 if success else 0.0 # Placeholder for p_hat
+        base_reward = 0.4 if success else 0.0  # Placeholder for p_hat
 
         summit_boost = 0.0
         # Check specific Summit criteria
         if "YAML" in task.description:
-             summit_boost += 0.2 # YAML fidelity
+            summit_boost += 0.2  # YAML fidelity
         if len(trajectory.actions) < 12:
-             summit_boost += 0.1 # Velocity bonus
+            summit_boost += 0.1  # Velocity bonus
 
         return base_reward + summit_boost
 
-    def update_policy(self, trajectories: List[Trajectory] | Trajectory):
+    def update_policy(self, trajectories: list[Trajectory] | Trajectory):
         """
         Updates the policy using GRPO/ADPO (simulated).
         """

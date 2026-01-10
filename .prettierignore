@@ -22,3 +22,4 @@ LICENSE
 *.snap
 .git/
 .husky/
+.github/workflows/release-ops-slo-issue.yml

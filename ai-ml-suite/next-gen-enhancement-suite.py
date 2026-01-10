@@ -944,7 +944,7 @@ async def main():
     if "integrated_analysis" in results:
         for i, conclusion in enumerate(results["integrated_analysis"]["conclusions"][:3]):
             print(
-                f"{i+1}. {conclusion.get('conclusion', 'N/A')} (confidence: {conclusion.get('weight', 0):.2f})"
+                f"{i + 1}. {conclusion.get('conclusion', 'N/A')} (confidence: {conclusion.get('weight', 0):.2f})"
             )
 
 

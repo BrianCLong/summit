@@ -1,10 +1,11 @@
 """Core evaluation routines for the Counterfactual Evaluation Harness."""
+
 from __future__ import annotations
 
 import json
-import math
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -21,12 +22,12 @@ class EvaluationArtifacts:
     """Convenience wrapper for CEH evaluation outputs."""
 
     baseline_predictions: np.ndarray
-    feature_ablation: List[Dict[str, Any]]
-    partial_correlations: List[Dict[str, Any]]
-    spurious_correlations: Dict[str, Any]
-    backdoor_adjustment: Optional[Dict[str, Any]]
-    uplift: Optional[Dict[str, Any]]
-    irm_result: Optional[Dict[str, Any]]
+    feature_ablation: list[dict[str, Any]]
+    partial_correlations: list[dict[str, Any]]
+    spurious_correlations: dict[str, Any]
+    backdoor_adjustment: dict[str, Any] | None
+    uplift: dict[str, Any] | None
+    irm_result: dict[str, Any] | None
 
 
 class CounterfactualEvaluationHarness:
@@ -86,7 +87,7 @@ class CounterfactualEvaluationHarness:
         self.baseline_test_preds_ = self._predict_proba(self.model_, self.X_test)
         self._is_fit = True
 
-    def run_full_evaluation(self, lambda_irm: float = 1.0) -> Dict[str, Any]:
+    def run_full_evaluation(self, lambda_irm: float = 1.0) -> dict[str, Any]:
         """Execute the entire CEH suite and return a report."""
 
         if not self._is_fit:
@@ -104,7 +105,7 @@ class CounterfactualEvaluationHarness:
             np.mean([row["sensitivity"] for row in ablation]) if ablation else 0.0
         )
 
-        guardrails: List[Dict[str, Any]] = []
+        guardrails: list[dict[str, Any]] = []
         if spurious["detected_features"]:
             guardrails.append(
                 {
@@ -127,7 +128,7 @@ class CounterfactualEvaluationHarness:
             "dataset": {
                 "name": self.dataset.name,
                 "description": self.dataset.description,
-                "size": int(len(self.dataset.data)),
+                "size": len(self.dataset.data),
                 "features": list(self.dataset.data.columns),
                 "confounders": list(self.dataset.confounders),
                 "treatment": self.dataset.treatment,
@@ -184,8 +185,8 @@ class CounterfactualEvaluationHarness:
         model,
         X: pd.DataFrame,
         baseline: np.ndarray,
-    ) -> List[Dict[str, Any]]:
-        results: List[Dict[str, Any]] = []
+    ) -> list[dict[str, Any]]:
+        results: list[dict[str, Any]] = []
         for column in X.columns:
             ablated = X.copy()
             ablated[column] = X[column].mean()
@@ -205,9 +206,9 @@ class CounterfactualEvaluationHarness:
         self,
         X: pd.DataFrame,
         y: pd.Series,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         confounders = [c for c in self.dataset.confounders if c in X.columns]
-        results: List[Dict[str, Any]] = []
+        results: list[dict[str, Any]] = []
 
         if not confounders:
             # With no confounders, return absolute correlation values.
@@ -241,12 +242,12 @@ class CounterfactualEvaluationHarness:
 
     def _detect_spurious_correlations(
         self,
-        ablation: Iterable[Dict[str, Any]],
-        partials: Iterable[Dict[str, Any]],
-    ) -> Dict[str, Any]:
+        ablation: Iterable[dict[str, Any]],
+        partials: Iterable[dict[str, Any]],
+    ) -> dict[str, Any]:
         partial_lookup = {row["feature"]: row["partial_correlation"] for row in partials}
 
-        records: List[Dict[str, Any]] = []
+        records: list[dict[str, Any]] = []
         for row in ablation:
             feature = row["feature"]
             partial_corr = partial_lookup.get(feature, 0.0)
@@ -274,7 +275,7 @@ class CounterfactualEvaluationHarness:
             "threshold": threshold,
         }
 
-    def _causal_backdoor_adjustment(self, model) -> Optional[Dict[str, Any]]:
+    def _causal_backdoor_adjustment(self, model) -> dict[str, Any] | None:
         treatment = self.dataset.treatment
         confounders = [c for c in self.dataset.confounders if c in self.X_test.columns]
         if treatment is None or not confounders:
@@ -303,9 +304,7 @@ class CounterfactualEvaluationHarness:
                 actual = y.loc[idx].to_numpy()
                 treat_flags = treat_mask.to_numpy(dtype=bool)
                 control_flags = control_mask.to_numpy(dtype=bool)
-                ate_actual += weight * (
-                    actual[treat_flags].mean() - actual[control_flags].mean()
-                )
+                ate_actual += weight * (actual[treat_flags].mean() - actual[control_flags].mean())
 
         if total_weight == 0:  # pragma: no cover - defensive
             return None
@@ -316,7 +315,7 @@ class CounterfactualEvaluationHarness:
             "gap": float((ate_pred - ate_actual) / total_weight),
         }
 
-    def _uplift_analysis(self, model) -> Optional[Dict[str, Any]]:
+    def _uplift_analysis(self, model) -> dict[str, Any] | None:
         treatment = self.dataset.treatment
         if treatment is None or treatment not in self.X_test.columns:
             return None
@@ -339,9 +338,7 @@ class CounterfactualEvaluationHarness:
 
         counterfactual_treat = self._predict_with_modified_feature(model, X, treatment, 1)
         counterfactual_ctrl = self._predict_with_modified_feature(model, X, treatment, 0)
-        counterfactual_uplift = float(
-            counterfactual_treat.mean() - counterfactual_ctrl.mean()
-        )
+        counterfactual_uplift = float(counterfactual_treat.mean() - counterfactual_ctrl.mean())
 
         return {
             "observed_uplift": actual_uplift,
@@ -367,8 +364,8 @@ class CounterfactualEvaluationHarness:
         X: pd.DataFrame,
         y: pd.Series,
         environments: pd.Series,
-    ) -> Dict[str, float]:
-        env_risks: Dict[str, float] = {}
+    ) -> dict[str, float]:
+        env_risks: dict[str, float] = {}
         unique_envs = environments.unique()
         for env in unique_envs:
             mask = environments == env
@@ -378,7 +375,7 @@ class CounterfactualEvaluationHarness:
             env_risks[str(env)] = float(log_loss(y.loc[mask], preds, labels=[0, 1]))
         return env_risks
 
-    def _apply_irm_penalty(self, lambda_irm: float) -> Optional[Dict[str, Any]]:
+    def _apply_irm_penalty(self, lambda_irm: float) -> dict[str, Any] | None:
         if self.env_train is None:
             return None
 
@@ -397,9 +394,7 @@ class CounterfactualEvaluationHarness:
             return 1.0 / float(env_counts[env_value])
 
         base_weights = self.env_train.map(_base_weight)
-        risk_ratio = self.env_train.map(
-            lambda env: baseline_risks[str(env)] / (mean_risk + 1e-8)
-        )
+        risk_ratio = self.env_train.map(lambda env: baseline_risks[str(env)] / (mean_risk + 1e-8))
         weights = base_weights * np.power(risk_ratio, lambda_irm)
         weights = weights / weights.mean()
         weights = weights.clip(lower=0.1, upper=25.0)

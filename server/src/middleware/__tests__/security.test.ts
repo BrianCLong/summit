@@ -11,22 +11,20 @@
 
 import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { Request, Response, NextFunction } from 'express';
-import {
-  createRateLimiter,
-  strictRateLimiter,
-  authRateLimiter,
-  aiRateLimiter,
-  graphqlRateLimiter,
-  restApiRateLimiter,
-  requestSizeLimiter,
-  ipWhitelist,
-  apiKeyAuth,
-  validateRequest,
-  securityHeaders,
-  corsConfig,
-  requestLogger,
-  errorHandler,
-} from '../security.js';
+let createRateLimiter: typeof import('../security.js').createRateLimiter;
+let strictRateLimiter: typeof import('../security.js').strictRateLimiter;
+let authRateLimiter: typeof import('../security.js').authRateLimiter;
+let aiRateLimiter: typeof import('../security.js').aiRateLimiter;
+let graphqlRateLimiter: typeof import('../security.js').graphqlRateLimiter;
+let restApiRateLimiter: typeof import('../security.js').restApiRateLimiter;
+let requestSizeLimiter: typeof import('../security.js').requestSizeLimiter;
+let ipWhitelist: typeof import('../security.js').ipWhitelist;
+let apiKeyAuth: typeof import('../security.js').apiKeyAuth;
+let validateRequest: typeof import('../security.js').validateRequest;
+let securityHeaders: typeof import('../security.js').securityHeaders;
+let corsConfig: typeof import('../security.js').corsConfig;
+let requestLogger: typeof import('../security.js').requestLogger;
+let errorHandler: typeof import('../security.js').errorHandler;
 
 // Mock dependencies
 jest.mock('../../monitoring/middleware.js', () => ({
@@ -34,6 +32,7 @@ jest.mock('../../monitoring/middleware.js', () => ({
 }));
 
 jest.mock('../../utils/logger.js', () => ({
+  __esModule: true,
   default: {
     info: jest.fn(),
     warn: jest.fn(),
@@ -46,6 +45,26 @@ describe('Security Middleware', () => {
   let mockRequest: Partial<Request>;
   let mockResponse: Partial<Response>;
   let mockNext: NextFunction;
+
+  beforeAll(async () => {
+    const securityModule = await import('../security.js');
+    ({
+      createRateLimiter,
+      strictRateLimiter,
+      authRateLimiter,
+      aiRateLimiter,
+      graphqlRateLimiter,
+      restApiRateLimiter,
+      requestSizeLimiter,
+      ipWhitelist,
+      apiKeyAuth,
+      validateRequest,
+      securityHeaders,
+      corsConfig,
+      requestLogger,
+      errorHandler,
+    } = securityModule);
+  });
 
   beforeEach(() => {
     mockRequest = {

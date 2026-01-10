@@ -292,7 +292,7 @@ def generate_blocking_keys(entity: Entity) -> list[str]:
             lat = float(entity.properties["latitude"])
             lng = float(entity.properties["longitude"])
             # Grid-based geo blocking (10km squares)
-            geo_key = f"geo:{int(lat*100)}_{int(lng*100)}"
+            geo_key = f"geo:{int(lat * 100)}_{int(lng * 100)}"
             keys.append(geo_key)
         except (ValueError, TypeError):
             pass

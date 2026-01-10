@@ -54,7 +54,7 @@ describe('LitigationHoldService', () => {
 
     await service.applyHoldToDataset('billing-events', hold);
     expect(repository.setLegalHold).toHaveBeenCalled();
-    const callArgs = (repository.setLegalHold as jest.Mock).mock.calls[0][1];
+    const callArgs = (repository.setLegalHold as jest.Mock).mock.calls[0][1] as any;
     expect(callArgs.matterNumber).toBe('MTR-001');
     expect(callArgs.custodians).toContain('alice');
     expect(callArgs.acknowledgedBy?.length).toBe(1);

@@ -20,6 +20,18 @@ import { getPostgresPool } from '../../config/database.js';
 // Mock dependencies
 jest.mock('argon2');
 jest.mock('jsonwebtoken');
+var mockCheckUserEnrollmentEligibility: jest.MockedFunction<
+  (email: string) => Promise<{ eligible: boolean; reason?: string }>
+>;
+jest.mock('../GAEnrollmentService.js', () => {
+  mockCheckUserEnrollmentEligibility = jest.fn();
+  return {
+    __esModule: true,
+    default: {
+      checkUserEnrollmentEligibility: mockCheckUserEnrollmentEligibility,
+    },
+  };
+});
 jest.mock('../../config/database.js', () => ({
   getPostgresPool: jest.fn<() => Pool>(() => mockPool),
 }));
@@ -42,6 +54,7 @@ describe('AuthService', () => {
   beforeEach(() => {
     // Reset mocks
     jest.clearAllMocks();
+    mockCheckUserEnrollmentEligibility.mockResolvedValue({ eligible: true });
 
     // Mock PostgreSQL client
     mockClient = {
@@ -425,6 +438,7 @@ describe('AuthService', () => {
         role: 'ADMIN',
         isActive: true,
         createdAt: new Date(),
+        scopes: [],
       };
 
       expect(authService.hasPermission(adminUser, 'investigation:create')).toBe(
@@ -441,6 +455,7 @@ describe('AuthService', () => {
         role: 'ANALYST',
         isActive: true,
         createdAt: new Date(),
+        scopes: [],
       };
 
       expect(
@@ -460,6 +475,7 @@ describe('AuthService', () => {
         role: 'ANALYST',
         isActive: true,
         createdAt: new Date(),
+        scopes: [],
       };
 
       expect(authService.hasPermission(analystUser, 'user:create')).toBe(false);
@@ -475,6 +491,7 @@ describe('AuthService', () => {
         role: 'VIEWER',
         isActive: true,
         createdAt: new Date(),
+        scopes: [],
       };
 
       expect(authService.hasPermission(viewerUser, 'investigation:read')).toBe(
@@ -492,6 +509,7 @@ describe('AuthService', () => {
         role: 'VIEWER',
         isActive: true,
         createdAt: new Date(),
+        scopes: [],
       };
 
       expect(authService.hasPermission(viewerUser, 'investigation:create')).toBe(
@@ -517,6 +535,7 @@ describe('AuthService', () => {
         role: null as any,
         isActive: true,
         createdAt: new Date(),
+        scopes: [],
       };
 
       expect(
@@ -531,6 +550,7 @@ describe('AuthService', () => {
         role: 'UNKNOWN_ROLE',
         isActive: true,
         createdAt: new Date(),
+        scopes: [],
       };
 
       expect(
@@ -545,6 +565,7 @@ describe('AuthService', () => {
         role: 'analyst', // lowercase
         isActive: true,
         createdAt: new Date(),
+        scopes: [],
       };
 
       expect(

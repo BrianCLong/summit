@@ -14,6 +14,9 @@ module.exports = {
       },
     ],
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(\\.pnpm/)?(conf|env-paths|atomically|dot-prop|pkg-dir|find-up-simple|find-up|locate-path|p-limit|yocto-queue|path-exists))',
+  ],
   testMatch: ['**/__tests__/**/*.test.ts'],
   collectCoverageFrom: [
     'src/**/*.ts',

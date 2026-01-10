@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Tuple
 
 import numpy as np
 
@@ -20,7 +19,7 @@ class LogisticRegressionModel:
         self.weights = rng.normal(scale=0.1, size=self.n_features)
         self.bias = 0.0
 
-    def copy(self) -> "LogisticRegressionModel":
+    def copy(self) -> LogisticRegressionModel:
         clone = LogisticRegressionModel(self.n_features, seed=self.seed)
         clone.weights = self.weights.copy()
         clone.bias = float(self.bias)
@@ -43,9 +42,7 @@ class LogisticRegressionModel:
         return (self.predict_proba(X)[:, 1] >= threshold).astype(int)
 
     # Training ---------------------------------------------------------
-    def _compute_gradient(
-        self, X: np.ndarray, y: np.ndarray
-    ) -> Tuple[np.ndarray, float]:
+    def _compute_gradient(self, X: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, float]:
         probs = self._sigmoid(self.decision_function(X))
         residual = probs - y
         grad_w = X.T @ residual / len(X)

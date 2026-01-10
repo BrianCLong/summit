@@ -1,9 +1,11 @@
-import unittest
-import os
 import json
+import os
 import shutil
 import tempfile
+import unittest
+
 from promptpack_lint.linter import Linter
+
 
 class TestLinter(unittest.TestCase):
     def setUp(self):
@@ -30,44 +32,28 @@ class TestLinter(unittest.TestCase):
 
     def test_valid_pack(self):
         pack_id = "test.valid@v1"
-        content = {
-            "id": pack_id,
-            "version": "1.0.0",
-            "roles": {"system": "sys"},
-            "vars": {}
-        }
+        content = {"id": pack_id, "version": "1.0.0", "roles": {"system": "sys"}, "vars": {}}
         pack_path = self.create_pack(pack_id, content)
         errors = self.linter.lint_pack(pack_path)
         self.assertEqual(errors, [])
 
     def test_missing_id(self):
         pack_id = "test.invalid"
-        content = {
-            "version": "1.0.0",
-            "roles": {"system": "sys"}
-        }
+        content = {"version": "1.0.0", "roles": {"system": "sys"}}
         pack_path = self.create_pack(pack_id, content)
         errors = self.linter.lint_pack(pack_path)
         self.assertTrue(any("id" in e for e in errors))
 
     def test_invalid_id_format(self):
         pack_id = "Test_Invalid"
-        content = {
-            "id": "Test_Invalid",
-            "version": "1.0.0",
-            "roles": {"system": "sys"}
-        }
+        content = {"id": "Test_Invalid", "version": "1.0.0", "roles": {"system": "sys"}}
         pack_path = self.create_pack(pack_id, content)
         errors = self.linter.lint_pack(pack_path)
         self.assertTrue(any("pattern" in e for e in errors) or any("match" in e for e in errors))
 
     def test_missing_template(self):
         pack_id = "test.missing-template@v1"
-        content = {
-            "id": pack_id,
-            "version": "1.0.0",
-            "template_path": "missing.md"
-        }
+        content = {"id": pack_id, "version": "1.0.0", "template_path": "missing.md"}
         pack_path = self.create_pack(pack_id, content)
         errors = self.linter.lint_pack(pack_path)
         self.assertTrue(any("Template file not found" in e for e in errors))
@@ -77,14 +63,13 @@ class TestLinter(unittest.TestCase):
         content = {
             "id": pack_id,
             "version": "1.0.0",
-            "roles": {
-                "system": "Hello {{ name }}!"
-            },
-            "vars": {} # 'name' is missing
+            "roles": {"system": "Hello {{ name }}!"},
+            "vars": {},  # 'name' is missing
         }
         pack_path = self.create_pack(pack_id, content)
         errors = self.linter.lint_pack(pack_path)
         self.assertTrue(any("Undefined variable 'name'" in e for e in errors))
+
 
 if __name__ == "__main__":
     unittest.main()

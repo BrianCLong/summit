@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Redact PII/secrets from disclosure pack artifacts."""
+
 from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, Pattern
+from re import Pattern
 
 REDACTION_TOKEN = "[REDACTED]"
 

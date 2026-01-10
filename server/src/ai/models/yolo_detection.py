@@ -84,7 +84,7 @@ class YOLODetection:
             }
 
         except Exception as e:
-            return {"error": f"Object detection failed: {str(e)}", "detections": []}
+            return {"error": f"Object detection failed: {e!s}", "detections": []}
 
     def detect_objects_batch(
         self,
@@ -349,7 +349,7 @@ def main():
         print(json.dumps(result, indent=2, ensure_ascii=False))
 
     except Exception as e:
-        print(json.dumps({"error": f"Detection failed: {str(e)}"}))
+        print(json.dumps({"error": f"Detection failed: {e!s}"}))
         sys.exit(1)
 
 

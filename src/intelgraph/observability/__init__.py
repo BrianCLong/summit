@@ -1,4 +1,4 @@
-from .tracing import start_span
 from .metrics import counter, histogram
+from .tracing import start_span
 
-__all__ = ["start_span", "counter", "histogram"]
+__all__ = ["counter", "histogram", "start_span"]

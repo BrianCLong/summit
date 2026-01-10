@@ -1,7 +1,6 @@
 """Storage client for fetching media assets."""
 
 import logging
-from typing import Optional
 
 import httpx
 
@@ -32,7 +31,7 @@ class StorageClient:
             response.raise_for_status()
             return response.content
 
-    async def upload(self, path: str, data: bytes, content_type: Optional[str] = None) -> str:
+    async def upload(self, path: str, data: bytes, content_type: str | None = None) -> str:
         # Placeholder upload to keep interface symmetrical
         logger.info("Mock upload to %s (content_type=%s)", path, content_type)
-        return f"{self.endpoint}/{self.bucket}/{path.lstrip('/') }"
+        return f"{self.endpoint}/{self.bucket}/{path.lstrip('/')}"

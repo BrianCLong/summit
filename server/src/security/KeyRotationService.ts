@@ -11,7 +11,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
-import { DataEnvelope, GovernanceVerdict } from '../types/data-envelope.js';
+import type { DataEnvelope, GovernanceVerdict } from '../types/data-envelope.js';
+import { GovernanceResult } from '../types/data-envelope.js';
 import logger from '../utils/logger.js';
 
 // ============================================================================
@@ -163,7 +164,7 @@ export class KeyRotationService {
         confidence: 1.0,
       },
       governance: {
-        verdict: GovernanceVerdict.ALLOW,
+        verdict: GovernanceResult.ALLOW,
         evaluatedPolicies: [],
         enforcedAt: new Date().toISOString(),
       },
@@ -252,7 +253,7 @@ export class KeyRotationService {
         confidence: 1.0,
       },
       governance: {
-        verdict: GovernanceVerdict.ALLOW,
+        verdict: GovernanceResult.ALLOW,
         evaluatedPolicies: [],
         enforcedAt: new Date().toISOString(),
       },
@@ -292,7 +293,7 @@ export class KeyRotationService {
         confidence: 1.0,
       },
       governance: {
-        verdict: GovernanceVerdict.ALLOW,
+        verdict: GovernanceResult.ALLOW,
         evaluatedPolicies: [],
         enforcedAt: new Date().toISOString(),
       },
@@ -331,7 +332,7 @@ export class KeyRotationService {
         confidence: 1.0,
       },
       governance: {
-        verdict: GovernanceVerdict.FLAG,
+        verdict: GovernanceResult.FLAG,
         evaluatedPolicies: [],
         enforcedAt: new Date().toISOString(),
       },
@@ -366,7 +367,7 @@ export class KeyRotationService {
         confidence: 1.0,
       },
       governance: {
-        verdict: GovernanceVerdict.ALLOW,
+        verdict: GovernanceResult.ALLOW,
         evaluatedPolicies: [],
         enforcedAt: new Date().toISOString(),
       },
@@ -397,7 +398,7 @@ export class KeyRotationService {
         confidence: 1.0,
       },
       governance: {
-        verdict: GovernanceVerdict.ALLOW,
+        verdict: GovernanceResult.ALLOW,
         evaluatedPolicies: [],
         enforcedAt: new Date().toISOString(),
       },
@@ -436,7 +437,7 @@ export class KeyRotationService {
         confidence: 1.0,
       },
       governance: {
-        verdict: GovernanceVerdict.ALLOW,
+        verdict: GovernanceResult.ALLOW,
         evaluatedPolicies: [],
         enforcedAt: new Date().toISOString(),
       },
@@ -458,7 +459,7 @@ export class KeyRotationService {
         confidence: 1.0,
       },
       governance: {
-        verdict: GovernanceVerdict.ALLOW,
+        verdict: GovernanceResult.ALLOW,
         evaluatedPolicies: [],
         enforcedAt: new Date().toISOString(),
       },
@@ -489,7 +490,7 @@ export class KeyRotationService {
         confidence: 1.0,
       },
       governance: {
-        verdict: GovernanceVerdict.ALLOW,
+        verdict: GovernanceResult.ALLOW,
         evaluatedPolicies: [],
         enforcedAt: new Date().toISOString(),
       },

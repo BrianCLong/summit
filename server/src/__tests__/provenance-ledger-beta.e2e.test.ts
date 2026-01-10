@@ -17,7 +17,10 @@ import type {
   VerificationReport,
 } from '../types/provenance-beta';
 
-describe('Provenance Ledger Beta - End-to-End', () => {
+const runAcceptance = process.env.RUN_ACCEPTANCE === 'true';
+const describeIf = runAcceptance ? describe : describe.skip;
+
+describeIf('Provenance Ledger Beta - End-to-End', () => {
   let provenanceLedger: ProvenanceLedgerBetaService;
   let testLicense: License;
   let userId: string;

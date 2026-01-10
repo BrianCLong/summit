@@ -201,7 +201,7 @@ export class SOC2ComplianceService {
    */
   private async generateCC81Evidence(startDate: Date, endDate: Date): Promise<any> {
     // This would query the audit_access_logs or event_store table.
-    const integrityCheck = await this.eventSourcingService.verifyLogIntegrity({ tenantId: 'SYSTEM', startDate, endDate });
+    const integrityCheck = await this.eventSourcingService.verifyIntegrity({ tenantId: 'SYSTEM', startDate, endDate });
 
     const sampleTransaction = {
       transaction_id: "txn_abc123",

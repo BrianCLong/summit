@@ -1,47 +1,19 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import { MultimodalDataService } from '../../src/services/MultimodalDataService';
 
 // Mock dependencies
-const mockQuery = jest.fn();
-const mockPool = {
-  query: mockQuery,
-  connect: jest.fn(),
-  on: jest.fn(),
-  end: jest.fn(),
-};
+const mockQuery: jest.MockedFunction<
+  (text: string, params?: unknown[]) => Promise<{ rows: any[] }>
+> = jest.fn();
+const mockUploadMedia: jest.MockedFunction<
+  (upload: any, userId: string) => Promise<any>
+> = jest.fn();
 
-jest.mock('pg', () => {
-  return {
-    Pool: jest.fn(() => mockPool),
-  };
-});
-
-const mockUploadMedia = jest.fn();
-jest.mock('../../src/services/MediaUploadService', () => {
-  return {
-    MediaUploadService: jest.fn(() => ({
-      uploadMedia: mockUploadMedia,
-    })),
-    MediaType: { IMAGE: 'IMAGE', VIDEO: 'VIDEO' }
-  };
-});
-
-const mockGetExtractionJobs = jest.fn();
-jest.mock('../../src/services/ExtractionJobService', () => {
-  return {
-    ExtractionJobService: jest.fn(() => ({
-      getExtractionJobs: mockGetExtractionJobs,
-      getExtractionJob: jest.fn(),
-      startExtractionJob: jest.fn(),
-      cancelExtractionJob: jest.fn(),
-    })),
-  };
-});
+const mockGetExtractionJobs: jest.MockedFunction<
+  (investigationId: string, options: any) => Promise<any>
+> = jest.fn();
 
 // Import after mocks
-import { Pool } from 'pg';
-import { MediaUploadService } from '../../src/services/MediaUploadService';
-import { ExtractionJobService } from '../../src/services/ExtractionJobService';
+import { MultimodalDataService } from '../../src/services/MultimodalDataService';
 
 describe('MultimodalDataService', () => {
   let service: MultimodalDataService;
@@ -52,10 +24,9 @@ describe('MultimodalDataService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Create new instances which will use the mocks
-    pool = new Pool();
-    mediaUploadService = new MediaUploadService({} as any);
-    extractionJobService = new ExtractionJobService({} as any, {});
+    pool = { query: mockQuery };
+    mediaUploadService = { uploadMedia: mockUploadMedia };
+    extractionJobService = { getExtractionJobs: mockGetExtractionJobs };
 
     service = new MultimodalDataService(
         pool,

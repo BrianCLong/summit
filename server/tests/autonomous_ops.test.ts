@@ -2,7 +2,7 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { AutomationExecutor } from '../src/autonomous/AutomationExecutor';
 import { GuardrailService } from '../src/autonomous/GuardrailService';
 import { ApprovalService } from '../src/autonomous/ApprovalService';
-import { PolicyEngine } from '../src/autonomous/policy-engine';
+import { PolicyDecision, PolicyEngine } from '../src/autonomous/policy-engine';
 import { Logger } from 'pino';
 import { Pool } from 'pg';
 
@@ -16,11 +16,11 @@ const mockLogger = {
 } as unknown as Logger;
 
 const mockDb = {
-    query: jest.fn(),
+  query: jest.fn(() => Promise.resolve({ rowCount: 1 })),
 } as unknown as Pool;
 
 const mockPolicyEngine = {
-    evaluate: jest.fn(),
+  evaluate: jest.fn(() => Promise.resolve({ allowed: true } as PolicyDecision)),
 } as unknown as PolicyEngine;
 
 describe('Autonomous Operations Flow', () => {
@@ -30,6 +30,12 @@ describe('Autonomous Operations Flow', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (mockPolicyEngine.evaluate as jest.Mock).mockImplementation(() =>
+      Promise.resolve({ allowed: true } as PolicyDecision),
+    );
+    (mockDb.query as jest.Mock).mockImplementation(() =>
+      Promise.resolve({ rowCount: 1 }),
+    );
     guardrailService = new GuardrailService(mockPolicyEngine, mockLogger);
     approvalService = new ApprovalService(mockDb, mockLogger);
     executor = new AutomationExecutor(guardrailService, approvalService, mockLogger);
@@ -55,8 +61,6 @@ describe('Autonomous Operations Flow', () => {
     });
 
     it('should allow valid operational actions', async () => {
-        (mockPolicyEngine.evaluate as jest.Mock).mockResolvedValue({ allowed: true });
-
         const result = await guardrailService.checkGuardrails({
             actionType: 'throttle_tenant',
             tenantId: 'tenant-1',
@@ -72,11 +76,6 @@ describe('Autonomous Operations Flow', () => {
   describe('AutomationExecutor', () => {
      it('should require approval for scaling actions', async () => {
          // Setup: Allow via guardrails
-         (mockPolicyEngine.evaluate as jest.Mock).mockResolvedValue({ allowed: true });
-
-         // Setup: Database mock for approval request
-         (mockDb.query as jest.Mock).mockResolvedValue({ rowCount: 1 });
-
          const result = await executor.executeAction({
              type: 'suggest_scale_up',
              tenantId: 'tenant-1',
@@ -94,8 +93,6 @@ describe('Autonomous Operations Flow', () => {
 
      it('should execute safe actions immediately', async () => {
         // Setup: Allow via guardrails
-        (mockPolicyEngine.evaluate as jest.Mock).mockResolvedValue({ allowed: true });
-
         const result = await executor.executeAction({
             type: 'auto_retry',
             tenantId: 'tenant-1',

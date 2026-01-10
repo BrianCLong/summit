@@ -11,7 +11,7 @@ import { Counter, Gauge, Histogram } from 'prom-client';
 import pino from 'pino';
 import { pool } from '../db/pg.js';
 import { provenanceLedger } from '../provenance/ledger.js';
-import { advancedAuditSystem } from '../audit/advanced-audit-system.js';
+import { advancedAuditSystem } from '../audit/index.js';
 import type {
   PIGGovernanceConfig,
   ApprovalWorkflow,

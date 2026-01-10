@@ -8,9 +8,8 @@ as input to Linear/board importers to keep parity with repository work items.
 
 import argparse
 import json
+from collections.abc import Iterable, Sequence
 from pathlib import Path
-from typing import Iterable, List, Sequence
-
 
 DEFAULT_MARKERS: Sequence[str] = ("TODO", "FIXME", "TBD")
 SKIP_DIRS: Sequence[str] = (
@@ -40,8 +39,8 @@ def is_text_file(path: Path, max_bytes: int = 2_000_000) -> bool:
         return False
 
 
-def scan_file(path: Path, markers: Sequence[str]) -> List[dict]:
-    results: List[dict] = []
+def scan_file(path: Path, markers: Sequence[str]) -> list[dict]:
+    results: list[dict] = []
     try:
         with path.open("r", encoding="utf-8", errors="ignore") as fh:
             for idx, line in enumerate(fh, start=1):
@@ -77,8 +76,12 @@ def walk_paths(root: Path, markers: Sequence[str]) -> Iterable[dict]:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate a TODO inventory JSON artifact.")
     parser.add_argument("--root", type=Path, default=Path("."), help="Root directory to scan")
-    parser.add_argument("--markers", nargs="*", default=list(DEFAULT_MARKERS), help="Markers to search for")
-    parser.add_argument("--output", type=Path, default=None, help="Optional output file path for JSON")
+    parser.add_argument(
+        "--markers", nargs="*", default=list(DEFAULT_MARKERS), help="Markers to search for"
+    )
+    parser.add_argument(
+        "--output", type=Path, default=None, help="Optional output file path for JSON"
+    )
     args = parser.parse_args()
 
     root = args.root.resolve()

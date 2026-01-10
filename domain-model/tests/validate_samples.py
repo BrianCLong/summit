@@ -1,7 +1,7 @@
 import argparse
 import json
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from jsonschema import Draft202012Validator, RefResolver
 from jsonschema.exceptions import ValidationError
@@ -25,7 +25,7 @@ RELATIONSHIP_SCHEMA = SCHEMA_ROOT / "relationships" / "relationship.schema.json"
 SAMPLES_ROOT = ROOT / "samples" / "v1"
 
 
-def load_json(path: Path) -> Dict[str, Any]:
+def load_json(path: Path) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -36,7 +36,7 @@ def build_validator(schema_path: Path) -> Draft202012Validator:
     return Draft202012Validator(schema, resolver=resolver)
 
 
-def infer_schema(sample: Dict[str, Any]) -> Path:
+def infer_schema(sample: dict[str, Any]) -> Path:
     if "relationshipType" in sample:
         return RELATIONSHIP_SCHEMA
     entity_type = sample.get("entityType")
@@ -67,7 +67,9 @@ def validate_all_samples() -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Validate canonical domain-model samples against schemas")
+    parser = argparse.ArgumentParser(
+        description="Validate canonical domain-model samples against schemas"
+    )
     parser.add_argument("--sample", type=Path, help="Optional path to a specific sample JSON file")
     args = parser.parse_args()
 

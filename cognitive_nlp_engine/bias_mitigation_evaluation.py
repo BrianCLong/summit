@@ -5,7 +5,7 @@ import io
 import random
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from cognitive_nlp_engine.dialogue.manager import DialogueManager
 from cognitive_nlp_engine.nlu.query_parser import SecurityQueryParser
@@ -20,9 +20,9 @@ class BiasScenario:
 
     name: str
     prompt: str
-    decision_context: Dict[str, Any]
+    decision_context: dict[str, Any]
     target_bias: BiasType
-    expected_strategies: List[str]
+    expected_strategies: list[str]
 
 
 @dataclass
@@ -33,25 +33,25 @@ class ScenarioEvaluationResult:
     target_bias: BiasType
     detected: bool
     detection_confidence: float
-    severity: Optional[str]
+    severity: str | None
     neutralized: bool
-    applied_strategies: List[str]
+    applied_strategies: list[str]
     bias_reduction: float
-    recommendations: List[str]
-    mitigation_recommendations: List[str]
-    raw_analysis: Dict[str, Any]
+    recommendations: list[str]
+    mitigation_recommendations: list[str]
+    raw_analysis: dict[str, Any]
 
 
 @dataclass
 class EvaluationSummary:
     """Aggregate view of the bias mitigation evaluation."""
 
-    scenario_results: List[ScenarioEvaluationResult]
+    scenario_results: list[ScenarioEvaluationResult]
     overall_detection_rate: float
     average_bias_reduction: float
     neutralization_success_rate: float
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return a JSON-serializable representation of the summary."""
         return {
             "overall_detection_rate": self.overall_detection_rate,
@@ -108,7 +108,7 @@ class CognitiveBiasMitigationEvaluator:
 
         self.scenarios = self._build_scenarios()
 
-    def _build_scenarios(self) -> List[BiasScenario]:
+    def _build_scenarios(self) -> list[BiasScenario]:
         """Define the targeted cognitive bias scenarios."""
         anchoring_context = {
             "scenario": "Budget forecasting anchored to initial vendor quote",
@@ -225,9 +225,9 @@ class CognitiveBiasMitigationEvaluator:
             ),
         ]
 
-    def evaluate(self) -> List[ScenarioEvaluationResult]:
+    def evaluate(self) -> list[ScenarioEvaluationResult]:
         """Run all scenarios and collect evaluation results."""
-        results: List[ScenarioEvaluationResult] = []
+        results: list[ScenarioEvaluationResult] = []
 
         for scenario in self.scenarios:
             conversation_id = self.dialogue_manager.start_dialogue(
@@ -253,7 +253,9 @@ class CognitiveBiasMitigationEvaluator:
                 }
             )
 
-            analysis_result = self.bias_system.analyze_decision_context(self.agent, decision_context)
+            analysis_result = self.bias_system.analyze_decision_context(
+                self.agent, decision_context
+            )
             sanitized_result = dict(analysis_result)
             timestamp_value = sanitized_result.get("timestamp")
             if isinstance(timestamp_value, datetime):
@@ -265,7 +267,7 @@ class CognitiveBiasMitigationEvaluator:
         return results
 
     def _summarize_scenario(
-        self, scenario: BiasScenario, analysis_result: Dict[str, Any]
+        self, scenario: BiasScenario, analysis_result: dict[str, Any]
     ) -> ScenarioEvaluationResult:
         """Create a condensed summary for an individual scenario."""
         bias_detections = analysis_result.get("bias_detections", [])
@@ -289,13 +291,9 @@ class CognitiveBiasMitigationEvaluator:
         else:
             bias_reduction = 0.0
 
-        neutralized = bool(
-            matching_detection
-            and applied_strategies
-            and bias_reduction >= 0.3
-        )
+        neutralized = bool(matching_detection and applied_strategies and bias_reduction >= 0.3)
 
-        recommendations: List[str] = []
+        recommendations: list[str] = []
         if matching_detection and matching_detection.get("recommendation"):
             recommendations.append(matching_detection["recommendation"])
 
@@ -325,7 +323,9 @@ def run_bias_mitigation_evaluation(verbose: bool = False) -> EvaluationSummary:
     scenario_results = evaluator.evaluate()
 
     total = len(scenario_results)
-    detection_rate = sum(1 for result in scenario_results if result.detected) / total if total else 0.0
+    detection_rate = (
+        sum(1 for result in scenario_results if result.detected) / total if total else 0.0
+    )
     average_bias_reduction = (
         sum(result.bias_reduction for result in scenario_results) / total if total else 0.0
     )

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -7,10 +8,9 @@ import pandas as pd
 import pandas.testing as pdt
 import pytest
 
-import sys
 sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 
-from resb import RESBConfig, RESBGenerator, RangeConstraint
+from resb import RangeConstraint, RESBConfig, RESBGenerator
 
 
 @pytest.fixture(scope="module")

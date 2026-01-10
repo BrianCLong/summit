@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import pytest
-
 from xra.explanations import explain_rank_shift
 from xra.metrics import compute_bias_metrics
 from xra.replay import load_retrieval_log
@@ -15,13 +14,14 @@ def test_bias_alerts_detect_injected_shift():
 
     metrics = compute_bias_metrics(baseline, candidate, k_values=(3, 5))
 
-    fairness_alerts = [alert for alert in metrics["alerts"] if str(alert["type"]).startswith("fairness@")]
+    fairness_alerts = [
+        alert for alert in metrics["alerts"] if str(alert["type"]).startswith("fairness@")
+    ]
     assert fairness_alerts, "Expected at least one fairness alert to be triggered"
     for alert in fairness_alerts:
         k = int(alert["k"])
         assert (
-            metrics["candidate"]["fairness"][k].average
-            < metrics["baseline"]["fairness"][k].average
+            metrics["candidate"]["fairness"][k].average < metrics["baseline"]["fairness"][k].average
         )
 
     exposure_alert = [alert for alert in metrics["alerts"] if alert["type"] == "exposure"]

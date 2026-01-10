@@ -3,4 +3,4 @@
 from .config import Settings
 from .processor import FeedProcessor
 
-__all__ = ["Settings", "FeedProcessor"]
+__all__ = ["FeedProcessor", "Settings"]

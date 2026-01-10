@@ -5,20 +5,20 @@ Implements Neo4j-based aggregation for graph-aware
 federated learning result storage and querying.
 """
 
-from .neo4j_aggregator import (
-    Neo4jAggregator,
-    AggregationConfig,
-    FederatedGraphResult,
-)
 from .graph_merger import (
     GraphMerger,
     MergeStrategy,
 )
+from .neo4j_aggregator import (
+    AggregationConfig,
+    FederatedGraphResult,
+    Neo4jAggregator,
+)
 
 __all__ = [
-    "Neo4jAggregator",
     "AggregationConfig",
     "FederatedGraphResult",
     "GraphMerger",
     "MergeStrategy",
+    "Neo4jAggregator",
 ]

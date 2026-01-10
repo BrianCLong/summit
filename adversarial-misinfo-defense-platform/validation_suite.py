@@ -393,7 +393,7 @@ class ValidationBenchmark:
         # Current performance (simulated from validation results)
         current_performance = self._simulate_current_performance(current_results)
 
-        for modality in sota_benchmarks.keys():
+        for modality in sota_benchmarks:
             if modality in current_performance:
                 current_metrics = current_performance[modality]
 
@@ -537,7 +537,7 @@ class ValidationBenchmark:
                 json.dump(results_dict, f, indent=2, default=str)
             self.logger.info(f"Saved validation results to {filepath}")
         except Exception as e:
-            self.logger.error(f"Failed to save validation results: {str(e)}")
+            self.logger.error(f"Failed to save validation results: {e!s}")
 
     def load_validation_results(self, filepath: str | Path) -> ValidationResults | None:
         """
@@ -552,7 +552,7 @@ class ValidationBenchmark:
             self.logger.info(f"Loaded validation results from {filepath}")
             return results
         except Exception as e:
-            self.logger.error(f"Failed to load validation results: {str(e)}")
+            self.logger.error(f"Failed to load validation results: {e!s}")
             return None
 
     def get_validation_history(self) -> list[ValidationResults]:

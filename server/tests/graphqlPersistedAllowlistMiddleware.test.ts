@@ -5,9 +5,12 @@ import path from 'path';
 import {
   createGraphqlPersistedAllowlistMiddleware,
   hashPersistedQuery,
-} from '../src/middleware/graphqlPersistedAllowlist.ts';
+} from '../src/middleware/graphqlPersistedAllowlist.js';
 
-describe('GraphqlPersistedAllowlistMiddleware', () => {
+const run = process.env.NO_NETWORK_LISTEN !== 'true';
+const describeIf = run ? describe : describe.skip;
+
+describeIf('GraphqlPersistedAllowlistMiddleware', () => {
   const manifestPath = path.join(__dirname, 'tmp-manifest.json');
   const secondaryManifestPath = path.join(
     __dirname,

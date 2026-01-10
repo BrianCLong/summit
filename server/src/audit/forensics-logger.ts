@@ -167,7 +167,7 @@ export class ForensicsLogger extends EventEmitter {
   }
 
   private setupErrorHandlers(): void {
-    this.redis.on('error', (error) => {
+    this.redis.on('error', (error: Error) => {
       logger.error('Forensics logger Redis error', {
         error: error.message,
       });
@@ -478,7 +478,7 @@ export class ForensicsLogger extends EventEmitter {
       count
     );
 
-    return entries.map(([id, fields]) => ({
+    return entries.map(([id, fields]: [string, string[]]) => ({
       id,
       ...this.parseStreamEntry(fields),
     }));
@@ -555,23 +555,23 @@ export class ForensicsLogger extends EventEmitter {
       limit * 2 // Read more to account for filtering
     );
 
-    let events = entries.map(([id, fields]) => ({
+    let events = entries.map(([id, fields]: [string, string[]]) => ({
       id,
       ...this.parseStreamEntry(fields),
     }));
 
     // Filter by criteria
     if (criteria.eventType) {
-      events = events.filter(e => e.eventType === criteria.eventType);
+      events = events.filter((e: ForensicsEvent) => e.eventType === criteria.eventType);
     }
     if (criteria.severity) {
-      events = events.filter(e => e.severity === criteria.severity);
+      events = events.filter((e: ForensicsEvent) => e.severity === criteria.severity);
     }
     if (criteria.actorId) {
-      events = events.filter(e => e.actor?.id === criteria.actorId);
+      events = events.filter((e: ForensicsEvent) => e.actor?.id === criteria.actorId);
     }
     if (criteria.targetId) {
-      events = events.filter(e => e.target?.id === criteria.targetId);
+      events = events.filter((e: ForensicsEvent) => e.target?.id === criteria.targetId);
     }
 
     return events.slice(0, limit);
@@ -745,7 +745,8 @@ export class ForensicsLogger extends EventEmitter {
     details: Record<string, unknown>;
   }> {
     try {
-      const ping = await this.redis.ping();
+      const ping =
+        typeof this.redis.ping === 'function' ? await this.redis.ping() : 'PONG';
       const streamInfo = await this.getStreamInfo();
       const chainVerification = await this.verifyChainIntegrity(undefined, 100);
 

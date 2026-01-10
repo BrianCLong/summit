@@ -261,16 +261,16 @@ describe('CaseRepo', () => {
 
   describe('delete', () => {
     it('should prevent deletion if case has audit logs', async () => {
-      const mockClient = {
+      const mockClient: any = {
         query: jest.fn(),
         release: jest.fn(),
       };
 
       mockClient.query
-        .mockResolvedValueOnce(undefined) // BEGIN
-        .mockResolvedValueOnce({ rows: [{ id: 'log-1' }] }); // Audit logs check
+        .mockResolvedValueOnce(undefined as any) // BEGIN
+        .mockResolvedValueOnce({ rows: [{ id: 'log-1' }] } as any); // Audit logs check
 
-      mockPool.connect = jest.fn().mockResolvedValueOnce(mockClient);
+      mockPool.connect.mockResolvedValueOnce(mockClient);
 
       await expect(repo.delete('case-123')).rejects.toThrow(
         'Cannot delete case with existing audit logs',
@@ -280,18 +280,18 @@ describe('CaseRepo', () => {
     });
 
     it('should delete case if no audit logs exist', async () => {
-      const mockClient = {
+      const mockClient: any = {
         query: jest.fn(),
         release: jest.fn(),
       };
 
       mockClient.query
-        .mockResolvedValueOnce(undefined) // BEGIN
-        .mockResolvedValueOnce({ rows: [] }) // No audit logs
-        .mockResolvedValueOnce({ rowCount: 1 }) // DELETE
-        .mockResolvedValueOnce(undefined); // COMMIT
+        .mockResolvedValueOnce(undefined as any) // BEGIN
+        .mockResolvedValueOnce({ rows: [] } as any) // No audit logs
+        .mockResolvedValueOnce({ rowCount: 1 } as any) // DELETE
+        .mockResolvedValueOnce(undefined as any); // COMMIT
 
-      mockPool.connect = jest.fn().mockResolvedValueOnce(mockClient);
+      mockPool.connect.mockResolvedValueOnce(mockClient);
 
       const result = await repo.delete('case-123');
 

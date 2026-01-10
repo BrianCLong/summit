@@ -87,10 +87,10 @@ export class QueryAnalyzer {
     const lowerQuery = query.toLowerCase();
 
     const patterns = [
-      { pattern: /where\s+(\w+)\.(\w+)\s*=/, type: 'equality' },
-      { pattern: /where\s+(\w+)\.(\w+)\s*in/, type: 'in' },
-      { pattern: /where\s+(\w+)\.(\w+)\s*<|>|<=|>=/, type: 'range' },
-      { pattern: /order\s+by\s+(\w+)\.(\w+)/, type: 'sort' },
+      { pattern: /where\s+(\w+)\.(\w+)\s*=/gi, type: 'equality' },
+      { pattern: /where\s+(\w+)\.(\w+)\s*in/gi, type: 'in' },
+      { pattern: /where\s+(\w+)\.(\w+)\s*(?:<=|>=|<|>)/gi, type: 'range' },
+      { pattern: /order\s+by\s+(\w+)\.(\w+)/gi, type: 'sort' },
     ];
 
     for (const { pattern } of patterns) {

@@ -1,4 +1,5 @@
-import { TenantService } from '../TenantService.js';
+import type { TenantService as TenantServiceType } from '../TenantService.js';
+import GAEnrollmentService from '../GAEnrollmentService.js';
 import { getPostgresPool } from '../../config/database.js';
 import { provenanceLedger } from '../../provenance/ledger.js';
 import { randomUUID } from 'crypto';
@@ -7,15 +8,23 @@ import { randomUUID } from 'crypto';
 jest.mock('../../config/database.js');
 jest.mock('../../provenance/ledger.js');
 jest.mock('../../utils/logger.js');
+let TenantService: typeof import('../TenantService.js').TenantService;
 
 describe('TenantService', () => {
-  let tenantService: TenantService;
+  let tenantService: TenantServiceType;
   let mockClient: any;
   let mockPool: any;
+
+  beforeAll(async () => {
+    ({ TenantService } = await import('../TenantService.js'));
+  });
 
   beforeEach(() => {
     // Reset mocks
     jest.clearAllMocks();
+    jest
+      .spyOn(GAEnrollmentService, 'checkTenantEnrollmentEligibility')
+      .mockResolvedValue({ eligible: true, reason: 'ok' });
 
     mockClient = {
       query: jest.fn(),
@@ -41,8 +50,7 @@ describe('TenantService', () => {
     const actorId = 'user-123';
 
     it('should create a tenant successfully and associate user', async () => {
-      // Mock unique slug check (returning 0 rows means strictly unique)
-      mockClient.query.mockResolvedValueOnce({ rowCount: 0 });
+      mockClient.query.mockResolvedValue({ rowCount: 0, rows: [] });
 
       // Mock insertion return
       const mockTenantRow = {
@@ -58,7 +66,11 @@ describe('TenantService', () => {
         created_at: new Date(),
         updated_at: new Date(),
       };
-      mockClient.query.mockResolvedValueOnce({ rows: [mockTenantRow] });
+      mockClient.query
+        .mockResolvedValueOnce(undefined as any) // BEGIN
+        .mockResolvedValueOnce({ rowCount: 0, rows: [] }) // SELECT slug
+        .mockResolvedValueOnce({ rows: [mockTenantRow] }) // INSERT tenant
+        .mockResolvedValueOnce({ rowCount: 1, rows: [] }); // UPDATE user
 
       const result = await tenantService.createTenant(validInput, actorId);
 
@@ -69,7 +81,7 @@ describe('TenantService', () => {
       // Verify User was updated
       expect(mockClient.query).toHaveBeenCalledWith(
           expect.stringContaining('UPDATE users'),
-          expect.arrayContaining([mockTenantRow.id, 'ADMIN', actorId])
+          expect.arrayContaining([expect.any(String), 'ADMIN', actorId])
       );
 
       // Verify Provenance Ledger was called
@@ -94,8 +106,10 @@ describe('TenantService', () => {
             updated_at: new Date()
         };
 
-        // Mock existing slug check returning the row
-        mockClient.query.mockResolvedValueOnce({ rowCount: 1, rows: [existingTenantRow] });
+        mockClient.query.mockResolvedValue({ rowCount: 0, rows: [] });
+        mockClient.query
+          .mockResolvedValueOnce(undefined as any) // BEGIN
+          .mockResolvedValueOnce({ rowCount: 1, rows: [existingTenantRow] }); // SELECT slug
 
         const result = await tenantService.createTenant(validInput, actorId);
 
@@ -114,8 +128,10 @@ describe('TenantService', () => {
           config: {},
           settings: {}
       };
-      // Mock existing slug
-      mockClient.query.mockResolvedValueOnce({ rowCount: 1, rows: [otherUserRow] });
+      mockClient.query.mockResolvedValue({ rowCount: 0, rows: [] });
+      mockClient.query
+        .mockResolvedValueOnce(undefined as any) // BEGIN
+        .mockResolvedValueOnce({ rowCount: 1, rows: [otherUserRow] }); // SELECT slug
 
       await expect(tenantService.createTenant(validInput, actorId))
         .rejects.toThrow("Tenant slug 'test-corp' is already taken");

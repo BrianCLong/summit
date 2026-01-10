@@ -11,6 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent.parent
 SERVER_SRC = ROOT / "server" / "src"
 
+
 def generate_dfd():
     print("Generating Data Flow Diagram...")
 
@@ -27,7 +28,7 @@ def generate_dfd():
                 file_path = os.path.join(root, file)
 
                 try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
+                    with open(file_path, encoding="utf-8") as f:
                         content = f.read()
 
                         # Identify dependencies based on imports
@@ -35,7 +36,11 @@ def generate_dfd():
                         imports = import_pattern.findall(content)
 
                         for imp in imports:
-                            if "service" in imp.lower() or "repo" in imp.lower() or "model" in imp.lower():
+                            if (
+                                "service" in imp.lower()
+                                or "repo" in imp.lower()
+                                or "model" in imp.lower()
+                            ):
                                 target = os.path.basename(imp)
                                 flows.append((component_name, target, "calls"))
                                 nodes.add(component_name)
@@ -74,6 +79,7 @@ def generate_dfd():
         f.write("```\n")
 
     print(f"DFD generated at {output_path}")
+
 
 if __name__ == "__main__":
     generate_dfd()

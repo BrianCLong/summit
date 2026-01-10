@@ -10,6 +10,7 @@ Features
 * Basic entity/relationship model normalisation
 * Entity resolution using fuzzy matching + optional NLP alias linking
 """
+
 from __future__ import annotations
 
 import csv

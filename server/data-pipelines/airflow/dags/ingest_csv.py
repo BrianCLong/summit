@@ -292,21 +292,21 @@ def send_completion_notification(**context):
     CSV Ingestion Pipeline Completed Successfully
     
     Extraction:
-    - Records processed: {ingestion_stats.get('records_processed', 0)}
-    - Records successful: {ingestion_stats.get('records_success', 0)}
-    - Records failed: {ingestion_stats.get('records_failed', 0)}
+    - Records processed: {ingestion_stats.get("records_processed", 0)}
+    - Records successful: {ingestion_stats.get("records_success", 0)}
+    - Records failed: {ingestion_stats.get("records_failed", 0)}
     
     Validation:
-    - Valid records: {validation_stats.get('valid_records', 0)}
-    - Invalid records: {validation_stats.get('invalid_records', 0)}
-    - Validation rate: {validation_stats.get('validation_rate', 0):.2%}
+    - Valid records: {validation_stats.get("valid_records", 0)}
+    - Invalid records: {validation_stats.get("invalid_records", 0)}
+    - Validation rate: {validation_stats.get("validation_rate", 0):.2%}
     
     Transformation:
-    - Entities created: {transform_stats.get('entities_created', 0)}
-    - Entity types: {', '.join(transform_stats.get('entity_types', []))}
+    - Entities created: {transform_stats.get("entities_created", 0)}
+    - Entity types: {", ".join(transform_stats.get("entity_types", []))}
     
     Loading:
-    - Entities loaded to Neo4j: {load_stats.get('entities_loaded', 0)}
+    - Entities loaded to Neo4j: {load_stats.get("entities_loaded", 0)}
     
     Pipeline completed at: {datetime.now().isoformat()}
     """

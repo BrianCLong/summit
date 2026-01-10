@@ -1,13 +1,15 @@
 from __future__ import annotations
+
 import sys
-from .prompt_loader import load_config, load_prompt_from_config
+
+from .modules.devops import DevOps
+from .modules.documenter import Documenter
+from .modules.executor import Executor
 from .modules.interpreter import Interpreter
 from .modules.planner import Planner
-from .modules.executor import Executor
-from .modules.verifier import Verifier
-from .modules.documenter import Documenter
-from .modules.devops import DevOps
 from .modules.pr_manager import PRManager
+from .modules.verifier import Verifier
+from .prompt_loader import load_config, load_prompt_from_config
 
 
 def run(request: str) -> None:
@@ -59,7 +61,9 @@ def run(request: str) -> None:
     pr_cfg = cfg.get("pr", {})
     pr_manager = PRManager()
     pr_title = f"Auto-generated implementation: {request[:60]}"
-    pr_body = "This PR was prepared by the ultra-maximal dev agent.\n\nSee generated docs in output/."
+    pr_body = (
+        "This PR was prepared by the ultra-maximal dev agent.\n\nSee generated docs in output/."
+    )
     pr_result = pr_manager.prepare_and_optionally_merge(
         title=pr_title,
         body=pr_body,
@@ -72,7 +76,7 @@ def run(request: str) -> None:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python -m agent.main \"<request>\"")
+        print('Usage: python -m agent.main "<request>"')
         sys.exit(1)
     request_text = " ".join(sys.argv[1:])
     run(request_text)

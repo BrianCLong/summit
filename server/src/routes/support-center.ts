@@ -250,11 +250,12 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const payload = ImpersonationStartSchema.parse(req.body);
+      const user = req.user as any;
       const actor = {
-        id: req.user?.id as string,
-        role: req.user?.role as string,
-        tenantId: (req.user?.tenantId || req.user?.defaultTenantId) as string,
-        email: req.user?.email as string | undefined,
+        id: user?.id as string,
+        role: user?.role as string,
+        tenantId: (user?.tenantId || user?.defaultTenantId) as string,
+        email: user?.email as string | undefined,
       };
 
       const result = await supportImpersonationService.startImpersonation({
@@ -283,11 +284,12 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const payload = ImpersonationStopSchema.parse(req.body);
+      const user = req.user as any;
       const actor = {
-        id: req.user?.id as string,
-        role: req.user?.role as string,
-        tenantId: (req.user?.tenantId || req.user?.defaultTenantId) as string,
-        email: req.user?.email as string | undefined,
+        id: user?.id as string,
+        role: user?.role as string,
+        tenantId: (user?.tenantId || user?.defaultTenantId) as string,
+        email: user?.email as string | undefined,
       };
 
       const result = await supportImpersonationService.stopImpersonation({
@@ -314,11 +316,12 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const payload = TenantHealthBundleSchema.parse(req.body);
+      const user = req.user as any;
       const actor = {
-        id: req.user?.id as string,
-        role: req.user?.role as string,
-        tenantId: (req.user?.tenantId || req.user?.defaultTenantId) as string,
-        email: req.user?.email as string | undefined,
+        id: user?.id as string,
+        role: user?.role as string,
+        tenantId: (user?.tenantId || user?.defaultTenantId) as string,
+        email: user?.email as string | undefined,
       };
 
       const result = await tenantHealthBundleService.exportBundle({

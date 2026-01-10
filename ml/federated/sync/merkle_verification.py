@@ -5,13 +5,13 @@ Provides integrity verification for model updates using Merkle trees.
 """
 
 import hashlib
-from typing import Any, List, Optional, Tuple
+from typing import Any
 
 
 class MerkleTree:
     """Merkle tree for data integrity verification"""
 
-    def __init__(self, data_blocks: List[Any]):
+    def __init__(self, data_blocks: list[Any]):
         self.data_blocks = data_blocks
         self.leaves = [self._hash(block) for block in data_blocks]
         self.root = self._build_tree(self.leaves)
@@ -22,10 +22,11 @@ class MerkleTree:
             data = data.encode()
         elif not isinstance(data, bytes):
             import pickle
+
             data = pickle.dumps(data)
         return hashlib.sha256(data).hexdigest()
 
-    def _build_tree(self, nodes: List[str]) -> str:
+    def _build_tree(self, nodes: list[str]) -> str:
         """Build Merkle tree and return root"""
         if not nodes:
             return ""
@@ -41,7 +42,7 @@ class MerkleTree:
 
         return self._build_tree(new_level)
 
-    def get_proof(self, index: int) -> List[Tuple[str, str]]:
+    def get_proof(self, index: int) -> list[tuple[str, str]]:
         """Get Merkle proof for data at index"""
         if index >= len(self.leaves):
             return []
@@ -77,7 +78,7 @@ class MerkleTree:
 
 def verify_merkle_proof(
     data: Any,
-    proof: List[Tuple[str, str]],
+    proof: list[tuple[str, str]],
     root: str,
 ) -> bool:
     """Verify a Merkle proof"""
@@ -87,6 +88,7 @@ def verify_merkle_proof(
         current = hashlib.sha256(data).hexdigest()
     else:
         import pickle
+
         current = hashlib.sha256(pickle.dumps(data)).hexdigest()
 
     for sibling, position in proof:

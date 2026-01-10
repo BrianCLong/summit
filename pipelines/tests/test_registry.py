@@ -1,14 +1,14 @@
 """
 Tests for Pipeline Registry
 """
-import json
+
 import tempfile
 from pathlib import Path
 
 import pytest
 import yaml
 
-from pipelines.registry.core import Pipeline, PipelineRegistry
+from pipelines.registry.core import PipelineRegistry
 
 
 @pytest.fixture
@@ -227,9 +227,7 @@ def test_dependency_analysis(temp_manifest_dir):
         "kind": "Pipeline",
         "metadata": {"name": "producer"},
         "spec": {
-            "outputs": [
-                {"name": "data", "namespace": "s3://bucket/data"}
-            ],
+            "outputs": [{"name": "data", "namespace": "s3://bucket/data"}],
             "tasks": [{"id": "task1", "type": "python", "code": {}}],
         },
     }
@@ -239,9 +237,7 @@ def test_dependency_analysis(temp_manifest_dir):
         "kind": "Pipeline",
         "metadata": {"name": "consumer"},
         "spec": {
-            "inputs": [
-                {"name": "data", "namespace": "s3://bucket/data"}
-            ],
+            "inputs": [{"name": "data", "namespace": "s3://bucket/data"}],
             "tasks": [{"id": "task1", "type": "python", "code": {}}],
         },
     }
@@ -272,9 +268,7 @@ def test_find_downstream_pipelines():
         "kind": "Pipeline",
         "metadata": {"name": "producer"},
         "spec": {
-            "outputs": [
-                {"name": "data", "namespace": "s3://bucket/data"}
-            ],
+            "outputs": [{"name": "data", "namespace": "s3://bucket/data"}],
             "tasks": [{"id": "task1", "type": "python", "code": {}}],
         },
     }
@@ -284,9 +278,7 @@ def test_find_downstream_pipelines():
         "kind": "Pipeline",
         "metadata": {"name": "consumer"},
         "spec": {
-            "inputs": [
-                {"name": "data", "namespace": "s3://bucket/data"}
-            ],
+            "inputs": [{"name": "data", "namespace": "s3://bucket/data"}],
             "tasks": [{"id": "task1", "type": "python", "code": {}}],
         },
     }

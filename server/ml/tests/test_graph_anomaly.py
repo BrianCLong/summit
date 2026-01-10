@@ -2,7 +2,6 @@ import io
 import json
 import sys
 from pathlib import Path
-from typing import Tuple
 
 import pytest
 
@@ -13,7 +12,7 @@ if str(ROOT) not in sys.path:
 from server.ml.models.graph_anomaly import GraphAnomalyDetector, run_cli
 
 
-def sample_graph() -> Tuple[list[dict], list[dict]]:
+def sample_graph() -> tuple[list[dict], list[dict]]:
     nodes = [
         {"id": "a", "type": "Person", "tags": ["seed"]},
         {"id": "b", "type": "Org", "tags": []},
@@ -73,4 +72,3 @@ def test_cli_round_trip(monkeypatch: pytest.MonkeyPatch):
     parsed = json.loads(output_stream.read())
     assert parsed["summary"]["totalNodes"] == len(nodes)
     assert parsed["metadata"]["entityId"] == "a"
-

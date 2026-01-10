@@ -1,0 +1,138 @@
+name: "Release Bundle"
+description: "Standardized release bundling and verification"
+inputs:
+  tag:
+    description: "Release tag (e.g. v1.0.0)"
+    required: true
+  dry_run:
+    description: "If true, skips publication steps (logic handled by caller usually, but included for completeness)"
+    default: "true"
+  default_branch:
+    description: "Default branch name"
+    default: "main"
+  override_freeze:
+    description: "Allow release during freeze"
+    default: "false"
+  override_reason:
+    description: "Reason for overriding freeze"
+    required: false
+
+outputs:
+  channel:
+    description: "Release channel (ga or rc)"
+    value: ${{ steps.classify.outputs.channel }}
+  previous_tag:
+    description: "Previous release tag"
+    value: ${{ steps.prev_tag.outputs.tag }}
+  artifacts_dir:
+    description: "Directory containing release artifacts"
+    value: ${{ steps.bundle.outputs.artifacts_dir }}
+  notes_path:
+    description: "Path to generated release notes"
+    value: ${{ steps.bundle.outputs.notes_path }}
+  manifest_path:
+    description: "Path to evidence manifest"
+    value: ${{ steps.bundle.outputs.manifest_path }}
+  bundle_path:
+    description: "Path to the compressed evidence tarball"
+    value: ${{ steps.bundle.outputs.bundle_path }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Preflight Check
+      shell: bash
+      run: |
+        if [ -f scripts/preflight.sh ]; then
+          chmod +x scripts/preflight.sh
+          ./scripts/preflight.sh "${{ inputs.tag }}"
+        else
+          echo "⚠️ scripts/preflight.sh not found, skipping."
+        fi
+
+    - name: Freeze Check
+      shell: bash
+      run: |
+        if [ "${{ inputs.override_freeze }}" == "true" ]; then
+          echo "⚠️ Freeze check overridden. Reason: ${{ inputs.override_reason }}"
+        else
+          if [ -f scripts/check-freeze.sh ]; then
+            chmod +x scripts/check-freeze.sh
+            ./scripts/check-freeze.sh
+          fi
+        fi
+
+    - name: Classify Tag
+      id: classify
+      shell: bash
+      run: |
+        TAG="${{ inputs.tag }}"
+        if [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "channel=ga" >> $GITHUB_OUTPUT
+        else
+          echo "channel=rc" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Resolve Previous Tag
+      id: prev_tag
+      shell: bash
+      run: |
+        # Fetch tags if needed (shallow clones might miss them)
+        git fetch --tags --force 2>/dev/null || true
+        PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+        echo "tag=$PREV_TAG" >> $GITHUB_OUTPUT
+
+    - name: Generate Artifact Bundle
+      id: bundle
+      shell: bash
+      run: |
+        OUTPUT_DIR="dist/release"
+        mkdir -p "$OUTPUT_DIR"
+        VERSION="${{ inputs.tag }}"
+
+        if [ ! -f scripts/bundle-release-evidence.sh ]; then
+          echo "❌ Error: scripts/bundle-release-evidence.sh not found!"
+          exit 1
+        fi
+
+        # Ensure scripts are executable
+        chmod +x scripts/bundle-release-evidence.sh
+
+        echo "📦 Running bundle script..."
+        echo "Dry Run: ${{ inputs.dry_run }}"
+
+        ./scripts/bundle-release-evidence.sh "$VERSION" "summit-platform" "${{ github.sha }}" "$OUTPUT_DIR"
+
+        # Determine paths based on script logic
+        EVIDENCE_DIR="$OUTPUT_DIR/evidence-$VERSION"
+        BUNDLE_FILE="$OUTPUT_DIR/summit-release-$VERSION-evidence.tar.gz"
+        MANIFEST_FILE="$EVIDENCE_DIR/MANIFEST.json"
+
+        echo "artifacts_dir=$EVIDENCE_DIR" >> $GITHUB_OUTPUT
+        echo "manifest_path=$MANIFEST_FILE" >> $GITHUB_OUTPUT
+        echo "bundle_path=$BUNDLE_FILE" >> $GITHUB_OUTPUT
+
+        # Assuming notes might be generated or we point to generic one
+        echo "notes_path=$EVIDENCE_DIR/metadata.txt" >> $GITHUB_OUTPUT
+
+    - name: Verify Bundle
+      shell: bash
+      run: |
+        MANIFEST="${{ steps.bundle.outputs.manifest_path }}"
+        if [ -f scripts/verify-evidence-bundle.ts ]; then
+          echo "🔍 Verifying bundle manifest: $MANIFEST"
+          # Use -y to avoid interactive prompts
+          npx -y tsx scripts/verify-evidence-bundle.ts "$MANIFEST"
+        else
+          echo "⚠️ verification script not found."
+        fi
+
+    - name: Summary
+      shell: bash
+      run: |
+        echo "## Release Bundle Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version**: ${{ inputs.tag }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Channel**: ${{ steps.classify.outputs.channel }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Previous Tag**: ${{ steps.prev_tag.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Bundle**: ${{ steps.bundle.outputs.bundle_path }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Dry Run**: ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY

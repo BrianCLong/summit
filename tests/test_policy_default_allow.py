@@ -1,6 +1,7 @@
-import pytest
 import os
+
 from intelgraph.policy import EnvPolicyEngine, PolicyRequest
+
 
 def test_allow_all():
     os.environ["INTELGRAPH_POLICY_MODE"] = "allow_all"
@@ -10,6 +11,7 @@ def test_allow_all():
     assert decision == "allow"
     assert reason == "default_allow"
 
+
 def test_deny_all():
     os.environ["INTELGRAPH_POLICY_MODE"] = "deny_all"
     engine = EnvPolicyEngine()
@@ -17,6 +19,7 @@ def test_deny_all():
     decision, reason = engine.decide(req)
     assert decision == "deny"
     assert reason == "deny_all"
+
 
 def test_opa_fallback():
     os.environ["INTELGRAPH_POLICY_MODE"] = "opa"

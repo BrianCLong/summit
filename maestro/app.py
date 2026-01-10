@@ -8,8 +8,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from fastapi import FastAPI
 
-from api.maestro import router as maestro_router
 from api.conductor import router as conductor_router
+from api.maestro import router as maestro_router
 from maestro.storage import MaestroStore
 
 

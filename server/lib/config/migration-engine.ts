@@ -27,15 +27,17 @@ export class MigrationEngine {
     if (!fs.existsSync(this.migrationsDir)) {
       return [];
     }
-    const files = fs.readdirSync(this.migrationsDir).filter(file => file.endsWith('.js'));
-    const migrations = files.map(file => {
+    const files = fs
+      .readdirSync(this.migrationsDir)
+      .filter((file: string) => file.endsWith('.js'));
+    const migrations = files.map((file: string) => {
       const migration = require(path.join(this.migrationsDir, file));
       return {
         version: parseInt(path.basename(file, '.js')),
         ...migration,
       };
     });
-    return migrations.sort((a, b) => a.version - b.version);
+    return migrations.sort((a: Migration, b: Migration) => a.version - b.version);
   }
 
   private loadMigrationHistory(): Set<number> {

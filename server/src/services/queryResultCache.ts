@@ -118,7 +118,7 @@ export class QueryResultCache {
 
     if (l1Entry) {
       this.l1.delete(signature);
-      cacheLocalSize.labels('query-signature:result').set(this.l1.size);
+      cacheLocalSize?.labels?.('query-signature:result')?.set?.(this.l1.size);
     }
 
     if (!this.redis) {
@@ -154,7 +154,7 @@ export class QueryResultCache {
     tenantId?: string,
   ): Promise<void> {
     this.setL1(signature, value, this.config.ttlSeconds);
-    cacheLocalSize.labels('query-signature:result').set(this.l1.size);
+    cacheLocalSize?.labels?.('query-signature:result')?.set?.(this.l1.size);
     recSet('query-signature', 'result', tenantId);
 
     if (!this.redis) return;
@@ -178,7 +178,7 @@ export class QueryResultCache {
   ): Promise<void> {
     const trimmed = rows.slice(0, this.config.partialLimit);
     this.setStreamingL1(signature, trimmed, this.config.streamingTtlSeconds);
-    cacheLocalSize.labels('query-signature:streaming').set(this.streamingCache.size);
+    cacheLocalSize?.labels?.('query-signature:streaming')?.set?.(this.streamingCache.size);
     recSet('query-signature', 'streaming', tenantId);
 
     if (!this.redis) return;
@@ -212,7 +212,7 @@ export class QueryResultCache {
 
     if (l1Entry) {
       this.streamingCache.delete(signature);
-      cacheLocalSize.labels('query-signature:streaming').set(this.streamingCache.size);
+      cacheLocalSize?.labels?.('query-signature:streaming')?.set?.(this.streamingCache.size);
     }
 
     if (!this.redis) {
@@ -314,7 +314,7 @@ export class QueryResultCache {
     if (candidate) {
       map.delete(candidate.key);
       recEviction('query-signature', `lfu-${operation}`);
-      cacheLocalSize.labels(`query-signature:${operation}`).set(map.size);
+      cacheLocalSize?.labels?.(`query-signature:${operation}`)?.set?.(map.size);
     }
   }
 
@@ -369,6 +369,8 @@ export class QueryResultCache {
     startedAt: number,
   ) {
     const durationSeconds = (Date.now() - startedAt) / 1000;
-    cacheLatencySeconds.labels(operation, result, tenantId ?? 'unknown').observe(durationSeconds);
+    cacheLatencySeconds
+      ?.labels?.(operation, result, tenantId ?? 'unknown')
+      ?.observe?.(durationSeconds);
   }
 }

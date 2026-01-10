@@ -356,7 +356,7 @@ def validate_cognitive_decision_support_system():
 
     # Calculate overall validation status
     passed_components = sum(1 for result in validation_results.values() if result)
-    total_components = len([k for k in validation_results.keys() if k != "overall"])
+    total_components = len([k for k in validation_results if k != "overall"])
     validation_results["overall"] = (
         passed_components >= total_components * 0.8
     )  # Allow 20% margin for partial passes

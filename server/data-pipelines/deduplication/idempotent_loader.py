@@ -57,7 +57,6 @@ class IdempotentLoader:
         database: str = "neo4j",
         default_merge_strategy: MergeStrategy = MergeStrategy.MERGE_PROPS,
     ):
-
         if not NEO4J_AVAILABLE:
             raise ImportError("neo4j package is required")
 
@@ -137,7 +136,7 @@ class IdempotentLoader:
                 result.merge_conflicts_resolved += batch_result.merge_conflicts_resolved
                 result.errors.extend(batch_result.errors)
 
-                self.logger.debug(f"Processed batch {i//batch_size + 1}: {len(batch)} entities")
+                self.logger.debug(f"Processed batch {i // batch_size + 1}: {len(batch)} entities")
 
             end_time = datetime.now()
             result.processing_time_seconds = (end_time - start_time).total_seconds()
@@ -185,7 +184,7 @@ class IdempotentLoader:
 
                 except Exception as e:
                     result.records_failed += 1
-                    result.errors.append(f"Entity {entity.get('id', 'unknown')}: {str(e)}")
+                    result.errors.append(f"Entity {entity.get('id', 'unknown')}: {e!s}")
                     self.logger.error(f"Failed to load entity {entity.get('id')}: {e}")
 
         return result
@@ -478,7 +477,7 @@ class IdempotentLoader:
 
             except Exception as e:
                 result.records_failed += 1
-                result.errors.append(f"Relationship {relationship.get('id', 'unknown')}: {str(e)}")
+                result.errors.append(f"Relationship {relationship.get('id', 'unknown')}: {e!s}")
 
     async def _get_existing_relationship(
         self, session, rel_id: str, rel_type: str
@@ -582,7 +581,7 @@ def merge_person_entities(existing: dict[str, Any], new: dict[str, Any]) -> dict
 
     # Organization - prefer non-null values
     for field in ["organization", "title", "location"]:
-        if field in new_props and new_props[field]:
+        if new_props.get(field):
             if not existing_props.get(field):
                 merged_props[field] = new_props[field]
 
@@ -599,9 +598,7 @@ def merge_organization_entities(existing: dict[str, Any], new: dict[str, Any]) -
     new_name = new.get("label", "")
 
     # Prefer name without abbreviations
-    if "." not in new_name and "." in existing_name:
-        merged["label"] = new_name
-    elif len(new_name) > len(existing_name):
+    if ("." not in new_name and "." in existing_name) or len(new_name) > len(existing_name):
         merged["label"] = new_name
 
     # Merge properties
@@ -615,7 +612,7 @@ def merge_organization_entities(existing: dict[str, Any], new: dict[str, Any]) -
 
     # Industry, size, etc. - prefer non-null
     for field in ["industry", "size", "website", "headquarters"]:
-        if field in new_props and new_props[field]:
+        if new_props.get(field):
             merged_props[field] = new_props[field]
 
     merged["props"] = merged_props

@@ -1,13 +1,17 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
-from . import config
 from .models import AlertMetadata, ExceptionEntry, ReleaseEnvelope, ToilEntry
-from .registry import AlertRegistry, DashboardBuilder, ExceptionsRegistry, ReleaseSafetyEnforcer, ToilDiary
+from .registry import (
+    AlertRegistry,
+    DashboardBuilder,
+    ExceptionsRegistry,
+    ReleaseSafetyEnforcer,
+    ToilDiary,
+)
 
 
 def parse_datetime(value: str) -> datetime:
@@ -66,7 +70,9 @@ def command_add_alert(args: argparse.Namespace) -> None:
 
 def command_record_page(args: argparse.Namespace) -> None:
     alerts = build_alerts(args)
-    alerts.record_page(args.id, args.minutes, false_positive=args.false_positive, source=args.source)
+    alerts.record_page(
+        args.id, args.minutes, false_positive=args.false_positive, source=args.source
+    )
     print("Page recorded")
 
 
@@ -105,7 +111,9 @@ def command_release(args: argparse.Namespace) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Toil governance and alert rationalization toolkit")
+    parser = argparse.ArgumentParser(
+        description="Toil governance and alert rationalization toolkit"
+    )
     parser.add_argument("--storage", default="ops/state", help="Directory for persisted state")
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -167,7 +175,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: Optional[list[str]] = None) -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = build_parser()
     args = parser.parse_args(argv)
     args.func(args)
@@ -175,4 +183,3 @@ def main(argv: Optional[list[str]] = None) -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -68,7 +68,7 @@ async function resolveDeployedVersion(): Promise<string | undefined> {
 
   try {
     const pkgPath = path.resolve('package.json');
-    const pkg = JSON.parse(await fs.readFile(pkgPath, 'utf8'));
+    const pkg = JSON.parse(String(await fs.readFile(pkgPath, 'utf8')));
     return typeof pkg.version === 'string' ? pkg.version : undefined;
   } catch (error: any) {
     return undefined;
@@ -140,7 +140,7 @@ async function collectJsonlSlice({
       continue;
     }
 
-    const content = await fs.readFile(absolute, 'utf8');
+    const content = String(await fs.readFile(absolute, 'utf8'));
     const lines = content
       .split('\n')
       .map((line) => line.trim())

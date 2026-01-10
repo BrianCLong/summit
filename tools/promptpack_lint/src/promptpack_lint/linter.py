@@ -1,30 +1,36 @@
-import json
-import yaml
-import os
 import copy
+import json
+import os
 import re
 
+import yaml
+
 # Ensure jsonschema is available since it is a dependency
-from jsonschema import validate, ValidationError
+from jsonschema import ValidationError, validate
+
 
 class Linter:
     def __init__(self, repo_root):
         self.repo_root = repo_root
         self.schema_path = os.path.join(repo_root, "prompts", "manifest.schema.json")
         try:
-            with open(self.schema_path, "r") as f:
+            with open(self.schema_path) as f:
                 self.schema = json.load(f)
         except FileNotFoundError:
             raise FileNotFoundError(f"Schema not found at {self.schema_path}")
 
     def load_manifest(self, pack_dir):
-        manifest_files = [f for f in os.listdir(pack_dir) if f in ["manifest.json", "manifest.yaml", "manifest.yml"]]
+        manifest_files = [
+            f
+            for f in os.listdir(pack_dir)
+            if f in ["manifest.json", "manifest.yaml", "manifest.yml"]
+        ]
         if not manifest_files:
             return None, ["No manifest.json or manifest.yaml found"]
 
         manifest_path = os.path.join(pack_dir, manifest_files[0])
         try:
-            with open(manifest_path, "r") as f:
+            with open(manifest_path) as f:
                 if manifest_path.endswith(".json"):
                     manifest = json.load(f)
                 else:
@@ -50,7 +56,7 @@ class Linter:
             else:
                 # Check vars in external template
                 try:
-                    with open(tmpl_path, "r") as f:
+                    with open(tmpl_path) as f:
                         content = f.read()
                         errors.extend(self.check_vars(content, manifest.get("vars", {})))
                 except Exception as e:
@@ -58,7 +64,9 @@ class Linter:
 
         if "roles" in manifest:
             for role, content in manifest["roles"].items():
-                errors.extend(self.check_vars(content, manifest.get("vars", {}), context=f"role:{role}"))
+                errors.extend(
+                    self.check_vars(content, manifest.get("vars", {}), context=f"role:{role}")
+                )
 
         if "tests" in manifest:
             for i, test in enumerate(manifest["tests"]):
@@ -71,8 +79,8 @@ class Linter:
         errors = []
         # Match {{var}} and {var}
         # Note: minimal regex, might catch JSON syntax or code blocks, but good for enforcement
-        jinja_matches = re.findall(r'\{\{\s*(\w+)\s*\}\}', content)
-        format_matches = re.findall(r'(?<!\{)\{(\w+)\}(?!\})', content) # Avoid {{double}}
+        jinja_matches = re.findall(r"\{\{\s*(\w+)\s*\}\}", content)
+        format_matches = re.findall(r"(?<!\{)\{(\w+)\}(?!\})", content)  # Avoid {{double}}
 
         found_vars = set(jinja_matches + format_matches)
 

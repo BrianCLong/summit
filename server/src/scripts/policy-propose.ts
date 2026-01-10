@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { program } from 'commander';
 import { ProposalEngine, DenyRateRule, BurstRule } from '../policy-engine/engine.js';
-import { PolicyChangeProposal, SecurityEvidence } from '../policy-engine/proposal-types.js';
+import { PolicyChangeProposal, SecurityEvidence, ProposedChange } from '../policy-engine/proposal-types.js';
 import * as yaml from 'js-yaml';
 
 // Ensure output directory exists
@@ -84,10 +84,10 @@ async function saveProposal(proposal: PolicyChangeProposal, outDir: string) {
 Rationale: ${proposal.rationale}
 
 ## Commands
-${proposal.verification.commands.map(c => `\`${c}\``).join('\n')}
+${proposal.verification.commands.map((c: string) => `\`${c}\``).join('\n')}
 
 ## Expected Signals
-${proposal.verification.expectedSignals.map(s => `- ${s}`).join('\n')}
+${proposal.verification.expectedSignals.map((s: string) => `- ${s}`).join('\n')}
 `;
   fs.writeFileSync(path.join(proposalDir, 'VERIFY.md'), verifyContent);
 
@@ -95,14 +95,14 @@ ${proposal.verification.expectedSignals.map(s => `- ${s}`).join('\n')}
   const rollbackContent = `# Rollback Plan for ${proposal.id}
 
 ## Steps
-${proposal.riskAssessment.rollbackSteps.map(s => `- ${s}`).join('\n')}
+${proposal.riskAssessment.rollbackSteps.map((s: string) => `- ${s}`).join('\n')}
 `;
   fs.writeFileSync(path.join(proposalDir, 'ROLLBACK.md'), rollbackContent);
 }
 
 function generateMockDiff(proposal: PolicyChangeProposal): string {
     // Attempt to generate a pseudo-unified diff
-    return proposal.proposedChanges.map(change => {
+    return proposal.proposedChanges.map((change: ProposedChange) => {
         const header = `diff --git a/${change.target} b/${change.target}\n--- a/${change.target}\n+++ b/${change.target}\n`;
 
         let chunk = '';

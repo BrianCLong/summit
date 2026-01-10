@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Upload detector artifacts to cloud object storage providers."""
+
 from __future__ import annotations
 
 import os

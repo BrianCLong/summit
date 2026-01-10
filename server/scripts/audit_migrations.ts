@@ -1,13 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { fileURLToPath } from 'url';
-
-// ESM compatibility
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const DEFAULT_MIGRATIONS_DIR = path.resolve(__dirname, '../db/migrations/postgres');
+const serverRoot = process.cwd().endsWith(`${path.sep}server`)
+  ? process.cwd()
+  : path.resolve(process.cwd(), 'server');
+const DEFAULT_MIGRATIONS_DIR = path.resolve(serverRoot, 'db/migrations/postgres');
 const DEFAULT_MANIFEST_PATH = path.join(DEFAULT_MIGRATIONS_DIR, 'manifest.json');
 
 export type Manifest = Record<string, string>; // filename -> sha256 hash
@@ -137,7 +134,7 @@ function assertMigrationsDir(migrationsDir: string) {
 
 export function readMigrations(migrationsDir: string): string[] {
   assertMigrationsDir(migrationsDir);
-  return fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort();
+  return fs.readdirSync(migrationsDir).filter((f: string) => f.endsWith('.sql')).sort();
 }
 
 function auditFile(manifest: Manifest, newManifest: Manifest, file: string, migrationsDir: string, mode: AuditMode) {
@@ -245,6 +242,7 @@ export async function main(args = process.argv.slice(2)) {
   }
 }
 
-if (import.meta.url === `file://${__filename}`) {
+const isDirectInvocation = process.argv[1]?.endsWith('audit_migrations.ts');
+if (isDirectInvocation) {
   main();
 }

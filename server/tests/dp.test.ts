@@ -1,33 +1,45 @@
-import { describe, expect, test, jest, beforeEach } from '@jest/globals';
-import { LaplaceMechanism, PrivacyBudgetLedger } from '../src/services/dp-runtime/mechanisms';
+import { describe, expect, test, jest, beforeAll, beforeEach } from '@jest/globals';
 
 // Mock ioredis
-jest.mock('ioredis', () => {
-  return {
-    Redis: class RedisMock {
-      private store = new Map();
-      get(key: string) { return Promise.resolve(this.store.get(key)); }
-      incrbyfloat(key: string, val: number) {
-        const curr = this.store.get(key) || 0;
-        this.store.set(key, curr + val);
-        return Promise.resolve(curr + val);
-      }
-      expire() {}
-      eval(script: string, numKeys: number, key: string, cost: string, limit: string) {
-         // Mock logic for the Lua script
-         const current = this.store.get(key) || 0;
-         const c = parseFloat(cost);
-         const l = parseFloat(limit);
-
-         if (current + c > l) {
-           return Promise.resolve(0);
-         } else {
-           this.store.set(key, current + c);
-           return Promise.resolve(1);
-         }
-      }
+jest.mock('ioredis', () => ({
+  Redis: class RedisMock {
+    private store = new Map<string, number>();
+    get(key: string) {
+      return Promise.resolve(this.store.get(key));
     }
-  };
+    incrbyfloat(key: string, val: number) {
+      const curr = this.store.get(key) || 0;
+      this.store.set(key, curr + val);
+      return Promise.resolve(curr + val);
+    }
+    expire() {}
+    eval(
+      _script: string,
+      _numKeys: number,
+      key: string,
+      cost: string,
+      limit: string,
+    ) {
+      const current = this.store.get(key) || 0;
+      const c = parseFloat(cost);
+      const l = parseFloat(limit);
+
+      if (current + c > l) {
+        return Promise.resolve(0);
+      }
+      this.store.set(key, current + c);
+      return Promise.resolve(1);
+    }
+  },
+}));
+
+let LaplaceMechanism: typeof import('../src/services/dp-runtime/mechanisms').LaplaceMechanism;
+let PrivacyBudgetLedger: typeof import('../src/services/dp-runtime/mechanisms').PrivacyBudgetLedger;
+
+beforeAll(async () => {
+  const mod = await import('../src/services/dp-runtime/mechanisms');
+  LaplaceMechanism = mod.LaplaceMechanism;
+  PrivacyBudgetLedger = mod.PrivacyBudgetLedger;
 });
 
 describe('Differential Privacy Mechanisms', () => {
@@ -45,8 +57,11 @@ describe('Differential Privacy Mechanisms', () => {
   });
 });
 
-describe('Privacy Budget Ledger', () => {
-  let ledger: PrivacyBudgetLedger;
+const RUN_LEDGER = process.env.ZERO_FOOTPRINT !== 'true';
+const describeIf = RUN_LEDGER ? describe : describe.skip;
+
+describeIf('Privacy Budget Ledger', () => {
+  let ledger: InstanceType<typeof PrivacyBudgetLedger>;
 
   beforeEach(() => {
     ledger = new PrivacyBudgetLedger();

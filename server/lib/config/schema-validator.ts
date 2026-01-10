@@ -24,7 +24,9 @@ export class SchemaValidator {
       return;
     }
 
-    const schemaFiles = fs.readdirSync(schemaDir).filter(file => file.match(/\.schema\.(json|ya?ml)$/));
+    const schemaFiles = fs
+      .readdirSync(schemaDir)
+      .filter((file: string) => file.match(/\.schema\.(json|ya?ml)$/));
     for (const file of schemaFiles) {
       const schemaName = path.basename(file).replace(/\.schema\.(json|ya?ml)$/i, '');
       const schemaPath = path.join(schemaDir, file);

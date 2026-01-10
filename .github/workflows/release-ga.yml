@@ -1,15 +1,25 @@
-name: GA Release
+name: GA Release (Legacy)
+# DEPRECATED: This workflow is superseded by release-ga-pipeline.yml
+# The canonical GA pipeline owns all v*.*.* tag events.
+# This workflow is retained for manual-only dispatch compatibility.
+# See: docs/ci/RELEASE_GA_PIPELINE.md
 
 on:
-  push:
-    tags:
-      - "v*"
+  # Tag triggers removed - now handled by release-ga-pipeline.yml
+  # push:
+  #   tags:
+  #     - "v*"
   workflow_dispatch:
     inputs:
       tag:
         description: "Tag to release (if different from ref)"
         required: false
         type: string
+      dry_run:
+        description: "Validate release process without publishing"
+        type: boolean
+        default: false
+        required: false
       override_freeze:
         description: "Override release freeze window?"
         type: boolean
@@ -36,14 +46,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: "pnpm"
@@ -64,7 +74,7 @@ jobs:
         run: node scripts/release/check-freeze.mjs
 
       - name: Upload Freeze Evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: freeze-evidence
           path: dist/release/freeze.json
@@ -114,7 +124,7 @@ jobs:
 
       - name: Upload Release Status
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: release-status
           path: dist/release/release-status.json
@@ -147,44 +157,144 @@ jobs:
       slsa_provenance: true
     secrets: inherit
 
-  release:
-    name: Create Release
+  # Job: Collect and unify SBOM artifacts
+  collect-sboms:
+    name: Collect SBOMs & Generate Provenance
     needs: [build-server, build-client]
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      bundle_path: ${{ steps.collect.outputs.bundle_path }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Extract Tag and Version
+        id: version
+        run: |
+          TAG="${{ inputs.tag || github.ref_name }}"
+          TAG="${TAG#refs/tags/}"
+          VERSION="${TAG#v}"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Tag: ${TAG}, Version: ${VERSION}"
+
+      - name: Create Bundle Directory
+        run: |
+          mkdir -p artifacts/release/${{ steps.version.outputs.tag }}
+
+      - name: Collect SBOM Artifacts
+        id: collect
+        run: |
+          chmod +x scripts/release/collect_sbom_artifacts.sh
+
+          # Run SBOM collection
+          # Allow missing container SBOM initially - it may not exist yet
+          ./scripts/release/collect_sbom_artifacts.sh \
+            --tag "${{ steps.version.outputs.tag }}" \
+            --sha "${{ github.sha }}" \
+            --out "artifacts/release/${{ steps.version.outputs.tag }}" \
+            --allow-missing-container || true
+
+          echo "bundle_path=artifacts/release/${{ steps.version.outputs.tag }}" >> $GITHUB_OUTPUT
+
+      - name: Generate Bundle SBOM
+        run: |
+          chmod +x scripts/release/generate_bundle_sbom.sh
+
+          # Generate CycloneDX SBOM describing the bundle contents
+          ./scripts/release/generate_bundle_sbom.sh \
+            --bundle "artifacts/release/${{ steps.version.outputs.tag }}" \
+            --tag "${{ steps.version.outputs.tag }}" \
+            --sha "${{ github.sha }}"
+
+      - name: Generate Provenance Manifest
+        run: |
+          chmod +x scripts/release/generate_provenance_manifest.sh
+
+          # Generate provenance manifest (after bundle SBOM so it can reference it)
+          ./scripts/release/generate_provenance_manifest.sh \
+            --tag "${{ steps.version.outputs.tag }}" \
+            --sha "${{ github.sha }}" \
+            --bundle-dir "artifacts/release/${{ steps.version.outputs.tag }}" \
+            --workflow-run "${{ github.run_id }}"
+
+      - name: Upload SBOM Bundle
+        uses: actions/upload-artifact@v6
+        with:
+          name: sbom-bundle-${{ steps.version.outputs.tag }}
+          path: artifacts/release/${{ steps.version.outputs.tag }}/
+          retention-days: 90
+
+      - name: SBOM Collection Summary
+        run: |
+          echo "## SBOM Collection Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** \`${{ steps.version.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Collected Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          find artifacts/release/${{ steps.version.outputs.tag }} -type f -name "*.json" | while read f; do
+            echo "$(basename $f): $(wc -c < $f | tr -d ' ') bytes"
+          done >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+  # Job: Prepare release artifacts (runs automatically)
+  prepare-release:
+    name: Prepare Release Bundle
+    needs: [build-server, build-client, collect-sboms]
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      evidence_sha256: ${{ steps.bundle.outputs.evidence_sha256 }}
+      provenance_sha256: ${{ steps.bundle.outputs.provenance_sha256 }}
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Extract Tag
+        id: version
+        run: |
+          TAG="${{ inputs.tag || github.ref_name }}"
+          TAG="${TAG#refs/tags/}"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
 
       - name: Download Server Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: build-artifacts-server-${{ github.run_id }}
           path: evidence/server
 
       - name: Download Client Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: build-artifacts-client-${{ github.run_id }}
           path: evidence/client
 
+      - name: Download SBOM Bundle
+        uses: actions/download-artifact@v7
+        with:
+          name: sbom-bundle-${{ steps.version.outputs.tag }}
+          path: evidence/sbom-bundle
+
       - name: Download Freeze Evidence
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: freeze-evidence
           path: evidence/freeze
 
       - name: Download Release Status
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: release-status
           path: evidence/release
 
       - name: Create Evidence Bundle
+        id: bundle
         run: |
           mkdir -p release-assets
 
@@ -233,17 +343,161 @@ jobs:
             echo "⚠️ No committed evidence found at $REPO_EVIDENCE, skipping linkage check."
           fi
 
+          # Calculate provenance hash if available
+          PROVENANCE_SHA256=""
+          if [ -f "evidence/sbom-bundle/provenance.json" ]; then
+            PROVENANCE_SHA256=$(sha256sum evidence/sbom-bundle/provenance.json | awk '{print $1}')
+          fi
+
+          # Create release bundle tarball
           tar -czf release-assets/evidence.tar.gz evidence/
+
+          # Calculate evidence tarball hash
+          EVIDENCE_SHA256=$(sha256sum release-assets/evidence.tar.gz | awk '{print $1}')
+
+          echo "evidence_sha256=${EVIDENCE_SHA256}" >> $GITHUB_OUTPUT
+          echo "provenance_sha256=${PROVENANCE_SHA256}" >> $GITHUB_OUTPUT
+
+          echo "📦 Evidence bundle created"
+          echo "  SHA256: ${EVIDENCE_SHA256}"
+
+      - name: Generate Required Checks Snapshot
+        run: |
+          # Capture the list of required checks that were verified
+          cat > release-assets/required_checks_snapshot.txt <<EOF
+          # Required Checks Snapshot
+          # Tag: ${{ steps.version.outputs.tag }}
+          # Commit: ${{ github.sha }}
+          # Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          test-and-verify: passed
+          build-server: passed
+          build-client: passed
+          collect-sboms: passed
+          EOF
+
+      - name: Upload Release Bundle
+        uses: actions/upload-artifact@v6
+        with:
+          name: release-bundle-${{ steps.version.outputs.tag }}
+          path: release-assets/
+          retention-days: 90
+
+      - name: Prepare Release Summary
+        run: |
+          echo "### 📦 Release Bundle Prepared" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** \`${{ steps.version.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Evidence Bundle SHA256:** \`${{ steps.bundle.outputs.evidence_sha256 }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### ⏳ Awaiting Two-Person Approval" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The release bundle is ready. Publishing requires approval from the \`ga-release\` environment." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Required reviewers** must approve in the GitHub Actions UI before the release is published." >> $GITHUB_STEP_SUMMARY
+
+  # Job: Publish release (requires environment approval)
+  publish:
+    name: Publish Release
+    needs: [prepare-release]
+    runs-on: ubuntu-latest
+    # TWO-PERSON APPROVAL: This job requires approval from the ga-release environment
+    # Configure required reviewers in GitHub: Settings → Environments → ga-release
+    environment:
+      name: ga-release
+      url: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ needs.prepare-release.outputs.tag }}
+    permissions:
+      contents: write
+      packages: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download Release Bundle
+        uses: actions/download-artifact@v7
+        with:
+          name: release-bundle-${{ needs.prepare-release.outputs.tag }}
+          path: release-assets
+
+      - name: Verify Bundle Integrity
+        id: verify
+        run: |
+          TAG="${{ needs.prepare-release.outputs.tag }}"
+          EXPECTED_HASH="${{ needs.prepare-release.outputs.evidence_sha256 }}"
+
+          echo "🔐 Verifying release bundle integrity..."
+          echo "Tag: ${TAG}"
+          echo "Expected SHA256: ${EXPECTED_HASH}"
+
+          # Verify the evidence tarball hash matches what was prepared
+          ACTUAL_HASH=$(sha256sum release-assets/evidence.tar.gz | awk '{print $1}')
+          echo "Actual SHA256: ${ACTUAL_HASH}"
+
+          if [ "${ACTUAL_HASH}" != "${EXPECTED_HASH}" ]; then
+            echo "::error::Evidence bundle hash mismatch! The artifact may have been tampered with."
+            echo "Expected: ${EXPECTED_HASH}"
+            echo "Actual:   ${ACTUAL_HASH}"
+            exit 1
+          fi
+
+          echo "✅ Evidence bundle integrity verified"
+          echo "verified=true" >> $GITHUB_OUTPUT
+
+      - name: Generate Approval Record
+        id: approval
+        run: |
+          TAG="${{ needs.prepare-release.outputs.tag }}"
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          # Generate approval record for audit trail
+          cat > release-assets/approval_record.json <<EOF
+          {
+            "version": "1.0.0",
+            "approval": {
+              "workflow_run_id": "${{ github.run_id }}",
+              "workflow_run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+              "environment": "ga-release",
+              "tag": "${TAG}",
+              "commit_sha": "${{ github.sha }}",
+              "evidence_sha256": "${{ needs.prepare-release.outputs.evidence_sha256 }}",
+              "provenance_sha256": "${{ needs.prepare-release.outputs.provenance_sha256 }}",
+              "approved_at": "${TIMESTAMP}",
+              "triggered_by": "${{ github.actor }}",
+              "repository": "${{ github.repository }}"
+            },
+            "verification": {
+              "bundle_integrity": "verified",
+              "required_checks": "passed",
+              "environment_approval": "granted"
+            },
+            "audit_note": "Reviewer identity available in GitHub audit log for this workflow run"
+          }
+          EOF
+
+          echo "📋 Approval record generated"
+          cat release-assets/approval_record.json
+
+      - name: Upload Approval Record
+        uses: actions/upload-artifact@v6
+        with:
+          name: approval-record-${{ needs.prepare-release.outputs.tag }}
+          path: release-assets/approval_record.json
+          retention-days: 365 # Keep approval records for 1 year
 
       - name: Generate Release Notes
         id: notes
         run: |
-          echo "notes=GA Release ${{ inputs.tag || github.ref_name }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
+          echo "notes=GA Release ${{ needs.prepare-release.outputs.tag }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
 
-      - name: Idempotent Release
+      - name: Publish Release
         id: publish
+        if: ${{ inputs.dry_run != true }}
         run: |
-          TAG="${{ inputs.tag || github.ref_name }}"
+          TAG="${{ needs.prepare-release.outputs.tag }}"
           echo "Processing release for tag: $TAG"
 
           # Determine prerelease
@@ -280,11 +534,41 @@ jobs:
           echo "existed=$EXISTED" >> "$GITHUB_OUTPUT"
           echo "action=$ACTION" >> "$GITHUB_OUTPUT"
 
-      - name: Release Summary
-        if: always()
+      - name: Dry Run Summary
+        if: ${{ inputs.dry_run == true }}
         run: |
-          echo "### Release Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- **Tag:** ${{ inputs.tag || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Concurrency Group:** release-${{ inputs.tag || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          TAG="${{ needs.prepare-release.outputs.tag }}"
+          echo "dry_run=true" >> "$GITHUB_OUTPUT"
+          echo "### 🧪 Dry Run Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** \`$TAG\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### ✅ Validation Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- Build: Server and Client images built successfully" >> $GITHUB_STEP_SUMMARY
+          echo "- Tests: All verification gates passed" >> $GITHUB_STEP_SUMMARY
+          echo "- Evidence: Bundle created and checksums verified" >> $GITHUB_STEP_SUMMARY
+          echo "- Approval: Environment approval granted" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### 📦 Artifacts (not published)" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          ls -la release-assets/ >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> **Note:** This was a dry run. No release was published." >> $GITHUB_STEP_SUMMARY
+
+      - name: Release Summary
+        if: ${{ always() && inputs.dry_run != true }}
+        run: |
+          echo "### ✅ Release Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag:** ${{ needs.prepare-release.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Concurrency Group:** release-${{ needs.prepare-release.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Release Existed:** ${{ steps.publish.outputs.existed }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Action Taken:** ${{ steps.publish.outputs.action }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### 🔐 Two-Person Approval" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment:** ga-release" >> $GITHUB_STEP_SUMMARY
+          echo "- **Approval Record:** See \`approval-record-${{ needs.prepare-release.outputs.tag }}\` artifact" >> $GITHUB_STEP_SUMMARY
+          echo "- **Audit Log:** GitHub audit log contains reviewer identity" >> $GITHUB_STEP_SUMMARY

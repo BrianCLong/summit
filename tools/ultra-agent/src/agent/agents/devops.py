@@ -1,5 +1,6 @@
 class DevOpsAgent:
-    def __init__(self, llm): self.llm = llm
+    def __init__(self, llm):
+        self.llm = llm
 
     async def build(self, arch: dict, impl: dict, sys_prompt: str) -> dict:
         prompt = f"""

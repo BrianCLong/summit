@@ -4,14 +4,14 @@ End-to-end integration tests for CISA KEV connector.
 Tests the complete ingestion pipeline with mock database.
 """
 
-import unittest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch
+import unittest
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any
+from unittest.mock import Mock, patch
 
-from connectors.cisa_kev.schema_mapping import map_cisa_kev_to_intelgraph
 from connectors.cisa_kev.connector import CISAKEVConnector
+from connectors.cisa_kev.schema_mapping import map_cisa_kev_to_intelgraph
 
 
 class MockGraphDBClient:
@@ -22,18 +22,18 @@ class MockGraphDBClient:
         self.relationships = []
         self.bulk_insert_called = False
 
-    def bulk_insert_entities(self, entities: List[Dict[str, Any]]) -> bool:
+    def bulk_insert_entities(self, entities: list[dict[str, Any]]) -> bool:
         """Mock bulk insert entities."""
         self.entities.extend(entities)
         self.bulk_insert_called = True
         return True
 
-    def bulk_insert_relationships(self, relationships: List[Dict[str, Any]]) -> bool:
+    def bulk_insert_relationships(self, relationships: list[dict[str, Any]]) -> bool:
         """Mock bulk insert relationships."""
         self.relationships.extend(relationships)
         return True
 
-    def query(self, query: str) -> List[Dict[str, Any]]:
+    def query(self, query: str) -> list[dict[str, Any]]:
         """Mock query."""
         return self.entities
 
@@ -44,9 +44,7 @@ class TestE2EIngestion(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Set up test fixtures."""
-        cls.sample_file = str(
-            Path(__file__).parent.parent / "sample.json"
-        )
+        cls.sample_file = str(Path(__file__).parent.parent / "sample.json")
 
     def setUp(self):
         """Set up mock database."""
@@ -79,8 +77,7 @@ class TestE2EIngestion(unittest.TestCase):
         """Test pipeline with ransomware filtering."""
         # Extract with ransomware filter
         entities, _ = map_cisa_kev_to_intelgraph(
-            self.sample_file,
-            config={"filter_ransomware": True}
+            self.sample_file, config={"filter_ransomware": True}
         )
 
         # Load to mock DB
@@ -124,16 +121,13 @@ class TestConnectorE2E(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Set up test fixtures."""
-        cls.sample_file = str(
-            Path(__file__).parent.parent / "sample.json"
-        )
+        cls.sample_file = str(Path(__file__).parent.parent / "sample.json")
 
     def test_connector_lifecycle(self):
         """Test connector connection lifecycle."""
+
         async def run_test():
-            connector = CISAKEVConnector(config={
-                "cache_enabled": False
-            })
+            connector = CISAKEVConnector(config={"cache_enabled": False})
 
             # Test connection
             await connector.connect()
@@ -153,18 +147,17 @@ class TestConnectorE2E(unittest.TestCase):
 
     def test_connector_extract_batches(self):
         """Test connector batch extraction."""
+
         async def run_test():
-            connector = CISAKEVConnector(config={
-                "batch_size": 50,
-                "cache_enabled": False
-            })
+            connector = CISAKEVConnector(config={"batch_size": 50, "cache_enabled": False})
 
             await connector.connect()
 
             # Mock the API response
-            with patch.object(connector, '_fetch_kev_data') as mock_fetch:
+            with patch.object(connector, "_fetch_kev_data") as mock_fetch:
                 # Load sample data
                 import json
+
                 with open(self.sample_file) as f:
                     sample_data = json.load(f)
 
@@ -185,6 +178,7 @@ class TestConnectorE2E(unittest.TestCase):
 
     def test_connector_metadata(self):
         """Test connector metadata retrieval."""
+
         async def run_test():
             connector = CISAKEVConnector(config={})
 
@@ -200,17 +194,16 @@ class TestConnectorE2E(unittest.TestCase):
 
     def test_connector_caching(self):
         """Test connector caching behavior."""
+
         async def run_test():
-            connector = CISAKEVConnector(config={
-                "cache_enabled": True,
-                "cache_ttl_hours": 24
-            })
+            connector = CISAKEVConnector(config={"cache_enabled": True, "cache_ttl_hours": 24})
 
             await connector.connect()
 
             # Mock the API
-            with patch.object(connector, '_fetch_kev_data') as mock_fetch:
+            with patch.object(connector, "_fetch_kev_data") as mock_fetch:
                 import json
+
                 with open(self.sample_file) as f:
                     sample_data = json.load(f)
 
@@ -240,16 +233,11 @@ class TestLicenseEnforcement(unittest.TestCase):
         # CISA KEV is public domain, should always pass
         # In production, integrate with license registry service
 
-        entities, _ = map_cisa_kev_to_intelgraph(
-            str(Path(__file__).parent.parent / "sample.json")
-        )
+        entities, _ = map_cisa_kev_to_intelgraph(str(Path(__file__).parent.parent / "sample.json"))
 
         # Verify data classification
         for entity in entities:
-            self.assertEqual(
-                entity["properties"]["data_classification"],
-                "public"
-            )
+            self.assertEqual(entity["properties"]["data_classification"], "public")
 
     def test_terms_of_service(self):
         """Test TOS compliance."""
@@ -268,19 +256,13 @@ class TestPIIDetection(unittest.TestCase):
 
     def test_no_pii_in_kev_data(self):
         """Test that no PII is present in KEV data."""
-        entities, _ = map_cisa_kev_to_intelgraph(
-            str(Path(__file__).parent.parent / "sample.json")
-        )
+        entities, _ = map_cisa_kev_to_intelgraph(str(Path(__file__).parent.parent / "sample.json"))
 
         # Verify no PII fields marked
         for entity in entities:
             metadata = entity.get("_metadata", {})
             pii_fields = metadata.get("_pii_fields", [])
-            self.assertEqual(
-                len(pii_fields),
-                0,
-                f"Unexpected PII found: {pii_fields}"
-            )
+            self.assertEqual(len(pii_fields), 0, f"Unexpected PII found: {pii_fields}")
 
 
 class TestObservability(unittest.TestCase):

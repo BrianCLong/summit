@@ -15,10 +15,10 @@ jobs:
     name: "Build & Lint (Strict)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "pnpm"
@@ -34,10 +34,10 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "pnpm"
@@ -51,7 +51,7 @@ jobs:
     name: "Security Gate (Gitleaks + Snyk)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Gitleaks
@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true # Allow to fail until policies are updated to modern Rego syntax
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v2
         with:
@@ -85,7 +85,7 @@ jobs:
     needs: [build-lint-strict]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Bootstrap & Smoke
         run: |
           echo "Executing Golden Path Smoke Test..."

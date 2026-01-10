@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       pr_number:
-        description: 'PR Number to analyze'
+        description: "PR Number to analyze"
         required: true
         type: string
       generate_patches:
-        description: 'Generate patch files (experimental)'
+        description: "Generate patch files (experimental)"
         required: false
         type: boolean
         default: false
@@ -22,20 +22,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Needed for patch generation if used
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
+        uses: pnpm/action-setup@v4
+        # version is read from package.json packageManager field
 
       - name: Install dependencies
         run: pnpm install
@@ -58,7 +57,7 @@ jobs:
             $FLAGS
 
       - name: Upload Analysis Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: mega-pr-${{ inputs.pr_number }}-plan
           path: artifacts/pr-containment/${{ inputs.pr_number }}

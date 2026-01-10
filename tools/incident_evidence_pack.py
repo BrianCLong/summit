@@ -12,10 +12,11 @@ import argparse
 import json
 import shutil
 import subprocess
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 
 @dataclass
@@ -41,7 +42,7 @@ class EvidencePack:
     notes: str | None = None
 
     def __post_init__(self) -> None:
-        timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        timestamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
         self.pack_dir = self.output_root / f"incident-{self.incident_id}-{timestamp}"
         self.attachments_dir = self.pack_dir / "attachments"
 
@@ -54,7 +55,9 @@ class EvidencePack:
         evidence_entries.extend(
             self._capture_category("traces", self.traces, {"*.json", "*.trace", "*.otlp"})
         )
-        evidence_entries.extend(self._capture_category("configs", self.configs, {"*.json", "*.yaml", "*.yml"}))
+        evidence_entries.extend(
+            self._capture_category("configs", self.configs, {"*.json", "*.yaml", "*.yml"})
+        )
 
         metrics = self._load_metrics()
         deploy = self._load_deploy_metadata()
@@ -63,7 +66,7 @@ class EvidencePack:
             "pack_id": self.pack_dir.name,
             "incident_id": self.incident_id,
             "severity": self.severity,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
             "notes": self.notes or "",
             "paths": {
                 "root": str(self.pack_dir),
@@ -82,7 +85,9 @@ class EvidencePack:
 
         return self.pack_dir
 
-    def _capture_category(self, name: str, sources: Iterable[Path], patterns: set[str]) -> list[EvidenceEntry]:
+    def _capture_category(
+        self, name: str, sources: Iterable[Path], patterns: set[str]
+    ) -> list[EvidenceEntry]:
         entries: list[EvidenceEntry] = []
         destination = self.attachments_dir / name
         destination.mkdir(parents=True, exist_ok=True)
@@ -202,16 +207,20 @@ class EvidencePack:
         )
         metrics_table = (
             "<h3>Metrics</h3><table><tr><th>Name</th><th>Current</th><th>Baseline</th><th>Delta</th></tr>"
-            f"{metrics_rows}</table>" if metrics_rows else "<p>No metrics provided.</p>"
+            f"{metrics_rows}</table>"
+            if metrics_rows
+            else "<p>No metrics provided.</p>"
         )
 
-        deploy_section = f"<pre>{json.dumps(deploy, indent=2)}</pre>" if deploy else "<p>No deploy metadata.</p>"
+        deploy_section = (
+            f"<pre>{json.dumps(deploy, indent=2)}</pre>" if deploy else "<p>No deploy metadata.</p>"
+        )
 
         return f"""<!doctype html>
 <html lang=\"en\">
 <head>
   <meta charset=\"utf-8\" />
-  <title>Incident Evidence Pack {summary.get('incident_id')}</title>
+  <title>Incident Evidence Pack {summary.get("incident_id")}</title>
   <style>
     body {{ font-family: Arial, sans-serif; margin: 1.5rem; }}
     table {{ border-collapse: collapse; width: 100%; margin-bottom: 1rem; }}
@@ -221,9 +230,9 @@ class EvidencePack:
 </head>
 <body>
   <h1>Incident Evidence Pack</h1>
-  <p><strong>Incident:</strong> {summary.get('incident_id')} | <strong>Severity:</strong> {summary.get('severity')}</p>
-  <p><strong>Generated:</strong> {summary.get('created_at')}</p>
-  <p><strong>Notes:</strong> {summary.get('notes')}</p>
+  <p><strong>Incident:</strong> {summary.get("incident_id")} | <strong>Severity:</strong> {summary.get("severity")}</p>
+  <p><strong>Generated:</strong> {summary.get("created_at")}</p>
+  <p><strong>Notes:</strong> {summary.get("notes")}</p>
   <h2>Artifacts</h2>
   {render_artifacts()}
   {metrics_table}
@@ -257,9 +266,15 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Incident evidence pack generator")
     parser.add_argument("--incident-id", required=True, help="Incident identifier or ticket number")
     parser.add_argument("--severity", default="unknown", help="Incident severity level")
-    parser.add_argument("--logs", nargs="*", type=Path, default=[Path("logs")], help="Log file paths or directories")
     parser.add_argument(
-        "--traces", nargs="*", type=Path, default=[Path("ops/otel"), Path("traces")], help="Trace export paths"
+        "--logs", nargs="*", type=Path, default=[Path("logs")], help="Log file paths or directories"
+    )
+    parser.add_argument(
+        "--traces",
+        nargs="*",
+        type=Path,
+        default=[Path("ops/otel"), Path("traces")],
+        help="Trace export paths",
     )
     parser.add_argument(
         "--configs",
@@ -269,10 +284,15 @@ def parse_args() -> argparse.Namespace:
         help="Config snapshot locations",
     )
     parser.add_argument("--metrics", type=Path, help="Path to current metrics JSON snapshot")
-    parser.add_argument("--metrics-baseline", type=Path, help="Optional baseline metrics JSON for delta calculation")
+    parser.add_argument(
+        "--metrics-baseline", type=Path, help="Optional baseline metrics JSON for delta calculation"
+    )
     parser.add_argument("--deploy-metadata", type=Path, help="Deploy metadata JSON (optional)")
     parser.add_argument(
-        "--output-root", type=Path, default=Path("artifacts/evidence-packs"), help="Where to write packs"
+        "--output-root",
+        type=Path,
+        default=Path("artifacts/evidence-packs"),
+        help="Where to write packs",
     )
     parser.add_argument("--notes", type=str, help="Free-form notes or trigger description")
     return parser.parse_args()

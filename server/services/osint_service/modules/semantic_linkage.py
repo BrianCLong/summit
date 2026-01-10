@@ -1,5 +1,6 @@
 from transformers import pipeline
 
+
 def analyze_text(text: str):
     """
     Analyzes text to extract entities and relationships using a pre-trained model.

@@ -56,7 +56,8 @@ class PolicyOracle:
             {
                 "name": "anonymization_required",
                 "check": lambda p, q, is_compliant: not (
-                    p.get("data_type") == "anonymous_data" and _resolve_field(q, "data") == "user_data"
+                    p.get("data_type") == "anonymous_data"
+                    and _resolve_field(q, "data") == "user_data"
                 )
                 or not is_compliant,
             }

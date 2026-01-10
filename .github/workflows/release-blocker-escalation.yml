@@ -1,0 +1,107 @@
+name: Release Blocker Escalation
+
+# SLO-STYLE ESCALATION WORKFLOW
+# Automatically escalates persistent release blockers with labels and status updates.
+#
+# DEPRECATION NOTICE:
+# This workflow is now a step in the Release Ops Orchestrator.
+# Primary schedule: release-ops-orchestrator.yml (hourly)
+# This workflow retains workflow_dispatch for manual runs and debugging.
+#
+# See docs/ci/BLOCKER_ESCALATION.md for full documentation.
+# See docs/ci/RELEASE_OPS_ORCHESTRATOR.md for orchestrator details.
+
+on:
+  # Schedule removed - now handled by release-ops-orchestrator.yml
+  # schedule:
+  #   - cron: "15 * * * *"
+
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run mode (print actions without modifying issues)"
+        type: boolean
+        default: false
+
+# Prevent concurrent runs
+concurrency:
+  group: release-blocker-escalation
+  cancel-in-progress: false
+
+permissions:
+  contents: write # For updating state file
+  issues: write # For updating issues and labels
+
+jobs:
+  escalate:
+    name: Escalate Blockers
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          # Need write access to commit state changes
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Escalation
+        id: escalate
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/release/escalate_release_blockers.sh
+
+          # Build arguments
+          ARGS=""
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            ARGS="--dry-run"
+          fi
+
+          # Run escalation script
+          ./scripts/release/escalate_release_blockers.sh \
+            --policy docs/ci/BLOCKER_ESCALATION_POLICY.yml \
+            --state docs/releases/_state/blockers_state.json \
+            --report artifacts/release-train/escalation_report.md \
+            $ARGS
+
+      - name: Check for State Changes
+        id: check_changes
+        run: |
+          if git diff --quiet docs/releases/_state/blockers_state.json 2>/dev/null; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit State Changes
+        if: steps.check_changes.outputs.changed == 'true' && inputs.dry_run != true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add docs/releases/_state/blockers_state.json
+
+          git commit -m "chore(release-ops): update blocker escalation state
+
+          Automated update from Release Blocker Escalation workflow.
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          [skip ci]"
+
+          git push
+
+      - name: Upload Escalation Report
+        uses: actions/upload-artifact@v6
+        with:
+          name: escalation-report-${{ github.run_id }}
+          path: artifacts/release-train/escalation_report.md
+          retention-days: 30
+
+      - name: Job Summary
+        run: |
+          if [[ -f artifacts/release-train/escalation_report.md ]]; then
+            cat artifacts/release-train/escalation_report.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### Release Blocker Escalation" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "No report generated." >> $GITHUB_STEP_SUMMARY
+          fi

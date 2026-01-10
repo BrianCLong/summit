@@ -1,4 +1,4 @@
-from summit_sdk import SummitClient, flow, tool, rag, PolicyContext
+from summit_sdk import PolicyContext, SummitClient, flow, rag, tool
 
 client = SummitClient(api_key="demo", endpoint="local")
 policy = PolicyContext(tenant="engineering", region="global", purpose="dev_assistant")
@@ -36,4 +36,3 @@ def dev_console(question: str):
 
 if __name__ == "__main__":
     print(dev_console("Summarize failing tests"))
-

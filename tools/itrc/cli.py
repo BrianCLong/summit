@@ -6,7 +6,6 @@ import argparse
 import json
 import shlex
 from pathlib import Path
-from typing import List
 
 from .capsule import CapsuleBuilder, load_capsule, prepare_artifacts, write_capsule
 from .receipt import load_receipt, verify_receipt_artifacts
@@ -15,7 +14,7 @@ from .signing import Signer, Verifier
 from .utils import Attachment, load_key, parse_key_value
 
 
-def main(argv: List[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
 
@@ -36,18 +35,24 @@ def main(argv: List[str] | None = None) -> int:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="itrc", description="Immutable Training Run Capsule toolkit")
+    parser = argparse.ArgumentParser(
+        prog="itrc", description="Immutable Training Run Capsule toolkit"
+    )
     sub = parser.add_subparsers(dest="subcommand", required=True)
 
     pack = sub.add_parser("pack", help="Build a signed capsule")
     pack.add_argument("--capsule", required=True, help="Destination capsule file")
     pack.add_argument("--name", required=True, help="Capsule name")
-    pack.add_argument("--command", dest="job_command", required=True, help="Command to execute (quoted)")
+    pack.add_argument(
+        "--command", dest="job_command", required=True, help="Command to execute (quoted)"
+    )
     pack.add_argument("--workdir", default=str(Path.cwd()), help="Working directory of the job")
     pack.add_argument("--env", action="append", default=[], help="Environment variable KEY=VALUE")
     pack.add_argument("--env-lock", required=True, help="Environment lockfile to embed")
     pack.add_argument("--image-digest", required=True, help="Container image digest")
-    pack.add_argument("--dataset-lineage", action="append", default=[], help="Dataset lineage identifier")
+    pack.add_argument(
+        "--dataset-lineage", action="append", default=[], help="Dataset lineage identifier"
+    )
     pack.add_argument("--seed", action="append", default=[], help="Deterministic seed KEY=VALUE")
     pack.add_argument("--hardware", action="append", default=[], help="Hardware hint KEY=VALUE")
     pack.add_argument("--policy", action="append", default=[], help="Policy hash KEY=VALUE")
@@ -63,17 +68,25 @@ def _build_parser() -> argparse.ArgumentParser:
     run = sub.add_parser("run", help="Replay a capsule and emit a receipt")
     run.add_argument("--capsule", required=True)
     run.add_argument("--key", required=True)
-    run.add_argument("--key-id", help="Identifier used when signing the receipt (defaults to capsule key id)")
+    run.add_argument(
+        "--key-id", help="Identifier used when signing the receipt (defaults to capsule key id)"
+    )
     run.add_argument("--receipt", required=True, help="Receipt output path")
-    run.add_argument("--artifact-base", help="Directory to read artifacts from (defaults to working dir)")
+    run.add_argument(
+        "--artifact-base", help="Directory to read artifacts from (defaults to working dir)"
+    )
     run.add_argument("--workdir", help="Override working directory for the run")
-    run.add_argument("--env", action="append", default=[], help="Override environment variable KEY=VALUE")
+    run.add_argument(
+        "--env", action="append", default=[], help="Override environment variable KEY=VALUE"
+    )
 
     receipt_verify = sub.add_parser("receipt-verify", help="Verify a receipt against a capsule")
     receipt_verify.add_argument("--capsule", required=True)
     receipt_verify.add_argument("--receipt", required=True)
     receipt_verify.add_argument("--key", required=True)
-    receipt_verify.add_argument("--artifact-base", help="Directory where artifacts should be located for verification")
+    receipt_verify.add_argument(
+        "--artifact-base", help="Directory where artifacts should be located for verification"
+    )
 
     return parser
 
@@ -146,7 +159,11 @@ def _cmd_receipt_verify(args: argparse.Namespace) -> int:
     capsule = load_capsule(Path(args.capsule), verifier)
     receipt = load_receipt(Path(args.receipt), verifier)
 
-    artifact_base = Path(args.artifact_base).resolve() if args.artifact_base else Path(capsule.manifest["working_dir"]).resolve()
+    artifact_base = (
+        Path(args.artifact_base).resolve()
+        if args.artifact_base
+        else Path(capsule.manifest["working_dir"]).resolve()
+    )
     verified = verify_receipt_artifacts(receipt, artifact_base)
     print(
         json.dumps(

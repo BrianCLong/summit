@@ -1,6 +1,6 @@
 import dataclasses
 import datetime as dt
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclasses.dataclass
@@ -8,8 +8,8 @@ class StepSpec:
     id: str
     description: str
     action: str
-    params: Dict[str, Any]
-    deps: List[str]
+    params: dict[str, Any]
+    deps: list[str]
 
 
 @dataclasses.dataclass
@@ -17,20 +17,20 @@ class RunbookSpec:
     id: str
     name: str
     description: str
-    parameters: Dict[str, Any]
-    preconditions: Dict[str, Any]
-    postconditions: Dict[str, Any]
-    steps: List[StepSpec]
+    parameters: dict[str, Any]
+    preconditions: dict[str, Any]
+    postconditions: dict[str, Any]
+    steps: list[StepSpec]
 
 
 @dataclasses.dataclass
 class StepResult:
     id: str
     status: str
-    started_at: Optional[str]
-    finished_at: Optional[str]
-    logs: List[str]
-    output: Dict[str, Any]
+    started_at: str | None
+    finished_at: str | None
+    logs: list[str]
+    output: dict[str, Any]
 
 
 @dataclasses.dataclass
@@ -38,14 +38,14 @@ class RunState:
     run_id: str
     runbook_id: str
     started_at: str
-    finished_at: Optional[str]
-    parameters: Dict[str, Any]
-    parameter_diff: Dict[str, Any]
-    steps: Dict[str, StepResult]
-    context: Dict[str, Any]
-    proof_path: Optional[str] = None
+    finished_at: str | None
+    parameters: dict[str, Any]
+    parameter_diff: dict[str, Any]
+    steps: dict[str, StepResult]
+    context: dict[str, Any]
+    proof_path: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "run_id": self.run_id,
             "runbook_id": self.runbook_id,
@@ -59,11 +59,8 @@ class RunState:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "RunState":
-        steps = {
-            k: StepResult(**v)
-            for k, v in data.get("steps", {}).items()
-        }
+    def from_dict(cls, data: dict[str, Any]) -> "RunState":
+        steps = {k: StepResult(**v) for k, v in data.get("steps", {}).items()}
         return cls(
             run_id=data["run_id"],
             runbook_id=data["runbook_id"],
@@ -78,4 +75,4 @@ class RunState:
 
 
 def utcnow_iso() -> str:
-    return dt.datetime.utcnow().replace(tzinfo=dt.timezone.utc).isoformat()
+    return dt.datetime.utcnow().replace(tzinfo=dt.UTC).isoformat()

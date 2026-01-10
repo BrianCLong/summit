@@ -1,10 +1,12 @@
-import yaml
-import os
 import logging
-from typing import List
+import os
+
+import yaml
+
 from .types import Task
 
 log = logging.getLogger("summit-fara")
+
 
 class CurriculumAgent:
     def __init__(self):
@@ -13,7 +15,7 @@ class CurriculumAgent:
         if not os.path.exists(self.backlog_path):
             self.backlog_path = "../../backlog.yaml"
 
-    def generate_tasks(self, count: int = 10) -> List[Task]:
+    def generate_tasks(self, count: int = 10) -> list[Task]:
         """
         Generates tasks based on repository state (backlog.yaml, pending PRs).
         """
@@ -22,23 +24,27 @@ class CurriculumAgent:
         # 1. Read Backlog
         if os.path.exists(self.backlog_path):
             try:
-                with open(self.backlog_path, 'r') as f:
+                with open(self.backlog_path) as f:
                     backlog_data = yaml.safe_load(f)
 
                 # Assuming backlog structure, iterate and create tasks
                 # This is a simplification based on typical yaml structure
                 if isinstance(backlog_data, list):
                     for item in backlog_data:
-                        if isinstance(item, dict) and 'title' in item:
-                            tasks.append(Task(
-                                id=str(item.get('id', len(tasks))),
-                                description=f"Implement feature: {item['title']}",
-                                type="feature"
-                            ))
+                        if isinstance(item, dict) and "title" in item:
+                            tasks.append(
+                                Task(
+                                    id=str(item.get("id", len(tasks))),
+                                    description=f"Implement feature: {item['title']}",
+                                    type="feature",
+                                )
+                            )
                 elif isinstance(backlog_data, dict):
-                     # Handle dictionary structure if backlog.yaml is keyed
-                     for key, val in backlog_data.items():
-                         tasks.append(Task(id=str(key), description=f"Process item: {val}", type="general"))
+                    # Handle dictionary structure if backlog.yaml is keyed
+                    for key, val in backlog_data.items():
+                        tasks.append(
+                            Task(id=str(key), description=f"Process item: {val}", type="general")
+                        )
 
             except Exception as e:
                 log.warning(f"Failed to read backlog.yaml: {e}")
@@ -51,7 +57,7 @@ class CurriculumAgent:
             "Check for taxonomy leaks in server/src/pii",
             "Verify SLO compliance badge generation",
             "Refactor auth middleware for consistent tenantId usage",
-            "Update README.md with latest component status"
+            "Update README.md with latest component status",
         ]
 
         for i, desc in enumerate(synthetic_tasks):

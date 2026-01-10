@@ -1,8 +1,10 @@
 from __future__ import annotations
+
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
+
 from .graph import ExperimentGraph
-from .schemas import Node, NodeType, Edge, EdgeType
+from .schemas import Node, NodeType
 from .telemetry import TelemetryLogger
 
 
@@ -20,5 +22,7 @@ class ExperimentRunner:
             stage=stage,
         )
         graph.add_node(eval_node)
-        self.telemetry.log_event("run_end", {"stage": stage, "node_id": eval_node.id, "result": result})
+        self.telemetry.log_event(
+            "run_end", {"stage": stage, "node_id": eval_node.id, "result": result}
+        )
         return eval_node

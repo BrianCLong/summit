@@ -3,9 +3,10 @@ Foresight Analysis Service API
 Advanced strategic foresight methodologies
 """
 
-from typing import List, Optional, Dict, Any
 from datetime import datetime
-from fastapi import FastAPI, HTTPException
+from typing import Any
+
+from fastapi import FastAPI
 from pydantic import BaseModel
 
 app = FastAPI(title="Foresight Analysis Service")
@@ -13,7 +14,7 @@ app = FastAPI(title="Foresight Analysis Service")
 
 class ForesightRequest(BaseModel):
     method: str
-    parameters: Dict[str, Any]
+    parameters: dict[str, Any]
 
 
 class TrendAnalysisRequest(BaseModel):
@@ -34,7 +35,7 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "foresight-analysis-service",
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.utcnow().isoformat(),
     }
 
 
@@ -46,7 +47,7 @@ async def futures_wheel(central_event: str, levels: int = 3):
         "method": "futures-wheel",
         "central_event": central_event,
         "levels": levels,
-        "results": {}
+        "results": {},
     }
 
 
@@ -57,27 +58,15 @@ async def causal_layered_analysis(issue: str):
     return {
         "method": "causal-layered-analysis",
         "issue": issue,
-        "layers": {
-            "litany": [],
-            "systemic_causes": [],
-            "worldview": [],
-            "myth": []
-        }
+        "layers": {"litany": [], "systemic_causes": [], "worldview": [], "myth": []},
     }
 
 
 @app.post("/api/foresight/morphological")
-async def morphological_analysis(
-    problem: str,
-    dimensions: List[Dict[str, Any]]
-):
+async def morphological_analysis(problem: str, dimensions: list[dict[str, Any]]):
     """Perform morphological analysis"""
     # TODO: Integrate with ForesightEngine
-    return {
-        "method": "morphological-analysis",
-        "problem": problem,
-        "configurations": []
-    }
+    return {"method": "morphological-analysis", "problem": problem, "configurations": []}
 
 
 @app.post("/api/foresight/backcasting")
@@ -88,7 +77,7 @@ async def backcasting(request: BackcastingRequest):
         "method": "backcasting",
         "desired_future": request.desired_future,
         "target_year": request.target_year,
-        "pathways": []
+        "pathways": [],
     }
 
 
@@ -96,25 +85,14 @@ async def backcasting(request: BackcastingRequest):
 async def analyze_trend(request: TrendAnalysisRequest):
     """Analyze trend"""
     # TODO: Integrate with TrendAnalyzer
-    return {
-        "trend": request.trend,
-        "category": request.category,
-        "analysis": {}
-    }
+    return {"trend": request.trend, "category": request.category, "analysis": {}}
 
 
 @app.post("/api/trends/project")
-async def project_trend(
-    trend_id: str,
-    time_horizon: int
-):
+async def project_trend(trend_id: str, time_horizon: int):
     """Project trend into future"""
     # TODO: Use TrendAnalyzer for projection
-    return {
-        "trend_id": trend_id,
-        "time_horizon": time_horizon,
-        "projection": {}
-    }
+    return {"trend_id": trend_id, "time_horizon": time_horizon, "projection": {}}
 
 
 @app.get("/api/ic-adaptation/collection-methods")
@@ -124,7 +102,7 @@ async def get_collection_evolution():
         "evolution": {
             "traditional": ["HUMINT", "SIGINT", "IMINT"],
             "emerging": ["AI-augmented", "quantum-sensing", "synthetic-aperture"],
-            "future": ["brain-computer-interface", "molecular-surveillance"]
+            "future": ["brain-computer-interface", "molecular-surveillance"],
         }
     }
 
@@ -136,7 +114,7 @@ async def get_analysis_tools():
         "tools": {
             "current": ["graph-analytics", "nlp", "geospatial"],
             "emerging": ["deep-learning", "causal-inference", "quantum-computing"],
-            "future": ["agi-assisted", "quantum-algorithms", "neuromorphic"]
+            "future": ["agi-assisted", "quantum-algorithms", "neuromorphic"],
         }
     }
 
@@ -148,11 +126,12 @@ async def get_workforce_requirements():
         "skills": {
             "technical": ["ai-ml", "quantum-computing", "biotechnology"],
             "analytical": ["foresight", "complexity-science", "systems-thinking"],
-            "domain": ["emerging-tech", "futures-analysis", "strategic-planning"]
+            "domain": ["emerging-tech", "futures-analysis", "strategic-planning"],
         }
     }
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8001)

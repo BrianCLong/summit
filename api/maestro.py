@@ -138,9 +138,7 @@ def create_artifact(request: CreateArtifactRequest, req: Request):
     # Verify run exists
     run = store.get_run(request.run_id)
     if not run:
-        raise HTTPException(
-            status_code=404, detail=f"Run {request.run_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Run {request.run_id} not found")
 
     artifact = Artifact(
         run_id=request.run_id,
@@ -166,9 +164,7 @@ def get_artifact(artifact_id: str, req: Request):
     store = req.app.state.maestro_store
     artifact = store.get_artifact(artifact_id)
     if not artifact:
-        raise HTTPException(
-            status_code=404, detail=f"Artifact {artifact_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Artifact {artifact_id} not found")
     return artifact
 
 
@@ -181,17 +177,13 @@ def create_disclosure_pack(request: CreateDisclosurePackRequest, req: Request):
     # Verify run exists
     run = store.get_run(request.run_id)
     if not run:
-        raise HTTPException(
-            status_code=404, detail=f"Run {request.run_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Run {request.run_id} not found")
 
     # Verify all artifacts exist
     for artifact_id in request.artifact_ids:
         artifact = store.get_artifact(artifact_id)
         if not artifact:
-            raise HTTPException(
-                status_code=404, detail=f"Artifact {artifact_id} not found"
-            )
+            raise HTTPException(status_code=404, detail=f"Artifact {artifact_id} not found")
 
     pack = DisclosurePack(
         run_id=request.run_id,
@@ -216,9 +208,7 @@ def get_disclosure_pack(pack_id: str, req: Request):
     store = req.app.state.maestro_store
     pack = store.get_disclosure_pack(pack_id)
     if not pack:
-        raise HTTPException(
-            status_code=404, detail=f"Disclosure pack {pack_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Disclosure pack {pack_id} not found")
     return pack
 
 

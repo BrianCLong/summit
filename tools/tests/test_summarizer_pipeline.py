@@ -3,7 +3,11 @@ import unittest
 
 from tools.summit_summarizer.fact_check import fact_check_summary
 from tools.summit_summarizer.models import Document
-from tools.summit_summarizer.pipeline import IterativeSummarizer, SummarizationConfig, SummarizationPipeline
+from tools.summit_summarizer.pipeline import (
+    IterativeSummarizer,
+    SummarizationConfig,
+    SummarizationPipeline,
+)
 from tools.summit_summarizer.retrieval import StaticDocumentRetriever
 
 
@@ -11,12 +15,20 @@ class DummyLLM:
     def __init__(self):
         self.calls = 0
 
-    def complete(self, prompt: str, *, system_prompt: str | None = None, temperature: float = 0.2) -> str:  # noqa: ARG002
+    def complete(
+        self, prompt: str, *, system_prompt: str | None = None, temperature: float = 0.2
+    ) -> str:
         if "EVALUATOR" in prompt:
             # First evaluation is strict, later approvals are lenient
             approved = self.calls > 0
             self.calls += 1
-            return json.dumps({"score": 0.9 if approved else 0.5, "feedback": "Revise" if not approved else "ok", "approved": approved})
+            return json.dumps(
+                {
+                    "score": 0.9 if approved else 0.5,
+                    "feedback": "Revise" if not approved else "ok",
+                    "approved": approved,
+                }
+            )
         self.calls += 1
         return f"summary draft {self.calls}"
 

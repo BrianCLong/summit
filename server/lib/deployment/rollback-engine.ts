@@ -76,7 +76,22 @@ export class RollbackEngine {
           actionType: 'ROLLBACK_EXECUTED',
           resourceType: 'Deployment',
           resourceId: options.serviceName,
+          timestamp: new Date(),
           payload: {
+            mutationType: 'CREATE',
+            entityId: options.serviceName,
+            entityType: 'Deployment',
+            newState: {
+              id: options.serviceName,
+              type: 'Deployment',
+              version: 1,
+              data: {
+                reason: options.reason,
+                migrationSteps: options.migrationSteps,
+                success: true,
+              },
+              metadata: {},
+            },
             reason: options.reason,
             migrationSteps: options.migrationSteps,
             success: true
@@ -104,7 +119,22 @@ export class RollbackEngine {
           actionType: 'ROLLBACK_FAILED',
           resourceType: 'Deployment',
           resourceId: options.serviceName,
+          timestamp: new Date(),
           payload: {
+            mutationType: 'CREATE',
+            entityId: options.serviceName,
+            entityType: 'Deployment',
+            newState: {
+              id: options.serviceName,
+              type: 'Deployment',
+              version: 1,
+              data: {
+                reason: options.reason,
+                error: (error as Error).message,
+                success: false,
+              },
+              metadata: {},
+            },
             reason: options.reason,
             error: (error as Error).message,
             success: false

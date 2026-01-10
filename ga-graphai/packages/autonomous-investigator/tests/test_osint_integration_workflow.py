@@ -1,7 +1,7 @@
 import json
 import pathlib
 import sys
-from typing import Callable, Dict
+from collections.abc import Callable
 
 import pytest
 
@@ -21,7 +21,7 @@ from autonomous_investigator.fusion_pipeline import (  # type: ignore
 
 
 @pytest.fixture
-def enrichment_providers() -> Dict[str, Callable[[FusionEntity], dict]]:
+def enrichment_providers() -> dict[str, Callable[[FusionEntity], dict]]:
     """Mock enrichment hooks representing external OSINT/FinIntel/Cyber APIs."""
 
     def osint_provider(entity: FusionEntity) -> dict:

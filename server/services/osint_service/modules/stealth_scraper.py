@@ -1,6 +1,7 @@
 import httpx
 from bs4 import BeautifulSoup
 
+
 async def scrape_website(url: str):
     """
     Scrapes a website for text and links using asynchronous requests.
