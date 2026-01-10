@@ -1,0 +1,27 @@
+{
+  "budgets": {
+    "repoHygiene": {
+      "maxUntrackedFiles": 0,
+      "paths": ["server/src", "client/src", "apps/web/src", "docs", "scripts"]
+    },
+    "dependencyCount": {
+      "maxDependencies": 60,
+      "packageJsonPath": "package.json"
+    },
+    "lintSuppression": {
+      "maxSuppressions": 2200,
+      "patterns": ["eslint-disable", "@ts-ignore"]
+    },
+    "techDebt": {
+      "maxTodos": 160,
+      "path": "server/src"
+    },
+    "testSkips": {
+      "maxSkips": 90,
+      "paths": ["server/tests", "tests"]
+    },
+    "verificationSpeed": {
+      "maxDurationMs": 10000
+    }
+  }
+}

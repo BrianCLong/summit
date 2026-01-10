@@ -43,4 +43,8 @@ for rb in "${REQUIRED_RUNBOOKS[@]}"; do
   fi
 done
 
+# 5. Check Integrity Budgets
+echo "💰 Checking Integrity Budgets..."
+npm run check:budgets || exit 1
+
 echo "🎉 GA Local Verification Passed!"
