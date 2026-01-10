@@ -8,6 +8,44 @@ export type ModelClass = "smart" | "fast" | "balanced" | "vision" | "embedding";
 export type SensitivityLevel = "low" | "medium" | "high" | "critical";
 export type TaskType = "rag_answer" | "summarization" | "classification" | "agent" | "tool_call" | "embedding" | "other";
 
+export type RecommendedAction = "allow" | "allow_with_strict_mode" | "require_step_up" | "block";
+
+export interface PromptInjectionFinding {
+  source: "user" | "retrieval";
+  score: number;
+  matchedRules: string[];
+  recommendedAction: RecommendedAction;
+  snippet?: string;
+}
+
+export interface SecurityContext {
+  promptFindings: PromptInjectionFinding[];
+  strictMode: boolean;
+  disabledTools: string[];
+  stepUpRequired?: boolean;
+  stepUpVerified?: boolean;
+}
+
+export interface RetrievedChunk {
+  text: string;
+  docId: string;
+  score?: number;
+  metadata?: Record<string, unknown>;
+  quarantined?: boolean;
+  finding?: PromptInjectionFinding;
+}
+
+export interface ToolPermissionDefinition {
+  name: string;
+  description: string;
+  schema: Record<string, unknown>;
+  minPrivilege: SensitivityLevel;
+  allowedRoutes: string[];
+  allowedRoles: string[];
+  stepUpRequired?: boolean;
+  highRisk?: boolean;
+}
+
 export interface ToolCallInvocation {
   toolName: string;
   args: Record<string, unknown>;
@@ -102,6 +140,9 @@ export interface LLMRequest {
   maxTokens?: number;
   temperature?: number;
   tenantId?: string;
+  userId?: string;
+  userRoles?: string[];
+  route?: string;
   tags?: string[];
   budget?: {
     maxCost?: number;
@@ -109,6 +150,8 @@ export interface LLMRequest {
   tools?: unknown;
   toolChoice?: unknown;
   palette?: PaletteRequestOptions;
+  securityContext?: SecurityContext;
+  retrievalContext?: { chunks: RetrievedChunk[] };
 }
 
 export interface LLMResponse {

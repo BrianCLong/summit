@@ -10,7 +10,8 @@ export const retrievalTool: ExecutableTool = {
       query: { type: 'string', description: 'The search query' },
       limit: { type: 'number', description: 'Max number of results' }
     },
-    required: ['query']
+    required: ['query'],
+    additionalProperties: false
   },
   execute: async (args, context) => {
     // In a real implementation, this would call RetrievalService
