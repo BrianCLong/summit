@@ -22,8 +22,16 @@ const envPattern = /[A-Z0-9_]*(KEY|TOKEN|SECRET|PASSWORD)/g;
 export class ContentBoundary {
   constructor(private readonly maxLength = 2000) {}
 
-  markUntrusted(raw: unknown): BoundedContent {
-    const text = typeof raw === 'string' ? raw : JSON.stringify(raw, null, 2);
+  private safeStringify(raw: unknown) {
+    if (typeof raw === 'string') return raw;
+    try {
+      return JSON.stringify(raw, null, 2);
+    } catch (err) {
+      return String(raw);
+    }
+  }
+
+  private redactText(text: string) {
     const redactions: string[] = [];
     let cleaned = text;
 
@@ -46,6 +54,37 @@ export class ContentBoundary {
       redactions.push('env-name');
       cleaned = cleaned.replace(envPattern, '[redacted-env]');
     }
+
+    return { cleaned, redactions };
+  }
+
+  sanitizeForStorage(raw: unknown): { value: unknown; redactions: string[] } {
+    const redactionSet = new Set<string>();
+    const walk = (value: unknown): unknown => {
+      if (typeof value === 'string') {
+        const { cleaned, redactions } = this.redactText(value);
+        redactions.forEach((entry) => redactionSet.add(entry));
+        return cleaned;
+      }
+      if (Array.isArray(value)) {
+        return value.map((entry) => walk(entry));
+      }
+      if (value && typeof value === 'object') {
+        const output: Record<string, unknown> = {};
+        Object.entries(value).forEach(([key, entry]) => {
+          output[key] = walk(entry);
+        });
+        return output;
+      }
+      return value;
+    };
+
+    return { value: walk(raw), redactions: Array.from(redactionSet) };
+  }
+
+  markUntrusted(raw: unknown): BoundedContent {
+    const text = this.safeStringify(raw);
+    const { cleaned, redactions } = this.redactText(text);
 
     const hash = crypto.createHash('sha256').update(cleaned).digest('hex');
     let truncated = false;

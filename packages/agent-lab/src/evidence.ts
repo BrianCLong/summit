@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 import { BoundedContent, ContentBoundary } from './contentBoundary';
+import { PrincipalChain } from './identity';
 import { JudgeScores } from './judge';
 import { PolicyDecision } from './policy';
 
@@ -22,6 +23,12 @@ export interface EvidenceArtifact {
   redaction: string[];
   notes?: string;
   allowed: boolean;
+  principal?: PrincipalChain;
+  correlationId?: string;
+  target?: string;
+  status?: string;
+  latencyMs?: number;
+  failureClass?: string;
 }
 
 export interface RunSummary {
@@ -32,7 +39,7 @@ export interface RunSummary {
   steps: Array<{
     name: string;
     tool: string;
-    status: 'allowed' | 'denied' | 'error';
+    status: 'allowed' | 'denied' | 'error' | 'kill-switch';
     message: string;
     evidenceId?: string;
   }>;
@@ -91,13 +98,22 @@ export class EvidenceStore {
     output: unknown,
     policy: PolicyDecision,
     notes?: string,
+    principal?: PrincipalChain,
+    metadata: {
+      correlationId?: string;
+      target?: string;
+      status?: string;
+      latencyMs?: number;
+      failureClass?: string;
+    } = {},
   ): EvidenceArtifact {
     const id = this.nextId();
+    const { value: sanitizedInputs, redactions: inputRedactions } = this.boundary.sanitizeForStorage(inputs);
     const bounded = this.boundary.markUntrusted(output);
     const rawFile = path.join(this.runPath, 'raw', `${id}-${tool}.txt`);
-    const stableOutput = typeof output === 'string' ? output : JSON.stringify(output, null, 2);
-    fs.writeFileSync(rawFile, stableOutput);
-    const hash = crypto.createHash('sha256').update(stableOutput).digest('hex');
+    fs.writeFileSync(rawFile, bounded.text);
+    const hash = bounded.hash;
+    const combinedRedactions = Array.from(new Set([...inputRedactions, ...bounded.redactions]));
 
     const artifact: EvidenceArtifact = {
       id,
@@ -105,14 +121,20 @@ export class EvidenceStore {
       tool,
       version,
       timestamp: new Date().toISOString(),
-      inputs,
+      inputs: sanitizedInputs as Record<string, unknown>,
       output: bounded,
       rawOutputPath: rawFile,
       hashes: { output: hash },
       policy,
-      redaction: bounded.redactions,
+      redaction: combinedRedactions,
       notes,
       allowed: policy.allowed,
+      principal,
+      correlationId: metadata.correlationId,
+      target: metadata.target,
+      status: metadata.status,
+      latencyMs: metadata.latencyMs,
+      failureClass: metadata.failureClass,
     };
 
     const ledgerPath = path.join(this.runPath, 'evidence', 'evidence.ndjson');
