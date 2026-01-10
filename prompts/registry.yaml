@@ -28,3 +28,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: raschka-2025h2-intake
+    version: v1
+    path: prompts/tasks/raschka-2025h2-pipeline.md
+    sha256: 1cad666d67b8afc1c8aaec48cf3b2a279595d50545bd0aaf76d836608b6f99c0
+    description: Deterministic intake pipeline for Raschka 2025H2 research list.
+    scope:
+      paths:
+        - tools/research/
+        - research/raschka-2025H2/
+        - tests/research/
+        - tests/fixtures/
+        - docs/adrs/
+        - docs/roadmap/STATUS.json
+        - prompts/tasks/
+        - agents/examples/
+        - artifacts/agent-runs/
+      domains:
+        - research
+        - governance
+        - backlog
+        - testing
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

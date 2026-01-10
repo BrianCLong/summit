@@ -1,0 +1,44 @@
+{
+  "task_id": "RASCHKA_2025H2_PIPELINE",
+  "agent_id": "gpt-5.2-codex",
+  "prompt_ref": {
+    "id": "raschka-2025h2-intake",
+    "version": "v1",
+    "sha256": "1cad666d67b8afc1c8aaec48cf3b2a279595d50545bd0aaf76d836608b6f99c0",
+    "path": "prompts/tasks/raschka-2025h2-pipeline.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "tools/research/",
+      "research/raschka-2025H2/",
+      "tests/research/",
+      "tests/fixtures/",
+      "docs/adrs/",
+      "docs/roadmap/STATUS.json",
+      "prompts/tasks/",
+      "agents/examples/",
+      "artifacts/agent-runs/"
+    ],
+    "domains": ["research", "governance", "testing", "backlog"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["pytest tests/research/test_raschka2025h2_pipeline.py"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Pipeline script generates papers.json, backlog.csv, and backlog.md deterministically.",
+    "Tests validate parsing and deferred enrichment behavior.",
+    "Research intake remains governed until authorized input is supplied."
+  ],
+  "stop_conditions": [
+    "Unauthorized access attempts to paywalled content.",
+    "Missing provenance for any paper metadata."
+  ],
+  "dependencies": ["docs/SUMMIT_READINESS_ASSERTION.md"],
+  "approvals": []
+}
