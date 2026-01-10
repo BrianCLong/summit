@@ -1,0 +1,54 @@
+{
+  "task_id": "DWO_PR2",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "durable-work-orchestration-pr2",
+    "version": "v1",
+    "sha256": "2b42b724167c7720b89b8c5fa3dcf3dc804a5c2e36d1182851a997dd7ea5bfb8",
+    "path": "prompts/agent-tasks/durable-work-orchestration-pr2.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/architecture/durable-work-orchestration.md",
+      "docs/roadmap/STATUS.json",
+      "config/feature-flags.json",
+      "prompts/agent-tasks/durable-work-orchestration-pr2.md",
+      "prompts/registry.yaml",
+      "agents/examples/durable-work-orchestration-pr2.json",
+      "server/src/work-orchestration/",
+      "server/src/routes/work-orchestration.ts",
+      "server/src/app.ts"
+    ],
+    "domains": ["orchestration", "governance", "documentation", "server"],
+    "exclusions": ["client/", "apps/web/"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "artifacts/agent-runs/DWO_PR2.json",
+      "agent-metrics.json",
+      "pnpm jest server/src/work-orchestration/__tests__/logic.test.ts",
+      "pnpm jest server/src/work-orchestration/__tests__/formula.test.ts"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Durable work orchestration APIs and service layer are available behind a feature flag",
+    "Policy gate checks emit durable events for mutations",
+    "Dependency resolution and formula compilation tests pass"
+  ],
+  "stop_conditions": [
+    "CI failure on pr-quality-gate.yml",
+    "OPA policy denial",
+    "Boundary check failure"
+  ],
+  "dependencies": [
+    "docs/SUMMIT_READINESS_ASSERTION.md",
+    "docs/governance/CONSTITUTION.md",
+    "docs/governance/META_GOVERNANCE.md"
+  ]
+}

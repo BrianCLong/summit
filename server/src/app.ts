@@ -100,6 +100,7 @@ import searchV1Router from './routes/search-v1.js';
 import ontologyRouter from './routes/ontology.js';
 import searchIndexRouter from './routes/search-index.js'; // New search-index route
 import dataGovernanceRouter from './routes/data-governance-routes.js';
+import workOrchestrationRouter from './routes/work-orchestration.js';
 import tenantBillingRouter from './routes/tenants/billing.js';
 import { gtmRouter } from './routes/gtm-messaging.js';
 import { airgapRouter } from './routes/airgap.js';
@@ -422,6 +423,7 @@ export const createApp = async () => {
   app.use('/api/ontology', ontologyRouter);
   app.use('/search', searchIndexRouter); // Register Search Index API
   app.use('/api', dataGovernanceRouter); // Register Data Governance API
+  app.use('/api', workOrchestrationRouter);
   app.use('/api', sharingRouter);
   app.use('/api/gtm', gtmRouter);
   app.use('/airgap', airgapRouter);

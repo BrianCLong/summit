@@ -1,0 +1,17 @@
+{
+  "task_id": "DWO_PR2",
+  "agent_id": "codex",
+  "prompt_ref": "durable-work-orchestration-pr2@v1",
+  "status": "completed",
+  "summary": "Added durable work orchestration service + API routes, feature flag gating, policy event logging, and unit tests for formula compilation/dependency resolution.",
+  "artifacts": {
+    "routes": "server/src/routes/work-orchestration.ts",
+    "service": "server/src/work-orchestration/service.ts",
+    "schema": "server/src/work-orchestration/schema.sql",
+    "tests": [
+      "server/src/work-orchestration/__tests__/logic.test.ts",
+      "server/src/work-orchestration/__tests__/formula.test.ts"
+    ]
+  },
+  "timestamp": "2026-01-04T00:10:00Z"
+}

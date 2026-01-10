@@ -61,6 +61,22 @@
         "label": "feature:SAGA_ENABLED"
       }
     },
+    "durable-work-orchestration": {
+      "key": "durable-work-orchestration",
+      "name": "Durable Work Orchestration",
+      "description": "Gate durable work orchestration APIs, hooks, convoys, and patrols",
+      "type": "boolean",
+      "defaultValue": false,
+      "tags": ["orchestration", "preview", "governance"],
+      "rollout": {
+        "type": "gradual",
+        "percentage": 0
+      },
+      "metadata": {
+        "branch": "feat/durable-work-orchestration",
+        "label": "feature:DURABLE_WORK_ORCHESTRATION"
+      }
+    },
     "prompt-registry-enabled": {
       "key": "prompt-registry-enabled",
       "name": "Prompt Registry",

@@ -28,3 +28,60 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: durable-work-orchestration-pr1
+    version: v1
+    path: prompts/agent-tasks/durable-work-orchestration-pr1.md
+    sha256: 7d62336d408d488712d0bd88c9eeeb94b130bb4839a9a5b255d9dcf7a11cf052
+    description: Durable work orchestration MVP prompt covering design doc and schemas/interfaces for PR1.
+    scope:
+      paths:
+        - docs/architecture/durable-work-orchestration.md
+        - docs/roadmap/STATUS.json
+        - prompts/agent-tasks/durable-work-orchestration-pr1.md
+        - prompts/registry.yaml
+        - agents/examples/durable-work-orchestration-pr1.json
+        - server/src/work-orchestration/
+      domains:
+        - orchestration
+        - governance
+        - documentation
+        - server
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: durable-work-orchestration-pr2
+    version: v1
+    path: prompts/agent-tasks/durable-work-orchestration-pr2.md
+    sha256: 2b42b724167c7720b89b8c5fa3dcf3dc804a5c2e36d1182851a997dd7ea5bfb8
+    description: Durable work orchestration MVP prompt covering API routes, services, and feature flag gating for PR2.
+    scope:
+      paths:
+        - docs/architecture/durable-work-orchestration.md
+        - docs/roadmap/STATUS.json
+        - config/feature-flags.json
+        - prompts/agent-tasks/durable-work-orchestration-pr2.md
+        - prompts/registry.yaml
+        - agents/examples/durable-work-orchestration-pr2.json
+        - server/src/work-orchestration/
+        - server/src/routes/work-orchestration.ts
+        - server/src/app.ts
+      domains:
+        - orchestration
+        - governance
+        - documentation
+        - server
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
