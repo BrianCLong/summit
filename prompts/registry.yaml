@@ -28,3 +28,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: strategic-cost-perf-sprint
+    version: v1
+    path: prompts/strategy/strategic-cost-perf-sprint.md
+    sha256: 980560629e31bedbd7ab6489ec2e8b49191495d2f679413c9f32d75c8f8797bd
+    description: Roadmap-aligned cost/performance baseline, guardrails, and savings attribution sprint prompt.
+    scope:
+      paths:
+        - docs/optimization/
+        - docs/strategy/
+        - scripts/verify_cost_perf_guardrails.sh
+        - .github/workflows/verify-cost-perf-guardrails.yml
+        - artifacts/cost_perf/
+        - docs/roadmap/STATUS.json
+        - prompts/strategy/
+      domains:
+        - docs
+        - ci
+        - observability
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

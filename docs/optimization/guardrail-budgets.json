@@ -1,0 +1,26 @@
+{
+  "cost_per_1k_tokens": {
+    "budget": 0.0035,
+    "tolerance_ratio": 0.03
+  },
+  "avg_tool_invocations_per_run": {
+    "budget": 2.5,
+    "tolerance_ratio": 0.05
+  },
+  "latency_p95_ms": {
+    "budget": 1500,
+    "tolerance_ratio": 0.05
+  },
+  "latency_p99_ms": {
+    "budget": 1900,
+    "tolerance_ratio": 0.05
+  },
+  "error_rate": {
+    "budget": 0.01,
+    "tolerance_absolute": 0.002
+  },
+  "sla_budget_remaining": {
+    "budget": 0.9,
+    "direction": "min"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "STRATEGIC_COST_PERF_GUARDRAILS",
+  "agent_id": "gpt-5.2-codex",
+  "prompt_ref": {
+    "id": "strategic-cost-perf-sprint",
+    "version": "v1",
+    "sha256": "980560629e31bedbd7ab6489ec2e8b49191495d2f679413c9f32d75c8f8797bd",
+    "path": "prompts/strategy/strategic-cost-perf-sprint.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/optimization/",
+      "docs/strategy/",
+      "scripts/verify_cost_perf_guardrails.sh",
+      ".github/workflows/verify-cost-perf-guardrails.yml",
+      "artifacts/cost_perf/",
+      "docs/roadmap/STATUS.json",
+      "prompts/strategy/"
+    ],
+    "domains": ["docs", "ci", "observability", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["artifacts/cost_perf/latest.json", "scripts/verify_cost_perf_guardrails.sh"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Guardrail budgets cover cost, latency, reliability, and tool invocation metrics.",
+    "Cost/perf snapshots include sample size and collection window metadata.",
+    "Guardrail script validates budgets and metrics and fails on regressions."
+  ],
+  "stop_conditions": [
+    "CI failure on main.",
+    "Guardrail script detects missing or malformed metrics payload.",
+    "Detection of PII in output."
+  ]
+}

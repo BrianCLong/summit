@@ -1,0 +1,18 @@
+{
+  "timestamp": "2025-12-31T00:00:00Z",
+  "environment": "synthetic-load",
+  "workload": "30rps-copilot-standard",
+  "sample_size": 1200,
+  "collection_window": "2025-12-31T00:00:00Z/2025-12-31T00:40:00Z",
+  "collector": "synthetic-smoke-harness",
+  "baseline_ref": "baseline-2025-12-31",
+  "metrics": {
+    "cost_per_1k_tokens": 0.0035,
+    "avg_tool_invocations_per_run": 2.4,
+    "latency_p95_ms": 1450,
+    "latency_p99_ms": 1800,
+    "error_rate": 0.008,
+    "sla_budget_remaining": 0.93
+  },
+  "notes": "Matches baseline until new measurements land"
+}

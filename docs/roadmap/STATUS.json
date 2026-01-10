@@ -1,6 +1,6 @@
 {
-  "last_updated": "2025-12-30T22:21:04Z",
-  "revision_note": "Added Graph-XAI differentiation track with publications, benchmarks, and case studies",
+  "last_updated": "2026-01-10T04:30:00Z",
+  "revision_note": "Hardened cost/perf guardrails with metadata validation, tool-invocation budgets, and prompt/task registry alignment",
   "initiatives": [
     {
       "id": "A",
