@@ -6,9 +6,9 @@ Manages state synchronization across federated nodes.
 
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +29,8 @@ class SyncRecord:
     round_number: int
     state: SyncState
     started_at: float
-    completed_at: Optional[float] = None
-    error: Optional[str] = None
+    completed_at: float | None = None
+    error: str | None = None
 
 
 class SyncManager:
@@ -39,8 +39,8 @@ class SyncManager:
     def __init__(self, node_id: str):
         self.node_id = node_id
         self.state = SyncState.IDLE
-        self._sync_history: List[SyncRecord] = []
-        self._pending_syncs: Dict[str, SyncRecord] = {}
+        self._sync_history: list[SyncRecord] = []
+        self._pending_syncs: dict[str, SyncRecord] = {}
 
         logger.info(f"Sync manager initialized for node {node_id}")
 
@@ -83,7 +83,7 @@ class SyncManager:
 
         logger.info(f"Sync {sync_id} {'completed' if success else 'failed'}")
 
-    def get_sync_status(self) -> Dict[str, Any]:
+    def get_sync_status(self) -> dict[str, Any]:
         """Get synchronization status"""
         return {
             "node_id": self.node_id,

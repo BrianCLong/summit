@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Shared signal-processing helpers for HF monitoring."""
+
 from __future__ import annotations
 
 import hashlib

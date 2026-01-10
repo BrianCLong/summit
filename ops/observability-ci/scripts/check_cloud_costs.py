@@ -6,13 +6,14 @@ from __future__ import annotations
 import argparse
 import sys
 import textwrap
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Dict, Iterable
+from typing import Any
 
 import yaml
 
 
-def load_budgets(path: Path) -> Iterable[Dict[str, Any]]:
+def load_budgets(path: Path) -> Iterable[dict[str, Any]]:
     data = yaml.safe_load(path.read_text())
     providers = data.get("providers", {})
     for provider_name, provider in providers.items():
@@ -27,12 +28,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--budget-config", type=Path, required=True)
     parser.add_argument("--threshold", type=float, default=0.8)
     parser.add_argument("--environment", type=str, default="production")
-    parser.add_argument("--actual-ratio", type=float,
-                        help="Override observed spend/budget ratio (0-1). Defaults to 0.65")
+    parser.add_argument(
+        "--actual-ratio",
+        type=float,
+        help="Override observed spend/budget ratio (0-1). Defaults to 0.65",
+    )
     return parser.parse_args()
 
 
-def select_budget(budgets: Iterable[Dict[str, Any]], environment: str) -> Dict[str, Any]:
+def select_budget(budgets: Iterable[dict[str, Any]], environment: str) -> dict[str, Any]:
     for budget in budgets:
         tags = budget.get("tags", {})
         if tags.get("environment") == environment:
@@ -44,12 +48,16 @@ def main() -> int:
     args = parse_args()
     budgets = list(load_budgets(args.budget_config))
     budget = select_budget(budgets, args.environment)
-    ratio = args.actual_ratio if args.actual_ratio is not None else min(0.65, budget.get("threshold_ratio", 0.8) - 0.05)
+    ratio = (
+        args.actual_ratio
+        if args.actual_ratio is not None
+        else min(0.65, budget.get("threshold_ratio", 0.8) - 0.05)
+    )
 
     message = textwrap.dedent(f"""
         ✅ Cost guardrail check
-        • provider: {budget['provider']}
-        • budget: {budget['name']}
+        • provider: {budget["provider"]}
+        • budget: {budget["name"]}
         • observed ratio: {ratio:.2f}
         • threshold: {args.threshold:.2f}
     """).strip()

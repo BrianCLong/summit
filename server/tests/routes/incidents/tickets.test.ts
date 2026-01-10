@@ -22,7 +22,9 @@ const app = express();
 app.use(express.json());
 app.use(ticketRouter);
 
-describe('Ticket Routes', () => {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('Ticket Routes', () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });

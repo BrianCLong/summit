@@ -3,33 +3,29 @@ Autoencoder-based anomaly detection for threat detection
 Uses reconstruction error as anomaly score
 """
 
+from dataclasses import dataclass
+
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import numpy as np
-from typing import Dict, List, Tuple, Optional
-from dataclasses import dataclass
 
 
 @dataclass
 class AutoencoderConfig:
     input_dim: int
     encoding_dim: int = 32
-    hidden_dims: List[int] = None
+    hidden_dims: list[int] = None
     learning_rate: float = 0.001
     batch_size: int = 128
     epochs: int = 100
     contamination: float = 0.1
-    device: str = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device: str = "cuda" if torch.cuda.is_available() else "cpu"
 
     def __post_init__(self):
         if self.hidden_dims is None:
             # Default progressive dimensionality reduction
-            self.hidden_dims = [
-                self.input_dim // 2,
-                self.input_dim // 4,
-                self.encoding_dim
-            ]
+            self.hidden_dims = [self.input_dim // 2, self.input_dim // 4, self.encoding_dim]
 
 
 class Autoencoder(nn.Module):
@@ -44,12 +40,14 @@ class Autoencoder(nn.Module):
         in_dim = config.input_dim
 
         for hidden_dim in config.hidden_dims:
-            encoder_layers.extend([
-                nn.Linear(in_dim, hidden_dim),
-                nn.ReLU(),
-                nn.BatchNorm1d(hidden_dim),
-                nn.Dropout(0.2)
-            ])
+            encoder_layers.extend(
+                [
+                    nn.Linear(in_dim, hidden_dim),
+                    nn.ReLU(),
+                    nn.BatchNorm1d(hidden_dim),
+                    nn.Dropout(0.2),
+                ]
+            )
             in_dim = hidden_dim
 
         self.encoder = nn.Sequential(*encoder_layers)
@@ -60,12 +58,14 @@ class Autoencoder(nn.Module):
         in_dim = config.encoding_dim
 
         for hidden_dim in hidden_dims_reversed:
-            decoder_layers.extend([
-                nn.Linear(in_dim, hidden_dim),
-                nn.ReLU(),
-                nn.BatchNorm1d(hidden_dim),
-                nn.Dropout(0.2)
-            ])
+            decoder_layers.extend(
+                [
+                    nn.Linear(in_dim, hidden_dim),
+                    nn.ReLU(),
+                    nn.BatchNorm1d(hidden_dim),
+                    nn.Dropout(0.2),
+                ]
+            )
             in_dim = hidden_dim
 
         # Final layer to reconstruct input
@@ -96,11 +96,7 @@ class AnomalyAutoencoder:
         self.scaler_std = None
         self.feature_names = None
 
-    def train(
-        self,
-        X: np.ndarray,
-        validation_split: float = 0.2
-    ) -> Dict[str, List[float]]:
+    def train(self, X: np.ndarray, validation_split: float = 0.2) -> dict[str, list[float]]:
         """
         Train the autoencoder on normal data
 
@@ -123,9 +119,11 @@ class AnomalyAutoencoder:
 
         # Convert to tensors
         X_train_tensor = torch.FloatTensor(X_train).to(self.config.device)
-        X_val_tensor = torch.FloatTensor(X_val).to(self.config.device) if X_val is not None else None
+        X_val_tensor = (
+            torch.FloatTensor(X_val).to(self.config.device) if X_val is not None else None
+        )
 
-        history = {'train_loss': [], 'val_loss': []}
+        history = {"train_loss": [], "val_loss": []}
 
         self.model.train()
 
@@ -135,7 +133,7 @@ class AnomalyAutoencoder:
             n_batches = 0
 
             for i in range(0, len(X_train_tensor), self.config.batch_size):
-                batch = X_train_tensor[i:i + self.config.batch_size]
+                batch = X_train_tensor[i : i + self.config.batch_size]
 
                 self.optimizer.zero_grad()
                 reconstructed = self.model(batch)
@@ -147,7 +145,7 @@ class AnomalyAutoencoder:
                 n_batches += 1
 
             avg_train_loss = epoch_loss / n_batches
-            history['train_loss'].append(avg_train_loss)
+            history["train_loss"].append(avg_train_loss)
 
             # Validation
             if X_val_tensor is not None:
@@ -155,13 +153,15 @@ class AnomalyAutoencoder:
                 with torch.no_grad():
                     val_reconstructed = self.model(X_val_tensor)
                     val_loss = self.criterion(val_reconstructed, X_val_tensor).item()
-                    history['val_loss'].append(val_loss)
+                    history["val_loss"].append(val_loss)
                 self.model.train()
 
             if epoch % 10 == 0:
-                print(f"Epoch {epoch}/{self.config.epochs}, "
-                      f"Train Loss: {avg_train_loss:.6f}"
-                      + (f", Val Loss: {val_loss:.6f}" if X_val_tensor is not None else ""))
+                print(
+                    f"Epoch {epoch}/{self.config.epochs}, "
+                    f"Train Loss: {avg_train_loss:.6f}"
+                    + (f", Val Loss: {val_loss:.6f}" if X_val_tensor is not None else "")
+                )
 
         # Calculate threshold based on training data
         self.model.eval()
@@ -242,22 +242,25 @@ class AnomalyAutoencoder:
 
     def save_model(self, path: str):
         """Save model to disk"""
-        torch.save({
-            'model_state_dict': self.model.state_dict(),
-            'optimizer_state_dict': self.optimizer.state_dict(),
-            'config': self.config,
-            'threshold': self.threshold,
-            'scaler_mean': self.scaler_mean,
-            'scaler_std': self.scaler_std,
-            'feature_names': self.feature_names
-        }, path)
+        torch.save(
+            {
+                "model_state_dict": self.model.state_dict(),
+                "optimizer_state_dict": self.optimizer.state_dict(),
+                "config": self.config,
+                "threshold": self.threshold,
+                "scaler_mean": self.scaler_mean,
+                "scaler_std": self.scaler_std,
+                "feature_names": self.feature_names,
+            },
+            path,
+        )
 
     def load_model(self, path: str):
         """Load model from disk"""
         checkpoint = torch.load(path, map_location=self.config.device)
-        self.model.load_state_dict(checkpoint['model_state_dict'])
-        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        self.threshold = checkpoint['threshold']
-        self.scaler_mean = checkpoint['scaler_mean']
-        self.scaler_std = checkpoint['scaler_std']
-        self.feature_names = checkpoint.get('feature_names')
+        self.model.load_state_dict(checkpoint["model_state_dict"])
+        self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+        self.threshold = checkpoint["threshold"]
+        self.scaler_mean = checkpoint["scaler_mean"]
+        self.scaler_std = checkpoint["scaler_std"]
+        self.feature_names = checkpoint.get("feature_names")

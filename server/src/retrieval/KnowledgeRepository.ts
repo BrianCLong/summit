@@ -120,7 +120,15 @@ export class KnowledgeRepository {
       params.push(query.queryText);
       const qIdx = pIdx;
 
-      const limit = typeof query.topK === 'number' ? Math.min(query.topK, 100) : 10;
+      const parsedTopK =
+        typeof query.topK === 'number'
+          ? query.topK
+          : typeof query.topK === 'string'
+            ? Number(query.topK)
+            : NaN;
+      const limit = Number.isFinite(parsedTopK)
+        ? Math.min(parsedTopK, 100)
+        : 10;
       params.push(limit);
       const limitIdx = qIdx + 1;
 

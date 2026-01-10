@@ -12,6 +12,7 @@ Behaviors:
 
 Note: This is a lightweight utility; in CI you can point to a snapshot Prometheus or pipe CSV.
 """
+
 import json
 import os
 import sys

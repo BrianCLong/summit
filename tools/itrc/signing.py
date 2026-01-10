@@ -6,8 +6,6 @@ import base64
 import hmac
 from dataclasses import dataclass
 from hashlib import sha256
-from typing import Dict
-
 
 SIGNATURE_ALGORITHM = "HMAC-SHA256"
 
@@ -18,7 +16,7 @@ class Signature:
     key_id: str
     signature: str
 
-    def as_dict(self) -> Dict[str, str]:
+    def as_dict(self) -> dict[str, str]:
         return {
             "algorithm": self.algorithm,
             "key_id": self.key_id,
@@ -37,7 +35,11 @@ class Signer:
 
     def sign(self, payload: bytes) -> Signature:
         digest = hmac.new(self._key, payload, sha256).digest()
-        return Signature(algorithm=SIGNATURE_ALGORITHM, key_id=self._key_id, signature=base64.b64encode(digest).decode("ascii"))
+        return Signature(
+            algorithm=SIGNATURE_ALGORITHM,
+            key_id=self._key_id,
+            signature=base64.b64encode(digest).decode("ascii"),
+        )
 
     def verify(self, payload: bytes, signature: Signature) -> None:
         if signature.algorithm != SIGNATURE_ALGORITHM:
@@ -65,5 +67,7 @@ class Verifier:
             raise ValueError("Signature verification failed")
 
 
-def signature_from_dict(data: Dict[str, str]) -> Signature:
-    return Signature(algorithm=data["algorithm"], key_id=data["key_id"], signature=data["signature"])
+def signature_from_dict(data: dict[str, str]) -> Signature:
+    return Signature(
+        algorithm=data["algorithm"], key_id=data["key_id"], signature=data["signature"]
+    )

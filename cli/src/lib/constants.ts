@@ -38,6 +38,10 @@ export const EXIT_CODES = {
   TIMEOUT: 6,
   EXPORT_ERROR: 7,
   SYNC_ERROR: 8,
+  POLICY_ERROR: 2,       // Policy/sandbox violations use exit code 2
+  SANDBOX_ERROR: 2,      // Policy/sandbox violations use exit code 2
+  GIT_WORKFLOW_ERROR: 2, // Git workflow errors use exit code 2
+  PROVIDER_ERROR: 3,     // Provider errors after retries use exit code 3
 } as const;
 
 export const MAX_QUERY_RESULTS = 10000;

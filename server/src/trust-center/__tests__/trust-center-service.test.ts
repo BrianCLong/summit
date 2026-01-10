@@ -17,8 +17,10 @@ describe('TrustCenterService export hardening', () => {
   });
 
   function buildPool(queryResults: any[]): { query: jest.Mock } {
-    const query = jest.fn();
-    queryResults.forEach((result) => query.mockResolvedValueOnce(result));
+    const query = jest.fn() as jest.Mock;
+    queryResults.forEach((result) =>
+      query.mockImplementationOnce(async () => result as any),
+    );
     return { query } as any;
   }
 
@@ -135,4 +137,3 @@ describe('TrustCenterService export hardening', () => {
     expect(pool.query).toHaveBeenCalledTimes(4);
   });
 });
-

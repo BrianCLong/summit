@@ -340,13 +340,15 @@ describe('RedactionEngine', () => {
 
   describe('Bulk Operations', () => {
     it('should redact multiple PostgreSQL records', async () => {
-      const mockQuery = pool.query as jest.Mock;
+      const mockQuery = pool.query as unknown as {
+        mockResolvedValueOnce: (value: unknown) => void;
+      };
       mockQuery.mockResolvedValueOnce({
         rows: [
           { id: '1', email: 'user1@example.com', name: 'User 1' },
           { id: '2', email: 'user2@example.com', name: 'User 2' },
         ],
-      });
+      } as any);
 
       const rules: RedactionRule[] = [
         {

@@ -21,6 +21,7 @@ jest.mock('../../auth/multi-tenant-rbac.js', () => {
 });
 
 jest.mock('../../utils/logger.js', () => ({
+  __esModule: true,
   default: {
     info: jest.fn(),
     warn: jest.fn(),
@@ -42,6 +43,11 @@ describe('AuthorizationService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockRbac = {
+      hasPermission: jest.fn(),
+      evaluateAccess: jest.fn(),
+    };
+    (getMultiTenantRBAC as jest.Mock).mockReturnValue(mockRbac);
     mockRbac = getMultiTenantRBAC() as unknown as {
       hasPermission: jest.Mock;
       evaluateAccess: jest.Mock;
@@ -55,8 +61,8 @@ describe('AuthorizationService', () => {
       kind: 'user',
       tenantId: 'tenant-a',
       roles: ['analyst'],
+      scopes: [],
       user: {
-        id: 'user-123',
         email: 'analyst@example.com',
         username: 'analyst1',
       },
@@ -70,7 +76,9 @@ describe('AuthorizationService', () => {
 
     it('allows access when principal has permission and passes OPA check', async () => {
       mockRbac.hasPermission.mockReturnValue(true);
-      mockRbac.evaluateAccess.mockResolvedValue({ allowed: true });
+      mockRbac.evaluateAccess.mockImplementation(() =>
+        Promise.resolve({ allowed: true }),
+      );
 
       const result = await authService.can(userPrincipal, 'view', resource);
 
@@ -114,7 +122,9 @@ describe('AuthorizationService', () => {
       };
 
       mockRbac.hasPermission.mockReturnValue(true);
-      mockRbac.evaluateAccess.mockResolvedValue({ allowed: true });
+      mockRbac.evaluateAccess.mockImplementation(() =>
+        Promise.resolve({ allowed: true }),
+      );
 
       const result = await authService.can(globalAdminPrincipal, 'view', crossTenantResource);
 
@@ -124,7 +134,9 @@ describe('AuthorizationService', () => {
     describe('action to permission mapping', () => {
       beforeEach(() => {
         mockRbac.hasPermission.mockReturnValue(true);
-        mockRbac.evaluateAccess.mockResolvedValue({ allowed: true });
+        mockRbac.evaluateAccess.mockImplementation(() =>
+          Promise.resolve({ allowed: true }),
+        );
       });
 
       it('maps view action to read permission', async () => {
@@ -159,6 +171,7 @@ describe('AuthorizationService', () => {
       kind: 'user',
       tenantId: 'tenant-a',
       roles: ['analyst'],
+      scopes: [],
     };
 
     const resource: ResourceRef = {
@@ -169,7 +182,9 @@ describe('AuthorizationService', () => {
 
     it('does not throw when access is allowed', async () => {
       mockRbac.hasPermission.mockReturnValue(true);
-      mockRbac.evaluateAccess.mockResolvedValue({ allowed: true });
+      mockRbac.evaluateAccess.mockImplementation(() =>
+        Promise.resolve({ allowed: true }),
+      );
 
       await expect(
         authService.assertCan(principal, 'view', resource)

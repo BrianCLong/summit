@@ -1,12 +1,15 @@
 from __future__ import annotations
-from .agents.architect import ArchitectAgent
-from .agents.engineer import EngineerAgent
-from .agents.tester import TesterAgent
-from .agents.documenter import DocumenterAgent
-from .agents.devops import DevOpsAgent
-from .agents.reviewer import ReviewerAgent
-from .tools import write_file, run_tests
+
 import json
+
+from .agents.architect import ArchitectAgent
+from .agents.devops import DevOpsAgent
+from .agents.documenter import DocumenterAgent
+from .agents.engineer import EngineerAgent
+from .agents.reviewer import ReviewerAgent
+from .agents.tester import TesterAgent
+from .tools import run_tests, write_file
+
 
 class Orchestrator:
     def __init__(self, llm):
@@ -35,7 +38,7 @@ class Orchestrator:
 
         # 4. Verification loop
         print("[Orchestrator] Verifying...")
-        for i in range(3): # Reduced to 3 for demo
+        for i in range(3):  # Reduced to 3 for demo
             self._write_files(impl.get("files", {}))
             self._write_files(tests.get("tests", {}))
 
@@ -44,11 +47,11 @@ class Orchestrator:
             passed = run_tests()
 
             if passed:
-                print(f"[Orchestrator] Tests passed on attempt {i+1}.")
+                print(f"[Orchestrator] Tests passed on attempt {i + 1}.")
                 break
 
-            print(f"[Orchestrator] Tests failed on attempt {i+1}. Iterating...")
-            feedback = "Tests failed. Fix the code and tests." # Real agent would capture stderr
+            print(f"[Orchestrator] Tests failed on attempt {i + 1}. Iterating...")
+            feedback = "Tests failed. Fix the code and tests."  # Real agent would capture stderr
 
             impl_raw = await self.engineer.improve(arch, impl, feedback, sys_prompt)
             impl = self._safe_parse(impl_raw)
@@ -78,14 +81,15 @@ class Orchestrator:
             "tests": tests.get("tests", {}),
             "docs": docs.get("files", {}),
             "infra": infra.get("files", {}),
-            "review": review
+            "review": review,
         }
 
     def _safe_parse(self, text):
-        if isinstance(text, dict): return text
+        if isinstance(text, dict):
+            return text
         try:
-            start = text.find('{')
-            end = text.rfind('}') + 1
+            start = text.find("{")
+            end = text.rfind("}") + 1
             return json.loads(text[start:end])
         except:
             return {}

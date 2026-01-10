@@ -1,0 +1,190 @@
+name: Schema Compatibility Check
+
+# API SCHEMA BACKWARD COMPATIBILITY VERIFICATION
+# Ensures GraphQL schema changes don't break existing clients.
+#
+# See docs/ci/SCHEMA_COMPATIBILITY.md for full documentation.
+
+on:
+  # Check on PRs that modify schema files
+  pull_request:
+    branches: [main, release/*]
+    paths:
+      - "graphql/schema.graphql"
+      - "**/schema.graphql"
+      - "**/schema.gql"
+
+  # Manual verification
+  workflow_dispatch:
+    inputs:
+      baseline:
+        description: "Baseline ref (default: latest RC tag)"
+        type: string
+        required: false
+      schema:
+        description: "Schema file path"
+        type: string
+        default: "graphql/schema.graphql"
+      strict:
+        description: "Fail on any change"
+        type: boolean
+        default: false
+      allow_additions:
+        description: "Allow additive changes"
+        type: boolean
+        default: true
+
+  # Verify on RC tags
+  push:
+    tags:
+      - "v*.*.*-rc.*"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check-compatibility:
+    name: Verify Schema Compatibility
+    runs-on: ubuntu-latest
+
+    outputs:
+      status: ${{ steps.check.outputs.status }}
+      breaking_changes: ${{ steps.check.outputs.breaking_changes }}
+      additions: ${{ steps.check.outputs.additions }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check for RC Phase
+        id: rc-phase
+        run: |
+          LATEST_RC=$(git tag -l 'v*.*.*-rc.*' --sort=-v:refname | head -1)
+
+          if [[ -z "$LATEST_RC" ]]; then
+            echo "No RC tags found - not in stabilization phase"
+            echo "in_stabilization=false" >> $GITHUB_OUTPUT
+          else
+            echo "Found RC tag: $LATEST_RC"
+            echo "in_stabilization=true" >> $GITHUB_OUTPUT
+            echo "rc_tag=$LATEST_RC" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check Schema Compatibility
+        id: check
+        if: steps.rc-phase.outputs.in_stabilization == 'true'
+        run: |
+          chmod +x scripts/release/check_schema_compatibility.sh
+
+          SCHEMA="${{ inputs.schema || 'graphql/schema.graphql' }}"
+          ARGS="--schema $SCHEMA --report"
+
+          BASELINE="${{ inputs.baseline || steps.rc-phase.outputs.rc_tag }}"
+          if [[ -n "$BASELINE" ]]; then
+            ARGS="$ARGS --baseline $BASELINE"
+          fi
+
+          if [[ "${{ inputs.strict }}" == "true" ]]; then
+            ARGS="$ARGS --strict"
+          fi
+
+          if [[ "${{ inputs.allow_additions }}" == "true" ]]; then
+            ARGS="$ARGS --allow-additions"
+          fi
+
+          # Run check
+          EXIT_CODE=0
+          OUTPUT=$(./scripts/release/check_schema_compatibility.sh $ARGS 2>&1) || EXIT_CODE=$?
+
+          # Parse JSON output
+          JSON_OUTPUT=$(echo "$OUTPUT" | tail -1)
+
+          STATUS=$(echo "$JSON_OUTPUT" | jq -r '.status')
+          BREAKING=$(echo "$JSON_OUTPUT" | jq -r '.breaking_changes')
+          ADDITIONS=$(echo "$JSON_OUTPUT" | jq -r '.additions')
+
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "breaking_changes=$BREAKING" >> $GITHUB_OUTPUT
+          echo "additions=$ADDITIONS" >> $GITHUB_OUTPUT
+
+          echo "$OUTPUT"
+
+          exit $EXIT_CODE
+
+      - name: Skip Check (Not in RC Phase)
+        if: steps.rc-phase.outputs.in_stabilization != 'true'
+        run: |
+          echo "Not in RC stabilization phase - schema changes are allowed"
+          echo "status=SKIP" >> $GITHUB_OUTPUT
+
+      - name: Upload Report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: schema-compatibility-report-${{ github.run_id }}
+          path: artifacts/reports/schema-compatibility-*.md
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && steps.check.outputs.status == 'FAIL'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const breaking = '${{ steps.check.outputs.breaking_changes }}';
+            const baseline = '${{ steps.rc-phase.outputs.rc_tag }}';
+
+            const body = `## ❌ Schema Compatibility Check Failed
+
+            This PR introduces **breaking changes** to the GraphQL schema during RC stabilization.
+
+            **Baseline:** \`${baseline}\`
+            **Breaking Changes:** ${breaking}
+
+            ### Breaking changes are not allowed during RC stabilization
+
+            Options:
+            1. **Revert the breaking changes** if they're not critical
+            2. **Get release team approval** if changes are necessary
+            3. **Cut a new RC** if breaking changes must go in
+
+            ### Guidelines
+            - Removing types, fields, queries, or mutations is breaking
+            - Changing field types to incompatible types is breaking
+            - Making optional fields required is breaking
+
+            ---
+            *Automated by Schema Compatibility Check*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Job Summary
+        if: always()
+        run: |
+          STATUS="${{ steps.check.outputs.status || 'SKIP' }}"
+          BREAKING="${{ steps.check.outputs.breaking_changes || '0' }}"
+          ADDITIONS="${{ steps.check.outputs.additions || '0' }}"
+          RC_TAG="${{ steps.rc-phase.outputs.rc_tag || 'N/A' }}"
+
+          STATUS_EMOJI="❓"
+          [[ "$STATUS" == "PASS" ]] && STATUS_EMOJI="✅"
+          [[ "$STATUS" == "WARN" ]] && STATUS_EMOJI="⚠️"
+          [[ "$STATUS" == "FAIL" ]] && STATUS_EMOJI="❌"
+          [[ "$STATUS" == "SKIP" ]] && STATUS_EMOJI="⏭️"
+
+          echo "### $STATUS_EMOJI Schema Compatibility: $STATUS" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Baseline | \`$RC_TAG\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Breaking Changes | $BREAKING |" >> $GITHUB_STEP_SUMMARY
+          echo "| Additions | $ADDITIONS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | $STATUS |" >> $GITHUB_STEP_SUMMARY

@@ -167,7 +167,6 @@ class BackpressureController:
             and (datetime.now() - self.circuit_breaker_last_failure).total_seconds()
             < self.config.circuit_breaker_timeout_seconds
         ):
-
             if self.state != FlowControlState.CIRCUIT_OPEN:
                 self.logger.warning("Opening circuit breaker due to high error rate")
                 self.state = FlowControlState.CIRCUIT_OPEN
@@ -180,7 +179,6 @@ class BackpressureController:
             and (datetime.now() - self.circuit_breaker_last_failure).total_seconds()
             >= self.config.circuit_breaker_timeout_seconds
         ):
-
             self.logger.info("Circuit breaker timeout passed, attempting to recover")
             self.circuit_breaker_failures = 0
             self.state = FlowControlState.NORMAL
@@ -192,7 +190,6 @@ class BackpressureController:
             or metrics.memory_usage_percent > self.config.max_memory_usage_percent
             or metrics.cpu_usage_percent > self.config.max_cpu_usage_percent
         ):
-
             if self.state != FlowControlState.BACKPRESSURE:
                 self.logger.warning(
                     f"Applying backpressure: buffer={metrics.buffer_utilization:.2%}, "
@@ -209,7 +206,6 @@ class BackpressureController:
             or metrics.error_rate > self.config.max_error_rate
             or metrics.buffer_utilization > self.config.buffer_low_watermark
         ):
-
             if self.state != FlowControlState.THROTTLED:
                 self.logger.info(
                     f"Applying throttling: rate={metrics.messages_per_second:.1f}/s, "

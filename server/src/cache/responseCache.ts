@@ -42,7 +42,7 @@ class MemoryTier implements CacheTier {
       }
     }
 
-    cacheLocalSize.labels('default').set(this.cache.size);
+    cacheLocalSize?.labels?.('default')?.set?.(this.cache.size);
   }
 
   async del(key: string): Promise<void> {

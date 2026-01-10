@@ -1,9 +1,10 @@
 import argparse
-import random
-from auto_scientist.impl.src.generator import Generator
-from auto_scientist.impl.src.oversight import Oversight
+
 from auto_scientist.impl.src.engine import ExecutionEngine
+from auto_scientist.impl.src.generator import Generator
 from auto_scientist.impl.src.logger import Logger
+from auto_scientist.impl.src.oversight import Oversight
+
 
 def main():
     parser = argparse.ArgumentParser(description="Auto-Scientist Loop")
@@ -36,6 +37,7 @@ def main():
             logger.log("refined", {"hypothesis": hypothesis})
 
     logger.log("failed", {"reason": "max_iterations_exceeded"})
+
 
 if __name__ == "__main__":
     main()

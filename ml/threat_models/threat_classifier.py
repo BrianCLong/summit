@@ -3,12 +3,12 @@ Supervised threat classifier using deep learning
 Multi-class classification for different threat categories
 """
 
+from dataclasses import dataclass
+
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import numpy as np
-from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass
 from sklearn.metrics import classification_report, confusion_matrix
 
 
@@ -16,14 +16,14 @@ from sklearn.metrics import classification_report, confusion_matrix
 class ClassifierConfig:
     input_dim: int
     num_classes: int
-    hidden_dims: List[int] = None
+    hidden_dims: list[int] = None
     learning_rate: float = 0.001
     batch_size: int = 128
     epochs: int = 50
     dropout_rate: float = 0.3
     weight_decay: float = 0.0001
-    device: str = 'cuda' if torch.cuda.is_available() else 'cpu'
-    class_weights: Optional[torch.Tensor] = None
+    device: str = "cuda" if torch.cuda.is_available() else "cpu"
+    class_weights: torch.Tensor | None = None
 
     def __post_init__(self):
         if self.hidden_dims is None:
@@ -41,12 +41,14 @@ class ThreatClassifierModel(nn.Module):
         in_dim = config.input_dim
 
         for hidden_dim in config.hidden_dims:
-            layers.extend([
-                nn.Linear(in_dim, hidden_dim),
-                nn.ReLU(),
-                nn.BatchNorm1d(hidden_dim),
-                nn.Dropout(config.dropout_rate)
-            ])
+            layers.extend(
+                [
+                    nn.Linear(in_dim, hidden_dim),
+                    nn.ReLU(),
+                    nn.BatchNorm1d(hidden_dim),
+                    nn.Dropout(config.dropout_rate),
+                ]
+            )
             in_dim = hidden_dim
 
         # Output layer
@@ -65,9 +67,7 @@ class ThreatClassifier:
         self.config = config
         self.model = ThreatClassifierModel(config).to(config.device)
         self.optimizer = optim.Adam(
-            self.model.parameters(),
-            lr=config.learning_rate,
-            weight_decay=config.weight_decay
+            self.model.parameters(), lr=config.learning_rate, weight_decay=config.weight_decay
         )
 
         # Loss function with optional class weights
@@ -85,9 +85,9 @@ class ThreatClassifier:
         self,
         X: np.ndarray,
         y: np.ndarray,
-        validation_data: Optional[Tuple[np.ndarray, np.ndarray]] = None,
-        class_names: Optional[List[str]] = None
-    ) -> Dict[str, List[float]]:
+        validation_data: tuple[np.ndarray, np.ndarray] | None = None,
+        class_names: list[str] | None = None,
+    ) -> dict[str, list[float]]:
         """
         Train the threat classifier
 
@@ -117,12 +117,7 @@ class ThreatClassifier:
             X_val = torch.FloatTensor(X_val_norm).to(self.config.device)
             y_val = torch.LongTensor(validation_data[1]).to(self.config.device)
 
-        history = {
-            'train_loss': [],
-            'train_acc': [],
-            'val_loss': [],
-            'val_acc': []
-        }
+        history = {"train_loss": [], "train_acc": [], "val_loss": [], "val_acc": []}
 
         for epoch in range(self.config.epochs):
             self.model.train()
@@ -133,8 +128,8 @@ class ThreatClassifier:
 
             # Training loop
             for i in range(0, len(X_train), self.config.batch_size):
-                batch_X = X_train[i:i + self.config.batch_size]
-                batch_y = y_train[i:i + self.config.batch_size]
+                batch_X = X_train[i : i + self.config.batch_size]
+                batch_y = y_train[i : i + self.config.batch_size]
 
                 self.optimizer.zero_grad()
                 outputs = self.model(batch_X)
@@ -151,8 +146,8 @@ class ThreatClassifier:
             avg_train_loss = epoch_loss / n_batches
             train_acc = correct / total
 
-            history['train_loss'].append(avg_train_loss)
-            history['train_acc'].append(train_acc)
+            history["train_loss"].append(avg_train_loss)
+            history["train_acc"].append(train_acc)
 
             # Validation
             if X_val is not None:
@@ -163,14 +158,20 @@ class ThreatClassifier:
                     _, val_predicted = torch.max(val_outputs.data, 1)
                     val_acc = (val_predicted == y_val).sum().item() / len(y_val)
 
-                    history['val_loss'].append(val_loss)
-                    history['val_acc'].append(val_acc)
+                    history["val_loss"].append(val_loss)
+                    history["val_acc"].append(val_acc)
 
             if epoch % 5 == 0:
-                val_str = f", Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}" if X_val is not None else ""
-                print(f"Epoch {epoch}/{self.config.epochs}, "
-                      f"Train Loss: {avg_train_loss:.4f}, Train Acc: {train_acc:.4f}"
-                      f"{val_str}")
+                val_str = (
+                    f", Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}"
+                    if X_val is not None
+                    else ""
+                )
+                print(
+                    f"Epoch {epoch}/{self.config.epochs}, "
+                    f"Train Loss: {avg_train_loss:.4f}, Train Acc: {train_acc:.4f}"
+                    f"{val_str}"
+                )
 
         print("Training complete!")
         return history
@@ -211,7 +212,7 @@ class ThreatClassifier:
 
         return probabilities.cpu().numpy()
 
-    def evaluate(self, X: np.ndarray, y: np.ndarray) -> Dict:
+    def evaluate(self, X: np.ndarray, y: np.ndarray) -> dict:
         """
         Evaluate model performance
 
@@ -226,19 +227,18 @@ class ThreatClassifier:
         y_proba = self.predict_proba(X)
 
         results = {
-            'accuracy': (y_pred == y).mean(),
-            'predictions': y_pred,
-            'probabilities': y_proba,
-            'confusion_matrix': confusion_matrix(y, y_pred).tolist()
+            "accuracy": (y_pred == y).mean(),
+            "predictions": y_pred,
+            "probabilities": y_proba,
+            "confusion_matrix": confusion_matrix(y, y_pred).tolist(),
         }
 
         if self.class_names is not None:
-            results['classification_report'] = classification_report(
-                y, y_pred,
-                target_names=self.class_names
+            results["classification_report"] = classification_report(
+                y, y_pred, target_names=self.class_names
             )
         else:
-            results['classification_report'] = classification_report(y, y_pred)
+            results["classification_report"] = classification_report(y, y_pred)
 
         return results
 
@@ -270,20 +270,23 @@ class ThreatClassifier:
 
     def save_model(self, path: str):
         """Save model to disk"""
-        torch.save({
-            'model_state_dict': self.model.state_dict(),
-            'optimizer_state_dict': self.optimizer.state_dict(),
-            'config': self.config,
-            'scaler_mean': self.scaler_mean,
-            'scaler_std': self.scaler_std,
-            'class_names': self.class_names
-        }, path)
+        torch.save(
+            {
+                "model_state_dict": self.model.state_dict(),
+                "optimizer_state_dict": self.optimizer.state_dict(),
+                "config": self.config,
+                "scaler_mean": self.scaler_mean,
+                "scaler_std": self.scaler_std,
+                "class_names": self.class_names,
+            },
+            path,
+        )
 
     def load_model(self, path: str):
         """Load model from disk"""
         checkpoint = torch.load(path, map_location=self.config.device)
-        self.model.load_state_dict(checkpoint['model_state_dict'])
-        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        self.scaler_mean = checkpoint['scaler_mean']
-        self.scaler_std = checkpoint['scaler_std']
-        self.class_names = checkpoint.get('class_names')
+        self.model.load_state_dict(checkpoint["model_state_dict"])
+        self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+        self.scaler_mean = checkpoint["scaler_mean"]
+        self.scaler_std = checkpoint["scaler_std"]
+        self.class_names = checkpoint.get("class_names")

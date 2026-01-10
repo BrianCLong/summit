@@ -1,11 +1,13 @@
 """Flow decorator that compiles functions into executable graphs."""
+
 from __future__ import annotations
 
 import inspect
 import json
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from .telemetry import TraceEmitter
 
@@ -13,21 +15,29 @@ from .telemetry import TraceEmitter
 @dataclass
 class FlowGraph:
     name: str
-    nodes: List[Dict[str, Any]]
-    edges: List[Dict[str, Any]]
-    policy_defaults: Dict[str, Any] = field(default_factory=dict)
+    nodes: list[dict[str, Any]]
+    edges: list[dict[str, Any]]
+    policy_defaults: dict[str, Any] = field(default_factory=dict)
 
     def to_json(self) -> str:
-        return json.dumps({
-            "name": self.name,
-            "nodes": self.nodes,
-            "edges": self.edges,
-            "policy_defaults": self.policy_defaults,
-        }, indent=2)
+        return json.dumps(
+            {
+                "name": self.name,
+                "nodes": self.nodes,
+                "edges": self.edges,
+                "policy_defaults": self.policy_defaults,
+            },
+            indent=2,
+        )
 
 
 class FlowWrapper:
-    def __init__(self, fn: Callable[..., Any], emitter: TraceEmitter, policy_defaults: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self,
+        fn: Callable[..., Any],
+        emitter: TraceEmitter,
+        policy_defaults: dict[str, Any] | None = None,
+    ):
         self.fn = fn
         self.emitter = emitter
         self.policy_defaults = policy_defaults or {}
@@ -45,16 +55,22 @@ class FlowWrapper:
 
     def to_graph(self) -> FlowGraph:
         sig = inspect.signature(self.fn)
-        nodes = [{
-            "id": self.fn.__name__,
-            "type": "python_function",
-            "inputs": list(sig.parameters.keys()),
-            "outputs": ["return"],
-        }]
-        return FlowGraph(name=self.fn.__name__, nodes=nodes, edges=[], policy_defaults=self.policy_defaults)
+        nodes = [
+            {
+                "id": self.fn.__name__,
+                "type": "python_function",
+                "inputs": list(sig.parameters.keys()),
+                "outputs": ["return"],
+            }
+        ]
+        return FlowGraph(
+            name=self.fn.__name__, nodes=nodes, edges=[], policy_defaults=self.policy_defaults
+        )
 
 
-def flow(*, policy_defaults: Optional[Dict[str, Any]] = None, emitter: Optional[TraceEmitter] = None) -> Callable[[Callable[..., Any]], FlowWrapper]:
+def flow(
+    *, policy_defaults: dict[str, Any] | None = None, emitter: TraceEmitter | None = None
+) -> Callable[[Callable[..., Any]], FlowWrapper]:
     """Decorator used to declare a Summit flow.
 
     Args:
@@ -67,4 +83,3 @@ def flow(*, policy_defaults: Optional[Dict[str, Any]] = None, emitter: Optional[
         return FlowWrapper(fn, wrapped_emitter, policy_defaults=policy_defaults)
 
     return decorator
-

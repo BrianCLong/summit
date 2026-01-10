@@ -1,3 +1,4 @@
+import type { Entity, BaseNode } from './schema.js';
 
 /**
  * @interface WorkflowDefinition

@@ -15,6 +15,7 @@ from typing import Any
 
 class FieldType(Enum):
     """Inferred field types."""
+
     STRING = "string"
     INTEGER = "integer"
     FLOAT = "float"
@@ -31,6 +32,7 @@ class FieldType(Enum):
 
 class CanonicalEntity(Enum):
     """Canonical entity types in IntelGraph model."""
+
     PERSON = "Person"
     ORG = "Org"
     LOCATION = "Location"
@@ -45,6 +47,7 @@ class CanonicalEntity(Enum):
 @dataclass
 class FieldSchema:
     """Inferred schema for a single field."""
+
     name: str
     inferred_type: FieldType
     nullable: bool
@@ -56,6 +59,7 @@ class FieldSchema:
 @dataclass
 class MappingSuggestion:
     """Suggested mapping to canonical model."""
+
     source_field: str
     canonical_entity: CanonicalEntity
     canonical_property: str
@@ -66,6 +70,7 @@ class MappingSuggestion:
 @dataclass
 class InferredSchema:
     """Complete inferred schema with mappings."""
+
     fields: list[FieldSchema]
     suggested_mappings: list[MappingSuggestion]
     primary_entity: CanonicalEntity | None
@@ -75,7 +80,9 @@ class InferredSchema:
 # Regex patterns for type detection
 PATTERNS = {
     FieldType.EMAIL: re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"),
-    FieldType.PHONE: re.compile(r"^\+?[1-9]\d{0,3}[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}$"),
+    FieldType.PHONE: re.compile(
+        r"^\+?[1-9]\d{0,3}[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}$"
+    ),
     FieldType.URL: re.compile(r"^https?://[^\s]+$"),
     FieldType.DATE: re.compile(r"^\d{4}-\d{2}-\d{2}$"),
     FieldType.DATETIME: re.compile(r"^\d{4}-\d{2}-\d{2}[T\s]\d{2}:\d{2}"),
@@ -97,7 +104,6 @@ CANONICAL_MAPPINGS = {
     "ssn": (CanonicalEntity.PERSON, "nationalId"),
     "social_security": (CanonicalEntity.PERSON, "nationalId"),
     "address": (CanonicalEntity.PERSON, "address"),
-
     # Organization fields
     "company": (CanonicalEntity.ORG, "name"),
     "company_name": (CanonicalEntity.ORG, "name"),
@@ -107,7 +113,6 @@ CANONICAL_MAPPINGS = {
     "tax_id": (CanonicalEntity.ORG, "taxId"),
     "industry": (CanonicalEntity.ORG, "industry"),
     "sector": (CanonicalEntity.ORG, "sector"),
-
     # Location fields
     "city": (CanonicalEntity.LOCATION, "city"),
     "state": (CanonicalEntity.LOCATION, "state"),
@@ -119,14 +124,12 @@ CANONICAL_MAPPINGS = {
     "lat": (CanonicalEntity.LOCATION, "latitude"),
     "lon": (CanonicalEntity.LOCATION, "longitude"),
     "lng": (CanonicalEntity.LOCATION, "longitude"),
-
     # Event fields
     "event_date": (CanonicalEntity.EVENT, "date"),
     "event_time": (CanonicalEntity.EVENT, "timestamp"),
     "event_type": (CanonicalEntity.EVENT, "type"),
     "incident_date": (CanonicalEntity.EVENT, "date"),
     "occurrence": (CanonicalEntity.EVENT, "timestamp"),
-
     # Asset fields
     "asset_id": (CanonicalEntity.ASSET, "id"),
     "asset_name": (CanonicalEntity.ASSET, "name"),
@@ -181,9 +184,7 @@ class SchemaInferenceEngine:
             record_count=len(rows),
         )
 
-    def _infer_field(
-        self, field_name: str, rows: list[dict[str, Any]]
-    ) -> FieldSchema:
+    def _infer_field(self, field_name: str, rows: list[dict[str, Any]]) -> FieldSchema:
         """Infer type and characteristics for a single field."""
         values = [row.get(field_name) for row in rows]
         non_null_values = [v for v in values if v is not None and v != ""]
@@ -215,9 +216,7 @@ class SchemaInferenceEngine:
             confidence=confidence,
         )
 
-    def _detect_type(
-        self, values: list[Any]
-    ) -> tuple[FieldType, str | None, float]:
+    def _detect_type(self, values: list[Any]) -> tuple[FieldType, str | None, float]:
         """Detect the most likely type for a list of values."""
         if not values:
             return FieldType.UNKNOWN, None, 0.0
@@ -259,9 +258,7 @@ class SchemaInferenceEngine:
 
         return FieldType.STRING, None, 0.5
 
-    def _generate_mappings(
-        self, fields: list[FieldSchema]
-    ) -> list[MappingSuggestion]:
+    def _generate_mappings(self, fields: list[FieldSchema]) -> list[MappingSuggestion]:
         """Generate canonical mapping suggestions for fields."""
         suggestions = []
 
@@ -341,8 +338,7 @@ class SchemaInferenceEngine:
         entity_scores: dict[CanonicalEntity, float] = {}
         for suggestion in suggestions:
             entity_scores[suggestion.canonical_entity] = (
-                entity_scores.get(suggestion.canonical_entity, 0.0)
-                + suggestion.confidence
+                entity_scores.get(suggestion.canonical_entity, 0.0) + suggestion.confidence
             )
 
         # Return entity with highest score

@@ -1,10 +1,11 @@
 """HTML report generation for the Pipeline Flakiness Detector."""
+
 from __future__ import annotations
 
 import html
 import os
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable, List
 
 from .core import StepAnalysis
 
@@ -14,7 +15,7 @@ class ReportContext:
     title: str
     runs: int
     threshold: float
-    analyses: List[StepAnalysis]
+    analyses: list[StepAnalysis]
 
 
 def _format_float(value: float) -> str:
@@ -24,7 +25,13 @@ def _format_float(value: float) -> str:
 class HTMLReportBuilder:
     """Produce deterministic HTML summaries for PFD runs."""
 
-    def __init__(self, analyses: Iterable[StepAnalysis], runs: int, threshold: float, title: str = "Pipeline Flakiness Report") -> None:
+    def __init__(
+        self,
+        analyses: Iterable[StepAnalysis],
+        runs: int,
+        threshold: float,
+        title: str = "Pipeline Flakiness Report",
+    ) -> None:
         self.context = ReportContext(
             title=title,
             runs=runs,
@@ -39,9 +46,9 @@ class HTMLReportBuilder:
         summary = self._render_summary(len(flagged), len(ctx.analyses))
         html_parts = [
             "<!DOCTYPE html>",
-            "<html lang=\"en\">",
+            '<html lang="en">',
             "<head>",
-            "<meta charset=\"utf-8\" />",
+            '<meta charset="utf-8" />',
             f"<title>{html.escape(ctx.title)}</title>",
             "<style>",
             "body { font-family: Arial, sans-serif; margin: 2rem; }",
@@ -56,7 +63,7 @@ class HTMLReportBuilder:
             "</head>",
             "<body>",
             f"<h1>{html.escape(ctx.title)}</h1>",
-            f"<div class=\"summary\">Runs: {ctx.runs} &mdash; Threshold: {_format_float(ctx.threshold)}</div>",
+            f'<div class="summary">Runs: {ctx.runs} &mdash; Threshold: {_format_float(ctx.threshold)}</div>',
             summary,
             "<table>",
             "<thead>",
@@ -81,15 +88,11 @@ class HTMLReportBuilder:
 
     def _render_summary(self, flagged_count: int, total: int) -> str:
         if total == 0:
-            return "<div class=\"summary\">No steps executed.</div>"
-        return (
-            "<div class=\"summary\">"
-            f"Flagged steps: {flagged_count} / {total}"
-            "</div>"
-        )
+            return '<div class="summary">No steps executed.</div>'
+        return f'<div class="summary">Flagged steps: {flagged_count} / {total}</div>'
 
     def _render_row(self, analysis: StepAnalysis) -> str:
-        row_class = " class=\"flagged\"" if analysis.flagged else ""
+        row_class = ' class="flagged"' if analysis.flagged else ""
         blame_text = self._format_blame(analysis)
         samples_html = self._format_samples(analysis)
         return (
@@ -117,7 +120,7 @@ class HTMLReportBuilder:
         return f"<code>{html.escape(location)}</code>"
 
     def _format_samples(self, analysis: StepAnalysis) -> str:
-        pieces: List[str] = []
+        pieces: list[str] = []
         for sample in analysis.unique_value_samples:
             pieces.append(
                 "<div>"

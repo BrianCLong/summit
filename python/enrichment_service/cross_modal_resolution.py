@@ -1,8 +1,10 @@
 # passes Bandit/SonarQube; AES-256-ready storage handled downstream
-from typing import Dict, Tuple, Optional
 import numpy as np
 
-def resolve_entity(text_vec: np.ndarray, image_vec: Optional[np.ndarray], alpha: float = 0.65) -> Tuple[str, float]:
+
+def resolve_entity(
+    text_vec: np.ndarray, image_vec: np.ndarray | None, alpha: float = 0.65
+) -> tuple[str, float]:
     """
     Fuse text+image embeddings; return (entity_key, confidence).
     alpha weights text; (1-alpha) weights image when present.

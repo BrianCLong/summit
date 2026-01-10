@@ -50,12 +50,16 @@ export async function emitTenantProvisioningReceipts(
 ): Promise<TenantProvisioningReceipts> {
   const provisioningEntry = await provenanceLedger.appendEntry({
     tenantId: input.tenantId,
+    timestamp: new Date(),
     actionType: 'TENANT_PROVISIONED',
     resourceType: 'tenant',
     resourceId: input.tenantId,
     actorId: input.actorId,
     actorType: input.actorType,
     payload: {
+      mutationType: 'CREATE' as const,
+      entityId: input.tenantId,
+      entityType: 'Tenant',
       namespace: input.namespace,
       partitions: input.partitions,
       plan: input.plan,
@@ -71,12 +75,16 @@ export async function emitTenantProvisioningReceipts(
 
   const quotaEntry = await provenanceLedger.appendEntry({
     tenantId: input.tenantId,
+    timestamp: new Date(),
     actionType: 'TENANT_QUOTA_ASSIGNED',
     resourceType: 'quota',
     resourceId: input.tenantId,
     actorId: input.actorId,
     actorType: input.actorType,
     payload: {
+      mutationType: 'CREATE' as const,
+      entityId: input.tenantId,
+      entityType: 'Quota',
       quota: input.quota,
       plan: input.plan,
       environment: input.environment,

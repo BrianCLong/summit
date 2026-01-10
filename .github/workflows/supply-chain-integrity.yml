@@ -1,11 +1,33 @@
 name: CI/CD Supply Chain Integrity
+# NOTE: GA tag triggers removed - now handled by release-ga-pipeline.yml
+# This workflow runs on branch pushes and PRs only.
+# See: docs/ci/RELEASE_GA_PIPELINE.md for GA release process.
 
 on:
   push:
     branches: [main, develop]
-    tags: ["v*.*.*"]
+    # Tag triggers removed - GA releases handled by release-ga-pipeline.yml
+    # tags: ["v*.*.*"]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".github/workflows/*.md"
   pull_request:
     branches: [main]
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "server/package.json"
+      - "client/package.json"
+      - "Dockerfile"
+      - "scripts/generate-sbom.sh"
+      - "scripts/scan-vulnerabilities.sh"
+      - "scripts/check-reproducibility.sh"
+      - ".github/workflows/supply-chain-integrity.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -26,22 +48,21 @@ jobs:
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
+        # version is read from package.json packageManager field
 
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.0.3
+        uses: actions/setup-node@65d868f8d4d85d7d4abb7de0875cde3fcc8798f5 # v4.0.3
         with:
           node-version: "20"
           cache: "pnpm"
 
       - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.1.0
+        uses: actions/setup-python@4f41a90a1f38628c7ccc608d05fbafe701bc20ae # v5.1.0
         with:
           python-version: "3.11"
 
       - name: Set up Go
-        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.0.1
+        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v5.0.1
         with:
           go-version: "1.21"
 
@@ -100,11 +121,42 @@ jobs:
             ./scripts/scan-vulnerabilities.sh . ./vulnerability-reports false false json || true
           fi
 
-      # Build and push container image if Dockerfile exists
-      - name: Build and Push Docker Image
-        if: hash docker 2>/dev/null && [ -f "Dockerfile" ]
+      # Upload source SBOMs immediately to free disk space before Docker build
+      - name: Upload Source SBOMs
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
+        with:
+          name: sboms-source-${{ env.VERSION }}
+          path: ./sboms/
+          retention-days: 90
+
+      # Upload source vulnerability reports immediately
+      - name: Upload Source Vulnerability Reports
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
+        with:
+          name: vulnerability-reports-source-${{ env.VERSION }}
+          path: ./vulnerability-reports/
+          retention-days: 90
+
+      # Clean up source artifacts to free disk space for Docker build
+      - name: Free Disk Space for Docker Build
+        if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
         run: |
-          DOCKER_IMAGE=ghcr.io/${{ github.repository_owner }}/summit-platform
+          echo "Disk usage before cleanup:"
+          df -h
+          echo "Removing source SBOM and vulnerability report files..."
+          rm -rf ./sboms/* ./vulnerability-reports/*
+          # Also clean up pnpm store and node_modules to maximize space
+          pnpm store prune || true
+          echo "Disk usage after cleanup:"
+          df -h
+
+      # Build and push container image (only on main branch or tags, not PRs)
+      - name: Build and Push Docker Image
+        if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
+        run: |
+          # Docker requires lowercase repository names
+          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          DOCKER_IMAGE=ghcr.io/${OWNER_LOWER}/summit-platform
           DOCKER_TAG=${{ env.VERSION }}
 
           # Build image
@@ -123,7 +175,9 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: "true"
         run: |
-          DOCKER_IMAGE=ghcr.io/${{ github.repository_owner }}/summit-platform
+          # Docker requires lowercase repository names
+          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          DOCKER_IMAGE=ghcr.io/${OWNER_LOWER}/summit-platform
           DOCKER_TAG=${{ env.VERSION }}
 
           # Sign container image with keyless signing
@@ -150,26 +204,28 @@ jobs:
           chmod +x scripts/bundle-release-evidence.sh
           ./scripts/bundle-release-evidence.sh ${{ env.VERSION }} summit-platform $GITHUB_SHA ./release-evidence
 
-      # Upload SBOMs as artifacts
-      - name: Upload SBOMs
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.3.3
+      # Upload container SBOMs (generated during Docker build)
+      - name: Upload Container SBOMs
+        if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
         with:
-          name: sboms-${{ env.VERSION }}
+          name: sboms-container-${{ env.VERSION }}
           path: ./sboms/
           retention-days: 90
 
-      # Upload vulnerability reports
-      - name: Upload Vulnerability Reports
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.3.3
+      # Upload container vulnerability reports (generated during Docker build)
+      - name: Upload Container Vulnerability Reports
+        if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
         with:
-          name: vulnerability-reports-${{ env.VERSION }}
+          name: vulnerability-reports-container-${{ env.VERSION }}
           path: ./vulnerability-reports/
           retention-days: 90
 
       # Upload release evidence bundle
       - name: Upload Release Evidence Bundle
         if: github.event_name == 'push' && github.ref_type == 'tag'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.3.3
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
         with:
           name: release-evidence-${{ env.VERSION }}
           path: ./release-evidence/summit-release-${{ env.VERSION }}-evidence.tar.gz
@@ -185,16 +241,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
 
-      - name: Download SBOMs
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.1.7
+      - name: Download Source SBOMs
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7
         with:
-          name: sboms-${{ needs.supply-chain-integrity.outputs.release-version }}
+          name: sboms-source-${{ needs.supply-chain-integrity.outputs.release-version }}
           path: ./sboms
 
-      - name: Download Vulnerability Reports
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.1.7
+      - name: Download Source Vulnerability Reports
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7
         with:
-          name: vulnerability-reports-${{ needs.supply-chain-integrity.outputs.release-version }}
+          name: vulnerability-reports-source-${{ needs.supply-chain-integrity.outputs.release-version }}
           path: ./vulnerability-reports
 
       - name: Install tools
@@ -221,7 +277,7 @@ jobs:
 
     steps:
       - name: Download Release Evidence Bundle
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.1.7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7
         with:
           name: release-evidence-${{ needs.supply-chain-integrity.outputs.release-version }}
           path: ./releases

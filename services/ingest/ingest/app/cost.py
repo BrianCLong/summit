@@ -1,8 +1,7 @@
 import hashlib
 import json
-import time
 from datetime import datetime
-from typing import Any, Dict, Literal
+from typing import Any, Literal
 
 # --- Data Structures ---
 
@@ -40,7 +39,9 @@ WEIGHTS = {
 
 
 def calculate_cost_units(
-    operation_type: OperationType, dimensions: Dict[str, Any], version: str = LATEST_WEIGHTS_VERSION
+    operation_type: OperationType,
+    dimensions: dict[str, Any],
+    version: str = LATEST_WEIGHTS_VERSION,
 ) -> int:
     """Calculates a deterministic cost in abstract units."""
     weights = WEIGHTS.get(version)
@@ -52,7 +53,9 @@ def calculate_cost_units(
 
     if operation_type == "ingest" or operation_type == "export":
         units += dimensions.get("io_bytes", 0) * op_weights["io_bytes_factor"]
-        units += dimensions.get("objects_written", 0) * op_weights["objects_written_factor"]
+        units += (
+            dimensions.get("objects_written", 0) * op_weights["objects_written_factor"]
+        )
 
     return round(units)
 
@@ -74,7 +77,7 @@ def _generate_event_id(correlation_id: str, operation_type: OperationType) -> st
 
 def emit_cost_event(
     operation_type: OperationType,
-    dimensions: Dict[str, Any],
+    dimensions: dict[str, Any],
     tenant_id: str,
     scope_id: str,
     correlation_id: str,

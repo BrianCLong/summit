@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Dict, Iterable, List, Sequence
+from collections.abc import Iterable, Sequence
 
 from .ml import EmbeddingModel
 from .models import FieldObservation, MappingReport, MappingResult, OntologyTag
 from .rules import evaluate_rules
 
-
-SENSITIVITY_BY_CATEGORY: Dict[str, str] = {
+SENSITIVITY_BY_CATEGORY: dict[str, str] = {
     "EMAIL": "medium",
     "PHONE": "high",
     "NAME": "medium",
@@ -22,7 +21,7 @@ SENSITIVITY_BY_CATEGORY: Dict[str, str] = {
     "PAYMENT_HINTS": "high",
 }
 
-JURISDICTION_HINTS: Dict[str, List[str]] = {
+JURISDICTION_HINTS: dict[str, list[str]] = {
     "GOV_ID": ["us"],
     "PAYMENT_HINTS": ["pci-dss"],
 }
@@ -39,16 +38,16 @@ class SPOM:
         self, fields: Sequence[FieldObservation], dataset: str | None = None
     ) -> MappingReport:
         dataset_name = dataset or (fields[0].dataset if fields else "unknown") or "unknown"
-        results: List[MappingResult] = []
+        results: list[MappingResult] = []
         for field in fields:
             results.append(self._map_field(field))
         return MappingReport(dataset=dataset_name, results=results)
 
     def _map_field(self, field: FieldObservation) -> MappingResult:
         matches = evaluate_rules(field)
-        scores: Dict[str, float] = defaultdict(float)
-        reasoning: Dict[str, List[str]] = defaultdict(list)
-        features: Dict[str, Dict[str, float]] = defaultdict(dict)
+        scores: dict[str, float] = defaultdict(float)
+        reasoning: dict[str, list[str]] = defaultdict(list)
+        features: dict[str, dict[str, float]] = defaultdict(dict)
 
         for match in matches:
             scores[match.category] += match.weight
@@ -106,7 +105,9 @@ class SPOM:
         jurisdictions = list(JURISDICTION_HINTS.get(category, []))
         if category == "GOV_ID" and "ssn" in field.name.lower():
             jurisdictions = ["us"]
-        if category == "ADDRESS" and "eu" in (field.description.lower() if field.description else ""):
+        if category == "ADDRESS" and "eu" in (
+            field.description.lower() if field.description else ""
+        ):
             jurisdictions.append("gdpr")
         return OntologyTag(
             label=category,

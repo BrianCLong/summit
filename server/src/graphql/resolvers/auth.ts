@@ -203,10 +203,11 @@ const authResolvers = {
      */
     login: async (
       _: any,
-      { email, password }: { email: string; password: string },
+      { input }: { input: { email: string; password: string } },
       context: any
     ) => {
-      validateInput(loginSchema, { email, password });
+      const { email, password } = input;
+      validateInput(loginSchema, input);
 
       const ip = context.req?.ip || 'unknown';
       const userAgent = context.req?.get?.('User-Agent') || '';

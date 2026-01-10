@@ -14,18 +14,24 @@ export * from './types.js';
 // Services
 export {
   HSMServiceImpl,
-  HSMServiceConfig,
-  HSMProviderConfig,
-  KeyRotationPolicy,
   HSMError,
   createHSMService,
 } from './HSMService.js';
 
+export type {
+  HSMServiceConfig,
+  HSMProviderConfig,
+  KeyRotationPolicy,
+} from './HSMService.js';
+
 export {
   ImmutableAuditServiceImpl,
-  AuditServiceConfig,
   AuditError,
   createImmutableAuditService,
+} from './ImmutableAuditService.js';
+
+export type {
+  AuditServiceConfig,
 } from './ImmutableAuditService.js';
 
 // Unified Zero-Trust Service

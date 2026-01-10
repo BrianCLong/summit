@@ -171,7 +171,9 @@ class Neo4jGraph:
     def node_by_id(self, node_id: str):
         return self.entity_by_id(node_id)
 
-    def search_entities(self, query: str, tenant_id: str, case_id: str, limit: int = 25) -> list[dict]:
+    def search_entities(
+        self, query: str, tenant_id: str, case_id: str, limit: int = 25
+    ) -> list[dict]:
         try:
             rows = self._run_read(
                 """
@@ -201,7 +203,9 @@ class Neo4jGraph:
             )
         return rows
 
-    def neighbors(self, node_id: str, max_hops: int = 1, labels: Sequence[str] | None = None) -> dict:
+    def neighbors(
+        self, node_id: str, max_hops: int = 1, labels: Sequence[str] | None = None
+    ) -> dict:
         rows = self._run_read(
             """
             MATCH (start {id: $id})
@@ -223,7 +227,9 @@ class Neo4jGraph:
                 nodes.append(
                     {
                         "id": node.get("id"),
-                        "type": (node.labels and list(node.labels)[0]) if hasattr(node, "labels") else node.get("type"),
+                        "type": (node.labels and list(node.labels)[0])
+                        if hasattr(node, "labels")
+                        else node.get("type"),
                         "name": node.get("name", node.get("title", "")),
                         "properties": dict(node),
                     }
@@ -232,7 +238,8 @@ class Neo4jGraph:
                 for rel in rel_list:
                     edges.append(
                         {
-                            "id": rel.get("id") or f"{rel.start_node.get('id')}:{rel.type}:{rel.end_node.get('id')}",
+                            "id": rel.get("id")
+                            or f"{rel.start_node.get('id')}:{rel.type}:{rel.end_node.get('id')}",
                             "source": rel.start_node.get("id"),
                             "target": rel.end_node.get("id"),
                             "type": rel.type,

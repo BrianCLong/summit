@@ -1,17 +1,21 @@
-import click
 import json
 from pathlib import Path
+
+import click
 from rich.console import Console
 from rich.table import Table
+
+from .metrics import ExactMatchMetric, ToolEfficiencyMetric, TraceLengthMetric
 from .schema import load_episode
-from .metrics import TraceLengthMetric, ToolEfficiencyMetric, ExactMatchMetric
 
 console = Console()
+
 
 @click.group()
 def main():
     """Summit Reasoning Evaluator (SRE) CLI"""
     pass
+
 
 @main.command()
 @click.option("--trace", type=click.Path(exists=True), help="Path to episode trace JSON/JSONL")
@@ -24,7 +28,7 @@ def eval(trace, metrics):
         metric_map = {
             "trace_length": TraceLengthMetric(),
             "tool_efficiency": ToolEfficiencyMetric(),
-            "exact_match": ExactMatchMetric()
+            "exact_match": ExactMatchMetric(),
         }
 
         results = {}
@@ -48,6 +52,7 @@ def eval(trace, metrics):
     except Exception as e:
         console.print(f"[red]Error processing trace: {e}[/red]")
 
+
 @main.command()
 @click.option("--suite", default="demo", help="Suite name to run")
 def run(suite):
@@ -63,16 +68,21 @@ def run(suite):
         "graph": {
             "nodes": [
                 {"id": "1", "type": "thought", "content": "I need to calculate 6 * 7"},
-                {"id": "2", "type": "call", "content": "calc(6*7)", "metadata": {"tool_name": "calculator"}},
+                {
+                    "id": "2",
+                    "type": "call",
+                    "content": "calc(6*7)",
+                    "metadata": {"tool_name": "calculator"},
+                },
                 {"id": "3", "type": "observation", "content": "42"},
-                {"id": "4", "type": "thought", "content": "The answer is 42"}
+                {"id": "4", "type": "thought", "content": "The answer is 42"},
             ],
             "edges": [
                 {"source": "1", "target": "2"},
                 {"source": "2", "target": "3"},
-                {"source": "3", "target": "4"}
-            ]
-        }
+                {"source": "3", "target": "4"},
+            ],
+        },
     }
 
     # Save mock to temp file
@@ -87,6 +97,7 @@ def run(suite):
     # Cleanup
     if temp_path.exists():
         temp_path.unlink()
+
 
 if __name__ == "__main__":
     main()

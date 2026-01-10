@@ -199,7 +199,7 @@ class EvidenceValidator:
             logger.error(f"Error validating evidence {evidence.id}: {e}")
             test.result = ValidationResult.INCONCLUSIVE
             test.confidence = 0.0
-            test.actual_outcome = f"Validation failed: {str(e)}"
+            test.actual_outcome = f"Validation failed: {e!s}"
 
         return test
 

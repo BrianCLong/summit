@@ -9,10 +9,8 @@ Provides REST endpoints for:
 """
 
 import json
-from typing import List
 
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import JSONResponse
 
 from .core.database import get_database
 from .core.models import (
@@ -82,7 +80,7 @@ def create_entity(entity_data: EntityBase):
     return created
 
 
-@app.get("/entities", response_model=List[EntityRead])
+@app.get("/entities", response_model=list[EntityRead])
 def list_entities(
     limit: int = Query(default=100, le=1000),
     offset: int = Query(default=0, ge=0),
@@ -141,16 +139,14 @@ def create_claim(claim_data: ClaimBase):
     # Validate entity exists
     entity = db.get_entity(claim_data.entity_id)
     if entity is None:
-        raise HTTPException(
-            status_code=404, detail=f"Entity {claim_data.entity_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Entity {claim_data.entity_id} not found")
 
     claim = Claim.model_validate(claim_data)
     created = db.create_claim(claim)
     return created
 
 
-@app.get("/claims", response_model=List[ClaimRead])
+@app.get("/claims", response_model=list[ClaimRead])
 def list_claims(
     limit: int = Query(default=100, le=1000),
     offset: int = Query(default=0, ge=0),
@@ -188,7 +184,7 @@ def create_decision(decision_data: DecisionBase):
     return created
 
 
-@app.get("/decisions", response_model=List[DecisionRead])
+@app.get("/decisions", response_model=list[DecisionRead])
 def list_decisions(
     limit: int = Query(default=100, le=1000),
     offset: int = Query(default=0, ge=0),
@@ -223,9 +219,7 @@ def get_decision(decision_id: int):
     """
     decision = db.get_decision(decision_id)
     if decision is None:
-        raise HTTPException(
-            status_code=404, detail=f"Decision {decision_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Decision {decision_id} not found")
     return decision
 
 
@@ -248,7 +242,7 @@ def create_source(source_data: SourceBase):
     return created
 
 
-@app.get("/sources", response_model=List[SourceRead])
+@app.get("/sources", response_model=list[SourceRead])
 def list_sources(
     limit: int = Query(default=100, le=1000),
     offset: int = Query(default=0, ge=0),

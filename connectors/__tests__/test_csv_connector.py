@@ -11,7 +11,6 @@ from simulated_ingestion.ingestion_pipeline import MockGraphDBClient, run_ingest
 
 
 class TestCsvConnector(unittest.TestCase):
-
     def setUp(self):
         self.csv_connector_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "../csv_connector")

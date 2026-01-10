@@ -5,7 +5,7 @@ import type { IntelGraphClient } from '../../src/intelgraph/client';
 
 describe('MaestroQueries', () => {
   it('builds a MaestroRunResponse from graph data', async () => {
-    const ig: IntelGraphClient = {
+    const ig = {
       // writes not used in this test
       createRun: jest.fn(),
       updateRun: jest.fn(),
@@ -59,7 +59,7 @@ describe('MaestroQueries', () => {
           },
         },
       }),
-    };
+    } as unknown as IntelGraphClient;
 
     const queries = new MaestroQueries(ig);
     const response = await queries.getRunResponse('run-1');

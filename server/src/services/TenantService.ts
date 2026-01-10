@@ -9,12 +9,14 @@ import GAEnrollmentService from './GAEnrollmentService.js';
 import { PrometheusMetrics } from '../utils/metrics.js';
 
 // Input Validation Schema
-export const createTenantSchema = z.object({
+export const createTenantBaseSchema = z.object({
   name: z.string().min(2).max(100),
   slug: z.string().min(3).max(50).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
   residency: z.enum(['US', 'EU']),
   region: z.string().optional(),
-}).transform(data => {
+});
+
+export const createTenantSchema = createTenantBaseSchema.transform(data => {
   // Default region based on residency
   if (!data.region) {
     data.region = data.residency === 'EU' ? 'eu-central-1' : 'us-east-1';
@@ -140,9 +142,9 @@ export class TenantService {
   private constructor() {
     this.metrics = new PrometheusMetrics('summit_tenancy');
     this.metrics.createHistogram(
-        'tenant_creation_duration_seconds',
-        'Time taken to create a tenant',
-        ['residency', 'tier']
+      'tenant_creation_duration_seconds',
+      'Time taken to create a tenant',
+      ['residency', 'tier']
     );
   }
 
@@ -168,7 +170,7 @@ export class TenantService {
       // GA Enrollment Check for Tenant Creation
       const enrollmentCheck = await GAEnrollmentService.checkTenantEnrollmentEligibility(validated.region);
       if (!enrollmentCheck.eligible) {
-          throw new Error(`Tenant creation rejected: ${enrollmentCheck.reason}`);
+        throw new Error(`Tenant creation rejected: ${enrollmentCheck.reason}`);
       }
 
       await client.query('BEGIN');
@@ -180,9 +182,9 @@ export class TenantService {
       if (existing.rowCount && existing.rowCount > 0) {
         const existingTenant = this.mapRowToTenant(existing.rows[0]);
         if (existingTenant.createdBy === actorId) {
-             logger.info(`Idempotent creation for tenant ${existingTenant.slug} by user ${actorId}`);
-             await client.query('ROLLBACK');
-             return existingTenant;
+          logger.info(`Idempotent creation for tenant ${existingTenant.slug} by user ${actorId}`);
+          await client.query('ROLLBACK');
+          return existingTenant;
         }
         throw new Error(`Tenant slug '${validated.slug}' is already taken.`);
       }
@@ -235,25 +237,25 @@ export class TenantService {
 
       // 6. Record Audit Event
       await provenanceLedger.appendEntry({
-         action: 'TENANT_CREATED',
-         actor: {
-             id: actorId || 'system',
-             role: 'admin'
-         },
-         metadata: {
-             tenantId: tenant.id,
-             residency: tenant.residency,
-             tier: tenant.tier
-         },
-         artifacts: []
+        action: 'TENANT_CREATED',
+        actor: {
+          id: actorId || 'system',
+          role: 'admin'
+        },
+        metadata: {
+          tenantId: tenant.id,
+          residency: tenant.residency,
+          tier: tenant.tier
+        },
+        artifacts: []
       });
 
       // 7. Associate User with Tenant (Set as their active tenant and grant admin)
       // Assuming 'users' table has tenant_id.
       // Also assuming we want to move the user into this tenant.
       await client.query(
-          'UPDATE users SET tenant_id = $1, role = $2 WHERE id = $3',
-          [tenantId, 'ADMIN', actorId]
+        'UPDATE users SET tenant_id = $1, role = $2 WHERE id = $3',
+        [tenantId, 'ADMIN', actorId]
       );
 
       await client.query('COMMIT');
@@ -262,8 +264,8 @@ export class TenantService {
       const [seconds, nanoseconds] = process.hrtime(start);
       const duration = seconds + nanoseconds / 1e9;
       this.metrics.observeHistogram('tenant_creation_duration_seconds', {
-          residency: tenant.residency,
-          tier: tenant.tier
+        residency: tenant.residency,
+        tier: tenant.tier
       }, duration);
 
       return tenant;

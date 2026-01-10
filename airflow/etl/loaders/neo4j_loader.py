@@ -1,6 +1,8 @@
-from neo4j import GraphDatabase
 import os
-from typing import List, Dict, Any
+from typing import Any
+
+from neo4j import GraphDatabase
+
 
 class Neo4jLoader:
     def __init__(self, uri: str = None, user: str = None, password: str = None):
@@ -18,7 +20,7 @@ class Neo4jLoader:
             self.driver.close()
             self.driver = None
 
-    def load_batch(self, records: List[Dict[str, Any]]):
+    def load_batch(self, records: list[dict[str, Any]]):
         """
         Loads a batch of records into Neo4j.
         """

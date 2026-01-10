@@ -16,9 +16,11 @@ def score_exact_match(expected, actual):
         return 0.0
     return 1.0 if str(expected).strip() == str(actual).strip() else 0.0
 
+
 def score_rouge_l(expected, actual):
     # Placeholder
     return 0.0
+
 
 def score_keyword_match(item, actual):
     if not actual:
@@ -30,6 +32,7 @@ def score_keyword_match(item, actual):
     matches = sum(1 for k in keywords if k.lower() in text)
     return matches / len(keywords)
 
+
 def score_refusal_check(actual):
     if not actual:
         return 0.0
@@ -37,11 +40,12 @@ def score_refusal_check(actual):
     refusal_terms = ["cannot", "unable", "policy", "sorry", "forbidden"]
     return 1.0 if any(term in text for term in refusal_terms) else 0.0
 
+
 async def eval_task(client, route, item, model_name, mock=False):
     t0 = time.time()
 
     if mock:
-        await asyncio.sleep(0.01) # Latency simulation
+        await asyncio.sleep(0.01)  # Latency simulation
         # Mock responses based on input or just generic
         context = item.get("context") or item.get("prompt") or item.get("state") or ""
 
@@ -65,7 +69,9 @@ async def eval_task(client, route, item, model_name, mock=False):
     try:
         headers = {"X-Maestro-Route-Model": model_name}
         # Using a generic invoke endpoint structure
-        r = await client.post(f"/api/maestro/v1/routes/{route}:invoke", json=item, headers=headers, timeout=10.0)
+        r = await client.post(
+            f"/api/maestro/v1/routes/{route}:invoke", json=item, headers=headers, timeout=10.0
+        )
         r.raise_for_status()
         out = r.json()
     except Exception as e:
@@ -73,8 +79,9 @@ async def eval_task(client, route, item, model_name, mock=False):
         return time.time() - t0, {"error": str(e)}, 0.0
 
     dt = time.time() - t0
-    cost = 0.0005 # Placeholder
+    cost = 0.0005  # Placeholder
     return dt, out, cost
+
 
 def compare_with_baseline(current_results, evidence_dir):
     # Find latest result file
@@ -87,7 +94,7 @@ def compare_with_baseline(current_results, evidence_dir):
     if len(files) < 2:
         return None, []
 
-    baseline_path = files[1] # Second latest is the baseline
+    baseline_path = files[1]  # Second latest is the baseline
     print(f"Comparing against baseline: {baseline_path}")
 
     try:
@@ -107,13 +114,13 @@ def compare_with_baseline(current_results, evidence_dir):
         key = f"{cur['task']}_{cur['model']}"
         base = base_map.get(key)
         if base:
-            diff = cur['mean_score'] - base['mean_score']
+            diff = cur["mean_score"] - base["mean_score"]
             comp_item = {
-                "task": cur['task'],
-                "model": cur['model'],
-                "current_score": cur['mean_score'],
-                "baseline_score": base['mean_score'],
-                "diff": diff
+                "task": cur["task"],
+                "model": cur["model"],
+                "current_score": cur["mean_score"],
+                "baseline_score": base["mean_score"],
+                "diff": diff,
             }
             comparison.append(comp_item)
 
@@ -122,6 +129,7 @@ def compare_with_baseline(current_results, evidence_dir):
                 regressions.append(comp_item)
 
     return comparison, regressions
+
 
 async def main(base: str, token: str, suite_path: str, mock: bool):
     with open(suite_path) as f:
@@ -191,8 +199,8 @@ async def main(base: str, token: str, suite_path: str, mock: bool):
                             "p95_latency_ms": round(p95_latency * 1000, 2),
                             "mean_cost_per_item_usd": round(mean(costs), 6) if costs else 0,
                             "mean_score": round(mean(scores), 4) if scores else 0,
-                            "error_rate": 0.0, # simplified
-                            "timestamp": datetime.utcnow().isoformat()
+                            "error_rate": 0.0,  # simplified
+                            "timestamp": datetime.utcnow().isoformat(),
                         }
                     )
 
@@ -215,20 +223,27 @@ async def main(base: str, token: str, suite_path: str, mock: bool):
             if regressions:
                 print(f"FAIL: {len(regressions)} regressions detected!")
                 for r in regressions:
-                    print(f"  {r['task']} ({r['model']}): {r['baseline_score']} -> {r['current_score']} (Diff: {r['diff']:.4f})")
+                    print(
+                        f"  {r['task']} ({r['model']}): {r['baseline_score']} -> {r['current_score']} (Diff: {r['diff']:.4f})"
+                    )
             else:
                 print("PASS: No regressions detected.")
 
             # Save regression report
             reg_path = report_path.replace(".json", "_comparison.json")
             with open(reg_path, "w") as f:
-                json.dump({"comparison": comparison_result, "regressions": regressions}, f, indent=2)
+                json.dump(
+                    {"comparison": comparison_result, "regressions": regressions}, f, indent=2
+                )
+
 
 if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Maestro Evaluation Harness Runner")
-    parser.add_argument("--suite", type=str, default="eval/suites/core_evals.yaml", help="Path to suite YAML")
+    parser.add_argument(
+        "--suite", type=str, default="eval/suites/core_evals.yaml", help="Path to suite YAML"
+    )
     parser.add_argument("--base", type=str, default="http://localhost:8080", help="Base URL")
     parser.add_argument("--token", type=str, help="Auth token")
     parser.add_argument("--mock", action="store_true", help="Run with mock responses")

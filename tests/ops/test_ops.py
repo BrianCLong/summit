@@ -28,7 +28,6 @@ from ops.observability import (
 
 
 class TestOpsStubs(unittest.TestCase):
-
     def setUp(self):
         # Reset feature flags to default state before each test
         _FEATURE_FLAGS.clear()

@@ -2,51 +2,49 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from typing import Dict, List, Optional
-
 
 class GraphNode(BaseModel):
     id: str
-    features: Optional[Dict[str, float]] = None
-    attrs: Optional[Dict[str, str]] = None
+    features: dict[str, float] | None = None
+    attrs: dict[str, str] | None = None
 
 
 class GraphEdge(BaseModel):
     src: str
     dst: str
     undirected: bool | None = None
-    features: Optional[Dict[str, float]] = None
-    attrs: Optional[Dict[str, str]] = None
+    features: dict[str, float] | None = None
+    attrs: dict[str, str] | None = None
 
 
 class Subgraph(BaseModel):
-    nodes: List[GraphNode]
-    edges: List[GraphEdge]
+    nodes: list[GraphNode]
+    edges: list[GraphEdge]
     directed: bool | None = None
-    metadata: Optional[Dict[str, str]] = None
+    metadata: dict[str, str] | None = None
 
 
 class ModelOutput(BaseModel):
     task: str
-    target: Dict[str, str]
+    target: dict[str, str]
     score: float
-    logits: Optional[List[float]] = None
-    label: Optional[str] = None
+    logits: list[float] | None = None
+    label: str | None = None
 
 
 class ModelMeta(BaseModel):
     name: str
     version: str
     gradients: bool | None = None
-    node_feature_names: Optional[List[str]] = None
-    edge_feature_names: Optional[List[str]] = None
+    node_feature_names: list[str] | None = None
+    edge_feature_names: list[str] | None = None
 
 
 class ExplainRequest(BaseModel):
     subgraph: Subgraph
-    outputs: List[ModelOutput]
+    outputs: list[ModelOutput]
     model: ModelMeta
-    options: Optional[Dict[str, str]] = None
+    options: dict[str, str] | None = None
 
 
 class Importance(BaseModel):
@@ -56,45 +54,45 @@ class Importance(BaseModel):
 
 
 class PathExplanation(BaseModel):
-    path: List[str]
+    path: list[str]
     score: float
     rationale: str
 
 
 class CounterfactualEdit(BaseModel):
     op: str
-    payload: Dict[str, str]
+    payload: dict[str, str]
     cost: float
 
 
 class Counterfactual(BaseModel):
-    target: Dict[str, str]
+    target: dict[str, str]
     new_score: float
     delta: float
-    edits: List[CounterfactualEdit]
+    edits: list[CounterfactualEdit]
 
 
 class Robustness(BaseModel):
     stability: float
-    details: Dict[str, List[str]] | Dict[str, float]
+    details: dict[str, list[str]] | dict[str, float]
 
 
 class Fairness(BaseModel):
     enabled: bool
-    parity: Optional[Dict[str, float]] = None
-    notes: List[str] = []
+    parity: dict[str, float] | None = None
+    notes: list[str] = []
 
 
 class VizPayload(BaseModel):
-    nodes: List[Dict[str, float | str]]
-    edges: List[Dict[str, float | str]]
-    legend: Dict[str, str]
+    nodes: list[dict[str, float | str]]
+    edges: list[dict[str, float | str]]
+    legend: dict[str, str]
 
 
 class ExplainResponse(BaseModel):
-    importances: List[Importance]
-    paths: List[PathExplanation]
-    counterfactuals: List[Counterfactual]
+    importances: list[Importance]
+    paths: list[PathExplanation]
+    counterfactuals: list[Counterfactual]
     robustness: Robustness
     fairness: Fairness
     viz: VizPayload

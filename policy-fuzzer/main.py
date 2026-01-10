@@ -202,7 +202,7 @@ def main():
                 {
                     "policy": violation["original_policy"],
                     "query": violation["original_query"],
-                    "reason": f"Metamorphic violation: {violation["relation_name"]}",
+                    "reason": f"Metamorphic violation: {violation['relation_name']}",
                     "transformed_query": violation["transformed_query"],
                     "original_compliant": violation["original_compliant"],
                     "transformed_compliant": violation["transformed_compliant"],

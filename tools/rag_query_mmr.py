@@ -60,7 +60,7 @@ qe = embed(q)
 cands = [{"path": p, "chunk": c, "emb": e} for (p, c, e) in rows if e]
 top = mmr(cands, qe, k=5, lam=0.6)
 
-context = "\n---\n".join(f"[{i+1}] {t['chunk'][:800]}" for i, t in enumerate(top))
+context = "\n---\n".join(f"[{i + 1}] {t['chunk'][:800]}" for i, t in enumerate(top))
 messages = [
     {"role": "system", "content": "Answer briefly with citations like [1], [2]."},
     {"role": "user", "content": f"Question: {q}\n\nContext:\n{context}"},

@@ -31,7 +31,7 @@ const HEALTH_BUNDLE_ALLOWED_FIELDS = [
 ];
 
 const HEALTH_BUNDLE_REDACTION_POLICY = {
-  rules: ['pii', 'financial', 'sensitive'],
+  rules: ['pii', 'financial', 'sensitive'] as ('pii' | 'financial' | 'sensitive')[],
   allowedFields: HEALTH_BUNDLE_ALLOWED_FIELDS,
   redactionMask: '[REDACTED]',
 };

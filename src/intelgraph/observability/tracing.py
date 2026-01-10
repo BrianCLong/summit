@@ -1,12 +1,15 @@
 import contextlib
-from typing import Generator, Any, Optional
+from collections.abc import Generator
+from typing import Any
 
 try:
     from opentelemetry import trace  # type: ignore
+
     _HAS_OTEL = True
 except ImportError:
     _HAS_OTEL = False
     trace = None
+
 
 @contextlib.contextmanager
 def start_span(name: str, **attrs: Any) -> Generator[Any, None, None]:

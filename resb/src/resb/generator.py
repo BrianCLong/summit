@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict
 
 import numpy as np
 import pandas as pd
 from sklearn.neighbors import NearestNeighbors
 
+from .auditor import LeakageAudit, audit_leakage
 from .config import RESBConfig
 from .constraints import check_constraints
 from .dp import (
@@ -19,7 +19,6 @@ from .dp import (
     validate_dp_parameters,
 )
 from .reporting import FidelityReport, UtilityReport, build_fidelity_report, build_utility_report
-from .auditor import LeakageAudit, audit_leakage
 
 
 @dataclass(frozen=True)
@@ -28,7 +27,7 @@ class BoostResult:
 
     synthetic: pd.DataFrame
     augmented: pd.DataFrame
-    reports: "Reports"
+    reports: Reports
     auditor: LeakageAudit
 
 
@@ -150,7 +149,7 @@ class RESBGenerator:
         counts = series.value_counts(dropna=False)
         return counts.idxmin()
 
-    def _sigma_map(self, minority_df: pd.DataFrame, exclude: tuple[str, ...]) -> Dict[str, float]:
+    def _sigma_map(self, minority_df: pd.DataFrame, exclude: tuple[str, ...]) -> dict[str, float]:
         if self.config.dp_sensitivity is not None:
             return {
                 column: gaussian_sigma(self.config.epsilon, self.config.delta, sensitivity)

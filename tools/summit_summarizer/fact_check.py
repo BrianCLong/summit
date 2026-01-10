@@ -1,11 +1,11 @@
 import re
 from collections import Counter
-from typing import Iterable, List
+from collections.abc import Iterable
 
 from .models import Document, FactCheckIssue, FactCheckReport
 
 
-def _split_sentences(text: str) -> List[str]:
+def _split_sentences(text: str) -> list[str]:
     cleaned = re.sub(r"\s+", " ", text.strip())
     return [s.strip() for s in re.split(r"(?<=[.!?])\s+", cleaned) if s.strip()]
 
@@ -19,7 +19,9 @@ def _token_overlap(sentence: str, document: str) -> float:
     return match_count / len(tokens)
 
 
-def fact_check_summary(summary: str, documents: Iterable[Document], *, threshold: float = 0.4) -> FactCheckReport:
+def fact_check_summary(
+    summary: str, documents: Iterable[Document], *, threshold: float = 0.4
+) -> FactCheckReport:
     """Performs a lightweight lexical fact check over the generated summary.
 
     The checker is intentionally conservative: it looks for lexical support for
@@ -29,7 +31,7 @@ def fact_check_summary(summary: str, documents: Iterable[Document], *, threshold
     """
 
     sources = list(documents)
-    issues: List[FactCheckIssue] = []
+    issues: list[FactCheckIssue] = []
     for sentence in _split_sentences(summary):
         overlaps = [_token_overlap(sentence, source.content) for source in sources]
         if not overlaps or max(overlaps) < threshold:

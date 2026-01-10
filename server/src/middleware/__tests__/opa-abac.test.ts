@@ -188,8 +188,10 @@ describe('OPAClient', () => {
         message: 'timeout of 5000ms exceeded',
       });
 
-      // Act & Assert
-      await expect(opaClient.evaluate('summit.authz.allow', input)).rejects.toThrow();
+      const result = await opaClient.evaluate('summit.authz.allow', input);
+      expect(result).toEqual(
+        expect.objectContaining({ allow: false, reason: 'opa_unavailable' }),
+      );
     });
 
     it('should handle OPA server connection errors', async () => {
@@ -206,8 +208,10 @@ describe('OPAClient', () => {
         message: 'connect ECONNREFUSED 127.0.0.1:8181',
       });
 
-      // Act & Assert
-      await expect(opaClient.evaluate('summit.authz.allow', input)).rejects.toThrow();
+      const result = await opaClient.evaluate('summit.authz.allow', input);
+      expect(result).toEqual(
+        expect.objectContaining({ allow: false, reason: 'opa_unavailable' }),
+      );
     });
 
     it('should handle boolean result from simple policy', async () => {
@@ -244,7 +248,7 @@ describe('createABACMiddleware', () => {
       const user = userFactory({
         id: 'user-123',
         tenantId: 'tenant-abc',
-        roles: ['analyst'],
+        role: 'analyst',
       });
       const req = requestFactory({
         user,
@@ -275,7 +279,7 @@ describe('createABACMiddleware', () => {
       const user = userFactory({
         id: 'user-123',
         tenantId: 'tenant-abc',
-        roles: ['viewer'],
+        role: 'viewer',
       });
       const req = requestFactory({
         user,
@@ -330,7 +334,7 @@ describe('createABACMiddleware', () => {
       const user = userFactory({
         id: 'user-123',
         tenantId: 'tenant-abc',
-        roles: ['analyst'],
+        role: 'analyst',
       });
       const req = requestFactory({
         user,
@@ -379,7 +383,7 @@ describe('createABACMiddleware', () => {
       const user = userFactory({
         id: 'user-123',
         tenantId: 'tenant-abc',
-        roles: ['admin'],
+        role: 'admin',
       });
       const req = requestFactory({
         user,
@@ -423,7 +427,7 @@ describe('createABACMiddleware', () => {
       const user = userFactory({
         id: 'user-123',
         tenantId: 'tenant-abc',
-        roles: ['analyst'],
+        role: 'analyst',
       });
       const req = requestFactory({
         user,
@@ -464,7 +468,7 @@ describe('createABACMiddleware', () => {
       const user = userFactory({
         id: 'user-123',
         tenantId: 'tenant-abc',
-        roles: ['analyst'],
+        role: 'analyst',
       });
       const req = requestFactory({
         user,

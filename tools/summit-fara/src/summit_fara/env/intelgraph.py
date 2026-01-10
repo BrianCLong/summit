@@ -1,11 +1,13 @@
-import os
 import logging
+import os
+
 try:
     from neo4j import GraphDatabase
 except ImportError:
     GraphDatabase = None
 
 log = logging.getLogger("summit-fara")
+
 
 class IntelGraphConnector:
     def __init__(self):

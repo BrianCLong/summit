@@ -18,7 +18,9 @@ def load_yaml(path: Path) -> Any:
 def validate_alertmanager_routes(config: dict[str, Any]) -> list[str]:
     issues: list[str] = []
     data = config.get("data", {})
-    notification_yaml = data.get("notification_channels.yaml") or data.get("notification_channels.yml")
+    notification_yaml = data.get("notification_channels.yaml") or data.get(
+        "notification_channels.yml"
+    )
     if not notification_yaml:
         return ["notification_channels.yaml missing from config map"]
 
@@ -41,9 +43,7 @@ def validate_alertmanager_routes(config: dict[str, Any]) -> list[str]:
         issues.append("root route must default to 'default' receiver")
 
     pagerduty_routing = [
-        r
-        for r in route.get("routes", [])
-        if r.get("match", {}).get("severity") == "critical"
+        r for r in route.get("routes", []) if r.get("match", {}).get("severity") == "critical"
     ]
     if not pagerduty_routing:
         issues.append("no critical severity route found for on-call paging")
@@ -66,7 +66,9 @@ def validate_pagerduty_service(definition: dict[str, Any]) -> list[str]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Validate on-call and PagerDuty escalation settings")
+    parser = argparse.ArgumentParser(
+        description="Validate on-call and PagerDuty escalation settings"
+    )
     parser.add_argument(
         "--config-map",
         default="ops/slos-and-alerts.yaml",

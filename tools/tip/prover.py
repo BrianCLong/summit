@@ -433,7 +433,9 @@ class TenantIsolationProver:
                         elif "namespaceSelector" in block:
                             if is_wildcard(block["namespaceSelector"]):
                                 # If podSelector is also empty or missing, it's very open
-                                if "podSelector" not in block or is_wildcard(block.get("podSelector", {})):
+                                if "podSelector" not in block or is_wildcard(
+                                    block.get("podSelector", {})
+                                ):
                                     findings.append(
                                         self._make_permissive_finding(
                                             policy,
@@ -451,7 +453,9 @@ class TenantIsolationProver:
 
                     # Missing 'to' or empty list 'to: []' means allow all destinations
                     destinations = rule.get("to")
-                    if destinations is None or (isinstance(destinations, list) and len(destinations) == 0):
+                    if destinations is None or (
+                        isinstance(destinations, list) and len(destinations) == 0
+                    ):
                         findings.append(
                             self._make_permissive_finding(
                                 policy,
@@ -479,7 +483,9 @@ class TenantIsolationProver:
                                 )
                         elif "namespaceSelector" in block:
                             if is_wildcard(block["namespaceSelector"]):
-                                if "podSelector" not in block or is_wildcard(block.get("podSelector", {})):
+                                if "podSelector" not in block or is_wildcard(
+                                    block.get("podSelector", {})
+                                ):
                                     findings.append(
                                         self._make_permissive_finding(
                                             policy,

@@ -2,14 +2,15 @@
 
 import time
 from abc import ABC, abstractmethod
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any
 
 import yaml
 
 from .license import LicenseConfig, LicenseEnforcer
 from .pii import PIIDetector, PIIField
-from .rate_limiter import RateLimiter, RateLimitConfig
+from .rate_limiter import RateLimitConfig, RateLimiter
 
 
 class BaseConnector(ABC):
@@ -45,12 +46,12 @@ class BaseConnector(ABC):
             "end_time": None,
         }
 
-    def _load_manifest(self) -> Dict[str, Any]:
+    def _load_manifest(self) -> dict[str, Any]:
         """Load and parse the connector manifest."""
         with open(self.manifest_path) as f:
             return yaml.safe_load(f)
 
-    def _init_rate_limiter(self) -> Optional[RateLimiter]:
+    def _init_rate_limiter(self) -> RateLimiter | None:
         """Initialize rate limiter from manifest config."""
         if "rate_limit" not in self.manifest:
             return None
@@ -71,7 +72,7 @@ class BaseConnector(ABC):
 
         return RateLimiter(config)
 
-    def _init_pii_detector(self) -> Optional[PIIDetector]:
+    def _init_pii_detector(self) -> PIIDetector | None:
         """Initialize PII detector from manifest config."""
         if "pii_flags" not in self.manifest:
             return None
@@ -93,7 +94,7 @@ class BaseConnector(ABC):
 
         return PIIDetector(pii_fields) if pii_fields else None
 
-    def _init_license_enforcer(self) -> Optional[LicenseEnforcer]:
+    def _init_license_enforcer(self) -> LicenseEnforcer | None:
         """Initialize license enforcer from manifest config."""
         if "license" not in self.manifest:
             return None
@@ -140,7 +141,7 @@ class BaseConnector(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def map_to_entities(self, raw_data: Any) -> tuple[List[Dict], List[Dict]]:
+    def map_to_entities(self, raw_data: Any) -> tuple[list[dict], list[dict]]:
         """
         Map raw data to IntelGraph entities and relationships.
 
@@ -154,7 +155,7 @@ class BaseConnector(ABC):
         """
         raise NotImplementedError
 
-    def process_record(self, raw_data: Any) -> Optional[Dict[str, Any]]:
+    def process_record(self, raw_data: Any) -> dict[str, Any] | None:
         """
         Process a single record through the full pipeline.
 
@@ -210,11 +211,11 @@ class BaseConnector(ABC):
                 "lineage": self._create_lineage_record(raw_data),
             }
 
-        except Exception as e:
+        except Exception:
             self.stats["records_failed"] += 1
             raise
 
-    def _create_lineage_record(self, raw_data: Any) -> Dict[str, Any]:
+    def _create_lineage_record(self, raw_data: Any) -> dict[str, Any]:
         """Create a lineage record for this data."""
         lineage_config = self.manifest.get("lineage", {})
 
@@ -229,7 +230,7 @@ class BaseConnector(ABC):
             "connector_version": self.manifest["version"],
         }
 
-    def run(self) -> Dict[str, Any]:
+    def run(self) -> dict[str, Any]:
         """
         Run the full connector pipeline.
 
@@ -262,7 +263,7 @@ class BaseConnector(ABC):
             ),
         }
 
-    def get_connector_info(self) -> Dict[str, Any]:
+    def get_connector_info(self) -> dict[str, Any]:
         """Get connector metadata and configuration."""
         return {
             "name": self.manifest["name"],

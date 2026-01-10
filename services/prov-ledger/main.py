@@ -1,8 +1,9 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
-from hashlib import sha256
-from datetime import datetime
 import uuid
+from datetime import datetime
+from hashlib import sha256
+
+from fastapi import FastAPI
+from pydantic import BaseModel, Field
 
 app = FastAPI(title="prov-ledger", version="1.0.0")
 
@@ -28,4 +29,6 @@ def health():
 def register_claim(body: ClaimIn):
     cid = "clm_" + uuid.uuid4().hex[:10]
     h = "sha256:" + sha256(f"{body.evidenceId}:{body.assertion}".encode()).hexdigest()
-    return ClaimOut(id=cid, hash=h, createdAt=datetime.utcnow().isoformat() + "Z", evidenceId=body.evidenceId)
+    return ClaimOut(
+        id=cid, hash=h, createdAt=datetime.utcnow().isoformat() + "Z", evidenceId=body.evidenceId
+    )

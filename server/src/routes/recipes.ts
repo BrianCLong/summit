@@ -12,7 +12,7 @@ router.get('/recipes', (_req, res) => {
   try {
     const files = fs.existsSync(recipesDir) ? fs.readdirSync(recipesDir) : [];
     const items = files.filter(
-      (f) => f.endsWith('.yaml') || f.endsWith('.yml'),
+      (f: string) => f.endsWith('.yaml') || f.endsWith('.yml'),
     );
     res.json({ items });
   } catch (e: any) {
@@ -57,7 +57,7 @@ router.post('/recipes/run', express.json(), async (req, res) => {
     if (!validRecipeFile) {
       const availableRecipes = fs
         .readdirSync(path.join(process.cwd(), 'recipes'))
-        .filter((f) => f.endsWith('.yaml') || f.endsWith('.yml'))
+        .filter((f: string) => f.endsWith('.yaml') || f.endsWith('.yml'))
         .join(', ');
       return res.status(404).json({
         error: `Recipe '${name}' not found. Available recipes: ${availableRecipes}`,

@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-from typing import Dict
 
 from .models import RunState
 
@@ -20,8 +19,8 @@ class Storage:
 
     def load_run(self, run_id: str) -> RunState:
         path = self.run_path(run_id)
-        with open(path, "r", encoding="utf-8") as f:
-            data: Dict = json.load(f)
+        with open(path, encoding="utf-8") as f:
+            data: dict = json.load(f)
         return RunState.from_dict(data)
 
     def exists(self, run_id: str) -> bool:

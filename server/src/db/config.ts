@@ -12,8 +12,8 @@ export const dbConfig = {
   },
   idleTimeoutMs: 10000,
   connectionTimeoutMs: 5000,
-  maxPoolSize: 20,
-  readPoolSize: 5,
+  maxPoolSize: parseInt(process.env.PG_WRITE_POOL_SIZE || '20', 10),
+  readPoolSize: parseInt(process.env.PG_READ_POOL_SIZE || '5', 10),
   statementTimeoutMs: 30000,
   slowQueryThresholdMs: Number.parseInt(
     process.env.SLOW_QUERY_MS ?? '250',

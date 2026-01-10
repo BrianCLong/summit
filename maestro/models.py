@@ -38,9 +38,7 @@ class Run(BaseModel):
     started_at: datetime = Field(default_factory=datetime.utcnow)
     finished_at: datetime | None = None
     status: RunStatus = Field(default=RunStatus.PENDING)
-    cost_estimate: float | None = Field(
-        None, description="Estimated cost in dollars", ge=0
-    )
+    cost_estimate: float | None = Field(None, description="Estimated cost in dollars", ge=0)
     cost_actual: float | None = Field(None, description="Actual cost in dollars", ge=0)
     related_entity_ids: list[str] = Field(
         default_factory=list,
@@ -50,9 +48,7 @@ class Run(BaseModel):
         default_factory=list,
         description="References to IntelGraph decisions (UUID strings)",
     )
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, description="Additional run metadata"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional run metadata")
 
     class Config:
         json_schema_extra = {
@@ -71,9 +67,7 @@ class Run(BaseModel):
 class ArtifactMetadata(BaseModel):
     """Metadata about an artifact's governance compliance."""
 
-    sbom_present: bool = Field(
-        default=False, description="Whether SBOM data is included"
-    )
+    sbom_present: bool = Field(default=False, description="Whether SBOM data is included")
     slsa_provenance_present: bool = Field(
         default=False, description="Whether SLSA provenance is included"
     )
@@ -91,9 +85,7 @@ class Artifact(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     run_id: str = Field(..., description="ID of the run that produced this artifact")
     kind: ArtifactKind = Field(..., description="Type of artifact")
-    path_or_uri: str = Field(
-        ..., description="File path, S3 URI, or other location identifier"
-    )
+    path_or_uri: str = Field(..., description="File path, S3 URI, or other location identifier")
     content_hash: str | None = Field(
         None, description="SHA256 or other hash of the artifact content"
     )
@@ -128,9 +120,7 @@ class DisclosurePack(BaseModel):
         default_factory=list, description="IDs of artifacts included in this pack"
     )
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, description="Additional pack metadata"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional pack metadata")
 
     class Config:
         json_schema_extra = {
@@ -186,11 +176,17 @@ class WorkItem(BaseModel):
     title: str = Field(..., description="Title of the work item")
     description: str | None = Field(None, description="Detailed description of the task")
     status: WorkItemStatus = Field(default=WorkItemStatus.PENDING)
-    priority: int = Field(default=0, description="Priority of the work item (higher is more urgent)")
+    priority: int = Field(
+        default=0, description="Priority of the work item (higher is more urgent)"
+    )
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
-    assigned_to_agent_id: str | None = Field(None, description="ID of the agent currently assigned to this item")
-    related_run_id: str | None = Field(None, description="ID of the Maestro Run associated with this work")
+    assigned_to_agent_id: str | None = Field(
+        None, description="ID of the agent currently assigned to this item"
+    )
+    related_run_id: str | None = Field(
+        None, description="ID of the Maestro Run associated with this work"
+    )
 
 
 class ReviewStatus(str, Enum):

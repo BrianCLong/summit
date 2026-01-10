@@ -1,26 +1,39 @@
 import { describe, it, expect, beforeAll, afterAll, jest } from '@jest/globals';
 import { QueueName, JobData } from '../src/queue/types.js';
 import { Job } from 'bullmq';
+import { JobQueue } from '../src/queue/job-queue.js';
 
 // Mock BullMQ
 jest.mock('bullmq', () => {
   return {
     Queue: jest.fn().mockImplementation(() => ({
-      add: jest.fn().mockResolvedValue({ id: 'mock-job-id', name: 'mock-job', data: {} }),
-      close: jest.fn().mockResolvedValue(undefined),
+      add: async () => ({
+        id: 'mock-job-id',
+        name: 'mock-job',
+        data: {},
+      }),
+      close: async () => undefined,
     })),
     QueueEvents: jest.fn().mockImplementation(() => ({
-      on: jest.fn(),
-      close: jest.fn().mockResolvedValue(undefined),
+      on: () => {},
+      close: async () => undefined,
+      waitUntilReady: async () => undefined,
+    })),
+    QueueScheduler: jest.fn().mockImplementation(() => ({
+      close: async () => undefined,
+      waitUntilReady: async () => undefined,
     })),
     Worker: jest.fn().mockImplementation((name, processor) => ({
-        on: jest.fn(),
-        close: jest.fn().mockResolvedValue(undefined),
+        on: () => {},
+        close: async () => undefined,
         processor
     })),
     FlowProducer: jest.fn().mockImplementation(() => ({
-        add: jest.fn().mockResolvedValue({ job: { id: 'flow-job-id' }, children: [] }),
-        close: jest.fn().mockResolvedValue(undefined),
+        add: async () => ({
+          job: { id: 'flow-job-id' },
+          children: [],
+        }),
+        close: async () => undefined,
     })),
   };
 });
@@ -40,19 +53,32 @@ jest.mock('@bull-board/express', () => ({
 }));
 
 // Import after mocks
-import { queueManager } from '../src/queue/index.js';
 import { workerManager } from '../src/queue/worker.js';
 
 // Mock retention engine
 jest.mock('../src/jobs/retention.js', () => ({
   retentionEngine: {
-    purgeDataset: jest.fn().mockResolvedValue(undefined),
+    purgeDataset: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
   },
 }));
 
 describe('Queue System', () => {
+  const queue = new JobQueue({
+    name: QueueName.DEFAULT,
+    connection: {} as any,
+  });
+
+  beforeEach(async () => {
+    const { Worker } = await import('bullmq');
+    (Worker as jest.Mock).mockImplementation((name, processor) => ({
+      on: () => {},
+      close: async () => undefined,
+      processor,
+    }));
+  });
+
   afterAll(async () => {
-    await queueManager.close();
+    await queue.shutdown();
     await workerManager.close();
   });
 
@@ -62,10 +88,9 @@ describe('Queue System', () => {
       payload: { foo: 'bar' },
     };
 
-    const job = await queueManager.addJob(QueueName.DEFAULT, 'test-job-1', jobData);
+    const jobId = await queue.enqueue(jobData, { jobName: 'test-job-1' });
 
-    expect(job).toBeDefined();
-    expect(job?.id).toBe('mock-job-id');
+    expect(jobId).toBe('mock-job-id');
   });
 
   it('should register a worker', async () => {
@@ -81,18 +106,15 @@ describe('Queue System', () => {
       expect(Worker).toHaveBeenCalledWith(QueueName.DEFAULT, processor, expect.any(Object));
   });
 
-  it('should add a flow', async () => {
-      const flow = {
-          name: 'parent-job',
-          queueName: QueueName.DEFAULT,
-          data: {},
-          children: [
-              { name: 'child-job', queueName: QueueName.DEFAULT, data: {} }
-          ]
-      };
-
-      const result = await queueManager.addFlow(flow);
-      expect(result).toBeDefined();
-      expect(result.job.id).toBe('flow-job-id');
+  it('should schedule a job', async () => {
+    const jobData: JobData = {
+      type: 'scheduled-job',
+      payload: { foo: 'bar' },
+    };
+    const scheduledId = await queue.schedule(jobData, {
+      at: new Date(Date.now() + 1000),
+      jobName: 'scheduled-job',
+    });
+    expect(scheduledId).toBe('mock-job-id');
   });
 });

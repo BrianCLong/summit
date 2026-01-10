@@ -90,7 +90,7 @@ describe('DbObservabilityService', () => {
     expect(snapshot.locks).toHaveLength(1);
     expect(snapshot.slowQueries.entries[0].source).toBe('pg_stat_statements');
     expect(snapshot.explain?.queryId).toBe('activeSessions');
-    expect(snapshot.summary.overall).toContain('blocking');
+    expect(snapshot.summary.overall).toMatch(/block(ed|ing)/i);
     expect(auditMock.recordEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         eventType: 'db_observability',

@@ -1,16 +1,17 @@
 """Leaderboard utilities for recording tournament results."""
+
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Iterable, List
+from typing import Any
 
 from .harness import HarnessResult
 
-
-LEADERBOARD_SCHEMA: Dict[str, Any] = {
+LEADERBOARD_SCHEMA: dict[str, Any] = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Leakage Red-Team Tournament Leaderboard",
     "type": "object",
@@ -70,16 +71,16 @@ LEADERBOARD_SCHEMA: Dict[str, Any] = {
 class LeaderboardEntry:
     run_id: str
     seed: int
-    agents: List[Dict[str, Any]]
-    defenses: List[str]
-    metrics: Dict[str, Any]
+    agents: list[dict[str, Any]]
+    defenses: list[str]
+    metrics: dict[str, Any]
     timestamp: str = datetime.utcnow().isoformat() + "Z"
 
 
 class Leaderboard:
     def __init__(self, path: Path) -> None:
         self.path = path
-        self._data: Dict[str, Any] = {"runs": []}
+        self._data: dict[str, Any] = {"runs": []}
         if path.exists():
             with path.open("r", encoding="utf-8") as handle:
                 self._data = json.load(handle)

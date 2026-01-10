@@ -1,0 +1,349 @@
+# release-ops-slo-issue.yml
+# Monthly SLO issue creation for Release Ops publication safety
+#
+# Creates/updates a monthly SLO summary issue with counts-only KPIs.
+# Deduplicates by month to avoid spam.
+#
+# Authority: docs/ci/RELEASE_OPS_SLO.md
+
+name: Release Ops SLO Issue
+
+on:
+  # Monthly on the 1st at 09:00 UTC
+  schedule:
+    - cron: '0 9 1 * *'
+
+  # Manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (no issue creation)"
+        type: boolean
+        default: false
+      month:
+        description: "Month to report (YYYY-MM, default: previous)"
+        type: string
+        required: false
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+env:
+  SITE_DIR: site/release-ops
+  STATE_FILE: docs/releases/_state/slo_issues_state.json
+
+jobs:
+  create-slo-issue:
+    name: Create Monthly SLO Issue
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine Report Month
+        id: month
+        run: |
+          if [[ -n "${{ github.event.inputs.month }}" ]]; then
+            REPORT_MONTH="${{ github.event.inputs.month }}"
+          else
+            # Previous month
+            REPORT_MONTH=$(date -d "last month" +%Y-%m)
+          fi
+
+          MONTH_NAME=$(date -d "${REPORT_MONTH}-01" +%B 2>/dev/null || echo "${REPORT_MONTH}")
+          YEAR=$(echo "${REPORT_MONTH}" | cut -d'-' -f1)
+
+          echo "month=${REPORT_MONTH}" >> $GITHUB_OUTPUT
+          echo "month_name=${MONTH_NAME}" >> $GITHUB_OUTPUT
+          echo "year=${YEAR}" >> $GITHUB_OUTPUT
+          echo "title=[Release Ops SLO] ${MONTH_NAME} ${YEAR}" >> $GITHUB_OUTPUT
+
+      - name: Download Site Artifact
+        id: download
+        uses: actions/download-artifact@v4
+        with:
+          name: release-ops-site
+          path: ${{ env.SITE_DIR }}
+        continue-on-error: true
+
+      - name: Fallback - Build Site
+        if: steps.download.outcome == 'failure'
+        run: |
+          echo "::notice::Artifact not found, building site locally"
+          mkdir -p ${{ env.SITE_DIR }}
+
+          # Initialize minimal time series if needed
+          if [[ ! -f "${{ env.SITE_DIR }}/redaction_metrics_timeseries.json" ]]; then
+            echo '{"version":"1.0","series":[]}' > "${{ env.SITE_DIR }}/redaction_metrics_timeseries.json"
+          fi
+
+          # Compute SLO
+          if [[ -x "./scripts/release/compute_release_ops_slo.sh" ]]; then
+            ./scripts/release/compute_release_ops_slo.sh \
+              --timeseries "${{ env.SITE_DIR }}/redaction_metrics_timeseries.json" \
+              --out "${{ env.SITE_DIR }}/release_ops_slo.json" || true
+          fi
+
+      - name: Verify SLO JSON Exists
+        run: |
+          if [[ ! -f "${{ env.SITE_DIR }}/release_ops_slo.json" ]]; then
+            echo "::error::SLO JSON not found"
+            exit 1
+          fi
+
+          echo "SLO status:"
+          jq '.summary' "${{ env.SITE_DIR }}/release_ops_slo.json"
+
+      - name: Extract Governance Identity
+        id: governance
+        run: |
+          # Make script executable if present
+          if [[ -f "./scripts/release/extract_governance_identity_for_slo.sh" ]]; then
+            chmod +x ./scripts/release/extract_governance_identity_for_slo.sh
+
+            # Extract governance identity
+            GOV_JSON=$(./scripts/release/extract_governance_identity_for_slo.sh \
+              --site-dir "${{ env.SITE_DIR }}" \
+              --month "${{ steps.month.outputs.month }}" \
+              --json 2>/dev/null) || GOV_JSON='{"governance_hash":"UNKNOWN","authenticity_status":"UNKNOWN","drift_count":0}'
+
+            # Parse and output
+            GOV_HASH=$(echo "${GOV_JSON}" | jq -r '.governance_hash_short // "UNKNOWN"')
+            GOV_AUTH=$(echo "${GOV_JSON}" | jq -r '.authenticity_status // "UNKNOWN"')
+            GOV_DRIFT=$(echo "${GOV_JSON}" | jq -r '.drift_message // "N/A"')
+
+            echo "hash=${GOV_HASH}" >> $GITHUB_OUTPUT
+            echo "authenticity=${GOV_AUTH}" >> $GITHUB_OUTPUT
+            echo "drift=${GOV_DRIFT}" >> $GITHUB_OUTPUT
+          else
+            echo "hash=UNKNOWN" >> $GITHUB_OUTPUT
+            echo "authenticity=UNKNOWN" >> $GITHUB_OUTPUT
+            echo "drift=N/A" >> $GITHUB_OUTPUT
+            echo "::notice::Governance identity helper not found"
+          fi
+
+      - name: Check Deduplication
+        id: dedup
+        run: |
+          REPORT_MONTH="${{ steps.month.outputs.month }}"
+
+          mkdir -p "$(dirname "${{ env.STATE_FILE }}")"
+
+          if [[ ! -f "${{ env.STATE_FILE }}" ]]; then
+            echo '{"issues":{}}' > "${{ env.STATE_FILE }}"
+          fi
+
+          EXISTING=$(jq -r --arg month "${REPORT_MONTH}" '.issues[$month] // empty' "${{ env.STATE_FILE }}")
+
+          if [[ -n "${EXISTING}" ]]; then
+            echo "::notice::SLO issue already exists for ${REPORT_MONTH}"
+            echo "action=update" >> $GITHUB_OUTPUT
+            echo "issue_number=$(echo "${EXISTING}" | jq -r '.issue_number')" >> $GITHUB_OUTPUT
+          else
+            echo "action=create" >> $GITHUB_OUTPUT
+            echo "issue_number=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate Issue Body
+        id: body
+        run: |
+          REPORT_MONTH="${{ steps.month.outputs.month }}"
+          MONTH_NAME="${{ steps.month.outputs.month_name }}"
+          YEAR="${{ steps.month.outputs.year }}"
+
+          SLO_JSON=$(cat "${{ env.SITE_DIR }}/release_ops_slo.json")
+
+          # Extract metrics
+          WEEKLY_STATUS=$(echo "${SLO_JSON}" | jq -r '.weekly.status')
+          MONTHLY_STATUS=$(echo "${SLO_JSON}" | jq -r '.monthly.status')
+          CURRENT_STREAK=$(echo "${SLO_JSON}" | jq -r '.current_streak')
+
+          # Build body
+          cat > issue_body.md << 'BODY_START'
+          ## Release Ops SLO Report
+BODY_START
+
+          cat >> issue_body.md << HEADER_EOF
+
+          **Period:** ${MONTH_NAME} ${YEAR}
+          **Generated:** $(date -u +"%Y-%m-%d %H:%M UTC")
+          **Current OK Streak:** ${CURRENT_STREAK} consecutive publishes
+
+          ---
+
+          ### Status Summary
+
+          | Window | Status |
+          |--------|--------|
+          | Weekly (7d) | ${WEEKLY_STATUS} |
+          | Monthly (30d) | ${MONTHLY_STATUS} |
+
+          ---
+
+          ### Monthly KPIs
+
+          HEADER_EOF
+
+          # Add KPI table
+          echo "${SLO_JSON}" | jq -r '
+              .monthly as $m |
+              .targets as $t |
+              "| Metric | Value | Target | Status |",
+              "|--------|-------|--------|--------|",
+              "| Success Rate | \($m.success_rate_pct)% | ≥\($t.success_rate_pct)% | \(if $m.success_rate_pct >= $t.success_rate_pct then "Met" else "Not Met" end) |",
+              "| Rollbacks | \($m.rollbacks_count) (\($m.rollback_rate_pct)%) | ≤\($t.rollback_rate_max_pct)% | \(if $m.rollback_rate_pct <= $t.rollback_rate_max_pct then "Met" else "Not Met" end) |",
+              "| FAILs | \($m.fail_count) (\($m.fail_rate_pct)%) | ≤\($t.fail_rate_max_pct)% | \(if $m.fail_rate_pct <= $t.fail_rate_max_pct then "Met" else "Not Met" end) |",
+              "| WARNs | \($m.warn_count) (\($m.warn_rate_pct)%) | - | - |",
+              "| MTBR | \($m.mtbr_hours // "N/A") hrs | ≥\($t.mtbr_target_hours) hrs | \(if ($m.mtbr_hours // 0) >= $t.mtbr_target_hours then "Met" elif $m.mtbr_hours == null then "-" else "Not Met" end) |",
+              "| Longest Streak | \($m.longest_ok_streak) | ≥\($t.ok_streak_target) | \(if $m.longest_ok_streak >= $t.ok_streak_target then "Met" else "Not Met" end) |"
+          ' >> issue_body.md
+
+          cat >> issue_body.md << 'FOOTER_EOF'
+
+          ---
+
+          ### Recent Incidents
+
+          FOOTER_EOF
+
+          INCIDENT_COUNT=$(echo "${SLO_JSON}" | jq '.monthly.recent_incidents | length')
+
+          if [[ "${INCIDENT_COUNT}" -eq 0 ]]; then
+            echo "No incidents in the reporting period." >> issue_body.md
+          else
+            echo "| Date | Run ID | Type |" >> issue_body.md
+            echo "|------|--------|------|" >> issue_body.md
+            echo "${SLO_JSON}" | jq -r '
+                .monthly.recent_incidents[] |
+                "| \(.date) | \(.run_id // "-") | \(.type) |"
+            ' >> issue_body.md
+          fi
+
+          # Add governance identity section
+          cat >> issue_body.md << GOV_SECTION_EOF
+
+          ---
+
+          ### Governance Identity
+
+          | Field | Value |
+          |-------|-------|
+          | Governance Hash | \`${{ steps.governance.outputs.hash }}\` |
+          | Governance Authenticity | ${{ steps.governance.outputs.authenticity }} |
+          | Governance Drift | ${{ steps.governance.outputs.drift }} |
+
+          _Governance identity provides correlation between releases and policy configuration.
+          Hash changes indicate policy updates during the period._
+
+          GOV_SECTION_EOF
+
+          cat >> issue_body.md << 'LINKS_EOF'
+
+          ---
+
+          ### Links
+
+          - [SLO Report (Pages)](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/release_ops_slo.html)
+          - [Trend Page](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/redaction_metrics_trend.html)
+          - [Time Series Data](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/redaction_metrics_timeseries.json)
+
+          ---
+
+          *This issue is automatically created monthly by the Release Ops SLO workflow.*
+          *All metrics are counts-only and contain no sensitive information.*
+          LINKS_EOF
+
+      - name: Create Issue
+        if: steps.dedup.outputs.action == 'create' && github.event.inputs.dry_run != 'true'
+        id: create
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('issue_body.md', 'utf8');
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '${{ steps.month.outputs.title }}',
+              body: body,
+              labels: ['release-ops', 'slo-report', 'monthly']
+            });
+
+            console.log(`Created issue #${issue.data.number}`);
+            return issue.data.number;
+
+      - name: Update Issue
+        if: steps.dedup.outputs.action == 'update' && github.event.inputs.dry_run != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('issue_body.md', 'utf8');
+            const issueNumber = ${{ steps.dedup.outputs.issue_number }};
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: `## SLO Update (${new Date().toISOString()})\n\n${body}`
+            });
+
+            console.log(`Updated issue #${issueNumber}`);
+
+      - name: Update State File
+        if: steps.dedup.outputs.action == 'create' && github.event.inputs.dry_run != 'true'
+        run: |
+          REPORT_MONTH="${{ steps.month.outputs.month }}"
+          ISSUE_NUMBER="${{ steps.create.outputs.result }}"
+          NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          jq --arg month "${REPORT_MONTH}" \
+             --arg issue "${ISSUE_NUMBER}" \
+             --arg created "${NOW}" \
+             '.issues[$month] = {
+                issue_number: ($issue | tonumber),
+                created_at: $created
+              }' "${{ env.STATE_FILE }}" > state_tmp.json
+
+          mv state_tmp.json "${{ env.STATE_FILE }}"
+
+      - name: Commit State Update
+        if: steps.dedup.outputs.action == 'create' && github.event.inputs.dry_run != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add "${{ env.STATE_FILE }}"
+          git commit -m "chore: update SLO issue state for ${{ steps.month.outputs.month }}" || true
+          git push || echo "::warning::Could not push state update"
+
+      - name: Dry Run Summary
+        if: github.event.inputs.dry_run == 'true'
+        run: |
+          echo "### Dry Run Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Title:** ${{ steps.month.outputs.title }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Action:** ${{ steps.dedup.outputs.action }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Body preview:**" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          head -50 issue_body.md >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Generate Summary
+        run: |
+          echo "## Release Ops SLO Issue" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Month:** ${{ steps.month.outputs.month_name }} ${{ steps.month.outputs.year }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Action:** ${{ steps.dedup.outputs.action }}" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ steps.dedup.outputs.action }}" == "create" ]]; then
+            echo "**Issue:** #${{ steps.create.outputs.result }}" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ steps.dedup.outputs.action }}" == "update" ]]; then
+            echo "**Issue:** #${{ steps.dedup.outputs.issue_number }}" >> $GITHUB_STEP_SUMMARY
+          fi

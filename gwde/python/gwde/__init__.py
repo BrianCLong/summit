@@ -1,11 +1,12 @@
 """GW-DE dual-entropy watermark encoder/decoder Python bindings."""
+
 from __future__ import annotations
 
+import re
 from types import SimpleNamespace
 from typing import Any, Dict, List
 
 import numpy as np
-import re
 
 ZERO_WIDTH_CHARS = {"\u200b", "\u200c", "\u2063", "\u2064"}
 IMAGE_METADATA_SLOTS = 24 * 8 * 4
@@ -14,7 +15,7 @@ try:  # pragma: no cover - exercised during optional native builds
     from importlib import import_module
 
     _native = import_module("gwde._gwde")
-except Exception:  # noqa: BLE001 - intentional broad catch for fallback
+except Exception:
     from . import _fallback as _native
 
 
@@ -29,7 +30,7 @@ class DetectionResult(SimpleNamespace):
         )
 
 
-def embed(payload: Any, key: str, state_seed: int) -> Dict[str, Any]:
+def embed(payload: Any, key: str, state_seed: int) -> dict[str, Any]:
     """Embed a watermark into text or image payloads."""
 
     return _native.embed(payload, key, state_seed)
@@ -45,19 +46,19 @@ def detect(payload: Any) -> DetectionResult:
         return DetectionResult(**raw)
     if hasattr(raw, "score"):
         return DetectionResult(
-            score=getattr(raw, "score"),
-            fp=getattr(raw, "fp"),
-            total_bits=getattr(raw, "total_bits"),
-            matching_bits=getattr(raw, "matching_bits"),
-            metadata_valid=getattr(raw, "metadata_valid"),
+            score=raw.score,
+            fp=raw.fp,
+            total_bits=raw.total_bits,
+            matching_bits=raw.matching_bits,
+            metadata_valid=raw.metadata_valid,
         )
     raise TypeError("Unsupported detection payload returned from backend")
 
 
-def laundering_simulations(payload: Any) -> Dict[str, Any]:
+def laundering_simulations(payload: Any) -> dict[str, Any]:
     """Apply canonical laundering transforms for regression tests."""
 
-    transforms: Dict[str, Any] = {}
+    transforms: dict[str, Any] = {}
     if isinstance(payload, str):
         transforms["paraphrase"] = _paraphrase(payload)
     elif isinstance(payload, np.ndarray):
@@ -67,9 +68,9 @@ def laundering_simulations(payload: Any) -> Dict[str, Any]:
 
 
 def _split_zero_width(segment: str) -> tuple[str, str, str]:
-    prefix_chars: List[str] = []
-    base_chars: List[str] = []
-    suffix_chars: List[str] = []
+    prefix_chars: list[str] = []
+    base_chars: list[str] = []
+    suffix_chars: list[str] = []
     seen_content = False
     for char in segment:
         if char in ZERO_WIDTH_CHARS:
@@ -94,7 +95,7 @@ def _paraphrase(text: str) -> str:
         "dog": "hound",
     }
     parts = re.split(r"(\s+)", text)
-    result: List[str] = []
+    result: list[str] = []
     for part in parts:
         if not part:
             continue
@@ -164,5 +165,4 @@ def _resize_image(image: np.ndarray, scale: float = 0.95) -> np.ndarray:
 
 from . import roc
 
-__all__ = ["DetectionResult", "embed", "detect", "laundering_simulations", "roc"]
-
+__all__ = ["DetectionResult", "detect", "embed", "laundering_simulations", "roc"]

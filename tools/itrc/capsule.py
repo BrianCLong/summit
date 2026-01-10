@@ -5,13 +5,13 @@ from __future__ import annotations
 import json
 import time
 import zipfile
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable, List
+from typing import Any
 
 from .signing import Signature, Signer, Verifier, signature_from_dict
 from .utils import Attachment, canonical_json, normalise_artifact_path, sha256_bytes, sha256_file
-
 
 SCHEMA = "itrc.capsule/1"
 
@@ -21,13 +21,13 @@ class Artifact:
     path: str
     sha256: str
 
-    def as_dict(self) -> Dict[str, str]:
+    def as_dict(self) -> dict[str, str]:
         return {"path": self.path, "sha256": self.sha256}
 
 
 @dataclass
 class Capsule:
-    manifest: Dict[str, Any]
+    manifest: dict[str, Any]
     signature: Signature
 
     def to_json(self) -> str:
@@ -51,16 +51,16 @@ class CapsuleBuilder:
         self,
         *,
         name: str,
-        command: List[str],
+        command: list[str],
         working_dir: Path,
-        env: Dict[str, str],
+        env: dict[str, str],
         container_image_digest: str,
         env_lock_attachment: Attachment,
-        dataset_lineage_ids: List[str],
-        seeds: Dict[str, str],
-        hardware_hints: Dict[str, str],
-        policy_hashes: Dict[str, str],
-        artifacts: List[Artifact],
+        dataset_lineage_ids: list[str],
+        seeds: dict[str, str],
+        hardware_hints: dict[str, str],
+        policy_hashes: dict[str, str],
+        artifacts: list[Artifact],
         description: str | None = None,
     ) -> None:
         self._name = name
@@ -119,9 +119,8 @@ def write_capsule(capsule: Capsule, attachments: Iterable[Attachment], destinati
 def load_capsule(path: Path, verifier: Verifier | None = None) -> Capsule:
     """Load a capsule from *path* and verify it if a *verifier* is provided."""
 
-    with zipfile.ZipFile(path, "r") as archive:
-        with archive.open("capsule.json") as manifest_file:
-            data = json.loads(manifest_file.read().decode("utf-8"))
+    with zipfile.ZipFile(path, "r") as archive, archive.open("capsule.json") as manifest_file:
+        data = json.loads(manifest_file.read().decode("utf-8"))
     capsule = Capsule(manifest=data["manifest"], signature=signature_from_dict(data["signature"]))
     if verifier is not None:
         verifier.verify(capsule.payload_bytes(), capsule.signature)
@@ -146,8 +145,8 @@ def _write_zip_entry(archive: zipfile.ZipFile, name: str, data: bytes) -> None:
     archive.writestr(info, data)
 
 
-def prepare_artifacts(paths: List[str], base_dir: Path) -> List[Artifact]:
-    artifacts: List[Artifact] = []
+def prepare_artifacts(paths: list[str], base_dir: Path) -> list[Artifact]:
+    artifacts: list[Artifact] = []
     for raw_path in sorted(paths):
         normalized = normalise_artifact_path(raw_path, base_dir)
         file_path = (base_dir / raw_path).resolve()

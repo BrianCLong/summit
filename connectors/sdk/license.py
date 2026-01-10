@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class LicenseClassification(Enum):
@@ -27,7 +27,7 @@ class BlockedField:
 
     field_name: str
     reason: str
-    alternative: Optional[str] = None
+    alternative: str | None = None
 
 
 @dataclass
@@ -37,9 +37,9 @@ class LicenseConfig:
     license_type: str
     classification: LicenseClassification
     attribution_required: bool
-    allowed_use_cases: List[str]
-    blocked_use_cases: List[str]
-    blocked_fields: List[BlockedField]
+    allowed_use_cases: list[str]
+    blocked_use_cases: list[str]
+    blocked_fields: list[BlockedField]
 
 
 class LicenseEnforcer:
@@ -79,7 +79,7 @@ class LicenseEnforcer:
 
         return True
 
-    def filter_blocked_fields(self, record: Dict[str, Any]) -> tuple[Dict[str, Any], List[str]]:
+    def filter_blocked_fields(self, record: dict[str, Any]) -> tuple[dict[str, Any], list[str]]:
         """
         Remove blocked fields from a record.
 
@@ -108,7 +108,7 @@ class LicenseEnforcer:
 
         return filtered, blocked
 
-    def get_attribution_text(self, source_name: str = None) -> Optional[str]:
+    def get_attribution_text(self, source_name: str = None) -> str | None:
         """
         Get the attribution text if required by license.
 
@@ -124,7 +124,7 @@ class LicenseEnforcer:
         source = source_name or "Unknown Source"
         return f"Data licensed under {self.config.license_type}. Source: {source}"
 
-    def get_license_summary(self) -> Dict[str, Any]:
+    def get_license_summary(self) -> dict[str, Any]:
         """Get a summary of license terms."""
         return {
             "license_type": self.config.license_type,
@@ -138,14 +138,14 @@ class LicenseEnforcer:
             ],
         }
 
-    def get_violation_report(self) -> Dict[str, Any]:
+    def get_violation_report(self) -> dict[str, Any]:
         """Get a report of license violations."""
         return {
             "total_violations": len(self.violation_log),
             "violations": self.violation_log,
         }
 
-    def check_field_allowed(self, field_name: str) -> tuple[bool, Optional[str]]:
+    def check_field_allowed(self, field_name: str) -> tuple[bool, str | None]:
         """
         Check if a field is allowed by the license.
 

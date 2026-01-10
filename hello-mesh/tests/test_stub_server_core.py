@@ -1,10 +1,10 @@
 import json
+import sys
 import threading
 import time
+import unittest
 import urllib.request
 from pathlib import Path
-import sys
-import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -16,7 +16,9 @@ class StubServerCoreTest(unittest.TestCase):
     def setUp(self) -> None:
         self.server = create_server(0, "test-svc")
         self.port = self.server.server_address[1]
-        self.thread = threading.Thread(target=self.server.serve_forever, kwargs={"poll_interval": 0.1}, daemon=True)
+        self.thread = threading.Thread(
+            target=self.server.serve_forever, kwargs={"poll_interval": 0.1}, daemon=True
+        )
         self.thread.start()
         # Give the server a moment to bind
         time.sleep(0.1)
@@ -47,7 +49,9 @@ class StubServerCoreTest(unittest.TestCase):
         self._get_json("/readyz")
         text = self._get_metrics()
         self.assertIn('hello_mesh_uptime_seconds{service="test-svc"}', text)
-        self.assertIn('http_requests_total{service="test-svc",method="GET",path="/healthz"} 1', text)
+        self.assertIn(
+            'http_requests_total{service="test-svc",method="GET",path="/healthz"} 1', text
+        )
         self.assertIn('http_requests_total{service="test-svc",method="GET",path="/readyz"} 1', text)
 
     def test_manifest_endpoint_returns_stubbed_payload(self) -> None:
@@ -58,7 +62,10 @@ class StubServerCoreTest(unittest.TestCase):
         self.assertEqual(payload["service"], "test-svc")
 
         metrics = self._get_metrics()
-        self.assertIn('http_requests_total{service="test-svc",method="GET",path="/manifest/abc123"} 1', metrics)
+        self.assertIn(
+            'http_requests_total{service="test-svc",method="GET",path="/manifest/abc123"} 1',
+            metrics,
+        )
 
 
 if __name__ == "__main__":

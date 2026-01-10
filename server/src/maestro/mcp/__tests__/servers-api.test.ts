@@ -3,6 +3,9 @@ import request from 'supertest';
 import router, { checkMCPHealth } from '../servers-api.js';
 import { jest, describe, it, expect } from '@jest/globals';
 
+const NO_NETWORK_LISTEN = process.env.NO_NETWORK_LISTEN === 'true';
+const describeIf = NO_NETWORK_LISTEN ? describe.skip : describe;
+
 // Mock the repo to avoid DB
 jest.unstable_mockModule('../MCPServersRepo.js', () => ({
   mcpServersRepo: {
@@ -60,7 +63,7 @@ jest.unstable_mockModule('../MCPServersRepo.js', () => ({
   },
 }));
 
-describe('MCP Servers API', () => {
+describeIf('MCP Servers API', () => {
   const app = express();
   app.use('/api/maestro/v1/mcp', router);
 

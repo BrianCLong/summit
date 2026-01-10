@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, Iterable, List, Optional
+from typing import Any
 from uuid import uuid4
 
 
@@ -10,37 +11,37 @@ class WorldState:
     """Normalized snapshot of a possible future repository state."""
 
     id: str
-    repo_snapshot: Dict[str, Any]
-    diffs: List[Dict[str, Any]] = field(default_factory=list)
-    intents: List[Any] = field(default_factory=list)
-    tasks: List[Any] = field(default_factory=list)
-    agents: Dict[str, Dict[str, Any]] = field(default_factory=dict)
-    invariants: List[Callable[["WorldState"], bool]] = field(default_factory=list)
-    constraints: List[Callable[["WorldState"], bool]] = field(default_factory=list)
-    risks: List[str] = field(default_factory=list)
-    architecture: Dict[str, Any] = field(default_factory=dict)
-    ci_state: Dict[str, Any] = field(default_factory=dict)
-    test_state: Dict[str, Any] = field(default_factory=dict)
+    repo_snapshot: dict[str, Any]
+    diffs: list[dict[str, Any]] = field(default_factory=list)
+    intents: list[Any] = field(default_factory=list)
+    tasks: list[Any] = field(default_factory=list)
+    agents: dict[str, dict[str, Any]] = field(default_factory=dict)
+    invariants: list[Callable[[WorldState], bool]] = field(default_factory=list)
+    constraints: list[Callable[[WorldState], bool]] = field(default_factory=list)
+    risks: list[str] = field(default_factory=list)
+    architecture: dict[str, Any] = field(default_factory=dict)
+    ci_state: dict[str, Any] = field(default_factory=dict)
+    test_state: dict[str, Any] = field(default_factory=dict)
     cost: float = 0.0
-    safety: Dict[str, Any] = field(default_factory=dict)
+    safety: dict[str, Any] = field(default_factory=dict)
     score: float = 0.0
 
     @classmethod
     def from_sources(
         cls,
-        repo_snapshot: Dict[str, Any],
-        intents: Optional[Iterable[Any]] = None,
-        invariants: Optional[Iterable[Callable[["WorldState"], bool]]] = None,
-        constraints: Optional[Iterable[Callable[["WorldState"], bool]]] = None,
-        tasks: Optional[Iterable[Any]] = None,
-        agents: Optional[Dict[str, Dict[str, Any]]] = None,
-        risks: Optional[Iterable[str]] = None,
-        architecture: Optional[Dict[str, Any]] = None,
-        ci_state: Optional[Dict[str, Any]] = None,
-        test_state: Optional[Dict[str, Any]] = None,
+        repo_snapshot: dict[str, Any],
+        intents: Iterable[Any] | None = None,
+        invariants: Iterable[Callable[[WorldState], bool]] | None = None,
+        constraints: Iterable[Callable[[WorldState], bool]] | None = None,
+        tasks: Iterable[Any] | None = None,
+        agents: dict[str, dict[str, Any]] | None = None,
+        risks: Iterable[str] | None = None,
+        architecture: dict[str, Any] | None = None,
+        ci_state: dict[str, Any] | None = None,
+        test_state: dict[str, Any] | None = None,
         cost: float = 0.0,
-        safety: Optional[Dict[str, Any]] = None,
-    ) -> "WorldState":
+        safety: dict[str, Any] | None = None,
+    ) -> WorldState:
         """Build a new world state from upstream adapters."""
 
         return cls(
@@ -60,7 +61,7 @@ class WorldState:
             safety=dict(safety or {}),
         )
 
-    def clone(self) -> "WorldState":
+    def clone(self) -> WorldState:
         """Create a deep-ish clone suitable for mutation without side effects."""
 
         return WorldState(
@@ -81,7 +82,7 @@ class WorldState:
             score=self.score,
         )
 
-    def register_diff(self, diff: Dict[str, Any]) -> None:
+    def register_diff(self, diff: dict[str, Any]) -> None:
         self.diffs.append(diff)
 
     def register_task(self, task: Any) -> None:
@@ -91,7 +92,7 @@ class WorldState:
         if risk not in self.risks:
             self.risks.append(risk)
 
-    def add_agent_state(self, name: str, state: Dict[str, Any]) -> None:
+    def add_agent_state(self, name: str, state: dict[str, Any]) -> None:
         self.agents[name] = state
 
     def apply_score(self, value: float) -> None:

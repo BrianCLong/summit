@@ -1,9 +1,10 @@
 """Pytest plugin exposing fixtures for the Pipeline Flakiness Detector."""
+
 from __future__ import annotations
 
 import os
+from collections.abc import Iterable
 from dataclasses import replace
-from typing import Iterable, List, Optional
 
 import pytest
 
@@ -18,7 +19,7 @@ class PFDSession:
         self.runs = runs
         self.threshold = threshold
         self.report_path = os.path.abspath(report_path)
-        self._records: List[StepAnalysis] = []
+        self._records: list[StepAnalysis] = []
 
     def run_pipeline(
         self,
@@ -27,8 +28,8 @@ class PFDSession:
         initial_input: object = None,
         seed: int = 0,
         set_seeds: bool = True,
-        name: Optional[str] = None,
-    ) -> List[StepAnalysis]:
+        name: str | None = None,
+    ) -> list[StepAnalysis]:
         detector = PipelineFlakinessDetector(
             list(steps),
             runs=self.runs,
@@ -94,7 +95,7 @@ def pfd_session(request: pytest.FixtureRequest) -> PFDSession:
 
 
 def pytest_unconfigure(config: pytest.Config) -> None:
-    session: Optional[PFDSession] = getattr(config, "_pfd_session", None)
+    session: PFDSession | None = getattr(config, "_pfd_session", None)
     if session is not None:
         session.finalize()
 

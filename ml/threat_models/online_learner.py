@@ -2,9 +2,9 @@
 Online learning for evolving threat detection
 """
 
-import numpy as np
 from collections import deque
-from typing import Dict, Optional
+
+import numpy as np
 from sklearn.linear_model import SGDClassifier
 from sklearn.preprocessing import StandardScaler
 
@@ -16,8 +16,8 @@ class OnlineThreatLearner:
         self,
         n_features: int,
         window_size: int = 10000,
-        learning_rate: str = 'optimal',
-        loss: str = 'log_loss'
+        learning_rate: str = "optimal",
+        loss: str = "log_loss",
     ):
         """
         Args:
@@ -30,10 +30,7 @@ class OnlineThreatLearner:
         self.window_size = window_size
 
         self.model = SGDClassifier(
-            loss=loss,
-            learning_rate=learning_rate,
-            random_state=42,
-            warm_start=True
+            loss=loss, learning_rate=learning_rate, random_state=42, warm_start=True
         )
 
         self.scaler = StandardScaler()
@@ -42,7 +39,7 @@ class OnlineThreatLearner:
         self.initialized = False
         self.n_updates = 0
 
-    def partial_fit(self, X: np.ndarray, y: np.ndarray, classes: Optional[np.ndarray] = None):
+    def partial_fit(self, X: np.ndarray, y: np.ndarray, classes: np.ndarray | None = None):
         """
         Incrementally update the model
 
@@ -92,10 +89,10 @@ class OnlineThreatLearner:
         X_scaled = self.scaler.transform(X)
         return self.model.predict_proba(X_scaled)
 
-    def get_model_performance(self) -> Dict:
+    def get_model_performance(self) -> dict:
         """Get model statistics"""
         return {
-            'n_updates': self.n_updates,
-            'buffer_size': len(self.data_buffer),
-            'initialized': self.initialized
+            "n_updates": self.n_updates,
+            "buffer_size": len(self.data_buffer),
+            "initialized": self.initialized,
         }

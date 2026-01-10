@@ -6,7 +6,6 @@ import os
 import subprocess
 import time
 from pathlib import Path
-from typing import Dict, List
 
 from .capsule import load_capsule
 from .receipt import ReceiptArtifact, build_receipt
@@ -25,7 +24,7 @@ def run_capsule(
     key_id: str | None,
     receipt_path: Path,
     artifact_base: Path | None = None,
-    env_overrides: Dict[str, str] | None = None,
+    env_overrides: dict[str, str] | None = None,
     workspace_override: Path | None = None,
 ) -> None:
     """Replay *capsule_path* and write a signed receipt to *receipt_path*."""
@@ -47,7 +46,9 @@ def run_capsule(
         environment.update(env_overrides)
     for seed_key, seed_value in manifest.get("lineage", {}).get("seeds", {}).items():
         environment.setdefault(f"ITRC_SEED_{seed_key.upper()}", str(seed_value))
-    environment.setdefault("PYTHONHASHSEED", manifest.get("lineage", {}).get("seeds", {}).get("python", "0"))
+    environment.setdefault(
+        "PYTHONHASHSEED", manifest.get("lineage", {}).get("seeds", {}).get("python", "0")
+    )
 
     start = time.time()
     try:
@@ -64,7 +65,7 @@ def run_capsule(
 
     duration_ms = int((time.time() - start) * 1000)
 
-    artifacts: List[ReceiptArtifact] = []
+    artifacts: list[ReceiptArtifact] = []
     for artifact in manifest.get("artifacts", []):
         path = artifact["path"]
         expected = artifact["sha256"]
@@ -72,10 +73,14 @@ def run_capsule(
         actual = sha256_file(artifact_path) if artifact_path.exists() else ""
         artifacts.append(ReceiptArtifact(path=path, expected_sha256=expected, actual_sha256=actual))
 
-    mismatched = [artifact for artifact in artifacts if artifact.expected_sha256 != artifact.actual_sha256]
+    mismatched = [
+        artifact for artifact in artifacts if artifact.expected_sha256 != artifact.actual_sha256
+    ]
     if mismatched:
         mismatch_paths = ", ".join(artifact.path for artifact in mismatched)
-        raise CapsuleReplayError(f"Replay artifacts mismatched expected digests for: {mismatch_paths}")
+        raise CapsuleReplayError(
+            f"Replay artifacts mismatched expected digests for: {mismatch_paths}"
+        )
 
     signer = Signer(key, key_id or capsule.signature.key_id)
     receipt = build_receipt(
@@ -96,7 +101,7 @@ def run_capsule(
         )
 
 
-def parse_env_overrides(values: List[str] | None) -> Dict[str, str]:
+def parse_env_overrides(values: list[str] | None) -> dict[str, str]:
     if not values:
         return {}
     return parse_key_value(values)

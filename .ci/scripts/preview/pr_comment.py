@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """Idempotently upsert the preview environment PR comment with rich links and actions."""
+
 from __future__ import annotations
 
 import argparse
 import os
-import sys
-from typing import Optional
 
 import requests
 
@@ -49,17 +48,19 @@ def build_comment(body: str, meta: dict) -> str:
 
 def _github_request(token: str, method: str, path: str, **kwargs):
     headers = kwargs.pop("headers", {})
-    headers.update({
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github+json",
-    })
+    headers.update(
+        {
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github+json",
+        }
+    )
     resp = requests.request(method, f"{API_ROOT}{path}", headers=headers, **kwargs)
     if resp.status_code >= 400:
         raise SystemExit(f"GitHub API error {resp.status_code}: {resp.text}")
     return resp
 
 
-def find_existing_comment(token: str, repo: str, pr_number: int) -> Optional[int]:
+def find_existing_comment(token: str, repo: str, pr_number: int) -> int | None:
     resp = _github_request(token, "GET", f"/repos/{repo}/issues/{pr_number}/comments")
     for comment in resp.json():
         if COMMENT_MARKER in comment.get("body", ""):
@@ -70,9 +71,13 @@ def find_existing_comment(token: str, repo: str, pr_number: int) -> Optional[int
 def upsert_comment(token: str, repo: str, pr_number: int, body: str) -> None:
     comment_id = find_existing_comment(token, repo, pr_number)
     if comment_id:
-        _github_request(token, "PATCH", f"/repos/{repo}/issues/comments/{comment_id}", json={"body": body})
+        _github_request(
+            token, "PATCH", f"/repos/{repo}/issues/comments/{comment_id}", json={"body": body}
+        )
     else:
-        _github_request(token, "POST", f"/repos/{repo}/issues/{pr_number}/comments", json={"body": body})
+        _github_request(
+            token, "POST", f"/repos/{repo}/issues/{pr_number}/comments", json={"body": body}
+        )
 
 
 def main() -> None:

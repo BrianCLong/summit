@@ -1,7 +1,5 @@
-import json
-import subprocess
 import tempfile
-import pytest
+
 
 def create_claim_with_evidence(client, url, license_terms=None, license_owner=None):
     claim = client.post(
@@ -48,8 +46,10 @@ def test_bundle_build_and_verify(client):
         path = f.name
 
     # Verify using the module function directly
-    from app.verify_bundle import verify_bundle
     from pathlib import Path
+
+    from app.verify_bundle import verify_bundle
+
     ok, reasons = verify_bundle(Path(path))
     assert ok, f"Verification failed: {reasons}"
 

@@ -63,11 +63,10 @@ async function verifyExport(manifestPath: string) {
 }
 
 // CLI entry point
-if (require.main === module) {
-  const args = process.argv.slice(2);
-  if (args.length !== 1) {
-    console.log('Usage: npx tsx verify-export.ts <manifest-path>');
-    process.exit(1);
-  }
+const args = process.argv.slice(2);
+if (args.length === 1) {
   verifyExport(args[0]);
+} else if (args.length > 0) {
+  console.log('Usage: npx tsx verify-export.ts <manifest-path>');
+  process.exit(1);
 }

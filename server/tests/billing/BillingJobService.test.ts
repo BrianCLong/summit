@@ -1,11 +1,14 @@
-import { jest } from '@jest/globals';
-import { BillingJobService } from '../../src/billing/BillingJobService.js';
+import { jest, beforeAll, beforeEach, describe, it, expect } from '@jest/globals';
 
 const logger = {
   info: jest.fn(),
   warn: jest.fn(),
   error: jest.fn(),
   debug: jest.fn(),
+};
+
+const billingService = {
+  generateAndExportReport: jest.fn(),
 };
 
 const sharedLockState = { locked: false };
@@ -18,7 +21,8 @@ class FakeClient {
   }
 
   async query(text: string) {
-    if (text.includes('pg_try_advisory_lock')) {
+    const normalized = text.toLowerCase();
+    if (normalized.includes('pg_try_advisory_lock')) {
       if (!this.lockState.locked) {
         this.lockState.locked = true;
         return { rows: [{ acquired: true }] };
@@ -26,12 +30,12 @@ class FakeClient {
       return { rows: [{ acquired: false }] };
     }
 
-    if (text.includes('pg_advisory_unlock')) {
+    if (normalized.includes('pg_advisory_unlock')) {
       this.lockState.locked = false;
       return { rows: [{ released: true }] };
     }
 
-    if (text.includes('SELECT tenant_id FROM tenant_plans')) {
+    if (normalized.includes('select tenant_id from tenant_plans')) {
       return { rows: [{ tenant_id: 'tenant-1' }] };
     }
 
@@ -47,9 +51,20 @@ const mockPool = {
   connect: jest.fn(async () => new FakeClient(sharedLockState)),
 };
 
-const billingService = {
-  generateAndExportReport: jest.fn(),
-};
+jest.unstable_mockModule('../../src/config/logger.js', () => ({
+  __esModule: true,
+  default: logger,
+}));
+
+jest.unstable_mockModule('../../src/billing/BillingService.js', () => ({
+  billingService,
+}));
+
+let BillingJobService: typeof import('../../src/billing/BillingJobService.js').BillingJobService;
+
+beforeAll(async () => {
+  ({ BillingJobService } = await import('../../src/billing/BillingJobService.js'));
+});
 
 describe('BillingJobService distributed locking', () => {
   beforeEach(() => {

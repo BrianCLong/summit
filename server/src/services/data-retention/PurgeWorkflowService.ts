@@ -13,14 +13,28 @@ import {
 } from './types.js';
 
 export class PurgeWorkflowService {
-  private signer: SigningService;
-  private receipts: ReceiptService;
+  private _signer?: SigningService;
+  private _receipts?: ReceiptService;
   private executor: PurgeExecutor;
 
   constructor(executor: PurgeExecutor, overrides?: { signer?: SigningService; receipts?: ReceiptService }) {
     this.executor = executor;
-    this.signer = overrides?.signer ?? new SigningService();
-    this.receipts = overrides?.receipts ?? ReceiptService.getInstance();
+    this._signer = overrides?.signer;
+    this._receipts = overrides?.receipts;
+  }
+
+  private get signer(): SigningService {
+    if (!this._signer) {
+      this._signer = new SigningService();
+    }
+    return this._signer;
+  }
+
+  private get receipts(): ReceiptService {
+    if (!this._receipts) {
+      this._receipts = ReceiptService.getInstance();
+    }
+    return this._receipts;
   }
 
   public async executePurge(request: PurgeRequest): Promise<PurgeWorkflowResult> {
@@ -47,8 +61,8 @@ export class PurgeWorkflowService {
     const manifestTargets: PurgeManifestTarget[] = results.map((result) => {
       const sampledIdsHash = result.sampledIds?.length
         ? createHash('sha256')
-            .update(result.sampledIds.sort().join('|'))
-            .digest('hex')
+          .update(result.sampledIds.sort().join('|'))
+          .digest('hex')
         : undefined;
 
       return {

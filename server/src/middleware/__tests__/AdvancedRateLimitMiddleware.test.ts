@@ -9,16 +9,16 @@ jest.mock('ioredis', () => {
     on: jest.fn(),
     consumeTokenBucket: jest.fn().mockImplementation((key, rate, cap, cost) => {
       // Mock logic: always allow unless explicitly set to fail
-      if (global.failNextTokenCheck) {
-          return [0, 0, 1000];
+      if ((global as any).failNextTokenCheck) {
+        return [0, 0, 1000];
       }
       return [1, 100, 0];
     }),
     incr: jest.fn().mockResolvedValue(1),
     decr: jest.fn().mockResolvedValue(0),
     get: jest.fn().mockImplementation((key) => {
-        if (key.includes('cost')) return Promise.resolve(global.mockCost || '0');
-        return Promise.resolve('0');
+      if (key.includes('cost')) return Promise.resolve((global as any).mockCost || '0');
+      return Promise.resolve('0');
     }),
     expire: jest.fn(),
     incrbyfloat: jest.fn(),

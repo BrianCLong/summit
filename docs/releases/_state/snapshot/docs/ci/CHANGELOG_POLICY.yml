@@ -1,0 +1,171 @@
+# Release Changelog Policy
+# Configures automatic changelog generation from commits and PRs
+#
+# This policy file is read by scripts/release/generate_changelog.sh
+# See docs/ci/CHANGELOG_GENERATOR.md for full documentation.
+
+version: "1.0.0"
+
+# Changelog format settings
+format:
+  # Output format: markdown, json, or both
+  output: markdown
+
+  # Include commit hashes
+  include_hashes: true
+
+  # Include PR links
+  include_pr_links: true
+
+  # Include author names
+  include_authors: true
+
+  # Include dates
+  include_dates: true
+
+  # Group by category
+  group_by_category: true
+
+# Commit categorization based on conventional commits
+categories:
+  - name: "Breaking Changes"
+    emoji: "💥"
+    patterns:
+      - "^.*!:.*"
+      - "BREAKING CHANGE"
+    priority: 1
+
+  - name: "Features"
+    emoji: "✨"
+    patterns:
+      - "^feat"
+      - "^feature"
+    priority: 2
+
+  - name: "Bug Fixes"
+    emoji: "🐛"
+    patterns:
+      - "^fix"
+      - "^bugfix"
+    priority: 3
+
+  - name: "Security"
+    emoji: "🔒"
+    patterns:
+      - "^security"
+      - "^sec"
+    priority: 4
+
+  - name: "Performance"
+    emoji: "⚡"
+    patterns:
+      - "^perf"
+      - "^performance"
+    priority: 5
+
+  - name: "Documentation"
+    emoji: "📚"
+    patterns:
+      - "^docs"
+      - "^doc"
+    priority: 6
+
+  - name: "Refactoring"
+    emoji: "♻️"
+    patterns:
+      - "^refactor"
+      - "^refact"
+    priority: 7
+
+  - name: "Tests"
+    emoji: "🧪"
+    patterns:
+      - "^test"
+      - "^tests"
+    priority: 8
+
+  - name: "Build & CI"
+    emoji: "🔧"
+    patterns:
+      - "^build"
+      - "^ci"
+      - "^chore\\(ci\\)"
+      - "^chore\\(build\\)"
+    priority: 9
+
+  - name: "Dependencies"
+    emoji: "📦"
+    patterns:
+      - "^deps"
+      - "^chore\\(deps\\)"
+      - "^bump"
+    priority: 10
+
+  - name: "Other"
+    emoji: "📝"
+    patterns:
+      - ".*"
+    priority: 99
+    catch_all: true
+
+# Commits to exclude from changelog
+exclude:
+  patterns:
+    - "^chore\\(release\\):"
+    - "^Merge branch"
+    - "^Merge pull request"
+    - "\\[skip ci\\]"
+    - "\\[skip changelog\\]"
+    - "^chore\\(release-ops\\):"
+    - "^WIP:"
+    - "^wip:"
+
+  # Exclude commits by author
+  authors:
+    - "dependabot[bot]"
+    - "github-actions[bot]"
+
+# PR integration
+pull_requests:
+  # Fetch PR details for commits
+  fetch_details: true
+
+  # Use PR title instead of commit message
+  prefer_pr_title: true
+
+  # Include PR labels in changelog
+  include_labels: true
+
+  # Labels to highlight
+  highlight_labels:
+    - "breaking-change"
+    - "security"
+    - "deprecation"
+
+# Contributors section
+contributors:
+  enabled: true
+  exclude_bots: true
+  group_by_contribution: false
+
+# Version comparison
+versioning:
+  # Tag pattern for releases
+  tag_pattern: "v*"
+
+  # Sort order: semver or date
+  sort_order: semver
+
+# Output settings
+output:
+  # Prepend to existing CHANGELOG.md
+  prepend_to_file: true
+  changelog_file: "CHANGELOG.md"
+
+  # Also generate release notes artifact
+  generate_artifact: true
+  artifact_path: "artifacts/release-train/release-notes.md"
+
+# State tracking
+state:
+  path: "docs/releases/_state/changelog_state.json"

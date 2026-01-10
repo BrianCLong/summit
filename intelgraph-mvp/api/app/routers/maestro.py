@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException
 
 from ..models.maestro import (
     Artifact,
@@ -65,8 +65,8 @@ def create_run(req: CreateRunRequest) -> Run:
 
 @router.get("/runs", response_model=list[Run])
 def list_runs(
-    owner: Optional[str] = None,
-    status: Optional[RunStatus] = None,
+    owner: str | None = None,
+    status: RunStatus | None = None,
     limit: int = 100,
 ) -> list[Run]:
     """
@@ -218,9 +218,7 @@ def create_disclosure_pack(req: CreateDisclosurePackRequest) -> DisclosurePack:
     # Validate all artifact IDs exist and belong to this run
     for artifact_id in req.artifact_ids:
         if artifact_id not in artifacts_db:
-            raise HTTPException(
-                status_code=404, detail=f"Artifact {artifact_id} not found"
-            )
+            raise HTTPException(status_code=404, detail=f"Artifact {artifact_id} not found")
         if artifacts_db[artifact_id].run_id != req.run_id:
             raise HTTPException(
                 status_code=400,
@@ -239,7 +237,7 @@ def create_disclosure_pack(req: CreateDisclosurePackRequest) -> DisclosurePack:
 
 
 @router.get("/runs/{run_id}/disclosure-pack", response_model=Optional[DisclosurePack])
-def get_disclosure_pack(run_id: str) -> Optional[DisclosurePack]:
+def get_disclosure_pack(run_id: str) -> DisclosurePack | None:
     """
     Get the disclosure pack for a run.
 

@@ -1,0 +1,151 @@
+name: On-Call Handoff
+
+# RELEASE OPS ON-CALL HANDOFF GENERATOR
+# Generates concise, actionable handoff notes for shift transitions.
+#
+# DEPRECATION NOTICE:
+# This workflow is now a step in the Release Ops Orchestrator.
+# Primary schedule: release-ops-orchestrator.yml (hourly, with built-in shift detection)
+# This workflow retains workflow_dispatch for manual runs and debugging.
+#
+# See docs/ci/ONCALL_HANDOFF.md for full documentation.
+# See docs/ci/RELEASE_OPS_ORCHESTRATOR.md for orchestrator details.
+
+on:
+  # Schedule removed - now handled by release-ops-orchestrator.yml
+  # The orchestrator calls this script hourly, but the script has built-in
+  # shift detection that only generates handoffs at appropriate times.
+  # schedule:
+  #   - cron: "30 7 * * *"   # Before EMEA -> Americas
+  #   - cron: "30 15 * * *"  # Before Americas -> APAC
+  #   - cron: "30 23 * * *"  # Before APAC -> EMEA
+
+  workflow_dispatch:
+    inputs:
+      shift:
+        description: "Force specific shift handoff"
+        type: choice
+        options:
+          - auto
+          - emea
+          - americas
+          - apac
+        default: auto
+      context:
+        description: "Additional context to include in handoff"
+        type: string
+        required: false
+      slack_output:
+        description: "Generate Slack-formatted output"
+        type: boolean
+        default: true
+
+# Prevent concurrent runs
+concurrency:
+  group: oncall-handoff
+  cancel-in-progress: false
+
+permissions:
+  contents: write # For updating state file
+  issues: read # For reading blocker issues
+  actions: read # For CI status
+
+jobs:
+  generate-handoff:
+    name: Generate Handoff Note
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate On-Call Handoff
+        id: handoff
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/release/generate_oncall_handoff.sh
+
+          # Build arguments
+          ARGS=""
+          ARGS="$ARGS --policy docs/ci/ONCALL_HANDOFF_POLICY.yml"
+          ARGS="$ARGS --state docs/releases/_state/handoff_state.json"
+          ARGS="$ARGS --out artifacts/release-train/oncall_handoff.md"
+
+          # Add shift if specified
+          if [[ "${{ inputs.shift }}" != "auto" && -n "${{ inputs.shift }}" ]]; then
+            ARGS="$ARGS --shift ${{ inputs.shift }}"
+          fi
+
+          # Add context if provided
+          if [[ -n "${{ inputs.context }}" ]]; then
+            ARGS="$ARGS --context '${{ inputs.context }}'"
+          fi
+
+          # Add Slack output if requested
+          if [[ "${{ inputs.slack_output }}" == "true" ]]; then
+            ARGS="$ARGS --slack-out artifacts/release-train/oncall_handoff_slack.txt"
+          fi
+
+          # Run handoff generator
+          ./scripts/release/generate_oncall_handoff.sh $ARGS
+
+      - name: Check for State Changes
+        id: check_changes
+        run: |
+          if git diff --quiet docs/releases/_state/handoff_state.json 2>/dev/null; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit State Changes
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add docs/releases/_state/handoff_state.json
+
+          git commit -m "chore(release-ops): update handoff state
+
+          Automated update from On-Call Handoff workflow.
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          [skip ci]"
+
+          git push
+
+      - name: Upload Handoff Artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: oncall-handoff-${{ github.run_id }}
+          path: |
+            artifacts/release-train/oncall_handoff.md
+            artifacts/release-train/oncall_handoff_slack.txt
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Job Summary
+        run: |
+          if [[ -f artifacts/release-train/oncall_handoff.md ]]; then
+            cat artifacts/release-train/oncall_handoff.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### On-Call Handoff" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "No handoff note generated." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Output Slack Message
+        if: inputs.slack_output == true
+        run: |
+          echo "### Slack-Formatted Handoff" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          if [[ -f artifacts/release-train/oncall_handoff_slack.txt ]]; then
+            cat artifacts/release-train/oncall_handoff_slack.txt >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No Slack output generated." >> $GITHUB_STEP_SUMMARY
+          fi
+          echo '```' >> $GITHUB_STEP_SUMMARY

@@ -131,13 +131,13 @@ class Saboteur:
         elif mutation_type == "modify_condition":
             if rules:
                 rule_to_mutate = random.choice(rules)
-                if "condition" in rule_to_mutate and rule_to_mutate["condition"]:
+                if rule_to_mutate.get("condition"):
                     if isinstance(rule_to_mutate["condition"], dict):
                         key_to_modify = random.choice(list(rule_to_mutate["condition"].keys()))
                         if key_to_modify not in ["AND", "OR", "NOT"]:
-                            rule_to_mutate["condition"][
-                                key_to_modify
-                            ] = _generate_random_condition()[key_to_modify]
+                            rule_to_mutate["condition"][key_to_modify] = (
+                                _generate_random_condition()[key_to_modify]
+                            )
         elif mutation_type == "introduce_conflict":
             if rules:
                 existing_rule = random.choice(rules)

@@ -9,7 +9,6 @@ from schema_mapping import map_esri_to_intelgraph
 
 
 class TestEsriConnector(unittest.TestCase):
-
     def setUp(self):
         self.sample_json_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "../esri_connector/sample.json")

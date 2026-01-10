@@ -1,6 +1,6 @@
 import { SecurityIncidentPipeline } from '../services/SecurityIncidentPipeline.js';
 import { AlertTriageV2Service } from '../services/AlertTriageV2Service.js';
-import { Neo4jService, neo } from '../db/neo4j.js';
+import { neo } from '../db/neo4j.js';
 import { AdvancedAuditSystem } from '../audit/advanced-audit-system.js';
 import { jest } from '@jest/globals';
 // Mock PrismaClient manually as it's hard to import in test env sometimes
@@ -33,9 +33,8 @@ const mockLogger: MockLogger = {
 
 // Mock Neo4jService
 const mockNeo4j = {
-  // readTransaction: jest.fn(), // Removed as per previous error
   getSession: jest.fn(),
-} as unknown as Neo4jService;
+};
 
 // Mock the neo helper
 jest.mock('../db/neo4j', () => {
@@ -60,7 +59,10 @@ describe('SecurityIncidentPipeline', () => {
 
   beforeEach(() => {
     // We need to mock neo.run return
-    (neo.run as jest.Mock).mockResolvedValue({ records: [] });
+    const neoRun = neo.run as unknown as jest.MockedFunction<
+      (query: string, params?: any) => Promise<any>
+    >;
+    neoRun.mockResolvedValue({ records: [] });
 
     pipeline = new SecurityIncidentPipeline(
       mockPrisma,
@@ -85,15 +87,21 @@ describe('SecurityIncidentPipeline', () => {
       details: {}
     };
 
-    (mockTriageService.scoreAlert as jest.Mock).mockResolvedValue({
+    const scoreAlertMock = mockTriageService.scoreAlert as unknown as jest.MockedFunction<
+      (eventId: string, event: any) => Promise<any>
+    >;
+    scoreAlertMock.mockResolvedValue({
       score: 0.9,
       recommendations: [{ action: 'investigate' }]
-    });
+    } as any);
 
-    (mockRedis.get as jest.Mock).mockResolvedValue(JSON.stringify({
+    const redisGetMock = mockRedis.get as unknown as jest.MockedFunction<
+      (key: string) => Promise<string | null>
+    >;
+    redisGetMock.mockResolvedValue(JSON.stringify({
       id: 'inc-1',
       status: 'new'
-    }));
+    }) as any);
 
     // Execute
     const result = await pipeline.processEvent(event);
@@ -121,10 +129,13 @@ describe('SecurityIncidentPipeline', () => {
       details: {}
     };
 
-    (mockTriageService.scoreAlert as jest.Mock).mockResolvedValue({
+    const scoreAlertMock = mockTriageService.scoreAlert as unknown as jest.MockedFunction<
+      (eventId: string, event: any) => Promise<any>
+    >;
+    scoreAlertMock.mockResolvedValue({
       score: 0.1,
       recommendations: []
-    });
+    } as any);
 
     const result = await pipeline.processEvent(event);
 

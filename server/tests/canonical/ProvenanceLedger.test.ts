@@ -1,5 +1,6 @@
 import { describe, expect, it, jest, beforeEach, afterEach } from '@jest/globals';
 import { ProvenanceLedgerV2 } from '../../src/provenance/ledger';
+import type { MutationPayload } from '../../src/provenance/types';
 import { pool } from '../../src/db/pg';
 
 // Mock DB pool
@@ -12,7 +13,7 @@ jest.mock('../../src/db/pg', () => ({
 
 // Mock crypto pipeline to avoid startup issues
 jest.mock('../../src/security/crypto/index.js', () => ({
-  createDefaultCryptoPipeline: jest.fn().mockResolvedValue({}),
+  createDefaultCryptoPipeline: jest.fn(() => Promise.resolve({} as any)),
 }));
 
 describe('ProvenanceLedgerV2', () => {
@@ -24,7 +25,9 @@ describe('ProvenanceLedgerV2', () => {
       query: jest.fn(),
       release: jest.fn(),
     };
-    (pool.connect as jest.Mock).mockResolvedValue(mockClient);
+    (pool.connect as jest.MockedFunction<() => Promise<any>>).mockResolvedValue(
+      mockClient,
+    );
 
     // We need to bypass the singleton to test properly or mock the methods on the singleton?
     // The class is exported, so we can instantiate it for testing.
@@ -36,37 +39,52 @@ describe('ProvenanceLedgerV2', () => {
     ledger.cleanup();
   });
 
-  it('should register a claim', async () => {
-    // Mock getLastEntry
+  it('should append a claim entry', async () => {
     mockClient.query
       .mockResolvedValueOnce({ rows: [] }) // BEGIN
       .mockResolvedValueOnce({ rows: [] }) // getLastEntry (empty)
       .mockResolvedValueOnce({ rows: [] }) // INSERT
       .mockResolvedValueOnce({ rows: [] }); // COMMIT
 
-    const claimData = { statement: 'Test Claim' };
-    const related = [{ claimId: 'c2', relationship: 'supports' }];
+    const claimData: MutationPayload = {
+      mutationType: 'CREATE',
+      entityId: 'claim-1',
+      entityType: 'Claim',
+      statement: 'Test Claim',
+      relatedClaims: [{ claimId: 'c2', relationship: 'supports' }],
+      newState: {
+        id: 'claim-1',
+        type: 'Claim',
+        version: 1,
+        data: { statement: 'Test Claim' },
+        metadata: {},
+      },
+    };
 
-    await ledger.registerClaim(
-      'claim-1',
-      claimData,
-      'tenant-1',
-      'user-1',
-      related
-    );
+    await ledger.appendEntry({
+      tenantId: 'tenant-1',
+      timestamp: new Date(),
+      actionType: 'REGISTER_CLAIM',
+      resourceType: 'Claim',
+      resourceId: 'claim-1',
+      actorId: 'user-1',
+      actorType: 'user',
+      payload: claimData,
+      metadata: {},
+    });
 
-    expect(mockClient.query).toHaveBeenCalledTimes(4); // BEGIN, SELECT, INSERT, COMMIT
+    expect(mockClient.query).toHaveBeenCalledTimes(4);
     const insertCall = mockClient.query.mock.calls[2];
     const insertSql = insertCall[0];
     const insertParams = insertCall[1];
 
     expect(insertSql).toContain('INSERT INTO provenance_ledger_v2');
-    expect(insertParams[6]).toBe('REGISTER_CLAIM'); // action_type
-    expect(insertParams[7]).toBe('Claim'); // resource_type
-    expect(insertParams[8]).toBe('claim-1'); // resource_id
+    expect(insertParams[6]).toBe('REGISTER_CLAIM');
+    expect(insertParams[7]).toBe('Claim');
+    expect(insertParams[8]).toBe('claim-1');
 
     const payload = JSON.parse(insertParams[11]);
     expect(payload.statement).toBe('Test Claim');
-    expect(payload.relatedClaims).toEqual(related);
+    expect(payload.relatedClaims).toEqual(claimData.relatedClaims);
   });
 });

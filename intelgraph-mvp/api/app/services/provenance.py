@@ -10,7 +10,9 @@ except ImportError:  # pragma: no cover - optional dependency for local testing
 
 
 class BaseProvenanceStore:
-    def record_hash(self, tenant_id: str, case_id: str, payload_hash: str, source: str, actor: str) -> None:
+    def record_hash(
+        self, tenant_id: str, case_id: str, payload_hash: str, source: str, actor: str
+    ) -> None:
         raise NotImplementedError
 
 
@@ -18,7 +20,9 @@ class InMemoryProvenanceStore(BaseProvenanceStore):
     def __init__(self):
         self.records: list[dict[str, Any]] = []
 
-    def record_hash(self, tenant_id: str, case_id: str, payload_hash: str, source: str, actor: str) -> None:
+    def record_hash(
+        self, tenant_id: str, case_id: str, payload_hash: str, source: str, actor: str
+    ) -> None:
         self.records.append(
             {
                 "tenant_id": tenant_id,
@@ -54,7 +58,9 @@ class PostgresProvenanceStore(BaseProvenanceStore):
                 """
             )
 
-    def record_hash(self, tenant_id: str, case_id: str, payload_hash: str, source: str, actor: str) -> None:
+    def record_hash(
+        self, tenant_id: str, case_id: str, payload_hash: str, source: str, actor: str
+    ) -> None:
         with self.conn.cursor() as cur:
             cur.execute(
                 """

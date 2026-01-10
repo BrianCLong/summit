@@ -10,7 +10,6 @@ Models:
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
 
 from pydantic import Field
 from sqlmodel import JSON, Column, SQLModel
@@ -52,9 +51,7 @@ class EntityBase(SQLModel):
     """Entity represents a node in the knowledge graph."""
 
     type: str = Field(description="Entity type (e.g., person, organization, event)")
-    labels: str = Field(
-        default="[]", description="JSON array of labels/tags for classification"
-    )
+    labels: str = Field(default="[]", description="JSON array of labels/tags for classification")
 
 
 class Entity(EntityBase, table=True):
@@ -62,7 +59,7 @@ class Entity(EntityBase, table=True):
 
     __tablename__ = "entities"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -88,7 +85,7 @@ class Claim(ClaimBase, table=True):
 
     __tablename__ = "claims"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
@@ -103,9 +100,7 @@ class DecisionBase(SQLModel):
         description="JSON array of options considered",
     )
     decision: str = Field(description="The actual decision made")
-    reversible_flag: bool = Field(
-        default=True, description="Whether this decision is reversible"
-    )
+    reversible_flag: bool = Field(default=True, description="Whether this decision is reversible")
     owners: str = Field(
         default="[]",
         sa_column=Column(JSON),
@@ -127,16 +122,14 @@ class Decision(DecisionBase, table=True):
 
     __tablename__ = "decisions"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class SourceBase(SQLModel):
     """Source represents provenance for claims and evidence."""
 
-    uri_or_hash: str = Field(
-        description="URI, hash, or identifier for the source material"
-    )
+    uri_or_hash: str = Field(description="URI, hash, or identifier for the source material")
     origin: str = Field(
         default=PolicyOrigin.PUBLIC.value,
         description="Classification origin (public, confidential, etc.)",
@@ -156,7 +149,7 @@ class Source(SourceBase, table=True):
 
     __tablename__ = "sources"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     ingested_at: datetime = Field(default_factory=datetime.utcnow)
 
 

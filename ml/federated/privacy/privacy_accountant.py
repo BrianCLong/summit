@@ -9,7 +9,7 @@ import logging
 import math
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -36,7 +36,7 @@ class PrivacyLedgerEntry:
     noise_multiplier: float
     sample_rate: float
     timestamp: float
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class RenyiDPAccountant:
@@ -60,16 +60,36 @@ class RenyiDPAccountant:
         self.composition = composition
 
         # RDP orders for moments accountant
-        self._rdp_orders = np.array([
-            1.25, 1.5, 1.75, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 8.0,
-            10.0, 12.0, 16.0, 20.0, 32.0, 64.0, 128.0, 256.0, 512.0, 1024.0
-        ])
+        self._rdp_orders = np.array(
+            [
+                1.25,
+                1.5,
+                1.75,
+                2.0,
+                2.5,
+                3.0,
+                4.0,
+                5.0,
+                6.0,
+                8.0,
+                10.0,
+                12.0,
+                16.0,
+                20.0,
+                32.0,
+                64.0,
+                128.0,
+                256.0,
+                512.0,
+                1024.0,
+            ]
+        )
 
         # Accumulated RDP at each order
         self._rdp_budget = np.zeros_like(self._rdp_orders)
 
         # Privacy ledger
-        self._ledger: List[PrivacyLedgerEntry] = []
+        self._ledger: list[PrivacyLedgerEntry] = []
 
         logger.info(
             f"RDP accountant initialized - epsilon={total_epsilon}, "
@@ -94,12 +114,10 @@ class RenyiDPAccountant:
         for i, order in enumerate(self._rdp_orders):
             if sample_rate == 1.0:
                 # No subsampling
-                rdp[i] = order / (2 * noise_multiplier ** 2)
+                rdp[i] = order / (2 * noise_multiplier**2)
             else:
                 # Privacy amplification by subsampling
-                rdp[i] = self._compute_rdp_subsampled_gaussian(
-                    order, noise_multiplier, sample_rate
-                )
+                rdp[i] = self._compute_rdp_subsampled_gaussian(order, noise_multiplier, sample_rate)
 
         return rdp
 
@@ -121,10 +139,13 @@ class RenyiDPAccountant:
         log_term = 0.0
         for k in range(2, int(order) + 1):
             log_binom = self._log_binomial(order, k)
-            log_moment = k * (k - 1) / (2 * noise_multiplier ** 2)
+            log_moment = k * (k - 1) / (2 * noise_multiplier**2)
             log_term = self._log_sum_exp(
                 log_term,
-                log_binom + k * np.log(sample_rate) + (order - k) * np.log(1 - sample_rate) + log_moment
+                log_binom
+                + k * np.log(sample_rate)
+                + (order - k) * np.log(1 - sample_rate)
+                + log_moment,
             )
 
         return log_term / (order - 1)
@@ -135,7 +156,7 @@ class RenyiDPAccountant:
         sample_rate: float,
         round_number: int = 0,
         operation: str = "training_step",
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> float:
         """
         Record a privacy-consuming step
@@ -153,6 +174,7 @@ class RenyiDPAccountant:
 
         # Record in ledger
         import time
+
         entry = PrivacyLedgerEntry(
             round_number=round_number,
             operation=operation,
@@ -184,18 +206,16 @@ class RenyiDPAccountant:
     def _rdp_to_epsilon_delta(self, delta: float) -> float:
         """Convert RDP to (epsilon, delta)-DP using optimal order"""
         if delta <= 0:
-            return float('inf')
+            return float("inf")
 
         # Find optimal order
-        epsilons = (
-            self._rdp_budget - np.log(delta) / (self._rdp_orders - 1)
-        )
+        epsilons = self._rdp_budget - np.log(delta) / (self._rdp_orders - 1)
 
         # Filter out invalid values
         valid_mask = (self._rdp_orders > 1) & np.isfinite(epsilons) & (epsilons >= 0)
 
         if not np.any(valid_mask):
-            return float('inf')
+            return float("inf")
 
         return float(np.min(epsilons[valid_mask]))
 
@@ -210,12 +230,11 @@ class RenyiDPAccountant:
 
         k = len(self._ledger)
         eps_sum = sum(entry.epsilon for entry in self._ledger)
-        eps_sq_sum = sum(entry.epsilon ** 2 for entry in self._ledger)
+        eps_sq_sum = sum(entry.epsilon**2 for entry in self._ledger)
 
         # Strong composition
         return min(
-            eps_sum,
-            np.sqrt(2 * k * np.log(1 / delta)) * np.sqrt(eps_sq_sum) + eps_sq_sum / 3
+            eps_sum, np.sqrt(2 * k * np.log(1 / delta)) * np.sqrt(eps_sq_sum) + eps_sq_sum / 3
         )
 
     def get_remaining_budget(self) -> float:
@@ -238,9 +257,7 @@ class RenyiDPAccountant:
         hypothetical_budget = self._rdp_budget + step_rdp
 
         # Convert to epsilon
-        epsilons = (
-            hypothetical_budget - np.log(self.total_delta) / (self._rdp_orders - 1)
-        )
+        epsilons = hypothetical_budget - np.log(self.total_delta) / (self._rdp_orders - 1)
         valid_mask = (self._rdp_orders > 1) & np.isfinite(epsilons) & (epsilons >= 0)
 
         if not np.any(valid_mask):
@@ -255,7 +272,7 @@ class RenyiDPAccountant:
         target_epsilon: float,
         num_steps: int,
         sample_rate: float,
-        delta: Optional[float] = None,
+        delta: float | None = None,
     ) -> float:
         """
         Compute required noise multiplier to achieve target epsilon
@@ -271,7 +288,7 @@ class RenyiDPAccountant:
 
             # Simulate training
             test_accountant = RenyiDPAccountant(
-                total_epsilon=float('inf'),
+                total_epsilon=float("inf"),
                 total_delta=delta,
             )
 
@@ -287,11 +304,11 @@ class RenyiDPAccountant:
 
         return high
 
-    def get_ledger(self) -> List[PrivacyLedgerEntry]:
+    def get_ledger(self) -> list[PrivacyLedgerEntry]:
         """Get privacy ledger"""
         return self._ledger.copy()
 
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> dict[str, Any]:
         """Get privacy accounting summary"""
         current_epsilon = self.get_epsilon(self.total_delta)
 
@@ -318,9 +335,9 @@ class RenyiDPAccountant:
 
     def _log_sum_exp(self, a: float, b: float) -> float:
         """Compute log(exp(a) + exp(b)) stably"""
-        if a == float('-inf'):
+        if a == float("-inf"):
             return b
-        if b == float('-inf'):
+        if b == float("-inf"):
             return a
         if a > b:
             return a + np.log1p(np.exp(b - a))
@@ -335,7 +352,7 @@ def create_accountant_for_training(
     total_clients: int,
     batch_size: int,
     dataset_size: int,
-) -> Tuple[RenyiDPAccountant, float]:
+) -> tuple[RenyiDPAccountant, float]:
     """
     Create accountant with computed noise multiplier for training
 

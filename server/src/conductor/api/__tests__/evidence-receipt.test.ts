@@ -30,7 +30,10 @@ jest.mock('../../../db/postgres.js', () => ({
   }),
 }));
 
-describe('evidence receipt routes', () => {
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('evidence receipt routes', () => {
   const app = express();
   app.use('/api/conductor/evidence', evidenceRoutes);
 

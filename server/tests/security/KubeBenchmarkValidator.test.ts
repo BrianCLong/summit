@@ -1,4 +1,4 @@
-import { kubeBenchmarkValidator } from '../src/security/KubeBenchmarkValidator.js';
+import { kubeBenchmarkValidator } from '../../src/security/KubeBenchmarkValidator.js';
 
 describe('KubeBenchmarkValidator', () => {
   it('should run CIS benchmark simulation when tools are missing', async () => {

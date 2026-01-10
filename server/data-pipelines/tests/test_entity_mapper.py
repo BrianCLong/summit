@@ -12,7 +12,6 @@ from transformations.entity_mapper import (
 
 
 class TestEntityMapper(unittest.TestCase):
-
     def test_normalize_name(self):
         self.assertEqual(normalize_name("John Doe"), "john doe")
         self.assertEqual(normalize_name("  Jane   Smith  "), "jane smith")

@@ -1,8 +1,9 @@
 """ROC tooling for GW-DE detection quality analysis."""
+
 from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from typing import Iterable, List, Sequence, Tuple
 
 
 @dataclass
@@ -12,13 +13,17 @@ class RocPoint:
     fpr: float
 
 
-def generate_roc(scores: Sequence[float], labels: Sequence[int], *, steps: int = 101) -> List[RocPoint]:
+def generate_roc(
+    scores: Sequence[float], labels: Sequence[int], *, steps: int = 101
+) -> list[RocPoint]:
     if len(scores) != len(labels):
         raise ValueError("Scores and labels length mismatch")
     if not scores:
         return []
-    thresholds = [min(scores) + i * (max(scores) - min(scores)) / max(steps - 1, 1) for i in range(steps)]
-    roc: List[RocPoint] = []
+    thresholds = [
+        min(scores) + i * (max(scores) - min(scores)) / max(steps - 1, 1) for i in range(steps)
+    ]
+    roc: list[RocPoint] = []
     for threshold in thresholds:
         tp = fp = tn = fn = 0
         for score, label in zip(scores, labels):
@@ -47,5 +52,4 @@ def auc(points: Iterable[RocPoint]) -> float:
     return area
 
 
-__all__ = ["RocPoint", "generate_roc", "auc"]
-
+__all__ = ["RocPoint", "auc", "generate_roc"]
