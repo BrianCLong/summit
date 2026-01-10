@@ -1,5 +1,5 @@
 {
-  "last_updated": "2025-12-29T12:30:00Z",
+  "last_updated": "2026-01-10T00:00:00Z",
   "initiatives": [
     {
       "id": "A",
@@ -8,19 +8,19 @@
         {
           "id": "A1",
           "name": "Local Vector Store",
-          "status": "rc-ready",
+          "status": "ga-hardening",
           "owner": "Jules"
         },
         {
           "id": "A2",
           "name": "RAG Ingestion Pipeline",
-          "status": "rc-ready",
+          "status": "ga-hardening",
           "owner": "Jules"
         },
         {
           "id": "A3",
           "name": "Copilot Query Service",
-          "status": "rc-ready",
+          "status": "ga-hardening",
           "owner": "Jules"
         }
       ]
@@ -56,13 +56,13 @@
         {
           "id": "C1",
           "name": "Policy-as-Code Engine",
-          "status": "rc-ready",
+          "status": "ga-hardening",
           "owner": "Jules"
         },
         {
           "id": "C2",
           "name": "Immutable Audit Log",
-          "status": "rc-ready",
+          "status": "ga-hardening",
           "owner": "Jules"
         }
       ]
