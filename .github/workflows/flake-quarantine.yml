@@ -1,0 +1,134 @@
+name: Flake Quarantine Lane
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  primary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: 9 }
+      - run: pnpm -C server install --frozen-lockfile
+      - run: mkdir -p ci_artifacts
+      - name: Run unit tests (primary)
+        run: |
+          set -o pipefail
+          # Run tests and capture JSON output.
+          # "|| true" ensures the step succeeds so we can analyze flakes in the next step.
+          # We use github.workspace to ensure absolute path correctness regardless of CWD.
+          pnpm -C server test:unit -- --json --outputFile=${{ github.workspace }}/ci_artifacts/jest-primary.json || true
+      - name: Detect suspect tests
+        run: node scripts/ci/mark_flakes.mjs ci_artifacts/jest-primary.json
+      - name: Upload primary artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: primary-artifacts
+          path: ci_artifacts/
+
+  quarantine:
+    needs: primary
+    runs-on: ubuntu-latest
+    # Run even if primary had failures, to differentiate flakes from real failures
+    if: always()
+    outputs:
+      files: ${{ steps.matrix.outputs.files }}
+      count: ${{ steps.fanout.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: 9 }
+      - run: pnpm -C server install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        with: { name: primary-artifacts, path: ci_artifacts }
+      - name: Generate matrix
+        id: matrix
+        run: |
+          SUSPECT=$(cat ci_artifacts/suspect-tests.json 2>/dev/null || echo "[]")
+          # Ensure output is a single line JSON string for the matrix
+          echo "files=$(echo $SUSPECT | jq -c '.')" >> $GITHUB_OUTPUT
+      - name: Set up dynamic matrix
+        run: echo "Matrix: ${{ steps.matrix.outputs.files }}"
+      - name: Quarantine matrix
+        uses: actions/github-script@v7
+        id: fanout
+        with:
+          script: |
+            const files = JSON.parse(process.env.MATRIX || '[]');
+            core.setOutput('count', files.length);
+        env:
+          MATRIX: ${{ steps.matrix.outputs.files }}
+      - name: Skip if nothing to quarantine
+        if: steps.fanout.outputs.count == 0
+        run: echo "No suspect tests."
+
+  quarantine-run:
+    needs: [primary, quarantine]
+    if: always() && needs.quarantine.outputs.count > 0
+    strategy:
+      fail-fast: false
+      matrix:
+        file: ${{ fromJson(needs.quarantine.outputs.files) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: 9 }
+      - run: pnpm -C server install --frozen-lockfile
+      - name: Re-run suspect test in isolation
+        env:
+          TEST_SEED: 4371
+          NODE_ENV: test
+          ZERO_FOOTPRINT: "1"
+          NO_NETWORK_LISTEN: "true"
+          RUN_ACCEPTANCE: "false"
+        run: |
+          # Sanitize filename for directory creation (replace / with _)
+          SAFE_NAME=$(echo "${{ matrix.file }}" | sed 's/\//_/g')
+          mkdir -p "ci_artifacts/quarantine/$SAFE_NAME"
+
+          # Run the specific test file
+          # We use github.workspace to ensure absolute path correctness.
+
+          pnpm -C server test:unit -- --runInBand --runTestsByPath "${{ matrix.file }}" \
+            --ci --logHeapUsage --testLocationInResults \
+            --json --outputFile="${{ github.workspace }}/ci_artifacts/quarantine/$SAFE_NAME/result.json" || echo "FAILED" > "ci_artifacts/quarantine/$SAFE_NAME/status.txt"
+      - name: Upload quarantine artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: quarantine-${{ strategy.job-index }}
+          path: ci_artifacts/quarantine/
+
+  ga-verdict:
+    needs: [primary, quarantine, quarantine-run]
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: primary-artifacts, path: ci_artifacts }
+      - uses: actions/download-artifact@v4
+        if: needs.quarantine.outputs.count > 0
+        with: { pattern: quarantine-*, path: ci_artifacts/quarantine, merge-multiple: true }
+      - run: node scripts/ci/quarantine_verdict.mjs
+      - name: Post Quarantine Summary
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'ci_artifacts/quarantine_summary.md';
+            if (fs.existsSync(path)) {
+              const summary = fs.readFileSync(path, 'utf8');
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: summary
+              });
+            }
