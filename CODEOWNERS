@@ -43,6 +43,14 @@
 /migrations/                  @acme/data-team
 /schema/                      @acme/data-team
 
+# Release & CI/CD Governance
+/.github/workflows/           @acme/ops-team @acme/security-team
+/scripts/                     @acme/ops-team
+/package.json                 @acme/ops-team @acme/security-team
+/scripts/ga-gate.sh           @acme/ops-team @acme/security-team
+/scripts/release-gate.sh      @acme/ops-team @acme/security-team
+/scripts/verify-ga.sh         @acme/ops-team @acme/security-team
+
 # Observability & SLOs
 /observability/               @acme/ops-team
 /monitoring/                  @acme/ops-team

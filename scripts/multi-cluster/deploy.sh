@@ -43,6 +43,30 @@ while [[ "$#" -gt 0 ]]; do
   shift
 done
 
+# GA Gate Enforcement
+if [[ "${DEPLOY_FORCE:-false}" != "true" && "${DRY_RUN}" != "--dry-run" ]]; then
+  echo "🔒 Enforcing GA Gates..."
+  # Run verification
+  if ! "$REPO_ROOT/scripts/verify-ga.sh"; then
+    echo "❌ GA Verification Failed. Use DEPLOY_FORCE=true to override (audit logged)."
+    exit 1
+  fi
+
+  # Run policy check if it exists
+  if [[ -f "$REPO_ROOT/scripts/check-ga-policy.sh" ]]; then
+     echo "🔒 Checking GA Policy..."
+     if ! "$REPO_ROOT/scripts/check-ga-policy.sh"; then
+        echo "❌ GA Policy Check Failed. Use DEPLOY_FORCE=true to override."
+        exit 1
+     fi
+  fi
+else
+  if [[ "${DEPLOY_FORCE:-false}" == "true" ]]; then
+     echo "⚠️  BYPASSING GA GATES (DEPLOY_FORCE=true)"
+     echo "    This action will be logged to audit trail."
+  fi
+fi
+
 # Validate environment
 if [[ ! "$ENV" =~ ^(dev|staging|prod)$ ]]; then
   echo "Error: Invalid environment '$ENV'. Must be dev, staging, or prod."

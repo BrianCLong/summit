@@ -33,7 +33,7 @@ fi
 
 # 4. Check for Runbooks
 echo "🔍 Verifying Runbooks..."
-REQUIRED_RUNBOOKS=("DEPLOYMENT_RUNBOOK.md" "OBSERVABILITY_RUNBOOK.md")
+REQUIRED_RUNBOOKS=("DEPLOYMENT_RUNBOOK.md" "observability.md")
 for rb in "${REQUIRED_RUNBOOKS[@]}"; do
   if [ -f "docs/runbooks/$rb" ]; then
     echo "✅ Runbook $rb exists."

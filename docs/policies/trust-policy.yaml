@@ -5,7 +5,7 @@ freeze_windows:
 
 # GA Risk Gate Configuration
 ga_gate:
-  freeze_mode: "advisory" # Options: advisory, blocking
+  freeze_mode: "blocking" # Options: advisory, blocking
   required_checks:
     - "secrets"
     - "dependencies"
