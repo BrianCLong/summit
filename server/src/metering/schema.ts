@@ -6,6 +6,12 @@ export enum MeterEventKind {
   LLM_TOKENS = 'llm.tokens',
   MAESTRO_COMPUTE_MS = 'maestro.compute.ms',
   API_REQUEST = 'api.request',
+  RUN_STARTED = 'run_started',
+  STEP_EXECUTED = 'step_executed',
+  APPROVAL_DECISION = 'approval_decision',
+  RECEIPT_EMITTED = 'receipt_emitted',
+  EVIDENCE_EXPORTED = 'evidence_exported',
+  STORAGE_BYTES_WRITTEN = 'storage_bytes_written',
 }
 
 export interface MeterEventBase {
@@ -58,6 +64,47 @@ export interface RequestMeterEvent extends MeterEventBase {
   statusCode?: number;
 }
 
+export interface RunStartedMeterEvent extends MeterEventBase {
+  kind: MeterEventKind.RUN_STARTED;
+  runId: string;
+  pipelineName?: string;
+}
+
+export interface StepExecutedMeterEvent extends MeterEventBase {
+  kind: MeterEventKind.STEP_EXECUTED;
+  runId: string;
+  stepId: string;
+  status: 'success' | 'failed';
+  tool?: string;
+}
+
+export interface ApprovalDecisionMeterEvent extends MeterEventBase {
+  kind: MeterEventKind.APPROVAL_DECISION;
+  runId: string;
+  stepId: string;
+  decision: 'approved' | 'declined';
+  userId?: string;
+}
+
+export interface ReceiptEmittedMeterEvent extends MeterEventBase {
+  kind: MeterEventKind.RECEIPT_EMITTED;
+  runId: string;
+  receiptId: string;
+  artifactId: string;
+}
+
+export interface EvidenceExportedMeterEvent extends MeterEventBase {
+  kind: MeterEventKind.EVIDENCE_EXPORTED;
+  runId: string;
+  evidenceCount?: number;
+}
+
+export interface StorageBytesWrittenMeterEvent extends MeterEventBase {
+  kind: MeterEventKind.STORAGE_BYTES_WRITTEN;
+  bytes: number;
+  storagePath?: string;
+}
+
 export type MeterEvent =
   | IngestMeterEvent
   | QueryMeterEvent
@@ -65,7 +112,13 @@ export type MeterEvent =
   | SeatMeterEvent
   | LlmMeterEvent
   | ComputeMeterEvent
-  | RequestMeterEvent;
+  | RequestMeterEvent
+  | RunStartedMeterEvent
+  | StepExecutedMeterEvent
+  | ApprovalDecisionMeterEvent
+  | ReceiptEmittedMeterEvent
+  | EvidenceExportedMeterEvent
+  | StorageBytesWrittenMeterEvent;
 
 export interface TenantUsageDailyRow {
   tenantId: string;

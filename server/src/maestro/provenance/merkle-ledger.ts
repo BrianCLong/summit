@@ -1,6 +1,7 @@
 import { createHash } from 'crypto';
 import { getPostgresPool } from '../../db/postgres.js';
 import { otelService } from '../../middleware/observability/otel-tracing.js';
+import { meteringEmitter } from '../../metering/emitter.js';
 
 interface Evidence {
   id: string;
@@ -303,6 +304,26 @@ export class ProvenanceLedger {
          VALUES ($1, $2, now())`,
         [runId, exportData.rootHash],
       );
+
+      const { rows: runRows } = await pool.query(
+        `SELECT tenant_id, runbook FROM run WHERE id = $1`,
+        [runId],
+      );
+      const tenantId = runRows[0]?.tenant_id || 'unknown';
+      const workflowType = runRows[0]?.runbook || 'maestro_run';
+
+      await meteringEmitter.emitEvidenceExported({
+        tenantId,
+        runId,
+        evidenceCount: exportData.evidenceCount,
+        source: 'maestro.provenance.export',
+        actorType: 'system',
+        workflowType,
+        correlationId: exportData.rootHash,
+        metadata: {
+          root_hash: exportData.rootHash,
+        },
+      });
 
       span?.addSpanAttributes({
         'provenance.export.run_id': runId,

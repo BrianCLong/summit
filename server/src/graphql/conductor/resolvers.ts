@@ -1,5 +1,6 @@
 import { getPostgresPool } from '../../db/postgres.js';
 import { approvalProgress } from '../../conductor/approvals.js';
+import { meteringEmitter } from '../../metering/emitter.js';
 
 export const conductorResolvers = {
   Mutation: {
@@ -10,6 +11,8 @@ export const conductorResolvers = {
     ) => {
       const pool = getPostgresPool();
       const userId = ctx?.user?.id || ctx?.user?.email || 'unknown';
+      const tenantId = ctx?.user?.tenantId || ctx?.tenantId || 'unknown';
+      const actorType = ctx?.user ? 'user' : 'system';
       // Record decision in approvals table
       await pool.query(
         `INSERT INTO approvals(run_id, step_id, user_id, verdict, reason)
@@ -22,6 +25,21 @@ export const conductorResolvers = {
         'INSERT INTO run_event (run_id, kind, payload) VALUES ($1,$2,$3)',
         [runId, 'approval.approved', { stepId, justification, userId }],
       );
+
+      await meteringEmitter.emitApprovalDecision({
+        tenantId,
+        runId,
+        stepId,
+        decision: 'approved',
+        userId,
+        source: 'conductor.graphql',
+        actorType,
+        workflowType: 'maestro_run',
+        correlationId: `${runId}:${stepId}:approved`,
+        metadata: {
+          justification,
+        },
+      });
       // Check M-of-N threshold
       const prog = await approvalProgress(runId, stepId);
       if (prog.satisfied) {
@@ -39,6 +57,8 @@ export const conductorResolvers = {
     ) => {
       const pool = getPostgresPool();
       const userId = ctx?.user?.id || ctx?.user?.email || 'unknown';
+      const tenantId = ctx?.user?.tenantId || ctx?.tenantId || 'unknown';
+      const actorType = ctx?.user ? 'user' : 'system';
       await pool.query(
         `INSERT INTO approvals(run_id, step_id, user_id, verdict, reason)
          VALUES ($1,$2,$3,'declined',$4)
@@ -49,6 +69,21 @@ export const conductorResolvers = {
         'INSERT INTO run_event (run_id, kind, payload) VALUES ($1,$2,$3)',
         [runId, 'approval.declined', { stepId, justification, userId }],
       );
+
+      await meteringEmitter.emitApprovalDecision({
+        tenantId,
+        runId,
+        stepId,
+        decision: 'declined',
+        userId,
+        source: 'conductor.graphql',
+        actorType,
+        workflowType: 'maestro_run',
+        correlationId: `${runId}:${stepId}:declined`,
+        metadata: {
+          justification,
+        },
+      });
       await pool.query(
         'UPDATE run_step SET status=$1, blocked_reason=$2, ended_at=now() WHERE run_id=$3 AND step_id=$4',
         ['FAILED', `declined: ${justification}`, runId, stepId],

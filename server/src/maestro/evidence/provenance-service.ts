@@ -2,6 +2,7 @@ import crypto from 'crypto';
 // import { S3Client, PutObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { getPostgresPool } from '../../db/postgres.js';
 import { otelService } from '../../middleware/observability/otel-tracing.js';
+import { meteringEmitter } from '../../metering/emitter.js';
 
 export interface EvidenceArtifact {
   id?: string;
@@ -138,6 +139,29 @@ export class EvidenceProvenanceService {
 
       // Create provenance chain entry
       await this.createProvenanceEntry(artifactId, sha256Hash, artifact.runId);
+
+      const { rows: runRows } = await pool.query(
+        `SELECT tenant_id, runbook FROM run WHERE id = $1`,
+        [artifact.runId],
+      );
+      const tenantId = runRows[0]?.tenant_id || 'unknown';
+      const workflowType = runRows[0]?.runbook || 'maestro_run';
+
+      await meteringEmitter.emitStorageBytesWritten({
+        tenantId,
+        bytes: contentBuffer.length,
+        storagePath: s3Key,
+        source: 'maestro.evidence.store',
+        actorType: 'system',
+        workflowType,
+        correlationId: artifactId,
+        idempotencyKey: `${artifactId}:${sha256Hash}`,
+        metadata: {
+          artifact_type: artifact.artifactType,
+          should_inline: shouldInline,
+          sha256: sha256Hash,
+        },
+      });
 
       span?.addSpanAttributes({
         'evidence.artifact_id': artifactId,

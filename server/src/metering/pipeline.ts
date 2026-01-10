@@ -2,11 +2,8 @@
 import logger from '../utils/logger';
 import { postgresMeterRepository } from './postgres-repository';
 import { meterStore } from './persistence';
-import {
-  MeterEvent,
-  MeterEventKind,
-  TenantUsageDailyRow,
-} from './schema';
+import { hasRequiredMeteringMetadata } from './metadata.js';
+import { MeterEvent, MeterEventKind, TenantUsageDailyRow } from './schema';
 
 type DeadLetter = { event: MeterEvent; reason: string };
 
@@ -149,6 +146,9 @@ export class MeteringPipeline {
       case MeterEventKind.STORAGE_BYTES_ESTIMATE:
         current.storageBytesEstimate += event.bytes;
         break;
+      case MeterEventKind.STORAGE_BYTES_WRITTEN:
+        current.storageBytesEstimate += event.bytes;
+        break;
       case MeterEventKind.USER_SEAT_ACTIVE:
         current.activeSeats += event.seatCount ?? 1;
         break;
@@ -179,6 +179,9 @@ export class MeteringPipeline {
     if (!event.tenantId) {
       throw new Error('tenantId is required');
     }
+    if (!hasRequiredMeteringMetadata(event.metadata)) {
+      throw new Error('metering metadata is required');
+    }
 
     if (event.kind === MeterEventKind.INGEST_UNITS && event.units < 0) {
       throw new Error('ingest units must be non-negative');
@@ -197,6 +200,9 @@ export class MeteringPipeline {
     }
     if (event.kind === MeterEventKind.MAESTRO_COMPUTE_MS && event.durationMs < 0) {
         throw new Error('compute duration must be non-negative');
+    }
+    if (event.kind === MeterEventKind.STORAGE_BYTES_WRITTEN && event.bytes < 0) {
+        throw new Error('storage bytes written must be non-negative');
     }
   }
 

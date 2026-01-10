@@ -171,6 +171,21 @@ export class FileStorageService {
             mimeType: options.mimeType,
           },
         });
+
+        await meteringEmitter.emitStorageBytesWritten({
+          tenantId: options.metadata?.tenantId as string | undefined || 'default_tenant',
+          bytes: size,
+          storagePath: finalPath,
+          source: 'file-storage-service',
+          actorType: options.uploadedBy ? 'user' : 'system',
+          workflowType: 'file_upload',
+          correlationId: sha256,
+          idempotencyKey: `${sha256}:write`,
+          metadata: {
+            uploadedBy: options.uploadedBy,
+            mimeType: options.mimeType,
+          },
+        });
       } catch (meterError) {
         logger.warn({ meterError, sha256 }, 'Failed to emit storage meter event');
       }

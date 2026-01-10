@@ -18,6 +18,7 @@ import {
 import { detectSuspiciousPayload } from '../../security/suspiciousReceipt.js';
 import { isEnabled } from '../../lib/featureFlags.js';
 import { provenanceLedger } from '../../provenance/ledger.js';
+import { meteringEmitter } from '../../metering/emitter.js';
 
 const router = express.Router();
 const metrics = prometheusConductorMetrics as any;
@@ -142,6 +143,21 @@ router.post(
          VALUES ($1, $2, $3)`,
         [artifactId, receiptBuffer, 'application/json'],
       );
+
+      await meteringEmitter.emitReceiptEmitted({
+        tenantId: req?.user?.tenantId || 'unknown',
+        runId,
+        receiptId: receipt.receiptId,
+        artifactId,
+        source: 'conductor.evidence.receipt',
+        actorType: req?.user ? 'user' : 'system',
+        workflowType: run.runbook || 'maestro_run',
+        correlationId: receipt.receiptId,
+        metadata: {
+          artifact_type: 'receipt',
+          size_bytes: receiptBuffer.length,
+        },
+      });
 
       usageLedger.recordUsage({
         operationName: 'conductor.receipt.create',
