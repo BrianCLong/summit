@@ -221,7 +221,7 @@ export function createDLPMiddleware(
       }
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       logger.error('DLP middleware error', {
         component: 'DLPMiddleware',
         error: error.message,
@@ -287,7 +287,7 @@ async function scanRequestData(
       violations: scanResults,
       processedContent,
     };
-  } catch (error) {
+  } catch (error: any) {
     logger.error('DLP request data scanning failed', {
       component: 'DLPMiddleware',
       error: error.message,
@@ -337,7 +337,7 @@ async function scanAndProcessResponse(
     });
 
     return processedContent;
-  } catch (error) {
+  } catch (error: any) {
     logger.error('DLP response scanning failed', {
       component: 'DLPMiddleware',
       error: error.message,
@@ -393,7 +393,7 @@ export function dlpStatusMiddleware(
     };
 
     res.json(status);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('DLP status endpoint error', {
       component: 'DLPMiddleware',
       error: error.message,

@@ -1,0 +1,49 @@
+name: Performance Baseline (k6)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *' # Run nightly at 2 AM
+  pull_request:
+    paths:
+      - 'k6/**'
+      - '.github/workflows/perf.yml'
+
+jobs:
+  perf:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Run k6 SLO Probe (Report Only)
+        run: |
+          k6 run k6/slo-probe.js --env OUTPUT_JSON=true > k6-output.txt
+        continue-on-error: true
+
+      - name: Run k6 Golden Path (Report Only)
+        run: |
+          k6 run k6/golden-path.js > k6-golden-path-output.txt
+        continue-on-error: true
+
+      - name: Archive k6 results
+        uses: actions/upload-artifact@v6
+        with:
+          name: k6-results
+          path: |
+            slo-results.json
+            k6-output.txt
+            k6-golden-path-output.txt
+
+      - name: Summary
+        run: |
+          echo "## Performance Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "### SLO Probe" >> $GITHUB_STEP_SUMMARY
+          if [ -f slo-results.json ]; then
+            cat slo-results.json | jq . >> $GITHUB_STEP_SUMMARY
+          else
+             echo "SLO Probe results missing" >> $GITHUB_STEP_SUMMARY
+          fi

@@ -1,5 +1,5 @@
 
-import { LLMRequest, LLMResult } from './interfaces';
+import { LLMRequest, LLMResult } from './interfaces.js';
 
 export interface Observability {
     logLLMCall(request: LLMRequest, result: LLMResult, durationMs: number): void;

@@ -1,40 +1,43 @@
 package intelgraph.authz
 
+import future.keywords.if
+import future.keywords.contains
+
 # Data Scientist Role Policy
 # Allows access to datasets and ML model lifecycle operations
 
-allow {
+allow if {
     input.subject.role == "data_scientist"
     input.action == "read"
     input.resource.type == "dataset"
 }
 
-allow {
+allow if {
     input.subject.role == "data_scientist"
     input.action == "write"
     input.resource.type == "dataset"
     # Additional constraints can be added here, e.g., sensitivity level
 }
 
-allow {
+allow if {
     input.subject.role == "data_scientist"
     input.action == "read"
     input.resource.type == "ml_model"
 }
 
-allow {
+allow if {
     input.subject.role == "data_scientist"
     input.action == "train"
     input.resource.type == "ml_model"
 }
 
-allow {
+allow if {
     input.subject.role == "data_scientist"
     input.action == "evaluate"
     input.resource.type == "ml_model"
 }
 
-allow {
+allow if {
     input.subject.role == "data_scientist"
     input.action == "deploy"
     input.resource.type == "ml_model"

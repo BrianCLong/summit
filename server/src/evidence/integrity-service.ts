@@ -115,14 +115,21 @@ export class EvidenceIntegrityService {
       }
 
       const passed = checked - mismatches.length;
-      span?.addSpanAttributes({
+      const spanAttributes = {
         'evidence.integrity.checked': checked,
         'evidence.integrity.mismatches': mismatches.length,
         'evidence.integrity.chunks': chunksProcessed,
-      });
+      };
+      if (typeof (span as any)?.addSpanAttributes === 'function') {
+        (span as any).addSpanAttributes(spanAttributes);
+      } else if (typeof (span as any)?.setAttribute === 'function') {
+        Object.entries(spanAttributes).forEach(([key, value]) => {
+          (span as any).setAttribute(key, value);
+        });
+      }
 
       return { checked, passed, mismatches, chunksProcessed };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error({ err: error }, 'Evidence integrity verification failed');
       throw error;
     } finally {
@@ -224,7 +231,7 @@ export class EvidenceIntegrityService {
 
     try {
       return await fs.readFile(storagePath);
-    } catch (error) {
+    } catch (error: any) {
       this.logger.warn({ artifactId: artifact.id, storagePath, err: error }, 'Failed to read artifact content');
       return null;
     }

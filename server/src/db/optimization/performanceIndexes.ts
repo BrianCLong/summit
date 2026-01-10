@@ -70,13 +70,13 @@ async function ensureNeo4jIndexes(): Promise<void> {
 export async function ensurePerformanceIndexes(): Promise<void> {
   try {
     await ensurePostgresIndexes();
-  } catch (error) {
+  } catch (error: any) {
     logger.warn({ err: error }, 'PostgreSQL index bootstrap failed');
   }
 
   try {
     await ensureNeo4jIndexes();
-  } catch (error) {
+  } catch (error: any) {
     logger.warn({ err: error }, 'Neo4j index bootstrap failed');
   }
 }

@@ -1,6 +1,11 @@
-category,reference,notes,differentiator
-vision-language,BLIP-2 / LLaVA,"image-text pretraining, chat VLM","graph projection + tool-native curriculum"
-doc_qa,LayoutLM / DocVQA,"layout-aware text tokens","IntelGraph mapping + telemetry-driven sampling"
-chart_qa,UniChart / ChartLLM,"chart-specific question answering","tool-orchestrated parsers + numeric verification traces"
-ui_understanding,Screen2Words / NLSA,"UI captioning/navigation","UI graph schema with action affordances and safety guardrails"
-multimodal_rag,MM-RAG (various),"retrieval over images/docs","graph-indexed retrieval with region-level provenance"
+category,reference,notes,differentiator,citation_placeholder
+vision-language,BLIP-2 / LLaVA,"image-text pretraining, chat VLM","graph projection + tool-native curriculum","[CITE-VL]"
+doc_qa,LayoutLM / DocVQA,"layout-aware text tokens","IntelGraph mapping + telemetry-driven sampling","[CITE-DOC-QA]"
+chart_qa,UniChart / ChartLLM,"chart-specific question answering","tool-orchestrated parsers + numeric verification traces","[CITE-CHART]"
+ui_understanding,Screen2Words / NLSA,"UI captioning/navigation","UI graph schema with action affordances and safety guardrails","[CITE-UI]"
+multimodal_rag,MM-RAG (various),"retrieval over images/docs","graph-indexed retrieval with region-level provenance","[CITE-MM-RAG]"
+anfis,Knowledge graph ranking systems,"graph scoring with provenance-weighted embeddings","policy-aware attribution and online calibration","[CITE-ANFIS]"
+ilc-pwd,Elastic inference schedulers,"latency-aware routing of inference jobs","joint training/inference placement with compliance and carbon guards","[CITE-ILC-PWD]"
+oaeac,SIEM correlation engines,"cross-signal anomaly correlation","policy-grounded remediation playbooks with causal explainability","[CITE-OAEAC]"
+itd-oip,Attack story builders,"timeline-based incident reconstruction","LLM-backed narratives with sandbox replay feedback loop","[CITE-ITD-OIP]"
+fopb-lg,Federated LLM gateways,"edge/cloud split routing for LLMs","privacy-budgeted federated tuning plus unified provenance","[CITE-FOPB-LG]"

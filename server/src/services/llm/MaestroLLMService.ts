@@ -1,7 +1,7 @@
 
-import { LLMRouter } from './LLMRouter';
-import { llmRouterConfig } from '../../config/llm-router.config';
-import { LLMRequest, LLMResult } from './interfaces';
+import { LLMRouter } from './LLMRouter.js';
+import { llmRouterConfig } from '../../config/llm-router.config.js';
+import { LLMRequest, LLMResult } from './interfaces.js';
 
 export class MaestroLLMService {
     private router: LLMRouter;

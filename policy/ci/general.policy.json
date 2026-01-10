@@ -1,0 +1,14 @@
+{
+  "invariants": [
+    {
+      "id": "SEC-002",
+      "description": "Dependencies must be pinned (no ^ or ~)",
+      "check": "dependency-pinning"
+    },
+    {
+      "id": "PROV-003",
+      "description": "PR description must not be empty",
+      "check": "pr-description"
+    }
+  ]
+}

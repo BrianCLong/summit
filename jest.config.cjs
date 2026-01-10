@@ -1,14 +1,13 @@
 module.exports = {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
-  extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts', '.mjs'],
+  extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts'],
   transform: {
     '^.+\\.[cm]?[tj]sx?$': [
       'ts-jest',
       {
         useESM: true,
         tsconfig: 'tsconfig.test.json',
-        isolatedModules: true,
       },
     ],
   },
@@ -18,6 +17,7 @@ module.exports = {
     '<rootDir>/archive/',
     '<rootDir>/salvage/',
     '<rootDir>/pull/',
+    '<rootDir>/packages/cli/',
   ],
   testPathIgnorePatterns: [
     '/node_modules/',
@@ -76,9 +76,11 @@ module.exports = {
     '^puppeteer$': '<rootDir>/__mocks__/puppeteer.js',
     '^@server/(.*)$': '<rootDir>/server/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
+    '^@intelgraph/provenance$': '<rootDir>/packages/provenance/src/index.ts',
+    '^@intelgraph/(.*)$': '<rootDir>/packages/$1/src/index.ts',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(uuid|.*\\.mjs$))',
+    'node_modules/(?!(uuid|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|.*\\.mjs$))',
     '<rootDir>/.disabled/',
     '<rootDir>/apps/.mobile-native-disabled/',
     '<rootDir>/apps/.desktop-electron-disabled/',
@@ -87,6 +89,6 @@ module.exports = {
   testEnvironmentOptions: {
     customExportConditions: ['node', 'node-addons', 'default'],
   },
-  setupFilesAfterEnv: ['<rootDir>/tests/utils/jest-setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/tests/utils/jest-setup.cjs'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 };

@@ -1,0 +1,37 @@
+{
+  "task_id": "RUNBOOKS-20260102",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "runbooks-docs-update",
+    "version": "v1",
+    "sha256": "d8fa2fa89f5bb30b954a8fc1735794033cd55be52bc8aedce76dcb57948fac11",
+    "path": "prompts/docs/runbooks-update@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/runbooks/**",
+      "docs/roadmap/STATUS.json",
+      "prompts/docs/runbooks-update@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/RUNBOOKS-20260102.json"
+    ],
+    "domains": ["documentation", "operations", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/runbooks/*.md", "docs/roadmap/STATUS.json"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Five operational runbooks are added under docs/runbooks with policy and receipt steps.",
+    "docs/roadmap/STATUS.json updated to reflect the documentation change."
+  ],
+  "stop_conditions": [
+    "Policy conflict with docs/governance/CONSTITUTION.md",
+    "Evidence capture steps cannot be defined"
+  ]
+}

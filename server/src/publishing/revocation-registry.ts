@@ -275,8 +275,8 @@ export class RevocationRegistry {
    * Import revocation list
    */
   async importRevocationList(inputPath: string): Promise<void> {
-    const content = await fs.readFile(inputPath, 'utf8');
-    const list = JSON.parse(content);
+    const content = await fs.readFile(inputPath, { encoding: 'utf8' });
+    const list = JSON.parse(String(content));
 
     // Verify each revocation signature
     for (const record of list.revocations) {
@@ -412,7 +412,7 @@ export class DistributedRevocationChecker {
         // const registry = new RevocationRegistry({...config});
         // await registry.importRevocationList(list);
         // this.addRegistry(registry);
-      } catch (error) {
+      } catch (error: any) {
         console.warn(`Failed to fetch revocation list from ${url}:`, error);
       }
     }

@@ -1,438 +1,163 @@
-# Prometheus Alert Rules for IntelGraph Conductor
-# Provides comprehensive monitoring and alerting for the MoE Conductor system
-
 groups:
-  # High-level system health alerts
-  - name: conductor.system
+  - name: summit-alerts
     rules:
-      - alert: ConductorDown
-        expr: conductor_system_health_status == 0
-        for: 30s
+      # HTTP Availability & Latency
+      - alert: HighHttpErrorRate
+        expr: |
+          sum(rate(http_requests_total{status_code=~"5.."}[5m]))
+          /
+          sum(rate(http_requests_total[5m])) > 0.01
+        for: 2m
         labels:
           severity: critical
-          service: conductor
-          component: system
         annotations:
-          summary: 'Conductor system is unhealthy'
-          description: 'The Conductor system health status indicates unhealthy state for {{ $labels.instance }}'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/conductor-down'
+          summary: "High HTTP Error Rate detected"
+          description: "Over 1% of HTTP requests are failing with 5xx errors."
 
-      - alert: ConductorDegraded
-        expr: conductor_system_health_status == 0.5
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 2.0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High HTTP P95 Latency"
+          description: "P95 latency is above 2 seconds for the last 5 minutes."
+
+      # GraphQL Health
+      - alert: HighGraphQLErrorRate
+        expr: |
+          sum(rate(graphql_errors_total[5m]))
+          /
+          sum(rate(graphql_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High GraphQL Error Rate"
+          description: "Over 5% of GraphQL operations are failing."
+
+      # Database Health
+      - alert: PostgresConnectionSaturation
+        expr: db_connections_active{database="postgres"} > 80
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Postgres connection pool near saturation"
+          description: "Active Postgres connections > 80 (assuming 100 max)."
+
+      - alert: Neo4jConnectionSaturation
+        expr: db_connections_active{database="neo4j"} > 80
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Neo4j connection pool near saturation"
+          description: "Active Neo4j connections > 80."
+
+      # Node.js Runtime
+      - alert: EventLoopLagHigh
+        expr: nodejs_eventloop_lag_seconds > 0.1
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Node.js Event Loop Lag"
+          description: "Event loop lag is > 100ms, indicating blocking operations."
+
+      # Maestro / AI
+      - alert: MaestroJobFailures
+        expr: rate(maestro_job_execution_duration_seconds_count{status="failed"}[5m]) > 0
         for: 2m
         labels:
           severity: warning
-          service: conductor
-          component: system
         annotations:
-          summary: 'Conductor system is degraded'
-          description: 'The Conductor system is running in degraded mode for {{ $labels.instance }}'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/conductor-degraded'
+          summary: "Maestro Job Failures Detected"
+          description: "Maestro jobs are failing."
 
-  # Golden Path Health Alert
-  - name: golden_path.health
-    rules:
-      - alert: GoldenPathHealthLow
-        expr: sum(rate(http_request_duration_seconds_count{path="/health/ready", status="200"}[7d])) / sum(rate(http_request_duration_seconds_count{path="/health/ready"}[7d])) < 0.995
+      - alert: HighLLMCost
+        expr: sum(rate(docling_cost_usd_total[1h])) * 24 > 100
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Projected Daily LLM Cost"
+          description: "Rate of spend suggests daily cost > $100."
+
+      # Data Pipeline
+      - alert: PipelineDown
+        expr: pipeline_uptime_ratio < 0.99
         for: 5m
         labels:
           severity: critical
-          service: api-server
-          component: health
         annotations:
-          summary: 'Golden Path Health Availability Drop'
-          description: 'The availability of the /health/ready endpoint has dropped below 99.5% over the last 7 days.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/golden-path-health-low'
+          summary: "Data Pipeline Uptime Low"
+          description: "Pipeline uptime dropped below 99%."
 
-  # API latency regression and p99 visibility
-  - name: api.latency
+  - name: tripane-sync-alerts
     rules:
-      - record: api_http_request_duration_seconds_p99
-        expr: histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{service="api-server"}[5m])))
+      # Alert 1 — Divergence rate > threshold
+      - alert: TriPaneDivergenceRateHigh
+        expr: sum(rate(triPane_sync_divergence_total{env="prod"}[5m])) > 0.05
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: "Tri-Pane Divergence Rate High"
+          description: "Divergence rate is > 0.05/s for 10m."
 
-      - record: api_http_request_duration_seconds_p99_baseline
-        expr: histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{service="api-server"}[1h])))
-
-      - alert: ApiP99LatencyRegression
+      # Alert 1b — Divergence affecting multiple tenants
+      - alert: TriPaneDivergenceMultiTenant
         expr: |
-          api_http_request_duration_seconds_p99 > 0.5
-          and api_http_request_duration_seconds_p99
-              > (api_http_request_duration_seconds_p99_baseline * 1.4)
+          count(
+            topk(999999,
+              sum by (tenant_id) (rate(triPane_sync_divergence_total{env="prod"}[5m]))
+            ) > 0
+          ) >= 2
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: "Tri-Pane Divergence Affecting Multiple Tenants"
+          description: "At least 2 tenants are experiencing divergence."
+
+      # Alert 2 — Divergence magnitude p95 > 30s
+      - alert: TriPaneDivergenceMagnitudeHigh
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le) (
+              rate(triPane_sync_divergence_delta_ms_bucket{env="prod"}[10m])
+            )
+          ) > 30000
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: "Tri-Pane Divergence Magnitude > 30s"
+          description: "95th percentile of divergence magnitude is > 30 seconds."
+
+      # Alert 3 — Pane latency p95 degraded
+      - alert: TriPaneRefreshLatencyHigh
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le, pane) (
+              rate(triPane_pane_refresh_latency_ms_bucket{env="prod"}[10m])
+            )
+          ) > 2000
+        for: 20m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Tri-Pane Refresh Latency Degraded"
+          description: "P95 refresh latency > 2s for {{ $labels.pane }}."
+
+      # Alert 4 — Error rate elevated
+      - alert: TriPaneErrorRateElevated
+        expr: sum(rate(triPane_pane_refresh_error_total{env="prod"}[5m])) > 0.1
         for: 10m
         labels:
           severity: warning
-          service: api-server
-          component: http
         annotations:
-          summary: 'API p99 latency regression'
-          description: >-
-            p99 latency is {{ $value }}s and more than 40% above the 1h baseline.
-            Inspect upstream dependencies, database health, and recent deploys.
-          runbook_url: 'https://docs.intelgraph.com/runbooks/api-latency-regression'
-
-  # Routing performance and reliability
-  - name: conductor.routing
-    rules:
-      - alert: HighRoutingErrorRate
-        expr: (rate(conductor_router_decisions_total{result="error"}[5m]) / rate(conductor_router_decisions_total[5m])) > 0.05
-        for: 2m
-        labels:
-          severity: warning
-          service: conductor
-          component: router
-        annotations:
-          summary: 'High routing error rate detected'
-          description: 'Conductor routing error rate is {{ $value | humanizePercentage }} for {{ $labels.expert }}'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/high-routing-errors'
-
-      - alert: CriticalRoutingErrorRate
-        expr: (rate(conductor_router_decisions_total{result="error"}[5m]) / rate(conductor_router_decisions_total[5m])) > 0.15
-        for: 1m
-        labels:
-          severity: critical
-          service: conductor
-          component: router
-        annotations:
-          summary: 'Critical routing error rate'
-          description: 'Conductor routing error rate is {{ $value | humanizePercentage }} for {{ $labels.expert }}'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/critical-routing-errors'
-
-      - alert: SlowRoutingDecisions
-        expr: histogram_quantile(0.95, rate(conductor_routing_confidence[5m])) > 2
-        for: 3m
-        labels:
-          severity: warning
-          service: conductor
-          component: router
-        annotations:
-          summary: 'Slow routing decisions detected'
-          description: '95th percentile routing latency is {{ $value }}s for {{ $labels.expert }}'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/slow-routing'
-
-      - alert: LowRoutingConfidence
-        expr: avg_over_time(conductor_routing_confidence[10m]) < 0.7
-        for: 5m
-        labels:
-          severity: warning
-          service: conductor
-          component: router
-        annotations:
-          summary: 'Low routing confidence detected'
-          description: 'Average routing confidence is {{ $value | humanizePercentage }} for {{ $labels.expert }}'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/low-confidence'
-
-  # Expert execution monitoring
-  - name: conductor.experts
-    rules:
-      - alert: HighExpertLatency
-        expr: histogram_quantile(0.95, rate(conductor_expert_latency_seconds_bucket[5m])) > 30
-        for: 2m
-        labels:
-          severity: warning
-          service: conductor
-          component: expert
-        annotations:
-          summary: 'High expert execution latency'
-          description: '95th percentile execution latency is {{ $value }}s for {{ $labels.expert }}'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/high-expert-latency'
-
-      - alert: CriticalExpertLatency
-        expr: histogram_quantile(0.95, rate(conductor_expert_latency_seconds_bucket[5m])) > 60
-        for: 1m
-        labels:
-          severity: critical
-          service: conductor
-          component: expert
-        annotations:
-          summary: 'Critical expert execution latency'
-          description: '95th percentile execution latency is {{ $value }}s for {{ $labels.expert }}'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/critical-expert-latency'
-
-      - alert: HighExpertErrorRate
-        expr: (rate(conductor_expert_executions_total{result="error"}[5m]) / rate(conductor_expert_executions_total[5m])) > 0.10
-        for: 2m
-        labels:
-          severity: warning
-          service: conductor
-          component: expert
-        annotations:
-          summary: 'High expert execution error rate'
-          description: 'Expert {{ $labels.expert }} error rate is {{ $value | humanizePercentage }}'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/high-expert-errors'
-
-      - alert: ExpertUnavailable
-        expr: (rate(conductor_expert_executions_total[5m]) == 0) and (rate(conductor_router_decisions_total{expert=~".+"}[5m]) > 0)
-        for: 5m
-        labels:
-          severity: critical
-          service: conductor
-          component: expert
-        annotations:
-          summary: 'Expert appears to be unavailable'
-          description: 'Expert {{ $labels.expert }} has not processed any tasks despite routing decisions'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/expert-unavailable'
-
-  # MCP services monitoring
-  - name: conductor.mcp
-    rules:
-      - alert: MCPServerDown
-        expr: conductor_mcp_server_status == 0
-        for: 30s
-        labels:
-          severity: critical
-          service: conductor
-          component: mcp
-        annotations:
-          summary: 'MCP server is down'
-          description: 'MCP server {{ $labels.server }} at {{ $labels.url }} is unhealthy'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/mcp-server-down'
-
-      - alert: HighMCPLatency
-        expr: histogram_quantile(0.95, rate(conductor_mcp_latency_seconds_bucket[5m])) > 5
-        for: 2m
-        labels:
-          severity: warning
-          service: conductor
-          component: mcp
-        annotations:
-          summary: 'High MCP operation latency'
-          description: '95th percentile MCP latency is {{ $value }}s for {{ $labels.server }}/{{ $labels.tool }}'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/high-mcp-latency'
-
-      - alert: HighMCPErrorRate
-        expr: (rate(conductor_mcp_operations_total{result="error"}[5m]) / rate(conductor_mcp_operations_total[5m])) > 0.05
-        for: 2m
-        labels:
-          severity: warning
-          service: conductor
-          component: mcp
-        annotations:
-          summary: 'High MCP operation error rate'
-          description: 'MCP {{ $labels.server }}/{{ $labels.tool }} error rate is {{ $value | humanizePercentage }}'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/high-mcp-errors'
-
-  # Resource and capacity monitoring
-  - name: conductor.capacity
-    rules:
-      - alert: HighActiveTasks
-        expr: conductor_active_tasks > 40
-        for: 2m
-        labels:
-          severity: warning
-          service: conductor
-          component: capacity
-        annotations:
-          summary: 'High number of active conductor tasks'
-          description: 'There are {{ $value }} active conductor tasks'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/high-active-tasks'
-
-      - alert: ConcurrencyLimitHit
-        expr: increase(conductor_concurrency_limit_hits_total[5m]) > 10
-        for: 1m
-        labels:
-          severity: warning
-          service: conductor
-          component: capacity
-        annotations:
-          summary: 'Conductor concurrency limits being hit frequently'
-          description: 'Expert {{ $labels.expert }} hit concurrency limits {{ $value }} times in 5 minutes'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/concurrency-limits'
-
-      - alert: HighTaskTimeouts
-        expr: increase(conductor_task_timeout_total[5m]) > 5
-        for: 2m
-        labels:
-          severity: warning
-          service: conductor
-          component: capacity
-        annotations:
-          summary: 'High number of task timeouts'
-          description: 'Expert {{ $labels.expert }} had {{ $value }} {{ $labels.timeout_type }} timeouts in 5 minutes'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/task-timeouts'
-
-  # Cost and quota monitoring
-  - name: conductor.cost
-    rules:
-      - alert: HighCostOperations
-        expr: histogram_quantile(0.95, rate(conductor_expert_cost_usd_bucket[5m])) > 5
-        for: 5m
-        labels:
-          severity: warning
-          service: conductor
-          component: cost
-        annotations:
-          summary: 'High cost operations detected'
-          description: '95th percentile cost is ${{ $value }} for {{ $labels.expert }}'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/high-cost-operations'
-
-      - alert: LowQuotaRemaining
-        expr: conductor_quota_remaining < 10
-        for: 1m
-        labels:
-          severity: warning
-          service: conductor
-          component: quota
-        annotations:
-          summary: 'Low quota remaining'
-          description: 'User {{ $labels.user_id }} has {{ $value }} {{ $labels.quota_type }} quota remaining for {{ $labels.expert }}'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/low-quota'
-
-      - alert: QuotaExhausted
-        expr: conductor_quota_remaining <= 0
-        for: 30s
-        labels:
-          severity: critical
-          service: conductor
-          component: quota
-        annotations:
-          summary: 'Quota exhausted'
-          description: 'User {{ $labels.user_id }} has exhausted {{ $labels.quota_type }} quota for {{ $labels.expert }}'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/quota-exhausted'
-
-  # Security monitoring
-  - name: conductor.security
-    rules:
-      - alert: SecurityPolicyViolations
-        expr: increase(conductor_security_events_total{result="denied"}[5m]) > 5
-        for: 1m
-        labels:
-          severity: warning
-          service: conductor
-          component: security
-        annotations:
-          summary: 'Multiple security policy violations detected'
-          description: '{{ $value }} security policy violations of type {{ $labels.type }} in 5 minutes'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/security-violations'
-
-      - alert: CriticalSecurityViolations
-        expr: increase(conductor_security_events_total{result="denied"}[1m]) > 10
-        for: 30s
-        labels:
-          severity: critical
-          service: conductor
-          component: security
-        annotations:
-          summary: 'Critical security violation rate'
-          description: '{{ $value }} security policy violations of type {{ $labels.type }} in 1 minute'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/critical-security-violations'
-
-      - alert: KillSwitchActive
-        expr: intelgraph_kill_switch_active > 0
-        for: 30s
-        labels:
-          severity: critical
-          service: conductor
-          component: security
-        annotations:
-          summary: 'Kill Switch Activated'
-          description: 'A kill switch has been activated for scope {{ $labels.scope }} (ID: {{ $labels.switch_id }})'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/kill-switch-activation'
-
-      - alert: CrossTenantAccessAttempts
-        expr: rate(intelgraph_security_cross_tenant_access_denied_total[5m]) > 0
-        for: 1m
-        labels:
-          severity: critical
-          service: conductor
-          component: security
-        annotations:
-          summary: 'Cross-Tenant Access Attempt Detected'
-          description: 'Denied access attempt from {{ $labels.source_tenant }} to {{ $labels.target_tenant }}'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/data-exposure-suspicion'
-
-  # Agent Behavior Monitoring
-  - name: conductor.agents
-    rules:
-      - alert: AgentRunawayLoop
-        expr: histogram_quantile(0.95, rate(intelgraph_agent_loop_iterations_bucket[5m])) > 50
-        for: 2m
-        labels:
-          severity: warning
-          service: conductor
-          component: agent
-        annotations:
-          summary: 'Possible Agent Runaway Loop'
-          description: 'Agent {{ $labels.agent_id }} is showing high loop iteration counts.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/agent-runaway'
-
-  # Data quality and integrity
-  - name: conductor.data
-    rules:
-      - alert: NoRecentActivity
-        expr: (time() - max(conductor_router_decisions_total)) > 300
-        for: 5m
-        labels:
-          severity: warning
-          service: conductor
-          component: data
-        annotations:
-          summary: 'No recent conductor activity'
-          description: 'No conductor routing decisions in the last 5 minutes'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/no-activity'
-
-      - alert: MetricsStale
-        expr: up{job="conductor"} == 0
-        for: 1m
-        labels:
-          severity: critical
-          service: conductor
-          component: monitoring
-        annotations:
-          summary: 'Conductor metrics endpoint is down'
-          description: 'Unable to scrape conductor metrics from {{ $labels.instance }}'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/metrics-down'
-
-  # Composite health checks
-  - name: conductor.health
-    rules:
-      - alert: ConductorHealthCheck
-        expr: |
-          (
-            (rate(conductor_router_decisions_total{result="error"}[5m]) / rate(conductor_router_decisions_total[5m])) > 0.1
-          ) or (
-            conductor_active_tasks > 50
-          ) or (
-            histogram_quantile(0.95, rate(conductor_expert_latency_seconds_bucket[5m])) > 45
-          ) or (
-            conductor_mcp_server_status == 0
-          )
-        for: 2m
-        labels:
-          severity: critical
-          service: conductor
-          component: health
-        annotations:
-          summary: 'Conductor composite health check failed'
-          description: 'Multiple conductor health indicators are failing'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/composite-health-failure'
-
-      - alert: ConductorPerformanceDegraded
-        expr: |
-          (
-            histogram_quantile(0.95, rate(conductor_expert_latency_seconds_bucket[5m])) > 15
-          ) and (
-            histogram_quantile(0.95, rate(conductor_mcp_latency_seconds_bucket[5m])) > 2
-          )
-        for: 5m
-        labels:
-          severity: warning
-          service: conductor
-          component: performance
-        annotations:
-          summary: 'Conductor performance is degraded'
-          description: 'Both expert execution and MCP operation latencies are elevated'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/performance-degraded'
-
-  # Background Job monitoring
-  - name: intelgraph.jobs
-    rules:
-      - alert: SOC2EvidenceJobFailed
-        expr: increase(intelgraph_soc2_job_runs_total{status="failure"}[1h]) > 0
-        for: 1m
-        labels:
-          severity: critical
-          team: compliance
-        annotations:
-          summary: "SOC2 evidence generation job failed"
-          description: "The automated monthly SOC2 evidence generation job has failed. Manual investigation is required to ensure compliance evidence is not missed for the audit period."
-          runbook_url: "https://docs.intelgraph.com/runbooks/soc2-evidence-job-failed"
+          summary: "Tri-Pane Error Rate Elevated"
+          description: "Refresh error rate > 0.1 errors/sec."

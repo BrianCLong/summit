@@ -4,9 +4,10 @@ import express from 'express';
 import * as crypto from 'crypto';
 import { createHash, createHmac, randomBytes, randomUUID } from 'crypto';
 import jwt from 'jsonwebtoken';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import { requirePermission } from '../auth/rbac-middleware.js';
+import { usageLedger } from '../../usage/usage-ledger.js';
 import {
   buildProvenanceReceipt,
   canonicalStringify,
@@ -14,6 +15,9 @@ import {
   RunEventRow,
   RunRow,
 } from '../../maestro/evidence/receipt.js';
+import { detectSuspiciousPayload } from '../../security/suspiciousReceipt.js';
+import { isEnabled } from '../../lib/featureFlags.js';
+import { provenanceLedger } from '../../provenance/ledger.js';
 
 const router = express.Router();
 const metrics = prometheusConductorMetrics as any;
@@ -57,9 +61,23 @@ router.post(
   requirePermission('evidence:create'),
   express.json(),
   async (req, res) => {
+    const requestSizeBytes = Buffer.byteLength(
+      JSON.stringify(req.body ?? {}),
+      'utf8',
+    );
     try {
       const { runId } = req.body || {};
       if (!runId) {
+        usageLedger.recordUsage({
+          operationName: 'conductor.receipt.create',
+          tenantId: req?.user?.tenantId,
+          userId: req?.user?.userId || req?.user?.sub,
+          timestamp: new Date(),
+          requestSizeBytes,
+          success: false,
+          statusCode: 400,
+          errorCategory: 'validation',
+        });
         return res
           .status(400)
           .json({ success: false, error: 'runId is required' });
@@ -72,6 +90,37 @@ router.post(
       }
 
       const receipt = buildProvenanceReceipt(run, events, artifacts);
+
+      // Security Check: Suspicious Payload Detection
+      if (isEnabled('SUSPICIOUS_DETECT_ENABLED')) {
+        const suspiciousResult = detectSuspiciousPayload(receipt);
+        if (suspiciousResult && suspiciousResult.isSuspicious) {
+          try {
+            // Non-blocking audit event
+            await provenanceLedger.appendEntry({
+              tenantId: run.tenant_id || 'system', // Fallback if run doesn't have tenantId (though it should)
+              actionType: 'SuspiciousPayloadObserved',
+              resourceType: 'ProvenanceReceipt',
+              resourceId: receipt.receiptId,
+              actorId: req.user?.id || 'system',
+              actorType: req.user ? 'user' : 'system',
+              payload: {
+                reason: suspiciousResult.reason,
+                details: suspiciousResult.details,
+                runId: runId
+              },
+              metadata: {
+                detectionSource: 'receipt-ingestion'
+              }
+            });
+            console.warn(`[SuspiciousPayload] Detected suspicious payload in receipt ${receipt.receiptId}: ${suspiciousResult.reason}`);
+          } catch (auditError) {
+            console.error('Failed to emit suspicious payload audit event', auditError);
+            // Don't block the request
+          }
+        }
+      }
+
       const receiptJson = canonicalStringify(receipt);
       const receiptBuffer = Buffer.from(receiptJson);
       const artifactId = randomUUID();
@@ -94,10 +143,30 @@ router.post(
         [artifactId, receiptBuffer, 'application/json'],
       );
 
+      usageLedger.recordUsage({
+        operationName: 'conductor.receipt.create',
+        tenantId: req?.user?.tenantId,
+        userId: req?.user?.userId || req?.user?.sub,
+        timestamp: new Date(),
+        requestSizeBytes,
+        success: true,
+        statusCode: 200,
+      });
+
       return res.json({ success: true, data: { receipt, artifactId } });
     } catch (error: any) {
       const message =
         error?.message || 'Failed to generate provenance receipt';
+      usageLedger.recordUsage({
+        operationName: 'conductor.receipt.create',
+        tenantId: req?.user?.tenantId,
+        userId: req?.user?.userId || req?.user?.sub,
+        timestamp: new Date(),
+        requestSizeBytes,
+        success: false,
+        statusCode: 500,
+        errorCategory: 'runtime',
+      });
       return res.status(500).json({ success: false, error: message });
     }
   },
@@ -242,7 +311,7 @@ router.post('/export', async (req, res) => {
       downloadUrl: `/api/maestro/v1/evidence/${evidenceBundle.id}/download`,
       verifyUrl: `/api/maestro/v1/evidence/${evidenceBundle.id}/verify`,
     });
-  } catch (error) {
+  } catch (error: any) {
     const duration = Date.now() - startTime;
     metrics?.evidenceExportLatency?.observe(duration / 1000);
     metrics?.evidenceExportRequests?.inc({
@@ -303,7 +372,7 @@ router.get('/:evidenceId/download', async (req, res) => {
       status: 'success',
       format,
     });
-  } catch (error) {
+  } catch (error: any) {
     metrics?.evidenceDownloadRequests?.inc({
       status: 'error',
       format: req.query.format || 'json',
@@ -353,7 +422,7 @@ router.post('/:evidenceId/verify', async (req, res) => {
       verification,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     metrics?.evidenceVerificationRequests?.inc({
       status: 'error',
     });
@@ -408,7 +477,7 @@ router.get('/:evidenceId/artifacts', async (req, res) => {
       })),
       count: artifacts.length,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Artifacts fetch error:', error);
     res.status(500).json({
       error: 'Failed to fetch artifacts',
@@ -459,7 +528,7 @@ router.get('/:evidenceId/artifacts/:artifactId/download', async (req, res) => {
       // In production, fetch from blob storage
       res.json({ message: 'Artifact content not available in storage' });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Artifact download error:', error);
     res.status(500).json({
       error: 'Failed to download artifact',
@@ -742,7 +811,7 @@ async function verifyEvidenceBundle(
     verification.valid = Object.values(verification.checks).every(
       (check) => check === true,
     );
-  } catch (error) {
+  } catch (error: any) {
     verification.errors.push(`Verification error: ${error.message}`);
   }
 

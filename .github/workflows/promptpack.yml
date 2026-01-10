@@ -1,0 +1,22 @@
+name: Prompt Pack Linter
+
+on:
+  push:
+    paths:
+      - 'prompts/**'
+      - 'tools/promptpack_lint/**'
+  pull_request:
+    paths:
+      - 'prompts/**'
+      - 'tools/promptpack_lint/**'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install -e tools/promptpack_lint
+      - run: promptpack-lint --repo .

@@ -44,12 +44,12 @@ async function generateEvidence(): Promise<void> {
   const sloReport = {
     period: 'Sprint 36',
     targets: {
-        graphql_p95: 1500,
-        error_rate: 0.01
+      graphql_p95: 1500,
+      error_rate: 0.01
     },
     actuals: {
-        graphql_p95: 320,
-        error_rate: 0.002
+      graphql_p95: 320,
+      error_rate: 0.002
     },
     compliant: true
   };
@@ -65,21 +65,21 @@ async function generateEvidence(): Promise<void> {
 
   // Hash the bundle (Mock)
   const crypto = await import('crypto');
-  const manifest = fs.readdirSync(artifactsDir).map(f => {
-      const content = fs.readFileSync(path.join(artifactsDir, f));
-      const hash = crypto.createHash('sha256').update(content).digest('hex');
-      return { file: f, hash };
+  const manifest = fs.readdirSync(artifactsDir).map((f: string) => {
+    const content = fs.readFileSync(path.join(artifactsDir, f));
+    const hash = crypto.createHash('sha256').update(content).digest('hex');
+    return { file: f, hash };
   });
 
   fs.writeFileSync(
-      path.join(artifactsDir, 'manifest.json'),
-      JSON.stringify(manifest, null, 2)
+    path.join(artifactsDir, 'manifest.json'),
+    JSON.stringify(manifest, null, 2)
   );
 
   log.info('Evidence bundle hashed and signed (manifest.json created).');
 }
 
-generateEvidence().catch((err: unknown) => {
+generateEvidence().catch((err: any) => {
   log.error(err);
   process.exit(1);
 });

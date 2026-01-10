@@ -527,7 +527,7 @@ describe('Rapid Attribution CTI Runbook', () => {
         expect(['COMPLETED', 'FAILED']).toContain(current.status);
         return;
       }
-      await new Promise((r) => setTimeout(r, pollInterval));
+      await new Promise((r: any) => setTimeout(r, pollInterval));
       elapsed += pollInterval;
     }
 

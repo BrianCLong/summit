@@ -24,6 +24,7 @@ import {
   Brain,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { t } from '../i18n';
 
 type Agent = {
   id: string;
@@ -152,7 +153,7 @@ export default function Switchboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-4 w-4" />
-              Agents
+              {t('agentsTitle')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -186,7 +187,7 @@ export default function Switchboard() {
         </Card>
         <Button className="w-full" onClick={() => setCmdOpen(true)}>
           <Rocket className="mr-2 h-4 w-4" />
-          Open Command Palette (⌘K)
+          {t('openCommandPalette')}
         </Button>
       </aside>
 
@@ -216,24 +217,22 @@ export default function Switchboard() {
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>Meeting Stage</CardTitle>
+            <CardTitle>{t('meetingStageTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
             {meeting ? (
               <div className="flex h-48 items-center justify-center rounded-xl bg-black/80 text-white">
-                Live WebRTC Stage
+                {t('liveWebrtcStage')}
               </div>
             ) : (
-              <Button onClick={() => setMeeting(true)}>
-                Start Local Meeting
-              </Button>
+              <Button onClick={() => setMeeting(true)}>{t('startLocalMeeting')}</Button>
             )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Approvals Inbox</CardTitle>
+            <CardTitle>{t('approvalsInboxTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {approvals.map((item) => (
@@ -246,7 +245,9 @@ export default function Switchboard() {
                   <p className="text-sm opacity-80">
                     {item.requester} → {item.system}
                   </p>
-                  <p className="text-xs opacity-70">Policy: {item.policy}</p>
+                  <p className="text-xs opacity-70">
+                    {t('policyLabel', { policy: item.policy })}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span
@@ -261,7 +262,7 @@ export default function Switchboard() {
                     {item.status}
                   </span>
                   <Button size="sm" variant="secondary">
-                    Review
+                    {t('reviewAction')}
                   </Button>
                 </div>
               </div>
@@ -271,7 +272,7 @@ export default function Switchboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Timeline</CardTitle>
+            <CardTitle>{t('timelineTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {timeline.map((entry) => (
@@ -292,7 +293,7 @@ export default function Switchboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Graph Slice: Who approved what?</CardTitle>
+            <CardTitle>{t('graphSliceTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-2">
             {graphSlice.map((row) => (
@@ -301,9 +302,11 @@ export default function Switchboard() {
                 className="rounded-xl border p-3 text-sm"
               >
                 <p className="font-semibold">{row.person}</p>
-                <p className="opacity-80">Role: {row.role}</p>
-                <p className="opacity-80">System: {row.system}</p>
-                <p className="opacity-70">Approved: {row.approvedChange}</p>
+                <p className="opacity-80">{t('roleLabel', { role: row.role })}</p>
+                <p className="opacity-80">{t('systemLabel', { system: row.system })}</p>
+                <p className="opacity-70">
+                  {t('approvedLabel', { change: row.approvedChange })}
+                </p>
               </div>
             ))}
           </CardContent>
@@ -316,20 +319,19 @@ export default function Switchboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Brain className="h-4 w-4" />
-              Co-pilot
+              {t('copilotTitle')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex gap-2">
               <Button variant="secondary">
                 <Mic className="mr-2 h-4 w-4" />
-                Listen
+                {t('listenAction')}
               </Button>
-              <Button variant="secondary">Present</Button>
+              <Button variant="secondary">{t('presentAction')}</Button>
             </div>
             <div className="text-xs opacity-70">
-              Context loaded: org, agenda, metrics. Actions will be
-              policy-checked.
+              {t('copilotContext')}
             </div>
           </CardContent>
         </Card>
@@ -339,9 +341,11 @@ export default function Switchboard() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Chat with Agent</DialogTitle>
+            <DialogTitle>{t('chatWithAgentTitle')}</DialogTitle>
           </DialogHeader>
-          <div className="min-h-32 rounded-xl border p-3">(messages…)</div>
+          <div className="min-h-32 rounded-xl border p-3">
+            {t('messagesPlaceholder')}
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -356,15 +360,15 @@ export default function Switchboard() {
             onClick={(event) => event.stopPropagation()}
           >
             <Command>
-              <CommandInput placeholder="/call maestro | /present deck | /join room | /status api" />
+              <CommandInput placeholder={t('commandPlaceholder')} />
               <CommandList>
                 <CommandItem onSelect={() => setMeeting(true)}>
-                  Start meeting
+                  {t('startMeetingCommand')}
                 </CommandItem>
                 <CommandItem onSelect={() => setOpen(true)}>
-                  Message Scribe
+                  {t('messageScribeCommand')}
                 </CommandItem>
-                <CommandItem>Open Graph View</CommandItem>
+                <CommandItem>{t('openGraphViewCommand')}</CommandItem>
               </CommandList>
             </Command>
           </div>

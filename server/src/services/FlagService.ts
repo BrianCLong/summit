@@ -75,7 +75,7 @@ export class FlagService {
             complianceRelevant: true,
             complianceFrameworks: ['SOC2'] // Operations change
         });
-    } catch (err) {
+    } catch (err: any) {
         logger.error({ err }, 'Failed to emit audit event for flag update');
     }
   }
@@ -103,7 +103,7 @@ export class FlagService {
             complianceRelevant: true,
             complianceFrameworks: ['SOC2']
         });
-    } catch (err) {
+    } catch (err: any) {
         logger.error({ err }, 'Failed to emit audit event for flag clear');
     }
   }

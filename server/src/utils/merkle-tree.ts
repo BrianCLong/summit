@@ -49,6 +49,7 @@ export class MerkleTreeBuilder {
     const sortedLeaves = [...this.leaves].sort((a, b) =>
       a.hash.localeCompare(b.hash),
     );
+    this.leaves = sortedLeaves;
 
     // Create leaf nodes
     let currentLevel: MerkleNode[] = sortedLeaves.map((leaf) => ({
@@ -66,7 +67,11 @@ export class MerkleTreeBuilder {
         const left = currentLevel[i];
         const right = currentLevel[i + 1] || left; // Duplicate last node if odd
 
-        const parentHash = this.computeHash(left.hash + right.hash);
+        const combined =
+          left.hash < right.hash
+            ? left.hash + right.hash
+            : right.hash + left.hash;
+        const parentHash = this.computeHash(combined);
         const parent: MerkleNode = {
           hash: parentHash,
           left,
@@ -105,27 +110,26 @@ export class MerkleTreeBuilder {
     }
 
     // Reconstruct the path to root
-    let currentHash = leafHash;
     let currentIndex = leafIndex;
-    let levelSize = tree.leaves.length;
+    let levelHashes = tree.leaves.map((leaf) => leaf.hash);
 
-    while (levelSize > 1) {
+    while (levelHashes.length > 1) {
       const isRightNode = currentIndex % 2 === 1;
       const siblingIndex = isRightNode ? currentIndex - 1 : currentIndex + 1;
+      const siblingHash =
+        levelHashes[siblingIndex] ?? levelHashes[currentIndex];
+      proof.push(siblingHash);
 
-      if (siblingIndex < levelSize) {
-        const siblingHash = this.getSiblingHash(
-          currentIndex,
-          levelSize,
-          tree.leaves,
-        );
-        if (siblingHash) {
-          proof.push(siblingHash);
-        }
+      const nextLevel: string[] = [];
+      for (let i = 0; i < levelHashes.length; i += 2) {
+        const left = levelHashes[i];
+        const right = levelHashes[i + 1] ?? left;
+        const combined = left < right ? left + right : right + left;
+        nextLevel.push(this.computeHash(combined));
       }
 
       currentIndex = Math.floor(currentIndex / 2);
-      levelSize = Math.ceil(levelSize / 2);
+      levelHashes = nextLevel;
     }
 
     return proof;
@@ -316,7 +320,7 @@ export function verifyMerkleRoot(items: any[], expectedRoot: string): boolean {
   try {
     const actualRoot = buildMerkleRoot(items);
     return actualRoot === expectedRoot;
-  } catch (error) {
+  } catch (error: any) {
     return false;
   }
 }

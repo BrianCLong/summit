@@ -1,0 +1,158 @@
+name: Weekly Ops Evidence Cadence
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch or tag to run against"
+        required: false
+        default: main
+      week_label:
+        description: "Optional ISO week label (YYYY-Www). Leave blank to compute in UTC"
+        required: false
+      status:
+        description: "Outcome for the evidence pack"
+        required: false
+        default: pass
+        type: choice
+        options:
+          - pass
+          - fail
+          - partial
+      notes:
+        description: "Optional run notes"
+        required: false
+
+jobs:
+  build-weekly-evidence:
+    name: Build weekly ops evidence
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      # No secrets required by default
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Compute identifiers
+        id: meta
+        run: |
+          set -euo pipefail
+          NOW_UTC=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          WEEK_LABEL_INPUT="${{ inputs.week_label }}"
+          if [[ -z "$WEEK_LABEL_INPUT" ]]; then
+            WEEK_LABEL=$(scripts/ops/compute_iso_week.sh)
+          else
+            WEEK_LABEL="$WEEK_LABEL_INPUT"
+          fi
+
+          OUTPUT_DIR="artifacts/ops-evidence/weekly/${WEEK_LABEL}_${SHORT_SHA}"
+          TARBALL_NAME="ops-evidence_weekly_${WEEK_LABEL}_${SHORT_SHA}.tar.gz"
+          RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          mkdir -p "$OUTPUT_DIR"
+
+          echo "generated_at=$NOW_UTC" >> "$GITHUB_OUTPUT"
+          echo "short_sha=$SHORT_SHA" >> "$GITHUB_OUTPUT"
+          echo "week_label=$WEEK_LABEL" >> "$GITHUB_OUTPUT"
+          echo "output_dir=$OUTPUT_DIR" >> "$GITHUB_OUTPUT"
+          echo "tarball_name=$TARBALL_NAME" >> "$GITHUB_OUTPUT"
+          echo "run_url=$RUN_URL" >> "$GITHUB_OUTPUT"
+          echo "artifact_upload_name=ops-evidence-weekly" >> "$GITHUB_OUTPUT"
+
+      - name: Generate ops evidence pack
+        env:
+          OUTPUT_DIR: ${{ steps.meta.outputs.output_dir }}
+          TARBALL_NAME: ${{ steps.meta.outputs.tarball_name }}
+        run: |
+          set -euo pipefail
+          if [[ -x scripts/verification/generate_ops_evidence_pack.sh ]]; then
+            OUTPUT_DIR="$OUTPUT_DIR" TARBALL_NAME="$TARBALL_NAME" scripts/verification/generate_ops_evidence_pack.sh
+          elif [[ -x scripts/verification/generate_ops_evidence_pack.ts ]]; then
+            node scripts/verification/generate_ops_evidence_pack.ts "$OUTPUT_DIR" "$TARBALL_NAME"
+          else
+            echo "generate_ops_evidence_pack script not found" >&2
+            exit 1
+          fi
+
+          if [[ ! -f "$OUTPUT_DIR/$TARBALL_NAME" ]]; then
+            # Attempt to relocate any produced tarball into the expected path
+            FOUND=$(find "$OUTPUT_DIR" -maxdepth 1 -name '*.tar.gz' | head -n1 || true)
+            if [[ -n "$FOUND" ]]; then
+              mv "$FOUND" "$OUTPUT_DIR/$TARBALL_NAME"
+            fi
+          fi
+
+          if [[ ! -f "$OUTPUT_DIR/$TARBALL_NAME" ]]; then
+            echo "Expected tarball $OUTPUT_DIR/$TARBALL_NAME not found" >&2
+            exit 1
+          fi
+
+      - name: Upload ops evidence pack
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ steps.meta.outputs.artifact_upload_name }}
+          path: ${{ steps.meta.outputs.output_dir }}/${{ steps.meta.outputs.tarball_name }}
+          if-no-files-found: error
+
+      - name: Emit evidence index entry
+        id: emit
+        env:
+          GENERATED_AT: ${{ steps.meta.outputs.generated_at }}
+          SHORT_SHA: ${{ steps.meta.outputs.short_sha }}
+          WEEK_LABEL: ${{ steps.meta.outputs.week_label }}
+          RUN_URL: ${{ steps.meta.outputs.run_url }}
+          ARTIFACT_UPLOAD_NAME: ${{ steps.meta.outputs.artifact_upload_name }}
+        run: |
+          set -euo pipefail
+          ENTRY_ID="${WEEK_LABEL}_${SHORT_SHA}"
+          REF_INPUT="${{ inputs.ref }}"
+          STATUS_INPUT="${{ inputs.status }}"
+          NOTES_INPUT="${{ inputs.notes }}"
+          ARTIFACT_REF="$RUN_URL#artifact=${ARTIFACT_UPLOAD_NAME}"
+
+          if [[ -x scripts/verification/emit_evidence_index_entry.sh ]]; then
+            scripts/verification/emit_evidence_index_entry.sh \
+              --id "$ENTRY_ID" \
+              --week-label "$WEEK_LABEL" \
+              --status "$STATUS_INPUT" \
+              --commit "${{ github.sha }}" \
+              --ref "$REF_INPUT" \
+              --generated-at "$GENERATED_AT" \
+              --artifact-url "$ARTIFACT_REF" \
+              ${NOTES_INPUT:+--notes "$NOTES_INPUT"} \
+              --output evidence-index-entry.json > evidence-index-entry.json
+          else
+            cat > evidence-index-entry.json <<EOF_JSON
+            {
+              "id": "$ENTRY_ID",
+              "kind": "weekly",
+              "generated_at_utc": "$GENERATED_AT",
+              "commit_sha": "${{ github.sha }}",
+              "ref": "$REF_INPUT",
+              "status": "$STATUS_INPUT",
+              "artifact": {
+                "type": "workflow_artifact",
+                "reference": "$ARTIFACT_REF"
+              },
+              "related": {
+                "iso_week": "$WEEK_LABEL"
+              }$(if [[ -n "$NOTES_INPUT" ]]; then printf ",\n  \"notes\": \"%s\"" "$NOTES_INPUT"; fi)
+            }
+            EOF_JSON
+            cat evidence-index-entry.json
+          fi
+
+          echo "snippet_path=evidence-index-entry.json" >> "$GITHUB_OUTPUT"
+
+      - name: Upload index snippet
+        uses: actions/upload-artifact@v6
+        with:
+          name: evidence-index-entry
+          path: ${{ steps.emit.outputs.snippet_path }}
+          if-no-files-found: error

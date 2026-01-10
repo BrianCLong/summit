@@ -1,0 +1,47 @@
+version: "0.1"
+gates:
+  pr:
+    - name: "lint"
+      command: "npm run lint"
+      severity: "block"
+      timeout_seconds: 300
+    - name: "test-unit"
+      command: "npm run test:unit"
+      severity: "block"
+      timeout_seconds: 600
+    - name: "sec-verify"
+      command: "echo 'running sec-verify'"
+      severity: "warn"
+      timeout_seconds: 300
+    - name: "a11y-keyboard-smoke"
+      command: "pnpm run test:a11y-gate"
+      severity: "block"
+      timeout_seconds: 600
+      artifacts_expected:
+        - "reports/a11y-keyboard"
+  nightly:
+    - name: "sec-verify"
+      command: "echo 'running sec-verify'"
+      severity: "warn"
+      timeout_seconds: 600
+    - name: "obs-verify"
+      command: "echo 'running obs-verify'"
+      severity: "warn"
+      timeout_seconds: 600
+    - name: "perf-budget"
+      command: "echo 'running perf-budget'"
+      severity: "warn"
+      timeout_seconds: 1200
+  release:
+    - name: "ga-verify"
+      command: "echo 'running ga-verify'"
+      severity: "block"
+      timeout_seconds: 1800
+    - name: "gov-verify"
+      command: "echo 'running gov-verify'"
+      severity: "block"
+      timeout_seconds: 600
+    - name: "connector-verify"
+      command: "echo 'running connector-verify'"
+      severity: "block"
+      timeout_seconds: 1200

@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { Pool } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
-import { ConfigVersion, EnvironmentName } from './types';
+import { ConfigVersion, EnvironmentName } from './types.js';
 
 export interface Approval {
   approver: string;
@@ -126,7 +126,7 @@ export class ApprovalWorkflowManager<TConfig = Record<string, any>> {
       `);
 
       await client.query('COMMIT');
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -455,7 +455,7 @@ export class ApprovalWorkflowManager<TConfig = Record<string, any>> {
       params,
     );
 
-    return result.rows.map((row) => this.mapRowToWorkflow(row));
+    return result.rows.map((row: any) => this.mapRowToWorkflow(row));
   }
 
   /**
@@ -554,7 +554,7 @@ export class ApprovalWorkflowManager<TConfig = Record<string, any>> {
     this.events.on(event, listener);
   }
 
-  private mapRowToWorkflow(row: any): ApprovalWorkflow<TConfig> {
+  private mapRowToWorkflow(row): ApprovalWorkflow<TConfig> {
     return {
       id: row.id,
       changeId: row.change_id,

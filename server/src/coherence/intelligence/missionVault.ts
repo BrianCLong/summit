@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { getNeo4jDriver } from '../../db/neo4j';
-import { RedisService } from '../../cache/redis';
-import logger from '../../utils/logger';
+import { getNeo4jDriver } from '../../db/neo4j.js';
+import { RedisService } from '../../cache/redis.js';
+import logger from '../../utils/logger.js';
 import { randomUUID as uuidv4 } from 'crypto';
 
 export interface MissionContext {
@@ -185,7 +185,7 @@ export class MissionVault {
       });
 
       return mission;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to create mission context', {
         error,
         tenantId,
@@ -218,7 +218,7 @@ export class MissionVault {
       // Query from Neo4j
       const session = this.neo4j.getSession();
       try {
-        const result = await session.executeRead(async (tx) => {
+        const result = await session.executeRead(async (tx: any) => {
           return await tx.run(
             `
             MATCH (t:Tenant {tenant_id: $tenantId})-[:HAS_MISSION]->(m:Mission {mission_id: $missionId})
@@ -263,7 +263,7 @@ export class MissionVault {
       } finally {
         await session.close();
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get mission context', {
         error,
         tenantId,
@@ -287,7 +287,7 @@ export class MissionVault {
     const session = this.neo4j.getSession();
     try {
 
-      await session.executeWrite(async (tx) => {
+      await session.executeWrite(async (tx: any) => {
         // Update mission phase if provided
         if (updates.phaseChange) {
           await tx.run(
@@ -438,7 +438,7 @@ export class MissionVault {
         factors,
         recommendations,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to assess mission health', {
         error,
         tenantId,
@@ -457,7 +457,7 @@ export class MissionVault {
     const session = this.neo4j.getSession();
 
     try {
-      const result = await session.executeRead(async (tx) => {
+      const result = await session.executeRead(async (tx: any) => {
         return await tx.run(
           `
           MATCH (t:Tenant {tenant_id: $tenantId})-[:HAS_MISSION]->(m:Mission)
@@ -514,7 +514,7 @@ export class MissionVault {
     const session = this.neo4j.getSession();
     try {
 
-      await session.executeWrite(async (tx) => {
+      await session.executeWrite(async (tx: any) => {
         await tx.run(
           `
           MATCH (m:Mission {mission_id: $missionId})
@@ -554,7 +554,7 @@ export class MissionVault {
     const session = this.neo4j.getSession();
 
     try {
-      await session.executeWrite(async (tx) => {
+      await session.executeWrite(async (tx: any) => {
         // Create mission node
         await tx.run(
           `
@@ -851,12 +851,12 @@ export class MissionVault {
       };
     }
 
-    const highRisks = risks.filter((r) => r.riskScore >= 0.7).length;
+    const highRisks = risks.filter((r: any) => r.riskScore >= 0.7).length;
     const mediumRisks = risks.filter(
-      (r) => r.riskScore >= 0.4 && r.riskScore < 0.7,
+      (r: any) => r.riskScore >= 0.4 && r.riskScore < 0.7,
     ).length;
     const mitigatedRisks = risks.filter(
-      (r) => r.status === 'mitigating' || r.status === 'closed',
+      (r: any) => r.status === 'mitigating' || r.status === 'closed',
     ).length;
 
     let score = 1.0;
@@ -889,13 +889,13 @@ export class MissionVault {
     }
 
     const available = resources.filter(
-      (r) => r.availability === 'available',
+      (r: any) => r.availability === 'available',
     ).length;
     const allocated = resources.filter(
-      (r) => r.availability === 'allocated',
+      (r: any) => r.availability === 'allocated',
     ).length;
     const unavailable = resources.filter(
-      (r) => r.availability === 'unavailable',
+      (r: any) => r.availability === 'unavailable',
     ).length;
 
     let score = (available + allocated * 0.8) / resources.length;

@@ -197,7 +197,7 @@ export async function setupRedisRateLimit(
     }
 
     return true;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Redis rate limit error:', error);
     return true; // Fail open
   }

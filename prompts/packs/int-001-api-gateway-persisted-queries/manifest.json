@@ -1,0 +1,38 @@
+{
+  "id": "int-001-api-gateway-persisted-queries",
+  "version": "1.0.0",
+  "description": "Imported from legacy structure: int-001-api-gateway-persisted-queries",
+  "model_config": {
+    "model": "gpt-4",
+    "temperature": 0.0
+  },
+  "vars": {
+    "key": {
+      "type": "string",
+      "description": "Auto-detected"
+    },
+    "fieldName": {
+      "type": "string",
+      "description": "Auto-detected"
+    },
+    "userLimit": {
+      "type": "string",
+      "description": "Auto-detected"
+    },
+    "sha256Hash": {
+      "type": "string",
+      "description": "Auto-detected"
+    },
+    "parentType": {
+      "type": "string",
+      "description": "Auto-detected"
+    }
+  },
+  "guardrails": {
+    "tags": [
+      "claude",
+      "legacy"
+    ]
+  },
+  "template_path": "template.md"
+}

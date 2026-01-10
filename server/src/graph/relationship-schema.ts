@@ -426,4 +426,63 @@ export const RELATIONSHIP_SCHEMA: Record<string, RelationshipTypeConfig> = {
     ],
     weight: 1.0,
   },
+
+  // Maestro / Conductor Relationships
+  DEFINED_BY: {
+    name: 'DEFINED_BY',
+    category: 'MAESTRO',
+    description: 'Connects a Run to its WorkflowDefinition',
+    properties: [],
+    constraints: [{ source: 'Run', target: 'WorkflowDefinition' }],
+    weight: 1.0,
+  },
+  EXECUTED_AS: {
+    name: 'EXECUTED_AS',
+    category: 'MAESTRO',
+    description: 'Connects a Run to its Steps',
+    properties: [{ name: 'order', required: true, type: 'number' }],
+    constraints: [{ source: 'Run', target: 'Step' }],
+    weight: 1.0,
+  },
+  PRODUCED: {
+    name: 'PRODUCED',
+    category: 'MAESTRO',
+    description: 'Connects a Run or Step to an Artifact',
+    properties: [],
+    constraints: [
+      { source: 'Run', target: 'Artifact' },
+      { source: 'Step', target: 'Artifact' },
+    ],
+    weight: 1.0,
+  },
+  REQUIRES_APPROVAL: {
+    name: 'REQUIRES_APPROVAL',
+    category: 'MAESTRO',
+    description: 'Connects a Run or Step to an ApprovalRequest',
+    properties: [],
+    constraints: [
+      { source: 'Run', target: 'ApprovalRequest' },
+      { source: 'Step', target: 'ApprovalRequest' },
+    ],
+    weight: 1.0,
+  },
+  SUBJECT_TO: {
+    name: 'SUBJECT_TO',
+    category: 'MAESTRO',
+    description: 'Connects a Run or Step to a PolicyDecision',
+    properties: [],
+    constraints: [
+      { source: 'Run', target: 'PolicyDecision' },
+      { source: 'Step', target: 'PolicyDecision' },
+    ],
+    weight: 1.0,
+  },
+  LOGGED_IN: {
+    name: 'LOGGED_IN',
+    category: 'MAESTRO',
+    description: 'Connects a Run to a Receipt',
+    properties: [],
+    constraints: [{ source: 'Run', target: 'Receipt' }],
+    weight: 1.0,
+  },
 };

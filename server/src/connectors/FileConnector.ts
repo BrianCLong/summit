@@ -59,7 +59,7 @@ export class FileConnector extends BaseConnector implements SourceConnector {
               try {
                   const parsed = JSON.parse(content);
                   records = Array.isArray(parsed) ? parsed : [parsed];
-              } catch (e) {
+              } catch (e: any) {
                   records = [{ text: content, path: filePath, error: 'JSON parse failed' }];
               }
             } else if (filePath.endsWith('.csv')) {
@@ -70,7 +70,7 @@ export class FileConnector extends BaseConnector implements SourceConnector {
         }
 
         return { records, nextCursor: 'DONE' };
-      } catch (err) {
+      } catch (err: any) {
         this.logger.error({ err, path: filePath }, 'Failed to read file');
         throw err;
       }

@@ -12,7 +12,7 @@ export const createExperiment = (req: Request, res: Response) => {
 
         experimentService.createExperiment(experiment);
         res.status(201).json(experiment);
-    } catch (e) {
+    } catch (e: any) {
         res.status(400).json({ error: (e as Error).message });
     }
 };

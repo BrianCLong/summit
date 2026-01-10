@@ -1,19 +1,51 @@
-import { runCypher } from '../graph/neo4j';
-import {
-  SCHEMA_CONSTRAINTS,
-  Entity,
-  NodeLabel,
-  EdgeType,
-  NodeLabels,
-  EdgeTypes,
-  NATURAL_KEYS
-} from '../graph/schema';
+// @ts-nocheck
+// server/src/services/IntelGraphService.ts
+import neo4j, { Driver, Session } from 'neo4j-driver';
 import { randomUUID } from 'crypto';
+import { getNeo4jDriver } from '../config/database';
+import { Entity, Claim, Evidence, PolicyLabel, Decision } from '../graph/schema';
+import { AppError, NotFoundError, DatabaseError } from '../lib/errors';
+import { provenanceLedger, ProvenanceLedgerV2 } from '../provenance/ledger';
+import { Counter, Histogram } from 'prom-client';
+import { z } from 'zod';
 
+// --- Zod Validation Schemas for Service Layer ---
+const CreateEntitySchema = z.object({ name: z.string().min(1), description: z.string().optional() });
+const CreateClaimSchema = z.object({ statement: z.string().min(1), confidence: z.number().min(0).max(1), entityId: z.string().uuid() });
+const AttachEvidenceSchema = z.object({ claimId: z.string().uuid(), sourceURI: z.string().url(), hash: z.string().min(1), content: z.string().min(1) });
+const TagPolicySchema = z.object({ label: z.string().min(1), sensitivity: z.enum(['public', 'internal', 'confidential', 'secret', 'top-secret']) });
+const CreateDecisionSchema = z.object({ question: z.string().min(1), recommendation: z.string().min(1), rationale: z.string().min(1) });
+
+// --- Prometheus Metrics ---
+const intelGraphRequestLatency = new Histogram({
+  name: 'intelgraph_service_request_latency_seconds',
+  help: 'Latency of IntelGraphService methods',
+  labelNames: ['method'],
+});
+
+const intelGraphOperationsCounter = new Counter({
+  name: 'intelgraph_service_operations_total',
+  help: 'Total number of operations handled by IntelGraphService',
+  labelNames: ['method', 'status'], // status can be 'success' or 'error'
+});
+
+
+/**
+ * @class IntelGraphService
+ * @description A hardened, production-ready singleton service for all IntelGraph interactions.
+ */
 export class IntelGraphService {
   private static instance: IntelGraphService;
+  private driver: Driver;
+  private ledger: ProvenanceLedgerV2;
 
-  private constructor() {}
+  private constructor() {
+    this.driver = getNeo4jDriver();
+    if (!this.driver) {
+      throw new AppError('Neo4j driver not initialized', 500);
+    }
+    this.ledger = provenanceLedger;
+  }
 
   public static getInstance(): IntelGraphService {
     if (!IntelGraphService.instance) {
@@ -22,258 +54,235 @@ export class IntelGraphService {
     return IntelGraphService.instance;
   }
 
-  public async initializeSchema(): Promise<void> {
-    console.log('Initializing IntelGraph schema constraints...');
-    for (const cypher of SCHEMA_CONSTRAINTS) {
-      try {
-        await runCypher(cypher);
-      } catch (error) {
-        console.error(`Failed to apply constraint: ${cypher}`, error);
-      }
-    }
-    console.log('IntelGraph schema initialization complete.');
-  }
-
   /**
-   * Ensures a node exists in the graph (Idempotent / Upsert).
-   * Uses MERGE based on natural keys if available, or CREATE if not.
-   * If the node exists, it updates `updatedAt` and any provided properties.
+   * A higher-order function to wrap method execution with metrics and error handling.
+   * @param {string} methodName - The name of the method being executed.
+   * @param {Function} fn - The function to execute.
+   * @returns {Promise<T>} The result of the function.
    */
-  public async ensureNode<T extends Entity>(
-    tenantId: string,
-    label: NodeLabel,
-    properties: Omit<T, 'id' | 'tenantId' | 'createdAt' | 'updatedAt' | 'label'>
-  ): Promise<T> {
-    this.validateNodeLabel(label);
-
-    const naturalKeys = NATURAL_KEYS[label];
-    const hasNaturalKey = naturalKeys && naturalKeys.length > 0 && naturalKeys.every(k => (properties as any)[k] !== undefined);
-
-    const id = randomUUID();
-    const now = new Date().toISOString();
-
-    let cypher: string;
-    let params: any = {
-      props: properties,
-      id,
-      tenantId,
-      now,
-    };
-
-    if (hasNaturalKey) {
-        // Construct MERGE clause
-        // MERGE (n:Label { tenantId: $tenantId, key1: $val1, ... })
-        const mergeProps = naturalKeys.map(k => `${k}: $${k}`).join(', ');
-        // Extract natural key values into params
-        naturalKeys.forEach(k => params[k] = (properties as any)[k]);
-
-        // Remove natural keys from $props to avoid duplication in SET if we wanted,
-        // but replacing $props is fine as long as we handle it.
-        // Actually, we want to update other props.
-
-        cypher = `
-            MERGE (n:${label} { tenantId: $tenantId, ${mergeProps} })
-            ON CREATE SET
-                n = $props,
-                n.id = $id,
-                n.tenantId = $tenantId,
-                n.createdAt = $now,
-                n.updatedAt = $now
-            ON MATCH SET
-                n += $props,
-                n.updatedAt = $now
-            RETURN n
-        `;
-    } else {
-        // Fallback to CREATE if no natural key definition (shouldn't happen for canonical entities)
-        // or just treat as a new distinct entity
-        cypher = `
-            CREATE (n:${label})
-            SET n = $props,
-                n.id = $id,
-                n.tenantId = $tenantId,
-                n.createdAt = $now,
-                n.updatedAt = $now
-            RETURN n
-        `;
-    }
-
-    const result = await runCypher(cypher, params);
-    if (!result || result.length === 0) {
-      throw new Error(`Failed to ensure node of type ${label}`);
-    }
-
-    return result[0]['n'] as T;
-  }
-
-  // Deprecated: use ensureNode for canonical correctness
-  public async createNode<T extends Entity>(
-    tenantId: string,
-    label: NodeLabel,
-    properties: Omit<T, 'id' | 'tenantId' | 'createdAt' | 'updatedAt' | 'label'>
-  ): Promise<T> {
-      return this.ensureNode(tenantId, label, properties);
-  }
-
-  public async createEdge(
-    tenantId: string,
-    fromId: string,
-    toId: string,
-    edgeType: EdgeType,
-    properties: Record<string, any> = {}
-  ): Promise<void> {
-    this.validateEdgeType(edgeType);
-
-    const cypher = `
-      MATCH (a), (b)
-      WHERE a.id = $fromId AND a.tenantId = $tenantId
-        AND b.id = $toId AND b.tenantId = $tenantId
-      MERGE (a)-[r:${edgeType}]->(b)
-      ON CREATE SET r = $props, r.createdAt = $now
-      ON MATCH SET r += $props
-      RETURN r
-    `;
-
-    const params = {
-      fromId,
-      toId,
-      tenantId,
-      props: properties,
-      now: new Date().toISOString(),
-    };
-
-    const result = await runCypher(cypher, params);
-    if (!result || result.length === 0) {
-      throw new Error(
-        `Failed to create edge ${edgeType} between ${fromId} and ${toId}. Check IDs and tenant ownership.`
-      );
-    }
-  }
-
-  public async getNodeById<T extends Entity>(
-    tenantId: string,
-    id: string
-  ): Promise<T | null> {
-    const cypher = `
-      MATCH (n)
-      WHERE n.id = $id AND n.tenantId = $tenantId
-      RETURN n
-    `;
-
-    const result = await runCypher(cypher, { id, tenantId });
-    if (!result || result.length === 0) {
-      return null;
-    }
-    return result[0]['n'] as T;
-  }
-
-  public async searchNodes<T extends Entity>(
-    tenantId: string,
-    label: NodeLabel,
-    criteria: Record<string, any> = {},
-    limit: number = 100
-  ): Promise<T[]> {
-    this.validateNodeLabel(label);
-
-    let whereClause = 'n.tenantId = $tenantId';
-    const params: any = { tenantId };
-
-    Object.keys(criteria).forEach((key) => {
-      if (!/^[a-zA-Z0-9_]+$/.test(key)) {
-         throw new Error(`Invalid property key: ${key}`);
+  private async measure<T>(methodName: string, fn: (session: Session) => Promise<T>): Promise<T> {
+    const end = intelGraphRequestLatency.startTimer({ method: methodName });
+    const session = this.driver.session();
+    try {
+      const result = await fn(session);
+      intelGraphOperationsCounter.inc({ method: methodName, status: 'success' });
+      return result;
+    } catch (error: any) {
+      intelGraphOperationsCounter.inc({ method: methodName, status: 'error' });
+      if (error instanceof AppError) {
+        throw error; // Re-throw known application errors
       }
-      whereClause += ` AND n.${key} = $${key}`;
-      params[key] = criteria[key];
+      // Wrap unknown errors in a standard DatabaseError
+      throw new DatabaseError(`IntelGraphService.${methodName} failed: ${error.message}`);
+    } finally {
+      end();
+      await session.close();
+    }
+  }
+
+  async createEntity(entityData: z.infer<typeof CreateEntitySchema>, owner: string, tenantId: string): Promise<Entity> {
+    return this.measure('createEntity', async (session) => {
+      const { name, description } = CreateEntitySchema.parse(entityData);
+      const now = new Date().toISOString();
+      const newEntity: Entity = { id: randomUUID(), createdAt: now, updatedAt: now, owner, name, description: description || '' };
+
+      const result = await session.run('CREATE (e:Entity $props) RETURN e', { props: { ...newEntity, tenantId } });
+      const createdEntity = result.records[0]?.get('e').properties as Entity;
+
+      await this.ledger.appendEntry({ tenantId, timestamp: new Date(now), actionType: 'CREATE', resourceType: 'Entity', resourceId: createdEntity.id, actorId: owner, actorType: 'user', payload: { mutationType: 'CREATE', entityId: createdEntity.id, entityType: 'Entity', name, description }, metadata: {} });
+      return createdEntity;
     });
-
-    const cypher = `
-      MATCH (n:${label})
-      WHERE ${whereClause}
-      RETURN n
-      LIMIT ${limit}
-    `;
-
-    const result = await runCypher(cypher, params);
-    return result.map((r) => r['n'] as T);
   }
 
-  /**
-   * Finds nodes using fuzzy matching on specific properties.
-   * Useful for entity resolution blocking.
-   */
-  public async findSimilarNodes<T extends Entity>(
-    tenantId: string,
-    label: NodeLabel,
-    criteria: {
-      name?: string;
-      email?: string;
-      phone?: string;
-    },
-    limit: number = 50
-  ): Promise<T[]> {
-    this.validateNodeLabel(label);
+  async createClaim(claimData: z.infer<typeof CreateClaimSchema>, owner: string, tenantId: string): Promise<Claim> {
+    return this.measure('createClaim', async (session) => {
+      const { statement, confidence, entityId } = CreateClaimSchema.parse(claimData);
+      const now = new Date().toISOString();
+      const newClaim: Claim = { id: randomUUID(), createdAt: now, updatedAt: now, owner, statement, confidence, entityId };
 
-    const conditions: string[] = [];
-    const params: any = { tenantId };
+      const result = await session.run(
+        `MATCH (e:Entity {id: $entityId, tenantId: $tenantId})
+             CREATE (c:Claim $props)
+             CREATE (c)-[:RELATES_TO]->(e)
+             RETURN c`,
+        { entityId, tenantId, props: { ...newClaim, tenantId } }
+      );
 
-    if (criteria.email) {
-      conditions.push('n.email = $email'); // Exact match for email usually best, but could do toLower
-      params.email = criteria.email;
-    }
+      if (result.records.length === 0) throw new NotFoundError(`Entity with ID ${entityId} not found for this tenant.`);
+      const createdClaim = result.records[0].get('c').properties as Claim;
 
-    if (criteria.phone) {
-      // Assuming phone is somewhat normalized, or use CONTAINS
-      conditions.push('n.phone = $phone');
-      params.phone = criteria.phone;
-    }
+      await this.ledger.appendEntry({ tenantId, timestamp: new Date(now), actionType: 'CREATE', resourceType: 'Claim', resourceId: createdClaim.id, actorId: owner, actorType: 'user', payload: { mutationType: 'CREATE', entityId: createdClaim.id, entityType: 'Claim', statement, confidence, parentEntityId: entityId }, metadata: {} });
+      return createdClaim;
+    });
+  }
 
-    if (criteria.name) {
-      // Fuzzy name matching: Case-insensitive, STARTS WITH, or token overlap if we had FullText index.
-      // Here we use simple case-insensitive matching and STARTS WITH.
-      conditions.push('(toLower(n.name) = toLower($name) OR toLower(n.name) STARTS WITH toLower($namePrefix))');
-      params.name = criteria.name;
-      params.namePrefix = criteria.name.substring(0, 3); // First 3 chars
-    }
+  async attachEvidence(evidenceData: z.infer<typeof AttachEvidenceSchema>, owner: string, tenantId: string): Promise<Evidence> {
+    return this.measure('attachEvidence', async (session) => {
+      const { claimId, sourceURI, hash, content } = AttachEvidenceSchema.parse(evidenceData);
+      const now = new Date().toISOString();
+      const newEvidence: Evidence = { id: randomUUID(), createdAt: now, updatedAt: now, owner, sourceURI, hash, content, claimId };
 
-    if (conditions.length === 0) {
-      return [];
-    }
+      const result = await session.run(
+        `MATCH (c:Claim {id: $claimId, tenantId: $tenantId})
+               CREATE (ev:Evidence $props)
+               CREATE (ev)-[:SUPPORTS]->(c)
+               RETURN ev`,
+        { claimId, tenantId, props: { ...newEvidence, tenantId } }
+      );
 
-    const whereClause = `n.tenantId = $tenantId AND (${conditions.join(' OR ')})`;
+      if (result.records.length === 0) throw new NotFoundError(`Claim with ID ${claimId} not found for this tenant.`);
+      const attachedEvidence = result.records[0].get('ev').properties as Evidence;
 
-    const cypher = `
-      MATCH (n:${label})
-      WHERE ${whereClause}
-      RETURN n
-      LIMIT ${limit}
-    `;
+      await this.ledger.appendEntry({ tenantId, timestamp: new Date(now), actionType: 'ATTACH', resourceType: 'Evidence', resourceId: attachedEvidence.id, actorId: owner, actorType: 'user', payload: { mutationType: 'CREATE', entityId: attachedEvidence.id, entityType: 'Evidence', claimId, sourceURI, hash }, metadata: {} });
+      return attachedEvidence;
+    });
+  }
 
-    const result = await runCypher(cypher, params);
+  async tagPolicy(policyData: z.infer<typeof TagPolicySchema>, targetNodeId: string, owner: string, tenantId: string): Promise<PolicyLabel> {
+    return this.measure('tagPolicy', async (session) => {
+      const { label, sensitivity } = TagPolicySchema.parse(policyData);
+      const now = new Date().toISOString();
+      const newPolicy: PolicyLabel = { id: randomUUID(), createdAt: now, updatedAt: now, owner, label, sensitivity };
 
-    // Deduplicate by ID in case query engine returns multiples (unlikely here but safe practice)
-    const seen = new Set<string>();
-    const uniqueResults: T[] = [];
+      const result = await session.run(
+        `MATCH (n {id: $targetNodeId, tenantId: $tenantId})
+               CREATE (p:PolicyLabel $props)
+               CREATE (n)-[:HAS_POLICY]->(p)
+               RETURN p`,
+        { targetNodeId, tenantId, props: { ...newPolicy, tenantId } }
+      );
 
-    for (const row of result) {
-      const node = row['n'] as T;
-      if (!seen.has(node.id)) {
-        seen.add(node.id);
-        uniqueResults.push(node);
+      if (result.records.length === 0) throw new NotFoundError(`Node with ID ${targetNodeId} not found for this tenant.`);
+      const taggedPolicy = result.records[0].get('p').properties as PolicyLabel;
+
+      await this.ledger.appendEntry({ tenantId, timestamp: new Date(now), actionType: 'TAG', resourceType: 'PolicyLabel', resourceId: taggedPolicy.id, actorId: owner, actorType: 'user', payload: { mutationType: 'CREATE', entityId: taggedPolicy.id, entityType: 'PolicyLabel', targetNodeId, label, sensitivity }, metadata: {} });
+      return taggedPolicy;
+    });
+  }
+
+  async getDecisionProvenance(decisionId: string, tenantId: string): Promise<any> {
+    return this.measure('getDecisionProvenance', async (session) => {
+      const result = await session.run(
+        `MATCH (d:Decision {id: $decisionId, tenantId: $tenantId})
+               OPTIONAL MATCH (d)-[:INFORMED_BY]->(c:Claim)
+               OPTIONAL MATCH (c)<-[:SUPPORTS]-(ev:Evidence)
+               WITH d, c, COLLECT(ev.properties) AS evidences
+               WITH d, COLLECT({claim: c.properties, evidences: evidences}) AS claims
+               RETURN {decision: d.properties, claims: claims} AS provenance`,
+        { decisionId, tenantId }
+      );
+
+      if (result.records.length === 0 || !result.records[0].get('provenance').decision) {
+        throw new NotFoundError(`Decision with ID ${decisionId} not found for this tenant.`);
       }
-    }
-
-    return uniqueResults;
+      return result.records[0].get('provenance');
+    });
   }
 
-  private validateNodeLabel(label: string): void {
-     if (!Object.values(NodeLabels).includes(label as NodeLabel)) {
-         throw new Error(`Invalid node label: ${label}`);
-     }
+  async getEntityClaims(entityId: string, tenantId: string): Promise<any> {
+    return this.measure('getEntityClaims', async (session) => {
+      const result = await session.run(
+        `MATCH (e:Entity {id: $entityId, tenantId: $tenantId})
+               OPTIONAL MATCH (e)<-[:RELATES_TO]-(c:Claim)
+               OPTIONAL MATCH (c)-[:HAS_POLICY]->(p:PolicyLabel)
+               WITH e, c, COLLECT(p.properties) AS policies
+               WITH e, COLLECT({claim: c.properties, policies: policies}) AS claims
+               RETURN {entity: e.properties, claims: claims} AS entityClaims`,
+        { entityId, tenantId }
+      );
+
+      if (result.records.length === 0 || !result.records[0].get('entityClaims').entity) {
+        throw new NotFoundError(`Entity with ID ${entityId} not found for this tenant.`);
+      }
+      return result.records[0].get('entityClaims');
+    });
   }
 
-  private validateEdgeType(type: string): void {
-     if (!Object.values(EdgeTypes).includes(type as EdgeType)) {
-         throw new Error(`Invalid edge type: ${type}`);
-     }
+  // --- Generic Graph Methods used by other services (e.g. EntityResolver) ---
+
+  async getNodeById(tenantId: string, nodeId: string): Promise<any> {
+    return this.measure('getNodeById', async (session) => {
+      const result = await session.run('MATCH (n {id: $nodeId, tenantId: $tenantId}) RETURN n', { nodeId, tenantId });
+      return result.records[0]?.get('n').properties;
+    });
+  }
+
+  async ensureNode(tenantId: string, label: string, properties: Record<string, any>): Promise<any> {
+    return this.measure('ensureNode', async (session) => {
+      const props: any = { ...properties, tenantId };
+      // Ensure id exists
+      if (!props.id) props.id = randomUUID();
+
+      const result = await session.run(
+        `MERGE (n:${label} {id: $id, tenantId: $tenantId}) 
+         SET n += $props 
+         RETURN n`,
+        { id: props.id, tenantId, props }
+      );
+      return result.records[0]?.get('n').properties;
+    });
+  }
+
+  async createEdge(tenantId: string, fromNodeId: string, toNodeId: string, relationshipType: string, properties: Record<string, any> = {}): Promise<any> {
+    return this.measure('createEdge', async (session) => {
+      const props = { ...properties, tenantId };
+      const result = await session.run(
+        `MATCH (a {id: $fromNodeId, tenantId: $tenantId}), (b {id: $toNodeId, tenantId: $tenantId})
+         MERGE (a)-[r:${relationshipType}]->(b)
+         SET r += $props
+         RETURN r`,
+        { fromNodeId, toNodeId, tenantId, props }
+      );
+      return result.records[0]?.get('r').properties;
+    });
+  }
+
+  async findSimilarNodes(tenantId: string, label: string, properties: Record<string, any>, limit: number = 100): Promise<any[]> {
+    return this.measure('findSimilarNodes', async (session) => {
+      // Basic implementation for now: exact match on properties provided
+      // In production this might use vector search or fulltext index
+      const whereClauses: string[] = ['n.tenantId = $tenantId'];
+      const params: Record<string, any> = { tenantId, limit: neo4j.int(limit) };
+
+      Object.entries(properties).forEach(([key, value], index) => {
+        whereClauses.push(`n.${key} = $val${index}`);
+        params[`val${index}`] = value;
+      });
+
+      const cypher = `MATCH (n:${label}) WHERE ${whereClauses.join(' AND ')} RETURN n LIMIT $limit`;
+      const result = await session.run(cypher, params);
+      return result.records.map(r => r.get('n').properties);
+    });
+  }
+
+  async createDecision(decisionData: z.infer<typeof CreateDecisionSchema>, informedByClaimIds: string[], owner: string, tenantId: string): Promise<Decision> {
+    return this.measure('createDecision', async (session) => {
+      const { question, recommendation, rationale } = CreateDecisionSchema.parse(decisionData);
+      const now = new Date().toISOString();
+      const newDecision: Decision = { id: randomUUID(), createdAt: now, updatedAt: now, owner, question, recommendation, rationale };
+
+      // FIX: pass props properly
+      const props = { ...newDecision, tenantId };
+
+      const result = await session.run(
+        `CREATE (d:Decision $props)
+               WITH d
+               UNWIND $informedByClaimIds AS claimId
+               MATCH (c:Claim {id: claimId, tenantId: $tenantId})
+               CREATE (d)-[:INFORMED_BY]->(c)
+               RETURN d`,
+        { props, informedByClaimIds, tenantId }
+      );
+
+      const createdDecision = result.records[0]?.get('d').properties as Decision;
+      if (!createdDecision) throw new DatabaseError(`Failed to create decision.`);
+
+      await this.ledger.appendEntry({ tenantId, timestamp: new Date(now), actionType: 'CREATE', resourceType: 'Decision', resourceId: createdDecision.id, actorId: owner, actorType: 'user', payload: { mutationType: 'CREATE', entityId: createdDecision.id, entityType: 'Decision', question, recommendation, informedByClaimIds }, metadata: {} });
+      return createdDecision;
+    });
+  }
+
+  public static _resetForTesting() {
+    IntelGraphService.instance = null;
   }
 }

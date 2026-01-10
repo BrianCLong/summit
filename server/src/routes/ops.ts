@@ -8,6 +8,8 @@ import logger from '../config/logger.js';
 import { evidenceIntegrityService } from '../evidence/integrity-service.js';
 import { policyHotReloadService } from '../policy/hotReloadService.js';
 import { policyBundleStore } from '../policy/bundleStore.js';
+import { releaseReadinessService } from '../services/releaseReadinessService.js';
+import { systemHealthService } from '../services/SystemHealthService.js';
 
 const router = Router();
 const backupService = new BackupService();
@@ -29,7 +31,7 @@ router.post('/maintenance', async (req, res) => {
         // Run asynchronously to avoid timeout
         runMaintenance().catch(err => logger.error('Async maintenance failed', err));
         res.json({ message: 'Maintenance task started' });
-    } catch (error) {
+    } catch (error: any) {
         logger.error('Failed to trigger maintenance', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -116,7 +118,7 @@ router.post('/backup/:type', async (req, res) => {
                 return res.status(400).json({ error: 'Invalid backup type. Use postgres, neo4j, or redis.' });
         }
         res.json({ message: 'Backup completed', path: result });
-    } catch (error) {
+    } catch (error: any) {
         logger.error(`Failed to backup ${type}`, error);
         res.status(500).json({ error: `Backup failed: ${(error as Error).message}` });
     }
@@ -140,7 +142,7 @@ router.post('/dr/drill', async (req, res) => {
         } else {
             res.status(500).json({ error: 'DR Drill failed' });
         }
-    } catch (error) {
+    } catch (error: any) {
         logger.error('DR drill error', error);
         res.status(500).json({ error: 'DR Drill execution error' });
     }
@@ -154,7 +156,7 @@ router.get('/dr/status', async (req, res) => {
     try {
         const status = await drService.getStatus();
         res.json(status);
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({ error: 'Failed to get DR status' });
     }
 });
@@ -180,10 +182,166 @@ router.post('/evidence/verify', async (req, res) => {
         });
 
         return res.json({ ok: true, ...result });
-    } catch (error) {
+    } catch (error: any) {
         logger.error('Failed to run evidence integrity verification', error);
         return res.status(500).json({ ok: false, error: 'Failed to verify evidence integrity' });
     }
 });
+
+/**
+ * @route GET /ops/release-readiness/summary
+ * @description Get release readiness summary with governance checks
+ */
+router.get(
+  '/release-readiness/summary',
+  ensureAuthenticated,
+  ensureRole(['ADMIN', 'OPERATOR']),
+  async (req, res) => {
+    try {
+      const summary = await releaseReadinessService.getSummary();
+      res.json(summary);
+    } catch (error: any) {
+      logger.error('Failed to get release readiness summary', error);
+      res.status(500).json({ error: 'Failed to retrieve release readiness summary' });
+    }
+  },
+);
+
+/**
+ * @route GET /ops/release-readiness/evidence-index
+ * @description Get structured evidence index from governance artifacts
+ */
+router.get(
+  '/release-readiness/evidence-index',
+  ensureAuthenticated,
+  ensureRole(['ADMIN', 'OPERATOR']),
+  async (req, res) => {
+    try {
+      const evidenceIndex = await releaseReadinessService.getEvidenceIndex();
+      res.json(evidenceIndex);
+    } catch (error: any) {
+      logger.error('Failed to get evidence index', error);
+      res.status(500).json({ error: 'Failed to retrieve evidence index' });
+    }
+  },
+);
+
+/**
+ * @route GET /ops/system-health
+ * @description Get system health status including kill-switch, safe-mode, backpressure
+ */
+router.get('/system-health', async (req, res) => {
+  try {
+    const status = await systemHealthService.getStatus();
+    res.json(status);
+  } catch (error: any) {
+    logger.error('Failed to get system health status', error);
+    res.status(500).json({ error: 'Failed to retrieve system health status' });
+  }
+});
+
+/**
+ * @route POST /ops/system-health/kill-switch
+ * @description Enable or disable the kill-switch
+ */
+router.post(
+  '/system-health/kill-switch',
+  ensureAuthenticated,
+  ensureRole(['ADMIN', 'admin']),
+  async (req, res) => {
+    const { enabled, reason } = req.body;
+
+    if (typeof enabled !== 'boolean') {
+      return res.status(400).json({ error: 'enabled (boolean) is required' });
+    }
+
+    if (enabled && !reason) {
+      return res.status(400).json({ error: 'reason is required when enabling kill-switch' });
+    }
+
+    try {
+      if (enabled) {
+        systemHealthService.enableKillSwitch(reason);
+      } else {
+        systemHealthService.disableKillSwitch();
+      }
+      res.json({ ok: true, killSwitchEnabled: systemHealthService.isKillSwitchEnabled() });
+    } catch (error: any) {
+      logger.error('Failed to toggle kill-switch', error);
+      res.status(500).json({ error: 'Failed to toggle kill-switch' });
+    }
+  },
+);
+
+/**
+ * @route POST /ops/system-health/safe-mode
+ * @description Enable or disable safe-mode
+ */
+router.post(
+  '/system-health/safe-mode',
+  ensureAuthenticated,
+  ensureRole(['ADMIN', 'admin']),
+  async (req, res) => {
+    const { enabled, reason } = req.body;
+
+    if (typeof enabled !== 'boolean') {
+      return res.status(400).json({ error: 'enabled (boolean) is required' });
+    }
+
+    if (enabled && !reason) {
+      return res.status(400).json({ error: 'reason is required when enabling safe-mode' });
+    }
+
+    try {
+      if (enabled) {
+        systemHealthService.enableSafeMode(reason);
+      } else {
+        systemHealthService.disableSafeMode();
+      }
+      res.json({ ok: true, safeModeEnabled: systemHealthService.isSafeModeEnabled() });
+    } catch (error: any) {
+      logger.error('Failed to toggle safe-mode', error);
+      res.status(500).json({ error: 'Failed to toggle safe-mode' });
+    }
+  },
+);
+
+/**
+ * @route POST /ops/policy-simulator
+ * @description Simulate a policy decision for testing/validation
+ */
+router.post(
+  '/policy-simulator',
+  ensureAuthenticated,
+  ensureRole(['ADMIN', 'admin', 'OPERATOR']),
+  async (req, res) => {
+    const { action, resource, subject, context } = req.body;
+
+    if (!action || !resource || !subject) {
+      return res.status(400).json({
+        error: 'action, resource, and subject are required',
+      });
+    }
+
+    if (!subject.id || !Array.isArray(subject.roles)) {
+      return res.status(400).json({
+        error: 'subject must have id (string) and roles (array)',
+      });
+    }
+
+    try {
+      const result = await systemHealthService.simulatePolicy({
+        action,
+        resource,
+        subject,
+        context,
+      });
+      res.json(result);
+    } catch (error: any) {
+      logger.error('Policy simulation failed', error);
+      res.status(500).json({ error: 'Policy simulation failed' });
+    }
+  },
+);
 
 export default router;

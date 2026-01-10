@@ -1,9 +1,6 @@
 """Golden I/O tests for STIX/TAXII connector parsing."""
 
-import json
-import os
 import sys
-import tempfile
 import unittest
 from pathlib import Path
 

@@ -4,16 +4,23 @@ import type {
   CandidateRequest,
   CandidateResponse,
   CandidateScore,
+  DeduplicationRequest,
   EntityRecord,
+  ExtractedEntity,
+  ExtractionOptions,
   ExplainResponse,
   MergePreview,
   MergePreviewRequest,
   MergeRecord,
   MergeRequest,
+  PredictionExplanation,
+  ResolutionCluster,
   ScoringModel,
   ScoringOptions,
   ScoreDecision,
   ScoreThresholds,
+  TemporalEvent,
+  TemporalPattern,
 } from './types.js';
 
 export interface StructuredLogger {
@@ -68,6 +75,29 @@ function resolveThresholds(input?: ScoreThresholds): ScoreThresholds {
     autoMerge: input?.autoMerge ?? DEFAULT_THRESHOLDS.autoMerge,
     review: input?.review ?? DEFAULT_THRESHOLDS.review,
   };
+}
+
+function choosePrimary(candidates: EntityRecord[]): EntityRecord {
+  return candidates.reduce((best, current) => {
+    if (current.confidence !== undefined && best.confidence !== undefined) {
+      return current.confidence > best.confidence ? current : best;
+    }
+    if (current.confidence !== undefined) {
+      return current;
+    }
+    if (best.confidence !== undefined) {
+      return best;
+    }
+    return current.name.localeCompare(best.name) < 0 ? current : best;
+  });
+}
+
+function parseDate(value: string): number {
+  const ts = Date.parse(value);
+  if (Number.isNaN(ts)) {
+    throw new Error(`Invalid timestamp ${value}`);
+  }
+  return ts;
 }
 
 function resolveScoring(input?: ScoringOptions): Required<ScoringOptions> {
@@ -206,6 +236,17 @@ function buildCandidateScore(
     ? clamp(ruleScore * (1 - scoring.mlBlend) + mlScore * scoring.mlBlend, 0, 1)
     : clamp(ruleScore, 0, 1);
   const decision = decideScore(finalScore, thresholds);
+  const contributions: Record<string, number> = {
+    nameSimilarity: Number((features.nameSimilarity * 0.35).toFixed(3)),
+    typeMatch: Number(((features.typeMatch ? 1 : 0) * 0.2).toFixed(3)),
+    propertyOverlap: Number((features.propertyOverlap * 0.15).toFixed(3)),
+    semanticSimilarity: Number((features.semanticSimilarity * 0.2).toFixed(3)),
+    phoneticSimilarity: Number((features.phoneticSimilarity * 0.05).toFixed(3)),
+    editDistance: Number((features.editDistance * 0.05).toFixed(3)),
+  };
+  if (mlScore !== undefined) {
+    contributions.mlScore = Number((mlScore * scoring.mlBlend).toFixed(3));
+  }
   const rationale = [
     `Name similarity ${(features.nameSimilarity * 100).toFixed(1)}%`,
     `Type ${features.typeMatch ? 'matches' : 'differs'}`,
@@ -233,6 +274,14 @@ function buildCandidateScore(
       finalScore: Number(finalScore.toFixed(3)),
     },
     rationale,
+    explanation: {
+      decision,
+      contributions,
+      rationale: [
+        ...rationale,
+        `Weighted blend ${(finalScore * 100).toFixed(1)}% (${decision})`,
+      ],
+    },
     decision,
   };
 }
@@ -304,6 +353,74 @@ export class EntityResolutionService {
       thresholds,
       model: scoring.model,
     };
+  }
+
+  resolveDuplicates(request: DeduplicationRequest): ResolutionCluster[] {
+    const startedAt = Date.now();
+    const thresholds = resolveThresholds(request.thresholds);
+    const scoring = resolveScoring(request.scoring);
+    const span = this.startSpan('intelgraph.entities.resolve', {
+      tenantId: request.tenantId,
+      population: request.population.length,
+    });
+    const population = request.population.filter(
+      (candidate) => candidate.tenantId === request.tenantId,
+    );
+    const byId = new Map(population.map((record) => [record.id, record]));
+    const visited = new Set<string>();
+    const clusters: ResolutionCluster[] = [];
+
+    for (const entity of population) {
+      if (visited.has(entity.id)) {
+        continue;
+      }
+      const candidates = population.filter(
+        (candidate) =>
+          candidate.id !== entity.id && candidate.type === entity.type &&
+          !visited.has(candidate.id),
+      );
+      const scores = candidates
+        .map((candidate) =>
+          buildCandidateScore(entity, candidate, scoring, thresholds),
+        )
+        .filter((score) => score.decision === 'auto-merge');
+      if (scores.length === 0) {
+        visited.add(entity.id);
+        continue;
+      }
+      const duplicates = scores.sort((a, b) => b.score - a.score);
+      duplicates.forEach((dup) => visited.add(dup.entityId));
+      visited.add(entity.id);
+      const primary = choosePrimary(
+        [entity, ...duplicates.map((dup) => byId.get(dup.entityId)!)],
+      );
+      const rationale = [
+        `Clustered ${duplicates.length} duplicates for ${entity.type}`,
+        `Primary selected: ${primary.name}`,
+      ];
+      const cluster: ResolutionCluster = {
+        clusterId: randomUUID(),
+        primary,
+        duplicates,
+        model: scoring.model,
+        rationale,
+        createdAt: this.clock().toISOString(),
+      };
+      clusters.push(cluster);
+    }
+
+    const durationMs = Date.now() - startedAt;
+    this.logInfo('intelgraph.entities.resolve', {
+      tenantId: request.tenantId,
+      clusters: clusters.length,
+      durationMs,
+      model: scoring.model.id,
+    });
+    this.metricsObserve('intelgraph_er_resolution_ms', durationMs, {
+      tenantId: request.tenantId,
+    });
+    span?.end({ durationMs, clusters: clusters.length });
+    return clusters;
   }
 
   merge(request: MergeRequest, featureSource: CandidateScore): MergeRecord {
@@ -472,6 +589,171 @@ export class EntityResolutionService {
     return explanation;
   }
 
+  explainPrediction(
+    entity: EntityRecord,
+    candidate: EntityRecord,
+    thresholds?: ScoreThresholds,
+    scoring?: ScoringOptions,
+  ): PredictionExplanation {
+    const resolvedThresholds = resolveThresholds(thresholds);
+    const resolvedScoring = resolveScoring(scoring);
+    const score = buildCandidateScore(
+      entity,
+      candidate,
+      resolvedScoring,
+      resolvedThresholds,
+    );
+    this.logInfo('intelgraph.entities.predict.explain', {
+      entityId: entity.id,
+      candidateId: candidate.id,
+      decision: score.decision,
+      model: resolvedScoring.model.id,
+    });
+    return (
+      score.explanation ?? {
+        decision: score.decision ?? decideScore(score.score, resolvedThresholds),
+        contributions: {},
+        rationale: score.rationale,
+      }
+    );
+  }
+
+  analyzeTemporalPatterns(
+    events: TemporalEvent[],
+    windowDays = 30,
+    minSupport = 2,
+  ): TemporalPattern[] {
+    const now = Date.now();
+    const windowMs = windowDays * 24 * 60 * 60 * 1000;
+    const grouped = new Map<string, TemporalEvent[]>();
+    events.forEach((event) => {
+      if (!grouped.has(event.entityId)) {
+        grouped.set(event.entityId, []);
+      }
+      grouped.get(event.entityId)!.push(event);
+    });
+
+    const patterns: TemporalPattern[] = [];
+    grouped.forEach((entityEvents, entityId) => {
+      const normalized = entityEvents.map((event) => ({
+        ...event,
+        ts: parseDate(event.timestamp),
+      }));
+      const recent = normalized.filter((event) => event.ts >= now - windowMs);
+      const previous = normalized.filter(
+        (event) => event.ts < now - windowMs && event.ts >= now - windowMs * 2,
+      );
+      const recentCount = recent.length;
+      const previousCount = previous.length;
+      let trend: TemporalPattern['trend'] = 'stable';
+      if (recentCount >= minSupport && recentCount >= previousCount * 1.5) {
+        trend = 'spike';
+      } else if (recentCount > previousCount && recentCount >= minSupport) {
+        trend = 'increasing';
+      }
+      const confidence = recentCount === 0
+        ? 0
+        : Number(
+          (
+            recentCount /
+            Math.max(recentCount + previousCount, 1)
+          ).toFixed(3),
+        );
+      patterns.push({
+        entityId,
+        trend,
+        support: recentCount,
+        windowDays,
+        confidence,
+        evidence: [
+          `Recent events: ${recentCount}`,
+          `Previous window: ${previousCount}`,
+        ],
+      });
+    });
+
+    this.logInfo('intelgraph.entities.temporal', {
+      patterns: patterns.length,
+      windowDays,
+      minSupport,
+    });
+    this.metricsIncrement('intelgraph_er_temporal_total', patterns.length);
+    return patterns;
+  }
+
+  extractEntitiesFromText(
+    text: string,
+    options: ExtractionOptions,
+  ): ExtractedEntity[] {
+    const defaultType = options.defaultType ?? 'unstructured';
+    const source = options.source ?? 'unstructured';
+    const tenantId = options.tenantId;
+    const seen = new Set<string>();
+    const entities: ExtractedEntity[] = [];
+    const addEntity = (
+      value: string,
+      type: string,
+      start: number,
+      end: number,
+      label: string,
+    ): void => {
+      const key = `${type}:${value}:${start}-${end}`;
+      if (seen.has(key)) {
+        return;
+      }
+      seen.add(key);
+      entities.push({
+        record: {
+          id: randomUUID(),
+          type: type || defaultType,
+          name: value,
+          tenantId,
+          attributes: { source },
+          source,
+        },
+        offsets: [{ start, end, label }],
+      });
+    };
+
+    const personRegex = /\b([A-Z][a-z]+\s[A-Z][a-z]+(?:\s[A-Z][a-z]+)*)\b/g;
+    let match: RegExpExecArray | null;
+    while ((match = personRegex.exec(text)) !== null) {
+      addEntity(match[1], 'person', match.index, personRegex.lastIndex, 'person');
+    }
+
+    const orgRegex = /\b([A-Z][A-Za-z0-9&]+\s(?:Inc|Corp|LLC|Agency|Council|Bureau))\b/g;
+    while ((match = orgRegex.exec(text)) !== null) {
+      addEntity(match[1], 'organization', match.index, orgRegex.lastIndex, 'org');
+    }
+
+    const dateRegex = /\b(\d{4}-\d{2}-\d{2})\b/g;
+    while ((match = dateRegex.exec(text)) !== null) {
+      addEntity(match[1], 'date', match.index, dateRegex.lastIndex, 'date');
+    }
+
+    const locationRegex = /\b([A-Z][a-z]+(?:\s[A-Z][a-z]+)*)\s(City|Province|State|Region)\b/g;
+    while ((match = locationRegex.exec(text)) !== null) {
+      addEntity(
+        `${match[1]} ${match[2]}`,
+        'location',
+        match.index,
+        locationRegex.lastIndex,
+        'location',
+      );
+    }
+
+    this.logInfo('intelgraph.entities.extract', {
+      source,
+      tenantId,
+      extracted: entities.length,
+    });
+    this.metricsIncrement('intelgraph_er_extract_total', entities.length, {
+      tenantId,
+      source,
+    });
+    return entities;
+  }
+
   private logInfo(event: string, payload: Record<string, unknown>): void {
     this.observability.logger?.info?.(event, payload);
   }
@@ -502,14 +784,21 @@ export type {
   CandidateRequest,
   CandidateResponse,
   CandidateScore,
+  DeduplicationRequest,
   EntityRecord,
+  ExtractedEntity,
+  ExtractionOptions,
   ExplainResponse,
   MergePreview,
   MergePreviewRequest,
   MergeRecord,
   MergeRequest,
+  PredictionExplanation,
+  ResolutionCluster,
   ScoringModel,
   ScoringOptions,
   ScoreDecision,
   ScoreThresholds,
+  TemporalEvent,
+  TemporalPattern,
 } from './types.js';

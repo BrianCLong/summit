@@ -11,6 +11,7 @@ export { GhostAnalyst } from './drivers/GhostAnalyst.js';
 
 // Metrics
 export { MetricsCollector } from './metrics/MetricsCollector.js';
+export { MissionSuiteRunner } from './metrics/MissionSuiteRunner.js';
 
 // Reporters
 export { ComparisonReporter } from './reporters/ComparisonReporter.js';

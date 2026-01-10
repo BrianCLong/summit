@@ -1,0 +1,40 @@
+{
+  "issue_number": 12876,
+  "title": "Revival: Claude/procurement automation engine 01 pdsi c yr aayq x3 uj6q x jui f",
+  "url": "https://github.com/BrianCLong/summit/pull/12876",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9694960151,
+      "node_id": "LA_kwDOPaNncM8AAAACQd1aFw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/size:%20XL",
+      "name": "size: XL",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9745579774,
+      "node_id": "LA_kwDOPaNncM8AAAACROG-_g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/automerge-safe",
+      "name": "automerge-safe",
+      "color": "0E8A16",
+      "default": false,
+      "description": "Approved for auto-merge by the merge train"
+    }
+  ],
+  "updatedAt": "2025-12-01T10:12:34Z",
+  "createdAt": "2025-11-29T11:47:00Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

@@ -1,5 +1,5 @@
 
-import { IngestionEvent } from '../../connectors/types';
+import { IngestionEvent } from '../../connectors/types.js';
 
 export interface EnrichmentResult {
   enrichedData: Record<string, any>;

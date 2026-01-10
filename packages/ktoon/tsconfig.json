@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "module": "ES2022",
+    "target": "ES2022",
+    "moduleResolution": "Node",
+    "declaration": true,
+    "declarationMap": true,
+    "composite": false,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "strict": true
+  },
+  "include": ["src", "tests"]
+}

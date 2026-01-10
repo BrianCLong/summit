@@ -1,0 +1,58 @@
+version: 1
+updated: 2025-12-30
+
+profiles:
+  critical-auth:
+    severity: critical
+    actions:
+      dev: deny
+      demo: deny
+      staging: deny
+      prod: kill
+    notes: "Never fail open; kill switch in prod if signals fail or ambiguity detected."
+
+  isolation:
+    severity: high
+    actions:
+      dev: deny
+      demo: deny
+      staging: deny
+      prod: deny
+    notes: "Tenant isolation never degrades; deterministic deny on any uncertainty."
+
+  demo:
+    severity: medium
+    actions:
+      dev: degrade
+      demo: degrade
+      staging: degrade
+      prod: deny
+    notes: "Demo mode prefers graceful degradation; production denies unintended demo behavior."
+
+  throttling:
+    severity: high
+    actions:
+      dev: throttle
+      demo: throttle
+      staging: throttle
+      prod: throttle
+    fallback: degrade
+    notes: "Throttle first, degrade if backpressure exceeds thresholds."
+
+  provenance:
+    severity: high
+    actions:
+      dev: deny
+      demo: deny
+      staging: deny
+      prod: deny
+    notes: "Critical evidence gaps fail closed; retries with backpressure allowed but default deny on persistence failure."
+
+  feature-gates:
+    severity: medium
+    actions:
+      dev: deny
+      demo: deny
+      staging: deny
+      prod: deny
+    notes: "Feature flags default to off; deny when flag state is ambiguous."

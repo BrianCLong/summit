@@ -2,6 +2,7 @@ package admin.panel
 
 import future.keywords.if
 import future.keywords.in
+import future.keywords.contains
 
 # ============================================================================
 # Admin Panel RBAC Policy
@@ -24,7 +25,7 @@ import future.keywords.in
 # ============================================================================
 
 # Default deny all
-default allow = false
+default allow := false
 
 # Input contract:
 # {
@@ -124,7 +125,7 @@ allow if {
 }
 
 # Deny if admin tries to escalate privileges above their own role
-deny[msg] if {
+deny contains msg if {
   is_admin
   not is_platform_admin
   input.operation.name in ["createUser", "updateUser", "bulkUpdateUserRole"]
@@ -133,7 +134,7 @@ deny[msg] if {
 }
 
 # Deny if admin tries to modify platform admin users
-deny[msg] if {
+deny contains msg if {
   is_admin
   not is_platform_admin
   input.operation.name in ["updateUser", "deleteUser", "suspendUser"]
@@ -142,7 +143,7 @@ deny[msg] if {
 }
 
 # Deny self-suspension
-deny[msg] if {
+deny contains msg if {
   input.operation.name in ["suspendUser", "deleteUser"]
   input.actor.id == input.context.targetUserId
   msg := "cannot_suspend_or_delete_self"
@@ -159,7 +160,7 @@ allow if {
 }
 
 # Deny impersonation of admins (unless platform admin)
-deny[msg] if {
+deny contains msg if {
   is_admin
   not is_platform_admin
   input.operation.name == "startImpersonation"
@@ -168,14 +169,14 @@ deny[msg] if {
 }
 
 # Require reason for impersonation
-deny[msg] if {
+deny contains msg if {
   input.operation.name == "startImpersonation"
   not input.operation.variables.reason
   msg := "impersonation_reason_required"
 }
 
 # Deny impersonation from untrusted IPs (example policy)
-deny[msg] if {
+deny contains msg if {
   input.operation.name == "startImpersonation"
   not is_trusted_ip(input.context.ip)
   msg := "impersonation_from_untrusted_ip"
@@ -208,7 +209,7 @@ allow if {
 }
 
 # Deny audit log deletion/modification
-deny[msg] if {
+deny contains msg if {
   input.operation.resource == "audit"
   input.operation.type == "mutation"
   input.operation.name in ["deleteAuditLog", "updateAuditLog"]
@@ -250,7 +251,7 @@ allow if {
 }
 
 # Require reason for critical flag changes
-deny[msg] if {
+deny contains msg if {
   input.operation.name in ["updateFeatureFlag", "toggleFeatureFlag"]
   input.operation.variables.tags[_] == "critical"
   not input.operation.variables.reason
@@ -258,7 +259,7 @@ deny[msg] if {
 }
 
 # Deny disabling security features without platform admin role
-deny[msg] if {
+deny contains msg if {
   is_admin
   not is_platform_admin
   input.operation.name in ["updateFeatureFlag", "toggleFeatureFlag"]
@@ -285,7 +286,7 @@ allow if {
 }
 
 # Deny modification of sensitive config without approval
-deny[msg] if {
+deny contains msg if {
   input.operation.name == "updateSystemConfig"
   input.operation.variables.isSensitive == true
   not input.operation.variables.approvalTicket
@@ -304,14 +305,14 @@ allow if {
 }
 
 # Deny exports larger than configured limit
-deny[msg] if {
+deny contains msg if {
   input.operation.name == "createDataExport"
   input.operation.variables.recordCount > data.config.max_export_records
   msg := "export_exceeds_max_records"
 }
 
 # Deny exporting PII without proper permissions
-deny[msg] if {
+deny contains msg if {
   input.operation.name == "createDataExport"
   input.operation.variables.exportType in ["users", "audit_logs"]
   not has_pii_export_permission
@@ -349,14 +350,14 @@ allow if {
 }
 
 # Limit bulk operation size
-deny[msg] if {
+deny contains msg if {
   input.operation.name in ["bulkSuspendUsers", "bulkUpdateUserRole", "bulkDeleteUsers"]
   count(input.operation.variables.userIds) > 100
   msg := "bulk_operation_exceeds_max_size"
 }
 
 # Require reason for bulk operations
-deny[msg] if {
+deny contains msg if {
   input.operation.name in ["bulkSuspendUsers", "bulkDeleteUsers"]
   not input.operation.variables.reason
   msg := "reason_required_for_bulk_operations"
@@ -367,14 +368,14 @@ deny[msg] if {
 # ============================================================================
 
 # Deny if rate limit exceeded (integration with rate limiter)
-deny[msg] if {
+deny contains msg if {
   input.operation.resource == "user"
   input.operation.type == "mutation"
   exceeds_rate_limit(input.actor.id, "admin.user.mutations", 50, 300) # 50 per 5 minutes
   msg := "rate_limit_exceeded"
 }
 
-deny[msg] if {
+deny contains msg if {
   input.operation.name == "startImpersonation"
   exceeds_rate_limit(input.actor.id, "admin.impersonation", 10, 3600) # 10 per hour
   msg := "impersonation_rate_limit_exceeded"
@@ -398,7 +399,7 @@ audit_required if {
 }
 
 # Compliance: Require MFA for sensitive operations
-deny[msg] if {
+deny contains msg if {
   input.operation.name in [
     "deleteUser",
     "bulkDeleteUsers",
@@ -414,7 +415,7 @@ deny[msg] if {
 # ============================================================================
 
 # Deny operations from restricted regions (example)
-deny[msg] if {
+deny contains msg if {
   input.operation.name in ["createDataExport", "startImpersonation"]
   input.context.region in data.restricted_regions
   msg := "operation_not_allowed_from_region"
@@ -425,12 +426,12 @@ deny[msg] if {
 # ============================================================================
 
 # Collect all deny reasons
-violations[msg] {
+violations contains msg if {
   deny[msg]
 }
 
 # Final decision
-decision = {
+decision := {
   "allow": allow,
   "deny": violations,
   "audit_required": audit_required,

@@ -6,24 +6,26 @@ import argparse
 import random
 import statistics
 import time
-from typing import Dict, Iterable, List
+from collections.abc import Iterable
 
 from . import Coordinator
 
 
-def _generate_updates(num_clients: int, dimension: int) -> List[List[float]]:
+def _generate_updates(num_clients: int, dimension: int) -> list[list[float]]:
     rng = random.Random(9876)
     return [[rng.uniform(-5.0, 5.0) for _ in range(dimension)] for _ in range(num_clients)]
 
 
-def run_benchmark(num_clients: int, threshold: int, dimension: int, runs: int = 25) -> Dict[str, float]:
+def run_benchmark(
+    num_clients: int, threshold: int, dimension: int, runs: int = 25
+) -> dict[str, float]:
     updates = _generate_updates(num_clients, dimension)
     coordinator = Coordinator(num_clients, threshold, dimension)
     for idx, metrics in enumerate(updates):
         coordinator.register_client(idx, metrics)
 
     active = list(range(num_clients))
-    latencies: List[float] = []
+    latencies: list[float] = []
     for _ in range(runs):
         start = time.perf_counter()
         coordinator.finalize(active)

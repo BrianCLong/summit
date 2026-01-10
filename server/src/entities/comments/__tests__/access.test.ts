@@ -2,11 +2,14 @@ import { describe, expect, it, jest } from '@jest/globals';
 import {
   createEntityCommentAuthorizer,
   EntityCommentAccessError,
+  OpaAccessClient,
 } from '../access.js';
 
 describe('entity comment ABAC authorizer', () => {
   it('allows access when OPA approves', async () => {
-    const checkDataAccess = jest.fn(async () => true);
+    const checkDataAccess = jest.fn(async () => true) as jest.MockedFunction<
+      OpaAccessClient['checkDataAccess']
+    >;
     const authorizer = createEntityCommentAuthorizer({
       checkDataAccess,
     });

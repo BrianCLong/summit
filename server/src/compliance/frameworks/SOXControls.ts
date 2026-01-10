@@ -834,18 +834,18 @@ export class SOXComplianceService {
 
     const summary = {
       totalControls: controlResults.length,
-      effective: controlResults.filter((r) => r.status === 'effective').length,
-      ineffective: controlResults.filter((r) => r.status === 'ineffective').length,
-      needsImprovement: controlResults.filter((r) => r.status === 'needs_improvement').length,
-      notTested: controlResults.filter((r) => r.status === 'not_tested').length,
-      materialWeaknesses: controlResults.filter((r) => r.deficiencyLevel === 'material_weakness').length,
-      significantDeficiencies: controlResults.filter((r) => r.deficiencyLevel === 'significant_deficiency').length,
+      effective: controlResults.filter((r: any) => r.status === 'effective').length,
+      ineffective: controlResults.filter((r: any) => r.status === 'ineffective').length,
+      needsImprovement: controlResults.filter((r: any) => r.status === 'needs_improvement').length,
+      notTested: controlResults.filter((r: any) => r.status === 'not_tested').length,
+      materialWeaknesses: controlResults.filter((r: any) => r.deficiencyLevel === 'material_weakness').length,
+      significantDeficiencies: controlResults.filter((r: any) => r.deficiencyLevel === 'significant_deficiency').length,
     };
 
     // Calculate ITGC domain results
     const itgcDomainResults = ITGC_DOMAINS.map((domain) => {
-      const domainResults = controlResults.filter((r) => domain.controls.includes(r.controlId));
-      const effective = domainResults.filter((r) => r.status === 'effective').length;
+      const domainResults = controlResults.filter((r: any) => domain.controls.includes(r.controlId));
+      const effective = domainResults.filter((r: any) => r.status === 'effective').length;
       const total = domainResults.length;
 
       let status: 'effective' | 'ineffective' | 'partially_effective';
@@ -905,7 +905,7 @@ export class SOXComplianceService {
    */
   getAssessmentHistory(tenantId: string): SOXComplianceReport[] {
     return Array.from(this.assessmentHistory.values()).filter(
-      (r) => r.tenantId === tenantId
+      (r: any) => r.tenantId === tenantId
     );
   }
 
@@ -1034,11 +1034,11 @@ export class SOXComplianceService {
   private generateRemediationPlan(
     results: SOXAssessmentResult[]
   ): SOXComplianceReport['remediationPlan'] {
-    const materialWeaknesses = results.filter((r) => r.deficiencyLevel === 'material_weakness');
-    const significantDeficiencies = results.filter((r) => r.deficiencyLevel === 'significant_deficiency');
-    const deficiencies = results.filter((r) => r.deficiencyLevel === 'deficiency');
+    const materialWeaknesses = results.filter((r: any) => r.deficiencyLevel === 'material_weakness');
+    const significantDeficiencies = results.filter((r: any) => r.deficiencyLevel === 'significant_deficiency');
+    const deficiencies = results.filter((r: any) => r.deficiencyLevel === 'deficiency');
 
-    const items: SOXComplianceReport['remediationPlan'] extends { items: infer T } ? T : never = [];
+    const items: Array<{ controlId: string; action: string; deadline?: string; responsible?: string }> = [];
 
     // Material weaknesses - immediate priority
     for (const result of materialWeaknesses) {

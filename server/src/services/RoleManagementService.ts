@@ -22,10 +22,12 @@ import logger from '../utils/logger.js';
 import { provenanceLedger } from '../provenance/ledger.js';
 import {
   createDataEnvelope,
-  DataEnvelope,
   DataClassification,
-  GovernanceVerdict,
   GovernanceResult,
+} from '../types/data-envelope.js';
+import type {
+  DataEnvelope,
+  GovernanceVerdict,
 } from '../types/data-envelope.js';
 
 // ============================================================================
@@ -425,7 +427,7 @@ export class RoleManagementService {
           warnings: [],
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error listing roles:', error);
       throw error;
     }
@@ -544,7 +546,7 @@ export class RoleManagementService {
         governanceVerdict: verdict,
         warnings: [],
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error getting role:', error);
       throw error;
     }
@@ -692,7 +694,7 @@ export class RoleManagementService {
           warnings: [],
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error creating role:', error);
       throw error;
     }
@@ -865,7 +867,7 @@ export class RoleManagementService {
           warnings: [],
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error updating role:', error);
       throw error;
     }
@@ -1010,7 +1012,7 @@ export class RoleManagementService {
           warnings: [],
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error deleting role:', error);
       throw error;
     }
@@ -1134,7 +1136,7 @@ export class RoleManagementService {
           warnings: expiresAt ? ['Role assignment has expiration date'] : [],
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error assigning role:', error);
       throw error;
     }
@@ -1213,7 +1215,7 @@ export class RoleManagementService {
           warnings: [],
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error revoking role:', error);
       throw error;
     }
@@ -1262,7 +1264,7 @@ export class RoleManagementService {
         governanceVerdict: verdict,
         warnings: [],
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error getting user roles:', error);
       throw error;
     }

@@ -35,7 +35,7 @@ export class BackupInventoryService {
           lastFailureAt: t.lastFailureAt ? new Date(t.lastFailureAt) : undefined,
         }]));
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error loading backup inventory from Redis', error);
     }
   }
@@ -44,7 +44,7 @@ export class BackupInventoryService {
     try {
       const targetsArray = Array.from(this.targets.values());
       await this.redis.set(this.REDIS_KEY, JSON.stringify(targetsArray));
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error saving backup inventory to Redis', error);
     }
   }

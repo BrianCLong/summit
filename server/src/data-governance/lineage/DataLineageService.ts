@@ -21,7 +21,7 @@ export interface LineageEdge {
 export class DataLineageService {
   private static instance: DataLineageService;
 
-  private constructor() {}
+  private constructor() { }
 
   static getInstance(): DataLineageService {
     if (!DataLineageService.instance) {
@@ -63,8 +63,8 @@ export class DataLineageService {
 
     // Find node for asset AND verify tenant
     const nodeRes = await pool.query(
-        'SELECT * FROM lineage_nodes WHERE asset_id = $1 AND tenant_id = $2',
-        [assetId, tenantId]
+      'SELECT * FROM lineage_nodes WHERE asset_id = $1 AND tenant_id = $2',
+      [assetId, tenantId]
     );
     if (nodeRes.rows.length === 0) return { nodes: [], edges: [] };
     const rootNode = nodeRes.rows[0];
@@ -73,57 +73,57 @@ export class DataLineageService {
     // Filter by tenant ID to ensure we don't accidentally traverse into another tenant's graph
     // (though nodes should prevent this, defense in depth)
     const edgesRes = await pool.query(
-        `SELECT * FROM lineage_edges
+      `SELECT * FROM lineage_edges
          WHERE (source_node_id = $1 OR target_node_id = $1)
          AND tenant_id = $2`,
-        [rootNode.id, tenantId]
+      [rootNode.id, tenantId]
     );
 
     const edges = edgesRes.rows.map(this.mapRowToEdge);
     if (edges.length === 0) {
-         return {
-             nodes: [this.mapRowToNode(rootNode)],
-             edges: []
-         };
+      return {
+        nodes: [this.mapRowToNode(rootNode)],
+        edges: []
+      };
     }
 
     const relatedNodeIds = new Set<string>();
     // Always include root node
     relatedNodeIds.add(rootNode.id);
-    edges.forEach(e => {
-        relatedNodeIds.add(e.sourceNodeId);
-        relatedNodeIds.add(e.targetNodeId);
+    edges.forEach((e: LineageEdge) => {
+      relatedNodeIds.add(e.sourceNodeId);
+      relatedNodeIds.add(e.targetNodeId);
     });
 
     // Fetch all related nodes, strictly filtering by tenant
     const relatedNodesRes = await pool.query(
-        `SELECT * FROM lineage_nodes WHERE id = ANY($1) AND tenant_id = $2`,
-        [[...relatedNodeIds], tenantId]
+      `SELECT * FROM lineage_nodes WHERE id = ANY($1) AND tenant_id = $2`,
+      [[...relatedNodeIds], tenantId]
     );
 
     return {
-        nodes: relatedNodesRes.rows.map(this.mapRowToNode),
-        edges: edges
+      nodes: relatedNodesRes.rows.map(this.mapRowToNode),
+      edges: edges
     };
   }
 
   private mapRowToNode(row: any): LineageNode {
-      return {
-          id: row.id,
-          assetId: row.asset_id,
-          name: row.name,
-          type: row.type,
-          tenantId: row.tenant_id
-      };
+    return {
+      id: row.id,
+      assetId: row.asset_id,
+      name: row.name,
+      type: row.type,
+      tenantId: row.tenant_id
+    };
   }
 
   private mapRowToEdge(row: any): LineageEdge {
-      return {
-          id: row.id,
-          sourceNodeId: row.source_node_id,
-          targetNodeId: row.target_node_id,
-          relationType: row.relation_type,
-          tenantId: row.tenant_id
-      };
+    return {
+      id: row.id,
+      sourceNodeId: row.source_node_id,
+      targetNodeId: row.target_node_id,
+      relationType: row.relation_type,
+      tenantId: row.tenant_id
+    };
   }
 }

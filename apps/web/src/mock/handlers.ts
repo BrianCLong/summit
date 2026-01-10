@@ -138,8 +138,6 @@ export const handlers = [
 
     // AI Analysis query
     if (queryString.includes('aiAnalysis')) {
-      const text = variables?.text || 'sample text'
-
       return HttpResponse.json({
         data: {
           aiAnalysis: {

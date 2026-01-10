@@ -8,6 +8,23 @@ This plan captures the conditions, remediation steps, and verification activitie
 - Reconcile PRs blocked by unrelated histories while preserving governance verdict wrapping and provenance metadata.
 - Validate compliance, security, and performance invariants and prepare final release artifacts (notes, migration guide, GA tag).
 
+### Parallel Execution Groups (Golden Path-aligned)
+
+To maximize velocity without compromising the golden path, coordinate work across the following concurrent groups. Each group must
+publish daily checkpoints in `GO_NO_GO_GATE.md` and block merges on missing evidence or red CI.
+
+1. **Reliability & ESM Hardening Pod**: Owns Jest/TypeScript ESM alignment, `import.meta` polyfills, and stabilization reruns.
+2. **Governance & Provenance Pod**: Replays cherry-picks with provenance stamps, validates verdict wrapping, and audits OPA policy
+   coverage for reconciled PRs.
+3. **Compliance & Security Pod**: Drives HIPAA/SOX evidence refresh, HSM/zero-trust ledger validation, and ensures SOC mappings
+   stay in sync with code changes.
+4. **Performance & Observability Pod**: Executes load/regression runs on policy suggestion latency, presence overlays, and
+   capacity planning; publishes dashboards and alerts for rollback triggers.
+5. **Release Readiness Pod**: Manages version bumps, release notes/migration guide updates, GA tag prep, and stakeholder comms.
+
+Escalate blocking issues to the Release Captain immediately and mark the impacted checklist item(s) as "at risk" with owner and
+ETA.
+
 ## Remediation Workstreams
 
 ### 1) Test & Tooling Stabilization

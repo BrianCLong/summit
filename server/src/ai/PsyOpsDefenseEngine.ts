@@ -52,11 +52,11 @@ interface DefensiveStrategy {
   targetProfile: string;
   tactics: Array<{
     type:
-      | 'INOCULATION'
-      | 'COUNTER_NARRATIVE'
-      | 'FACT_INJECTION'
-      | 'EMOTIONAL_REGULATION'
-      | 'CRITICAL_THINKING_PROMPT';
+    | 'INOCULATION'
+    | 'COUNTER_NARRATIVE'
+    | 'FACT_INJECTION'
+    | 'EMOTIONAL_REGULATION'
+    | 'CRITICAL_THINKING_PROMPT';
     content: string;
     timing: 'IMMEDIATE' | 'DELAYED' | 'CONTEXTUAL';
     effectiveness: number;
@@ -69,7 +69,7 @@ export class PsyOpsDefenseEngine extends EventEmitter {
   private signatures: Map<string, PsyOpsSignature> = new Map();
   private cognitiveProfiles: Map<string, CognitiveProfile> = new Map();
   private defensiveStrategies: Map<string, DefensiveStrategy> = new Map();
-  private mlModels: {
+  private mlModels!: {
     threatClassifier: any;
     behaviorPredictor: any;
     responseOptimizer: any;
@@ -177,7 +177,7 @@ export class PsyOpsDefenseEngine extends EventEmitter {
       }
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Error analyzing psychological threats:', error);
       throw error;
     }
@@ -192,10 +192,10 @@ export class PsyOpsDefenseEngine extends EventEmitter {
     strengthAreas: string[];
     personalizedTraining: Array<{
       type:
-        | 'INOCULATION'
-        | 'AWARENESS'
-        | 'CRITICAL_THINKING'
-        | 'EMOTIONAL_REGULATION';
+      | 'INOCULATION'
+      | 'AWARENESS'
+      | 'CRITICAL_THINKING'
+      | 'EMOTIONAL_REGULATION';
       content: string;
       priority: number;
     }>;
@@ -222,7 +222,7 @@ export class PsyOpsDefenseEngine extends EventEmitter {
         personalizedTraining,
         progressTracking,
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Error building user resilience:', error);
       throw error;
     }
@@ -328,7 +328,7 @@ export class PsyOpsDefenseEngine extends EventEmitter {
         protectiveMeasures,
         monitoringActions,
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Error deploying protective response:', error);
       throw error;
     }
@@ -405,7 +405,7 @@ export class PsyOpsDefenseEngine extends EventEmitter {
         relatedThreats,
         threatCampaignId,
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Error attributing threat source:', error);
       throw error;
     }
@@ -488,7 +488,7 @@ export class PsyOpsDefenseEngine extends EventEmitter {
         await this.updateThreatSignatures();
         await this.refineMlModels();
         await this.optimizeDefensiveStrategies();
-      } catch (error) {
+      } catch (error: any) {
         this.logger.error('Error in continuous learning:', error);
       }
     }, 3600000); // Every hour

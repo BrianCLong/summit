@@ -3,7 +3,7 @@ import type {
   DSARConnector,
   ExportStorage,
   KafkaEventLog,
-} from './types';
+} from './types.js';
 
 export interface PostgresRow {
   table: string;
@@ -20,7 +20,7 @@ const clone = <T>(value: T): T => {
 };
 
 const cloneRows = (rows: PostgresRow[]): PostgresRow[] =>
-  rows.map((row) => ({ ...row, data: clone(row.data) }));
+  rows.map((row: any) => ({ ...row, data: clone(row.data) }));
 
 export class InMemoryPostgresConnector implements DSARConnector<PostgresRow[]> {
   public readonly name = 'postgres';
@@ -32,7 +32,7 @@ export class InMemoryPostgresConnector implements DSARConnector<PostgresRow[]> {
   }
 
   private subjects(): string[] {
-    return Array.from(new Set(this.rows.map((row) => row.subjectId))).sort();
+    return Array.from(new Set(this.rows.map((row: any) => row.subjectId))).sort();
   }
 
   private orderedRows(): PostgresRow[] {
@@ -50,7 +50,7 @@ export class InMemoryPostgresConnector implements DSARConnector<PostgresRow[]> {
   async collect(subjectId: string, tenantId: string): Promise<PostgresRow[]> {
     this.calls.collect += 1;
     return this.orderedRows().filter(
-      (row) => row.subjectId === subjectId && row.tenantId === tenantId,
+      (row: any) => row.subjectId === subjectId && row.tenantId === tenantId,
     );
   }
 
@@ -62,7 +62,7 @@ export class InMemoryPostgresConnector implements DSARConnector<PostgresRow[]> {
     this.calls.rectify += 1;
     Object.entries(patch).forEach(([table, value]) => {
       const target = this.rows.find(
-        (row) =>
+        (row: any) =>
           row.subjectId === subjectId &&
           row.tenantId === tenantId &&
           row.table === table,
@@ -83,7 +83,7 @@ export class InMemoryPostgresConnector implements DSARConnector<PostgresRow[]> {
   async delete(subjectId: string, tenantId: string): Promise<void> {
     this.calls.delete += 1;
     this.rows = this.rows.filter(
-      (row) => !(row.subjectId === subjectId && row.tenantId === tenantId),
+      (row: any) => !(row.subjectId === subjectId && row.tenantId === tenantId),
     );
   }
 
@@ -97,7 +97,7 @@ export class InMemoryPostgresConnector implements DSARConnector<PostgresRow[]> {
   getRows(subjectId: string, tenantId: string): PostgresRow[] {
     return cloneRows(
       this.rows.filter(
-        (row) => row.subjectId === subjectId && row.tenantId === tenantId,
+        (row: any) => row.subjectId === subjectId && row.tenantId === tenantId,
       ),
     );
   }

@@ -32,10 +32,18 @@ const logger = (pino as any)();
 const router = express.Router();
 
 // WAR-GAMED SIMULATION - BullMQ setup for video analysis jobs
-const connection = getRedisClient(); // Use existing Redis client for BullMQ
-if (!connection) {
+// WAR-GAMED SIMULATION - BullMQ setup for video analysis jobs
+const redisClient = getRedisClient(); // Use existing Redis client for BullMQ
+if (!redisClient) {
   throw new Error('Redis connection is required for AI queue rate limiting');
 }
+
+// Create a new connection with maxRetriesPerRequest: null as required by BullMQ
+// If it's a mock client (no duplicate method), we fallback to the client itself and hope for the best (or it will fail later)
+const connection = (redisClient as any).duplicate
+  ? (redisClient as any).duplicate({ maxRetriesPerRequest: null })
+  : redisClient;
+
 const videoAnalysisQueue = new Queue('videoAnalysisQueue', {
   connection,
   limiter: {
@@ -92,6 +100,10 @@ const extractionEngineConfig: ExtractionEngineConfig = {
   tempPath: process.env.TEMP_PATH || './temp', // Ensure this is configured
   maxConcurrentJobs: 5,
   enableGPU: process.env.ENABLE_GPU === 'true',
+  allowedPaths: [
+    process.env.MEDIA_UPLOAD_PATH || '/tmp/intelgraph/uploads',
+    process.env.TEMP_PATH || './temp'
+  ],
 };
 const extractionEngine = new ExtractionEngine(
   extractionEngineConfig,
@@ -101,7 +113,7 @@ const extractionEngine = new ExtractionEngine(
 // WAR-GAMED SIMULATION - Worker to process video analysis jobs
 const videoAnalysisWorker = new Worker(
   'videoAnalysisQueue',
-  async (job) => {
+  async (job: any) => {
     const { jobId, mediaPath, mediaType, extractionMethods, options } =
       job.data as ExtractionRequest;
     logger.info(`Processing video analysis job: ${jobId}`);
@@ -131,11 +143,11 @@ const videoAnalysisWorker = new Worker(
 );
 
 // WAR-GAMED SIMULATION - Handle worker events
-videoAnalysisWorker.on('completed', (job) => {
+videoAnalysisWorker.on('completed', (job: any) => {
   logger.info(`Job ${job.id} has completed!`);
 });
 
-videoAnalysisWorker.on('failed', (job, err) => {
+videoAnalysisWorker.on('failed', (job: any, err: any) => {
   logger.error(`Job ${job?.id} has failed with error ${err.message}`);
 });
 
@@ -276,16 +288,16 @@ router.post(
       res.json({
         success: true,
         entityId,
-        jobId: result.jobId,
-        taskId: result.taskId,
-        candidates: result.candidates,
+        jobId: (result as any).jobId,
+        taskId: (result as any).taskId,
+        candidates: (result as any).candidates,
         metadata: {
-          model: result.modelName || 'default_link_predictor',
+          model: (result as any).modelName || 'default_link_predictor',
           topK,
           executionTime: responseTime,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Error in link prediction: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -365,12 +377,12 @@ router.post(
         metadata: {
           model: 'scaffold-sentiment-v1',
           executionTime: responseTime,
-          analyzedFields: sentimentResult.field_sentiments
-            ? Object.keys(sentimentResult.field_sentiments).length
+          analyzedFields: (sentimentResult as any).field_sentiments
+            ? Object.keys((sentimentResult as any).field_sentiments).length
             : 1,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Error in sentiment analysis: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -449,7 +461,7 @@ router.post(
           generatedAt: new Date().toISOString(),
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Error in AI summary generation: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -510,7 +522,7 @@ router.get('/models/status', async (req: AuthenticatedRequest, res: Response) =>
         lastChecked: new Date().toISOString(),
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error(
       `Error checking model status: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );
@@ -579,7 +591,7 @@ router.get('/capabilities', async (req: AuthenticatedRequest, res: Response) => 
       version: '1.0.0-scaffold',
       lastUpdated: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error(
       `Error retrieving capabilities: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );
@@ -660,7 +672,7 @@ router.post(
         message:
           'Video analysis job submitted successfully. Use /api/ai/job-status/:jobId to track progress.',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Error submitting video analysis job: ${error instanceof Error ? error.message : String(error)}`,
         error,
@@ -732,7 +744,7 @@ router.get('/job-status/:jobId', async (req: AuthenticatedRequest, res: Response
         ? new Date(job.finishedOn).toISOString()
         : undefined,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error(
       `Error getting job status for ${jobId}: ${error instanceof Error ? error.message : String(error)}`,
       error,
@@ -848,7 +860,7 @@ router.post(
         success: true,
         message: 'Feedback received successfully and queued for processing',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Error processing feedback: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -921,7 +933,7 @@ router.post(
         originalPrediction: { deceptionScore },
       });
       res.status(200).json({ success: true, message: 'Feedback received' });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Error processing deception feedback: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -1135,7 +1147,7 @@ router.post('/adversary/generate', async (req: AuthenticatedRequest, res: Respon
       persistence,
     });
     res.json({ ttps: chain });
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });

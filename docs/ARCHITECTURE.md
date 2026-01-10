@@ -1,68 +1,104 @@
-# IntelGraph Architecture
+# Detailed architectural diagram
 
-Summit (IntelGraph) is an enterprise-grade intelligence platform designed for high-stakes environments. It combines graph analytics, real-time collaboration, and AI-driven insights into a unified operating picture.
-
-## High-Level Overview
-
-The platform follows a modern, distributed architecture:
-
-- **Frontend**: Single Page Application (SPA) built with React, Vite, and Material-UI.
-- **Backend**: Node.js/Express monolith with modular service architecture and GraphQL API.
-- **Data Layer**: Polyglot persistence using Neo4j, PostgreSQL, TimescaleDB, and Redis.
-- **Orchestration**: Background job processing via BullMQ and Maestro.
-
-## Core Components
-
-### 1. The Application Layer (`apps/web`, `server/`)
-
-- **GraphQL API**: The primary interface for the frontend. It uses Apollo Server and supports federation-ready schemas.
-- **Real-Time Engine**: Socket.io handles live updates for collaborative investigations (e.g., cursor tracking, graph updates).
-- **Maestro Orchestrator**: Manages long-running tasks like data ingestion, AI enrichment, and report generation.
-
-### 2. The Data Layer
-
-We use the right tool for each job:
-
-- **Neo4j (Graph Database)**: The source of truth for entities (People, Organizations, Events) and their relationships.
-- **PostgreSQL (Relational)**: Stores user accounts, audit logs, structured case metadata, and vector embeddings (via `pgvector`).
-- **TimescaleDB (Time-Series)**: Handles high-velocity metrics and telemetry data.
-- **Redis (Cache & Pub/Sub)**: Manages sessions, API rate limiting, and real-time event broadcasting.
-
-### 3. Intelligence Services (`server/src/services/`)
-
-- **Copilot**: An AI assistant that executes RAG (Retrieval-Augmented Generation) queries against the graph and vector stores.
-- **Ingestion Hooks**: A pipeline for processing incoming data, including PII detection and entity resolution.
-- **Narrative Simulation Engine**: A specialized module for "what-if" scenario modeling and threat forecasting.
-
-### 4. Infrastructure & Security
-
-- **Authentication**: Stateless JWTs with strict refresh token rotation.
-- **Authorization**: Fine-grained ABAC (Attribute-Based Access Control) using OPA (Open Policy Agent) concepts.
-- **Deployment**: Docker Compose for local development ("Golden Path") and Kubernetes (Helm) for production.
-
-## Data Flow: The "Golden Path"
-
-1.  **Ingest**: Data enters via API, Webhooks, or Connectors.
-2.  **Process**: The `IngestionService` normalizes data, detects PII, and resolves entities.
-3.  **Persist**: Entities are stored in Neo4j; metadata in Postgres.
-4.  **Enrich**: Maestro triggers AI jobs to generate embeddings or infer new links.
-5.  **Serve**: The GraphQL API serves the enriched graph to the React client.
-
-## Diagram
+## Runtime / platform architecture (C4-ish, Mermaid)
 
 ```mermaid
-graph TD
-    Client[React Frontend] -->|GraphQL/WS| API[Node.js API Server]
-    API -->|Cypher| Neo4j[(Neo4j Graph DB)]
-    API -->|SQL| Postgres[(Postgres + Vector)]
-    API -->|Redis Protocol| Redis[(Redis Cache)]
-    API -->|Jobs| Maestro[Maestro Worker]
-    Maestro -->|Enrichment| Python[Python Services]
-    Maestro -->|Write| Neo4j
+flowchart LR
+  %% Users
+  U[Analyst / Operator] -->|Browser| FE[Frontend UI
+(client/)
+React 18 + Vite + MUI]
+  U -->|Browser| CU[Conductor UI
+(conductor-ui/)
+Ops/Admin UX]
+
+  %% Edge/API
+  FE -->|HTTPS| API[API Tier
+(Node.js + Express + Apollo GraphQL)
+GraphQL + REST]
+  CU -->|HTTPS| API
+
+  %% Core services
+  API -->|AuthZ / Policy checks| POL[Policy & Guardrails
+(Policy fetcher + enforcement points)
+clients/cos-policy-fetcher/ + policy artifacts]
+  API -->|Cache / rate limit / pubsub| REDIS[(Redis)]
+  API -->|Relational + audit + vectors| PG[(PostgreSQL)]
+  API -->|Graph relationships| NEO[(Neo4j)]
+  API -->|Telemetry time-series| TS[(TimescaleDB)]
+
+  %% Background orchestration
+  API -->|enqueue jobs| MQ[BullMQ / Maestro
+(.maestro/ + orchestration)
+Queue + workers]
+  MQ -->|uses| REDIS
+  MQ -->|read/write| PG
+  MQ -->|read/write| NEO
+  MQ -->|pipelines| AIMS[AI/ML + Pipelines
+(ai-ml-suite/ + domain modules)]
+
+  %% Observability
+  API -->|metrics/logs| OBS[Observability Stack
+(Grafana + alerting)]
+  MQ -->|metrics/logs| OBS
+  TS -->|dashboards| OBS
+
+  %% Ops / Runbooks / Governance
+  OBS --> RUN[Runbooks & Operator Playbooks
+(RUNBOOKS/)]
+  API --> SEC[Security & Compliance
+(SECURITY/ + compliance/ + audit/)]
+  MQ --> SEC
+
+  %% CI / gates
+  DEV[Developer Workstation] -->|make bootstrap| BOOT[Bootstrap + Tooling
+(make targets, pnpm, Docker)]
+  DEV -->|make ga| GA[GA Gate
+Lint + Verify + Tests + Smoke + Security]
+  GA --> API
+  GA --> MQ
+  GA --> FE
+
+  %% Notes
+  classDef store fill:#f6f6f6,stroke:#999,stroke-width:1px;
+  class PG,NEO,TS,REDIS store;
 ```
 
-## Key Constraints
+## Repository “codemap” architecture (what lives where)
 
-- **Deployable-First**: The `main` branch is always stable.
-- **Golden Path**: The core loop (Ingest -> Graph -> Analyze) must always work.
-- **Provable Provenance**: All AI-generated insights must be traceable to their source evidence.
+This is the view that helps new contributors answer “where is the thing?” quickly, based on real top-level directories in the repo:
+
+```mermaid
+flowchart TB
+  ROOT[Repo Root: summit] --> GOV[Governance & Ops]
+  ROOT --> PLAT[Platform (Runtime)]
+  ROOT --> AI[AI/ML + Domain Modules]
+  ROOT --> AG[Agentic Development Tooling]
+
+  GOV --> RUNBOOKS[RUNBOOKS/]
+  GOV --> SECURITY[SECURITY/ + .security/]
+  GOV --> COMPLIANCE[compliance/]
+  GOV --> AUDIT[audit/]
+  GOV --> CI[.ci/ + ci/ + .ga-check/ + .github/]
+  GOV --> QA[__tests__/ + __mocks__/ + GOLDEN/ datasets + .evidence/]
+
+  PLAT --> CLIENT[client/]
+  PLAT --> CONDUCTOR[conductor-ui/]
+  PLAT --> CLI[cli/]
+  PLAT --> BACKEND[backend/]
+  PLAT --> API[api/ + apis/ + api-schemas/]
+  PLAT --> ORCH[.maestro/ + .orchestrator/]
+  PLAT --> CFG[config/ + configs/ data-plane + compose/ + charts/]
+
+  AG --> CLAUDE[.claude/]
+  AG --> GEMINI[.gemini/]
+  AG --> JULES[.jules/ + .Jules/]
+  AG --> QWEN[.qwen/]
+  AG --> PROMPTS[.agentic-prompts/ + .agent-guidance/]
+  AG --> DEVCONTAINER[.devcontainer/]
+
+  AI --> AIML[ai-ml-suite/]
+  AI --> COG[cognitive-* modules]
+  AI --> AM[active-measures-module/]
+  AI --> OTHER[additional vertical modules (numerous)]
+```

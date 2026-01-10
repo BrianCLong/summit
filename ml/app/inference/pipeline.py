@@ -1,12 +1,14 @@
 """Inference pipeline with batching, quantization, and model caching."""
+
 from __future__ import annotations
 
 import asyncio
 import copy
 from collections import OrderedDict
+from collections.abc import Iterable
 from dataclasses import dataclass
 from time import perf_counter
-from typing import Any, Iterable
+from typing import Any
 
 import torch
 
@@ -83,9 +85,7 @@ class InferencePipeline:
         start = perf_counter()
         with torch.no_grad():
             if batch_tensor is not None:
-                outputs = self._batched_forward(
-                    model, x, edges, batch_tensor, requested_batch_size
-                )
+                outputs = self._batched_forward(model, x, edges, batch_tensor, requested_batch_size)
             else:
                 outputs = model(x, edges)
 
@@ -141,9 +141,7 @@ class InferencePipeline:
 
     def _quantize_model(self, model: torch.nn.Module, bits: int) -> torch.nn.Module:
         if bits == 8:
-            return torch.quantization.quantize_dynamic(
-                model, {torch.nn.Linear}, dtype=torch.qint8
-            )
+            return torch.quantization.quantize_dynamic(model, {torch.nn.Linear}, dtype=torch.qint8)
         if bits == 16:
             return model.half()
         return model
@@ -217,9 +215,7 @@ class InferencePipeline:
             chunk_mask = torch.zeros_like(batch_mask)
             chunk_mask[chunk] = True
             outputs.append(
-                self._run_single_batch(
-                    model, node_features, edge_index, chunk, chunk_mask
-                )
+                self._run_single_batch(model, node_features, edge_index, chunk, chunk_mask)
             )
         return outputs
 

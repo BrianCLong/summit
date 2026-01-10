@@ -1,6 +1,7 @@
-import { createHash } from 'node:crypto';
+import { createHash, generateKeyPairSync } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import type { EvidenceBundle, LedgerEntry } from 'common-types';
+import { stableHash } from '@ga-graphai/data-integrity';
 import { createExportManifest } from '../src/manifest.js';
 import {
   ProvenanceBundleValidator,
@@ -58,6 +59,10 @@ function buildLedgerEntries(): LedgerEntry[] {
 const fixedNow = () => new Date('2024-06-01T12:00:00Z');
 
 describe('ProvenanceBundleValidator', () => {
+  const { privateKey, publicKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
+  const issuerPrivateKey = privateKey.export({ format: 'pem', type: 'pkcs1' }).toString();
+  const issuerPublicKey = publicKey.export({ format: 'pem', type: 'pkcs1' }).toString();
+
   it('submits provenance bundles for third-party verification with custody tracking', async () => {
     const entries = buildLedgerEntries();
     const bundle: EvidenceBundle = {
@@ -65,7 +70,13 @@ describe('ProvenanceBundleValidator', () => {
       headHash: entries.at(-1)?.hash,
       entries,
     };
-    const manifest = createExportManifest({ caseId: 'case-77', ledger: entries });
+    const manifest = createExportManifest({
+      caseId: 'case-77',
+      ledger: entries,
+      privateKey: issuerPrivateKey,
+      publicKey: issuerPublicKey,
+      now: fixedNow,
+    });
 
     const captured: ExternalValidationPayload[] = [];
     const validator: ThirdPartyValidator = {
@@ -116,7 +127,13 @@ describe('ProvenanceBundleValidator', () => {
       headHash: entries.at(-1)?.hash,
       entries,
     };
-    const manifest = createExportManifest({ caseId: 'case-21', ledger: entries });
+    const manifest = createExportManifest({
+      caseId: 'case-21',
+      ledger: entries,
+      privateKey: issuerPrivateKey,
+      publicKey: issuerPublicKey,
+      now: fixedNow,
+    });
     manifest.merkleRoot = 'tampered-root';
 
     const validator: ThirdPartyValidator = {
@@ -138,5 +155,88 @@ describe('ProvenanceBundleValidator', () => {
     expect(report.manifestVerification.valid).toBe(false);
     expect(report.compliance.status).toBe('non-compliant');
     expect(report.custodyTrail.at(-1)?.stage).toBe('attested');
+  });
+
+  it('hashes bundles deterministically with canonical ordering and domain separation', () => {
+    const entries = buildLedgerEntries();
+    const bundle: EvidenceBundle = {
+      generatedAt: fixedNow().toISOString(),
+      headHash: entries.at(-1)?.hash,
+      entries,
+    };
+
+    const reorderedKeys = entries.map((entry) => ({
+      hash: entry.hash,
+      timestamp: entry.timestamp,
+      id: entry.id,
+      category: entry.category,
+      actor: entry.actor,
+      action: entry.action,
+      resource: entry.resource,
+      payload: { ...entry.payload },
+      previousHash: entry.previousHash,
+    }));
+
+    const reorderedBundle: EvidenceBundle = {
+      generatedAt: bundle.generatedAt,
+      headHash: bundle.headHash,
+      entries: reorderedKeys,
+    };
+
+    expect(hashBundle(bundle)).toBe(hashBundle(reorderedBundle));
+  });
+
+  it('applies domain separation to avoid collisions with other hash domains', () => {
+    const entries = buildLedgerEntries();
+    const bundle: EvidenceBundle = {
+      generatedAt: fixedNow().toISOString(),
+      headHash: entries.at(-1)?.hash,
+      entries,
+    };
+
+    const bundleHash = hashBundle(bundle);
+    const rawHash = stableHash({ headHash: bundle.headHash, entries: bundle.entries });
+
+    expect(bundleHash).not.toBe(rawHash);
+  });
+
+  it('throws when headHash is missing', () => {
+    const entries = buildLedgerEntries();
+    const bundle: EvidenceBundle = {
+      generatedAt: fixedNow().toISOString(),
+      headHash: undefined,
+      entries,
+    };
+
+    expect(() => hashBundle(bundle)).toThrow(/headHash/);
+  });
+
+  it('rejects duplicate ledger entries', () => {
+    const entries = buildLedgerEntries();
+    const duplicate = { ...entries[0] };
+    const bundle: EvidenceBundle = {
+      generatedAt: fixedNow().toISOString(),
+      headHash: entries.at(-1)?.hash,
+      entries: [entries[0], duplicate],
+    };
+
+    expect(() => hashBundle(bundle)).toThrow(/duplicate entry/);
+  });
+
+  it('detects ordering changes in bundles', () => {
+    const entries = buildLedgerEntries();
+    const bundle: EvidenceBundle = {
+      generatedAt: fixedNow().toISOString(),
+      headHash: entries.at(-1)?.hash,
+      entries,
+    };
+
+    const reversedBundle: EvidenceBundle = {
+      generatedAt: bundle.generatedAt,
+      headHash: bundle.headHash,
+      entries: [...entries].reverse(),
+    };
+
+    expect(hashBundle(bundle)).not.toBe(hashBundle(reversedBundle));
   });
 });

@@ -11,8 +11,7 @@
 
 import { Redis } from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
-// @ts-ignore - LRU cache may have different export structure
-import LRUCache from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 import {
   DataEnvelope,
   GovernanceVerdict,
@@ -177,7 +176,7 @@ export class DistributedCacheService {
         });
       }
       this.stats.l2Misses++;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, key }, 'Redis get error');
     }
 
@@ -260,7 +259,7 @@ export class DistributedCacheService {
         governanceVerdict: createVerdict(GovernanceResult.ALLOW, 'Cache set successful'),
         classification: DataClassification.INTERNAL,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, key }, 'Cache set error');
       return createDataEnvelope(false, {
         source: 'DistributedCacheService',
@@ -290,7 +289,7 @@ export class DistributedCacheService {
         governanceVerdict: createVerdict(GovernanceResult.ALLOW, 'Cache delete successful'),
         classification: DataClassification.INTERNAL,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, key }, 'Cache delete error');
       return createDataEnvelope(false, {
         source: 'DistributedCacheService',
@@ -336,7 +335,7 @@ export class DistributedCacheService {
         governanceVerdict: createVerdict(GovernanceResult.ALLOW, 'Tag invalidation successful'),
         classification: DataClassification.INTERNAL,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, tag }, 'Cache tag invalidation error');
       return createDataEnvelope(0, {
         source: 'DistributedCacheService',
@@ -391,7 +390,7 @@ export class DistributedCacheService {
       this.subscriber = this.redis.duplicate();
       await this.subscriber.subscribe(this.config.invalidationChannel);
 
-      this.subscriber.on('message', (channel, message) => {
+      this.subscriber.on('message', (channel: string, message: string) => {
         if (channel === this.config.invalidationChannel) {
           const key = message;
           this.l1Cache.delete(key);
@@ -401,7 +400,7 @@ export class DistributedCacheService {
       });
 
       logger.info('Cache invalidation listener started');
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to setup invalidation listener');
     }
   }
@@ -410,7 +409,7 @@ export class DistributedCacheService {
     if (this.config.enableInvalidation) {
       try {
         await this.redis.publish(this.config.invalidationChannel, key);
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, key }, 'Failed to broadcast invalidation');
       }
     }
@@ -446,7 +445,7 @@ export class DistributedCacheService {
 
     try {
       await pipeline.exec();
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to flush write buffer');
     }
   }
@@ -514,7 +513,7 @@ export class DistributedCacheService {
         governanceVerdict: createVerdict(GovernanceResult.ALLOW, 'Cache cleared'),
         classification: DataClassification.INTERNAL,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to clear cache');
       return createDataEnvelope(false, {
         source: 'DistributedCacheService',

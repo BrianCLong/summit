@@ -146,7 +146,7 @@ export class RedactionService {
     const answerResult = this.redactText(
       answer.answer,
       'answer_text',
-      answer.citations.flatMap((c) => c.policyLabels || []),
+      answer.citations.flatMap((c: any) => c.policyLabels || []),
     );
     decisions.push(...answerResult.decisions);
     if (answerResult.wasRedacted) redactedCount++;
@@ -220,6 +220,17 @@ export class RedactionService {
       uncertaintyLevel,
       explanation,
     };
+  }
+
+  /**
+   * Generic redact method for simple string redaction
+   */
+  async redact(
+    text: string,
+    _policy?: { maxClassification?: string; policyLabels?: string[] }
+  ): Promise<string> {
+    const result = this.redactText(text, 'generic', []);
+    return result.content;
   }
 
   /**
@@ -327,6 +338,7 @@ export class RedactionService {
         pattern: /\b(\+\d{1,3}[-.]?)?\(?\d{3}\)?[-.]?\d{3}[-.]?\d{4}\b/g,
         type: 'PHONE',
       },
+      { pattern: /(\(\d{3}\)\s*\d{3}-\d{4})|(\b\d{3}-\d{2}-\d{4}\b)/g, type: 'PHONE' },
       { pattern: /\bCLASSIFIED\b/gi, type: 'CLASSIFICATION_MARKER' },
       { pattern: /\bSECRET\b/gi, type: 'CLASSIFICATION_MARKER' },
       { pattern: /\bTOP SECRET\b/gi, type: 'CLASSIFICATION_MARKER' },
@@ -394,29 +406,29 @@ export class RedactionService {
     // Get IDs of redacted citations
     const redactedEntityIds = new Set(
       redactedCitations
-        .filter((c) => c.wasRedacted && c.sourceType === 'graph_entity')
-        .map((c) => c.sourceId),
+        .filter((c: Citation) => c.wasRedacted && c.sourceType === 'graph_entity')
+        .map((c: Citation) => c.sourceId),
     );
     const redactedEvidenceIds = new Set(
       redactedCitations
-        .filter((c) => c.wasRedacted && c.sourceType === 'evidence')
-        .map((c) => c.sourceId),
+        .filter((c: Citation) => c.wasRedacted && c.sourceType === 'evidence')
+        .map((c: Citation) => c.sourceId),
     );
     const redactedClaimIds = new Set(
       redactedCitations
-        .filter((c) => c.wasRedacted && c.sourceType === 'claim')
-        .map((c) => c.sourceId),
+        .filter((c: Citation) => c.wasRedacted && c.sourceType === 'claim')
+        .map((c: Citation) => c.sourceId),
     );
 
     // Filter provenance
     const filteredEntityIds = provenance.entityIds.filter(
-      (id) => !redactedEntityIds.has(id),
+      (id: string) => !redactedEntityIds.has(id),
     );
     const filteredEvidenceIds = provenance.evidenceIds.filter(
-      (id) => !redactedEvidenceIds.has(id),
+      (id: string) => !redactedEvidenceIds.has(id),
     );
     const filteredClaimIds = provenance.claimIds.filter(
-      (id) => !redactedClaimIds.has(id),
+      (id: string) => !redactedClaimIds.has(id),
     );
 
     const wasRedacted =
@@ -510,6 +522,7 @@ export class RedactionService {
       /\bCLASSIFIED\b/i,
       /\bSECRET\b/i,
       /\bTOP SECRET\b/i,
+      /\(\d{3}\)\s*\d{3}-\d{4}/, // Phone Number
     ];
 
     return sensitivePatterns.some((pattern) => pattern.test(text));

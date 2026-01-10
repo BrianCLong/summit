@@ -5,9 +5,10 @@ from __future__ import annotations
 import hashlib
 import math
 from collections import defaultdict
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from statistics import mean, pstdev
-from typing import Any, Dict, Iterable, Iterator, List, Mapping, Optional, Sequence, Tuple
+from typing import Any
 
 BITS = 64
 DEFAULT_MINHASH_PERMUTATIONS = 128
@@ -21,18 +22,22 @@ class ColumnSketch:
     dtype: str
     simhash: int
     density: float
-    mean: Optional[float]
-    deviation: Optional[float]
+    mean: float | None
+    deviation: float | None
     cardinality: int
 
-    def similarity(self, other: "ColumnSketch") -> float:
+    def similarity(self, other: ColumnSketch) -> float:
         if self.name != other.name:
             return 0.0
         if not self.simhash and not other.simhash:
             simhash_sim = 1.0
         else:
             simhash_sim = 1.0 - hamming_distance(self.simhash, other.simhash, BITS) / BITS
-        if self.dtype == other.dtype == "numeric" and self.mean is not None and other.mean is not None:
+        if (
+            self.dtype == other.dtype == "numeric"
+            and self.mean is not None
+            and other.mean is not None
+        ):
             denom = max(abs(self.mean), abs(other.mean), 1.0)
             mean_sim = 1.0 - min(abs(self.mean - other.mean) / denom, 1.0)
             dev_a = self.deviation or 0.0
@@ -49,13 +54,13 @@ class ColumnSketch:
 class TableFingerprint:
     """Composite perceptual fingerprint for a table."""
 
-    columns: Dict[str, ColumnSketch]
+    columns: dict[str, ColumnSketch]
     schema_signature: str
-    minhash_signature: Tuple[int, ...]
+    minhash_signature: tuple[int, ...]
     num_rows: int
 
     @property
-    def column_names(self) -> List[str]:
+    def column_names(self) -> list[str]:
         return sorted(self.columns.keys())
 
 
@@ -68,8 +73,8 @@ class TableFingerprintBuilder:
     def build(self, table: Any) -> TableFingerprint:
         records = list(iter_records(table))
         columns = sorted({key for row in records for key in row.keys()})
-        column_values: Dict[str, List[str]] = {col: [] for col in columns}
-        numeric_values: Dict[str, List[float]] = defaultdict(list)
+        column_values: dict[str, list[str]] = {col: [] for col in columns}
+        numeric_values: dict[str, list[float]] = defaultdict(list)
         for row in records:
             for column in columns:
                 raw_value = row.get(column)
@@ -78,7 +83,7 @@ class TableFingerprintBuilder:
                 numeric_value = coerce_numeric(raw_value)
                 if numeric_value is not None:
                     numeric_values[column].append(numeric_value)
-        column_sketches: Dict[str, ColumnSketch] = {}
+        column_sketches: dict[str, ColumnSketch] = {}
         for column in columns:
             values = column_values[column]
             dtype = infer_dtype(values, numeric_values[column])
@@ -86,7 +91,9 @@ class TableFingerprintBuilder:
             unique_ratio = unique_density(values)
             if dtype == "numeric" and numeric_values[column]:
                 mean_value = mean(numeric_values[column])
-                deviation = pstdev(numeric_values[column]) if len(numeric_values[column]) > 1 else 0.0
+                deviation = (
+                    pstdev(numeric_values[column]) if len(numeric_values[column]) > 1 else 0.0
+                )
             else:
                 mean_value = None
                 deviation = None
@@ -132,7 +139,8 @@ def iter_records_from_mapping(table: Mapping[str, Sequence[Any]]) -> Iterator[Ma
     length = max(lengths, default=0)
     for index in range(length):
         yield {
-            column: table[column][index] if index < len(table[column]) else None for column in columns
+            column: table[column][index] if index < len(table[column]) else None
+            for column in columns
         }
 
 
@@ -153,7 +161,7 @@ def canonicalize_value(value: Any) -> str:
     return " ".join(text.split())
 
 
-def coerce_numeric(value: Any) -> Optional[float]:
+def coerce_numeric(value: Any) -> float | None:
     if value is None:
         return None
     if isinstance(value, (int, float)):
@@ -232,7 +240,7 @@ def hash_list(items: Sequence[str]) -> str:
     return hasher.hexdigest()
 
 
-def hash_token(token: str, *, seed: Optional[bytes] = None) -> int:
+def hash_token(token: str, *, seed: bytes | None = None) -> int:
     if seed is None:
         seed = b"tpfr"
     hasher = hashlib.blake2b(digest_size=8, key=seed)
@@ -243,13 +251,15 @@ def hash_token(token: str, *, seed: Optional[bytes] = None) -> int:
 class MinHasher:
     """Simple MinHash implementation for token streams."""
 
-    def __init__(self, num_permutations: int = DEFAULT_MINHASH_PERMUTATIONS, seed: int = 42) -> None:
+    def __init__(
+        self, num_permutations: int = DEFAULT_MINHASH_PERMUTATIONS, seed: int = 42
+    ) -> None:
         if num_permutations <= 0:
             raise ValueError("num_permutations must be positive")
         self._num_permutations = num_permutations
         self._seeds = [self._seed_bytes(seed, index) for index in range(num_permutations)]
 
-    def signature(self, tokens: Iterable[str]) -> Tuple[int, ...]:
+    def signature(self, tokens: Iterable[str]) -> tuple[int, ...]:
         mins = [2**64 - 1] * self._num_permutations
         for token in tokens:
             encoded = token.encode("utf-8")
@@ -267,4 +277,3 @@ class MinHasher:
         hasher.update(seed.to_bytes(8, "big", signed=False))
         hasher.update(index.to_bytes(8, "big", signed=False))
         return hasher.digest()
-

@@ -3,7 +3,7 @@ package revops.segments
 # Segment rules centralize SMB/Mid/Enterprise classification for reuse across decisions.
 # Segments can be overridden via tenant config using tenant_overrides.rego.
 
-default segment_for_lead = "unknown"
+default segment_for_lead := "unknown"
 
 data_segments := {
   "enterprise": {
@@ -20,7 +20,7 @@ data_segments := {
   },
 }
 
-segment_for_lead = segment {
+segment_for_lead := segment if {
   some key
   rule := data_segments[key]
   lead := input.lead
@@ -28,7 +28,7 @@ segment_for_lead = segment {
   segment := rule.segment
 }
 
-segment_for_lead = segment {
+segment_for_lead := segment if {
   lead := input.lead
   lead.segment_hint != ""
   segment := lead.segment_hint

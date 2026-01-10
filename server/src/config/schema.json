@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "env": {
+      "type": "string",
+      "enum": ["development", "test", "staging", "production"],
+      "default": "development"
+    },
+    "port": {
+      "type": "integer",
+      "default": 4000
+    },
+    "requireRealDbs": {
+      "type": "boolean",
+      "default": false
+    },
+    "neo4j": {
+      "type": "object",
+      "properties": {
+        "uri": { "type": "string", "default": "bolt://localhost:7687" },
+        "username": { "type": "string", "default": "neo4j" },
+        "password": { "type": "string", "default": "devpassword" },
+        "database": { "type": "string", "default": "neo4j" }
+      },
+      "required": ["uri", "username", "password", "database"],
+      "default": {}
+    },
+    "postgres": {
+      "type": "object",
+      "properties": {
+        "host": { "type": "string", "default": "localhost" },
+        "port": { "type": "integer", "default": 5432 },
+        "database": { "type": "string", "default": "intelgraph_dev" },
+        "username": { "type": "string", "default": "intelgraph" },
+        "password": { "type": "string", "default": "devpassword" }
+      },
+      "required": ["host", "port", "database", "username", "password"],
+      "default": {}
+    },
+    "redis": {
+      "type": "object",
+      "properties": {
+        "host": { "type": "string", "default": "localhost" },
+        "port": { "type": "integer", "default": 6379 },
+        "password": { "type": "string", "default": "devpassword" },
+        "db": { "type": "integer", "default": 0 }
+      },
+      "required": ["host", "port", "password", "db"],
+      "default": {}
+    },
+    "jwt": {
+      "type": "object",
+      "properties": {
+        "secret": { "type": "string", "minLength": 10, "default": "dev_jwt_secret_12345" },
+        "expiresIn": { "type": "string", "default": "24h" },
+        "refreshSecret": { "type": "string", "minLength": 10, "default": "dev_refresh_secret_67890" },
+        "refreshExpiresIn": { "type": "string", "default": "7d" }
+      },
+      "required": ["secret", "expiresIn", "refreshSecret", "refreshExpiresIn"],
+      "default": {}
+    },
+    "bcrypt": {
+      "type": "object",
+      "properties": {
+        "rounds": { "type": "integer", "default": 12 }
+      },
+      "required": ["rounds"],
+      "default": {}
+    },
+    "rateLimit": {
+      "type": "object",
+      "properties": {
+        "windowMs": { "type": "integer", "default": 900000 },
+        "maxRequests": { "type": "integer", "default": 100 }
+      },
+      "required": ["windowMs", "maxRequests"],
+      "default": {}
+    },
+    "cors": {
+      "type": "object",
+      "properties": {
+        "origin": { "type": "string", "default": "http://localhost:3000" }
+      },
+      "required": ["origin"],
+      "default": {}
+    },
+    "features": {
+      "type": "object",
+      "properties": {
+        "GRAPH_EXPAND_CACHE": { "type": "boolean", "default": true },
+        "AI_REQUEST_ENABLED": { "type": "boolean", "default": true }
+      },
+      "required": ["GRAPH_EXPAND_CACHE", "AI_REQUEST_ENABLED"],
+      "default": {}
+    }
+  },
+  "required": ["env", "port", "neo4j", "postgres", "redis", "jwt", "bcrypt", "rateLimit", "cors", "features"],
+  "additionalProperties": false
+}

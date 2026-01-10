@@ -161,14 +161,17 @@ export class CryptoPipeline {
       errors.push(`Key ${key.id} version ${key.version} is expired`);
     }
 
+    if (bundle.certificateChain?.length) {
+      certificateResult = this.certificateValidator.validate(
+        bundle.certificateChain,
+      );
+      if (!certificateResult.valid) {
+        errors.push(...certificateResult.errors);
+      }
+    }
+
     if (!publicKeyPem) {
       if (bundle.certificateChain?.length) {
-        certificateResult = this.certificateValidator.validate(
-          bundle.certificateChain,
-        );
-        if (!certificateResult.valid) {
-          errors.push(...certificateResult.errors);
-        }
         try {
           const leaf = new crypto.X509Certificate(bundle.certificateChain[0]);
           publicKeyPem = leaf.publicKey
@@ -274,7 +277,7 @@ export class CryptoPipeline {
         default:
           throw new Error(`Unsupported verification algorithm ${algorithm}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.warn('Signature verification error', error);
       return false;
     }
@@ -316,7 +319,7 @@ export async function createDefaultCryptoPipeline(
   let parsed: EnvKeyDefinition[];
   try {
     parsed = JSON.parse(raw);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to parse CRYPTO_SIGNING_KEYS', error);
     return null;
   }

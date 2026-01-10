@@ -44,7 +44,7 @@ const startServer = async () => {
       const kafkaModule = await import('./realtime/kafkaConsumer.js');
       startKafkaConsumer = kafkaModule.startKafkaConsumer;
       stopKafkaConsumer = kafkaModule.stopKafkaConsumer;
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Kafka not available - running in minimal mode');
     }
   }
@@ -74,7 +74,7 @@ const startServer = async () => {
   useServer(
     {
       schema,
-      context: async (ctx) => {
+      context: async (ctx: any) => {
         const request = (ctx.extra as any).request ?? (ctx as any).extra;
         const baseContext = await getContext({ req: request });
 
@@ -85,7 +85,7 @@ const startServer = async () => {
           subscriptionEngine,
         };
       },
-      onConnect: (ctx) => {
+      onConnect: (ctx: any) => {
         const connectionId = randomUUID();
         (ctx.extra as any).connectionId = connectionId;
         subscriptionEngine.registerConnection(
@@ -93,7 +93,7 @@ const startServer = async () => {
           (ctx.extra as any).socket,
         );
       },
-      onSubscribe: (ctx, msg) => {
+      onSubscribe: (ctx: any, msg: any) => {
         const socket = (ctx.extra as any).socket;
         if (!subscriptionEngine.enforceBackpressure(socket)) {
           return [new GraphQLError('Backpressure threshold exceeded')];
@@ -104,25 +104,25 @@ const startServer = async () => {
         }
         (ctx.extra as any).lastFanoutStart = process.hrtime.bigint();
       },
-      onNext: (ctx) => {
+      onNext: (ctx: any) => {
         const startedAt =
           (ctx.extra as any).lastFanoutStart ?? process.hrtime.bigint();
         subscriptionEngine.recordFanout(startedAt);
         (ctx.extra as any).lastFanoutStart = process.hrtime.bigint();
       },
-      onComplete: (ctx, msg) => {
+      onComplete: (ctx: any, msg: any) => {
         const connectionId = (ctx.extra as any).connectionId;
         if (connectionId) {
           subscriptionEngine.completeSubscription(connectionId, msg?.id);
         }
       },
-      onError: (ctx, msg, errors) => {
+      onError: (ctx: any, msg: any, errors: any) => {
         logger.error(
           { errors, operationId: msg?.id, connectionId: (ctx.extra as any).connectionId },
           'GraphQL WS subscription error',
         );
       },
-      onClose: (ctx) => {
+      onClose: (ctx: any) => {
         const connectionId = (ctx.extra as any).connectionId;
         if (connectionId) {
           subscriptionEngine.unregisterConnection(connectionId);
@@ -164,6 +164,10 @@ const startServer = async () => {
     const policyWatcher = PolicyWatcher.getInstance();
     policyWatcher.start();
 
+    // Start GA Core Metrics Service
+    const { gaCoreMetrics } = await import('./services/GACoremetricsService.js');
+    gaCoreMetrics.start();
+
     // Check Neo4j Indexes
     checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
 
@@ -176,7 +180,7 @@ const startServer = async () => {
         try {
           const { createSampleData } = await import('./utils/sampleData.js');
           await createSampleData();
-        } catch (error) {
+        } catch (error: any) {
           logger.warn('Failed to create sample data, continuing without it');
         }
       }, 2000); // Wait 2 seconds for connections to be established
@@ -208,7 +212,7 @@ const startServer = async () => {
       closePostgresPool(),
       closeRedisClient(),
     ]);
-    httpServer.close((err) => {
+    httpServer.close((err: any) => {
       if (err) {
         logger.error(
           `Error during shutdown: ${err instanceof Error ? err.message : 'Unknown error'}`,
@@ -222,7 +226,7 @@ const startServer = async () => {
   process.on('SIGTERM', shutdown);
 };
 
-startServer().catch((err) => {
+startServer().catch((err: any) => {
   logger.error(`Fatal error during startup: ${err}`);
   process.exit(1);
 });

@@ -1,11 +1,12 @@
 """Scaling-law and response-surface modeling utilities."""
+
 from __future__ import annotations
 
 import math
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from typing import Iterable, List, Sequence
 
-from .core import Config, Experiment, Metrics
+from .core import Config, Experiment
 
 
 @dataclass
@@ -16,14 +17,14 @@ class ScalingFit:
     exponent: float
 
     def predict(self, compute: float) -> float:
-        return self.coefficient * compute ** self.exponent
+        return self.coefficient * compute**self.exponent
 
 
 @dataclass
 class LinearModel:
     """Simple linear regression for response surfaces."""
 
-    weights: List[float]
+    weights: list[float]
     intercept: float
     feature_names: Sequence[str]
 
@@ -38,8 +39,8 @@ def _safe_log(value: float) -> float:
 def fit_power_law(experiments: Iterable[Experiment], metric: str = "training_loss") -> ScalingFit:
     """Fit a power law using log-linear regression on compute (flops) and metric."""
 
-    xs: List[float] = []
-    ys: List[float] = []
+    xs: list[float] = []
+    ys: list[float] = []
     for exp in experiments:
         flops = exp.metrics.flops or 0.0
         metric_value = getattr(exp.metrics, metric, None)
@@ -65,7 +66,7 @@ def fit_power_law(experiments: Iterable[Experiment], metric: str = "training_los
     return ScalingFit(coefficient=coefficient, exponent=exponent)
 
 
-def _config_features(config: Config) -> List[float]:
+def _config_features(config: Config) -> list[float]:
     # Normalize basic configuration knobs for regression
     data_mix_sum = sum(config.data_mix.values()) or 1.0
     return [
@@ -75,16 +76,18 @@ def _config_features(config: Config) -> List[float]:
         config.context_length or 0.0,
         1.0 if config.moe else 0.0,
         config.learning_rate or 0.0,
-        config.curriculum and 1.0 or 0.0,
+        (config.curriculum and 1.0) or 0.0,
         data_mix_sum,
     ]
 
 
-def fit_linear_response_surface(experiments: Iterable[Experiment], metric: str = "reasoning_score") -> LinearModel:
+def fit_linear_response_surface(
+    experiments: Iterable[Experiment], metric: str = "reasoning_score"
+) -> LinearModel:
     """Fit a simple linear regression of metric ~ config features."""
 
-    feature_matrix: List[List[float]] = []
-    targets: List[float] = []
+    feature_matrix: list[list[float]] = []
+    targets: list[float] = []
     for exp in experiments:
         metric_value = getattr(exp.metrics, metric, None)
         if metric_value is None:
@@ -135,7 +138,7 @@ def fit_linear_response_surface(experiments: Iterable[Experiment], metric: str =
     return LinearModel(weights=weights, intercept=intercept, feature_names=feature_names)
 
 
-def _solve_linear_system(matrix: List[List[float]], vector: List[float]) -> List[float]:
+def _solve_linear_system(matrix: list[list[float]], vector: list[float]) -> list[float]:
     """Solve a linear system using Gaussian elimination."""
 
     n = len(vector)

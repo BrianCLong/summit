@@ -1,13 +1,13 @@
 package summit.provenance
 
-default valid = false
+default valid := false
 
-valid {
+valid if {
   no_orphan_deploys
   required_fields_present
 }
 
-required_fields_present {
+required_fields_present if {
   input.id
   input.timestamp
   input.actor.type
@@ -17,16 +17,16 @@ required_fields_present {
   input.subject.id
 }
 
-no_orphan_deploys {
+no_orphan_deploys if {
   not orphan_deploys
 }
 
-orphan_deploys {
+orphan_deploys if {
   input.action == "deploy"
   not input.context.commit
 }
 
-deny[msg] {
+deny contains msg if {
   orphan_deploys
   msg := "deploy provenance event missing commit context"
 }

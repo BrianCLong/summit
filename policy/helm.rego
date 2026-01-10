@@ -1,7 +1,7 @@
 package helmsecurity
 
 # Deny deployments without security context
-deny[msg] {
+deny contains msg if {
     input.Kind == "Deployment"
     container := input.spec.template.spec.containers[_]
     not container.securityContext.runAsNonRoot
@@ -9,7 +9,7 @@ deny[msg] {
 }
 
 # Deny deployments with empty image
-deny[msg] {
+deny contains msg if {
     input.Kind == "Deployment"
     container := input.spec.template.spec.containers[_]
     container.image == ""
@@ -17,7 +17,7 @@ deny[msg] {
 }
 
 # Deny use of latest tags in production
-deny[msg] {
+deny contains msg if {
     input.Kind == "Deployment"
     container := input.spec.template.spec.containers[_]
     endswith(container.image, ":latest")
@@ -25,7 +25,7 @@ deny[msg] {
 }
 
 # Require resource limits
-deny[msg] {
+deny contains msg if {
     input.Kind == "Deployment"
     container := input.spec.template.spec.containers[_]
     not container.resources.limits
@@ -33,7 +33,7 @@ deny[msg] {
 }
 
 # Require resource requests
-deny[msg] {
+deny contains msg if {
     input.Kind == "Deployment"
     container := input.spec.template.spec.containers[_]
     not container.resources.requests
@@ -41,7 +41,7 @@ deny[msg] {
 }
 
 # Deny privileged containers
-deny[msg] {
+deny contains msg if {
     input.Kind == "Deployment"
     container := input.spec.template.spec.containers[_]
     container.securityContext.privileged == true
@@ -49,7 +49,7 @@ deny[msg] {
 }
 
 # Deny containers running as root user ID
-deny[msg] {
+deny contains msg if {
     input.Kind == "Deployment"
     container := input.spec.template.spec.containers[_]
     container.securityContext.runAsUser == 0
@@ -57,27 +57,27 @@ deny[msg] {
 }
 
 # Require labels for tracking
-deny[msg] {
+deny contains msg if {
     input.Kind == "Deployment"
     not input.metadata.labels["app.kubernetes.io/name"]
     msg := sprintf("%s: missing required label app.kubernetes.io/name", [input.metadata.name])
 }
 
-deny[msg] {
+deny contains msg if {
     input.Kind == "Deployment"
     not input.metadata.labels["app.kubernetes.io/version"]
     msg := sprintf("%s: missing required label app.kubernetes.io/version", [input.metadata.name])
 }
 
 # Warn about missing health checks
-warn[msg] {
+warn contains msg if {
     input.Kind == "Deployment"
     container := input.spec.template.spec.containers[_]
     not container.livenessProbe
     msg := sprintf("%s: consider adding liveness probe for container %s", [input.metadata.name, container.name])
 }
 
-warn[msg] {
+warn contains msg if {
     input.Kind == "Deployment"
     container := input.spec.template.spec.containers[_]
     not container.readinessProbe
@@ -85,14 +85,14 @@ warn[msg] {
 }
 
 # Warn about missing pod security context
-warn[msg] {
+warn contains msg if {
     input.Kind == "Deployment"
     not input.spec.template.spec.securityContext
     msg := sprintf("%s: consider setting pod-level security context", [input.metadata.name])
 }
 
 # Service-specific policies
-deny[msg] {
+deny contains msg if {
     input.Kind == "Service"
     input.spec.type == "LoadBalancer"
     not input.metadata.annotations["service.beta.kubernetes.io/aws-load-balancer-ssl-cert"]
@@ -100,7 +100,7 @@ deny[msg] {
 }
 
 # NetworkPolicy requirements for production namespaces
-warn[msg] {
+warn contains msg if {
     input.Kind == "Deployment"
     input.metadata.namespace
     not startswith(input.metadata.namespace, "pr-")

@@ -22,54 +22,55 @@ intelgraph adr:list --status accepted
 
 ### Infrastructure & Deployment
 
-| Number | Title | Status | Area | Tags |
-|--------|-------|--------|------|------|
-| [0001](0001-use-helm-terraform.md) | Use Helm and Terraform for Infrastructure | Accepted | Infrastructure | helm, terraform, iac |
+| Number                                     | Title                                       | Status   | Area           | Tags                           |
+| ------------------------------------------ | ------------------------------------------- | -------- | -------------- | ------------------------------ |
+| [0001](0001-use-helm-terraform.md)         | Use Helm and Terraform for Infrastructure   | Accepted | Infrastructure | helm, terraform, iac           |
 | [0003](0003-firecracker-runtime-pooler.md) | Firecracker Micro-VM Pooler for MCP Runtime | Proposed | Infrastructure | runtime, performance, security |
 
 ### Auth & Security
 
-| Number | Title | Status | Area | Tags |
-|--------|-------|--------|------|------|
+| Number                       | Title                                            | Status   | Area          | Tags                        |
+| ---------------------------- | ------------------------------------------------ | -------- | ------------- | --------------------------- |
 | [0002](0002-abac-step-up.md) | Attribute-Based Access Control with Step-Up Auth | Accepted | Auth/Security | abac, opa, webauthn, policy |
 
 ### Observability & Compliance
 
-| Number | Title | Status | Area | Tags |
-|--------|-------|--------|------|------|
-| [0004](0004-deterministic-replay-engine.md) | Deterministic Replay Engine for MCP Sessions | Proposed | Observability | observability, compliance, dx |
-| [0005](0005-disclosure-packager.md) | Ship Disclosure Packager | Accepted | Compliance | audit, sbom, attestation |
+| Number                                      | Title                                                     | Status   | Area          | Tags                          |
+| ------------------------------------------- | --------------------------------------------------------- | -------- | ------------- | ----------------------------- |
+| [0004](0004-deterministic-replay-engine.md) | Deterministic Replay Engine for MCP Sessions              | Proposed | Observability | observability, compliance, dx |
+| [0005](0005-disclosure-packager.md)         | Ship Disclosure Packager                                  | Accepted | Compliance    | audit, sbom, attestation      |
+| [0022](0022-golden-path-supply-chain.md)    | Golden Path Supply Chain Controls for Reference Artifacts | Proposed | Compliance    | sbom, slsa, cosign            |
 
 ### Data & Storage
 
-| Number | Title | Status | Area | Tags |
-|--------|-------|--------|------|------|
-| [0006](0006-neo4j-graph-store.md) | Neo4j as Primary Graph Store | Accepted | Data | neo4j, graph, cypher |
-| [0009](0009-postgres-pgvector.md) | Postgres with pgvector for Vector Search | Accepted | Data | postgres, vector, embeddings |
-| [0011](0011-provenance-ledger-schema.md) | Provenance Ledger Schema Design | Accepted | Data | provenance, ledger, timescale |
+| Number                                   | Title                                    | Status   | Area | Tags                          |
+| ---------------------------------------- | ---------------------------------------- | -------- | ---- | ----------------------------- |
+| [0006](0006-neo4j-graph-store.md)        | Neo4j as Primary Graph Store             | Accepted | Data | neo4j, graph, cypher          |
+| [0009](0009-postgres-pgvector.md)        | Postgres with pgvector for Vector Search | Accepted | Data | postgres, vector, embeddings  |
+| [0011](0011-provenance-ledger-schema.md) | Provenance Ledger Schema Design          | Accepted | Data | provenance, ledger, timescale |
 
 ### API & Integration
 
-| Number | Title | Status | Area | Tags |
-|--------|-------|--------|------|------|
-| [0007](0007-graphql-api-design.md) | GraphQL API Design & Schema Strategy | Accepted | API | graphql, api, schema |
+| Number                             | Title                                | Status   | Area | Tags                 |
+| ---------------------------------- | ------------------------------------ | -------- | ---- | -------------------- |
+| [0007](0007-graphql-api-design.md) | GraphQL API Design & Schema Strategy | Accepted | API  | graphql, api, schema |
 
 ### AI/ML & Copilot
 
-| Number | Title | Status | Area | Tags |
-|--------|-------|--------|------|------|
+| Number                                        | Title                                   | Status   | Area  | Tags                          |
+| --------------------------------------------- | --------------------------------------- | -------- | ----- | ----------------------------- |
 | [0012](0012-copilot-graphrag-architecture.md) | Copilot Architecture: GraphRAG + Policy | Accepted | AI/ML | copilot, graphrag, policy, ai |
 
 ### Multi-tenancy & Authorization
 
-| Number | Title | Status | Area | Tags |
-|--------|-------|--------|------|------|
+| Number                                         | Title                          | Status   | Area          | Tags                                  |
+| ---------------------------------------------- | ------------------------------ | -------- | ------------- | ------------------------------------- |
 | [0010](0010-multi-tenant-compartment-model.md) | Multi-Tenant Compartment Model | Accepted | Auth/Security | multi-tenant, isolation, compartments |
 
 ### Policy & Governance
 
-| Number | Title | Status | Area | Tags |
-|--------|-------|--------|------|------|
+| Number                                     | Title                               | Status   | Area       | Tags                           |
+| ------------------------------------------ | ----------------------------------- | -------- | ---------- | ------------------------------ |
 | [0008](0008-authority-license-compiler.md) | Authority & License Compiler Design | Accepted | Compliance | authority, licensing, compiler |
 
 ## ADR Areas

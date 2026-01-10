@@ -7,13 +7,13 @@
  * @module runbooks/runtime/executors/pattern-miner-executor
  */
 
-import { BaseStepExecutor } from './base';
+import { BaseStepExecutor } from './base.js';
 import {
   StepExecutorContext,
   StepExecutorResult,
   RunbookActionType,
   PatternMinerService,
-} from '../types';
+} from '../types.js';
 
 /**
  * Campaign match result
@@ -290,7 +290,7 @@ export class PatternMinerStepExecutor extends BaseStepExecutor {
           },
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       return this.failure(
         error instanceof Error ? error.message : 'Failed to mine patterns'
       );

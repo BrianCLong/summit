@@ -9,7 +9,7 @@ export async function runThreatCorrelation(osintData: any) {
       osintData,
     );
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error running threat correlation:', error.message);
     throw new Error(`Failed to run threat correlation: ${error.message}`);
   }
@@ -22,7 +22,7 @@ export async function runWargameOptimizer(logs: any) {
       logs,
     );
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error running wargame optimizer:', error.message);
     throw new Error(`Failed to run wargame optimizer: ${error.message}`);
   }
@@ -35,7 +35,7 @@ export async function runSentimentVolatility(signals: any) {
       signals,
     );
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error running sentiment volatility:', error.message);
     throw new Error(`Failed to run sentiment volatility: ${error.message}`);
   }
@@ -48,7 +48,7 @@ export async function runStegoAnalyzer(mediaData: any) {
       mediaData,
     );
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error running stego analyzer:', error.message);
     throw new Error(`Failed to run stego analyzer: ${error.message}`);
   }

@@ -8,9 +8,9 @@ with support for air-gapped synchronization.
 import asyncio
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -43,14 +43,14 @@ class FederatedCoordinatorAgent:
         self.config = config
         self.state = CoordinatorState.IDLE
         self.current_round = 0
-        self._registered_nodes: Dict[str, Dict[str, Any]] = {}
-        self._round_updates: Dict[int, List[Dict[str, Any]]] = {}
+        self._registered_nodes: dict[str, dict[str, Any]] = {}
+        self._round_updates: dict[int, list[dict[str, Any]]] = {}
         self._global_model = None
-        self._training_metrics: List[Dict[str, float]] = []
+        self._training_metrics: list[dict[str, float]] = []
 
         logger.info(f"Coordinator {config.coordinator_id} initialized")
 
-    async def start_training(self, initial_model: Any = None) -> Dict[str, Any]:
+    async def start_training(self, initial_model: Any = None) -> dict[str, Any]:
         """Start federated training process"""
         self._global_model = initial_model
         logger.info(f"Starting federated training for {self.config.num_rounds} rounds")
@@ -85,7 +85,7 @@ class FederatedCoordinatorAgent:
         self.state = CoordinatorState.COMPLETED
         return {"model": self._global_model, "metrics": self._training_metrics}
 
-    def register_node(self, node_id: str, capabilities: Dict[str, Any]) -> bool:
+    def register_node(self, node_id: str, capabilities: dict[str, Any]) -> bool:
         """Register a node for participation"""
         self._registered_nodes[node_id] = {
             "capabilities": capabilities,
@@ -95,27 +95,27 @@ class FederatedCoordinatorAgent:
         logger.info(f"Registered node {node_id}")
         return True
 
-    async def _select_participants(self) -> List[str]:
+    async def _select_participants(self) -> list[str]:
         """Select participants for current round"""
         available = list(self._registered_nodes.keys())
         num_select = min(len(available), self.config.max_participants)
         return available[:num_select]
 
     async def _collect_updates(
-        self, round_num: int, participants: List[str]
-    ) -> List[Dict[str, Any]]:
+        self, round_num: int, participants: list[str]
+    ) -> list[dict[str, Any]]:
         """Collect updates from participants"""
         self._round_updates[round_num] = []
         # In production, would distribute model and wait for updates
         await asyncio.sleep(0.1)  # Simulate
         return self._round_updates.get(round_num, [])
 
-    async def _aggregate_updates(self, updates: List[Dict[str, Any]]) -> Any:
+    async def _aggregate_updates(self, updates: list[dict[str, Any]]) -> Any:
         """Aggregate model updates"""
         # Placeholder aggregation
         return self._global_model
 
-    def _compute_round_metrics(self, updates: List[Dict[str, Any]]) -> Dict[str, float]:
+    def _compute_round_metrics(self, updates: list[dict[str, Any]]) -> dict[str, float]:
         """Compute metrics for round"""
         return {
             "accuracy": sum(u.get("accuracy", 0) for u in updates) / max(len(updates), 1),
@@ -123,7 +123,7 @@ class FederatedCoordinatorAgent:
             "num_participants": len(updates),
         }
 
-    def submit_update(self, node_id: str, update: Dict[str, Any]) -> bool:
+    def submit_update(self, node_id: str, update: dict[str, Any]) -> bool:
         """Submit update from a node"""
         round_num = update.get("round_number", self.current_round)
         if round_num not in self._round_updates:
@@ -131,7 +131,7 @@ class FederatedCoordinatorAgent:
         self._round_updates[round_num].append(update)
         return True
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get coordinator status"""
         return {
             "coordinator_id": self.config.coordinator_id,

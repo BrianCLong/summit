@@ -1,3 +1,7 @@
+# Custom scalar types
+scalar JSON
+scalar DateTime
+
 type Runbook {
   id: ID!
   name: String!

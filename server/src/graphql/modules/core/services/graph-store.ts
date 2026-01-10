@@ -1,4 +1,4 @@
-import type { GraphStore } from '../../services-types';
+import type { GraphStore } from '../../services-types.js';
 
 export function createGraphStore(): GraphStore {
   const entities: any[] = [];
@@ -11,7 +11,7 @@ export function createGraphStore(): GraphStore {
     },
     async getRelationships(entityId: string) {
       return relationships.filter(
-        (r) => r.source === entityId || r.target === entityId,
+        (r: any) => r.source === entityId || r.target === entityId,
       );
     },
     async upsertEntity(input) {

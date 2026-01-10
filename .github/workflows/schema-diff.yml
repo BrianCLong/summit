@@ -10,23 +10,27 @@ on:
       - master
       - develop
     paths:
-      - 'graphql/schema.graphql'
-      - 'server/src/**/routes.ts'
-      - 'server/src/**/routes/**'
-      - 'api-schemas/**'
-      - '.github/workflows/schema-diff.yml'
+      - "graphql/schema.graphql"
+      - "server/src/**/routes.ts"
+      - "server/src/**/routes/**"
+      - "api-schemas/**"
+      - ".github/workflows/schema-diff.yml"
 
   workflow_dispatch:
     inputs:
       version:
-        description: 'Base version to compare against'
+        description: "Base version to compare against"
         required: false
-        default: 'v1'
+        default: "v1"
       strict:
-        description: 'Fail on breaking changes'
+        description: "Fail on breaking changes"
         type: boolean
         required: false
         default: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -41,15 +45,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
-          fetch-depth: 0  # Full history for accurate diffs
+          fetch-depth: 0 # Full history for accurate diffs
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: |
@@ -72,7 +76,7 @@ jobs:
           ts-node scripts/schema-diff.ts --version=${{ github.event.inputs.version || 'v1' }} --output=text
 
       - name: Upload diff report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: schema-diff-report
@@ -99,7 +103,7 @@ jobs:
 
       - name: Generate PR comment
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
@@ -227,10 +231,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Download diff report
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: schema-diff-report
           path: ./diff-reports
@@ -259,8 +263,8 @@ jobs:
           echo "✅ Audit entry recorded"
 
       - name: Upload audit log
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: audit-log
           path: audit/ga-evidence/api-contracts/audit-log/
-          retention-days: 2555  # 7 years for SOC 2 compliance
+          retention-days: 2555 # 7 years for SOC 2 compliance

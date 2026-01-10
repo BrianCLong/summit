@@ -2,7 +2,7 @@ import type {
   DSARRequest,
   IdentityVerification,
   IdentityVerifier,
-} from './types';
+} from './types.js';
 
 export class StaticIdentityVerifier implements IdentityVerifier {
   constructor(private readonly expectedTokens: Record<string, string>) {}

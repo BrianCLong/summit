@@ -1,4 +1,4 @@
-import type { AIService } from '../../services-types';
+import type { AIService } from '../../services-types.js';
 
 export function createAIService(): AIService {
   return {

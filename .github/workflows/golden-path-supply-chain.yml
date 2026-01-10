@@ -1,0 +1,37 @@
+name: Golden Path Supply Chain
+
+# Disabled: reusable workflow in subdirectory not supported
+# TODO: Move reusable/supply-chain-policy.yml to top-level workflows
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Reason for manual run"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+
+env:
+  REFERENCE_SERVICE: authz-gateway
+  IMAGE_OWNER: ${{ github.repository_owner }}
+  IMAGE_NAME: ${{ github.repository_owner }}/summit-authz-gateway
+  DOCKER_CONTEXT: services/authz-gateway
+  DOCKERFILE: services/authz-gateway/Dockerfile
+
+jobs:
+  # This workflow is disabled pending SLSA infrastructure setup.
+  # The reusable workflows require container registry access and signing keys.
+  # See: docs/releases/MVP-4_POST_GA_STABILIZATION_PLAN.md for re-enablement criteria
+  placeholder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Workflow status
+        run: |
+          echo "Golden Path Supply Chain workflow is disabled"
+          echo "Reason: Pending SLSA infrastructure setup"
+          echo "To enable: Configure container registry and signing keys"

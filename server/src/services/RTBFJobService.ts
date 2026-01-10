@@ -12,6 +12,7 @@ import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
 import { PrometheusMetrics } from '../utils/metrics.js';
 import logger from '../utils/logger.js';
 import { tracer } from '../observability/telemetry.js';
+import { enforceRampDecisionForTenant } from '../policy/ramp.js';
 import { DatabaseService } from './DatabaseService.js';
 import type { Span } from '@opentelemetry/api';
 
@@ -529,6 +530,13 @@ export class RTBFJobService extends EventEmitter {
         });
 
         try {
+          enforceRampDecisionForTenant({
+            tenantId: request.tenantId,
+            action: 'START',
+            workflow: 'rtbf_request',
+            key: request.id,
+          });
+
           // Validate request
           const validationResult = await this.validateRequest(request);
           if (!validationResult.valid) {
@@ -580,7 +588,7 @@ export class RTBFJobService extends EventEmitter {
           this.emit('jobSubmitted', { job, request });
 
           return request.id;
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to submit RTBF request', {
             jobId: request.id,
             error: (error as Error).message,
@@ -659,7 +667,7 @@ export class RTBFJobService extends EventEmitter {
       );
 
       return result.rows.length > 0;
-    } catch (error) {
+    } catch (error: any) {
       return false;
     }
   }
@@ -673,7 +681,7 @@ export class RTBFJobService extends EventEmitter {
           const countQuery = this.buildCountQuery(table, target);
           const result = await this.db.query(countQuery.sql, countQuery.params);
           totalEstimate += parseInt(result.rows[0].count);
-        } catch (error) {
+        } catch (error: any) {
           logger.warn('Failed to estimate record count', {
             table,
             target: target.type,
@@ -756,7 +764,7 @@ export class RTBFJobService extends EventEmitter {
 
       try {
         await this.startJob(job);
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Failed to start job', {
           jobId: job.id,
           error: (error as Error).message,
@@ -847,8 +855,8 @@ export class RTBFJobService extends EventEmitter {
 
     try {
       const result = await this.db.query(query.sql, query.params);
-      return result.rows.map((row) => row.id);
-    } catch (error) {
+      return result.rows.map((row: any) => row.id);
+    } catch (error: any) {
       logger.error('Failed to get record IDs', {
         table,
         target: target.type,
@@ -1041,7 +1049,7 @@ export class RTBFJobService extends EventEmitter {
       `,
         [job.id, job.tenantId, JSON.stringify(job), job.status],
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to save job', {
         jobId: job.id,
         error: (error as Error).message,
@@ -1089,7 +1097,7 @@ export class RTBFJobService extends EventEmitter {
       if (result.rows.length === 0) return null;
 
       return JSON.parse(result.rows[0].job_data);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get job', {
         jobId,
         error: (error as Error).message,
@@ -1105,6 +1113,13 @@ export class RTBFJobService extends EventEmitter {
     if (job.status === 'completed' || job.status === 'failed') {
       return false;
     }
+
+    enforceRampDecisionForTenant({
+      tenantId: job.tenantId,
+      action: 'CANCEL',
+      workflow: 'rtbf_request',
+      key: jobId,
+    });
 
     job.status = 'cancelled';
     job.processing.errors.push(`Cancelled: ${reason}`);
@@ -1263,7 +1278,7 @@ class RTBFWorker {
               },
             });
           }
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to process record', {
             workerId: this.workerId,
             recordId,
@@ -1291,7 +1306,7 @@ class RTBFWorker {
         recordsDeleted,
         errors,
       });
-    } catch (error) {
+    } catch (error: any) {
       parentPort?.postMessage({
         type: 'batch_error',
         data: {

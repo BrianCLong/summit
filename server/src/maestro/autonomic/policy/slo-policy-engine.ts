@@ -1,7 +1,7 @@
 
-import { SLODefinition, SLAContract, ErrorBudget, SLOAlert, SLOAlertLevel } from './types';
-import { SignalsService } from '../signals/signals-service';
-import { HealthSnapshot } from '../signals/types';
+import { SLODefinition, SLAContract, ErrorBudget, SLOAlert, SLOAlertLevel } from './types.js';
+import { SignalsService } from '../signals/signals-service.js';
+import { HealthSnapshot } from '../signals/types.js';
 import { randomUUID } from 'crypto';
 
 export class SLOPolicyEngine {

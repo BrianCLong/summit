@@ -296,13 +296,13 @@ export class CoxProportionalHazards {
 
     for (let i = 0; i < data.length; i++) {
       for (let j = i + 1; j < data.length; j++) {
-        if (data[i].time === data[j].time) continue;
+        if (data[i].time === data[j].time) {continue;}
 
         const [earlier, later] = data[i].time < data[j].time
           ? [data[i], data[j]]
           : [data[j], data[i]];
 
-        if (!earlier.event) continue;
+        if (!earlier.event) {continue;}
 
         const riskEarlier = this.computeRiskScore(earlier.covariates);
         const riskLater = this.computeRiskScore(later.covariates);

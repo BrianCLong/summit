@@ -124,7 +124,7 @@ export class PluginManager {
     setInterval(async () => {
       try {
         await this.updateRevocationList();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to update revocation list:', error);
       }
     }, 60000); // Check every minute
@@ -461,7 +461,7 @@ export class PluginManager {
       if (!isValid) {
         throw new Error('invalid-signature');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Signature verification failed:', error);
       throw new Error('signature-verification-failed');
     }
@@ -475,7 +475,7 @@ export class PluginManager {
       if (!manifest.sbomHash || manifest.sbomHash.length !== 64) {
         throw new Error('invalid-sbom-hash');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('SBOM verification failed:', error);
       throw error;
     }
@@ -515,7 +515,7 @@ export class PluginManager {
     return (
       this.hasHighRiskActions(manifest.scopes) ||
       !this.trustedSigners.has(manifest.signer) ||
-      (manifest.authorityBinding &&
+      (!!manifest.authorityBinding &&
         manifest.authorityBinding.piiCategories.length > 0)
     );
   }
@@ -581,10 +581,10 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
         "SELECT plugin_id, reason, scope FROM plugin_revocations WHERE created_at > now() - interval '1 hour'",
       );
 
-      result.rows.forEach((row) => {
+      result.rows.forEach((row: any) => {
         this.revokedPlugins.set(row.plugin_id, row);
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to update revocation list:', error);
     }
   }

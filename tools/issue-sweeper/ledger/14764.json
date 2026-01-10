@@ -1,0 +1,21 @@
+{
+  "issue_number": 14764,
+  "title": "Sprint 18: Switchboard Hosted SaaS Hardening & Onboarding",
+  "url": "https://github.com/BrianCLong/summit/pull/14764",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-29T20:35:41Z",
+  "createdAt": "2025-12-28T03:45:13Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

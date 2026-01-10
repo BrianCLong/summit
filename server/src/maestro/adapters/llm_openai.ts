@@ -1,4 +1,4 @@
-import { CostMeter, LLMCallMetadata, LLMUsage } from '../cost_meter';
+import { CostMeter, LLMCallMetadata, LLMUsage } from '../cost_meter.js';
 
 export interface LLMResult {
   content: string;

@@ -12,7 +12,12 @@
     "lint": "eslint src/**/*.ts",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": ["plugin", "extensibility", "microkernel", "architecture"],
+  "keywords": [
+    "plugin",
+    "extensibility",
+    "microkernel",
+    "architecture"
+  ],
   "author": "IntelGraph Team",
   "license": "MIT",
   "dependencies": {
@@ -27,6 +32,7 @@
     "@types/semver": "^7.5.6",
     "typescript": "^5.3.3",
     "jest": "^29.7.0",
-    "@types/jest": "^29.5.11"
+    "@types/jest": "^29.5.11",
+    "ts-jest": "^29.2.5"
   }
 }

@@ -1,0 +1,34 @@
+name: audit-exception-expiry
+
+on:
+  pull_request:
+    paths:
+      - "audit/exceptions.yaml"
+      - "scripts/audit/check-exceptions.js"
+      - ".github/workflows/audit-exception-expiry.yml"
+  push:
+    branches: [main]
+    paths:
+      - "audit/exceptions.yaml"
+      - "scripts/audit/check-exceptions.js"
+      - ".github/workflows/audit-exception-expiry.yml"
+
+jobs:
+  validate-exceptions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Use Node.js 20
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ] || [ -f pnpm-lock.yaml ] || [ -f yarn.lock ]; then
+            npm install js-yaml
+          else
+            npm install js-yaml
+          fi
+      - name: Validate exceptions
+        run: node scripts/audit/check-exceptions.js

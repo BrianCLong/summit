@@ -1,0 +1,10 @@
+{
+  "service": "mvp4ga",
+  "generatedAt": "2025-01-02T00:00:00Z",
+  "measurements": [
+    { "slo": "api-availability", "window": "1h", "good": 1790, "total": 1800 },
+    { "slo": "api-availability", "window": "6h", "good": 10700, "total": 10800 },
+    { "slo": "api-latency", "window": "1h", "good": 1700, "total": 1800 },
+    { "slo": "api-latency", "window": "24h", "good": 28700, "total": 30000 }
+  ]
+}

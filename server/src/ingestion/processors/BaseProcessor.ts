@@ -1,4 +1,4 @@
-import { Document } from '../../data-model/types';
+import { Document } from '../../data-model/types.js';
 
 export abstract class BaseProcessor {
   abstract supportedExtensions: string[];

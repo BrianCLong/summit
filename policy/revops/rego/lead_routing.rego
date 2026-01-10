@@ -1,9 +1,11 @@
 package revops.lead_routing
 
+import future.keywords.if
+import future.keywords.contains
 import data.revops.config
 import data.revops.segments
 
-default decision = {
+default decision := {
   "allowed": false,
   "reason": "not_evaluated",
   "assignee": {"type": "none"},
@@ -12,7 +14,7 @@ default decision = {
 }
 
 # Main lead routing decision surfaced to clients.
-decision := output {
+decision := output if {
   lead := input.lead
   tenant_id := input.tenant.id
 
@@ -34,28 +36,35 @@ decision := output {
   }
 }
 
-blocklisted(lead, tenant_id) {
+blocklisted(lead, tenant_id) if {
   lead.domain != ""
   config.tenant[tenant_id].blocklist.domains[_] == lead.domain
 }
 
-choose_assignee(route_cfg) = assignee {
+choose_assignee(route_cfg) := assignee if {
   assignee := route_cfg.assignee
 }
 
-choose_assignee(route_cfg) = assignee {
+choose_assignee(route_cfg) := assignee if {
   not route_cfg.assignee
   assignee := {"type": "none"}
 }
 
-flags(lead, segment, tenant_id) = out {
-  default out = []
+# Flags when country is in important countries
+flags(lead, segment, tenant_id) := ["priority_region", segment] if {
   important_countries := config.tenant[tenant_id].lead_routing_flags.important_countries
   some c
   important_countries[c] == lead.country
-  out := ["priority_region", segment]
 }
 
-flags(_, _, _) = [] {
+# Flags when country is not in important countries
+flags(lead, segment, tenant_id) := [] if {
+  input.lead
+  important_countries := config.tenant[tenant_id].lead_routing_flags.important_countries
+  not lead.country in important_countries
+}
+
+# Flags when no lead is provided
+flags(_, _, _) := [] if {
   not input.lead
 }

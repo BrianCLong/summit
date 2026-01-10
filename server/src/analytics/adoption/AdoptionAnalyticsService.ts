@@ -31,11 +31,13 @@ import {
   FeatureUsageStats,
 } from './types.js';
 import {
-  DataEnvelope,
-  GovernanceVerdict,
   GovernanceResult,
   DataClassification,
   createDataEnvelope,
+} from '../../types/data-envelope.js';
+import type {
+  DataEnvelope,
+  GovernanceVerdict,
 } from '../../types/data-envelope.js';
 
 /**
@@ -127,7 +129,7 @@ export class AdoptionAnalyticsService {
         } else {
           skipped++;
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Error tracking event in batch', { error, eventId: event.eventId });
         skipped++;
       }
@@ -321,7 +323,7 @@ export class AdoptionAnalyticsService {
     );
 
     const activeUsers = parseInt(usersResult.rows[0]?.active_users || '0');
-    const featuresUsed = featuresResult.rows.map((r) => r.feature_id);
+    const featuresUsed = featuresResult.rows.map((r: any) => r.feature_id);
     const totalFeatures = this.features.size;
 
     // Calculate adoption rate
@@ -614,7 +616,7 @@ export class AdoptionAnalyticsService {
       [options.startDate, options.endDate]
     );
 
-    return result.rows.map((row) => {
+    return result.rows.map((row: any) => {
       const feature = this.features.get(row.feature_id);
       return {
         featureId: row.feature_id,

@@ -226,24 +226,25 @@ export class GuardrailsService {
     });
 
     // Aggregate results
-    const allPassed = results.every((r) => r.passed);
+    const allPassed = results.every((r: any) => r.passed);
     const criticalFailed = results.some(
-      (r) => !r.passed && r.severity === 'critical',
+      (r: any) => !r.passed && r.severity === 'critical',
     );
     const errorFailed = results.some(
-      (r) => !r.passed && r.severity === 'error',
+      (r: any) => !r.passed && r.severity === 'error',
     );
+    console.log('Guardrails Debug: criticalFailed', criticalFailed, 'Results:', JSON.stringify(results.map((r: any) => ({ name: r.name, passed: r.passed, severity: r.severity }))));
 
     const checks: GuardrailCheck = {
       passed: allPassed,
-      checks: results.map((r) => ({
+      checks: results.map((r: any) => ({
         name: r.name,
         passed: r.passed,
         reason: r.reason,
       })),
       failureReason: allPassed
         ? undefined
-        : results.find((r) => !r.passed)?.reason,
+        : results.find((r: any) => !r.passed)?.reason,
     };
 
     // Generate refusal if critical/error guardrails failed
@@ -363,12 +364,12 @@ export class GuardrailsService {
     investigationId: string,
   ): CopilotRefusal {
     const criticalFailure = failedResults.find(
-      (r) => !r.passed && r.severity === 'critical',
+      (r: any) => !r.passed && r.severity === 'critical',
     );
     const errorFailure = failedResults.find(
-      (r) => !r.passed && r.severity === 'error',
+      (r: any) => !r.passed && r.severity === 'error',
     );
-    const primaryFailure = criticalFailure || errorFailure || failedResults.find((r) => !r.passed);
+    const primaryFailure = criticalFailure || errorFailure || failedResults.find((r: any) => !r.passed);
 
     // Determine category
     let category: CopilotRefusal['category'] = 'internal_error';
@@ -556,24 +557,24 @@ export class GuardrailsService {
     answerId: string,
   ): void {
     const failedCritical = results.filter(
-      (r) => !r.passed && r.severity === 'critical',
+      (r: any) => !r.passed && r.severity === 'critical',
     );
     const failedErrors = results.filter(
-      (r) => !r.passed && r.severity === 'error',
+      (r: any) => !r.passed && r.severity === 'error',
     );
 
     if (failedCritical.length > 0) {
       this.logRiskyPrompt(
         prompt,
         'critical',
-        failedCritical.map((r) => r.name),
+        failedCritical.map((r: any) => r.name),
         true,
       );
     } else if (failedErrors.length > 0) {
       this.logRiskyPrompt(
         prompt,
         'high',
-        failedErrors.map((r) => r.name),
+        failedErrors.map((r: any) => r.name),
         false,
       );
     }

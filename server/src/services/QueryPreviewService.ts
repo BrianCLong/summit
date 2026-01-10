@@ -19,6 +19,7 @@ import { NlToCypherService } from '../ai/nl-to-cypher/nl-to-cypher.service.js';
 import { GlassBoxRunService } from './GlassBoxRunService.js';
 import { QueryResultCache, type QueryResultPayload } from './queryResultCache.js';
 import { wrapCypherWithPagination } from './pagination.js';
+import { enforceTenantScopeForCypher } from './graphTenantScope.js';
 
 export type QueryLanguage = 'cypher' | 'sql';
 
@@ -207,7 +208,7 @@ export class QueryPreviewService {
       }, 'Created query preview');
 
       return preview;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, input }, 'Failed to create query preview');
       metrics.queryPreviewErrorsTotal.inc({ language: input.language || 'cypher' });
       throw error;
@@ -262,6 +263,7 @@ export class QueryPreviewService {
       naturalLanguageQuery: input.naturalLanguageQuery,
       parameters: {
         ...input.parameters,
+        tenantId: input.tenantId,
         investigationId: input.investigationId,
         focusEntityIds: input.focusEntityIds,
         maxHops: input.maxHops,
@@ -511,6 +513,8 @@ export class QueryPreviewService {
                 {
                   maxRows: input.maxRows || 100,
                   timeout: input.timeout || 30000,
+                  tenantId: preview.tenantId,
+                  actorId: input.userId,
                 }
               );
               return {
@@ -626,7 +630,7 @@ export class QueryPreviewService {
         streamingChannel: streamTopic,
         streamedBatches: streamTopic ? streamedBatches : undefined,
       };
-    } catch (error) {
+    } catch (error: any) {
       await this.glassBoxService.updateStatus(run.id, 'failed', undefined, String(error));
 
       metrics.queryPreviewExecutionsTotal.inc({
@@ -706,9 +710,9 @@ export class QueryPreviewService {
         { investigationId }
       );
 
-      const labels = result.records.map(r => r.get('label'));
+      const labels = result.records.map((r: any) => r.get('label'));
 
-      return `Investigation graph schema:\nNode labels: ${labels.filter(l => l !== 'Entity').join(', ')}\nRelationship types: ${labels.filter(l => !l.match(/^[A-Z]/)).join(', ')}`;
+      return `Investigation graph schema:\nNode labels: ${labels.filter((l: any) => l !== 'Entity').join(', ')}\nRelationship types: ${labels.filter((l: any) => !l.match(/^[A-Z]/)).join(', ')}`;
     } finally {
       await session.close();
     }
@@ -859,6 +863,8 @@ export class QueryPreviewService {
       timeout: number;
       cursor?: number;
       batchSize?: number;
+      tenantId?: string;
+      actorId?: string;
       streamObserver?: (payload: {
         batch: unknown[];
         nextCursor?: number | null;
@@ -878,16 +884,22 @@ export class QueryPreviewService {
     const limit = Math.min(options.batchSize ?? options.maxRows, options.maxRows);
 
     try {
-      const finalQuery = wrapCypherWithPagination(query);
+      const scoped = await enforceTenantScopeForCypher(query, parameters, {
+        tenantId: options.tenantId,
+        actorId: options.actorId,
+        action: 'graph.read',
+        resource: 'graph.query.preview',
+      });
+      const finalQuery = wrapCypherWithPagination(scoped.cypher);
       const result = await session.run(finalQuery, {
-        ...parameters,
+        ...scoped.params,
         skip,
         limitPlusOne: limit + 1,
       }, {
         timeout: options.timeout,
       });
 
-      const mapped = result.records.map(record => record.toObject());
+      const mapped = result.records.map((record: any) => record.toObject());
       const hasMore = mapped.length > limit;
       const records = hasMore ? mapped.slice(0, limit) : mapped;
       const nextCursor = hasMore ? skip + limit : undefined;

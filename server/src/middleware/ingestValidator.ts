@@ -417,7 +417,7 @@ export class IngestValidator {
             req.validationResult = validationResult;
 
             next();
-          } catch (error) {
+          } catch (error: any) {
             const duration = Date.now() - startTime;
 
             logger.error('Validation error', {
@@ -521,7 +521,7 @@ export class IngestValidator {
       }
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       result.isValid = false;
       result.errors.push({
         field: 'root',
@@ -696,7 +696,7 @@ export class IngestValidator {
           });
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       result.errors.push({
         field: 'schema',
         message: 'Schema validation failed',

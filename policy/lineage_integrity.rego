@@ -1,6 +1,9 @@
 package summit.lineage
 
-default allow = false
+import future.keywords.if
+import future.keywords.contains
+
+default allow := false
 
 #
 # Input shape:
@@ -13,13 +16,13 @@ default allow = false
 # }
 #
 
-valid_lineage {
+valid_lineage if {
   ln := input.lineage
   ln.has_full_provenance == true
   ln.edges_valid == true
   ln.no_gaps == true
 }
 
-allow {
+allow if {
   valid_lineage
 }

@@ -1,3 +1,0 @@
-This PR (#1300) performs total recapture + rehydration, resolves case-collisions, and adds green-gates evidence.
-If any *.MERGED files exist, fold their diffs into the canonical file and remove the placeholder before final merge.
-If CI surfaces security advisories, resolve or add signed, time-bounded waivers as appropriate.

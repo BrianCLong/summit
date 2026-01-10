@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <defs>
+    <style>
+      .box { fill: #f8f9fa; stroke: #333; stroke-width: 2; rx: 5; }
+      .text { font-family: sans-serif; font-size: 14px; fill: #333; text-anchor: middle; }
+      .arrow { stroke: #333; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .label { font-family: sans-serif; font-size: 12px; fill: #666; text-anchor: middle; }
+      .highlight { fill: #e6f3ff; stroke: #0066cc; }
+      .chaos { fill: #fff0f0; stroke: #cc0000; }
+      .calm { fill: #f0fff4; stroke: #009933; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+  </defs>
+
+  <!-- Left Side: Chaos -->
+  <rect x="50" y="50" width="200" height="400" class="box chaos" />
+  <text x="150" y="80" class="text" font-weight="bold">Input: Raw Telemetry</text>
+
+  <rect x="70" y="120" width="160" height="30" class="box" fill="#fff" stroke="#999" stroke-dasharray="4"/>
+  <text x="150" y="140" class="text">Alert: High CPU</text>
+
+  <rect x="70" y="160" width="160" height="30" class="box" fill="#fff" stroke="#999" stroke-dasharray="4"/>
+  <text x="150" y="180" class="text">Log: Exception 500</text>
+
+  <rect x="70" y="200" width="160" height="30" class="box" fill="#fff" stroke="#999" stroke-dasharray="4"/>
+  <text x="150" y="220" class="text">Metric: Latency > 2s</text>
+
+  <rect x="70" y="240" width="160" height="30" class="box" fill="#fff" stroke="#999" stroke-dasharray="4"/>
+  <text x="150" y="260" class="text">Trace: Timeout</text>
+
+  <rect x="70" y="280" width="160" height="30" class="box" fill="#fff" stroke="#999" stroke-dasharray="4"/>
+  <text x="150" y="300" class="text">Alert: Pod Restart</text>
+
+  <text x="150" y="400" class="text" font-style="italic">"The Flood"</text>
+
+  <!-- Middle: Summit -->
+  <rect x="300" y="150" width="200" height="200" class="box highlight" />
+  <text x="400" y="180" class="text" font-weight="bold">Summit Cognitive Layer</text>
+
+  <text x="400" y="220" class="text">1. Filters Noise</text>
+  <text x="400" y="250" class="text">2. Correlates Signals</text>
+  <text x="400" y="280" class="text">3. Maps to Policy</text>
+  <text x="400" y="310" class="text">4. Evaluates Risks</text>
+
+  <!-- Arrows -->
+  <line x1="250" y1="250" x2="300" y2="250" class="arrow" />
+  <line x1="500" y1="250" x2="550" y2="250" class="arrow" />
+
+  <!-- Right Side: Choice Architecture -->
+  <rect x="550" y="50" width="200" height="400" class="box calm" />
+  <text x="650" y="80" class="text" font-weight="bold">Output: Structured Choice</text>
+
+  <rect x="570" y="150" width="160" height="60" class="box" style="fill: white; stroke: #009933; stroke-width: 2;" />
+  <text x="650" y="175" class="text" font-weight="bold">Option A: Rollback</text>
+  <text x="650" y="195" class="label">Recommened (Safe)</text>
+
+  <rect x="570" y="230" width="160" height="60" class="box" style="fill: white; stroke: #666;" />
+  <text x="650" y="255" class="text" font-weight="bold">Option B: Investigate</text>
+  <text x="650" y="275" class="label">Open War Room</text>
+
+  <rect x="570" y="310" width="160" height="60" class="box" style="fill: white; stroke: #666;" />
+  <text x="650" y="335" class="text" font-weight="bold">Option C: Snooze</text>
+  <text x="650" y="355" class="label">False Positive</text>
+
+  <text x="650" y="420" class="text" font-style="italic">"The Decision"</text>
+
+</svg>

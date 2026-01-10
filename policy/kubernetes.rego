@@ -58,7 +58,7 @@ deny contains msg if {
 deny contains msg if {
 	input.kind == "Pod"
 	container := input.spec.containers[_]
-	"ALL" not in container.securityContext.capabilities.drop
+	not "ALL" in container.securityContext.capabilities.drop
 	msg := "Containers must drop ALL capabilities"
 }
 
@@ -167,12 +167,12 @@ approved_registry(image) if {
 	startswith(image, pattern)
 }
 
-get_containers[container] if {
+get_containers contains container if {
 	input.kind == "Pod"
 	container := input.spec.containers[_]
 }
 
-get_containers[container] if {
+get_containers contains container if {
 	input.kind in ["Deployment", "StatefulSet", "DaemonSet"]
 	container := input.spec.template.spec.containers[_]
 }
@@ -239,12 +239,12 @@ deny contains msg if {
 	msg := sprintf("hostPath volumes are not allowed: %s", [volume.name])
 }
 
-get_volumes[volume] if {
+get_volumes contains volume if {
 	input.kind == "Pod"
 	volume := input.spec.volumes[_]
 }
 
-get_volumes[volume] if {
+get_volumes contains volume if {
 	input.kind in ["Deployment", "StatefulSet", "DaemonSet"]
 	volume := input.spec.template.spec.volumes[_]
 }

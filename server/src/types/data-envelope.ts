@@ -352,6 +352,26 @@ export function validateDataEnvelope<T>(envelope: DataEnvelope<T>): {
     errors.push('Missing data hash');
   }
 
+  if (!envelope.governanceVerdict) {
+    errors.push('Missing governance verdict');
+  } else {
+    if (!envelope.governanceVerdict.verdictId) {
+      errors.push('Missing verdict ID');
+    }
+    if (envelope.governanceVerdict.result === undefined) {
+      errors.push('Missing governance result');
+    }
+    if (!envelope.governanceVerdict.decidedAt) {
+      errors.push('Missing verdict decision time');
+    }
+    if (!envelope.governanceVerdict.evaluator) {
+      errors.push('Missing verdict evaluator');
+    }
+    if (!envelope.governanceVerdict.policyId) {
+      errors.push('Missing policy ID');
+    }
+  }
+
   // Validate confidence score if present
   if (envelope.confidence !== undefined && envelope.confidence !== null) {
     if (envelope.confidence < 0 || envelope.confidence > 1) {

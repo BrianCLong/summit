@@ -2,10 +2,10 @@
 // Queue Worker for Processing Scheduled Tasks
 // Implements worker processes that consume tasks from Redis queues
 
-import { costAwareScheduler, SchedulingContext } from './cost-aware-scheduler';
-import { ExpertArm } from '../learn/bandit';
-import { prometheusConductorMetrics } from '../observability/prometheus';
-import { adaptiveRouter } from '../router/router-v2';
+import { costAwareScheduler, SchedulingContext } from './cost-aware-scheduler.js';
+import { ExpertArm } from '../learn/bandit.js';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
+import { adaptiveRouter } from '../router/router-v2.js';
 import { performance } from 'perf_hooks';
 
 export interface WorkerConfig {
@@ -98,7 +98,7 @@ export class QueueWorker {
         if (!taskProcessed) {
           await this.sleep(this.config.pollInterval);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Worker loop error in ${workerId}:`, error);
         prometheusConductorMetrics.recordOperationalEvent(
       'worker_error',
@@ -170,7 +170,7 @@ export class QueueWorker {
           0,
         );
       }
-    } catch (error) {
+    } catch (error: any) {
       // Mark task as failed
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -267,7 +267,7 @@ export class QueueWorker {
           executionTime: processingTime,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       const processingTime = performance.now() - startTime;
 
       return {
@@ -366,7 +366,7 @@ export class QueueWorker {
 
     try {
       await Promise.race([Promise.all(this.workerPromises), timeoutPromise]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error during worker shutdown:', error);
     }
 

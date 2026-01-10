@@ -56,7 +56,7 @@ export class SummitAnomalyService {
       }
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error during anomaly detection:', error);
       return null;
     }

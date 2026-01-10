@@ -1,5 +1,5 @@
-import logger from '../../utils/logger';
-import { ConsensusRequest, ConsensusResult } from './types';
+import logger from '../../utils/logger.js';
+import { ConsensusRequest, ConsensusResult } from './types.js';
 
 export class ConsensusManager {
   private static instance: ConsensusManager;

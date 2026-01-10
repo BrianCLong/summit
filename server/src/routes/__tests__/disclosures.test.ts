@@ -31,7 +31,10 @@ import disclosuresRouter from '../disclosures.js';
 const app = express();
 app.use('/disclosures', disclosuresRouter);
 
-describe('Disclosures routes', () => {
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('Disclosures routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

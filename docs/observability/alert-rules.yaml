@@ -1,0 +1,65 @@
+# Prometheus-style alert rules for the Summit observability standard
+
+groups:
+  - name: summit-observability
+    interval: 30s
+    rules:
+      - alert: SummitHighErrorRate
+        expr: sum(rate(http_request_errors_total[5m])) / sum(rate(http_requests_total[5m])) > 0.02
+        for: 5m
+        labels:
+          severity: page
+          team: observability
+        annotations:
+          summary: "High 5xx rate"
+          description: "5xx ratio above 2% for 5m"
+
+      - alert: SummitLatencyP95Degraded
+        expr: histogram_quantile(0.95, sum by (le) (rate(http_request_duration_ms_bucket[5m]))) > 0.5
+        for: 10m
+        labels:
+          severity: page
+          team: observability
+        annotations:
+          summary: "Latency p95 degraded"
+          description: "P95 latency above 500ms for 10m"
+
+      - alert: SummitQueueBacklog
+        expr: max_over_time(queue_depth[10m]) > 50
+        for: 10m
+        labels:
+          severity: page
+          team: observability
+        annotations:
+          summary: "Queue depth high"
+          description: "Queue backlog growing beyond 50 messages"
+
+      - alert: SummitWorkerSaturation
+        expr: avg_over_time(resource_saturation_ratio[10m]) > 0.85
+        for: 10m
+        labels:
+          severity: page
+          team: observability
+        annotations:
+          summary: "Worker pool saturation"
+          description: "Worker pool saturation above 85% for 10m"
+
+      - alert: SummitErrorBudgetFastBurn
+        expr: sum(rate(http_request_errors_total[5m])) / sum(rate(http_requests_total[5m])) > 0.02
+        for: 1h
+        labels:
+          severity: page
+          team: observability
+        annotations:
+          summary: "Fast error budget burn"
+          description: "Projected to exhaust error budget within hours"
+
+      - alert: SummitErrorBudgetSlowBurn
+        expr: sum(rate(http_request_errors_total[30m])) / sum(rate(http_requests_total[30m])) > 0.01
+        for: 6h
+        labels:
+          severity: ticket
+          team: observability
+        annotations:
+          summary: "Slow error budget burn"
+          description: "Sustained error budget consumption"

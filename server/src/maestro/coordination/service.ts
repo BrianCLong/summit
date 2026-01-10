@@ -1,8 +1,8 @@
 
-import { CoordinationContext, CoordinationRole, CoordinationSchema, SharedBudget } from './types';
-import { budgetManager } from './budget-manager';
-import { maestroService } from '../MaestroService'; // We know this exists and has logAudit
-import { logger } from '../../utils/logger';
+import { CoordinationContext, CoordinationRole, CoordinationSchema, SharedBudget } from './types.js';
+import { budgetManager } from './budget-manager.js';
+import { maestroService } from '../MaestroService.js'; // We know this exists and has logAudit
+import { logger } from '../../utils/logger.js';
 import * as crypto from 'node:crypto';
 
 export class CoordinationService {

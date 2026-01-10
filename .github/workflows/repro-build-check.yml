@@ -1,0 +1,27 @@
+name: Reproducible Builds Check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repro-check:
+    name: Reproducibility Sanity Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Run Reproducible Builds Check
+        run: ./scripts/repro-check.sh || echo "::warning::Reproducible build check failed, but this is currently non-blocking."

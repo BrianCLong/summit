@@ -1,0 +1,54 @@
+name: Compliance & Governance
+
+on:
+  push:
+    branches: ["main"]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+  pull_request:
+    branches: ["main"]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/PULL_REQUEST_TEMPLATE/**"
+  schedule:
+    - cron: "0 0 * * 1" # Weekly verification
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  governance-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install --frozen-lockfile
+
+      - name: Verify Governance Rules
+        run: pnpm verify:governance
+
+  compliance-drift-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install --frozen-lockfile
+
+      - name: Verify Compliance Drift
+        run: pnpm verify:compliance

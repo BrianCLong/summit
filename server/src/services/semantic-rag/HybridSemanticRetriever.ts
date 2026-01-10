@@ -255,8 +255,8 @@ export class HybridSemanticRetriever {
       const result = await client.query(query, params);
 
       const snippets: SemanticSnippet[] = result.rows
-        .filter(row => row.similarity >= this.config.minSimilarity)
-        .map(row => SemanticSnippetSchema.parse({
+        .filter((row: any) => row.similarity >= this.config.minSimilarity)
+        .map((row: any) => SemanticSnippetSchema.parse({
           id: row.id,
           entityId: row.entity_id,
           kind: row.kind,
@@ -689,7 +689,7 @@ export class HybridSemanticRetriever {
 
       await client.query('COMMIT');
       return ids;
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {

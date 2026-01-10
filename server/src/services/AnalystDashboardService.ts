@@ -128,7 +128,7 @@ export class AnalystDashboardService {
 
       // Calculate percentiles
       const sortedTimes = triageData
-        .map((row) => row.triage_time_seconds)
+        .map((row: any) => row.triage_time_seconds)
         .sort((a, b) => a - b);
       const metrics: MTTTMetrics = {
         p50_seconds: this.calculatePercentile(sortedTimes, 0.5),
@@ -184,7 +184,7 @@ export class AnalystDashboardService {
       });
 
       return metrics;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Failed to calculate MTTT metrics', {
         timeRange,
         error: error instanceof Error ? error.message : String(error),
@@ -238,10 +238,10 @@ export class AnalystDashboardService {
       // Calculate FP metrics
       const totalAlerts = classificationData.length;
       const falsePositives = classificationData.filter(
-        (row) => row.classification === 'false_positive',
+        (row: any) => row.classification === 'false_positive',
       ).length;
       const truePositives = classificationData.filter(
-        (row) => row.classification === 'true_positive',
+        (row: any) => row.classification === 'true_positive',
       ).length;
       const unclassified = totalAlerts - falsePositives - truePositives;
 
@@ -295,7 +295,7 @@ export class AnalystDashboardService {
       });
 
       return metrics;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Failed to calculate FP metrics', {
         timeRange,
         error: error instanceof Error ? error.message : String(error),
@@ -338,7 +338,7 @@ export class AnalystDashboardService {
       ORDER BY avg_triage_time_seconds ASC
     `;
 
-    return performanceData.map((row) => ({
+    return performanceData.map((row: any) => ({
       analyst_id: row.analyst_id,
       analyst_name: row.analyst_name || 'Unknown',
       alerts_triaged: row.alerts_triaged,
@@ -393,7 +393,7 @@ export class AnalystDashboardService {
     };
 
     // Group by hour, day, severity, source
-    volumeData.forEach((row) => {
+    volumeData.forEach((row: any) => {
       const hour = row.hour?.toString() || '0';
       const day = this.getDayName(row.day_of_week);
       const severity = row.severity || 'unknown';
@@ -688,7 +688,7 @@ export class AnalystDashboardService {
   private groupMetricsBySeverity(triageData: any[]): Record<string, number> {
     const grouped: Record<string, number[]> = {};
 
-    triageData.forEach((row) => {
+    triageData.forEach((row: any) => {
       const severity = row.severity || 'unknown';
       if (!grouped[severity]) {
         grouped[severity] = [];
@@ -709,7 +709,7 @@ export class AnalystDashboardService {
   private groupMetricsByAnalyst(triageData: any[]): Record<string, number> {
     const grouped: Record<string, number[]> = {};
 
-    triageData.forEach((row) => {
+    triageData.forEach((row: any) => {
       const analyst = row.analyst_id || 'unassigned';
       if (!grouped[analyst]) {
         grouped[analyst] = [];
@@ -732,7 +732,7 @@ export class AnalystDashboardService {
   ): Record<string, number> {
     const grouped: Record<string, { total: number; fp: number }> = {};
 
-    classificationData.forEach((row) => {
+    classificationData.forEach((row: any) => {
       const rule = row.rule_id || 'unknown';
       if (!grouped[rule]) {
         grouped[rule] = { total: 0, fp: 0 };
@@ -757,7 +757,7 @@ export class AnalystDashboardService {
   ): Record<string, number> {
     const grouped: Record<string, { total: number; fp: number }> = {};
 
-    classificationData.forEach((row) => {
+    classificationData.forEach((row: any) => {
       const category = row.category || 'unknown';
       if (!grouped[category]) {
         grouped[category] = { total: 0, fp: 0 };

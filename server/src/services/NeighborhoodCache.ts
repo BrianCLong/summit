@@ -145,7 +145,7 @@ export class NeighborhoodCache {
         `Cache MISS for neighborhood ${nodeId} (tenant: ${tenantContext.tenantId}) - ${latency}ms`,
       );
       return null;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Failed to get neighborhood ${nodeId} from cache: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -212,7 +212,7 @@ export class NeighborhoodCache {
       await this.cleanupIfNeeded(tenantContext);
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Failed to cache neighborhood ${nodeId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -245,7 +245,7 @@ export class NeighborhoodCache {
       }
 
       return 0;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Failed to invalidate neighborhood ${nodeId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -297,7 +297,7 @@ export class NeighborhoodCache {
       }
 
       return neighborhoods;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Failed to get investigation neighborhoods: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -326,7 +326,7 @@ export class NeighborhoodCache {
       }
 
       return 0;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Failed to clear tenant cache: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -358,7 +358,7 @@ export class NeighborhoodCache {
       logger.info(
         `Preloaded investigation ${investigationId} with ${nodeIds.length} nodes (tenant: ${tenantContext.tenantId})`,
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Failed to preload investigation: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -376,7 +376,7 @@ export class NeighborhoodCache {
       this.stats.hitRate = total > 0 ? this.stats.hits / total : 0;
 
       return { ...this.stats, hitRatio: this.stats.hitRate };
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Failed to get cache stats: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -403,7 +403,7 @@ export class NeighborhoodCache {
           memory: info,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Neighborhood cache health check failed');
       return {
         status: 'unhealthy',
@@ -447,7 +447,7 @@ export class NeighborhoodCache {
     try {
       await this.redis.sadd(nodeIndexKey, cacheKey);
       await this.redis.expire(nodeIndexKey, this.defaultTTL);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         `Failed to update indexes: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -465,7 +465,7 @@ export class NeighborhoodCache {
 
     try {
       await this.redis.del(nodeIndexKey);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         `Failed to remove from indexes: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -512,7 +512,7 @@ export class NeighborhoodCache {
           );
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         `Failed to cleanup cache: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );

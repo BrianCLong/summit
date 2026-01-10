@@ -36,7 +36,7 @@ export function getRedisClient(): Redis {
       });
 
       redisClient.on('connect', () => logger.info('Redis client connected.'));
-      redisClient.on('error', (err) => {
+      redisClient.on('error', (err: any) => {
         logger.warn(
           `Redis connection failed - using mock responses. Error: ${err.message}`,
         );
@@ -65,7 +65,7 @@ export function getRedisClient(): Redis {
         telemetry.subsystems.cache.dels.add(1);
         return await originalDel(key);
       }) as any;
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         `Redis initialization failed - using development mode. Error: ${(error as Error).message}`,
       );
@@ -100,6 +100,8 @@ function createMockRedisClient() {
     quit: async () => { },
     on: () => { },
     connect: async () => { },
+    options: { keyPrefix: 'summit:' },
+    duplicate: () => createMockRedisClient(),
   };
 }
 

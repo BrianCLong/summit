@@ -11,7 +11,7 @@
  */
 
 // Types
-export * from './types';
+export * from './types.js';
 
 // State Management
 export {
@@ -20,7 +20,7 @@ export {
   RedisRunbookExecutionLogRepository,
   InMemoryRunbookExecutionRepository,
   InMemoryRunbookExecutionLogRepository,
-} from './state-manager';
+} from './state-manager.js';
 
 // Runtime Engine
 export {
@@ -28,16 +28,18 @@ export {
   DefaultStepExecutorRegistry,
   InMemoryRunbookDefinitionRepository,
   RuntimeEngineConfig,
-} from './engine';
+} from './engine.js';
 
 // Executors
-export * from './executors';
+export * from './executors/index.js';
 
 // Rapid Attribution Runbook
 export {
   RapidAttributionRunbook,
   createRapidAttributionRunbook,
-} from './rapid-attribution-runbook';
+  validateRapidAttributionInput,
+  rapidAttributionExampleInput,
+} from './rapid-attribution-runbook.js';
 
 // API Routes
-export { runtimeApiRouter } from './api';
+export { runtimeApiRouter } from './api.js';

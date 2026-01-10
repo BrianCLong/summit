@@ -1,4 +1,4 @@
-import { ForesightBundle, InjectionContext, EvolutionProposal } from '../types';
+import { ForesightBundle, InjectionContext, EvolutionProposal } from '../types.js';
 
 export class InjectionOrchestrator {
   public prepareContext(

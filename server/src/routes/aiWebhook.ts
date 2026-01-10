@@ -2,13 +2,15 @@ import { Router } from 'express';
 import crypto from 'crypto';
 import { pubsub } from '../realtime/pubsub.js';
 import { randomUUID as uuid } from 'node:crypto';
-import { logger } from '../logger.js';
+import { logger } from '../utils/logger.js';
+import { createRouteRateLimitMiddleware } from '../middleware/rateLimit.js';
 
 const router = Router();
-const SECRET = process.env.ML_WEBHOOK_SECRET;
+const webhookRateLimit = createRouteRateLimitMiddleware('webhookIngest');
 
 function verifySignature(body: Buffer, sig: string): boolean {
-  if (!SECRET) {
+  const secret = process.env.ML_WEBHOOK_SECRET;
+  if (!secret) {
     logger.error('ML_WEBHOOK_SECRET is not configured');
     return false;
   }
@@ -17,7 +19,7 @@ function verifySignature(body: Buffer, sig: string): boolean {
     return false;
   }
 
-  const h = crypto.createHmac('sha256', SECRET).update(body).digest('hex');
+  const h = crypto.createHmac('sha256', secret).update(body).digest('hex');
   const digestBuffer = Buffer.from(h);
   const sigBuffer = Buffer.from(sig || '');
 
@@ -26,12 +28,12 @@ function verifySignature(body: Buffer, sig: string): boolean {
       return false;
     }
     return crypto.timingSafeEqual(digestBuffer, sigBuffer);
-  } catch (error) {
+  } catch (error: any) {
     return false;
   }
 }
 
-router.post('/ai/webhook', async (req, res) => {
+router.post('/ai/webhook', webhookRateLimit, async (req, res) => {
   const sig = req.header('X-IntelGraph-Signature') || '';
 
   // Sentinel: CRITICAL Fix - Do not fallback to JSON.stringify(req.body)
@@ -86,7 +88,7 @@ router.post('/ai/webhook', async (req, res) => {
       meta: { jobId: job_id, kind, count: insights.length },
     });
     res.json({ ok: true });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error processing AI webhook', error);
     return res.status(500).json({ error: 'Internal server error' });
   }

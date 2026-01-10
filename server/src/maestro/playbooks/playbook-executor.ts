@@ -1,5 +1,7 @@
-import Ajv from 'ajv';
+import AjvModule from 'ajv';
 import { Queue, Worker, type JobsOptions } from 'bullmq';
+
+const Ajv = (AjvModule as any).default || AjvModule;
 import { PLAYBOOK_SCHEMA, PLAYBOOK_STEP_SCHEMA } from './schema.js';
 import type {
   PlaybookDefinition,
@@ -50,7 +52,7 @@ export class PlaybookExecutorService {
   private worker: WorkerLike;
   private runStore = new Map<string, PlaybookRunRecord>();
   private actionHandlers = new Map<string, PlaybookActionHandler>();
-  private ajv: Ajv;
+  private ajv: InstanceType<typeof Ajv>;
 
   private constructor(private deps: PlaybookExecutorDeps) {
     this.ajv = new Ajv({ allErrors: true, strict: false });
@@ -64,12 +66,12 @@ export class PlaybookExecutorService {
     this.worker = deps.workerFactory
       ? deps.workerFactory(
           'maestro_playbooks',
-          async (job) => this.processStep(job.data),
+          async (job: any) => this.processStep(job.data),
           { connection: deps.redisConnection, concurrency: 3 },
         )
       : new Worker(
           'maestro_playbooks',
-          async (job) => this.processStep(job.data),
+          async (job: any) => this.processStep(job.data),
           { connection: deps.redisConnection, concurrency: 3 },
         );
   }
@@ -192,7 +194,7 @@ export class PlaybookExecutorService {
         { runKey: payload.runKey, stepId: nextStep.id },
         { jobId: `${payload.runKey}:${nextStep.id}` },
       );
-    } catch (error) {
+    } catch (error: any) {
       runRecord.stepStatuses.set(step.id, 'failed');
       runRecord.status = 'failed';
       runRecord.completedAt = new Date().toISOString();

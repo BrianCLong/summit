@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import type { ConnectorSnapshot } from './types';
+import type { ConnectorSnapshot } from './types.js';
 
 const sortObject = (value: unknown): unknown => {
   if (Array.isArray(value)) {

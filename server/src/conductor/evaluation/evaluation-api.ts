@@ -8,10 +8,10 @@ import {
   GoldenTask,
   EvaluationResult,
   QualityMetrics,
-} from './golden-tasks';
+} from './golden-tasks.js';
 
 // QualityMetrics is calculated dynamically by evaluationEngine.calculateQualityMetrics()
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import Redis from 'ioredis';
 
 export const evaluationRouter = express.Router();
@@ -104,7 +104,7 @@ evaluationRouter.post('/evaluate', async (req, res) => {
             0.05,
           );
         }
-      } catch (error) {
+      } catch (error: any) {
         console.warn(
           'Failed to load baseline for regression detection:',
           error,
@@ -132,7 +132,7 @@ evaluationRouter.post('/evaluate', async (req, res) => {
 
       // Keep only last 1000 evaluations
       await redis.zremrangebyrank('evaluation_timeline', 0, -1001);
-    } catch (error) {
+    } catch (error: any) {
       console.warn('Failed to store evaluation results:', error);
     } finally {
       redis.disconnect();
@@ -181,7 +181,7 @@ evaluationRouter.post('/evaluate', async (req, res) => {
     }
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Evaluation error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(
@@ -232,7 +232,7 @@ evaluationRouter.get('/tasks', async (req, res) => {
       })),
       total: tasks.length,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Tasks listing error:', error);
 
     res.status(500).json({
@@ -267,7 +267,7 @@ evaluationRouter.get('/results/:runId', async (req, res) => {
       runId,
       ...result,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Result retrieval error:', error);
 
     res.status(500).json({
@@ -316,7 +316,7 @@ evaluationRouter.get('/trends', async (req, res) => {
       trends,
       total: trends.length,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Trends retrieval error:', error);
 
     res.status(500).json({
@@ -374,7 +374,7 @@ evaluationRouter.post('/baseline/:baselineId', async (req, res) => {
       baselineId,
       runId,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Baseline setting error:', error);
 
     res.status(500).json({
@@ -450,7 +450,7 @@ evaluationRouter.post('/gate', async (req, res) => {
           );
           gates.regressions = regressions.length === 0;
         }
-      } catch (error) {
+      } catch (error: any) {
         console.warn('Baseline regression check failed:', error);
       } finally {
         redis.disconnect();
@@ -472,7 +472,7 @@ evaluationRouter.post('/gate', async (req, res) => {
       regressions: regressions.length > 0 ? regressions : undefined,
       message: passed ? 'Quality gate passed' : 'Quality gate failed',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Quality gate error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(

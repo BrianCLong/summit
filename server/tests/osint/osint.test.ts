@@ -1,7 +1,6 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
-import { OSINTPrioritizationService } from '../../src/services/OSINTPrioritizationService';
+import OSINTAggregator from '../../src/services/OSINTAggregator.js';
 import { VeracityScoringService } from '../../src/services/VeracityScoringService';
-import { enqueueOSINT } from '../../src/services/OSINTQueueService';
 
 // Mock dependencies
 jest.mock('../../src/config/database', () => ({
@@ -9,19 +8,18 @@ jest.mock('../../src/config/database', () => ({
   getPostgresPool: jest.fn(),
 }));
 
-jest.mock('../../src/services/OSINTQueueService', () => ({
-  enqueueOSINT: jest.fn(),
-  osintQueue: {
-    add: jest.fn(),
-    getJobCounts: jest.fn(),
-  },
-  startOSINTWorkers: jest.fn(),
+jest.mock('../../src/services/SecureFusionService.js', () => ({
+  __esModule: true,
+  default: jest.fn().mockImplementation(() => ({
+    fuse: jest.fn().mockImplementation(async () => ({ ok: true })),
+  })),
 }));
 
 jest.mock('../../src/utils/logger', () => ({
   info: jest.fn(),
   error: jest.fn(),
   warn: jest.fn(),
+  debug: jest.fn(),
 }));
 
 const mockRun = jest.fn();
@@ -40,44 +38,29 @@ const { getNeo4jDriver } = require('../../src/config/database');
 describe('OSINT System', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (getNeo4jDriver as jest.Mock).mockReturnValue(mockDriver);
   });
 
-  describe('OSINTPrioritizationService', () => {
-    it('should identify targets based on graph query', async () => {
-      // Mock Neo4j result
-      mockRun.mockResolvedValueOnce({
-        records: [
-          { get: (key: string) => (key === 'id' ? 'entity-1' : 5) },
-          { get: (key: string) => (key === 'id' ? 'entity-2' : 3) },
-        ],
-      });
+  describe('OSINTAggregator', () => {
+    it('should enqueue items with deterministic scoring', async () => {
+      const randomSpy = jest.spyOn(Math, 'random').mockReturnValue(0);
+      const service = new OSINTAggregator();
 
-      const service = new OSINTPrioritizationService();
-      const targets = await service.identifyTargets();
+      const result = await service.ingest(
+        { text: 'nuclear incident', type: 'signal' },
+        'satellite-feed-alpha',
+      );
 
-      expect(targets).toEqual(['entity-1', 'entity-2']);
-      expect(mockRun).toHaveBeenCalledWith(expect.stringContaining('MATCH (n:Entity)'), expect.any(Object));
-    });
-
-    it('should run prioritization cycle and enqueue jobs', async () => {
-       // Mock Neo4j result
-       mockRun.mockResolvedValueOnce({
-        records: [
-          { get: (key: string) => (key === 'id' ? 'entity-1' : 5) },
-        ],
-      });
-
-      const service = new OSINTPrioritizationService();
-      await service.runPrioritizationCycle('tenant-1');
-
-      expect(enqueueOSINT).toHaveBeenCalledWith('comprehensive_scan', 'entity-1', { tenantId: 'tenant-1' });
+      expect(result.status).toBe('queued');
+      expect(result.score).toBeGreaterThan(0);
+      randomSpy.mockRestore();
     });
   });
 
   describe('VeracityScoringService', () => {
     it('should calculate veracity score correctly', async () => {
       // Mock Neo4j result for sources
-      mockRun.mockResolvedValueOnce({
+      mockRun.mockImplementationOnce(async () => ({
         records: [
           {
             get: (key: string) => {
@@ -91,8 +74,8 @@ describe('OSINT System', () => {
                return {};
             }
           }
-        ]
-      });
+        ],
+      }));
 
       const service = new VeracityScoringService();
       const result = await service.scoreEntity('entity-1');
@@ -107,9 +90,9 @@ describe('OSINT System', () => {
     });
 
     it('should handle no sources', async () => {
-      mockRun.mockResolvedValueOnce({
-        records: [{ get: (key: string) => (key === 'sources' ? [] : {}) }]
-      });
+      mockRun.mockImplementationOnce(async () => ({
+        records: [{ get: (key: string) => (key === 'sources' ? [] : {}) }],
+      }));
 
       const service = new VeracityScoringService();
       const result = await service.scoreEntity('entity-empty');

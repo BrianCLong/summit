@@ -15,7 +15,6 @@ from server.src.ai.utilities.ai_utilities import (
 
 
 class TestAiUtilitiesStubs(unittest.TestCase):
-
     def test_extract_text_from_document(self):
         result = extract_text_from_document("dummy.pdf")
         self.assertEqual(result, "Extracted text content.")

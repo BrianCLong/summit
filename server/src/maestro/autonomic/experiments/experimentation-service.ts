@@ -1,5 +1,5 @@
 
-import { Experiment, Assignment } from './types';
+import { Experiment, Assignment } from './types.js';
 import crypto from 'crypto';
 
 export class ExperimentationService {

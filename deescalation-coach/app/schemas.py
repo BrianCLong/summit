@@ -2,19 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
 
 
 class AnalyzeRequest(BaseModel):
     text: str
-    lang: Optional[str] = None
+    lang: str | None = None
 
 
 class ToneDiagnostic(BaseModel):
-    sentiment: Dict[str, float]
-    emotion: Dict[str, float]
-    toxicity: Dict[str, float]
+    sentiment: dict[str, float]
+    emotion: dict[str, float]
+    toxicity: dict[str, float]
     absolutist_score: float = Field(ge=0, le=1)
     caps_ratio: float = Field(ge=0, le=1)
 
@@ -25,12 +24,12 @@ class Rewrite(BaseModel):
 
 
 class Guidance(BaseModel):
-    tips: List[str]
-    evidence_prompts: List[str]
+    tips: list[str]
+    evidence_prompts: list[str]
 
 
 class AnalyzeResponse(BaseModel):
     rewrite: Rewrite
     diagnostic: ToneDiagnostic
     guidance: Guidance
-    policy_flags: List[str] = []
+    policy_flags: list[str] = []

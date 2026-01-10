@@ -1,0 +1,51 @@
+name: Policy Auto-Tuning CI
+
+on:
+  push:
+    paths:
+      - 'server/src/policy-engine/**'
+      - 'server/src/scripts/policy-propose.ts'
+      - '.github/workflows/policy-auto-tuning-ci.yml'
+  pull_request:
+    paths:
+      - 'server/src/policy-engine/**'
+      - 'server/src/scripts/policy-propose.ts'
+
+jobs:
+  test-engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install --frozen-lockfile
+
+      - name: Run Unit Tests
+        run: npx tsx server/src/policy-engine/__tests__/engine.test.ts
+
+      - name: Verify Golden Fixtures
+        run: |
+          # Generate proposals from fixed fixtures
+          npx tsx server/src/scripts/policy-propose.ts --input fixtures/security-evidence.json --out out/proposals/
+
+          # Check if expected proposals exist (simple existence check for now)
+          if [ ! -d "out/proposals" ]; then
+            echo "Failed to generate proposals"
+            exit 1
+          fi
+
+          # Check for forbidden targets in any generated patch (Safety Guardrail)
+          # We forbid patching .ts files or secrets
+          if grep -r "target.*\.ts" out/proposals/; then
+             echo "SECURITY VIOLATION: Proposal targeted a TypeScript file!"
+             exit 1
+          fi
+          if grep -r "target.*secrets" out/proposals/; then
+             echo "SECURITY VIOLATION: Proposal targeted a secrets file!"
+             exit 1
+          fi

@@ -1,0 +1,22 @@
+# Dependencies
+/node_modules
+/server/node_modules
+/web/node_modules
+
+# Build artifacts
+/dist
+/server/dist
+/web/dist
+
+# Database files
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.*
+!.env.example

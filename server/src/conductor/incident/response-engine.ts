@@ -2,8 +2,8 @@
 // Provides orchestrated response to security and operational incidents
 
 import { EventEmitter } from 'events';
-import { prometheusConductorMetrics } from '../observability/prometheus';
-import { conductorResilienceManager } from '../resilience/circuit-breaker';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
+import { conductorResilienceManager } from '../resilience/circuit-breaker.js';
 import Redis from 'ioredis';
 
 export interface IncidentContext {
@@ -22,13 +22,13 @@ export interface ResponseAction {
   id: string;
   name: string;
   type:
-    | 'isolate'
-    | 'throttle'
-    | 'failover'
-    | 'scale'
-    | 'notify'
-    | 'collect'
-    | 'remediate';
+  | 'isolate'
+  | 'throttle'
+  | 'failover'
+  | 'scale'
+  | 'notify'
+  | 'collect'
+  | 'remediate';
   priority: number;
   timeout: number;
   condition?: (context: IncidentContext) => boolean;
@@ -187,7 +187,7 @@ export class IncidentResponseEngine extends EventEmitter {
 
       // Set up escalation timer
       this.scheduleEscalation(incident, playbook);
-    } catch (error) {
+    } catch (error: any) {
       this.addTimelineEvent(incident, 'playbook_execution_failed', {
         error: error.message,
       });
@@ -234,7 +234,8 @@ export class IncidentResponseEngine extends EventEmitter {
 
       incident.status = 'contained';
       this.addTimelineEvent(incident, 'containment_successful');
-    } catch (error) {
+    } catch (error: any) {
+      console.error(`Failed to handle incident ${incident.context.id}:`, error);
       this.addTimelineEvent(incident, 'containment_failed', {
         error: error.message,
       });
@@ -273,7 +274,7 @@ export class IncidentResponseEngine extends EventEmitter {
       this.addTimelineEvent(incident, 'evidence_collected', {
         types: Object.keys(evidence),
       });
-    } catch (error) {
+    } catch (error: any) {
       this.addTimelineEvent(incident, 'evidence_collection_failed', {
         error: error.message,
       });
@@ -318,7 +319,12 @@ export class IncidentResponseEngine extends EventEmitter {
         'incident_action_executed',
         result.success,
       );
-    } catch (error) {
+    } catch (error: any) {
+      // Log action failure
+      this.emit('action_failed', {
+        action: action.name,
+        error: error.message,
+      });
       this.addTimelineEvent(incident, 'action_failed', {
         action: action.name,
         error: error.message,
@@ -331,7 +337,11 @@ export class IncidentResponseEngine extends EventEmitter {
           this.addTimelineEvent(incident, 'action_rolledback', {
             action: action.name,
           });
-        } catch (rollbackError) {
+        } catch (rollbackError: any) {
+          console.error(
+            `Failed fallback rollback during execution failure:`,
+            rollbackError,
+          );
           this.addTimelineEvent(incident, 'rollback_failed', {
             action: action.name,
             error: rollbackError.message,

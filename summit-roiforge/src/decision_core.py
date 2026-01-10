@@ -1,48 +1,53 @@
-from typing import List, Dict, Any
-import time
 import random
+import time
+from typing import Any
+
 
 class Agent:
     def __init__(self, name: str, role: str):
         self.name = name
         self.role = role
 
-    def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
+    def process(self, context: dict[str, Any]) -> dict[str, Any]:
         print(f"[{self.name}] Processing task...")
         # Simulation of processing time
         time.sleep(0.1)
         return {"status": "processed", "agent": self.name}
 
+
 class ApprovalAgent(Agent):
-    def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
+    def process(self, context: dict[str, Any]) -> dict[str, Any]:
         # Simulate approval logic
         risk_score = context.get("risk_score", 0)
         approved = risk_score < 80
         return {
             "status": "approved" if approved else "rejected",
             "agent": self.name,
-            "reason": "Risk score acceptable" if approved else "Risk too high"
+            "reason": "Risk score acceptable" if approved else "Risk too high",
         }
 
+
 class MonitorAgent(Agent):
-    def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
+    def process(self, context: dict[str, Any]) -> dict[str, Any]:
         # Simulate monitoring
         return {"status": "monitored", "anomalies": [], "agent": self.name}
 
+
 class ExecAgent(Agent):
-    def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
+    def process(self, context: dict[str, Any]) -> dict[str, Any]:
         # Simulate execution
         return {"status": "executed", "action": "adjust_price", "agent": self.name}
+
 
 class DecisionCore:
     def __init__(self):
         self.agents = {
             "approval": ApprovalAgent("ApproveBot", "approver"),
             "monitor": MonitorAgent("WatcherBot", "monitor"),
-            "exec": ExecAgent("DoerBot", "executor")
+            "exec": ExecAgent("DoerBot", "executor"),
         }
 
-    def run_workflow(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    def run_workflow(self, input_data: dict[str, Any]) -> dict[str, Any]:
         """
         Simulates a LangGraph/AutoGen workflow:
         Monitor -> Approval -> Execution
@@ -67,6 +72,7 @@ class DecisionCore:
             results["execution"] = {"status": "skipped", "reason": "Not approved"}
 
         return results
+
 
 if __name__ == "__main__":
     core = DecisionCore()

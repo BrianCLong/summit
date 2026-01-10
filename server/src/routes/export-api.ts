@@ -5,6 +5,7 @@ import pino from 'pino';
 import { opaClient } from '../services/opa-client';
 import { businessMetrics, addSpanAttributes } from '../observability/telemetry';
 import { costGuard } from '../services/cost-guard';
+import { provenanceLedger } from '../provenance/ledger.js';
 import type { AuthenticatedRequest } from './types.js';
 
 const router = Router();
@@ -56,6 +57,7 @@ const exportRequestSchema = z.object({
     approvals: z.array(z.string()).optional(),
     step_up_verified: z.boolean().optional(),
     pii_export_approved: z.boolean().optional(),
+    compliance_mode: z.boolean().optional(),
   }),
   case_id: z.string().optional(),
   claim_ids: z.array(z.string()).optional(),
@@ -151,6 +153,7 @@ router.post('/export', async (req: AuthenticatedRequest, res: Response) => {
       'export.purpose': exportRequest.context.purpose,
       'export.type': exportRequest.context.export_type,
       'export.source_count': exportRequest.dataset.sources.length,
+      'export.compliance_mode': Boolean(exportRequest.context.compliance_mode),
     });
 
     logger.info(
@@ -232,8 +235,9 @@ router.post('/export', async (req: AuthenticatedRequest, res: Response) => {
     );
 
     // Create audit trail
+    const opaDecisionId = policyDecision.decision_id || requestId;
     const auditTrail = {
-      decision_id: requestId,
+      decision_id: opaDecisionId,
       timestamp: new Date().toISOString(),
       policy_version: 'export-enhanced-1.0',
       evaluator: 'opa-policy-engine',
@@ -263,6 +267,32 @@ router.post('/export', async (req: AuthenticatedRequest, res: Response) => {
       metadata: { requestId, decision: policyDecision.action },
     });
 
+    await provenanceLedger.appendEntry({
+      tenantId: exportRequest.context.tenant_id,
+      timestamp: new Date(),
+      actionType: 'EXPORT_POLICY_DECISION',
+      resourceType: 'Export',
+      resourceId: requestId,
+      actorId: exportRequest.context.user_id,
+      actorType: 'user',
+      payload: {
+        action: 'export',
+        decision: policyDecision.action,
+        violations: policyDecision.violations,
+        redactions,
+        request: {
+          dataset: exportRequest.dataset,
+          context: exportRequest.context,
+        },
+      },
+      metadata: {
+        requestId,
+        policyDecisionId: opaDecisionId,
+        policyVersion: auditTrail.policy_version,
+        complianceMode: exportRequest.context.compliance_mode ?? false,
+      },
+    });
+
     const response: ExportResponse = {
       decision: {
         effect:
@@ -275,8 +305,8 @@ router.post('/export', async (req: AuthenticatedRequest, res: Response) => {
         violations: policyDecision.violations,
         risk_assessment: policyDecision.risk_assessment,
         redactions,
-        audit_trail: auditTrail,
-      },
+      audit_trail: auditTrail,
+    },
       cost_estimate: {
         estimated_cost: costCheck.estimatedCost,
         budget_remaining: costCheck.budgetRemaining,
@@ -303,7 +333,7 @@ router.post('/export', async (req: AuthenticatedRequest, res: Response) => {
     );
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ requestId, error }, 'Export request failed');
 
     if (error instanceof z.ZodError) {
@@ -464,7 +494,7 @@ router.post('/export/simulate', async (req: AuthenticatedRequest, res: Response)
     );
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ requestId, error }, 'Export simulation failed');
 
     if (error instanceof z.ZodError) {

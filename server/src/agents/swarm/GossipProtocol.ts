@@ -24,9 +24,9 @@ export class GossipProtocol {
     this.publisher = redis.duplicate();
     this.subscriber = redis.duplicate();
 
-    await this.subscriber.subscribe('swarm:gossip', 'swarm:consensus');
+    await this.subscriber!.subscribe('swarm:gossip', 'swarm:consensus');
 
-    this.subscriber.on('message', (channel, message) => {
+    this.subscriber!.on('message', (channel: string, message: string) => {
       try {
         const parsed: SwarmMessage = JSON.parse(message);
         // Don't process own messages
@@ -36,7 +36,7 @@ export class GossipProtocol {
         if (handler) {
           handler(parsed);
         }
-      } catch (err) {
+      } catch (err: any) {
         logger.error('Failed to parse gossip message', err);
       }
     });

@@ -1,5 +1,5 @@
-import { MigrationDestination } from '../Destination';
-import { MigrationContext } from '../types';
+import { MigrationDestination } from '../Destination.js';
+import { MigrationContext } from '../types.js';
 
 export class MockMigrationDestination implements MigrationDestination {
   async write(ctx: MigrationContext, records: any[]): Promise<void> {

@@ -9,14 +9,14 @@ risk_thresholds := {
   "high": 0.4
 }
 
-default decision = {
+default decision := {
   "allowed": false,
   "reason": "not_evaluated",
   "required_approvals": [],
   "flags": []
 }
 
-decision = out {
+decision := out if {
   subj := input.subject
   allowed_roles[subj.role]
   not invariants.plan_change_blocked(input)
@@ -34,18 +34,18 @@ decision = out {
   }
 }
 
-compute_delta(before, after) = {
+compute_delta(before, after) := {
   "price_changes": price_changes(before.prices, after.prices),
   "max_change": max_price_change(before.prices, after.prices),
   "discount_change": discount_delta(before.discounts, after.discounts),
   "new_skus": new_skus(before.prices, after.prices),
   "removed_skus": removed_skus(before.prices, after.prices)
-} {
+} if {
   before
   after
 }
 
-price_changes(before, after) = [change | sku := keys(after)[_];
+price_changes(before, after) := [change | sku := object.keys(after)[_];
   before_price := value_or_default(before[sku], after[sku]);
   after_price := after[sku];
   diff := after_price - before_price;
@@ -53,50 +53,49 @@ price_changes(before, after) = [change | sku := keys(after)[_];
   change := {"sku": sku, "before": before_price, "after": after_price, "delta": diff, "percent": pct}
 ]
 
-max_price_change(before, after) = max(abs_changes) {
+max_price_change(before, after) := max(abs_changes) if {
   abs_changes := [abs(c.percent) | c := price_changes(before, after)[_]]
-}
+  count(abs_changes) > 0
+} else := 0
 
-max_price_change(_, _) = 0 { true }
-
-percent_change(before, after) = pct {
+percent_change(before, after) := pct if {
   before == 0
   pct := 1
-} else = pct {
+} else := pct if {
   pct := (after - before) / before
 }
 
-value_or_default(v, fallback) = out {
+value_or_default(v, fallback) := out if {
   out := v
-} else = fallback
+} else := fallback
 
-risk_level(delta) = "high" {
+risk_level(delta) := "high" if {
   delta.max_change >= risk_thresholds["high"]
-} else = "medium" {
+} else := "medium" if {
   delta.max_change >= risk_thresholds["medium"]
-} else = "medium" {
+} else := "medium" if {
   count(delta.new_skus) > 0
-} else = "low"
+} else := "low"
 
-approvals_for("low") = []
-approvals_for("medium") = ["finance_manager"]
-approvals_for("high") = ["finance_manager", "cfo"]
+approvals_for("low") := []
+approvals_for("medium") := ["finance_manager"]
+approvals_for("high") := ["finance_manager", "cfo"]
 
 # Flags inform Switchboard dashboards about risky attributes.
-delta_flags(delta) = flags {
+delta_flags(delta) := flags if {
   base := []
-  high_change := {f | delta.max_change >= risk_thresholds["high"]; f := "high_revenue_impact"}
-  new_sku := {f | count(delta.new_skus) > 0; f := "new_sku_added"}
-  removed := {f | count(delta.removed_skus) > 0; f := "sku_removed"}
-  discount := {f | abs(delta.discount_change) > 0.1; f := "discount_shift"}
+  high_change := ["high_revenue_impact" | delta.max_change >= risk_thresholds["high"]]
+  new_sku := ["new_sku_added" | count(delta.new_skus) > 0]
+  removed := ["sku_removed" | count(delta.removed_skus) > 0]
+  discount := ["discount_shift" | abs(delta.discount_change) > 0.1]
   flags := array.concat(base, array.concat(array.concat(array.concat([], high_change), new_sku), array.concat(removed, discount)))
 }
 
-new_skus(before, after) = [sku | sku := keys(after)[_]; not before[sku]]
+new_skus(before, after) := [sku | sku := object.keys(after)[_]; not before[sku]]
 
-removed_skus(before, after) = [sku | sku := keys(before)[_]; not after[sku]]
+removed_skus(before, after) := [sku | sku := object.keys(before)[_]; not after[sku]]
 
-discount_delta(before, after) = diff {
+discount_delta(before, after) := diff if {
   before_default := value_or_default(before["default"], 0)
   after_default := value_or_default(after["default"], 0)
   diff := after_default - before_default

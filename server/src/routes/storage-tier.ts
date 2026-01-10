@@ -30,7 +30,7 @@ router.post('/recommend', async (req: AuthenticatedRequest, res: Response, next:
       success: true,
       data: recommendation
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error in storage recommendation', error);
     next(error);
   }

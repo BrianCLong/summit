@@ -216,7 +216,7 @@ router.post(
           },
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       const responseTime = Date.now() - startTime;
 
       logger.error(
@@ -269,7 +269,7 @@ router.get('/patterns', async (req: AuthenticatedRequest, res: Response) => {
       patterns,
       count: patterns.length,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error(
       {
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -306,7 +306,7 @@ router.get('/health', async (req: AuthenticatedRequest, res: Response) => {
       uptime: process.uptime(),
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error(
       {
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -342,7 +342,7 @@ router.post('/cache/clear', async (req: AuthenticatedRequest, res: Response) => 
       success: true,
       message: 'Query cache cleared successfully',
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error(
       {
         error: error instanceof Error ? error.message : 'Unknown error',

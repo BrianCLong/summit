@@ -68,7 +68,7 @@ export class ConflictUIController {
         hasActiveConflicts: activeConflicts.length > 0,
         resolutionHistory: history.resolutions.slice(0, 5), // Last 5 resolutions
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get conflict deltas', {
         error: error.message,
         entityId: req.params.entityId,
@@ -157,7 +157,7 @@ export class ConflictUIController {
         resolutions: auditTrail,
         message: `Successfully resolved ${resolutions.length} conflicts`,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to resolve conflicts', {
         error: error.message,
         entityId: req.params.entityId,
@@ -215,7 +215,7 @@ export class ConflictUIController {
           hasMore: history.totalConflicts > limit,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get conflict history', {
         error: error.message,
         entityId: req.params.entityId,
@@ -291,7 +291,7 @@ export class ConflictUIController {
               status: 'no_conflicts',
             });
           }
-        } catch (error) {
+        } catch (error: any) {
           results.push({
             entityId,
             conflictsResolved: 0,
@@ -307,13 +307,13 @@ export class ConflictUIController {
         totalConflictsResolved: totalResolved,
         results,
         summary: {
-          successful: results.filter((r) => r.status === 'success').length,
-          noConflicts: results.filter((r) => r.status === 'no_conflicts')
+          successful: results.filter((r: any) => r.status === 'success').length,
+          noConflicts: results.filter((r: any) => r.status === 'no_conflicts')
             .length,
-          errors: results.filter((r) => r.status === 'error').length,
+          errors: results.filter((r: any) => r.status === 'error').length,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Batch conflict resolution failed', {
         error: error.message,
       });

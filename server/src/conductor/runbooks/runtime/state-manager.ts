@@ -20,7 +20,7 @@ import {
   RunbookLogEventType,
   generateLogId,
   nowISO,
-} from './types';
+} from './types.js';
 
 // ============================================================================
 // Redis-backed Execution Repository
@@ -153,8 +153,8 @@ export class RedisRunbookExecutionRepository implements RunbookExecutionReposito
     const results = await pipeline.exec();
 
     return (results || [])
-      .filter((r) => r && r[1])
-      .map((r) => JSON.parse(r![1] as string));
+      .filter((r: any) => r && r[1])
+      .map((r: any) => JSON.parse(r![1] as string));
   }
 }
 

@@ -1,9 +1,11 @@
 import fs from 'fs/promises';
 import path from 'path';
 import yaml from 'js-yaml';
-import Ajv from 'ajv';
-import { logger } from '../utils/logger';
-import type { PromptConfig } from './types';
+import AjvModule from 'ajv';
+import { logger } from '../utils/logger.js';
+import type { PromptConfig } from './types.js';
+
+const Ajv = (AjvModule as any).default || AjvModule;
 
 export class PromptRegistry {
   private prompts: Map<string, PromptConfig> = new Map();
@@ -25,7 +27,7 @@ export class PromptRegistry {
       // Load all prompt templates
       const files = await fs.readdir(this.promptsDir);
       const yamlFiles = files.filter(
-        (f) => f.endsWith('.yaml') || f.endsWith('.yml'),
+        (f: string) => f.endsWith('.yaml') || f.endsWith('.yml'),
       );
 
       for (const file of yamlFiles) {
@@ -212,9 +214,9 @@ export class PromptRegistry {
               rendered.includes(expected),
             );
             if (!passed) {
-               missing = example.expected_contains.filter(
-                  (expected) => !rendered.includes(expected),
-                );
+              missing = example.expected_contains.filter(
+                (expected) => !rendered.includes(expected),
+              );
             }
           }
 

@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { SIEMEvent } from '../../siem/types';
-import { SIEMSink, SIEMSinkConfig } from '../../siem/sink';
-import logger from '../../utils/logger';
+import { SIEMEvent } from '../../siem/types.js';
+import { SIEMSink, SIEMSinkConfig } from '../../siem/sink.js';
+import logger from '../../utils/logger.js';
 
 export class SplunkSIEMSink implements SIEMSink {
   private config: SIEMSinkConfig;
@@ -51,7 +51,7 @@ export class SplunkSIEMSink implements SIEMSink {
         })
        });
        return true;
-    } catch (error) {
+    } catch (error: any) {
       return false;
     }
   }

@@ -1,5 +1,5 @@
 
-import { Backend } from './types';
+import { Backend } from './types.js';
 
 /**
  * @class AdaptiveRouter

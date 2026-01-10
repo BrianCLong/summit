@@ -1,0 +1,33 @@
+openapi: 3.0.3
+info:
+  title: MCB Benchmark API
+  version: 1.0.0
+paths:
+  /mcb/benchmark:
+    post:
+      summary: Run metric-contract benchmark
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contract:
+                  type: object
+                replayToken:
+                  type: string
+      responses:
+        '200':
+          description: Benchmark executed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  binder:
+                    type: object
+                  driftAlerts:
+                    type: array
+                    items:
+                      type: string

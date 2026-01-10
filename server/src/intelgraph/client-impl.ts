@@ -208,7 +208,7 @@ export class IntelGraphClientImpl implements IntelGraphClient {
         `,
         { runId }
       );
-      return result.records.map(r => {
+      return result.records.map((r: any) => {
         const props = r.get('t').properties;
         return {
           ...props,
@@ -252,7 +252,7 @@ export class IntelGraphClientImpl implements IntelGraphClient {
         `,
         { runId }
       );
-      return result.records.map(r => r.get('a').properties as Artifact);
+      return result.records.map((r: any) => r.get('a').properties as Artifact);
     } finally {
       await session.close();
     }
@@ -269,7 +269,7 @@ export class IntelGraphClientImpl implements IntelGraphClient {
         `,
         { taskId }
       );
-      return result.records.map(r => r.get('a').properties as Artifact);
+      return result.records.map((r: any) => r.get('a').properties as Artifact);
     } finally {
       await session.close();
     }

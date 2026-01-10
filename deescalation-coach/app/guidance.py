@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import List
-
 from .schemas import Guidance
 
 DEFAULT_TIPS = [
@@ -14,7 +12,7 @@ DEFAULT_TIPS = [
 ]
 
 
-def evidence_questions(text: str) -> List[str]:
+def evidence_questions(text: str) -> list[str]:
     return [
         "What primary source supports this claim?",
         "Are there independent sources that confirm it?",

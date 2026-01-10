@@ -1,6 +1,6 @@
 import ExcelJS from 'exceljs';
-import { ExportOptions, ReportExporter, normalizeTabularData } from './base';
-import { ReportArtifact } from '../types';
+import { ExportOptions, ReportExporter, normalizeTabularData } from './base.js';
+import { ReportArtifact } from '../types.js';
 
 export class ExcelExporter implements ReportExporter {
   readonly format = 'xlsx' as const;
@@ -11,7 +11,7 @@ export class ExcelExporter implements ReportExporter {
     const rows = normalizeTabularData(data);
     const headers = Object.keys(rows[0] || { value: 'value' });
     sheet.addRow(headers);
-    rows.forEach((row) => sheet.addRow(headers.map((key) => row[key] ?? '')));
+    rows.forEach((row: any) => sheet.addRow(headers.map((key) => row[key] ?? '')));
 
     if (options.watermark) {
       const watermarkSheet = workbook.addWorksheet('Watermark');

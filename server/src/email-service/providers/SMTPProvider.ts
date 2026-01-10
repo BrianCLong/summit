@@ -96,7 +96,7 @@ export class SMTPProvider extends EmailProvider {
           rejected: info.rejected,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
         recipientEmail,

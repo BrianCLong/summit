@@ -60,10 +60,26 @@ def generate_html_report(failing_cases, coverage_data):
             .color-7 {{ background-color: #d32f2f; }}
             .color-8 {{ background-color: #c62828; }}
             .color-9 {{ background-color: #b71c1c; }} /* Darkest red */
+            .severity-critical {{ background-color: #b71c1c; color: white; }}
+            .severity-high {{ background-color: #d32f2f; color: white; }}
+            .severity-medium {{ background-color: #f44336; color: white; }}
+            .severity-low {{ background-color: #ef9a9a; }}
+            .collapsible {{ cursor: pointer; }}
         </style>
+        <script>
+            function toggle_visibility(id) {{
+               var e = document.getElementById(id);
+               if(e.style.display == 'block')
+                  e.style.display = 'none';
+               else
+                  e.style.display = 'block';
+            }}
+        </script>
     </head>
     <body>
         <h1>Policy Fuzzer Report</h1>
+
+        {summary_section}
 
         <h2>Failing Cases</h2>
         {failing_cases_table}
@@ -81,13 +97,24 @@ def generate_html_report(failing_cases, coverage_data):
         failing_cases, key=lambda x: severity_order.get(x.get("severity", "Low"), 0), reverse=True
     )
 
+    # Generate summary section
+    summary_section = f"""
+    <h2>Summary</h2>
+    <p>Total Failing Cases: {len(failing_cases)}</p>
+    """
+
     # Generate failing cases table
     failing_cases_table = ""
     if sorted_failing_cases:
-        failing_cases_table = "<table><tr><th>Severity</th><th>Impact</th><th>Policy</th><th>Query</th><th>Reason</th><th>Reproducer</th></tr>"
+        failing_cases_table = "<table><tr><th>Severity</th><th>Impact</th><th>Policy & Query</th><th>Reason</th><th>Reproducer</th></tr>"
         for i, case in enumerate(sorted_failing_cases):
             reproducer_link = f'<a href="reproducer_{i}.py">reproducer_{i}.py</a>'
-            failing_cases_table += f"<tr><td>{case.get('severity', 'N/A')}</td><td>{case.get('impact', 'N/A')}</td><td><pre>{case['policy']}</pre></td><td><pre>{case['query']}</pre></td><td>{case['reason']}</td><td>{reproducer_link}</td></tr>"
+            policy_id = f"policy_{i}"
+            query_id = f"query_{i}"
+            collapsible_policy = f'<div class="collapsible" onclick="toggle_visibility(\'{policy_id}\')">View Policy</div><pre id="{policy_id}" style="display:none;">{case["policy"]}</pre>'
+            collapsible_query = f'<div class="collapsible" onclick="toggle_visibility(\'{query_id}\')">View Query</div><pre id="{query_id}" style="display:none;">{case["query"]}</pre>'
+            severity_class = f"severity-{case.get('severity', 'low').lower()}"
+            failing_cases_table += f'<tr><td class="{severity_class}">{case.get("severity", "N/A")}</td><td>{case.get("impact", "N/A")}</td><td>{collapsible_policy}{collapsible_query}</td><td>{case["reason"]}</td><td>{reproducer_link}</td></tr>'
         failing_cases_table += "</table>"
     else:
         failing_cases_table = "<p>No failing cases found.</p>"
@@ -103,6 +130,7 @@ def generate_html_report(failing_cases, coverage_data):
     with open(report_path, "w") as f:
         f.write(
             html_content.format(
+                summary_section=summary_section,
                 failing_cases_table=failing_cases_table,
                 coverage_heatmap_table=coverage_heatmap_table,
             )
@@ -124,7 +152,7 @@ def generate_reports(failing_cases, coverage_data):
     if failing_cases:
         with open(os.path.join(REPORTS_DIR, "failing_cases.txt"), "w") as f:
             for i, case in enumerate(failing_cases):
-                f.write(f"Failing Case {i+1}:\n")
+                f.write(f"Failing Case {i + 1}:\n")
                 f.write(f"  Severity: {case.get('severity', 'N/A')}\n")
                 f.write(f"  Impact: {case.get('impact', 'N/A')}\n")
                 f.write(f"  Policy: {case['policy']}\n")
@@ -139,7 +167,7 @@ def generate_reports(failing_cases, coverage_data):
         # Generate reproducer files
         for i, case in enumerate(failing_cases):
             with open(os.path.join(REPORTS_DIR, f"reproducer_{i}.py"), "w") as f:
-                f.write(f"# Reproducer for failing case {i+1}\n")
+                f.write(f"# Reproducer for failing case {i + 1}\n")
                 f.write("from datetime import datetime\n")
                 f.write(
                     "from governance_layers import check_consent, check_licenses, check_geo, check_retention, check_time_window\n"

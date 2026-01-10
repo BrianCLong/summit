@@ -2,20 +2,94 @@
  * Tests for authentication middleware
  */
 
-import { ensureAuthenticated, requirePermission } from '../auth';
-import AuthService from '../../services/AuthService';
-import { requestFactory, responseFactory, nextFactory } from '../../../../tests/factories/requestFactory';
-import { userFactory } from '../../../../tests/factories/userFactory';
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+import { randomUUID } from 'crypto';
+import { jest, describe, it, expect, beforeAll, beforeEach } from '@jest/globals';
+import AuthService from '../../services/AuthService.js';
 
-jest.mock('../../services/AuthService');
+let ensureAuthenticated: typeof import('../auth.js').ensureAuthenticated;
+let requirePermission: typeof import('../auth.js').requirePermission;
+const verifyTokenMock: any = jest.fn();
+const hasPermissionMock: any = jest.fn();
+
+const requestFactory = (options: any = {}) => {
+  const requestId = randomUUID();
+  return {
+    id: requestId,
+    headers: {
+      'content-type': 'application/json',
+      'user-agent': 'IntelGraph-Test/1.0',
+      'x-request-id': requestId,
+      ...(options.headers || {}),
+    },
+    body: options.body || {},
+    query: options.query || {},
+    params: options.params || {},
+    user: options.user,
+    tenant: options.tenant,
+    cookies: options.cookies || {},
+    ip: options.ip || '127.0.0.1',
+    method: options.method || 'GET',
+    url: options.url || '/',
+    path: options.path || '/',
+    get(name: string) {
+      return this.headers[name.toLowerCase()];
+    },
+  };
+};
+
+const responseFactory = (): any => {
+  const res: any = {
+    statusCode: 200,
+    headers: {} as Record<string, string>,
+    body: null,
+  };
+
+  res.status = jest.fn().mockReturnValue(res);
+  res.json = jest.fn().mockReturnValue(res);
+  res.send = jest.fn().mockReturnValue(res);
+  res.set = jest.fn().mockReturnValue(res);
+  res.setHeader = jest.fn((name: string, value: string) => {
+    res.headers[name] = value;
+    return res;
+  });
+  res.getHeader = jest.fn((name: string) => res.headers[name]);
+  res.end = jest.fn();
+
+  return res;
+};
+
+const nextFactory = () => jest.fn();
+
+const userFactory = (overrides: any = {}) => {
+  const id = randomUUID();
+  const role = overrides.role || 'analyst';
+  const tenantId = overrides.tenantId || 'test-tenant-1';
+  return {
+    id,
+    email: overrides.email || `testuser_${id.slice(0, 8)}@test.intelgraph.local`,
+    username: overrides.username || `testuser_${id.slice(0, 8)}`,
+    role,
+    tenantId,
+    defaultTenantId: overrides.defaultTenantId || tenantId,
+    permissions: overrides.permissions || [],
+    isActive: overrides.isActive ?? true,
+    scopes: overrides.scopes || [],
+    createdAt: overrides.createdAt || new Date(),
+    updatedAt: overrides.updatedAt || new Date(),
+  };
+};
 
 describe('Authentication Middleware', () => {
-  let mockAuthService: jest.Mocked<AuthService>;
+  beforeAll(async () => {
+    ({ ensureAuthenticated, requirePermission } = await import('../auth.js'));
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockAuthService = new AuthService() as jest.Mocked<AuthService>;
+    verifyTokenMock.mockReset();
+    hasPermissionMock.mockReset();
+    (AuthService.prototype as any).verifyToken = verifyTokenMock;
+    (AuthService.prototype as any).hasPermission = hasPermissionMock;
   });
 
   describe('ensureAuthenticated', () => {
@@ -27,11 +101,11 @@ describe('Authentication Middleware', () => {
       const res = responseFactory();
       const next = nextFactory();
 
-      mockAuthService.verifyToken = jest.fn().mockResolvedValue(user);
+      verifyTokenMock.mockResolvedValue(user);
 
       await ensureAuthenticated(req as any, res, next);
 
-      expect(mockAuthService.verifyToken).toHaveBeenCalledWith('valid-token');
+      expect(verifyTokenMock).toHaveBeenCalledWith('valid-token');
       expect(req.user).toEqual(user);
       expect(next).toHaveBeenCalled();
       expect(res.status).not.toHaveBeenCalled();
@@ -45,11 +119,11 @@ describe('Authentication Middleware', () => {
       const res = responseFactory();
       const next = nextFactory();
 
-      mockAuthService.verifyToken = jest.fn().mockResolvedValue(user);
+      verifyTokenMock.mockResolvedValue(user);
 
       await ensureAuthenticated(req as any, res, next);
 
-      expect(mockAuthService.verifyToken).toHaveBeenCalledWith('valid-token');
+      expect(verifyTokenMock).toHaveBeenCalledWith('valid-token');
       expect(req.user).toEqual(user);
       expect(next).toHaveBeenCalled();
     });
@@ -75,7 +149,7 @@ describe('Authentication Middleware', () => {
       const res = responseFactory();
       const next = nextFactory();
 
-      mockAuthService.verifyToken = jest.fn().mockResolvedValue(null);
+      verifyTokenMock.mockResolvedValue(null);
 
       await ensureAuthenticated(req as any, res, next);
 
@@ -91,7 +165,9 @@ describe('Authentication Middleware', () => {
       const res = responseFactory();
       const next = nextFactory();
 
-      mockAuthService.verifyToken = jest.fn().mockRejectedValue(new Error('Token verification failed'));
+      verifyTokenMock.mockRejectedValue(
+        new Error('Token verification failed'),
+      );
 
       await ensureAuthenticated(req as any, res, next);
 
@@ -122,12 +198,12 @@ describe('Authentication Middleware', () => {
       const res = responseFactory();
       const next = nextFactory();
 
-      mockAuthService.hasPermission = jest.fn().mockReturnValue(true);
+      hasPermissionMock.mockReturnValue(true);
 
       const middleware = requirePermission('write');
       middleware(req as any, res, next);
 
-      expect(mockAuthService.hasPermission).toHaveBeenCalledWith(user, 'write');
+      expect(hasPermissionMock).toHaveBeenCalledWith(user, 'write');
       expect(next).toHaveBeenCalled();
       expect(res.status).not.toHaveBeenCalled();
     });
@@ -138,12 +214,12 @@ describe('Authentication Middleware', () => {
       const res = responseFactory();
       const next = nextFactory();
 
-      mockAuthService.hasPermission = jest.fn().mockReturnValue(false);
+      hasPermissionMock.mockReturnValue(false);
 
       const middleware = requirePermission('write');
       middleware(req as any, res, next);
 
-      expect(mockAuthService.hasPermission).toHaveBeenCalledWith(user, 'write');
+      expect(hasPermissionMock).toHaveBeenCalledWith(user, 'write');
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith({ error: 'Forbidden' });
       expect(next).not.toHaveBeenCalled();
@@ -168,12 +244,12 @@ describe('Authentication Middleware', () => {
       const res = responseFactory();
       const next = nextFactory();
 
-      mockAuthService.hasPermission = jest.fn().mockReturnValue(true);
+      hasPermissionMock.mockReturnValue(true);
 
       const middleware = requirePermission('admin');
       middleware(req as any, res, next);
 
-      expect(mockAuthService.hasPermission).toHaveBeenCalledWith(adminUser, 'admin');
+      expect(hasPermissionMock).toHaveBeenCalledWith(adminUser, 'admin');
       expect(next).toHaveBeenCalled();
     });
   });

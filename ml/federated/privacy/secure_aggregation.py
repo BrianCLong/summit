@@ -9,7 +9,6 @@ import hashlib
 import logging
 import secrets
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -45,18 +44,16 @@ class SecureAggregator:
     ):
         self.threshold = threshold
         self.prime = self._generate_prime(prime_bits)
-        self._pending_shares: Dict[str, List[SecretShare]] = {}
+        self._pending_shares: dict[str, list[SecretShare]] = {}
 
-        logger.info(
-            f"Secure aggregator initialized - threshold={threshold}"
-        )
+        logger.info(f"Secure aggregator initialized - threshold={threshold}")
 
     def create_shares(
         self,
         secret: np.ndarray,
         node_id: str,
         num_shares: int,
-    ) -> List[SecretShare]:
+    ) -> list[SecretShare]:
         """
         Create secret shares using Shamir's Secret Sharing
 
@@ -69,9 +66,7 @@ class SecureAggregator:
             List of SecretShare objects
         """
         if num_shares < self.threshold:
-            raise ValueError(
-                f"num_shares ({num_shares}) must be >= threshold ({self.threshold})"
-            )
+            raise ValueError(f"num_shares ({num_shares}) must be >= threshold ({self.threshold})")
 
         shares = []
         flat_secret = secret.flatten()
@@ -79,9 +74,7 @@ class SecureAggregator:
         # Generate random polynomial coefficients
         coefficients = [flat_secret]
         for _ in range(self.threshold - 1):
-            coef = np.array([
-                secrets.randbelow(self.prime) for _ in range(len(flat_secret))
-            ])
+            coef = np.array([secrets.randbelow(self.prime) for _ in range(len(flat_secret))])
             coefficients.append(coef)
 
         # Evaluate polynomial at different points
@@ -111,8 +104,8 @@ class SecureAggregator:
 
     def reconstruct_secret(
         self,
-        shares: List[SecretShare],
-        original_shape: Tuple[int, ...],
+        shares: list[SecretShare],
+        original_shape: tuple[int, ...],
     ) -> np.ndarray:
         """
         Reconstruct secret from shares using Lagrange interpolation
@@ -125,15 +118,11 @@ class SecureAggregator:
             Reconstructed secret
         """
         if len(shares) < self.threshold:
-            raise ValueError(
-                f"Need at least {self.threshold} shares, got {len(shares)}"
-            )
+            raise ValueError(f"Need at least {self.threshold} shares, got {len(shares)}")
 
         # Verify commitments
         for share in shares:
-            expected = self._create_commitment(
-                share.value.flatten(), share.node_id, share.share_id
-            )
+            expected = self._create_commitment(share.value.flatten(), share.node_id, share.share_id)
             if expected != share.commitment:
                 raise ValueError(f"Share {share.share_id} failed commitment check")
 
@@ -163,9 +152,9 @@ class SecureAggregator:
 
     def aggregate_with_secret_sharing(
         self,
-        updates: Dict[str, np.ndarray],
+        updates: dict[str, np.ndarray],
         dropout_tolerance: float = 0.3,
-    ) -> Optional[np.ndarray]:
+    ) -> np.ndarray | None:
         """
         Securely aggregate updates using secret sharing
 
@@ -183,13 +172,11 @@ class SecureAggregator:
         num_nodes = len(node_ids)
 
         if num_nodes < self.threshold:
-            logger.warning(
-                f"Insufficient nodes ({num_nodes}) for secure aggregation"
-            )
+            logger.warning(f"Insufficient nodes ({num_nodes}) for secure aggregation")
             return None
 
         # Each node creates shares for all other nodes
-        all_shares: Dict[str, List[SecretShare]] = {nid: [] for nid in node_ids}
+        all_shares: dict[str, list[SecretShare]] = {nid: [] for nid in node_ids}
 
         for node_id, update in updates.items():
             shares = self.create_shares(update, node_id, num_nodes)
@@ -207,7 +194,7 @@ class SecureAggregator:
             return None
 
         # Each surviving node sums their received shares
-        local_sums: Dict[str, np.ndarray] = {}
+        local_sums: dict[str, np.ndarray] = {}
 
         for node_id in surviving_nodes:
             node_shares = all_shares[node_id]
@@ -226,9 +213,7 @@ class SecureAggregator:
                 value=local_sums[node_id],
                 threshold=self.threshold,
                 total_shares=len(surviving_nodes),
-                commitment=self._create_commitment(
-                    local_sums[node_id].flatten(), node_id, i + 1
-                ),
+                commitment=self._create_commitment(local_sums[node_id].flatten(), node_id, i + 1),
             )
             aggregate_shares.append(share)
 
@@ -243,7 +228,7 @@ class SecureAggregator:
 
     def pairwise_masking_aggregate(
         self,
-        updates: Dict[str, np.ndarray],
+        updates: dict[str, np.ndarray],
     ) -> np.ndarray:
         """
         Aggregate using pairwise random masks
@@ -287,8 +272,8 @@ class SecureAggregator:
         # Use a known large prime for efficiency
         known_primes = {
             127: 2**127 - 1,  # Mersenne prime
-            61: 2**61 - 1,    # Mersenne prime
-            31: 2**31 - 1,    # Mersenne prime
+            61: 2**61 - 1,  # Mersenne prime
+            31: 2**31 - 1,  # Mersenne prime
         }
         return known_primes.get(bits, 2**61 - 1)
 

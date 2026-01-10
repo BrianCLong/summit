@@ -1,4 +1,4 @@
-import { evidenceProvenanceService } from '../../maestro/evidence/provenance-service';
+import { evidenceProvenanceService } from '../../maestro/evidence/provenance-service.js';
 import { saveEvidenceBundle } from '../../db/repositories/evidenceRepo.js';
 
 export const evidenceResolvers = {

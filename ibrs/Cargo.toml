@@ -8,12 +8,12 @@ description = "Immutable Business Rules Sandbox deterministic rule engine"
 [dependencies]
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-thiserror = "1"
+thiserror = "2"
 clap = { version = "4", features = ["derive"] }
-notify = "6"
+notify = "8"
 tokio = { version = "1", features = ["full"] }
 arc-swap = "1"
-config = "0.13"
+config = "0.15"
 anyhow = "1"
 
 [dev-dependencies]

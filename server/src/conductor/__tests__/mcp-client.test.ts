@@ -145,9 +145,13 @@ describe('MCPClient', () => {
       expect(sentMessage.params.name).toBe('test.tool');
 
       // Simulate response
-      const messageHandler = mockWs.on.mock.calls.find(
+      const messageCall = mockWs.on.mock.calls.find(
         (call) => call[0] === 'message',
-      )[1] as (data: any) => void;
+      );
+      if (!messageCall) {
+        throw new Error('Expected message handler to be registered');
+      }
+      const messageHandler = messageCall[1] as (data: any) => void;
       const response = {
         jsonrpc: '2.0',
         id: sentMessage.id,
@@ -169,9 +173,13 @@ describe('MCPClient', () => {
       );
 
       // Simulate error response
-      const messageHandler = mockWs.on.mock.calls.find(
+      const messageCall = mockWs.on.mock.calls.find(
         (call) => call[0] === 'message',
-      )[1] as (data: any) => void;
+      );
+      if (!messageCall) {
+        throw new Error('Expected message handler to be registered');
+      }
+      const messageHandler = messageCall[1] as (data: any) => void;
       const errorResponse = {
         jsonrpc: '2.0',
         id: sentMessage.id,
@@ -247,9 +255,13 @@ describe('MCPClient', () => {
       );
       expect(sentMessage.method).toBe('server/info');
 
-      const messageHandler = mockWs.on.mock.calls.find(
+      const messageCall = mockWs.on.mock.calls.find(
         (call) => call[0] === 'message',
-      )[1] as (data: any) => void;
+      );
+      if (!messageCall) {
+        throw new Error('Expected message handler to be registered');
+      }
+      const messageHandler = messageCall[1] as (data: any) => void;
       const response = {
         jsonrpc: '2.0',
         id: sentMessage.id,

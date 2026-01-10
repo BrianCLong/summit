@@ -22,6 +22,7 @@ import { authRateLimiter, loginRateLimiter, registerRateLimiter, passwordResetRa
 import { ensureAuthenticated } from '../middleware/auth.js';
 import * as z from 'zod';
 import logger from '../utils/logger.js';
+import { CanonicalError } from '../errors/canonical.js';
 
 const router = Router();
 const authService = new AuthService();
@@ -96,7 +97,7 @@ function validateBody<T extends z.ZodSchema>(schema: T) {
       }
       req.body = result.data;
       next();
-    } catch (error) {
+    } catch (error: any) {
       return res.status(400).json({
         error: 'Invalid request body',
         code: 'INVALID_JSON',
@@ -149,7 +150,7 @@ router.post(
         refreshToken: result.refreshToken,
         expiresIn: result.expiresIn,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Registration failed',
         error: error instanceof Error ? error.message : String(error),
@@ -215,7 +216,7 @@ router.post(
         refreshToken: result.refreshToken,
         expiresIn: result.expiresIn,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({
         message: 'Login failed',
         error: error instanceof Error ? error.message : String(error),
@@ -247,10 +248,7 @@ router.post(
       const result = await authService.refreshAccessToken(refreshToken);
 
       if (!result) {
-        return res.status(401).json({
-          error: 'Invalid or expired refresh token',
-          code: 'INVALID_REFRESH_TOKEN',
-        });
+        throw new CanonicalError('AUTH_EXPIRED_TOKEN');
       }
 
       logger.info({
@@ -263,7 +261,7 @@ router.post(
         token: result.token,
         refreshToken: result.refreshToken,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Token refresh failed',
         error: error instanceof Error ? error.message : String(error),
@@ -302,7 +300,7 @@ router.post(
       res.json({
         message: 'Logout successful',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Logout failed',
         error: error instanceof Error ? error.message : String(error),
@@ -344,7 +342,7 @@ router.get(
           updatedAt: user.updatedAt,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to get user profile',
         error: error instanceof Error ? error.message : String(error),
@@ -388,7 +386,7 @@ router.post(
       res.json({
         message: 'If an account with that email exists, a password reset link has been sent',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Password reset request failed',
         error: error instanceof Error ? error.message : String(error),
@@ -426,7 +424,7 @@ router.post(
       res.json({
         message: 'Password reset successful. Please log in with your new password.',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({
         message: 'Password reset failed',
         error: error instanceof Error ? error.message : String(error),
@@ -477,7 +475,7 @@ router.post(
       res.json({
         message: 'Password changed successfully',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({
         message: 'Password change failed',
         error: error instanceof Error ? error.message : String(error),
@@ -537,7 +535,7 @@ router.get(
           role: user.role,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       res.status(401).json({
         valid: false,
         error: 'Token verification failed',
@@ -578,7 +576,7 @@ router.post(
       res.json({
         message: 'Token revoked successfully',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Token revocation failed',
         error: error instanceof Error ? error.message : String(error),

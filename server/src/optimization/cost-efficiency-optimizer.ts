@@ -215,7 +215,7 @@ export class CostEfficiencyOptimizer extends EventEmitter {
         costPrediction,
         optimizationApplied: optimizations,
       };
-    } catch (error) {
+    } catch (error: any) {
       this.emit('modelSelectionError', {
         error: error.message,
         criteria: criteria.taskType,
@@ -600,7 +600,7 @@ export class CostEfficiencyOptimizer extends EventEmitter {
             this.modelProfiles.set(profile.id, profile);
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.warn('Failed to load cached model profiles:', error);
       }
     }
@@ -892,7 +892,7 @@ export class CostEfficiencyOptimizer extends EventEmitter {
             recentMetrics.avgResponseTime || profile.averageLatency;
           profile.lastUpdated = Date.now();
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.warn(`Failed to update profile for model ${modelId}:`, error);
       }
     }

@@ -14,7 +14,10 @@ import type {
   ClaimEvidenceLink,
 } from '../types/provenance-beta.js';
 
-describe('Provenance Ledger Enhancements', () => {
+const runAcceptance = process.env.RUN_ACCEPTANCE === 'true';
+const describeIf = runAcceptance ? describe : describe.skip;
+
+describeIf('Provenance Ledger Enhancements', () => {
   let provenanceLedger: ProvenanceLedgerBetaService;
   let testLicense: License;
   let testSource: Source;

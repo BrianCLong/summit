@@ -1,10 +1,11 @@
 from __future__ import annotations
-from dataclasses import dataclass
-from typing import Optional, Literal
+
 import os
+from dataclasses import dataclass
+from typing import Literal
 
 try:
-    from openai import OpenAI, AsyncOpenAI
+    from openai import AsyncOpenAI, OpenAI
 except ImportError:
     OpenAI = None
     AsyncOpenAI = None
@@ -38,9 +39,7 @@ class LLM:
         elif config.provider == "anthropic":
             if anthropic is None:
                 raise ImportError("anthropic package not installed.")
-            self.client = anthropic.AsyncAnthropic(
-                api_key=os.environ.get("ANTHROPIC_API_KEY")
-            )
+            self.client = anthropic.AsyncAnthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
     async def call(self, prompt: str) -> str:
         """Unified interface to call either OpenAI or Anthropic."""

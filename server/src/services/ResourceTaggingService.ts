@@ -76,7 +76,9 @@ export interface TaggingPolicy {
 }
 
 export class ResourceTaggingService {
-  private db: ManagedPostgresPool = getPostgresPool();
+  private get db(): ManagedPostgresPool {
+    return getPostgresPool();
+  }
   private tagCache = new Map<string, ResourceTag[]>();
   private cacheTTL = 300000; // 5 minutes
   private defaultPolicy: TaggingPolicy = {
@@ -86,9 +88,18 @@ export class ResourceTaggingService {
       TagCategory.COST_CENTER,
     ],
   };
+  private initialized = false;
 
-  constructor() {
-    this.initializeDatabase();
+  constructor() { }
+
+  private async ensureInitialized(): Promise<void> {
+    if (this.initialized) return;
+    try {
+      await this.initializeDatabase();
+      this.initialized = true;
+    } catch (error) {
+      logger.warn('Failed to initialize ResourceTagging DB, will retry', error);
+    }
   }
 
   /**
@@ -141,7 +152,7 @@ export class ResourceTaggingService {
       `);
 
       logger.info('Resource tagging database initialized');
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to initialize resource tagging database');
       throw error;
     }
@@ -155,6 +166,7 @@ export class ResourceTaggingService {
     resourceType: ResourceType,
     tags: ResourceTag[],
   ): Promise<void> {
+    await this.ensureInitialized();
     try {
       // Validate required tags
       this.validateTags(tags);
@@ -189,7 +201,7 @@ export class ResourceTaggingService {
         { resourceId, resourceType, tagCount: tags.length },
         'Resource tagged',
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, resourceId, resourceType }, 'Failed to tag resource');
       throw error;
     }
@@ -209,6 +221,7 @@ export class ResourceTaggingService {
       return cached;
     }
 
+    await this.ensureInitialized();
     try {
       const result = await this.db.read(
         `SELECT tag_category, tag_key, tag_value, metadata
@@ -217,7 +230,7 @@ export class ResourceTaggingService {
         [resourceId, resourceType],
       );
 
-      const tags: ResourceTag[] = result.rows.map((row) => ({
+      const tags: ResourceTag[] = result.rows.map((row: any) => ({
         category: row.tag_category,
         key: row.tag_key,
         value: row.tag_value,
@@ -227,7 +240,7 @@ export class ResourceTaggingService {
       this.tagCache.set(cacheKey, tags);
 
       return tags;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, resourceId, resourceType }, 'Failed to get resource tags');
       return [];
     }
@@ -237,6 +250,7 @@ export class ResourceTaggingService {
    * Record resource cost with associated tags
    */
   async recordResourceCost(resource: TaggedResource): Promise<void> {
+    await this.ensureInitialized();
     try {
       // Ensure resource is tagged
       if (!resource.tags || resource.tags.length === 0) {
@@ -269,7 +283,7 @@ export class ResourceTaggingService {
         },
         'Resource cost recorded',
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, resource }, 'Failed to record resource cost');
       throw error;
     }
@@ -283,6 +297,7 @@ export class ResourceTaggingService {
     startDate: Date,
     endDate: Date,
   ): Promise<CostAllocation[]> {
+    await this.ensureInitialized();
     try {
       const result = await this.db.read(
         `SELECT
@@ -338,7 +353,7 @@ export class ResourceTaggingService {
       }
 
       return allocationsArray;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, dimension, startDate, endDate }, 'Failed to get cost allocation');
       throw error;
     }
@@ -386,7 +401,7 @@ export class ResourceTaggingService {
       if (change > 0.1) return 'increasing';
       if (change < -0.1) return 'decreasing';
       return 'stable';
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to calculate trend');
       return 'stable';
     }
@@ -399,6 +414,7 @@ export class ResourceTaggingService {
     startDate: Date,
     endDate: Date,
   ): Promise<Array<{ resourceType: string; totalCost: number; count: number }>> {
+    await this.ensureInitialized();
     try {
       const result = await this.db.read(
         `SELECT
@@ -412,12 +428,12 @@ export class ResourceTaggingService {
         [startDate, endDate],
       );
 
-      return result.rows.map((row) => ({
+      return result.rows.map((row: any) => ({
         resourceType: row.resource_type,
         totalCost: parseFloat(row.total_cost),
         count: parseInt(row.count),
       }));
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, startDate, endDate }, 'Failed to get cost summary');
       throw error;
     }
@@ -457,6 +473,7 @@ export class ResourceTaggingService {
     byCostCenter: CostAllocation[];
     byResourceType: Array<{ resourceType: string; totalCost: number; count: number }>;
   }> {
+    await this.ensureInitialized();
     try {
       const [byEnvironment, byTeam, byService, byCostCenter, byResourceType] =
         await Promise.all([
@@ -477,7 +494,7 @@ export class ResourceTaggingService {
         byCostCenter,
         byResourceType,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, startDate, endDate }, 'Failed to generate cost report');
       throw error;
     }
@@ -490,6 +507,7 @@ export class ResourceTaggingService {
     resourceType?: ResourceType,
     limit: number = 100,
   ): Promise<Array<{ resourceId: string; resourceType: string; lastSeen: Date }>> {
+    await this.ensureInitialized();
     try {
       const query = resourceType
         ? `SELECT DISTINCT rc.resource_id, rc.resource_type, MAX(rc.timestamp) as last_seen
@@ -513,12 +531,12 @@ export class ResourceTaggingService {
       const params = resourceType ? [resourceType, limit] : [limit];
       const result = await this.db.read(query, params);
 
-      return result.rows.map((row) => ({
+      return result.rows.map((row: any) => ({
         resourceId: row.resource_id,
         resourceType: row.resource_type,
         lastSeen: row.last_seen,
       }));
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, resourceType }, 'Failed to get untagged resources');
       throw error;
     }

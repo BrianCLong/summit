@@ -1,7 +1,7 @@
 import { PubSub } from 'graphql-subscriptions';
 import { withFilter } from 'graphql-subscriptions';
-import { RedisService } from '../../cache/redis';
-import logger from '../../utils/logger';
+import { RedisService } from '../../cache/redis.js';
+import logger from '../../utils/logger.js';
 
 export interface CoherenceUpdate {
   tenantId: string;
@@ -69,7 +69,7 @@ class CoherenceSubscriptionManager {
             this.pubsub.publish('NARRATIVE_UPDATED', data);
             break;
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Failed to parse Redis subscription message', {
           error,
           channel,
@@ -165,7 +165,7 @@ class CoherenceSubscriptionManager {
         tenantId: update.tenantId,
         changeType: update.changeType,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to publish coherence update', { error, update });
     }
   }
@@ -180,7 +180,7 @@ class CoherenceSubscriptionManager {
         activityId: update.activityId,
         changeType: update.changeType,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to publish activity update', { error, update });
     }
   }
@@ -195,7 +195,7 @@ class CoherenceSubscriptionManager {
         narrativeId: update.narrativeId,
         changeType: update.changeType,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to publish narrative update', { error, update });
     }
   }

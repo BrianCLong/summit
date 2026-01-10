@@ -18,6 +18,7 @@
  * - Full session context (IP, user agent, correlation ID)
  *
  * @module cases/domain/CaseAuditLog
+ * @note This module is essential for the "Case spaces with immutable audit" feature.
  */
 
 import { createHash, randomUUID } from 'crypto';
@@ -125,7 +126,7 @@ export class CaseAuditLogRepository implements ICaseAuditLogRepository {
       for (const row of result.rows) {
         this.lastHashCache.set(row.case_id, row.hash);
       }
-    } catch (error) {
+    } catch (error: any) {
       // Table might not exist yet - that's okay
       if ((error as NodeJS.ErrnoException).code !== '42P01') {
         throw error;

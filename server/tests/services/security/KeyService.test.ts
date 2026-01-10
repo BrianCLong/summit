@@ -1,13 +1,18 @@
-import { jest } from '@jest/globals';
+import { jest, beforeAll } from '@jest/globals';
 
-// Mock config BEFORE importing KeyService
-jest.mock('../../../src/config/secrets.js', () => ({
-  default: {
-    ENCRYPTION_KEY: '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef' // 64 hex chars
-  }
-}));
+let KeyService: typeof import('../../../src/services/security/KeyService.js').KeyService;
 
-import { KeyService } from '../../../src/services/security/KeyService.js';
+beforeAll(async () => {
+  process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
+  process.env.NEO4J_PASSWORD = 'password';
+  process.env.JWT_SECRET = 'x'.repeat(32);
+  process.env.JWT_REFRESH_SECRET = 'y'.repeat(32);
+  process.env.SESSION_SECRET = 'z'.repeat(32);
+  process.env.ENCRYPTION_KEY =
+    '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+
+  ({ KeyService } = await import('../../../src/services/security/KeyService.js'));
+});
 
 describe('KeyService', () => {
   describe('generateApiKey', () => {

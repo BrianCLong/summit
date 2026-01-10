@@ -1,0 +1,153 @@
+{
+  "title": "Summit Golden Observability Dashboard",
+  "schemaVersion": 39,
+  "tags": ["summit", "golden", "observability"],
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "type": "query",
+        "datasource": "$datasource",
+        "query": "label_values(http_requests_total, service)",
+        "refresh": 1
+      },
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "refresh": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Request Rate",
+      "datasource": "$datasource",
+      "targets": [
+        {
+          "expr": "sum by (code, method) (rate(http_requests_total{service=\"$service\"}[5m]))",
+          "legendFormat": "{{method}} {{code}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Rate (5xx)",
+      "datasource": "$datasource",
+      "targets": [
+        {
+          "expr": "sum(rate(http_request_errors_total{service=\"$service\"}[5m]))",
+          "legendFormat": "errors/s"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "reqps" },
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [{ "color": "green" }, { "value": 0.02, "color": "red" }]
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Latency (P50/P95/P99)",
+      "datasource": "$datasource",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(http_request_duration_ms_bucket{service=\"$service\"}[5m])))",
+          "legendFormat": "p50"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_ms_bucket{service=\"$service\"}[5m])))",
+          "legendFormat": "p95"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(http_request_duration_ms_bucket{service=\"$service\"}[5m])))",
+          "legendFormat": "p99"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
+      "type": "stat",
+      "title": "Saturation",
+      "datasource": "$datasource",
+      "targets": [
+        {
+          "expr": "avg(resource_saturation_ratio{service=\"$service\"})",
+          "legendFormat": "saturation"
+        }
+      ],
+      "options": { "reduceOptions": { "calcs": ["last"], "values": false } },
+      "fieldConfig": {
+        "defaults": {
+          "max": 1,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [{ "color": "green" }, { "value": 0.85, "color": "red" }]
+          }
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Queue Depth",
+      "datasource": "$datasource",
+      "targets": [
+        {
+          "expr": "max by (queue) (queue_depth{service=\"$service\"})",
+          "legendFormat": "queue {{queue}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Retries & Cache Hit",
+      "datasource": "$datasource",
+      "targets": [
+        {
+          "expr": "rate(http_retries_total{service=\"$service\"}[5m])",
+          "legendFormat": "retries/s"
+        },
+        {
+          "expr": "rate(cache_hits_total{service=\"$service\"}[5m])",
+          "legendFormat": "cache hits/s"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Top Errors",
+      "datasource": "$datasource",
+      "targets": [
+        {
+          "expr": "topk(5, rate(http_request_errors_total{service=\"$service\"}[15m]))",
+          "legendFormat": "{{code}}"
+        }
+      ],
+      "options": { "showHeader": true }
+    },
+    {
+      "type": "stat",
+      "title": "Runbook",
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "name"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": [
+            { "url": "/d/runbook?var-service=$service", "title": "Open runbook" },
+            { "url": "https://pagerduty.com", "title": "Page on-call" }
+          ]
+        }
+      }
+    }
+  ]
+}

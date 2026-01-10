@@ -129,7 +129,32 @@ type LicenseClause = z.infer<typeof LicenseClauseSchema>;
 type DataLicense = z.infer<typeof DataLicenseSchema>;
 type AuthorityBinding = z.infer<typeof AuthorityBindingSchema>;
 type QueryPlan = z.infer<typeof QueryPlanSchema>;
-type PolicyDecision = z.infer<typeof PolicyDecisionSchema>;
+export type PolicyDecision = z.infer<typeof PolicyDecisionSchema>;
+
+function sortJson(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => sortJson(item));
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.entries(value as Record<string, unknown>)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .reduce<Record<string, unknown>>((acc, [key, val]) => {
+        const next = sortJson(val);
+        if (next !== undefined) {
+          acc[key] = next;
+        }
+        return acc;
+      }, {});
+  }
+
+  return value === undefined ? undefined : value;
+}
+
+export function serializePolicyDecision(decision: PolicyDecision): string {
+  const sanitized = sortJson(decision);
+  return JSON.stringify(sanitized);
+}
 
 interface PolicyEvaluationResult {
   queryId: string;

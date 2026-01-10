@@ -1,3 +1,3 @@
-export * from './types';
-export * from './harness';
-export * from './service';
+export * from './types.js';
+export * from './harness.js';
+export * from './service.js';

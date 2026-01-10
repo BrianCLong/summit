@@ -1,7 +1,7 @@
 // Metrics and Observability for MoE Conductor
 // Provides Prometheus metrics, health checks, and performance monitoring
 
-import { ExpertType } from '../types';
+import { ExpertType } from '../types/index.js';
 
 export interface MetricsRegistry {
   // Counters

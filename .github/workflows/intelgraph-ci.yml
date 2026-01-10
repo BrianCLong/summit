@@ -1,0 +1,70 @@
+# .github/workflows/intelgraph-ci.yml
+name: IntelGraph CI
+
+on:
+  pull_request:
+    paths:
+      - "server/**"
+      - "policy/**"
+  push:
+    branches:
+      - main
+    paths:
+      - "server/**"
+      - "policy/**"
+
+jobs:
+  build-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint and Format Check
+        run: |
+          pnpm --filter intelgraph-server run lint
+          # Format check is non-blocking until codebase is fully formatted
+          pnpm --filter intelgraph-server run format:check || true
+
+      - name: Set up OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          opa-version: latest
+
+      - name: Build OPA Policy Bundle
+        run: |
+          # Build rego bundle (not WASM) since WASM with optimization requires entrypoints
+          opa build --bundle \
+            --output policy/bundle.tar.gz \
+            policy/
+
+      - name: Upload OPA Bundle as Artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: opa-bundle
+          path: policy/bundle.tar.gz
+          retention-days: 7
+
+      - name: Container Hardening Audit
+        run: |
+          chmod +x security-hardening/harden_container.sh
+          ./security-hardening/harden_container.sh Dockerfile
+
+  security-gate:
+    name: Security Gate
+    needs: build-and-verify
+    uses: ./.github/workflows/ci-security.yml
+    with:
+      run_dast: false
+      run_snyk: false
+    secrets: inherit

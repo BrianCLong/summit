@@ -1,11 +1,10 @@
+import sys
 from math import isclose
 from pathlib import Path
-import sys
 
 sys.path.append(str(Path(__file__).resolve().parents[1] / "python"))
 
 import pytest
-
 from fae import (
     SecureAggregator,
     apply_dp_noise,
@@ -17,7 +16,6 @@ from fae import (
     slice_metrics,
     verify_report,
 )
-
 
 RAW_EVENTS = [
     {
@@ -104,9 +102,7 @@ def test_shapley_and_markov_match_raw_counts(aggregator):
     assert shapley_attribution(aggregated) == pytest.approx(
         shapley_attribution(raw_counts), rel=1e-6
     )
-    assert markov_attribution(aggregated) == pytest.approx(
-        markov_attribution(raw_counts), rel=1e-6
-    )
+    assert markov_attribution(aggregated) == pytest.approx(markov_attribution(raw_counts), rel=1e-6)
 
 
 def test_dp_noise_changes_results_predictably(aggregator):
@@ -119,9 +115,7 @@ def test_dp_noise_changes_results_predictably(aggregator):
     ]
     noisy = apply_dp_noise(values, epsilon=0.5, seed=42)
     assert noisy != pytest.approx(values)
-    assert noisy == pytest.approx(
-        apply_dp_noise(values, epsilon=0.5, seed=42), rel=1e-9
-    )
+    assert noisy == pytest.approx(apply_dp_noise(values, epsilon=0.5, seed=42), rel=1e-9)
 
 
 def test_reports_are_deterministic(aggregator):
@@ -147,4 +141,3 @@ def test_cohort_slice(aggregator):
     cohort = next(iter(sliced.values()))
     expected = tuple(sorted((("region", "na"), ("segment", "a"))))
     assert cohort.cohort == expected
-

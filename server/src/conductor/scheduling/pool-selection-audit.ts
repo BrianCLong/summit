@@ -49,7 +49,7 @@ export async function recordPoolSelectionAudit(
         entry.purpose || null,
       ],
     );
-  } catch (error) {
+  } catch (error: any) {
     console.warn('Failed to record pool selection audit', {
       error: error instanceof Error ? error.message : error,
       requestId: entry.requestId,

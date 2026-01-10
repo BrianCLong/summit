@@ -4,11 +4,11 @@
  * Exports all v0.4.0 transcendent intelligence resolvers
  */
 
-import { transcendentResolvers } from './transcendent-resolvers';
+import { transcendentResolvers } from './transcendent-resolvers.js';
 import { mergeResolvers } from '@graphql-tools/merge';
 
 // Merge all v0.4.0 resolvers
 export const v040Resolvers = mergeResolvers([transcendentResolvers]);
 
 // Export individual resolver modules for selective importing
-export { transcendentResolvers } from './transcendent-resolvers';
+export { transcendentResolvers } from './transcendent-resolvers.js';

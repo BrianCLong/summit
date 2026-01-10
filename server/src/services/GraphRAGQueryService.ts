@@ -20,6 +20,7 @@ import { QueryPreviewService, type CreatePreviewInput, type QueryPreview, type E
 import { GlassBoxRunService, type GlassBoxRun } from './GlassBoxRunService.js';
 import { NlToCypherService } from '../ai/nl-to-cypher/nl-to-cypher.service.js';
 import { meteringEmitter } from '../metering/emitter.js';
+import { promptRegistry } from '../prompts/registry.js';
 
 export type GraphRAGQueryRequest = {
   investigationId: string;
@@ -125,6 +126,18 @@ export class GraphRAGQueryService {
       autoExecute: request.autoExecute,
     }, 'Starting GraphRAG query');
 
+    // Load the system prompt contract to link it in audit metadata
+    let systemPromptId = 'core.jules-copilot@v4';
+    let systemPromptOwner = 'jules';
+    try {
+      const promptConfig = promptRegistry.getPrompt(systemPromptId);
+      if (promptConfig) {
+        systemPromptOwner = promptConfig.meta.owner;
+      }
+    } catch (e: any) {
+      logger.warn({ error: e }, 'Failed to load system prompt config for audit metadata');
+    }
+
     // Create glass-box run for observability
     const run = await this.glassBoxService.createRun({
       investigationId: request.investigationId,
@@ -137,6 +150,8 @@ export class GraphRAGQueryService {
         maxHops: request.maxHops,
         generatePreview: request.generateQueryPreview,
         autoExecute: request.autoExecute,
+        systemPromptId,
+        systemPromptOwner,
       },
     });
 
@@ -252,6 +267,18 @@ export class GraphRAGQueryService {
         enrichedCount: enrichedCitations.length,
       });
 
+      // Enforce Prompt Contract: Block publication if claims lack provenance (missing citations)
+      if (enrichedCitations.length === 0 && ragResponse.answer.length > 50) {
+        const errorMsg = 'Publication blocked: Answer generated but lacks required citations.';
+        logger.warn({ runId: run.id }, errorMsg);
+
+        // We log it as a failed step or warning, but per strict prompt contract, we should probably fail or redact.
+        // For MVP-4 GA, we'll mark the run as having a policy violation but return what we have with a warning,
+        // OR strictly fail. The prompt says "block publication if any claim lacks provenance".
+        // Let's implement a strict block for high-stakes compliance.
+        throw new Error(errorMsg);
+      }
+
       // Step 4: Get subgraph size for metadata
       const subgraphSize = await this.getSubgraphSize(
         request.investigationId,
@@ -323,7 +350,7 @@ export class GraphRAGQueryService {
       }
 
       return response;
-    } catch (error) {
+    } catch (error: any) {
       await this.glassBoxService.updateStatus(run.id, 'failed', undefined, String(error));
 
       metrics.graphragQueryTotal.inc({
@@ -565,7 +592,7 @@ export class GraphRAGQueryService {
         confidence: row.confidence ? parseFloat(row.confidence) : undefined,
         sourceUrl: row.source_url,
       }));
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         error,
         entityIds,
@@ -628,7 +655,7 @@ export class GraphRAGQueryService {
       }
 
       return undefined;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         error,
         investigationId,

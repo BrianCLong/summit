@@ -1,0 +1,35 @@
+{
+  "name": "@summit/ktoon",
+  "version": "0.1.0",
+  "description": "Tokenizer-aware TOON v3 superset encoder/decoder with dictionaries, patches, and references.",
+  "type": "module",
+  "license": "MIT",
+  "private": true,
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "toon",
+    "ktoon",
+    "serialization",
+    "llm",
+    "mcp",
+    "streaming"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}

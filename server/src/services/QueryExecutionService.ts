@@ -1,6 +1,7 @@
 import { Result, Driver, Session } from 'neo4j-driver';
 import { getNeo4jDriver } from '../db/neo4j';
 import { logger } from '../config/logger';
+import { enforceTenantScopeForCypher } from './graphTenantScope.js';
 
 export interface ExecutionResult {
   records: any[];
@@ -48,6 +49,11 @@ export class QueryExecutionService {
 
     // 3. Enforce Limits
     const safeCypher = this.enforceLimits(cypher, rowLimit);
+    const scoped = await enforceTenantScopeForCypher(safeCypher, params, {
+      tenantId,
+      action: 'graph.read',
+      resource: 'graph.sandbox.query',
+    });
 
     const driver = getNeo4jDriver();
     // Use READ session
@@ -57,11 +63,11 @@ export class QueryExecutionService {
     });
 
     try {
-      const result: Result = await session.run(safeCypher, params, {
+      const result: Result = await session.run(scoped.cypher, scoped.params, {
         timeout: timeoutMs,
       });
 
-      const records = result.records.map((r) => r.toObject());
+      const records = result.records.map((r: any) => r.toObject());
       const summary = result.summary;
 
       return {

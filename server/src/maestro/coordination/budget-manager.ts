@@ -1,5 +1,5 @@
 
-import { SharedBudget, CoordinationContext } from './types';
+import { SharedBudget, CoordinationContext } from './types.js';
 
 export class CoordinationBudgetManager {
   // In-memory store for now. In production, this would be Redis/Postgres.

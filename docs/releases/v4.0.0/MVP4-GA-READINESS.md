@@ -17,7 +17,7 @@
 ### Reliability
 
 - [x] **Smoke Test**: `make smoke` passes in clean env.
-- [ ] **Performance**: P95 latency < 200ms for critical path (Pending Load Test).
+- [ ] **Performance**: P95 latency < 200ms for critical path (**Blocked: k6 binary unavailable in current environment; load test tooling could not be executed—see Load Test Summary**).
 - [x] **Drift**: No unchecked config drift (`PolicyWatcher` active).
 
 ### Governance
@@ -60,7 +60,20 @@
 
 ## 4. Sign-Offs
 
-- [ ] **Product**: Features match spec.
-- [ ] **Engineering**: System is stable/maintainable.
-- [ ] **Security**: System is secure/compliant.
-- [ ] **SRE**: System is operable/observable.
+- [ ] **Product**: Features match spec. _(Pending: owner assignment and dated approval.)_
+- [ ] **Engineering**: System is stable/maintainable. _(Pending: owner assignment and dated approval.)_
+- [ ] **Security**: System is secure/compliant. _(Pending: owner assignment and dated approval.)_
+- [ ] **SRE**: System is operable/observable. _(Pending: owner assignment and dated approval.)_
+
+---
+
+## Load Test Summary (MVP4 GA)
+
+- **Objective**: Validate P95 latency < 200ms on critical paths under production-like load.
+- **Attempted Command**: `scripts/load-testing/run-load-tests.sh --profile baseline`
+- **Result**: **Blocked** — required load test dependency `k6` is not available in the current environment, and installation via npm is denied by registry policy. The orchestration script halts during prerequisite checks.
+- **Next Actions to Unblock**:
+  - Provision `k6` and `kubectl` in the execution environment (or run from CI runner with those tools pre-installed).
+  - Target a reachable deployment URL with `/health` responding (export `TARGET_URL`).
+  - Re-run `scripts/load-testing/run-load-tests.sh --profile baseline` and capture the generated `test-results/load-testing/*/summary.json` P95 metrics for documentation.
+  - If P95 > 200ms, profile API handlers and DB queries before re-running.

@@ -55,7 +55,7 @@ export class ActionSandbox {
     this.networkGuard = new NetworkGuard(logger);
 
     // Ensure base directory exists
-    fs.mkdir(basePath, { recursive: true }).catch(() => {});
+    fs.mkdir(basePath, { recursive: true }).catch(() => { });
   }
 
   /**
@@ -99,7 +99,7 @@ export class ActionSandbox {
       );
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         {
           sandboxId,
@@ -123,7 +123,7 @@ export class ActionSandbox {
       };
     } finally {
       // Cleanup sandbox directory
-      await this.cleanupSandbox(sandboxPath).catch((err) => {
+      await this.cleanupSandbox(sandboxPath).catch((err: any) => {
         this.logger.warn(
           { sandboxId, error: err.message },
           'Failed to cleanup sandbox',
@@ -224,7 +224,7 @@ export class ActionSandbox {
               }
             }
           })
-          .catch(() => {}); // Ignore monitoring errors
+          .catch(() => { }); // Ignore monitoring errors
       }, 1000);
 
       // Capture output
@@ -259,7 +259,7 @@ export class ActionSandbox {
         context.id,
         context.config,
       );
-      networkMonitor.on('violation', (violation) => {
+      networkMonitor.on('violation', (violation: string) => {
         violations.push(`Network violation: ${violation}`);
       });
 
@@ -299,7 +299,7 @@ export class ActionSandbox {
             cpuTimeMs,
             networkConnections,
           },
-          violations: violations.concat([`Process error: ${error.message}`]),
+          violations: violations.map((violation: any) => violation.description).concat([`Process error: ${error.message}`]),
         });
       });
     });
@@ -841,7 +841,7 @@ class NetworkGuard {
       if (this.isSuspiciousConnection(host, parseInt(port, 10))) {
         emitter.emit('violation', `Suspicious connection to ${host}:${port}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       // Ignore parsing errors
     }
   }
@@ -906,7 +906,7 @@ export class URLValidator {
       }
 
       return { valid: true };
-    } catch (error) {
+    } catch (error: any) {
       return { valid: false, reason: 'Invalid URL format' };
     }
   }

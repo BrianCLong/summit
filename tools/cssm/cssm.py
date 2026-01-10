@@ -4,15 +4,16 @@ The mapper aligns source system schemas with a canonical business ontology and
 emits structured artifacts that downstream consumers can reason over without
 needing to understand each source individually.
 """
+
 from __future__ import annotations
 
+import pathlib
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from itertools import combinations
-import pathlib
-from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
-from .ontology import CanonicalAttribute, CanonicalOntology, load_ontology
 from .embeddings import cosine_similarity, deterministic_embedding
+from .ontology import CanonicalAttribute, CanonicalOntology, load_ontology
 
 
 @dataclass(frozen=True)
@@ -37,9 +38,9 @@ class FieldAnnotation:
     confidence: float
     rule_matches: Sequence[RuleMatch]
     embedding_similarity: float
-    embedding_hints: Sequence[Tuple[str, float]]
+    embedding_hints: Sequence[tuple[str, float]]
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "source_system": self.source_system,
             "source_table": self.source_table,
@@ -70,8 +71,8 @@ class CanonicalSemanticSchemaMapper:
 
     @classmethod
     def from_path(
-        cls, ontology_path: Optional[PathLike] = None, min_confidence: float = 0.55
-    ) -> "CanonicalSemanticSchemaMapper":
+        cls, ontology_path: PathLike | None = None, min_confidence: float = 0.55
+    ) -> CanonicalSemanticSchemaMapper:
         path = (
             pathlib.Path(ontology_path)
             if ontology_path is not None
@@ -80,8 +81,8 @@ class CanonicalSemanticSchemaMapper:
         ontology = load_ontology(path)
         return cls(ontology=ontology, min_confidence=min_confidence)
 
-    def map_sources(self, systems: Sequence[Dict[str, object]]) -> Dict[str, object]:
-        annotations: List[FieldAnnotation] = []
+    def map_sources(self, systems: Sequence[dict[str, object]]) -> dict[str, object]:
+        annotations: list[FieldAnnotation] = []
         for system in sorted(systems, key=lambda s: s["name"]):
             for table in sorted(system.get("tables", []), key=lambda t: t["name"]):
                 for field in sorted(table.get("fields", []), key=lambda f: f["name"]):
@@ -101,20 +102,22 @@ class CanonicalSemanticSchemaMapper:
     # Annotation logic
     # ------------------------------------------------------------------
     def _annotate_field(
-        self, system: Dict[str, object], table: Dict[str, object], field: Dict[str, object]
+        self, system: dict[str, object], table: dict[str, object], field: dict[str, object]
     ) -> FieldAnnotation:
         source_name = str(field["name"]).strip()
         source_desc = str(field.get("description", "")).strip()
         source_type = str(field.get("data_type", "unknown")).lower()
 
-        best_attr: Optional[CanonicalAttribute] = None
+        best_attr: CanonicalAttribute | None = None
         best_confidence = -1.0
         best_rule_matches: Sequence[RuleMatch] = []
         best_similarity = 0.0
-        best_hints: Sequence[Tuple[str, float]] = []
+        best_hints: Sequence[tuple[str, float]] = []
 
         for candidate in self._canonical_attributes:
-            rule_matches = list(self._evaluate_rules(source_name, source_desc, source_type, candidate))
+            rule_matches = list(
+                self._evaluate_rules(source_name, source_desc, source_type, candidate)
+            )
             rule_score = sum(match.weight for match in rule_matches)
 
             name_embedding = deterministic_embedding(source_name + " " + source_desc)
@@ -135,7 +138,9 @@ class CanonicalSemanticSchemaMapper:
         assert best_attr is not None, "Ontology must provide at least one attribute"
 
         hints = self._embedding_hints(source_name + " " + source_desc, exclude=best_attr.name)
-        final_confidence = max(best_confidence, self.min_confidence if best_rule_matches else best_confidence)
+        final_confidence = max(
+            best_confidence, self.min_confidence if best_rule_matches else best_confidence
+        )
 
         return FieldAnnotation(
             source_system=str(system["name"]),
@@ -209,7 +214,7 @@ class CanonicalSemanticSchemaMapper:
                     detail="Source description mentions USD aligning with canonical unit",
                 )
 
-    def _semantic_type_aliases(self) -> Dict[str, set]:
+    def _semantic_type_aliases(self) -> dict[str, set]:
         return {
             "varchar": {"identifier", "attribute", "contact"},
             "string": {"identifier", "attribute", "contact"},
@@ -221,7 +226,7 @@ class CanonicalSemanticSchemaMapper:
             "decimal": {"amount", "financial"},
         }
 
-    def _semantic_keywords(self) -> Dict[str, set]:
+    def _semantic_keywords(self) -> dict[str, set]:
         return {
             "identifier": {"id", "identifier", "key"},
             "timestamp": {"date", "time", "timestamp"},
@@ -239,10 +244,10 @@ class CanonicalSemanticSchemaMapper:
         return min(1.0, combined)
 
     def _embedding_hints(
-        self, source_text: str, exclude: Optional[str] = None
-    ) -> Sequence[Tuple[str, float]]:
+        self, source_text: str, exclude: str | None = None
+    ) -> Sequence[tuple[str, float]]:
         source_embedding = deterministic_embedding(source_text)
-        scores: List[Tuple[str, float]] = []
+        scores: list[tuple[str, float]] = []
         for candidate in self._canonical_attributes:
             if exclude and candidate.name == exclude:
                 continue
@@ -263,11 +268,16 @@ class CanonicalSemanticSchemaMapper:
     # ------------------------------------------------------------------
     def _build_compatibility_matrix(
         self, annotations: Sequence[FieldAnnotation]
-    ) -> List[Dict[str, object]]:
-        matrix: List[Dict[str, object]] = []
+    ) -> list[dict[str, object]]:
+        matrix: list[dict[str, object]] = []
         annotations = sorted(
             annotations,
-            key=lambda ann: (ann.canonical.name, ann.source_system, ann.source_table, ann.field_name),
+            key=lambda ann: (
+                ann.canonical.name,
+                ann.source_system,
+                ann.source_table,
+                ann.field_name,
+            ),
         )
         for left, right in combinations(annotations, 2):
             if left.source_system == right.source_system:
@@ -283,7 +293,7 @@ class CanonicalSemanticSchemaMapper:
             )
         return matrix
 
-    def _compatibility(self, left: FieldAnnotation, right: FieldAnnotation) -> Tuple[bool, str]:
+    def _compatibility(self, left: FieldAnnotation, right: FieldAnnotation) -> tuple[bool, str]:
         if left.canonical.name != right.canonical.name:
             return (
                 False,
@@ -310,7 +320,7 @@ class CanonicalSemanticSchemaMapper:
 
         return (True, "Canonical, unit, and type alignment confirmed")
 
-    def _compatibility_endpoint(self, annotation: FieldAnnotation) -> Dict[str, object]:
+    def _compatibility_endpoint(self, annotation: FieldAnnotation) -> dict[str, object]:
         return {
             "system": annotation.source_system,
             "table": annotation.source_table,
@@ -323,14 +333,12 @@ class CanonicalSemanticSchemaMapper:
     # Migration aide
     # ------------------------------------------------------------------
     def _build_migration_aide(self, annotations: Sequence[FieldAnnotation]) -> str:
-        sections: Dict[str, List[FieldAnnotation]] = {}
+        sections: dict[str, list[FieldAnnotation]] = {}
         for annotation in annotations:
             sections.setdefault(annotation.source_system, []).append(annotation)
 
-        lines: List[str] = ["# Canonical Migration Aide", ""]
-        lines.append(
-            "This aide summarizes the normalization steps required for each source system"
-        )
+        lines: list[str] = ["# Canonical Migration Aide", ""]
+        lines.append("This aide summarizes the normalization steps required for each source system")
         lines.append("to align with the canonical business ontology.")
         lines.append("")
 
@@ -343,7 +351,10 @@ class CanonicalSemanticSchemaMapper:
             )
             for annotation in system_annotations:
                 canonical = annotation.canonical
-                rule_summary = ", ".join(match.name for match in annotation.rule_matches) or "embedding similarity"
+                rule_summary = (
+                    ", ".join(match.name for match in annotation.rule_matches)
+                    or "embedding similarity"
+                )
                 lines.append(
                     f"- `{annotation.source_table}.{annotation.field_name}` → `{canonical.name}`"
                     f" ({canonical.classification}; confidence {annotation.confidence:.2f})."
@@ -352,10 +363,14 @@ class CanonicalSemanticSchemaMapper:
                     f"  - Evidence: {rule_summary}; embedding {annotation.embedding_similarity:.2f}."
                 )
                 if annotation.canonical.unit and annotation.canonical.unit != annotation.data_type:
-                    lines.append(
-                        f"  - Normalize units to {annotation.canonical.unit}."
-                    )
-                if annotation.data_type not in {"varchar", "string", "numeric", "currency", "decimal"}:
+                    lines.append(f"  - Normalize units to {annotation.canonical.unit}.")
+                if annotation.data_type not in {
+                    "varchar",
+                    "string",
+                    "numeric",
+                    "currency",
+                    "decimal",
+                }:
                     lines.append(
                         f"  - Review data type '{annotation.data_type}' for compatibility."
                     )
@@ -364,10 +379,10 @@ class CanonicalSemanticSchemaMapper:
 
 
 def map_sources(
-    systems: Sequence[Dict[str, object]],
-    ontology_path: Optional[PathLike] = None,
+    systems: Sequence[dict[str, object]],
+    ontology_path: PathLike | None = None,
     min_confidence: float = 0.55,
-) -> Dict[str, object]:
+) -> dict[str, object]:
     mapper = CanonicalSemanticSchemaMapper.from_path(
         ontology_path=ontology_path, min_confidence=min_confidence
     )
@@ -375,4 +390,3 @@ def map_sources(
 
 
 PathLike = pathlib.Path | str
-

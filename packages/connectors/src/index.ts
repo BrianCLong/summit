@@ -4,7 +4,6 @@
  */
 
 import { EventEmitter } from 'events';
-import { v4 as uuidv4 } from 'uuid';
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
 export interface ConnectorConfig {
@@ -315,7 +314,7 @@ export abstract class BaseConnector extends EventEmitter {
   private async applyRateLimiting(): Promise<void> {
     // Simple rate limiting implementation
     // Production version would use a more sophisticated approach
-    return new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       if (this.config.rateLimiting) {
         const delay = 1000 / this.config.rateLimiting.maxRequestsPerSecond;
         setTimeout(resolve, delay);
@@ -490,16 +489,18 @@ export class RestAPIConnector extends BaseConnector {
  */
 export class DatabaseConnector extends BaseConnector {
   protected async executeOperation(
-    operation: string,
-    params: Record<string, any>,
+    _operation: string,
+    _params: Record<string, any>,
   ): Promise<any> {
     // Database operation execution
     // Would use pg, mysql2, mongodb, etc. based on database type
+    await Promise.resolve();
     throw new Error('Database connector not fully implemented');
   }
 
   async testConnection(): Promise<boolean> {
     // Test database connection
+    await Promise.resolve();
     return true;
   }
 
@@ -572,6 +573,9 @@ export class ConnectorRegistry extends EventEmitter {
 
     const connector = new ConnectorClass(config);
     connector.validate();
+    if ('addOperation' in connector && typeof connector.addOperation === 'function') {
+      (options.operations ?? []).forEach((operation) => (connector as any).addOperation(operation));
+    }
 
     this.connectors.set(config.id, connector);
     this.emit('connector.registered', config);
@@ -797,10 +801,13 @@ export class ConnectorDiscoveryApi {
         if (missing.length > 0) {
           throw new Error(`Missing required parameters: ${missing.join(', ')}`);
         }
-        return connector.execute(operation.name, params);
+        const response = await connector.execute(operation.name, params);
+        return response;
       },
     };
   }
 }
+
+export * from './conformance/index';
 
 export default ConnectorRegistry;

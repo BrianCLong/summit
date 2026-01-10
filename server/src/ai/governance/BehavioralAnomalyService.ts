@@ -193,7 +193,7 @@ export class BehavioralAnomalyService implements IAnomalyDetectionService {
       });
 
       return enhancedAnomalies;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Anomaly detection failed', { error, scope });
       throw error;
     }
@@ -233,7 +233,7 @@ export class BehavioralAnomalyService implements IAnomalyDetectionService {
           const enhanced = await this.analyzeWithLLM(anomaly, scope);
           enhancedAnomalies.push(enhanced);
           this.statistics.llmAnalyses++;
-        } catch (error) {
+        } catch (error: any) {
           logger.warn({ error, anomalyId: anomaly.id }, 'LLM analysis failed, using original');
           enhancedAnomalies.push(anomaly);
         }
@@ -339,7 +339,7 @@ Format your response as JSON:
           })),
         };
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error }, 'Failed to parse LLM analysis response');
     }
     return {};
@@ -1045,7 +1045,7 @@ Format your response as JSON:
             // await this.sendPagerDutyAlert(anomaly);
             break;
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, channel, anomalyId: anomaly.id }, 'Failed to send alert');
       }
     }

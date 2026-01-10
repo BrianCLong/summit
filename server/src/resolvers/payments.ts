@@ -1,4 +1,5 @@
 import { recordRevenue } from '../monitoring/businessMetrics.js';
+import { wrapResolversWithPolicy } from './policyWrapper';
 
 const paymentsResolvers = {
   Query: {
@@ -36,4 +37,4 @@ const paymentsResolvers = {
   },
 };
 
-export default paymentsResolvers;
+export default wrapResolversWithPolicy('Payments', paymentsResolvers);

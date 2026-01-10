@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 import random
-from typing import MutableSequence, Sequence
+from collections.abc import MutableSequence, Sequence
 
 
 def laplace_noise(scale: float, rng: random.Random) -> float:
@@ -30,4 +30,3 @@ def apply_dp_noise(
     for value in values:
         noised.append(float(value) + laplace_noise(scale, rng))
     return noised
-

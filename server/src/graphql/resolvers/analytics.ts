@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { Neo4jGraphAnalyticsService } from '../../services/GraphAnalyticsService';
+import { Neo4jGraphAnalyticsService } from '../../services/GraphAnalyticsService.js';
 
 export const analyticsResolvers = {
   Query: {

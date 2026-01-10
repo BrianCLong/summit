@@ -1,6 +1,6 @@
-import { PipelineStage, PipelineContext, IngestionPipeline } from './pipeline';
+import { PipelineStage, PipelineContext, IngestionPipeline } from './pipeline.js';
 import EmbeddingService from '../../../services/EmbeddingService.js';
-import { pg, pool } from '../../../db/pg';
+import { pg, pool } from '../../../db/pg.js';
 import crypto from 'crypto';
 
 // --- STAGES ---
@@ -124,7 +124,7 @@ export class StoreStage implements PipelineStage {
       }
 
       await client.query('COMMIT');
-    } catch (e) {
+    } catch (e: any) {
       await client.query('ROLLBACK');
       throw e;
     } finally {

@@ -68,7 +68,7 @@ export class UsageMeteringService {
          });
       }
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to record usage event', { error, event });
       throw error;
     } finally {
@@ -118,7 +118,7 @@ export class UsageMeteringService {
       }
       }
       await client.query('COMMIT');
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Failed to record batch usage events', { error, count: events.length });
       throw error;

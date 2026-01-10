@@ -31,3 +31,18 @@ features:
   dark_mode_ui:
     default: true
     owners: [frontend]
+  # GA Playbooks
+  playbook_polling_place: { default: false, owners: [product] }
+  playbook_ballot_process: { default: false, owners: [product] }
+  playbook_deepfake: { default: false, owners: [product] }
+  playbook_data_fabrication: { default: false, owners: [product] }
+  playbook_harassment: { default: false, owners: [product] }
+  # Migration Gates
+  index_v2_migration_gate: { default: false, owners: [data] }
+  db_migration_2025_12_29_gate: { default: false, owners: [db] }
+
+  # Analyst Loop v1 (Sprint Jan 5–Jan 16)
+  analyst_loop_v1: { default: true, owners: [product] }
+  media_gate: { default: true, owners: [security] }
+  dossier_export: { default: true, owners: [graph] }
+  "connectors.osint.location_enrichment": { default: false, owners: [security, osint] }

@@ -1,4 +1,4 @@
-import { MappingSpecSchema, MappingSpec } from './schema';
+import { MappingSpecSchema, MappingSpec } from './schema.js';
 import { z } from 'zod';
 
 export class SpecValidator {
@@ -9,7 +9,7 @@ export class SpecValidator {
   public static validate(spec: unknown): MappingSpec {
     try {
       return MappingSpecSchema.parse(spec);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         throw new Error(`Invalid Mapping Spec: ${JSON.stringify(error.format())}`);
       }

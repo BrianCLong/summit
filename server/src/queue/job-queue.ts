@@ -129,11 +129,11 @@ export class JobQueue<TData = unknown, TResult = unknown> {
       limiter: this.config.workerOptions?.limiter,
     });
 
-    this.worker.on('error', (err) => {
+    this.worker.on('error', (err: any) => {
       this.logger.error({ err }, 'Job worker error');
     });
 
-    this.worker.on('completed', (job) => {
+    this.worker.on('completed', (job: any) => {
       this.logger.info({ jobId: job.id }, 'Job completed');
     });
 

@@ -15,8 +15,8 @@ import {
   estimateTokensAndCost,
   reconcileActualUsage,
   Provider,
-} from '../../lib/tokcount-enhanced';
-import logger from '../../utils/logger';
+} from '../../lib/tokcount-enhanced.js';
+import logger from '../../utils/logger.js';
 
 export class BudgetError extends Error {
   constructor(
@@ -147,7 +147,7 @@ async function withOTEL<T>(
     const result = await fn(span);
     span.end();
     return result;
-  } catch (error) {
+  } catch (error: any) {
     span.setAttributes({
       'error.message': error instanceof Error ? error.message : String(error),
     });
@@ -190,7 +190,7 @@ export function budgetDirective(directiveName = 'budget') {
         > = async (source, args, context, info) => {
           return withOTEL(
             `graphql.budget.${info.fieldName}`,
-            async (span) => {
+            async (span: any) => {
               const startTime = Date.now();
 
               try {
@@ -348,7 +348,7 @@ export function budgetDirective(directiveName = 'budget') {
                 });
 
                 return result;
-              } catch (error) {
+              } catch (error: any) {
                 const duration = Date.now() - startTime;
                 span.setAttributes({
                   'budget.execution_time_ms': duration,

@@ -195,7 +195,7 @@ async function pgstattupleAvailable(pool: QueryablePool): Promise<boolean> {
       "SELECT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pgstattuple')",
     );
     return Boolean(result.rows[0]?.exists);
-  } catch (error) {
+  } catch (error: any) {
     appLogger?.warn(
       { err: error },
       'Failed to check for pgstattuple extension availability',
@@ -262,8 +262,8 @@ async function collectPgstattupleBloat(
     [limit],
   );
 
-  const tables = tablesResult.rows.map((row) => toBloatEstimate(row, 'pgstattuple'));
-  const indexes = indexesResult.rows.map((row) =>
+  const tables = tablesResult.rows.map((row: any) => toBloatEstimate(row, 'pgstattuple'));
+  const indexes = indexesResult.rows.map((row: any) =>
     toBloatEstimate({ ...row, sourceRelation: row.table_name ?? row.name }, 'pgstattuple', 'index'),
   );
 
@@ -320,8 +320,8 @@ async function collectHeuristicBloat(
     [limit],
   );
 
-  const tables = tablesResult.rows.map((row) => toBloatEstimate(row, 'heuristic'));
-  const indexes = indexesResult.rows.map((row) =>
+  const tables = tablesResult.rows.map((row: any) => toBloatEstimate(row, 'heuristic'));
+  const indexes = indexesResult.rows.map((row: any) =>
     toBloatEstimate({ ...row, sourceRelation: row.table_name ?? row.name }, 'heuristic', 'index'),
   );
 
@@ -392,7 +392,7 @@ async function collectAutovacuumStats(
 
   const freezeMaxAge = asNumber(result.rows[0]?.freeze_max_age) || 200_000_000;
 
-  const stats = result.rows.map((row) => {
+  const stats = result.rows.map((row: any) => {
     const vacuumTrigger = asNumber(row.vacuum_trigger);
     const analyzeTrigger = asNumber(row.analyze_trigger);
     const vacuumDebt = Math.max(asNumber(row.n_dead_tup) - vacuumTrigger, 0);
@@ -431,15 +431,15 @@ function emitMetrics(
 ): void {
   [...bloat.tables, ...bloat.indexes].forEach((estimate) => {
     metrics.bloatPct
-      .labels(estimate.schema, estimate.name, estimate.kind)
-      .set(estimate.bloatPct);
+      ?.labels?.(estimate.schema, estimate.name, estimate.kind)
+      ?.set?.(estimate.bloatPct);
   });
 
   autovacuum.stats.forEach((stat) => {
     metrics.vacuumDebt
-      .labels(stat.schema, stat.name)
-      .set(Math.max(stat.vacuumDebt, 0));
-    metrics.xidAge.labels(stat.schema, stat.name).set(stat.xidAge);
+      ?.labels?.(stat.schema, stat.name)
+      ?.set?.(Math.max(stat.vacuumDebt, 0));
+    metrics.xidAge?.labels?.(stat.schema, stat.name)?.set?.(stat.xidAge);
   });
 }
 
@@ -563,7 +563,7 @@ export async function generateDbHealthReport(
     try {
       bloatEstimates = await collectPgstattupleBloat(pool, limit);
       usedPgstattuple = true;
-    } catch (error) {
+    } catch (error: any) {
       bloatNotes.push(
         'pgstattuple is enabled but could not be queried; falling back to heuristic estimates.',
       );

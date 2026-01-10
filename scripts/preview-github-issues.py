@@ -5,7 +5,6 @@ Preview GitHub Issues for IntelGraph MVP Roadmap
 This script shows what issues would be created without requiring GitHub token
 """
 
-
 # Issues to create (same as create-github-issues.py but for preview)
 issues = [
     # Phase 4: Observability & Reliability

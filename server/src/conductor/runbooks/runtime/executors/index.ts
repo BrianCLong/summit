@@ -6,10 +6,10 @@
  * @module runbooks/runtime/executors
  */
 
-export * from './base';
-export * from './ingest-executor';
-export * from './graph-lookup-executor';
-export * from './pattern-miner-executor';
-export * from './report-executor';
-export * from './custom-executor';
-export * from './registry';
+export * from './base.js';
+export * from './ingest-executor.js';
+export * from './graph-lookup-executor.js';
+export * from './pattern-miner-executor.js';
+export * from './report-executor.js';
+export * from './custom-executor.js';
+export * from './registry.js';

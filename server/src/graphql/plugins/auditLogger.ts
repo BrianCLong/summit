@@ -7,7 +7,7 @@ import fs from 'fs';
 import axios from 'axios';
 import _ from 'lodash';
 import { provenanceLedger } from '../../provenance/ledger.js';
-import { getAuditSystem } from '../../audit/advanced-audit-system.js';
+import { getAuditSystem } from '../../audit/index.js';
 import type { GraphQLContext } from '../apollo-v5-server.js';
 
 const { isEqual } = _;
@@ -108,9 +108,9 @@ const auditLoggerPlugin: ApolloServerPlugin<GraphQLContext> = {
             },
             complianceRelevant: true, // Mutations are usually relevant
           });
-        } catch (error) {
+        } catch (error: any) {
           if (process.env.NODE_ENV !== 'test') {
-             console.error('Failed to log to Advanced Audit System', error);
+            console.error('Failed to log to Advanced Audit System', error);
           }
         }
 
@@ -129,7 +129,7 @@ const auditLoggerPlugin: ApolloServerPlugin<GraphQLContext> = {
               correlationId,
             },
           });
-        } catch (error) {
+        } catch (error: any) {
           console.error('Failed to stamp GraphQL mutation to Provenance Ledger', error);
         }
 
@@ -139,13 +139,13 @@ const auditLoggerPlugin: ApolloServerPlugin<GraphQLContext> = {
               timeout: 2000,
             });
           } else {
-             // throw new Error('No Elasticsearch URL'); // Suppress to avoid noise
+            // throw new Error('No Elasticsearch URL'); // Suppress to avoid noise
           }
         } catch (_err) {
-           // Fallback only if no other system is working
-           if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
-             fs.appendFileSync(LOG_FILE, JSON.stringify(logEntry) + '\n');
-           }
+          // Fallback only if no other system is working
+          if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
+            fs.appendFileSync(LOG_FILE, JSON.stringify(logEntry) + '\n');
+          }
         }
       },
     };

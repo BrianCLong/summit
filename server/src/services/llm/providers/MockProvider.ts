@@ -1,5 +1,5 @@
 
-import { LLMProvider, LLMRequest, LLMResult, ProviderConfig } from '../interfaces';
+import { LLMProvider, LLMRequest, LLMResult, ProviderConfig } from '../interfaces.js';
 
 export class MockProvider implements LLMProvider {
   name = 'mock';

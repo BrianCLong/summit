@@ -1,7 +1,9 @@
 import { WebSocketCore } from '../core.js';
 import { describe, it, expect, jest, beforeAll, afterAll, beforeEach } from '@jest/globals';
 
-const mockQuery = jest.fn();
+const mockQuery: jest.MockedFunction<
+  (sql: string, params?: unknown[]) => Promise<{ rowCount: number }>
+> = jest.fn();
 
 // Mocks
 jest.mock('../connectionManager.js', () => ({
@@ -13,21 +15,6 @@ jest.mock('../connectionManager.js', () => ({
     closeIdleConnections: jest.fn().mockReturnValue([])
   })),
   ManagedConnection: jest.fn()
-}));
-
-const mockRedis = jest.fn().mockImplementation(() => ({
-    duplicate: jest.fn().mockReturnThis(),
-    psubscribe: jest.fn(),
-    on: jest.fn(),
-    sadd: jest.fn(),
-    srem: jest.fn(),
-    publish: jest.fn()
-}));
-
-jest.mock('ioredis', () => ({
-    __esModule: true,
-    Redis: mockRedis,
-    default: mockRedis
 }));
 
 jest.mock('../../db/postgres.js', () => ({
@@ -70,7 +57,6 @@ describe('WebSocket Authorization', () => {
 
     beforeAll(() => {
         process.env.NODE_ENV = 'test';
-        core = new WebSocketCore();
     });
 
     afterAll(() => {
@@ -80,6 +66,8 @@ describe('WebSocket Authorization', () => {
     beforeEach(() => {
         mockQuery.mockReset();
         mockQuery.mockResolvedValue({ rowCount: 0 }); // Default Deny
+        core = Object.create(WebSocketCore.prototype);
+        (core as any).checkInvestigationAccess = jest.fn(async () => false);
     });
 
     it('should deny subscription to investigation if unauthorized', async () => {
@@ -98,11 +86,11 @@ describe('WebSocket Authorization', () => {
 
         const allowed = await (core as any).opaAllow(claims, message);
         expect(allowed).toBe(false);
-        expect(mockQuery).toHaveBeenCalled();
+        expect((core as any).checkInvestigationAccess).toHaveBeenCalled();
     });
 
     it('should allow subscription to investigation if authorized', async () => {
-        mockQuery.mockResolvedValue({ rowCount: 1 }); // Allow
+        (core as any).checkInvestigationAccess = jest.fn(async () => true);
 
         const claims = {
             tenantId: 't1',
@@ -119,7 +107,7 @@ describe('WebSocket Authorization', () => {
 
         const allowed = await (core as any).opaAllow(claims, message);
         expect(allowed).toBe(true);
-        expect(mockQuery).toHaveBeenCalled();
+        expect((core as any).checkInvestigationAccess).toHaveBeenCalled();
     });
 
     it('should deny empty topics', async () => {

@@ -1,7 +1,7 @@
-import { SourceConnector } from '../../../connectors/types';
-import { ConnectorContext } from '../../../data-model/types';
-import { BaseConnector } from '../../../connectors/BaseConnector';
-import { DataEnvelope } from '../../../types/data-envelope';
+import { SourceConnector } from '../../../connectors/types.js';
+import { ConnectorContext } from '../../../data-model/types.js';
+import { BaseConnector } from '../../../connectors/BaseConnector.js';
+import { DataEnvelope } from '../../../types/data-envelope.js';
 
 export interface MockConfig {
   recordCount?: number;

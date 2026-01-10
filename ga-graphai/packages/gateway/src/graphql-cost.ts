@@ -42,6 +42,8 @@ export interface GraphQLRateLimiterOptions {
   defaultProfile?: TenantBudgetProfile;
   tenantProfiles?: Record<string, TenantBudgetProfile>;
   costWeights?: Partial<CostWeights>;
+  windowMs?: number;
+  maxRequestsPerWindow?: number;
 }
 
 interface TenantStats {
@@ -140,15 +142,24 @@ export class GraphQLRateLimiter {
   private readonly defaultProfile: TenantBudgetProfile;
   private readonly tenantProfiles: Map<string, TenantBudgetProfile>;
   private readonly stats = new Map<string, TenantStats>();
+  private readonly requestWindows = new Map<string, number[]>();
+  private readonly windowMs: number;
+  private readonly maxRequestsPerWindow: number;
 
   constructor(private readonly schema: GraphQLSchema, options: GraphQLRateLimiterOptions = {}) {
     this.analyzer = new GraphQLCostAnalyzer(schema, options.costWeights);
     this.defaultProfile = options.defaultProfile ?? DEFAULT_PROFILE;
     this.tenantProfiles = new Map(Object.entries(options.tenantProfiles ?? {}));
+    this.windowMs = options.windowMs ?? 60_000;
+    this.maxRequestsPerWindow = options.maxRequestsPerWindow ?? 120;
   }
 
   beginExecution(source: string, tenantId: string): GuardedExecution {
     const plan = this.analyzer.analyze(source);
+    const ddosDecision = this.evaluateBurst(tenantId);
+    if (ddosDecision) {
+      return { plan, decision: ddosDecision };
+    }
     const stats = this.ensureStats(tenantId);
     const profile = this.tenantProfiles.get(tenantId) ?? this.defaultProfile;
     const decision = this.costGuard.planBudget({
@@ -201,5 +212,34 @@ export class GraphQLRateLimiter {
     const sorted = [...latencies].sort((a, b) => a - b);
     const index = Math.min(sorted.length - 1, Math.floor(sorted.length * 0.95));
     return sorted[index];
+  }
+
+  private evaluateBurst(tenantId: string): CostGuardDecision | null {
+    if (!this.maxRequestsPerWindow || this.maxRequestsPerWindow <= 0) {
+      return null;
+    }
+    const now = Date.now();
+    const windowStart = now - this.windowMs;
+    const entries = this.requestWindows.get(tenantId) ?? [];
+    const recent = entries.filter((timestamp) => timestamp >= windowStart);
+    recent.push(now);
+    this.requestWindows.set(tenantId, recent);
+
+    if (recent.length > this.maxRequestsPerWindow) {
+      const retryAfterMs = Math.max(0, recent[0] + this.windowMs - now);
+      return {
+        action: 'kill',
+        reason: 'Rate limit exceeded for tenant window',
+        reasonCode: 'RATE_LIMIT_WINDOW',
+        nextCheckMs: retryAfterMs || 1000,
+        metrics: {
+          projectedRru: 0,
+          projectedLatencyMs: 0,
+          saturation: Number((recent.length / this.maxRequestsPerWindow).toFixed(2)),
+        },
+      } satisfies CostGuardDecision;
+    }
+
+    return null;
   }
 }

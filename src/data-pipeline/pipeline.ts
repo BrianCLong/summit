@@ -232,19 +232,72 @@ export class DataPipeline {
     cursor: string | number | undefined,
     lineageId: string
   ): Promise<IngestionResult | null> {
-    try {
-      return await source.load(cursor);
-    } catch (error) {
-      this.monitor.increment(source.name, 'ingestionErrors');
-      this.dlq.push({
-        record: {},
-        reason: `Ingestion error: ${(error as Error).message}`,
-        source: source.name,
-        timestamp: Date.now(),
-        lineageId,
-      });
-      return null;
+    const maxAttempts = 2;
+    let attempt = 0;
+    let lastError: unknown;
+
+    while (attempt < maxAttempts) {
+      try {
+        return await source.load(cursor);
+      } catch (error) {
+        lastError = error;
+        const isTransient = this.isTransientIngestionError(error);
+        if (!isTransient || attempt + 1 >= maxAttempts) {
+          this.monitor.increment(source.name, 'ingestionErrors');
+          const entry = {
+            record: {},
+            reason: `Ingestion error: ${(error as Error).message}`,
+            source: source.name,
+            timestamp: Date.now(),
+            lineageId,
+            errorCode: isTransient ? 'INGESTION_TRANSIENT_FAILURE' : 'INGESTION_PERMANENT_FAILURE',
+          } as DeadLetterEntry;
+
+          if (process.env.CHAOS_PROVENANCE_LOGS === 'true') {
+            entry.provenance = {
+              featureFlag: 'CHAOS_PROVENANCE_LOGS',
+              context: {
+                attempt,
+                transient: isTransient,
+              },
+            };
+            // Preserve stable provenance breadcrumbs for audit
+            // eslint-disable-next-line no-console
+            console.info('[chaos][ingestion]', entry);
+          }
+
+          this.dlq.push(entry);
+          return null;
+        }
+
+        attempt += 1;
+      }
     }
+
+    this.monitor.increment(source.name, 'ingestionErrors');
+    this.dlq.push({
+      record: {},
+      reason: `Ingestion error: ${(lastError as Error)?.message ?? 'unknown'}`,
+      source: source.name,
+      timestamp: Date.now(),
+      lineageId,
+      errorCode: 'INGESTION_PERMANENT_FAILURE',
+    });
+    return null;
+  }
+
+  private isTransientIngestionError(error: unknown): boolean {
+    if (!error || typeof error !== 'object') {
+      return false;
+    }
+
+    const code = (error as { code?: string }).code;
+    const transientCodes = new Set(['ETIMEDOUT', 'ECONNRESET', 'EAI_AGAIN', 'INGESTION_TRANSIENT']);
+    if (code && transientCodes.has(code)) {
+      return true;
+    }
+
+    return (error as { transient?: boolean }).transient === true;
   }
 
   private safeTransform(record: DataRecord, source: string, lineageId: string): DataRecord | null {

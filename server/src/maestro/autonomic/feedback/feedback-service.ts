@@ -1,5 +1,5 @@
 
-import { FeedbackEvent, FeedbackSummary } from './types';
+import { FeedbackEvent, FeedbackSummary } from './types.js';
 import { randomUUID } from 'crypto';
 
 export class FeedbackService {

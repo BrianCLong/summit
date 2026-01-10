@@ -116,7 +116,7 @@ export class ProvenanceClaimService {
 
       await client.query('COMMIT');
       return evidence;
-    } catch (e) {
+    } catch (e: any) {
       await client.query('ROLLBACK');
       throw e;
     } finally {
@@ -192,7 +192,7 @@ export class ProvenanceClaimService {
 
       await client.query('COMMIT');
       return claim;
-    } catch (e) {
+    } catch (e: any) {
       await client.query('ROLLBACK');
       throw e;
     } finally {
@@ -207,7 +207,7 @@ export class ProvenanceClaimService {
       const link = await this.linkClaimToEvidenceInternal(client, input);
       await client.query('COMMIT');
       return link;
-    } catch (e) {
+    } catch (e: any) {
       await client.query('ROLLBACK');
       throw e;
     } finally {

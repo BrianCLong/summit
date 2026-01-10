@@ -88,7 +88,7 @@ export class BudgetLedgerManager {
       connectionTimeoutMillis: 2000,
     });
 
-    pool.on('error', (err) => {
+    pool.on('error', (err: any) => {
       logger.error('Database pool error', { error: err });
     });
 
@@ -125,7 +125,7 @@ export class BudgetLedgerManager {
         utilizationPct: parseFloat(result.rows[0].utilization_pct),
         reason: result.rows[0].reason,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to check tenant budget', {
         error,
         tenantId,
@@ -186,7 +186,7 @@ export class BudgetLedgerManager {
       });
 
       return ledgerId;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to record spending', { error, entry });
       throw error;
     }
@@ -231,7 +231,7 @@ export class BudgetLedgerManager {
       }
 
       return success;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to reconcile spending', {
         error,
         ledgerId,
@@ -258,7 +258,7 @@ export class BudgetLedgerManager {
       );
 
       return result.rowCount > 0;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to mark spending as failed', {
         error,
         ledgerId,
@@ -302,7 +302,7 @@ export class BudgetLedgerManager {
         createdBy: row.created_by,
         notes: row.notes,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get tenant budget', { error, tenantId });
       return null;
     }
@@ -388,7 +388,7 @@ export class BudgetLedgerManager {
       });
 
       return result.rowCount > 0;
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Failed to update tenant budget', {
         error,
@@ -436,7 +436,7 @@ export class BudgetLedgerManager {
         status: row.status,
         remainingBudget: parseFloat(row.remaining_budget || 0),
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get budget utilization', { error, tenantId });
       return null;
     }
@@ -500,7 +500,7 @@ export class BudgetLedgerManager {
           ? parseFloat(row.avg_accuracy_ratio)
           : undefined,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get spending summary', {
         error,
         tenantId,
@@ -584,7 +584,7 @@ export class BudgetLedgerManager {
         params,
       );
 
-      return result.rows.map((row) => ({
+      return result.rows.map((row: any) => ({
         id: row.id,
         tenantId: row.tenant_id,
         correlationId: row.correlation_id,
@@ -616,7 +616,7 @@ export class BudgetLedgerManager {
         createdAt: row.created_at,
         updatedAt: row.updated_at,
       }));
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get spending entries', {
         error,
         filters,

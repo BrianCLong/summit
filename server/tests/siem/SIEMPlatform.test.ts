@@ -1,7 +1,5 @@
 import { siemPlatform } from '../../src/siem/SIEMPlatform.js';
-import { defaultRules } from '../../src/siem/rules.js';
-import { describe, it, beforeEach } from 'node:test';
-import assert from 'node:assert';
+import { describe, it, beforeEach, expect } from '@jest/globals';
 
 describe('SIEMPlatform', () => {
   beforeEach(() => {
@@ -16,8 +14,8 @@ describe('SIEMPlatform', () => {
       userId: 'user1'
     });
 
-    assert.ok(event.id);
-    assert.strictEqual(event.eventType, 'login_success');
+    expect(event.id).toBeDefined();
+    expect(event.eventType).toBe('login_success');
   });
 
   it('should correlate events and trigger alert', async () => {
@@ -37,7 +35,7 @@ describe('SIEMPlatform', () => {
 
     // Should not alert yet
     let alerts = siemPlatform.getAlerts({}).filter(a => a.description.includes(userId));
-    assert.strictEqual(alerts.length, 0);
+    expect(alerts.length).toBe(0);
 
     // 5th failure
     await siemPlatform.ingestEvent({
@@ -50,10 +48,10 @@ describe('SIEMPlatform', () => {
 
     // Should alert now
     alerts = siemPlatform.getAlerts({}).filter(a => a.title.includes('Brute Force'));
-    assert.ok(alerts.length > 0, 'Expected brute force alert to be triggered');
+    expect(alerts.length).toBeGreaterThan(0);
 
     // Verify it's the right alert (check timestamp or IP)
     const recentAlert = alerts.find(a => a.description.includes('192.168.1.100'));
-    assert.ok(recentAlert, 'Expected alert description to contain the IP');
+    expect(recentAlert).toBeDefined();
   });
 });

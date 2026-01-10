@@ -112,7 +112,7 @@ export class VisualEmotionAnalyzer {
 
     const sum = Object.values(raw).reduce((a, b) => a + b, 0);
     for (const k in raw) {
-      raw[k] /= sum;
+      raw[k as keyof typeof raw]! /= sum;
     }
     return raw;
   }

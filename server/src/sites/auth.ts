@@ -24,7 +24,7 @@ export async function verifySiteAuth(req: any, res: any, next: any) {
       return res.status(401).json({ error: 'bad sig' });
     (req as any).siteId = siteId;
     next();
-  } catch (e) {
+  } catch (e: any) {
     return res.status(400).json({ error: 'auth failed' });
   }
 }

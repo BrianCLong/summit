@@ -9,41 +9,41 @@ on:
         description: 'Node.js version (e.g., "20.x", "18.x", "20")'
         required: false
         type: string
-        default: '20.x'
+        default: "20.x"
       pnpm-version:
-        description: 'pnpm version'
+        description: "pnpm version"
         required: false
         type: string
-        default: '9.12.0'
+        default: "9.12.0"
       python-version:
-        description: 'Python version (optional)'
+        description: "Python version (optional)"
         required: false
         type: string
-        default: ''
+        default: ""
       install-deps:
-        description: 'Install dependencies'
+        description: "Install dependencies"
         required: false
         type: boolean
         default: true
       cache-dependency-path:
-        description: 'Path to lockfile for cache key'
+        description: "Path to lockfile for cache key"
         required: false
         type: string
-        default: 'pnpm-lock.yaml'
+        default: "pnpm-lock.yaml"
       working-directory:
-        description: 'Working directory for installation'
+        description: "Working directory for installation"
         required: false
         type: string
-        default: '.'
+        default: "."
     outputs:
       node-version:
-        description: 'Resolved Node.js version'
+        description: "Resolved Node.js version"
         value: ${{ jobs.setup.outputs.node }}
       pnpm-version:
-        description: 'Resolved pnpm version'
+        description: "Resolved pnpm version"
         value: ${{ jobs.setup.outputs.pnpm }}
       cache-hit:
-        description: 'Whether cache was hit'
+        description: "Whether cache was hit"
         value: ${{ jobs.setup.outputs.cache-hit }}
 
 permissions:
@@ -63,7 +63,7 @@ jobs:
       cache-hit: ${{ steps.cache-pnpm.outputs.cache-hit }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Resolve versions
         id: versions
@@ -71,21 +71,18 @@ jobs:
           echo "node=${{ inputs.node-version }}" >> "$GITHUB_OUTPUT"
           echo "pnpm=${{ inputs.pnpm-version }}" >> "$GITHUB_OUTPUT"
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ inputs.node-version }}
-          cache: 'pnpm'
-          cache-dependency-path: ${{ inputs.cache-dependency-path }}
-
-      - name: Enable Corepack
-        run: corepack enable
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: ${{ inputs.pnpm-version }}
           run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: "pnpm"
+          cache-dependency-path: ${{ inputs.cache-dependency-path }}
 
       - name: Get pnpm store path
         id: pnpm-store
@@ -95,7 +92,7 @@ jobs:
 
       - name: Cache dependencies
         id: cache-deps
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.pnpm-store
@@ -112,10 +109,10 @@ jobs:
 
       - name: Setup Python (optional)
         if: inputs.python-version != ''
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ inputs.python-version }}
-          cache: 'pip'
+          cache: "pip"
 
       - name: Install Python dependencies (optional)
         if: inputs.python-version != '' && hashFiles('requirements.txt') != ''

@@ -10,15 +10,37 @@ import {
   ValidationContext,
   validate,
   specifiedRules,
+  visit,
 } from 'graphql';
 import { depthLimit } from 'graphql-depth-limit';
-import { costAnalysis } from 'graphql-cost-analysis';
-import { createComplexityLimitRule } from 'graphql-query-complexity';
 import rateLimit from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
 import Redis from 'ioredis';
 import crypto from 'crypto';
 import { performance } from 'perf_hooks';
+
+const costAnalysisModule =
+  typeof require === 'function'
+    ? (() => {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          return require('graphql-cost-analysis');
+        } catch {
+          return null;
+        }
+      })()
+    : null;
+const complexityModule =
+  typeof require === 'function'
+    ? (() => {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          return require('graphql-query-complexity');
+        } catch {
+          return null;
+        }
+      })()
+    : null;
 
 // Types
 interface SecurityConfig {
@@ -93,7 +115,7 @@ export async function loadPersistedQueries(
 
       console.log(`Loaded ${persistedQueries.size} persisted queries`);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to load persisted queries:', error);
     if (defaultConfig.enforcePersistedQueries) {
       throw new Error('Failed to load required persisted queries');
@@ -103,6 +125,30 @@ export async function loadPersistedQueries(
 
 // Query complexity analysis
 function createComplexityAnalysis(maxComplexity: number) {
+  const createComplexityLimitRule = complexityModule?.createComplexityLimitRule;
+  if (!createComplexityLimitRule) {
+    console.warn(
+      'graphql-query-complexity not available, skipping complexity rules',
+    );
+    return (context: ValidationContext) => ({
+      Document(node) {
+        let complexity = 0;
+        visit(node, {
+          Field() {
+            complexity += 1;
+          },
+        });
+        if (complexity > maxComplexity) {
+          context.reportError(
+            new GraphQLError(
+              `Query complexity ${complexity} exceeds maximum allowed complexity ${maxComplexity}`,
+            ),
+          );
+        }
+      },
+    });
+  }
+
   return createComplexityLimitRule(maxComplexity, {
     maximumComplexity: maxComplexity,
     variables: {},
@@ -131,13 +177,60 @@ function createComplexityAnalysis(maxComplexity: number) {
 
 // Query depth analysis
 function createDepthAnalysis(maxDepth: number) {
-  return depthLimit(maxDepth, {
+  const depthLimitRule =
+    typeof (depthLimit as any) === 'function'
+      ? depthLimit
+      : (depthLimit as any)?.default;
+  if (!depthLimitRule) {
+    console.warn('graphql-depth-limit not available, skipping depth rules');
+    return (context: ValidationContext) => ({
+      Document(node) {
+        const computeDepth = (selectionSet?: any, depth = 0): number => {
+          if (!selectionSet?.selections?.length) return depth;
+          return Math.max(
+            ...selectionSet.selections.map((selection: any) => {
+              if (selection.selectionSet) {
+                return computeDepth(selection.selectionSet, depth + 1);
+              }
+              return depth + 1;
+            }),
+          );
+        };
+
+        let maxObservedDepth = 0;
+        visit(node, {
+          OperationDefinition(operation) {
+            maxObservedDepth = Math.max(
+              maxObservedDepth,
+              computeDepth(operation.selectionSet, 0),
+            );
+          },
+        });
+
+        if (maxObservedDepth > maxDepth) {
+          context.reportError(
+            new GraphQLError(
+              `Query depth ${maxObservedDepth} exceeds maximum allowed depth ${maxDepth}`,
+            ),
+          );
+        }
+      },
+    });
+  }
+
+  return depthLimitRule(maxDepth, {
     ignore: ['__schema', '__type'],
   });
 }
 
 // Cost analysis for resource-intensive operations
 function createCostAnalysis(maxCost: number) {
+  const costAnalysis = costAnalysisModule?.costAnalysis;
+  if (!costAnalysis) {
+    console.warn('graphql-cost-analysis not available, skipping cost rules');
+    return () => ({});
+  }
+
   return costAnalysis({
     maximumCost: maxCost,
     defaultCost: 1,
@@ -201,11 +294,21 @@ function sanitizeQuery(query: string): string {
 
 // Rate limiting middleware
 export const createRateLimiter = (config: SecurityConfig['rateLimit']) => {
-  return rateLimit({
-    store: new RedisStore({
+  let store: RedisStore | undefined;
+  try {
+    store = new RedisStore({
       client: redisClient,
       prefix: 'graphql:rate:',
-    }),
+    });
+  } catch (error: any) {
+    console.warn(
+      'rate-limit-redis unavailable, falling back to in-memory store',
+      error?.message || error,
+    );
+  }
+
+  return rateLimit({
+    ...(store ? { store } : {}),
     windowMs: config.windowMs,
     max: config.maxRequests,
     message: {
@@ -364,7 +467,7 @@ export async function queryCacheMiddleware(
       res.json(result);
       return;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.warn('Cache read error:', error);
   }
 
@@ -411,7 +514,7 @@ export function securityValidationMiddleware(
     }
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({
       errors: [
         {

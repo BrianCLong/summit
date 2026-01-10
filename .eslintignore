@@ -14,3 +14,6 @@ v4/archive/
 .venv/
 venv/
 v24_modules/
+.archive/
+_salvage_from_refs/
+templates/

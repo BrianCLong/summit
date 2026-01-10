@@ -4,7 +4,7 @@ import base64
 import hashlib
 import json
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pandas as pd
@@ -62,7 +62,7 @@ def _hash_content(data: bytes) -> str:
 
 
 def _current_ts() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def _normalise_dataframe(df: pd.DataFrame) -> pd.DataFrame:

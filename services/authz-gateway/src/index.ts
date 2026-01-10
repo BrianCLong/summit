@@ -23,12 +23,15 @@ import { breakGlassManager } from './break-glass';
 import { sloMiddleware, sloTracker, buildSloEvidence } from './slo';
 import { generateIncidentEvidence } from './incidents';
 import { buildStandardHooks, buildPolicyBundle } from './standards';
+import { AbacLocalEvaluator } from './abac-local-evaluator';
+import { log } from './audit';
 
 export async function createApp(): Promise<express.Application> {
   await initKeys();
   await startObservability();
   const attributeService = new AttributeService();
   const stepUpManager = new StepUpManager();
+  const abacEvaluator = new AbacLocalEvaluator();
   const trustedServices = (
     process.env.SERVICE_AUTH_CALLERS || 'api-gateway,maestro'
   )
@@ -96,6 +99,53 @@ export async function createApp(): Promise<express.Application> {
       res.json(buildPolicyBundle());
     },
   );
+
+  app.post('/abac/demo/enforce', async (req, res) => {
+    try {
+      const subjectId = String(req.body?.subjectId || '');
+      const action = String(req.body?.action || '').trim();
+      if (!subjectId || !action) {
+        return res.status(400).json({ error: 'subject_and_action_required' });
+      }
+      const subject = await attributeService.getSubjectAttributes(subjectId);
+      const resource: ResourceAttributes = {
+        id: String(req.body?.resource?.id || 'inline'),
+        tenantId: req.body?.resource?.tenantId || subject.tenantId,
+        residency: req.body?.resource?.residency || subject.residency,
+        classification: req.body?.resource?.classification || subject.clearance,
+        owner: req.body?.resource?.owner || subject.org,
+        customer_id: req.body?.resource?.customer_id,
+        tags: req.body?.resource?.tags || [],
+      };
+      const input = {
+        subject,
+        resource,
+        action,
+        context: attributeService.getDecisionContext(
+          String(req.body?.context?.currentAcr || subject.loa || 'loa1'),
+        ),
+      };
+      const evaluation = abacEvaluator.evaluate(input);
+      await log({
+        subject: subject.id,
+        action,
+        resource: JSON.stringify(resource),
+        tenantId: subject.tenantId,
+        allowed: evaluation.decision.allowed,
+        reason: evaluation.decision.reason,
+        decisionId: evaluation.decision.decisionId,
+        policyVersion: evaluation.decision.policyVersion,
+        inputsHash: evaluation.decision.inputsHash,
+      });
+      const status = evaluation.decision.allowed ? 200 : 403;
+      res.status(status).json({
+        policyVersion: evaluation.version,
+        ...evaluation.decision,
+      });
+    } catch (error) {
+      res.status(400).json({ error: (error as Error).message });
+    }
+  });
 
   app.post('/auth/login', async (req, res) => {
     try {

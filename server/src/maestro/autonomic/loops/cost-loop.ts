@@ -1,7 +1,7 @@
 
-import { ControlLoop, AdaptationPlan } from './types';
-import { HealthSnapshot } from '../signals/types';
-import { SLOAlert } from '../policy/types';
+import { ControlLoop, AdaptationPlan } from './types.js';
+import { HealthSnapshot } from '../signals/types.js';
+import { SLOAlert } from '../policy/types.js';
 
 export class CostOptimizationLoop implements ControlLoop {
   public name = 'CostOptimizationLoop';

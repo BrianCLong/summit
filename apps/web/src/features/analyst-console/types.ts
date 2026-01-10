@@ -9,6 +9,8 @@
  * Location: apps/web/src/features/analyst-console
  */
 
+import { TimeWindow as DomainTimeWindow } from '@/domain/timeWindow'
+
 // =============================================================================
 // Entity & Link Types (for Graph Pane)
 // =============================================================================
@@ -84,12 +86,10 @@ export interface AnalystLocation {
 // =============================================================================
 
 /**
- * Time window for filtering data across all panes
+ * Time window for filtering data across all panes.
+ * Using the shared domain model.
  */
-export interface TimeWindow {
-  from: string // ISO 8601
-  to: string // ISO 8601
-}
+export type TimeWindow = DomainTimeWindow
 
 /**
  * Filter configuration for the analyst view
@@ -116,6 +116,7 @@ export interface AnalystSelectionState {
  */
 export interface AnalystViewState {
   timeWindow: TimeWindow
+  timeWindowSeq: number // Monotonically increasing sequence ID for race-proofing
   filters: AnalystViewFilters
   selection: AnalystSelectionState
 }

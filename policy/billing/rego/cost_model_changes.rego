@@ -4,14 +4,14 @@ import data.billing.invariants
 
 allowed_roles := {"finops_owner", "finance_manager", "cfo"}
 
-default decision = {
+default decision := {
   "allowed": false,
   "reason": "not_evaluated",
   "required_approvals": [],
   "flags": []
 }
 
-decision = out {
+decision := out if {
   subj := input.subject
   allowed_roles[subj.role]
   not invariants.cost_model_blocked(input)
@@ -27,9 +27,9 @@ decision = out {
   }
 }
 
-flags_for(input) = flags {
+flags_for(req) := flags if {
   base := ["unit_economics"]
-  missing_analysis := {f | input.context.impact_analysis == ""; f := "missing_impact_analysis"}
-  retroactive := {f | input.model_before.effective_at > input.model_after.effective_at; f := "retroactive_change"}
+  missing_analysis := ["missing_impact_analysis" | req.context.impact_analysis == ""]
+  retroactive := ["retroactive_change" | req.model_before.effective_at > req.model_after.effective_at]
   flags := array.concat(base, array.concat(missing_analysis, retroactive))
 }

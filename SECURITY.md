@@ -1,33 +1,63 @@
 # Security Policy
 
-This document outlines the security policy for the Summit (IntelGraph) platform.
+## Supported Versions
 
-## Threat Model
-
-_(Coming soon)_
-
-## Security Controls
-
-Our CI/CD pipeline enforces a number of security controls on every pull request and release. These controls are defined in the `.github/workflows/ci-security.yml` workflow.
-
-- **Secret Scanning**: We use `gitleaks` to scan for hardcoded secrets in the codebase. This is configured to run on every pull request and fail the build if any secrets are found.
-
-- **Static Application Security Testing (SAST)**: We use `CodeQL` and `Semgrep` to identify potential vulnerabilities in our code. `CodeQL` is configured to run on both JavaScript and Python code. `Semgrep` uses the `p/ci` ruleset to check for common security issues.
-
-- **Dependency Vulnerability Scanning**: We use `Snyk` to scan our dependencies for known vulnerabilities. The `SNYK_FAIL_THRESHOLD` is set to `high`, which means that pull requests with `HIGH` or `CRITICAL` vulnerabilities will be blocked from merging.
-
-- **Filesystem and Container Scanning**: We use `Trivy` to scan our filesystem and container images for vulnerabilities. This includes scanning for known CVEs in the operating system and application packages.
-
-- **Infrastructure-as-Code (IaC) Scanning**: We use `Checkov` to scan our Terraform and Helm charts for misconfigurations. This helps to ensure that our infrastructure is deployed in a secure manner.
-
-- **Policy Enforcement**: We use `OPA/Conftest` to enforce policies on our Kubernetes manifests. This allows us to define and enforce custom security policies for our production environment.
-
-- **Dynamic Application Security Testing (DAST)**: We use `OWASP ZAP` to perform dynamic analysis of the running application. This is configured to run on a weekly schedule against the staging environment.
-
-## Incident Response
-
-_(Coming soon)_
+| Version | Supported          |
+| ------- | ------------------ |
+| 1.0.x   | :white_check_mark: |
+| < 1.0   | :x:                |
 
 ## Reporting a Vulnerability
 
-Please report any security vulnerabilities to our security team at `security@summit.ai`. We appreciate your efforts to disclose your findings responsibly.
+Please report security vulnerabilities to **security@summit.ai**.
+
+We will acknowledge receipt within 24 hours and provide a timeline for triage and remediation.
+
+### Disclosure Policy
+
+*   **Embargo:** We request a 30-day embargo on public disclosure to allow for remediation.
+*   **Bounty:** We do not currently offer a bug bounty program.
+*   **Safe Harbor:** We will not take legal action against researchers who discover and report vulnerabilities in good faith and in accordance with this policy.
+
+### Incident Response
+
+For details on how we handle security incidents, please refer to the [Incident Response Playbook](docs/ops/INCIDENT_RESPONSE.md).
+
+### Evidence
+
+For compliance evidence regarding vulnerability management, see [Evidence Index](docs/compliance/EVIDENCE_INDEX.md).
+
+## Threat Model (High Level)
+
+### Assets
+
+*   **Customer Data:** PII, usage metrics, and proprietary graph data stored in **Neo4j** and **PostgreSQL**.
+*   **Intellectual Property:** Source code, ML models (PyTorch/ONNX), and proprietary algorithms (Rust crates for graph processing).
+*   **Availability:** The ability for the platform to serve requests via the **IntelGraph API**.
+
+### Threats
+
+*   **Unauthorized Access:** External attackers gaining access to data or systems.
+*   **Insider Threat:** Malicious or negligent employees compromising security.
+*   **Supply Chain Attack:** Compromise of third-party dependencies (Rust crates, NPM packages, Python libs) or build tools.
+*   **Denial of Service:** Attacks aiming to disrupt service availability.
+
+### Mitigations
+
+*   **Identity & Access Management:** Strong authentication (MFA), least privilege (RBAC) enforced via API Gateway.
+*   **Encryption:** Data encrypted at rest (AES-256 via **HashiCorp Vault/KMS**) and in transit (TLS 1.2+).
+*   **Vulnerability Management:** Regular scanning of code and dependencies (**Trivy**, **Dependabot**).
+*   **Policy Enforcement:** **OPA/Conftest** policies for configuration validation in CI/CD.
+*   **Monitoring & Alerting:** Comprehensive observability stack (**Prometheus**, **Grafana**) to detect anomalies.
+
+## Scope & Exclusions
+
+**Covered:**
+*   Application security (code, dependencies, build pipeline).
+*   Infrastructure as Code configuration.
+*   Operational runbooks and incident response policies.
+
+**Excluded (Out of Scope):**
+*   Physical security of data centers (managed by Cloud Provider).
+*   Personnel security (background checks, HR policies).
+*   Third-party audits (SOC2/ISO certification reports are available upon request but not stored in this repo).

@@ -1,0 +1,6 @@
+{
+  "algorithm": "dev-placeholder-sha256",
+  "keyId": "dev-key-1",
+  "target": "hashes.json",
+  "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+}

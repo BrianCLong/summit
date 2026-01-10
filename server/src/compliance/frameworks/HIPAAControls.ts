@@ -888,10 +888,10 @@ export class HIPAAComplianceService {
 
     const summary = {
       totalControls: controlResults.length,
-      compliant: controlResults.filter((r) => r.status === 'compliant').length,
-      nonCompliant: controlResults.filter((r) => r.status === 'non_compliant').length,
-      partiallyCompliant: controlResults.filter((r) => r.status === 'partially_compliant').length,
-      notApplicable: controlResults.filter((r) => r.status === 'not_applicable').length,
+      compliant: controlResults.filter((r: any) => r.status === 'compliant').length,
+      nonCompliant: controlResults.filter((r: any) => r.status === 'non_compliant').length,
+      partiallyCompliant: controlResults.filter((r: any) => r.status === 'partially_compliant').length,
+      notApplicable: controlResults.filter((r: any) => r.status === 'not_applicable').length,
     };
 
     let overallStatus: HIPAAComplianceReport['overallStatus'];
@@ -925,7 +925,7 @@ export class HIPAAComplianceService {
    */
   getAssessmentHistory(tenantId: string): HIPAAComplianceReport[] {
     return Array.from(this.assessmentHistory.values()).filter(
-      (r) => r.tenantId === tenantId
+      (r: any) => r.tenantId === tenantId
     );
   }
 
@@ -1016,10 +1016,10 @@ export class HIPAAComplianceService {
   private generateRemediationPlan(
     results: HIPAAAssessmentResult[]
   ): HIPAAComplianceReport['remediationPlan'] {
-    const nonCompliant = results.filter((r) => r.status === 'non_compliant');
-    const partiallyCompliant = results.filter((r) => r.status === 'partially_compliant');
+    const nonCompliant = results.filter((r: any) => r.status === 'non_compliant');
+    const partiallyCompliant = results.filter((r: any) => r.status === 'partially_compliant');
 
-    const items: HIPAAComplianceReport['remediationPlan'] extends { items: infer T } ? T : never = [];
+    const items: Array<{ controlId: string; action: string; deadline?: string }> = [];
 
     for (const result of nonCompliant) {
       items.push({

@@ -5,7 +5,7 @@ Lightweight placeholder detector for audio deepfake detection.
 """
 
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 import torch
 
@@ -15,7 +15,9 @@ logger = logging.getLogger(__name__)
 class AudioDetector:
     """Basic audio deepfake detector placeholder."""
 
-    def __init__(self, model: torch.nn.Module, device: str = "cuda" if torch.cuda.is_available() else "cpu"):
+    def __init__(
+        self, model: torch.nn.Module, device: str = "cuda" if torch.cuda.is_available() else "cpu"
+    ):
         self.model = model
         self.device = device
         self.model.to(self.device)
@@ -23,7 +25,7 @@ class AudioDetector:
         self.threshold = 0.5
         logger.info("AudioDetector initialized on %s", self.device)
 
-    async def detect(self, media_data: bytes, enable_explanation: bool = False) -> Dict[str, Any]:
+    async def detect(self, media_data: bytes, enable_explanation: bool = False) -> dict[str, Any]:
         """Run a minimal detection pass returning a deterministic score."""
         # Convert bytes length into a simple feature to keep behavior deterministic
         tensor = torch.tensor([len(media_data)], dtype=torch.float32, device=self.device)
@@ -33,7 +35,7 @@ class AudioDetector:
 
         is_synthetic = raw_score >= self.threshold
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "is_synthetic": is_synthetic,
             "confidence_score": float(raw_score),
             "model_version": "v1.0.0",
@@ -48,6 +50,6 @@ class AudioDetector:
 
         return result
 
-    def _segment_scores(self, score: float) -> List[Dict[str, float]]:
+    def _segment_scores(self, score: float) -> list[dict[str, float]]:
         # Return a single segment score to satisfy the API contract
         return [{"segment": 0, "score": float(score)}]

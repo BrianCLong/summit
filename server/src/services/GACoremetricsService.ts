@@ -110,16 +110,23 @@ export class GACoreMetricsService {
   // private erService = new HybridEntityResolutionService();
 
   constructor() {
-    // Start metrics collection
+    // Eager initialization removed
+  }
+
+  public start(): void {
+    if (this.isStarted) return;
+    this.isStarted = true;
     this.startMetricsCollection();
   }
+
+  private isStarted = false;
 
   private startMetricsCollection(): void {
     // Collect metrics every 30 seconds
     setInterval(async () => {
       try {
         await this.collectAllMetrics();
-      } catch (error) {
+      } catch (error: any) {
         log.error(
           { error: error.message },
           'Failed to collect GA Core metrics',
@@ -128,7 +135,7 @@ export class GACoreMetricsService {
     }, 30000);
 
     // Initial collection
-    this.collectAllMetrics().catch((error) => {
+    this.collectAllMetrics().catch((error: any) => {
       log.error({ error: error.message }, 'Initial metrics collection failed');
     });
   }
@@ -198,7 +205,7 @@ export class GACoreMetricsService {
       }
 
       log.debug('Collected ER precision metrics');
-    } catch (error) {
+    } catch (error: any) {
       log.error(
         { error: error.message },
         'Failed to collect ER precision metrics',
@@ -238,7 +245,7 @@ export class GACoreMetricsService {
       this.policyDenialsWithAppealsRate.set(appealsRate);
 
       log.debug('Collected policy appeal metrics');
-    } catch (error) {
+    } catch (error: any) {
       log.error(
         { error: error.message },
         'Failed to collect policy appeal metrics',
@@ -268,7 +275,7 @@ export class GACoreMetricsService {
       }
 
       log.debug('Collected export integrity metrics');
-    } catch (error) {
+    } catch (error: any) {
       log.error(
         { error: error.message },
         'Failed to collect export integrity metrics',
@@ -296,7 +303,7 @@ export class GACoreMetricsService {
       this.copilotNlSuccessRate.set(successRate);
 
       log.debug('Collected Copilot metrics');
-    } catch (error) {
+    } catch (error: any) {
       log.error({ error: error.message }, 'Failed to collect Copilot metrics');
     }
   }
@@ -321,7 +328,7 @@ export class GACoreMetricsService {
       this.hypothesisRigorScoreAvg.set(rigorScore);
 
       log.debug('Collected hypothesis rigor metrics');
-    } catch (error) {
+    } catch (error: any) {
       log.error(
         { error: error.message },
         'Failed to collect hypothesis rigor metrics',
@@ -348,7 +355,7 @@ export class GACoreMetricsService {
 
       await session.close();
       log.debug('Collected data quality metrics');
-    } catch (error) {
+    } catch (error: any) {
       log.error(
         { error: error.message },
         'Failed to collect data quality metrics',
@@ -452,7 +459,7 @@ export class GACoreMetricsService {
         },
         'GA Core overall status calculated',
       );
-    } catch (error) {
+    } catch (error: any) {
       log.error(
         { error: error.message },
         'Failed to calculate overall GA status',

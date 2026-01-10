@@ -13,12 +13,14 @@ import supportTicketResolvers from './supportTicket.js';
 import sprint28Resolvers from './sprint28.js';
 import ewResolvers from './electronic-warfare.js';
 import { collaborationResolvers } from './collaboration';
+import { cognitiveSecurityResolvers } from './cognitive-security.js';
+import { deduplicationResolvers } from './deduplication.js';
 
 // MC Platform v0.4.0 Transcendent Intelligence Resolvers (DISABLED - incomplete)
-// import { v040Resolvers } from './v040';
+// import { v040Resolvers } from './v040.js';
 
 // MC Platform v0.4.1 Sovereign Safeguards Resolvers (DISABLED - incomplete)
-// import { v041Resolvers } from './v041';
+// import { v041Resolvers } from './v041.js';
 
 // Instantiate the WargameResolver
 const wargameResolver = new WargameResolver(); // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
@@ -37,6 +39,8 @@ const resolvers = {
     ...(sprint28Resolvers.Query || {}),
     ...(ewResolvers.Query || {}),
     ...(collaborationResolvers.Query || {}),
+    ...(cognitiveSecurityResolvers.Query || {}),
+    ...(deduplicationResolvers.Query || {}),
     // MC Platform v0.4.0 Transcendent Intelligence (DISABLED)
     // ...(v040Resolvers.Query || {}),
     // MC Platform v0.4.1 Sovereign Safeguards (DISABLED)
@@ -67,6 +71,7 @@ const resolvers = {
     ...(sprint28Resolvers.Mutation || {}),
     ...(ewResolvers.Mutation || {}),
     ...(collaborationResolvers.Mutation || {}),
+    ...(cognitiveSecurityResolvers.Mutation || {}),
     // MC Platform v0.4.0 Transcendent Intelligence (DISABLED)
     // ...(v040Resolvers.Mutation || {}),
     // MC Platform v0.4.1 Sovereign Safeguards (DISABLED)
@@ -83,7 +88,13 @@ const resolvers = {
   WarRoom: collaborationResolvers.WarRoom,
   Subscription: {
     ...(collaborationResolvers.Subscription || {}),
+    ...(cognitiveSecurityResolvers.Subscription || {}),
   },
+  // Cognitive Security type resolvers
+  CogSecClaim: cognitiveSecurityResolvers.CogSecClaim,
+  CogSecCampaign: cognitiveSecurityResolvers.CogSecCampaign,
+  CogSecIncident: cognitiveSecurityResolvers.CogSecIncident,
+  VerificationAppeal: cognitiveSecurityResolvers.VerificationAppeal,
 };
 
 export default resolvers;

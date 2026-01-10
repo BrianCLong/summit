@@ -5,21 +5,22 @@ package mc.sovereign.v041
 
 import future.keywords.if
 import future.keywords.in
+import future.keywords.contains
 
 # === CORE PRINCIPLES ===
 
-default allow = false
+default allow := false
 
 # Independent verification required for all sovereign operations
-default independent_verification_required = true
+default independent_verification_required := true
 
 # Reversible autonomy enforced at all levels
-default reversible_autonomy_enforced = true
+default reversible_autonomy_enforced := true
 
 # === SOVEREIGN OPERATION AUTHORIZATION ===
 
 # Sovereign operations require multiple independent verifications
-allow {
+allow if {
     input.operation.isSovereign
     input.actor.role in ["platform-admin", "sovereign-controller", "compliance-officer"]
     independent_verification_complete
@@ -30,7 +31,7 @@ allow {
 
 # === INDEPENDENT VERIFICATION FRAMEWORK ===
 
-independent_verification_complete {
+independent_verification_complete if {
     # Multiple independent verification sources required
     count(input.verification.independent_sources) >= 2
 
@@ -44,7 +45,7 @@ independent_verification_complete {
     all_verifications_signed
 }
 
-verification_source_diversity {
+verification_source_diversity if {
     # Ensure no two verifications come from the same entity
     verification_entities := {entity |
         some i
@@ -53,14 +54,14 @@ verification_source_diversity {
     count(verification_entities) == count(input.verification.independent_sources)
 }
 
-all_verifications_recent {
+all_verifications_recent if {
     current_time := time.now_ns()
     every verification in input.verification.independent_sources {
         (current_time - verification.timestamp_ns) <= 86400000000000 # 24 hours
     }
 }
 
-all_verifications_signed {
+all_verifications_signed if {
     every verification in input.verification.independent_sources {
         verification.signature_valid == true
         verification.signature_algorithm in ["Ed25519", "Dilithium-2", "SPHINCS+"]
@@ -69,7 +70,7 @@ all_verifications_signed {
 
 # === CONTAINMENT READINESS VERIFICATION ===
 
-containment_readiness_verified {
+containment_readiness_verified if {
     # Emergency stop mechanisms available
     input.containment.emergency_stop.available == true
     input.containment.emergency_stop.response_time_ms <= 100
@@ -90,7 +91,7 @@ containment_readiness_verified {
 
 # === LAWFUL INTEROPERABILITY CONFIRMATION ===
 
-lawful_interoperability_confirmed {
+lawful_interoperability_confirmed if {
     # Jurisdiction compliance verified
     jurisdiction_compliance_verified
 
@@ -104,7 +105,7 @@ lawful_interoperability_confirmed {
     regulatory_reporting_active
 }
 
-jurisdiction_compliance_verified {
+jurisdiction_compliance_verified if {
     # Operation complies with all relevant jurisdictions
     every jurisdiction in input.operation.affected_jurisdictions {
         input.compliance.jurisdictions[jurisdiction].status == "COMPLIANT"
@@ -112,7 +113,7 @@ jurisdiction_compliance_verified {
     }
 }
 
-data_sovereignty_requirements_met {
+data_sovereignty_requirements_met if {
     # Data remains within required boundaries
     input.data_sovereignty.requirements_met == true
     input.data_sovereignty.residency_verified == true
@@ -124,7 +125,7 @@ data_sovereignty_requirements_met {
     input.data_sovereignty.retention_compliant == true
 }
 
-cross_border_approvals_valid {
+cross_border_approvals_valid if {
     # All cross-border data flows have valid approvals
     every flow in input.cross_border_flows {
         flow.approval_status == "APPROVED"
@@ -133,7 +134,7 @@ cross_border_approvals_valid {
     }
 }
 
-regulatory_reporting_active {
+regulatory_reporting_active if {
     # Real-time regulatory reporting available
     input.regulatory_reporting.real_time_enabled == true
     input.regulatory_reporting.last_report_ns > (time.now_ns() - 1800000000000) # 30 minutes
@@ -144,7 +145,7 @@ regulatory_reporting_active {
 
 # === REVERSIBLE AUTONOMY SAFEGUARDS ===
 
-reversible_autonomy_safeguards {
+reversible_autonomy_safeguards if {
     # All autonomous operations must be reversible
     reversibility_guaranteed
 
@@ -158,7 +159,7 @@ reversible_autonomy_safeguards {
     continuous_monitoring_active
 }
 
-reversibility_guaranteed {
+reversibility_guaranteed if {
     # Every autonomous action has a reversal path
     input.autonomy.reversibility.guaranteed == true
     input.autonomy.reversibility.max_reversal_time_seconds <= 60
@@ -171,7 +172,7 @@ reversibility_guaranteed {
     input.autonomy.reversibility.decision_trees_logged == true
 }
 
-human_control_mechanisms_active {
+human_control_mechanisms_active if {
     # Human can intervene at any time
     input.autonomy.human_control.intervention_available == true
     input.autonomy.human_control.override_time_ms <= 500
@@ -183,7 +184,7 @@ human_control_mechanisms_active {
     count(input.autonomy.human_control.authorized_operators) >= 2
 }
 
-autonomy_scope_limited {
+autonomy_scope_limited if {
     # Autonomy operates within defined boundaries
     input.autonomy.scope.boundaries_defined == true
     input.autonomy.scope.boundary_violations == 0
@@ -195,7 +196,7 @@ autonomy_scope_limited {
     input.autonomy.scope.capability_restrictions_active == true
 }
 
-continuous_monitoring_active {
+continuous_monitoring_active if {
     # Real-time monitoring of all autonomous actions
     input.monitoring.real_time_active == true
     input.monitoring.last_heartbeat_ns > (time.now_ns() - 30000000000) # 30 seconds
@@ -210,7 +211,7 @@ continuous_monitoring_active {
 # === SPECIFIC OPERATION TYPES ===
 
 # Transcendent intelligence operations require enhanced safeguards
-allow {
+allow if {
     input.operation.name in ["enableTranscendentIntelligence", "configureTranscendentController"]
     input.operation.transcendence_level in ["SUPERINTELLIGENT", "UNBOUNDED"]
     transcendent_enhanced_safeguards
@@ -219,7 +220,7 @@ allow {
     lawful_interoperability_confirmed
 }
 
-transcendent_enhanced_safeguards {
+transcendent_enhanced_safeguards if {
     # Additional safety requirements for transcendent operations
     input.transcendent_safeguards.ethics_board_approval == true
     input.transcendent_safeguards.safety_committee_review == true
@@ -235,14 +236,14 @@ transcendent_enhanced_safeguards {
 }
 
 # Cross-border operations require additional approvals
-allow {
+allow if {
     input.operation.isCrossBorder
     cross_border_operation_approved
     independent_verification_complete
     lawful_interoperability_confirmed
 }
 
-cross_border_operation_approved {
+cross_border_operation_approved if {
     # All affected jurisdictions approve
     every jurisdiction in input.operation.affected_jurisdictions {
         input.cross_border_approvals[jurisdiction].status == "APPROVED"
@@ -259,13 +260,13 @@ cross_border_operation_approved {
 # === EMERGENCY PROCEDURES ===
 
 # Emergency containment with sovereign safeguards
-allow {
+allow if {
     input.operation.name == "emergencySovereignContainment"
     input.actor.role in ["platform-admin", "sovereign-controller", "emergency-responder"]
     emergency_containment_authorized
 }
 
-emergency_containment_authorized {
+emergency_containment_authorized if {
     # Emergency declared by authorized entity
     input.emergency.declared == true
     input.emergency.declaring_authority in ["government", "regulator", "platform-admin"]
@@ -286,7 +287,7 @@ emergency_containment_authorized {
 # === COMPLIANCE MONITORING ===
 
 # Continuous compliance verification
-compliance_status_valid {
+compliance_status_valid if {
     # All compliance checks current
     every check in input.compliance.continuous_checks {
         check.status == "PASSING"
@@ -303,7 +304,7 @@ compliance_status_valid {
 # === AUDIT AND EVIDENCE REQUIREMENTS ===
 
 # Enhanced audit trail for sovereign operations
-audit_trail_complete {
+audit_trail_complete if {
     # All decisions logged with full context
     input.audit.decision_logging_complete == true
 
@@ -320,39 +321,39 @@ audit_trail_complete {
 # === SOVEREIGN SAFEGUARDS VALIDATION ===
 
 # Deny operations lacking sovereign safeguards
-deny[msg] {
+deny contains msg if {
     input.operation.isSovereign
     not independent_verification_complete
     msg := "Sovereign operation requires independent verification from multiple sources"
 }
 
-deny[msg] {
+deny contains msg if {
     input.operation.isSovereign
     not containment_readiness_verified
     msg := "Sovereign operation requires verified containment readiness"
 }
 
-deny[msg] {
+deny contains msg if {
     input.operation.isSovereign
     not lawful_interoperability_confirmed
     msg := "Sovereign operation requires confirmed lawful interoperability"
 }
 
-deny[msg] {
+deny contains msg if {
     input.operation.isSovereign
     not reversible_autonomy_safeguards
     msg := "Sovereign operation requires reversible autonomy safeguards"
 }
 
 # Deny transcendent operations without enhanced safeguards
-deny[msg] {
+deny contains msg if {
     input.operation.transcendence_level in ["SUPERINTELLIGENT", "UNBOUNDED"]
     not transcendent_enhanced_safeguards
     msg := "Transcendent operations require enhanced safeguards including ethics board approval"
 }
 
 # Deny cross-border operations without proper approvals
-deny[msg] {
+deny contains msg if {
     input.operation.isCrossBorder
     not cross_border_operation_approved
     msg := "Cross-border operations require explicit approvals from all affected jurisdictions"
@@ -360,11 +361,11 @@ deny[msg] {
 
 # === POLICY METADATA ===
 
-policy_version = "v0.4.1"
-policy_name = "Sovereign Safeguards"
-compatible_versions = ["v0.4.0", "v0.4.1"]
+policy_version := "v0.4.1"
+policy_name := "Sovereign Safeguards"
+compatible_versions := ["v0.4.0", "v0.4.1"]
 
-required_fields_sovereign = [
+required_fields_sovereign := [
     "operation",
     "actor",
     "verification",
@@ -375,4 +376,4 @@ required_fields_sovereign = [
     "audit"
 ]
 
-sovereign_safeguards_enabled = true
+sovereign_safeguards_enabled := true

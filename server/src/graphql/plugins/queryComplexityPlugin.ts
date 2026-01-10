@@ -161,7 +161,7 @@ export function createQueryComplexityPlugin(
               }
             }
 
-          } catch (error) {
+          } catch (error: any) {
             // If error is already a GraphQLError, rethrow it
             if (error instanceof GraphQLError) {
               throw error;

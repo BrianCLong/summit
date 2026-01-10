@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { getNeo4jDriver } from '../../config/database';
-import { EmbeddingService } from '../../services/EmbeddingService';
+import { getNeo4jDriver } from '../../config/database.js';
+import EmbeddingService from '../../services/EmbeddingService.js';
 
 export class PriorArtService {
   private static instance: PriorArtService;
@@ -18,7 +18,7 @@ export class PriorArtService {
   }
 
   async findSimilar(text: string, tenantId: string, limit: number = 10): Promise<any[]> {
-    const embedding = await this.embeddingService.getEmbedding(text);
+    const embedding = await this.embeddingService.generateEmbedding({ text });
     const driver = getNeo4jDriver();
     const session = driver.session();
 

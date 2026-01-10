@@ -1,5 +1,7 @@
 // Types
 export * from './types/plugin.js';
+export { PluginManifestSchema, PluginSignatureSchema } from './manifest/schema.js';
+export { PluginManifestValidationError } from './errors/PluginManifestValidationError.js';
 
 // Core
 export { PluginManager } from './core/PluginManager.js';
@@ -17,6 +19,12 @@ export {
   type PermissionCheckResult,
   type ResourceQuota,
 } from './security/PluginSecurity.js';
+export {
+  verifySignature,
+  type SignatureVerificationInput,
+  type SignatureVerificationResult,
+  type SignatureVerificationStatus,
+} from './security/verifySignature.js';
 
 // Authorization
 export {

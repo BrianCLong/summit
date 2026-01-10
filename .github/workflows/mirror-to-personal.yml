@@ -1,21 +1,24 @@
 name: Mirror to BrianCLong/summit
 
+# Disabled: This workflow requires PERSONAL_MIRROR_TOKEN secret
+# and is only needed when mirroring from TopicalityLLC/Summit
 on:
-  push:
-    branches:
-      - main
-      - 'release/**'
   workflow_dispatch:
+    inputs:
+      reason:
+        description: "Reason for manual run"
+        required: false
+        type: string
 
 jobs:
   mirror:
     runs-on: ubuntu-latest
     # Prevent infinite loop by checking if the push came from GitHub Actions
     if: github.event.head_commit.author.name != 'BrianCLong Mirror Bot'
-    
+
     steps:
       - name: Checkout TopicalityLLC/Summit
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ secrets.PERSONAL_MIRROR_TOKEN }}

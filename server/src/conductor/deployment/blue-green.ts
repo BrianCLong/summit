@@ -5,8 +5,8 @@
 import { EventEmitter } from 'events';
 import { spawn } from 'child_process';
 import Redis from 'ioredis';
-import { prometheusConductorMetrics } from '../observability/prometheus';
-import { multiRegionFailoverManager } from '../failover/multi-region';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
+import { multiRegionFailoverManager } from '../failover/multi-region.js';
 
 export interface DeploymentConfig {
   strategy: 'blue-green' | 'canary' | 'rolling';
@@ -300,7 +300,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
               throw new Error('Health validation failed - initiating rollback');
             }
           }
-        } catch (error) {
+        } catch (error: any) {
           phase.status = 'failed';
           phase.endTime = Date.now();
           execution.errors.push(`Phase ${phase.name} failed: ${error.message}`);
@@ -328,7 +328,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
       'deployment_success',
       { success: true },
     );
-    } catch (error) {
+    } catch (error: any) {
       execution.status = 'failed';
       execution.endTime = Date.now();
       execution.errors.push(`Deployment failed: ${error.message}`);
@@ -371,7 +371,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
           phase,
           `Action completed: ${action.name} (${action.duration}ms)`,
         );
-      } catch (error) {
+      } catch (error: any) {
         action.status = 'failed';
         action.error = error.message;
         action.duration = Date.now() - startTime;
@@ -801,7 +801,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
       await this.cleanupFailedDeployment(execution);
 
       this.emit('deployment:rolled_back', execution);
-    } catch (rollbackError) {
+    } catch (rollbackError: any) {
       console.error('Rollback failed:', rollbackError);
       execution.errors.push(`Rollback failed: ${rollbackError.message}`);
     }
@@ -823,7 +823,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
         metrics.errorRate <= rollbackThreshold.errorRate &&
         metrics.latencyP95 <= rollbackThreshold.latencyP95
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Health validation failed:', error);
       return false;
     }
@@ -881,7 +881,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
             await this.executeCommand(healthCheck.target);
             return;
         }
-      } catch (error) {
+      } catch (error: any) {
         if (attempt === healthCheck.retries - 1) {
           throw error;
         }
@@ -1089,7 +1089,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
       await this.executeCommand(
         'kubectl delete configmap server-green-config --ignore-not-found=true',
       );
-    } catch (error) {
+    } catch (error: any) {
       console.warn('Cleanup warning:', error.message);
     }
   }

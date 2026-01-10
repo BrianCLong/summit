@@ -119,10 +119,28 @@ pii_handling_compliant if {
 sensitive_modality_pii_protected if {
     # Text modalities require PII protection
     every modality in input.multi_modal.input_modalities {
-        modality == "TEXT" implies input.multi_modal.pii_protection.text_anonymization == true
-        modality == "AUDIO" implies input.multi_modal.pii_protection.voice_anonymization == true
-        modality == "IMAGE" implies input.multi_modal.pii_protection.face_blurring == true
+        modality_pii_protected(modality)
     }
+}
+
+# Helper rules for PII protection by modality
+modality_pii_protected(modality) if {
+    modality == "TEXT"
+    input.multi_modal.pii_protection.text_anonymization == true
+}
+
+modality_pii_protected(modality) if {
+    modality == "AUDIO"
+    input.multi_modal.pii_protection.voice_anonymization == true
+}
+
+modality_pii_protected(modality) if {
+    modality == "IMAGE"
+    input.multi_modal.pii_protection.face_blurring == true
+}
+
+modality_pii_protected(modality) if {
+    not modality in ["TEXT", "AUDIO", "IMAGE"]
 }
 
 cross_modal_privacy_preserved if {
@@ -922,20 +940,40 @@ objective_conflicts_resolved if {
 
 accuracy_vs_creativity_balanced if {
     accuracy_objectives := [obj | obj := input.cognitive_synthesis.objectives[_]; obj.objective_type == "ACCURACY_MAXIMIZATION"]
-    creativity_objectives := [obj | obj := input.cognitive_synthesis.objectives[_]; obj.objective_type == "CREATIVITY_ENHANCEMENT"]
+    count(accuracy_objectives) == 0
+}
 
+accuracy_vs_creativity_balanced if {
+    creativity_objectives := [obj | obj := input.cognitive_synthesis.objectives[_]; obj.objective_type == "CREATIVITY_ENHANCEMENT"]
+    count(creativity_objectives) == 0
+}
+
+accuracy_vs_creativity_balanced if {
+    accuracy_objectives := [obj | obj := input.cognitive_synthesis.objectives[_]; obj.objective_type == "ACCURACY_MAXIMIZATION"]
+    creativity_objectives := [obj | obj := input.cognitive_synthesis.objectives[_]; obj.objective_type == "CREATIVITY_ENHANCEMENT"]
+    count(accuracy_objectives) > 0
+    count(creativity_objectives) > 0
     # If both present, priorities should be balanced
-    count(accuracy_objectives) == 0 or count(creativity_objectives) == 0 or
-    (abs(accuracy_objectives[0].priority - creativity_objectives[0].priority) <= 0.3)
+    abs(accuracy_objectives[0].priority - creativity_objectives[0].priority) <= 0.3
+}
+
+efficiency_vs_quality_balanced if {
+    efficiency_objectives := [obj | obj := input.cognitive_synthesis.objectives[_]; obj.objective_type == "EFFICIENCY_IMPROVEMENT"]
+    count(efficiency_objectives) == 0
+}
+
+efficiency_vs_quality_balanced if {
+    quality_objectives := [obj | obj := input.cognitive_synthesis.objectives[_]; obj.objective_type in ["ACCURACY_MAXIMIZATION", "COHERENCE_OPTIMIZATION"]]
+    count(quality_objectives) == 0
 }
 
 efficiency_vs_quality_balanced if {
     efficiency_objectives := [obj | obj := input.cognitive_synthesis.objectives[_]; obj.objective_type == "EFFICIENCY_IMPROVEMENT"]
     quality_objectives := [obj | obj := input.cognitive_synthesis.objectives[_]; obj.objective_type in ["ACCURACY_MAXIMIZATION", "COHERENCE_OPTIMIZATION"]]
-
+    count(efficiency_objectives) > 0
+    count(quality_objectives) > 0
     # If both present, ensure reasonable balance
-    count(efficiency_objectives) == 0 or count(quality_objectives) == 0 or
-    (efficiency_objectives[0].priority <= max([q.priority | q := quality_objectives[_]]) + 0.2)
+    efficiency_objectives[0].priority <= max([q.priority | q := quality_objectives[_]]) + 0.2
 }
 
 synthesis_constraints_respected if {
@@ -954,40 +992,72 @@ synthesis_constraints_respected if {
 
 time_constraints_reasonable if {
     every constraint in input.cognitive_synthesis.constraints {
-        constraint.constraint_type == "TIME_CONSTRAINT" implies
-        constraint.value.max_processing_time_seconds <= 3600  # 1 hour max
-        constraint.value.max_processing_time_seconds >= 10    # 10 seconds min
+        time_constraint_valid(constraint)
     }
+}
+
+time_constraint_valid(constraint) if {
+    constraint.constraint_type == "TIME_CONSTRAINT"
+    constraint.value.max_processing_time_seconds <= 3600  # 1 hour max
+    constraint.value.max_processing_time_seconds >= 10    # 10 seconds min
+}
+
+time_constraint_valid(constraint) if {
+    constraint.constraint_type != "TIME_CONSTRAINT"
 }
 
 resource_constraints_appropriate if {
     every constraint in input.cognitive_synthesis.constraints {
-        constraint.constraint_type == "RESOURCE_CONSTRAINT" implies (
-            constraint.value.max_cpu_cores <= 32 and
-            constraint.value.max_memory_gb <= 128 and
-            constraint.value.max_storage_gb <= 1000
-        )
+        resource_constraint_valid(constraint)
     }
+}
+
+resource_constraint_valid(constraint) if {
+    constraint.constraint_type == "RESOURCE_CONSTRAINT"
+    constraint.value.max_cpu_cores <= 32
+    constraint.value.max_memory_gb <= 128
+    constraint.value.max_storage_gb <= 1000
+}
+
+resource_constraint_valid(constraint) if {
+    constraint.constraint_type != "RESOURCE_CONSTRAINT"
 }
 
 quality_constraints_achievable if {
     every constraint in input.cognitive_synthesis.constraints {
-        constraint.constraint_type == "QUALITY_CONSTRAINT" implies (
-            constraint.value.min_accuracy >= 0.5 and constraint.value.min_accuracy <= 1.0 and
-            constraint.value.min_coherence >= 0.5 and constraint.value.min_coherence <= 1.0 and
-            constraint.value.min_relevance >= 0.5 and constraint.value.min_relevance <= 1.0
-        )
+        quality_constraint_valid(constraint)
     }
+}
+
+quality_constraint_valid(constraint) if {
+    constraint.constraint_type == "QUALITY_CONSTRAINT"
+    constraint.value.min_accuracy >= 0.5
+    constraint.value.min_accuracy <= 1.0
+    constraint.value.min_coherence >= 0.5
+    constraint.value.min_coherence <= 1.0
+    constraint.value.min_relevance >= 0.5
+    constraint.value.min_relevance <= 1.0
+}
+
+quality_constraint_valid(constraint) if {
+    constraint.constraint_type != "QUALITY_CONSTRAINT"
 }
 
 ethical_constraints_enforced if {
     every constraint in input.cognitive_synthesis.constraints {
-        constraint.constraint_type == "ETHICAL_CONSTRAINT" implies (
-            constraint.strictness in ["MEDIUM", "HARD", "ABSOLUTE"] and
-            constraint.value.bias_tolerance <= 0.2 and
-            constraint.value.harm_prevention_level >= 0.9
-        )
+        ethical_constraint_valid(constraint)
     }
+}
+
+ethical_constraint_valid(constraint) if {
+    constraint.constraint_type == "ETHICAL_CONSTRAINT"
+    constraint.strictness in ["MEDIUM", "HARD", "ABSOLUTE"]
+    constraint.value.bias_tolerance <= 0.2
+    constraint.value.harm_prevention_level >= 0.9
+}
+
+ethical_constraint_valid(constraint) if {
+    constraint.constraint_type != "ETHICAL_CONSTRAINT"
 }
 
 output_quality_requirements_met if {
@@ -1012,9 +1082,16 @@ explanation_requirements_reasonable if {
     input.cognitive_synthesis.explanation.depth in [
         "MINIMAL", "SUMMARY", "DETAILED", "COMPREHENSIVE", "FULL_TRACE"
     ]
-
     # Full trace only for research grade
-    input.cognitive_synthesis.explanation.depth != "FULL_TRACE" or
+    input.cognitive_synthesis.explanation.depth != "FULL_TRACE"
+}
+
+explanation_requirements_reasonable if {
+    input.cognitive_synthesis.explanation.depth in [
+        "MINIMAL", "SUMMARY", "DETAILED", "COMPREHENSIVE", "FULL_TRACE"
+    ]
+    # Full trace only for research grade
+    input.cognitive_synthesis.explanation.depth == "FULL_TRACE"
     input.cognitive_synthesis.quality == "RESEARCH_GRADE"
 }
 

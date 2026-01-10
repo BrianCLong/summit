@@ -146,7 +146,7 @@ export class RegulatoryPackService {
 
       span?.addSpanAttributes({
         'regulatory_pack.loaded_count': results.length,
-        'regulatory_pack.error_count': results.filter((r) => r.validationErrors.length > 0).length,
+        'regulatory_pack.error_count': results.filter((r: any) => r.validationErrors.length > 0).length,
       });
 
       return results;
@@ -360,7 +360,7 @@ export class RegulatoryPackService {
 
     const { rows } = await pool.query(query, params);
 
-    return rows.map((row) => ({
+    return rows.map((row: { id: string; name: string; framework: string; version: string; status: string; control_count?: number; updated_at: Date }) => ({
       id: row.id,
       name: row.name,
       framework: row.framework as ComplianceFramework,
@@ -460,7 +460,7 @@ export class RegulatoryPackService {
             contentHash: createHash('sha256').update(contentStr).digest('hex'),
             contentSize: contentStr.length,
             redactionApplied: true,
-            redactionRules: DEFAULT_REDACTION_RULES.map((r) => r.category),
+            redactionRules: DEFAULT_REDACTION_RULES.map((r: any) => r.category),
           };
 
           snapshots.push(snapshot);
@@ -597,7 +597,7 @@ export class RegulatoryPackService {
       [controlId]
     );
 
-    return rows.map((row) => ({
+    return rows.map((row: { id: string; test_id: string; control_id: string; executed_at: Date; executed_by: string; status: string; details: unknown; evidence: unknown; duration: number; failure_reason?: string }) => ({
       id: row.id,
       testId: row.test_id,
       controlId: row.control_id,

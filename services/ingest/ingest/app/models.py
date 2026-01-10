@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Literal
+from typing import Any, Literal
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -23,8 +23,10 @@ class IngestJobRequest(BaseModel):
 
     source_type: Literal["csv", "json", "s3", "postgres"] = Field(alias="sourceType")
     source: str
-    schema_map: Dict[str, str] = Field(alias="schemaMap")
-    redaction_rules: Dict[str, str] = Field(default_factory=dict, alias="redactionRules")
+    schema_map: dict[str, str] = Field(alias="schemaMap")
+    redaction_rules: dict[str, str] = Field(
+        default_factory=dict, alias="redactionRules"
+    )
     postgres: PostgresOptions | None = Field(default=None, alias="postgresOptions")
 
 
@@ -34,16 +36,18 @@ class JobStatus(BaseModel):
     id: str
     status: Literal["pending", "completed", "failed"]
     processed: int = 0
-    pii_summary: Dict[str, int] = Field(default_factory=dict, alias="piiSummary")
-    quality_insights: Dict[str, Any] | None = Field(default=None, alias="qualityInsights")
+    pii_summary: dict[str, int] = Field(default_factory=dict, alias="piiSummary")
+    quality_insights: dict[str, Any] | None = Field(
+        default=None, alias="qualityInsights"
+    )
 
 
 class EventEnvelope(BaseModel):
     tenantId: str
     entityType: str
-    attributes: Dict[str, Any]
-    provenance: Dict[str, Any]
-    policy: Dict[str, Any]
+    attributes: dict[str, Any]
+    provenance: dict[str, Any]
+    policy: dict[str, Any]
 
 
 def new_job_id() -> str:

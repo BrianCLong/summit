@@ -12,8 +12,8 @@
  * @module runbooks/runtime/rapid-attribution-runbook
  */
 
-import { RunbookDefinition, RunbookStepDefinition } from './types';
-import { LegalBasis, DataLicense } from '../dags/types';
+import { RunbookDefinition, RunbookStepDefinition } from './types.js';
+import { LegalBasis, DataLicense } from '../dags/types.js';
 
 /**
  * Step 1: Ingest Indicators

@@ -1,8 +1,8 @@
 
-import { ChangeRequest, SchemaVersion, SchemaDefinition, Vocabulary, Concept } from './models';
-import { SchemaRegistryService } from './SchemaRegistryService';
+import { ChangeRequest, SchemaVersion, SchemaDefinition, Vocabulary, Concept } from './models.js';
+import { SchemaRegistryService } from './SchemaRegistryService.js';
 import { randomUUID } from 'crypto';
-import { FilePersistenceAdapter, PersistenceAdapter } from './persistence';
+import { FilePersistenceAdapter, PersistenceAdapter } from './persistence.js';
 
 export class WorkflowService {
   private static instance: WorkflowService;

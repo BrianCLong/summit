@@ -1,6 +1,7 @@
 import subprocess
 from pathlib import Path
 
+
 def run_redaction(tmp_path: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [

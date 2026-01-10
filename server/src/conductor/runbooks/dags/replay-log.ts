@@ -8,7 +8,7 @@
 
 import { createHash, sign, verify } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-import { ReplayLogEntry, createReplayLogHash, Evidence } from './types';
+import { ReplayLogEntry, createReplayLogHash, Evidence } from './types.js';
 
 /**
  * Replay Log Manager
@@ -187,7 +187,7 @@ export class ReplayLog {
               error: `Signature verification failed at entry ${i}`,
             };
           }
-        } catch (err) {
+        } catch (err: any) {
           return {
             valid: false,
             error: `Signature verification error at entry ${i}: ${err}`,

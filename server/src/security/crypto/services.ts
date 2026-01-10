@@ -122,7 +122,7 @@ export class Rfc3161TimestampingService implements TimestampingService {
       try {
         Buffer.from(token, 'base64');
         return true;
-      } catch (error) {
+      } catch (error: any) {
         return false;
       }
     }
@@ -175,7 +175,7 @@ export class DatabaseAuditLogger implements AuditLogger {
         resourceId,
         details,
       });
-    } catch (error) {
+    } catch (error: any) {
       // Auditing must never throw in hot paths
       console.warn('Failed to write crypto audit log', error);
     }

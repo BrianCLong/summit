@@ -95,6 +95,27 @@ export interface EventPayloads {
     status: 'started' | 'completed' | 'failed';
     owner?: string;
   };
+  'summit.intelgraph.graph.updated': {
+    source: string;
+    ingress: string;
+    namespace?: string;
+    trigger: 'refresh' | 'stream';
+    version: number;
+    nodeCount: number;
+    edgeCount: number;
+    durationMs?: number;
+    topic?: string;
+    correlationId?: string;
+  };
+  'summit.intelgraph.agent.triggered': {
+    agent: string;
+    reason: string;
+    priority?: 'low' | 'normal' | 'high';
+    namespace?: string;
+    graphVersion?: number;
+    correlationId?: string;
+    payload?: Record<string, unknown>;
+  };
 }
 
 export type EventName = keyof EventPayloads;
@@ -204,6 +225,39 @@ export const EVENT_SCHEMAS: Record<
       dataset: 'alignment-suite',
       status: 'started',
       owner: 'ml-bench',
+    },
+  },
+  'summit.intelgraph.graph.updated': {
+    name: 'summit.intelgraph.graph.updated',
+    version: '1.0',
+    description: 'Knowledge graph snapshot updated from refresh or streaming source',
+    required: ['source', 'ingress', 'trigger', 'version', 'nodeCount', 'edgeCount'],
+    example: {
+      source: 'confluent',
+      ingress: 'message-broker',
+      namespace: 'intelgraph',
+      trigger: 'stream',
+      version: 12,
+      nodeCount: 420,
+      edgeCount: 880,
+      durationMs: 135,
+      topic: 'intelgraph.updates',
+      correlationId: 'trace-1234',
+    },
+  },
+  'summit.intelgraph.agent.triggered': {
+    name: 'summit.intelgraph.agent.triggered',
+    version: '1.0',
+    description: 'Agent reaction requested due to graph change',
+    required: ['agent', 'reason'],
+    example: {
+      agent: 'incident-first-responder',
+      reason: 'critical incident ingested from kafka topic incidents.high',
+      priority: 'high',
+      namespace: 'intelgraph',
+      graphVersion: 12,
+      correlationId: 'trace-1234',
+      payload: { incidentId: 'inc-123', serviceId: 'svc-api' },
     },
   },
 };

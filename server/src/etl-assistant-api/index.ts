@@ -125,7 +125,7 @@ async function executePythonModule(
       try {
         const result = JSON.parse(stdout);
         resolve(result);
-      } catch (err) {
+      } catch (err: any) {
         apiLogger.error({ stdout, err }, 'Failed to parse Python output');
         reject(new Error('Failed to parse Python output'));
       }
@@ -164,7 +164,7 @@ export function createETLAssistantAPI(pg: Pool): Router {
         }, 'Schema preview completed');
 
         res.json(result);
-      } catch (err) {
+      } catch (err: any) {
         apiLogger.error({ err }, 'Schema preview failed');
         res.status(400).json({
           error: 'Schema preview failed',
@@ -199,7 +199,7 @@ export function createETLAssistantAPI(pg: Pool): Router {
         }, 'PII scan completed');
 
         res.json(result);
-      } catch (err) {
+      } catch (err: any) {
         apiLogger.error({ err }, 'PII scan failed');
         res.status(400).json({
           error: 'PII scan failed',
@@ -235,7 +235,7 @@ export function createETLAssistantAPI(pg: Pool): Router {
         }, 'License check completed');
 
         res.json(result);
-      } catch (err) {
+      } catch (err: any) {
         apiLogger.error({ err }, 'License check failed');
         res.status(400).json({
           error: 'License check failed',
@@ -272,7 +272,7 @@ export function createETLAssistantAPI(pg: Pool): Router {
           config_id: configId,
           message: 'Configuration saved successfully',
         });
-      } catch (err) {
+      } catch (err: any) {
         apiLogger.error({ err }, 'Failed to save configuration');
         res.status(500).json({
           error: 'Failed to save configuration',
@@ -306,7 +306,7 @@ export function createETLAssistantAPI(pg: Pool): Router {
         }
 
         res.json(config);
-      } catch (err) {
+      } catch (err: any) {
         apiLogger.error({ err }, 'Failed to load configuration');
         res.status(500).json({
           error: 'Failed to load configuration',
@@ -337,7 +337,7 @@ async function inferSchemaInProcess(
   }
 
   const fields = Object.keys(rows[0]).map((fieldName) => {
-    const values = rows.map((r) => r[fieldName]).filter((v) => v != null);
+    const values = rows.map((r: any) => r[fieldName]).filter((v) => v != null);
     const inferredType = inferFieldType(values);
 
     return {
@@ -478,7 +478,7 @@ async function detectPIIInProcess(rows: Record<string, any>[]): Promise<any> {
   const fieldNames = Object.keys(rows[0]);
 
   for (const fieldName of fieldNames) {
-    const values = rows.map((r) => r[fieldName]).filter((v) => v != null);
+    const values = rows.map((r: any) => r[fieldName]).filter((v) => v != null);
     const piiMatch = detectPIIField(fieldName, values);
     if (piiMatch) {
       piiMatches.push(piiMatch);
@@ -598,7 +598,7 @@ async function checkLicenseCompliance(
     );
 
     if (result.rows.length > 0) {
-      dataSourceIds = result.rows.map((r) => r.id);
+      dataSourceIds = result.rows.map((r: any) => r.id);
     }
   }
 
@@ -722,7 +722,7 @@ async function saveConfiguration(
     await client.query('COMMIT');
 
     return configId;
-  } catch (err) {
+  } catch (err: any) {
     await client.query('ROLLBACK');
     throw err;
   } finally {

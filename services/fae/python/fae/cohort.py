@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Mapping
+from collections.abc import Mapping
 
 from .aggregates import CohortKey, SecureAggregatedMetrics
 
@@ -17,4 +17,3 @@ def slice_metrics(
         if all(cohort_dict.get(key) == value for key, value in filters.items()):
             selected[cohort] = metric
     return selected
-

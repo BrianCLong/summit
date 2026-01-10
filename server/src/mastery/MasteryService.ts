@@ -173,7 +173,7 @@ export class MasteryService {
                     },
                     metadata: {}
                 });
-            } catch (err) {
+            } catch (err: any) {
                  console.error('Failed to log lab completion', err);
             }
 
@@ -199,7 +199,7 @@ export class MasteryService {
             }
         });
         return completed;
-    } catch (err) {
+    } catch (err: any) {
         console.error('Failed to fetch completed labs', err);
         return new Set();
     }
@@ -261,7 +261,7 @@ export class MasteryService {
             .filter(e => e.actorId === userId || (e.payload as any).certificate?.userId === userId)
             .map(e => (e.payload as any).certificate as Certificate)
             .filter(c => !!c);
-    } catch (e) {
+    } catch (e: any) {
         console.error('Failed to fetch user certificates', e);
         return [];
     }

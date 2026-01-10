@@ -9,12 +9,14 @@ import GAEnrollmentService from './GAEnrollmentService.js';
 import { PrometheusMetrics } from '../utils/metrics.js';
 
 // Input Validation Schema
-export const createTenantSchema = z.object({
+export const createTenantBaseSchema = z.object({
   name: z.string().min(2).max(100),
   slug: z.string().min(3).max(50).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
   residency: z.enum(['US', 'EU']),
   region: z.string().optional(),
-}).transform(data => {
+});
+
+export const createTenantSchema = createTenantBaseSchema.transform(data => {
   // Default region based on residency
   if (!data.region) {
     data.region = data.residency === 'EU' ? 'eu-central-1' : 'us-east-1';
@@ -51,6 +53,88 @@ export interface Tenant {
   updatedAt: Date;
 }
 
+const SETTINGS_HISTORY_KEY = 'settings_history';
+const SETTINGS_HISTORY_LIMIT = 10;
+
+interface SettingsHistoryEntry {
+  id: string;
+  timestamp: string;
+  actorId: string;
+  reason: string;
+  settings: Record<string, unknown>;
+}
+
+function sanitizeSettingsSnapshot(
+  settings: Record<string, unknown> | null | undefined,
+): Record<string, unknown> {
+  const snapshot = { ...(settings || {}) } as Record<string, unknown>;
+  delete snapshot[SETTINGS_HISTORY_KEY];
+  return snapshot;
+}
+
+export function buildSettingsWithHistory(
+  currentSettings: Record<string, unknown> | null | undefined,
+  updates: Record<string, unknown>,
+  actorId: string,
+  reason: string,
+): { settings: Record<string, unknown>; historyEntry: SettingsHistoryEntry } {
+  const sanitizedCurrent = sanitizeSettingsSnapshot(currentSettings);
+  const history = Array.isArray(currentSettings?.[SETTINGS_HISTORY_KEY])
+    ? (currentSettings?.[SETTINGS_HISTORY_KEY] as SettingsHistoryEntry[])
+    : [];
+  const historyEntry: SettingsHistoryEntry = {
+    id: randomUUID(),
+    timestamp: new Date().toISOString(),
+    actorId,
+    reason,
+    settings: sanitizedCurrent,
+  };
+  const nextHistory = [historyEntry, ...history].slice(0, SETTINGS_HISTORY_LIMIT);
+  const sanitizedUpdates = { ...updates } as Record<string, unknown>;
+  delete sanitizedUpdates[SETTINGS_HISTORY_KEY];
+  return {
+    settings: {
+      ...sanitizedCurrent,
+      ...sanitizedUpdates,
+      [SETTINGS_HISTORY_KEY]: nextHistory,
+    },
+    historyEntry,
+  };
+}
+
+export function buildRollbackSettings(
+  currentSettings: Record<string, unknown> | null | undefined,
+  actorId: string,
+  reason: string,
+): {
+  settings: Record<string, unknown>;
+  rolledBackTo: SettingsHistoryEntry;
+} {
+  const history = Array.isArray(currentSettings?.[SETTINGS_HISTORY_KEY])
+    ? (currentSettings?.[SETTINGS_HISTORY_KEY] as SettingsHistoryEntry[])
+    : [];
+  if (!history.length) {
+    throw new Error('No rollback history available');
+  }
+  const [latest, ...rest] = history;
+  const sanitizedCurrent = sanitizeSettingsSnapshot(currentSettings);
+  const rollbackEntry: SettingsHistoryEntry = {
+    id: randomUUID(),
+    timestamp: new Date().toISOString(),
+    actorId,
+    reason,
+    settings: sanitizedCurrent,
+  };
+  const nextHistory = [rollbackEntry, ...rest].slice(0, SETTINGS_HISTORY_LIMIT);
+  return {
+    settings: {
+      ...(latest.settings || {}),
+      [SETTINGS_HISTORY_KEY]: nextHistory,
+    },
+    rolledBackTo: latest,
+  };
+}
+
 export class TenantService {
   private static instance: TenantService;
   private metrics: PrometheusMetrics;
@@ -58,9 +142,9 @@ export class TenantService {
   private constructor() {
     this.metrics = new PrometheusMetrics('summit_tenancy');
     this.metrics.createHistogram(
-        'tenant_creation_duration_seconds',
-        'Time taken to create a tenant',
-        ['residency', 'tier']
+      'tenant_creation_duration_seconds',
+      'Time taken to create a tenant',
+      ['residency', 'tier']
     );
   }
 
@@ -86,7 +170,7 @@ export class TenantService {
       // GA Enrollment Check for Tenant Creation
       const enrollmentCheck = await GAEnrollmentService.checkTenantEnrollmentEligibility(validated.region);
       if (!enrollmentCheck.eligible) {
-          throw new Error(`Tenant creation rejected: ${enrollmentCheck.reason}`);
+        throw new Error(`Tenant creation rejected: ${enrollmentCheck.reason}`);
       }
 
       await client.query('BEGIN');
@@ -98,9 +182,9 @@ export class TenantService {
       if (existing.rowCount && existing.rowCount > 0) {
         const existingTenant = this.mapRowToTenant(existing.rows[0]);
         if (existingTenant.createdBy === actorId) {
-             logger.info(`Idempotent creation for tenant ${existingTenant.slug} by user ${actorId}`);
-             await client.query('ROLLBACK');
-             return existingTenant;
+          logger.info(`Idempotent creation for tenant ${existingTenant.slug} by user ${actorId}`);
+          await client.query('ROLLBACK');
+          return existingTenant;
         }
         throw new Error(`Tenant slug '${validated.slug}' is already taken.`);
       }
@@ -153,25 +237,25 @@ export class TenantService {
 
       // 6. Record Audit Event
       await provenanceLedger.appendEntry({
-         action: 'TENANT_CREATED',
-         actor: {
-             id: actorId || 'system',
-             role: 'admin'
-         },
-         metadata: {
-             tenantId: tenant.id,
-             residency: tenant.residency,
-             tier: tenant.tier
-         },
-         artifacts: []
+        action: 'TENANT_CREATED',
+        actor: {
+          id: actorId || 'system',
+          role: 'admin'
+        },
+        metadata: {
+          tenantId: tenant.id,
+          residency: tenant.residency,
+          tier: tenant.tier
+        },
+        artifacts: []
       });
 
       // 7. Associate User with Tenant (Set as their active tenant and grant admin)
       // Assuming 'users' table has tenant_id.
       // Also assuming we want to move the user into this tenant.
       await client.query(
-          'UPDATE users SET tenant_id = $1, role = $2 WHERE id = $3',
-          [tenantId, 'ADMIN', actorId]
+        'UPDATE users SET tenant_id = $1, role = $2 WHERE id = $3',
+        [tenantId, 'ADMIN', actorId]
       );
 
       await client.query('COMMIT');
@@ -180,13 +264,13 @@ export class TenantService {
       const [seconds, nanoseconds] = process.hrtime(start);
       const duration = seconds + nanoseconds / 1e9;
       this.metrics.observeHistogram('tenant_creation_duration_seconds', {
-          residency: tenant.residency,
-          tier: tenant.tier
+        residency: tenant.residency,
+        tier: tenant.tier
       }, duration);
 
       return tenant;
 
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Failed to create tenant:', error);
       throw error;
@@ -217,10 +301,17 @@ export class TenantService {
     return this.mapRowToTenant(result.rows[0]);
   }
 
+  async listTenants(limit = 100, offset = 0): Promise<Tenant[]> {
+    const pool = getPostgresPool();
+    const result = await pool.query('SELECT * FROM tenants ORDER BY created_at DESC LIMIT $1 OFFSET $2', [limit, offset]);
+    return result.rows.map(this.mapRowToTenant);
+  }
+
   async updateSettings(
     tenantId: string,
     settings: Record<string, any>,
     actorId: string,
+    reason = 'settings_update',
   ): Promise<Tenant> {
     const pool = getPostgresPool();
     const client = await pool.connect();
@@ -232,10 +323,12 @@ export class TenantService {
         throw new Error('Tenant not found');
       }
 
-      const mergedSettings = {
-        ...(existing.rows[0].settings || {}),
-        ...settings,
-      };
+      const { settings: mergedSettings } = buildSettingsWithHistory(
+        existing.rows[0].settings || {},
+        settings,
+        actorId,
+        reason,
+      );
 
       const result = await client.query(
         'UPDATE tenants SET settings = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
@@ -250,6 +343,7 @@ export class TenantService {
         metadata: {
           tenantId,
           updatedKeys: Object.keys(settings),
+          reason,
           settingsHash: createHash('sha256')
             .update(JSON.stringify(mergedSettings))
             .digest('hex'),
@@ -259,7 +353,7 @@ export class TenantService {
 
       await client.query('COMMIT');
       return tenant;
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Failed to update tenant settings', error);
       throw error;
@@ -319,9 +413,59 @@ export class TenantService {
 
       await client.query('COMMIT');
       return tenant;
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Failed to disable tenant', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async rollbackSettings(
+    tenantId: string,
+    actorId: string,
+    reason = 'settings_rollback',
+  ): Promise<{ tenant: Tenant; rolledBackTo: SettingsHistoryEntry }> {
+    const pool = getPostgresPool();
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+      const existing = await client.query('SELECT * FROM tenants WHERE id = $1', [tenantId]);
+      if (!existing.rowCount) {
+        throw new Error('Tenant not found');
+      }
+
+      const { settings: mergedSettings, rolledBackTo } = buildRollbackSettings(
+        existing.rows[0].settings || {},
+        actorId,
+        reason,
+      );
+
+      const result = await client.query(
+        'UPDATE tenants SET settings = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+        [mergedSettings, tenantId],
+      );
+
+      const tenant = this.mapRowToTenant(result.rows[0]);
+
+      await provenanceLedger.appendEntry({
+        action: 'TENANT_SETTINGS_ROLLBACK',
+        actor: { id: actorId, role: 'admin' },
+        metadata: {
+          tenantId,
+          reason,
+          rolledBackTo: rolledBackTo.id,
+        },
+        artifacts: [],
+      });
+
+      await client.query('COMMIT');
+      return { tenant, rolledBackTo };
+    } catch (error: any) {
+      await client.query('ROLLBACK');
+      logger.error('Failed to rollback tenant settings', error);
       throw error;
     } finally {
       client.release();
@@ -341,7 +485,7 @@ export class TenantService {
     };
   }
 
-  private mapRowToTenant(row: any): Tenant {
+  private mapRowToTenant(row): Tenant {
     return {
       id: row.id,
       name: row.name,

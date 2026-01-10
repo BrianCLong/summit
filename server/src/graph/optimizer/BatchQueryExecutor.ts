@@ -41,8 +41,8 @@ export class BatchQueryExecutor {
     try {
       const promises = batch.map(item =>
         tx.run(item.query, item.params)
-          .then(res => ({ status: 'fulfilled', value: res, item }))
-          .catch(err => ({ status: 'rejected', reason: err, item }))
+          .then((res: unknown) => ({ status: 'fulfilled', value: res, item }))
+          .catch((err: unknown) => ({ status: 'rejected', reason: err, item }))
       );
 
       const results = await Promise.all(promises);
@@ -58,7 +58,7 @@ export class BatchQueryExecutor {
 
       // telemetry.subsystems.database.batch.size.record(batch.length);
 
-    } catch (error) {
+    } catch (error: any) {
        await tx.rollback();
        batch.forEach(item => item.reject(error));
     } finally {

@@ -1,6 +1,6 @@
-import { SplunkSIEMSink } from '../splunk/exporter';
-import { pg } from '../../db/pg';
-import { SIEMEvent } from '../../siem/types';
+import { SplunkSIEMSink } from '../splunk/exporter.js';
+import { pg } from '../../db/pg.js';
+import { SIEMEvent } from '../../siem/types.js';
 
 export class SIEMManager {
     // In-memory cache of sinks for performance (stubbed)

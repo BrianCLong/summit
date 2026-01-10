@@ -3,9 +3,9 @@
 // Continuous quality gates with regression detection and CI integration
 
 import { EventEmitter } from 'events';
-import { ExpertArm } from '../learn/bandit';
-import { adaptiveExpertRouter } from '../router/router-v2';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { ExpertArm } from '../learn/bandit.js';
+import { adaptiveExpertRouter } from '../router/router-v2.js';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import { writeFileSync, readFileSync, existsSync } from 'fs';
 import { spawn } from 'child_process';
 import * as path from 'path';
@@ -460,7 +460,7 @@ export class GoldenTaskSuite {
       try {
         const baselines = JSON.parse(readFileSync(baselineFile, 'utf8'));
         this.baselines = new Map(Object.entries(baselines));
-      } catch (error) {
+      } catch (error: any) {
         console.warn('Failed to load quality baselines:', error.message);
       }
     }
@@ -601,7 +601,7 @@ export class EvaluationEngine extends EventEmitter {
         'evaluation_pass_rate',
         evaluationRun.summary.passed / evaluationRun.summary.totalTasks,
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Evaluation failed:', error);
       evaluationRun.summary.qualityGate = 'fail';
       this.emit('evaluation:failed', { runId, error });
@@ -636,7 +636,7 @@ export class EvaluationEngine extends EventEmitter {
           const result = await this.executeTask(task, run.config.timeoutMs);
           run.results.push(result);
           this.emit('task:completed', { task, result, runId: run.id });
-        } catch (error) {
+        } catch (error: any) {
           const errorResult: TaskResult = {
             taskId: task.id,
             status: 'error',
@@ -680,7 +680,7 @@ export class EvaluationEngine extends EventEmitter {
         const result = await this.executeTask(task, run.config.timeoutMs);
         run.results.push(result);
         this.emit('task:completed', { task, result, runId: run.id });
-      } catch (error) {
+      } catch (error: any) {
         const errorResult: TaskResult = {
           taskId: task.id,
           status: 'error',
@@ -898,7 +898,7 @@ export class EvaluationEngine extends EventEmitter {
         default:
           throw new Error(`Unknown scoring method: ${scoring.method}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Scoring error for task ${task.id}:`, error);
       rawScore = 0;
       feedback = `Scoring error: ${error.message}`;
@@ -1025,9 +1025,9 @@ export class EvaluationEngine extends EventEmitter {
     const { results } = run;
 
     run.summary.totalTasks = results.length;
-    run.summary.passed = results.filter((r) => r.status === 'passed').length;
-    run.summary.failed = results.filter((r) => r.status === 'failed').length;
-    run.summary.skipped = results.filter((r) => r.status === 'skipped').length;
+    run.summary.passed = results.filter((r: any) => r.status === 'passed').length;
+    run.summary.failed = results.filter((r: any) => r.status === 'failed').length;
+    run.summary.skipped = results.filter((r: any) => r.status === 'skipped').length;
 
     if (results.length > 0) {
       run.summary.avgScore =
@@ -1084,7 +1084,7 @@ export class EvaluationEngine extends EventEmitter {
             baselineScore,
             scoreDrop,
             significantRegression,
-            affectedTasks: results.map((r) => r.taskId),
+            affectedTasks: results.map((r: any) => r.taskId),
           });
         }
       }

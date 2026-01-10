@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <!-- Background -->
+  <rect width="800" height="600" fill="#f8f9fa" />
+
+  <!-- Title -->
+  <text x="400" y="40" font-family="Arial, sans-serif" font-size="24" text-anchor="middle" font-weight="bold" fill="#333">Organizational Physics of Summit</text>
+
+  <!-- Central Core: Summit Engine -->
+  <circle cx="400" cy="300" r="100" fill="#2c3e50" opacity="0.1" />
+  <circle cx="400" cy="300" r="80" fill="none" stroke="#2c3e50" stroke-width="2" stroke-dasharray="5,5" />
+  <text x="400" y="290" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" font-weight="bold" fill="#2c3e50">Summit Core</text>
+  <text x="400" y="315" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#555">Entropy Absorption</text>
+
+  <!-- Pillar 1: Alignment (Top) -->
+  <g transform="translate(400, 120)">
+    <rect x="-80" y="-30" width="160" height="60" rx="10" fill="#e74c3c" opacity="0.8" />
+    <text x="0" y="5" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="white" font-weight="bold">Alignment</text>
+    <text x="0" y="20" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="white">Constraints > Consensus</text>
+  </g>
+  <line x1="400" y1="150" x2="400" y2="220" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrowhead)" />
+
+  <!-- Pillar 2: Incentives (Right) -->
+  <g transform="translate(600, 300)">
+    <rect x="-80" y="-30" width="160" height="60" rx="10" fill="#3498db" opacity="0.8" />
+    <text x="0" y="5" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="white" font-weight="bold">Incentives</text>
+    <text x="0" y="20" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="white">Path of Least Resistance</text>
+  </g>
+  <line x1="520" y1="300" x2="480" y2="300" stroke="#3498db" stroke-width="2" marker-end="url(#arrowhead)" />
+
+  <!-- Pillar 3: Conflict (Bottom) -->
+  <g transform="translate(400, 480)">
+    <rect x="-80" y="-30" width="160" height="60" rx="10" fill="#f1c40f" opacity="0.9" />
+    <text x="0" y="5" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#333" font-weight="bold">Conflict</text>
+    <text x="0" y="20" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#333">Bounded Negotiation</text>
+  </g>
+  <line x1="400" y1="450" x2="400" y2="380" stroke="#f1c40f" stroke-width="2" marker-end="url(#arrowhead)" />
+
+  <!-- Pillar 4: Memory (Left) -->
+  <g transform="translate(200, 300)">
+    <rect x="-80" y="-30" width="160" height="60" rx="10" fill="#27ae60" opacity="0.8" />
+    <text x="0" y="5" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="white" font-weight="bold">Memory</text>
+    <text x="0" y="20" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="white">Executable Structure</text>
+  </g>
+  <line x1="280" y1="300" x2="320" y2="300" stroke="#27ae60" stroke-width="2" marker-end="url(#arrowhead)" />
+
+  <!-- Connecting Lines/Orbit -->
+  <circle cx="400" cy="300" r="180" fill="none" stroke="#bdc3c7" stroke-width="1" stroke-dasharray="10,5" />
+
+  <!-- Annotations -->
+  <text x="650" y="150" font-family="Arial, sans-serif" font-size="12" fill="#7f8c8d" font-style="italic">Inputs: Chaos, Tools, Politics</text>
+  <text x="650" y="450" font-family="Arial, sans-serif" font-size="12" fill="#7f8c8d" font-style="italic">Outputs: Coherence, Speed, Safety</text>
+
+  <!-- Arrow Definition -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    </marker>
+  </defs>
+</svg>

@@ -12,24 +12,23 @@ Outputs a JSON payload to stdout with `hourly_usd`, `ttl_hours`, `total_usd`,
 `budget_usd`, and `breakdown`. Exits non-zero when the estimated total exceeds
 budget and override is not permitted.
 """
+
 from __future__ import annotations
 
 import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 try:
     import yaml
 except Exception:  # pragma: no cover - dependency missing is actionable
-    sys.stderr.write(
-        "PyYAML is required for calc_cost.py. Install with `pip install pyyaml`.\n"
-    )
+    sys.stderr.write("PyYAML is required for calc_cost.py. Install with `pip install pyyaml`.\n")
     raise
 
 
-def _load_yaml(path: Path) -> Dict[str, Any]:
+def _load_yaml(path: Path) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as handle:
         return yaml.safe_load(handle) or {}
 
@@ -55,7 +54,7 @@ def _to_gib(value: str) -> float:
     raise ValueError(f"Unsupported memory unit for {value!r}")
 
 
-def _calc_component_cost(component: Dict[str, Any], pricing: Dict[str, float]) -> Dict[str, float]:
+def _calc_component_cost(component: dict[str, Any], pricing: dict[str, float]) -> dict[str, float]:
     replicas = int(component.get("replicas", 1))
     resources = component.get("requests", {})
     cpu = _to_cores(resources.get("cpu", "0"))
@@ -72,7 +71,7 @@ def _calc_component_cost(component: Dict[str, Any], pricing: Dict[str, float]) -
     }
 
 
-def estimate(values: Dict[str, Any], pricing: Dict[str, float]) -> Dict[str, Any]:
+def estimate(values: dict[str, Any], pricing: dict[str, float]) -> dict[str, Any]:
     components = values.get("components") or {}
     breakdown = {}
     hourly = 0.0

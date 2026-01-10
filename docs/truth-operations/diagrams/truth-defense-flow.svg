@@ -1,0 +1,310 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1600">
+  <!-- Title -->
+  <text x="600" y="30" font-size="24" font-weight="bold" text-anchor="middle" fill="#1a1a1a">
+    Summit Truth Defense Flow
+  </text>
+  <text x="600" y="55" font-size="14" text-anchor="middle" fill="#666">
+    Adversarial-Resistant Information Processing Pipeline
+  </text>
+
+  <!-- Information Ingestion -->
+  <rect x="450" y="80" width="300" height="60" rx="5" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="600" y="110" font-size="16" font-weight="bold" text-anchor="middle" fill="#1976d2">
+    Information Arrives
+  </text>
+  <text x="600" y="130" font-size="12" text-anchor="middle" fill="#555">
+    Claims, Observations, Reports
+  </text>
+
+  <!-- Arrow -->
+  <path d="M 600 140 L 600 180" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+
+  <!-- Pillar 4: Authority Validation -->
+  <rect x="50" y="180" width="280" height="100" rx="5" fill="#fff3e0" stroke="#f57c00" stroke-width="2"/>
+  <text x="190" y="205" font-size="14" font-weight="bold" text-anchor="middle" fill="#f57c00">
+    PILLAR 4: Authority Validation
+  </text>
+  <text x="190" y="225" font-size="11" text-anchor="middle" fill="#555">
+    ✓ Identity verification
+  </text>
+  <text x="190" y="242" font-size="11" text-anchor="middle" fill="#555">
+    ✓ Authority score check
+  </text>
+  <text x="190" y="259" font-size="11" text-anchor="middle" fill="#555">
+    ✓ Continuity monitoring
+  </text>
+
+  <!-- Pillar 1: Integrity Scoring -->
+  <rect x="350" y="180" width="500" height="100" rx="5" fill="#fce4ec" stroke="#c2185b" stroke-width="2"/>
+  <text x="600" y="205" font-size="14" font-weight="bold" text-anchor="middle" fill="#c2185b">
+    PILLAR 1: Integrity Scoring
+  </text>
+  <text x="450" y="225" font-size="11" text-anchor="middle" fill="#555">
+    Source Volatility
+  </text>
+  <text x="600" y="225" font-size="11" text-anchor="middle" fill="#555">
+    Correlation Independence
+  </text>
+  <text x="750" y="225" font-size="11" text-anchor="middle" fill="#555">
+    Historical Behavior
+  </text>
+  <text x="450" y="245" font-size="11" text-anchor="middle" fill="#555">
+    Narrative Shift Velocity
+  </text>
+  <text x="600" y="245" font-size="11" text-anchor="middle" fill="#555">
+    Verification Depth
+  </text>
+  <text x="750" y="245" font-size="11" text-anchor="middle" fill="#555">
+    Composite Score
+  </text>
+  <text x="600" y="270" font-size="12" font-weight="bold" text-anchor="middle" fill="#c2185b">
+    Integrity Score: [0.0 - 1.0]
+  </text>
+
+  <!-- Arrow -->
+  <path d="M 600 280 L 600 320" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+
+  <!-- Decision Diamond: Integrity Check -->
+  <polygon points="600,320 750,400 600,480 450,400" fill="#ffebee" stroke="#d32f2f" stroke-width="2"/>
+  <text x="600" y="395" font-size="13" font-weight="bold" text-anchor="middle" fill="#d32f2f">
+    Integrity Score
+  </text>
+  <text x="600" y="415" font-size="13" font-weight="bold" text-anchor="middle" fill="#d32f2f">
+    ≥ Threshold?
+  </text>
+
+  <!-- Low Integrity Path -->
+  <path d="M 450 400 L 300 400" stroke="#d32f2f" stroke-width="2" fill="none" marker-end="url(#arrowhead-red)"/>
+  <text x="370" y="390" font-size="11" fill="#d32f2f">LOW</text>
+
+  <!-- Pillar 5: Blast Radius Containment (Low Integrity) -->
+  <rect x="50" y="350" width="250" height="100" rx="5" fill="#ffebee" stroke="#d32f2f" stroke-width="2"/>
+  <text x="175" y="375" font-size="13" font-weight="bold" text-anchor="middle" fill="#d32f2f">
+    PILLAR 5: Containment
+  </text>
+  <text x="175" y="395" font-size="11" text-anchor="middle" fill="#555">
+    Quarantine information
+  </text>
+  <text x="175" y="412" font-size="11" text-anchor="middle" fill="#555">
+    Freeze dependencies
+  </text>
+  <text x="175" y="429" font-size="11" text-anchor="middle" fill="#555">
+    Prevent cascade
+  </text>
+
+  <!-- High Integrity Path -->
+  <path d="M 600 480 L 600 520" stroke="#2e7d32" stroke-width="2" fill="none" marker-end="url(#arrowhead-green)"/>
+  <text x="620" y="505" font-size="11" fill="#2e7d32">HIGH</text>
+
+  <!-- Pillar 2: Narrative Collision -->
+  <rect x="400" y="520" width="400" height="100" rx="5" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2"/>
+  <text x="600" y="545" font-size="14" font-weight="bold" text-anchor="middle" fill="#7b1fa2">
+    PILLAR 2: Narrative Collision Detection
+  </text>
+  <text x="500" y="565" font-size="11" text-anchor="middle" fill="#555">
+    Explanatory Diversity
+  </text>
+  <text x="700" y="565" font-size="11" text-anchor="middle" fill="#555">
+    Convergence Velocity
+  </text>
+  <text x="500" y="585" font-size="11" text-anchor="middle" fill="#555">
+    Unexplained Elements
+  </text>
+  <text x="700" y="585" font-size="11" text-anchor="middle" fill="#555">
+    Suppression Score
+  </text>
+  <text x="600" y="610" font-size="11" font-style="italic" text-anchor="middle" fill="#555">
+    "When stories harden too quickly..."
+  </text>
+
+  <!-- Arrow -->
+  <path d="M 600 620 L 600 660" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+
+  <!-- Pillar 3: Temporal Truth -->
+  <rect x="400" y="660" width="400" height="100" rx="5" fill="#e8f5e9" stroke="#388e3c" stroke-width="2"/>
+  <text x="600" y="685" font-size="14" font-weight="bold" text-anchor="middle" fill="#388e3c">
+    PILLAR 3: Temporal Truth Protection
+  </text>
+  <text x="500" y="705" font-size="11" text-anchor="middle" fill="#555">
+    Decision Window Check
+  </text>
+  <text x="700" y="705" font-size="11" text-anchor="middle" fill="#555">
+    Information Velocity
+  </text>
+  <text x="500" y="725" font-size="11" text-anchor="middle" fill="#555">
+    Time-to-Decision
+  </text>
+  <text x="700" y="725" font-size="11" text-anchor="middle" fill="#555">
+    Temporal Value Decay
+  </text>
+  <text x="600" y="750" font-size="11" font-style="italic" text-anchor="middle" fill="#555">
+    "Truth has a half-life"
+  </text>
+
+  <!-- Arrow -->
+  <path d="M 600 760 L 600 800" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+
+  <!-- Decision Diamond: Action Decision -->
+  <polygon points="600,800 750,900 600,1000 450,900" fill="#e1f5fe" stroke="#0277bd" stroke-width="2"/>
+  <text x="600" y="890" font-size="13" font-weight="bold" text-anchor="middle" fill="#0277bd">
+    Decision Required?
+  </text>
+  <text x="600" y="910" font-size="12" text-anchor="middle" fill="#0277bd">
+    Act or Wait?
+  </text>
+
+  <!-- Pillar 6: Strategic Silence -->
+  <path d="M 750 900 L 920 900" stroke="#6a1b9a" stroke-width="2" fill="none" marker-end="url(#arrowhead-purple)"/>
+  <text x="830" y="890" font-size="11" fill="#6a1b9a">WAIT</text>
+
+  <rect x="920" y="850" width="250" height="100" rx="5" fill="#f3e5f5" stroke="#6a1b9a" stroke-width="2"/>
+  <text x="1045" y="875" font-size="13" font-weight="bold" text-anchor="middle" fill="#6a1b9a">
+    PILLAR 6: Strategic Silence
+  </text>
+  <text x="1045" y="895" font-size="11" text-anchor="middle" fill="#555">
+    Observational / Denial
+  </text>
+  <text x="1045" y="912" font-size="11" text-anchor="middle" fill="#555">
+    Prioritization / Uncertainty
+  </text>
+  <text x="1045" y="929" font-size="11" font-style="italic" text-anchor="middle" fill="#555">
+    "Not reacting is signal"
+  </text>
+
+  <!-- Monitor loop -->
+  <path d="M 1045 950 L 1045 1030 L 850 1030 L 850 900" stroke="#6a1b9a" stroke-width="2" fill="none" stroke-dasharray="5,5" marker-end="url(#arrowhead-purple)"/>
+  <text x="950" y="1025" font-size="10" fill="#6a1b9a">Monitor & Review</text>
+
+  <!-- Action Path -->
+  <path d="M 600 1000 L 600 1050" stroke="#2e7d32" stroke-width="2" fill="none" marker-end="url(#arrowhead-green)"/>
+  <text x="620" y="1030" font-size="11" fill="#2e7d32">ACT</text>
+
+  <!-- Decision Execution -->
+  <rect x="450" y="1050" width="300" height="60" rx="5" fill="#c8e6c9" stroke="#388e3c" stroke-width="2"/>
+  <text x="600" y="1075" font-size="15" font-weight="bold" text-anchor="middle" fill="#2e7d32">
+    Execute Decision
+  </text>
+  <text x="600" y="1095" font-size="11" text-anchor="middle" fill="#555">
+    With Integrity-Aware Confidence
+  </text>
+
+  <!-- Arrow -->
+  <path d="M 600 1110 L 600 1150" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+
+  <!-- Monitoring & Feedback -->
+  <rect x="400" y="1150" width="400" height="80" rx="5" fill="#fff9c4" stroke="#f9a825" stroke-width="2"/>
+  <text x="600" y="1175" font-size="14" font-weight="bold" text-anchor="middle" fill="#f57f17">
+    Continuous Monitoring & Feedback
+  </text>
+  <text x="600" y="1195" font-size="11" text-anchor="middle" fill="#555">
+    Track decision outcomes | Update integrity baselines
+  </text>
+  <text x="600" y="1212" font-size="11" text-anchor="middle" fill="#555">
+    Detect compromised decisions | Trigger containment if needed
+  </text>
+
+  <!-- Feedback Loop -->
+  <path d="M 800 1190 L 950 1190 L 950 230 L 850 230" stroke="#f9a825" stroke-width="2" fill="none" stroke-dasharray="5,5" marker-end="url(#arrowhead-orange)"/>
+  <text x="970" y="700" font-size="10" fill="#f57f17" transform="rotate(90 970 700)">Feedback Loop</text>
+
+  <!-- Containment trigger from monitoring -->
+  <path d="M 400 1190 L 250 1190 L 250 400" stroke="#d32f2f" stroke-width="2" fill="none" stroke-dasharray="5,5" marker-end="url(#arrowhead-red)"/>
+  <text x="260" y="800" font-size="10" fill="#d32f2f">If Integrity Degrades</text>
+
+  <!-- Threat Detection -->
+  <rect x="50" y="1300" width="1100" height="120" rx="5" fill="#ffe0b2" stroke="#e65100" stroke-width="3"/>
+  <text x="600" y="1330" font-size="16" font-weight="bold" text-anchor="middle" fill="#e65100">
+    Threat Detection Layer (Active Across All Pillars)
+  </text>
+  <text x="200" y="1355" font-size="11" text-anchor="middle" fill="#555">
+    Noise Attack
+  </text>
+  <text x="380" y="1355" font-size="11" text-anchor="middle" fill="#555">
+    Poisoning Attack
+  </text>
+  <text x="560" y="1355" font-size="11" text-anchor="middle" fill="#555">
+    Narrative Attack
+  </text>
+  <text x="740" y="1355" font-size="11" text-anchor="middle" fill="#555">
+    Timing Attack
+  </text>
+  <text x="920" y="1355" font-size="11" text-anchor="middle" fill="#555">
+    Authority Attack
+  </text>
+  <text x="600" y="1385" font-size="12" font-weight="bold" text-anchor="middle" fill="#e65100">
+    Detection → Containment → Investigation → Remediation → Learning
+  </text>
+  <text x="600" y="1405" font-size="11" font-style="italic" text-anchor="middle" fill="#555">
+    "The primary attack surface is belief, not code"
+  </text>
+
+  <!-- Success Metrics -->
+  <rect x="50" y="1450" width="1100" height="100" rx="5" fill="#e8eaf6" stroke="#3f51b5" stroke-width="2"/>
+  <text x="600" y="1478" font-size="14" font-weight="bold" text-anchor="middle" fill="#3f51b5">
+    Truth Operations Success Metrics
+  </text>
+  <text x="250" y="1502" font-size="11" text-anchor="middle" fill="#555">
+    Attack Detection Rate
+  </text>
+  <text x="450" y="1502" font-size="11" text-anchor="middle" fill="#555">
+    Containment Speed
+  </text>
+  <text x="650" y="1502" font-size="11" text-anchor="middle" fill="#555">
+    False Positive Rate
+  </text>
+  <text x="850" y="1502" font-size="11" text-anchor="middle" fill="#555">
+    Decision Quality
+  </text>
+  <text x="1050" y="1502" font-size="11" text-anchor="middle" fill="#555">
+    Recovery Time
+  </text>
+  <text x="250" y="1525" font-size="11" text-anchor="middle" fill="#555">
+    Blast Radius Reduction
+  </text>
+  <text x="450" y="1525" font-size="11" text-anchor="middle" fill="#555">
+    Temporal Decision Value
+  </text>
+  <text x="650" y="1525" font-size="11" text-anchor="middle" fill="#555">
+    Silence Success Rate
+  </text>
+  <text x="850" y="1525" font-size="11" text-anchor="middle" fill="#555">
+    Narrative Quality
+  </text>
+  <text x="1050" y="1525" font-size="11" text-anchor="middle" fill="#555">
+    Authority Continuity
+  </text>
+
+  <!-- Legend -->
+  <text x="100" y="1580" font-size="12" font-weight="bold" fill="#333">Legend:</text>
+  <rect x="180" y="1568" width="20" height="15" fill="#fce4ec" stroke="#c2185b"/>
+  <text x="205" y="1580" font-size="10" fill="#555">Integrity Analysis</text>
+  <rect x="310" y="1568" width="20" height="15" fill="#f3e5f5" stroke="#7b1fa2"/>
+  <text x="335" y="1580" font-size="10" fill="#555">Narrative Detection</text>
+  <rect x="450" y="1568" width="20" height="15" fill="#e8f5e9" stroke="#388e3c"/>
+  <text x="475" y="1580" font-size="10" fill="#555">Temporal Analysis</text>
+  <rect x="590" y="1568" width="20" height="15" fill="#fff3e0" stroke="#f57c00"/>
+  <text x="615" y="1580" font-size="10" fill="#555">Authority Validation</text>
+  <rect x="740" y="1568" width="20" height="15" fill="#ffebee" stroke="#d32f2f"/>
+  <text x="765" y="1580" font-size="10" fill="#555">Containment</text>
+  <rect x="860" y="1568" width="20" height="15" fill="#f3e5f5" stroke="#6a1b9a"/>
+  <text x="885" y="1580" font-size="10" fill="#555">Strategic Silence</text>
+
+  <!-- Arrow Markers -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#333" />
+    </marker>
+    <marker id="arrowhead-red" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#d32f2f" />
+    </marker>
+    <marker id="arrowhead-green" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#2e7d32" />
+    </marker>
+    <marker id="arrowhead-purple" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#6a1b9a" />
+    </marker>
+    <marker id="arrowhead-orange" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#f9a825" />
+    </marker>
+  </defs>
+</svg>

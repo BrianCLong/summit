@@ -563,7 +563,6 @@ class ProviderReconciler:
 
         for diff in diffs:
             if diff.recommended_action == "update_runtime_cap" and diff.confidence > 0.7:
-
                 # Update runtime cap in Redis (not policy file)
                 runtime_key = f"runtime_cap:{diff.provider}:{diff.quota_type}"
                 new_cap = diff.observed_value

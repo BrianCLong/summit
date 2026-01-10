@@ -322,6 +322,7 @@ def check_time_window(policy, query):
             f"Access date {query_access_date_shifted.isoformat()} is outside policy window {policy_start_date.isoformat()} - {policy_end_date.isoformat()}",
         )
 
+
 def check_user_role(policy, query):
     """Checks user role."""
     policy_role = policy.get("user_role")
@@ -350,6 +351,7 @@ def check_user_role(policy, query):
     COVERAGE["user_role"]["default"] += 1
     return True, None
 
+
 def check_network_condition(policy, query):
     """Checks network condition."""
     policy_net = policy.get("network_condition")
@@ -370,8 +372,8 @@ def check_network_condition(policy, query):
         return True, None
     elif policy_net == "vpn":
         if query_net in ["secure", "vpn"]:
-             COVERAGE["network_condition"]["vpn_match"] += 1
-             return True, None
+            COVERAGE["network_condition"]["vpn_match"] += 1
+            return True, None
         else:
             return False, f"Policy requires VPN/secure, got {query_net}"
 

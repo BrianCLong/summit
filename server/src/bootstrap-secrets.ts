@@ -31,7 +31,7 @@ export async function bootstrapSecrets() {
     await manager.loadSecretsToEnv(secretsToLoad);
 
     logger.info('Secrets bootstrapped successfully.');
-  } catch (error) {
+  } catch (error: any) {
     logger.error(`Failed to bootstrap secrets: ${error}`);
     process.exit(1);
   }

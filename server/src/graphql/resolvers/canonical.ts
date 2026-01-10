@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { graphCore } from '../../services/GraphCoreService';
-import { provenanceLedger } from '../../provenance/ledger';
+import { graphCore } from '../../services/GraphCoreService.js';
+import { provenanceLedger } from '../../provenance/ledger.js';
 
 export const canonicalResolvers = {
   CanonicalEntity: {
@@ -22,7 +22,7 @@ export const canonicalResolvers = {
       if (typeof obj.policyLabels === 'string') {
         try {
           return JSON.parse(obj.policyLabels);
-        } catch (e) {
+        } catch (e: any) {
           return {};
         }
       }

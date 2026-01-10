@@ -1,7 +1,9 @@
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
+import AjvModule from 'ajv';
+import addFormatsModule from 'ajv-formats';
 import { promises as fs } from 'fs';
 
+const Ajv = (AjvModule as any).default || AjvModule;
+const addFormats = (addFormatsModule as any).default || addFormatsModule;
 const ajv = new Ajv({ allErrors: true, strict: true });
 addFormats(ajv);
 
@@ -16,9 +18,9 @@ export async function validateArtifact(
   return ok
     ? { ok: true as const, errors: [] as string[] }
     : {
-        ok: false as const,
-        errors: (validate.errors || []).map(
-          (e) => `${e.instancePath} ${e.message}`,
-        ),
-      };
+      ok: false as const,
+      errors: (validate.errors || []).map(
+        (e: any) => `${e.instancePath} ${e.message}`,
+      ),
+    };
 }

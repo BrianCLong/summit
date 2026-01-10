@@ -1,0 +1,199 @@
+name: Auto-Remediation
+
+# AUTOMATED REMEDIATION FOR RELEASE BLOCKERS
+# Matches release blocker issues to playbooks and executes
+# appropriate remediation steps.
+#
+# See docs/ci/AUTO_REMEDIATION.md for full documentation.
+
+on:
+  # Trigger on issue label events
+  issues:
+    types: [labeled]
+
+  # Scheduled scan for remediation candidates
+  schedule:
+    - cron: "0 */4 * * *" # Every 4 hours
+
+  # Manual dispatch
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Specific issue number to remediate"
+        type: string
+        required: false
+      playbook:
+        description: "Force specific playbook"
+        type: choice
+        options:
+          - auto-detect
+          - flaky-tests
+          - dependency-update
+          - build-cache
+          - lockfile-conflict
+          - type-errors
+          - sbom-failure
+          - ci-timeout
+          - security-scan
+        default: auto-detect
+      dry_run:
+        description: "Dry run mode (show actions without executing)"
+        type: boolean
+        default: true
+      auto_only:
+        description: "Only run auto-execute playbooks"
+        type: boolean
+        default: true
+
+# Prevent concurrent runs
+concurrency:
+  group: auto-remediation-${{ github.event.issue.number || 'batch' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write # For committing fixes
+  issues: write # For commenting and labeling
+  actions: write # For triggering workflows and clearing caches
+  pull-requests: write # For creating fix PRs
+
+jobs:
+  check-trigger:
+    name: Check Trigger Conditions
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+      issue_number: ${{ steps.check.outputs.issue_number }}
+    steps:
+      - name: Check if should run
+        id: check
+        run: |
+          # For workflow_dispatch, always run
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "issue_number=${{ inputs.issue_number }}" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # For scheduled runs, always run batch mode
+          if [[ "${{ github.event_name }}" == "schedule" ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "issue_number=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # For issue label events, check for remediation triggers
+          LABELS='${{ toJson(github.event.issue.labels.*.name) }}'
+
+          # Check if issue has a remediation-triggering label
+          if echo "$LABELS" | grep -qE '"release-blocker"|"needs-remediation"|"flaky-test"|"build-failure"|"dependency"'; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "issue_number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+            echo "Issue does not have remediation labels, skipping"
+          fi
+
+  remediate:
+    name: Run Remediation
+    needs: check-trigger
+    if: needs.check-trigger.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Run Auto-Remediation
+        id: remediate
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/release/run_remediation.sh
+
+          # Build arguments
+          ARGS=""
+          ARGS="$ARGS --playbooks docs/ci/REMEDIATION_PLAYBOOKS.yml"
+          ARGS="$ARGS --state docs/releases/_state/remediation_state.json"
+
+          # Add specific issue if provided
+          if [[ -n "${{ needs.check-trigger.outputs.issue_number }}" ]]; then
+            ARGS="$ARGS --issue ${{ needs.check-trigger.outputs.issue_number }}"
+          fi
+
+          # Add specific playbook if provided
+          if [[ "${{ inputs.playbook }}" != "auto-detect" && -n "${{ inputs.playbook }}" ]]; then
+            ARGS="$ARGS --playbook ${{ inputs.playbook }}"
+          fi
+
+          # Add flags
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          if [[ "${{ inputs.auto_only }}" == "true" ]]; then
+            ARGS="$ARGS --auto"
+          fi
+
+          # Run remediation
+          ./scripts/release/run_remediation.sh $ARGS
+
+      - name: Check for State Changes
+        id: check_changes
+        run: |
+          if git diff --quiet docs/releases/_state/remediation_state.json 2>/dev/null; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit State Changes
+        if: steps.check_changes.outputs.changed == 'true' && inputs.dry_run != true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add docs/releases/_state/remediation_state.json
+
+          git commit -m "chore(release-ops): update remediation state
+
+          Automated update from Auto-Remediation workflow.
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          [skip ci]"
+
+          git push
+
+      - name: Job Summary
+        run: |
+          echo "### Auto-Remediation Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ -n "${{ needs.check-trigger.outputs.issue_number }}" ]]; then
+            echo "**Issue:** #${{ needs.check-trigger.outputs.issue_number }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Mode:** Batch processing" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            echo "**Dry Run:** Yes (no changes made)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "See workflow logs for detailed remediation steps." >> $GITHUB_STEP_SUMMARY

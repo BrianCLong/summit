@@ -2,6 +2,7 @@
 import { getPostgresPool } from './postgres.js';
 import logger from '../utils/logger.js';
 import { RedisService } from '../cache/redis.js';
+import { coldStorageService } from '../services/ColdStorageService.js';
 
 export class PartitionManager {
   private pool = getPostgresPool();
@@ -41,7 +42,7 @@ export class PartitionManager {
       logger.info(`Created partition ${partitionName} for tenant ${tenantId}`);
 
       await client.query('COMMIT');
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error(`Failed to create partition for tenant ${tenantId}`, error);
       throw error;
@@ -92,7 +93,7 @@ export class PartitionManager {
       logger.info(`Created monthly partition ${partitionName} (${startStr} to ${endStr})`);
 
       await client.query('COMMIT');
-    } catch (error) {
+    } catch (error: any) {
        await client.query('ROLLBACK');
        // Don't log error if it's just that the parent table doesn't exist yet (might be dev env)
        if ((error as any).code === '42P01') {
@@ -125,6 +126,50 @@ export class PartitionManager {
     }
 
     // Future: Logic to detach old partitions and move to cold storage (e.g. S3 parquet)
+  }
+
+  async detachOldPartitions(
+    tables: string[],
+    retentionMonths: number,
+  ): Promise<void> {
+    const cutoff = new Date();
+    cutoff.setMonth(cutoff.getMonth() - retentionMonths);
+
+    const client = await this.pool.connect();
+    try {
+      for (const table of tables) {
+        const result = await client.query(
+          'SELECT inhrelid::regclass::text AS partition_name FROM pg_inherits WHERE inhparent = $1::regclass',
+          [table],
+        );
+
+        for (const row of result.rows ?? []) {
+          const partitionName = row.partition_name as string;
+          const match = partitionName.match(/_y(\d{4})m(\d{2})$/);
+          if (!match) continue;
+
+          const year = Number(match[1]);
+          const month = Number(match[2]);
+          const partitionDate = new Date(year, month - 1, 1);
+
+          if (partitionDate <= cutoff) {
+            await client.query(
+              `ALTER TABLE ${table} DETACH PARTITION ${partitionName}`,
+            );
+            await coldStorageService.archivePartition(
+              table,
+              partitionName,
+              true,
+            );
+          }
+        }
+      }
+    } catch (error: any) {
+      logger.error('Failed to detach old partitions', error);
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 }
 

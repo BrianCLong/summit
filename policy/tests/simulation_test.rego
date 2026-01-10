@@ -1,8 +1,9 @@
 package summit.policy.simulation_test
 
 import data.summit.policy.simulation
+import future.keywords.if
 
-test_ingest_allowed_low_risk {
+test_ingest_allowed_low_risk if {
   simulation.decision with input as {
     "action": "ingest",
     "risk": 0.3,
@@ -15,7 +16,7 @@ test_ingest_allowed_low_risk {
   simulation.decision_trace[_].rule == "allow_ingest_low_risk"
 }
 
-test_export_requires_review {
+test_export_requires_review if {
   simulation.decision == "deny" with input as {
     "action": "export",
     "risk": 0.2,
@@ -36,7 +37,7 @@ test_export_requires_review {
   }
 }
 
-test_high_risk_denied {
+test_high_risk_denied if {
   simulation.decision == "deny" with input as {
     "action": "ingest",
     "risk": 0.9,

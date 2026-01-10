@@ -70,7 +70,7 @@ export class TransformerInferenceService {
       // Here we process sequentially for simplicity as the script is single-shot
       const results = await Promise.all(batch.map((item) => this.runPythonInference(item)));
       results.forEach((result, idx) => resolvers[idx](result));
-    } catch (error) {
+    } catch (error: any) {
        // Fallback or error handling
        console.error("NER Inference failed", error);
        resolvers.forEach(resolve => resolve({ error: "Inference failed" }));
@@ -87,7 +87,7 @@ export class TransformerInferenceService {
     };
 
     return new Promise((resolve, reject) => {
-      PythonShell.run('ner.py', options).then(messages => {
+      PythonShell.run('ner.py', options).then((messages: unknown[]) => {
          if (messages && messages.length > 0) {
            const output = messages[0] as Record<string, unknown>;
            resolve({
@@ -99,7 +99,7 @@ export class TransformerInferenceService {
          } else {
            resolve({ error: "No output from NER script" });
          }
-      }).catch(err => {
+      }).catch((err: unknown) => {
         reject(err);
       });
     });

@@ -1,14 +1,14 @@
 // @ts-nocheck
 import PDFDocument from 'pdfkit';
-import { ExportOptions, ReportExporter, normalizeTabularData } from './base';
-import { ReportArtifact } from '../types';
+import { ExportOptions, ReportExporter, normalizeTabularData } from './base.js';
+import { ReportArtifact } from '../types.js';
 
 function renderTable(doc: PDFDocument, rows: ReturnType<typeof normalizeTabularData>) {
   const keys = Object.keys(rows[0] || { value: 'value' });
   doc.font('Helvetica-Bold').fontSize(10).text(keys.join(' | '));
   doc.moveDown(0.4);
   doc.font('Helvetica').fontSize(10);
-  rows.forEach((row) => {
+  rows.forEach((row: any) => {
     const line = keys.map((key) => String(row[key] ?? '')).join(' | ');
     doc.text(line);
   });

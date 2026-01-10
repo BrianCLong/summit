@@ -24,7 +24,7 @@ export class MessagingRepo {
       );
 
       return this.mapRow(res.rows[0] as MessageRow);
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ senderId: payload.senderId, error: error instanceof Error ? error.message : 'Unknown error' }, 'Failed to create message');
       throw error;
     }
@@ -39,7 +39,7 @@ export class MessagingRepo {
        LIMIT $3`,
       [userId, otherUserId, limit]
     );
-    return res.rows.map((row) => this.mapRow(row as MessageRow));
+    return res.rows.map((row: any) => this.mapRow(row as MessageRow));
   }
 
   private mapRow(row: MessageRow): Message {
@@ -49,7 +49,7 @@ export class MessagingRepo {
       recipientId: row.recipient_id,
       content: row.content,
       createdAt: row.created_at,
-      readAt: row.read_at,
+      readAt: row.read_at ?? undefined,
     };
   }
 }

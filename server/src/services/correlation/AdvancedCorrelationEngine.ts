@@ -2,6 +2,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import EmbeddingService from '../EmbeddingService.js';
 import logger from '../../utils/logger.js';
+// @ts-ignore - CommonJS module import
 import EntityCorrelationEngine from '../EntityCorrelationEngine.js';
 
 /**
@@ -14,12 +15,12 @@ import EntityCorrelationEngine from '../EntityCorrelationEngine.js';
  */
 export class AdvancedCorrelationEngine {
   private embeddingService: EmbeddingService;
-  private baseCorrelationEngine: EntityCorrelationEngine;
+  private baseCorrelationEngine: any;
   private logger = logger.child({ service: 'AdvancedCorrelationEngine' });
 
   constructor(
     embeddingService?: EmbeddingService,
-    baseCorrelationEngine?: EntityCorrelationEngine
+    baseCorrelationEngine?: any
   ) {
     this.embeddingService = embeddingService || new EmbeddingService();
     this.baseCorrelationEngine = baseCorrelationEngine || new EntityCorrelationEngine();
@@ -132,7 +133,7 @@ export class AdvancedCorrelationEngine {
             entity.embedding = embeddings[idx++];
           }
         }
-      } catch (err) {
+      } catch (err: any) {
         this.logger.error('Failed to generate embeddings during correlation', err);
       }
     }
@@ -199,12 +200,12 @@ export class AdvancedCorrelationEngine {
             processed.add(e2.id);
           }
         } else {
-             // If no embedding, fallback to assume they belong together (conservative)
-             // OR assume they don't.
-             // Since they were ALREADY grouped by base engine, we assume they belong together unless vector says otherwise.
-             // But if vector is missing, we can't disprove it. So keep together.
-             currentCluster.push(e2);
-             processed.add(e2.id);
+          // If no embedding, fallback to assume they belong together (conservative)
+          // OR assume they don't.
+          // Since they were ALREADY grouped by base engine, we assume they belong together unless vector says otherwise.
+          // But if vector is missing, we can't disprove it. So keep together.
+          currentCluster.push(e2);
+          processed.add(e2.id);
         }
       }
       clusters.push(currentCluster);
@@ -217,7 +218,7 @@ export class AdvancedCorrelationEngine {
     for (const e1 of g1) {
       for (const e2 of g2) {
         if (e1.embedding && e2.embedding) {
-           if (this.cosineSimilarity(e1.embedding, e2.embedding) >= threshold) return true;
+          if (this.cosineSimilarity(e1.embedding, e2.embedding) >= threshold) return true;
         }
       }
     }
@@ -241,7 +242,7 @@ export class AdvancedCorrelationEngine {
       const withoutTime = group.filter(e => !e.timestamp && !e.createdAt);
 
       if (withTime.length < 1) {
-         // No timed entities, can't split by time.
+        // No timed entities, can't split by time.
         timeAlignedGroups.push(group);
         continue;
       }
@@ -251,8 +252,8 @@ export class AdvancedCorrelationEngine {
       // But if there are mixed entities, we can't really judge without more info.
       // The failing test has 2 timed entities. So it should pass the check below.
       if (withTime.length < 2 && withoutTime.length === 0) {
-         timeAlignedGroups.push(group);
-         continue;
+        timeAlignedGroups.push(group);
+        continue;
       }
 
       // Sort by time
@@ -266,7 +267,7 @@ export class AdvancedCorrelationEngine {
       const clusters = [];
 
       for (let i = 1; i < withTime.length; i++) {
-        const prev = withTime[i-1];
+        const prev = withTime[i - 1];
         const curr = withTime[i];
         const t1 = new Date(prev.timestamp || prev.createdAt).getTime();
         const t2 = new Date(curr.timestamp || curr.createdAt).getTime();
@@ -365,9 +366,9 @@ export class AdvancedCorrelationEngine {
     // If Min(g2) - Max(g1) > window or Min(g1) - Max(g2) > window, then incompatible.
 
     const getTimes = (g: any[]) => g
-        .map(e => e.timestamp || e.createdAt)
-        .filter(t => t)
-        .map(t => new Date(t).getTime());
+      .map(e => e.timestamp || e.createdAt)
+      .filter(t => t)
+      .map(t => new Date(t).getTime());
 
     const t1 = getTimes(g1);
     const t2 = getTimes(g2);
@@ -391,8 +392,8 @@ export class AdvancedCorrelationEngine {
 
     // Add metadata about the correlation
     if (fused) {
-      fused.correlationMetadata = {
-        sourceCount: new Set(cluster.map(e => e.source)).size,
+      (fused as any).correlationMetadata = {
+        sourceCount: new Set(cluster.map((e: any) => e.source)).size,
         entityCount: cluster.length,
         method: 'advanced-hybrid',
         constituents: cluster.map(e => e.id)

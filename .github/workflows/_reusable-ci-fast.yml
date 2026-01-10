@@ -5,18 +5,18 @@ on:
       test-command:
         required: false
         type: string
-        default: 'pnpm run test:fast -- --runInBand --bail=1 --silent'
+        default: "pnpm run test:fast -- --runInBand --bail=1 --silent"
 
 jobs:
   fast:
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     env:
-      CI: 'true'
-      NODE_OPTIONS: '--max-old-space-size=3072'
+      CI: "true"
+      NODE_OPTIONS: "--max-old-space-size=3072"
       PNPM_CACHE_FOLDER: ~/.pnpm-store
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -24,15 +24,15 @@ jobs:
           run_install: false
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20.11.x'
+          node-version: "20.11.x"
 
       - name: Enable corepack (belt & suspenders)
         run: corepack enable
 
       - name: Install deps
-        run: pnpm i --no-frozen-lockfile
+        run: pnpm i --frozen-lockfile
 
       - name: Run fast lane
         run: ${{ inputs.test-command }}
@@ -40,7 +40,7 @@ jobs:
 
       - name: Upload Jest results (debug)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: fast-jest-results
           path: |

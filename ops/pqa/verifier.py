@@ -14,7 +14,7 @@ import json
 import logging
 import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any, NamedTuple
 
 from .signer import PQAAttestation, PQASignature
@@ -146,7 +146,7 @@ class PQAVerifier:
 
             logger.info(
                 f"PQA verification: {attestation.attestation_id}, "
-                f"result={overall_valid}, verify_time={verify_time*1000:.2f}ms"
+                f"result={overall_valid}, verify_time={verify_time * 1000:.2f}ms"
             )
 
             return result
@@ -173,7 +173,7 @@ class PQAVerifier:
             return False, None
 
         # Check validity period
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if now < signer.valid_from:
             return False, None
 
@@ -186,7 +186,7 @@ class PQAVerifier:
         """Check if signature timestamp is within valid window"""
         try:
             sig_time = datetime.fromisoformat(signature.timestamp.replace("Z", "+00:00"))
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
 
             # Check not too old
             if now - sig_time > self.max_age:
@@ -282,8 +282,8 @@ def create_demo_verifier(signer_id: str = "mc-pqa-demo") -> PQAVerifier:
         classical_pubkey=classical_key,
         quantum_pubkey=quantum_key,
         key_version="v1.0-hybrid",
-        valid_from=datetime.now(timezone.utc) - timedelta(hours=1),
-        valid_until=datetime.now(timezone.utc) + timedelta(days=365),
+        valid_from=datetime.now(UTC) - timedelta(hours=1),
+        valid_until=datetime.now(UTC) + timedelta(days=365),
     )
 
     return PQAVerifier([trusted_signer], max_age_minutes=60)

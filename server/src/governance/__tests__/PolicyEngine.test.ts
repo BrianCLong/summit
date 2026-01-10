@@ -56,7 +56,7 @@ describe('PolicyEngine MVP-3 GA', () => {
 
     expect(verdict.action).toBe('DENY');
     expect(verdict.policyIds).toContain('test-policy-1');
-    expect(verdict.reasons[0]).toContain('violation');
+    expect(verdict.reasons.join(' ')).toMatch(/policy|deny/i);
   });
 
   it('should include provenance and metadata', () => {

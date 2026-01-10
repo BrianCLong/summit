@@ -5,6 +5,14 @@ export interface EntityRecord {
   attributes: Record<string, unknown>;
   tenantId: string;
   confidence?: number;
+  source?: string;
+  sources?: SourceAttribution[];
+}
+
+export interface SourceAttribution {
+  source: string;
+  reliability?: number;
+  lastSeenAt?: string;
 }
 
 export interface CandidateScore {
@@ -22,6 +30,7 @@ export interface CandidateScore {
     finalScore: number;
   };
   rationale: string[];
+  explanation?: PredictionExplanation;
   decision?: ScoreDecision;
 }
 
@@ -61,6 +70,12 @@ export interface ScoringOptions {
   model?: ScoringModel;
 }
 
+export interface PredictionExplanation {
+  decision: ScoreDecision;
+  contributions: Record<string, number>;
+  rationale: string[];
+}
+
 export interface MergeRequest {
   tenantId: string;
   primaryId: string;
@@ -86,6 +101,22 @@ export interface MergeRecord {
   modelHash: string;
 }
 
+export interface DeduplicationRequest {
+  tenantId: string;
+  population: EntityRecord[];
+  thresholds?: ScoreThresholds;
+  scoring?: ScoringOptions;
+}
+
+export interface ResolutionCluster {
+  clusterId: string;
+  primary: EntityRecord;
+  duplicates: CandidateScore[];
+  model: ScoringModel;
+  rationale: string[];
+  createdAt: string;
+}
+
 export interface ExplainResponse {
   mergeId: string;
   features: CandidateScore['features'];
@@ -93,6 +124,34 @@ export interface ExplainResponse {
   policyTags: string[];
   createdAt: string;
   modelHash: string;
+}
+
+export interface TemporalEvent {
+  entityId: string;
+  timestamp: string;
+  type: string;
+  value?: number;
+  context?: Record<string, unknown>;
+}
+
+export interface TemporalPattern {
+  entityId: string;
+  trend: 'spike' | 'increasing' | 'stable';
+  support: number;
+  windowDays: number;
+  confidence: number;
+  evidence: string[];
+}
+
+export interface ExtractedEntity {
+  record: EntityRecord;
+  offsets: { start: number; end: number; label: string }[];
+}
+
+export interface ExtractionOptions {
+  tenantId: string;
+  defaultType?: string;
+  source?: string;
 }
 
 export interface AuditEntry {

@@ -73,7 +73,7 @@ def _run_command(
         raise ChaosHookError(f"Required binary '{binary}' not found on PATH for hook {hook_name}.")
 
     try:
-        completed = subprocess.run(  # noqa: S603,S607 - intentional command execution
+        completed = subprocess.run(
             command,
             check=False,
             capture_output=True,

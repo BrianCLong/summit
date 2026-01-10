@@ -1,12 +1,12 @@
+import importlib.util
 import json
-import tempfile
+import sys
 from pathlib import Path
 
-import importlib.util
-import sys
-
 OPTIMIZATION_DIR = Path(__file__).resolve().parents[1] / "optimization"
-spec = importlib.util.spec_from_file_location("ml_benchmarking", OPTIMIZATION_DIR / "ml_benchmarking.py")
+spec = importlib.util.spec_from_file_location(
+    "ml_benchmarking", OPTIMIZATION_DIR / "ml_benchmarking.py"
+)
 module = importlib.util.module_from_spec(spec)
 sys.modules["ml_benchmarking"] = module
 assert spec.loader is not None

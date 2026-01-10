@@ -1,5 +1,5 @@
-import { getPostgresPool } from '../postgres';
-import baseLogger from '../../config/logger';
+import { getPostgresPool } from '../postgres.js';
+import baseLogger from '../../config/logger.js';
 
 const logger = baseLogger.child({ name: 'uat-repo' });
 
@@ -27,7 +27,7 @@ async function ensureTable() {
       );
       CREATE INDEX IF NOT EXISTS idx_uat_run ON maestro_uat_checkpoints(run_id);
     `);
-  } catch (e) {
+  } catch (e: any) {
     logger.warn(
       { err: e },
       'ensureTable maestro_uat_checkpoints failed (mock mode?)',
@@ -51,7 +51,7 @@ export async function addUATCheckpoint(c: UATCheckpoint) {
       ],
     );
     return { ok: true };
-  } catch (e) {
+  } catch (e: any) {
     logger.warn({ err: e }, 'addUATCheckpoint failed');
     return { ok: false };
   }
@@ -68,7 +68,7 @@ export async function listUATCheckpoints(runId: string) {
        ORDER BY created_at DESC`,
       [runId],
     );
-    return res.rows.map((r) => ({
+    return res.rows.map((r: any) => ({
       run_id: r.run_id,
       checkpoint: r.checkpoint,
       verdict: r.verdict,
@@ -76,7 +76,7 @@ export async function listUATCheckpoints(runId: string) {
       actor: r.actor,
       created_at: r.created_at,
     }));
-  } catch (e) {
+  } catch (e: any) {
     logger.warn({ err: e }, 'listUATCheckpoints failed');
     return [];
   }

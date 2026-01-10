@@ -280,7 +280,7 @@ export class TenantCostService extends EventEmitter {
       }
 
       logger.info('Loaded tenant budgets', { count: budgets.rows.length });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to load tenant budgets', {
         error: error instanceof Error ? error.message : String(error)
       });
@@ -365,7 +365,7 @@ export class TenantCostService extends EventEmitter {
 
           // Update real-time metrics
           this.updateMetrics(tenantId, usage);
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to record resource usage', {
             tenantId,
             error: error instanceof Error ? error.message : String(error),
@@ -472,7 +472,7 @@ export class TenantCostService extends EventEmitter {
           this.metrics.observeHistogram('cost_calculation_duration', duration);
 
           return metrics;
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to calculate tenant costs', {
             tenantId,
             period,
@@ -781,7 +781,7 @@ export class TenantCostService extends EventEmitter {
         [alertKey],
       );
       return result.rows[0]?.timestamp.getTime() || null;
-    } catch (error) {
+    } catch (error: any) {
       return null;
     }
   }
@@ -792,7 +792,7 @@ export class TenantCostService extends EventEmitter {
         'INSERT INTO cost_alerts (alert_key, timestamp) VALUES ($1, NOW())',
         [alertKey],
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to record alert', {
         alertKey,
         error: error instanceof Error ? error.message : String(error),
@@ -843,7 +843,7 @@ export class TenantCostService extends EventEmitter {
 
           this.forecasts.set(tenantId, forecast);
           return forecast;
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to generate cost forecast', {
             tenantId,
             error: error instanceof Error ? error.message : String(error),
@@ -1099,7 +1099,7 @@ export class TenantCostService extends EventEmitter {
       try {
         const metrics = await this.calculateTenantCosts(tenantId, period);
         trends.push(metrics);
-      } catch (error) {
+      } catch (error: any) {
         logger.warn('Failed to get trend data point', { tenantId, period, i });
       }
     }
@@ -1117,14 +1117,14 @@ export class TenantCostService extends EventEmitter {
       for (const row of tenants.rows) {
         try {
           await this.calculateTenantCosts(row.tenant_id);
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to calculate costs for tenant', {
             tenantId: row.tenant_id,
             error: error instanceof Error ? error.message : String(error),
           });
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to calculate all tenant costs', {
         error: error instanceof Error ? error.message : String(error),
       });
@@ -1136,14 +1136,14 @@ export class TenantCostService extends EventEmitter {
       for (const tenantId of Array.from(this.budgets.keys())) {
         try {
           await this.generateCostForecast(tenantId);
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to generate forecast for tenant', {
             tenantId,
             error: error instanceof Error ? error.message : String(error),
           });
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to generate all forecasts', {
         error: error instanceof Error ? error.message : String(error),
       });
@@ -1169,7 +1169,7 @@ export class TenantCostService extends EventEmitter {
       );
 
       logger.info('Updated tenant budget', { tenantId });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to save budget', {
         tenantId,
         error: error instanceof Error ? error.message : String(error)
@@ -1211,9 +1211,11 @@ export class TenantCostService extends EventEmitter {
       const costCategory = this.config.costCategories.find(
         (c) => c.name === category,
       );
-      if (costCategory) {
+      if (costCategory && typeof rate === 'number') {
         costCategory.ratePerUnit = rate;
         logger.info('Updated cost rate', { category, rate });
+      } else if (costCategory) {
+        logger.warn('Skipped updating cost rate due to undefined value', { category });
       }
     }
   }

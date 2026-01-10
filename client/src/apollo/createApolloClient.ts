@@ -9,11 +9,12 @@ import { createPersistedQueryLink } from '@apollo/client/link/persisted-queries'
 import { setContext } from '@apollo/client/link/context';
 import { persistCache, LocalStorageWrapper } from 'apollo3-cache-persist';
 import sha256 from 'crypto-js/sha256';
+import { DEV, VITE_API_URL, VITE_TENANT_ID, VITE_WS_URL } from '../config/env.js';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001/graphql';
+const API_URL = VITE_API_URL || 'http://localhost:4001/graphql';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:4001/graphql';
-const TENANT = import.meta.env.VITE_TENANT_ID || 'dev';
+const WS_URL = VITE_WS_URL || 'ws://localhost:4001/graphql';
+const TENANT = VITE_TENANT_ID || 'dev';
 
 export async function createApolloClient() {
   const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
@@ -163,7 +164,7 @@ export async function createApolloClient() {
       });
 
       // Clear cache if it gets corrupted
-      if (import.meta.env.DEV) {
+      if (DEV) {
         // eslint-disable-next-line no-console
         console.log('Apollo cache persistence enabled for tenant:', TENANT);
       }
@@ -179,7 +180,7 @@ export async function createApolloClient() {
   return new ApolloClient({
     link,
     cache,
-    connectToDevTools: import.meta.env.DEV,
+    connectToDevTools: DEV,
     defaultOptions: {
       watchQuery: {
         errorPolicy: 'all',

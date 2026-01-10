@@ -177,7 +177,7 @@ export class MCPOrchestrator extends EventEmitter {
 
       this.emit('workflow:complete', { executionId, status: execution.status });
 
-    } catch (error) {
+    } catch (error: any) {
       execution.status = 'failed';
       execution.completedAt = new Date();
       this.emit('workflow:error', { executionId, error });
@@ -257,7 +257,7 @@ export class MCPOrchestrator extends EventEmitter {
           server: serverName,
         };
 
-      } catch (error) {
+      } catch (error: any) {
         lastError = error as Error;
         ctx.metrics.retryCount++;
 

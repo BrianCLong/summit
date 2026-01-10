@@ -1,0 +1,39 @@
+{
+  "rules": [
+    {
+      "id": "protect-root-configs",
+      "description": "Agents cannot modify root configuration files.",
+      "files": [
+        "tsconfig.json",
+        "package.json",
+        "turbo.json",
+        "pnpm-workspace.yaml",
+        ".github/workflows/**"
+      ],
+      "allow_agents": ["Jules"]
+    },
+    {
+      "id": "enforce-zone-containment",
+      "description": "Agents must stay within their assigned zones.",
+      "files": [
+        "policy/**",
+        "docs/governance/**"
+      ]
+    },
+    {
+      "id": "no-ci-silencing",
+      "description": "Agents cannot disable CI checks.",
+      "pattern": "eslint-disable",
+      "level": "error"
+    },
+    {
+      "id": "no-todos-in-critical-paths",
+      "description": "Agents cannot add TODOs in critical paths.",
+      "pattern": "TODO",
+      "files": [
+        "server/src/auth/**",
+        "server/src/security/**"
+      ]
+    }
+  ]
+}

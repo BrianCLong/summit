@@ -1,0 +1,39 @@
+name: web-accessibility
+
+on:
+  pull_request:
+    paths:
+      - "apps/web/**"
+      - ".github/workflows/web-accessibility.yml"
+      - "docs/ui/ACCESSIBILITY.md"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: "pnpm"
+          cache-dependency-path: apps/web/pnpm-lock.yaml
+
+      - uses: pnpm/action-setup@v4
+        # version is read from package.json packageManager field
+
+      - name: Install dependencies
+        working-directory: apps/web
+        run: pnpm install --frozen-lockfile
+
+      - name: Accessibility lint
+        working-directory: apps/web
+        run: pnpm run lint:a11y
+
+      - name: Accessibility smoke test
+        working-directory: apps/web
+        run: pnpm run test -- --run src/__tests__/accessibility/landmarkKeyboardFlow.test.tsx

@@ -42,6 +42,22 @@ export type PluginCapability =
 // Plugin Manifest
 // ============================================================================
 
+export interface PluginResourceLimits {
+  /** Maximum execution time in milliseconds (default: 30000) */
+  timeoutMs?: number;
+  /** Maximum memory usage in MB (default: 128) */
+  memoryMb?: number;
+  /** Maximum API calls per execution (default: 100) */
+  apiCalls?: number;
+  /** Maximum LLM tokens per execution (default: 0) */
+  tokens?: number;
+  /** Network access restrictions */
+  network?: {
+    /** Allowed domains (glob patterns) */
+    domains: string[];
+  };
+}
+
 export interface PluginManifest {
   /** Unique plugin identifier */
   id: string;
@@ -57,6 +73,8 @@ export interface PluginManifest {
   category: PluginCategory;
   /** Required capabilities */
   capabilities: PluginCapability[];
+  /** Resource limits required by the plugin */
+  resources?: PluginResourceLimits;
   /** Minimum platform version */
   minPlatformVersion?: string;
   /** Plugin dependencies */
@@ -75,6 +93,8 @@ export interface PluginManifest {
   license?: string;
   /** Tags for search */
   tags?: string[];
+  /** Optional cryptographic signature of the bundle */
+  signature?: string;
 }
 
 export interface PluginDependency {
@@ -121,6 +141,12 @@ export type PluginEvent =
   | 'webhook:received'
   | 'custom';
 
+export interface PluginPackage {
+  manifest: PluginManifest;
+  code: string; // Base64 encoded or raw string
+  signature?: string;
+}
+
 // ============================================================================
 // Plugin Context
 // ============================================================================
@@ -160,6 +186,7 @@ export interface PluginMetrics {
   memoryUsedBytes?: number;
   apiCallCount?: number;
   dataProcessed?: number;
+  tokensConsumed?: number;
 }
 
 // ============================================================================

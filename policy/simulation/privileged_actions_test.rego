@@ -3,15 +3,15 @@ package policy.simulation.privileged_actions
 import data.summit.abac
 import data.scenarios
 
-obligation_types(decision) = {t | obligation := decision.obligations[_]; t := obligation.type}
+obligation_types(decision) := {t | obligation := decision.obligations[_]; t := obligation.type}
 
-expected_obligation_types(scenario) = {t | t := scenario.expected.obligations[_]}
+expected_obligation_types(scenario) := {t | t := scenario.expected.obligations[_]}
 
-scenario_decision(scenario) = decision {
+scenario_decision(scenario) := decision if {
   decision := abac.decision with input as scenario.input
 }
 
-test_privileged_simulations_align_with_expectations {
+test_privileged_simulations_align_with_expectations if {
   scenario := scenarios[_]
   decision := scenario_decision(scenario)
 

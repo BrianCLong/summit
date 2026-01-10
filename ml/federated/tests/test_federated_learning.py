@@ -9,22 +9,22 @@ Tests cover:
 - Model aggregation strategies
 """
 
-import pytest
-import numpy as np
 import tempfile
 from pathlib import Path
 
-from ml.federated.core.flower_server import FederatedServer, ServerConfig
-from ml.federated.core.flower_client import FederatedClient, ClientConfig, PrivacyAccountant
-from ml.federated.core.strategies import OSINTFedAvg, PrivacyPreservingStrategy
-from ml.federated.core.model_registry import ModelRegistry, ModelVersion
-from ml.federated.privacy.pgvector_dp import PgVectorDifferentialPrivacy, PrivacyConfig
-from ml.federated.privacy.secure_aggregation import SecureAggregator
-from ml.federated.privacy.privacy_accountant import RenyiDPAccountant
+import numpy as np
+import pytest
+
 from ml.federated.aggregation.graph_merger import GraphMerger, MergeStrategy
-from ml.federated.sync.merkle_verification import MerkleTree, verify_merkle_proof
+from ml.federated.core.flower_client import ClientConfig, FederatedClient, PrivacyAccountant
+from ml.federated.core.flower_server import FederatedServer, ServerConfig
+from ml.federated.core.model_registry import ModelRegistry
+from ml.federated.osint.data_loader import OSINTDataLoader
 from ml.federated.osint.osint_model import OSINTClassifier, OSINTEmbedder
-from ml.federated.osint.data_loader import OSINTDataLoader, OSINTDataset
+from ml.federated.privacy.pgvector_dp import PgVectorDifferentialPrivacy, PrivacyConfig
+from ml.federated.privacy.privacy_accountant import RenyiDPAccountant
+from ml.federated.privacy.secure_aggregation import SecureAggregator
+from ml.federated.sync.merkle_verification import MerkleTree, verify_merkle_proof
 
 
 class TestServerConfig:
@@ -426,7 +426,7 @@ class TestIntegration:
             clients = []
             for i in range(2):
                 client_config = ClientConfig(
-                    node_id=f"node_{i+1}",
+                    node_id=f"node_{i + 1}",
                     enable_local_dp=True,
                 )
                 client = FederatedClient(client_config)

@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agent Lab WorkflowSpec",
+  "type": "object",
+  "required": ["name", "steps"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "default": "1.0.0"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "dryRun": {
+      "type": "boolean"
+    },
+    "objectives": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "expect": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "policy": {
+      "type": "object",
+      "properties": {
+        "allowedTools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "targetAllowlist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "commandAllowlist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "defaultTimeoutMs": {
+          "type": "number"
+        }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "tool"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "tool": {
+            "type": "string"
+          },
+          "inputs": {
+            "type": "object"
+          },
+          "expect": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -9,6 +9,7 @@ import {
   verify as verifyPayload,
 } from 'node:crypto';
 import type { EvidenceBundle, LedgerEntry, LedgerFactInput } from 'common-types';
+import { augmentEvidenceBundle, buildExecutionAttestation } from './bundle-utils.js';
 
 const LAMPORT_KEY_COUNT = 256;
 const LAMPORT_SECRET_BYTES = 32;
@@ -455,10 +456,28 @@ export class QuantumSafeLedger {
 
   exportEvidence(limit = 200): EvidenceBundle {
     const entries = this.list(limit);
-    return {
+    const baseBundle: EvidenceBundle = {
       generatedAt: this.now().toISOString(),
       headHash: entries.at(-1)?.chainHash,
       entries,
     };
+    const signer = entries.at(-1)?.signature;
+    const augmented = augmentEvidenceBundle(baseBundle, entries, {
+      signer: 'quantum-safe-ledger',
+      publicKey: signer?.ed25519PublicKey,
+      signature: signer?.ed25519Signature,
+      issuedAt: this.now(),
+    });
+
+    const executionAttestation = this.identityPublicKey
+      ? buildExecutionAttestation(
+          'QuantumSafeLedger chain integrity verified',
+          this.verifyChain(),
+          this.now(),
+          'quantum-safe-ledger',
+        )
+      : undefined;
+
+    return { ...augmented, executionAttestation };
   }
 }

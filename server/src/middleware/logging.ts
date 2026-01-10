@@ -1,7 +1,8 @@
-import pinoHttp from 'pino-http';
+import pinoHttpModule from 'pino-http';
 import pino from 'pino';
 import { randomUUID } from 'crypto';
 
+const pinoHttp = (pinoHttpModule as any).default || pinoHttpModule;
 const logger = (pino as any)();
 
 export const loggingMiddleware = pinoHttp({
@@ -10,7 +11,7 @@ export const loggingMiddleware = pinoHttp({
   redact: ['req.headers.authorization', 'req.headers.cookie'],
 
   // Inject custom properties into the log object
-  customProps: (req: any, res) => {
+  customProps: (req: any, res: any) => {
     return {
       correlationId: req.correlationId || req.headers['x-correlation-id'],
       traceId: req.traceId,
@@ -24,12 +25,12 @@ export const loggingMiddleware = pinoHttp({
   },
 
   // Custom generator for Request ID
-  genReqId: (req) => {
+  genReqId: (req: any) => {
     return (req.headers['x-request-id'] as string) || randomUUID();
   },
 
   // Customize the log level based on response status
-  customLogLevel: (req, res, err) => {
+  customLogLevel: (req: any, res: any, err: any) => {
     if (res.statusCode >= 500 || err) {
       return 'error';
     }
@@ -40,7 +41,7 @@ export const loggingMiddleware = pinoHttp({
   },
 
   // Custom success message
-  customSuccessMessage: (req, res) => {
+  customSuccessMessage: (req: any, res: any) => {
     if (res.statusCode === 404) {
       return 'Resource not found';
     }

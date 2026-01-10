@@ -61,7 +61,7 @@ class ThreatIndexService:
 class _ThreatIndexRequestHandler(BaseHTTPRequestHandler):
     service: ThreatIndexService = ThreatIndexService()
 
-    def do_POST(self) -> None:  # noqa: N802 - required by BaseHTTPRequestHandler
+    def do_POST(self) -> None:
         if self.path != "/threat-index":
             self.send_error(HTTPStatus.NOT_FOUND, "Endpoint not found")
             return
@@ -87,9 +87,7 @@ class _ThreatIndexRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def log_message(
-        self, format: str, *args: object
-    ) -> None:  # noqa: A003 - method signature fixed
+    def log_message(self, format: str, *args: object) -> None:
         return  # Suppress default logging during tests
 
 

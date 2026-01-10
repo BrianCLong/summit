@@ -1,7 +1,6 @@
 """Response sanitization and redaction (RSR) defense."""
-from __future__ import annotations
 
-from typing import Dict
+from __future__ import annotations
 
 from ..api import DefenseAdapter
 
@@ -9,7 +8,7 @@ from ..api import DefenseAdapter
 class RSRDefense(DefenseAdapter):
     name = "RSR"
 
-    def process(self, response: str, context: Dict[str, object]) -> str:
+    def process(self, response: str, context: dict[str, object]) -> str:
         sanitized = response
         for canary in context.get("canaries", []):
             if canary in sanitized:

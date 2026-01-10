@@ -1,10 +1,22 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
+import { randomUUID } from 'crypto';
 import { logger } from '../utils/logger.js';
 import { getVariant, isEnabled } from '../lib/featureFlags.js';
 import { telemetryService } from '../analytics/telemetry/TelemetryService.js';
+import { auditTrailService } from '../services/audit/AuditTrailService.js';
 
 const router = Router();
+
+const healthEndpointsEnabled = () => (process.env.HEALTH_ENDPOINTS_ENABLED ?? 'false').toLowerCase() === 'true';
+
+const baseStatus = () => ({
+  timestamp: new Date().toISOString(),
+  uptime: process.uptime(),
+  environment: process.env.NODE_ENV || 'development',
+});
+
+const startedAt = () => new Date(Date.now() - Math.floor(process.uptime() * 1000)).toISOString();
 
 // Error details interface for better type safety
 interface ServiceHealthError {
@@ -12,6 +24,56 @@ interface ServiceHealthError {
   error: string;
   timestamp: string;
 }
+
+const buildDisabledResponse = (res: Response) =>
+  res.status(404).json({ status: 'disabled', reason: 'HEALTH_ENDPOINTS_ENABLED is false' });
+
+router.get('/healthz', (_req: Request, res: Response) => {
+  if (!healthEndpointsEnabled()) {
+    return buildDisabledResponse(res);
+  }
+
+  res.status(200).json({
+    status: 'ok',
+    ...baseStatus(),
+  });
+});
+
+router.get('/readyz', (_req: Request, res: Response) => {
+  if (!healthEndpointsEnabled()) {
+    return buildDisabledResponse(res);
+  }
+
+  const readiness = {
+    database: 'skipped',
+    cache: 'skipped',
+    messaging: 'skipped',
+  } as const;
+
+  res.status(200).json({
+    status: 'ready',
+    checks: readiness,
+    message: 'Shallow readiness probe; deep checks remain on /health/ready',
+    ...baseStatus(),
+  });
+});
+
+router.get('/status', (_req: Request, res: Response) => {
+  if (!healthEndpointsEnabled()) {
+    return buildDisabledResponse(res);
+  }
+
+  const version = process.env.APP_VERSION || process.env.npm_package_version || 'unknown';
+  const commit = process.env.GIT_COMMIT || process.env.COMMIT_SHA || 'unknown';
+
+  res.status(200).json({
+    status: 'ok',
+    version,
+    commit,
+    startedAt: startedAt(),
+    ...baseStatus(),
+  });
+});
 
 /**
  * @openapi
@@ -24,25 +86,6 @@ interface ServiceHealthError {
  *     responses:
  *       200:
  *         description: Service is healthy
- *     description: Basic health check endpoint
- *     responses:
- *       200:
- *         description: Service is running
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: ok
- *                 timestamp:
- *                   type: string
- *                   format: date-time
- *                 uptime:
- *                   type: number
- *                 environment:
- *                   type: string
  */
 import { asyncHandler } from '../middleware/async-handler.js';
 router.get('/health', asyncHandler(async (_req: Request, res: Response) => {
@@ -85,14 +128,8 @@ router.get('/health', asyncHandler(async (_req: Request, res: Response) => {
  *                       type: string
  *       503:
  *         description: Service is degraded or unhealthy
- *     description: Detailed health check with dependency status
- *     responses:
- *       200:
- *         description: System is healthy
- *       503:
- *         description: System is degraded
  */
-router.get('/health/detailed', async (_req: Request, res: Response) => {
+router.get('/health/detailed', async (req: Request, res: Response) => {
   telemetryService.track('system_alert', 'system', 'detailed_health_check', 'system', {
       component: 'health_detailed',
       severity: 'info',
@@ -130,7 +167,7 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
     const neo4j = (await import('../db/neo4jConnection.js')).default;
     await neo4j.getDriver().verifyConnectivity();
     health.services.neo4j = 'healthy';
-  } catch (error) {
+  } catch (error: any) {
     const errorMsg = error instanceof Error ? error.message : 'Connection failed';
     health.services.neo4j = 'unhealthy';
     health.status = 'degraded';
@@ -148,7 +185,7 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
     const pool = getPostgresPool();
     await pool.query('SELECT 1');
     health.services.postgres = 'healthy';
-  } catch (error) {
+  } catch (error: any) {
     const errorMsg = error instanceof Error ? error.message : 'Connection failed';
     health.services.postgres = 'unhealthy';
     health.status = 'degraded';
@@ -166,7 +203,7 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
     const redis = getRedisClient();
     await redis.ping();
     health.services.redis = 'healthy';
-  } catch (error) {
+  } catch (error: any) {
     const errorMsg = error instanceof Error ? error.message : 'Connection failed';
     health.services.redis = 'unhealthy';
     health.status = 'degraded';
@@ -193,6 +230,36 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
   });
   if (cacheStrategy && cacheStrategy !== 'control') {
     health.services['cache-strategy'] = cacheStrategy;
+  }
+
+  const traceIdHeader =
+    (req.headers['x-request-id'] as string | undefined) ||
+    (req.headers['x-trace-id'] as string | undefined) ||
+    randomUUID();
+  const customerId =
+    (req.headers['x-customer-id'] as string | undefined) ||
+    (req.headers['x-tenant-id'] as string | undefined) ||
+    'platform';
+
+  try {
+    await auditTrailService.recordPolicyDecision({
+      customer: customerId,
+      actorId: 'health-monitor',
+      action: 'health_detailed_check',
+      resourceId: 'service-health',
+      resourceType: 'system',
+      classification: 'internal',
+      policyVersion: 'health-monitoring-v1',
+      decisionId: randomUUID(),
+      traceId: traceIdHeader,
+      metadata: {
+        status: health.status,
+        services: health.services,
+        errorCount: errors.length,
+      },
+    });
+  } catch (error: any) {
+    logger.warn({ error }, 'Failed to append audit trail event for health check');
   }
 
   const statusCode = health.status === 'ok' ? 200 : 503;
@@ -232,7 +299,7 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
   try {
     const neo4j = (await import('../db/neo4jConnection.js')).default;
     await neo4j.getDriver().verifyConnectivity();
-  } catch (error) {
+  } catch (error: any) {
     const msg = error instanceof Error ? error.message : 'Unknown error';
     failures.push(`Neo4j: ${msg}`);
     logger.warn({ error }, 'Readiness check failed: Neo4j unavailable');
@@ -242,7 +309,7 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
     const { getPostgresPool } = await import('../db/postgres.js');
     const pool = getPostgresPool();
     await pool.query('SELECT 1');
-  } catch (error) {
+  } catch (error: any) {
     const msg = error instanceof Error ? error.message : 'Unknown error';
     failures.push(`PostgreSQL: ${msg}`);
     logger.warn({ error }, 'Readiness check failed: PostgreSQL unavailable');
@@ -252,7 +319,7 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
     const { getRedisClient } = await import('../db/redis.js');
     const redis = getRedisClient();
     await redis.ping();
-  } catch (error) {
+  } catch (error: any) {
     const msg = error instanceof Error ? error.message : 'Unknown error';
     failures.push(`Redis: ${msg}`);
     logger.warn({ error }, 'Readiness check failed: Redis unavailable');

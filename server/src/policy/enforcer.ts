@@ -143,7 +143,7 @@ export class PolicyEnforcer {
         });
 
         return decision;
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
 
@@ -359,6 +359,16 @@ export class PolicyEnforcer {
       return decision;
     }
 
+    if (
+      context.resource &&
+      context.resource.includes('graph') &&
+      context.tenantId === 'unknown'
+    ) {
+      decision.allow = false;
+      decision.reason = 'Tenant ID required for graph access';
+      return decision;
+    }
+
     // Purpose-based access control
     if (context.action === 'ingest' || context.action === 'write') {
       if (!context.purpose) {
@@ -401,7 +411,7 @@ export class PolicyEnforcer {
       if (cached) {
         return JSON.parse(cached) as PolicyDecision;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Policy cache read error:', error);
     }
     return null;
@@ -414,7 +424,7 @@ export class PolicyEnforcer {
   ): Promise<void> {
     try {
       await redis.setWithTTL(key, JSON.stringify(decision), ttl);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Policy cache write error:', error);
     }
   }
@@ -441,7 +451,7 @@ export class PolicyEnforcer {
 
     try {
       await this.emitDecisionEvent(entry, context, decision);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Policy audit bus publish failed:', error);
     }
 

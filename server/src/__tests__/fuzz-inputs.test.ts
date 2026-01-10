@@ -1,7 +1,3 @@
-declare module 'validator';
-declare module 'html-escaper';
-declare module 'isomorphic-dompurify';
-
 jest.mock(
   'validator',
   () => ({
@@ -79,7 +75,7 @@ describe('Deterministic fuzzing of boundary inputs', () => {
         expect(result.startsWith(basePath)).toBe(true);
         expect(result.includes('..')).toBe(false);
         expect(result.includes('~')).toBe(false);
-      } catch (error) {
+      } catch (error: any) {
         expect((error as Error).message.toLowerCase()).toMatch(/path/);
       }
     });

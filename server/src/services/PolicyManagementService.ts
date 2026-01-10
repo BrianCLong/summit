@@ -16,6 +16,7 @@ import { z } from 'zod';
 import { Policy, PolicyRule, PolicyAction, Stage } from '../governance/types.js';
 import { createDataEnvelope, DataEnvelope, GovernanceResult } from '../types/data-envelope.js';
 import logger from '../utils/logger.js';
+import { enforceRampDecisionForTenant } from '../policy/ramp.js';
 
 // ============================================================================
 // Extended Policy Types for Management
@@ -225,7 +226,7 @@ export class PolicyManagementService {
           evaluator: 'PolicyManagementService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error listing policies:', error);
       throw error;
     }
@@ -260,7 +261,7 @@ export class PolicyManagementService {
           evaluator: 'PolicyManagementService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error getting policy:', error);
       throw error;
     }
@@ -359,7 +360,7 @@ export class PolicyManagementService {
           evaluator: 'PolicyManagementService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Error creating policy:', error);
 
@@ -525,7 +526,7 @@ export class PolicyManagementService {
           evaluator: 'PolicyManagementService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Error updating policy:', error);
 
@@ -598,7 +599,7 @@ export class PolicyManagementService {
           evaluator: 'PolicyManagementService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error deleting policy:', error);
       throw error;
     }
@@ -641,7 +642,7 @@ export class PolicyManagementService {
         [policyId]
       );
 
-      const versions: PolicyVersion[] = result.rows.map((row) => ({
+      const versions: PolicyVersion[] = result.rows.map((row: any) => ({
         id: row.id,
         policyId: row.policy_id,
         version: row.version,
@@ -664,7 +665,7 @@ export class PolicyManagementService {
           evaluator: 'PolicyManagementService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error listing policy versions:', error);
       throw error;
     }
@@ -771,7 +772,7 @@ export class PolicyManagementService {
           evaluator: 'PolicyManagementService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Error rolling back policy:', error);
       throw error;
@@ -861,7 +862,7 @@ export class PolicyManagementService {
           evaluator: 'PolicyManagementService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Error submitting for approval:', error);
       throw error;
@@ -884,6 +885,13 @@ export class PolicyManagementService {
     try {
       await client.query('BEGIN');
       const now = new Date().toISOString();
+
+      enforceRampDecisionForTenant({
+        tenantId,
+        action: 'APPROVE',
+        workflow: 'policy_management',
+        key: policyId,
+      });
 
       const result = await client.query(
         `UPDATE managed_policies
@@ -946,7 +954,7 @@ export class PolicyManagementService {
           evaluator: 'PolicyManagementService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Error approving policy:', error);
       throw error;
@@ -1008,7 +1016,7 @@ export class PolicyManagementService {
           evaluator: 'PolicyManagementService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error publishing policy:', error);
       throw error;
     }

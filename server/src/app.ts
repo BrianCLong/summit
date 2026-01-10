@@ -1,4 +1,3 @@
-
 import 'dotenv/config';
 import express from 'express';
 import { ApolloServer } from '@apollo/server';
@@ -7,9 +6,9 @@ import { expressMiddleware } from '@as-integrations/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 // import { applyMiddleware } from 'graphql-middleware';
 import cors from 'cors';
-import helmet from 'helmet';
 import pino from 'pino';
-import pinoHttp from 'pino-http';
+import pinoHttpModule from 'pino-http';
+const pinoHttp = (pinoHttpModule as any).default || pinoHttpModule;
 import { logger as appLogger } from './config/logger.js';
 import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
 import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.js';
@@ -21,40 +20,40 @@ import { featureFlagContextMiddleware } from './middleware/feature-flag-context.
 import { sanitizeInput } from './middleware/sanitization.js';
 import { piiGuardMiddleware } from './middleware/pii-guard.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { publicRateLimit, authenticatedRateLimit } from './middleware/rateLimiter.js';
 import { advancedRateLimiter } from './middleware/TieredRateLimitMiddleware.js';
 import { circuitBreakerMiddleware } from './middleware/circuitBreakerMiddleware.js';
 import { overloadProtection } from './middleware/overloadProtection.js';
+import { admissionControl } from './runtime/backpressure/AdmissionControl.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
 import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mode.js';
 import { residencyEnforcement } from './middleware/residency.js';
 import { requestProfilingMiddleware } from './middleware/request-profiling.js';
+import { securityHeaders } from './middleware/securityHeaders.js';
 import exceptionRouter from './data-residency/exceptions/routes.js';
 import monitoringRouter from './routes/monitoring.js';
 import billingRouter from './routes/billing.js';
 import entityResolutionRouter from './routes/entity-resolution.js';
 import workspaceRouter from './routes/workspaces.js';
-import aiRouter from './routes/ai.js';
 import gaCoreMetricsRouter from './routes/ga-core-metrics.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
+import receiptsRouter from './routes/receipts.js';
 import predictiveRouter from './routes/predictive.js';
+import { policyRouter } from './routes/policy.js';
+import policyManagementRouter from './routes/policies/policy-management.js';
 import { metricsRoute } from './http/metricsRoute.js';
-const rbacRouter = require('./routes/rbacRoutes.js');
-import { typeDefs } from './graphql/schema.js';
-import resolvers from './graphql/resolvers/index.js';
+import monitoringBackpressureRouter from './routes/monitoring-backpressure.js';
+import rbacRouter from './routes/rbacRoutes.js';
 // import { licenseRuleValidationMiddleware } from './graphql/middleware/licenseRuleValidationMiddleware.js';
 import { getContext } from './lib/auth.js';
 import { getNeo4jDriver } from './db/neo4j.js';
 import { initializeTracing, getTracer } from './observability/tracer.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
 import { startTrustWorker } from './workers/trustScoreWorker.js';
 import { startRetentionWorker } from './workers/retentionWorker.js';
 import { cfg } from './config.js';
-import webhookRouter from './routes/webhooks.js';
-import { webhookWorker } from './webhooks/webhook.worker.js';
 import supportTicketsRouter from './routes/support-tickets.js';
 import ticketLinksRouter from './routes/ticket-links.js';
 import tenantContextMiddleware from './middleware/tenantContext.js';
@@ -80,7 +79,7 @@ import { SummitInvestigate } from './services/SummitInvestigate.js';
 import { streamIngest } from './ingest/stream.js';
 import osintRouter from './routes/osint.js';
 import palettesRouter from './routes/palettes.js';
-import edgeOpsRouter from './routes/edge-ops.js';
+
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger.js';
 import metaOrchestratorRouter from './routes/meta-orchestrator.js';
@@ -88,15 +87,17 @@ import adminSmokeRouter from './routes/admin-smoke.js';
 import lineageRouter from './routes/lineage.js';
 import scenarioRouter from './routes/scenarios.js';
 import resourceCostsRouter from './routes/resource-costs.js';
-import queryReplayRouter from './routes/query-replay.js';
+
 import streamRouter from './routes/stream.js'; // Added import
 import queryPreviewStreamRouter from './routes/query-preview-stream.js';
 import correctnessProgramRouter from './routes/correctness-program.js';
 import commandConsoleRouter from './routes/internal/command-console.js';
 import searchV1Router from './routes/search-v1.js';
+import ontologyRouter from './routes/ontology.js';
 import searchIndexRouter from './routes/search-index.js'; // New search-index route
 import dataGovernanceRouter from './routes/data-governance-routes.js';
 import tenantBillingRouter from './routes/tenants/billing.js';
+import tenantUsageRouter from './routes/tenants/usage.js';
 import { gtmRouter } from './routes/gtm-messaging.js';
 import { airgapRouter } from './routes/airgap.js';
 import analyticsRouter from './routes/analytics.js';
@@ -108,6 +109,9 @@ import exportsRouter from './routes/exports.js';
 import retentionRouter from './routes/retention.js';
 import drRouter from './routes/dr.js';
 import reportingRouter from './routes/reporting.js';
+import policyProfilesRouter from './routes/policy-profiles.js';
+import policyProposalsRouter from './routes/policy-proposals.js';
+import evidenceRouter from './routes/evidence.js';
 import masteryRouter from './routes/mastery.js';
 import cryptoIntelligenceRouter from './routes/crypto-intelligence.js';
 import demoRouter from './routes/demo.js';
@@ -117,23 +121,24 @@ import featureFlagsRouter from './routes/feature-flags.js';
 import mlReviewRouter from './routes/ml_review.js';
 import adminFlagsRouter from './routes/admin-flags.js';
 import auditEventsRouter from './routes/audit-events.js';
+import brandPackRouter from './services/brand-packs/brand-pack.routes.js';
 import { centralizedErrorHandler } from './middleware/error-handling-middleware.js';
 import pluginAdminRouter from './routes/plugins/plugin-admin.js';
 import integrationAdminRouter from './routes/integrations/integration-admin.js';
 import securityAdminRouter from './routes/security/security-admin.js';
 import complianceAdminRouter from './routes/compliance/compliance-admin.js';
 import sandboxAdminRouter from './routes/sandbox/sandbox-admin.js';
+import adminTenantsRouter from './routes/admin/tenants.js';
 import onboardingRouter from './routes/onboarding.js';
 import supportCenterRouter from './routes/support-center.js';
 import i18nRouter from './routes/i18n.js';
 import experimentationRouter from './routes/experimentation.js';
 import { v4Router } from './routes/v4/index.js';
 import vectorStoreRouter from './routes/vector-store.js';
+import intelGraphRouter from './routes/intel-graph.js';
+import graphragRouter from './routes/graphrag.js';
 
 export const createApp = async () => {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-
   // Initialize OpenTelemetry tracing
   // Tracer is already initialized in index.ts, but we ensure it's available here
   // Verified usage for comprehensive observability
@@ -148,8 +153,11 @@ export const createApp = async () => {
 
   const isProduction = cfg.NODE_ENV === 'production';
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
-    .map((origin) => origin.trim())
+    .map((origin: string) => origin.trim())
     .filter(Boolean);
+  const securityHeadersEnabled = process.env.SECURITY_HEADERS_ENABLED !== 'false';
+  const cspReportOnly = process.env.SECURITY_HEADERS_CSP_REPORT_ONLY === 'true';
+  const cspEnabledFlag = process.env.SECURITY_HEADERS_CSP_ENABLED === 'true';
 
   const safetyState = await resolveSafetyState();
   if (safetyState.killSwitch || safetyState.safeMode) {
@@ -164,27 +172,11 @@ export const createApp = async () => {
   app.use(overloadProtection);
 
   app.use(
-    helmet({
-      contentSecurityPolicy: isProduction
-        ? {
-          useDefaults: true,
-          directives: {
-            defaultSrc: ["'self'"],
-            objectSrc: ["'none'"],
-            imgSrc: ["'self'", 'data:'],
-            scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
-            styleSrc: ["'self'", "'unsafe-inline'"],
-            connectSrc: ["'self'", ...allowedOrigins, 'https://api.intelgraph.example'],
-          },
-        }
-        : false,
-      referrerPolicy: { policy: 'no-referrer' },
-      hsts: isProduction
-        ? { maxAge: 31536000, includeSubDomains: true, preload: true }
-        : false,
-      crossOriginOpenerPolicy: { policy: 'same-origin' },
-      crossOriginResourcePolicy: { policy: 'same-origin' },
-      crossOriginEmbedderPolicy: false,
+    securityHeaders({
+      enabled: securityHeadersEnabled,
+      allowedOrigins,
+      enableCsp: cspEnabledFlag || isProduction,
+      cspReportOnly,
     }),
   );
   app.use(
@@ -201,6 +193,10 @@ export const createApp = async () => {
       credentials: true,
     }),
   );
+
+  // Rate limiting - applied early to prevent abuse
+  // Public rate limit applies to all routes as baseline protection
+  app.use(publicRateLimit);
 
   // Enhanced Pino HTTP logger with correlation and trace context
   app.use(
@@ -279,19 +275,32 @@ export const createApp = async () => {
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(' ')[1];
 
-        if (!token) {
-          console.warn('Development: No token provided, allowing request');
+        if (token) {
+          return next();
+        }
+
+        // SEC-2025-001: Fail Closed by default.
+        // Only allow bypass if explicitly enabled via env var.
+        if (process.env.ENABLE_INSECURE_DEV_AUTH === 'true') {
+          console.warn('Development: No token provided, allowing request (ENABLE_INSECURE_DEV_AUTH=true)');
           (req as any).user = {
             sub: 'dev-user',
             email: 'dev@intelgraph.local',
             role: 'admin',
           };
+          return next();
         }
-        next();
+
+        // Default: Reject unauthenticated requests even in dev/test if bypass not enabled
+        res.status(401).json({ error: 'Unauthorized', message: 'No token provided' });
       };
 
   // Resolve and enforce tenant context for API and GraphQL surfaces
   app.use(['/api', '/graphql'], tenantContextMiddleware());
+  app.use(['/api', '/graphql'], admissionControl);
+
+  // Authenticated rate limiting for API and GraphQL routes
+  app.use(['/api', '/graphql'], authenticatedRateLimit);
 
   // Enforce Data Residency
   app.use(['/api', '/graphql'], residencyEnforcement);
@@ -330,7 +339,7 @@ export const createApp = async () => {
   app.use(healthRouter);
 
   // Swagger UI
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.use('/api-docs', ...(swaggerUi.serve as any), swaggerUi.setup(swaggerSpec) as any);
 
 
 
@@ -352,7 +361,7 @@ export const createApp = async () => {
     try {
       const status = await advancedRateLimiter.getStatus(req.params.userId);
       res.json(status);
-    } catch (err) {
+    } catch (err: any) {
       res.status(500).json({ error: 'Failed to fetch rate limit status' });
     }
   });
@@ -364,18 +373,31 @@ export const createApp = async () => {
   app.use('/sso', ssoRouter);
 
   // Other routes
+  // app.use('/api/policy', policyRouter);
+  app.use('/api/policies', policyManagementRouter);
+  app.use('/policies', policyManagementRouter);
+  app.use('/api/receipts', receiptsRouter);
+  app.use('/api/brand-packs', brandPackRouter);
   app.use(['/monitoring', '/api/monitoring'], monitoringRouter);
+  app.use('/api', monitoringBackpressureRouter);
   app.use('/api/ga-core-metrics', gaCoreMetricsRouter);
-  app.use('/api/ai', aiRouter);
+  if (process.env.SKIP_AI_ROUTES !== 'true') {
+    const { default: aiRouter } = await import('./routes/ai.js');
+    app.use('/api/ai', aiRouter);
+  }
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
   app.use('/api/predictive', predictiveRouter);
-  app.use('/disclosures', disclosuresRouter);
+  app.use('/api/export', disclosuresRouter); // Mount export under /api/export as per spec
+  app.use('/disclosures', disclosuresRouter); // Keep old mount for compat
   app.use('/rbac', rbacRouter);
   app.use('/api/billing', billingRouter);
   app.use('/api/er', entityResolutionRouter);
   app.use('/api/workspaces', workspaceRouter);
-  app.use('/api/webhooks', webhookRouter);
+  if (process.env.SKIP_WEBHOOKS !== 'true') {
+    const { default: webhookRouter } = await import('./routes/webhooks.js');
+    app.use('/api/webhooks', webhookRouter);
+  }
   app.use('/api/support', supportTicketsRouter);
   app.use('/api', ticketLinksRouter);
   app.use('/api/cases', caseRouter);
@@ -394,18 +416,20 @@ export const createApp = async () => {
   app.use('/api/tenants', tenantsRouter);
   app.use('/api/actions', actionsRouter);
   app.use('/api/osint', osintRouter);
-  app.use('/api/edge', edgeOpsRouter);
+
   app.use('/api/meta-orchestrator', metaOrchestratorRouter);
   app.use('/api', adminSmokeRouter);
   app.use('/api/scenarios', scenarioRouter);
   app.use('/api/costs', resourceCostsRouter);
   app.use('/api/tenants/:tenantId/billing', tenantBillingRouter);
+  app.use('/api/tenants/:tenantId/usage', tenantUsageRouter);
   app.use('/api/internal/command-console', commandConsoleRouter);
-  app.use('/api/query-replay', queryReplayRouter);
+
   app.use('/api/correctness', correctnessProgramRouter);
   app.use('/api', queryPreviewStreamRouter);
   app.use('/api/stream', streamRouter); // Register stream route
   app.use('/api/v1/search', searchV1Router); // Register Unified Search API
+  app.use('/api/ontology', ontologyRouter);
   app.use('/search', searchIndexRouter); // Register Search Index API
   app.use('/api', dataGovernanceRouter); // Register Data Governance API
   app.use('/api', sharingRouter);
@@ -418,6 +442,9 @@ export const createApp = async () => {
   app.use('/api', anomaliesRouter);
   app.use('/api', exportsRouter);
   app.use('/api', retentionRouter);
+  app.use('/api/policy-profiles', policyProfilesRouter);
+  app.use('/api/policy-proposals', authenticateToken, policyProposalsRouter);
+  app.use('/api/evidence', evidenceRouter);
   app.use('/dr', drRouter);
   app.use('/', opsRouter);
   app.use('/api/reporting', reportingRouter);
@@ -429,6 +456,7 @@ export const createApp = async () => {
   app.use('/api/ml-reviews', mlReviewRouter);
   app.use('/api/admin/flags', adminFlagsRouter);
   app.use('/api', auditEventsRouter);
+  app.use('/api/admin', adminTenantsRouter);
   app.use('/api/plugins', pluginAdminRouter);
   app.use('/api/integrations', integrationAdminRouter);
   app.use('/api/security', securityAdminRouter);
@@ -446,6 +474,8 @@ export const createApp = async () => {
   // Vector Store Routes
   app.use('/api/vector-store', vectorStoreRouter);
 
+  app.use('/api/intel-graph', intelGraphRouter);
+  app.use('/api/graphrag', graphragRouter);
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes
@@ -509,7 +539,7 @@ export const createApp = async () => {
         session.run(countQuery, { query: q }),
       ]);
 
-      const evidence = searchResult.records.map((record) => ({
+      const evidence = searchResult.records.map((record: any) => ({
         node: record.get('node').properties,
         score: record.get('score'),
       }));
@@ -526,7 +556,7 @@ export const createApp = async () => {
           currentPage: Math.floor(Number(skip) / Number(limit)) + 1,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       appLogger.error(
         `Error in search/evidence: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -536,85 +566,92 @@ export const createApp = async () => {
     }
   });
 
-  const executableSchema = makeExecutableSchema({
-    typeDefs: typeDefs as any,
-    resolvers: resolvers as any,
-  });
+  if (process.env.SKIP_GRAPHQL !== 'true') {
+    const { typeDefs } = await import('./graphql/schema.js');
+    const { default: resolvers } = await import('./graphql/resolvers/index.js');
 
-  const schema = executableSchema; // applyMiddleware(executableSchema, licenseRuleValidationMiddleware);
+    const executableSchema = makeExecutableSchema({
+      typeDefs: typeDefs as any,
+      resolvers: resolvers as any,
+    });
 
-  // GraphQL over HTTP
-  const { persistedQueriesPlugin } = await import(
-    './graphql/plugins/persistedQueries.js'
-  );
-  const { default: pbacPlugin } = await import('./graphql/plugins/pbac.js');
-  const { default: resolverMetricsPlugin } = await import(
-    './graphql/plugins/resolverMetrics.js'
-  );
-  const { default: auditLoggerPlugin } = await import(
-    './graphql/plugins/auditLogger.js'
-  );
-  const { depthLimit } = await import('./graphql/validation/depthLimit.js');
-  const { rateLimitAndCachePlugin } = await import('./graphql/plugins/rateLimitAndCache.js');
+    const schema = executableSchema; // applyMiddleware(executableSchema, licenseRuleValidationMiddleware);
 
-  const apollo = new ApolloServer({
-    schema,
-    // Security plugins - Order matters for execution lifecycle
-    plugins: [
-      persistedQueriesPlugin as any,
-      resolverMetricsPlugin as any,
-      auditLoggerPlugin as any,
-      rateLimitAndCachePlugin(schema) as any,
-      // Enable PBAC in production
-      ...(cfg.NODE_ENV === 'production' ? [pbacPlugin() as any] : []),
-    ],
-    // Security configuration based on environment
-    introspection: cfg.NODE_ENV !== 'production',
-    // Enhanced query validation rules
-    validationRules: [
-      depthLimit(cfg.NODE_ENV === 'production' ? 6 : 8), // Stricter in prod
-    ],
-    // Security context
-    formatError: (formattedError, error) => {
-      // Always allow introspection errors (dev) or client-side validation errors
-      if (
-        formattedError.extensions?.code === 'GRAPHQL_VALIDATION_FAILED' ||
-        formattedError.extensions?.code === 'BAD_USER_INPUT' ||
-        formattedError.extensions?.code === 'UNAUTHENTICATED' ||
-        formattedError.extensions?.code === 'FORBIDDEN'
-      ) {
+    // GraphQL over HTTP
+    const { persistedQueriesPlugin } = await import(
+      './graphql/plugins/persistedQueries.js'
+    );
+    const { default: pbacPlugin } = await import('./graphql/plugins/pbac.js');
+    const { default: resolverMetricsPlugin } = await import(
+      './graphql/plugins/resolverMetrics.js'
+    );
+    const { default: auditLoggerPlugin } = await import(
+      './graphql/plugins/auditLogger.js'
+    );
+    const { depthLimit } = await import('./graphql/validation/depthLimit.js');
+    const { rateLimitAndCachePlugin } = await import('./graphql/plugins/rateLimitAndCache.js');
+
+    const apollo = new ApolloServer({
+      schema,
+      // Security plugins - Order matters for execution lifecycle
+      plugins: [
+        persistedQueriesPlugin as any,
+        resolverMetricsPlugin as any,
+        auditLoggerPlugin as any,
+        rateLimitAndCachePlugin(schema) as any,
+        // Enable PBAC in production
+        ...(cfg.NODE_ENV === 'production' ? [pbacPlugin() as any] : []),
+      ],
+      // Security configuration based on environment
+      introspection: cfg.NODE_ENV !== 'production',
+      // Enhanced query validation rules
+      validationRules: [
+        depthLimit(cfg.NODE_ENV === 'production' ? 6 : 8), // Stricter in prod
+      ],
+      // Security context
+      formatError: (formattedError, error) => {
+        // Always allow introspection errors (dev) or client-side validation errors
+        if (
+          formattedError.extensions?.code === 'GRAPHQL_VALIDATION_FAILED' ||
+          formattedError.extensions?.code === 'BAD_USER_INPUT' ||
+          formattedError.extensions?.code === 'UNAUTHENTICATED' ||
+          formattedError.extensions?.code === 'FORBIDDEN'
+        ) {
+          return formattedError;
+        }
+
+        // In production, mask everything else as Internal Server Error
+        if (cfg.NODE_ENV === 'production') {
+          appLogger.error(
+            { err: error, stack: (error as any)?.stack },
+            `GraphQL Error: ${formattedError.message}`,
+          );
+          return new GraphQLError('Internal server error', {
+            extensions: {
+              code: 'INTERNAL_SERVER_ERROR',
+              http: { status: 500 }
+            }
+          });
+        }
+
+        // In development, return the full error
         return formattedError;
-      }
+      },
+    });
+    await apollo.start();
 
-      // In production, mask everything else as Internal Server Error
-      if (cfg.NODE_ENV === 'production') {
-        appLogger.error(
-          { err: error, stack: (error as any)?.stack },
-          `GraphQL Error: ${formattedError.message}`,
-        );
-        return new GraphQLError('Internal server error', {
-          extensions: {
-            code: 'INTERNAL_SERVER_ERROR',
-            http: { status: 500 }
-          }
-        });
-      }
-
-      // In development, return the full error
-      return formattedError;
-    },
-  });
-  await apollo.start();
-
-  app.use(
-    '/graphql',
-    express.json(),
-    authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
-    advancedRateLimiter.middleware(), // Applied AFTER authentication to enable per-user limits
-    expressMiddleware(apollo, {
-      context: async ({ req }) => getContext({ req: req as any })
-    }),
-  );
+    app.use(
+      '/graphql',
+      express.json(),
+      authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
+      advancedRateLimiter.middleware(), // Applied AFTER authentication to enable per-user limits
+      expressMiddleware(apollo, {
+        context: async ({ req }) => getContext({ req: req as any })
+      }),
+    );
+  } else {
+    appLogger.warn('GraphQL disabled via SKIP_GRAPHQL');
+  }
 
   if (!safetyState.killSwitch && !safetyState.safeMode) {
     // Start background trust worker if enabled
@@ -632,12 +669,15 @@ export const createApp = async () => {
     );
   }
 
-  // Ensure webhook worker is running (it's an auto-starting worker, but importing it ensures it's registered)
-  // In a real production setup, this might be in a separate process/container.
-  // For MVP/Monolith, we keep it here.
-  if (webhookWorker) {
-    // Just referencing it to prevent tree-shaking/unused variable lint errors if any,
-    // though import side-effects usually suffice.
+  if (process.env.SKIP_WEBHOOKS !== 'true') {
+    // Ensure webhook worker is running (it's an auto-starting worker, but importing it ensures it's registered)
+    // In a real production setup, this might be in a separate process/container.
+    // For MVP/Monolith, we keep it here.
+    const { webhookWorker } = await import('./webhooks/webhook.worker.js');
+    if (webhookWorker) {
+      // Just referencing it to prevent tree-shaking/unused variable lint errors if any,
+      // though import side-effects usually suffice.
+    }
   }
 
   appLogger.info('Anomaly detector activated.');

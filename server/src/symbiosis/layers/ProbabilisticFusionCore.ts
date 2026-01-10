@@ -1,4 +1,4 @@
-import { BeliefState, FusionDiff } from '../types';
+import { BeliefState, FusionDiff } from '../types.js';
 
 export class ProbabilisticFusionCore {
   private beliefStore: Map<string, BeliefState>;

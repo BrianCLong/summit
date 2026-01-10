@@ -4,9 +4,9 @@ import data.revops.governance
 import data.governance_inputs
 
 # Golden path: compliant record should be allowed with no violations or SLA breaches.
-test_governance_compliant {
-  input := governance_inputs.compliant
-  decision := governance.decision with input as input
+test_governance_compliant if {
+  test_input := governance_inputs.compliant
+  decision := governance.decision with input as test_input
 
   decision.allowed
   count(decision.violations) == 0
@@ -16,9 +16,9 @@ test_governance_compliant {
 }
 
 # Stage evidence, naming, dedupe, and forecast rules should block invalid deals.
-test_governance_enforces_stage_and_naming {
-  input := governance_inputs.invalid_stage_and_naming
-  decision := governance.decision with input as input
+test_governance_enforces_stage_and_naming if {
+  test_input := governance_inputs.invalid_stage_and_naming
+  decision := governance.decision with input as test_input
 
   not decision.allowed
   decision.violations[_] == "deal_naming_invalid"
@@ -32,9 +32,9 @@ test_governance_enforces_stage_and_naming {
 }
 
 # SLA clocks, manual routing bans, discount approvals, and stale detection must fire actions.
-test_governance_flags_sla_and_quote_controls {
-  input := governance_inputs.sla_and_quote
-  decision := governance.decision with input as input
+test_governance_flags_sla_and_quote_controls if {
+  test_input := governance_inputs.sla_and_quote
+  decision := governance.decision with input as test_input
 
   not decision.allowed
   decision.sla_breaches[_] == "speed_to_lead_breach"
@@ -58,9 +58,9 @@ test_governance_flags_sla_and_quote_controls {
 }
 
 # Permissions, attribution hygiene, and partner routing must be enforced.
-test_governance_permissions_and_attribution {
-  input := governance_inputs.permissions_and_attribution
-  decision := governance.decision with input as input
+test_governance_permissions_and_attribution if {
+  test_input := governance_inputs.permissions_and_attribution
+  decision := governance.decision with input as test_input
 
   not decision.allowed
   decision.violations[_] == "marketing_utm_source_missing"

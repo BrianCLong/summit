@@ -1,12 +1,12 @@
-import logger from '../../utils/logger';
-import { AgentLifecycleManager } from './AgentLifecycleManager';
-import { TaskRouter } from './TaskRouter';
-import { ConsensusManager } from './ConsensusManager';
-import { PolicyEngine } from '../governance/PolicyEngine';
-import { AgentTask, AgentMessage } from './types';
-import { PersistenceLayer, InMemoryPersistence } from './persistence';
-import { IntelGraphIntegration } from './IntelGraphIntegration';
-import { traceTask } from './telemetry';
+import logger from '../../utils/logger.js';
+import { AgentLifecycleManager } from './AgentLifecycleManager.js';
+import { TaskRouter } from './TaskRouter.js';
+import { ConsensusManager } from './ConsensusManager.js';
+import { PolicyEngine } from '../governance/PolicyEngine.js';
+import { AgentTask, AgentMessage } from './types.js';
+import { PersistenceLayer, InMemoryPersistence } from './persistence.js';
+import { IntelGraphIntegration } from './IntelGraphIntegration.js';
+import { traceTask } from './telemetry.js';
 import { EventEmitter } from 'events';
 import { randomUUID } from 'crypto';
 

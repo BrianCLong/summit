@@ -87,7 +87,7 @@ async function batchLoadAssessments(
       const keys = ids.map((id) => `assessment:${tenantId}:${id}`);
       const cachedValues = await redis.mget(keys);
 
-      cachedValues.forEach((val, index) => {
+      cachedValues.forEach((val: any, index: any) => {
         if (val) {
           try {
             const assessment = JSON.parse(val);
@@ -102,7 +102,7 @@ async function batchLoadAssessments(
           missingIds.push(ids[index]);
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error }, 'Redis cache error in complianceAssessmentLoader');
       missingIds.push(...ids.filter(id => !assessmentMap.has(id)));
     }
@@ -199,7 +199,7 @@ async function batchLoadAssessments(
         },
         'Compliance assessment batch load completed'
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, ids: missingIds }, 'Error in compliance assessment batch loader');
     } finally {
       if (shouldRelease) {
@@ -292,7 +292,7 @@ async function batchLoadAssessmentsByControl(
     }
 
     return controlIds.map((controlId) => assessmentsByControl.get(controlId) || []);
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error, controlIds }, 'Error loading assessments by control');
     return controlIds.map(() => new Error('Failed to load assessments'));
   } finally {
@@ -376,7 +376,7 @@ async function batchLoadAssessmentsByFramework(
     }
 
     return frameworks.map((framework) => assessmentsByFramework.get(framework) || []);
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error, frameworks }, 'Error loading assessments by framework');
     return frameworks.map(() => new Error('Failed to load assessments'));
   } finally {
@@ -412,8 +412,8 @@ export function createComplianceAssessmentLoader(
  */
 export function createAssessmentsByControlLoader(
   context: DataLoaderContext
-) {
-  return new DataLoader(
+): DataLoader<string, ComplianceAssessmentWithVerdict[]> {
+  return new DataLoader<string, ComplianceAssessmentWithVerdict[]>(
     (controlIds) => batchLoadAssessmentsByControl(controlIds, context),
     {
       cache: true,
@@ -428,8 +428,8 @@ export function createAssessmentsByControlLoader(
  */
 export function createAssessmentsByFrameworkLoader(
   context: DataLoaderContext
-) {
-  return new DataLoader(
+): DataLoader<string, ComplianceAssessmentWithVerdict[]> {
+  return new DataLoader<string, ComplianceAssessmentWithVerdict[]>(
     (frameworks) => batchLoadAssessmentsByFramework(frameworks, context),
     {
       cache: true,

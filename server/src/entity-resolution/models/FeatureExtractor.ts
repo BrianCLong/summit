@@ -1,6 +1,6 @@
-import { FuzzyMatcher } from '../engine/FuzzyMatcher';
-import { PhoneticMatchers } from '../utils/PhoneticMatchers';
-import { StringNormalizer } from '../utils/StringNormalizer';
+import { FuzzyMatcher } from '../engine/FuzzyMatcher.js';
+import { PhoneticMatchers } from '../utils/PhoneticMatchers.js';
+import { StringNormalizer } from '../utils/StringNormalizer.js';
 
 export interface EntityFeatures {
   name_levenshtein: number;

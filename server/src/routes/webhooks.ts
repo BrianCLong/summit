@@ -53,8 +53,53 @@ const verifyGitHubSignature = (req: any, res: any, next: any) => {
     ) {
       return res.status(401).json({ error: 'Invalid signature' });
     }
-  } catch (error) {
+  } catch (error: any) {
     return res.status(401).json({ error: 'Invalid signature format' });
+  }
+
+  next();
+};
+
+// Jira Secret Verification Middleware
+const verifyJiraSecret = (req: any, res: any, next: any) => {
+  const secret = process.env.JIRA_WEBHOOK_SECRET;
+
+  // Skip verification if secret is not configured
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      logger.warn('JIRA_WEBHOOK_SECRET is missing in production. Endpoint is insecure.');
+    }
+    return next();
+  }
+
+  // Check for secret in header or query param (common Jira patterns)
+  const incomingSecret = req.headers['x-webhook-secret'] || req.query.secret;
+
+  if (!incomingSecret || incomingSecret !== secret) {
+    logger.warn('Jira webhook rejected: Invalid secret');
+    return res.status(401).json({ error: 'Unauthorized: Invalid webhook secret' });
+  }
+
+  next();
+};
+
+// Lifecycle Secret Verification Middleware
+const verifyLifecycleSecret = (req: any, res: any, next: any) => {
+  const secret = process.env.LIFECYCLE_WEBHOOK_SECRET;
+
+  // Skip verification if secret is not configured
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      logger.warn('LIFECYCLE_WEBHOOK_SECRET is missing in production. Endpoint is insecure.');
+    }
+    return next();
+  }
+
+  const incomingSecret = req.headers['x-lifecycle-secret'] || req.headers['x-webhook-secret'];
+
+  if (!incomingSecret || incomingSecret !== secret) {
+    logger.warn('Lifecycle webhook rejected: Invalid secret');
+    return res.status(401).json({ error: 'Unauthorized: Invalid webhook secret' });
   }
 
   next();
@@ -65,7 +110,7 @@ const validate = (schema: any) => (req: any, res: any, next: any) => {
   try {
     req.body = schema.parse(req.body);
     next();
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({ error: 'Invalid input', details: error });
   }
 };
@@ -379,7 +424,7 @@ router.post(
   body('pull_request').optional().isObject(),
   body('issue').optional().isObject(),
   async (req, res) => {
-    return tracer.trace('webhook.receive', async (span) => {
+    return tracer.trace('webhook.receive', async (span: any) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         span.setStatus({ code: SpanStatusCode.ERROR, message: 'Validation failed' });
@@ -487,6 +532,7 @@ router.post(
  */
 router.post(
   '/jira',
+  verifyJiraSecret,
   body('webhookEvent').isString(),
   body('issue').optional().isObject(),
   async (req, res) => {
@@ -540,7 +586,7 @@ router.post(
       }
 
       res.status(200).json({ status: 'processed' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Jira webhook error:', error);
       res.status(500).json({ error: 'Webhook processing failed' });
     }
@@ -582,6 +628,7 @@ router.post(
  */
 router.post(
   '/lifecycle',
+  verifyLifecycleSecret,
   body('event_type').isIn([
     'run_created',
     'run_completed',
@@ -621,7 +668,7 @@ router.post(
       }
 
       res.status(200).json({ status: 'processed' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Lifecycle webhook error:', error);
       res.status(500).json({ error: 'Webhook processing failed' });
     }

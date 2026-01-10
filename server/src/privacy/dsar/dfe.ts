@@ -1,9 +1,9 @@
-import { applyConnectorRedactions } from './redaction';
+import { applyConnectorRedactions } from './redaction.js';
 import {
   buildDeletionProof,
   buildRectificationProof,
   hashDeterministic,
-} from './proofs';
+} from './proofs.js';
 import type {
   DataSubjectFulfillmentOptions,
   DSARConnector,
@@ -13,7 +13,7 @@ import type {
   ExportConnectorRecord,
   ExportManifest,
   IdentityVerification,
-} from './types';
+} from './types.js';
 
 const cloneResponse = (response: DSARResponse): DSARResponse =>
   JSON.parse(JSON.stringify(response)) as DSARResponse;

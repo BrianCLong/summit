@@ -175,7 +175,7 @@ export class FileStorageService {
         logger.warn({ meterError, sha256 }, 'Failed to emit storage meter event');
       }
       return storedFile;
-    } catch (error) {
+    } catch (error: any) {
       // Cleanup on error
       try {
         await fs.unlink(tempPath);
@@ -264,7 +264,7 @@ export class FileStorageService {
       await fs.unlink(result.metadata.storagePath);
       logger.info(`Deleted file: ${fileId}`);
       return true;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Failed to delete file ${fileId}:`, error);
       return false;
     }

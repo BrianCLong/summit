@@ -1,7 +1,7 @@
 package deploy.gates
 
 # Require cosign signature, SBOM, and no critical vulns
-allow {
+allow if {
   input.image.signed
   input.image.slsa_level >= 3
   not input.image.has_critical_vulns

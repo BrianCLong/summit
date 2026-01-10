@@ -5,7 +5,7 @@
 
 import WebSocket from 'ws';
 import { randomUUID as uuid } from 'crypto';
-import { MCPRequest, MCPResponse, MCPTool } from '../../types';
+import { MCPRequest, MCPResponse, MCPTool } from '../../types.js';
 
 export interface GraphOpsConfig {
   neo4jUri: string;
@@ -169,7 +169,7 @@ export class GraphOpsServer {
                 `Method '${message.method}' not found`,
               );
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error processing message:', error);
           this.sendError(ws, 'unknown', -32700, 'Parse error');
         }
@@ -287,7 +287,7 @@ export class GraphOpsServer {
         result,
       };
       ws.send(JSON.stringify(response));
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error executing tool ${name}:`, error);
       this.sendError(
         ws,

@@ -111,7 +111,7 @@ export async function getAuthToken(): Promise<string> {
       cases: ['c1'],
     }),
   });
-  if (!res.ok) return '';
+  if (!res.ok) {return '';}
   const data = await res.json();
   return data.access_token;
 }

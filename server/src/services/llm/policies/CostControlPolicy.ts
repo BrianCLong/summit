@@ -1,5 +1,5 @@
 
-import { RoutingPolicy, LLMProvider, LLMRequest, LLMRouterConfig } from '../interfaces';
+import { RoutingPolicy, LLMProvider, LLMRequest, LLMRouterConfig } from '../interfaces.js';
 
 // Simple in-memory budget tracker for demonstration
 // In production, this would be backed by Redis or a database

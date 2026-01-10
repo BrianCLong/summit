@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { correctnessProgram } from '../correctness-program';
-import { correlationIdMiddleware } from '../correctness-program/observability';
+import { correctnessProgram } from '../correctness-program/index.js';
+import { correlationIdMiddleware } from '../correctness-program/observability.js';
 
 const router = Router();
 router.use(correlationIdMiddleware);
@@ -34,7 +34,7 @@ router.post('/reconciliation/run', async (req, res, next) => {
     const { pairId } = req.body;
     const run = await correctnessProgram.reconciliation.runPair(pairId);
     res.json(run);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });

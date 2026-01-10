@@ -15,6 +15,10 @@ import { maestroAuthzMiddleware } from '../../middleware/maestro-authz.js';
 import { recordEndpointResult } from '../../observability/reliability-metrics.js';
 import { flagService } from '../../services/FlagService.js';
 import { MaestroEvents } from '../../realtime/maestro.js';
+import {
+  policyActionGate,
+  evaluatePolicyAction,
+} from '../../middleware/policy-action-gate.js';
 
 const router = express.Router();
 router.use(express.json());
@@ -37,7 +41,7 @@ const emitRunStatus = async (
     if (io) {
       MaestroEvents.emitStatusChange(io, tenantId, runId, status);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.warn('Failed to emit maestro status update', error);
   }
 };
@@ -80,14 +84,25 @@ router.get('/runs', authorize('run_maestro'), async (req, res) => {
     }));
 
     res.json({ items: formattedItems });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching runs:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // POST /runs - Create a new run
-router.post('/runs', authorize('run_maestro'), async (req, res) => {
+router.post(
+  '/runs',
+  policyActionGate({
+    action: 'start_run',
+    resource: 'maestro_run',
+    resolveResourceId: (req) => req.body?.pipeline_id,
+    buildResourceAttributes: (req) => ({
+      pipelineId: req.body?.pipeline_id,
+    }),
+  }),
+  authorize('run_maestro'),
+  async (req, res) => {
   // Kill Switch Check
   if (flagService.getFlag('DISABLE_MAESTRO_RUNS')) {
       return res.status(503).json({ error: 'Maestro run creation is currently disabled due to maintenance or high load.' });
@@ -171,7 +186,7 @@ router.post('/runs', authorize('run_maestro'), async (req, res) => {
     });
 
     res.status(201).json(formattedRun);
-  } catch (error) {
+  } catch (error: any) {
     const [seconds, nanoseconds] = process.hrtime(start);
     const duration = seconds + nanoseconds / 1e9;
 
@@ -216,7 +231,7 @@ router.get('/runs/:id', authorize('run_maestro'), async (req, res) => {
     // }
 
     res.json(run);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching run:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -235,6 +250,35 @@ router.put('/runs/:id', authorize('run_maestro'), async (req, res) => {
 
     const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
 
+    if (validation.data.status === 'cancelled') {
+      const decision = await evaluatePolicyAction({
+        action: 'cancel_run',
+        resource: 'maestro_run',
+        tenantId,
+        userId: (req as any).user?.id,
+        role: (req as any).user?.role,
+        resourceAttributes: {
+          runId: req.params.id,
+          status: validation.data.status,
+        },
+        subjectAttributes: (req as any).user?.attributes || {},
+        sessionContext: {
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent'),
+          timestamp: Date.now(),
+          sessionId: (req as any).sessionID,
+        },
+      });
+
+      if (!decision.allow) {
+        return res.status(403).json({
+          error: 'Forbidden',
+          reason: decision.reason,
+          decision,
+        });
+      }
+    }
+
     // Calculate duration if both start and end times provided
     if (validation.data.started_at && validation.data.completed_at) {
       validation.data.duration_ms =
@@ -252,19 +296,30 @@ router.put('/runs/:id', authorize('run_maestro'), async (req, res) => {
     }
 
     res.json(run);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating run:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // DELETE /runs/:id - Delete a run
-router.delete('/runs/:id', authorize('run_maestro'), async (req, res) => {
+router.delete(
+  '/runs/:id',
+  policyActionGate({
+    action: 'delete_run',
+    resource: 'maestro_run',
+    resolveResourceId: (req) => req.params.id,
+    buildResourceAttributes: (req) => ({
+      runId: req.params.id,
+    }),
+  }),
+  authorize('run_maestro'),
+  async (req, res) => {
     try {
       const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
       const deleted = await runsRepo.delete(req.params.id, tenantId); // Pass tenantId
       res.status(deleted ? 204 : 404).send();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting run:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
@@ -287,7 +342,7 @@ router.get('/pipelines/:id/runs', authorize('run_maestro'), async (req, res) => 
       }));
 
       res.json({ items: formattedRuns });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching pipeline runs:', error);
       res.status(500).json({ error: 'Internal server error' });
     }

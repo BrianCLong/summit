@@ -1,5 +1,5 @@
 
-import { LlmProvider, ProviderId, ChatCompletionRequest, ChatCompletionResult } from '../types';
+import { LlmProvider, ProviderId, ChatCompletionRequest, ChatCompletionResult } from '../types.js';
 
 export class AnthropicProvider implements LlmProvider {
   id: ProviderId = 'anthropic';

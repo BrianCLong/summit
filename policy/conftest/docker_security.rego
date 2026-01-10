@@ -3,14 +3,14 @@ package docker.security
 import rego.v1
 
 # Deny images using latest tag in production
-deny[msg] {
+deny contains msg if {
   input.services[service_name].image
   contains(input.services[service_name].image, ":latest")
   msg := sprintf("Service '%s' uses ':latest' tag, should use specific version", [service_name])
 }
 
 # Require specific image digests for critical services
-deny[msg] {
+deny contains msg if {
   critical_services := {"opa", "mcp-graphops", "mcp-files"}
   critical_services[service_name]
   input.services[service_name]
@@ -20,7 +20,7 @@ deny[msg] {
 }
 
 # Require health checks for all services
-warn[msg] {
+warn contains msg if {
   input.services[service_name]
   not input.services[service_name].healthcheck
   not input.services[service_name].depends_on
@@ -28,7 +28,7 @@ warn[msg] {
 }
 
 # Require resource limits for production services
-warn[msg] {
+warn contains msg if {
   input.services[service_name]
   not input.services[service_name].deploy.resources.limits
   production_services := {"server", "opa", "mcp-graphops", "mcp-files"}
@@ -37,19 +37,19 @@ warn[msg] {
 }
 
 # Deny root user in containers
-deny[msg] {
+deny contains msg if {
   input.services[service_name].user == "0"
   msg := sprintf("Service '%s' runs as root, should use non-root user", [service_name])
 }
 
 # Deny privileged containers
-deny[msg] {
+deny contains msg if {
   input.services[service_name].privileged == true
   msg := sprintf("Service '%s' runs in privileged mode, this is not allowed", [service_name])
 }
 
 # Require security context for critical services
-warn[msg] {
+warn contains msg if {
   critical_services := {"opa", "server"}
   critical_services[service_name]
   input.services[service_name]
@@ -58,7 +58,7 @@ warn[msg] {
 }
 
 # Deny binding to all interfaces in production
-warn[msg] {
+warn contains msg if {
   input.services[service_name].ports[_]
   port_config := input.services[service_name].ports[_]
   startswith(port_config, "0.0.0.0:")
@@ -66,7 +66,7 @@ warn[msg] {
 }
 
 # Require environment variable validation
-warn[msg] {
+warn contains msg if {
   input.services[service_name].environment
   env_list := input.services[service_name].environment
   sensitive_vars := {"password", "secret", "key", "token"}
@@ -77,7 +77,7 @@ warn[msg] {
 }
 
 # Require restart policies for production services
-warn[msg] {
+warn contains msg if {
   production_services := {"server", "opa", "mcp-graphops", "mcp-files", "neo4j", "postgres", "redis"}
   production_services[service_name]
   input.services[service_name]
@@ -86,7 +86,7 @@ warn[msg] {
 }
 
 # Validate volume mount security
-warn[msg] {
+warn contains msg if {
   input.services[service_name].volumes[_]
   volume := input.services[service_name].volumes[_]
   contains(volume, "/var/run/docker.sock")
@@ -94,7 +94,7 @@ warn[msg] {
 }
 
 # Require networks for service isolation
-warn[msg] {
+warn contains msg if {
   input.services[service_name]
   not input.services[service_name].networks
   count(input.services) > 1
@@ -102,7 +102,7 @@ warn[msg] {
 }
 
 # Validate logging configuration
-warn[msg] {
+warn contains msg if {
   production_services := {"server", "opa"}
   production_services[service_name]
   input.services[service_name]
@@ -111,7 +111,7 @@ warn[msg] {
 }
 
 # Check for development configurations in production
-deny[msg] {
+deny contains msg if {
   input.services[service_name].environment
   env_list := input.services[service_name].environment
   dev_indicators := ["DEBUG=", "NODE_ENV=development", "RAILS_ENV=development"]

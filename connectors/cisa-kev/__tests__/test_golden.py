@@ -10,13 +10,13 @@ These tests ensure that:
 Golden tests should be updated when intentional changes are made to the schema mapping.
 """
 
-import unittest
 import json
+import unittest
 from pathlib import Path
-from typing import List, Dict, Any
-from deepdiff import DeepDiff
+from typing import Any
 
 from connectors.cisa_kev.schema_mapping import map_cisa_kev_to_intelgraph
+from deepdiff import DeepDiff
 
 
 class GoldenTestRunner:
@@ -46,7 +46,7 @@ class GoldenTestRunner:
         """
         return str(self.input_path / filename)
 
-    def load_expected(self, filename: str) -> List[Dict[str, Any]]:
+    def load_expected(self, filename: str) -> list[dict[str, Any]]:
         """
         Load expected output.
 
@@ -60,10 +60,7 @@ class GoldenTestRunner:
             return json.load(f)
 
     def compare_entities(
-        self,
-        actual: List[Dict],
-        expected: List[Dict],
-        ignore_fields: List[str] = None
+        self, actual: list[dict], expected: list[dict], ignore_fields: list[str] = None
     ) -> tuple[bool, str]:
         """
         Compare actual vs expected entities.
@@ -83,18 +80,15 @@ class GoldenTestRunner:
             ]
 
         # Sort for consistent comparison
-        actual_sorted = sorted(
-            actual,
-            key=lambda e: e.get("properties", {}).get("id", "")
-        )
-        expected_sorted = sorted(
-            expected,
-            key=lambda e: e.get("properties", {}).get("id", "")
-        )
+        actual_sorted = sorted(actual, key=lambda e: e.get("properties", {}).get("id", ""))
+        expected_sorted = sorted(expected, key=lambda e: e.get("properties", {}).get("id", ""))
 
         # Compare counts first
         if len(actual_sorted) != len(expected_sorted):
-            return False, f"Count mismatch: expected {len(expected_sorted)}, got {len(actual_sorted)}"
+            return (
+                False,
+                f"Count mismatch: expected {len(expected_sorted)}, got {len(actual_sorted)}",
+            )
 
         # Compare each entity
         for i, (actual_entity, expected_entity) in enumerate(zip(actual_sorted, expected_sorted)):
@@ -102,20 +96,17 @@ class GoldenTestRunner:
             actual_comparison = {
                 "type": actual_entity["type"],
                 "properties": {
-                    k: v for k, v in actual_entity["properties"].items()
+                    k: v
+                    for k, v in actual_entity["properties"].items()
                     if k in expected_entity["properties"]
-                }
+                },
             }
             expected_comparison = {
                 "type": expected_entity["type"],
-                "properties": expected_entity["properties"]
+                "properties": expected_entity["properties"],
             }
 
-            diff = DeepDiff(
-                expected_comparison,
-                actual_comparison,
-                ignore_order=True
-            )
+            diff = DeepDiff(expected_comparison, actual_comparison, ignore_order=True)
 
             if diff:
                 return False, f"Entity {i} mismatch:\n{diff.to_json(indent=2)}"
@@ -124,10 +115,10 @@ class GoldenTestRunner:
 
     def assert_golden(
         self,
-        actual_entities: List[Dict],
-        actual_relationships: List[Dict],
+        actual_entities: list[dict],
+        actual_relationships: list[dict],
         expected_entities_file: str,
-        expected_relationships_file: str = None
+        expected_relationships_file: str = None,
     ):
         """
         Assert that actual output matches golden fixtures.
@@ -178,11 +169,7 @@ class TestGoldenIO(unittest.TestCase):
         entities, relationships = map_cisa_kev_to_intelgraph(input_file)
 
         # Assert against golden output
-        self.runner.assert_golden(
-            entities,
-            relationships,
-            "entities.json"
-        )
+        self.runner.assert_golden(entities, relationships, "entities.json")
 
     def test_golden_ransomware_filter(self):
         """
@@ -196,23 +183,18 @@ class TestGoldenIO(unittest.TestCase):
 
         # Process with ransomware filter
         entities, relationships = map_cisa_kev_to_intelgraph(
-            input_file,
-            config={"filter_ransomware": True}
+            input_file, config={"filter_ransomware": True}
         )
 
         # Verify all entities have ransomware flag
         for entity in entities:
             self.assertTrue(
                 entity["properties"]["known_ransomware_use"],
-                f"Entity {entity['properties']['id']} should have ransomware flag"
+                f"Entity {entity['properties']['id']} should have ransomware flag",
             )
 
         # Assert against golden output
-        self.runner.assert_golden(
-            entities,
-            relationships,
-            "ransomware_entities.json"
-        )
+        self.runner.assert_golden(entities, relationships, "ransomware_entities.json")
 
     def test_golden_entity_structure(self):
         """
@@ -225,36 +207,33 @@ class TestGoldenIO(unittest.TestCase):
 
         required_top_level = ["type", "properties", "_metadata"]
         required_properties = [
-            "id", "cve_id", "name", "vendor_project", "product",
-            "source", "confidence"
+            "id",
+            "cve_id",
+            "name",
+            "vendor_project",
+            "product",
+            "source",
+            "confidence",
         ]
-        required_metadata = [
-            "connector_name", "connector_version", "ingestion_timestamp"
-        ]
+        required_metadata = ["connector_name", "connector_version", "ingestion_timestamp"]
 
         for entity in entities:
             # Check top-level structure
             for field in required_top_level:
-                self.assertIn(
-                    field,
-                    entity,
-                    f"Entity missing required field: {field}"
-                )
+                self.assertIn(field, entity, f"Entity missing required field: {field}")
 
             # Check properties
             for field in required_properties:
                 self.assertIn(
                     field,
                     entity["properties"],
-                    f"Entity properties missing required field: {field}"
+                    f"Entity properties missing required field: {field}",
                 )
 
             # Check metadata
             for field in required_metadata:
                 self.assertIn(
-                    field,
-                    entity["_metadata"],
-                    f"Entity metadata missing required field: {field}"
+                    field, entity["_metadata"], f"Entity metadata missing required field: {field}"
                 )
 
     def test_golden_data_types(self):
@@ -302,7 +281,7 @@ class TestGoldenIO(unittest.TestCase):
             self.assertEqual(
                 len(pii_fields),
                 0,
-                f"Unexpected PII detected in entity {entity['properties']['id']}: {pii_fields}"
+                f"Unexpected PII detected in entity {entity['properties']['id']}: {pii_fields}",
             )
 
     def test_golden_confidence_scores(self):
@@ -320,7 +299,7 @@ class TestGoldenIO(unittest.TestCase):
             self.assertEqual(
                 confidence,
                 1.0,
-                f"Entity {entity['properties']['id']} should have confidence 1.0 (authoritative source)"
+                f"Entity {entity['properties']['id']} should have confidence 1.0 (authoritative source)",
             )
 
     def test_golden_source_attribution(self):
@@ -337,7 +316,7 @@ class TestGoldenIO(unittest.TestCase):
             self.assertEqual(
                 source,
                 "cisa-kev",
-                f"Entity {entity['properties']['id']} has incorrect source: {source}"
+                f"Entity {entity['properties']['id']} has incorrect source: {source}",
             )
 
     def test_golden_idempotency(self):
@@ -354,10 +333,7 @@ class TestGoldenIO(unittest.TestCase):
 
         # Compare (ignoring timestamps)
         match, diff = self.runner.compare_entities(entities1, entities2)
-        self.assertTrue(
-            match,
-            f"Mapping should be idempotent. Differences found:\n{diff}"
-        )
+        self.assertTrue(match, f"Mapping should be idempotent. Differences found:\n{diff}")
 
     def test_golden_entity_uniqueness(self):
         """
@@ -374,7 +350,7 @@ class TestGoldenIO(unittest.TestCase):
         self.assertEqual(
             len(ids),
             len(unique_ids),
-            f"Duplicate entity IDs found: {[id for id in ids if ids.count(id) > 1]}"
+            f"Duplicate entity IDs found: {[id for id in ids if ids.count(id) > 1]}",
         )
 
 
@@ -397,10 +373,7 @@ class TestGoldenRegression(unittest.TestCase):
         entities, _ = map_cisa_kev_to_intelgraph(input_file)
 
         # Find Log4j vulnerability
-        log4j = next(
-            (e for e in entities if e["properties"]["cve_id"] == "CVE-2021-44228"),
-            None
-        )
+        log4j = next((e for e in entities if e["properties"]["cve_id"] == "CVE-2021-44228"), None)
 
         self.assertIsNotNone(log4j, "Log4j vulnerability should be present")
 
@@ -425,23 +398,19 @@ class TestGoldenRegression(unittest.TestCase):
 
         # All KEV fields should be mapped
         mapped_kev_fields = [
-            "cve_id",           # cveID
-            "vendor_project",   # vendorProject
-            "product",          # product
+            "cve_id",  # cveID
+            "vendor_project",  # vendorProject
+            "product",  # product
             "vulnerability_name",  # vulnerabilityName
-            "date_added",       # dateAdded
+            "date_added",  # dateAdded
             "short_description",  # shortDescription
             "required_action",  # requiredAction
-            "due_date",         # dueDate
+            "due_date",  # dueDate
             "known_ransomware_use",  # knownRansomwareCampaignUse
         ]
 
         for field in mapped_kev_fields:
-            self.assertIn(
-                field,
-                props,
-                f"KEV field not mapped: {field}"
-            )
+            self.assertIn(field, props, f"KEV field not mapped: {field}")
 
 
 if __name__ == "__main__":

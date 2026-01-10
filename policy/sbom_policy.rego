@@ -1,6 +1,6 @@
 package summit.sbom
 
-default allow = false
+default allow := false
 
 #
 # Input shape (CycloneDX-ish):
@@ -23,18 +23,18 @@ default allow = false
 
 # ---- VULNERABILITY POLICY ----
 
-no_critical_vulns {
+no_critical_vulns if {
   not exists_critical_vuln
 }
 
-exists_critical_vuln {
+exists_critical_vuln if {
   pkg := input.sbom.packages[_]
   pkg.vuln.severity == "critical"
 }
 
 # ---- LICENSE POLICY ----
 
-no_disallowed_licenses {
+no_disallowed_licenses if {
   not exists_disallowed_license
 }
 
@@ -43,7 +43,7 @@ disallowed_licenses := {
   "AGPL-3.0",
 }
 
-exists_disallowed_license {
+exists_disallowed_license if {
   pkg := input.sbom.packages[_]
   pkg.license != ""
   disallowed_licenses[pkg.license]
@@ -51,7 +51,7 @@ exists_disallowed_license {
 
 # ---- DECISION ----
 
-allow {
+allow if {
   no_critical_vulns
   no_disallowed_licenses
 }

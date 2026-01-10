@@ -5,20 +5,21 @@ package mc.admin.v040
 
 import future.keywords.if
 import future.keywords.in
+import future.keywords.contains
 
 # === BASIC ACCESS CONTROL (v0.3.9 EXTENDED) ===
 
-default allow = false
+default allow := false
 
 # Platform admin global access
-allow {
+allow if {
     input.operation.isMutation
     input.actor.role == "platform-admin"
     input.transcendent_mode_enabled != true # Transcendent mode requires additional checks
 }
 
 # Tenant admin scoped access
-allow {
+allow if {
     input.operation.isMutation
     input.actor.role == "tenant-admin"
     input.tenant == input.actor.tenant
@@ -29,7 +30,7 @@ allow {
 # === TRANSCENDENT MODE AUTHORIZATION ===
 
 # Transcendent operations require elevated authorization
-allow {
+allow if {
     input.operation.isTranscendent
     input.actor.role in ["platform-admin", "transcendent-admin"]
     transcendent_mode_safety_checks
@@ -40,28 +41,28 @@ allow {
 # === EVOLUTION PROPOSAL SYSTEM ===
 
 # Evolution proposals require sandbox validation
-allow {
+allow if {
     input.operation.name == "proposeEvolution"
     input.actor.role in ["platform-admin", "tenant-admin", "evolution-engineer"]
     basic_evolution_checks
 }
 
 # Evolution approval requires elevated permissions
-allow {
+allow if {
     input.operation.name == "approveEvolution"
     input.actor.role in ["platform-admin", "evolution-approver"]
     evolution_approval_checks
 }
 
 # Evolution application requires all validations
-allow {
+allow if {
     input.operation.name == "applyEvolution"
     input.actor.role in ["platform-admin", "evolution-deployer"]
     evolution_application_checks
 }
 
 # Emergency rollback always allowed for authorized users
-allow {
+allow if {
     input.operation.name == "rollbackEvolution"
     input.actor.role in ["platform-admin", "evolution-approver", "safety-officer"]
     emergency_rollback_checks
@@ -69,7 +70,7 @@ allow {
 
 # === SAFETY GUARD FUNCTIONS ===
 
-transcendent_mode_safety_checks {
+transcendent_mode_safety_checks if {
     # HITL (Human-in-the-Loop) required for transcendent operations
     input.hitl_required == true
     input.human_oversight.enabled == true
@@ -85,7 +86,7 @@ transcendent_mode_safety_checks {
     time.now_ns() < input.operation.expiry_ns
 }
 
-sandbox_validation_passed {
+sandbox_validation_passed if {
     # Sandbox proofs required for all transcendent operations
     input.sandbox_results.opa_simulation_passed == true
     input.sandbox_results.test_coverage >= 0.85
@@ -97,7 +98,7 @@ sandbox_validation_passed {
     input.sandbox_results.signature_valid == true
 }
 
-human_oversight_check {
+human_oversight_check if {
     # Human oversight required for high-risk operations
     input.human_oversight.enabled == true
     input.human_oversight.operator_id != ""
@@ -109,7 +110,7 @@ human_oversight_check {
 
 # === EVOLUTION SYSTEM CHECKS ===
 
-basic_evolution_checks {
+basic_evolution_checks if {
     # Weight sum validation (must not exceed 1.0)
     evolution_weight_sum <= 1.0
 
@@ -126,7 +127,7 @@ basic_evolution_checks {
     ]
 }
 
-evolution_approval_checks {
+evolution_approval_checks if {
     # Proposal must exist and be in correct state
     input.evolution_proposal.approval_status == "PENDING_REVIEW"
     input.evolution_proposal.sandbox_results.all_tests_passed == true
@@ -141,20 +142,31 @@ evolution_approval_checks {
     time.now_ns() < input.evolution_proposal.approval_deadline_ns
 }
 
-evolution_application_checks {
+evolution_application_checks if {
     # Proposal must be approved
     input.evolution_proposal.approval_status == "APPROVED"
     input.evolution_proposal.approved_by != ""
 
     # Additional safety validations for high-risk proposals
-    high_risk_additional_checks if input.evolution_proposal.risk_assessment.overall_risk == "HIGH"
+    high_risk_check_ok
 
     # Rollback readiness
     input.rollback_plan.prepared == true
     input.rollback_plan.estimated_time_seconds <= 300
 }
 
-emergency_rollback_checks {
+# High risk check passes if not high risk
+high_risk_check_ok if {
+    input.evolution_proposal.risk_assessment.overall_risk != "HIGH"
+}
+
+# High risk check passes if high risk and additional checks pass
+high_risk_check_ok if {
+    input.evolution_proposal.risk_assessment.overall_risk == "HIGH"
+    high_risk_additional_checks
+}
+
+emergency_rollback_checks if {
     # Emergency situations allow expedited rollback
     input.emergency.declared == true
     input.emergency.severity in ["HIGH", "CRITICAL"]
@@ -164,7 +176,7 @@ emergency_rollback_checks {
     count(input.rollback_reason) >= 10 # Minimum description length
 }
 
-high_risk_additional_checks {
+high_risk_additional_checks if {
     # Additional approvals for high-risk changes
     input.evolution_proposal.additional_approvals.safety_officer == true
     input.evolution_proposal.additional_approvals.security_lead == true
@@ -181,13 +193,13 @@ high_risk_additional_checks {
 # === QUANTUM OPERATIONS AUTHORIZATION ===
 
 # Quantum operations require quantum clearance
-allow {
+allow if {
     input.operation.isQuantum
     input.actor.quantum_clearance >= input.operation.required_quantum_level
     quantum_safety_checks
 }
 
-quantum_safety_checks {
+quantum_safety_checks if {
     # Quantum coherence requirements
     input.quantum.coherence_time_us >= 50.0
     input.quantum.error_rate <= 0.01
@@ -200,13 +212,13 @@ quantum_safety_checks {
 # === AUTONOMY TIER ENFORCEMENT ===
 
 # Autonomy operations bounded by tier
-allow {
+allow if {
     input.operation.isAutonomous
     autonomy_tier_check
     autonomy_safety_limits
 }
 
-autonomy_tier_check {
+autonomy_tier_check if {
     # Tier-based capability restrictions
     input.autonomy.current_tier <= input.actor.max_autonomy_tier
 
@@ -214,7 +226,7 @@ autonomy_tier_check {
     tier_time_limits[input.autonomy.current_tier] >= input.operation.estimated_duration_seconds
 }
 
-autonomy_safety_limits {
+autonomy_safety_limits if {
     # Compensation monitoring (halt if >0.5%/24h)
     input.autonomy.compensation_rate_24h <= 0.005
 
@@ -229,13 +241,13 @@ autonomy_safety_limits {
 
 # === PERFORMANCE AND COMPLIANCE HELPERS ===
 
-evolution_weight_sum = sum([
+evolution_weight_sum := sum([
     weight |
     some i
     input.evolution_proposal.capability_weights[i] = weight
 ])
 
-tier_time_limits = {
+tier_time_limits := {
     "TIER_1_SUPERVISED": 3600,    # 1 hour
     "TIER_2_GUIDED": 14400,       # 4 hours
     "TIER_3_AUTONOMOUS": 86400,   # 24 hours
@@ -245,15 +257,26 @@ tier_time_limits = {
 # === RESIDENCY AND PURPOSE ENFORCEMENT (ENHANCED) ===
 
 # Geographic residency enforcement
-residency_check {
+residency_check if {
     input.tenant_region == input.actor.region
     input.operation.data_residency_compliant == true
 
     # Enhanced for transcendent operations
-    transcendent_residency_check if input.operation.isTranscendent
+    transcendent_residency_ok
 }
 
-transcendent_residency_check {
+# Transcendent residency passes if not transcendent
+transcendent_residency_ok if {
+    not input.operation.isTranscendent
+}
+
+# Transcendent residency passes if transcendent and checks pass
+transcendent_residency_ok if {
+    input.operation.isTranscendent
+    transcendent_residency_check
+}
+
+transcendent_residency_check if {
     # Transcendent operations require additional residency validation
     input.transcendent.data_sovereignty.validated == true
     input.transcendent.cross_border_data_flow.approved == true
@@ -261,14 +284,25 @@ transcendent_residency_check {
 }
 
 # Purpose limitation enforcement
-purpose_check {
+purpose_check if {
     input.operation.purpose in input.tenant.allowed_purposes
 
     # Enhanced purpose tracking for transcendent operations
-    transcendent_purpose_check if input.operation.isTranscendent
+    transcendent_purpose_ok
 }
 
-transcendent_purpose_check {
+# Transcendent purpose passes if not transcendent
+transcendent_purpose_ok if {
+    not input.operation.isTranscendent
+}
+
+# Transcendent purpose passes if transcendent and checks pass
+transcendent_purpose_ok if {
+    input.operation.isTranscendent
+    transcendent_purpose_check
+}
+
+transcendent_purpose_check if {
     # Transcendent operations require explicit purpose declaration
     input.transcendent.declared_purpose != ""
     input.transcendent.purpose_alignment_verified == true
@@ -278,7 +312,7 @@ transcendent_purpose_check {
 # === AUDIT AND EVIDENCE REQUIREMENTS ===
 
 # All transcendent operations must generate evidence
-evidence_generation_required {
+evidence_generation_required if {
     input.operation.isTranscendent
     input.evidence_generation.enabled == true
     input.evidence_generation.cryptographic_signing == true
@@ -286,7 +320,7 @@ evidence_generation_required {
 }
 
 # Post-quantum signature requirements
-pq_signature_required {
+pq_signature_required if {
     input.operation.isMutation
     input.security.post_quantum_signatures.enabled == true
     input.security.dual_signature_scheme == true # Ed25519 + Dilithium
@@ -295,13 +329,13 @@ pq_signature_required {
 # === EMERGENCY PROCEDURES ===
 
 # Emergency containment always allowed for safety officers
-allow {
+allow if {
     input.operation.name == "emergencyContainment"
     input.actor.role in ["platform-admin", "safety-officer", "emergency-responder"]
     emergency_containment_checks
 }
 
-emergency_containment_checks {
+emergency_containment_checks if {
     # Emergency must be declared or imminent threat detected
     emergency_conditions_met
 
@@ -312,7 +346,7 @@ emergency_containment_checks {
     input.containment.preserve_evidence == true
 }
 
-emergency_conditions_met {
+emergency_conditions_met if {
     # Declared emergency
     input.emergency.status == "ACTIVE"
 
@@ -327,7 +361,7 @@ emergency_conditions_met {
 # === TEST COVERAGE AND VALIDATION ===
 
 # Deny operations with insufficient test coverage
-deny[msg] {
+deny contains msg if {
     input.operation.isMutation
     input.operation.requires_testing == true
     input.test_results.coverage < 0.8
@@ -335,21 +369,21 @@ deny[msg] {
 }
 
 # Deny transcendent operations without sandbox validation
-deny[msg] {
+deny contains msg if {
     input.operation.isTranscendent
     not sandbox_validation_passed
     msg := "Transcendent operation requires successful sandbox validation"
 }
 
 # Deny evolution without weight sum validation
-deny[msg] {
+deny contains msg if {
     input.operation.name in ["proposeEvolution", "applyEvolution"]
     evolution_weight_sum > 1.0
     msg := sprintf("Evolution weight sum %.2f exceeds maximum 1.0", [evolution_weight_sum])
 }
 
 # Deny high-risk operations without additional approvals
-deny[msg] {
+deny contains msg if {
     input.evolution_proposal.risk_assessment.overall_risk == "HIGH"
     input.operation.name == "applyEvolution"
     not high_risk_additional_checks
@@ -359,7 +393,7 @@ deny[msg] {
 # === MONITORING AND OBSERVABILITY ===
 
 # Require monitoring for all transcendent operations
-monitoring_required {
+monitoring_required if {
     input.operation.isTranscendent
     input.monitoring.real_time_enabled == true
     input.monitoring.alerting_configured == true
@@ -367,7 +401,7 @@ monitoring_required {
 }
 
 # Performance SLA enforcement
-performance_sla_check {
+performance_sla_check if {
     input.performance.latency_p95_ms <= 350
     input.performance.error_rate <= 0.001
     input.performance.availability >= 0.999
@@ -376,11 +410,11 @@ performance_sla_check {
 # === POLICY METADATA ===
 
 # Policy version and compatibility
-policy_version = "v0.4.0"
-compatible_api_versions = ["v0.3.9", "v0.4.0"]
+policy_version := "v0.4.0"
+compatible_api_versions := ["v0.3.9", "v0.4.0"]
 
 # Required input fields for validation
-required_fields = [
+required_fields := [
     "operation",
     "actor",
     "tenant",
@@ -388,7 +422,7 @@ required_fields = [
 ]
 
 # Enhanced required fields for transcendent operations
-transcendent_required_fields = [
+transcendent_required_fields := [
     "operation",
     "actor",
     "tenant",

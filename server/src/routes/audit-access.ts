@@ -50,7 +50,7 @@ auditAccessRouter.get('/cases/:caseId', async (req, res) => {
       totalLogs: logs.length,
       logs,
     });
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error(
       { error: (error as Error).message },
       'Failed to get case audit logs',
@@ -88,7 +88,7 @@ auditAccessRouter.get('/users/:userId', async (req, res) => {
       totalLogs: logs.length,
       logs,
     });
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error(
       { error: (error as Error).message },
       'Failed to get user audit logs',
@@ -140,7 +140,7 @@ auditAccessRouter.post('/query', async (req, res) => {
       limit: query.limit || 100,
       logs,
     });
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error(
       { error: (error as Error).message },
       'Failed to query audit logs',
@@ -177,7 +177,7 @@ auditAccessRouter.get('/correlation/:correlationId', async (req, res) => {
       totalLogs: logs.length,
       logs,
     });
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error(
       { error: (error as Error).message },
       'Failed to get correlated audit logs',
@@ -218,7 +218,7 @@ auditAccessRouter.post('/verify-integrity', async (req, res) => {
     );
 
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error(
       { error: (error as Error).message },
       'Failed to verify integrity',
@@ -277,7 +277,7 @@ auditAccessRouter.get('/stats', async (req, res) => {
       byAction: actionStats.rows,
       byLegalBasis: legalBasisStats.rows,
     });
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error(
       { error: (error as Error).message },
       'Failed to get audit stats',

@@ -126,7 +126,7 @@ export class GlueSchemaRegistry implements SchemaRegistryClient {
 
       this.idCache.set(subject, id);
       return id;
-    } catch (error) {
+    } catch (error: any) {
       // Don't log error here if we expect caller to handle EntityNotFound (like register)
       // But usually getId is called by producer expecting success.
       // Re-throwing so caller can decide.

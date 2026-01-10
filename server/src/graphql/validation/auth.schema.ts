@@ -10,7 +10,7 @@ const passwordSchema = z.string()
     .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character');
 
 export const registerSchema = z.object({
-    email: z.string().email('Invalid email address').transform(val => val.toLowerCase()),
+    email: z.string().email('Invalid email address').transform((val: string) => val.toLowerCase()),
     password: passwordSchema,
     username: z.string().optional(),
     firstName: z.string().min(1, 'First name is required'),
@@ -18,7 +18,7 @@ export const registerSchema = z.object({
 });
 
 export const loginSchema = z.object({
-    email: z.string().email('Invalid email address').transform(val => val.toLowerCase()),
+    email: z.string().email('Invalid email address').transform((val: string) => val.toLowerCase()),
     password: z.string().min(1, 'Password is required'),
 });
 

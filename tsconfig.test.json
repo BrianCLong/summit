@@ -3,8 +3,8 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "allowImportMeta": true,
     "target": "ES2022",
+    "allowJs": true,
     "strict": false,
     "noImplicitAny": false,
     "esModuleInterop": true,

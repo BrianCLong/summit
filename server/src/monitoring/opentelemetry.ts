@@ -117,7 +117,7 @@ class OpenTelemetryService {
       logger.info(
         `OpenTelemetry initialized. Service Name: ${this.config.serviceName}, Environment: ${this.config.environment}, Jaeger Enabled: ${!!this.config.jaegerEndpoint}`,
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Failed to initialize OpenTelemetry. Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -196,7 +196,7 @@ class OpenTelemetryService {
         });
 
         return result;
-      } catch (error) {
+      } catch (error: any) {
         span.setStatus({
           code: SpanStatusCode.ERROR,
           message: error instanceof Error ? error.message : 'Unknown error',
@@ -238,7 +238,7 @@ class OpenTelemetryService {
         const result = await operation();
         span.setStatus({ code: SpanStatusCode.OK });
         return result;
-      } catch (error) {
+      } catch (error: any) {
         span.setStatus({
           code: SpanStatusCode.ERROR,
           message: error instanceof Error ? error.message : 'Unknown error',
@@ -269,7 +269,7 @@ class OpenTelemetryService {
         const result = await processor();
         span.setStatus({ code: SpanStatusCode.OK });
         return result;
-      } catch (error) {
+      } catch (error: any) {
         span.setStatus({
           code: SpanStatusCode.ERROR,
           message: error instanceof Error ? error.message : 'Unknown error',

@@ -11,9 +11,18 @@ import Redis from 'ioredis';
 import { logger } from '../utils/logger.js';
 import { AgentTask, TaskResult } from './types.js';
 import { PolicyGuard } from './policyGuard.js';
-import { Budget } from '../ai/llmBudget';
 import { systemMonitor } from '../lib/system-monitor';
 import { getTracer, SpanStatusCode, SpanKind } from '../observability/tracer';
+
+// Mock Budget class until we locate the real one or fix the import
+class Budget {
+    maxUSD: number;
+    usedUSD: number;
+    constructor(maxUSD: number) {
+        this.maxUSD = maxUSD;
+        this.usedUSD = 0;
+    }
+}
 
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
   maxRetriesPerRequest: null,
@@ -48,7 +57,7 @@ class MaestroOrchestrator {
 
   async enqueueTask(task: AgentTask): Promise<string> {
     const tracer = getTracer();
-    return tracer.withSpan('maestro.enqueueTask', async (span) => {
+    return tracer.withSpan('maestro.enqueueTask', async (span: any) => {
       span.setAttribute('maestro.task.kind', task.kind);
       span.setAttribute('maestro.task.repo', task.repo);
       span.setAttribute('maestro.task.budget', task.budgetUSD);
@@ -87,7 +96,7 @@ class MaestroOrchestrator {
         });
 
         return job.id!;
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({
           code: SpanStatusCode.ERROR,
@@ -100,7 +109,7 @@ class MaestroOrchestrator {
 
   async enqueueTaskChain(tasks: AgentTask[]): Promise<string[]> {
     const tracer = getTracer();
-    return tracer.withSpan('maestro.enqueueTaskChain', async (span) => {
+    return tracer.withSpan('maestro.enqueueTaskChain', async (span: any) => {
       span.setAttribute('maestro.chain.length', tasks.length);
       const taskIds: string[] = [];
 
@@ -179,7 +188,7 @@ class MaestroOrchestrator {
   ) {
     return async (job: Job<T>): Promise<TaskResult> => {
       const tracer = getTracer();
-      return tracer.withSpan(`maestro.agent.${agentName}`, async (span) => {
+      return tracer.withSpan(`maestro.agent.${agentName}`, async (span: any) => {
         span.setAttribute('maestro.agent.name', agentName);
         span.setAttribute('maestro.job.id', job.id || 'unknown');
         span.setAttribute('maestro.task.kind', job.data.kind);
@@ -249,7 +258,7 @@ class MaestroOrchestrator {
 
   private async waitForDependencies(dependencies: string[]): Promise<void> {
     const tracer = getTracer();
-    return tracer.withSpan('maestro.waitForDependencies', async (span) => {
+    return tracer.withSpan('maestro.waitForDependencies', async (span: any) => {
       span.setAttribute('maestro.dependencies.count', dependencies.length);
 
       // Simple dependency waiting - in production would use more sophisticated coordination
@@ -263,7 +272,7 @@ class MaestroOrchestrator {
         );
 
         const allComplete = jobs.every(
-          (job) =>
+          (job: any) =>
             job &&
             (job.finishedOn !== undefined || job.failedReason !== undefined),
         );

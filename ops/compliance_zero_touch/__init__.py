@@ -3,6 +3,6 @@
 from .engine import ComplianceOrchestrator, ZeroTouchComplianceEngine
 
 __all__ = [
-    "ZeroTouchComplianceEngine",
     "ComplianceOrchestrator",
+    "ZeroTouchComplianceEngine",
 ]

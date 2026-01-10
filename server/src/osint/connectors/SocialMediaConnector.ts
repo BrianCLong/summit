@@ -1,6 +1,6 @@
 
-import { OSINTSourceConnector, OSINTQuery } from './types';
-import { OSINTEnrichmentResult, SocialMediaProfile } from '../types';
+import { OSINTSourceConnector, OSINTQuery } from './types.js';
+import { OSINTEnrichmentResult, SocialMediaProfile } from '../types.js';
 
 export class SocialMediaConnector implements OSINTSourceConnector {
   id = 'social-media-mock';

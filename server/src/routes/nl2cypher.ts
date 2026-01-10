@@ -10,7 +10,7 @@ const router = express.Router();
 const tracer = trace.getTracer('nl2cypher');
 
 router.post('/nl2cypher', async (req: AuthenticatedRequest, res: Response) => {
-  await tracer.startActiveSpan('nl2cypher', async (span) => {
+  await tracer.startActiveSpan('nl2cypher', async (span: any) => {
     try {
       const { prompt } = req.body;
       const { cypher, ast, rationale, estimatedCost } = nl2cypher(prompt);
@@ -30,7 +30,7 @@ router.post('/nl2cypher/diff', (req, res) => {
 });
 
 router.post('/sandbox/execute', async (req: AuthenticatedRequest, res: Response) => {
-  await tracer.startActiveSpan('sandbox', async (span) => {
+  await tracer.startActiveSpan('sandbox', async (span: any) => {
     try {
       const { cypher } = req.body;
       if (!cypher || typeof cypher !== 'string') {
@@ -48,7 +48,7 @@ router.post('/sandbox/execute', async (req: AuthenticatedRequest, res: Response)
         /\bPERIODIC\s+COMMIT\b/i,
         /\bREMOVE\b/i,
       ];
-      if (banned.some((r) => r.test(cypher))) {
+      if (banned.some((r: any) => r.test(cypher))) {
         return res
           .status(400)
           .json({ error: 'Query contains forbidden operations in sandbox' });

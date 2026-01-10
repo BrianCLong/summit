@@ -2,9 +2,11 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import yaml from 'js-yaml';
-import Ajv from 'ajv';
+import AjvModule from 'ajv';
 import logger from '../utils/logger.js';
 import type { PromptConfig } from './types.js';
+
+const Ajv = (AjvModule as any).default || AjvModule;
 
 export class PromptRegistry {
   private prompts: Map<string, PromptConfig> = new Map();
@@ -29,7 +31,7 @@ export class PromptRegistry {
       try {
         const schemaContent = await fs.readFile(schemaPath, 'utf-8');
         this.schema = JSON.parse(schemaContent);
-      } catch (e) {
+      } catch (e: any) {
         logger.warn('Schema file not found or invalid, proceeding without validation');
       }
 
@@ -299,7 +301,7 @@ export class PromptRegistry {
       }
     }
 
-    const passed = results.filter((r) => r.passed).length;
+    const passed = results.filter((r: any) => r.passed).length;
     const total = results.length;
 
     logger.info('Golden tests completed', {

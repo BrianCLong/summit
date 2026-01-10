@@ -5,7 +5,7 @@ import {
   EvaluationCriteria,
   EvaluationReportSchema,
   ProhibitedActionType
-} from './types';
+} from './types.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export class EvaluationHarness {

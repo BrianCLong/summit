@@ -130,8 +130,8 @@ export class DetectionContentPackV6Service {
 
       const metrics: ContentPackMetrics = {
         totalRules: allRules.length,
-        newRules: allRules.filter((r) => r.version === '1.0.0').length,
-        tunedRules: allRules.filter((r) => parseFloat(r.version) > 1.0).length,
+        newRules: allRules.filter((r: any) => r.version === '1.0.0').length,
+        tunedRules: allRules.filter((r: any) => parseFloat(r.version) > 1.0).length,
         attackCoverage: {
           techniques: Object.keys(attackCoverage).reduce(
             (acc, tactic) => acc + Object.keys(attackCoverage[tactic]).length,
@@ -149,7 +149,7 @@ export class DetectionContentPackV6Service {
         metrics,
       );
       return metrics;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Failed to deploy Detection Content Pack v6', {
         error,
       });
@@ -596,7 +596,7 @@ export class DetectionContentPackV6Service {
               `Expected ${test.expectedResult}, got ${result}`,
             );
           }
-        } catch (error) {
+        } catch (error: any) {
           failedTests++;
           await this.updateTestStatus(test.id, 'failed', error.message);
         }

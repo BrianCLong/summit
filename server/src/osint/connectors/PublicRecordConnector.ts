@@ -1,6 +1,6 @@
 
-import { OSINTSourceConnector, OSINTQuery } from './types';
-import { OSINTEnrichmentResult, PublicRecord } from '../types';
+import { OSINTSourceConnector, OSINTQuery } from './types.js';
+import { OSINTEnrichmentResult, PublicRecord } from '../types.js';
 
 export class PublicRecordConnector implements OSINTSourceConnector {
   id = 'public-record-mock';

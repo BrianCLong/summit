@@ -48,7 +48,7 @@ export const canonicalResolvers = {
          } finally {
              await session.close();
          }
-      } catch (e) {
+      } catch (e: any) {
          console.warn("Neo4j unavailable, using mock", e);
       }
 
@@ -85,7 +85,7 @@ export const canonicalResolvers = {
          } finally {
              await session.close();
          }
-      } catch (e) {
+      } catch (e: any) {
          console.warn("Neo4j unavailable, using mock", e);
       }
 
@@ -121,7 +121,7 @@ export const canonicalResolvers = {
            } finally {
                await session.close();
            }
-       } catch (e) {
+       } catch (e: any) {
            console.warn("Neo4j unavailable, using mock", e);
            results = MOCK_ENTITIES;
        }

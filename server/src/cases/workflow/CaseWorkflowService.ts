@@ -142,9 +142,17 @@ export class CaseWorkflowService {
     auditContext: {
       legalBasis: LegalBasis;
       correlationId?: string;
+      tenantId: string;
     },
   ): Promise<WorkflowTransitionResult> {
-    const caseData = await this.getCase(request.caseId, ''); // TODO: get tenant from context
+    if (!auditContext.tenantId) {
+      return {
+        success: false,
+        errors: ['Tenant ID is required'],
+      };
+    }
+
+    const caseData = await this.getCase(request.caseId, auditContext.tenantId);
     if (!caseData) {
       return {
         success: false,
@@ -207,8 +215,13 @@ export class CaseWorkflowService {
   async getAvailableTransitions(
     caseId: string,
     userId: string,
+    tenantId: string,
   ): Promise<string[]> {
-    const caseData = await this.getCase(caseId, '');
+    if (!tenantId) {
+      throw new Error('Tenant ID is required');
+    }
+
+    const caseData = await this.getCase(caseId, tenantId);
     if (!caseData) return [];
 
     const userRoles = await this.participantRepo.getUserRoleIds(caseId, userId);
@@ -226,8 +239,13 @@ export class CaseWorkflowService {
     auditContext: {
       legalBasis: string;
       reason: string;
+      tenantId: string;
     },
   ): Promise<CaseTask> {
+    if (!auditContext.tenantId) {
+      throw new Error('Tenant ID is required');
+    }
+
     const task = await this.taskRepo.create(input);
 
     // Create SLA if due date is set
@@ -251,7 +269,7 @@ export class CaseWorkflowService {
     await this.emitEvent({
       type: 'task.created',
       caseId: input.caseId,
-      tenantId: '', // TODO: get from case
+      tenantId: auditContext.tenantId,
       userId: input.createdBy,
       timestamp: new Date(),
       data: { task },
@@ -267,14 +285,19 @@ export class CaseWorkflowService {
     taskId: string,
     userId: string,
     assignedBy: string,
+    tenantId: string,
   ): Promise<CaseTask | null> {
+    if (!tenantId) {
+      throw new Error('Tenant ID is required');
+    }
+
     const task = await this.taskRepo.assignTask(taskId, userId, assignedBy);
 
     if (task) {
       await this.emitEvent({
         type: 'task.assigned',
         caseId: task.caseId,
-        tenantId: '',
+        tenantId,
         userId: assignedBy,
         timestamp: new Date(),
         data: { task, assignedTo: userId },
@@ -290,8 +313,13 @@ export class CaseWorkflowService {
   async completeTask(
     taskId: string,
     userId: string,
+    tenantId: string,
     resultData?: Record<string, unknown>,
   ): Promise<CaseTask | null> {
+    if (!tenantId) {
+      throw new Error('Tenant ID is required');
+    }
+
     const task = await this.taskRepo.completeTask(taskId, userId, resultData);
 
     if (task) {
@@ -308,7 +336,7 @@ export class CaseWorkflowService {
       await this.emitEvent({
         type: 'task.completed',
         caseId: task.caseId,
-        tenantId: '',
+        tenantId,
         userId,
         timestamp: new Date(),
         data: { task, resultData },
@@ -344,13 +372,17 @@ export class CaseWorkflowService {
   /**
    * Add participant to case
    */
-  async addParticipant(input: CaseParticipantInput): Promise<unknown> {
+  async addParticipant(input: CaseParticipantInput, tenantId: string): Promise<unknown> {
+    if (!tenantId) {
+      throw new Error('Tenant ID is required');
+    }
+
     const participant = await this.participantRepo.addParticipant(input);
 
     await this.emitEvent({
       type: 'case.participant_added',
       caseId: input.caseId,
-      tenantId: '',
+      tenantId,
       userId: input.assignedBy || 'system',
       timestamp: new Date(),
       data: { participant },
@@ -367,7 +399,12 @@ export class CaseWorkflowService {
     userId: string,
     roleId: string,
     removedBy: string,
+    tenantId: string,
   ): Promise<unknown> {
+    if (!tenantId) {
+      throw new Error('Tenant ID is required');
+    }
+
     const participant = await this.participantRepo.removeParticipant(
       caseId,
       userId,
@@ -379,7 +416,7 @@ export class CaseWorkflowService {
       await this.emitEvent({
         type: 'case.participant_removed',
         caseId,
-        tenantId: '',
+        tenantId,
         userId: removedBy,
         timestamp: new Date(),
         data: { participant },
@@ -401,13 +438,17 @@ export class CaseWorkflowService {
   /**
    * Request approval
    */
-  async requestApproval(input: CaseApprovalInput): Promise<unknown> {
+  async requestApproval(input: CaseApprovalInput, tenantId: string): Promise<unknown> {
+    if (!tenantId) {
+      throw new Error('Tenant ID is required');
+    }
+
     const approval = await this.approvalRepo.createApproval(input);
 
     await this.emitEvent({
       type: 'approval.requested',
       caseId: input.caseId,
-      tenantId: '',
+      tenantId,
       userId: input.requestedBy,
       timestamp: new Date(),
       data: { approval },
@@ -419,7 +460,11 @@ export class CaseWorkflowService {
   /**
    * Submit approval vote
    */
-  async submitApprovalVote(input: CaseApprovalVoteInput): Promise<unknown> {
+  async submitApprovalVote(input: CaseApprovalVoteInput, tenantId: string): Promise<unknown> {
+    if (!tenantId) {
+      throw new Error('Tenant ID is required');
+    }
+
     const vote = await this.approvalRepo.submitVote(input);
 
     // Check if approval is complete
@@ -443,7 +488,7 @@ export class CaseWorkflowService {
       await this.emitEvent({
         type: eventType,
         caseId: approval.caseId,
-        tenantId: '',
+        tenantId,
         userId: input.approverUserId,
         timestamp: new Date(),
         data: { approval, vote, checkResult },
@@ -485,15 +530,21 @@ export class CaseWorkflowService {
 
   /**
    * Check for breached SLAs (run periodically)
+   * Note: For system-level SLA checks, tenantId should be derived from the case
    */
   async checkBreachedSLAs(): Promise<unknown[]> {
     const events = await this.slaTracker.checkBreachedSLAs();
 
     for (const event of events) {
+      // For system checks, we need to fetch the case to get the tenantId
+      // This is acceptable as these are background jobs
+      const caseData = await this.caseRepo.findById(event.caseId, 'system');
+      const tenantId = caseData?.tenantId || 'system';
+
       await this.emitEvent({
         type: 'sla.breached',
         caseId: event.caseId,
-        tenantId: '',
+        tenantId,
         userId: 'system',
         timestamp: new Date(),
         data: event,
@@ -505,15 +556,21 @@ export class CaseWorkflowService {
 
   /**
    * Check for at-risk SLAs (run periodically)
+   * Note: For system-level SLA checks, tenantId should be derived from the case
    */
   async checkAtRiskSLAs(): Promise<unknown[]> {
     const events = await this.slaTracker.checkAtRiskSLAs();
 
     for (const event of events) {
+      // For system checks, we need to fetch the case to get the tenantId
+      // This is acceptable as these are background jobs
+      const caseData = await this.caseRepo.findById(event.caseId, 'system');
+      const tenantId = caseData?.tenantId || 'system';
+
       await this.emitEvent({
         type: 'sla.at_risk',
         caseId: event.caseId,
-        tenantId: '',
+        tenantId,
         userId: 'system',
         timestamp: new Date(),
         data: event,
@@ -569,7 +626,7 @@ export class CaseWorkflowService {
     for (const handler of handlers) {
       try {
         await handler(event);
-      } catch (error) {
+      } catch (error: any) {
         serviceLogger.error(
           {
             error,

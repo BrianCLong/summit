@@ -149,4 +149,96 @@ describe('EntityResolutionService', () => {
     expect(preview.decision).toBeDefined();
     expect(preview.sandboxId).toMatch(/-/);
   });
+
+  it('clusters duplicates across sources and honors confidence for primaries', () => {
+    const service = new EntityResolutionService(
+      () => new Date('2024-05-05T00:00:00Z'),
+    );
+    const population: EntityRecord[] = [
+      {
+        id: 'p-100',
+        tenantId: fixture.tenantId,
+        type: 'person',
+        name: 'Jane Roe',
+        attributes: { location: 'Paris' },
+        confidence: 0.9,
+        source: 'crm',
+      },
+      {
+        id: 'p-101',
+        tenantId: fixture.tenantId,
+        type: 'person',
+        name: 'Jane Roe',
+        attributes: { location: 'Paris' },
+        confidence: 0.7,
+        source: 'osint',
+      },
+      {
+        id: 'p-200',
+        tenantId: fixture.tenantId,
+        type: 'organization',
+        name: 'Acme Corp',
+        attributes: {},
+      },
+    ];
+
+    const clusters = service.resolveDuplicates({
+      tenantId: fixture.tenantId,
+      population,
+      thresholds: { autoMerge: 0.8, review: 0.6 },
+    });
+
+    expect(clusters).toHaveLength(1);
+    expect(clusters[0].primary.id).toBe('p-100');
+    expect(clusters[0].duplicates[0].entityId).toBe('p-101');
+    expect(clusters[0].rationale[0]).toContain('duplicates');
+  });
+
+  it('detects temporal spikes for entities', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-05-05T00:00:00Z'));
+    const service = new EntityResolutionService();
+    const events = [
+      { entityId: 'p-1', timestamp: '2024-05-01T00:00:00Z', type: 'mention' },
+      { entityId: 'p-1', timestamp: '2024-05-02T00:00:00Z', type: 'mention' },
+      { entityId: 'p-1', timestamp: '2024-03-01T00:00:00Z', type: 'mention' },
+    ];
+
+    const patterns = service.analyzeTemporalPatterns(events, 45, 1);
+    vi.useRealTimers();
+
+    expect(patterns[0].trend).toBe('spike');
+    expect(patterns[0].evidence[0]).toContain('Recent events');
+  });
+
+  it('extracts entities from unstructured text with offsets', () => {
+    const service = new EntityResolutionService();
+    const text = 'On 2024-01-01 Jane Roe met Acme Corp in Paris City.';
+    const extracted = service.extractEntitiesFromText(text, {
+      tenantId: fixture.tenantId,
+      source: 'report',
+    });
+
+    const person = extracted.find((item) => item.record.type === 'person');
+    const org = extracted.find((item) => item.record.type === 'organization');
+    const date = extracted.find((item) => item.record.type === 'date');
+
+    expect(person?.offsets[0].start).toBeGreaterThanOrEqual(0);
+    expect(org?.record.name).toBe('Acme Corp');
+    expect(date?.record.name).toBe('2024-01-01');
+  });
+
+  it('provides explainability for candidate predictions', () => {
+    const service = new EntityResolutionService();
+    const explanation = service.explainPrediction(
+      fixture.entities[0],
+      fixture.entities[1],
+      { autoMerge: 0.9, review: 0.7 },
+      { mlEnabled: true, mlBlend: 0.25 },
+    );
+
+    expect(explanation.decision).toBeDefined();
+    expect(Object.keys(explanation.contributions)).not.toHaveLength(0);
+    expect(explanation.rationale.some((line) => line.includes('Weighted blend'))).toBe(true);
+  });
 });

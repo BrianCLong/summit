@@ -83,7 +83,7 @@ export const getContext = async ({
         req.tenantContext ||
         extractTenantContext(req, { strict: false }),
     };
-  } catch (error) {
+  } catch (error: any) {
     logger.warn(
       { requestId, error: (error as Error).message },
       'Authentication failed',
@@ -126,7 +126,7 @@ export const verifyToken = async (token: string): Promise<User> => {
     }
 
     return user;
-  } catch (error) {
+  } catch (error: any) {
     throw new GraphQLError('Invalid or expired token', {
       extensions: {
         code: 'UNAUTHENTICATED',

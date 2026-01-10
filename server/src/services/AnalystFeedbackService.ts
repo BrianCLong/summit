@@ -76,7 +76,7 @@ export class AnalystFeedbackService {
       await this.triggerRetrainingIfNeeded(feedback.alertId);
 
       return feedbackRecord as AnalystFeedback;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Failed to record analyst feedback', {
         error: error instanceof Error ? error.message : String(error),
         feedback,
@@ -111,7 +111,7 @@ export class AnalystFeedbackService {
 
           // Ideally, update re-ranking or trigger fine-tuning here
           // For now, we just log/store it
-      } catch (error) {
+      } catch (error: any) {
           this.logger.error('Failed to submit correction', {
             error: error instanceof Error ? error.message : String(error),
             input
@@ -155,7 +155,7 @@ export class AnalystFeedbackService {
       });
 
       return labelEntry as LabelStoreEntry;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Failed to store label', {
         error: error instanceof Error ? error.message : String(error),
         label
@@ -175,7 +175,7 @@ export class AnalystFeedbackService {
       });
 
       return feedback as AnalystFeedback[];
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Failed to get feedback for alert', {
         error: error instanceof Error ? error.message : String(error),
         alertId
@@ -195,7 +195,7 @@ export class AnalystFeedbackService {
       });
 
       return labels as LabelStoreEntry[];
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Failed to get labels for alert', {
         error: error instanceof Error ? error.message : String(error),
         alertId
@@ -246,7 +246,7 @@ export class AnalystFeedbackService {
       });
 
       return trainingData;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Failed to generate training data', {
         error: error instanceof Error ? error.message : String(error)
       });
@@ -294,7 +294,7 @@ export class AnalystFeedbackService {
           avgConfidence: stat._avg.confidence,
         })),
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Failed to get feedback statistics', {
         error: error instanceof Error ? error.message : String(error)
       });
@@ -367,7 +367,7 @@ export class AnalystFeedbackService {
         // Here you would call your ML pipeline
         // await this.mlService.triggerRetraining();
       }
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Failed to check retraining conditions', {
         error: error instanceof Error ? error.message : String(error),
         alertId,

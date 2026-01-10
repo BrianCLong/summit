@@ -9,11 +9,11 @@
  * It sets up global test utilities and configuration.
  */
 
-// @ts-nocheck
-import { jest } from '@jest/globals';
-
 // Extend Jest timeout for integration tests
-jest.setTimeout(30000);
+// Note: `jest` is a global injected by Jest - no import needed
+if (typeof jest !== 'undefined') {
+  jest.setTimeout(30000);
+}
 
 // Global test utilities
 declare global {
@@ -81,5 +81,3 @@ console.warn = (...args: unknown[]) => {
   }
   originalWarn.apply(console, args);
 };
-
-export {};

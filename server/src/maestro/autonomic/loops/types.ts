@@ -1,6 +1,6 @@
 
-import { HealthSnapshot } from '../signals/types';
-import { SLOAlert } from '../policy/types';
+import { HealthSnapshot } from '../signals/types.js';
+import { SLOAlert } from '../policy/types.js';
 
 export interface AdaptationPlan {
   id: string;

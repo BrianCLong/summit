@@ -1,12 +1,12 @@
 package summit.sbom
 
-default acceptable = false
+default acceptable := false
 
-acceptable {
+acceptable if {
   not has_critical_vulns
 }
 
-has_critical_vulns {
+has_critical_vulns if {
   some i
   comp := input.components[i]
   some j
@@ -14,7 +14,7 @@ has_critical_vulns {
   vuln.severity == "CRITICAL"
 }
 
-deny[msg] {
+deny contains msg if {
   has_critical_vulns
   msg := "CRITICAL vulnerabilities present in SBOM components"
 }

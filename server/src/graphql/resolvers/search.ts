@@ -1,10 +1,10 @@
 // @ts-nocheck
-import { ElasticsearchService } from '../../../apps/search-engine/src/services/ElasticsearchService';
-import { QueryBuilderService } from '../../../apps/search-engine/src/services/QueryBuilderService';
-import { SavedSearchService } from '../../../apps/search-engine/src/services/SavedSearchService';
-import { SearchAnalyticsService } from '../../../apps/search-engine/src/services/SearchAnalyticsService';
-import { IndexingService } from '../../../apps/search-engine/src/services/IndexingService';
-import { SearchQuery } from '../../../apps/search-engine/src/types';
+import { ElasticsearchService } from '../../../apps/search-engine/src/services/ElasticsearchService.js';
+import { QueryBuilderService } from '../../../apps/search-engine/src/services/QueryBuilderService.js';
+import { SavedSearchService } from '../../../apps/search-engine/src/services/SavedSearchService.js';
+import { SearchAnalyticsService } from '../../../apps/search-engine/src/services/SearchAnalyticsService.js';
+import { IndexingService } from '../../../apps/search-engine/src/services/IndexingService.js';
+import { SearchQuery } from '../../../apps/search-engine/src/types.js';
 import logger from '../../config/logger.js';
 
 const searchLogger = logger.child({ name: 'SearchResolvers' });
@@ -115,7 +115,7 @@ export const searchResolvers = {
           suggestions: result.suggestions,
           scrollId: result.scrollId,
         };
-      } catch (error) {
+      } catch (error: any) {
         searchLogger.error('Search failed', {
           error: error instanceof Error ? error.message : String(error),
           query: query.query,
@@ -156,7 +156,7 @@ export const searchResolvers = {
           score: item.score,
           highlight: item.highlight,
         }));
-      } catch (error) {
+      } catch (error: any) {
         searchLogger.error('Autocomplete failed', {
           error: error instanceof Error ? error.message : String(error),
         });
@@ -178,7 +178,7 @@ export const searchResolvers = {
         }
 
         return await analyticsService.getQuerySuggestions(prefix, limit);
-      } catch (error) {
+      } catch (error: any) {
         searchLogger.error('Query suggestions failed', {
           error: error instanceof Error ? error.message : String(error),
         });
@@ -203,7 +203,7 @@ export const searchResolvers = {
           context.user.id,
           limit,
         );
-      } catch (error) {
+      } catch (error: any) {
         searchLogger.error('Personalized suggestions failed', {
           error: error instanceof Error ? error.message : String(error),
         });
@@ -221,7 +221,7 @@ export const searchResolvers = {
         }
 
         return await savedSearchService.getSavedSearch(id, context.user.id);
-      } catch (error) {
+      } catch (error: any) {
         searchLogger.error('Get saved search failed', {
           error: error instanceof Error ? error.message : String(error),
         });
@@ -263,7 +263,7 @@ export const searchResolvers = {
         );
 
         return result.searches;
-      } catch (error) {
+      } catch (error: any) {
         searchLogger.error('List saved searches failed', {
           error: error instanceof Error ? error.message : String(error),
         });
@@ -291,7 +291,7 @@ export const searchResolvers = {
           new Date(startDate),
           new Date(endDate),
         );
-      } catch (error) {
+      } catch (error: any) {
         searchLogger.error('Get search metrics failed', {
           error: error instanceof Error ? error.message : String(error),
         });
@@ -314,7 +314,7 @@ export const searchResolvers = {
           status: health.status,
           details: health.details,
         };
-      } catch (error) {
+      } catch (error: any) {
         searchLogger.error('Search health check failed', {
           error: error instanceof Error ? error.message : String(error),
         });
@@ -364,7 +364,7 @@ export const searchResolvers = {
           isPublic,
           tags,
         );
-      } catch (error) {
+      } catch (error: any) {
         searchLogger.error('Save search failed', {
           error: error instanceof Error ? error.message : String(error),
         });
@@ -411,7 +411,7 @@ export const searchResolvers = {
           updates,
           context.user.id,
         );
-      } catch (error) {
+      } catch (error: any) {
         searchLogger.error('Update saved search failed', {
           error: error instanceof Error ? error.message : String(error),
         });
@@ -438,7 +438,7 @@ export const searchResolvers = {
         );
 
         return deleted;
-      } catch (error) {
+      } catch (error: any) {
         searchLogger.error('Delete saved search failed', {
           error: error instanceof Error ? error.message : String(error),
         });
@@ -492,7 +492,7 @@ export const searchResolvers = {
           suggestions: result.suggestions,
           scrollId: result.scrollId,
         };
-      } catch (error) {
+      } catch (error: any) {
         searchLogger.error('Execute saved search failed', {
           error: error instanceof Error ? error.message : String(error),
         });
@@ -519,7 +519,7 @@ export const searchResolvers = {
 
         await analyticsService.trackClick(queryId, resultId, position);
         return true;
-      } catch (error) {
+      } catch (error: any) {
         searchLogger.error('Track search click failed', {
           error: error instanceof Error ? error.message : String(error),
         });
@@ -547,7 +547,7 @@ export const searchResolvers = {
 
         searchLogger.info('Full reindex completed');
         return true;
-      } catch (error) {
+      } catch (error: any) {
         searchLogger.error('Reindex failed', {
           error: error instanceof Error ? error.message : String(error),
         });

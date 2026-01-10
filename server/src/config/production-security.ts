@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { cfg } from '../config.js';
-import logger from '../utils/logger.js';
+import { Express } from 'express';
+import helmet from 'helmet';
+import { logger } from '../config/logger.js';
 import AuthService from '../services/AuthService.js';
+import { Request, Response, NextFunction } from 'express';
 
 /**
  * Production Authentication Middleware
@@ -34,7 +34,7 @@ export const productionAuthMiddleware = async (
     // Attach user to request
     (req as any).user = user;
     next();
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Authentication error:', error);
     return res.status(403).json({ error: 'Forbidden: Token verification failed' });
   }
@@ -45,12 +45,34 @@ export const productionAuthMiddleware = async (
  * This function is called during app initialization in production mode.
  * It supplements the standard security middleware (Helmet, CORS) defined in app.ts.
  */
-export const applyProductionSecurity = (app: any) => {
+export const applyProductionSecurity = (app: Express) => {
   logger.info('Applying additional production security configurations...');
 
-  // Future hardening:
-  // - Strict Content Security Policy (CSP)
-  // - HSTS enforcement (if not handled by load balancer)
-  // - TLS version enforcement
-  // - Additional rate limiting strategies
+  // 1. Strict Transport Security (HSTS)
+  // Already handled by securityHeaders in app.ts, but we reinforce it here just in case,
+  // or add other headers Helmet doesn't default to.
+  // Note: helmet() in app.ts enables HSTS in production.
+
+  // 2. Permissions Policy (formerly Feature Policy)
+  // Restrict browser features to improve privacy and security.
+  app.use((req, res, next) => {
+    res.setHeader(
+      'Permissions-Policy',
+      'geolocation=(), microphone=(), camera=(), payment=(), usb=(), vr=()',
+    );
+    next();
+  });
+
+  // 3. X-Permitted-Cross-Domain-Policies
+  // Prevent Adobe Flash and PDF documents from loading data from this domain.
+  app.use(
+    helmet.permittedCrossDomainPolicies({
+      permittedPolicies: 'none',
+    }),
+  );
+
+  // 4. Disable X-Powered-By (Redundant as Helmet does it, but good practice)
+  app.disable('x-powered-by');
+
+  // 5. Additional hardening can be added here (e.g., specific CSP adjustments)
 };

@@ -37,10 +37,12 @@ class MemoryTier implements CacheTier {
     // Simple eviction policy
     if (this.cache.size > 10000) {
       const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
+      if (firstKey !== undefined) {
+        this.cache.delete(firstKey);
+      }
     }
 
-    cacheLocalSize.labels('default').set(this.cache.size);
+    cacheLocalSize?.labels?.('default')?.set?.(this.cache.size);
   }
 
   async del(key: string): Promise<void> {
@@ -129,7 +131,7 @@ export async function getCachedJson<T>(
       await l1.set(key, l2Hit, ttl);
       return JSON.parse(l2Hit) as T;
     }
-  } catch (e) { }
+  } catch (e: any) { }
 
   return null;
 }
@@ -153,7 +155,7 @@ export async function setCachedJson(
         await l2.addTag(prefix, key);
       }
     }
-  } catch (e) { }
+  } catch (e: any) { }
 }
 
 /**
@@ -220,7 +222,7 @@ export async function cached<T>(
         await l1.set(key, l2Hit, ttlSec);
         return JSON.parse(l2Hit) as T;
       }
-    } catch (e) {
+    } catch (e: any) {
       // Ignore redis errors
     }
   }
@@ -251,7 +253,7 @@ export async function cached<T>(
       for (const tag of allTags) {
         await l2.addTag(tag, key);
       }
-    } catch (e) {
+    } catch (e: any) {
       // Ignore
     }
   }

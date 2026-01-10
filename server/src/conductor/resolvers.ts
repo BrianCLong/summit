@@ -2,9 +2,9 @@
 // GraphQL Resolvers for MoE Conductor
 // Integrates the Conductor system with GraphQL API
 
-import { conductor } from './index';
-import { ConductInput } from './types';
-import { OPAClient, SecurityContext } from './security/opa-client';
+import { conductor } from './index.js';
+import { ConductInput } from './types/index.js';
+import { OPAClient, SecurityContext } from './security/opa-client.js';
 import {
   governanceLimitEngine,
   estimateTaskCost,
@@ -273,7 +273,7 @@ export const conductorResolvers = {
           governance_limits_approaching:
             limits.warnings.length > 0 || limits.critical.length > 0,
         };
-      } catch (error) {
+      } catch (error: any) {
         // Always decrement concurrent counter on error
         governanceLimitEngine.decrementConcurrent(securityContext.userId);
         console.error('Conductor execution failed:', error);
@@ -357,7 +357,7 @@ export const conductorQueries = {
         status: 'healthy',
         message: `Router selected: ${testDecision.expert}`,
       });
-    } catch (error) {
+    } catch (error: any) {
       checks.push({
         name: 'routing',
         status: 'unhealthy',

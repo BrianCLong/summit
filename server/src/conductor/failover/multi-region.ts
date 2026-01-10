@@ -4,7 +4,7 @@
 
 import { EventEmitter } from 'events';
 import Redis from 'ioredis';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 
 export interface RegionConfig {
   id: string;
@@ -169,7 +169,7 @@ export class MultiRegionFailoverManager extends EventEmitter {
           } else {
             health.status = 'unreachable';
           }
-        } catch (error) {
+        } catch (error: any) {
           health.status = 'unreachable';
           health.errors.push(error.message);
           health.latency = Date.now() - startTime;
@@ -216,7 +216,7 @@ export class MultiRegionFailoverManager extends EventEmitter {
             threshold: region.replication.lag_threshold_ms,
           });
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(
           `Failed to monitor replication for region ${region.id}:`,
           error,
@@ -346,7 +346,7 @@ export class MultiRegionFailoverManager extends EventEmitter {
       'failover_completed',
       { success: true },
     );
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Failover failed: ${error.message}`);
       failoverEvent.status = 'failed';
       failoverEvent.duration = Date.now() - failoverEvent.timestamp;
@@ -356,7 +356,7 @@ export class MultiRegionFailoverManager extends EventEmitter {
       // Attempt rollback
       try {
         await this.rollbackFailover(failoverEvent);
-      } catch (rollbackError) {
+      } catch (rollbackError: any) {
         console.error(`Rollback failed: ${rollbackError.message}`);
       }
 
@@ -531,7 +531,7 @@ export class MultiRegionFailoverManager extends EventEmitter {
 
       this.emit('failover:rolled_back', failoverEvent);
       console.log(`Rollback completed for failover ${failoverEvent.id}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Rollback failed: ${error.message}`);
       throw error;
     }
@@ -608,7 +608,7 @@ export class MultiRegionFailoverManager extends EventEmitter {
         healthy: response.ok,
         latency: Date.now() - start,
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         healthy: false,
         latency: Date.now() - start,

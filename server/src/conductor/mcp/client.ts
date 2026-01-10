@@ -3,7 +3,7 @@
 
 import WebSocket from 'ws';
 import { randomUUID as uuid } from 'crypto';
-import { MCPRequest, MCPResponse, MCPServerConfig, MCPTool } from '../types';
+import { MCPRequest, MCPResponse, MCPServerConfig, MCPTool } from '../types/index.js';
 import logger from '../../config/logger.js';
 
 export interface MCPClientOptions {
@@ -270,7 +270,7 @@ export class MCPClient {
       } else {
         pending.resolve(message.result);
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to parse MCP message:', error);
     }
   }
@@ -380,7 +380,7 @@ export async function executeToolAnywhere(
         userScopes,
       );
       return { serverName, result };
-    } catch (error) {
+    } catch (error: any) {
       console.warn(`Failed to execute ${toolName} on ${serverName}:`, error);
       // Continue to next server
     }

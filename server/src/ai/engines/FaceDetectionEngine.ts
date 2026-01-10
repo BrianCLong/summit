@@ -104,7 +104,7 @@ export class FaceDetectionEngine {
 
       this.isInitialized = true;
       logger.info('Face Detection Engine initialized successfully');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize Face Detection Engine:', error);
       throw error;
     }
@@ -208,7 +208,7 @@ export class FaceDetectionEngine {
         `Face detection completed: ${qualifiedDetections.length} faces detected`,
       );
       return qualifiedDetections;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Face detection failed:', error);
       throw error;
     }
@@ -259,7 +259,7 @@ export class FaceDetectionEngine {
         `Video face detection completed: ${results.length} frames processed`,
       );
       return results;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Video face detection failed:', error);
       throw error;
     }
@@ -416,7 +416,7 @@ export class FaceDetectionEngine {
         detection.boundingBox,
       );
       detection.landmarks = landmarks;
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Landmark extraction failed:', error);
       // Provide default landmarks based on bounding box
       detection.landmarks = this.getDefaultLandmarks(detection.boundingBox);
@@ -846,17 +846,14 @@ export class FaceDetectionEngine {
 
     // Factor in landmark confidence if available
     let landmarkScore = 1.0;
-    if (detection.landmarks?.leftEye?.confidence) {
-      const avgLandmarkConfidence =
-        [
-          detection.landmarks.leftEye.confidence,
-          detection.landmarks.rightEye.confidence,
-          detection.landmarks.nose.confidence,
-          detection.landmarks.leftMouth.confidence,
-          detection.landmarks.rightMouth.confidence,
-        ].reduce((sum, conf) => sum + (conf || 0), 0) / 5;
-
-      landmarkScore = avgLandmarkConfidence;
+    if (detection.landmarks) {
+      const landmarks = detection.landmarks as any;
+      landmarkScore =
+        Object.values(landmarks).reduce((sum: number, conf: any) => {
+          return (
+            sum + (typeof conf === 'number' ? conf : (conf as any).confidence || 0)
+          );
+        }, 0) / Object.keys(landmarks).length;
     }
 
     // Combined quality score

@@ -1,0 +1,56 @@
+{
+  "issue_number": 586,
+  "title": "feat: scaffold sprint18 clean rooms and subscriptions",
+  "url": "https://github.com/BrianCLong/summit/pull/586",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T16:17:29Z",
+  "createdAt": "2025-08-18T02:34:55Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11762,
+        "url": "https://github.com/BrianCLong/summit/pull/11762",
+        "mergedAt": null,
+        "title": "feat: Anthropic Claude Skills pack with CI integration"
+      },
+      {
+        "number": 15259,
+        "url": "https://github.com/BrianCLong/summit/pull/15259",
+        "mergedAt": "2026-01-01T07:29:47Z",
+        "title": "Expand autonomous agent capabilities and governance"
+      },
+      {
+        "number": 10121,
+        "url": "https://github.com/BrianCLong/summit/pull/10121",
+        "mergedAt": "2025-10-14T08:53:53Z",
+        "title": "feat: Optimize database connection pooling"
+      },
+      {
+        "number": 11891,
+        "url": "https://github.com/BrianCLong/summit/pull/11891",
+        "mergedAt": null,
+        "title": "Build Geopolitical Risk Intelligence Platform"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

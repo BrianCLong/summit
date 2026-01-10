@@ -121,7 +121,7 @@ export class EntitlementsService implements EntitlementsInterface {
           entityType: 'Entitlement',
           artifactKey,
           source,
-          sourceId
+          sourceId: sourceId ?? undefined
         },
         metadata: {
           tenantId,
@@ -133,7 +133,7 @@ export class EntitlementsService implements EntitlementsInterface {
 
       await client.query('COMMIT');
       return entitlement;
-    } catch (err) {
+    } catch (err: any) {
       await client.query('ROLLBACK');
       throw err;
     } finally {

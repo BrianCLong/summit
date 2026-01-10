@@ -1,0 +1,10 @@
+{
+  "name": "summit-mini",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "dev": "pnpm -C server dev & pnpm -C web dev",
+    "build": "pnpm -C server build && pnpm -C web build",
+    "start": "pnpm -C server start"
+  }
+}

@@ -6,12 +6,12 @@
  * @module runbooks/runtime/executors/custom-executor
  */
 
-import { BaseStepExecutor } from './base';
+import { BaseStepExecutor } from './base.js';
 import {
   StepExecutorContext,
   StepExecutorResult,
   RunbookActionType,
-} from '../types';
+} from '../types.js';
 
 /**
  * Custom execution function type
@@ -59,7 +59,7 @@ export class CustomStepExecutor extends BaseStepExecutor {
 
       // Execute the custom function
       return await customFn(ctx);
-    } catch (error) {
+    } catch (error: any) {
       return this.failure(
         error instanceof Error ? error.message : 'Custom execution failed'
       );
@@ -103,7 +103,7 @@ export class NotifyStepExecutor extends BaseStepExecutor {
           },
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       return this.failure(
         error instanceof Error ? error.message : 'Notification failed'
       );
@@ -139,10 +139,10 @@ export class ValidateStepExecutor extends BaseStepExecutor {
         validationResults.push(result);
       }
 
-      const allPassed = validationResults.every((r) => r.passed);
+      const allPassed = validationResults.every((r: any) => r.passed);
 
       if (!allPassed) {
-        const failures = validationResults.filter((r) => !r.passed);
+        const failures = validationResults.filter((r: any) => !r.passed);
         return this.failure(
           `Validation failed: ${failures.map((f) => f.message).join('; ')}`
         );
@@ -157,11 +157,11 @@ export class ValidateStepExecutor extends BaseStepExecutor {
         {
           kpis: {
             rulesChecked: validationResults.length,
-            rulesPassed: validationResults.filter((r) => r.passed).length,
+            rulesPassed: validationResults.filter((r: any) => r.passed).length,
           },
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       return this.failure(
         error instanceof Error ? error.message : 'Validation failed'
       );
@@ -266,7 +266,7 @@ export class TransformStepExecutor extends BaseStepExecutor {
           },
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       return this.failure(
         error instanceof Error ? error.message : 'Transform failed'
       );
@@ -397,7 +397,7 @@ export class EnrichIntelStepExecutor extends BaseStepExecutor {
           },
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       return this.failure(
         error instanceof Error ? error.message : 'Enrichment failed'
       );

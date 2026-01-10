@@ -31,7 +31,7 @@ class SDK:
         token = self._client.headers.get("Authorization")
         if token:
             token = "Bearer ***"
-        return f"SDK(base_url='{str(self._client.base_url)}', token='{token}', allow_writes={self._allow_writes})"
+        return f"SDK(base_url='{self._client.base_url!s}', token='{token}', allow_writes={self._allow_writes})"
 
     # Natural language query -------------------------------------------------
     def nlq(self, query: str) -> NLQuery:

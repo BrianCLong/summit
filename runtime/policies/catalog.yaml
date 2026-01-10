@@ -1,0 +1,181 @@
+# Runtime Policy Catalog
+# Centralized definitions for production-grade runtime enforcement.
+
+version: 1
+updated: 2025-12-30
+owner: runtime-governance
+
+domains:
+  - id: authn-authz
+    name: Authentication & Authorization
+    intent: Ensure every request has verified identity and scoped permissions.
+    policies:
+      - id: authn-required
+        description: All runtime entry points must validate identity tokens and session freshness.
+        severity: critical
+        enforcement: fail-closed
+        checks:
+          - jwt-signature-valid
+          - session-not-revoked
+        evidence: telemetry
+        response-profile: critical-auth
+      - id: authz-scope
+        description: Authorization decisions must be evaluated against policy engine with least-privilege scopes.
+        severity: critical
+        enforcement: fail-closed
+        checks:
+          - opa-allow
+          - tenant-scope-validated
+        evidence: telemetry
+        response-profile: critical-auth
+
+  - id: tenant-isolation
+    name: Tenant Isolation
+    intent: Prevent cross-tenant data access and side-channel leakage.
+    policies:
+      - id: tenant-context-propagation
+        description: Tenant context must be bound to every call chain, including background jobs.
+        severity: critical
+        enforcement: fail-closed
+        checks:
+          - tenant-header-present
+          - tenant-context-signed
+        evidence: telemetry
+        response-profile: isolation
+      - id: data-partitioning
+        description: Data access layers must enforce tenant-partition filters and encryption keys.
+        severity: high
+        enforcement: fail-closed
+        checks:
+          - partition-filter-applied
+          - kms-key-matches-tenant
+        evidence: telemetry
+        response-profile: isolation
+
+  - id: demo-mode
+    name: Demo Mode Constraints
+    intent: Restrict capabilities and data exposure in demo environments.
+    policies:
+      - id: demo-readonly
+        description: Mutating operations disabled or degraded in demo mode.
+        severity: medium
+        enforcement: degrade
+        checks:
+          - environment-is-demo
+          - mutation-blocked
+        evidence: telemetry
+        response-profile: demo
+      - id: demo-data-redaction
+        description: Sensitive fields redacted and synthetic data enforced for demo tenants.
+        severity: high
+        enforcement: fail-closed
+        checks:
+          - pii-scan-pass
+          - synthetic-dataset
+        evidence: telemetry
+        response-profile: demo
+
+  - id: rate-limiting
+    name: Rate Limiting
+    intent: Protect services against abuse and noisy-neighbor effects.
+    policies:
+      - id: request-rate-cap
+        description: Per-identity and per-tenant request ceilings with burst budgets.
+        severity: high
+        enforcement: throttle
+        checks:
+          - token-bucket-allow
+        evidence: telemetry
+        response-profile: throttling
+      - id: concurrency-cap
+        description: Concurrency guardrails for expensive operations.
+        severity: medium
+        enforcement: degrade
+        checks:
+          - circuit-capacity-available
+        evidence: telemetry
+        response-profile: throttling
+
+  - id: data-classification
+    name: Data Classification Handling
+    intent: Ensure data is handled according to classification levels.
+    policies:
+      - id: classified-access
+        description: Classified data paths require hardened auth, mfa, and context binding.
+        severity: critical
+        enforcement: fail-closed
+        checks:
+          - classification-tag-present
+          - hardened-auth-level
+        evidence: telemetry
+        response-profile: critical-auth
+      - id: outbound-filtering
+        description: Prevent egress of restricted data to non-compliant sinks.
+        severity: high
+        enforcement: deny
+        checks:
+          - egress-sink-allowed
+          - dlp-scan-pass
+        evidence: telemetry
+        response-profile: isolation
+
+  - id: provenance
+    name: Provenance Emission
+    intent: Emit immutable provenance for all critical operations.
+    policies:
+      - id: provenance-required
+        description: Every critical decision must emit provenance events with correlation IDs.
+        severity: high
+        enforcement: fail-closed
+        checks:
+          - provenance-event-written
+          - correlation-id-present
+        evidence: telemetry
+        response-profile: provenance
+
+  - id: feature-flags
+    name: Feature Flag Enforcement
+    intent: Enforce feature availability by environment and tenant with kill-switch support.
+    policies:
+      - id: flag-gate
+        description: Guard experimental or risky features behind centrally managed flags.
+        severity: medium
+        enforcement: deny
+        checks:
+          - flag-enabled
+          - rollout-percentage
+        evidence: telemetry
+        response-profile: feature-gates
+
+  - id: dangerous-ops
+    name: Dangerous Operation Gating
+    intent: Gate operations that can impact safety, availability, or compliance.
+    policies:
+      - id: destructive-action-guard
+        description: Destructive or bulk actions require step-up verification and dual control.
+        severity: critical
+        enforcement: fail-closed
+        checks:
+          - dual-approval-recorded
+          - breakglass-token-valid
+        evidence: telemetry
+        response-profile: critical-auth
+      - id: admin-surface-minimization
+        description: Administrative surfaces require least privilege sessions with short TTLs.
+        severity: high
+        enforcement: fail-closed
+        checks:
+          - admin-session-active
+          - session-ttl-valid
+        evidence: telemetry
+        response-profile: critical-auth
+
+metadata:
+  signaling:
+    emit: runtime-telemetry
+    schema: ../telemetry/schema.json
+  drift_detection:
+    enable: true
+    cadence: 5m
+  feedback:
+    export_script: ../../scripts/runtime/export-signals.ts

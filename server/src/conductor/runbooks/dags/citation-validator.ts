@@ -5,7 +5,7 @@
  * Ensures all evidence is properly cited with sources, timestamps, and integrity hashes.
  */
 
-import { Citation, Evidence, createCitationHash } from './types';
+import { Citation, Evidence, createCitationHash } from './types.js';
 
 /**
  * Citation validation result
@@ -223,7 +223,7 @@ export class CitationValidator {
       // Validate URL format
       try {
         new URL(citation.url);
-      } catch (e) {
+      } catch (e: any) {
         errors.push(`Invalid URL format: ${citation.url}`);
       }
     }

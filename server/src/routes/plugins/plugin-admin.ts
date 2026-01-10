@@ -16,11 +16,14 @@ import { PluginManager } from '../../plugins/PluginManager.js';
 import { PluginRegistry } from '../../plugins/PluginRegistry.js';
 import { Principal } from '../../types/identity.js';
 import logger from '../../utils/logger.js';
+import { requireTenantContextMiddleware } from '../../middleware/require-tenant-context.js';
 
 const router = express.Router();
 const authz = new AuthorizationServiceImpl();
 const pluginManager = new PluginManager();
 const pluginRegistry = new PluginRegistry();
+
+router.use(ensureAuthenticated, requireTenantContextMiddleware());
 
 // ============================================================================
 // Middleware
@@ -31,15 +34,25 @@ const pluginRegistry = new PluginRegistry();
  */
 const buildPrincipal = (req: Request, res: Response, next: NextFunction): void => {
   const user = (req as any).user;
+  const tenantContext = (req as any).tenantContext;
   if (!user) {
     res.status(401).json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' });
+    return;
+  }
+
+  if (!tenantContext?.tenantId) {
+    res.status(400).json({
+      error: 'TENANT_CONTEXT_REQUIRED',
+      code: 'TENANT_CONTEXT_REQUIRED',
+      message: 'Tenant context is required for plugin administration',
+    });
     return;
   }
 
   const principal: Principal = {
     kind: 'user',
     id: user.id,
-    tenantId: req.headers['x-tenant-id'] as string || user.tenantId || 'default-tenant',
+    tenantId: tenantContext.tenantId,
     roles: [user.role],
     scopes: [],
     user: {
@@ -106,7 +119,6 @@ const requirePluginRead = async (req: Request, res: Response, next: NextFunction
  */
 router.get(
   '/',
-  ensureAuthenticated,
   buildPrincipal,
   requirePluginRead,
   async (req: Request, res: Response): Promise<void> => {
@@ -139,7 +151,6 @@ router.get(
  */
 router.get(
   '/:id',
-  ensureAuthenticated,
   buildPrincipal,
   requirePluginRead,
   async (req: Request, res: Response): Promise<void> => {
@@ -168,7 +179,6 @@ router.get(
  */
 router.post(
   '/:id/enable',
-  ensureAuthenticated,
   buildPrincipal,
   requirePluginAdmin,
   async (req: Request, res: Response): Promise<void> => {
@@ -198,7 +208,6 @@ router.post(
  */
 router.post(
   '/:id/disable',
-  ensureAuthenticated,
   buildPrincipal,
   requirePluginAdmin,
   async (req: Request, res: Response): Promise<void> => {
@@ -222,7 +231,6 @@ router.post(
  */
 router.post(
   '/:id/execute',
-  ensureAuthenticated,
   buildPrincipal,
   requirePluginRead,
   async (req: Request, res: Response): Promise<void> => {
@@ -258,7 +266,6 @@ router.post(
  */
 router.get(
   '/:id/config',
-  ensureAuthenticated,
   buildPrincipal,
   requirePluginRead,
   async (req: Request, res: Response): Promise<void> => {
@@ -282,7 +289,6 @@ router.get(
  */
 router.put(
   '/:id/config',
-  ensureAuthenticated,
   buildPrincipal,
   requirePluginAdmin,
   async (req: Request, res: Response): Promise<void> => {
@@ -313,7 +319,6 @@ router.put(
  */
 router.get(
   '/:id/health',
-  ensureAuthenticated,
   buildPrincipal,
   requirePluginRead,
   async (req: Request, res: Response): Promise<void> => {
@@ -337,7 +342,6 @@ router.get(
  */
 router.delete(
   '/:id',
-  ensureAuthenticated,
   buildPrincipal,
   requirePluginAdmin,
   async (req: Request, res: Response): Promise<void> => {

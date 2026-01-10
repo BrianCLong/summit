@@ -101,7 +101,7 @@ async function batchLoadVerdicts(
       const keys = ids.map((id) => `verdict:${tenantId}:${id}`);
       const cachedValues = await redis.mget(keys);
 
-      cachedValues.forEach((val, index) => {
+      cachedValues.forEach((val: any, index: number) => {
         if (val) {
           try {
             const verdict = JSON.parse(val);
@@ -117,7 +117,7 @@ async function batchLoadVerdicts(
           missingIds.push(ids[index]);
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error }, 'Redis cache error in policyVerdictLoader');
       missingIds.push(...ids.filter(id => !verdictMap.has(id)));
     }
@@ -206,7 +206,7 @@ async function batchLoadVerdicts(
         },
         'Policy verdict batch load completed'
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, ids: missingIds }, 'Error in policy verdict batch loader');
     } finally {
       if (shouldRelease) {
@@ -242,7 +242,7 @@ async function batchLoadVerdictsByKey(
       const cacheKeys = keys.map((k) => `verdict-key:${tenantId}:${keyToString(k)}`);
       const cachedValues = await redis.mget(cacheKeys);
 
-      cachedValues.forEach((val, index) => {
+      cachedValues.forEach((val: any, index: number) => {
         if (val) {
           try {
             const verdict = JSON.parse(val);
@@ -258,7 +258,7 @@ async function batchLoadVerdictsByKey(
           missingKeys.push(keys[index]);
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error }, 'Redis cache error in policyVerdictLoader key lookup');
       missingKeys.push(...keys.filter(k => !verdictMap.has(keyToString(k))));
     }
@@ -358,7 +358,7 @@ async function batchLoadVerdictsByKey(
         }
         await pipeline.exec();
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Error loading verdicts by key');
     } finally {
       if (shouldRelease) {
@@ -439,7 +439,7 @@ async function batchLoadVerdictsBySubject(
     }
 
     return subjectIds.map((subjectId) => verdictsBySubject.get(subjectId) || []);
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error, subjectIds }, 'Error loading verdicts by subject');
     return subjectIds.map(() => new Error('Failed to load verdicts'));
   } finally {
@@ -519,7 +519,7 @@ async function batchLoadDeniedVerdicts(
     }
 
     return policyIds.map((policyId) => verdictsByPolicy.get(policyId) || []);
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error, policyIds }, 'Error loading denied verdicts');
     return policyIds.map(() => new Error('Failed to load denied verdicts'));
   } finally {
@@ -541,7 +541,7 @@ export function createPolicyVerdictLoader(
 ) {
   return new DataLoader(
     // @ts-ignore
-    (ids) => batchLoadVerdicts(ids, context),
+    (ids: readonly string[]) => batchLoadVerdicts(ids, context),
     {
       cache: true,
       maxBatchSize: 100,
@@ -555,9 +555,9 @@ export function createPolicyVerdictLoader(
  */
 export function createVerdictByKeyLoader(
   context: DataLoaderContext
-) {
-  return new DataLoader(
-    (keys) => batchLoadVerdictsByKey(keys, context),
+): DataLoader<VerdictLookupKey, PolicyVerdictWithGovernance | null, string> {
+  return new DataLoader<VerdictLookupKey, PolicyVerdictWithGovernance | null, string>(
+    (keys: readonly VerdictLookupKey[]) => batchLoadVerdictsByKey(keys, context),
     {
       cache: true,
       maxBatchSize: 50,
@@ -572,9 +572,9 @@ export function createVerdictByKeyLoader(
  */
 export function createVerdictsBySubjectLoader(
   context: DataLoaderContext
-) {
-  return new DataLoader(
-    (subjectIds) => batchLoadVerdictsBySubject(subjectIds, context),
+): DataLoader<string, PolicyVerdictWithGovernance[]> {
+  return new DataLoader<string, PolicyVerdictWithGovernance[]>(
+    (subjectIds: readonly string[]) => batchLoadVerdictsBySubject(subjectIds, context),
     {
       cache: true,
       maxBatchSize: 30,
@@ -588,9 +588,9 @@ export function createVerdictsBySubjectLoader(
  */
 export function createDeniedVerdictsLoader(
   context: DataLoaderContext
-) {
-  return new DataLoader(
-    (policyIds) => batchLoadDeniedVerdicts(policyIds, context),
+): DataLoader<string, PolicyVerdictWithGovernance[]> {
+  return new DataLoader<string, PolicyVerdictWithGovernance[]>(
+    (policyIds: readonly string[]) => batchLoadDeniedVerdicts(policyIds, context),
     {
       cache: true,
       maxBatchSize: 20,

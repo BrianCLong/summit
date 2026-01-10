@@ -6,8 +6,8 @@ import {
   ConductResult,
   RouteDecision,
   ExpertType,
-} from './types';
-import { moERouter } from './router';
+} from './types/index.js';
+import { moERouter } from './router/index.js';
 import {
   mcpClient,
   mcpRegistry,
@@ -79,7 +79,7 @@ export class Conductor {
     this.missionControlResolver = new MissionControlConflictResolver();
     try {
       registerBuiltins();
-    } catch {}
+    } catch { }
   }
 
   /**
@@ -151,25 +151,25 @@ export class Conductor {
       // Governance Policy Check (Priority 1)
       const policyEngine = PolicyEngine.getInstance();
       const policyContext = {
-          environment: process.env.NODE_ENV || 'dev',
-          user: {
-              id: input.userContext?.userId || 'system',
-              role: input.userContext?.role || 'user',
-              permissions: input.userContext?.scopes || [],
-              tenantId: tenantId
-          },
-          action: 'conduct_task',
-          resource: {
-              type: 'task',
-              id: auditId,
-              task: input.task,
-              expert: decision.expert
-          }
+        environment: process.env.NODE_ENV || 'dev',
+        user: {
+          id: input.userContext?.userId || 'system',
+          role: input.userContext?.role || 'user',
+          permissions: input.userContext?.scopes || [],
+          tenantId: tenantId
+        },
+        action: 'conduct_task',
+        resource: {
+          type: 'task',
+          id: auditId,
+          task: input.task,
+          expert: decision.expert
+        }
       };
 
       const policyDecision = await policyEngine.evaluate(policyContext);
       if (!policyDecision.allow) {
-          throw new Error(`Governance policy blocked task: ${policyDecision.reason}`);
+        throw new Error(`Governance policy blocked task: ${policyDecision.reason}`);
       }
 
       const tenantForCache =
@@ -209,7 +209,7 @@ export class Conductor {
               });
             }
             return conductResult;
-          } catch {}
+          } catch { }
         }
       }
 
@@ -295,13 +295,13 @@ export class Conductor {
             tenantForCache,
           );
           conductResult.logs.push(`cache:set key=${cacheKey}`);
-        } catch {}
+        } catch { }
       }
 
       // Usage accrual (runs count now, resource metrics TBD)
       try {
         await accrueUsage(tenantId, { runInc: true });
-      } catch {}
+      } catch { }
 
       // Record actual spending for the task
       if (result.cost) {
@@ -328,7 +328,7 @@ export class Conductor {
       }
 
       return conductResult;
-    } catch (error) {
+    } catch (error: any) {
       const endTime = performance.now();
 
       const redacted = (s: string) =>
@@ -560,7 +560,7 @@ export class Conductor {
           cost: 0.002,
         };
       }
-    } catch (error) {
+    } catch (error: any) {
       logs.push(`Graph operation failed: ${error.message}`);
       throw error;
     }
@@ -632,7 +632,7 @@ export class Conductor {
           cost: 0.0002,
         };
       }
-    } catch (error) {
+    } catch (error: any) {
       logs.push(`File operation failed: ${error.message}`);
       throw error;
     }

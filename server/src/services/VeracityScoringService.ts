@@ -95,7 +95,7 @@ export class VeracityScoringService {
       logger.info(`Updated veracity for ${entityId}: ${score} (${confidence})`);
       return veracity;
 
-    } catch (err) {
+    } catch (err: any) {
       logger.error(`Failed to score entity ${entityId}`, err);
       throw err;
     } finally {

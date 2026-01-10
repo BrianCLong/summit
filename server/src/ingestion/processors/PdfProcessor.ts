@@ -1,5 +1,5 @@
-import { BaseProcessor } from './BaseProcessor';
-import { Document } from '../../data-model/types';
+import { BaseProcessor } from './BaseProcessor.js';
+import { Document } from '../../data-model/types.js';
 
 export class PdfProcessor extends BaseProcessor {
   supportedExtensions = ['.pdf'];

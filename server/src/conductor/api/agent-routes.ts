@@ -1,7 +1,7 @@
 // @ts-nocheck
 // Agent Timeline and HITL API Routes
 import express from 'express';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 
 const router = express.Router();
 
@@ -177,7 +177,7 @@ router.get('/runs/:runId/agents/timeline', async (req, res) => {
       },
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     (prometheusConductorMetrics as any)?.agentTimelineRequests?.inc({ status: 'error' });
 
     console.error('Agent timeline fetch error:', error);
@@ -254,7 +254,7 @@ router.post('/runs/:runId/hitl/:checkpointId/approve', async (req, res) => {
       updatedStep: steps[stepIndex],
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     (prometheusConductorMetrics as any)?.hitlActionRequests?.inc({
       status: 'error',
       action: 'approve',
@@ -322,7 +322,7 @@ router.post('/runs/:runId/hitl/:checkpointId/block', async (req, res) => {
       updatedStep: steps[stepIndex],
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     (prometheusConductorMetrics as any)?.hitlActionRequests?.inc({
       status: 'error',
       action: 'block',
@@ -411,7 +411,7 @@ router.post('/runs/:runId/hitl/:checkpointId/edit', async (req, res) => {
       updatedStep: steps[stepIndex],
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     (prometheusConductorMetrics as any)?.hitlActionRequests?.inc({
       status: 'error',
       action: 'edit',
@@ -449,7 +449,7 @@ router.get('/runs/:runId/hitl/pending', async (req, res) => {
       count: pendingSteps.length,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Pending HITL fetch error:', error);
     res.status(500).json({
       error: 'Failed to fetch pending checkpoints',
@@ -494,7 +494,7 @@ router.post('/runs/:runId/agents/simulate', async (req, res) => {
       runId,
       simulation: simulationResult,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Agent simulation error:', error);
     res.status(500).json({
       error: 'Failed to simulate agent step',

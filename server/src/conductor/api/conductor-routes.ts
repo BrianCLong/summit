@@ -7,10 +7,10 @@ import { PremiumModelRouter } from '../premium-routing/premium-model-router.js';
 import { ComplianceGate } from '../web-orchestration/compliance-gate.js';
 import { RedisRateLimiter } from '../web-orchestration/redis-rate-limiter.js';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';
-import { policyRoutes } from './policy-routes';
-import { evidenceRoutes } from './evidence-routes';
-import { agentRoutes } from './agent-routes';
-import { servingRoutes } from './serving-routes';
+import { policyRoutes } from './policy-routes.js';
+import { evidenceRoutes } from './evidence-routes.js';
+import { agentRoutes } from './agent-routes.js';
+import { servingRoutes } from './serving-routes.js';
 import {
   authenticateUser,
   requirePermission,
@@ -112,7 +112,7 @@ router.post(
           apiVersion: '2.0.0-phase2a',
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Conductor orchestration API error', {
         error: error.message,
         query: req.body.query?.substring(0, 100),
@@ -198,7 +198,7 @@ router.get(
       // TODO: wire real metrics aggregations here
       const rateLimitStats = await rateLimiter.getRateLimitStats();
       return res.json({ demo: false, rateLimit: rateLimitStats });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Metrics API error', { error: error.message });
 
       res.status(500).json({
@@ -228,7 +228,7 @@ router.get(
         data: signals,
         meta: { totalModels: signals.length, timestamp: new Date().toISOString() },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Pricing signals API error', { error: error.message });
       res.status(500).json({ success: false, error: 'Failed to fetch pricing signals' });
     }
@@ -246,7 +246,7 @@ router.post(
         message: 'Pricing refresh triggered',
         metadata: { requestedAt: new Date().toISOString() },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Pricing refresh API error', { error: error.message });
       res.status(500).json({ success: false, error: 'Failed to refresh pricing' });
     }
@@ -271,7 +271,7 @@ router.get(
         data: capacities,
         meta: { totalRegions: capacities.length },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Capacity list API error', { error: error.message });
       res.status(500).json({ success: false, error: 'Failed to list capacity' });
     }
@@ -292,7 +292,7 @@ router.post(
           reservedAt: new Date().toISOString(),
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Capacity reserve API error', { error: error.message });
       res.status(500).json({ success: false, error: 'Failed to reserve capacity' });
     }
@@ -313,7 +313,7 @@ router.post(
           releasedAt: new Date().toISOString(),
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Capacity release API error', { error: error.message });
       res.status(500).json({ success: false, error: 'Failed to release capacity' });
     }
@@ -338,7 +338,7 @@ router.get(
         data: flags,
         meta: { totalFlags: flags.length },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Flags API error', { error: error.message });
       res.status(500).json({ success: false, error: 'Failed to fetch flags' });
     }
@@ -374,7 +374,7 @@ router.get('/health', async (req: Request, res: Response) => {
       components: healthChecks,
       uptime: process.uptime(),
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(503).json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
@@ -434,7 +434,7 @@ router.get(
           active_models: models.filter((m) => m.status === 'active').length,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({
         success: false,
         error: error.message,
@@ -536,7 +536,7 @@ router.get(
             sources.reduce((sum, s) => sum + s.quality, 0) / sources.length,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({
         success: false,
         error: error.message,
@@ -594,7 +594,7 @@ router.get('/auth/jwks', async (req: Request, res: Response) => {
   try {
     const jwks = await jwtRotationManager.getJWKS();
     res.json(jwks);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('❌ Failed to get JWKS', { error: error.message });
     res.status(500).json({ error: 'Failed to get JWKS' });
   }
@@ -607,7 +607,7 @@ router.get(
     try {
       const status = jwtRotationManager.getRotationStatus();
       res.json(status);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to get rotation status', {
         error: error.message,
       });
@@ -624,7 +624,7 @@ router.post(
       await jwtRotationManager.rotateKeys();
       const status = jwtRotationManager.getRotationStatus();
       res.json({ message: 'Keys rotated successfully', status });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to rotate keys', { error: error.message });
       res.status(500).json({ error: 'Failed to rotate keys' });
     }

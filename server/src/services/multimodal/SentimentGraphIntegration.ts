@@ -60,7 +60,7 @@ export class SentimentGraphIntegration {
 
       logger.info(`Stored sentiment analysis for entity ${entityId}`);
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to store sentiment analysis', error);
       throw error;
     } finally {
@@ -85,7 +85,7 @@ export class SentimentGraphIntegration {
       `;
 
       const result = await session.run(cypher, { emotion, tenantId, minConfidence });
-      return result.records.map(r => ({
+      return result.records.map((r: any) => ({
         entity: r.get('e').properties,
         sentiment: r.get('s').properties
       }));

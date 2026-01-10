@@ -8,8 +8,8 @@ import {
   Runbook,
   RunbookStep,
   ApprovalWorkflow,
-} from './registry';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+} from './registry.js';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import crypto from 'crypto';
 
 export const runbookRouter = express.Router();
@@ -107,7 +107,7 @@ runbookRouter.post('/create', async (req, res) => {
     );
 
     res.status(201).json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Runbook creation error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(
@@ -160,7 +160,7 @@ runbookRouter.get('/:runbookId', async (req, res) => {
       success: true,
       runbook,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Runbook retrieval error:', error);
 
     res.status(500).json({
@@ -187,7 +187,7 @@ runbookRouter.get('/', async (req, res) => {
       runbooks,
       total: runbooks.length,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Runbook listing error:', error);
 
     res.status(500).json({
@@ -239,7 +239,7 @@ runbookRouter.post('/:runbookId/execute', async (req, res) => {
     );
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Runbook execution error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(
@@ -285,7 +285,7 @@ runbookRouter.get('/executions/:executionId', async (req, res) => {
       success: true,
       execution,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Execution retrieval error:', error);
 
     res.status(500).json({
@@ -339,7 +339,7 @@ runbookRouter.post('/approvals/:approvalId/process', async (req, res) => {
     }
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Approval processing error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(
@@ -440,7 +440,7 @@ runbookRouter.put('/:runbookId', async (req, res) => {
     prometheusConductorMetrics.recordOperationalEvent('runbook_updated', { success: true });
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Runbook update error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(
@@ -490,7 +490,7 @@ runbookRouter.post('/:runbookId/validate', async (req, res) => {
       },
       message: 'Runbook signature is valid',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Runbook validation error:', error);
 
     res.status(500).json({
@@ -533,7 +533,7 @@ runbookRouter.get('/stats/overview', async (req, res) => {
       success: true,
       stats,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Stats retrieval error:', error);
 
     res.status(500).json({

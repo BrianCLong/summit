@@ -142,7 +142,7 @@ export class NarrativeSimulationEngine {
         if (event) {
           this.queueEvent(event);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(
           `Agent ${agent.id} failed to decide action:`,
           error instanceof Error ? error.message : error,

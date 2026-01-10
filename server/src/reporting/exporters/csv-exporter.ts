@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { parse } from 'json2csv';
-import { ExportOptions, ReportExporter, normalizeTabularData } from './base';
-import { ReportArtifact } from '../types';
+import { ExportOptions, ReportExporter, normalizeTabularData } from './base.js';
+import { ReportArtifact } from '../types.js';
 
 export class CsvExporter implements ReportExporter {
   readonly format = 'csv' as const;

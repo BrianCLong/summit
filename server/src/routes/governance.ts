@@ -32,8 +32,19 @@ router.get('/vocabularies', ensureAuthenticated, (req: AuthenticatedRequest, res
 });
 
 router.post('/vocabularies', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
-    // TODO: Add permission check (schema.admin)
     try {
+        // Permission check: Only schema.admin can create vocabularies
+        const userRoles = req.user?.role?.split(',') || [];
+        const hasSchemaAdminPermission = userRoles.includes('schema.admin') ||
+                                          userRoles.includes('admin') ||
+                                          req.user?.permissions?.includes('schema.admin');
+
+        if (!hasSchemaAdminPermission) {
+            return res.status(403).json({
+                error: 'Forbidden: schema.admin permission required to create vocabularies'
+            });
+        }
+
         const { name, description, concepts } = req.body;
         const vocab = registry.createVocabulary(name, description, concepts);
         res.status(201).json(vocab);

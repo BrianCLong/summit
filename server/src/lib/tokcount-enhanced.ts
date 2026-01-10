@@ -6,6 +6,10 @@
 
 import LRU from 'lru-cache';
 import logger from '../utils/logger.js';
+import { BudgetTracker } from './resources/budget-tracker.js';
+import { CostDomain } from './resources/types.js';
+
+const budgetTracker = BudgetTracker.getInstance();
 
 export type Provider = 'openai' | 'anthropic' | 'gemini';
 export type Part = 'prompt' | 'completion';
@@ -20,6 +24,7 @@ export interface EstimateInput {
   };
   provider?: Provider;
   model?: string;
+  tenantId?: string; // Added for cost tracking
 }
 
 export interface EstimateOutput {
@@ -159,7 +164,7 @@ async function tokenizePrecise(
           const text = serializePayload(payload);
           const tokens = encode(text, model).length;
           return { prompt: tokens, method: 'precise' };
-        } catch (error) {
+        } catch (error: any) {
           logger.warn('GPT tokenizer failed, falling back to heuristic', {
             error: error instanceof Error ? error.message : String(error),
           });
@@ -179,7 +184,7 @@ async function tokenizePrecise(
       default:
         return tokenizeHeuristic(payload, provider);
     }
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Precise tokenization failed', {
       provider,
       model,
@@ -363,6 +368,17 @@ export async function estimateTokensAndCost(
     (billedCompletionTokens / 1000) * pricing.per1k.completion;
   const totalUSD = +(promptUSD + completionUSD).toFixed(6);
 
+  if (input.tenantId) {
+    // Report measurement hook for LLM generation
+    budgetTracker.trackCost(input.tenantId, CostDomain.LLM_GENERATION, totalUSD, {
+        provider,
+        model,
+        promptTokens: billedPromptTokens,
+        completionTokens: billedCompletionTokens,
+        estimated: true // Mark as estimated since this is pre-call
+    });
+  }
+
   return {
     provider,
     model,
@@ -445,7 +461,7 @@ export async function reconcileActualUsage(
       reconciliationConfidence: confidence,
       estimationMethod: 'reconciled',
     };
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Token usage reconciliation failed', {
       error: error instanceof Error ? error.message : String(error),
       estimated,

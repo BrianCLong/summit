@@ -17,10 +17,15 @@ export class MeteringPipeline {
   private processedKeys = new Set<string>();
   private deadLetters: DeadLetter[] = [];
   private rollups = new Map<string, TenantUsageDailyRow>();
+  private cleanupTimer?: NodeJS.Timeout;
 
   constructor() {
     // Periodically clean up cache to avoid memory leak
-    setInterval(() => this.cleanupCache(), 1000 * 60 * 60); // Every hour
+    this.cleanupTimer = setInterval(
+      () => this.cleanupCache(),
+      1000 * 60 * 60,
+    ); // Every hour
+    this.cleanupTimer.unref?.();
   }
 
   private cleanupCache() {
@@ -33,7 +38,7 @@ export class MeteringPipeline {
   async enqueue(event: MeterEvent): Promise<void> {
     try {
       await this.handleEvent(event);
-    } catch (error) {
+    } catch (error: any) {
       this.deadLetters.push({
         event,
         reason: (error as Error).message,
@@ -56,7 +61,7 @@ export class MeteringPipeline {
       try {
         await this.handleEvent(event);
         replayed++;
-      } catch (error) {
+      } catch (error: any) {
         stillDead.push({
           event,
           reason: (error as Error).message,
@@ -105,14 +110,14 @@ export class MeteringPipeline {
             this.processedKeys.add(idempotencyKey);
             return;
         }
-    } catch (err) {
+    } catch (err: any) {
         logger.error({ err }, 'Failed to persist meter event');
     }
 
     // Write to Integrity Log (File Store)
     try {
         await meterStore.append(event);
-    } catch (err) {
+    } catch (err: any) {
         logger.error({ err }, 'Failed to append to meter store');
         // We might want to throw here to DLQ, but for now we log.
         throw err;

@@ -1,0 +1,87 @@
+name: GA Gate
+
+on:
+  pull_request:
+    branches: [main]
+    # SAFETY: Conservative paths-ignore to prevent skipping required checks
+    # This workflow MUST run on any code/config/dependency changes
+    # Only skip for pure documentation changes
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/PULL_REQUEST_TEMPLATE/**"
+      - "LICENSE"
+      - ".gitignore"
+      # NOTE: We do NOT ignore:
+      # - .github/workflows/** (workflow changes must trigger this)
+      # - package.json, pnpm-lock.yaml, .pnpmfile.cjs (dependency changes must trigger this)
+      # - scripts/**, tools/** (build/test script changes must trigger this)
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ga-gate:
+    name: GA Readiness Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        # version is read from package.json packageManager field
+
+      - name: Install Dependencies
+        run: |
+          make bootstrap
+
+      - name: Run GA Gate
+        # CANONICAL ENTRYPOINT: Uses make ga -> scripts/ga-gate.sh
+        # This is the official GA verification entrypoint (equivalent to pnpm ga:verify)
+        run: |
+          make ga
+
+      - name: Generate GA Snapshot
+        if: always()
+        run: |
+          mkdir -p artifacts/ga
+          ./scripts/ga/ga-snapshot \
+            --out artifacts/ga/ga_snapshot.json \
+            --allow-missing \
+            --include-ci \
+            --include-release
+
+      - name: Upload GA Report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ga-report
+          path: artifacts/ga/
+
+      - name: Job Summary
+        if: always()
+        run: |
+          if [ -f artifacts/ga/ga_report.md ]; then
+            cat artifacts/ga/ga_report.md >> $GITHUB_STEP_SUMMARY
+          fi

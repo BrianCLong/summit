@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 export interface StandardSchema<T> {
   version: string;
   schema: T;
@@ -108,31 +111,38 @@ export function buildEvalReportSchema(): StandardSchema<JsonSchema> {
 }
 
 export function buildPolicyBundle() {
-  const rego = `package summit.abac
-
-default allow = false
-
-allow {
-  input.action == "dataset:read"
-  input.subject.tenantId == input.resource.tenantId
-  input.subject.clearance == input.resource.classification
-}
-
-allow {
-  input.action == "break-glass:request"
-}`;
+  const candidateDir = path.resolve(__dirname, '..', 'policy', 'abac', 'v1');
+  const bundleDir = fs.existsSync(candidateDir)
+    ? candidateDir
+    : path.resolve(process.cwd(), 'services', 'authz-gateway', 'policy', 'abac', 'v1');
+  const manifestPath = path.join(bundleDir, 'manifest.json');
+  const dataPath = path.join(bundleDir, 'data.json');
+  const policyPath = path.join(bundleDir, 'policy.rego');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')) as {
+    policy_version: string;
+    revision: string;
+    roots: string[];
+    description?: string;
+  };
+  const rego = fs.readFileSync(policyPath, 'utf8');
+  const data = fs.readFileSync(dataPath, 'utf8');
+  const version = process.env.POLICY_BUNDLE_VERSION || manifest.policy_version;
 
   return {
-    version: process.env.POLICY_BUNDLE_VERSION || 'v1',
-    manifest: {
-      revision: new Date().toISOString(),
-      roots: ['policies', 'data'],
-    },
+    version,
+    manifest: { ...manifest, exported_at: new Date().toISOString() },
     policies: [
       {
         path: 'policies/abac.rego',
         mediaType: 'text/plain',
         contents: Buffer.from(rego).toString('base64'),
+      },
+    ],
+    data: [
+      {
+        path: 'data.json',
+        mediaType: 'application/json',
+        contents: Buffer.from(data).toString('base64'),
       },
     ],
     metadata: {

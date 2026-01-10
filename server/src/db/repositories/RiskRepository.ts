@@ -1,5 +1,5 @@
-import { pg } from '../../db/pg';
-import { RiskScore, RiskSignal, RiskScoreInput } from '../../risk/types';
+import { pg } from '../../db/pg.js';
+import { RiskScore, RiskSignal, RiskScoreInput } from '../../risk/types.js';
 
 /**
  * Repository for managing Risk Scores and Signals in PostgreSQL.
@@ -11,7 +11,7 @@ export class RiskRepository {
    * This is transactional.
    */
   async saveRiskScore(input: RiskScoreInput): Promise<RiskScore> {
-    return await pg.transaction(async (tx) => {
+    return await pg.transaction(async (tx: any) => {
       // 1. Insert Risk Score
       const scoreRows = await tx.query(
         `INSERT INTO risk_scores (

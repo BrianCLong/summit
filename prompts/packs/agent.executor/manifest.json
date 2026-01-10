@@ -1,0 +1,17 @@
+{
+  "id": "agent.executor",
+  "version": "1.0.0",
+  "description": "Imported from legacy structure: agent.executor",
+  "model_config": {
+    "model": "gpt-4",
+    "temperature": 0.0
+  },
+  "vars": {},
+  "guardrails": {
+    "tags": [
+      "agent",
+      "system-prompt"
+    ]
+  },
+  "template_path": "system.md"
+}

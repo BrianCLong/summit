@@ -1152,7 +1152,7 @@ export class AdminPanelService {
   // HELPERS
   // ==========================================================================
 
-  private mapDatabaseUserToUser(row: any): User {
+  private mapDatabaseUserToUser(row): User {
     return {
       id: row.id,
       email: row.email,

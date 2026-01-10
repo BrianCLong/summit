@@ -10,9 +10,10 @@ This script:
 
 import json
 import sys
-from pathlib import Path
-from typing import List, Dict, Any
 from datetime import datetime
+from pathlib import Path
+from typing import Any
+
 import requests
 
 # Add parent directories to path
@@ -39,17 +40,17 @@ class DemoConversationLoader:
         except:
             return False
 
-    def load_conversations(self) -> List[Dict[str, Any]]:
+    def load_conversations(self) -> list[dict[str, Any]]:
         """Load demo conversations from JSONL file."""
         conversations = []
-        with open(self.data_path / "demo-conversations.jsonl", "r") as f:
+        with open(self.data_path / "demo-conversations.jsonl") as f:
             for line in f:
                 if line.strip():
                     conversations.append(json.loads(line))
         print(f"✓ Loaded {len(conversations)} demo conversations")
         return conversations
 
-    def analyze_conversation(self, conv: Dict[str, Any]) -> Dict[str, Any]:
+    def analyze_conversation(self, conv: dict[str, Any]) -> dict[str, Any]:
         """
         Analyze a single conversation.
 
@@ -62,17 +63,15 @@ class DemoConversationLoader:
                 "diagnostic": {},
                 "rewrite": {},
                 "guidance": [],
-                "escalation_risk": conv["ground_truth"]["escalation_risk"]
-            }
+                "escalation_risk": conv["ground_truth"]["escalation_risk"],
+            },
         }
 
         if self.api_available:
             # Use real API
             try:
                 response = requests.post(
-                    f"{self.api_url}/analyze",
-                    json={"text": conv["customer_message"]},
-                    timeout=10
+                    f"{self.api_url}/analyze", json={"text": conv["customer_message"]}, timeout=10
                 )
 
                 if response.status_code == 200:
@@ -93,7 +92,7 @@ class DemoConversationLoader:
 
         return result
 
-    def _mock_analysis(self, conv: Dict[str, Any]) -> Dict[str, Any]:
+    def _mock_analysis(self, conv: dict[str, Any]) -> dict[str, Any]:
         """Generate mock analysis based on ground truth."""
         gt = conv["ground_truth"]
 
@@ -103,7 +102,7 @@ class DemoConversationLoader:
             "sentiment": gt["sentiment"],
             "emotion": gt["emotion"],
             "absolutist_score": gt["absolutist_score"],
-            "caps_ratio": self._calculate_caps_ratio(conv["customer_message"])
+            "caps_ratio": self._calculate_caps_ratio(conv["customer_message"]),
         }
 
         # Generate rewrite
@@ -115,13 +114,10 @@ class DemoConversationLoader:
         return {
             "timestamp": datetime.utcnow().isoformat(),
             "diagnostic": diagnostic,
-            "rewrite": {
-                "version": "v1",
-                "text": rewrite
-            },
+            "rewrite": {"version": "v1", "text": rewrite},
             "guidance": guidance,
             "policy_flags": [],
-            "escalation_risk": gt["escalation_risk"]
+            "escalation_risk": gt["escalation_risk"],
         }
 
     def _calculate_caps_ratio(self, text: str) -> float:
@@ -134,7 +130,7 @@ class DemoConversationLoader:
         caps = [c for c in letters if c.isupper()]
         return len(caps) / len(letters)
 
-    def _generate_rewrite(self, text: str, diagnostic: Dict[str, Any]) -> str:
+    def _generate_rewrite(self, text: str, diagnostic: dict[str, Any]) -> str:
         """Generate a de-escalated version of the message."""
         # Simple rewrite logic for demo
         rewrite = text.lower()
@@ -157,7 +153,9 @@ class DemoConversationLoader:
 
         return rewrite
 
-    def _generate_guidance(self, scenario: str, diagnostic: Dict[str, Any], approach: str) -> List[str]:
+    def _generate_guidance(
+        self, scenario: str, diagnostic: dict[str, Any], approach: str
+    ) -> list[str]:
         """Generate coaching guidance for the agent."""
         guidance = []
 
@@ -174,28 +172,28 @@ class DemoConversationLoader:
             "billing_dispute": [
                 "Review account history before responding",
                 "Offer specific timeline for resolution",
-                "Consider escalation to billing specialist"
+                "Consider escalation to billing specialist",
             ],
             "service_outage": [
                 "Acknowledge business impact",
                 "Provide concrete ETA for restoration",
-                "Offer service credits proactively"
+                "Offer service credits proactively",
             ],
             "subscription_cancellation": [
                 "Verify cancellation status immediately",
                 "If error occurred, apologize and fix",
-                "Document for fraud prevention team"
+                "Document for fraud prevention team",
             ],
             "shipping_delay": [
                 "Express empathy for missed special occasion",
                 "Expedite shipping at no charge",
-                "Offer discount on future order"
+                "Offer discount on future order",
             ],
             "refund_processing": [
                 "Investigate refund status immediately",
                 "Escalate to finance if delayed",
-                "Provide proof of processing if available"
-            ]
+                "Provide proof of processing if available",
+            ],
         }
 
         if scenario in scenario_guidance:
@@ -207,7 +205,7 @@ class DemoConversationLoader:
 
         return guidance
 
-    def process_all(self) -> Dict[str, Any]:
+    def process_all(self) -> dict[str, Any]:
         """Process all demo conversations and save results."""
         print("\n🗣️  Starting De-escalation Coaching Demo Pipeline")
         print("=" * 60)
@@ -241,17 +239,18 @@ class DemoConversationLoader:
             "processed_at": datetime.utcnow().isoformat(),
             "total_conversations": len(conversations),
             "risk_distribution": risk_counts,
-            "avg_toxicity": sum(r["analysis"]["diagnostic"]["toxicity"] for r in results) / len(results),
-            "results": results
+            "avg_toxicity": sum(r["analysis"]["diagnostic"]["toxicity"] for r in results)
+            / len(results),
+            "results": results,
         }
 
         with open(output_file, "w") as f:
             json.dump(summary, f, indent=2)
 
         print(f"\n{'=' * 60}")
-        print(f"✓ Analysis complete!")
+        print("✓ Analysis complete!")
         print(f"  Total conversations: {len(conversations)}")
-        print(f"  Risk distribution:")
+        print("  Risk distribution:")
         for risk, count in risk_counts.items():
             print(f"    {risk}: {count}")
         print(f"  Average toxicity: {summary['avg_toxicity']:.2f}")

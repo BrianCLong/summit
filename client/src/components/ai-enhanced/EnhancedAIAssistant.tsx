@@ -164,7 +164,7 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
   >('idle');
   const [streamBuf, setStreamBuf] = useState('');
   // Ref to avoid TDZ/closure issues when callbacks reference handlers defined later
-  const handleSendMessageRef = useRef<(text?: string) => void>(() => {});
+  const handleSendMessageRef = useRef<(text?: string) => void>(() => { });
 
   // Voice control logic
   const startVoice = useCallback(() => {
@@ -208,10 +208,7 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
   const holdRef = useHoldToTalk(startVoice, stopVoice); // Integrate the hook
 
   // 🔒 keep a ref to the latest stream buffer so the event handler sees fresh data
-  const streamRef = useRef('');
-  useEffect(() => {
-    streamRef.current = streamBuf;
-  }, [streamBuf]);
+  const streamBufRef = useRef('');
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -225,7 +222,11 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
   useEffect(() => {
     if (!transport) return;
     const unsubscribe = transport.on((evt) => {
-      if (abortRef.current?.signal.aborted) return;
+      console.log('TRANS-EVT:', evt.type, evt.type === 'token' ? evt.value : '');
+      if (abortRef.current?.signal.aborted) {
+        console.log('EVENT DROPPED - ABORTED');
+        return;
+      }
 
       switch (evt.type) {
         case 'status':
@@ -235,15 +236,18 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
         case 'token':
           setStatus('streaming');
           setIsTyping(true);
-          setStreamBuf((s) => s + evt.value);
+          const nextBuf = streamBufRef.current + evt.value;
+          streamBufRef.current = nextBuf;
+          setStreamBuf(nextBuf);
           break;
         case 'done': {
-          const final = streamRef.current;
+          const final = streamBufRef.current;
+          console.log('DONE RECEIVED. BUFFER:', final);
           if (final) {
             setMessages((m) => [
               ...m,
               {
-                id: `msg-${clock.now()}`,
+                id: `msg-${clock.now()}-${Math.random().toString(36).substr(2, 9)}`,
                 type: 'assistant',
                 content: final,
                 timestamp: new Date(),
@@ -254,10 +258,9 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
               },
             ]);
             setStreamBuf('');
-            streamRef.current = '';
+            streamBufRef.current = '';
           }
-          // 👇 microtask settle ensures DOM reflects final message before "idle"
-          Promise.resolve().then(() => setStatus('idle'));
+          setStatus('Online');
           setIsTyping(false);
           break;
         }
@@ -289,7 +292,7 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
       if (!messageText.trim()) return;
 
       const userMessage: Message = {
-        id: `msg-${clock.now()}`,
+        id: `msg-${clock.now()}-${Math.random().toString(36).substr(2, 9)}`,
         type: 'user',
         content: messageText,
         timestamp: new Date(),

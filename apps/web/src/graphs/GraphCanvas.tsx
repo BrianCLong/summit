@@ -18,6 +18,7 @@ import { zoom } from 'd3-zoom'
 import { drag } from 'd3-drag'
 import { cn } from '@/lib/utils'
 import type { Entity, Relationship, GraphLayout } from '@/types'
+import { CanvasGraphRenderer } from './CanvasGraphRenderer'
 
 interface GraphCanvasProps {
   entities: Entity[]
@@ -54,6 +55,21 @@ export function GraphCanvas({
   selectedEntityId,
   className,
 }: GraphCanvasProps) {
+  // Use canvas renderer for large graphs
+  const PERFORMANCE_THRESHOLD = 500
+  if (entities.length > PERFORMANCE_THRESHOLD) {
+    return (
+      <CanvasGraphRenderer
+        entities={entities}
+        relationships={relationships}
+        layout={layout}
+        onEntitySelect={onEntitySelect}
+        selectedEntityId={selectedEntityId}
+        className={className}
+      />
+    )
+  }
+
   const svgRef = useRef<SVGSVGElement>(null)
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 })
   const [fps, setFps] = useState(0)

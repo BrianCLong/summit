@@ -1,0 +1,94 @@
+{
+  "issue_number": 143,
+  "title": "Entity CRUD APIs",
+  "url": "https://github.com/BrianCLong/summit/issues/143",
+  "state": "open",
+  "labels": [],
+  "updatedAt": "2025-08-13T17:08:35Z",
+  "createdAt": "2025-08-13T17:08:35Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15180,
+        "url": "https://github.com/BrianCLong/summit/pull/15180",
+        "mergedAt": "2025-12-31T14:21:19Z",
+        "title": "chore(deps): bump zaproxy/action-baseline from 0.14.0 to 0.15.0"
+      },
+      {
+        "number": 15275,
+        "url": "https://github.com/BrianCLong/summit/pull/15275",
+        "mergedAt": "2026-01-01T05:13:41Z",
+        "title": "Add GA operator handbook and incident runbooks"
+      },
+      {
+        "number": 15279,
+        "url": "https://github.com/BrianCLong/summit/pull/15279",
+        "mergedAt": "2026-01-01T07:43:56Z",
+        "title": "Implement Postgres usage metering persistence"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 11881,
+        "url": "https://github.com/BrianCLong/summit/pull/11881",
+        "mergedAt": null,
+        "title": "Fix devcontainer setup for F5 start"
+      },
+      {
+        "number": 13186,
+        "url": "https://github.com/BrianCLong/summit/pull/13186",
+        "mergedAt": "2025-12-04T15:38:58Z",
+        "title": "Implement federated learning for distributed OSINT training"
+      },
+      {
+        "number": 10037,
+        "url": "https://github.com/BrianCLong/summit/pull/10037",
+        "mergedAt": "2025-10-04T22:44:15Z",
+        "title": "feat: launch autonomous investigator overlay"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 1302,
+        "url": "https://github.com/BrianCLong/summit/pull/1302",
+        "mergedAt": "2025-09-23T17:05:47Z",
+        "title": "feat: build maestro conductor milestone shell"
+      },
+      {
+        "number": 11895,
+        "url": "https://github.com/BrianCLong/summit/pull/11895",
+        "mergedAt": null,
+        "title": "Build Crisis Management and Emergency Response Platform"
+      },
+      {
+        "number": 13042,
+        "url": "https://github.com/BrianCLong/summit/pull/13042",
+        "mergedAt": "2025-12-01T19:17:12Z",
+        "title": "chore: Finalize CI/CD consolidation and cleanup"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

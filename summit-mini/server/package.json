@@ -1,0 +1,21 @@
+{
+  "name": "summit-mini-server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --loader ts-node/esm src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.6.0",
+    "express": "^4.19.2",
+    "nanoid": "^5.0.7"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/express": "^4.17.21",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  }
+}

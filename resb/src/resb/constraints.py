@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from typing import Callable, Iterable, Protocol
+from typing import Protocol
 
 import pandas as pd
 
@@ -13,8 +14,7 @@ class DenialConstraint(Protocol):
 
     name: str
 
-    def __call__(self, candidate: pd.Series) -> bool:
-        ...
+    def __call__(self, candidate: pd.Series) -> bool: ...
 
 
 @dataclass(frozen=True)

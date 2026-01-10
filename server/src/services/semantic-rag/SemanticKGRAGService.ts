@@ -304,7 +304,7 @@ export class SemanticKGRAGService {
       }, 'Semantic KG-RAG query completed');
 
       return finalResponse;
-    } catch (error) {
+    } catch (error: any) {
       state.errors.push(error as Error);
       this.orchestratorStates.delete(requestId);
 
@@ -373,7 +373,7 @@ Analyze this query and provide an execution plan.`;
       agentState.endTime = Date.now();
 
       return validated as any;
-    } catch (error) {
+    } catch (error: any) {
       agentState.status = 'failed';
       agentState.error = error instanceof Error ? error.message : 'Unknown error';
       agentState.endTime = Date.now();
@@ -678,7 +678,7 @@ Check for hallucinations, citation accuracy, and quality.`;
         confidence: response.confidence * validation.qualityScore,
         validationIssues: validation.issues,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error }, 'Validation agent failed, using unvalidated response');
       return {
         ...response,
@@ -783,7 +783,7 @@ Check for hallucinations, citation accuracy, and quality.`;
       if (cached) {
         return SemanticRAGResponseSchema.parse(JSON.parse(cached));
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error }, 'Cache check failed');
     }
 
@@ -804,7 +804,7 @@ Check for hallucinations, citation accuracy, and quality.`;
 
     try {
       await this.redis.setex(cacheKey, ttl, JSON.stringify(response));
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error }, 'Cache write failed');
     }
   }

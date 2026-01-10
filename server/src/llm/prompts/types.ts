@@ -1,5 +1,5 @@
 
-import { ChatMessage, ChatCompletionRequest } from '../types';
+import { ChatMessage, ChatCompletionRequest } from '../types.js';
 
 export interface PromptTemplate {
   id: string;

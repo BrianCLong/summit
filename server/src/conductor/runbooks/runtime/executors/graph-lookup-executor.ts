@@ -7,13 +7,13 @@
  * @module runbooks/runtime/executors/graph-lookup-executor
  */
 
-import { BaseStepExecutor } from './base';
+import { BaseStepExecutor } from './base.js';
 import {
   StepExecutorContext,
   StepExecutorResult,
   RunbookActionType,
   InfrastructureEnrichmentService,
-} from '../types';
+} from '../types.js';
 
 /**
  * Infrastructure node representation
@@ -240,7 +240,7 @@ export class GraphLookupStepExecutor extends BaseStepExecutor {
           },
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       return this.failure(
         error instanceof Error ? error.message : 'Failed to lookup infrastructure'
       );

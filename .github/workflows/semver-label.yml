@@ -1,0 +1,37 @@
+name: SemVer Label Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, labeled, unlabeled]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  check-semver-label:
+    name: Check SemVer Label
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - name: Install dependencies (scripts)
+        run: |
+          npm install -g tsx
+          # OR use npx directly
+
+      - name: Run Label Check
+        env:
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+        run: |
+          npx tsx scripts/check-semver-label.ts
+
+      - name: Run SemVer Tests
+        run: |
+          node --test test/semver/check-semver-label.test.mjs

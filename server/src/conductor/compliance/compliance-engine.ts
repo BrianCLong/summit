@@ -2,7 +2,7 @@
 // Implements SOC2, GDPR, and other regulatory compliance monitoring and enforcement
 
 import { createHash, randomUUID } from 'crypto';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import Redis from 'ioredis';
 
 export interface ComplianceFramework {
@@ -46,11 +46,11 @@ export interface EvidenceRequirement {
   id: string;
   requirementId: string;
   type:
-    | 'documentation'
-    | 'log_analysis'
-    | 'system_config'
-    | 'user_attestation'
-    | 'third_party_cert';
+  | 'documentation'
+  | 'log_analysis'
+  | 'system_config'
+  | 'user_attestation'
+  | 'third_party_cert';
   description: string;
   collectionMethod: 'manual' | 'automated' | 'api';
   retentionPeriod: number;
@@ -89,22 +89,22 @@ export interface ComplianceFinding {
   assessmentId: string;
   requirementId: string;
   category:
-    | 'gap'
-    | 'weakness'
-    | 'non_compliance'
-    | 'best_practice'
-    | 'observation';
+  | 'gap'
+  | 'weakness'
+  | 'non_compliance'
+  | 'best_practice'
+  | 'observation';
   severity: 'low' | 'medium' | 'high' | 'critical';
   title: string;
   description: string;
   recommendation: string;
   remediation: RemediationPlan;
   status:
-    | 'open'
-    | 'in_progress'
-    | 'resolved'
-    | 'accepted_risk'
-    | 'false_positive';
+  | 'open'
+  | 'in_progress'
+  | 'resolved'
+  | 'accepted_risk'
+  | 'false_positive';
   assignee: string;
   dueDate: number;
   evidence: string[];
@@ -140,10 +140,10 @@ export interface GDPRDataMapping {
   id: string;
   tenantId: string;
   dataCategory:
-    | 'personal'
-    | 'sensitive_personal'
-    | 'pseudonymized'
-    | 'anonymized';
+  | 'personal'
+  | 'sensitive_personal'
+  | 'pseudonymized'
+  | 'anonymized';
   dataTypes: string[];
   processingPurpose: string[];
   legalBasis: string[];
@@ -560,21 +560,21 @@ export class ComplianceEngine {
         `Compliance assessment ${assessmentId} completed for ${frameworkId}`,
       );
       prometheusConductorMetrics.recordOperationalEvent(
-      'compliance_assessment_completed',
-      { success: true },
-    );
+        'compliance_assessment_completed',
+        { success: true },
+      );
       prometheusConductorMetrics.recordOperationalMetric(
         'compliance_score',
         assessment.overallScore,
       );
 
       return assessmentId;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Compliance assessment error:', error);
       prometheusConductorMetrics.recordOperationalEvent(
-      'compliance_assessment_error',
-      { success: false },
-    );
+        'compliance_assessment_error',
+        { success: false },
+      );
       throw error;
     }
   }
@@ -620,13 +620,13 @@ export class ComplianceEngine {
     try {
       // Find test procedures for this control
       const framework = Array.from(this.frameworks.values()).find((f) =>
-        f.requirements.some((r) => r.controls.some((c) => c.id === control.id)),
+        f.requirements.some((r: any) => r.controls.some((c: any) => c.id === control.id)),
       );
 
       if (!framework) return findings;
 
-      const requirement = framework.requirements.find((r) =>
-        r.controls.some((c) => c.id === control.id),
+      const requirement = framework.requirements.find((r: any) =>
+        r.controls.some((c: any) => c.id === control.id),
       );
 
       if (!requirement) return findings;
@@ -671,7 +671,7 @@ export class ComplianceEngine {
           }
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Control test error for ${control.id}:`, error);
 
       const finding: ComplianceFinding = {
@@ -794,7 +794,7 @@ export class ComplianceEngine {
 
         findings.push(finding);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Evidence collection error for ${evidenceReq.id}:`, error);
     }
 

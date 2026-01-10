@@ -11,16 +11,16 @@ describe('NarrativeTracker', () => {
 
   it('should cluster similar posts', () => {
     const posts: SocialPost[] = [
-      { id: '1', content: 'The sky is blue today', authorId: 'u1', timestamp: new Date(), platform: 'x', metadata: {} },
-      { id: '2', content: 'The sky is very blue', authorId: 'u2', timestamp: new Date(), platform: 'x', metadata: {} },
-      { id: '3', content: 'Look how blue the sky is', authorId: 'u3', timestamp: new Date(), platform: 'x', metadata: {} },
+      { id: '1', content: 'The azure sky is bright today', authorId: 'u1', timestamp: new Date(), platform: 'x', metadata: {} },
+      { id: '2', content: 'The azure sky looks bright', authorId: 'u2', timestamp: new Date(), platform: 'x', metadata: {} },
+      { id: '3', content: 'Look how bright the azure sky is', authorId: 'u3', timestamp: new Date(), platform: 'x', metadata: {} },
       { id: '4', content: 'I like apples', authorId: 'u4', timestamp: new Date(), platform: 'x', metadata: {} },
     ];
 
     const clusters = tracker.clusterNarratives(posts);
     expect(clusters.length).toBe(1); // Should cluster the 3 sky posts
     expect(clusters[0].volume).toBe(3);
-    expect(clusters[0].keywords).toContain('blue');
+    expect(clusters[0].keywords).toContain('azure');
   });
 
   it('should detect linguistic anomalies (copypasta)', () => {

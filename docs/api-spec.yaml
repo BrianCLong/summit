@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
   title: IntelGraph Summit API
-  version: 1.0.0
-  description: API for IntelGraph Summit, including Maestro orchestration and monitoring.
+  version: 1.1.0
+  description: API for IntelGraph Summit, including Maestro orchestration, policy simulation, and disclosure.
 
 servers:
   - url: /api
@@ -13,6 +13,7 @@ servers:
 paths:
   /monitoring/metrics:
     get:
+      operationId: getMonitoringMetrics
       summary: Prometheus metrics
       tags: [Observability]
       responses:
@@ -25,6 +26,7 @@ paths:
 
   /health:
     get:
+      operationId: getHealth
       summary: System health check
       tags: [Observability]
       responses:
@@ -41,8 +43,94 @@ paths:
               schema:
                 $ref: '#/components/schemas/HealthStatus'
 
+  /api/tenants:
+    post:
+      summary: Create a new tenant
+      tags: [Tenancy]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTenantRequest'
+      responses:
+        '201':
+          description: Tenant created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+
+    get:
+      summary: List tenants (Admin only)
+      tags: [Tenancy]
+      responses:
+        '200':
+          description: List of tenants
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tenant'
+
+  /api/policy/simulate:
+    post:
+      summary: Simulate a policy decision (Preflight)
+      tags: [Governance]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicySimulationInput'
+      responses:
+        '200':
+          description: Simulation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicySimulationResult'
+
+  /api/export/bundles:
+    post:
+      summary: Create an Intel Bundle export
+      tags: [Disclosure]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBundleRequest'
+      responses:
+        '202':
+          description: Bundle generation started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobStatus'
+
+  /api/receipts/{id}:
+    get:
+      summary: Get a signed receipt by ID
+      tags: [Provenance]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Signed receipt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Receipt'
+
   /api/maestro/route/preview:
     post:
+      operationId: previewRoute
       summary: Preview routing candidates for a task
       tags: [Maestro]
       requestBody:
@@ -66,6 +154,7 @@ paths:
 
   /api/maestro/route/execute:
     post:
+      operationId: executeRoute
       summary: Execute a task with selected candidates
       tags: [Maestro]
       requestBody:
@@ -91,6 +180,7 @@ paths:
 
   /api/maestro/web/interfaces:
     get:
+      operationId: getWebInterfaces
       summary: Get available web interfaces
       tags: [Maestro]
       responses:
@@ -103,6 +193,7 @@ paths:
 
   /api/maestro/web/run:
     post:
+      operationId: runWebOrchestration
       summary: Orchestrate web search/content tasks
       tags: [Maestro]
       requestBody:
@@ -128,6 +219,7 @@ paths:
 
   /api/maestro/budgets:
     get:
+      operationId: getBudgets
       summary: Get budget and usage information
       tags: [Maestro]
       responses:
@@ -140,6 +232,7 @@ paths:
 
   /api/maestro/policy/check:
     post:
+      operationId: checkPolicy
       summary: Check policy for an action
       tags: [Maestro]
       requestBody:
@@ -163,6 +256,7 @@ paths:
 
   /api/maestro/runs:
     post:
+      operationId: createRun
       summary: Create and run a new pipeline
       tags: [Maestro]
       requestBody:
@@ -184,6 +278,136 @@ paths:
               schema:
                 type: object
 
+  /api/tenants/{tenantId}/workflows:
+    post:
+      operationId: createWorkflowDefinition
+      summary: Create or update a workflow definition
+      tags: [Maestro]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowDefinitionInput'
+      responses:
+        '201':
+          description: Workflow definition created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowDefinition'
+
+  /api/tenants/{tenantId}/runs:
+    post:
+      operationId: startRun
+      summary: Start a new run from a workflow definition
+      tags: [Maestro]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartRunInput'
+      responses:
+        '201':
+          description: Run started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Run'
+
+  /api/tenants/{tenantId}/runs/{runId}:
+    get:
+      operationId: getRun
+      summary: Get run details including receipts
+      tags: [Maestro]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Run details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Run'
+
+  /api/tenants/{tenantId}/runs/{runId}/approve:
+    post:
+      operationId: approveRun
+      summary: Approve or reject a run/step
+      tags: [Maestro]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalInput'
+      responses:
+        '200':
+          description: Approval processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalResult'
+
+  /api/tenants/{tenantId}/runs/{runId}/events:
+    get:
+      operationId: getRunEvents
+      summary: Get timeline events for a run
+      tags: [Maestro]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RunEvent'
+
 components:
   schemas:
     HealthStatus:
@@ -196,6 +420,116 @@ components:
           type: string
           format: date-time
         error:
+          type: string
+
+    CreateTenantRequest:
+      type: object
+      required: [name, slug, adminEmail]
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        adminEmail:
+          type: string
+        tier:
+          type: string
+          enum: [internal, partner, hosted]
+        policyProfile:
+          type: string
+          enum: [strict, balanced, fast_ops]
+
+    Tenant:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        tier:
+          type: string
+        status:
+          type: string
+
+    PolicySimulationInput:
+      type: object
+      required: [subjectTenantId, resourceTenantId, action]
+      properties:
+        subjectTenantId:
+          type: string
+        resourceTenantId:
+          type: string
+        action:
+          type: string
+        purpose:
+          type: string
+        justification:
+          type: string
+        profile:
+          type: string
+          enum: [strict, balanced, fast_ops]
+          description: Optional profile to simulate against
+
+    PolicySimulationResult:
+      type: object
+      properties:
+        allow:
+          type: boolean
+        reason:
+          type: string
+        overlaysApplied:
+          type: array
+          items:
+            type: string
+        evaluationPath:
+          type: array
+          items:
+            type: string
+
+    CreateBundleRequest:
+      type: object
+      required: [runId]
+      properties:
+        runId:
+          type: string
+        redactionProfile:
+          type: string
+          enum: [none, sources, raw_content, actor_ids, minimize_pii]
+        includeReceipts:
+          type: boolean
+
+    JobStatus:
+      type: object
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+          enum: [queued, processing, completed, failed]
+
+    Receipt:
+      type: object
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        action:
+          type: string
+        actor:
+          type: string
+        resource:
+          type: string
+        inputHash:
+          type: string
+        policyDecisionId:
+          type: string
+        signature:
+          type: string
+        signerKeyId:
           type: string
 
     Candidate:
@@ -360,3 +694,102 @@ components:
               type: string
             sla_hours:
               type: number
+
+    WorkflowDefinitionInput:
+      type: object
+      required: [version, env, retentionClass, costCenter, inputSchema, outputSchema, body]
+      properties:
+        version:
+          type: string
+        env:
+          type: string
+        retentionClass:
+          type: string
+        costCenter:
+          type: string
+        inputSchema:
+          type: string
+        outputSchema:
+          type: string
+        body:
+          type: string
+
+    WorkflowDefinition:
+      allOf:
+        - $ref: '#/components/schemas/WorkflowDefinitionInput'
+        - type: object
+          properties:
+            id:
+              type: string
+            tenantId:
+              type: string
+            createdAt:
+              type: string
+            updatedAt:
+              type: string
+
+    StartRunInput:
+      type: object
+      required: [workflowId, input]
+      properties:
+        workflowId:
+          type: string
+        input:
+          type: string
+        env:
+          type: string
+
+    Run:
+      type: object
+      properties:
+        id:
+          type: string
+        tenantId:
+          type: string
+        workflowId:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, RUNNING, COMPLETED, FAILED, CANCELLED, NEEDS_APPROVAL]
+        startedAt:
+          type: string
+        completedAt:
+          type: string
+        input:
+          type: string
+        output:
+          type: string
+        receipts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Receipt'
+
+    ApprovalInput:
+      type: object
+      required: [decision, rationale]
+      properties:
+        decision:
+          type: string
+          enum: [APPROVE, REJECT]
+        rationale:
+          type: string
+        stepId:
+          type: string
+
+    ApprovalResult:
+      type: object
+      properties:
+        status:
+          type: string
+
+    RunEvent:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        timestamp:
+          type: string
+        payload:
+          type: string

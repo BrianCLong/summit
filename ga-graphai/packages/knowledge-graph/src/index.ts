@@ -1,3 +1,4 @@
+import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
 import { StructuredEventEmitter } from '@ga-graphai/common-types';
 import type { PolicyRule } from '@ga-graphai/common-types';
 import { stableHash } from '@ga-graphai/data-integrity';
@@ -183,7 +184,141 @@ export interface GraphSnapshot {
     refreshDurationMs?: number;
     lastQueryDurationMs?: number;
     traceId?: string;
+    residencyFiltered?: number;
   };
+  encryption?: {
+    mode: KnowledgeGraphEncryptionMode;
+    algorithm: KnowledgeGraphEncryptionAlgorithm;
+    sensitiveNodes: number;
+  };
+}
+
+export type KnowledgeGraphEncryptionAlgorithm = 'aes-256-gcm';
+
+export type KnowledgeGraphEncryptionMode = 'transparent' | 'encrypt-sensitive';
+
+export interface EncryptedGraphPayload {
+  algorithm: KnowledgeGraphEncryptionAlgorithm;
+  iv: string;
+  authTag: string;
+  ciphertext: string;
+  associatedData?: string;
+}
+
+export interface KnowledgeGraphEncryptionOptions {
+  mode?: KnowledgeGraphEncryptionMode;
+  secret: string;
+  algorithm?: KnowledgeGraphEncryptionAlgorithm;
+  associatedData?: string;
+  sensitiveTypes?: NodeType[];
+  sensitiveFields?: string[];
+}
+
+export interface DataResidencyOptions {
+  allowedRegions: string[];
+  denyUnknown?: boolean;
+}
+
+export interface ProtectedNodeSummary {
+  id: string;
+  reason: string;
+}
+
+function isEncryptedPayload(value: unknown): value is EncryptedGraphPayload {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  const payload = value as Record<string, unknown>;
+  return (
+    typeof payload.algorithm === 'string' &&
+    typeof payload.iv === 'string' &&
+    typeof payload.authTag === 'string' &&
+    typeof payload.ciphertext === 'string'
+  );
+}
+
+function deriveKey(secret: string): Buffer {
+  return createHash('sha256').update(secret).digest();
+}
+
+function encryptPayload(
+  data: unknown,
+  options: KnowledgeGraphEncryptionOptions,
+): EncryptedGraphPayload {
+  const algorithm = options.algorithm ?? 'aes-256-gcm';
+  const iv = randomBytes(12);
+  const cipher = createCipheriv(algorithm, deriveKey(options.secret), iv);
+  if (options.associatedData) {
+    cipher.setAAD(Buffer.from(options.associatedData));
+  }
+  const plaintext = Buffer.from(JSON.stringify(data), 'utf8');
+  const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]).toString('base64');
+  const authTag = cipher.getAuthTag().toString('base64');
+  return {
+    algorithm,
+    iv: iv.toString('base64'),
+    authTag,
+    ciphertext,
+    associatedData: options.associatedData,
+  } satisfies EncryptedGraphPayload;
+}
+
+function decryptPayload<T = unknown>(
+  payload: EncryptedGraphPayload,
+  secret: string,
+  associatedData?: string,
+): T {
+  const key = deriveKey(secret);
+  const decipher = createDecipheriv(
+    payload.algorithm,
+    key,
+    Buffer.from(payload.iv, 'base64'),
+  );
+  if (associatedData ?? payload.associatedData) {
+    decipher.setAAD(Buffer.from(associatedData ?? payload.associatedData ?? ''));
+  }
+  const decrypted = Buffer.concat([
+    decipher.update(Buffer.from(payload.ciphertext, 'base64')),
+    decipher.final(),
+  ]);
+  return JSON.parse(decrypted.toString('utf8')) as T;
+}
+
+export interface AgentTrigger {
+  agent: string;
+  reason: string;
+  priority?: 'low' | 'normal' | 'high';
+  payload?: Record<string, unknown>;
+  correlationId?: string;
+}
+
+export interface GraphUpdate {
+  source?: string;
+  ingress?: string;
+  topic?: string;
+  correlationId?: string;
+  traceId?: string;
+  observedAt?: string;
+  namespace?: string;
+  services?: ServiceRecord[];
+  environments?: EnvironmentRecord[];
+  pipelines?: PipelineRecord[];
+  incidents?: IncidentRecord[];
+  policies?: PolicyRule[];
+  costSignals?: CostSignalRecord[];
+  nodes?: GraphNode[];
+  edges?: GraphEdge[];
+  deletions?: {
+    services?: string[];
+    environments?: string[];
+    pipelines?: string[];
+    incidents?: string[];
+    policies?: string[];
+    costSignals?: string[];
+    nodes?: string[];
+    edges?: string[];
+  };
+  agentTriggers?: AgentTrigger[];
 }
 
 export interface StructuredLogger {
@@ -215,11 +350,15 @@ export interface KnowledgeGraphOptions {
   logger?: StructuredLogger;
   metrics?: MetricsRecorder;
   tracer?: Tracer;
+  encryption?: KnowledgeGraphEncryptionOptions;
+  dataResidency?: DataResidencyOptions;
 }
 
 interface GraphState {
   nodes: Map<string, GraphNode>;
   edges: Map<string, GraphEdge>;
+  streamNodes: Map<string, GraphNode>;
+  streamEdges: Map<string, GraphEdge>;
   pipelines: Map<string, PipelineRecord>;
   services: Map<string, ServiceRecord>;
   environments: Map<string, EnvironmentRecord>;
@@ -251,6 +390,8 @@ export class OrchestrationKnowledgeGraph {
   private readonly state: GraphState = {
     nodes: new Map(),
     edges: new Map(),
+    streamNodes: new Map(),
+    streamEdges: new Map(),
     pipelines: new Map(),
     services: new Map(),
     environments: new Map(),
@@ -267,6 +408,9 @@ export class OrchestrationKnowledgeGraph {
   private costSignalConnectors: CostSignalConnector[] = [];
   private version = 0;
 
+  private readonly encryption?: KnowledgeGraphEncryptionOptions;
+  private readonly dataResidency?: DataResidencyOptions;
+
   constructor(
     events: StructuredEventEmitter | KnowledgeGraphOptions = new StructuredEventEmitter(),
     options: KnowledgeGraphOptions = {},
@@ -278,6 +422,8 @@ export class OrchestrationKnowledgeGraph {
       this.events = new StructuredEventEmitter();
       this.options = events ?? {};
     }
+    this.encryption = this.options.encryption;
+    this.dataResidency = this.options.dataResidency;
   }
 
   registerPipelineConnector(connector: PipelineConnector): void {
@@ -369,6 +515,16 @@ export class OrchestrationKnowledgeGraph {
       edgeCount: snapshot.edges.length,
       sandbox: snapshot.sandbox,
     });
+    this.events.emitEvent('summit.intelgraph.graph.updated', {
+      source: 'connector-refresh',
+      ingress: 'ingestion',
+      namespace: snapshot.namespace,
+      trigger: 'refresh',
+      version: this.version,
+      nodeCount: snapshot.nodes.length,
+      edgeCount: snapshot.edges.length,
+      durationMs,
+    });
     span?.end({
       durationMs,
       nodeCount: snapshot.nodes.length,
@@ -379,13 +535,15 @@ export class OrchestrationKnowledgeGraph {
   }
 
   snapshot(durationMs?: number): GraphSnapshot {
-    const nodes = Array.from(this.state.nodes.values());
+    const baseNodes = Array.from(this.state.nodes.values());
     const edges = Array.from(this.state.edges.values());
+    const residency = this.enforceDataResidency(baseNodes, edges);
+    const protectedNodes = residency.nodes.map((node) => this.protectNode(node));
     const serviceRisk = this.calculateServiceRisk();
     const warnings = this.options.sandboxMode
       ? ['Sandbox mode active: graph mutations isolated']
       : undefined;
-    const lineage = this.lineageSummary(nodes, edges);
+    const lineage = this.lineageSummary(protectedNodes, residency.edges);
     const namespace = this.namespace();
     if (warnings) {
       this.logWarn('intelgraph.kg.sandbox', { namespace });
@@ -393,16 +551,16 @@ export class OrchestrationKnowledgeGraph {
     return {
       generatedAt: new Date().toISOString(),
       version: this.version,
-      nodes,
-      edges,
+      nodes: protectedNodes,
+      edges: residency.edges,
       serviceRisk,
       sandbox: this.options.sandboxMode,
       namespace,
-      warnings,
+      warnings: this.mergeWarnings(warnings, residency.warnings),
       lineage,
       stats: {
-        nodes: nodes.length,
-        edges: edges.length,
+        nodes: protectedNodes.length,
+        edges: residency.edges.length,
         services: this.state.services.size,
         incidents: this.state.incidents.size,
         pipelines: this.state.pipelines.size,
@@ -413,17 +571,26 @@ export class OrchestrationKnowledgeGraph {
       },
       telemetry: {
         refreshDurationMs: durationMs,
+        residencyFiltered: residency.filteredCount,
       },
+      encryption: this.snapshotEncryptionSummary(residency.nodes),
     };
   }
 
   getNode(id: string): GraphNode | undefined {
-    return this.state.nodes.get(id);
+    const node = this.state.nodes.get(id);
+    if (!node) {
+      return undefined;
+    }
+    if (this.isResidencyBlocked(node)) {
+      return undefined;
+    }
+    return this.protectNode(node);
   }
 
   getNodes(ids: string[]): GraphNode[] {
     return ids
-      .map((id) => this.state.nodes.get(id))
+      .map((id) => this.getNode(id))
       .filter((node): node is GraphNode => Boolean(node));
   }
 
@@ -442,14 +609,25 @@ export class OrchestrationKnowledgeGraph {
       span?.end({ found: false });
       return undefined;
     }
-    const environments = Array.from(this.state.environments.values()).filter(
-      (environment) =>
+    const environments = Array.from(this.state.environments.values()).filter((environment) => {
+      const residencyNode: GraphNode = {
+        id: `env:${environment.id}`,
+        type: 'environment',
+        data: environment,
+      };
+      const linked =
         this.state.edges.has(edgeId(`service:${serviceId}`, 'DEPLOYED_IN', `env:${environment.id}`)) ||
-        this.state.edges.has(edgeId(`env:${environment.id}`, 'DEPLOYED_IN', `service:${serviceId}`)),
-    );
-    const incidents = Array.from(this.state.incidents.values()).filter(
-      (incident) => incident.serviceId === serviceId,
-    );
+        this.state.edges.has(edgeId(`env:${environment.id}`, 'DEPLOYED_IN', `service:${serviceId}`));
+      return linked && !this.isResidencyBlocked(residencyNode);
+    });
+    const incidents = Array.from(this.state.incidents.values()).filter((incident) => {
+      const residencyNode: GraphNode = {
+        id: `incident:${incident.id}`,
+        type: 'incident',
+        data: incident,
+      };
+      return incident.serviceId === serviceId && !this.isResidencyBlocked(residencyNode);
+    });
     const policies = Array.from(this.state.policies.values()).filter((policy) =>
       policy.resources.some((resource) => resource.includes(serviceId)),
     );
@@ -497,6 +675,138 @@ export class OrchestrationKnowledgeGraph {
     return snapshot;
   }
 
+  applyUpdate(update: GraphUpdate): GraphSnapshot {
+    if (this.options.requireConfirmation && !this.options.confirmationProvided) {
+      throw new Error('Graph refresh confirmation required but not provided');
+    }
+
+    const previousState = this.cloneState();
+    const startedAt = Date.now();
+    const source = update.source ?? 'intelgraph.stream';
+    const namespace = update.namespace ?? this.namespace();
+    const span = this.startSpan('intelgraph.kg.stream.update', {
+      source,
+      topic: update.topic,
+      namespace,
+    });
+
+    const serviceDelta = this.mergeRecords(
+      this.state.services,
+      update.services,
+      update,
+      'service',
+    );
+    const environmentDelta = this.mergeRecords(
+      this.state.environments,
+      update.environments,
+      update,
+      'environment',
+    );
+    const pipelineDelta = this.mergePipelineRecords(
+      this.state.pipelines,
+      update.pipelines,
+      update,
+    );
+    const incidentDelta = this.mergeRecords(
+      this.state.incidents,
+      update.incidents,
+      update,
+      'incident',
+    );
+    const policyDelta = this.mergeRecords(
+      this.state.policies,
+      update.policies,
+      update,
+      'policy',
+    );
+    const costSignalDelta = this.mergeRecords(
+      this.state.costSignals,
+      update.costSignals,
+      update,
+      'cost-signal',
+      (record) => `${record.serviceId}:${record.timeBucket}`,
+    );
+
+    this.mergeStreamNodes(update.nodes, update);
+    this.mergeStreamEdges(update.edges, update);
+    this.applyDeletions(update.deletions);
+
+    this.rebuildGraph();
+
+    const durationMs = Date.now() - startedAt;
+    this.version += 1;
+    const snapshot = this.snapshot(durationMs);
+    const mutationDelta =
+      Math.abs(snapshot.nodes.length - previousState.nodes.size) +
+      Math.abs(snapshot.edges.length - previousState.edges.size);
+
+    if (this.options.mutationThreshold !== undefined && mutationDelta > this.options.mutationThreshold) {
+      this.restoreState(previousState);
+      const error = new Error(
+        `Refusing to mutate graph by ${mutationDelta} elements without confirmation`,
+      );
+      this.logWarn('intelgraph.kg.stream.blocked', {
+        namespace,
+        mutationDelta,
+        threshold: this.options.mutationThreshold,
+      });
+      span?.recordException?.(error);
+      span?.end({ error: error.message });
+      throw error;
+    }
+
+    this.metricsObserve('intelgraph_kg_stream_update_ms', durationMs, {
+      source,
+    });
+    this.metricsIncrement('intelgraph_kg_stream_updates_total', 1, {
+      source,
+      topic: update.topic ?? 'unspecified',
+    });
+    this.events.emitEvent('summit.intelgraph.graph.updated', {
+      source,
+      ingress: update.ingress ?? 'message-broker',
+      namespace,
+      trigger: 'stream',
+      version: this.version,
+      nodeCount: snapshot.nodes.length,
+      edgeCount: snapshot.edges.length,
+      durationMs,
+      topic: update.topic,
+      correlationId: update.correlationId,
+    });
+
+    if (update.agentTriggers) {
+      for (const trigger of update.agentTriggers) {
+        this.events.emitEvent('summit.intelgraph.agent.triggered', {
+          agent: trigger.agent,
+          reason: trigger.reason,
+          priority: trigger.priority ?? 'normal',
+          namespace,
+          graphVersion: this.version,
+          correlationId: trigger.correlationId ?? update.correlationId,
+          payload: trigger.payload,
+        });
+      }
+    }
+
+    this.logInfo('intelgraph.kg.stream.update', {
+      namespace,
+      source,
+      topic: update.topic,
+      durationMs,
+      services: serviceDelta.added + serviceDelta.updated,
+      environments: environmentDelta.added + environmentDelta.updated,
+      pipelines: pipelineDelta.added + pipelineDelta.updated,
+      incidents: incidentDelta.added + incidentDelta.updated,
+      policies: policyDelta.added + policyDelta.updated,
+      costSignals: costSignalDelta.added + costSignalDelta.updated,
+      nodes: update.nodes?.length ?? 0,
+      edges: update.edges?.length ?? 0,
+    });
+    span?.end({ durationMs, mutationDelta, nodeCount: snapshot.nodes.length });
+    return snapshot;
+  }
+
   private namespace(): string {
     if (this.options.namespace) {
       return this.options.namespace;
@@ -504,10 +814,129 @@ export class OrchestrationKnowledgeGraph {
     return this.options.sandboxMode ? 'intelgraph-sandbox' : 'intelgraph';
   }
 
+  private mergeRecords<T extends { provenance?: GraphProvenance }>(
+    map: Map<string, T>,
+    records: T[] | undefined,
+    update: GraphUpdate,
+    type: string,
+    idSelector: (record: T) => string = (record) =>
+      (record as unknown as { id: string }).id,
+  ): { added: number; updated: number } {
+    if (!records || records.length === 0) {
+      return { added: 0, updated: 0 };
+    }
+
+    let added = 0;
+    let updated = 0;
+    for (const record of records) {
+      const id = idSelector(record);
+      const provenance =
+        record.provenance ?? this.defaultStreamProvenance(update, `${type}:${id}`);
+      const enrichedRecord = { ...record, provenance } as T;
+      if (map.has(id)) {
+        updated += 1;
+      } else {
+        added += 1;
+      }
+      map.set(id, enrichedRecord);
+    }
+    return { added, updated };
+  }
+
+  private mergePipelineRecords(
+    map: Map<string, PipelineRecord>,
+    records: PipelineRecord[] | undefined,
+    update: GraphUpdate,
+  ): { added: number; updated: number } {
+    if (!records || records.length === 0) {
+      return { added: 0, updated: 0 };
+    }
+
+    let added = 0;
+    let updated = 0;
+    for (const record of records) {
+      const provenance =
+        record.provenance ?? this.defaultStreamProvenance(update, `pipeline:${record.id}`);
+      const stages = record.stages.map((stage) => ({
+        ...stage,
+        provenance:
+          stage.provenance ??
+          this.defaultStreamProvenance(update, `stage:${stage.id}:${record.id}`),
+      }));
+      const pipeline: PipelineRecord = { ...record, provenance, stages };
+      if (map.has(record.id)) {
+        updated += 1;
+      } else {
+        added += 1;
+      }
+      map.set(record.id, pipeline);
+    }
+    return { added, updated };
+  }
+
+  private mergeStreamNodes(nodes: GraphNode[] | undefined, update: GraphUpdate): void {
+    if (!nodes) {
+      return;
+    }
+    for (const node of nodes) {
+      const provenance = node.provenance ?? this.defaultStreamProvenance(update, node.id);
+      this.state.streamNodes.set(node.id, { ...node, provenance });
+    }
+  }
+
+  private mergeStreamEdges(edges: GraphEdge[] | undefined, update: GraphUpdate): void {
+    if (!edges) {
+      return;
+    }
+    for (const edge of edges) {
+      const provenance = edge.provenance ?? this.defaultStreamProvenance(update, edge.id);
+      this.state.streamEdges.set(edge.id, { ...edge, provenance });
+    }
+  }
+
+  private applyDeletions(deletions: GraphUpdate['deletions']): void {
+    if (!deletions) {
+      return;
+    }
+    deletions.services?.forEach((id) => this.state.services.delete(id));
+    deletions.environments?.forEach((id) => this.state.environments.delete(id));
+    deletions.pipelines?.forEach((id) => this.state.pipelines.delete(id));
+    deletions.incidents?.forEach((id) => this.state.incidents.delete(id));
+    deletions.policies?.forEach((id) => this.state.policies.delete(id));
+    deletions.costSignals?.forEach((id) => this.state.costSignals.delete(id));
+    deletions.nodes?.forEach((id) => {
+      this.state.streamNodes.delete(id);
+      this.state.nodes.delete(id);
+    });
+    deletions.edges?.forEach((id) => {
+      this.state.streamEdges.delete(id);
+      this.state.edges.delete(id);
+    });
+  }
+
+  private defaultStreamProvenance(update: GraphUpdate, seed: string): GraphProvenance {
+    const observedAt = update.observedAt ?? new Date().toISOString();
+    const lineage = new Set<string>();
+    if (update.correlationId) {
+      lineage.add(update.correlationId);
+    }
+    return {
+      source: update.source ?? 'intelgraph.stream',
+      ingress: update.ingress ?? 'message-broker',
+      observedAt,
+      traceId: update.traceId,
+      checksum: stableHash({ seed, observedAt, topic: update.topic, source: update.source }),
+      lineage: Array.from(lineage),
+      attributes: update.topic ? { topic: update.topic } : undefined,
+    } satisfies GraphProvenance;
+  }
+
   private cloneState(): GraphState {
     return {
       nodes: new Map(this.state.nodes),
       edges: new Map(this.state.edges),
+      streamNodes: new Map(this.state.streamNodes),
+      streamEdges: new Map(this.state.streamEdges),
       pipelines: new Map(this.state.pipelines),
       services: new Map(this.state.services),
       environments: new Map(this.state.environments),
@@ -520,6 +949,8 @@ export class OrchestrationKnowledgeGraph {
   private restoreState(snapshot: GraphState): void {
     this.state.nodes.clear();
     this.state.edges.clear();
+    this.state.streamNodes.clear();
+    this.state.streamEdges.clear();
     this.state.pipelines.clear();
     this.state.services.clear();
     this.state.environments.clear();
@@ -529,6 +960,8 @@ export class OrchestrationKnowledgeGraph {
 
     snapshot.nodes.forEach((value, key) => this.state.nodes.set(key, value));
     snapshot.edges.forEach((value, key) => this.state.edges.set(key, value));
+    snapshot.streamNodes.forEach((value, key) => this.state.streamNodes.set(key, value));
+    snapshot.streamEdges.forEach((value, key) => this.state.streamEdges.set(key, value));
     snapshot.pipelines.forEach((value, key) => this.state.pipelines.set(key, value));
     snapshot.services.forEach((value, key) => this.state.services.set(key, value));
     snapshot.environments.forEach((value, key) => this.state.environments.set(key, value));
@@ -756,6 +1189,130 @@ export class OrchestrationKnowledgeGraph {
     };
   }
 
+  private mergeWarnings(
+    ...warnings: Array<string[] | undefined>
+  ): string[] | undefined {
+    const merged = warnings.flatMap((warning) => warning ?? []);
+    return merged.length ? Array.from(new Set(merged)) : undefined;
+  }
+
+  private protectionMode(): KnowledgeGraphEncryptionMode {
+    if (!this.encryption?.secret) {
+      return 'transparent';
+    }
+    return this.encryption.mode ?? 'encrypt-sensitive';
+  }
+
+  private shouldEncryptNode(node: GraphNode): boolean {
+    if (this.protectionMode() !== 'encrypt-sensitive') {
+      return false;
+    }
+    if (!this.encryption?.secret) {
+      return false;
+    }
+    const sensitiveTypes = new Set(
+      this.encryption.sensitiveTypes ?? ['service', 'environment', 'incident'],
+    );
+    const sensitiveFields = new Set(
+      this.encryption.sensitiveFields ?? ['piiClassification', 'soxCritical', 'owner'],
+    );
+    const hasSensitiveField = Object.keys(node.data ?? {}).some((field) =>
+      sensitiveFields.has(field),
+    );
+    const sensitivityAttribute = node.provenance?.attributes
+      ? (node.provenance.attributes as Record<string, unknown>).sensitivity
+      : undefined;
+    const provenanceSensitivity =
+      typeof sensitivityAttribute === 'string' &&
+      sensitivityAttribute.toLowerCase() !== 'public';
+    return sensitiveTypes.has(node.type) || hasSensitiveField || provenanceSensitivity;
+  }
+
+  private protectNode(node: GraphNode): GraphNode {
+    if (!this.shouldEncryptNode(node)) {
+      return node;
+    }
+    if (!this.encryption) {
+      return node;
+    }
+    const encryptedPayload = encryptPayload(node.data, this.encryption);
+    return {
+      ...node,
+      data: encryptedPayload,
+      provenance: {
+        ...node.provenance,
+        attributes: {
+          ...node.provenance?.attributes,
+          encrypted: true,
+          encryptionAlgorithm: encryptedPayload.algorithm,
+        },
+      },
+    } satisfies GraphNode;
+  }
+
+  private isResidencyBlocked(node: GraphNode): boolean {
+    if (!this.dataResidency) {
+      return false;
+    }
+    const allowed = new Set(this.dataResidency.allowedRegions.map((region) => region.toLowerCase()));
+    const region =
+      typeof node.data === 'object' && node.data !== null
+        ? (node.data as Record<string, unknown>).region
+        : undefined;
+    if (typeof region === 'string') {
+      return !allowed.has(region.toLowerCase());
+    }
+    return Boolean(this.dataResidency.denyUnknown);
+  }
+
+  private enforceDataResidency(
+    nodes: GraphNode[],
+    edges: GraphEdge[],
+  ): { nodes: GraphNode[]; edges: GraphEdge[]; warnings?: string[]; filteredCount: number } {
+    if (!this.dataResidency) {
+      return { nodes, edges, filteredCount: 0 };
+    }
+    const filteredNodeIds = new Set<string>();
+    const residencyWarnings: string[] = [];
+
+    const filteredNodes = nodes.filter((node) => {
+      if (this.isResidencyBlocked(node)) {
+        filteredNodeIds.add(node.id);
+        return false;
+      }
+      return true;
+    });
+
+    const filteredEdges = edges.filter(
+      (edge) => !filteredNodeIds.has(edge.from) && !filteredNodeIds.has(edge.to),
+    );
+
+    if (filteredNodeIds.size) {
+      residencyWarnings.push(
+        `Data residency filter removed ${filteredNodeIds.size} node(s) outside of ${this.dataResidency.allowedRegions.join(', ')}`,
+      );
+    }
+
+    return {
+      nodes: filteredNodes,
+      edges: filteredEdges,
+      warnings: residencyWarnings.length ? residencyWarnings : undefined,
+      filteredCount: filteredNodeIds.size,
+    };
+  }
+
+  private snapshotEncryptionSummary(nodes: GraphNode[]): GraphSnapshot['encryption'] {
+    if (this.protectionMode() === 'transparent' || !this.encryption?.secret) {
+      return undefined;
+    }
+    const sensitiveNodes = nodes.filter((node) => isEncryptedPayload(node.data)).length;
+    return {
+      mode: this.protectionMode(),
+      algorithm: this.encryption.algorithm ?? 'aes-256-gcm',
+      sensitiveNodes,
+    };
+  }
+
   private rebuildGraph(): void {
     this.state.nodes.clear();
     this.state.edges.clear();
@@ -944,6 +1501,13 @@ export class OrchestrationKnowledgeGraph {
       };
       this.state.edges.set(edge.id, edge);
     }
+
+    for (const node of this.state.streamNodes.values()) {
+      this.state.nodes.set(node.id, node);
+    }
+    for (const edge of this.state.streamEdges.values()) {
+      this.state.edges.set(edge.id, edge);
+    }
   }
 
   private calculateServiceRisk(): Record<string, ServiceRiskProfile> {
@@ -1029,23 +1593,60 @@ export class OrchestrationKnowledgeGraph {
   }
 }
 
+export function decryptGraphPayload<T = unknown>(
+  payload: unknown,
+  secret: string,
+  options?: { associatedData?: string },
+): T {
+  if (!isEncryptedPayload(payload)) {
+    throw new Error('Payload is not encrypted data');
+  }
+  return decryptPayload<T>(payload, secret, options?.associatedData ?? payload.associatedData);
+}
+
+export function decryptGraphNode<TData = Record<string, unknown>>(
+  node: GraphNode,
+  secret: string,
+  options?: { associatedData?: string },
+): GraphNode<TData> {
+  if (!isEncryptedPayload(node.data)) {
+    return node as GraphNode<TData>;
+  }
+  const decrypted = decryptGraphPayload<TData>(node.data, secret, options);
+  return { ...node, data: decrypted };
+}
+
 export type {
+  AgentTrigger,
   CostSignalConnector,
   CostSignalRecord,
   EnvironmentConnector,
   EnvironmentRecord,
   GraphEdge,
   GraphNode,
+  GraphUpdate,
   GraphSnapshot,
   IncidentConnector,
   IncidentRecord,
+  KnowledgeGraphEncryptionAlgorithm,
+  KnowledgeGraphEncryptionMode,
+  KnowledgeGraphEncryptionOptions,
   PipelineConnector,
   PipelineRecord,
   PipelineStageRecord,
   PolicyConnector,
+  ProtectedNodeSummary,
   ServiceConnector,
   ServiceRecord,
   ServiceRiskProfile,
+  DataResidencyOptions,
 };
 
 export * from './osint.js';
+export {
+  KafkaGraphUpdateStream,
+  type KafkaLikeConsumer,
+  type KafkaLikeEachMessagePayload,
+  type KafkaLikeMessage,
+  type KafkaStreamConfig,
+} from './streams.js';

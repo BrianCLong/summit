@@ -1,5 +1,5 @@
-import { getPostgresPool } from '../postgres';
-import baseLogger from '../../config/logger';
+import { getPostgresPool } from '../postgres.js';
+import baseLogger from '../../config/logger.js';
 
 const logger = baseLogger.child({ name: 'pipelines-repo' });
 
@@ -15,7 +15,7 @@ async function ensureTable() {
         updated_at TIMESTAMPTZ DEFAULT NOW()
       );
     `);
-  } catch (e) {
+  } catch (e: any) {
     logger.warn({ err: e }, 'ensure pipeline_defs failed (mock mode?)');
   }
 }
@@ -36,7 +36,7 @@ export async function savePipelineDef(
       [id, name, JSON.stringify(nodes), JSON.stringify(edges)],
     );
     return { ok: true };
-  } catch (e) {
+  } catch (e: any) {
     logger.warn({ err: e }, 'savePipelineDef failed');
     return { ok: false };
   }
@@ -59,7 +59,7 @@ export async function getPipelineDef(id: string) {
       edges: r.edges,
       updated_at: r.updated_at,
     };
-  } catch (e) {
+  } catch (e: any) {
     logger.warn({ err: e }, 'getPipelineDef failed');
     return null;
   }

@@ -7,25 +7,25 @@ on:
   workflow_call:
     inputs:
       node-version-file:
-        description: 'Path to .nvmrc or package.json (optional, defaults to auto-detect)'
+        description: "Path to .nvmrc or package.json (optional, defaults to auto-detect)"
         required: false
         type: string
       pnpm-version:
-        description: 'PNPM version (optional, defaults to repo pin)'
+        description: "PNPM version (optional, defaults to repo pin)"
         required: false
         type: string
-        default: '9.12.0'
+        default: "9.12.0"
       install-deps:
-        description: 'Whether to install dependencies (defaults to true)'
+        description: "Whether to install dependencies (defaults to true)"
         required: false
         type: boolean
         default: true
     outputs:
       node-version:
-        description: 'The detected/resolved Node.js version'
+        description: "The detected/resolved Node.js version"
         value: ${{ jobs.toolchain.outputs.node }}
       pnpm-version:
-        description: 'The resolved pnpm version'
+        description: "The resolved pnpm version"
         value: ${{ jobs.toolchain.outputs.pnpm }}
 
 permissions:
@@ -40,7 +40,7 @@ jobs:
       pnpm: ${{ steps.resolve-pnpm.outputs.pnpm }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Detect Node.js version
         id: detect
@@ -89,21 +89,18 @@ jobs:
           echo "pnpm=9.12.0" >> "$GITHUB_OUTPUT"
           echo "⚠️  Falling back to pinned pnpm 9.12.0"
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ steps.detect.outputs.version }}
-          cache: 'pnpm'
-          cache-dependency-path: pnpm-lock.yaml
-
-      - name: Enable Corepack
-        run: corepack enable
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: ${{ steps.resolve-pnpm.outputs.pnpm }}
           run_install: ${{ inputs.install-deps }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ steps.detect.outputs.version }}
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Log toolchain versions
         shell: bash

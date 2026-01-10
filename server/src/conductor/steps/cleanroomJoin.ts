@@ -1,4 +1,4 @@
-import { applyDp } from '../../dp';
+import { applyDp } from '../../dp.js';
 
 export async function cleanroomJoin(ctx: any, step: any) {
   const cfg = step.inputs || {};

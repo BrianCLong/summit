@@ -9,6 +9,7 @@ import { tenantLimitEnforcer } from '../lib/resources/tenant-limit-enforcer.js';
 import { quotaOverrideService } from '../lib/resources/overrides/QuotaOverrideService.js';
 import { provenanceLedger } from '../provenance/ledger.js';
 import { metrics } from '../monitoring/metrics.js';
+import { RateLimitRouteGroup, getRateLimitConfig } from '../config/rateLimit.js';
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -59,7 +60,7 @@ export const createRateLimiter = (endpointClass: EndpointClass = EndpointClass.D
                     else if (endpointClass === EndpointClass.EXPORT) limit = Math.max(5, Math.floor(quota.requestsPerMinute / 20));
                     else limit = quota.requestsPerMinute;
                 }
-            } catch (e) {
+            } catch (e: any) {
                 // Fallback to defaults
             }
 
@@ -188,7 +189,7 @@ export const createRateLimiter = (endpointClass: EndpointClass = EndpointClass.D
 
             next();
 
-        } catch (e) {
+        } catch (e: any) {
             console.error('Rate limit error', e);
             // Fail open if Redis is down? Or closed?
             // Usually fail open for reliability unless strict.
@@ -199,3 +200,66 @@ export const createRateLimiter = (endpointClass: EndpointClass = EndpointClass.D
 
 // Default export backward compatible (approximate)
 export const rateLimitMiddleware = createRateLimiter(EndpointClass.DEFAULT);
+
+type InMemoryRateLimitEntry = {
+    count: number;
+    resetAt: number;
+};
+
+const inMemoryStore: Map<string, InMemoryRateLimitEntry> = new Map();
+
+function buildRateLimitKey(req: Request, group: RateLimitRouteGroup): string {
+    const tenantId = (req as any).tenant?.id || (req as any).tenant?.tenantId || (req as any).user?.tenant_id;
+    const identifier = tenantId ? `tenant:${tenantId}` : `ip:${req.ip || req.socket?.remoteAddress || 'unknown'}`;
+    const routeFragment = `${req.baseUrl || ''}${req.route?.path || req.path || req.originalUrl || 'unknown'}`;
+    return `${identifier}:group:${group}:route:${routeFragment}`;
+}
+
+function applyInMemoryRateLimit(key: string, limit: number, windowMs: number) {
+    const now = Date.now();
+    const existing = inMemoryStore.get(key);
+
+    if (!existing || existing.resetAt <= now) {
+        const resetAt = now + windowMs;
+        const entry = { count: 1, resetAt } satisfies InMemoryRateLimitEntry;
+        inMemoryStore.set(key, entry);
+        return { allowed: true, remaining: limit - 1, resetAt } as const;
+    }
+
+    existing.count += 1;
+    const remaining = limit - existing.count;
+    return { allowed: existing.count <= limit, remaining, resetAt: existing.resetAt } as const;
+}
+
+export function resetRateLimitStore() {
+    inMemoryStore.clear();
+}
+
+export function createRouteRateLimitMiddleware(group: RateLimitRouteGroup) {
+    return (req: Request, res: Response, next: NextFunction) => {
+        const config = getRateLimitConfig();
+        if (!config.enabled) {
+            return next();
+        }
+
+        const groupConfig = config.groups[group] || config.groups.default;
+        const key = buildRateLimitKey(req, group);
+        const result = applyInMemoryRateLimit(key, groupConfig.limit, groupConfig.windowMs);
+
+        const retryAfterSeconds = Math.max(1, Math.ceil((result.resetAt - Date.now()) / 1000));
+        res.setHeader('X-RateLimit-Limit', String(groupConfig.limit));
+        res.setHeader('X-RateLimit-Remaining', String(Math.max(result.remaining, 0)));
+        res.setHeader('X-RateLimit-Reset', String(Math.ceil(result.resetAt / 1000)));
+
+        if (!result.allowed) {
+            res.setHeader('Retry-After', String(retryAfterSeconds));
+            return res.status(429).json({
+                error: 'rate_limit_exceeded',
+                code: 'RATE_LIMIT_EXCEEDED',
+                retryAfter: retryAfterSeconds,
+            });
+        }
+
+        return next();
+    };
+}

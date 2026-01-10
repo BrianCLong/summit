@@ -24,7 +24,7 @@ export async function loadPolicyBundleFromDisk(
   signaturePath?: string,
 ): Promise<PolicyBundleVersion> {
   const verification = await loadSignedPolicy(bundlePath, signaturePath);
-  const content = await fs.readFile(bundlePath, 'utf8');
+  const content = verification.buf.toString('utf8');
   const parsed = tenantPolicyBundleSchema.parse(JSON.parse(content));
   const versionId = deriveVersionId(parsed, verification.digest);
 
@@ -59,6 +59,25 @@ class PolicyBundleStore {
 
   getCurrent(): PolicyBundleVersion | undefined {
     return this.currentPolicyVersionId ? this.versions.get(this.currentPolicyVersionId) : undefined;
+  }
+
+  resolveForTenant(
+    tenantId: string,
+    versionId?: string,
+  ): PolicyBundleVersion | undefined {
+    if (versionId) {
+      const byVersion = this.versions.get(versionId);
+      if (byVersion && byVersion.bundle.tenantId === tenantId) return byVersion;
+    }
+
+    const current = this.getCurrent();
+    if (current && current.bundle.tenantId === tenantId) return current;
+
+    const candidates = Array.from(this.versions.values())
+      .filter((version) => version.bundle.tenantId === tenantId)
+      .sort((a, b) => a.loadedAt.getTime() - b.loadedAt.getTime());
+
+    return candidates.at(-1);
   }
 
   list(): PolicyBundleVersion[] {

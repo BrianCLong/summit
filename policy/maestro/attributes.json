@@ -1,0 +1,17 @@
+{
+  "mfa": {
+    "description": "Step-up verification asserted",
+    "type": "boolean",
+    "default": false
+  },
+  "break_glass": {
+    "description": "Break-glass authorization acknowledged",
+    "type": "boolean",
+    "default": false
+  },
+  "dual_control": {
+    "description": "Dual-control approval recorded",
+    "type": "boolean",
+    "default": false
+  }
+}

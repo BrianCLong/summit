@@ -1,5 +1,5 @@
-import { DataQualityMetric } from './models';
-import { getDriver } from '../../graph/neo4j';
+import { DataQualityMetric } from './models.js';
+import { getDriver } from '../../graph/neo4j.js';
 
 export class DataQualityService {
 
@@ -50,7 +50,7 @@ export class DataQualityService {
             });
         }
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error calculating data quality metrics:', error);
     } finally {
         await session.close();

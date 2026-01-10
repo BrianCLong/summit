@@ -1,0 +1,209 @@
+name: Release Rollback
+
+# EMERGENCY RELEASE ROLLBACK WORKFLOW
+# Safely rolls back a failed GA release with full audit trail.
+#
+# See docs/ci/ROLLBACK_AUTOMATION.md for full documentation.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "GA tag to rollback (e.g., v4.1.2)"
+        required: true
+        type: string
+      reason:
+        description: "Reason for rollback (min 20 chars)"
+        required: true
+        type: string
+      create_issue:
+        description: "Create tracking issue"
+        type: boolean
+        default: true
+      dry_run:
+        description: "Dry run (show what would happen)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  validate:
+    name: Validate Rollback Request
+    runs-on: ubuntu-latest
+    outputs:
+      valid: ${{ steps.validate.outputs.valid }}
+      previous_tag: ${{ steps.validate.outputs.previous_tag }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Validate Request
+        id: validate
+        run: |
+          TAG="${{ inputs.tag }}"
+          REASON="${{ inputs.reason }}"
+
+          # Validate tag format
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid tag format: $TAG. Expected vX.Y.Z"
+            echo "valid=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          # Validate reason length
+          if [[ ${#REASON} -lt 20 ]]; then
+            echo "::error::Reason must be at least 20 characters"
+            echo "valid=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          # Check if tag exists
+          if ! git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "::error::Tag $TAG does not exist"
+            echo "valid=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          # Find previous tag
+          PREVIOUS=$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | grep -v '\-rc\.' | grep -A1 "^${TAG}$" | tail -1)
+          if [[ -z "$PREVIOUS" || "$PREVIOUS" == "$TAG" ]]; then
+            echo "::error::Could not find previous stable tag"
+            echo "valid=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          echo "✅ Validation passed"
+          echo "  Tag: $TAG"
+          echo "  Previous: $PREVIOUS"
+          echo "  Reason: $REASON"
+
+          echo "valid=true" >> $GITHUB_OUTPUT
+          echo "previous_tag=$PREVIOUS" >> $GITHUB_OUTPUT
+
+  approve:
+    name: Rollback Approval
+    runs-on: ubuntu-latest
+    needs: validate
+    if: needs.validate.outputs.valid == 'true' && inputs.dry_run == false
+    environment: hotfix-release
+
+    steps:
+      - name: Approval Required
+        run: |
+          echo "Rollback approved by: ${{ github.actor }}"
+          echo "Tag: ${{ inputs.tag }}"
+          echo "Reason: ${{ inputs.reason }}"
+
+  rollback:
+    name: Execute Rollback
+    runs-on: ubuntu-latest
+    needs: [validate, approve]
+    if: always() && needs.validate.outputs.valid == 'true' && (needs.approve.result == 'success' || inputs.dry_run == true)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Execute Rollback
+        id: rollback
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/release/rollback_release.sh
+
+          ARGS="--tag ${{ inputs.tag }} --reason '${{ inputs.reason }}'"
+
+          if [[ "${{ inputs.create_issue }}" == "true" ]]; then
+            ARGS="$ARGS --create-issue"
+          fi
+
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            ARGS="$ARGS --dry-run"
+          fi
+
+          ARGS="$ARGS --force"
+
+          # Execute rollback
+          OUTPUT=$(eval "./scripts/release/rollback_release.sh $ARGS" 2>&1) || true
+
+          echo "$OUTPUT"
+
+          # Parse JSON output
+          JSON_OUTPUT=$(echo "$OUTPUT" | tail -1)
+          STATUS=$(echo "$JSON_OUTPUT" | jq -r '.status // "unknown"')
+
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+
+      - name: Upload Report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: rollback-report-${{ inputs.tag }}-${{ github.run_id }}
+          path: artifacts/reports/rollback-*.md
+          retention-days: 90
+
+      - name: Job Summary
+        if: always()
+        run: |
+          TAG="${{ inputs.tag }}"
+          PREVIOUS="${{ needs.validate.outputs.previous_tag }}"
+          REASON="${{ inputs.reason }}"
+          DRY_RUN="${{ inputs.dry_run }}"
+
+          if [[ "$DRY_RUN" == "true" ]]; then
+            echo "### ⏭️ Rollback Dry Run: $TAG" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### 🔄 Release Rollback: $TAG" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | \`$TAG\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Previous | \`$PREVIOUS\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Reason | $REASON |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered By | @${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dry Run | $DRY_RUN |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "$DRY_RUN" != "true" ]]; then
+            echo "### Actions Taken" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Deleted Git tag: \`$TAG\`" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Deleted GitHub release" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Created tracking issue" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Generated rollback report" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "1. Verify production is running \`$PREVIOUS\`" >> $GITHUB_STEP_SUMMARY
+            echo "2. Complete root cause analysis" >> $GITHUB_STEP_SUMMARY
+            echo "3. Create fix PR" >> $GITHUB_STEP_SUMMARY
+            echo "4. Schedule new release" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  notify:
+    name: Send Notifications
+    runs-on: ubuntu-latest
+    needs: rollback
+    if: always() && needs.rollback.result == 'success' && inputs.dry_run == false
+
+    steps:
+      - name: Notify Team
+        run: |
+          echo "🔄 Release Rollback Notification"
+          echo ""
+          echo "Tag: ${{ inputs.tag }}"
+          echo "Reason: ${{ inputs.reason }}"
+          echo "Previous: ${{ needs.validate.outputs.previous_tag }}"
+          echo "Triggered by: ${{ github.actor }}"
+          echo ""
+          echo "Slack/Teams notification would be sent here"

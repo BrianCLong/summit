@@ -1,8 +1,9 @@
 import { WatchlistService } from '../watchlists/WatchlistService';
+import { wrapResolversWithPolicy } from './policyWrapper';
 
 const service = new WatchlistService();
 
-export const watchlistResolvers = {
+const resolvers = {
   Query: {
     watchlists: () => service.all(),
     watchlist: (_: any, { id }: any) => service.get(id),
@@ -26,3 +27,5 @@ export const watchlistResolvers = {
     },
   },
 };
+
+export const watchlistResolvers = wrapResolversWithPolicy('Watchlists', resolvers);

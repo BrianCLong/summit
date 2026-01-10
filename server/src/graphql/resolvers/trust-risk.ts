@@ -8,8 +8,7 @@ import {
   getTrustScore,
   upsertTrustScore,
   insertRiskSignal,
-} from '../../db/repositories/trustRiskRepo.js';
-import {
+  listRecentSignals,
   listRiskSignalsPaged,
   listTrustScores,
 } from '../../db/repositories/trustRiskRepo.js';
@@ -48,16 +47,14 @@ export const trustRiskResolvers = {
       );
     },
     async riskSignals(_: any, { tenantId, limit, kind, severity }: any) {
-      const rows = await (
-        await import('../../db/repositories/trustRiskRepo.js')
-      ).listRecentSignals(tenantId, undefined, Math.min(limit ?? 50, 100));
+      const rows = await listRecentSignals(tenantId, undefined, Math.min(limit ?? 50, 100));
       return rows
         .filter(
-          (r) =>
+          (r: any) =>
             (!kind || r.kind === kind) &&
             (!severity || r.severity === severity),
         )
-        .map((r) => ({
+        .map((r: any) => ({
           id: r.id,
           tenantId: r.tenant_id,
           kind: r.kind,
@@ -79,7 +76,7 @@ export const trustRiskResolvers = {
         offset,
       });
       return {
-        items: page.items.map((r) => ({
+        items: page.items.map((r: any) => ({
           id: r.id,
           tenantId: r.tenant_id,
           kind: r.kind,
@@ -96,7 +93,7 @@ export const trustRiskResolvers = {
     async trustScoresPage(_: any, { tenantId, limit, offset }: any) {
       const page = await listTrustScores(tenantId, limit, offset);
       return {
-        items: page.items.map((ts) => ({
+        items: page.items.map((ts: any) => ({
           subjectId: ts.subject_id,
           score: Number(ts.score),
           reasons: ts.reasons || [],

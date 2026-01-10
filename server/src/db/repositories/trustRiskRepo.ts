@@ -1,4 +1,4 @@
-import { pg } from '../../db/pg';
+import { pg } from '../../db/pg.js';
 
 export type TrustScoreRecord = {
   id: string;

@@ -124,7 +124,7 @@ class Neo4jLoader:
                 result.errors.extend(batch_result.errors)
 
                 self.logger.debug(
-                    f"Loaded entity batch {i//batch_size + 1}: "
+                    f"Loaded entity batch {i // batch_size + 1}: "
                     f"{batch_result.entities_loaded}/{len(batch)} successful"
                 )
 
@@ -244,7 +244,7 @@ class Neo4jLoader:
         except Exception as e:
             self.logger.error(f"Failed to load {entity_type} entities: {e}")
             result.entities_failed = len(entities)
-            result.errors.append(f"{entity_type}: {str(e)}")
+            result.errors.append(f"{entity_type}: {e!s}")
 
         return result
 

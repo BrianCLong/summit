@@ -10,6 +10,7 @@ import {
   PQCKeyStore,
 } from '../services/QuantumResistantCryptoService';
 import { PQCAlgorithm as PQCAlgorithmEnum } from '@intelgraph/post-quantum-crypto';
+import { wrapResolversWithPolicy } from './policyWrapper';
 
 // PubSub for subscriptions
 const pubsub = new PubSub();
@@ -309,4 +310,4 @@ export const pqcResolvers = {
   },
 };
 
-export default pqcResolvers;
+export default wrapResolversWithPolicy('PQC', pqcResolvers);

@@ -102,3 +102,64 @@ export class ProvenanceLedger {
     );
   }
 }
+
+export function buildEvidencePayload(input) {
+  const base = {
+    tenant: input.tenant,
+    caseId: input.caseId,
+    environment: input.environment,
+    operation: input.operation,
+    request: input.request,
+    policy: input.policy,
+    decision: input.decision,
+    model: input.model,
+    cost: input.cost,
+    output: input.output,
+    correlationId: input.correlationId,
+  };
+
+  const signature =
+    input.signature ??
+    `stub-signature:${crypto
+      .createHash('sha256')
+      .update(
+        JSON.stringify({
+          tenant: base.tenant,
+          caseId: base.caseId,
+          operation: base.operation,
+          correlationId: base.correlationId,
+        }),
+      )
+      .digest('hex')}`;
+
+  return {
+    ...base,
+    id: input.id ?? crypto.randomUUID(),
+    timestamp: input.timestamp ?? new Date().toISOString(),
+    signature,
+  };
+}
+
+export class InMemoryLedger {
+  constructor() {
+    this.entries = new Map();
+  }
+
+  record(payload) {
+    const entry = buildEvidencePayload(payload);
+    this.entries.set(entry.id, entry);
+    return entry;
+  }
+
+  get(id) {
+    return this.entries.get(id);
+  }
+
+  list(limit) {
+    const values = Array.from(this.entries.values());
+    if (limit && limit > 0) {
+      return values.slice(-limit);
+    }
+    return values;
+  }
+}

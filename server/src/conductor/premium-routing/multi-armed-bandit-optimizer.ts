@@ -326,7 +326,7 @@ export class MultiArmedBanditOptimizer {
         regret: arm.regret,
         confidence: arm.confidence,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to update bandit arm', {
         error: error.message,
         armId,
@@ -592,7 +592,7 @@ export class MultiArmedBanditOptimizer {
     if (rewards.length < 2) return 0;
 
     const mean = rewards.reduce((sum, r) => sum + r, 0) / rewards.length;
-    const squaredDiffs = rewards.map((r) => Math.pow(r - mean, 2));
+    const squaredDiffs = rewards.map((r: any) => Math.pow(r - mean, 2));
     return squaredDiffs.reduce((sum, diff) => sum + diff, 0) / rewards.length;
   }
 

@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Prompt Pack Manifest v1",
+  "type": "object",
+  "required": ["id", "version"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+(\\.[a-z0-9-]+)*(@v[0-9]+)?$",
+      "description": "Unique identifier for the prompt pack (e.g., core.jules-copilot@v1)."
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of the prompt pack."
+    },
+    "description": {
+      "type": "string"
+    },
+    "roles": {
+      "type": "object",
+      "properties": {
+        "system": { "type": "string", "description": "System prompt template." },
+        "user": { "type": "string", "description": "User message template." },
+        "assistant": { "type": "string", "description": "Assistant pre-fill or example." }
+      },
+      "additionalProperties": false
+    },
+    "template_path": {
+      "type": "string",
+      "description": "Relative path to a monolithic template file if roles are not used."
+    },
+    "vars": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": { "type": "string", "enum": ["string", "number", "boolean", "json"] },
+          "default": {},
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["input"],
+        "properties": {
+          "input": { "type": "object" },
+          "expected": { "type": "string" },
+          "asserts": { "type": "array" },
+          "seed": { "type": "integer" }
+        }
+      }
+    },
+    "guardrails": {
+      "type": "object",
+      "properties": {
+        "blocked_terms": { "type": "array", "items": { "type": "string" } },
+        "pii_masking": { "type": "boolean" },
+        "tags": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "model_config": {
+        "type": "object",
+        "properties": {
+            "model": { "type": "string" },
+            "temperature": { "type": "number" },
+            "max_tokens": { "type": "integer" }
+        }
+    },
+    "vendor_overrides": {
+      "type": "object",
+      "properties": {
+        "grok": { "type": "object" },
+        "gemini": { "type": "object" },
+        "claude": { "type": "object" },
+        "openai": { "type": "object" }
+      },
+      "additionalProperties": true
+    }
+  }
+}

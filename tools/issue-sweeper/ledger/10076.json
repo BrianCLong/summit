@@ -1,0 +1,67 @@
+{
+  "issue_number": 10076,
+  "title": "[P1][Air-Gap] Offline Deploy v1 (images+digests, registry steps, config injection, checksums, transcript)",
+  "url": "https://github.com/BrianCLong/summit/issues/10076",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9399487338,
+      "node_id": "LA_kwDOPaNncM8AAAACMEDLag",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/prio:P1",
+      "name": "prio:P1",
+      "color": "ff9800",
+      "default": false,
+      "description": "High priority"
+    },
+    {
+      "id": 9402657980,
+      "node_id": "LA_kwDOPaNncM8AAAACMHEsvA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/prd:october",
+      "name": "prd:october",
+      "color": "0366d6",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9402658137,
+      "node_id": "LA_kwDOPaNncM8AAAACMHEtWQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/lane:platform",
+      "name": "lane:platform",
+      "color": "0366d6",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9402663788,
+      "node_id": "LA_kwDOPaNncM8AAAACMHFDbA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/runbook",
+      "name": "runbook",
+      "color": "0366d6",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-04T18:27:29Z",
+  "createdAt": "2025-10-04T18:27:29Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

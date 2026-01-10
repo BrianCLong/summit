@@ -1,9 +1,9 @@
-import { getCiSignal } from './ci-signal';
-import { getP95Latency } from './p95-latency';
-import { getGraphConsistency } from './graph-consistency';
-import { getErrorTaxonomies } from './error-taxonomies';
-import { getSecretDrift } from './secret-drift';
-import { getPredictiveAnomalyDetection } from './predictive-anomaly-detection';
+import { getCiSignal } from './ci-signal.js';
+import { getP95Latency } from './p95-latency.js';
+import { getGraphConsistency } from './graph-consistency.js';
+import { getErrorTaxonomies } from './error-taxonomies.js';
+import { getSecretDrift } from './secret-drift.js';
+import { getPredictiveAnomalyDetection } from './predictive-anomaly-detection.js';
 
 export const getHealthScore = async () => {
   const ciSignal = await getCiSignal();

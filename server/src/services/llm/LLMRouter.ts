@@ -6,14 +6,14 @@ import {
     LLMRouterConfig,
     RoutingPolicy,
     SafetyGuardrail
-} from './interfaces';
-import { Observability, ConsoleObservability } from './observability';
-import { OpenAIProvider } from './providers/OpenAIProvider';
-import { AnthropicProvider } from './providers/AnthropicProvider';
-import { MockProvider } from './providers/MockProvider';
-import { CostControlPolicy } from './policies/CostControlPolicy';
-import { LatencyPolicy } from './policies/LatencyPolicy';
-import { PIIGuardrail } from './guardrails/PIIGuardrail';
+} from './interfaces.js';
+import { Observability, ConsoleObservability } from './observability.js';
+import { OpenAIProvider } from './providers/OpenAIProvider.js';
+import { AnthropicProvider } from './providers/AnthropicProvider.js';
+import { MockProvider } from './providers/MockProvider.js';
+import { CostControlPolicy } from './policies/CostControlPolicy.js';
+import { LatencyPolicy } from './policies/LatencyPolicy.js';
+import { PIIGuardrail } from './guardrails/PIIGuardrail.js';
 
 export class LLMRouter {
     private providers: Map<string, LLMProvider> = new Map();

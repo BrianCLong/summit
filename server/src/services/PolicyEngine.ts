@@ -2,6 +2,7 @@ import { EventEmitter } from 'events';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import yaml from 'js-yaml';
+import { getAuditSystem } from '../audit/index.js';
 import { AdvancedAuditSystem } from '../audit/advanced-audit-system.js';
 import { AppError } from '../lib/errors.js';
 import { fileURLToPath } from 'url';
@@ -39,7 +40,7 @@ export interface PolicyDecision {
 export class PolicyEngine extends EventEmitter {
   private static instance: PolicyEngine;
   private config: any;
-  private auditSystem: AdvancedAuditSystem;
+  private auditSystem: AdvancedAuditSystem | null = null;
   private initialized: boolean = false;
   private opaUrl: string = 'http://localhost:8181/v1/data/governance/allow';
 
@@ -48,11 +49,11 @@ export class PolicyEngine extends EventEmitter {
     // Use getInstance without params, assuming it's already initialized by the main app
     // or fallback to lazy initialization if possible
     try {
-        this.auditSystem = AdvancedAuditSystem.getInstance();
-    } catch (e) {
-        // If not initialized, we can't really log audits effectively yet.
-        // We'll let it fail or log to console.
-        console.warn('PolicyEngine: AuditSystem not ready', e);
+      this.auditSystem = getAuditSystem();
+    } catch (e: any) {
+      // If not initialized, we can't really log audits effectively yet.
+      // We'll let it fail or log to console.
+      console.warn('PolicyEngine: AuditSystem not ready', e);
     }
   }
 
@@ -71,23 +72,23 @@ export class PolicyEngine extends EventEmitter {
       const configPath = join(process.cwd(), 'policy/governance-config.yaml');
 
       try {
-          const fileContents = await readFile(configPath, 'utf8');
-          this.config = yaml.load(fileContents);
-          console.log('PolicyEngine loaded configuration from', configPath);
-      } catch (e) {
-          console.warn('PolicyEngine could not load config file from', configPath, e);
-          // Fallback
-           this.config = {
-            environments: {
-              dev: { mode: 'permissive', enforce: false },
-              staging: { mode: 'strict', enforce: true },
-              prod: { mode: 'strict', enforce: true }
-            }
-          };
+        const fileContents = await readFile(configPath, 'utf8');
+        this.config = yaml.load(fileContents as unknown as string);
+        console.log('PolicyEngine loaded configuration from', configPath);
+      } catch (e: any) {
+        console.warn('PolicyEngine could not load config file from', configPath, e);
+        // Fallback
+        this.config = {
+          environments: {
+            dev: { mode: 'permissive', enforce: false },
+            staging: { mode: 'strict', enforce: true },
+            prod: { mode: 'strict', enforce: true }
+          }
+        };
       }
 
       this.initialized = true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to initialize PolicyEngine', error);
       throw error;
     }
@@ -106,69 +107,69 @@ export class PolicyEngine extends EventEmitter {
     // Try OPA first
     let decision: PolicyDecision;
     try {
-        decision = await this.queryOpa(context);
-    } catch (e) {
-        // Fallback to simulation if OPA is not available
-        decision = this.simulateRegoEvaluation(context, envConfig);
+      decision = await this.queryOpa(context);
+    } catch (e: any) {
+      // Fallback to simulation if OPA is not available
+      decision = this.simulateRegoEvaluation(context, envConfig);
     }
 
     // Audit Log
     if (this.auditSystem) {
-        try {
-            await this.auditSystem.log(
-            { id: context.user.id, type: 'user', role: context.user.role, tenantId: context.user.tenantId },
-            context.action,
-            { id: context.resource.id || 'unknown', type: context.resource.type },
-            { ...context, decision },
-            { decision: decision.allow ? 'ALLOW' : 'DENY' }
-            );
-        } catch (e) {
-            console.error('Failed to log audit event', e);
-        }
+      try {
+        await this.auditSystem.log(
+          { id: context.user.id, type: 'user', role: context.user.role, tenantId: context.user.tenantId },
+          context.action,
+          { id: context.resource.id || 'unknown', type: context.resource.type },
+          { ...context, decision },
+          { decision: decision.allow ? 'ALLOW' : 'DENY' }
+        );
+      } catch (e: any) {
+        console.error('Failed to log audit event', e);
+      }
     }
 
     return decision;
   }
 
   private async queryOpa(context: PolicyContext): Promise<PolicyDecision> {
-      return new Promise((resolve, reject) => {
-          const data = JSON.stringify({ input: context });
-          const req = http.request(this.opaUrl, {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-                  'Content-Length': data.length
-              },
-              timeout: 200 // fast timeout for sidecar
-          }, (res) => {
-              if (res.statusCode !== 200) {
-                  reject(new Error(`OPA returned ${res.statusCode}`));
-                  return;
-              }
-              let body = '';
-              res.on('data', chunk => body += chunk);
-              res.on('end', () => {
-                  try {
-                      const result = JSON.parse(body);
-                      // OPA result format: { result: boolean } or { result: { allow: boolean, ... } }
-                      if (result.result === true || result.result === false) {
-                          resolve({ allow: result.result });
-                      } else if (result.result && typeof result.result.allow === 'boolean') {
-                          resolve({ allow: result.result.allow, reason: result.result.reason });
-                      } else {
-                          // If undefined, default to deny
-                          resolve({ allow: false, reason: 'OPA result undefined' });
-                      }
-                  } catch (e) {
-                      reject(e);
-                  }
-              });
-          });
-
-          req.on('error', (e) => reject(e));
-          req.write(data);
-          req.end();
+    return new Promise((resolve, reject) => {
+      const data = JSON.stringify({ input: context });
+      const req = http.request(this.opaUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': data.length
+        },
+        timeout: 200 // fast timeout for sidecar
+      }, (res) => {
+        if (res.statusCode !== 200) {
+          reject(new Error(`OPA returned ${res.statusCode}`));
+          return;
+        }
+        let body = '';
+        res.on('data', chunk => body += chunk);
+        res.on('end', () => {
+          try {
+            const result = JSON.parse(body);
+            // OPA result format: { result: boolean } or { result: { allow: boolean, ... } }
+            if (result.result === true || result.result === false) {
+              resolve({ allow: result.result });
+            } else if (result.result && typeof result.result.allow === 'boolean') {
+              resolve({ allow: result.result.allow, reason: result.result.reason });
+            } else {
+              // If undefined, default to deny
+              resolve({ allow: false, reason: 'OPA result undefined' });
+            }
+          } catch (e: any) {
+            reject(e);
+          }
+        });
       });
+
+      req.on('error', (e) => reject(e));
+      req.write(data);
+      req.end();
+    });
   }
 
   private simulateRegoEvaluation(context: PolicyContext, envConfig: any): PolicyDecision {
@@ -181,9 +182,9 @@ export class PolicyEngine extends EventEmitter {
 
     // 2. Dev Environment Permissiveness
     if (envConfig && envConfig.mode === 'permissive') {
-        if (context.environment === 'dev') {
-            return { allow: true, reason: 'Dev environment permissive' };
-        }
+      if (context.environment === 'dev') {
+        return { allow: true, reason: 'Dev environment permissive' };
+      }
     }
 
     // 3. Compliance Blocks
@@ -193,14 +194,14 @@ export class PolicyEngine extends EventEmitter {
 
     // 4. Permission Check
     if (context.user.permissions && context.user.permissions.includes(context.action)) {
-        // 5. Runtime Checks
-        if (context.action === 'copilot_query') {
-            const query = context.resource.query || '';
-            if (/ssn|credit card/i.test(query)) {
-                return { allow: false, reason: 'PII detected in query' };
-            }
+      // 5. Runtime Checks
+      if (context.action === 'copilot_query') {
+        const query = context.resource.query || '';
+        if (/ssn|credit card/i.test(query)) {
+          return { allow: false, reason: 'PII detected in query' };
         }
-        return { allow: true };
+      }
+      return { allow: true };
     }
 
     return { allow: false, reason: 'Insufficient permissions' };
@@ -234,7 +235,7 @@ export class PolicyEngine extends EventEmitter {
         }
 
         next();
-      } catch (error) {
+      } catch (error: any) {
         next(error);
       }
     };

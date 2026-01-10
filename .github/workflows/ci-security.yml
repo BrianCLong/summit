@@ -11,6 +11,11 @@ on:
         required: false
         type: boolean
         default: true
+      run_snyk:
+        description: "Enable or disable Snyk dependency scanning."
+        required: false
+        type: boolean
+        default: false
     secrets:
       snyk_token:
         description: "Snyk API token when invoking as a reusable workflow."
@@ -33,6 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       run_dast: ${{ steps.flags.outputs.run_dast }}
+      run_snyk: ${{ steps.flags.outputs.run_snyk }}
     steps:
       - id: flags
         run: |
@@ -46,13 +52,22 @@ jobs:
           fi
           echo "run_dast=$RUN_DAST" >> "$GITHUB_OUTPUT"
 
+          RUN_SNYK="false"
+          if command -v jq >/dev/null 2>&1 && [ -f "$GITHUB_EVENT_PATH" ]; then
+            VALUE=$(jq -r '.inputs.run_snyk // empty' "$GITHUB_EVENT_PATH")
+            if [ "$VALUE" = "true" ]; then
+              RUN_SNYK="true"
+            fi
+          fi
+          echo "run_snyk=$RUN_SNYK" >> "$GITHUB_OUTPUT"
+
   secret-scan:
     name: Secret scanning (Gitleaks)
     runs-on: ubuntu-latest
     needs: context
     steps:
       - name: Checkout
-        uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
         with:
           fetch-depth: 0
       - name: Prepare report directory
@@ -63,12 +78,12 @@ jobs:
           args: detect --source . --report-format sarif --report-path ${{ env.REPORT_DIR }}/gitleaks.sarif
       - name: Upload SARIF to GitHub Security
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: ${{ env.REPORT_DIR }}/gitleaks.sarif
       - name: Persist report artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: ${{ env.REPORT_DIR }}/gitleaks.sarif
@@ -86,16 +101,16 @@ jobs:
       matrix:
         language: [javascript, python]
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
       - name: Autobuild (best effort)
-        uses: github/codeql-action/autobuild@v3
+        uses: github/codeql-action/autobuild@v4
         continue-on-error: true
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:${{ matrix.language }}"
 
@@ -107,7 +122,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Run Semgrep CI ruleset
@@ -119,12 +134,12 @@ jobs:
           auditOn: push
       - name: Upload Semgrep SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: ${{ env.REPORT_DIR }}/semgrep.sarif
       - name: Persist Semgrep report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: ${{ env.REPORT_DIR }}/semgrep.sarif
@@ -133,10 +148,11 @@ jobs:
     name: Dependency vulnerability scan (Snyk)
     runs-on: ubuntu-latest
     needs: context
+    if: ${{ needs.context.outputs.run_snyk == 'true' }}
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN || secrets.snyk_token }}
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Ensure SNYK_TOKEN is configured
@@ -147,7 +163,7 @@ jobs:
             exit 1
           fi
       - name: Run Snyk test across all manifests
-        uses: snyk/actions/node@b98d498629f1c368650224d6d212bf7dfa89e4bf # 0.4.0
+        uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04 # 1.0.0
         with:
           command: test
           args: >-
@@ -157,12 +173,12 @@ jobs:
             --sarif-file-output=${{ env.REPORT_DIR }}/snyk.sarif
       - name: Upload Snyk SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: ${{ env.REPORT_DIR }}/snyk.sarif
       - name: Persist Snyk report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: ${{ env.REPORT_DIR }}/snyk.sarif
@@ -175,7 +191,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Install Trivy
         uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1 # v0.2.4
       - name: Prepare report directory
@@ -191,12 +207,12 @@ jobs:
             .
       - name: Upload filesystem SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-fs.sarif
       - name: Persist filesystem report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: ${{ env.REPORT_DIR }}/trivy-fs.sarif
@@ -209,7 +225,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Build server image for scanning
@@ -217,7 +233,7 @@ jobs:
       - name: Build client image for scanning
         run: docker build -t security-suite/client ./client
       - name: Scan server image
-        uses: aquasecurity/trivy-action@b95621a837499832c705591a4924e4b10b34332e # 0.16.0
+        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # 0.16.0
         with:
           image-ref: security-suite/server
           format: sarif
@@ -226,11 +242,11 @@ jobs:
           ignore-unfixed: true
       - name: Upload server SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-server.sarif
       - name: Scan client image
-        uses: aquasecurity/trivy-action@b95621a837499832c705591a4924e4b10b34332e # 0.16.0
+        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # 0.16.0
         with:
           image-ref: security-suite/client
           format: sarif
@@ -239,12 +255,12 @@ jobs:
           ignore-unfixed: true
       - name: Upload client SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-client.sarif
       - name: Persist container reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: |
@@ -256,7 +272,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: context
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1 # v0.2.4
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
@@ -270,7 +286,7 @@ jobs:
             .
       - name: Persist license report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: ${{ env.REPORT_DIR }}/trivy-license.json
@@ -280,7 +296,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: context
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Install Checkov
         run: pip install --no-cache-dir checkov==3.2.23
       - name: Run Checkov across Terraform and Helm assets
@@ -294,12 +310,12 @@ jobs:
             --output sarif
       - name: Upload Checkov SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: ${{ env.REPORT_DIR }}/results.sarif
       - name: Persist Checkov report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: ${{ env.REPORT_DIR }}/results.sarif
@@ -309,7 +325,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: context
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Install Helm
         uses: azure/setup-helm@v4
         with:
@@ -330,7 +346,7 @@ jobs:
         run: conftest test rendered --policy policies/opa
       - name: Persist rendered manifests
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: rendered
@@ -342,7 +358,7 @@ jobs:
       - context
       - opa-policy
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Install Helm
         uses: azure/setup-helm@v4
         with:
@@ -368,7 +384,7 @@ jobs:
           fi
       - name: Persist CIS report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: ${{ env.REPORT_DIR }}/trivy-cis.json
@@ -378,14 +394,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: context
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Execute baseline checks
         run: |
           chmod +x scripts/security/baseline-check.sh
           REPORT_DIR="$REPORT_DIR" scripts/security/baseline-check.sh
       - name: Persist baseline report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: ${{ env.REPORT_DIR }}/baseline-report.json
@@ -397,7 +413,7 @@ jobs:
     if: ${{ needs.context.outputs.run_dast == 'true' }}
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Boot application stack
@@ -414,7 +430,7 @@ jobs:
           echo "Application did not become ready in time" >&2
           exit 1
       - name: OWASP ZAP baseline scan
-        uses: zaproxy/action-baseline@v0.14.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: "http://localhost:3000"
           cmd_options: "-a -m 5"
@@ -430,7 +446,7 @@ jobs:
         run: docker compose -f docker-compose.yml down
       - name: Persist ZAP reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: |
@@ -459,7 +475,7 @@ jobs:
       dashboard_url: ${{ steps.dashboard.outputs.dashboard_url }}
     steps:
       - name: Download all security reports
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: security-reports
           path: aggregated-security
@@ -512,7 +528,7 @@ jobs:
                 json.dump(summary, fh, indent=2)
           PY
       - name: Publish job summary
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
@@ -531,7 +547,7 @@ jobs:
               .write();
       - name: Upload aggregated summary
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: aggregated-security/security-summary.json

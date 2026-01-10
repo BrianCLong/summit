@@ -1,5 +1,5 @@
 import express from 'express';
-import { InboundAlertService } from '../../integrations/inbound/service';
+import { InboundAlertService } from '../../integrations/inbound/service.js';
 
 const router = express.Router();
 const service = new InboundAlertService();

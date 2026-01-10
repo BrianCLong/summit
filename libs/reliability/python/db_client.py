@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import asyncio
 import os
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import Any, Awaitable, Callable, Dict
+from typing import Any
 
 import asyncpg
 import neo4j
@@ -22,12 +23,14 @@ class RetryConfig:
     retryable_errors: list[str]
 
 
-with open(os.path.join(os.getcwd(), "configs", "data-plane", "defaults.yaml"), "r", encoding="utf-8") as f:
+with open(
+    os.path.join(os.getcwd(), "configs", "data-plane", "defaults.yaml"), encoding="utf-8"
+) as f:
     SHARED = yaml.safe_load(f)
 
 
 async def _backoff(attempt: int, base: int, max_delay: int, jitter: bool) -> None:
-    delay = min(max_delay, base * (2 ** attempt))
+    delay = min(max_delay, base * (2**attempt))
     if jitter:
         delay *= 0.5 + os.urandom(1)[0] / 255 / 2
     await asyncio.sleep(delay / 1000)
@@ -58,17 +61,24 @@ class PgClient:
         async with self.pool.acquire() as conn:
             return await self.breaker.execute(op, lambda: self._retrying(func, conn))
 
-    async def _retrying(self, func: Callable[[asyncpg.Connection], Awaitable[Any]], conn: asyncpg.Connection) -> Any:
+    async def _retrying(
+        self, func: Callable[[asyncpg.Connection], Awaitable[Any]], conn: asyncpg.Connection
+    ) -> Any:
         last_error: Exception | None = None
         for attempt in range(self.retry_cfg.max_attempts):
             try:
                 return await func(conn)
-            except Exception as err:  # noqa: BLE001
+            except Exception as err:
                 last_error = err
                 code = getattr(err, "sqlstate", None)
                 if code not in self.retry_cfg.retryable_errors:
                     raise
-                await _backoff(attempt, self.retry_cfg.backoff_ms, self.retry_cfg.max_backoff_ms, self.retry_cfg.jitter)
+                await _backoff(
+                    attempt,
+                    self.retry_cfg.backoff_ms,
+                    self.retry_cfg.max_backoff_ms,
+                    self.retry_cfg.jitter,
+                )
         if last_error:
             raise last_error
 
@@ -94,8 +104,12 @@ class Neo4jClient:
             )
         )
 
-    def run(self, op: str, cypher: str, params: Dict[str, Any] | None = None, mode: str = "WRITE") -> Any:
-        session = self.driver.session(default_access_mode=neo4j.WRITE_ACCESS if mode == "WRITE" else neo4j.READ_ACCESS)
+    def run(
+        self, op: str, cypher: str, params: dict[str, Any] | None = None, mode: str = "WRITE"
+    ) -> Any:
+        session = self.driver.session(
+            default_access_mode=neo4j.WRITE_ACCESS if mode == "WRITE" else neo4j.READ_ACCESS
+        )
         try:
             return self.breaker.execute(op, lambda: session.run(cypher, params or {}))
         finally:

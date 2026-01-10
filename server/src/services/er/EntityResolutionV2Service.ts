@@ -93,7 +93,7 @@ export class EntityResolutionV2Service {
   private readonly poolProvider: () => ReturnType<typeof getPostgresPool>;
 
   constructor({ dlq, pool }: EntityResolutionV2Dependencies = {}) {
-    this.dlq = dlq ?? dlqFactory('er-merge-conflicts');
+    this.dlq = dlq ?? (dlqFactory('er-merge-conflicts') as any);
     this.poolProvider = () => pool ?? getPostgresPool();
   }
 
@@ -533,7 +533,7 @@ export class EntityResolutionV2Service {
       { ids: [masterId, ...uniqueMergeIds] }
     );
 
-    const entities: EntityV2[] = result.records.map(r => {
+    const entities: EntityV2[] = result.records.map((r: any) => {
       const node = r.get('n');
       return {
         id: node.properties.id,
@@ -799,7 +799,7 @@ export class EntityResolutionV2Service {
         guardrails: guardrailResult,
         overrideUsed: !!req.guardrailOverrideReason,
       };
-    } catch (e) {
+    } catch (e: any) {
       await tx.rollback();
       log.error(e, 'Merge failed');
       throw e;
@@ -856,7 +856,7 @@ export class EntityResolutionV2Service {
 
        await tx.commit();
        log.info(`Reverted merge decision ${decisionId}`);
-     } catch (e) {
+     } catch (e: any) {
        await tx.rollback();
        throw e;
      }

@@ -180,7 +180,7 @@ export class AzureConnector extends EventEmitter {
 
       azureConnections.inc({ tenant_id: tenantId });
       this.emit('connected', { tenantId, container: config.containerName });
-    } catch (error) {
+    } catch (error: any) {
       this.emit('error', { tenantId, error });
       throw error;
     }
@@ -275,7 +275,7 @@ export class AzureConnector extends EventEmitter {
         });
 
         return metadata;
-      } catch (error) {
+      } catch (error: any) {
         span.recordException?.(error as Error);
         span.setStatus?.({ message: (error as Error).message });
         azureOperations.inc({
@@ -370,7 +370,7 @@ export class AzureConnector extends EventEmitter {
         });
 
         return data;
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
         azureOperations.inc({
@@ -421,7 +421,7 @@ export class AzureConnector extends EventEmitter {
         });
 
         this.emit('blobDeleted', { tenantId: this.tenantId, blobName });
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
         azureOperations.inc({
@@ -465,7 +465,7 @@ export class AzureConnector extends EventEmitter {
         });
 
         return this.mapAzureMetadata(blobName, propertiesResponse);
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
         azureOperations.inc({
@@ -538,7 +538,7 @@ export class AzureConnector extends EventEmitter {
           blobs,
           continuationToken: page.value?.continuationToken,
         };
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
         azureOperations.inc({
@@ -604,7 +604,7 @@ export class AzureConnector extends EventEmitter {
           sourceBlob,
           destinationBlob,
         });
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
         azureOperations.inc({
@@ -672,7 +672,7 @@ export class AzureConnector extends EventEmitter {
           });
 
           return sasUrl;
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           span.setStatus({ code: 2, message: (error as Error).message });
           azureOperations.inc({
@@ -723,7 +723,7 @@ export class AzureConnector extends EventEmitter {
           });
 
           this.emit('tierChanged', { tenantId: this.tenantId, blobName, tier });
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           span.setStatus({ code: 2, message: (error as Error).message });
           azureOperations.inc({
@@ -796,7 +796,7 @@ export class AzureConnector extends EventEmitter {
       const latency = Date.now() - startTime;
 
       return { healthy: true, latency };
-    } catch (error) {
+    } catch (error: any) {
       return {
         healthy: false,
         latency: Date.now() - startTime,
@@ -840,7 +840,7 @@ export class AzureConnector extends EventEmitter {
           blobNames,
           count: blobNames.length,
         });
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
         azureOperations.inc({

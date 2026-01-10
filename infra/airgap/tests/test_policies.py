@@ -4,15 +4,10 @@ Air-Gapped Deployment Policy Tests
 Tests for validating security policies and configurations
 """
 
-import json
-import os
-import re
-import sys
 from pathlib import Path
 
 import pytest
 import yaml
-
 
 # Get the base directory for airgap configs
 AIRGAP_DIR = Path(__file__).parent.parent
@@ -61,9 +56,9 @@ class TestNamespaceConfiguration:
                 ns_name = doc["metadata"]["name"]
 
                 # Check for PSS enforcement label
-                assert (
-                    "pod-security.kubernetes.io/enforce" in labels
-                ), f"Missing PSS enforcement for {ns_name}"
+                assert "pod-security.kubernetes.io/enforce" in labels, (
+                    f"Missing PSS enforcement for {ns_name}"
+                )
 
     def test_security_zone_labels(self, namespace_config):
         """Verify security zone labels are applied"""
@@ -112,12 +107,8 @@ class TestNetworkPolicies:
 
                 # Default deny should cover both directions
                 if "default-deny" in name:
-                    assert (
-                        "Ingress" in policy_types
-                    ), f"{name} missing Ingress in policyTypes"
-                    assert (
-                        "Egress" in policy_types
-                    ), f"{name} missing Egress in policyTypes"
+                    assert "Ingress" in policy_types, f"{name} missing Ingress in policyTypes"
+                    assert "Egress" in policy_types, f"{name} missing Egress in policyTypes"
 
     def test_siem_no_egress(self, network_policies):
         """Verify SIEM namespace has no external egress"""
@@ -166,9 +157,7 @@ class TestMalwareScannerConfig:
 
                     # Require at least 2 engines for 91% reduction target
                     enabled_engines = [e for e in engines if e.get("enabled", True)]
-                    assert (
-                        len(enabled_engines) >= 2
-                    ), "At least 2 scanning engines required"
+                    assert len(enabled_engines) >= 2, "At least 2 scanning engines required"
 
     def test_quarantine_enabled(self, scanner_config):
         """Verify quarantine is enabled"""
@@ -190,9 +179,7 @@ class TestMalwareScannerConfig:
                     config = yaml.safe_load(data["scanner-config.yaml"])
                     thresholds = config.get("scanning", {}).get("thresholds", {})
 
-                    assert thresholds.get(
-                        "blockOnDetection", False
-                    ), "Must block on detection"
+                    assert thresholds.get("blockOnDetection", False), "Must block on detection"
 
 
 class TestSLSASBOMPolicy:
@@ -218,9 +205,7 @@ class TestSLSASBOMPolicy:
                     config = yaml.safe_load(data["policy.yaml"])
                     slsa = config.get("supplyChainPolicy", {}).get("slsa", {})
 
-                    assert (
-                        slsa.get("minimumLevel", 0) >= 3
-                    ), "SLSA Level 3 minimum required"
+                    assert slsa.get("minimumLevel", 0) >= 3, "SLSA Level 3 minimum required"
 
     def test_sbom_required(self, slsa_policy):
         """Verify SBOM is required"""
@@ -258,9 +243,7 @@ class TestSLSASBOMPolicy:
                     )
 
                     assert vuln.get("required", False), "Vulnerability scanning required"
-                    assert vuln.get(
-                        "blockOnCritical", False
-                    ), "Must block on critical vulns"
+                    assert vuln.get("blockOnCritical", False), "Must block on critical vulns"
 
 
 class TestSNMPMonitoring:
@@ -362,9 +345,7 @@ class TestTerraformVariables:
     def test_slsa_level_default(self, terraform_vars):
         """Verify SLSA level default is 3"""
         # Check for slsa_provenance_level variable with default 3
-        assert (
-            "slsa_provenance_level" in terraform_vars
-        ), "Missing slsa_provenance_level variable"
+        assert "slsa_provenance_level" in terraform_vars, "Missing slsa_provenance_level variable"
         assert "default     = 3" in terraform_vars, "SLSA level should default to 3"
 
     def test_vpc_cidr_defined(self, terraform_vars):
@@ -373,9 +354,7 @@ class TestTerraformVariables:
 
     def test_scanning_station_cidr_defined(self, terraform_vars):
         """Verify scanning station CIDR is defined"""
-        assert (
-            "scanning_station_cidr" in terraform_vars
-        ), "Missing scanning_station_cidr variable"
+        assert "scanning_station_cidr" in terraform_vars, "Missing scanning_station_cidr variable"
 
 
 if __name__ == "__main__":

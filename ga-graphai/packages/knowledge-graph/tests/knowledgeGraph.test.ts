@@ -12,6 +12,7 @@ import {
   type IncidentRecord,
   type PolicyConnector,
   type CostSignalConnector,
+  decryptGraphNode,
 } from '../src/index.js';
 import type { PolicyRule } from '@ga-graphai/common-types';
 
@@ -195,6 +196,45 @@ describe('OrchestrationKnowledgeGraph', () => {
     expect(nodes.every((node) => node)).toBe(true);
   });
 
+  it('applies streaming updates and emits agent triggers', async () => {
+    await graph.refresh();
+
+    const snapshot = graph.applyUpdate({
+      source: 'confluent',
+      topic: 'intelgraph.updates',
+      incidents: [
+        {
+          id: 'incident-stream',
+          serviceId: 'svc-api',
+          environmentId: 'env-prod',
+          severity: 'critical',
+          occurredAt: new Date('2024-03-21T00:00:00Z').toISOString(),
+          status: 'open',
+        },
+      ],
+      agentTriggers: [
+        {
+          agent: 'incident-responder',
+          reason: 'critical incident detected via stream',
+          priority: 'high',
+          payload: { incidentId: 'incident-stream' },
+        },
+      ],
+    });
+
+    expect(snapshot.nodes.some((node) => node.id === 'incident:incident-stream')).toBe(true);
+    expect(
+      eventTransport,
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'summit.intelgraph.graph.updated' }),
+    );
+    expect(
+      eventTransport,
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'summit.intelgraph.agent.triggered' }),
+    );
+  });
+
   it('emits structured telemetry for IntelGraph queries', async () => {
     await graph.refresh();
     graph.queryService('svc-api');
@@ -321,5 +361,50 @@ describe('OrchestrationKnowledgeGraph', () => {
     graph.registerCostSignalConnector(costConnector);
 
     await expect(graph.refresh()).rejects.toThrow(/Refusing to mutate/);
+  });
+
+  it('encrypts sensitive nodes end-to-end when protection is enabled', async () => {
+    const secret = '0123456789abcdef0123456789abcdef';
+    graph = new OrchestrationKnowledgeGraph({
+      encryption: {
+        secret,
+        mode: 'encrypt-sensitive',
+        sensitiveFields: ['piiClassification'],
+      },
+    });
+
+    graph.registerPipelineConnector(pipelineConnector);
+    graph.registerServiceConnector(serviceConnector);
+    graph.registerEnvironmentConnector(environmentConnector);
+    graph.registerIncidentConnector(incidentConnector);
+    graph.registerPolicyConnector(policyConnector);
+    graph.registerCostSignalConnector(costConnector);
+
+    const snapshot = await graph.refresh();
+    const serviceNode = snapshot.nodes.find((node) => node.id === 'service:svc-api');
+
+    expect(typeof serviceNode?.data).toBe('object');
+    expect(serviceNode?.provenance?.attributes?.encrypted).toBe(true);
+
+    const decrypted = decryptGraphNode(serviceNode!, secret);
+    expect((decrypted.data as ServiceRecord).name).toBe('API');
+  });
+
+  it('enforces data residency by filtering non-compliant nodes', async () => {
+    graph = new OrchestrationKnowledgeGraph({
+      dataResidency: { allowedRegions: ['eu-west-1'], denyUnknown: false },
+    });
+
+    graph.registerPipelineConnector(pipelineConnector);
+    graph.registerServiceConnector(serviceConnector);
+    graph.registerEnvironmentConnector(environmentConnector);
+    graph.registerIncidentConnector(incidentConnector);
+    graph.registerPolicyConnector(policyConnector);
+    graph.registerCostSignalConnector(costConnector);
+
+    const snapshot = await graph.refresh();
+
+    expect(snapshot.nodes.some((node) => node.id.startsWith('env:'))).toBe(false);
+    expect(snapshot.telemetry?.residencyFiltered).toBeGreaterThan(0);
   });
 });

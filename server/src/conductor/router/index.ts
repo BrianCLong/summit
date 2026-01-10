@@ -7,7 +7,7 @@ import {
   ExpertType,
   RoutingFeatures,
   ExpertCapabilities,
-} from '../types';
+} from '../types/index.js';
 
 export class MoERouter {
   private expertCapabilities: Record<ExpertType, ExpertCapabilities>;

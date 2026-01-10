@@ -25,6 +25,7 @@ interface SessionData {
   endTime?: number;
   steps: StepMetric[];
   metrics: Partial<SessionMetrics>;
+  groundTruthDetectedAt?: number;
 }
 
 export class MetricsCollector {
@@ -44,6 +45,7 @@ export class MetricsCollector {
         sessionId,
         scenarioType,
         startTime: new Date().toISOString(),
+        investigationCompleted: false,
         tasksCompleted: 0,
         tasksFailed: 0,
         totalQueries: 0,
@@ -54,9 +56,16 @@ export class MetricsCollector {
         relationshipsTotal: 0,
         keyEntitiesFound: 0,
         keyEntitiesExpected: 0,
+        groundTruthFound: 0,
+        groundTruthTotal: 0,
+        groundTruthCoverage: 0,
         copilotQueriesCount: 0,
         copilotSuccessRate: 0,
         copilotAverageResponseTime: 0,
+        citationCorrectnessRate: 1,
+        falseLinkRate: 0,
+        p95StepLatency: 0,
+        leakageIncidents: 0,
         errors: [],
       },
     };
@@ -125,6 +134,25 @@ export class MetricsCollector {
     });
   }
 
+  updateSessionMetrics(
+    sessionId: string,
+    updates: Partial<SessionMetrics>
+  ): void {
+    const session = this.sessions.get(sessionId);
+    if (!session) {
+      throw new Error(`Session ${sessionId} not found`);
+    }
+
+    session.metrics = { ...session.metrics, ...updates };
+
+    if (
+      updates.timeToGroundTruth !== undefined &&
+      session.groundTruthDetectedAt === undefined
+    ) {
+      session.groundTruthDetectedAt = session.startTime + updates.timeToGroundTruth;
+    }
+  }
+
   /**
    * End session and calculate final metrics
    */
@@ -136,6 +164,9 @@ export class MetricsCollector {
 
     session.endTime = Date.now();
     const duration = session.endTime - session.startTime;
+
+    const latencies = session.steps.map((step) => step.duration).sort((a, b) => a - b);
+    const p95StepLatency = this.calculatePercentile(latencies, 95);
 
     // Calculate coverage rates
     const entitiesExplored = session.metrics.entitiesExplored || 0;
@@ -151,6 +182,19 @@ export class MetricsCollector {
     // Calculate quality metrics
     const keyEntitiesFound = session.metrics.keyEntitiesFound || 0;
     const keyEntitiesExpected = session.metrics.keyEntitiesExpected || 1;
+
+    const groundTruthFound = session.metrics.groundTruthFound || 0;
+    const groundTruthTotal = session.metrics.groundTruthTotal || 0;
+    const groundTruthCoverage =
+      groundTruthTotal > 0 ? groundTruthFound / groundTruthTotal : 0;
+
+    const investigationCompleted = (session.metrics.tasksFailed || 0) === 0;
+
+    const timeToGroundTruth =
+      session.metrics.timeToGroundTruth ||
+      (session.groundTruthDetectedAt
+        ? session.groundTruthDetectedAt - session.startTime
+        : undefined);
 
     const precision =
       keyEntitiesFound > 0 && entitiesExplored > 0
@@ -178,17 +222,25 @@ export class MetricsCollector {
       tasksCompleted,
       tasksFailed,
       successRate: totalTasks > 0 ? tasksCompleted / totalTasks : 0,
+      investigationCompleted,
       timeToFirstInsight,
       timeToKeyFindings: duration,
+      timeToGroundTruth,
       totalQueries: session.metrics.totalQueries || 0,
       averageQueryTime: session.metrics.averageQueryTime || 0,
+      p95StepLatency,
       entitiesExplored,
       entitiesTotal,
       coverageRate: entitiesTotal > 0 ? entitiesExplored / entitiesTotal : 0,
       relationshipsExplored,
       relationshipsTotal,
+      falseLinkRate: session.metrics.falseLinkRate || 0,
       keyEntitiesFound,
       keyEntitiesExpected,
+      groundTruthFound,
+      groundTruthTotal,
+      groundTruthCoverage,
+      citationCorrectnessRate: session.metrics.citationCorrectnessRate || 0,
       precision,
       recall,
       f1Score,
@@ -196,6 +248,7 @@ export class MetricsCollector {
       copilotSuccessRate: session.metrics.copilotSuccessRate || 0,
       copilotAverageResponseTime:
         session.metrics.copilotAverageResponseTime || 0,
+      leakageIncidents: session.metrics.leakageIncidents || 0,
       errors: session.metrics.errors || [],
     };
 
@@ -260,6 +313,15 @@ export class MetricsCollector {
       (total, s) => total + s.errors.length,
       0
     );
+    const timeToGroundTruth = sessions
+      .map((s) => s.timeToGroundTruth)
+      .filter((val): val is number => typeof val === 'number');
+    const p95Latencies = sessions.map((s) => s.p95StepLatency || 0);
+    const citationCorrectness = sessions.map(
+      (s) => s.citationCorrectnessRate || 0
+    );
+    const falseLinkRates = sessions.map((s) => s.falseLinkRate || 0);
+    const leakageIncidents = sessions.map((s) => s.leakageIncidents || 0);
     const totalTasks = sessions.reduce(
       (total, s) => total + s.tasksCompleted + s.tasksFailed,
       0
@@ -269,13 +331,32 @@ export class MetricsCollector {
       totalSessions: sessions.length,
       averageSuccessRate: sum(successRates),
       averageDuration: sum(durations),
+      averageTimeToGroundTruth:
+        timeToGroundTruth.length > 0 ? sum(timeToGroundTruth) : 0,
       averageCoverageRate: sum(coverageRates),
       averagePrecision: sum(precisions),
       averageRecall: sum(recalls),
       averageF1Score: sum(f1Scores),
       averageQueriesPerSession: sum(queries),
       errorRate: totalTasks > 0 ? errors / totalTasks : 0,
+      p95Latency: sum(p95Latencies),
+      averageCitationCorrectness: sum(citationCorrectness),
+      averageFalseLinkRate: sum(falseLinkRates),
+      averageLeakageIncidents: sum(leakageIncidents),
     };
+  }
+
+  private calculatePercentile(values: number[], percentile: number): number {
+    if (values.length === 0) {
+      return 0;
+    }
+
+    if (percentile <= 0) return values[0];
+    if (percentile >= 100) return values[values.length - 1];
+
+    const rank = (percentile / 100) * values.length;
+    const index = Math.min(values.length - 1, Math.ceil(rank) - 1);
+    return values[index];
   }
 
   /**
@@ -318,22 +399,31 @@ export class MetricsCollector {
       'tasksCompleted',
       'tasksFailed',
       'successRate',
+      'investigationCompleted',
       'timeToFirstInsight',
+      'timeToGroundTruth',
       'totalQueries',
       'averageQueryTime',
+      'p95StepLatency',
       'entitiesExplored',
       'entitiesTotal',
       'coverageRate',
       'relationshipsExplored',
       'relationshipsTotal',
+      'falseLinkRate',
       'keyEntitiesFound',
       'keyEntitiesExpected',
+      'groundTruthFound',
+      'groundTruthTotal',
+      'groundTruthCoverage',
+      'citationCorrectnessRate',
       'precision',
       'recall',
       'f1Score',
       'copilotQueriesCount',
       'copilotSuccessRate',
       'copilotAverageResponseTime',
+      'leakageIncidents',
       'errorCount',
     ];
 
@@ -346,22 +436,31 @@ export class MetricsCollector {
       session.tasksCompleted,
       session.tasksFailed,
       session.successRate.toFixed(4),
+      session.investigationCompleted ?? false,
       session.timeToFirstInsight || '',
+      session.timeToGroundTruth || '',
       session.totalQueries,
       session.averageQueryTime.toFixed(2),
+      session.p95StepLatency?.toFixed(2) || 0,
       session.entitiesExplored,
       session.entitiesTotal,
       session.coverageRate.toFixed(4),
       session.relationshipsExplored,
       session.relationshipsTotal,
+      (session.falseLinkRate || 0).toFixed(4),
       session.keyEntitiesFound,
       session.keyEntitiesExpected,
+      session.groundTruthFound || 0,
+      session.groundTruthTotal || 0,
+      (session.groundTruthCoverage || 0).toFixed(4),
+      (session.citationCorrectnessRate || 0).toFixed(4),
       (session.precision || 0).toFixed(4),
       (session.recall || 0).toFixed(4),
       (session.f1Score || 0).toFixed(4),
       session.copilotQueriesCount,
       session.copilotSuccessRate.toFixed(4),
       session.copilotAverageResponseTime.toFixed(2),
+      session.leakageIncidents || 0,
       session.errors.length,
     ]);
 

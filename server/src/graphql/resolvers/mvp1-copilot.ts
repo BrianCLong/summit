@@ -1,10 +1,10 @@
-import { CopilotIntegrationService } from '../../services/CopilotIntegrationService';
+import { CopilotIntegrationService } from '../../services/CopilotIntegrationService.js';
 import {
   AuthenticationError,
   ForbiddenError,
   UserInputError,
 } from 'apollo-server-express';
-import { FeatureFlags } from '../../config/featureFlags';
+import { FeatureFlags } from '../../config/featureFlags.js';
 
 const copilotService = new CopilotIntegrationService();
 
@@ -346,8 +346,8 @@ const mvp1CopilotResolvers = {
           },
         );
 
-        const successful = results.filter((r) => r.result !== null);
-        const failed = results.filter((r) => r.result === null);
+        const successful = results.filter((r: any) => r.result !== null);
+        const failed = results.filter((r: any) => r.result === null);
 
         return {
           success: failed.length === 0,

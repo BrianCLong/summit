@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { logger } from '../config/logger.js';
-import { advancedAuditSystem, AuditEvent } from '../audit/advanced-audit-system.js';
+import { advancedAuditSystem } from '../audit/index.js';
+import { AuditEvent } from '../audit/advanced-audit-system.js';
 import { provenanceLedger } from '../provenance/ledger.js';
 import { getPostgresPool } from '../config/database.js';
 
@@ -59,9 +60,9 @@ export interface SimulationResult {
   };
   // P4.1: Diff Report details
   diffReport?: {
-      newDenialsByAction: Record<string, number>;
-      newlyAllowedRiskCount: number;
-      topImpactedTenants: { tenantId: string; count: number }[];
+    newDenialsByAction: Record<string, number>;
+    newlyAllowedRiskCount: number;
+    topImpactedTenants: { tenantId: string; count: number }[];
   }
 }
 
@@ -70,15 +71,15 @@ export interface PolicyDecisionEvaluator {
 }
 
 export interface PolicyDraft {
-    draftId: string;
-    tenantId: string;
-    version: number;
-    policyText: string;
-    author: string;
-    changeSummary: string;
-    createdAt: Date;
-    status: 'draft' | 'pending_approval' | 'published' | 'archived';
-    approvals: string[];
+  draftId: string;
+  tenantId: string;
+  version: number;
+  policyText: string;
+  author: string;
+  changeSummary: string;
+  createdAt: Date;
+  status: 'draft' | 'pending_approval' | 'published' | 'archived';
+  approvals: string[];
 }
 
 const DEFAULT_FIXTURE_EVENTS: AccessEvent[] = [
@@ -164,11 +165,11 @@ class HeuristicPolicyEvaluator implements PolicyDecisionEvaluator {
     }
 
     if (policyText.includes(`deny_action_${action}`)) {
-        return {
-            allow: false,
-            source: 'candidate_policy',
-            reason: `action ${action} explicitly denied`
-        };
+      return {
+        allow: false,
+        source: 'candidate_policy',
+        reason: `action ${action} explicitly denied`
+      };
     }
 
     if (event.caseId) {
@@ -207,9 +208,9 @@ function ensureTransitionBucket(map: Record<string, TransitionBreakdown>, key: s
 
 export class PolicySimulationService {
   constructor(private readonly evaluator: PolicyDecisionEvaluator = new HeuristicPolicyEvaluator()) {
-      this.initializeSchema().catch(err => {
-          logger.error({ error: err }, 'Failed to initialize PolicySimulationService schema');
-      });
+    this.initializeSchema().catch(err => {
+      logger.error({ error: err }, 'Failed to initialize PolicySimulationService schema');
+    });
   }
 
   private async initializeSchema() {
@@ -229,7 +230,7 @@ export class PolicySimulationService {
         );
         CREATE INDEX IF NOT EXISTS idx_policy_drafts_tenant ON policy_drafts(tenant_id);
       `);
-    } catch (e) {
+    } catch (e: any) {
       logger.warn({ error: e }, "Could not initialize DB schema for PolicySimulationService");
     }
   }
@@ -263,7 +264,7 @@ export class PolicySimulationService {
       let candidateDecision: SimulationDecision;
       try {
         candidateDecision = await this.evaluator.evaluate(event, options.candidatePolicy);
-      } catch (error) {
+      } catch (error: any) {
         fallbackUsed = true;
         candidateDecision = {
           allow: baselineAllow,
@@ -308,13 +309,13 @@ export class PolicySimulationService {
     // P4.1 Diff Report Logic
     const newDenialsByAction: Record<string, number> = {};
     changes.allowedToDenied.forEach(e => {
-        newDenialsByAction[e.action] = (newDenialsByAction[e.action] || 0) + 1;
+      newDenialsByAction[e.action] = (newDenialsByAction[e.action] || 0) + 1;
     });
 
     const topImpactedTenants = Object.entries(breakdowns.byTenant)
-        .map(([tenantId, breakdown]) => ({ tenantId, count: breakdown.allowedToDenied + breakdown.deniedToAllowed }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 5);
+      .map(([tenantId, breakdown]) => ({ tenantId, count: breakdown.allowedToDenied + breakdown.deniedToAllowed }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
 
     return {
       summary: {
@@ -341,9 +342,9 @@ export class PolicySimulationService {
         featureFlagEnabled: process.env.POLICY_SIMULATION === '1',
       },
       diffReport: {
-          newDenialsByAction,
-          newlyAllowedRiskCount: changes.deniedToAllowed.length,
-          topImpactedTenants
+        newDenialsByAction,
+        newlyAllowedRiskCount: changes.deniedToAllowed.length,
+        topImpactedTenants
       }
     };
   }
@@ -352,15 +353,15 @@ export class PolicySimulationService {
   async createDraft(input: { tenantId: string, policyText: string, author: string, changeSummary: string }): Promise<PolicyDraft> {
     const draftId = `draft_${randomUUID()}`;
     const draft: PolicyDraft = {
-        draftId,
-        tenantId: input.tenantId,
-        version: 1, // Simple versioning
-        policyText: input.policyText,
-        author: input.author,
-        changeSummary: input.changeSummary,
-        createdAt: new Date(),
-        status: 'draft',
-        approvals: []
+      draftId,
+      tenantId: input.tenantId,
+      version: 1, // Simple versioning
+      policyText: input.policyText,
+      author: input.author,
+      changeSummary: input.changeSummary,
+      createdAt: new Date(),
+      status: 'draft',
+      approvals: []
     };
 
     // Persist
@@ -378,129 +379,129 @@ export class PolicySimulationService {
   }
 
   async getDraft(draftId: string): Promise<PolicyDraft | undefined> {
-      const pool = getPostgresPool();
-      const res = await pool.query('SELECT * FROM policy_drafts WHERE draft_id = $1', [draftId]);
-      if (res.rows.length === 0) return undefined;
-      const row = res.rows[0];
-      return {
-          draftId: row.draft_id,
-          tenantId: row.tenant_id,
-          version: row.version,
-          policyText: row.policy_text,
-          author: row.author,
-          changeSummary: row.change_summary,
-          status: row.status as any,
-          approvals: row.approvals || [],
-          createdAt: row.created_at
-      };
+    const pool = getPostgresPool();
+    const res = await pool.query('SELECT * FROM policy_drafts WHERE draft_id = $1', [draftId]);
+    if (res.rows.length === 0) return undefined;
+    const row = res.rows[0];
+    return {
+      draftId: row.draft_id,
+      tenantId: row.tenant_id,
+      version: row.version,
+      policyText: row.policy_text,
+      author: row.author,
+      changeSummary: row.change_summary,
+      status: row.status as any,
+      approvals: row.approvals || [],
+      createdAt: row.created_at
+    };
   }
 
   // P3.2: Replay Against Historical Events
   async replayHistorical(draftId: string, timeWindowHours: number = 24): Promise<SimulationResult> {
-      const draft = await this.getDraft(draftId);
-      if (!draft) throw new Error("Draft not found");
+    const draft = await this.getDraft(draftId);
+    if (!draft) throw new Error("Draft not found");
 
-      let events: AccessEvent[] = [];
-      try {
-          const endTime = new Date();
-          const startTime = new Date(endTime.getTime() - (timeWindowHours * 60 * 60 * 1000));
+    let events: AccessEvent[] = [];
+    try {
+      const endTime = new Date();
+      const startTime = new Date(endTime.getTime() - (timeWindowHours * 60 * 60 * 1000));
 
-          const auditEvents = await advancedAuditSystem.queryEvents({
-              startTime,
-              endTime,
-              tenantIds: [draft.tenantId],
-              // We want access/decision events.
-              // Based on AuditEventType in advanced-audit-system.ts: 'resource_access', 'policy_decision', etc.
-              eventTypes: ['resource_access', 'policy_decision', 'user_action']
-          });
-
-          events = auditEvents.map(ae => ({
-              requestId: ae.requestId,
-              actorId: ae.userId || 'unknown',
-              tenantId: ae.tenantId,
-              action: ae.action,
-              resource: ae.resourceType,
-              decision: ae.outcome === 'success' ? 'allow' : 'deny',
-              timestamp: ae.timestamp.toISOString(),
-              context: ae.details,
-              role: ae.details?.role || 'unknown' // assuming role might be in details
-          }));
-
-      } catch (e) {
-          logger.error({ error: e }, "Failed to fetch historical events for simulation");
-          // Fail fast!
-          throw new Error("Could not fetch historical events. Simulation aborted to prevent misleading results.");
-      }
-
-      if (events.length === 0) {
-          // If no events found, return empty result or warn.
-          // Do NOT use fixtures silently.
-          logger.warn("No historical events found for simulation period");
-          // We can proceed with empty events, runSimulation handles it.
-      }
-
-      return this.runSimulation({
-          candidatePolicy: draft.policyText,
-          events
+      const auditEvents = await advancedAuditSystem.queryEvents({
+        startTime,
+        endTime,
+        tenantIds: [draft.tenantId],
+        // We want access/decision events.
+        // Based on AuditEventType in advanced-audit-system.ts: 'resource_access', 'policy_decision', etc.
+        eventTypes: ['resource_access', 'policy_decision', 'user_action']
       });
+
+      events = auditEvents.map(ae => ({
+        requestId: ae.requestId,
+        actorId: ae.userId || 'unknown',
+        tenantId: ae.tenantId,
+        action: ae.action,
+        resource: ae.resourceType,
+        decision: ae.outcome === 'success' ? 'allow' : 'deny',
+        timestamp: ae.timestamp.toISOString(),
+        context: ae.details,
+        role: ae.details?.role || 'unknown' // assuming role might be in details
+      }));
+
+    } catch (e: any) {
+      logger.error({ error: e }, "Failed to fetch historical events for simulation");
+      // Fail fast!
+      throw new Error("Could not fetch historical events. Simulation aborted to prevent misleading results.");
+    }
+
+    if (events.length === 0) {
+      // If no events found, return empty result or warn.
+      // Do NOT use fixtures silently.
+      logger.warn("No historical events found for simulation period");
+      // We can proceed with empty events, runSimulation handles it.
+    }
+
+    return this.runSimulation({
+      candidatePolicy: draft.policyText,
+      events
+    });
   }
 
   // P4.2: Approval Gate
   async publishDraft(draftId: string, approverId: string): Promise<PolicyDraft> {
-      const draft = await this.getDraft(draftId);
-      if (!draft) throw new Error("Draft not found");
+    const draft = await this.getDraft(draftId);
+    if (!draft) throw new Error("Draft not found");
 
-      // Check if already approved by this user
-      if (!draft.approvals.includes(approverId)) {
-          draft.approvals.push(approverId);
-          // Update DB
-          const pool = getPostgresPool();
-          await pool.query('UPDATE policy_drafts SET approvals = $1 WHERE draft_id = $2', [draft.approvals, draftId]);
-      }
-
-      if (draft.approvals.length < 2) {
-          if (draft.status !== 'pending_approval') {
-              draft.status = 'pending_approval';
-              const pool = getPostgresPool();
-              await pool.query('UPDATE policy_drafts SET status = $1 WHERE draft_id = $2', [draft.status, draftId]);
-          }
-          // Return draft with updated status, DO NOT THROW
-          return draft;
-      }
-
-      // If we have 2 approvals, publish
-      draft.status = 'published';
+    // Check if already approved by this user
+    if (!draft.approvals.includes(approverId)) {
+      draft.approvals.push(approverId);
+      // Update DB
       const pool = getPostgresPool();
-      await pool.query('UPDATE policy_drafts SET status = $1 WHERE draft_id = $2', [draft.status, draftId]);
+      await pool.query('UPDATE policy_drafts SET approvals = $1 WHERE draft_id = $2', [draft.approvals, draftId]);
+    }
 
-      // Log to provenance ledger
-      try {
-        await provenanceLedger.appendEntry({
-            timestamp: new Date(),
-            tenantId: draft.tenantId,
-            actionType: 'policy_published',
-            resourceType: 'Policy',
-            resourceId: draft.draftId,
-            actorId: approverId,
-            actorType: 'user',
-            payload: {
-                mutationType: 'publish',
-                entityId: draft.draftId,
-                entityType: 'PolicyDraft',
-                version: draft.version,
-                policyText: draft.policyText,
-                approvals: draft.approvals,
-                changeSummary: draft.changeSummary
-            } as any,
-            metadata: {
-                purpose: 'governance_policy_update'
-            }
-        });
-      } catch (e) {
-          logger.error({ error: e }, "Failed to log policy publish to provenance ledger");
+    if (draft.approvals.length < 2) {
+      if (draft.status !== 'pending_approval') {
+        draft.status = 'pending_approval';
+        const pool = getPostgresPool();
+        await pool.query('UPDATE policy_drafts SET status = $1 WHERE draft_id = $2', [draft.status, draftId]);
       }
-
+      // Return draft with updated status, DO NOT THROW
       return draft;
+    }
+
+    // If we have 2 approvals, publish
+    draft.status = 'published';
+    const pool = getPostgresPool();
+    await pool.query('UPDATE policy_drafts SET status = $1 WHERE draft_id = $2', [draft.status, draftId]);
+
+    // Log to provenance ledger
+    try {
+      await provenanceLedger.appendEntry({
+        timestamp: new Date(),
+        tenantId: draft.tenantId,
+        actionType: 'policy_published',
+        resourceType: 'Policy',
+        resourceId: draft.draftId,
+        actorId: approverId,
+        actorType: 'user',
+        payload: {
+          mutationType: 'publish',
+          entityId: draft.draftId,
+          entityType: 'PolicyDraft',
+          version: draft.version,
+          policyText: draft.policyText,
+          approvals: draft.approvals,
+          changeSummary: draft.changeSummary
+        } as any,
+        metadata: {
+          purpose: 'governance_policy_update'
+        }
+      });
+    } catch (e: any) {
+      logger.error({ error: e }, "Failed to log policy publish to provenance ledger");
+    }
+
+    return draft;
   }
 
   private validateEvents(events: AccessEvent[]): void {

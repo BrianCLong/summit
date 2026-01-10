@@ -68,4 +68,4 @@ deny contains msg if {
     msg := "Data retention CronJobs must include a checksum/config annotation for change tracking"
 }
 
-allow if { not deny[_] }
+allow if { count(deny) == 0 }

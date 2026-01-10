@@ -111,6 +111,7 @@ export interface RoutingDecision {
   estimatedCostPerHour?: number;
   compliance?: string[];
   reasoning: string[];
+  policyDecisions?: PolicyDecision[];
 }
 
 export interface RoutingPlan {
@@ -128,6 +129,14 @@ export interface PolicyInput {
 }
 
 export interface PolicyEvaluation {
+  allowed: boolean;
+  reason?: string;
+  obligations?: string[];
+  directives?: Record<string, unknown>;
+}
+
+export interface PolicyDecision {
+  hookId: string;
   allowed: boolean;
   reason?: string;
   obligations?: string[];

@@ -1,5 +1,5 @@
-import { ExportOptions, ReportExporter } from './base';
-import { ReportArtifact } from '../types';
+import { ExportOptions, ReportExporter } from './base.js';
+import { ReportArtifact } from '../types.js';
 
 export class XmlExporter implements ReportExporter {
   readonly format = 'xml' as const;

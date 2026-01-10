@@ -17,7 +17,7 @@ program
     const evidence = opts.evidence
       ? (JSON.parse(readFileSync(opts.evidence, 'utf-8')) as EvidenceBundle)
       : undefined;
-    const result = verifyManifest(manifest, ledger, evidence);
+    const result = verifyManifest(manifest, ledger, { evidence });
     if (!result.valid) {
       console.error('Manifest verification FAILED');
       result.reasons.forEach((reason) => console.error(`- ${reason}`));

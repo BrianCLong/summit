@@ -172,7 +172,7 @@ export class SandboxExecutorService {
         preview.cypher,
         { ...preview.parameters, ...parameters },
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         { planId, error: error instanceof Error ? error.message : 'Unknown' },
         'Failed to get EXPLAIN plan',
@@ -348,7 +348,7 @@ export class SandboxExecutorService {
         statistics,
         warnings,
       };
-    } catch (error) {
+    } catch (error: any) {
       const executionTimeMs = Date.now() - startTime;
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -392,11 +392,11 @@ export class SandboxExecutorService {
 
       session
         .run(cypher, parameters)
-        .then((result) => {
+        .then((result: Result) => {
           clearTimeout(timeoutId);
           resolve(result);
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           clearTimeout(timeoutId);
           reject(error);
         });
@@ -424,7 +424,7 @@ export class SandboxExecutorService {
           operatorType: result.summary.plan.operatorType,
           arguments: result.summary.plan.arguments,
           identifiers: result.summary.plan.identifiers,
-          children: result.summary.plan.children?.map((child) => ({
+          children: result.summary.plan.children?.map((child: any) => ({
             operatorType: child.operatorType,
             arguments: child.arguments,
           })),
@@ -432,7 +432,7 @@ export class SandboxExecutorService {
       }
 
       return undefined;
-    } catch (error) {
+    } catch (error: any) {
       logger.debug(
         { error: error instanceof Error ? error.message : 'Unknown' },
         'EXPLAIN query failed',
@@ -635,7 +635,7 @@ export class SandboxExecutorService {
       await session.run('RETURN 1');
       await session.close();
       neo4jConnected = true;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Neo4j health check failed');
     }
 

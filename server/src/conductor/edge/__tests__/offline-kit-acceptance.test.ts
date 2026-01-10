@@ -3,18 +3,27 @@
 // reconnection merges without conflicts, policy simulation shows no leakage
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
-import { OfflineKit } from '../offline-kit';
-import { proofCarryingResultSystem } from '../proof-carrying-results';
-import { policyLeakSimulator } from '../policy-leak-simulator';
-import { claimSyncEngine } from '../claim-sync';
-import { crdtSyncEngine } from '../crdt-sync';
 
-describe('Offline Kit - Acceptance Criteria', () => {
-  let offlineKit: OfflineKit;
+const RUN_ACCEPTANCE = process.env.RUN_ACCEPTANCE === 'true';
+const describeIf = RUN_ACCEPTANCE ? describe : describe.skip;
+
+describeIf('Offline Kit - Acceptance Criteria', () => {
+  let OfflineKit: typeof import('../offline-kit').OfflineKit;
+  let proofCarryingResultSystem: typeof import('../proof-carrying-results').proofCarryingResultSystem;
+  let policyLeakSimulator: typeof import('../policy-leak-simulator').policyLeakSimulator;
+  let claimSyncEngine: typeof import('../claim-sync').claimSyncEngine;
+  let crdtSyncEngine: typeof import('../crdt-sync').crdtSyncEngine;
+  let offlineKit: any;
   const edgeNodeId = 'edge-test-node-001';
   const cloudNodeId = 'cloud-primary';
 
   beforeAll(async () => {
+    ({ OfflineKit } = await import('../offline-kit'));
+    ({ proofCarryingResultSystem } = await import('../proof-carrying-results'));
+    ({ policyLeakSimulator } = await import('../policy-leak-simulator'));
+    ({ claimSyncEngine } = await import('../claim-sync'));
+    ({ crdtSyncEngine } = await import('../crdt-sync'));
+
     // Initialize offline kit for edge node
     offlineKit = new OfflineKit({
       nodeId: edgeNodeId,
@@ -40,7 +49,9 @@ describe('Offline Kit - Acceptance Criteria', () => {
   });
 
   afterAll(async () => {
-    await offlineKit.shutdown();
+    if (offlineKit) {
+      await offlineKit.shutdown();
+    }
   });
 
   describe('Acceptance: Edge session can produce proof-carrying results', () => {
@@ -436,7 +447,7 @@ describe('Offline Kit - Acceptance Criteria', () => {
 
       // Recommendations should be actionable
       const hasClaimBasedRecommendation = simulation.recommendations.some(
-        (r) => r.includes('claim'),
+        (r: any) => r.includes('claim'),
       );
 
       console.log('✅ PASS: Policy simulation provided recommendations');

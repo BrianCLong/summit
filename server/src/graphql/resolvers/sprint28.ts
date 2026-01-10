@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { pg } from '../db/pg';
-import { getContext } from '../auth/context';
+import { pg } from '../../db/pg.js';
+import { getContext } from '../auth/context.js';
 import pino from 'pino';
 
 const logger = (pino as any)({ name: 'resolvers:sprint28' });
@@ -22,8 +22,8 @@ export const sprint28Resolvers = {
            GROUP BY event_name`,
           [tenantId]
         );
-        return rows.map((r) => ({ ...r, period }));
-      } catch (err) {
+        return rows.map((r: any) => ({ ...r, period }));
+      } catch (err: any) {
         logger.error({ err }, 'Error fetching funnel');
         return [];
       }
@@ -51,7 +51,7 @@ export const sprint28Resolvers = {
           exports: 3,
           nps: parseFloat(npsRow?.nps || '0'),
         };
-      } catch (err) {
+      } catch (err: any) {
         logger.error({ err }, 'Error fetching pilot KPIs');
         throw new Error('Failed to fetch pilot KPIs');
       }
@@ -96,7 +96,7 @@ export const sprint28Resolvers = {
         );
         logger.info({ workspaceId, score }, 'NPS Submitted');
         return true;
-      } catch (err) {
+      } catch (err: any) {
         logger.error({ err }, 'Error submitting NPS');
         throw new Error('Failed to submit NPS');
       }
@@ -115,7 +115,7 @@ export const sprint28Resolvers = {
           [workspaceId, name, props] // pg library handles JSON serialization if passed as object usually, or we stringify
         );
         return true;
-      } catch (err) {
+      } catch (err: any) {
         logger.error({ err }, 'Error recording event');
         // Swallow error for telemetry to not break app flow?
         return false;

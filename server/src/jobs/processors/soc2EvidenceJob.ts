@@ -1,15 +1,15 @@
 // @ts-nocheck
 import { Job } from 'pg-boss';
-import { SOC2ComplianceService } from '../../services/SOC2ComplianceService';
-import { SigningService } from '../../services/SigningService';
-import { getTracer } from '../../observability/tracer';
-import { metrics } from '../../observability/metrics';
-import { WormStorageService } from '../../services/WormStorageService';
-import { generatePdfFromPacket } from '../../utils/pdfGenerator';
-import { ComplianceMonitoringService } from '../../services/ComplianceMonitoringService';
-import { EventSourcingService } from '../../services/EventSourcingService';
-import { UserRepository } from '../../data/UserRepository';
-import { getPostgresPool } from '../../config/database';
+import { SOC2ComplianceService } from '../../services/SOC2ComplianceService.js';
+import { SigningService } from '../../services/SigningService.js';
+import { getTracer } from '../../observability/tracer.js';
+import { metrics } from '../../observability/metrics.js';
+import { WormStorageService } from '../../services/WormStorageService.js';
+import { generatePdfFromPacket } from '../../utils/pdfGenerator.js';
+import { ComplianceMonitoringService } from '../../services/ComplianceMonitoringService.js';
+import { EventSourcingService } from '../../services/EventSourcingService.js';
+import { UserRepository } from '../../data/UserRepository.js';
+import { getPostgresPool } from '../../config/database.js';
 
 interface SOC2JobPayload {
   [key: string]: unknown;
@@ -44,7 +44,7 @@ export default async function handle(job: Job<SOC2JobPayload>) {
 
   try {
     // 1. Generate the evidence packet
-    const packet = await (tracer as any).startActiveSpan('generate-packet', async (span) => {
+    const packet = await (tracer as any).startActiveSpan('generate-packet', async (span: any) => {
       const result = await soc2Service.generateSOC2Packet(startDate, endDate);
       span.end();
       return result;
@@ -52,14 +52,14 @@ export default async function handle(job: Job<SOC2JobPayload>) {
     const jsonPacket = JSON.stringify(packet, null, 2);
 
     // 2. Generate the PDF report
-    const pdfBuffer = await (tracer as any).startActiveSpan('generate-pdf', async (span) => {
+    const pdfBuffer = await (tracer as any).startActiveSpan('generate-pdf', async (span: any) => {
         const result = await generatePdfFromPacket(packet);
         span.end();
         return result;
     });
 
     // 3. Sign both artifacts
-    const { jsonSignature, pdfSignature } = await (tracer as any).startActiveSpan('sign-artifacts', async (span) => {
+    const { jsonSignature, pdfSignature } = await (tracer as any).startActiveSpan('sign-artifacts', async (span: any) => {
         const jsonSig = signingService.sign(jsonPacket);
         const pdfSig = signingService.sign(pdfBuffer);
         span.end();
@@ -67,7 +67,7 @@ export default async function handle(job: Job<SOC2JobPayload>) {
     });
 
     // 4. Store the artifacts and their signatures
-    await (tracer as any).startActiveSpan('store-artifacts', async (span) => {
+    await (tracer as any).startActiveSpan('store-artifacts', async (span: any) => {
         const fileSuffix = `${startDate.toISOString()}_${endDate.toISOString()}`;
         await storageService.store(`SOC2_Evidence_${fileSuffix}.json`, Buffer.from(jsonPacket));
         await storageService.store(`SOC2_Evidence_${fileSuffix}.json.sig`, Buffer.from(jsonSignature));
@@ -82,7 +82,7 @@ export default async function handle(job: Job<SOC2JobPayload>) {
     (metrics as any).soc2PacketSize?.observe(jsonPacket.length);
 
     console.log(`[JOB: ${JOB_NAME}] Successfully generated and stored SOC2 evidence for ${startDate.toDateString()} - ${endDate.toDateString()}`);
-  } catch (error) {
+  } catch (error: any) {
     const duration = Date.now() - startTime;
     (metrics as any).soc2JobDuration?.observe(duration);
     (metrics as any).soc2JobRuns?.inc({ status: 'failure' });

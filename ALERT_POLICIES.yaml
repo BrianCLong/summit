@@ -397,6 +397,66 @@ spec:
             description: 'Certificate {{ $labels.name }} expires in {{ div (sub $value (time())) 86400 | humanizeDuration }}'
 
     # ====================================================================
+    # AI COPILOT SERVICE ALERTS
+    # ====================================================================
+
+    - name: intelgraph.ai.copilot
+      interval: 30s
+      rules:
+        # AI Copilot availability SLO burn rate - CRITICAL
+        - alert: AiCopilotAvailabilityBurnRate
+          expr: |
+            (
+              (1 - (rate(http_request_duration_seconds_count{job="ai-copilot",status!~"5.."}[30m]) / rate(http_request_duration_seconds_count{job="ai-copilot"}[30m])))
+              > (2 * 0.001)
+            )
+          for: 2m
+          labels:
+            severity: critical
+            service: ai-copilot
+            slo: availability
+            team: platform
+            pager: immediate
+          annotations:
+            summary: '🤖 AI Copilot availability burn rate high'
+            description: |
+              AI Copilot error rate {{ $value | humanizePercentage }} is burning error budget too fast.
+              IMMEDIATE ACTION REQUIRED.
+            runbook_url: 'https://runbooks.intelgraph.ai/ai-copilot'
+            dashboard_url: 'https://grafana.intelgraph.ai/d/ai-copilot'
+
+        # AI Copilot latency SLO breach - WARNING
+        - alert: AiCopilotLatencyBurnRate
+          expr: |
+            histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="ai-copilot"}[5m])) > 1.0
+          for: 10m
+          labels:
+            severity: warning
+            service: ai-copilot
+            slo: latency
+            team: platform
+          annotations:
+            summary: '🤖 AI Copilot P95 latency exceeds SLO'
+            description: |
+              AI Copilot P95 latency {{ $value | humanizeDuration }} exceeds 1s SLO.
+            runbook_url: 'https://runbooks.intelgraph.ai/ai-copilot'
+
+        # AI Copilot high error rate - CRITICAL
+        - alert: AiCopilotHighErrorRate
+          expr: |
+            rate(http_request_duration_seconds_count{job="ai-copilot",status=~"5.."}[5m]) / rate(http_request_duration_seconds_count{job="ai-copilot"}[5m]) > 0.01
+          for: 5m
+          labels:
+            severity: critical
+            service: ai-copilot
+            team: platform
+            pager: immediate
+          annotations:
+            summary: '🤖 AI Copilot error rate high'
+            description: 'AI Copilot error rate {{ $value | humanizePercentage }} exceeds 1% threshold'
+            runbook_url: 'https://runbooks.intelgraph.ai/ai-copilot'
+
+    # ====================================================================
     # BUSINESS METRICS ALERTS
     # ====================================================================
 

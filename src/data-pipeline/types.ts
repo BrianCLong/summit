@@ -45,6 +45,11 @@ export interface DeadLetterEntry {
   source: string;
   timestamp: number;
   lineageId: string;
+  errorCode?: string;
+  provenance?: {
+    featureFlag?: string;
+    context?: Record<string, unknown>;
+  };
 }
 
 export interface PipelineMetricsSnapshot {

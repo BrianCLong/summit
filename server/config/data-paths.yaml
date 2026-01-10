@@ -15,6 +15,43 @@ dataPaths:
       - server/src/integrations/n8n-policy.ts
       - server/src/routes/admin.ts
 
+  - id: maestro-n8n-allowed-flows
+    system: maestro
+    path: /v1/data/maestro/n8n/allowed_flows
+    description: Allowlist for Maestro n8n flows configured via admin routes
+    tags:
+      - maestro
+      - n8n
+      - allowlist
+      - opa
+    sources:
+      - server/src/routes/admin.ts
+
+  - id: maestro-n8n-allowed-prefixes
+    system: maestro
+    path: /v1/data/maestro/n8n/allowed_prefixes
+    description: Allowed prefix enforcement for Maestro n8n integrations
+    tags:
+      - maestro
+      - n8n
+      - prefixes
+      - opa
+    sources:
+      - server/src/routes/admin.ts
+
+  - id: maestro-n8n-denied-prefixes
+    system: maestro
+    path: /v1/data/maestro/n8n/denied_prefixes
+    description: Deny list of prefixes for Maestro n8n integrations
+    tags:
+      - maestro
+      - n8n
+      - prefixes
+      - denylist
+      - opa
+    sources:
+      - server/src/routes/admin.ts
+
   - id: intelgraph-authz
     system: intelgraph
     path: /v1/data/intelgraph/authz
@@ -28,6 +65,18 @@ dataPaths:
       - services/api/src/graphql/abac.ts
       - server/src/conductor/governance/policy-simulator.ts
       - server/src/services/governance/PolicyEngine.ts
+
+  - id: intelgraph-authz-simulate
+    system: intelgraph
+    path: /v1/data/intelgraph/authz/simulate
+    description: Simulation endpoint for IntelGraph ABAC bundle previews
+    tags:
+      - intelgraph
+      - authz
+      - simulate
+      - opa
+    sources:
+      - server/src/conductor/governance/policy-simulator.ts
 
   - id: intelgraph-export-decision
     system: intelgraph
@@ -64,6 +113,72 @@ dataPaths:
       - opa
     sources:
       - server/src/conductor/edge/crdt-conflict-resolver.ts
+
+  - id: intelgraph-allow
+    system: intelgraph
+    path: /v1/data/intelgraph/allow
+    description: Legacy IntelGraph allow check for middleware and gateway clients
+    tags:
+      - intelgraph
+      - authz
+      - allow
+      - opa
+    sources:
+      - server/src/services/governance/PolicyEngine.ts
+      - server/src/services/AccessControl.js
+      - server/src/middleware/opa-with-appeals.ts
+      - server/src/middleware/graphql-authz.ts
+      - server/src/middleware/opa.ts
+      - server/src/tests/security/tenant_isolation.test.ts
+
+  - id: intelgraph-budget-decision
+    system: intelgraph
+    path: /v1/data/intelgraph/budget/decision
+    description: Budget enforcement policy for IntelGraph requests
+    tags:
+      - intelgraph
+      - budget
+      - enforcement
+      - opa
+    sources:
+      - server/src/middleware/opa-enforcer.ts
+      - server/src/middleware/__tests__/opa-enforcer.test.ts
+
+  - id: intelgraph-approvals-request
+    system: intelgraph
+    path: /v1/data/intelgraph/approvals/evaluate_request
+    description: Approval workflow request evaluation for IntelGraph
+    tags:
+      - intelgraph
+      - approvals
+      - governance
+      - opa
+    sources:
+      - services/approvals/src/services/opa-client.ts
+
+  - id: intelgraph-approvals-decision
+    system: intelgraph
+    path: /v1/data/intelgraph/approvals/evaluate_decision
+    description: Approval decision evaluation for IntelGraph
+    tags:
+      - intelgraph
+      - approvals
+      - decision
+      - opa
+    sources:
+      - services/approvals/src/services/opa-client.ts
+
+  - id: intelgraph-approvals-policy-version
+    system: intelgraph
+    path: /v1/data/intelgraph/approvals/policy_version
+    description: Approval policy version resolution for IntelGraph workflows
+    tags:
+      - intelgraph
+      - approvals
+      - policy
+      - opa
+    sources:
+      - services/approvals/src/services/opa-client.ts
 
   - id: companyos-customer-decision
     system: companyos

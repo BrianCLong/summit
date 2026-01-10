@@ -46,6 +46,8 @@ function initializeServices(): GraphRAGService {
 }
 
 
+import { Context } from '../context.js';
+
 interface GraphRAGQueryInput {
   investigationId: string;
   question: string;
@@ -55,13 +57,6 @@ interface GraphRAGQueryInput {
   maxTokens?: number;
   useCase?: string;
   rankingStrategy?: string;
-}
-
-interface Context {
-  user?: {
-    id: string;
-    roles: string[];
-  };
 }
 
 export const graphragResolvers = {
@@ -108,7 +103,7 @@ export const graphragResolvers = {
           );
 
           return response;
-        } catch (error) {
+        } catch (error: any) {
           logger.error(
             `GraphRAG query failed. Investigation ID: ${input.investigationId}, User ID: ${context.user.id}, Error: ${error instanceof Error ? error.message : 'Unknown error'
             }`,
@@ -169,7 +164,7 @@ export const graphragResolvers = {
           topK,
           threshold: 0.7,
           includeText: true,
-          tenantId: context.user?.tenant_id || context.user?.tenantId,
+          tenantId: context.user?.tenantId,
         });
 
         // TODO: Fetch full entity objects from Neo4j using the entity IDs
@@ -192,7 +187,7 @@ export const graphragResolvers = {
         );
 
         return similarEntities;
-      } catch (error) {
+      } catch (error: any) {
         logger.error(
           `Similarity search failed. Entity ID: ${entityId}, Investigation ID: ${investigationId}, User ID: ${context.user.id}, Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         );
@@ -231,7 +226,7 @@ export const graphragResolvers = {
           success: true,
           message: `Cache cleared for investigation ${investigationId}`,
         };
-      } catch (error) {
+      } catch (error: any) {
         logger.error(
           `Cache clear failed. Investigation ID: ${investigationId}, User ID: ${context.user.id}, Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         );
@@ -277,7 +272,7 @@ export async function getGraphRAGHealth(): Promise<{
   try {
     const service = initializeServices();
     return await service.getHealth();
-  } catch (error) {
+  } catch (error: any) {
     logger.error(
       `GraphRAG health check failed. Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );

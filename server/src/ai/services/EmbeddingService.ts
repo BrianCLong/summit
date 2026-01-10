@@ -77,7 +77,7 @@ export class EmbeddingService {
 
       this.isInitialized = true;
       logger.info('Embedding Service initialized successfully');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize Embedding Service:', error);
       throw error;
     }
@@ -116,7 +116,7 @@ export class EmbeddingService {
         `Generated text embedding with dimension: ${embedding.length}`,
       );
       return embedding;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Text embedding generation failed:', error);
       throw error;
     }
@@ -149,7 +149,7 @@ export class EmbeddingService {
         `Generated image embedding with dimension: ${embedding.length}`,
       );
       return embedding;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Image embedding generation failed:', error);
       throw error;
     }
@@ -181,7 +181,7 @@ export class EmbeddingService {
         `Generated audio embedding with dimension: ${embedding.length}`,
       );
       return embedding;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Audio embedding generation failed:', error);
       throw error;
     }
@@ -253,7 +253,7 @@ export class EmbeddingService {
         `Generated multimodal embedding with dimension: ${combinedEmbedding.length}`,
       );
       return combinedEmbedding;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Multimodal embedding generation failed:', error);
       throw error;
     }
@@ -294,7 +294,7 @@ export class EmbeddingService {
       ]);
 
       logger.debug(`Stored embedding: ${id} (${modality})`);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to store embedding:', error);
       throw error;
     }
@@ -351,7 +351,7 @@ export class EmbeddingService {
 
       const result = await this.db.query(query, params);
 
-      const similarities: SimilarityResult[] = result.rows.map((row) => ({
+      const similarities: SimilarityResult[] = result.rows.map((row: any) => ({
         id: row.id,
         similarity: row.similarity,
         metadata: row.metadata,
@@ -360,7 +360,7 @@ export class EmbeddingService {
 
       logger.debug(`Found ${similarities.length} similar embeddings`);
       return similarities;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Similarity search failed:', error);
       throw error;
     }
@@ -423,7 +423,7 @@ export class EmbeddingService {
 
       logger.info(`Cross-modal search returned ${results.length} results`);
       return results;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Cross-modal search failed:', error);
       throw error;
     }
@@ -470,7 +470,7 @@ export class EmbeddingService {
         `Clustering completed: ${validClusters.length} clusters found`,
       );
       return validClusters;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Clustering failed:', error);
       throw error;
     }
@@ -714,7 +714,7 @@ export class EmbeddingService {
 
     const result = await this.db.query(query, [ids]);
 
-    return result.rows.map((row) => ({
+    return result.rows.map((row: any) => ({
       id: row.id,
       vector: JSON.parse(row.vector),
       metadata: row.metadata,
@@ -859,7 +859,7 @@ export class EmbeddingService {
       this.availableModels.set('audio', audioModels);
 
       logger.info('Embedding models loaded successfully');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to load embedding models:', error);
       throw error;
     }

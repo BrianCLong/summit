@@ -5,18 +5,17 @@ package revops.tenant_overrides
 import data.revops.config
 import data.revops.invariants
 
-default merged = {}
+default merged := {}
 
-merged := out {
+merged := result if {
   tenant_id := input.tenant.id
   base := config.tenant[tenant_id]
   overrides := config.tenant_overrides[tenant_id]
-  out := base
-  out := merge(out, overrides)
-  not invariants.violations[_] with input as input
+  result := merge(base, overrides)
+  count(invariants.violations) == 0 with input as input
 }
 
-merge(x, y) = z {
+merge(x, y) := z if {
   z := x
   y
 }

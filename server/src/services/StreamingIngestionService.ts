@@ -45,7 +45,7 @@ export class StreamingIngestionService {
       try {
         await this.processRecord(job.data);
         recordsIngested.inc({ source_type: job.data.record.sourceType, status: 'success' });
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, jobId: job.id }, 'Ingestion job failed');
         recordsIngested.inc({ source_type: job.data.record.sourceType, status: 'failure' });
         throw error;
@@ -88,7 +88,7 @@ export class StreamingIngestionService {
           removeOnFail: false // Keep failed for DLQ inspection
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, sourceId }, 'Streaming failed, restarting in 5s');
       setTimeout(() => this.startStreaming(sourceId, connector, tenantId), 5000);
     }

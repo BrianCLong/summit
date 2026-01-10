@@ -44,8 +44,14 @@ class RBACManager {
   private permissionCache: Map<string, Set<string>> = new Map();
 
   constructor() {
+    const enabledEnv = process.env.RBAC_ENABLED;
+    const enabled =
+      enabledEnv === undefined
+        ? true
+        : !['false', '0', 'no'].includes(enabledEnv.toLowerCase());
+
     this.config = {
-      enabled: process.env.RBAC_ENABLED === 'true' || true,
+      enabled,
       rolesClaim: process.env.RBAC_ROLES_CLAIM || 'groups',
       defaultRole: process.env.RBAC_DEFAULT_ROLE || 'viewer',
       roles: {
@@ -131,7 +137,7 @@ class RBACManager {
         const envConfig = JSON.parse(process.env.RBAC_CONFIG);
         this.config = { ...this.config, ...envConfig };
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         '⚠️ Failed to parse RBAC_CONFIG from environment, using defaults',
         { error: error.message },
@@ -337,7 +343,7 @@ export function authenticateUser(
     });
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     logger.error('❌ Authentication middleware error', {
       error: error.message,
     });
@@ -351,6 +357,10 @@ export function authenticateUser(
 export function requirePermission(permission: string) {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
+      if (!rbacManager.getConfig().enabled) {
+        return next();
+      }
+
       const user = (req as AuthenticatedRequest).user;
 
       if (!user) {
@@ -386,7 +396,7 @@ export function requirePermission(permission: string) {
       });
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Authorization middleware error', {
         error: error.message,
         permission,
@@ -402,6 +412,10 @@ export function requirePermission(permission: string) {
 export function requireAnyPermission(...permissions: string[]) {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
+      if (!rbacManager.getConfig().enabled) {
+        return next();
+      }
+
       const user = (req as AuthenticatedRequest).user;
 
       if (!user) {
@@ -427,7 +441,7 @@ export function requireAnyPermission(...permissions: string[]) {
       }
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Multi-permission authorization error', {
         error: error.message,
       });
@@ -466,7 +480,7 @@ export function getUserInfo(req: Request, res: Response): void {
         },
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('❌ Get user info error', { error: error.message });
     res.status(500).json({ error: 'Failed to get user information' });
   }

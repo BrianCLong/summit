@@ -40,8 +40,9 @@ function stableStringify(value: unknown): string {
   if (value === null || value === undefined) return String(value);
   if (typeof value !== 'object') return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map((v) => stableStringify(v)).join(',')}]`;
-  const keys = Object.keys(value).sort();
-  return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(value[k])}`).join(',')}}`;
+  const obj = value as Record<string, unknown>;
+  const keys = Object.keys(obj).sort();
+  return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(obj[k])}`).join(',')}}`;
 }
 
 export function buildGraphCacheKey(ctx: GraphQueryCacheContext) {
@@ -85,7 +86,9 @@ export async function runWithGraphQueryCache<T>(
   const cached = await getCachedJson<T>(cacheKey, { ttlSeconds });
   if (cached !== null) {
     recHit('graph-cache', op, tenantLabel);
-    cacheLatencySeconds.labels(op, 'hit', tenantLabel).observe((Date.now() - start) / 1000);
+  cacheLatencySeconds
+    ?.labels?.(op, 'hit', tenantLabel)
+    ?.observe?.((Date.now() - start) / 1000);
     return cached;
   }
 
@@ -93,7 +96,9 @@ export async function runWithGraphQueryCache<T>(
   const fresh = await fetcher();
   await setCachedJson(cacheKey, fresh, { ttlSeconds, indexPrefixes: tags });
   recSet('graph-cache', op, tenantLabel);
-  cacheLatencySeconds.labels(op, 'miss', tenantLabel).observe((Date.now() - start) / 1000);
+  cacheLatencySeconds
+    ?.labels?.(op, 'miss', tenantLabel)
+    ?.observe?.((Date.now() - start) / 1000);
   return fresh;
 }
 
@@ -121,5 +126,7 @@ export async function invalidateGraphQueryCache(options: {
 }
 
 export function recordCacheBypass(reason: string, op: string, tenantId?: string) {
-  cacheBypassTotal.labels(op, reason, tenantId || 'unknown').inc();
+  cacheBypassTotal
+    ?.labels?.(op, reason, tenantId || 'unknown')
+    ?.inc?.();
 }

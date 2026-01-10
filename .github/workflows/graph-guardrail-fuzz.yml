@@ -14,12 +14,13 @@ on:
 jobs:
   guardrail-fuzz:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
         with:
           version: 9.12.3
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 20.14.0
           cache: pnpm
@@ -30,9 +31,11 @@ jobs:
         env:
           GRAPH_GUARDRAIL_FUZZ_ITERATIONS: 80
           GRAPH_GUARDRAIL_FUZZ_SEED: 8339
+          GRAPH_GUARDRAIL_FUZZ_MAX_ITERATIONS: 120
       - name: Run guardrail fuzz (nightly full)
         if: github.event_name == 'schedule'
         run: pnpm test:fuzz:graph-guardrails
         env:
           GRAPH_GUARDRAIL_FUZZ_ITERATIONS: 300
           GRAPH_GUARDRAIL_FUZZ_SEED: 8339
+          GRAPH_GUARDRAIL_FUZZ_MAX_ITERATIONS: 300

@@ -211,3 +211,32 @@ export type ExecutionReceipt = Receipt;
 // Function aliases for backward compatibility
 export const canonicalReceiptPayload = canonicalizeReceiptPayload;
 export const hashReceiptPayload = computeReceiptPayloadHash;
+export const hashReceipt = computeReceiptHash;
+export const verifyReceipt = verifyReceiptSignature;
+
+/**
+ * Apply redaction to specific fields in a receipt, marking hashes as REDACTED
+ * and tracking disclosure metadata.
+ */
+export function applyRedaction<T extends { hashes?: { inputs?: Array<{ name: string; hash: string; redactable?: boolean }> }; disclosure?: { redactions?: string[]; reason?: string } }>(
+  receipt: T,
+  fieldsToRedact: string[],
+  reason: string,
+): T {
+  const clone = JSON.parse(JSON.stringify(receipt)) as T;
+
+  if (clone.hashes?.inputs) {
+    for (const input of clone.hashes.inputs) {
+      if (fieldsToRedact.includes(input.name) && input.redactable !== false) {
+        input.hash = 'REDACTED';
+      }
+    }
+  }
+
+  clone.disclosure = {
+    redactions: fieldsToRedact,
+    reason,
+  };
+
+  return clone;
+}

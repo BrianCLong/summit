@@ -26,7 +26,7 @@ router.use(express.json());
 // POST /api/maestro/v1/runs/:id/mcp/sessions
 router.post('/runs/:id/mcp/sessions', (req, res) => {
   const tracer = trace.getTracer('maestro-mcp');
-  tracer.startActiveSpan('mcp.session.create', (span) => {
+  tracer.startActiveSpan('mcp.session.create', (span: any) => {
     const runId = req.params.id;
     const { scopes, servers } = req.body || {};
     if (!Array.isArray(scopes) || scopes.length === 0) {
@@ -59,7 +59,7 @@ router.post('/runs/:id/mcp/sessions', (req, res) => {
 // DELETE /api/maestro/v1/runs/:id/mcp/sessions/:sid
 router.delete('/runs/:id/mcp/sessions/:sid', (req, res) => {
   const tracer = trace.getTracer('maestro-mcp');
-  tracer.startActiveSpan('mcp.session.revoke', (span) => {
+  tracer.startActiveSpan('mcp.session.revoke', (span: any) => {
     revokeSession(req.params.sid);
     const runId = req.params.id;
     const before = sessionsByRun.get(runId) || [];

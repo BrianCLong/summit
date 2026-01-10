@@ -1,20 +1,21 @@
-import mlflow.pyfunc
-import time
-from typing import Dict, Any, List
 import logging
-import os
+import time
+from typing import Any
 
 logger = logging.getLogger(__name__)
+
 
 class MockModel:
     def predict(self, data):
         # Return dummy predictions for prototype
         import random
+
         return [random.random() for _ in range(len(data))]
+
 
 class ModelManager:
     _instance = None
-    _models: Dict[str, Any] = {}
+    _models: dict[str, Any] = {}
 
     def __new__(cls):
         if cls._instance is None:
@@ -44,7 +45,7 @@ class ModelManager:
             self._models[key] = MockModel()
             return self._models[key]
 
-    async def predict(self, model_name: str, version: str, data: List[Any]):
+    async def predict(self, model_name: str, version: str, data: list[Any]):
         model = await self.load_model(model_name, version)
         start_time = time.time()
 
@@ -58,5 +59,6 @@ class ModelManager:
 
         latency = (time.time() - start_time) * 1000
         return predictions, latency
+
 
 model_manager = ModelManager()

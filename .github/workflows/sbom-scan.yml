@@ -1,0 +1,20 @@
+name: SBOM & Vulnerability Scanning
+on: [push, pull_request]
+permissions:
+  contents: read
+  security-events: write
+jobs:
+  sbom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: anchore/sbom-action@v0
+        with:
+          format: cyclonedx-json
+          output-file: sbom.json
+      - uses: anchore/scan-action@v7
+        with:
+          sbom: sbom.json
+          fail-build: true
+          severity-cutoff: critical
+# Linked: https://linear.app/summi7/issue/SUM-10197

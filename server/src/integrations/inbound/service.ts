@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
-import { pg } from '../../db/pg';
-import { InboundAlertConfig, InboundAlert } from './types';
-import { IncidentService } from '../../services/IncidentService'; // Hypothetical service
+import { pg } from '../../db/pg.js';
+import { InboundAlertConfig, InboundAlert } from './types.js';
+import { IncidentService } from '../../services/IncidentService.js'; // Hypothetical service
 
 export class InboundAlertService {
   async processAlert(

@@ -7,9 +7,9 @@ import {
   costAwareScheduler,
   SchedulingContext,
   BudgetConfig,
-} from './cost-aware-scheduler';
-import { ExpertArm } from '../learn/bandit';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+} from './cost-aware-scheduler.js';
+import { ExpertArm } from '../learn/bandit.js';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 
 export const schedulerRouter = express.Router();
 
@@ -117,7 +117,7 @@ schedulerRouter.post('/schedule', async (req, res) => {
     }
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Scheduling error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent('scheduler_error', { success: false });
@@ -167,7 +167,7 @@ schedulerRouter.post('/dequeue/:queueName', async (req, res) => {
       workerId,
       dequeuedAt: Date.now(),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Dequeue error:', error);
 
     res.status(500).json({
@@ -218,7 +218,7 @@ schedulerRouter.post('/complete', async (req, res) => {
       message: 'Task completed successfully',
       requestId,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Task completion error:', error);
 
     res.status(500).json({
@@ -249,7 +249,7 @@ schedulerRouter.post('/fail', async (req, res) => {
       message: 'Task marked as failed',
       requestId,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Task failure error:', error);
 
     res.status(500).json({
@@ -271,7 +271,7 @@ schedulerRouter.get('/metrics', async (req, res) => {
       metrics,
       timestamp: Date.now(),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Metrics retrieval error:', error);
 
     res.status(500).json({
@@ -320,7 +320,7 @@ schedulerRouter.post('/budget/:tenantId', async (req, res) => {
       tenantId,
       config,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Budget configuration error:', error);
 
     res.status(500).json({
@@ -350,7 +350,7 @@ schedulerRouter.get('/spending/:tenantId', async (req, res) => {
       report,
       timestamp: Date.now(),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Spending report error:', error);
 
     res.status(500).json({
@@ -392,7 +392,7 @@ schedulerRouter.get('/queues', async (req, res) => {
       },
       timestamp: Date.now(),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Queue status error:', error);
 
     res.status(500).json({
@@ -419,7 +419,7 @@ schedulerRouter.get('/health', async (req, res) => {
       timestamp: Date.now(),
       service: 'scheduler-api',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Health check error:', error);
 
     res.status(503).json({

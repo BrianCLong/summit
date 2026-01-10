@@ -8,11 +8,11 @@
  * - R3: Disinformation Network Mapping
  */
 
-import { DAGExecutor } from './dags/dag-executor';
-import { LegalBasis, DataLicense } from './dags/types';
-import { createR1RapidAttributionRunbook } from './r1-rapid-attribution';
-import { createR2PhishingClusterRunbook } from './r2-phishing-cluster';
-import { createR3DisinformationNetworkRunbook } from './r3-disinformation-network';
+import { DAGExecutor } from './dags/dag-executor.js';
+import { LegalBasis, DataLicense } from './dags/types.js';
+import { createR1RapidAttributionRunbook } from './r1-rapid-attribution.js';
+import { createR2PhishingClusterRunbook } from './r2-phishing-cluster.js';
+import { createR3DisinformationNetworkRunbook } from './r3-disinformation-network.js';
 
 /**
  * Example: Execute R1 - Rapid Attribution (CTI)
@@ -302,7 +302,7 @@ export async function runAllExamples() {
     await executeR3Example();
 
     console.log('\n=== All Examples Completed Successfully ===\n');
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error running examples:', error);
     throw error;
   }

@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { cacheService } from './CacheService.js';
-import { advancedAuditSystem } from '../audit/advanced-audit-system.js';
+import { advancedAuditSystem } from '../audit/index.js';
 
 export interface Investigation {
   id: string;
@@ -731,7 +731,7 @@ export class InvestigationWorkflowService extends EventEmitter {
       // Try to load from cache
       investigation = await cacheService.get(
         `investigation:${investigationId}`,
-      );
+      ) as any;
       if (investigation) {
         this.investigations.set(investigationId, investigation);
       }

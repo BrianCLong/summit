@@ -94,7 +94,7 @@ export class NetworkSecurityService extends EventEmitter {
         }
 
         return result;
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error analyzing traffic batch:', error);
         return null;
     }

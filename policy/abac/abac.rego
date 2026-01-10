@@ -2,64 +2,64 @@ package summit.abac
 
 import data.abac
 
-default decision = {
+default decision := {
   "allow": false,
   "reason": "policy_denied",
   "obligations": []
 }
 
-dual_control_required {
+dual_control_required if {
   abac.actions[input.action].requiresDualControl == true
 }
 
-dual_control_approvals := approvals {
+dual_control_approvals := approvals if {
   approvals := input.context.dualControlApprovals
 }
 
-dual_control_approvals := [] {
+dual_control_approvals := [] if {
   not input.context.dualControlApprovals
 }
 
 distinct_approvals := {approval | approval := dual_control_approvals[_]}
 
-dual_control_satisfied {
+dual_control_satisfied if {
   not dual_control_required
 }
 
-dual_control_satisfied {
+dual_control_satisfied if {
   dual_control_required
   valid := {approval | distinct_approvals[approval]; approval != input.subject.id}
   count(valid) >= 2
 }
 
-clearance_rank(level) = rank {
+clearance_rank(level) := rank if {
   rank := abac.clearance_rank[level]
 }
 
-subject_clearance_rank = clearance_rank(input.subject.clearance)
-resource_classification_rank = clearance_rank(input.resource.classification)
+subject_clearance_rank := clearance_rank(input.subject.clearance)
+resource_classification_rank := clearance_rank(input.resource.classification)
 
-tenant_match {
+tenant_match if {
   input.subject.tenantId == input.resource.tenantId
 }
 
-residency_match {
+residency_match if {
   allowed := abac.residency_matrix[input.subject.residency]
   allowed[_] == input.resource.residency
 }
 
-has_required_role(action) {
+has_required_role(action) if {
   required := abac.actions[action].allowedRoles
   count(required) == 0
 }
 
-has_required_role(action) {
+has_required_role(action) if {
   required := abac.actions[action].allowedRoles
   role := required[_]
   input.subject.roles[_] == role
 }
 
-has_required_role(action) {
+has_required_role(action) if {
   action_parts := split(action, ":")
   count(action_parts) == 2
   entitlement := input.subject.entitlements[_]
@@ -70,27 +70,27 @@ has_required_role(action) {
   ent_parts[2] == action_parts[1]
 }
 
-clearance_sufficient {
+clearance_sufficient if {
   subject_clearance_rank >= resource_classification_rank
 }
 
-step_up_needed {
+step_up_needed if {
   abac.actions[input.action].requiresStepUp
 }
 
-step_up_needed {
+step_up_needed if {
   input.context.protectedActions[_] == input.action
 }
 
-step_up_needed {
+step_up_needed if {
   resource_classification_rank >= clearance_rank("confidential")
 }
 
-sufficient_acr {
+sufficient_acr if {
   input.context.currentAcr == "loa2"
 }
 
-allow {
+allow if {
   tenant_match
   residency_match
   clearance_sufficient
@@ -98,32 +98,32 @@ allow {
   dual_control_satisfied
 }
 
-deny_reason := "tenant_mismatch" {
+deny_reason := "tenant_mismatch" if {
   not tenant_match
-} else := "residency_mismatch" {
+} else := "residency_mismatch" if {
   tenant_match
   not residency_match
-} else := "insufficient_clearance" {
+} else := "insufficient_clearance" if {
   tenant_match
   residency_match
   not clearance_sufficient
-} else := "least_privilege_violation" {
+} else := "least_privilege_violation" if {
   tenant_match
   residency_match
   clearance_sufficient
   not has_required_role(input.action)
-} else := "dual_control_required" {
+} else := "dual_control_required" if {
   tenant_match
   residency_match
   clearance_sufficient
   has_required_role(input.action)
   dual_control_required
   not dual_control_satisfied
-} else := "policy_denied" {
+} else := "policy_denied" if {
   true
 }
 
-obligation_set[obligation] {
+obligation_set contains obligation if {
   step_up_needed
   not sufficient_acr
   obligation := {
@@ -133,7 +133,7 @@ obligation_set[obligation] {
   }
 }
 
-obligation_set[obligation] {
+obligation_set contains obligation if {
   dual_control_required
   not dual_control_satisfied
   obligation := {
@@ -146,7 +146,7 @@ decision := {
   "allow": true,
   "reason": "allow",
   "obligations": obligations,
-} {
+} if {
   allow
   obligations := [obligation | obligation_set[obligation]]
 }
@@ -155,7 +155,7 @@ decision := {
   "allow": false,
   "reason": reason,
   "obligations": obligations,
-} {
+} if {
   not allow
   reason := deny_reason
   obligations := [obligation | obligation_set[obligation]]

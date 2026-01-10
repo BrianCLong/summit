@@ -1,15 +1,17 @@
+package opa.intelgraph.authz
 
-package intelgraph.authz
+import future.keywords.if
+import future.keywords.contains
 
-default allow = false
+default allow := false
 
-allow {
+allow if {
     input.method == "GET"
     input.path = ["data", "read"]
     input.user.roles[_] == "reader"
 }
 
-allow {
+allow if {
     input.method == "POST"
     input.path = ["data", "write"]
     input.user.roles[_] == "writer"

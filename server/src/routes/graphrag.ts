@@ -1,169 +1,178 @@
 /**
- * GraphRAG HTTP API Routes
- *
- * POST /graphrag/answer - Get evidence-first answer with citations
+ * GraphRAG REST API Routes
+ * RESTful endpoints for GraphRAG operations
  */
 
-import { Router, Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
-import logger from '../utils/logger.js';
-import { getGraphRagService, UserContext, GraphRagRequest } from '../services/graphrag/index.js';
+import express, { Request, Response } from 'express';
+import { GraphRAGQueryService } from '../services/GraphRAGQueryService.js';
+import { GraphRAGService } from '../services/GraphRAGService.js';
+import { QueryPreviewService } from '../services/QueryPreviewService.js';
+import { GlassBoxRunService } from '../services/GlassBoxRunService.js';
+import { NlToCypherService } from '../ai/nl-to-cypher/nl-to-cypher.service.js';
+import EmbeddingService from '../services/EmbeddingService.js';
+import { LLMService } from '../services/LLMService.js';
+import { LLMServiceAdapter } from '../ai/nl-to-cypher/LLMServiceAdapter.js';
 
-const router = Router();
+import { getNeo4jDriver, getPostgresPool, getRedisClient } from '../config/database.js';
+import { ensureAuthenticated } from '../middleware/auth.js';
+import { createRateLimiter, EndpointClass } from '../middleware/rateLimit.js';
+import { validateRequest } from '../middleware/validation.js';
 
-// Request validation schema
-const AnswerRequestSchema = z.object({
-  caseId: z.string().min(1, 'caseId is required'),
-  question: z.string().min(3, 'question must be at least 3 characters').max(2000),
-});
+const graphRagRateLimiter = createRateLimiter(EndpointClass.QUERY);
+import { logger } from '../utils/logger.js';
+import { AuthenticatedRequest } from './types.js';
 
-// Response limits
-const MAX_ANSWER_LENGTH = 10000;
-const MAX_CONTEXT_NODES = 100;
-const MAX_CONTEXT_EDGES = 200;
-const MAX_CONTEXT_EVIDENCE = 50;
+const router = express.Router();
 
-/**
- * Extract user context from request (populated by auth middleware)
- */
-function extractUserContext(req: Request): UserContext {
-  // User context should be populated by auth middleware
-  const user = (req as any).user || {};
+// Initialize services lazily
+let graphRAGQueryService: GraphRAGQueryService;
 
-  return {
-    userId: user.userId || user.id || 'anonymous',
-    roles: user.roles || [],
-    clearances: user.clearances || [],
-    needToKnowTags: user.needToKnowTags || [],
-    tenantId: user.tenantId,
-    classification: user.classification,
-    cases: user.cases || [],
-  };
+function initializeServices() {
+  if (!graphRAGQueryService) {
+    const neo4jDriver = getNeo4jDriver();
+    const redisClient = getRedisClient();
+    const pool = getPostgresPool().pool; // ManagedPostgresPool has a .pool property
+
+    const embeddingService = new EmbeddingService();
+    const llmService = new LLMService();
+
+    const graphRAGService = new GraphRAGService(
+      neo4jDriver,
+      llmService as any,
+      embeddingService,
+      redisClient
+    );
+
+    const glassBoxService = new GlassBoxRunService(pool, redisClient);
+
+    const modelAdapter = new LLMServiceAdapter(llmService);
+    const nlToCypherService = new NlToCypherService(modelAdapter);
+
+    const queryPreviewService = new QueryPreviewService(
+      pool,
+      neo4jDriver,
+      nlToCypherService,
+      glassBoxService,
+      redisClient
+    );
+
+    graphRAGQueryService = new GraphRAGQueryService(
+      graphRAGService,
+      queryPreviewService,
+      glassBoxService,
+      pool,
+      neo4jDriver
+    );
+  }
 }
 
-/**
- * POST /graphrag/answer
- *
- * Request body:
- * {
- *   "caseId": "string",
- *   "question": "string"
- * }
- *
- * Response:
- * {
- *   "answer": {
- *     "answerText": "string",
- *     "citations": [{ "evidenceId": "string", "claimId": "string" }],
- *     "unknowns": ["string"],
- *     "usedContextSummary": { "numNodes": 0, "numEdges": 0, "numEvidenceSnippets": 0 }
- *   },
- *   "rawContext": { ... },
- *   "requestId": "string",
- *   "timestamp": "string"
- * }
- */
-router.post(
-  '/answer',
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      // Validate request body
-      const parseResult = AnswerRequestSchema.safeParse(req.body);
-      if (!parseResult.success) {
-        res.status(400).json({
-          error: 'Validation error',
-          details: parseResult.error.errors,
-        });
-        return;
-      }
+// Apply authentication and rate limiting
+router.use(ensureAuthenticated);
+router.use(graphRagRateLimiter);
 
-      const { caseId, question } = parseResult.data;
+// Validation schema for new query endpoint
+const querySchema = {
+  query: { type: 'string', required: false }, // Optional because it might be 'question'
+  question: { type: 'string', required: false },
+  investigationId: { type: 'string', required: true },
+  // ... other fields are optional or handled dynamically
+};
 
-      // Extract user context from authenticated request
-      const userContext = extractUserContext(req);
+const handleQuery = async (req: AuthenticatedRequest, res: Response) => {
+  initializeServices();
 
-      logger.info({
-        message: 'GraphRAG answer request received',
-        caseId,
-        userId: userContext.userId,
-        questionLength: question.length,
-      });
+  try {
+    const body = req.body;
+    let requestPayload;
 
-      // Build GraphRAG request
-      const graphRagRequest: GraphRagRequest = {
-        caseId,
-        question,
-        userId: userContext.userId,
+    const tenantId = req.user?.tenant_id;
+    const userId = req.user?.id;
+
+    if (!tenantId || !userId) {
+      logger.warn({ user: req.user }, 'Missing user context for GraphRAG query');
+      return res.status(401).json({ error: 'Unauthorized: Missing user context' });
+    }
+
+    // Detect legacy request (GraphRAGService style)
+    if (body.context || body.maxResults || body.depth || body.model) {
+      requestPayload = {
+        question: body.query || body.question,
+        investigationId: body.investigationId,
+        tenantId,
+        userId,
+        // Map legacy fields
+        maxHops: body.depth || body.maxHops || 2,
+        focusEntityIds: body.focusEntityIds,
+        // Legacy "options" often passed, so we ignore or map what we can
+        generateQueryPreview: false, // Legacy assumes direct execution
+        autoExecute: true
       };
-
-      // Get answer from service
-      const service = getGraphRagService();
-      const response = await service.answer(graphRagRequest, userContext);
-
-      // Apply response limits
-      const limitedResponse = applyResponseLimits(response);
-
-      res.json(limitedResponse);
-    } catch (error) {
-      logger.error({
-        message: 'GraphRAG answer request failed',
-        error: error instanceof Error ? error.message : String(error),
-      });
-
-      if (error instanceof z.ZodError) {
-        res.status(400).json({
-          error: 'Validation error',
-          details: error.errors,
-        });
-        return;
-      }
-
-      next(error);
+    } else {
+      // New schema
+      requestPayload = {
+        question: body.query || body.question,
+        investigationId: body.investigationId,
+        tenantId,
+        userId,
+        focusEntityIds: body.focusEntityIds,
+        maxHops: body.maxHops,
+        generateQueryPreview: body.generatePreview,
+        autoExecute: body.autoExecute ?? true,
+      };
     }
-  },
-);
+
+    if (!requestPayload.question || !requestPayload.investigationId) {
+      return res.status(400).json({ error: 'Missing required fields: query/question, investigationId' });
+    }
+
+    const result = await graphRAGQueryService.query(requestPayload);
+
+    res.json(result);
+  } catch (error: any) {
+    logger.error({ error, body: req.body }, 'GraphRAG query failed');
+    res.status(500).json({ error: error.message });
+  }
+};
 
 /**
- * Apply response size limits
+ * POST /api/graphrag/query
+ * Execute a natural language query against the graph + docs
  */
-function applyResponseLimits(response: any): any {
-  // Truncate answer text if too long
-  if (response.answer?.answerText?.length > MAX_ANSWER_LENGTH) {
-    response.answer.answerText =
-      response.answer.answerText.substring(0, MAX_ANSWER_LENGTH) +
-      '... [truncated]';
-  }
-
-  // Limit raw context sizes
-  if (response.rawContext) {
-    if (response.rawContext.nodes?.length > MAX_CONTEXT_NODES) {
-      response.rawContext.nodes = response.rawContext.nodes.slice(0, MAX_CONTEXT_NODES);
-    }
-    if (response.rawContext.edges?.length > MAX_CONTEXT_EDGES) {
-      response.rawContext.edges = response.rawContext.edges.slice(0, MAX_CONTEXT_EDGES);
-    }
-    if (response.rawContext.evidenceSnippets?.length > MAX_CONTEXT_EVIDENCE) {
-      response.rawContext.evidenceSnippets = response.rawContext.evidenceSnippets.slice(
-        0,
-        MAX_CONTEXT_EVIDENCE,
-      );
-    }
-  }
-
-  return response;
-}
+router.post('/query', validateRequest(querySchema), handleQuery);
 
 /**
- * GET /graphrag/health
- *
- * Health check endpoint
+ * POST /api/graphrag/answer
+ * Legacy endpoint alias for backward compatibility
  */
-router.get('/health', (_req: Request, res: Response) => {
-  res.json({
-    status: 'healthy',
-    service: 'graphrag',
-    timestamp: new Date().toISOString(),
-  });
+router.post('/answer', validateRequest(querySchema), handleQuery);
+
+
+/**
+ * POST /api/graphrag/preview/execute
+ * Execute a previously generated preview
+ */
+router.post('/preview/execute', async (req: AuthenticatedRequest, res: Response) => {
+  initializeServices();
+
+  try {
+    const { previewId, useEditedQuery, dryRun } = req.body;
+
+    if (!previewId) {
+      return res.status(400).json({ error: 'Missing previewId' });
+    }
+
+    const result = await graphRAGQueryService.executePreview({
+      previewId,
+      userId: req.user?.id || 'unknown',
+      useEditedQuery,
+      dryRun
+    });
+
+    res.json(result);
+  } catch (error: any) {
+    logger.error({ error, body: req.body }, 'Preview execution failed');
+    res.status(500).json({ error: error.message });
+  }
 });
 
 export default router;

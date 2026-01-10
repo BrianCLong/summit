@@ -8,7 +8,7 @@ import entityCommentsRouter from '../entity-comments.js';
 const memDb = newDb({ noAstCoverageCheck: true });
 memDb.public.registerFunction({
   name: 'gen_random_uuid',
-  returns: 'uuid',
+  returns: 'uuid' as any,
   implementation: randomUUID,
 });
 const { Pool: MemPool } = memDb.adapters.createPg();
@@ -26,7 +26,10 @@ const ACTOR_ONE = 'entity-comment-owner';
 const ACTOR_TWO = 'entity-comment-other';
 const ENTITY_ID = 'entity-for-comments';
 
-describe('Entity comment soft delete lifecycle', () => {
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('Entity comment soft delete lifecycle', () => {
   let app: express.Express;
   let checkAccessMock: jest.Mock;
   const originalCheckAccess = opaClient.checkDataAccess;

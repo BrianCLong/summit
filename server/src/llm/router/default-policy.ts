@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { RoutingPolicy, RoutingContext, RoutingDecision, ProviderId, ModelId } from '../types';
+import { RoutingPolicy, RoutingContext, RoutingDecision, ProviderId, ModelId } from '../types.js';
 
 export class DefaultRoutingPolicy implements RoutingPolicy {
 

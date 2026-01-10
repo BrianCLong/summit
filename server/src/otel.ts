@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { logger } from './config/logger.js';
-import { initializeTracing } from './observability/tracer.js';
+import { initializeTracing, getTracer as getCoreTracer } from './observability/tracer.js';
 
 // Legacy OpenTelemetry entry point - redirects to new tracer implementation
 // Maintained for backward compatibility and to satisfy build requirements
@@ -23,7 +23,7 @@ export async function startOtel(): Promise<void> {
     const tracer = initializeTracing();
     await tracer.initialize();
     logger.info('OpenTelemetry SDK started successfully.');
-  } catch (error) {
+  } catch (error: any) {
     logger.warn('Failed to start OpenTelemetry SDK', {
       error: (error as Error).message,
     });
@@ -32,4 +32,8 @@ export async function startOtel(): Promise<void> {
 
 export function isOtelStarted() {
   return started;
+}
+
+export function getTracer(_name?: string) {
+  return getCoreTracer();
 }

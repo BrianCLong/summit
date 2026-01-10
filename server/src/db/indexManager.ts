@@ -28,7 +28,7 @@ async function loadIndexConfig(): Promise<IndexConfig[]> {
         const fileContents = await fs.readFile(CONFIG_PATH, 'utf8');
         const config = yaml.load(fileContents) as OptimizerConfig;
         return config.indexes || [];
-    } catch (error) {
+    } catch (error: any) {
         logger.warn('Failed to load neo4j-optimization.yml, falling back to defaults', error);
         return [
           { label: 'Entity', property: 'id', type: 'CONSTRAINT' },
@@ -87,7 +87,7 @@ export async function checkNeo4jIndexes() {
             logger.info({ query }, 'Creating missing index/constraint...');
             try {
                 await neo.run(query);
-            } catch (e) {
+            } catch (e: any) {
                 logger.error({ error: e, query }, 'Failed to create index');
             }
         }
@@ -95,7 +95,7 @@ export async function checkNeo4jIndexes() {
         logger.info('All required Neo4j indexes are present.');
     }
 
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Failed to check Neo4j indexes', error);
   }
 }

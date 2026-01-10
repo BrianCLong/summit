@@ -142,7 +142,7 @@ async function createPolicyTagIndexes(session: Session): Promise<void> {
     try {
       await session.run(index.cypher);
       logger.info(`Created index: ${index.name}`);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(`Index ${index.name} may already exist: ${error.message}`);
     }
   }
@@ -275,7 +275,7 @@ async function createPolicyTagConstraints(session: Session): Promise<void> {
     try {
       await session.run(constraint.cypher);
       logger.info(`Created constraint: ${constraint.name}`);
-    } catch (error) {
+    } catch (error: any) {
       // Constraints may not be supported in all Neo4j versions
       logger.warn(`Could not create constraint ${constraint.name}: ${error.message}`);
     }
@@ -304,7 +304,7 @@ export async function up(driver: Driver): Promise<void> {
     try {
       const piiUpdated = await detectAndFlagPII(session);
       logger.info(`PII detection completed: ${piiUpdated} entities flagged`);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('PII detection skipped (may require APOC plugin)', { error: error.message });
     }
 
@@ -317,7 +317,7 @@ export async function up(driver: Driver): Promise<void> {
     // 7. Create constraints (optional)
     try {
       await createPolicyTagConstraints(session);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Constraint creation skipped', { error: error.message });
     }
 
@@ -327,7 +327,7 @@ export async function up(driver: Driver): Promise<void> {
       ownersAssigned,
       expiryDatesSet,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Neo4j policy tags migration failed', { error: error.message });
     throw error;
   } finally {
@@ -395,13 +395,13 @@ export async function down(driver: Driver): Promise<void> {
       try {
         await session.run(`DROP INDEX ${indexName} IF EXISTS`);
         logger.info(`Dropped index: ${indexName}`);
-      } catch (error) {
+      } catch (error: any) {
         logger.warn(`Could not drop index ${indexName}: ${error.message}`);
       }
     }
 
     logger.info('Neo4j policy tags rollback completed');
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Neo4j policy tags rollback failed', { error: error.message });
     throw error;
   } finally {

@@ -144,7 +144,7 @@ entityCommentsRouter.post('/:id/comments', async (req, res) => {
     }
 
     res.status(201).json(comment);
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof EntityCommentAccessError) {
       return res.status(error.status).json({ error: error.code });
     }
@@ -197,7 +197,7 @@ entityCommentsRouter.get('/:id/comments', async (req, res) => {
     );
 
     res.json(comments);
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof EntityCommentAccessError) {
       return res.status(error.status).json({ error: error.code });
     }
@@ -288,7 +288,7 @@ entityCommentsRouter.post('/:id/comments/:commentId/delete', async (req, res) =>
     });
 
     res.json({ status: 'deleted', comment: deleted });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof EntityCommentAccessError) {
       return res.status(error.status).json({ error: error.code });
     }
@@ -372,7 +372,7 @@ entityCommentsRouter.post('/:id/comments/:commentId/restore', async (req, res) =
     });
 
     res.json({ status: 'restored', comment: restored });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof EntityCommentAccessError) {
       return res.status(error.status).json({ error: error.code });
     }

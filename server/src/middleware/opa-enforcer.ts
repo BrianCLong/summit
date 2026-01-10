@@ -65,6 +65,8 @@ export class OPAEnforcer {
     string,
     { decision: OPADecision; expiresAt: number }
   >();
+  private cacheHits = 0;
+  private cacheMisses = 0;
 
   constructor(options: OPAEnforcerOptions = {}) {
     this.options = {
@@ -92,12 +94,11 @@ export class OPAEnforcer {
     if (this.options.cacheDecisions) {
       const cached = this.decisionCache.get(cacheKey);
       if (cached && Date.now() < cached.expiresAt) {
-        logger.debug('OPA decision cache hit', {
-          tenantId: input.tenant_id,
-          requestId: input.request_id,
-        });
+        this.recordCacheHit(input);
         return cached.decision;
       }
+
+      this.recordCacheMiss(input, cached ? 'expired' : 'miss');
     }
 
     try {
@@ -127,7 +128,7 @@ export class OPAEnforcer {
       });
 
       return decision;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('OPA policy evaluation failed', {
         error: error instanceof Error ? error.message : String(error),
         tenantId: input.tenant_id,
@@ -260,7 +261,7 @@ export class OPAEnforcer {
         }
 
         return response.data.result;
-      } catch (error) {
+      } catch (error: any) {
         lastError = error instanceof Error ? error : new Error(String(error));
 
         if (attempt < this.options.retries) {
@@ -336,7 +337,10 @@ export class OPAEnforcer {
             req.get('x-tenant-id') || (req as any).user?.tenantId || 'default',
           user_id: (req as any).user?.id || req.get('x-user-id') || 'anonymous',
           mutation: req.body.operationName || 'unnamed',
-          field_name: this.extractMutationField(req.body.query),
+          field_name: this.extractMutationField(
+            req.body.query,
+            req.body.operationName,
+          ),
           est_usd: parseFloat(req.get('x-estimated-usd') || '0'),
           est_total_tokens: parseInt(req.get('x-estimated-tokens') || '0'),
           risk_tag: req.get('x-risk-tag'),
@@ -368,7 +372,7 @@ export class OPAEnforcer {
         // Attach decision to request for downstream use
         (req as any).opaDecision = decision;
         next();
-      } catch (error) {
+      } catch (error: any) {
         logger.error('OPA middleware error', {
           error: error instanceof Error ? error.message : String(error),
           url: req.originalUrl,
@@ -383,9 +387,13 @@ export class OPAEnforcer {
   /**
    * Extract mutation field name from GraphQL query
    */
-  private extractMutationField(query: string): string | undefined {
+  private extractMutationField(
+    query: string,
+    operationName?: string,
+  ): string | undefined {
     const mutationMatch = query.match(/mutation\s+\w*\s*{[^{]*(\w+)\s*\(/);
-    return mutationMatch?.[1];
+    const fieldName = mutationMatch?.[1];
+    return fieldName && fieldName.length > 2 ? fieldName : operationName;
   }
 
   /**
@@ -396,7 +404,7 @@ export class OPAEnforcer {
 
     try {
       return JSON.parse(decodeURIComponent(approversHeader));
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Failed to parse approvers header', {
         header: approversHeader,
         error,
@@ -422,18 +430,53 @@ export class OPAEnforcer {
     ); // Every 5 minutes
   }
 
+  private calculateCacheHitRate(): number {
+    const total = this.cacheHits + this.cacheMisses;
+    if (total === 0) return 0;
+
+    return this.cacheHits / total;
+  }
+
+  private recordCacheHit(input: OPAInput): void {
+    this.cacheHits += 1;
+    logger.debug('OPA decision cache hit', {
+      tenantId: input.tenant_id,
+      requestId: input.request_id,
+      cacheHits: this.cacheHits,
+      cacheMisses: this.cacheMisses,
+      cacheHitRate: this.calculateCacheHitRate(),
+    });
+  }
+
+  private recordCacheMiss(input: OPAInput, reason: string): void {
+    this.cacheMisses += 1;
+    logger.debug('OPA decision cache miss', {
+      tenantId: input.tenant_id,
+      requestId: input.request_id,
+      reason,
+      cacheHits: this.cacheHits,
+      cacheMisses: this.cacheMisses,
+      cacheHitRate: this.calculateCacheHitRate(),
+    });
+  }
+
   /**
    * Get enforcement statistics
    */
   getStats(): {
     enabled: boolean;
     cacheSize: number;
+    cacheHits: number;
+    cacheMisses: number;
     cacheHitRate: number;
   } {
+    const totalCacheChecks = this.cacheHits + this.cacheMisses;
     return {
       enabled: this.options.enabled,
       cacheSize: this.decisionCache.size,
-      cacheHitRate: 0, // TODO: Track cache hits/misses
+      cacheHits: this.cacheHits,
+      cacheMisses: this.cacheMisses,
+      cacheHitRate: totalCacheChecks === 0 ? 0 : this.cacheHits / totalCacheChecks,
     };
   }
 }

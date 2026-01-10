@@ -1,4 +1,4 @@
-import { ForesightBundle } from '../types';
+import { ForesightBundle } from '../types.js';
 
 export class TrajectoryPredictor {
   private transitionMatrix: Map<string, Map<string, number>>;

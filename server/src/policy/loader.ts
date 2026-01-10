@@ -10,6 +10,7 @@ type PolicyBundleVerification = {
   modified: Date;
   signatureVerified: boolean;
   digest: string;
+  buf: Buffer;
 };
 
 const DEFAULT_ALLOWED_EXTENSIONS = ['.tar', '.tgz', '.tar.gz', '.bundle'];
@@ -90,5 +91,6 @@ export async function loadSignedPolicy(
     modified: stat.mtime,
     signatureVerified,
     digest,
+    buf,
   } as const;
 }

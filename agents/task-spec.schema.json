@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/agents/task-spec.schema.json",
+  "title": "Agent Task Specification",
+  "description": "Canonical machine-readable contract every agent must provide before execution.",
+  "type": "object",
+  "required": [
+    "task_id",
+    "agent_id",
+    "prompt_ref",
+    "declared_scope",
+    "allowed_operations",
+    "verification_requirements",
+    "debt_budget",
+    "success_criteria",
+    "stop_conditions"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "pattern": "^[A-Z0-9_-]+$",
+      "description": "Stable identifier for the task (links to artifacts and metrics)."
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "Identity of the agent executing the task."
+    },
+    "prompt_ref": {
+      "type": "object",
+      "required": ["id", "version", "sha256", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "version": { "type": "string" },
+        "sha256": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" },
+        "path": { "type": "string" }
+      }
+    },
+    "declared_scope": {
+      "type": "object",
+      "required": ["paths", "domains"],
+      "additionalProperties": false,
+      "properties": {
+        "paths": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Paths (globs allowed) the agent may touch."
+        },
+        "domains": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Domain areas associated with the change."
+        },
+        "exclusions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional explicit exclusions to enforce."
+        }
+      }
+    },
+    "allowed_operations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["create", "edit", "delete"]
+      },
+      "minItems": 1,
+      "description": "Operations permitted for this task."
+    },
+    "verification_requirements": {
+      "type": "object",
+      "required": ["tier", "artifacts"],
+      "additionalProperties": false,
+      "properties": {
+        "tier": {
+          "type": "string",
+          "enum": ["A", "B", "C"],
+          "description": "Verification depth required (A=full, C=light)."
+        },
+        "artifacts": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Evidence artifacts expected (test logs, proofs, policies)."
+        }
+      }
+    },
+    "debt_budget": {
+      "type": "object",
+      "required": ["permitted", "retirement_target"],
+      "additionalProperties": false,
+      "properties": {
+        "permitted": {
+          "type": "integer",
+          "description": "Maximum net debt allowed (positive adds debt)."
+        },
+        "retirement_target": {
+          "type": "integer",
+          "description": "Minimum debt units to retire (negative allowed)."
+        }
+      }
+    },
+    "success_criteria": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Objective, testable statements that define completion."
+    },
+    "stop_conditions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Conditions that halt execution or require escalation."
+    },
+    "dependencies": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Optional upstream tasks or artifacts required."
+    },
+    "approvals": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Explicit approvals or sign-offs captured for the task."
+    }
+  }
+}

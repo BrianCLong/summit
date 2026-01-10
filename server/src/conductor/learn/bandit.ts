@@ -4,7 +4,7 @@
 
 import Redis from 'ioredis';
 import { EventEmitter } from 'events';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 
 export type ExpertArm =
   | 'LLM_LIGHT'
@@ -887,7 +887,7 @@ export class AdaptiveRouter extends EventEmitter {
       }
 
       console.log('Restored bandit state from Redis');
-    } catch (error) {
+    } catch (error: any) {
       console.warn('Failed to load persisted bandit state:', error.message);
     }
   }

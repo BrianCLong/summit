@@ -1,10 +1,10 @@
-import { pg } from '../../db/pg';
+import { pg } from '../../db/pg.js';
 import {
   AuthorizationError,
   NotFoundError,
   ValidationError,
-} from '../../errors/ErrorHandlingFramework';
-import { CreateSessionInput, MemorySession } from '../types';
+} from '../../errors/ErrorHandlingFramework.js';
+import { CreateSessionInput, MemorySession } from '../types.js';
 
 const DEFAULT_STATUS: MemorySession['status'] = 'active';
 

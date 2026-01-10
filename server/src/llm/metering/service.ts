@@ -1,5 +1,5 @@
 
-import QuotaManager from '../../lib/resources/quota-manager';
+import QuotaManager from '../../lib/resources/quota-manager.js';
 
 export class LlmMeteringService {
     async checkQuota(tenantId: string, tokens: number): Promise<boolean> {

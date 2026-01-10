@@ -1,5 +1,5 @@
-import type { RedactionRule } from './redaction';
-import type { RectificationProof, DeletionProof } from './proofs';
+import type { RedactionRule } from './redaction.js';
+import type { RectificationProof, DeletionProof } from './proofs.js';
 
 export type DSAROperation = 'export' | 'rectify' | 'delete';
 

@@ -1,5 +1,5 @@
 
-import { AdaptationPlan } from '../loops/types';
+import { AdaptationPlan } from '../loops/types.js';
 import { randomUUID } from 'crypto';
 
 export type GovernanceStatus = 'APPROVED' | 'DENIED' | 'PENDING_APPROVAL';

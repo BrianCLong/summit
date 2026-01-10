@@ -1,4 +1,4 @@
-import { getHealthScore } from '../../../health/aggregator';
+import { getHealthScore } from '../../../health/aggregator.js';
 
 const healthResolvers = {
   Query: {

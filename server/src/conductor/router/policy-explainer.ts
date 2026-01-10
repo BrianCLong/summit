@@ -2,8 +2,8 @@
 // Policy Explanation Service for Router Decisions
 // Provides detailed explanations of routing decisions and policy enforcement
 
-import { RouterQuery, RouterResponse } from './router-v2';
-import { ExpertArm } from '../learn/bandit';
+import { RouterQuery, RouterResponse } from './router-v2.js';
+import { ExpertArm } from '../learn/bandit.js';
 
 export interface PolicyRule {
   id: string;
@@ -299,7 +299,7 @@ export class PolicyExplainer {
       }
 
       return { matched, result, context };
-    } catch (error) {
+    } catch (error: any) {
       return {
         matched: false,
         result: 'allow',

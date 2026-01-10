@@ -1,4 +1,3 @@
-
 def simulate_threats(data: dict):
     """
     Simulates threats and vulnerabilities based on OSINT data.

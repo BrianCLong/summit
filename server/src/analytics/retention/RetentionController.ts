@@ -19,7 +19,7 @@ export const runRetention = (req: Request, res: Response) => {
             policyDays: days,
             timestamp: new Date().toISOString()
         });
-    } catch (e) {
+    } catch (e: any) {
         res.status(500).json({ error: (e as Error).message });
     }
 };

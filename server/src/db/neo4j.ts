@@ -15,6 +15,7 @@ import {
   neo4jQueryLatencyMs,
   neo4jQueryTotal,
 } from '../metrics/neo4jMetrics.js';
+import { neo4jPerformanceMonitor } from './neo4jPerformanceMonitor.js';
 
 dotenv.config();
 
@@ -60,7 +61,7 @@ export async function initializeNeo4jDriver(): Promise<void> {
 
       // Notify ready callbacks
       await Promise.all(readyCallbacks.map(cb => cb({ reason: 'driver_initialized' })));
-    } catch (error) {
+    } catch (error: any) {
       neo4jConnectivityUp.set(0);
       if (REQUIRE_REAL_DBS) {
         logger.error('Neo4j connectivity required but failed.', error);
@@ -126,3 +127,46 @@ export const neo = {
     }
   }
 };
+
+type SessionLike = {
+  run: (cypher: string, params?: any, txConfig?: any) => Promise<any>;
+};
+
+function inferLabels(cypher: string): { operation: string; label: string } {
+  const operation = /\b(create|merge|delete|set)\b/i.test(cypher)
+    ? 'write'
+    : 'read';
+  const labelMatch = cypher.match(/:\s*([A-Za-z0-9_]+)/);
+  return {
+    operation,
+    label: labelMatch?.[1] || 'unlabeled',
+  };
+}
+
+export function instrumentSession<T extends SessionLike>(session: T): T {
+  const run = async (cypher: string, params?: any, txConfig?: any) => {
+    const start = Date.now();
+    const labels = inferLabels(cypher);
+    try {
+      const result = await session.run(cypher, params, txConfig);
+      neo4jPerformanceMonitor.recordSuccess({
+        cypher,
+        params,
+        durationMs: Date.now() - start,
+        labels,
+      });
+      return result;
+    } catch (error: any) {
+      neo4jPerformanceMonitor.recordError({
+        cypher,
+        params,
+        durationMs: Date.now() - start,
+        labels,
+        error: error?.message ?? String(error),
+      });
+      throw error;
+    }
+  };
+
+  return { ...session, run } as T;
+}

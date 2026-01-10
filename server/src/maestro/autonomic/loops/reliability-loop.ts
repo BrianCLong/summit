@@ -1,7 +1,7 @@
 
-import { ControlLoop, AdaptationPlan } from './types';
-import { HealthSnapshot, SignalType, HealthStatus } from '../signals/types';
-import { SLOAlert, SLOAlertLevel } from '../policy/types';
+import { ControlLoop, AdaptationPlan } from './types.js';
+import { HealthSnapshot, SignalType, HealthStatus } from '../signals/types.js';
+import { SLOAlert, SLOAlertLevel } from '../policy/types.js';
 
 export class ReliabilityLoop implements ControlLoop {
   public name = 'ReliabilityLoop';

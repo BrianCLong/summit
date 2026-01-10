@@ -585,7 +585,7 @@ export async function importSubgraph(
       imported,
       errors: [],
     };
-  } catch (error) {
+  } catch (error: any) {
     await pool.query('ROLLBACK');
     errors.push(`Import failed: ${(error as Error).message}`);
 

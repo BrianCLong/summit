@@ -218,7 +218,7 @@ export async function up(pool: Pool): Promise<void> {
 
     await client.query('COMMIT');
     logger.info('Migration 032 completed: Adoption analytics system');
-  } catch (error) {
+  } catch (error: any) {
     await client.query('ROLLBACK');
     logger.error('Migration 032 failed', { error });
     throw error;
@@ -248,7 +248,7 @@ export async function down(pool: Pool): Promise<void> {
 
     await client.query('COMMIT');
     logger.info('Migration 032 rolled back: Adoption analytics system');
-  } catch (error) {
+  } catch (error: any) {
     await client.query('ROLLBACK');
     logger.error('Migration 032 rollback failed', { error });
     throw error;

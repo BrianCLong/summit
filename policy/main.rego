@@ -1,6 +1,9 @@
 package main
 
-default allow = false
+import future.keywords.if
+import future.keywords.contains
+
+default allow := false
 
 # Import specific policies
 import data.summit.data as data_policy
@@ -8,13 +11,13 @@ import data.summit.data as data_policy
 # --- Access Policy (Consolidated) ---
 # Formerly in access.rego
 
-allow {
+allow if {
   input.actor.type == "user"
   some r
   input.actor.roles[r] == "governance-admin"
 }
 
-allow {
+allow if {
   input.actor.type == "service"
   some r
   input.actor.roles[r] == "governance-bot"
@@ -22,13 +25,13 @@ allow {
 
 # --- Data Policy Delegation ---
 
-allow {
+allow if {
   data_policy.allow
 }
 
 # --- Global Invariants ---
 
 # Global invariant: deny if tenant is suspended
-deny {
+deny if {
   input.tenant.status == "suspended"
 }

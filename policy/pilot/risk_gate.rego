@@ -1,40 +1,45 @@
 package pilot.gate
 
-default allow = false
+default allow := false
 
 # Allow only when no unexcepted violations remain.
-allow {
+allow if {
   not pending_violations
 }
 
 # Aggregate all violations for evaluation.
-all_violations[v] {
+all_violations contains v if {
   v := iam_wildcard_violation[_]
-} else {
+}
+
+all_violations contains v if {
   v := privileged_workload_violation[_]
-} else {
+}
+
+all_violations contains v if {
   v := public_exposure_violation[_]
-} else {
+}
+
+all_violations contains v if {
   v := missing_tags_violation[_]
 }
 
 # Expose violations that are not safely allowlisted.
-active_violations[v] {
+active_violations contains v if {
   v := all_violations[_]
   not allowlisted(v.id)
 }
 
 # Flag any remaining violations.
-pending_violations {
+pending_violations if {
   count(active_violations) > 0
 }
 
 # IAM: Wildcard actions or resources are blocked.
-iam_wildcard_violation[v] {
-  some policy
-  policy := input.iam.policies[_]
-  policy.id := id
-  policy.effect := effect
+iam_wildcard_violation contains v if {
+  some policy in input.iam.policies
+  id := policy.id
+  effect := policy.effect
   lower(effect) == "allow"
   some stmt in policy.statements
   stmt.actions[_] == "*"
@@ -44,11 +49,11 @@ iam_wildcard_violation[v] {
     "message": sprintf("IAM policy %q uses wildcard actions", [id])
   }
 }
-iam_wildcard_violation[v] {
-  some policy
-  policy := input.iam.policies[_]
-  policy.id := id
-  policy.effect := effect
+
+iam_wildcard_violation contains v if {
+  some policy in input.iam.policies
+  id := policy.id
+  effect := policy.effect
   lower(effect) == "allow"
   some stmt in policy.statements
   stmt.resources[_] == "*"
@@ -60,11 +65,10 @@ iam_wildcard_violation[v] {
 }
 
 # Kubernetes: privileged or host-level access is blocked.
-privileged_workload_violation[v] {
-  some workload
-  workload := input.kubernetes.workloads[_]
-  workload.kind := kind
-  workload.name := name
+privileged_workload_violation contains v if {
+  some workload in input.kubernetes.workloads
+  kind := workload.kind
+  name := workload.name
   workload.securityContext.privileged
   v := {
     "id": "k8s-privileged",
@@ -72,11 +76,11 @@ privileged_workload_violation[v] {
     "message": sprintf("Workload %s/%s requests privileged=true", [kind, name])
   }
 }
-privileged_workload_violation[v] {
-  some workload
-  workload := input.kubernetes.workloads[_]
-  workload.kind := kind
-  workload.name := name
+
+privileged_workload_violation contains v if {
+  some workload in input.kubernetes.workloads
+  kind := workload.kind
+  name := workload.name
   workload.securityContext.hostNetwork
   v := {
     "id": "k8s-privileged",
@@ -84,11 +88,11 @@ privileged_workload_violation[v] {
     "message": sprintf("Workload %s/%s uses hostNetwork", [kind, name])
   }
 }
-privileged_workload_violation[v] {
-  some workload
-  workload := input.kubernetes.workloads[_]
-  workload.kind := kind
-  workload.name := name
+
+privileged_workload_violation contains v if {
+  some workload in input.kubernetes.workloads
+  kind := workload.kind
+  name := workload.name
   workload.volumes[_].hostPath
   v := {
     "id": "k8s-privileged",
@@ -98,9 +102,8 @@ privileged_workload_violation[v] {
 }
 
 # Public exposure without auth is blocked.
-public_exposure_violation[v] {
-  some bucket
-  bucket := input.storage.buckets[_]
+public_exposure_violation contains v if {
+  some bucket in input.storage.buckets
   bucket.public == true
   v := {
     "id": "public-storage",
@@ -108,9 +111,9 @@ public_exposure_violation[v] {
     "message": sprintf("Bucket %q is public without auth", [bucket.name])
   }
 }
-public_exposure_violation[v] {
-  some ingress
-  ingress := input.network.ingress[_]
+
+public_exposure_violation contains v if {
+  some ingress in input.network.ingress
   ingress.public == true
   not ingress.auth_enabled
   v := {
@@ -121,31 +124,29 @@ public_exposure_violation[v] {
 }
 
 # Required ownership metadata must exist.
-missing_tags_violation[v] {
-  some resource
-  resource := input.metadata[_]
+missing_tags_violation contains v if {
+  some resource in input.metadata
   required_tags := {"env", "team", "service"}
   missing := required_tags - {k | resource.tags[k]}
   count(missing) > 0
   v := {
     "id": "missing-tags",
     "resource": resource.name,
-    "message": sprintf("Resource %q is missing tags: %v", [resource.name, array.sort(missing)])
+    "message": sprintf("Resource %q is missing tags: %v", [resource.name, sort(missing)])
   }
 }
 
 # Allowlist with owner + expiry + ticket enforcement.
-allowlisted(id) {
-  some item
-  item := data.allowlist.exceptions[_]
+allowlisted(id) if {
+  some item in data.allowlist.exceptions
   item.id == id
   item.owner != ""
   item.ticket != ""
   not expired(item.expires)
 }
 
-expired(ts) {
-  parsed := time.parse_rfc3339(ts)
+expired(ts) if {
+  parsed := time.parse_rfc3339_ns(ts)
   now := time.now_ns()
   parsed <= now
 }

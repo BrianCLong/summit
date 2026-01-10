@@ -7,13 +7,13 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { BaseStepExecutor } from './base';
+import { BaseStepExecutor } from './base.js';
 import {
   StepExecutorContext,
   StepExecutorResult,
   RunbookActionType,
   ReportGeneratorService,
-} from '../types';
+} from '../types.js';
 
 /**
  * Attribution report structure
@@ -302,7 +302,7 @@ export class ReportGeneratorStepExecutor extends BaseStepExecutor {
           },
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       return this.failure(
         error instanceof Error ? error.message : 'Failed to generate report'
       );

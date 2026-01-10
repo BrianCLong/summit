@@ -5,7 +5,7 @@ import {
   SimpleSpanProcessor,
   ConsoleSpanExporter,
 } from '@opentelemetry/sdk-trace-base';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction, RequestHandler } from 'express';
 
 type TracingConfig = {
   sampleRatio: number;
@@ -96,6 +96,17 @@ export async function stopObservability() {
   return undefined;
 }
 
+export const registry = {
+  metrics: new Map<string, unknown>(),
+  getSingleMetric(name: string) {
+    return this.metrics.get(name);
+  },
+  registerMetric(metric: { name?: string }) {
+    const key = metric.name || 'metric';
+    this.metrics.set(key, metric);
+  },
+};
+
 export function metricsHandler(_req: Request, res: Response) {
   res
     .status(200)
@@ -119,10 +130,5 @@ export function requestMetricsMiddleware(
   next();
 }
 
-export function tracingContextMiddleware(
-  _req: Request,
-  _res: Response,
-  next: NextFunction,
-) {
+export const tracingContextMiddleware: RequestHandler = (_req, _res, next) =>
   next();
-}

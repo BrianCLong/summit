@@ -1,65 +1,116 @@
 // @ts-nocheck
-// centralized-error-handler.ts
-import { Request, Response, NextFunction } from 'express';
-import { logger } from '../utils/logger';
-import { recordEndpointResult } from '../observability/reliability-metrics';
+import type { NextFunction, Request, Response } from 'express';
+import { GraphQLError } from 'graphql';
+import { z } from 'zod';
+const ZodError = z.ZodError;
+import { logger } from '../config/logger.js';
+import { recordEndpointResult } from '../observability/reliability-metrics.js';
 
-interface AppError extends Error {
-  statusCode?: number;
-  isOperational?: boolean;
-}
+const deriveStatusCode = (error: unknown): number => {
+  if (error instanceof GraphQLError) {
+    const httpStatus = error.extensions?.http?.status;
+    if (typeof httpStatus === 'number') return httpStatus;
+  }
 
-/**
- * A centralized error handling middleware.
- *
- * @param err - The error object.
- * @param req - The Express request object.
- * @param res - The Express response object.
- * @param next - The next middleware function.
- */
+  if (error instanceof ZodError) {
+    return 400;
+  }
+
+  const candidateStatus =
+    (error as { statusCode?: number })?.statusCode ??
+    (error as { status?: number })?.status;
+
+  if (typeof candidateStatus === 'number') {
+    return candidateStatus;
+  }
+
+  if ((error as { type?: string })?.type === 'entity.parse.failed') {
+    return 400;
+  }
+
+  return 500;
+};
+
+const normalizeGraphQLError = (error: unknown, statusCode: number): GraphQLError => {
+  if (error instanceof GraphQLError) {
+    return error;
+  }
+
+  const code = statusCode >= 500 ? 'INTERNAL_SERVER_ERROR' : 'BAD_USER_INPUT';
+  const message = statusCode >= 500 ? 'Internal server error' : 'Invalid request payload';
+
+  return new GraphQLError(message, {
+    extensions: {
+      code,
+      http: { status: statusCode },
+    },
+  });
+};
+
+const deriveMessage = (error: unknown, fallback: string): string => {
+  if (error instanceof GraphQLError) {
+    return error.message;
+  }
+  if (error instanceof ZodError) {
+    return 'Invalid request payload';
+  }
+  if (error instanceof Error) {
+    return error.message || fallback;
+  }
+  return fallback;
+};
+
 export const centralizedErrorHandler = (
-  err: AppError,
+  err: unknown,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-  // If the headers have already been sent, delegate to the default Express error handler.
   if (res.headersSent) {
     return next(err);
   }
 
-  // Determine the status code of the error. Default to 500 for unexpected errors.
-  const statusCode = err.statusCode || 500;
+  const statusCode = deriveStatusCode(err);
+  const isGraphQLRoute = req.path?.startsWith('/graphql');
+  const graphQLError = isGraphQLRoute
+    ? normalizeGraphQLError(err, statusCode)
+    : err instanceof GraphQLError
+      ? err
+      : null;
 
-  // In a production environment, avoid sending back detailed error messages.
-  // We can distinguish between operational errors (expected) and programmer errors (unexpected).
-  const isProduction = process.env.NODE_ENV === 'production';
-  const message =
-    isProduction && !err.isOperational
-      ? 'An unexpected error occurred. Please try again later.'
-      : err.message || 'Internal Server Error';
+  const message = deriveMessage(graphQLError ?? err, statusCode >= 500 ? 'Internal server error' : 'Bad request');
 
-  // Log the error for debugging and monitoring purposes.
-  logger.error(err.message, {
-    timestamp: new Date().toISOString(),
+  logger.error({
+    err,
     path: req.path,
     method: req.method,
     statusCode,
-    stack: err.stack,
-  });
+    correlationId: (req as Record<string, unknown>).correlationId,
+  }, 'Request failed');
 
-  // Restore observability for failed requests.
   recordEndpointResult({
     endpoint: req.path,
-    statusCode: statusCode,
-    durationSeconds: res.locals.duration || 0,
-    tenantId: (req as any).user?.tenantId || 'unknown',
+    statusCode,
+    durationSeconds: (res.locals.duration as number) || 0,
+    tenantId: (req as { user?: { tenantId?: string }; tenantId?: string }).tenantId ||
+      (req as { user?: { tenantId?: string } }).user?.tenantId ||
+      'unknown',
   });
 
-  // Send a standardized error response.
-  res.status(statusCode).json({
-    status: 'error',
-    statusCode,
-    message,
-  });
+  const responseBody: Record<string, unknown> = {
+    error: {
+      message,
+      code: graphQLError?.extensions?.code,
+      correlationId:
+        (req as Record<string, unknown>).correlationId ||
+        req.headers['x-correlation-id'] ||
+        req.headers['x-request-id'],
+    },
+  };
+
+  if (graphQLError?.extensions?.details && process.env.NODE_ENV !== 'production') {
+    (responseBody.error as Record<string, unknown>).details = graphQLError.extensions.details;
+  }
+
+  res.status(statusCode).json(responseBody);
 };

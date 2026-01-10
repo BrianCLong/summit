@@ -153,7 +153,7 @@ export class ApprovalRepo {
       [userId],
     );
 
-    return rows.map((row) => ({
+    return rows.map((row: any) => ({
       approvalId: row.approval_id,
       caseId: row.case_id,
       caseTitle: row.case_title,

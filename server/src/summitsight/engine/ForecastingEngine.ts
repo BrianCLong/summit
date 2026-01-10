@@ -1,5 +1,5 @@
-import { SummitsightDataService } from '../SummitsightDataService';
-import { Forecast, KPIValue } from '../types';
+import { SummitsightDataService } from '../SummitsightDataService.js';
+import { Forecast, KPIValue } from '../types/index.js';
 
 export class ForecastingEngine {
     private dataService: SummitsightDataService;

@@ -4,11 +4,86 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
+  validate-release-policy:
+    name: Validate Release Policy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate Release Policy
+        run: pnpm lint:release-policy
+
+  lint-reason-codes:
+    name: Lint Release Reason Codes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint Reason Codes
+        run: node scripts/release/lint-reason-codes.mjs
+
+  ga-risk-gate:
+    name: GA Risk Gate
+    uses: ./.github/workflows/ga-risk-gate.yml
+    with:
+      ref: ${{ github.sha }}
+    secrets: inherit
+
   security-scan:
     name: Vulnerability and Security Scan
+    needs: [ga-risk-gate]
     uses: ./.github/workflows/ci-security.yml
     with:
       run_dast: false # DAST is too slow for a PR check
     secrets:
       snyk_token: ${{ secrets.SNYK_TOKEN }}
+
+  sbom:
+    name: SBOM (warn-only policy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@v0
+
+      - name: Generate SBOM artifact
+        run: bash scripts/generate-sbom.sh . artifacts/sbom/sbom.json
+
+      - name: SBOM policy check (non-blocking)
+        continue-on-error: true
+        env:
+          SBOM_FILE: artifacts/sbom/sbom.json
+        run: node scripts/sbom-policy-check.mjs
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: sbom-cyclonedx
+          path: artifacts/sbom/sbom.json
+          retention-days: 14

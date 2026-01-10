@@ -448,7 +448,7 @@ export class PSIEngine extends EventEmitter {
     }
 
     // Record privacy parameters
-    if (!job.results) job.results = { intersectionSize: 0, confidence: 0 };
+    if (!job.results) {job.results = { intersectionSize: 0, confidence: 0 };}
 
     this.jobs.set(jobId, job);
     this.emit('differential_privacy_applied', {
@@ -733,12 +733,12 @@ export class PSIEngine extends EventEmitter {
         linkHints: Array.from(intersection.elements).map((element, index) => ({
           leftHash: `left_${crypto
             .createHash('sha256')
-            .update(element + 'left')
+            .update(`${element  }left`)
             .digest('hex')
             .slice(0, 16)}`,
           rightHash: `right_${crypto
             .createHash('sha256')
-            .update(element + 'right')
+            .update(`${element  }right`)
             .digest('hex')
             .slice(0, 16)}`,
           confidence: 0.95 + Math.random() * 0.05, // Mock confidence
@@ -819,12 +819,12 @@ export class PSIEngine extends EventEmitter {
         linkHints: Array.from(intersection.elements).map((element, index) => ({
           leftHash: `oprf_left_${crypto
             .createHash('sha256')
-            .update(element + 'left')
+            .update(`${element  }left`)
             .digest('hex')
             .slice(0, 16)}`,
           rightHash: `oprf_right_${crypto
             .createHash('sha256')
-            .update(element + 'right')
+            .update(`${element  }right`)
             .digest('hex')
             .slice(0, 16)}`,
           confidence: 0.98 + Math.random() * 0.02,
@@ -957,7 +957,7 @@ export class PSIEngine extends EventEmitter {
       datasetA.hashedElements!.map((element) =>
         crypto
           .createHash('sha256')
-          .update(element + 'ecdh_a')
+          .update(`${element  }ecdh_a`)
           .digest('hex'),
       ),
     );
@@ -966,7 +966,7 @@ export class PSIEngine extends EventEmitter {
       datasetB.hashedElements!.map((element) =>
         crypto
           .createHash('sha256')
-          .update(element + 'ecdh_b')
+          .update(`${element  }ecdh_b`)
           .digest('hex'),
       ),
     );
@@ -993,11 +993,11 @@ export class PSIEngine extends EventEmitter {
     datasetA.hashedElements!.forEach((element) => {
       const blinded = crypto
         .createHash('sha256')
-        .update(element + 'blind')
+        .update(`${element  }blind`)
         .digest('hex');
       const oprfOutput = crypto
         .createHash('sha256')
-        .update(blinded + 'oprf')
+        .update(`${blinded  }oprf`)
         .digest('hex');
       blindedElements.set(element, blinded);
       oprfOutputs.set(blinded, oprfOutput);
@@ -1006,11 +1006,11 @@ export class PSIEngine extends EventEmitter {
     datasetB.hashedElements!.forEach((element) => {
       const blinded = crypto
         .createHash('sha256')
-        .update(element + 'blind')
+        .update(`${element  }blind`)
         .digest('hex');
       const oprfOutput = crypto
         .createHash('sha256')
-        .update(blinded + 'oprf')
+        .update(`${blinded  }oprf`)
         .digest('hex');
       blindedElements.set(element, blinded);
       oprfOutputs.set(blinded, oprfOutput);
@@ -1113,14 +1113,14 @@ export class PSIEngine extends EventEmitter {
   }
 
   private calculateHashSimilarity(hash1: string, hash2: string): number {
-    if (hash1 === hash2) return 1.0;
+    if (hash1 === hash2) {return 1.0;}
 
     // Simple Hamming distance-based similarity
     let matches = 0;
     const minLength = Math.min(hash1.length, hash2.length);
 
     for (let i = 0; i < minLength; i++) {
-      if (hash1[i] === hash2[i]) matches++;
+      if (hash1[i] === hash2[i]) {matches++;}
     }
 
     return matches / minLength;
@@ -1143,8 +1143,8 @@ export class PSIEngine extends EventEmitter {
   private sampleGaussian(mu: number, sigma: number): number {
     let u = 0,
       v = 0;
-    while (u === 0) u = Math.random();
-    while (v === 0) v = Math.random();
+    while (u === 0) {u = Math.random();}
+    while (v === 0) {v = Math.random();}
 
     const z = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
     return z * sigma + mu;

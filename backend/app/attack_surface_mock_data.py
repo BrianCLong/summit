@@ -11,15 +11,15 @@ mock_assets = [
                 "id": "vuln-001",
                 "severity": "High",
                 "description": "Publicly accessible S3 bucket.",
-                "recommendation": "Restrict public access to the bucket."
+                "recommendation": "Restrict public access to the bucket.",
             },
             {
                 "id": "vuln-002",
                 "severity": "Medium",
                 "description": "Server-side encryption not enabled.",
-                "recommendation": "Enable server-side encryption for the bucket."
-            }
-        ]
+                "recommendation": "Enable server-side encryption for the bucket.",
+            },
+        ],
     },
     {
         "id": "asset-002",
@@ -32,9 +32,9 @@ mock_assets = [
                 "id": "vuln-003",
                 "severity": "Low",
                 "description": "Two-factor authentication not enforced for all users.",
-                "recommendation": "Enforce two-factor authentication for all users."
+                "recommendation": "Enforce two-factor authentication for all users.",
             }
-        ]
+        ],
     },
     {
         "id": "asset-003",
@@ -48,8 +48,8 @@ mock_assets = [
                 "id": "vuln-004",
                 "severity": "Critical",
                 "description": "Default credentials are being used.",
-                "recommendation": "Change the default credentials immediately."
+                "recommendation": "Change the default credentials immediately.",
             }
-        ]
-    }
+        ],
+    },
 ]

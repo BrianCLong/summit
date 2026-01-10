@@ -3,7 +3,7 @@ package kubernetes.admission
 import rego.v1
 
 # Deny containers without resource limits
-deny[msg] {
+deny contains msg if {
   input.kind == "Deployment"
   input.spec.template.spec.containers[i]
   container := input.spec.template.spec.containers[i]
@@ -12,7 +12,7 @@ deny[msg] {
 }
 
 # Deny containers running as root
-deny[msg] {
+deny contains msg if {
   input.kind == "Deployment"
   input.spec.template.spec.containers[i]
   container := input.spec.template.spec.containers[i]
@@ -21,7 +21,7 @@ deny[msg] {
 }
 
 # Require security context for conductor services
-deny[msg] {
+deny contains msg if {
   input.kind == "Deployment"
   conductor_services := {"conductor-server", "conductor-opa", "conductor-mcp"}
   conductor_services[input.metadata.name]
@@ -32,7 +32,7 @@ deny[msg] {
 }
 
 # Deny privileged containers
-deny[msg] {
+deny contains msg if {
   input.kind == "Deployment"
   input.spec.template.spec.containers[i]
   container := input.spec.template.spec.containers[i]
@@ -41,7 +41,7 @@ deny[msg] {
 }
 
 # Require non-root filesystem for conductor services
-deny[msg] {
+deny contains msg if {
   input.kind == "Deployment"
   conductor_services := {"conductor-server", "conductor-opa"}
   conductor_services[input.metadata.name]
@@ -52,7 +52,7 @@ deny[msg] {
 }
 
 # Require network policies for conductor namespace
-warn[msg] {
+warn contains msg if {
   input.kind == "Namespace"
   input.metadata.name == "conductor"
   not input.metadata.annotations["networking.k8s.io/network-policy"]
@@ -60,7 +60,7 @@ warn[msg] {
 }
 
 # Validate service account configuration
-warn[msg] {
+warn contains msg if {
   input.kind == "Deployment"
   input.metadata.namespace == "conductor"
   not input.spec.template.spec.serviceAccountName
@@ -68,7 +68,7 @@ warn[msg] {
 }
 
 # Require pod security standards
-deny[msg] {
+deny contains msg if {
   input.kind == "Namespace"
   input.metadata.name == "conductor"
   not input.metadata.labels["pod-security.kubernetes.io/enforce"]
@@ -76,7 +76,7 @@ deny[msg] {
 }
 
 # Validate secret management
-warn[msg] {
+warn contains msg if {
   input.kind == "Deployment"
   input.spec.template.spec.containers[i]
   container := input.spec.template.spec.containers[i]
@@ -87,7 +87,7 @@ warn[msg] {
 }
 
 # Require liveness and readiness probes
-warn[msg] {
+warn contains msg if {
   input.kind == "Deployment"
   input.spec.template.spec.containers[i]
   container := input.spec.template.spec.containers[i]
@@ -95,7 +95,7 @@ warn[msg] {
   msg := sprintf("Container '%s' should have liveness probe", [container.name])
 }
 
-warn[msg] {
+warn contains msg if {
   input.kind == "Deployment"
   input.spec.template.spec.containers[i]
   container := input.spec.template.spec.containers[i]
@@ -104,20 +104,20 @@ warn[msg] {
 }
 
 # Require signed and attested images for deployments
-deny[msg] {
+deny contains msg if {
   input.kind == "Deployment"
   not input.spec.template.metadata.annotations["supplychain.summit.dev/signed"] == "true"
   msg := "Deployment must declare supplychain.summit.dev/signed=true"
 }
 
-deny[msg] {
+deny contains msg if {
   input.kind == "Deployment"
   not input.spec.template.metadata.annotations["supplychain.summit.dev/attested"] == "true"
   msg := "Deployment must declare supplychain.summit.dev/attested=true"
 }
 
 # Validate image pull policy
-warn[msg] {
+warn contains msg if {
   input.kind == "Deployment"
   input.spec.template.spec.containers[i]
   container := input.spec.template.spec.containers[i]
@@ -127,7 +127,7 @@ warn[msg] {
 }
 
 # Require resource quotas for conductor namespace
-warn[msg] {
+warn contains msg if {
   input.kind == "Namespace"
   input.metadata.name == "conductor"
   not input.metadata.annotations["quota.kubernetes.io/cpu"]
@@ -135,14 +135,14 @@ warn[msg] {
 }
 
 # Validate ingress security
-deny[msg] {
+deny contains msg if {
   input.kind == "Ingress"
   input.metadata.namespace == "conductor"
   not input.metadata.annotations["kubernetes.io/ingress.class"]
   msg := "Conductor ingress must specify ingress class"
 }
 
-deny[msg] {
+deny contains msg if {
   input.kind == "Ingress"
   input.metadata.namespace == "conductor"
   not input.spec.tls
@@ -150,7 +150,7 @@ deny[msg] {
 }
 
 # Require pod disruption budgets for conductor services
-warn[msg] {
+warn contains msg if {
   input.kind == "Deployment"
   input.metadata.namespace == "conductor"
   critical_services := {"conductor-server", "conductor-opa"}
@@ -159,7 +159,7 @@ warn[msg] {
 }
 
 # Validate horizontal pod autoscaler
-warn[msg] {
+warn contains msg if {
   input.kind == "Deployment"
   input.metadata.namespace == "conductor"
   scalable_services := {"conductor-server"}

@@ -8,9 +8,9 @@ import {
   BanditContext,
   ExpertArm,
   RouteDecision,
-} from '../learn/bandit';
-import { prometheusConductorMetrics } from '../observability/prometheus';
-import { conductorResilienceManager } from '../resilience/circuit-breaker';
+} from '../learn/bandit.js';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
+import { conductorResilienceManager } from '../resilience/circuit-breaker.js';
 
 export interface RouterQuery {
   id: string;
@@ -223,7 +223,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
       this.emit('route:decision', { query, response, context: banditContext });
 
       return response;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Routing error:', error);
       prometheusConductorMetrics.recordOperationalEvent(
         'router_v2_error',

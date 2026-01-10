@@ -13,6 +13,7 @@ import jwt from 'jsonwebtoken';
 const { sign, verify } = jwt;
 import { getPostgresPool, getRedisClient } from '../config/database.js';
 import logger from '../utils/logger.js';
+import { correlationStorage } from '../config/logger.js';
 import { AuditTimelineRollupService } from './AuditTimelineRollupService.js';
 
 // Core audit event types
@@ -222,7 +223,7 @@ export class AdvancedAuditSystem extends EventEmitter {
     }
 
     // Initialize schema
-    this.initializeSchema().catch((err) => {
+    this.initializeSchema().catch((err: any) => {
       this.logger.error(
         { error: err.message },
         'Failed to initialize audit schema',
@@ -231,7 +232,7 @@ export class AdvancedAuditSystem extends EventEmitter {
 
     // Start periodic flush
     this.flushInterval = setInterval(() => {
-      this.flushEventBuffer().catch((err) => {
+      this.flushEventBuffer().catch((err: any) => {
         this.logger.error(
           { error: err.message },
           'Failed to flush audit events',
@@ -245,7 +246,7 @@ export class AdvancedAuditSystem extends EventEmitter {
       process.env.NODE_ENV !== 'test';
     if (scheduleRetention) {
       this.retentionInterval = setInterval(() => {
-        this.pruneExpiredEvents().catch((err) => {
+        this.pruneExpiredEvents().catch((err: any) => {
           this.logger.error(
             { error: err.message },
             'Failed to prune audit events by retention policy',
@@ -266,8 +267,22 @@ export class AdvancedAuditSystem extends EventEmitter {
       // If disabled, we might need a mock or fail. For audit, we should probably fail or warn.
       const redis = getRedisClient();
 
-      const signingKey = process.env.AUDIT_SIGNING_KEY || 'dev-signing-key-do-not-use-in-prod';
-      const encryptionKey = process.env.AUDIT_ENCRYPTION_KEY || 'dev-encryption-key-do-not-use-in-prod';
+      // SECURITY: Audit signing and encryption keys must be set in production
+      const signingKey = process.env.AUDIT_SIGNING_KEY;
+      const encryptionKey = process.env.AUDIT_ENCRYPTION_KEY;
+
+      if (!signingKey || !encryptionKey) {
+        if (process.env.NODE_ENV === 'production') {
+          throw new Error(
+            'AUDIT_SIGNING_KEY and AUDIT_ENCRYPTION_KEY environment variables must be set in production. ' +
+            'These keys are critical for audit trail integrity and compliance.'
+          );
+        }
+        logger.warn(
+          'AUDIT_SIGNING_KEY and/or AUDIT_ENCRYPTION_KEY not set - using insecure defaults for development only. ' +
+          'NEVER use these defaults in production!'
+        );
+      }
 
       if (!redis) {
         logger.warn("AdvancedAuditSystem initialized without Redis. Real-time alerting will be disabled.");
@@ -277,8 +292,8 @@ export class AdvancedAuditSystem extends EventEmitter {
         db,
         redis as Redis, // If null, we'll need to handle it in methods
         logger,
-        signingKey,
-        encryptionKey
+        signingKey || 'dev-signing-key-insecure',
+        encryptionKey || 'dev-encryption-key-insecure'
       );
     }
     return AdvancedAuditSystem.instance;
@@ -309,18 +324,35 @@ export class AdvancedAuditSystem extends EventEmitter {
    */
   async recordEvent(eventData: Partial<AuditEvent>): Promise<string> {
     try {
-      // Validate required fields
-      const validation = AuditEventSchema.safeParse(eventData);
+      // 1. Get defaults from AsyncLocalStorage if available
+      const store = correlationStorage.getStore();
+      const defaults = {
+        correlationId: store?.get('correlationId') || randomUUID(),
+        tenantId: store?.get('tenantId') || 'unknown',
+        requestId: store?.get('requestId'),
+        serviceId: 'intelgraph-server',
+        outcome: 'success',
+        complianceRelevant: false,
+        complianceFrameworks: [],
+      };
+
+      // 2. Merge with provided data - filtering out undefined provided values to allow defaults to take over
+      const cleanEventData = Object.fromEntries(
+        Object.entries(eventData).filter(([_, v]) => v !== undefined)
+      );
+      const mergedData = { ...defaults, ...cleanEventData };
+
+      // 3. Validate required fields
+      const validation = AuditEventSchema.safeParse(mergedData);
       if (!validation.success) {
         throw new Error(`Invalid audit event: ${validation.error.message}`);
       }
 
-      // Build complete event
+      // 4. Build complete event
       const event: AuditEvent = {
         id: randomUUID(),
         timestamp: new Date(),
         sessionId: eventData.sessionId,
-        requestId: eventData.requestId,
         userId: eventData.userId,
         resourceType: eventData.resourceType,
         resourceId: eventData.resourceId,
@@ -365,7 +397,7 @@ export class AdvancedAuditSystem extends EventEmitter {
       );
 
       return event.id;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         {
           error: error.message,
@@ -449,8 +481,8 @@ export class AdvancedAuditSystem extends EventEmitter {
       }
 
       const result = await this.db.query(sql, params);
-      return result.rows.map((row) => this.deserializeEvent(row));
-    } catch (error) {
+      return result.rows.map((row: any) => this.deserializeEvent(row));
+    } catch (error: any) {
       this.logger.error(
         {
           error: error.message,
@@ -570,7 +602,7 @@ export class AdvancedAuditSystem extends EventEmitter {
       );
 
       return report;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         {
           error: error.message,
@@ -677,7 +709,7 @@ export class AdvancedAuditSystem extends EventEmitter {
       );
 
       return analysis;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         {
           error: error.message,
@@ -768,7 +800,7 @@ export class AdvancedAuditSystem extends EventEmitter {
       this.logger.info(result, 'Audit trail integrity verification completed');
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         { error: error.message },
         'Failed to verify audit trail integrity',
@@ -902,7 +934,7 @@ export class AdvancedAuditSystem extends EventEmitter {
         },
         'Audit events flushed to database',
       );
-    } catch (error) {
+    } catch (error: any) {
       // Re-add events to buffer if flush fails
       this.eventBuffer.unshift(...eventsToFlush);
       throw error;
@@ -1257,4 +1289,4 @@ export class AdvancedAuditSystem extends EventEmitter {
 
 // Export singleton instance getter
 // This allows lazy initialization with correct dependencies
-export const advancedAuditSystem = AdvancedAuditSystem.getInstance();
+export const getAuditSystem = () => AdvancedAuditSystem.getInstance();

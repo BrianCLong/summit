@@ -130,8 +130,12 @@ interface AuditEvent {
 }
 
 export class MVP1RBACService {
-  private postgresClient = getPostgresPool();
-  private neo4jDriver = getNeo4jDriver();
+  private get postgresClient() {
+    return getPostgresPool();
+  }
+  private get neo4jDriver() {
+    return getNeo4jDriver();
+  }
 
   // Base permissions arrays to avoid circular reference
   private static readonly VIEWER_PERMISSIONS: Permission[] = [
@@ -229,7 +233,7 @@ export class MVP1RBACService {
       }
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Permission check failed:', error);
       return false;
     }
@@ -340,7 +344,7 @@ export class MVP1RBACService {
 
       // Admins can access all investigations in their tenant
       return [Role.ADMIN, Role.SUPER_ADMIN].includes(user.role);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Investigation permission check failed:', error);
       return false;
     }
@@ -413,7 +417,7 @@ export class MVP1RBACService {
 
       // Mirror to Neo4j for graph analysis (optional)
       await this.mirrorAuditEventNeo4j(auditEvent);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to record audit event:', error);
       // Don't throw - audit failure shouldn't break business operations
     }

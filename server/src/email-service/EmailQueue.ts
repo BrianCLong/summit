@@ -57,7 +57,7 @@ export class EmailQueue {
   ): Promise<void> {
     this.worker = new Worker(
       'email-queue',
-      async (job) => {
+      async (job: any) => {
         await processFn(job);
       },
       {
@@ -70,7 +70,7 @@ export class EmailQueue {
       },
     );
 
-    this.worker.on('completed', (job) => {
+    this.worker.on('completed', (job: any) => {
       console.log(`Email job ${job.id} completed`);
     });
 

@@ -1,0 +1,24 @@
+openapi: 3.0.3
+info:
+  title: OAMM Interface Gateway API
+  version: 1.0.0
+paths:
+  /oamm/interfaces:
+    get:
+      summary: List versioned interfaces and insertion points
+      responses:
+        '200':
+          description: Interface policy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  interfaces:
+                    type: array
+                    items:
+                      type: object
+                  proprietaryBoundaries:
+                    type: array
+                    items:
+                      type: object

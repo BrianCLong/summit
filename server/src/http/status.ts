@@ -3,8 +3,8 @@
 
 import express from 'express';
 import os from 'os';
-import { createBudgetController } from '../conductor/admission/budget-control';
-import { getConductorHealth } from '../conductor/metrics';
+import { createBudgetController } from '../conductor/admission/budget-control.js';
+import { getConductorHealth } from '../conductor/metrics/index.js';
 import Redis from 'ioredis';
 
 export const statusRouter = express.Router();
@@ -93,7 +93,7 @@ async function ping(target: string): Promise<{
         details: { type: 'database_connection' },
       };
     }
-  } catch (error) {
+  } catch (error: any) {
     const responseTime = Date.now() - startTime;
     return {
       status: 'unhealthy',
@@ -115,8 +115,8 @@ function getSystemUsage() {
   let totalTick = 0;
 
   for (const cpu of cpus) {
-    for (const type in cpu.times) {
-      totalTick += cpu.times[type];
+    for (const type in cpu.times as any) {
+      totalTick += (cpu.times as any)[type];
     }
     totalIdle += cpu.times.idle;
   }
@@ -137,7 +137,7 @@ async function getBudgetStatus() {
     const status = await budgetController.getBudgetStatus();
     redis.disconnect();
     return status;
-  } catch (error) {
+  } catch (error: any) {
     return {
       error: error.message,
       status: 'unknown',
@@ -221,7 +221,7 @@ statusRouter.get('/status', async (_req, res) => {
       try {
         conductorHealth = await getConductorHealth();
         budgetStatus = await getBudgetStatus();
-      } catch (error) {
+      } catch (error: any) {
         conductorHealth = { status: 'error', error: error.message };
         budgetStatus = { status: 'error', error: error.message };
       }
@@ -284,7 +284,7 @@ statusRouter.get('/status', async (_req, res) => {
     });
 
     res.status(httpStatus).json(status);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Status endpoint error:', error);
 
     res.status(500).json({
@@ -312,7 +312,7 @@ statusRouter.get('/ready', async (_req, res) => {
     const { getPostgresPool } = await import('../config/database.js');
     const pool = getPostgresPool();
     await pool.query('SELECT 1');
-  } catch (e) {
+  } catch (e: any) {
     return res.status(503).json({
       status: 'unready',
       component: 'postgres',
@@ -325,7 +325,7 @@ statusRouter.get('/ready', async (_req, res) => {
     if (redis) {
       await redis.ping();
     }
-  } catch (e) {
+  } catch (e: any) {
     return res.status(503).json({
       status: 'unready',
       component: 'redis',
@@ -354,7 +354,7 @@ statusRouter.get('/health/conductor', async (_req, res) => {
       checks: health.checks,
       conductor_enabled: process.env.CONDUCTOR_ENABLED === 'true',
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(503).json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
@@ -382,7 +382,7 @@ statusRouter.get('/status/budget', async (_req, res) => {
       timestamp: new Date().toISOString(),
       ...budgetStatus,
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       timestamp: new Date().toISOString(),
       status: 'error',
@@ -421,7 +421,7 @@ statusRouter.get('/health/:service', async (req, res) => {
       timestamp: new Date().toISOString(),
       ...result,
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(503).json({
       service,
       timestamp: new Date().toISOString(),

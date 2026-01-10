@@ -1,5 +1,3 @@
-import express from 'express';
-import request from 'supertest';
 import usageRouter from '../../../src/routes/tenants/usage.js';
 
 const mockQuery = jest.fn();
@@ -22,13 +20,41 @@ jest.mock('../../../src/middleware/auth.js', () => ({
   },
 }));
 
-describe('GET /api/tenants/:tenantId/usage', () => {
-  let app: express.Application;
+const runRequest = async (params: {
+  tenantId: string;
+  query?: Record<string, any>;
+  headers?: Record<string, string>;
+}) => {
+  const req: any = {
+    method: 'GET',
+    url: '/',
+    path: '/',
+    baseUrl: '/api/tenants/' + params.tenantId + '/usage',
+    params: { tenantId: params.tenantId },
+    query: params.query ?? {},
+    headers: params.headers ?? {},
+    body: {},
+  };
+  const res: any = {
+    status: jest.fn().mockReturnThis(),
+    json: jest.fn().mockReturnThis(),
+  };
 
+  await new Promise<void>((resolve, reject) => {
+    usageRouter.handle(req, res, (err: any) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve();
+    });
+  });
+
+  return res;
+};
+
+describe('GET /api/tenants/:tenantId/usage', () => {
   beforeEach(() => {
-    app = express();
-    app.use(express.json());
-    app.use('/api/tenants/:tenantId/usage', usageRouter);
     mockQuery.mockReset();
     mockRelease.mockReset();
   });
@@ -47,11 +73,15 @@ describe('GET /api/tenants/:tenantId/usage', () => {
       ],
     });
 
-    const res = await request(app)
-      .get(
-        '/api/tenants/tenant-123/usage?from=2024-01-01T00:00:00.000Z&to=2024-01-31T23:59:59.000Z&dimension=llm.tokens&limit=5',
-      )
-      .expect(200);
+    const res = await runRequest({
+      tenantId: 'tenant-123',
+      query: {
+        from: '2024-01-01T00:00:00.000Z',
+        to: '2024-01-31T23:59:59.000Z',
+        dimension: 'llm.tokens',
+        limit: '5',
+      },
+    });
 
     expect(mockQuery).toHaveBeenCalledTimes(1);
     expect(mockQuery).toHaveBeenCalledWith(
@@ -63,7 +93,8 @@ describe('GET /api/tenants/:tenantId/usage', () => {
         ['llm.tokens'],
       ]),
     );
-    expect(res.body.rollups[0]).toMatchObject({
+    const body = res.json.mock.calls[0][0];
+    expect(body.rollups[0]).toMatchObject({
       dimension: 'llm.tokens',
       totalQuantity: 1234,
       unit: 'tokens',
@@ -72,21 +103,28 @@ describe('GET /api/tenants/:tenantId/usage', () => {
   });
 
   it('rejects cross-tenant access', async () => {
-    const res = await request(app)
-      .get('/api/tenants/other-tenant/usage')
-      .set('x-tenant-id', 'tenant-123')
-      .expect(403);
+    const res = await runRequest({
+      tenantId: 'other-tenant',
+      headers: { 'x-tenant-id': 'tenant-123' },
+    });
 
-    expect(res.body.error).toBe('tenant_access_denied');
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ error: 'tenant_access_denied' }),
+    );
     expect(mockQuery).not.toHaveBeenCalled();
   });
 
   it('validates query parameters', async () => {
-    const res = await request(app)
-      .get('/api/tenants/tenant-123/usage?from=not-a-date')
-      .expect(400);
+    const res = await runRequest({
+      tenantId: 'tenant-123',
+      query: { from: 'not-a-date' },
+    });
 
-    expect(res.body.error).toBe('Validation failed');
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ error: 'Validation failed' }),
+    );
     expect(mockQuery).not.toHaveBeenCalled();
   });
 });

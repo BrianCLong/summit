@@ -1,4 +1,4 @@
-import { EntityFeatures } from './FeatureExtractor';
+import { EntityFeatures } from './FeatureExtractor.js';
 
 export interface ExplanationFeature {
   name: string;

@@ -1,0 +1,134 @@
+controls:
+  - id: CM-1
+    objective: Deterministic change control
+    soc2: [CC1.1, CC8.1]
+    iso: [A12-1, A14-2]
+    ai_governance: model-and-data-lineage
+    enforcement:
+      - ci_workflow: .github/workflows/pr-quality-gate.yml
+      - policy: CODEOWNERS
+      - ledger: provenance
+    evidence:
+      - ci_results
+      - provenance_ledger
+      - signed_attestations
+    frequency: per_commit
+    owner: ci_governance_engine
+  - id: CM-2
+    objective: Protected branches and release criteria
+    soc2: [CC5.2, CC7.2]
+    iso: [A12-5, A14-2-8]
+    ai_governance: release-from-validated-artifacts
+    enforcement:
+      - branch_protection
+      - release_workflow
+      - registry_provenance_validation
+    evidence:
+      - release_logs
+      - artifact_signatures
+      - sboms
+    frequency: per_release
+    owner: release_automation
+  - id: SI-1
+    objective: Identity-bound changes
+    soc2: [CC6.1, CC6.3]
+    iso: [A9-4]
+    ai_governance: human-attributed-approvals
+    enforcement:
+      - CODEOWNERS
+      - signed_commits
+      - provenance_ledger
+    evidence:
+      - git_signatures
+      - provenance_events
+      - access_logs
+    frequency: per_commit
+    owner: access_control_service
+  - id: SI-2
+    objective: Supply chain integrity
+    soc2: [CC1.4, CC7.4]
+    iso: [A12-6, A14-2-4]
+    ai_governance: model-artifact-integrity
+    enforcement:
+      - sbom_validation
+      - signature_verification
+      - dependency_policy
+    evidence:
+      - sboms
+      - signature_verification_logs
+      - dependency_scan_reports
+    frequency: nightly_and_on_change
+    owner: ci_security_scanner
+  - id: AV-1
+    objective: Service SLO adherence
+    soc2: [A1.2]
+    iso: [A17-1]
+    ai_governance: ai-quality-degradation-detection
+    enforcement:
+      - slo_monitors
+      - alert_policies
+      - synthetic_checks
+    evidence:
+      - slo_burn_alerts
+      - synthetic_logs
+      - incident_retrospectives
+    frequency: continuous
+    owner: observability_stack
+  - id: DG-1
+    objective: Data residency and handling
+    soc2: [CC1.4, CC8.2]
+    iso: [A8, A18]
+    ai_governance: dataset-lineage-and-restrictions
+    enforcement:
+      - data_handling_policies
+      - retention_jobs
+      - access_controls
+    evidence:
+      - data_retention_logs
+      - access_reviews
+      - dataset_fingerprints
+    frequency: daily_and_quarterly
+    owner: data_governance_service
+  - id: AI-1
+    objective: Model provenance and output guardrails
+    soc2: [CC7.2, CC7.3]
+    iso: [A14-2-5, A18-1]
+    ai_governance: model-version-lineage
+    enforcement:
+      - provenance_ledger
+      - output_scanners
+      - policy_engine_opa
+    evidence:
+      - ledger_records
+      - scanner_reports
+      - policy_decision_logs
+    frequency: per_output
+    owner: ai_governance_runtime
+  - id: EX-1
+    objective: Time-bounded exceptions
+    soc2: [CC4.1, CC5.3]
+    iso: [A12-1-2, A18-2]
+    ai_governance: explicit-risk-acceptance
+    enforcement:
+      - audit/exceptions.yaml
+      - ci_exception_expiry_check
+    evidence:
+      - exception_records
+      - ci_check_history
+      - approval_links
+    frequency: per_ci_run
+    owner: ci_governance_engine
+  - id: DE-1
+    objective: Technical debt observability
+    soc2: [CC4.2]
+    iso: [A18-2-3]
+    ai_governance: bias-and-drift-debt-tracking
+    enforcement:
+      - debt_score_pipeline
+      - automated_reports
+    evidence:
+      - debt_trend_reports
+      - remediation_tasks
+      - ci_deltas
+    frequency: weekly_and_per_change
+    owner: metrics_pipeline

@@ -1,15 +1,15 @@
 
-import { SignalsService } from './signals/signals-service';
-import { SLOPolicyEngine } from './policy/slo-policy-engine';
-import { GovernanceEngine } from './governance/governance-engine';
-import { HealingExecutor } from './healing/healing-executor';
-import { ExperimentationService } from './experiments/experimentation-service';
-import { AdaptiveRoutingService } from './optimization/adaptive-routing';
-import { FeedbackService } from './feedback/feedback-service';
-import { ReliabilityLoop } from './loops/reliability-loop';
-import { CostOptimizationLoop } from './loops/cost-loop';
-import { SignalType } from './signals/types';
-import { SLOAlert } from './policy/types';
+import { SignalsService } from './signals/signals-service.js';
+import { SLOPolicyEngine } from './policy/slo-policy-engine.js';
+import { GovernanceEngine } from './governance/governance-engine.js';
+import { HealingExecutor } from './healing/healing-executor.js';
+import { ExperimentationService } from './experiments/experimentation-service.js';
+import { AdaptiveRoutingService } from './optimization/adaptive-routing.js';
+import { FeedbackService } from './feedback/feedback-service.js';
+import { ReliabilityLoop } from './loops/reliability-loop.js';
+import { CostOptimizationLoop } from './loops/cost-loop.js';
+import { SignalType } from './signals/types.js';
+import { SLOAlert } from './policy/types.js';
 
 export class AutonomicLayer {
   public readonly signals: SignalsService;
@@ -86,7 +86,7 @@ export class AutonomicLayer {
                 }
             }
         }
-    } catch (err) {
+    } catch (err: any) {
         console.error('[AutonomicLayer] Error in control loop cycle:', err);
     }
   }

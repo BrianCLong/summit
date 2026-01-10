@@ -12,11 +12,11 @@ import type {
   CompileResponse,
   CompileError,
   SchemaContext,
-} from './types';
-import { generateFromPattern, queryPatterns } from './query-patterns';
-import { estimateQueryCost, isSafeToExecute, generateCostWarnings } from './cost-estimator';
-import { validateCypher, extractRequiredParameters, isReadOnlyQuery } from './validator';
-import { buildQueryExplanation, explainQuery, summarizeQuery } from './explainer';
+} from './types.js';
+import { generateFromPattern, queryPatterns } from './query-patterns.js';
+import { estimateQueryCost, isSafeToExecute, generateCostWarnings } from './cost-estimator.js';
+import { validateCypher, extractRequiredParameters, isReadOnlyQuery } from './validator.js';
+import { buildQueryExplanation, explainQuery, summarizeQuery } from './explainer.js';
 
 const logger = (pino as any)({ name: 'nl-graph-query' });
 
@@ -157,7 +157,7 @@ export class NlGraphQueryService {
       );
 
       return response;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         {
           queryId,

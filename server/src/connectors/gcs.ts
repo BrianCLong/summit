@@ -177,7 +177,7 @@ export class GCSConnector extends EventEmitter {
         });
 
         return new Promise((resolve, reject) => {
-          stream.on('error', (error) => {
+          stream.on('error', (error: Error) => {
             gcsOperations.inc({
               tenant_id: this.tenantId,
               operation: 'upload',
@@ -224,7 +224,7 @@ export class GCSConnector extends EventEmitter {
               });
 
               resolve(objectMetadata);
-            } catch (error) {
+            } catch (error: any) {
               reject(error);
             }
           });
@@ -240,7 +240,7 @@ export class GCSConnector extends EventEmitter {
             reject(new Error('Unsupported data type'));
           }
         });
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
         gcsOperations.inc({
@@ -321,7 +321,7 @@ export class GCSConnector extends EventEmitter {
         });
 
         return data;
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
         gcsOperations.inc({
@@ -370,7 +370,7 @@ export class GCSConnector extends EventEmitter {
         });
 
         return stream;
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
         gcsOperations.inc({
@@ -413,7 +413,7 @@ export class GCSConnector extends EventEmitter {
         });
 
         this.emit('objectDeleted', { tenantId: this.tenantId, objectName });
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
         gcsOperations.inc({
@@ -456,7 +456,7 @@ export class GCSConnector extends EventEmitter {
         });
 
         return this.mapGCSMetadata(metadata);
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
         gcsOperations.inc({
@@ -494,7 +494,7 @@ export class GCSConnector extends EventEmitter {
           versions: options.versions || false,
         });
 
-        const objects = files.map((file) => this.mapFileToMetadata(file));
+        const objects = files.map((file: any) => this.mapFileToMetadata(file));
 
         gcsLatency.observe(
           { operation: 'list', bucket: this.config.bucketName },
@@ -517,7 +517,7 @@ export class GCSConnector extends EventEmitter {
           objects,
           nextPageToken: metadata.nextPageToken,
         };
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
         gcsOperations.inc({
@@ -570,7 +570,7 @@ export class GCSConnector extends EventEmitter {
           sourceObject,
           destinationObject,
         });
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
         gcsOperations.inc({
@@ -621,7 +621,7 @@ export class GCSConnector extends EventEmitter {
           });
 
           return url;
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           span.setStatus({ code: 2, message: (error as Error).message });
           gcsOperations.inc({
@@ -677,7 +677,7 @@ export class GCSConnector extends EventEmitter {
       const latency = Date.now() - startTime;
 
       return { healthy: true, latency };
-    } catch (error) {
+    } catch (error: any) {
       return {
         healthy: false,
         latency: Date.now() - startTime,
@@ -721,7 +721,7 @@ export class GCSConnector extends EventEmitter {
           objectNames,
           count: objectNames.length,
         });
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
         gcsOperations.inc({

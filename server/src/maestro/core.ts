@@ -97,26 +97,64 @@ export class Maestro {
       let result: string = '';
 
       if (task.agent.kind === 'llm') {
-        const llmResult = await this.llm.callCompletion(
-          task.runId,
-          task.id,
-          {
-            model: task.agent.modelId!,
-            messages: [
-              { role: 'system', content: 'You are an execution agent.' },
-              { role: 'user', content: task.description },
-              ...(task.input.requestText
-                ? [{ role: 'user', content: String(task.input.requestText) }]
-                : []),
-            ],
-          },
-          {
-            feature: `maestro_${task.kind}`,
-            tenantId: typeof task.input?.tenantId === 'string' ? task.input.tenantId : undefined,
-            environment: process.env.NODE_ENV || 'unknown',
-          },
-        );
-        result = llmResult.content;
+        let attempts = 0;
+        const maxRetries = 3;
+        let lastError: any;
+
+        while (attempts < maxRetries) {
+          const controller = new AbortController();
+          const signal = controller.signal;
+          let timeoutId: NodeJS.Timeout;
+
+          try {
+            // Timeout promise that cleans up properly
+            const timeout = new Promise<never>((_, reject) => {
+              timeoutId = setTimeout(() => {
+                controller.abort();
+                reject(new Error('LLM execution timed out'));
+              }, 60000);
+            });
+
+            const llmCall = this.llm.callCompletion(
+              task.runId,
+              task.id,
+              {
+                model: task.agent.modelId!,
+                messages: [
+                  { role: 'system', content: 'You are an execution agent.' },
+                  { role: 'user', content: task.description },
+                  ...(task.input.requestText
+                    ? [{ role: 'user', content: String(task.input.requestText) }]
+                    : []),
+                ],
+              },
+              {
+                feature: `maestro_${task.kind}`,
+                tenantId: typeof task.input?.tenantId === 'string' ? task.input.tenantId : undefined,
+                environment: process.env.NODE_ENV || 'unknown',
+                // @ts-ignore - Assuming adapter supports signal or just ignoring it safely
+                signal: signal
+              },
+            );
+
+            const llmResult = (await Promise.race([llmCall, timeout])) as any;
+            clearTimeout(timeoutId!); // Clear timeout on success
+            result = llmResult.content;
+            break; // Success
+          } catch (err: any) {
+            clearTimeout(timeoutId!); // Clear timeout on failure
+            lastError = err;
+            attempts++;
+            // Clean up abort controller on error if not already aborted
+            if (!signal.aborted) controller.abort();
+
+            if (attempts >= maxRetries) break;
+            // Exponential backoff: 1s, 2s, 4s...
+            await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempts - 1)));
+          }
+        }
+
+        if (!result && lastError) throw lastError;
       } else {
         // TODO: shell tools, etc.
         result = 'TODO: implement non-LLM agent';

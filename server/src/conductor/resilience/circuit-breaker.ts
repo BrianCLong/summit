@@ -1,7 +1,7 @@
 // Conductor Circuit Breaker & Bulkhead Pattern
 // Implements fault tolerance with service isolation and cascading failure prevention
 
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 
 export interface CircuitBreakerConfig {
   failureThreshold: number; // Number of failures before opening
@@ -264,7 +264,7 @@ export class ResourcePool {
     try {
       const result = await fn();
       resolve(result);
-    } catch (error) {
+    } catch (error: any) {
       reject(error);
     } finally {
       this.activeRequests--;

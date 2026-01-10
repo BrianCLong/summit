@@ -1,0 +1,146 @@
+file,line,scope_owner,summary,suggested_parent_epic,priority,status
+".disabled/intelgraph-mcp.disabled/src/server.ts",10,"@intelgraph/platform-core","Wire graph backend with tenant-scoped filtering","EPIC-005",P2,pending
+"apps/gateway/src/rbac/scim.ts",2,"@intelgraph/security-team","Implement SCIM sync using IdP API","EPIC-003",P2,pending
+"companyos/services/tenant-api/src/middleware/authContext.ts",5,"@intelgraph/security-team","Wire OPA policy engine for ABAC","EPIC-001",P1,pending
+"companyos/services/tenant-api/src/middleware/authContext.ts",49,"@intelgraph/security-team","Replace mock auth with OPA policy evaluation","EPIC-001",P1,pending
+"companyos/services/tenant-api/src/middleware/authContext.ts",71,"@intelgraph/security-team","Replace with actual OPA policy decision point","EPIC-001",P1,pending
+"companyos/src/evidence/sources.ts",14,"@intelgraph/ops-team","Replace stubbed metrics with actual scrape","EPIC-017",P2,pending
+"companyos/src/evidence/sources.ts",19,"@intelgraph/finops-team","Implement usage and billing computation","EPIC-018",P2,pending
+"conductor-ui/frontend/src/maestro/main-maestro.js",7,"@intelgraph/ops-team","Configure OpenTelemetry with exporter packages","EPIC-020",P2,pending
+"conductor-ui/frontend/src/maestro/main-maestro.tsx",7,"@intelgraph/ops-team","Configure OpenTelemetry with exporter packages","EPIC-020",P2,pending
+"companyos/services/tenant-api/src/middleware/metrics.ts",10,"@intelgraph/ops-team","Replace with proper Prometheus client","EPIC-017",P2,pending
+"intelgraph-mcp/services/replay-engine/src/replayer.ts",5,"@intelgraph/platform-core","Enforce causal ordering per ADR 0004","EPIC-008",P2,pending
+"intelgraph-mcp/services/runtime-pooler/src/firecracker.ts",114,"@intelgraph/platform-core","Connect sandbox runner to VM guest agent","EPIC-008",P2,pending
+"october2025/companyos-switchboard/apps/web/src/switchboard/router.ts",41,"@intelgraph/ops-team","Integrate with production logger","EPIC-020",P2,pending
+"october2025/companyos-switchboard/apps/web/src/switchboard/router.ts",44,"@intelgraph/ops-team","Integrate with metrics collection","EPIC-017",P2,pending
+"server/src/conductor/mcp/client.ts",76,"@intelgraph/security-team","Implement TLS certificate pinning","EPIC-003",P1,pending
+"server/src/conductor/contracts/trust.ts",16,"@intelgraph/security-team","Verify signature against registered key","EPIC-002",P1,pending
+"server/src/conductor/models.ts",6,"@intelgraph/security-team","Implement cosign verification for OCI/S3","EPIC-002",P1,pending
+"packages/geopolitical-analysis/src/safeguards/compliance.ts",242,"@intelgraph/security-team","Integrate with audit logging system","EPIC-002",P2,pending
+"services/identity-spiffe/src/controller.ts",19,"@intelgraph/security-team","Integrate SPIFFE/SPIRE for workload identity","EPIC-003",P2,pending
+"services/knowledge-service/src/index.ts",24,"@intelgraph/data-team","Query vector store with embeddings","EPIC-005",P1,pending
+"services/knowledge-service/src/index.ts",43,"@intelgraph/data-team","Query Neo4j for code relationships","EPIC-005",P2,pending
+"services/lsc-service/src/index.ts",25,"@intelgraph/integrations-team","Build GSN graph from events","EPIC-011",P1,pending
+"src/agents/archetypes/base/BaseAgentArchetype.ts",190,"@intelgraph/security-team","Integrate with actual OPA service","EPIC-001",P1,pending
+"src/agents/archetypes/base/BaseAgentArchetype.ts",222,"@intelgraph/security-team","Connect to audit logging service","EPIC-002",P1,pending
+"src/agents/archetypes/chief-of-staff/ChiefOfStaffAgent.ts",381,"@intelgraph/integrations-team","Connect email/inbox system","EPIC-009",P2,pending
+"src/agents/archetypes/chief-of-staff/ChiefOfStaffAgent.ts",415,"@intelgraph/integrations-team","Connect calendar system","EPIC-009",P2,pending
+"src/agents/archetypes/chief-of-staff/ChiefOfStaffAgent.ts",441,"@intelgraph/integrations-team","Connect task management system","EPIC-009",P2,pending
+"src/agents/archetypes/revops/RevOpsAgent.ts",530,"@intelgraph/integrations-team","Connect CRM system","EPIC-009",P2,pending
+"src/agents/archetypes/revops/RevOpsAgent.ts",601,"@intelgraph/integrations-team","Connect CRM and usage tracking","EPIC-009",P2,pending
+"src/agents/archetypes/coo/COOAgent.ts",536,"@intelgraph/ops-team","Connect SLA monitoring system","EPIC-017",P2,pending
+"src/agents/archetypes/coo/COOAgent.ts",569,"@intelgraph/ops-team","Connect incident management system","EPIC-017",P2,pending
+"src/agents/archetypes/coo/COOAgent.ts",683,"@intelgraph/ops-team","Connect incident management system","EPIC-017",P2,pending
+"src/agents/archetypes/coo/COOAgent.ts",699,"@intelgraph/ops-team","Connect incident management and notification","EPIC-017",P2,pending
+"services/foreign-intel-service/src/routes/agencies.ts",20,"@intelgraph/data-team","Query agencies from database","EPIC-005",P2,pending
+"services/foreign-intel-service/src/routes/agencies.ts",30,"@intelgraph/data-team","Query from database","EPIC-005",P2,pending
+"services/foreign-intel-service/src/routes/agencies.ts",53,"@intelgraph/data-team","Fetch agency from database","EPIC-005",P2,pending
+"services/notification-router/src/delivery-channels/email-delivery.ts",249,"@intelgraph/data-team","Fetch email config from database","EPIC-009",P2,pending
+"services/federation-service/src/services/federation-manager.ts",304,"@intelgraph/platform-core","Extract source organization from context","EPIC-008",P2,pending
+"services/federation-service/src/services/federation-manager.ts",305,"@intelgraph/platform-core","Extract target organization from agreement","EPIC-008",P2,pending
+"server/src/ai/nl-to-cypher/nl-to-cypher.service.ts",176,"@intelgraph/platform-core","Connect to Neo4j sandbox","EPIC-013",P1,pending
+"api/search.js",6,"@intelgraph/data-team","Implement Typesense search integration","EPIC-006",P2,pending
+"tools/replayctl/src/cli.ts",514,"@intelgraph/platform-core","Implement replay functionality","EPIC-008",P2,pending
+"server/src/routes/ai.ts",428,"@intelgraph/platform-core","Replace with actual LLM integration","EPIC-014",P0,pending
+"services/ingest-adapters/src/index.ts",223,"@intelgraph/ops-team","Export metrics to Prometheus","EPIC-017",P2,pending
+"apps/analytics-engine/src/server.ts",462,"@intelgraph/platform-core","Implement PDF export","EPIC-021",P2,pending
+"apps/web/src/pages/AdminDashboard.tsx",33,"@intelgraph/frontend-team","Build admin dashboard components","EPIC-023",P2,pending
+"client/src/components/IntelGraphWorkbench.tsx",382,"@intelgraph/frontend-team","Implement graph layout algorithms","EPIC-024",P2,pending
+"packages/business-rules/src/index.ts",793,"@intelgraph/platform-core","Implement conflict detection for policies","EPIC-001",P2,pending
+"packages/blockchain/src/consensus/ConsensusEngine.ts",261,"@intelgraph/security-team","Implement signature verification","EPIC-002",P2,pending
+"packages/blockchain/src/core/Blockchain.ts",425,"@intelgraph/security-team","Implement signature verification","EPIC-002",P2,pending
+"packages/query-language/src/index.ts",91,"@intelgraph/platform-core","Build CST to AST conversion","EPIC-006",P2,pending
+"server/src/graphql/resolvers.er.ts",447,"@intelgraph/data-team","Implement entity merge logic","EPIC-005",P1,pending
+"server/src/graphql/multimodalResolvers.ts",273,"@intelgraph/platform-core","Implement multimodal timeline generation","EPIC-014",P2,pending
+"server/src/autonomous/PredictiveOpsService.ts",44,"@intelgraph/ops-team","Implement queue backlog monitoring","EPIC-017",P2,pending
+"server/src/maestro/engine.ts",101,"@intelgraph/platform-core","Validate input against template schema","EPIC-013",P1,pending
+"server/src/mastery/MasteryService.ts",133,"@intelgraph/platform-core","Verify citations with Hypothesis service","EPIC-015",P2,pending
+"src/agents/archetypes/base/BaseAgentArchetype.ts",263,"@intelgraph/ops-team","Implement real health check for graph","EPIC-017",P2,pending
+"src/agents/archetypes/chief-of-staff/ChiefOfStaffAgent.ts",209,"@intelgraph/platform-core","Execute actions in agent","EPIC-013",P2,pending
+"src/agents/archetypes/chief-of-staff/ChiefOfStaffAgent.ts",347,"@intelgraph/platform-core","Implement meeting preparation analysis","EPIC-013",P2,pending
+"src/agents/archetypes/chief-of-staff/ChiefOfStaffAgent.ts",472,"@intelgraph/integrations-team","Connect action item tracking","EPIC-009",P2,pending
+"src/agents/archetypes/revops/RevOpsAgent.ts",577,"@intelgraph/platform-core","Connect forecasting system","EPIC-013",P2,pending
+"src/agents/archetypes/revops/RevOpsAgent.ts",639,"@intelgraph/integrations-team","Connect lead management system","EPIC-009",P2,pending
+"src/agents/archetypes/coo/COOAgent.ts",597,"@intelgraph/platform-core","Connect approval engine","EPIC-008",P2,pending
+"src/agents/archetypes/coo/COOAgent.ts",638,"@intelgraph/platform-core","Connect workflow engine","EPIC-008",P2,pending
+"tools/prompt-system/src/cli/index.ts",55,"@intelgraph/platform-core","Implement clipboard functionality","EPIC-021",P3,pending
+"tools/prompt-system/src/cli/index.ts",89,"@intelgraph/platform-core","Implement file write functionality","EPIC-021",P3,pending
+"tools/prompt-system/src/cli/index.ts",214,"@intelgraph/platform-core","Implement template validation","EPIC-021",P2,pending
+"tools/prompt-system/src/cli/index.ts",270,"@intelgraph/platform-core","Format and output metrics","EPIC-017",P3,pending
+"tools/replayctl/src/cli.ts",171,"@intelgraph/security-team","Implement legal hold checking","EPIC-004",P2,pending
+"tools/replayctl/src/cli.ts",563,"@intelgraph/platform-core","Retrieve checkpoints","EPIC-008",P2,pending
+"ml/ttp_train.py",45,"@intelgraph/platform-core","Implement ML model fine-tuning","EPIC-014",P2,pending
+"services/i18n-service/src/integrations/copilot/i18n-adapter.ts",188,"@intelgraph/integrations-team","Connect to i18n message catalog","EPIC-009",P2,pending
+"packages/prov-ledger/src/primitives.ts",72,"@intelgraph/security-team","Implement real signature verification","EPIC-002",P1,pending
+"packages/prov-ledger/src/primitives.ts",80,"@intelgraph/security-team","Verify manifest chain","EPIC-002",P1,pending
+"services/streaming-ingest/src/server.ts",136,"@intelgraph/ops-team","Implement metrics collection","EPIC-017",P2,pending
+"server/src/conductor/scheduler/selectGpuPool.ts",18,"@intelgraph/platform-core","Load dynamic GPU pools","EPIC-008",P2,pending
+"server/src/conductor/steps/cleanroomAggregate.ts",4,"@intelgraph/security-team","Apply differential privacy noise","EPIC-002",P2,pending
+"server/src/conductor/steps/embedUpsert.ts",26,"@intelgraph/platform-core","Call embedding generator","EPIC-005",P1,pending
+"server/src/graphql/mutations/SafeMutations.ts",339,"@intelgraph/data-team","Implement cache invalidation","EPIC-006",P1,pending
+"server/src/graphql/mutations/SafeMutations.ts",506,"@intelgraph/data-team","Implement custom schema configuration","EPIC-007",P2,pending
+"server/src/graphql/resolvers/mvp1-copilot.ts",151,"@intelgraph/platform-core","Connect entity creation service","EPIC-013",P1,pending
+"packages/predictive-graph-intelligence/src/index.ts",2,"@intelgraph/platform-core","Implement predictive signals","EPIC-015",P2,pending
+"server/src/routes/ai.ts",480,"@intelgraph/ops-team","Implement real health checks for models","EPIC-017",P1,pending
+"packages/dashboard-framework/src/store.ts",487,"@intelgraph/frontend-team","Implement undo/redo functionality","EPIC-023",P2,pending
+"packages/dashboard-framework/src/store.ts",492,"@intelgraph/frontend-team","Implement undo/redo functionality","EPIC-023",P2,pending
+"server/src/billing/BillingJobService.ts",39,"@intelgraph/platform-core","Implement distributed locking for jobs","EPIC-008",P2,pending
+"server/src/risk/FeatureStore.ts",9,"@intelgraph/platform-core","Implement real feature aggregation","EPIC-015",P2,pending
+"prov-ledger/app/api.py",65,"@intelgraph/security-team","Implement hash calculation/verification","EPIC-002",P1,pending
+"prov-ledger/app/api.py",69,"@intelgraph/data-team","Implement Merkle tree storage in PostgreSQL","EPIC-002",P1,pending
+"prov-ledger/app/disclosure.py",23,"@intelgraph/platform-core","Implement bundle chunking","EPIC-002",P2,pending
+"server/src/cases/workflow/CaseWorkflowService.ts",147,"@intelgraph/platform-core","Extract tenant from context in queries","EPIC-008",P2,pending
+"server/src/cases/workflow/CaseWorkflowService.ts",254,"@intelgraph/platform-core","Extract tenant from case object","EPIC-008",P2,pending
+"server/src/maestro/engine.ts",98,"@intelgraph/platform-core","Implement snake_case to camelCase mapping","EPIC-013",P3,pending
+"server/src/graphql/resolvers/graphragResolvers.ts",175,"@intelgraph/data-team","Fetch entity objects from Neo4j","EPIC-006",P1,pending
+"server/src/reporting/service.ts",54,"@intelgraph/platform-core","Extract tenant from access context","EPIC-008",P2,pending
+"server/src/reporting/service.ts",78,"@intelgraph/platform-core","Extract tenant from access context","EPIC-008",P2,pending
+"server/src/db/postgres.ts",413,"@intelgraph/data-team","Implement read replica support","EPIC-007",P2,pending
+"server/src/federation/intents.ts",144,"@intelgraph/platform-core","Extract tenant from intent/actor","EPIC-008",P2,pending
+"server/src/conductor/api/conductor-routes.ts",198,"@intelgraph/ops-team","Wire real metrics aggregation queries","EPIC-017",P2,pending
+"server/src/conductor/learn/bandit.ts",689,"@intelgraph/platform-core","Implement time-windowed metrics","EPIC-017",P2,pending
+"server/src/notifications-hub/NotificationHub.ts",363,"@intelgraph/data-team","Implement Redis deduplication","EPIC-009",P2,pending
+"server/src/middleware/idempotency.ts",403,"@intelgraph/ops-team","Track error rates in metrics","EPIC-017",P2,pending
+"server/src/middleware/opa-enforcer.ts",436,"@intelgraph/ops-team","Track cache hit/miss metrics","EPIC-017",P2,pending
+"server/src/conductor/admission/budget-control.ts",282,"@intelgraph/finops-team","Track per-expert request counts","EPIC-018",P2,pending
+"server/src/conductor/router/router-v2.ts",810,"@intelgraph/platform-core","Analyze routing history","EPIC-008",P2,pending
+"server/src/conductor/router/router-v2.ts",815,"@intelgraph/finops-team","Calculate routing cost efficiency","EPIC-018",P2,pending
+"server/src/conductor/router/router-v2.ts",820,"@intelgraph/ops-team","Implement latency predictions","EPIC-017",P2,pending
+"apps/web/src/components/FlowStudio.tsx",15,"@intelgraph/frontend-team","Replace jQuery with React state management","EPIC-023",P2,pending
+"apps/web/src/features/explain/explainSlice.ts",3,"@intelgraph/frontend-team","Restore viewSync feature","EPIC-023",P3,pending
+"apps/web/src/features/explain/explainSlice.ts",36,"@intelgraph/frontend-team","Re-enable viewSync feature","EPIC-023",P3,pending
+"apps/web/src/features/triPane/TriPaneShell.tsx",154,"@intelgraph/frontend-team","Make graph ID dynamic","EPIC-023",P2,pending
+"apps/web/src/pages/AdminPage.tsx",14,"@intelgraph/frontend-team","Add toast notification","EPIC-023",P3,pending
+"apps/web/src/sync/history-explain-bridge.ts",1,"@intelgraph/frontend-team","Remove jQuery dependency","EPIC-023",P2,pending
+"apps/web/src/sync/history-explain-bridge.ts",10,"@intelgraph/frontend-team","Replace with React events","EPIC-023",P2,pending
+"client/src/components/IntelGraphWorkbench.tsx",732,"@intelgraph/frontend-team","Implement hover tooltips","EPIC-024",P3,pending
+"client/src/components/IntelGraphWorkbench.tsx",795,"@intelgraph/frontend-team","Implement hover tooltips","EPIC-024",P3,pending
+"client/src/components/dashboard/LiveActivityFeed.tsx",24,"@intelgraph/frontend-team","Re-enable GraphQL subscriptions","EPIC-023",P2,pending
+"client/src/components/dashboard/LiveActivityFeed.tsx",108,"@intelgraph/frontend-team","Re-enable GraphQL subscriptions","EPIC-023",P2,pending
+"client/src/components/dashboard/LiveActivityFeed.tsx",119,"@intelgraph/frontend-team","Re-enable when subscriptions ready","EPIC-023",P2,pending
+"client/src/components/dashboard/StatsOverview.tsx",5,"@intelgraph/frontend-team","Re-enable GraphQL queries","EPIC-023",P2,pending
+"client/src/components/graph/InteractiveGraphExplorer.jsx",568,"@intelgraph/frontend-team","Highlight clusters in visualization","EPIC-024",P3,pending
+"october2025/companyos-switchboard/apps/web/src/app/api/switchboard/[[...path]]/route.ts",31,"@intelgraph/security-team","Implement JWT verification","EPIC-003",P0,pending
+"companyos/services/tenant-api/src/middleware/authContext.ts",179,"@intelgraph/security-team","Validate JWT and extract user","EPIC-003",P0,pending
+"intelgraph/server/server.js",163,"@intelgraph/security-team","Extract user from token","EPIC-003",P1,pending
+"server/src/middleware/unifiedAuth.ts",73,"@intelgraph/security-team","Implement API key verification","EPIC-003",P1,pending
+"server/src/pii/redactionMiddleware.ts",537,"@intelgraph/security-team","Log redaction to audit ledger","EPIC-002",P1,pending
+"server/src/middleware/provenance-enforcement.ts",535,"@intelgraph/security-team","Send provenance to audit ledger","EPIC-002",P1,pending
+"server/src/middleware/llm-preflight.ts",220,"@intelgraph/security-team","Track usage per user/tenant","EPIC-018",P1,pending
+"server/src/middleware/governance.ts",197,"@intelgraph/security-team","Implement role-based access checks","EPIC-003",P1,pending
+"server/src/claims/sign.ts",24,"@intelgraph/security-team","Implement Merkle log verification","EPIC-002",P1,pending
+"server/src/graphql/intelgraph/resolvers.ts",480,"@intelgraph/ops-team","Implement OPA health checks","EPIC-017",P2,pending
+"server/src/graphql/resolvers/safe-mutations.ts",41,"@intelgraph/platform-core","Implement idempotency enforcement","EPIC-008",P1,pending
+"server/src/graphql/resolvers/safe-mutations.ts",83,"@intelgraph/platform-core","Implement outbox and saga orchestration","EPIC-008",P1,pending
+"server/src/events/EventService.ts",39,"@intelgraph/platform-core","Handle queue event sinks","EPIC-011",P2,pending
+"server/src/events/EventService.ts",167,"@intelgraph/platform-core","Implement generic sink storage","EPIC-011",P2,pending
+"server/src/conductor/events/engine.ts",99,"@intelgraph/platform-core","Enqueue conductor runs","EPIC-008",P2,pending
+"server/src/routes/governance.ts",35,"@intelgraph/security-team","Add permission validation","EPIC-003",P1,pending
+"tools/legal/ltdim/index.ts",159,"@intelgraph/security-team","Load keys from secure storage","EPIC-003",P0,pending
+"scripts/generate-test-suite.ts",81,"@intelgraph/platform-core","Add comprehensive tests","EPIC-001",P2,pending
+"server/src/__tests__/trust-center-api.test.ts",9,"@intelgraph/platform-core","Create test fixtures and enable tests","EPIC-001",P1,pending
+"server/src/connectors/__tests__/gcs-ingest.test.ts",29,"@intelgraph/platform-core","Fix TypeScript inference in mocks","EPIC-001",P2,pending
+"e2e/client/collab-delta-sync.spec.ts",5,"@intelgraph/platform-core","Implement multi-client E2E test","EPIC-001",P2,pending
+"e2e/maestro-run-console.spec.ts",3,"@intelgraph/platform-core","Enable E2E tests when environment ready","EPIC-001",P2,pending
+"tests/e2e/maestro-api-ui-flow.spec.ts",51,"@intelgraph/platform-core","Improve test assertions","EPIC-001",P2,pending
+"tests/e2e/maestro-api-ui-flow.spec.ts",61,"@intelgraph/platform-core","Improve test assertions","EPIC-001",P2,pending

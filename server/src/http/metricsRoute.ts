@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { Request, Response } from 'express';
-import { register } from '../observability/metrics.js';
+import { registry as register } from '../observability/metrics.js';
 import { logger } from '../config/logger.js';
 
 export const metricsRoute = async (_req: Request, res: Response) => {
@@ -8,7 +8,7 @@ export const metricsRoute = async (_req: Request, res: Response) => {
     res.set('Content-Type', register.contentType);
     const metrics = await register.metrics();
     res.send(metrics);
-  } catch (err) {
+  } catch (err: any) {
     logger.error({ err }, 'Error generating metrics');
     res.status(500).send('Error generating metrics');
   }

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { TicketingAdapter, Ticket } from '../types/ticketing';
+import { TicketingAdapter, Ticket } from '../types/ticketing.js';
 
 export interface JiraConfig {
   baseUrl: string;

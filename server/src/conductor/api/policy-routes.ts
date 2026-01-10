@@ -1,8 +1,8 @@
 // @ts-nocheck
 // API Routes for Policy Explanation and Simulation
 import express from 'express';
-import { policyExplainer } from '../router/policy-explainer';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { policyExplainer } from '../router/policy-explainer.js';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import { opaPolicyEngine } from '../governance/opa-integration.js';
 import logger from '../../config/logger.js';
 
@@ -139,7 +139,7 @@ router.post('/explain', async (req, res) => {
     };
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     const duration = Date.now() - startTime;
     metrics?.policyExplanationLatency?.observe(
       duration / 1000,
@@ -210,7 +210,7 @@ router.post('/simulate', async (req, res) => {
       timestamp: new Date().toISOString(),
       simulation,
     });
-  } catch (error) {
+  } catch (error: any) {
     const duration = Date.now() - startTime;
     metrics?.policySimulationLatency?.observe(
       duration / 1000,
@@ -284,7 +284,7 @@ router.get('/rules', async (req, res) => {
       count: rules.length,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     metrics?.policyRulesRequests?.inc({ status: 'error' });
 
     console.error('Policy rules fetch error:', error);
@@ -351,7 +351,7 @@ router.get(
     metrics?.runRoutingRequests?.inc({ status: 'success' });
 
     res.json(routingDecision);
-  } catch (error) {
+  } catch (error: any) {
     metrics?.runRoutingRequests?.inc({ status: 'error' });
 
     console.error('Run routing fetch error:', error);

@@ -30,16 +30,17 @@ export default function PluginCatalog() {
           id="q"
           className="border rounded px-2 py-1"
           placeholder="filter…"
+          aria-label="Filter plugins"
         />
       </div>
-      <table className="w-full text-sm">
+      <table className="w-full text-sm" aria-label="Plugin Catalog">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Version</th>
-            <th>Digest</th>
-            <th>Approved</th>
-            <th>Risk</th>
+            <th scope="col">Name</th>
+            <th scope="col">Version</th>
+            <th scope="col">Digest</th>
+            <th scope="col">Approved</th>
+            <th scope="col">Risk</th>
           </tr>
         </thead>
         <tbody>
@@ -48,6 +49,12 @@ export default function PluginCatalog() {
               key={p.id}
               className="p-row border-b hover:bg-gray-50 cursor-pointer"
               onClick={() => setSel(p)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') setSel(p)
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label={`Select plugin ${p.name}`}
             >
               <td>{p.name}</td>
               <td>{p.version}</td>
@@ -59,7 +66,7 @@ export default function PluginCatalog() {
         </tbody>
       </table>
       {sel && (
-        <div className="mt-4 p-3 rounded-2xl shadow">
+        <div className="mt-4 p-3 rounded-2xl shadow" role="region" aria-label="Plugin Details">
           <div className="text-sm">
             Capabilities: <code>{JSON.stringify(sel.capabilities)}</code>
           </div>
@@ -67,6 +74,7 @@ export default function PluginCatalog() {
             <button
               onClick={() => approve(sel.id)}
               className="px-3 py-1 rounded-2xl shadow"
+              aria-label={`Approve plugin ${sel.name}`}
             >
               Approve
             </button>

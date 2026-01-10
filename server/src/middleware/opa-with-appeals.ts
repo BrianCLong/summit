@@ -132,7 +132,7 @@ export class OPAWithAppealsMiddleware {
           // Include appeal information in response
           appeal: decision.appeal,
         });
-      } catch (error) {
+      } catch (error: any) {
         log.error(
           { error: error.message, path: req.path },
           'OPA evaluation failed',
@@ -143,7 +143,7 @@ export class OPAWithAppealsMiddleware {
           allowed: false,
           policy: 'system.fail_secure',
           reason: 'Policy evaluation failed - access denied for security',
-decisionId: randomUUID(),
+          decisionId: randomUUID(),
           timestamp: new Date().toISOString(),
           appeal: this.createAppealPath('SYSTEM_ERROR'),
         };
@@ -186,10 +186,9 @@ decisionId: randomUUID(),
         await this.auditDecision(policyInput, decision, 'DENIED');
 
         throw new Error(
-          `Access denied: ${decision.reason}${
-            decision.appeal?.available
-              ? ` (Appeal ID: ${decision.appeal.appealId})`
-              : ''
+          `Access denied: ${decision.reason}${decision.appeal?.available
+            ? ` (Appeal ID: ${decision.appeal.appealId})`
+            : ''
           }`,
         );
       }
@@ -238,7 +237,7 @@ decisionId: randomUUID(),
         allowed: opaResult.allow || false,
         policy: opaResult.policy || 'unknown',
         reason: opaResult.reason || 'Access denied by policy',
-decisionId: randomUUID(),
+        decisionId: randomUUID(),
         timestamp: new Date().toISOString(),
         ttl: this.cacheTtl,
         metadata: opaResult.metadata,
@@ -260,7 +259,7 @@ decisionId: randomUUID(),
       });
 
       return decision;
-    } catch (error) {
+    } catch (error: any) {
       log.error(
         { error: error.message, input: policyInput },
         'OPA request failed',
@@ -277,7 +276,7 @@ decisionId: randomUUID(),
     policyInput?: PolicyInput,
     decisionId?: string,
   ): AppealPath {
-const appealId = randomUUID();
+    const appealId = randomUUID();
 
     // Determine if appeal is available based on policy type
     const appealable =
@@ -337,7 +336,7 @@ const appealId = randomUUID();
         'To appeal this policy decision, provide detailed business justification and specify the duration needed.',
     };
 
-    return instructions[policy] || instructions.default;
+    return (instructions as any)[policy] || instructions.default;
   }
 
   /**
@@ -354,7 +353,7 @@ const appealId = randomUUID();
     const pool = getPostgresPool();
 
     const appealRequest: AppealRequest = {
-id: randomUUID(),
+      id: randomUUID(),
       decisionId,
       userId,
       justification,
@@ -410,7 +409,7 @@ id: randomUUID(),
       );
 
       return appealRequest;
-    } catch (error) {
+    } catch (error: any) {
       log.error(
         {
           error: error.message,
@@ -501,7 +500,7 @@ id: randomUUID(),
         respondedBy: appeal.responded_by,
         responseReason: appeal.response_reason,
       };
-    } catch (error) {
+    } catch (error: any) {
       log.error(
         {
           error: error.message,
@@ -534,7 +533,7 @@ id: randomUUID(),
         id, decision_id, user_id, approved_by, expires_at, created_at
       ) VALUES ($1, $2, $3, $4, $5, NOW())
     `,
-[randomUUID(), decisionId, userId, approvedBy, expiresAt],
+      [randomUUID(), decisionId, userId, approvedBy, expiresAt],
     );
 
     log.info(

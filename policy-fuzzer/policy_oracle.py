@@ -51,6 +51,18 @@ class PolicyOracle:
             }
         )
 
+        # Property 3: If a policy requires anonymized data, a query with user_data should not be compliant.
+        properties.append(
+            {
+                "name": "anonymization_required",
+                "check": lambda p, q, is_compliant: not (
+                    p.get("data_type") == "anonymous_data"
+                    and _resolve_field(q, "data") == "user_data"
+                )
+                or not is_compliant,
+            }
+        )
+
         return properties
 
     def determine_expected_compliance(self, policy, query):

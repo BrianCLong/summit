@@ -26,9 +26,9 @@ import {
   RunbookExecutionLogEntry,
   createInitialExecution,
   nowISO,
-} from './types';
-import { LegalBasis, DataLicense } from '../dags/types';
-import { RunbookStateManager } from './state-manager';
+} from './types.js';
+import { LegalBasis, DataLicense } from '../dags/types.js';
+import { RunbookStateManager } from './state-manager.js';
 
 // ============================================================================
 // Step Executor Registry Implementation
@@ -281,7 +281,7 @@ export class RunbookRuntimeEngine implements RunbookRuntime {
       } else if (finalState.status === 'RUNNING') {
         await this.stateManager.completeExecution(executionId, actorId);
       }
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       try {
         await this.stateManager.failExecution(executionId, actorId, errorMessage);
@@ -364,7 +364,7 @@ export class RunbookRuntimeEngine implements RunbookRuntime {
         } else {
           throw new Error(result.errorMessage || 'Step failed without error message');
         }
-      } catch (error) {
+      } catch (error: any) {
         lastError = error instanceof Error ? error : new Error(String(error));
 
         // Check if we should retry
@@ -440,14 +440,20 @@ export class RunbookRuntimeEngine implements RunbookRuntime {
     timeoutMs: number,
     stepId: string
   ): Promise<T> {
+    let timeoutId: NodeJS.Timeout | undefined;
+    const timeoutPromise = new Promise<T>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error(`Step ${stepId} timed out after ${timeoutMs}ms`));
+      }, timeoutMs);
+    });
+
     return Promise.race([
-      promise,
-      new Promise<T>((_, reject) =>
-        setTimeout(
-          () => reject(new Error(`Step ${stepId} timed out after ${timeoutMs}ms`)),
-          timeoutMs
-        )
-      ),
+      promise.finally(() => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      }),
+      timeoutPromise,
     ]);
   }
 

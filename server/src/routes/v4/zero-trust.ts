@@ -28,7 +28,7 @@ import {
   IntegrityVerification,
   MerkleProof,
 } from '../../security/zero-trust/types.js';
-import { GovernanceVerdict } from '../../governance/types.js';
+import type { GovernanceVerdict } from '../../governance/types.js';
 
 // =============================================================================
 // Types
@@ -123,7 +123,7 @@ router.use(async (_req, _res, next) => {
   try {
     await initializeServices();
     next();
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error }, 'Failed to initialize zero-trust services');
     next(error);
   }
@@ -898,7 +898,7 @@ router.get('/health', async (_req: Request, res: Response) => {
     };
 
     res.json(status);
-  } catch (error) {
+  } catch (error: any) {
     res.status(503).json({
       status: 'unhealthy',
       error: error instanceof Error ? error.message : 'Unknown error',

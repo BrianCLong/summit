@@ -77,7 +77,7 @@ async function startWorker() {
     try {
       const redis = getRedisClient();
       await redis.ping();
-    } catch (error) {
+    } catch (error: any) {
       return res.status(503).json({
         success: false,
         status: 'not ready',

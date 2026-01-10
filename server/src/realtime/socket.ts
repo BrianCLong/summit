@@ -173,7 +173,7 @@ export function initSocket(httpServer: any): Server {
             serviceId: 'realtime',
           },
         );
-      } catch (err) {
+      } catch (err: any) {
         logger.warn(
           { err: (err as Error).message, actionType },
           'Failed to emit realtime audit event',
@@ -276,7 +276,7 @@ export function initSocket(httpServer: any): Server {
               presenceCount: presence.length,
             },
           );
-        } catch (err) {
+        } catch (err: any) {
           logger.warn(
             { err: (err as Error).message, investigationId },
             'Failed to join investigation room',
@@ -326,7 +326,7 @@ export function initSocket(httpServer: any): Server {
               presenceCount: presence.length,
             },
           );
-        } catch (err) {
+        } catch (err: any) {
           logger.warn(
             { err: (err as Error).message, investigationId },
             'Failed to leave investigation room cleanly',
@@ -348,7 +348,7 @@ export function initSocket(httpServer: any): Server {
             status || 'online',
           );
           await broadcastPresence(investigationId, presence);
-        } catch (err) {
+        } catch (err: any) {
           logger.warn(
             { err: (err as Error).message, investigationId },
             'Failed to refresh presence',
@@ -391,7 +391,7 @@ export function initSocket(httpServer: any): Server {
               presenceCount: presence.length,
             },
           );
-        } catch (err) {
+        } catch (err: any) {
           logger.warn(
             { err: (err as Error).message, investigationId },
             'Failed to update presence status',
@@ -429,7 +429,7 @@ export function initSocket(httpServer: any): Server {
             details: { annotationId: annotation.id, targetId: annotation.targetId },
           });
           ns.to(roomFor(payload.investigationId)).emit('activity:event', activityEntry);
-        } catch (err) {
+        } catch (err: any) {
           logger.warn(
             { err: (err as Error).message, investigationId: payload.investigationId },
             'Failed to add annotation',
@@ -469,7 +469,7 @@ export function initSocket(httpServer: any): Server {
             details: { annotationId: payload.annotationId },
           });
           ns.to(roomFor(payload.investigationId)).emit('activity:event', activityEntry);
-        } catch (err) {
+        } catch (err: any) {
           logger.warn(
             { err: (err as Error).message, investigationId: payload.investigationId },
             'Failed to update annotation',
@@ -500,7 +500,7 @@ export function initSocket(httpServer: any): Server {
             details: { annotationId },
           });
           ns.to(roomFor(investigationId)).emit('activity:event', activityEntry);
-        } catch (err) {
+        } catch (err: any) {
           logger.warn(
             { err: (err as Error).message, investigationId },
             'Failed to delete annotation',
@@ -549,7 +549,7 @@ export function initSocket(httpServer: any): Server {
             messageLength: payload.message?.length ?? 0,
           },
         );
-      } catch (err) {
+      } catch (err: any) {
         logger.warn(
           { err: (err as Error).message, investigationId: payload.investigationId },
           'Failed to add comment',
@@ -596,7 +596,7 @@ export function initSocket(httpServer: any): Server {
             messageLength: payload.message?.length ?? 0,
           },
         );
-      } catch (err) {
+      } catch (err: any) {
         logger.warn(
           { err: (err as Error).message, investigationId: payload.investigationId },
           'Failed to update comment',
@@ -637,7 +637,7 @@ export function initSocket(httpServer: any): Server {
               investigationId,
             },
           );
-        } catch (err) {
+        } catch (err: any) {
           logger.warn(
             { err: (err as Error).message, investigationId },
             'Failed to delete comment',
@@ -722,7 +722,7 @@ export function initSocket(httpServer: any): Server {
             details: { id: op.id, kind: op.kind, action: op.action },
           });
           ns.to(roomFor(graphId)).emit('activity:event', activityEntry);
-        } catch (err) {
+        } catch (err: any) {
           logger.warn(
             { err: (err as Error).message, graphId },
             'Failed to record graph activity entry',
@@ -761,7 +761,7 @@ export function initSocket(httpServer: any): Server {
               presenceCount: presence.length,
             },
           );
-        } catch (err) {
+        } catch (err: any) {
           logger.warn(
             { err: (err as Error).message, investigationId },
             'Failed to clean up presence on disconnect',

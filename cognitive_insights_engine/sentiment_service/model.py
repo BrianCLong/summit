@@ -27,6 +27,6 @@ class LLMGraphSentimentModel:
         influence: dict[str, float] = {}
         if neighbours:
             weight = score / len(neighbours)
-            influence = {n: weight for n in neighbours}
+            influence = dict.fromkeys(neighbours, weight)
 
         return {"sentiment": label, "score": score, "influence_map": influence}

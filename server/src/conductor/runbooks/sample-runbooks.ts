@@ -1,7 +1,7 @@
 // Sample Runbooks for Conductor
 // Provides default operational procedures for common scenarios
 
-import { runbookRegistry, Runbook } from './registry';
+import { runbookRegistry, Runbook } from './registry.js';
 
 export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
   {
@@ -427,13 +427,13 @@ export async function loadSampleRunbooks(): Promise<void> {
       try {
         await runbookRegistry.registerRunbook(runbook, 'system');
         console.log(`Loaded runbook: ${runbook.name} (${runbook.id})`);
-      } catch (error) {
+      } catch (error: any) {
         console.warn(`Failed to load runbook ${runbook.id}:`, error);
       }
     }
 
     console.log(`Successfully loaded ${sampleRunbooks.length} sample runbooks`);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error loading sample runbooks:', error);
   }
 }

@@ -74,7 +74,7 @@ router.post(
       );
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -95,7 +95,7 @@ router.get(
       const result = await enhancedOnboardingService.getCurrentStep(tenantId, userId);
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -123,7 +123,7 @@ router.post(
       );
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -151,7 +151,7 @@ router.post(
       );
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -176,7 +176,7 @@ router.get(
       );
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -202,7 +202,7 @@ router.post(
       );
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -224,7 +224,7 @@ router.get(
       const result = await enhancedOnboardingService.getContextualHelp(route, userId);
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -246,7 +246,7 @@ router.post(
       await enhancedOnboardingService.recordHelpRequest(tenantId, userId, stepId, topic);
 
       res.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -283,7 +283,7 @@ router.get(
       );
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }

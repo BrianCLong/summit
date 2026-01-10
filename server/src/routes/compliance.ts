@@ -70,7 +70,7 @@ router.get(
       res.setHeader('Content-Type', 'application/json');
       res.send(jsonPacket);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to generate SOC2 packet:', error);
     res.status(500).json({ error: 'An internal server error occurred.' });
   }

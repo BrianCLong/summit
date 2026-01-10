@@ -6,13 +6,25 @@ slos:
     indicator: "1 - (sum(rate(http_requests_total{status_code=~\"5..\"}[30d])) / sum(rate(http_requests_total[30d])))"
 
   - name: query_latency
-    target: p95 < 500ms
+    target: p95 < 1500ms
     window: 7d
     description: "95th percentile of request duration over 7 days"
     indicator: "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[7d])) by (le))"
+
+  - name: api_verify_latency
+    target: p95 < 1500ms
+    window: 7d
+    description: "95th percentile of verification API duration"
+    indicator: "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{route=\"/verify\"}[7d])) by (le))"
 
   - name: graph_query_latency
     target: p95 < 1000ms
     window: 7d
     description: "95th percentile of graph query duration"
     indicator: "histogram_quantile(0.95, sum(rate(graph_operation_duration_seconds_bucket[7d])) by (le))"
+
+  - name: ledger_write_success
+    target: 99.95%
+    window: 7d
+    description: "Percentage of successful writes to the Evidence Ledger"
+    indicator: "sum(rate(ledger_write_total{status=\"success\"}[7d])) / sum(rate(ledger_write_total[7d]))"

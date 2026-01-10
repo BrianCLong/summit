@@ -3,8 +3,8 @@
 // for the Conductor MoE+MCP system
 
 import { trace, _context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
-import { conductorMetrics } from '../metrics';
-import { ExpertType } from '../types';
+import { conductorMetrics } from '../metrics/index.js';
+import { ExpertType } from '../types/index.js';
 
 const tracer = trace.getTracer('conductor', '1.0.0');
 
@@ -287,7 +287,7 @@ export async function withConductorSpan<T>(
     const result = await operation(span);
     span.setStatus({ code: SpanStatusCode.OK });
     return result;
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof Error) {
       span.recordException(error);
       span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });

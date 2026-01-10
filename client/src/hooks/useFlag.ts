@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { DEV } from '../config/env.js';
 
 interface FlagConfig {
   [key: string]: {
@@ -44,7 +45,7 @@ const DEFAULT_FLAGS: FlagConfig = {
     },
   },
   'graph-lod-benchmark': {
-    enabled: import.meta.env.DEV ?? true,
+    enabled: DEV ?? true,
     rollout: 100,
     conditions: {
       env: ['development', 'staging', 'production'],
@@ -87,7 +88,7 @@ const DEFAULT_FLAGS: FlagConfig = {
     },
   },
   'event-inspector': {
-    enabled: import.meta.env.DEV,
+    enabled: DEV,
     rollout: 100,
     conditions: {
       env: ['development'],

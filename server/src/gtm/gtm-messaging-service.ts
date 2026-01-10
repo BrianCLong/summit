@@ -41,45 +41,62 @@ interface ChannelPerformanceInput {
 
 export class GtmMessagingService {
   private repository: ClaimsRepository;
-  private claimsSubmitted: Counter<string>;
-  private claimsApproved: Counter<string>;
-  private claimsExpired: Counter<string>;
-  private approvalDuration: Histogram<string>;
-  private activeApprovedClaims: Gauge<string>;
+
+  private static getOrCreateCounter(config: any): Counter<any> {
+    const existing = register.getSingleMetric(config.name);
+    if (existing) return existing as Counter<any>;
+    return new Counter(config);
+  }
+
+  private static getOrCreateGauge(config: any): Gauge<any> {
+    const existing = register.getSingleMetric(config.name);
+    if (existing) return existing as Gauge<any>;
+    return new Gauge(config);
+  }
+
+  private static getOrCreateHistogram(config: any): Histogram<any> {
+    const existing = register.getSingleMetric(config.name);
+    if (existing) return existing as Histogram<any>;
+    return new Histogram(config);
+  }
+
+  private static claimsSubmitted = GtmMessagingService.getOrCreateCounter({
+    name: 'gtm_claims_submitted_total',
+    help: 'Count of claims submitted by risk tier',
+    labelNames: ['riskTier'] as const,
+  });
+  private static claimsApproved = GtmMessagingService.getOrCreateCounter({
+    name: 'gtm_claims_approved_total',
+    help: 'Count of claims approved by risk tier',
+    labelNames: ['riskTier'] as const,
+  });
+  private static claimsExpired = GtmMessagingService.getOrCreateCounter({
+    name: 'gtm_claims_expired_total',
+    help: 'Count of claims that hit expiry',
+    labelNames: ['riskTier'] as const,
+  });
+  private static approvalDuration = GtmMessagingService.getOrCreateHistogram({
+    name: 'gtm_claim_approval_duration_seconds',
+    help: 'Time from submission to approval',
+    labelNames: ['riskTier'] as const,
+    buckets: [0.5, 1, 3, 6, 12, 24, 48, 72, 96],
+  });
+  private static activeApprovedClaims = GtmMessagingService.getOrCreateGauge({
+    name: 'gtm_claims_active',
+    help: 'Active approved claims per channel',
+    labelNames: ['channel'] as const,
+  });
+
+  static resetMetrics() {
+    this.claimsSubmitted.reset();
+    this.claimsApproved.reset();
+    this.claimsExpired.reset();
+    this.approvalDuration.reset();
+    this.activeApprovedClaims.reset();
+  }
 
   constructor(repository = new ClaimsRepository()) {
     this.repository = repository;
-    this.claimsSubmitted = new Counter({
-      name: 'gtm_claims_submitted_total',
-      help: 'Count of claims submitted by risk tier',
-      labelNames: ['riskTier'] as const,
-      registers: [register],
-    });
-    this.claimsApproved = new Counter({
-      name: 'gtm_claims_approved_total',
-      help: 'Count of claims approved by risk tier',
-      labelNames: ['riskTier'] as const,
-      registers: [register],
-    });
-    this.claimsExpired = new Counter({
-      name: 'gtm_claims_expired_total',
-      help: 'Count of claims that hit expiry',
-      labelNames: ['riskTier'] as const,
-      registers: [register],
-    });
-    this.approvalDuration = new Histogram({
-      name: 'gtm_claim_approval_duration_seconds',
-      help: 'Time from submission to approval',
-      labelNames: ['riskTier'] as const,
-      buckets: [0.5, 1, 3, 6, 12, 24, 48, 72, 96],
-      registers: [register],
-    });
-    this.activeApprovedClaims = new Gauge({
-      name: 'gtm_claims_active',
-      help: 'Active approved claims per channel',
-      labelNames: ['channel'] as const,
-      registers: [register],
-    });
   }
 
   async submitClaim(input: ClaimInput): Promise<SubmitClaimResult> {
@@ -110,7 +127,7 @@ export class GtmMessagingService {
       complianceSurface: parsed.complianceSurface,
     };
     await this.repository.upsertClaim(claim);
-    this.claimsSubmitted.inc({ riskTier: claim.riskTier });
+    GtmMessagingService.claimsSubmitted.inc({ riskTier: claim.riskTier });
     return {
       claim,
       enforcement: this.computeEnforcementGates(claim),
@@ -138,9 +155,9 @@ export class GtmMessagingService {
     if (approvalsMet) {
       claim.status = ClaimStatus.Approved;
       claim.publishedAt = claim.publishedAt ?? now.toISOString();
-      this.claimsApproved.inc({ riskTier: claim.riskTier });
+      GtmMessagingService.claimsApproved.inc({ riskTier: claim.riskTier });
       const submissionTime = new Date(claim.createdAt).getTime();
-      this.approvalDuration.observe({ riskTier: claim.riskTier }, (now.getTime() - submissionTime) / 1000 / 3600);
+      GtmMessagingService.approvalDuration.observe({ riskTier: claim.riskTier }, (now.getTime() - submissionTime) / 1000 / 3600);
       await this.updateActiveClaimsGauge();
     }
 
@@ -152,7 +169,7 @@ export class GtmMessagingService {
     const claims = await this.repository.loadClaims();
     const updated = claims.map((claim) => {
       if (claim.status === ClaimStatus.Approved && new Date(claim.reviewDate) < currentDate) {
-        this.claimsExpired.inc({ riskTier: claim.riskTier });
+        GtmMessagingService.claimsExpired.inc({ riskTier: claim.riskTier });
         return { ...claim, status: ClaimStatus.Expired, expiry: currentDate.toISOString(), updatedAt: currentDate.toISOString() };
       }
       return claim;
@@ -596,7 +613,7 @@ export class GtmMessagingService {
       });
     });
     (Object.keys(counts) as Channel[]).forEach((channel) => {
-      this.activeApprovedClaims.set({ channel }, counts[channel]);
+      GtmMessagingService.activeApprovedClaims.set({ channel }, counts[channel]);
     });
   }
 }

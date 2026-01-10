@@ -223,7 +223,7 @@ export async function explainGraph(req: ExplainRequest): Promise<Explanation[]> 
       default:
         return [makeErrorExplanation('Unsupported explanation type')];
     }
-  } catch (error) {
+  } catch (error: any) {
     const reason = error instanceof Error ? error.message : String(error);
     logger.warn({
       message: 'graph_explainer_failed',

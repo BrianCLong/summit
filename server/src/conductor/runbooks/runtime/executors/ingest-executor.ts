@@ -7,13 +7,13 @@
  * @module runbooks/runtime/executors/ingest-executor
  */
 
-import { BaseStepExecutor } from './base';
+import { BaseStepExecutor } from './base.js';
 import {
   StepExecutorContext,
   StepExecutorResult,
   RunbookActionType,
   IndicatorIngestService,
-} from '../types';
+} from '../types.js';
 
 /**
  * Indicator types supported for ingestion
@@ -209,7 +209,7 @@ export class IngestStepExecutor extends BaseStepExecutor {
           },
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       return this.failure(
         error instanceof Error ? error.message : 'Failed to ingest indicators'
       );

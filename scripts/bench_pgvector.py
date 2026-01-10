@@ -13,11 +13,11 @@ import csv
 import json
 import math
 import os
-from pathlib import Path
 import random
 import statistics
 import time
-from typing import Dict, Iterable, List, Sequence, Tuple
+from collections.abc import Iterable, Sequence
+from pathlib import Path
 
 import psycopg2
 from psycopg2.extras import execute_values
@@ -34,7 +34,7 @@ def vector_literal(values: Sequence[float]) -> str:
     return f"[{','.join(f'{v:.6f}' for v in values)}]"
 
 
-def percentile(values: List[float], pct: float) -> float:
+def percentile(values: list[float], pct: float) -> float:
     ordered = sorted(values)
     k = (len(ordered) - 1) * pct
     lower = math.floor(k)
@@ -113,8 +113,8 @@ def warm_up(cur, dimension: int, ef_search: int, repeats: int) -> None:
 
 def measure_latency(
     conn, dimension: int, ef_search: int, samples: int, warmups: int
-) -> Tuple[float, float]:
-    timings: List[float] = []
+) -> tuple[float, float]:
+    timings: list[float] = []
     with conn.cursor() as cur:
         if warmups:
             warm_up(cur, dimension, ef_search, warmups)
@@ -147,19 +147,17 @@ def run_benchmarks(
     tenants: int,
     samples: int,
     warmups: int,
-) -> Dict[int, List[Dict[str, float]]]:
-    results: Dict[int, List[Dict[str, float]]] = {}
+) -> dict[int, list[dict[str, float]]]:
+    results: dict[int, list[dict[str, float]]] = {}
     for dimension in dimensions:
         seed_embeddings(conn, dimension, rows, tenants)
-        dimension_results: List[Dict[str, float]] = []
+        dimension_results: list[dict[str, float]] = []
 
         for m in m_values:
             for ef_construction in ef_construction_values:
                 build_ms = build_index(conn, m, ef_construction)
                 for ef_search in ef_search_values:
-                    avg_ms, p99_ms = measure_latency(
-                        conn, dimension, ef_search, samples, warmups
-                    )
+                    avg_ms, p99_ms = measure_latency(conn, dimension, ef_search, samples, warmups)
                     dimension_results.append(
                         {
                             "dimension": dimension,
@@ -179,14 +177,10 @@ def run_benchmarks(
     return results
 
 
-def print_results(results: Dict[int, List[Dict[str, float]]]) -> None:
+def print_results(results: dict[int, list[dict[str, float]]]) -> None:
     print("\nHNSW Parameter Benchmarks")
-    print(
-        "dimension | m  | ef_construction | ef_search | build_ms | avg_ms | p99_ms | samples"
-    )
-    print(
-        "----------|----|-----------------|-----------|----------|--------|--------|--------"
-    )
+    print("dimension | m  | ef_construction | ef_search | build_ms | avg_ms | p99_ms | samples")
+    print("----------|----|-----------------|-----------|----------|--------|--------|--------")
     for dimension, measurements in results.items():
         for row in sorted(
             measurements,
@@ -197,12 +191,12 @@ def print_results(results: Dict[int, List[Dict[str, float]]]) -> None:
             )
 
 
-def write_json(results: Dict[int, List[Dict[str, float]]], path: Path) -> None:
+def write_json(results: dict[int, list[dict[str, float]]], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(results, indent=2))
 
 
-def write_csv(results: Dict[int, List[Dict[str, float]]], path: Path) -> None:
+def write_csv(results: dict[int, list[dict[str, float]]], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     flat_rows = [
         {

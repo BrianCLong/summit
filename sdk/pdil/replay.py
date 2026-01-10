@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import json
 import random
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional
 
 from .adapters import ModelAdapter
 from .models import GoldenCase, GoldenSet, PromptDiffOutcome, PromptRun, ReplayReport
@@ -30,8 +30,8 @@ class PromptDiffRunner:
     def __init__(
         self,
         golden_set: GoldenSet,
-        adapters: Dict[str, ModelAdapter],
-        risk_assessor: Optional[RiskAssessor] = None,
+        adapters: dict[str, ModelAdapter],
+        risk_assessor: RiskAssessor | None = None,
     ) -> None:
         self.golden_set = golden_set
         self.adapters = adapters
@@ -46,7 +46,7 @@ class PromptDiffRunner:
         shuffle: bool = False,
     ) -> ReplayReport:
         controller = SeedController(seed)
-        outcomes: List[PromptDiffOutcome] = []
+        outcomes: list[PromptDiffOutcome] = []
         cases = list(self.golden_set.cases)
         if shuffle:
             rng = random.Random(seed)
@@ -58,7 +58,9 @@ class PromptDiffRunner:
                 raise KeyError(f"Prompt version missing for case {case.case_id}")
             baseline_run = self._execute(case, baseline_version, baseline_prompt, controller)
             candidate_run = self._execute(case, candidate_version, candidate_prompt, controller)
-            outcomes.append(PromptDiffOutcome(case=case, baseline=baseline_run, candidate=candidate_run))
+            outcomes.append(
+                PromptDiffOutcome(case=case, baseline=baseline_run, candidate=candidate_run)
+            )
         assessment = self.risk_assessor.assess(outcomes)
         return ReplayReport(seed=seed, outcomes=outcomes, assessment=assessment)
 
@@ -70,7 +72,11 @@ class PromptDiffRunner:
         controller: SeedController,
     ) -> PromptRun:
         adapter = self._adapter_for(prompt_version)
-        seed = controller.for_case(case.case_id, prompt_version) if adapter.supports_seed_control else None
+        seed = (
+            controller.for_case(case.case_id, prompt_version)
+            if adapter.supports_seed_control
+            else None
+        )
         response = adapter.generate(prompt, seed=seed)
         passed, taxonomy = classify_failure(case, response)
         severity = case.severity_for(taxonomy or "default")
@@ -99,11 +105,11 @@ def load_golden_set(path: Path) -> GoldenSet:
     return GoldenSet(cases)
 
 
-def load_cases(cases: Iterable[Dict[str, object]]) -> GoldenSet:
+def load_cases(cases: Iterable[dict[str, object]]) -> GoldenSet:
     return GoldenSet([_case_from_dict(item) for item in cases])
 
 
-def _case_from_dict(item: Dict[str, object]) -> GoldenCase:
+def _case_from_dict(item: dict[str, object]) -> GoldenCase:
     return GoldenCase(
         case_id=str(item["case_id"]),
         prompts=dict(item["prompts"]),

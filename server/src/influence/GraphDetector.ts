@@ -47,11 +47,13 @@ export class GraphDetector {
 
           return { isAnomalous: false, score: density, reason: 'Normal density' };
 
-      } catch (error) {
+      } catch (error: any) {
           console.error('Graph detection error:', error);
           return { isAnomalous: false, score: 0, reason: 'Error executing query' };
       } finally {
-          await session.close();
+          if (session?.close) {
+            await session.close();
+          }
       }
   }
 
@@ -84,11 +86,13 @@ export class GraphDetector {
 
         return { depth, breadth };
 
-      } catch (error) {
+      } catch (error: any) {
          console.error('Cascade analysis error:', error);
          return { depth: 0, breadth: 0 };
       } finally {
-          await session.close();
+          if (session?.close) {
+            await session.close();
+          }
       }
   }
 }

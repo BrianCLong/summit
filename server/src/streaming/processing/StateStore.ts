@@ -34,14 +34,14 @@ export class RedisStateStore implements StateStore {
   constructor(redisUrl: string = 'redis://localhost:6379') {
     this.redis = new (Redis as any)(redisUrl, {
       lazyConnect: true,
-      retryStrategy: (times) => Math.min(times * 50, 2000),
+      retryStrategy: (times: number) => Math.min(times * 50, 2000),
     });
   }
 
   async connect() {
     try {
       await this.redis.connect();
-    } catch (e) {
+    } catch (e: any) {
       this.logger.error('Failed to connect to Redis', e);
     }
   }

@@ -1,4 +1,4 @@
-import type { FeatureFlagService } from '../services/FeatureFlagService.js';
+import type { FeatureFlagService } from '@intelgraph/feature-flags';
 import { logger } from './logger.js';
 
 const GLOBAL_KILL_SWITCH_FLAG_KEY = 'platform.kill-switch.global';
@@ -36,8 +36,9 @@ async function evaluateFlag(
 ): Promise<boolean> {
   if (!flagService) return false;
   try {
-    return await flagService.isEnabled(key, { key: 'system' }, false);
-  } catch (error) {
+    // Cast to any for method compatibility across different FeatureFlagService implementations
+    return await (flagService as any).isEnabled(key, { key: 'system' }, false);
+  } catch (error: any) {
     logger.warn({ err: error, flag: key }, 'Feature flag evaluation failed');
     return false;
   }

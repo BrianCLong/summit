@@ -44,6 +44,9 @@ pnpm sim:run --scenario terror-cell --size large --noise 0.3
 
 # Generate report
 pnpm sim:run --scenario all --report --output ./reports/
+
+# Run a mission suite regression harness
+pnpm sim:run --mission-suite investigation-quality --output ./reports/ --baseline-metrics ./reports/investigation-quality-main-metrics.json
 ```
 
 ## Safety Features
@@ -90,17 +93,17 @@ The ghost analyst simulates human analyst workflows:
 // Scripted workflow
 const workflow = {
   steps: [
-    { type: 'CREATE_INVESTIGATION', params: { name: 'Test' } },
-    { type: 'QUERY_ENTITIES', params: { type: 'PERSON' } },
-    { type: 'EXPAND_NETWORK', params: { depth: 2 } },
-    { type: 'RUN_COPILOT', params: { goal: 'Find key nodes' } },
+    { type: "CREATE_INVESTIGATION", params: { name: "Test" } },
+    { type: "QUERY_ENTITIES", params: { type: "PERSON" } },
+    { type: "EXPAND_NETWORK", params: { depth: 2 } },
+    { type: "RUN_COPILOT", params: { goal: "Find key nodes" } },
   ],
 };
 
 // AI-driven exploration
 const aiAgent = new AIGhostAnalyst({
-  model: 'gpt-4',
-  strategy: 'exploratory',
+  model: "gpt-4",
+  strategy: "exploratory",
   maxSteps: 20,
 });
 ```
@@ -111,9 +114,14 @@ Collected metrics include:
 
 - **Task Success**: Investigation completion rate
 - **Time-to-Insight**: Duration to key findings
+- **Time-to-Ground-Truth**: Time to capture the first ground-truth entity/edge
 - **Query Efficiency**: Number of queries needed
 - **Coverage**: Percentage of graph explored
 - **Quality**: Precision/recall of findings
+- **Citation Correctness**: Ground-truth aligned citations versus injected documents
+- **False-Link Rate**: Unexpected edges added to the graph
+- **p95 Latency**: p95 across workflow steps
+- **Leakage Detection**: Count of secret-looking values in exported artifacts
 
 ## Reporting
 
@@ -223,28 +231,28 @@ pnpm typecheck
 ### Scenario Generator
 
 ```typescript
-import { ScenarioGenerator } from '@intelgraph/sim-harness';
+import { ScenarioGenerator } from "@intelgraph/sim-harness";
 
 const generator = new ScenarioGenerator({
   seed: 42,
   deterministic: true,
 });
 
-const scenario = await generator.generate('fraud-ring', {
-  size: 'large',
+const scenario = await generator.generate("fraud-ring", {
+  size: "large",
   noise: 0.2,
-  complexity: 'high',
+  complexity: "high",
 });
 ```
 
 ### Ghost Analyst
 
 ```typescript
-import { GhostAnalyst } from '@intelgraph/sim-harness';
+import { GhostAnalyst } from "@intelgraph/sim-harness";
 
 const analyst = new GhostAnalyst({
-  apiUrl: 'http://localhost:4000',
-  strategy: 'systematic',
+  apiUrl: "http://localhost:4000",
+  strategy: "systematic",
 });
 
 const session = await analyst.runWorkflow(workflow);
@@ -254,7 +262,7 @@ const metrics = await analyst.getMetrics();
 ### Metrics Collection
 
 ```typescript
-import { MetricsCollector } from '@intelgraph/sim-harness';
+import { MetricsCollector } from "@intelgraph/sim-harness";
 
 const collector = new MetricsCollector();
 collector.start();

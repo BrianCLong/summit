@@ -1,4 +1,4 @@
-import { RagQuestion, RagAnswer, RagCitation } from '../types';
+import { RagQuestion, RagAnswer, RagCitation } from '../types.js';
 import { RetrievalService } from '../retrieval/service.js';
 import LLMService from '../../../services/LLMService.js';
 

@@ -1,0 +1,21 @@
+{
+  "version": "audit-export-v1",
+  "customer": "customer-x",
+  "from": "2025-12-29T22:20:10.899Z",
+  "to": "2025-12-29T22:20:10.899Z",
+  "exported_at": "2025-12-29T22:20:10.906Z",
+  "events_file": "events.jsonl",
+  "event_count": 2,
+  "hash_chain": {
+    "start": "d43f8714d96a871f75e4478bbb4ed4e88a3ea662077b8fd07e6dbf07f1760c7b",
+    "end": "1e349ba7f6ecb7ceadcbacd311b610b2d93ff7e88bd835e647df00691086c967",
+    "valid": true
+  },
+  "redaction_rules": [
+    "internal: drop actor.ip_address",
+    "confidential: drop actor identifiers and owner metadata",
+    "restricted: keep only types and decision identifiers; metadata flagged as redacted"
+  ],
+  "public_key": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAH8zJf1ZsrdHK156TYJ5HkmjKrQIRfQbvOLtwqonkrio=\n-----END PUBLIC KEY-----\n",
+  "signature": "JFjJ9wovFuPT2vbfCxsONXWvvy4lrDyIr3fQed798MZXX3bvYQ2dUiM1YMcxFWNaFdHpDjutqLUgcOQozwu5Bg=="
+}

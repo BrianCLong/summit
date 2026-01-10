@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.ai/schemas/information-metadata.schema.json",
+  "title": "Information Supply Chain Metadata",
+  "description": "Metadata for tracking information provenance, quality, and lifecycle status.",
+  "type": "object",
+  "required": [
+    "source_id",
+    "source_class",
+    "ingest_timestamp",
+    "confidence_score",
+    "lifecycle_stage"
+  ],
+  "properties": {
+    "source_id": {
+      "type": "string",
+      "description": "Unique identifier of the origin source."
+    },
+    "source_class": {
+      "type": "string",
+      "enum": ["A", "B", "C", "D"],
+      "description": "Trust classification of the source (A=Authoritative, D=Adversarial)."
+    },
+    "source_type": {
+      "type": "string",
+      "enum": ["first_party", "third_party", "human", "synthetic"],
+      "description": "Nature of the source."
+    },
+    "ingest_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp when the data entered the system."
+    },
+    "confidence_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Current quantified trust level (0.0 - 1.0)."
+    },
+    "lifecycle_stage": {
+      "type": "string",
+      "enum": [
+        "raw",
+        "normalized",
+        "enriched",
+        "assessed",
+        "active",
+        "stale",
+        "archived",
+        "revoked"
+      ],
+      "description": "Current stage in the information lifecycle."
+    },
+    "trace_id": {
+      "type": "string",
+      "description": "Global unique ID for tracing lineage."
+    },
+    "transformations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tx_id": { "type": "string" },
+          "type": { "type": "string" },
+          "actor": { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "delta": { "type": "number" }
+        }
+      }
+    },
+    "valid_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when this information expires."
+    }
+  }
+}

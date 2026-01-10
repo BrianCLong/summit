@@ -13,7 +13,7 @@ import random
 import uuid
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -96,7 +96,7 @@ class InvariantEngine:
                     "both_blocked": baseline_blocked and candidate_blocked,
                     "both_allowed": not baseline_blocked and not candidate_blocked,
                 },
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                timestamp=datetime.now(UTC).isoformat(),
             )
 
         def residency_routing_invariant(
@@ -120,7 +120,7 @@ class InvariantEngine:
                     "candidate_zone": candidate_zone,
                     "zones_match": passed,
                 },
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                timestamp=datetime.now(UTC).isoformat(),
             )
 
         def policy_deny_invariant(baseline_resp: dict, candidate_resp: dict) -> InvariantCheck:
@@ -142,7 +142,7 @@ class InvariantEngine:
                     "both_denied": baseline_denied and candidate_denied,
                     "both_allowed": not baseline_denied and not candidate_denied,
                 },
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                timestamp=datetime.now(UTC).isoformat(),
             )
 
         def tenant_isolation_invariant(baseline_resp: dict, candidate_resp: dict) -> InvariantCheck:
@@ -164,7 +164,7 @@ class InvariantEngine:
                     "candidate_tenant": candidate_tenant,
                     "isolation_maintained": passed,
                 },
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                timestamp=datetime.now(UTC).isoformat(),
             )
 
         # Register invariants
@@ -192,7 +192,7 @@ class InvariantEngine:
                     candidate_result=None,
                     passed=False,
                     details={"error": str(e)},
-                    timestamp=datetime.now(timezone.utc).isoformat(),
+                    timestamp=datetime.now(UTC).isoformat(),
                 )
                 checks.append(failed_check)
 
@@ -220,7 +220,7 @@ class ShadowTrafficRunner:
             "request_id": request.request_id,
             "tenant_context": request.tenant_id,
             "processing_zone": "us-east-1",  # Default
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
         # Simulate safety-critical behaviors
@@ -279,7 +279,7 @@ class ShadowTrafficRunner:
                 tenant_id=random.choice(["TENANT_001", "EU_TENANT_002", "ASIA_TENANT_003"]),
                 request_type="inference",
                 payload_hash=f"payload-{i}-{random.randint(1000, 9999)}",
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                timestamp=datetime.now(UTC).isoformat(),
             )
 
             # Send to both baseline and candidate
@@ -321,7 +321,7 @@ class ShadowTrafficRunner:
             cse_score=cse_score,
             safety_violations=safety_violations[:10],  # Limit to first 10
             recommendation=recommendation,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
         )
 
         print(f"📊 CSE Results: {cse_score:.3f} ({recommendation})")
@@ -375,7 +375,7 @@ class CSEOrchestrator:
 
         # Save overall gate result
         gate_result = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "baseline_url": baseline_url,
             "candidate_url": candidate_url,
             "flows_tested": flows,

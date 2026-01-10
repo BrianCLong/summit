@@ -1,7 +1,6 @@
 // @ts-nocheck
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import pino from 'pino';
 
 const logger = (pino as any)({ name: 'SynonymService' });
@@ -16,32 +15,22 @@ export class SynonymService {
 
   private loadSynonyms() {
     try {
-      // Handle both ESM and CJS environments or different structures
-      // Ideally use a config loader, but simple fs check is fine
-      let configPath = '';
-      if (typeof import.meta !== 'undefined' && import.meta.url) {
-          const __filename = fileURLToPath(import.meta.url);
-          const __dirname = path.dirname(__filename);
-          configPath = path.join(__dirname, '../config/synonyms.json');
-      } else {
-          // Fallback if import.meta not available (CJS) or different structure
-          configPath = path.resolve('server/src/config/synonyms.json');
-      }
+      const candidatePaths = [
+        path.resolve(process.cwd(), 'server/src/config/synonyms.json'),
+        path.resolve(process.cwd(), 'src/config/synonyms.json'),
+      ];
 
-      // Check relative to process.cwd() as fallback
-      if (!fs.existsSync(configPath)) {
-        configPath = path.resolve(process.cwd(), 'server/src/config/synonyms.json');
-      }
+      const configPath = candidatePaths.find((candidate) => fs.existsSync(candidate));
 
-      if (fs.existsSync(configPath)) {
+      if (configPath) {
         const raw = fs.readFileSync(configPath, 'utf-8');
         this.synonyms = JSON.parse(raw);
         this.loaded = true;
         logger.info(`Loaded synonyms for ${Object.keys(this.synonyms).length} terms.`);
       } else {
-        logger.warn(`Synonym file not found at ${configPath}`);
+        logger.warn('Synonym file not found in expected locations');
       }
-    } catch (err) {
+    } catch (err: any) {
       const error = err instanceof Error ? err : new Error(String(err));
       logger.error({ err: error }, 'Failed to load synonyms');
     }

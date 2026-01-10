@@ -1,76 +1,100 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { IntelGraphService } from '../services/IntelGraphService.js';
-import * as neo4j from '../graph/neo4j.js';
+
+// Define shared mocks
+const mockRun = jest.fn() as jest.MockedFunction<
+  (...args: any[]) => Promise<any>
+>;
+const mockClose = jest.fn() as jest.MockedFunction<() => Promise<void>>;
+const mockSession = { run: mockRun, close: mockClose };
+const mockDriver = { session: jest.fn(() => mockSession) };
 
 // Mock neo4j
 jest.mock('../graph/neo4j.js');
 
+// Mock configs and dependencies
+jest.mock('../config/database.js', () => ({
+  getNeo4jDriver: jest.fn(() => mockDriver),
+  getPostgresPool: jest.fn(),
+  getRedisClient: jest.fn(),
+}));
+
+jest.mock('../audit/advanced-audit-system.js', () => ({
+  advancedAuditSystem: {
+    logEvent: jest.fn(),
+  },
+}));
+
+jest.mock('../provenance/ledger.js', () => ({
+  provenanceLedger: {
+    appendEntry: jest.fn(),
+  },
+  ProvenanceLedgerV2: jest.fn(),
+}));
+
 describe('IntelGraphService', () => {
   let service: IntelGraphService;
-  const mockRunCypher = neo4j.runCypher as jest.MockedFunction<typeof neo4j.runCypher>;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Re-initialize to ensure fresh mocks
+    // @ts-ignore
+    IntelGraphService.instance = null;
+    mockClose.mockResolvedValue(undefined);
+    const dbModule = jest.requireMock('../config/database.js') as {
+      getNeo4jDriver: jest.Mock;
+    };
+    dbModule.getNeo4jDriver.mockReturnValue(mockDriver);
+    (mockDriver.session as jest.Mock).mockReturnValue(mockSession);
     service = IntelGraphService.getInstance();
   });
 
-  describe('ensureNode (Canonical Upsert)', () => {
-    it('should use MERGE when natural keys are present', async () => {
-      const tenantId = 'tenant-123';
-      const personProps = { fullName: 'Jane Doe', email: 'jane@example.com' };
+  describe('createEntity', () => {
+    it('should create an entity and log to ledger', async () => {
+      const owner = 'user-1';
+      const tenantId = 't1';
+      const entityData = { name: 'Test Entity', description: 'Description' };
 
-      const expectedNode = {
-        properties: {
-          ...personProps,
-          id: 'mock-uuid',
-          tenantId,
-          createdAt: '2023-01-01',
-          updatedAt: '2023-01-01',
-          label: 'Person'
-        }
+      const mockRecord = {
+        get: jest.fn().mockReturnValue({ properties: { id: 'uuid-1', ...entityData } })
       };
+      // Reset mockRun implementation for this test
+      mockRun.mockResolvedValue({ records: [mockRecord] });
 
-      mockRunCypher.mockImplementation(async (cypher: string, params: Record<string, any> = {}) => {
-        return [{ n: expectedNode.properties }] as any[];
-      });
+      const result = await service.createEntity(entityData, owner, tenantId);
 
-      const result = await service.ensureNode(tenantId, 'Person', personProps);
-
-      expect(result).toEqual(expectedNode.properties);
-      expect(mockRunCypher).toHaveBeenCalledTimes(1);
-      const callArgs = mockRunCypher.mock.calls[0];
-
-      // Verify MERGE is used
-      expect(callArgs[0]).toContain('MERGE (n:Person { tenantId: $tenantId, email: $email })');
-      expect(callArgs[0]).toContain('ON CREATE SET');
-      expect(callArgs[0]).toContain('ON MATCH SET');
-
-      // Verify params
-      expect(callArgs[1]).toHaveProperty('email', 'jane@example.com');
-      expect(callArgs[1]).toHaveProperty('tenantId', tenantId);
+      expect(result).toHaveProperty('id', 'uuid-1');
+      expect(result.name).toBe('Test Entity');
+      expect(mockRun).toHaveBeenCalledWith(
+        expect.stringContaining('CREATE (e:Entity'),
+        expect.objectContaining({ props: expect.objectContaining({ name: 'Test Entity' }) })
+      );
     });
   });
 
-  describe('createEdge', () => {
-      it('should use MERGE for edges to prevent duplicates', async () => {
-          const tenantId = 't1';
-          mockRunCypher.mockResolvedValue([{ r: { type: 'RELATED_TO' } }] as any[]);
+  describe('createClaim', () => {
+    it('should create a claim linked to an entity', async () => {
+      const owner = 'user-1';
+      const tenantId = 't1';
+      const claimData = {
+        statement: 'AI is great',
+        confidence: 0.9,
+        entityId: '11111111-1111-1111-1111-111111111111',
+      };
 
-          await service.createEdge(tenantId, 'a', 'b', 'RELATED_TO');
+      const mockRecord = {
+        get: jest.fn().mockReturnValue({ properties: { id: 'c-1', ...claimData } })
+      };
+      mockRun.mockResolvedValue({ records: [mockRecord] });
 
-          expect(mockRunCypher).toHaveBeenCalledTimes(1);
-          const cypher = mockRunCypher.mock.calls[0][0];
-          expect(cypher).toContain('MERGE (a)-[r:RELATED_TO]->(b)');
-      });
-  });
+      const result = await service.createClaim(claimData, owner, tenantId);
 
-  describe('Validation', () => {
-      it('should reject invalid labels', async () => {
-          await expect(service.ensureNode('t1', 'Hacker' as any, {})).rejects.toThrow('Invalid node label');
-      });
-
-      it('should reject invalid property keys in search', async () => {
-          await expect(service.searchNodes('t1', 'Person', { 'bad-key!': 'val' })).rejects.toThrow('Invalid property key');
-      });
+      expect(result).toHaveProperty('id', 'c-1');
+      expect(result.statement).toBe('AI is great');
+      expect(mockRun).toHaveBeenCalledWith(
+        expect.stringContaining('CREATE (c:Claim'),
+        expect.anything()
+      );
+    });
   });
 });

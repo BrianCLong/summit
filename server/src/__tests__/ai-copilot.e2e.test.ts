@@ -9,9 +9,15 @@ import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import { Express } from 'express';
 import { setupTestApp } from '../__helpers__/test-app';
-import { createTestInvestigation, createTestEntities } from '../__helpers__/test-data';
+import {
+  createTestInvestigation,
+  createTestEntities,
+} from '../__helpers__/test-data';
 
-describe('AI Copilot E2E', () => {
+const runAcceptance = process.env.RUN_ACCEPTANCE === 'true';
+const describeIf = runAcceptance ? describe : describe.skip;
+
+describeIf('AI Copilot E2E', () => {
   let app: Express;
   let authToken: string;
   let investigationId: string;

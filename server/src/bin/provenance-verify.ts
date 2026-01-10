@@ -149,7 +149,7 @@ class ProvenanceVerifier {
             `Evidence file hash mismatch for ${item.id}: expected ${item.content_hash}, got ${fileHash}`,
           );
         }
-      } catch (error) {
+      } catch (error: any) {
         errors.push(
           `Failed to read evidence file ${filePath}: ${error instanceof Error ? error.message : String(error)}`,
         );
@@ -188,7 +188,7 @@ class ProvenanceVerifier {
 
       try {
         manifest = JSON.parse(manifestContent);
-      } catch (error) {
+      } catch (error: any) {
         result.valid = false;
         result.manifestValid = false;
         result.errors.push(`Failed to parse manifest JSON: ${error instanceof Error ? error.message : String(error)}`);
@@ -279,7 +279,7 @@ class ProvenanceVerifier {
         );
       }
 
-    } catch (error) {
+    } catch (error: any) {
       result.valid = false;
       result.errors.push(
         `Verification failed with exception: ${error instanceof Error ? error.message : String(error)}`,

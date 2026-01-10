@@ -3,18 +3,19 @@
 from __future__ import annotations
 
 import time
+
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import PlainTextResponse
-from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
-from .schemas import AnalyzeRequest, AnalyzeResponse, Rewrite, ToneDiagnostic
-from .ethics import guard_request
-from .redact import redact_text
 from .diagnostics import analyze_text
-from .rewrite import rewrite_text
+from .ethics import guard_request
 from .guidance import generate_guidance
-from .security import rate_limiter, api_key_auth
 from .observability import record_metrics
+from .redact import redact_text
+from .rewrite import rewrite_text
+from .schemas import AnalyzeRequest, AnalyzeResponse, Rewrite, ToneDiagnostic
+from .security import api_key_auth, rate_limiter
 
 router = APIRouter()
 

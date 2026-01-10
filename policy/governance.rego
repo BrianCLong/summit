@@ -1,51 +1,51 @@
 
 package governance
 
-default allow = false
+default allow := false
 
 # Allow access if no violations
-allow {
+allow if {
     not any_violations
 }
 
 # Check for violations based on context
-any_violations {
+any_violations if {
     violation[_]
 }
 
 # Violation: High risk use case without mitigation
-violation["high_risk_use_case"] {
+violation contains "high_risk_use_case" if {
     input.risk_score >= 90
     input.mitigation != "DENY"
 }
 
 # Violation: Disallowed sector
-violation["disallowed_sector"] {
+violation contains "disallowed_sector" if {
     disallowed_sectors := {"gambling", "predatory_lending", "authoritarian_surveillance"}
     disallowed_sectors[input.sector]
 }
 
 # Violation: Guardrail breach
-violation["guardrail_breach"] {
+violation contains "guardrail_breach" if {
     input.guardrail_check.allowed == false
 }
 
 # Policy: Governance Approval for High Risk
-requires_approval {
+requires_approval if {
     input.risk_score >= 70
 }
 
 # Helper to get risk mitigation requirements
-mitigation = res {
+mitigation := res if {
     input.risk_score >= 90
     res := "DENY"
-} else = res {
+} else := res if {
     input.risk_score >= 70
     res := "REVIEW"
-} else = res {
+} else := res if {
     input.risk_score >= 50
     res := "RESTRICT"
-} else = res {
+} else := res if {
     input.risk_score >= 30
     res := "PHILANTHROPIC_OFFSET"
-} else = "NONE"
+} else := "NONE"

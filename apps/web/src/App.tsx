@@ -29,6 +29,9 @@ const SupplyChainDashboard = React.lazy(
 const AdvancedDashboardPage = React.lazy(
   () => import('@/pages/dashboards/AdvancedDashboardPage')
 )
+const UsageCostDashboard = React.lazy(
+  () => import('@/pages/dashboards/UsageCostDashboard')
+)
 const DataSourcesPage = React.lazy(() => import('@/pages/DataSourcesPage'))
 const ModelsPage = React.lazy(() => import('@/pages/ModelsPage'))
 const ReportsPage = React.lazy(() => import('@/pages/ReportsPage'))
@@ -50,6 +53,10 @@ const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
 // const OnboardingWizard = React.lazy(() => import('@/pages/Onboarding/OnboardingWizard').then(module => ({ default: module.OnboardingWizard })))
 const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboard'))
 const TrustDashboard = React.lazy(() => import('@/pages/TrustDashboard'))
+const CopilotPage = React.lazy(() => import('@/components/CopilotPanel').then(m => ({ default: m.CopilotPanel })))
+
+// Workbench
+import { WorkbenchShell } from '@/workbench/shell/WorkbenchLayout'
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -58,10 +65,13 @@ import { ErrorBoundary, NotFound } from '@/components/error'
 import Explain from '@/components/Explain'
 import { CommandStatusProvider } from '@/features/internal-command/CommandStatusProvider'
 import { DemoIndicator } from '@/components/common/DemoIndicator'
+import { DemoModeGate } from '@/components/common/DemoModeGate'
+import { isDemoModeEnabled } from '@/lib/demoMode'
 
 function App() {
   const [showPalette, setShowPalette] = React.useState(false);
   const [showExplain, setShowExplain] = React.useState(false);
+  const demoModeEnabled = isDemoModeEnabled()
 
   React.useEffect(()=>{
     const onKey=(e:KeyboardEvent)=>{
@@ -121,6 +131,12 @@ function App() {
                     <Route path="/maestro/*" element={<MaestroDashboard />} />
                     <Route path="/trust" element={<TrustDashboard />} />
 
+                    {/* Workbench Route - intentionally outside main layout for focus mode, or inside if desired.
+                        The prompts asked for a "shell", usually implying it might stand alone or take over.
+                        I'll put it at /workbench. */}
+                    <Route path="/workbench" element={<WorkbenchShell />} />
+                    <Route path="/copilot" element={<CopilotPage />} />
+
                     {/* Protected routes with layout */}
                     <Route path="/" element={<Layout />}>
                       <Route index element={<HomePage />} />
@@ -164,6 +180,10 @@ function App() {
                         element={<AdvancedDashboardPage />}
                       />
                       <Route
+                        path="dashboards/usage-cost"
+                        element={<UsageCostDashboard />}
+                      />
+                      <Route
                         path="internal/command"
                         element={<InternalCommandDashboard />}
                       />
@@ -186,7 +206,19 @@ function App() {
                       <Route path="help" element={<HelpPage />} />
                       <Route path="changelog" element={<ChangelogPage />} />
 
-                      <Route path="demo" element={<DemoControlPage />} />
+                      {/* Explicitly Gated Demo Routes */}
+                      <Route
+                        path="demo"
+                        element={
+                          demoModeEnabled ? (
+                            <DemoModeGate>
+                              <DemoControlPage />
+                            </DemoModeGate>
+                          ) : (
+                            <Navigate to="/" replace />
+                          )
+                        }
+                      />
                       {/* <Route path="onboarding" element={<OnboardingWizard />} /> */}
 
                       {/* Catch all */}

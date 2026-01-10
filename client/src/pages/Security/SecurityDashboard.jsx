@@ -53,18 +53,17 @@ import {
   Refresh,
   Add,
   RotateRight,
-  Delete,
   Warning,
-  CheckCircle,
-  Error,
   Search,
   Shield,
   Lock,
-  Visibility,
-  VisibilityOff,
   Timeline,
 } from '@mui/icons-material';
-import { KeyManagementAPI, PIIDetectionAPI } from '../../services/security-api';
+import {
+  KeyManagementAPI,
+  PIIDetectionAPI,
+  SensitiveContextError,
+} from '../../services/security-api';
 
 // Status colors
 const statusColors = {
@@ -431,21 +430,71 @@ function PIIScanner() {
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [contextModalOpen, setContextModalOpen] = useState(false);
+  const [pendingPayload, setPendingPayload] = useState(null);
+  const [purpose, setPurpose] = useState('investigation');
+  const [justification, setJustification] = useState('');
+  const [caseId, setCaseId] = useState('');
+  const [accessContext, setAccessContext] = useState(null);
 
   const handleScan = async () => {
+    let data;
     try {
       setScanning(true);
       setError(null);
-
-      let data;
+      setAccessContext(null);
       if (scanType === 'object') {
         data = JSON.parse(inputData);
       } else {
         data = inputData;
       }
 
-      const response = await PIIDetectionAPI.scan(data, scanType, includeValue);
+      if (!purpose || !justification || !caseId) {
+        setPendingPayload({ scanType, includeValue, data });
+        setContextModalOpen(true);
+        setError('Sensitive context required');
+        return;
+      }
+
+      const response = await PIIDetectionAPI.scan(data, scanType, includeValue, {
+        purpose,
+        justification,
+        caseId,
+      });
       setResult(response.data);
+      setAccessContext(response.accessContext || null);
+    } catch (err) {
+      if (err instanceof SensitiveContextError || err?.code === 'SENSITIVE_CONTEXT_REQUIRED') {
+        setPendingPayload({ scanType, includeValue, data });
+        setContextModalOpen(true);
+        setError(err.message);
+      } else {
+        setError(err.message);
+      }
+    } finally {
+      setScanning(false);
+    }
+  };
+
+  const handleContextSubmit = async () => {
+    if (!pendingPayload) return;
+    try {
+      setScanning(true);
+      const response = await PIIDetectionAPI.scan(
+        pendingPayload.data,
+        pendingPayload.scanType,
+        pendingPayload.includeValue,
+        {
+          purpose,
+          justification,
+          caseId,
+        },
+      );
+      setResult(response.data);
+      setAccessContext(response.accessContext || null);
+      setContextModalOpen(false);
+      setPendingPayload(null);
+      setError(null);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -455,6 +504,53 @@ function PIIScanner() {
 
   return (
     <Box>
+      <Dialog
+        open={contextModalOpen}
+        onClose={() => setContextModalOpen(false)}
+        TransitionProps={{ timeout: 0 }}
+        data-testid="sensitive-context-dialog"
+        disablePortal
+      >
+        <DialogTitle>Provide access context</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            Sensitive operations require a purpose, justification, and case identifier to proceed.
+          </Typography>
+          <TextField
+            label="Purpose"
+            value={purpose}
+            onChange={(e) => setPurpose(e.target.value)}
+            fullWidth
+            required
+          />
+          <TextField
+            label="Justification"
+            value={justification}
+            onChange={(e) => setJustification(e.target.value)}
+            fullWidth
+            required
+            multiline
+            minRows={2}
+          />
+          <TextField
+            label="Case ID"
+            value={caseId}
+            onChange={(e) => setCaseId(e.target.value)}
+            fullWidth
+            required
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setContextModalOpen(false)}>Cancel</Button>
+          <Button
+            onClick={handleContextSubmit}
+            variant="contained"
+            disabled={scanning || !purpose || !justification || !caseId}
+          >
+            Continue
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <Card>
@@ -519,6 +615,20 @@ function PIIScanner() {
               <Typography variant="h6" gutterBottom>
                 Scan Results
               </Typography>
+
+              {accessContext && (
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1 }}>
+                  <Tooltip
+                    title={`Purpose: ${accessContext.purpose} • Case: ${accessContext.caseId}`}
+                    placement="right"
+                  >
+                    <Chip label="Why am I seeing this?" variant="outlined" size="small" />
+                  </Tooltip>
+                  <Typography variant="caption" color="text.secondary">
+                    {accessContext.justification}
+                  </Typography>
+                </Box>
+              )}
 
               {!result ? (
                 <Typography color="text.secondary">
@@ -717,3 +827,5 @@ function RotationHistory() {
     </TableContainer>
   );
 }
+
+export { PIIScanner };

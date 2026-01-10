@@ -154,7 +154,7 @@ export class NarrativeAnalysisService {
         if (typeof attrs === 'string') {
             try {
                 attrs = JSON.parse(attrs);
-            } catch (e) {
+            } catch (e: any) {
                 return; // Skip invalid JSON
             }
         }

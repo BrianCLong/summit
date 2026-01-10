@@ -4,8 +4,8 @@
  * Exports all DAG-based runbook components.
  */
 
-export * from './types';
-export * from './replay-log';
-export * from './gates';
-export * from './citation-validator';
-export * from './dag-executor';
+export * from './types.js';
+export * from './replay-log.js';
+export * from './gates.js';
+export * from './citation-validator.js';
+export * from './dag-executor.js';
