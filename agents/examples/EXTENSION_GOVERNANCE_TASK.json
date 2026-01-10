@@ -1,0 +1,46 @@
+{
+  "task_id": "EXTENSION_GOVERNANCE_20260110",
+  "agent_id": "jules",
+  "prompt_ref": {
+    "id": "ecosystem-extension-governance",
+    "version": "v1",
+    "sha256": "0807d7e50758ce37b7eb26fc0b6086505ba7c0102034069de571fb0728e95952",
+    "path": "prompts/docs/ecosystem-extension-governance@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ecosystem/",
+      "docs/roadmap/STATUS.json",
+      "docs/security/SECURITY_REMEDIATION_LEDGER.md",
+      "prompts/docs/ecosystem-extension-governance@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/EXTENSION_GOVERNANCE_TASK.json"
+    ],
+    "domains": ["documentation", "governance", "ecosystem", "security"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/ecosystem/README.md",
+      "docs/ecosystem/EXTENSION_MODEL.md",
+      "docs/ecosystem/EXTENSION_SECURITY_REQUIREMENTS.md",
+      "docs/ecosystem/EXTENSION_REVIEW_CHECKLIST.md",
+      "docs/ecosystem/EXTENSION_COMPATIBILITY_POLICY.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Extension governance documentation is present and aligned to authority sources.",
+    "Roadmap status is updated with the extension governance revision.",
+    "Security remediation ledger exists and is referenced by extension docs."
+  ],
+  "stop_conditions": [
+    "Policy bypass requested or implied.",
+    "PII exposure in generated artifacts.",
+    "Sandbox violation alert."
+  ]
+}

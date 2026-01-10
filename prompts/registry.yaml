@@ -1,81 +1,112 @@
 version: 1
 prompts:
-  - id: agent-native-loop-n4
-    version: v1
-    path: prompts/governance/agent-native-loop-n4.md
-    sha256: 2fcf3ef5535a5dd116439d1fc8a665e03945e1c6981373895fd9344bd486b658
-    description: Closed-loop, agent-native development lifecycle with CI-governed prompts and deterministic archives.
-    scope:
-      paths:
-        - agents/
-        - prompts/
-        - scripts/ci/
-        - docs/ga/
-        - artifacts/
-        - metrics/
-        - observability/
-        - .github/
-      domains:
-        - governance
-        - ci
-        - provenance
-        - quality
-        - observability
-    verification:
-      tiers_required:
-        - A
-      debt_budget:
-        permitted: 0
-        retirement_target: 1
-    allowed_operations:
-      - create
-      - edit
-  - id: runbooks-docs-update
-    version: v1
-    path: prompts/docs/runbooks-update@v1.md
-    sha256: d8fa2fa89f5bb30b954a8fc1735794033cd55be52bc8aedce76dcb57948fac11
-    description: Add or update operational runbooks with policy and receipt evidence steps.
-    scope:
-      paths:
-        - docs/runbooks/
-        - docs/roadmap/STATUS.json
-        - agents/examples/
-        - prompts/docs/runbooks-update@v1.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - operations
-        - governance
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: companyos-sprint-04
-    version: v1
-    path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
-    sha256: 434a88382afaa83775ef9055171b2095acb3595b82566da8c0e2a21d1625dac2
-    description: Plan and record the CompanyOS Sprint 04 execution brief and roadmap status update.
-    scope:
-      paths:
-        - sprint/
-        - docs/roadmap/STATUS.json
-        - prompts/companyos/
-        - agents/examples/
-      domains:
-        - companyos
-        - sprint-planning
-        - roadmap
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
+- id: agent-native-loop-n4
+  version: v1
+  path: prompts/governance/agent-native-loop-n4.md
+  sha256: 2fcf3ef5535a5dd116439d1fc8a665e03945e1c6981373895fd9344bd486b658
+  description: Closed-loop, agent-native development lifecycle with CI-governed prompts
+    and deterministic archives.
+  scope:
+    paths:
+    - agents/
+    - prompts/
+    - scripts/ci/
+    - docs/ga/
+    - artifacts/
+    - metrics/
+    - observability/
+    - .github/
+    domains:
+    - governance
+    - ci
+    - provenance
+    - quality
+    - observability
+  verification:
+    tiers_required:
+    - A
+    debt_budget:
+      permitted: 0
+      retirement_target: 1
+  allowed_operations:
+  - create
+  - edit
+- id: runbooks-docs-update
+  version: v1
+  path: prompts/docs/runbooks-update@v1.md
+  sha256: d8fa2fa89f5bb30b954a8fc1735794033cd55be52bc8aedce76dcb57948fac11
+  description: Add or update operational runbooks with policy and receipt evidence
+    steps.
+  scope:
+    paths:
+    - docs/runbooks/
+    - docs/roadmap/STATUS.json
+    - agents/examples/
+    - prompts/docs/runbooks-update@v1.md
+    - prompts/registry.yaml
+    domains:
+    - documentation
+    - operations
+    - governance
+  verification:
+    tiers_required:
+    - C
+    debt_budget:
+      permitted: 0
+      retirement_target: 0
+  allowed_operations:
+  - create
+  - edit
+- id: companyos-sprint-04
+  version: v1
+  path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
+  sha256: 434a88382afaa83775ef9055171b2095acb3595b82566da8c0e2a21d1625dac2
+  description: Plan and record the CompanyOS Sprint 04 execution brief and roadmap
+    status update.
+  scope:
+    paths:
+    - sprint/
+    - docs/roadmap/STATUS.json
+    - prompts/companyos/
+    - agents/examples/
+    domains:
+    - companyos
+    - sprint-planning
+    - roadmap
+  verification:
+    tiers_required:
+    - C
+    debt_budget:
+      permitted: 0
+      retirement_target: 0
+  allowed_operations:
+  - create
+  - edit
+- id: ecosystem-extension-governance
+  version: v1
+  path: prompts/docs/ecosystem-extension-governance@v1.md
+  sha256: 0807d7e50758ce37b7eb26fc0b6086505ba7c0102034069de571fb0728e95952
+  description: Define and update Summit extension governance documentation and roadmap
+    status.
+  scope:
+    paths:
+    - docs/ecosystem/
+    - docs/roadmap/STATUS.json
+    - docs/security/SECURITY_REMEDIATION_LEDGER.md
+    - agents/examples/
+    - prompts/docs/ecosystem-extension-governance@v1.md
+    - prompts/registry.yaml
+    domains:
+    - documentation
+    - governance
+    - ecosystem
+    - security
+  verification:
+    tiers_required:
+    - C
+    debt_budget:
+      permitted: 0
+      retirement_target: 0
+  allowed_operations:
+  - create
+  - edit
