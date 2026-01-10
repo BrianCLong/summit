@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Awaitable, Callable, Dict
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 from .verifier import ConsentVerifier
 
-ASGISend = Callable[[Dict[str, Any]], Awaitable[None]]
-ASGIReceive = Callable[[], Awaitable[Dict[str, Any]]]
-ASGIApp = Callable[[Dict[str, Any], ASGIReceive, ASGISend], Awaitable[None]]
+ASGISend = Callable[[dict[str, Any]], Awaitable[None]]
+ASGIReceive = Callable[[], Awaitable[dict[str, Any]]]
+ASGIApp = Callable[[dict[str, Any], ASGIReceive, ASGISend], Awaitable[None]]
 
 
 class ConsentPresentMiddleware:
@@ -26,7 +27,7 @@ class ConsentPresentMiddleware:
         self.verifier = verifier
         self.header = header.lower()
 
-    async def __call__(self, scope: Dict[str, Any], receive: ASGIReceive, send: ASGISend) -> None:
+    async def __call__(self, scope: dict[str, Any], receive: ASGIReceive, send: ASGISend) -> None:
         if scope.get("type") != "http":
             await self.app(scope, receive, send)
             return
@@ -64,7 +65,7 @@ def consent_present(
     return wrapper
 
 
-def _extract_header(scope: Dict[str, Any], header: str) -> str | None:
+def _extract_header(scope: dict[str, Any], header: str) -> str | None:
     headers = scope.get("headers") or []
     for key, value in headers:
         if isinstance(key, bytes) and key.decode("latin-1").lower() == header:

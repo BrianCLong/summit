@@ -8,16 +8,16 @@ Provides predictive, prescriptive, and scenario-building AI capabilities for:
 - Scenario planning and what-if analysis
 """
 
-import os
 import logging
-from datetime import datetime, timedelta
-from typing import List, Optional, Dict, Any
+import os
+from datetime import datetime
 from enum import Enum
+from typing import Any
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 from pydantic import BaseModel, Field
-from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 from starlette.responses import Response
 
 # Configure logging
@@ -26,25 +26,23 @@ logger = logging.getLogger(__name__)
 
 # Prometheus metrics
 REQUESTS = Counter(
-    'strategic_foresight_requests_total',
-    'Total requests to strategic foresight service',
-    ['method', 'endpoint']
+    "strategic_foresight_requests_total",
+    "Total requests to strategic foresight service",
+    ["method", "endpoint"],
 )
 DURATION = Histogram(
-    'strategic_foresight_request_duration_seconds',
-    'Request duration in seconds',
-    ['endpoint']
+    "strategic_foresight_request_duration_seconds", "Request duration in seconds", ["endpoint"]
 )
 PREDICTIONS = Counter(
-    'strategic_foresight_predictions_total',
-    'Total predictions generated',
-    ['prediction_type', 'confidence_level']
+    "strategic_foresight_predictions_total",
+    "Total predictions generated",
+    ["prediction_type", "confidence_level"],
 )
 
 app = FastAPI(
     title="Strategic Foresight AI Suite",
     description="AI-driven predictive analytics and scenario planning for strategic decision-making",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 app.add_middleware(
@@ -57,6 +55,7 @@ app.add_middleware(
 
 
 # ============ Models ============
+
 
 class TrendType(str, Enum):
     MARKET = "market"
@@ -81,14 +80,16 @@ class TimeHorizon(str, Enum):
 
 class MarketSignal(BaseModel):
     """Input signal for market analysis"""
+
     domain: str = Field(..., description="Market domain or sector")
-    indicators: List[str] = Field(default=[], description="Key indicators to analyze")
-    entities: List[str] = Field(default=[], description="Entities of interest")
+    indicators: list[str] = Field(default=[], description="Key indicators to analyze")
+    entities: list[str] = Field(default=[], description="Entities of interest")
     time_horizon: TimeHorizon = Field(default=TimeHorizon.MEDIUM)
 
 
 class TrendPrediction(BaseModel):
     """Predicted market or technology trend"""
+
     trend_id: str
     trend_type: TrendType
     title: str
@@ -96,14 +97,15 @@ class TrendPrediction(BaseModel):
     confidence: float = Field(..., ge=0.0, le=1.0)
     impact_score: float = Field(..., ge=0.0, le=10.0)
     time_horizon: TimeHorizon
-    key_drivers: List[str]
-    affected_sectors: List[str]
-    recommended_actions: List[str]
-    evidence_sources: List[str]
+    key_drivers: list[str]
+    affected_sectors: list[str]
+    recommended_actions: list[str]
+    evidence_sources: list[str]
 
 
 class CompetitiveThreat(BaseModel):
     """Identified competitive threat"""
+
     threat_id: str
     competitor: str
     threat_level: ThreatLevel
@@ -111,57 +113,61 @@ class CompetitiveThreat(BaseModel):
     description: str
     confidence: float = Field(..., ge=0.0, le=1.0)
     time_to_impact: str
-    indicators: List[str]
-    countermeasures: List[str]
-    affected_capabilities: List[str]
+    indicators: list[str]
+    countermeasures: list[str]
+    affected_capabilities: list[str]
 
 
 class PartnershipOpportunity(BaseModel):
     """Identified partnership opportunity"""
+
     opportunity_id: str
     partner: str
     opportunity_type: str
     strategic_fit_score: float = Field(..., ge=0.0, le=1.0)
-    synergy_areas: List[str]
+    synergy_areas: list[str]
     potential_value: str
-    risk_factors: List[str]
+    risk_factors: list[str]
     recommended_approach: str
     time_sensitivity: str
 
 
 class Scenario(BaseModel):
     """Strategic scenario for planning"""
+
     scenario_id: str
     name: str
     description: str
     probability: float = Field(..., ge=0.0, le=1.0)
-    impact_assessment: Dict[str, float]
-    key_assumptions: List[str]
-    trigger_events: List[str]
-    recommended_preparations: List[str]
-    opportunities: List[str]
-    risks: List[str]
+    impact_assessment: dict[str, float]
+    key_assumptions: list[str]
+    trigger_events: list[str]
+    recommended_preparations: list[str]
+    opportunities: list[str]
+    risks: list[str]
 
 
 class StrategicRecommendation(BaseModel):
     """Prescriptive strategic recommendation"""
+
     recommendation_id: str
     title: str
     description: str
     priority: int = Field(..., ge=1, le=5)
     confidence: float = Field(..., ge=0.0, le=1.0)
     expected_outcome: str
-    resources_required: List[str]
+    resources_required: list[str]
     timeline: str
-    success_metrics: List[str]
-    dependencies: List[str]
+    success_metrics: list[str]
+    dependencies: list[str]
 
 
 class ForesightAnalysisRequest(BaseModel):
     """Request for comprehensive foresight analysis"""
+
     domain: str
-    focus_areas: List[str] = Field(default=[])
-    competitors: List[str] = Field(default=[])
+    focus_areas: list[str] = Field(default=[])
+    competitors: list[str] = Field(default=[])
     time_horizon: TimeHorizon = Field(default=TimeHorizon.MEDIUM)
     scenario_count: int = Field(default=3, ge=1, le=10)
     include_partnerships: bool = Field(default=True)
@@ -169,51 +175,56 @@ class ForesightAnalysisRequest(BaseModel):
 
 class ForesightAnalysisResponse(BaseModel):
     """Comprehensive foresight analysis response"""
+
     analysis_id: str
     generated_at: datetime
     domain: str
-    trends: List[TrendPrediction]
-    threats: List[CompetitiveThreat]
-    partnerships: List[PartnershipOpportunity]
-    scenarios: List[Scenario]
-    recommendations: List[StrategicRecommendation]
+    trends: list[TrendPrediction]
+    threats: list[CompetitiveThreat]
+    partnerships: list[PartnershipOpportunity]
+    scenarios: list[Scenario]
+    recommendations: list[StrategicRecommendation]
     executive_summary: str
     processing_time_ms: float
 
 
 class ScenarioRequest(BaseModel):
     """Request for scenario generation"""
-    base_conditions: Dict[str, Any]
-    variables: List[str]
-    constraints: List[str] = Field(default=[])
+
+    base_conditions: dict[str, Any]
+    variables: list[str]
+    constraints: list[str] = Field(default=[])
     time_horizon: TimeHorizon = Field(default=TimeHorizon.MEDIUM)
     scenario_count: int = Field(default=3, ge=1, le=10)
 
 
 class PivotAnalysisRequest(BaseModel):
     """Request for pivot opportunity analysis"""
+
     current_position: str
-    capabilities: List[str]
-    market_signals: List[str]
-    constraints: List[str] = Field(default=[])
+    capabilities: list[str]
+    market_signals: list[str]
+    constraints: list[str] = Field(default=[])
 
 
 class PivotOpportunity(BaseModel):
     """Identified pivot opportunity"""
+
     pivot_id: str
     direction: str
     description: str
     feasibility_score: float = Field(..., ge=0.0, le=1.0)
     market_potential: str
-    capability_gap: List[str]
+    capability_gap: list[str]
     timeline: str
-    risks: List[str]
-    success_factors: List[str]
+    risks: list[str]
+    success_factors: list[str]
 
 
 # ============ AI Analysis Functions ============
 
-def analyze_market_trends(domain: str, time_horizon: TimeHorizon) -> List[TrendPrediction]:
+
+def analyze_market_trends(domain: str, time_horizon: TimeHorizon) -> list[TrendPrediction]:
     """Analyze and predict market trends"""
     # AI-driven trend analysis simulation
     trends = [
@@ -225,14 +236,18 @@ def analyze_market_trends(domain: str, time_horizon: TimeHorizon) -> List[TrendP
             confidence=0.85,
             impact_score=8.5,
             time_horizon=time_horizon,
-            key_drivers=["Generative AI demand", "Edge computing growth", "Sovereignty requirements"],
+            key_drivers=[
+                "Generative AI demand",
+                "Edge computing growth",
+                "Sovereignty requirements",
+            ],
             affected_sectors=["Government", "Finance", "Healthcare", "Defense"],
             recommended_actions=[
                 "Invest in AI infrastructure capabilities",
                 "Develop sovereign cloud partnerships",
-                "Build AI talent pipeline"
+                "Build AI talent pipeline",
             ],
-            evidence_sources=["Market research", "Patent filings", "Investment trends"]
+            evidence_sources=["Market research", "Patent filings", "Investment trends"],
         ),
         TrendPrediction(
             trend_id=f"trend_{domain}_002",
@@ -242,14 +257,18 @@ def analyze_market_trends(domain: str, time_horizon: TimeHorizon) -> List[TrendP
             confidence=0.92,
             impact_score=9.0,
             time_horizon=time_horizon,
-            key_drivers=["Geopolitical tensions", "Data protection laws", "National security concerns"],
+            key_drivers=[
+                "Geopolitical tensions",
+                "Data protection laws",
+                "National security concerns",
+            ],
             affected_sectors=["Technology", "Government", "Critical Infrastructure"],
             recommended_actions=[
                 "Develop compliant infrastructure",
                 "Build local partnerships",
-                "Engage with regulators"
+                "Engage with regulators",
             ],
-            evidence_sources=["EU regulations", "National policies", "Trade agreements"]
+            evidence_sources=["EU regulations", "National policies", "Trade agreements"],
         ),
         TrendPrediction(
             trend_id=f"trend_{domain}_003",
@@ -264,46 +283,55 @@ def analyze_market_trends(domain: str, time_horizon: TimeHorizon) -> List[TrendP
             recommended_actions=[
                 "Expand analytics capabilities",
                 "Build vertical solutions",
-                "Develop strategic partnerships"
+                "Develop strategic partnerships",
             ],
-            evidence_sources=["Market analysis", "Customer demand", "Competitor moves"]
-        )
+            evidence_sources=["Market analysis", "Customer demand", "Competitor moves"],
+        ),
     ]
     return trends
 
 
-def identify_competitive_threats(competitors: List[str], domain: str) -> List[CompetitiveThreat]:
+def identify_competitive_threats(competitors: list[str], domain: str) -> list[CompetitiveThreat]:
     """Identify and assess competitive threats"""
     threats = []
-    threat_types = ["market_entry", "technology_disruption", "talent_acquisition", "partnership_formation"]
+    threat_types = [
+        "market_entry",
+        "technology_disruption",
+        "talent_acquisition",
+        "partnership_formation",
+    ]
 
     for i, competitor in enumerate(competitors[:5]):  # Limit to 5 competitors
         threat_level = [ThreatLevel.HIGH, ThreatLevel.MEDIUM, ThreatLevel.CRITICAL][i % 3]
-        threats.append(CompetitiveThreat(
-            threat_id=f"threat_{competitor.lower().replace(' ', '_')}_{i:03d}",
-            competitor=competitor,
-            threat_level=threat_level,
-            threat_type=threat_types[i % len(threat_types)],
-            description=f"Potential {threat_types[i % len(threat_types)]} activity from {competitor}",
-            confidence=0.7 + (i * 0.05),
-            time_to_impact="6-12 months",
-            indicators=[
-                "Executive hiring patterns",
-                "Patent filings",
-                "Partnership announcements",
-                "Investment activity"
-            ],
-            countermeasures=[
-                "Accelerate product roadmap",
-                "Strengthen key partnerships",
-                "Increase market presence"
-            ],
-            affected_capabilities=["Market position", "Technology leadership", "Talent pool"]
-        ))
+        threats.append(
+            CompetitiveThreat(
+                threat_id=f"threat_{competitor.lower().replace(' ', '_')}_{i:03d}",
+                competitor=competitor,
+                threat_level=threat_level,
+                threat_type=threat_types[i % len(threat_types)],
+                description=f"Potential {threat_types[i % len(threat_types)]} activity from {competitor}",
+                confidence=0.7 + (i * 0.05),
+                time_to_impact="6-12 months",
+                indicators=[
+                    "Executive hiring patterns",
+                    "Patent filings",
+                    "Partnership announcements",
+                    "Investment activity",
+                ],
+                countermeasures=[
+                    "Accelerate product roadmap",
+                    "Strengthen key partnerships",
+                    "Increase market presence",
+                ],
+                affected_capabilities=["Market position", "Technology leadership", "Talent pool"],
+            )
+        )
     return threats
 
 
-def find_partnership_opportunities(domain: str, capabilities: List[str]) -> List[PartnershipOpportunity]:
+def find_partnership_opportunities(
+    domain: str, capabilities: list[str]
+) -> list[PartnershipOpportunity]:
     """Identify strategic partnership opportunities"""
     opportunities = [
         PartnershipOpportunity(
@@ -315,7 +343,7 @@ def find_partnership_opportunities(domain: str, capabilities: List[str]) -> List
             potential_value="$50-100M over 3 years",
             risk_factors=["Coordination complexity", "IP sharing concerns"],
             recommended_approach="Joint venture with phased integration",
-            time_sensitivity="High - window closing in 6 months"
+            time_sensitivity="High - window closing in 6 months",
         ),
         PartnershipOpportunity(
             opportunity_id="partner_002",
@@ -326,24 +354,30 @@ def find_partnership_opportunities(domain: str, capabilities: List[str]) -> List
             potential_value="Access to EU government contracts",
             risk_factors=["Bureaucratic processes", "Political changes"],
             recommended_approach="Formal membership with active participation",
-            time_sensitivity="Medium - application window quarterly"
+            time_sensitivity="Medium - application window quarterly",
         ),
         PartnershipOpportunity(
             opportunity_id="partner_003",
             partner="Global Defense Tech Alliance",
             opportunity_type="Strategic Alliance",
             strategic_fit_score=0.75,
-            synergy_areas=["Defense market access", "Security certifications", "Technology sharing"],
+            synergy_areas=[
+                "Defense market access",
+                "Security certifications",
+                "Technology sharing",
+            ],
             potential_value="Entry to $500B defense market",
             risk_factors=["Compliance requirements", "Geopolitical sensitivity"],
             recommended_approach="Associate membership with gradual escalation",
-            time_sensitivity="Low - ongoing opportunity"
-        )
+            time_sensitivity="Low - ongoing opportunity",
+        ),
     ]
     return opportunities
 
 
-def generate_scenarios(base_conditions: Dict[str, Any], variables: List[str], count: int) -> List[Scenario]:
+def generate_scenarios(
+    base_conditions: dict[str, Any], variables: list[str], count: int
+) -> list[Scenario]:
     """Generate strategic scenarios"""
     scenarios = [
         Scenario(
@@ -354,25 +388,25 @@ def generate_scenarios(base_conditions: Dict[str, Any], variables: List[str], co
             impact_assessment={
                 "revenue_growth": 8.5,
                 "market_share": 7.0,
-                "competitive_position": 9.0
+                "competitive_position": 9.0,
             },
             key_assumptions=[
                 "Favorable regulatory environment",
                 "Strong economic growth",
-                "Continued AI advancement"
+                "Continued AI advancement",
             ],
             trigger_events=[
                 "Major government AI initiative",
                 "Competitor market exit",
-                "Technology breakthrough"
+                "Technology breakthrough",
             ],
             recommended_preparations=[
                 "Scale infrastructure capacity",
                 "Accelerate hiring",
-                "Expand partnership network"
+                "Expand partnership network",
             ],
             opportunities=["Market leadership", "Premium pricing", "Talent attraction"],
-            risks=["Overextension", "Quality dilution", "Competitor response"]
+            risks=["Overextension", "Quality dilution", "Competitor response"],
         ),
         Scenario(
             scenario_id="scenario_baseline",
@@ -382,25 +416,25 @@ def generate_scenarios(base_conditions: Dict[str, Any], variables: List[str], co
             impact_assessment={
                 "revenue_growth": 5.0,
                 "market_share": 5.0,
-                "competitive_position": 6.0
+                "competitive_position": 6.0,
             },
             key_assumptions=[
                 "Stable regulatory environment",
                 "Moderate economic conditions",
-                "Continued technology evolution"
+                "Continued technology evolution",
             ],
             trigger_events=[
                 "Normal market dynamics",
                 "Gradual customer adoption",
-                "Incremental competitor moves"
+                "Incremental competitor moves",
             ],
             recommended_preparations=[
                 "Maintain operational excellence",
                 "Focus on core competencies",
-                "Build selective partnerships"
+                "Build selective partnerships",
             ],
             opportunities=["Sustainable growth", "Customer deepening", "Operational efficiency"],
-            risks=["Disruption vulnerability", "Talent attrition", "Market stagnation"]
+            risks=["Disruption vulnerability", "Talent attrition", "Market stagnation"],
         ),
         Scenario(
             scenario_id="scenario_pessimistic",
@@ -410,31 +444,31 @@ def generate_scenarios(base_conditions: Dict[str, Any], variables: List[str], co
             impact_assessment={
                 "revenue_growth": -2.0,
                 "market_share": 3.0,
-                "competitive_position": 4.0
+                "competitive_position": 4.0,
             },
             key_assumptions=[
                 "Restrictive regulations",
                 "Economic downturn",
-                "Disruptive technology shifts"
+                "Disruptive technology shifts",
             ],
             trigger_events=[
                 "Major regulatory change",
                 "Economic crisis",
-                "Competitor breakthrough"
+                "Competitor breakthrough",
             ],
             recommended_preparations=[
                 "Build cash reserves",
                 "Diversify revenue streams",
-                "Develop contingency plans"
+                "Develop contingency plans",
             ],
             opportunities=["Market consolidation", "Distressed acquisitions", "Pivot potential"],
-            risks=["Revenue decline", "Talent loss", "Market position erosion"]
-        )
+            risks=["Revenue decline", "Talent loss", "Market position erosion"],
+        ),
     ]
     return scenarios[:count]
 
 
-def generate_strategic_recommendations(analysis: Dict[str, Any]) -> List[StrategicRecommendation]:
+def generate_strategic_recommendations(analysis: dict[str, Any]) -> list[StrategicRecommendation]:
     """Generate prescriptive strategic recommendations"""
     recommendations = [
         StrategicRecommendation(
@@ -444,10 +478,14 @@ def generate_strategic_recommendations(analysis: Dict[str, Any]) -> List[Strateg
             priority=1,
             confidence=0.90,
             expected_outcome="Technology leadership and talent attraction",
-            resources_required=["$5M initial investment", "15 senior AI researchers", "Cloud infrastructure"],
+            resources_required=[
+                "$5M initial investment",
+                "15 senior AI researchers",
+                "Cloud infrastructure",
+            ],
             timeline="12-18 months to full operation",
             success_metrics=["Patent filings", "Research publications", "Product innovations"],
-            dependencies=["Talent acquisition", "Infrastructure", "Leadership commitment"]
+            dependencies=["Talent acquisition", "Infrastructure", "Leadership commitment"],
         ),
         StrategicRecommendation(
             recommendation_id="rec_002",
@@ -456,10 +494,18 @@ def generate_strategic_recommendations(analysis: Dict[str, Any]) -> List[Strateg
             priority=1,
             confidence=0.85,
             expected_outcome="Regulatory compliance and government market access",
-            resources_required=["$10M infrastructure investment", "Regulatory partnerships", "Security certifications"],
+            resources_required=[
+                "$10M infrastructure investment",
+                "Regulatory partnerships",
+                "Security certifications",
+            ],
             timeline="18-24 months for full compliance",
-            success_metrics=["Certifications obtained", "Government contracts", "Data sovereignty compliance"],
-            dependencies=["Regulatory approval", "Infrastructure build-out", "Partner agreements"]
+            success_metrics=[
+                "Certifications obtained",
+                "Government contracts",
+                "Data sovereignty compliance",
+            ],
+            dependencies=["Regulatory approval", "Infrastructure build-out", "Partner agreements"],
         ),
         StrategicRecommendation(
             recommendation_id="rec_003",
@@ -468,10 +514,14 @@ def generate_strategic_recommendations(analysis: Dict[str, Any]) -> List[Strateg
             priority=2,
             confidence=0.80,
             expected_outcome="Market access expansion and capability enhancement",
-            resources_required=["Partnership team expansion", "Investment budget", "Executive engagement"],
+            resources_required=[
+                "Partnership team expansion",
+                "Investment budget",
+                "Executive engagement",
+            ],
             timeline="6-12 months for initial partnerships",
             success_metrics=["Partnerships signed", "Joint revenue", "Market reach expansion"],
-            dependencies=["Executive sponsorship", "Legal framework", "Value proposition clarity"]
+            dependencies=["Executive sponsorship", "Legal framework", "Value proposition clarity"],
         ),
         StrategicRecommendation(
             recommendation_id="rec_004",
@@ -482,19 +532,28 @@ def generate_strategic_recommendations(analysis: Dict[str, Any]) -> List[Strateg
             expected_outcome="Early threat detection and strategic response capability",
             resources_required=["Intelligence platform", "Analyst team", "Data subscriptions"],
             timeline="3-6 months for deployment",
-            success_metrics=["Threat detection rate", "Response time", "Strategic decisions informed"],
-            dependencies=["Platform selection", "Team training", "Data access"]
-        )
+            success_metrics=[
+                "Threat detection rate",
+                "Response time",
+                "Strategic decisions informed",
+            ],
+            dependencies=["Platform selection", "Team training", "Data access"],
+        ),
     ]
     return recommendations
 
 
 # ============ API Endpoints ============
 
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
-    return {"status": "healthy", "service": "strategic-foresight", "timestamp": datetime.utcnow().isoformat()}
+    return {
+        "status": "healthy",
+        "service": "strategic-foresight",
+        "timestamp": datetime.utcnow().isoformat(),
+    }
 
 
 @app.get("/metrics")
@@ -511,6 +570,7 @@ async def analyze_foresight(request: ForesightAnalysisRequest):
     Returns trends, threats, partnerships, scenarios, and recommendations.
     """
     import time
+
     start_time = time.time()
 
     REQUESTS.labels(method="POST", endpoint="/analyze").inc()
@@ -519,35 +579,39 @@ async def analyze_foresight(request: ForesightAnalysisRequest):
         # Generate analysis components
         trends = analyze_market_trends(request.domain, request.time_horizon)
         threats = identify_competitive_threats(request.competitors, request.domain)
-        partnerships = find_partnership_opportunities(request.domain, request.focus_areas) if request.include_partnerships else []
+        partnerships = (
+            find_partnership_opportunities(request.domain, request.focus_areas)
+            if request.include_partnerships
+            else []
+        )
         scenarios = generate_scenarios({}, request.focus_areas, request.scenario_count)
-        recommendations = generate_strategic_recommendations({
-            "trends": trends,
-            "threats": threats,
-            "partnerships": partnerships
-        })
+        recommendations = generate_strategic_recommendations(
+            {"trends": trends, "threats": threats, "partnerships": partnerships}
+        )
 
         # Generate executive summary
         executive_summary = f"""
 Strategic Foresight Analysis for {request.domain}
 
 Key Findings:
-- {len(trends)} significant trends identified with average confidence of {sum(t.confidence for t in trends)/len(trends):.0%}
+- {len(trends)} significant trends identified with average confidence of {sum(t.confidence for t in trends) / len(trends):.0%}
 - {len([t for t in threats if t.threat_level in [ThreatLevel.HIGH, ThreatLevel.CRITICAL]])} high-priority competitive threats requiring attention
-- {len(partnerships)} partnership opportunities with combined strategic fit score of {sum(p.strategic_fit_score for p in partnerships)/max(len(partnerships), 1):.0%}
+- {len(partnerships)} partnership opportunities with combined strategic fit score of {sum(p.strategic_fit_score for p in partnerships) / max(len(partnerships), 1):.0%}
 - {len(scenarios)} scenarios developed for strategic planning
 - {len([r for r in recommendations if r.priority == 1])} priority-1 recommendations for immediate action
 
-Top Recommendation: {recommendations[0].title if recommendations else 'None'}
-Primary Threat: {threats[0].competitor if threats else 'None identified'}
-Best Partnership Opportunity: {partnerships[0].partner if partnerships else 'None identified'}
+Top Recommendation: {recommendations[0].title if recommendations else "None"}
+Primary Threat: {threats[0].competitor if threats else "None identified"}
+Best Partnership Opportunity: {partnerships[0].partner if partnerships else "None identified"}
         """.strip()
 
         processing_time = (time.time() - start_time) * 1000
 
         # Track predictions
         for trend in trends:
-            conf_level = "high" if trend.confidence > 0.8 else "medium" if trend.confidence > 0.6 else "low"
+            conf_level = (
+                "high" if trend.confidence > 0.8 else "medium" if trend.confidence > 0.6 else "low"
+            )
             PREDICTIONS.labels(prediction_type="trend", confidence_level=conf_level).inc()
 
         return ForesightAnalysisResponse(
@@ -560,11 +624,11 @@ Best Partnership Opportunity: {partnerships[0].partner if partnerships else 'Non
             scenarios=scenarios,
             recommendations=recommendations,
             executive_summary=executive_summary,
-            processing_time_ms=processing_time
+            processing_time_ms=processing_time,
         )
 
 
-@app.post("/trends", response_model=List[TrendPrediction])
+@app.post("/trends", response_model=list[TrendPrediction])
 async def get_trends(signal: MarketSignal):
     """Get market trend predictions"""
     REQUESTS.labels(method="POST", endpoint="/trends").inc()
@@ -572,31 +636,33 @@ async def get_trends(signal: MarketSignal):
         return analyze_market_trends(signal.domain, signal.time_horizon)
 
 
-@app.post("/threats", response_model=List[CompetitiveThreat])
-async def get_threats(competitors: List[str], domain: str = "technology"):
+@app.post("/threats", response_model=list[CompetitiveThreat])
+async def get_threats(competitors: list[str], domain: str = "technology"):
     """Identify competitive threats"""
     REQUESTS.labels(method="POST", endpoint="/threats").inc()
     with DURATION.labels(endpoint="/threats").time():
         return identify_competitive_threats(competitors, domain)
 
 
-@app.post("/partnerships", response_model=List[PartnershipOpportunity])
-async def get_partnerships(domain: str, capabilities: List[str] = []):
+@app.post("/partnerships", response_model=list[PartnershipOpportunity])
+async def get_partnerships(domain: str, capabilities: list[str] = []):
     """Find partnership opportunities"""
     REQUESTS.labels(method="POST", endpoint="/partnerships").inc()
     with DURATION.labels(endpoint="/partnerships").time():
         return find_partnership_opportunities(domain, capabilities)
 
 
-@app.post("/scenarios", response_model=List[Scenario])
+@app.post("/scenarios", response_model=list[Scenario])
 async def get_scenarios(request: ScenarioRequest):
     """Generate strategic scenarios"""
     REQUESTS.labels(method="POST", endpoint="/scenarios").inc()
     with DURATION.labels(endpoint="/scenarios").time():
-        return generate_scenarios(request.base_conditions, request.variables, request.scenario_count)
+        return generate_scenarios(
+            request.base_conditions, request.variables, request.scenario_count
+        )
 
 
-@app.post("/pivots", response_model=List[PivotOpportunity])
+@app.post("/pivots", response_model=list[PivotOpportunity])
 async def get_pivot_opportunities(request: PivotAnalysisRequest):
     """Analyze pivot opportunities"""
     REQUESTS.labels(method="POST", endpoint="/pivots").inc()
@@ -611,7 +677,7 @@ async def get_pivot_opportunities(request: PivotAnalysisRequest):
                 capability_gap=["Government compliance expertise", "Security certifications"],
                 timeline="12-18 months",
                 risks=["Regulatory hurdles", "Long sales cycles", "Competitor entrenchment"],
-                success_factors=["Strong partnerships", "Proven technology", "Domain expertise"]
+                success_factors=["Strong partnerships", "Proven technology", "Domain expertise"],
             ),
             PivotOpportunity(
                 pivot_id="pivot_002",
@@ -622,7 +688,7 @@ async def get_pivot_opportunities(request: PivotAnalysisRequest):
                 capability_gap=["Multi-language support", "International partnerships"],
                 timeline="18-24 months",
                 risks=["Geopolitical complexity", "Data sovereignty issues", "Trust building"],
-                success_factors=["NATO partnerships", "Compliance frameworks", "Track record"]
+                success_factors=["NATO partnerships", "Compliance frameworks", "Track record"],
             ),
             PivotOpportunity(
                 pivot_id="pivot_003",
@@ -633,13 +699,14 @@ async def get_pivot_opportunities(request: PivotAnalysisRequest):
                 capability_gap=["Commercial sales capability", "Enterprise integrations"],
                 timeline="6-12 months",
                 risks=["Brand positioning", "Competitive intensity", "Feature requirements"],
-                success_factors=["Product-market fit", "Sales team", "Customer success"]
-            )
+                success_factors=["Product-market fit", "Sales team", "Customer success"],
+            ),
         ]
         return pivots
 
 
 if __name__ == "__main__":
     import uvicorn
+
     port = int(os.getenv("PORT", 8003))
     uvicorn.run(app, host="0.0.0.0", port=port)

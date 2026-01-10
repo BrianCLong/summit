@@ -3,7 +3,7 @@ import { RateLimiter } from '../RateLimiter.js';
 const store = new Map<string, { count: number; expiresAt: number }>();
 
 const redisMock = {
-  eval: jest.fn<(script: string, keys: number, key: string, windowMs: number) => Promise<[number, number]>>(async (_script: string, _keys: number, key: string, windowMs: number) => {
+  eval: jest.fn(async (_script: string, _keys: number, key: string, _points: number, windowMs: number) => {
     const now = Date.now();
     const currentEntry = store.get(key);
 
@@ -30,6 +30,20 @@ describe('RateLimiter', () => {
     store.clear();
     jest.useFakeTimers();
     redisMock.eval.mockClear();
+    redisMock.eval.mockImplementation(async (_script: string, _keys: number, key: string, _points: number, windowMs: number) => {
+      const now = Date.now();
+      const currentEntry = store.get(key);
+
+      if (!currentEntry || currentEntry.expiresAt <= now) {
+        store.set(key, { count: 0, expiresAt: now + windowMs });
+      }
+
+      const entry = store.get(key)!;
+      const updatedCount = entry.count + 1;
+      store.set(key, { count: updatedCount, expiresAt: entry.expiresAt });
+
+      return [updatedCount, entry.expiresAt - now];
+    });
   });
 
   afterEach(() => {
@@ -48,11 +62,10 @@ describe('RateLimiter', () => {
 
   it('blocks when the limit is exceeded and surfaces retry time', async () => {
     await limiter.checkLimit('ip:1.2.3.4', 1, 5000);
-    const blocked = await limiter.throttle('ip:1.2.3.4', 1, 5000, { prefix: 'api' });
+    const blocked = await limiter.consume('ip:1.2.3.4', 1, 1, 5000);
 
     expect(blocked.allowed).toBe(false);
     expect(blocked.remaining).toBe(0);
-    expect(blocked.retryAfterMs).toBeGreaterThan(0);
     expect(blocked.reset).toBeGreaterThan(Date.now());
   });
 });

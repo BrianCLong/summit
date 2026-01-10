@@ -11,18 +11,28 @@ type AwaitedEvent<T> = Promise<T>;
 const waitForEvent = <T>(
   socket: ClientSocket,
   event: string,
+  timeoutMs = 5000,
 ): AwaitedEvent<T> =>
-  new Promise((resolve) => {
-    socket.once(event, (payload: T) => resolve(payload));
+  new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error(`Timed out waiting for ${event}`));
+    }, timeoutMs);
+    socket.once(event, (payload: T) => {
+      clearTimeout(timeout);
+      resolve(payload);
+    });
   });
 
-describe('CollaborationHub realtime flows', () => {
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('CollaborationHub realtime flows', () => {
   let httpServer: HttpServer;
   let ioServer: Server;
   let port: number;
 
   const connectClient = async (): Promise<ClientSocket> => {
-    const socket = Client(`http://localhost:${port}/collaboration`, {
+    const socket = Client(`http://127.0.0.1:${port}/collaboration`, {
       transports: ['websocket'],
       autoConnect: true,
     });
@@ -64,7 +74,7 @@ describe('CollaborationHub realtime flows', () => {
     createCollaborationHub(ioServer, { activityLimit: 20 });
 
     await new Promise<void>((resolve) => {
-      httpServer.listen(() => {
+      httpServer.listen(0, '127.0.0.1', () => {
         port = (httpServer.address() as AddressInfo).port;
         resolve();
       });

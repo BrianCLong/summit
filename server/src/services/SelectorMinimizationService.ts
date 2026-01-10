@@ -12,7 +12,7 @@ import logger from '../utils/logger.js';
 import { CircuitBreaker } from '../utils/CircuitBreaker.js';
 import { getRedisClient } from '../db/redis.js';
 import { getPostgresPool } from '../db/postgres.js';
-import { advancedAuditSystem } from '../audit/advanced-audit-system.js';
+import { advancedAuditSystem } from '../audit/index.js';
 import * as crypto from 'crypto';
 
 // ============================================================================

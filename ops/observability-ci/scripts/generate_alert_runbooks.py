@@ -5,9 +5,9 @@ from __future__ import annotations
 
 import argparse
 import json
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 import yaml
 
@@ -71,9 +71,7 @@ def validate_alerts(alerts: Iterable[AlertRule]) -> None:
             missing_fields.append(f"expr missing for alert {alert.name!r}")
 
     if missing_fields:
-        raise SystemExit(
-            "Invalid alert definitions: " + "; ".join(sorted(set(missing_fields)))
-        )
+        raise SystemExit("Invalid alert definitions: " + "; ".join(sorted(set(missing_fields))))
 
 
 def serialize_payload(alert: AlertRule) -> str:
@@ -117,16 +115,12 @@ def build_runbook(alerts: Iterable[AlertRule]) -> str:
                     "**One-click remediation**:",
                     (
                         "```bash\n"
-                        "./ops/observability-ci/scripts/one-click-remediation.sh \""
-                        f"{alert.name}\"\n"
+                        './ops/observability-ci/scripts/one-click-remediation.sh "'
+                        f'{alert.name}"\n'
                         "```"
                     ),
                     "**Verification hook**:",
-                    (
-                        "```bash\n"
-                        "make -C ops/observability-ci smoke\n"
-                        "```"
-                    ),
+                    ("```bash\nmake -C ops/observability-ci smoke\n```"),
                 ]
             )
         )
@@ -159,9 +153,7 @@ def ensure_payloads_current(alerts: Iterable[AlertRule], output_dir: Path) -> No
 
     missing = sorted(set(expected) - set(actual))
     extra = sorted(set(actual) - set(expected))
-    stale = sorted(
-        name for name, content in expected.items() if actual.get(name) != content
-    )
+    stale = sorted(name for name, content in expected.items() if actual.get(name) != content)
 
     issues: list[str] = []
     if missing:

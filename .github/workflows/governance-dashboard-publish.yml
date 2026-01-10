@@ -1,0 +1,128 @@
+name: Governance Dashboard Publish
+
+# Generates and publishes the governance dashboard to GitHub Pages
+# Provides a live view of governance posture
+#
+# Authority: docs/ci/GOVERNANCE_LOCKFILE.md
+
+on:
+  # Run after policy validation completes
+  workflow_run:
+    workflows: ["Governance Policy Validation", "Governance Drift Check"]
+    types: [completed]
+
+  # Run on policy file changes
+  push:
+    branches: [main]
+    paths:
+      - "docs/ci/*.yml"
+      - "docs/ci/*.yaml"
+      - "docs/releases/_state/*.json"
+      - "scripts/release/render_governance_dashboard.sh"
+
+  # Run daily
+  schedule:
+    - cron: "0 12 * * *" # 12:00 UTC daily
+
+  # Manual trigger
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: governance-dashboard
+  cancel-in-progress: true
+
+jobs:
+  generate-dashboard:
+    name: Generate Governance Dashboard
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Dependencies
+        run: pip install pyyaml
+
+      - name: Make Scripts Executable
+        run: chmod +x scripts/release/*.sh
+
+      - name: Generate HTML Dashboard
+        run: |
+          mkdir -p site/governance
+
+          # Generate HTML dashboard
+          ./scripts/release/render_governance_dashboard.sh \
+            --format html \
+            --out-file site/governance/index.html \
+            --verbose
+
+          # Generate JSON for API consumers
+          ./scripts/release/render_governance_dashboard.sh \
+            --format json \
+            --out-file site/governance/status.json
+
+          # Generate markdown for archival
+          ./scripts/release/render_governance_dashboard.sh \
+            --format md \
+            --out-file site/governance/README.md
+
+          echo "Dashboard generated:"
+          ls -la site/governance/
+
+      - name: Generate Dashboard Summary
+        run: |
+          # Extract key metrics for summary
+          STATUS=$(jq -r '.validation.status // "unknown"' site/governance/status.json)
+          POLICIES=$(jq -r '.policy_inventory | length' site/governance/status.json)
+          FREEZE=$(jq -r '.state_flags.freeze_mode' site/governance/status.json)
+          HASH=$(jq -r '.governance_hash[:16]' site/governance/status.json)
+
+          echo "## Governance Dashboard Generated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Validation Status | ${STATUS} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Policy Files | ${POLICIES} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Freeze Mode | ${FREEZE} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Governance Hash | ${HASH}... |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "[View Dashboard](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/governance/)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Dashboard Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-dashboard-${{ github.run_number }}
+          path: site/governance/
+          retention-days: 30
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/governance/
+
+  deploy-dashboard:
+    name: Deploy to Pages
+    needs: generate-dashboard
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages

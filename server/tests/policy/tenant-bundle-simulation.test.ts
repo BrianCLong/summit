@@ -95,6 +95,15 @@ describe('tenant policy bundle simulation', () => {
           patches: [
             {
               op: 'set',
+              path: '/tenantIsolation',
+              value: {
+                enabled: true,
+                allowCrossTenant: true,
+                actions: [],
+              },
+            },
+            {
+              op: 'set',
               path: '/crossTenant',
               value: {
                 mode: 'allowlist',

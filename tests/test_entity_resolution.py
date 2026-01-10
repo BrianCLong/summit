@@ -12,6 +12,7 @@ sys.modules["prometheus_client"] = MagicMock()
 # Now import the class to test
 from entity_resolution import EntityResolutionEngine
 
+
 def test_entity_resolution_resolve():
     # Setup mocks
     mock_redis = MagicMock()
@@ -56,6 +57,7 @@ def test_entity_resolution_resolve():
 
             # Verify Neo4j update called
             assert mock_neo4j.create_or_update_entity.call_count == 2
+
 
 def test_entity_resolution_no_cluster():
     # Setup mocks

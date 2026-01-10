@@ -108,3 +108,13 @@ updates:
     groups:
       minor-and-patch:
         update-types: ["minor", "patch"]
+
+  # Python pip
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]

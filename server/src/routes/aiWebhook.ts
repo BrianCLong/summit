@@ -2,7 +2,7 @@ import { Router } from 'express';
 import crypto from 'crypto';
 import { pubsub } from '../realtime/pubsub.js';
 import { randomUUID as uuid } from 'node:crypto';
-import { logger } from '../logger.js';
+import { logger } from '../utils/logger.js';
 import { createRouteRateLimitMiddleware } from '../middleware/rateLimit.js';
 
 const router = Router();

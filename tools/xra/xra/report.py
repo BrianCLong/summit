@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from datetime import datetime
 from pathlib import Path
-from typing import Iterable, List
 
 from .explanations import Explanation
 
 
 def _format_metric_table(metrics: dict, key: str) -> str:
-    rows: List[str] = []
+    rows: list[str] = []
     rows.append("| k | Baseline | Candidate | Δ |")
     rows.append("|---|----------|-----------|---|")
     for k in metrics["k_values"]:
@@ -22,10 +22,12 @@ def _format_metric_table(metrics: dict, key: str) -> str:
 
 
 def _format_alerts(alerts: Iterable[dict]) -> str:
-    content: List[str] = []
+    content: list[str] = []
     for alert in alerts:
         details = ", ".join(
-            f"{name}={value}" for name, value in alert.items() if name not in {"type", "severity", "message"}
+            f"{name}={value}"
+            for name, value in alert.items()
+            if name not in {"type", "severity", "message"}
         )
         meta = f"**{alert['severity'].upper()}** – {alert['message']}"
         if details:
@@ -47,8 +49,8 @@ def generate_markdown_report(
     timestamp = datetime.utcnow().isoformat(timespec="seconds") + "Z"
     exposure = metrics["baseline"]["exposure"], metrics["candidate"]["exposure"]
     report = [
-        f"# Explainable Ranking Audit", 
-        "", 
+        "# Explainable Ranking Audit",
+        "",
         f"- Generated: {timestamp}",
         f"- Baseline version: **{baseline_version}**",
         f"- Candidate version: **{candidate_version}**",
@@ -95,7 +97,9 @@ def generate_markdown_report(
         if explanation.shap_contributions:
             report.append("| Feature | Contribution |")
             report.append("|---------|--------------|")
-            for name, value in sorted(explanation.shap_contributions.items(), key=lambda item: -abs(item[1])):
+            for name, value in sorted(
+                explanation.shap_contributions.items(), key=lambda item: -abs(item[1])
+            ):
                 report.append(f"| {name} | {value:+.4f} |")
         else:
             report.append("(No feature contributions available.)")
@@ -103,7 +107,9 @@ def generate_markdown_report(
         if explanation.ablation_effects:
             report.append("| Feature | Score delta |")
             report.append("|---------|-------------|")
-            for name, value in sorted(explanation.ablation_effects.items(), key=lambda item: -abs(item[1])):
+            for name, value in sorted(
+                explanation.ablation_effects.items(), key=lambda item: -abs(item[1])
+            ):
                 report.append(f"| {name} | {value:+.4f} |")
         else:
             report.append("(No ablation effects computed.)")

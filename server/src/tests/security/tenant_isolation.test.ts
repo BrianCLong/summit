@@ -2,8 +2,9 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { OPAMiddleware } from '../../middleware/opa.js';
 
 // Mock axios
-const mockPost = jest.fn();
+const mockPost: any = jest.fn();
 jest.mock('axios', () => ({
+  __esModule: true,
   default: {
     post: (...args: unknown[]) => mockPost(...args),
     get: jest.fn(),
@@ -17,7 +18,8 @@ jest.mock('../../config/database.js', () => ({
 
 // Mock logger
 jest.mock('../../utils/logger.js', () => ({
-  default: { error: jest.fn(), warn: jest.fn(), info: jest.fn() }
+  __esModule: true,
+  default: { error: jest.fn(), warn: jest.fn(), info: jest.fn() },
 }));
 
 // Mock audit

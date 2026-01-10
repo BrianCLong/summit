@@ -22,6 +22,14 @@ make bootstrap && make up && make smoke
 
 This sequence is our contract. If it passes, your environment is healthy.
 
+## 🔖 Contribution Playbooks
+
+For ready-to-use templates that keep issues and PRs crisp, copy the relevant playbook from **[Contribution Playbooks](docs/CONTRIBUTION_PLAYBOOKS.md)**:
+
+- **Feature**: scope, rollout, observability, and Definition of Done checklists.
+- **Bugfix**: reproduction, guardrails, regression coverage, and backport plan.
+- **Documentation**: audience, coverage, link verification, and asset expectations.
+
 ## 🛠 Development Workflow
 
 ### 1. Issue & Branching
@@ -48,12 +56,6 @@ This sequence is our contract. If it passes, your environment is healthy.
 - Fill out the PR template completely.
 - Ensure all CI checks pass (Lint, Unit, Golden Path).
 
-### 4. Release Rules
-
-- Releases are only cut from `main`.
-- Tags must be `vX.Y.Z` or `vX.Y.Z-rc.N`.
-- Tag versions must match the `package.json` versions in the repository.
-
 ## 🤖 Guidelines for External Contributors (Bots & Co-authors)
 
 We welcome contributions from AI agents and automated systems. To reduce friction and ensure safety, please follow these rules:
@@ -61,9 +63,10 @@ We welcome contributions from AI agents and automated systems. To reduce frictio
 ### For AI Agents & Bots
 
 1.  **Read the Instructions**: You **MUST** read and adhere to [`AGENTS.md`](AGENTS.md). It contains specific directives for code generation, architectural boundaries, and prohibited actions.
-2.  **Sign Your Work**: All commits must be signed.
-3.  **Context Awareness**: Do not hallucinate dependencies or APIs. Verify existence before importing.
-4.  **No-Op Changes**: If you need to force a review on an existing file without functional changes, add a non-breaking comment or whitespace change to trigger the diff.
+2.  **Honor the Quality Charter**: Follow the Agent Quality Charter (in `AGENTS.md`)—no debug print statements or commented-out code; run `pnpm format:check` and `pnpm lint` (treat warnings as failures) locally before opening a PR.
+3.  **Sign Your Work**: All commits must be signed.
+4.  **Context Awareness**: Do not hallucinate dependencies or APIs. Verify existence before importing.
+5.  **No-Op Changes**: If you need to force a review on an existing file without functional changes, add a non-breaking comment or whitespace change to trigger the diff.
 
 ### Co-authoring
 
@@ -84,8 +87,13 @@ Major architectural changes are reviewed by our internal "Council of Solvers" (a
 
 ## 📦 Release Cadence & CI/CD
 
-- **Release Preflight**: Releases must be cut from the `main` branch. The tag version must match the version in `package.json` and all workspaces exactly.
-- **Release Captain**: Our automated Release Captain ("Jules") manages the merge train and release tagging.
+- **Release Cadence**: Weekly cut to staging each Tuesday 18:00 UTC; production releases every other Thursday after a 48-hour soak and green merge-train. Emergencies use the hotfix path below.
+- **Branch Policies**:
+  - `main` is always deployable and protected (PR + CI required; no direct commits).
+  - Short-lived work branches follow `type/scope/description` (e.g., `feat/ingest/add-rss-connector`, `fix/api/auth-refresh`), rebased on `main` before merging.
+  - Release branches use `release/vX.Y` when stabilization is needed; only cherry-picked fixes and release-note updates land there.
+  - Hotfixes branch from `main` as `hotfix/<issue>` and are cherry-picked onto the active `release/vX.Y` branch after verification.
+- **Release Captain**: Our automated Release Captain ("Jules") manages the merge train, tagging, and release freezes during incidents.
 - **Sprints**: We operate on a sprint cadence (currently Q4 2025 Strategic Sprints).
 - **CI Gates**:
   - **Fast Lane**: Lint & Unit tests (blocking).

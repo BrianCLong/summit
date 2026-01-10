@@ -66,10 +66,13 @@ describe('WebSocketConnectionPool', () => {
     );
 
     expect(managed.getState()).toBe(ConnectionState.CONNECTED);
-    expect(ws.messages).toHaveLength(0);
+    const initialMessages = ws.messages.filter(
+      (msg) => !msg.includes('connection_ack'),
+    );
+    expect(initialMessages).toHaveLength(0);
 
     pool.send('tenantA@userA', JSON.stringify({ type: 'initial' }));
-    expect(ws.messages).toHaveLength(1);
+    expect(ws.messages).toHaveLength(2);
 
     pool.handleNetworkChange('offline');
     expect(managed.getState()).toBe(ConnectionState.RECONNECTING);
@@ -153,7 +156,7 @@ describe('WebSocketConnectionPool', () => {
       JSON.stringify({ type: 'burst-1' }),
     );
     expect(firstSend).toBe(false);
-    expect(managed.getQueueSize()).toBe(1);
+    expect(managed.getQueueSize()).toBe(2);
 
     ws.bufferedAmount = 0;
     const secondSend = pool.send(
@@ -161,7 +164,7 @@ describe('WebSocketConnectionPool', () => {
       JSON.stringify({ type: 'burst-2' }),
     );
     expect(secondSend).toBe(false);
-    expect(managed.getQueueSize()).toBe(2);
+    expect(managed.getQueueSize()).toBe(3);
 
     jest.advanceTimersByTime(1000);
     jest.runOnlyPendingTimers();

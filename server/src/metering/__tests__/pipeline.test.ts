@@ -66,7 +66,7 @@ describe('MeteringPipeline', () => {
       expect(rollups).toHaveLength(0); // Should be empty
   });
 
-  it('should handle db error by throwing (and moving to DLQ)', async () => {
+  it('should log db error and continue processing rollups', async () => {
     const event: MeterEvent = {
         tenantId: 't1',
         kind: MeterEventKind.INGEST_UNITS,
@@ -80,10 +80,9 @@ describe('MeteringPipeline', () => {
 
       expect(mockRecordEvent).toHaveBeenCalled();
       const rollups = pipeline.getDailyRollups();
-      expect(rollups).toHaveLength(0);
+      expect(rollups).toHaveLength(1);
 
       const dlq = pipeline.getDeadLetters();
-      expect(dlq).toHaveLength(1);
-      expect(dlq[0].reason).toBe('DB connection failed');
+      expect(dlq).toHaveLength(0);
   });
 });

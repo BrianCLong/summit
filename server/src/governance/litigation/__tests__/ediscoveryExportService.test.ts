@@ -46,7 +46,9 @@ describe('EDiscoveryExportService', () => {
     const result = await service.exportDataset(scope, records);
 
     expect(fs.existsSync(result.manifest.payloadPath)).toBe(true);
-    const payload = await fsp.readFile(result.manifest.payloadPath, 'utf8');
+    const payload = (await fsp.readFile(result.manifest.payloadPath, {
+      encoding: 'utf8',
+    })) as unknown as string;
     const computedHash = crypto
       .createHash('sha256')
       .update(await fsp.readFile(result.manifest.payloadPath))
@@ -55,9 +57,10 @@ describe('EDiscoveryExportService', () => {
     expect(result.manifest.recordCount).toBe(2);
 
     const artifact = registry.getArtifact(result.evidenceArtifact.id);
-    expect(artifact?.hash).toBe(result.manifest.checksum);
+    expect(artifact?.hash).toBe(artifact?.custodyTrail[0].checksum);
     expect(artifact?.custodyTrail).toHaveLength(2);
     expect(artifact?.custodyTrail[1].eventType).toBe('exported');
+    expect(artifact?.custodyTrail[1].checksum).toBe(result.manifest.checksum);
 
     const lines = payload.trim().split('\n');
     expect(lines).toHaveLength(2);

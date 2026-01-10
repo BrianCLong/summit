@@ -1,4 +1,5 @@
 """Webhook delivery engine with persistence, retries, and observability."""
+
 from __future__ import annotations
 
 import datetime as dt
@@ -7,10 +8,11 @@ import hmac
 import json
 import sqlite3
 import time
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import Enum
 from time import perf_counter
-from typing import Any, Mapping, Protocol
+from typing import Any, Protocol
 
 
 class DeliveryStatus(str, Enum):
@@ -55,8 +57,7 @@ class DeliveryAttempt:
 
 
 class HttpClient(Protocol):
-    def post(self, url: str, headers: Mapping[str, str], body: bytes) -> "HttpResponse":
-        ...
+    def post(self, url: str, headers: Mapping[str, str], body: bytes) -> HttpResponse: ...
 
 
 @dataclass(frozen=True)
@@ -283,7 +284,9 @@ class DeliveryStore:
             last_error=row["last_error"],
         )
 
-    def due_deliveries(self, as_of: dt.datetime | None = None, limit: int = 50) -> list[WebhookDelivery]:
+    def due_deliveries(
+        self, as_of: dt.datetime | None = None, limit: int = 50
+    ) -> list[WebhookDelivery]:
         boundary = as_of or dt.datetime.utcnow()
         cursor = self._conn.cursor()
         rows = cursor.execute(
@@ -417,7 +420,9 @@ class WebhookWorker:
         )
         self.metrics.record_success(duration_ms)
 
-    def _handle_failure(self, delivery: WebhookDelivery, status_code: int, duration_ms: float, error: str) -> None:
+    def _handle_failure(
+        self, delivery: WebhookDelivery, status_code: int, duration_ms: float, error: str
+    ) -> None:
         attempts = delivery.attempt_count + 1
         next_attempt_at: dt.datetime | None
         new_status: DeliveryStatus

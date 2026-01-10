@@ -3,9 +3,8 @@ Tests for Strategic Foresight AI Suite
 """
 
 import pytest
+from app import app
 from fastapi.testclient import TestClient
-
-from app import app, TimeHorizon, TrendType, ThreatLevel
 
 
 @pytest.fixture
@@ -29,14 +28,17 @@ class TestHealthEndpoints:
 
 class TestForesightAnalysis:
     def test_analyze_basic(self, client):
-        response = client.post("/analyze", json={
-            "domain": "technology",
-            "focus_areas": ["AI", "cloud"],
-            "competitors": ["CompetitorA", "CompetitorB"],
-            "time_horizon": "medium_term",
-            "scenario_count": 3,
-            "include_partnerships": True
-        })
+        response = client.post(
+            "/analyze",
+            json={
+                "domain": "technology",
+                "focus_areas": ["AI", "cloud"],
+                "competitors": ["CompetitorA", "CompetitorB"],
+                "time_horizon": "medium_term",
+                "scenario_count": 3,
+                "include_partnerships": True,
+            },
+        )
         assert response.status_code == 200
         data = response.json()
 
@@ -51,18 +53,15 @@ class TestForesightAnalysis:
         assert data["processing_time_ms"] > 0
 
     def test_analyze_minimal(self, client):
-        response = client.post("/analyze", json={
-            "domain": "finance"
-        })
+        response = client.post("/analyze", json={"domain": "finance"})
         assert response.status_code == 200
         data = response.json()
         assert data["domain"] == "finance"
 
     def test_analyze_without_partnerships(self, client):
-        response = client.post("/analyze", json={
-            "domain": "defense",
-            "include_partnerships": False
-        })
+        response = client.post(
+            "/analyze", json={"domain": "defense", "include_partnerships": False}
+        )
         assert response.status_code == 200
         data = response.json()
         assert len(data["partnerships"]) == 0
@@ -70,11 +69,14 @@ class TestForesightAnalysis:
 
 class TestTrends:
     def test_get_trends(self, client):
-        response = client.post("/trends", json={
-            "domain": "healthcare",
-            "indicators": ["AI adoption", "digital health"],
-            "time_horizon": "long_term"
-        })
+        response = client.post(
+            "/trends",
+            json={
+                "domain": "healthcare",
+                "indicators": ["AI adoption", "digital health"],
+                "time_horizon": "long_term",
+            },
+        )
         assert response.status_code == 200
         trends = response.json()
 
@@ -88,9 +90,7 @@ class TestTrends:
 
 class TestThreats:
     def test_get_threats(self, client):
-        response = client.post("/threats?domain=technology", json=[
-            "Microsoft", "Google", "Amazon"
-        ])
+        response = client.post("/threats?domain=technology", json=["Microsoft", "Google", "Amazon"])
         assert response.status_code == 200
         threats = response.json()
 
@@ -116,11 +116,14 @@ class TestPartnerships:
 
 class TestScenarios:
     def test_get_scenarios(self, client):
-        response = client.post("/scenarios", json={
-            "base_conditions": {"market": "growing"},
-            "variables": ["regulation", "competition", "technology"],
-            "scenario_count": 3
-        })
+        response = client.post(
+            "/scenarios",
+            json={
+                "base_conditions": {"market": "growing"},
+                "variables": ["regulation", "competition", "technology"],
+                "scenario_count": 3,
+            },
+        )
         assert response.status_code == 200
         scenarios = response.json()
 
@@ -133,11 +136,14 @@ class TestScenarios:
 
 class TestPivots:
     def test_get_pivot_opportunities(self, client):
-        response = client.post("/pivots", json={
-            "current_position": "Enterprise software",
-            "capabilities": ["AI/ML", "Cloud", "Security"],
-            "market_signals": ["Government digitization", "Defense modernization"]
-        })
+        response = client.post(
+            "/pivots",
+            json={
+                "current_position": "Enterprise software",
+                "capabilities": ["AI/ML", "Cloud", "Security"],
+                "market_signals": ["Government digitization", "Defense modernization"],
+            },
+        )
         assert response.status_code == 200
         pivots = response.json()
 
@@ -150,11 +156,14 @@ class TestPivots:
 
 class TestValidation:
     def test_invalid_scenario_count(self, client):
-        response = client.post("/scenarios", json={
-            "base_conditions": {},
-            "variables": ["x"],
-            "scenario_count": 20  # Max is 10
-        })
+        response = client.post(
+            "/scenarios",
+            json={
+                "base_conditions": {},
+                "variables": ["x"],
+                "scenario_count": 20,  # Max is 10
+            },
+        )
         assert response.status_code == 422
 
     def test_missing_required_field(self, client):

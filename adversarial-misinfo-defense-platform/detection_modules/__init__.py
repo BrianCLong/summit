@@ -10,10 +10,10 @@ from .text_detector import TextDetector
 from .video_detector import VideoDetector
 
 __all__ = [
-    "TextDetector",
-    "ImageDetector",
     "AudioDetector",
-    "VideoDetector",
-    "MemeDetector",
     "DeepfakeDetector",
+    "ImageDetector",
+    "MemeDetector",
+    "TextDetector",
+    "VideoDetector",
 ]

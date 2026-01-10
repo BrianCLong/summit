@@ -12,8 +12,8 @@ jobs:
     outputs:
       hashes: ${{ steps.slsa-subjects.outputs.hashes }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 18.x
       - uses: pnpm/action-setup@v4
@@ -27,7 +27,7 @@ jobs:
         id: slsa-subjects
         run: |
           echo "hashes=$(base64 -w0 dist/checksums.txt)" >> "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: summit-artifacts
           path: |
@@ -40,7 +40,7 @@ jobs:
       actions: read
       id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.10.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
     with:
       base64-subjects: "${{ needs.build.outputs.hashes }}"
       upload-assets: true
@@ -52,12 +52,12 @@ jobs:
     needs: [provenance]
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: summit-artifacts
           path: dist
       - name: Download provenance attestation
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: slsa-attestation
           path: provenance

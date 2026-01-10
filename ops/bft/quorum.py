@@ -15,7 +15,7 @@ import random
 import time
 import uuid
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
 
@@ -82,9 +82,9 @@ class BFTWriteFencing:
         self.current_epoch: EpochState | None = None
         self.pending_writes: dict[str, WriteOperation] = {}
         self.confirmed_writes: set[str] = set()
-        self.region_status: dict[str, RegionStatus] = {
-            region: RegionStatus.HEALTHY for region in all_regions
-        }
+        self.region_status: dict[str, RegionStatus] = dict.fromkeys(
+            all_regions, RegionStatus.HEALTHY
+        )
 
         # Signing key for votes (in production: HSM)
         self.signing_key = f"bft-{region_id}-key".encode()
@@ -144,7 +144,7 @@ class BFTWriteFencing:
             epoch_id=epoch_id,
             sequence_number=(self.current_epoch.sequence_number + 1) if self.current_epoch else 1,
             committee=committee,
-            start_time=datetime.now(timezone.utc).isoformat(),
+            start_time=datetime.now(UTC).isoformat(),
             votes=[],
             confirmed=False,
             arbitration_log=[],
@@ -174,7 +174,7 @@ class BFTWriteFencing:
             "epoch_id": self.current_epoch.epoch_id,
             "voter_region": self.region_id,
             "vote_type": "commit",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "write_id": operation.write_id,
         }
 
@@ -247,7 +247,7 @@ class BFTWriteFencing:
                 "epoch_id": self.current_epoch.epoch_id,
                 "voter_region": region,
                 "vote_type": vote_type,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             }
 
             # Simulate signing with region's key
@@ -314,7 +314,7 @@ class BFTWriteFencing:
                 operation_type="test_write",
                 data_hash=hashlib.sha256(f"chaos-{time.time()}".encode()).hexdigest()[:16],
                 residency_zone="us-east-1",
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                timestamp=datetime.now(UTC).isoformat(),
                 proposer_region=self.region_id,
             )
 
@@ -392,7 +392,7 @@ async def main():
             operation_type="data_update",
             data_hash=hashlib.sha256(f"test-data-{i}".encode()).hexdigest()[:16],
             residency_zone="us-east-1",
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             proposer_region="us-east-1",
         )
 

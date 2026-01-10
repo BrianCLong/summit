@@ -316,7 +316,7 @@ export class AgentClient {
       throw new Error(`Remote agent creation failed: ${response.statusText}`);
     }
 
-    const { id } = await response.json();
+    const { id } = await response.json() as { id: string };
 
     // Poll for completion
     const pollInterval = options.pollInterval || 1000;
@@ -387,7 +387,7 @@ export class AgentClient {
   private async executeEnrichmentAgent(
     config: AgentConfig,
     status: AgentStatus,
-    options: SpinOptions
+    _options: SpinOptions
   ): Promise<unknown> {
     this.addLog(status, 'info', 'Running enrichment agent');
     status.progress = 25;
@@ -412,7 +412,7 @@ export class AgentClient {
   private async executeAnalysisAgent(
     config: AgentConfig,
     status: AgentStatus,
-    options: SpinOptions
+    _options: SpinOptions
   ): Promise<unknown> {
     this.addLog(status, 'info', 'Running analysis agent');
     status.progress = 20;
@@ -437,7 +437,7 @@ export class AgentClient {
   private async executeCorrelationAgent(
     config: AgentConfig,
     status: AgentStatus,
-    options: SpinOptions
+    _options: SpinOptions
   ): Promise<unknown> {
     this.addLog(status, 'info', 'Running correlation agent');
     status.progress = 15;
@@ -462,7 +462,7 @@ export class AgentClient {
   private async executeReportAgent(
     config: AgentConfig,
     status: AgentStatus,
-    options: SpinOptions
+    _options: SpinOptions
   ): Promise<unknown> {
     this.addLog(status, 'info', 'Running report agent');
     status.progress = 20;

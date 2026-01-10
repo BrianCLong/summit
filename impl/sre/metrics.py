@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import List
+
 from .models import Episode
+
 
 class Metric(ABC):
     @property
@@ -13,6 +14,7 @@ class Metric(ABC):
         """Returns a scalar score for the episode."""
         pass
 
+
 class TraceLengthMetric(Metric):
     @property
     def name(self) -> str:
@@ -20,6 +22,7 @@ class TraceLengthMetric(Metric):
 
     def compute(self, episode: Episode) -> float:
         return float(len(episode.graph.nodes))
+
 
 class ToolEfficiencyMetric(Metric):
     @property
@@ -35,6 +38,7 @@ class ToolEfficiencyMetric(Metric):
         # For now, just a placeholder ratio of unique tools to total calls
         unique_tools = set(n.metadata.get("tool_name", "unknown") for n in tool_calls)
         return len(unique_tools) / len(tool_calls)
+
 
 class ExactMatchMetric(Metric):
     @property

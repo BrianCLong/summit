@@ -3,16 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 
 from .constraints import (
     ConstraintSet,
-    CorrelationConstraint,
-    MarginalConstraint,
-    DenialConstraint,
 )
 
 
@@ -21,12 +17,12 @@ class VerificationReport:
     """Results returned by :class:`ConstraintVerifier`."""
 
     success: bool
-    marginal_distances: Dict[str, float]
-    correlation_deltas: Dict[Tuple[str, str], float]
-    denial_violations: Dict[str, float]
+    marginal_distances: dict[str, float]
+    correlation_deltas: dict[tuple[str, str], float]
+    denial_violations: dict[str, float]
     privacy_risk: float
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "success": self.success,
             "marginals": self.marginal_distances,
@@ -50,7 +46,7 @@ class ConstraintVerifier:
     def verify(
         self,
         synthetic: pd.DataFrame,
-        reference: Optional[pd.DataFrame] = None,
+        reference: pd.DataFrame | None = None,
     ) -> VerificationReport:
         marginal_distances = self._check_marginals(synthetic)
         correlation_deltas = self._check_correlations(synthetic)
@@ -85,8 +81,8 @@ class ConstraintVerifier:
             privacy_risk=float(privacy_risk),
         )
 
-    def _check_marginals(self, synthetic: pd.DataFrame) -> Dict[str, float]:
-        distances: Dict[str, float] = {}
+    def _check_marginals(self, synthetic: pd.DataFrame) -> dict[str, float]:
+        distances: dict[str, float] = {}
         for column, constraint in self.constraints.marginals.items():
             if column not in synthetic.columns or synthetic[column].empty:
                 continue
@@ -99,21 +95,26 @@ class ConstraintVerifier:
             distances[column] = float(distance)
         return distances
 
-    def _check_correlations(self, synthetic: pd.DataFrame) -> Dict[Tuple[str, str], float]:
-        deltas: Dict[Tuple[str, str], float] = {}
+    def _check_correlations(self, synthetic: pd.DataFrame) -> dict[tuple[str, str], float]:
+        deltas: dict[tuple[str, str], float] = {}
         for constraint in self.constraints.correlations:
-            if constraint.column_x not in synthetic.columns or constraint.column_y not in synthetic.columns:
+            if (
+                constraint.column_x not in synthetic.columns
+                or constraint.column_y not in synthetic.columns
+            ):
                 continue
             series_x = synthetic[constraint.column_x].astype(float)
             series_y = synthetic[constraint.column_y].astype(float)
             observed = series_x.corr(series_y)
             if pd.isna(observed):
                 observed = 0.0
-            deltas[(constraint.column_x, constraint.column_y)] = float(abs(observed - constraint.target))
+            deltas[(constraint.column_x, constraint.column_y)] = float(
+                abs(observed - constraint.target)
+            )
         return deltas
 
-    def _check_denials(self, synthetic: pd.DataFrame) -> Dict[str, float]:
-        violations: Dict[str, float] = {}
+    def _check_denials(self, synthetic: pd.DataFrame) -> dict[str, float]:
+        violations: dict[str, float] = {}
         for constraint in self.constraints.denial_constraints:
             try:
                 mask = synthetic.eval(constraint.predicate)
@@ -126,7 +127,7 @@ class ConstraintVerifier:
     def _compute_privacy_risk(
         self,
         synthetic: pd.DataFrame,
-        reference: Optional[pd.DataFrame],
+        reference: pd.DataFrame | None,
     ) -> float:
         if reference is None or reference.empty:
             # Proxy using duplicate rate in the synthetic data.
@@ -137,10 +138,10 @@ class ConstraintVerifier:
         matches = sum(1 for key in synthetic_keys if key in reference_keys)
         return matches / max(len(synthetic_keys), 1)
 
-    def _hash_rows(self, frame: pd.DataFrame) -> set[Tuple[object, ...]]:
+    def _hash_rows(self, frame: pd.DataFrame) -> set[tuple[object, ...]]:
         hashes = set()
         for _, row in frame.iterrows():
-            normalized: Tuple[object, ...] = tuple(self._normalize_value(value) for value in row)
+            normalized: tuple[object, ...] = tuple(self._normalize_value(value) for value in row)
             hashes.add(normalized)
         return hashes
 

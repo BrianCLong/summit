@@ -8,6 +8,7 @@ packages:
   - 'libs/*/node'
   - 'client'
   - 'server'
+  - 'cli'
   - 'tools/*'
   - 'devtools/*'
   - 'prov-ledger-service'

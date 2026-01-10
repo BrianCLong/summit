@@ -142,7 +142,6 @@ class CostController:
         config: CostConfig = None,
         storage_paths: list[str] | None = None,
     ):
-
         self.limits = limits or ResourceLimits()
         self.config = config or CostConfig()
         self.storage_paths = storage_paths or ["./data"]

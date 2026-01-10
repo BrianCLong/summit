@@ -179,14 +179,14 @@ class OpaPolicyEngine {
       );
 
       // Fail-safe: deny by default
-      const decision = {
+      const decision: PolicyDecision = {
         allow: false,
         reason: `Policy evaluation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         reasons: ['opa_error'],
         attrsUsed: this.defaultAttrsUsed(context),
         policyBundleVersion,
         auditLog: {
-          logLevel: 'error',
+          logLevel: 'error' as const,
           message: 'OPA policy evaluation failure',
           metadata: {
             error: error instanceof Error ? error.message : 'Unknown error',

@@ -88,7 +88,7 @@ describe('Plugin Sandbox & Marketplace Isolation', () => {
   test('Should allow network access with capability', async () => {
     // Mock global fetch for the test runner environment
     const originalFetch = global.fetch;
-    global.fetch = jest.fn().mockResolvedValue('ok');
+    global.fetch = jest.fn(() => Promise.resolve('ok')) as unknown as typeof fetch;
 
     const pkg = createPackage(`return await fetch('https://google.com');`, [{ type: 'network.outbound' }]);
     const id = 'network-pass-' + randomUUID();
@@ -157,6 +157,6 @@ describe('Plugin Sandbox & Marketplace Isolation', () => {
     // Deactivate
     marketplace.disableKillSwitch('admin');
     const result = await runPlugin(id, { x: 1 });
-    expect(result).toBe(2); // assuming code is 'return inputs.x + 1' but here it is 'return 1' which ignores input
+    expect(result).toBe(1);
   });
 });

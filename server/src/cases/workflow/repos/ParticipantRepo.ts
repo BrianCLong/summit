@@ -339,7 +339,7 @@ export class ParticipantRepo {
 
   // ==================== MAPPERS ====================
 
-  private mapParticipantRow(row): CaseParticipant {
+  private mapParticipantRow(row: any): CaseParticipant {
     return {
       id: row.id,
       caseId: row.case_id,
@@ -354,7 +354,7 @@ export class ParticipantRepo {
     };
   }
 
-  private mapRoleRow(row): CaseRole {
+  private mapRoleRow(row: any): CaseRole {
     return {
       id: row.id,
       name: row.name,

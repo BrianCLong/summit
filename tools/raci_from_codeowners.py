@@ -76,7 +76,7 @@ def generate_raci_markdown(owner_mapping: dict[str, list[str]]) -> str:
                 f"`{area}`" for area in areas[:3]
             )  # Limit to first 3 for readability
             if len(areas) > 3:
-                area_list += f" (+{len(areas)-3} more)"
+                area_list += f" (+{len(areas) - 3} more)"
 
             # Determine scope based on patterns
             scope = "Specific" if any("/" in area for area in areas) else "Broad"

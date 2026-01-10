@@ -1,27 +1,28 @@
 from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import Dict, List, Any, Optional
+
 from .graph import ExperimentGraph
 from .schemas import Node
 
 
 @dataclass
 class StageConstraint:
-    max_runs: Optional[int] = None
-    required_metrics: Dict[str, float] = field(default_factory=dict)
+    max_runs: int | None = None
+    required_metrics: dict[str, float] = field(default_factory=dict)
 
 
 @dataclass
 class CurriculumStage:
     name: str
-    goals: List[str]
+    goals: list[str]
     constraints: StageConstraint
     description: str = ""
 
 
 @dataclass
 class Curriculum:
-    stages: List[CurriculumStage]
+    stages: list[CurriculumStage]
     current_index: int = 0
 
     @property
@@ -32,12 +33,12 @@ class Curriculum:
         """
         `eval_selector(graph) -> List[Node]` returns eval nodes with metrics.
         """
-        eval_nodes: List[Node] = eval_selector(graph)
+        eval_nodes: list[Node] = eval_selector(graph)
         if not eval_nodes:
             return False
 
         # Simple policy: check required_metrics against best eval.
-        best_metrics: Dict[str, float] = {}
+        best_metrics: dict[str, float] = {}
         for node in eval_nodes:
             metrics = node.payload.get("metrics", {})
             for k, v in metrics.items():

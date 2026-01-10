@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import tempfile
+import unittest
 from datetime import datetime, timedelta
 from pathlib import Path
-import unittest
 
 from ops.toil import (
     AlertMetadata,
@@ -55,7 +55,9 @@ class ToilSystemTest(unittest.TestCase):
             )
         metrics = self.diary.on_call_load()
         self.assertGreater(metrics["pages_per_week"], 0)
-        breaches = self.diary.budget_breaches([ToilBudget(team="sre", max_hours_per_person=5, team_size=1)])
+        breaches = self.diary.budget_breaches(
+            [ToilBudget(team="sre", max_hours_per_person=5, team_size=1)]
+        )
         self.assertIn("sre", breaches)
         top = self.diary.rank_top_drivers(limit=1)[0]
         self.assertEqual(top[0], "search_latency")
@@ -103,7 +105,9 @@ class ToilSystemTest(unittest.TestCase):
         self.assertEqual(len(self.exceptions.exceptions), 0)
 
     def test_chatops_rbac_and_remediation(self) -> None:
-        result = self.chatops.run_command("retry_job", user_role="sre", target="job123", dry_run=True)
+        result = self.chatops.run_command(
+            "retry_job", user_role="sre", target="job123", dry_run=True
+        )
         self.assertTrue(result.dry_run)
         with self.assertRaises(PolicyViolation):
             self.chatops.run_command("retry_job", user_role="guest", target="job123")
@@ -183,4 +187,3 @@ class ToilSystemTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

@@ -2,7 +2,7 @@ import { emitAuditEvent } from '../audit/emit.js';
 import { ReceiptService } from '../services/ReceiptService.js';
 import { AuditService } from '../services/security/AuditService.js';
 import { loadPolicyBundleFromDisk, policyBundleStore } from './bundleStore.js';
-import { areRampConfigsEqual, normalizeRampConfig } from './ramp.js';
+import { areRampConfigsEqual, normalizeRampConfig, type RampConfig } from './ramp.js';
 
 function assertHotReloadEnabled() {
   const enabled = (process.env.POLICY_HOT_RELOAD || '').toLowerCase() === 'true';
@@ -21,8 +21,8 @@ export class PolicyHotReloadService {
     before?: unknown;
     after?: unknown;
   }) {
-    const before = normalizeRampConfig(params.before as any);
-    const after = normalizeRampConfig(params.after as any);
+    const before = normalizeRampConfig(params.before as Partial<RampConfig> | undefined);
+    const after = normalizeRampConfig(params.after as Partial<RampConfig> | undefined);
     if (areRampConfigsEqual(before, after)) return;
 
     const receiptService = ReceiptService.getInstance();
@@ -49,8 +49,8 @@ export class PolicyHotReloadService {
         digest: params.digest,
         signatureVerified: params.signatureVerified,
       },
-      before: before as Record<string, unknown>,
-      after: after as Record<string, unknown>,
+      before: before as unknown as Record<string, unknown>,
+      after: after as unknown as Record<string, unknown>,
     });
   }
 

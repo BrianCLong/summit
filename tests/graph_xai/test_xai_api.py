@@ -16,7 +16,6 @@ from graph_xai.xai_api import (
 
 
 class TestXaiApiStubs(unittest.TestCase):
-
     def test_generate_counterfactuals(self):
         result = generate_counterfactuals({}, "node1", "positive")
         self.assertIsInstance(result, list)

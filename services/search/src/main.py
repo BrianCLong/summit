@@ -5,9 +5,10 @@ import random
 import statistics
 import time
 from collections import Counter, defaultdict, deque
+from collections.abc import Iterable
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Any, Iterable, Literal
+from typing import Any, Literal
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -282,7 +283,11 @@ class IndexRegistry:
 
     def reset(self) -> None:
         self.indices = {
-            "primary": {"documents": deepcopy(self.base_documents), "last_seq": 0, "health": "green"},
+            "primary": {
+                "documents": deepcopy(self.base_documents),
+                "last_seq": 0,
+                "health": "green",
+            },
         }
         self.active_label = "primary"
         self.previous_label = None
@@ -445,7 +450,9 @@ class ReindexPipeline:
         candidate = self.registry.candidate_label
         remaining = 0
         if self.job:
-            remaining = len([event for event in self.events if event.sequence > self.job.last_processed_seq])
+            remaining = len(
+                [event for event in self.events if event.sequence > self.job.last_processed_seq]
+            )
         return ReindexStatus(
             activeIndex=active,
             candidateIndex=candidate,
@@ -517,7 +524,9 @@ class SearchEngine:
 
     def suggest(self, prefix: str, language: str = "any", limit: int = 5) -> list[Suggestion]:
         filtered_docs = [
-            doc for doc in self.index_registry.active_documents() if language == "any" or doc["language"] == language
+            doc
+            for doc in self.index_registry.active_documents()
+            if language == "any" or doc["language"] == language
         ]
         candidates: list[Suggestion] = []
         prefix_lower = prefix.lower()
@@ -593,7 +602,11 @@ class SearchEngine:
             },
         )
         hits = [
-            SearchHit(id=str(doc.get("id")), score=float(doc.get("_matchesPosition", {}).get("text", [{}])[0].get("start", 1)), source=doc)
+            SearchHit(
+                id=str(doc.get("id")),
+                score=float(doc.get("_matchesPosition", {}).get("text", [{}])[0].get("start", 1)),
+                source=doc,
+            )
             for doc in response.get("hits", [])
         ]
         facets = [
@@ -659,28 +672,35 @@ class SearchEngine:
         clauses: list[str] = []
         for key, value in filters.items():
             if isinstance(value, list):
-                clauses.append(" OR ".join([f"{key} = {repr(v)}" for v in value]))
+                clauses.append(" OR ".join([f"{key} = {v!r}" for v in value]))
             else:
-                clauses.append(f"{key} = {repr(value)}")
+                clauses.append(f"{key} = {value!r}")
         return clauses
 
     @staticmethod
     def _parse_es_facets(aggregations: dict[str, Any]) -> list[FacetResult]:
         facets: list[FacetResult] = []
         for key, agg in aggregations.items():
-            buckets = {bucket.get("key"): bucket.get("doc_count", 0) for bucket in agg.get("buckets", [])}
+            buckets = {
+                bucket.get("key"): bucket.get("doc_count", 0) for bucket in agg.get("buckets", [])
+            }
             facets.append(FacetResult(field=key, counts=buckets))
         return facets
 
     def _search_mock(self, request: QueryRequest) -> BackendSearchResult:
-        filtered = self._apply_filters(self.index_registry.active_documents(), request.filters, request.language)
+        filtered = self._apply_filters(
+            self.index_registry.active_documents(), request.filters, request.language
+        )
         scored = list(self._score_documents(filtered, request))
         if request.seed is not None:
             rng = random.Random(request.seed)
             rng.shuffle(scored)
         else:
             scored.sort(key=lambda item: item[1], reverse=True)
-        hits = [SearchHit(id=doc["id"], score=score, source=doc) for doc, score in scored[: request.size]]
+        hits = [
+            SearchHit(id=doc["id"], score=score, source=doc)
+            for doc, score in scored[: request.size]
+        ]
         facets = self._facet_counts(filtered, request.facets)
         suggestions = self.suggest(request.query, request.language)
         return BackendSearchResult(
@@ -692,7 +712,9 @@ class SearchEngine:
         )
 
     @staticmethod
-    def _apply_filters(documents: Iterable[dict[str, Any]], filters: dict[str, Any] | None, language: str) -> list[dict[str, Any]]:
+    def _apply_filters(
+        documents: Iterable[dict[str, Any]], filters: dict[str, Any] | None, language: str
+    ) -> list[dict[str, Any]]:
         results: list[dict[str, Any]] = []
         for doc in documents:
             if language != "any" and doc.get("language") != language:
@@ -701,7 +723,9 @@ class SearchEngine:
                 failed = False
                 for key, value in filters.items():
                     if isinstance(value, list):
-                        if doc.get(key) not in value and not set(value).intersection(set(doc.get(key, []))):
+                        if doc.get(key) not in value and not set(value).intersection(
+                            set(doc.get(key, []))
+                        ):
                             failed = True
                             break
                     elif doc.get(key) != value and value not in doc.get(key, []):
@@ -713,7 +737,9 @@ class SearchEngine:
         return results
 
     @staticmethod
-    def _score_documents(documents: Iterable[dict[str, Any]], request: QueryRequest) -> Iterable[tuple[dict[str, Any], float]]:
+    def _score_documents(
+        documents: Iterable[dict[str, Any]], request: QueryRequest
+    ) -> Iterable[tuple[dict[str, Any], float]]:
         query_lower = request.query.lower()
         for doc in documents:
             text = f"{doc.get('title', '')} {doc.get('text', '')}".lower()
@@ -727,7 +753,9 @@ class SearchEngine:
                 field_value = doc.get(field)
                 if isinstance(field_value, str) and field_value.lower().find(query_lower) >= 0:
                     boost_factor += weight
-                if isinstance(field_value, list) and query_lower in [item.lower() for item in field_value]:
+                if isinstance(field_value, list) and query_lower in [
+                    item.lower() for item in field_value
+                ]:
                     boost_factor += weight
             yield doc, min(1.0, overlap * boost_factor)
 
@@ -737,7 +765,9 @@ class SearchEngine:
             return 0.0
         if query in text:
             return 0.9
-        proximity = sum(1 for token in text.split() if token.startswith(query[: max(1, len(query) - fuzziness)]))
+        proximity = sum(
+            1 for token in text.split() if token.startswith(query[: max(1, len(query) - fuzziness)])
+        )
         return min(0.85, 0.3 + (proximity / max(1, len(text.split()))))
 
     @staticmethod
@@ -768,7 +798,15 @@ reindex_pipeline = ReindexPipeline(registry=index_registry, feature_flags=featur
 async def search(request: Request, query: QueryRequest) -> QueryResponse:
     tenant_id = request.headers.get("x-tenant-id", "anonymous")
     start = time.perf_counter()
-    audit_logger.info("query", extra={"q": query.query, "filters": query.filters, "backend": query.backend, "tenant": tenant_id})
+    audit_logger.info(
+        "query",
+        extra={
+            "q": query.query,
+            "filters": query.filters,
+            "backend": query.backend,
+            "tenant": tenant_id,
+        },
+    )
     result = search_engine.search(query)
     took_ms = int((time.perf_counter() - start) * 1000)
     analytics.record_query(tenant_id, query, took_ms)

@@ -5,7 +5,7 @@ import pytest
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 
-from prompt_engineering import PromptEngineer, PromptTuning  # noqa: E402
+from prompt_engineering import PromptEngineer, PromptTuning
 
 
 def test_build_payload_includes_sections():

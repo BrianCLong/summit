@@ -1,35 +1,36 @@
 import json
-import os
 import sys
+
 
 def parse_trivy(filepath):
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath) as f:
             data = json.load(f)
 
         count = 0
-        if 'Results' in data:
-            for result in data['Results']:
-                if 'Secrets' in result:
-                    count += len(result['Secrets'])
+        if "Results" in data:
+            for result in data["Results"]:
+                if "Secrets" in result:
+                    count += len(result["Secrets"])
         return {"count": count}
     except FileNotFoundError:
-        return {"count": 0} # Assume 0 if not run or no secrets found (if file missing? risky)
+        return {"count": 0}  # Assume 0 if not run or no secrets found (if file missing? risky)
     except Exception as e:
         print(f"Error parsing Trivy: {e}", file=sys.stderr)
         return {"count": 0}
 
+
 def parse_grype(filepath):
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath) as f:
             data = json.load(f)
 
         # Count High/Critical
         count = 0
-        if 'matches' in data:
-            for match in data['matches']:
-                severity = match.get('vulnerability', {}).get('severity', 'UNKNOWN')
-                if severity in ['CRITICAL', 'HIGH']:
+        if "matches" in data:
+            for match in data["matches"]:
+                severity = match.get("vulnerability", {}).get("severity", "UNKNOWN")
+                if severity in ["CRITICAL", "HIGH"]:
                     count += 1
         return {"critical_vulns": count}
     except FileNotFoundError:
@@ -37,6 +38,7 @@ def parse_grype(filepath):
     except Exception as e:
         print(f"Error parsing Grype: {e}", file=sys.stderr)
         return {"critical_vulns": 0}
+
 
 def main():
     trivy_file = "trivy-results.json"
@@ -49,12 +51,12 @@ def main():
     # Simple parsing of freeze mode
     freeze_mode = "advisory"
     try:
-        with open(trust_policy_file, 'r') as f:
+        with open(trust_policy_file) as f:
             for line in f:
                 if "freeze_mode:" in line:
                     parts = line.split(":", 1)
                     if len(parts) > 1:
-                        val = parts[1].strip().split()[0].replace('"', '').replace("'", "")
+                        val = parts[1].strip().split()[0].replace('"', "").replace("'", "")
                         if val == "blocking":
                             freeze_mode = "blocking"
     except:
@@ -63,17 +65,14 @@ def main():
     output = {
         "secrets_scan": secrets,
         "sbom": {"vulns": vulns},
-        "authz_check": {"violations": 0}, # Placeholder until real AuthZ scanner integrated
+        "authz_check": {"violations": 0},  # Placeholder until real AuthZ scanner integrated
         "export_check": {"violations": 0},
         "dlp_check": {"violations": 0},
-        "trust_policy": {
-            "ga_gate": {
-                "freeze_mode": freeze_mode
-            }
-        }
+        "trust_policy": {"ga_gate": {"freeze_mode": freeze_mode}},
     }
 
     print(json.dumps(output, indent=2))
+
 
 if __name__ == "__main__":
     main()

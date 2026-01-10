@@ -19,8 +19,8 @@ describe('NetworkSecurityService', () => {
     it('should detect malicious traffic', async () => {
         const maliciousFlows = service.generateMockTraffic(100, true);
 
-        const anomalyPromise = new Promise((resolve) => {
-            service.once('anomaly', (result) => {
+    const anomalyPromise = new Promise<unknown>((resolve) => {
+            service.once('anomaly', (result: unknown) => {
                 resolve(result);
             });
         });
@@ -59,8 +59,8 @@ describe('NetworkSecurityService', () => {
     it('should detect DDoS volume', async () => {
         const ddosFlows: TrafficFlow[] = [];
         const now = Date.now();
-        // Create 200 very short, high packet rate flows
-        for (let i = 0; i < 200; i++) {
+        // Keep below batch size to avoid auto-flush before analyzeNow
+        for (let i = 0; i < 90; i++) {
              ddosFlows.push({
                 flowId: `ddos-${i}`,
                 sourceIp: `1.2.3.${i}`, // Distributed

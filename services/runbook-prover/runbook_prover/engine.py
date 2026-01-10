@@ -1,12 +1,12 @@
 import json
 import uuid
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 import yaml
 
 from .actions import ActionRegistry
-from .models import RunState, RunbookSpec, StepResult, StepSpec, utcnow_iso
+from .models import RunbookSpec, RunState, StepResult, StepSpec, utcnow_iso
 from .proof import emit_proof_bundle
 from .storage import Storage
 
@@ -19,7 +19,7 @@ class RunbookEngine:
         self.actions = ActionRegistry(base_path)
 
     def load_spec(self, path: Path) -> RunbookSpec:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             data = yaml.safe_load(f) if path.suffix in {".yaml", ".yml"} else json.load(f)
         steps = [
             StepSpec(
@@ -41,7 +41,7 @@ class RunbookEngine:
             steps=steps,
         )
 
-    def parameter_diff(self, provided: Dict[str, Any], defaults: Dict[str, Any]) -> Dict[str, Any]:
+    def parameter_diff(self, provided: dict[str, Any], defaults: dict[str, Any]) -> dict[str, Any]:
         diff = {}
         for key, default_value in defaults.items():
             if provided.get(key) != default_value:
@@ -51,7 +51,7 @@ class RunbookEngine:
                 diff[key] = {"provided": value, "default": None}
         return diff
 
-    def init_state(self, spec: RunbookSpec, params: Dict[str, Any]) -> RunState:
+    def init_state(self, spec: RunbookSpec, params: dict[str, Any]) -> RunState:
         run_id = uuid.uuid4().hex[:10]
         now = utcnow_iso()
         steps = {
@@ -76,7 +76,7 @@ class RunbookEngine:
             context={},
         )
 
-    def run(self, runbook_path: Path, params: Dict[str, Any], resume_run_id: str = "") -> RunState:
+    def run(self, runbook_path: Path, params: dict[str, Any], resume_run_id: str = "") -> RunState:
         spec = self.load_spec(runbook_path)
         if resume_run_id:
             state = self.storage.load_run(resume_run_id)
@@ -115,9 +115,9 @@ class RunbookEngine:
         finally:
             step_state.finished_at = utcnow_iso()
 
-    def _topological_sort(self, steps: List[StepSpec]) -> List[StepSpec]:
-        resolved: List[str] = []
-        ordered: List[StepSpec] = []
+    def _topological_sort(self, steps: list[StepSpec]) -> list[StepSpec]:
+        resolved: list[str] = []
+        ordered: list[StepSpec] = []
         steps_by_id = {s.id: s for s in steps}
 
         def visit(step_id: str):
@@ -134,7 +134,7 @@ class RunbookEngine:
         return ordered
 
 
-def dataclass_to_dict(spec: RunbookSpec) -> Dict[str, Any]:
+def dataclass_to_dict(spec: RunbookSpec) -> dict[str, Any]:
     return {
         "id": spec.id,
         "name": spec.name,

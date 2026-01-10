@@ -1,4 +1,5 @@
-import { PrivacyIncidentDrillEngine, defaultScenario } from '@server/pits';
+import { PrivacyIncidentDrillEngine } from '../src/pits/engine';
+import { defaultScenario } from '../src/pits/defaultScenario';
 import { describe, it, expect } from '@jest/globals';
 
 describe('PrivacyIncidentDrillEngine', () => {
@@ -39,7 +40,7 @@ describe('PrivacyIncidentDrillEngine', () => {
     for (const breach of report.slaBreaches) {
       expect(breach.recommendedAction).toMatch(/\d+(\.\d+)?h/);
       const matchingTimeline = report.timeline.find(
-        (entry) => entry.eventId === breach.eventId,
+        (entry: { eventId: string }) => entry.eventId === breach.eventId,
       );
       expect(matchingTimeline?.status).toBe('breached');
     }

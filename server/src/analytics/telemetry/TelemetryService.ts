@@ -9,12 +9,16 @@ export class TelemetryService {
   private scrubber: TelemetryScrubber;
   private logStream: fs.WriteStream | null = null;
   private currentLogFile: string = '';
+  private enabled: boolean;
 
   constructor(config: TelemetryConfig) {
     this.config = config;
+    this.enabled = config.enabled ?? true;
     this.scrubber = new TelemetryScrubber(config.salt);
-    this.ensureLogDir();
-    this.rotateLog();
+    if (this.enabled) {
+      this.ensureLogDir();
+      this.rotateLog();
+    }
   }
 
   private ensureLogDir() {
@@ -77,6 +81,9 @@ export class TelemetryService {
   }
 
   private writeEvent(event: TelemetryEvent) {
+    if (!this.enabled) {
+      return;
+    }
     // Ensure we are writing to the correct day's log
     this.rotateLog();
 
@@ -95,6 +102,7 @@ export class TelemetryService {
 const config: TelemetryConfig = {
   salt: process.env.TELEMETRY_SALT || 'development_salt',
   logDir: process.env.TELEMETRY_LOG_DIR || path.join(process.cwd(), 'logs', 'telemetry'),
+  enabled: process.env.DISABLE_TELEMETRY !== 'true',
 };
 
 export const telemetryService = new TelemetryService(config);

@@ -3,15 +3,17 @@ from __future__ import annotations
 import csv
 import io
 import json
+import time
 from collections import defaultdict
-from typing import Any, Dict, Iterator, cast
+from collections.abc import Iterator
+from typing import Any, cast
 
 import requests  # type: ignore[import-untyped]
 
+from .cost import emit_cost_event
 from .models import EventEnvelope, IngestJobRequest, JobStatus
 from .pii import apply_redaction, detect_pii
 from .redis_stream import RedisStream
-from .cost import emit_cost_event
 
 try:  # Lazy import to keep ingest lightweight when ML stack is absent in tests
     from ml.app.pipelines import PostgresPreprocessingPipeline
@@ -24,11 +26,11 @@ async def _load_source(req: IngestJobRequest) -> str:
         resp = requests.get(req.source, timeout=10)
         resp.raise_for_status()
         return cast(str, resp.text)
-    with open(req.source, "r", encoding="utf-8") as f:
+    with open(req.source, encoding="utf-8") as f:
         return f.read()
 
 
-def _iter_records(req: IngestJobRequest, raw: str) -> Iterator[Dict[str, Any]]:
+def _iter_records(req: IngestJobRequest, raw: str) -> Iterator[dict[str, Any]]:
     if req.source_type == "csv":
         reader = csv.DictReader(io.StringIO(raw))
         for row in reader:
@@ -44,16 +46,22 @@ def _iter_records(req: IngestJobRequest, raw: str) -> Iterator[Dict[str, Any]]:
 
 async def run_job(job_id: str, req: IngestJobRequest, stream: RedisStream) -> JobStatus:
     start_time = time.time()
-    pii_summary: Dict[str, int] = defaultdict(int)
+    pii_summary: dict[str, int] = defaultdict(int)
     processed = 0
     total_bytes = 0
-    quality_insights: Dict[str, Any] | None = None
+    quality_insights: dict[str, Any] | None = None
 
     if req.source_type == "postgres":
-        if PostgresPreprocessingPipeline is None:  # pragma: no cover - fallback when ML package unavailable
-            raise RuntimeError("Postgres preprocessing pipeline is unavailable in this environment")
+        if (
+            PostgresPreprocessingPipeline is None
+        ):  # pragma: no cover - fallback when ML package unavailable
+            raise RuntimeError(
+                "Postgres preprocessing pipeline is unavailable in this environment"
+            )
         if req.postgres is None:
-            raise ValueError("postgresOptions must be provided for postgres source type")
+            raise ValueError(
+                "postgresOptions must be provided for postgres source type"
+            )
         pipeline = PostgresPreprocessingPipeline(
             connection_uri=req.source,
             table=req.postgres.table,
@@ -65,7 +73,7 @@ async def run_job(job_id: str, req: IngestJobRequest, stream: RedisStream) -> Jo
         result = pipeline.run()
         quality_insights = result.quality_insights
 
-        def _postgres_iter() -> Iterator[Dict[str, Any]]:
+        def _postgres_iter() -> Iterator[dict[str, Any]]:
             for partition in result.dataframe.to_delayed():
                 for row in partition.compute().to_dict(orient="records"):
                     yield row
@@ -73,11 +81,11 @@ async def run_job(job_id: str, req: IngestJobRequest, stream: RedisStream) -> Jo
         records = _postgres_iter()
     else:
         raw = await _load_source(req)
-        total_bytes = len(raw.encode('utf-8'))
+        total_bytes = len(raw.encode("utf-8"))
         records = _iter_records(req, raw)
 
     for record in records:
-        mapped: Dict[str, str] = {}
+        mapped: dict[str, str] = {}
         for src, canon in req.schema_map.items():
             if src in record and record[src] not in (None, ""):
                 value = str(record[src])
@@ -88,7 +96,9 @@ async def run_job(job_id: str, req: IngestJobRequest, stream: RedisStream) -> Jo
         event = EventEnvelope(
             tenantId=mapped.get("tenantId", "unknown"),
             entityType=mapped.get("entityType", "generic"),
-            attributes={k: v for k, v in mapped.items() if k not in {"tenantId", "entityType"}},
+            attributes={
+                k: v for k, v in mapped.items() if k not in {"tenantId", "entityType"}
+            },
             provenance={"source": req.source},
             policy={"redaction": req.redaction_rules},
         )
@@ -98,14 +108,14 @@ async def run_job(job_id: str, req: IngestJobRequest, stream: RedisStream) -> Jo
     # Emit cost event
     try:
         emit_cost_event(
-            operation_type='ingest',
+            operation_type="ingest",
             tenant_id=req.tenant_id or "unknown",
             scope_id=req.scope_id or "default",
             correlation_id=job_id,
             dimensions={
-                'io_bytes': total_bytes,
-                'objects_written': processed,
-                'cpu_ms': int((time.time() - start_time) * 1000),
+                "io_bytes": total_bytes,
+                "objects_written": processed,
+                "cpu_ms": int((time.time() - start_time) * 1000),
             },
         )
     except Exception as e:

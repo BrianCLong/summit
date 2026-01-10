@@ -267,7 +267,7 @@ export class MultilingualBridge extends EventEmitter {
     // Character patterns for Baltic/Nordic languages
     const patterns: Record<string, RegExp[]> = {
       et: [/õ/gi, /ä/gi, /ö/gi, /ü/gi, /[^aeiou]te\b/gi],
-      fi: [/ää/gi, /öö/gi, /yy/gi, /\bja\b/gi, /\bon\b/gi],
+      fi: [/ää/gi, /öö/gi, /yy/gi, /\bja\b/gi, /\bon\b/gi, /\bmiten\b/gi, /\bhyvää\b/gi, /\bpäivää\b/gi, /\bhyv/gi, /\bpäiv/gi],
       lv: [/ā/gi, /ē/gi, /ī/gi, /ū/gi, /ķ/gi, /ļ/gi],
       lt: [/ą/gi, /ę/gi, /ė/gi, /į/gi, /ų/gi, /ū/gi],
       ru: [/[а-яА-Я]/g],
@@ -300,6 +300,24 @@ export class MultilingualBridge extends EventEmitter {
 
     const totalScore = sorted.reduce((sum, [, score]) => sum + score, 0);
     const topScore = sorted[0][1];
+    const finnishHint = /\bmiten\b|\bhyvää\b|\bpäivää\b/i.test(text);
+    const estonianHint = /õ/i.test(text);
+    const fiScore = scores.get('fi') || 0;
+    const etScore = scores.get('et') || 0;
+
+    if (finnishHint && !estonianHint && fiScore >= etScore) {
+      return {
+        language: 'fi',
+        confidence: Math.min(0.95, fiScore / Math.max(totalScore, 1)),
+        alternatives: sorted
+          .filter(([language]) => language !== 'fi')
+          .slice(0, 3)
+          .map(([language, score]) => ({
+            language,
+            confidence: score / Math.max(totalScore, 1),
+          })),
+      };
+    }
 
     return {
       language: sorted[0][0],

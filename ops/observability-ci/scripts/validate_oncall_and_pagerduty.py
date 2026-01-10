@@ -45,14 +45,10 @@ def validate_pagerduty_service(
 
     service_name = metadata.get("name")
     if expected_service and service_name != expected_service:
-        errors.append(
-            "pagerduty service name does not align with rotation.pagerduty.service"
-        )
+        errors.append("pagerduty service name does not align with rotation.pagerduty.service")
 
     if expected_policy and spec.get("escalation_policy") != expected_policy:
-        errors.append(
-            "pagerduty escalation_policy does not match rotation contract"
-        )
+        errors.append("pagerduty escalation_policy does not match rotation contract")
 
     if not spec.get("incident_urgency_rules"):
         errors.append("pagerduty incident_urgency_rules must be defined")

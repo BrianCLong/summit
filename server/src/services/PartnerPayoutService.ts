@@ -14,10 +14,17 @@ interface PartnerPayoutReport {
 
 export class PartnerPayoutService {
     private static instance: PartnerPayoutService;
-    private pool: Pool;
+    private _pool?: Pool;
 
     private constructor() {
-        this.pool = getPostgresPool();
+        // Lazy initialization
+    }
+
+    private get pool(): Pool {
+        if (!this._pool) {
+            this._pool = getPostgresPool();
+        }
+        return this._pool;
     }
 
     public static getInstance(): PartnerPayoutService {

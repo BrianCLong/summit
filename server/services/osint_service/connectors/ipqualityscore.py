@@ -1,10 +1,12 @@
 import os
+
 import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
 IPQUALITYSCORE_API_KEY = os.getenv("IPQUALITYSCORE_API_KEY")
+
 
 def get_ip_reputation(ip_address: str):
     """

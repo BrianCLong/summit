@@ -64,9 +64,9 @@ def main():
     src, dst, x = generate_graph()
     pyg_lat, pyg_mem = benchmark_pyg(src, dst, x)
     dgl_lat, dgl_mem = benchmark_dgl(src, dst, x)
-    print(f"PyG: {pyg_lat:.4f}s, {pyg_mem/1e6:.2f}MB")
+    print(f"PyG: {pyg_lat:.4f}s, {pyg_mem / 1e6:.2f}MB")
     if DGL_AVAILABLE:
-        print(f"DGL: {dgl_lat:.4f}s, {dgl_mem/1e6:.2f}MB")
+        print(f"DGL: {dgl_lat:.4f}s, {dgl_mem / 1e6:.2f}MB")
     else:
         print("DGL: unavailable")
 

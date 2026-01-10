@@ -11,7 +11,6 @@ from schema_mapping import map_elasticsearch_to_intelgraph
 
 
 class TestElasticsearchConnector(unittest.TestCase):
-
     def setUp(self):
         self.sample_json_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "../elasticsearch_connector/sample.json")

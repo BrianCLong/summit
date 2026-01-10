@@ -127,7 +127,7 @@ class GroundingValidator:
             response_type = "privacy_blocked" if privacy_blocked else "data_exposed"
 
             result = {
-                "test_id": f"pde_{i+1:02d}",
+                "test_id": f"pde_{i + 1:02d}",
                 "query": query,
                 "grounded": grounded,
                 "privacy_blocked": privacy_blocked,
@@ -139,7 +139,7 @@ class GroundingValidator:
 
             status = "✅" if (grounded and privacy_blocked and policy_enforced) else "⚠️"
             print(
-                f"  {status} Test {i+1:2d}: {'PASS' if (grounded and privacy_blocked) else 'REVIEW'}"
+                f"  {status} Test {i + 1:2d}: {'PASS' if (grounded and privacy_blocked) else 'REVIEW'}"
             )
 
         category_result = {
@@ -192,7 +192,7 @@ class GroundingValidator:
                 policy_enforcements += 1
 
             result = {
-                "test_id": f"ctl_{i+1:02d}",
+                "test_id": f"ctl_{i + 1:02d}",
                 "query": query,
                 "grounded": grounded,
                 "privacy_blocked": privacy_blocked,
@@ -206,7 +206,7 @@ class GroundingValidator:
 
             status = "✅" if (grounded and privacy_blocked and policy_enforced) else "⚠️"
             print(
-                f"  {status} Test {i+1:2d}: {'PASS' if (grounded and privacy_blocked) else 'REVIEW'}"
+                f"  {status} Test {i + 1:2d}: {'PASS' if (grounded and privacy_blocked) else 'REVIEW'}"
             )
 
         category_result = {
@@ -258,7 +258,7 @@ class GroundingValidator:
                 policy_enforcements += 1
 
             result = {
-                "test_id": f"pba_{i+1:02d}",
+                "test_id": f"pba_{i + 1:02d}",
                 "query": query,
                 "grounded": grounded,
                 "privacy_blocked": privacy_blocked,
@@ -270,7 +270,7 @@ class GroundingValidator:
 
             status = "✅" if (grounded and privacy_blocked and policy_enforced) else "⚠️"
             print(
-                f"  {status} Test {i+1:2d}: {'PASS' if (grounded and policy_enforced) else 'REVIEW'}"
+                f"  {status} Test {i + 1:2d}: {'PASS' if (grounded and policy_enforced) else 'REVIEW'}"
             )
 
         category_result = {
@@ -321,7 +321,7 @@ class GroundingValidator:
                 policy_enforcements += 1
 
             result = {
-                "test_id": f"drv_{i+1:02d}",
+                "test_id": f"drv_{i + 1:02d}",
                 "query": query,
                 "grounded": grounded,
                 "privacy_blocked": privacy_blocked,
@@ -333,7 +333,7 @@ class GroundingValidator:
 
             status = "✅" if (grounded and privacy_blocked and policy_enforced) else "⚠️"
             print(
-                f"  {status} Test {i+1:2d}: {'PASS' if (grounded and privacy_blocked) else 'REVIEW'}"
+                f"  {status} Test {i + 1:2d}: {'PASS' if (grounded and privacy_blocked) else 'REVIEW'}"
             )
 
         category_result = {
@@ -385,7 +385,7 @@ class GroundingValidator:
                 policy_enforcements += 1
 
             result = {
-                "test_id": f"pia_{i+1:02d}",
+                "test_id": f"pia_{i + 1:02d}",
                 "query": query,
                 "grounded": grounded,
                 "privacy_blocked": privacy_blocked,
@@ -397,7 +397,7 @@ class GroundingValidator:
 
             status = "✅" if (grounded and privacy_blocked and policy_enforced) else "⚠️"
             print(
-                f"  {status} Test {i+1:2d}: {'PASS' if (grounded and privacy_blocked) else 'REVIEW'}"
+                f"  {status} Test {i + 1:2d}: {'PASS' if (grounded and privacy_blocked) else 'REVIEW'}"
             )
 
         category_result = {

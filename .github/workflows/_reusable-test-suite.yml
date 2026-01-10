@@ -48,7 +48,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup toolchain
         uses: ./.github/actions/setup-toolchain
@@ -92,7 +92,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: test-results-${{ inputs.test-type }}
           path: |
@@ -103,7 +103,7 @@ jobs:
 
       - name: Upload coverage
         if: ${{ inputs.upload-coverage && inputs.test-type == 'unit' }}
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           directory: ${{ inputs.working-directory }}/coverage
           fail_ci_if_error: false

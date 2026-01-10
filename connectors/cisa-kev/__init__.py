@@ -14,17 +14,17 @@ Usage:
     stats = await connector.ingest()
 """
 
-from connectors.cisa_kev.schema_mapping import (
-    map_cisa_kev_to_intelgraph,
-    get_ransomware_vulnerabilities,
-    get_recent_vulnerabilities
-)
 from connectors.cisa_kev.connector import CISAKEVConnector
+from connectors.cisa_kev.schema_mapping import (
+    get_ransomware_vulnerabilities,
+    get_recent_vulnerabilities,
+    map_cisa_kev_to_intelgraph,
+)
 
 __version__ = "1.0.0"
 __all__ = [
-    "map_cisa_kev_to_intelgraph",
+    "CISAKEVConnector",
     "get_ransomware_vulnerabilities",
     "get_recent_vulnerabilities",
-    "CISAKEVConnector",
+    "map_cisa_kev_to_intelgraph",
 ]

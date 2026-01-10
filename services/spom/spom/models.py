@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from datetime import UTC, datetime
+from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -14,13 +14,13 @@ class FieldObservation(BaseModel):
     name: str
     data_type: str = "string"
     description: str = ""
-    sample_values: List[str] = Field(default_factory=list, alias="sampleValues")
-    constraints: Dict[str, Any] = Field(default_factory=dict)
-    dataset: Optional[str] = None
+    sample_values: list[str] = Field(default_factory=list, alias="sampleValues")
+    constraints: dict[str, Any] = Field(default_factory=dict)
+    dataset: str | None = None
 
     @field_validator("sample_values", mode="before")
     @classmethod
-    def _coerce_values(cls, value: Any) -> List[str]:
+    def _coerce_values(cls, value: Any) -> list[str]:
         if value is None:
             return []
         if isinstance(value, list):
@@ -39,7 +39,7 @@ class OntologyTag(BaseModel):
     label: str
     category: str
     sensitivity: str
-    jurisdictions: List[str] = Field(default_factory=list)
+    jurisdictions: list[str] = Field(default_factory=list)
 
     def summary(self) -> str:
         jurisdictions = ", ".join(self.jurisdictions) if self.jurisdictions else "global"
@@ -52,8 +52,8 @@ class MappingResult(BaseModel):
     field: FieldObservation
     tag: OntologyTag
     confidence: float
-    explanations: List[str]
-    evidence: Dict[str, Any] = Field(default_factory=dict)
+    explanations: list[str]
+    evidence: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("confidence")
     @classmethod
@@ -68,11 +68,11 @@ class MappingReport(BaseModel):
     """Collection of mapping results for a dataset."""
 
     dataset: str
-    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    results: List[MappingResult]
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    results: list[MappingResult]
 
-    def as_index(self) -> Dict[str, MappingResult]:
+    def as_index(self) -> dict[str, MappingResult]:
         return {result.field.name: result for result in self.results}
 
-    def top_hits(self, threshold: float = 0.6) -> List[MappingResult]:
+    def top_hits(self, threshold: float = 0.6) -> list[MappingResult]:
         return [result for result in self.results if result.confidence >= threshold]

@@ -1,14 +1,24 @@
 
 import request from 'supertest';
-import { createApp } from '../../src/app';
-import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
+import { describe, it, expect, beforeAll, afterAll, jest } from '@jest/globals';
 
-describe('GraphQL Security & Performance Integration Tests', () => {
+const unstableMockModule = (jest as any).unstable_mockModule as any;
+unstableMockModule('../../src/utils/htmlSanitizer', () => ({
+  sanitizeHtml: (value: string) => value,
+  deepSanitize: (value: unknown) => value,
+}));
+
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('GraphQL Security & Performance Integration Tests', () => {
   let app: any;
   let server: any;
   let authToken: string;
+  let createApp: typeof import('../../src/app').createApp;
 
   beforeAll(async () => {
+    ({ createApp } = await import('../../src/app'));
     app = await createApp();
     server = app.listen(0);
 

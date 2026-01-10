@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,35 +19,35 @@ logging.basicConfig(level=logging.INFO)
 
 
 class DiscoverRequest(BaseModel):
-    records: List[Dict[str, float]]
-    algorithm: Optional[str] = Field(default=None, description="notears | pc | granger")
+    records: list[dict[str, float]]
+    algorithm: str | None = Field(default=None, description="notears | pc | granger")
 
 
 class DiscoverResponse(BaseModel):
     simId: str
-    graph: Dict[str, Dict[str, float]]
+    graph: dict[str, dict[str, float]]
     confidence: float
 
 
 class InterventionRequest(BaseModel):
     simId: str
-    interventions: Dict[str, float]
-    target: Optional[str] = None
+    interventions: dict[str, float]
+    target: str | None = None
 
 
 class InterventionResponse(BaseModel):
     simId: str
-    delta: Dict[str, float]
-    projected: Dict[str, float]
-    paths: List[Dict[str, object]]
+    delta: dict[str, float]
+    projected: dict[str, float]
+    paths: list[dict[str, object]]
     confidence: float
 
 
 class ExplainResponse(BaseModel):
     simId: str
-    graph: Dict[str, Dict[str, float]]
+    graph: dict[str, dict[str, float]]
     confidence: float
-    lastIntervention: Optional[InterventionResponse]
+    lastIntervention: InterventionResponse | None
 
 
 def require_feature(settings: Settings = Depends(get_settings)) -> FeatureFlag:  # noqa: B008
@@ -141,5 +140,5 @@ def explain(sim_id: str) -> ExplainResponse:
 
 
 @app.get("/health")
-def health() -> Dict[str, str]:
+def health() -> dict[str, str]:
     return {"status": "ok", "feature": "enabled" if settings.feature_enabled else "disabled"}

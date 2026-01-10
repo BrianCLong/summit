@@ -61,9 +61,14 @@ export function withPolicy(action: string, resolver: any) {
       await ensureAuthz(actionName, resource, context);
     }
 
-    const decision = await evaluate(action, context.user, resource, {
+    const decision = await evaluate(
+      action,
+      context.user,
+      resource as unknown as Record<string, unknown>,
+      {
       tenant: context?.tenant,
-    });
+      },
+    );
     if (!decision.allow) {
       throw new GraphQLError('Forbidden', {
         extensions: {

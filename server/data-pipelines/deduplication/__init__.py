@@ -8,10 +8,10 @@ from .minhash_dedup import LSHIndex, MinHashDeduplicator
 from .similarity import EntityMatcher, SimilarityCalculator
 
 __all__ = [
-    "MinHashDeduplicator",
-    "LSHIndex",
-    "IdempotentLoader",
-    "MergeStrategy",
-    "SimilarityCalculator",
     "EntityMatcher",
+    "IdempotentLoader",
+    "LSHIndex",
+    "MergeStrategy",
+    "MinHashDeduplicator",
+    "SimilarityCalculator",
 ]

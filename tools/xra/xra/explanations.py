@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import random
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Tuple
 
-from .models import QueryResult, RankedDocument, RetrievalLog
+from .models import RankedDocument, RetrievalLog
 
 
 @dataclass
@@ -16,13 +16,13 @@ class Explanation:
     baseline_rank: int
     candidate_rank: int
     rank_shift: int
-    shap_contributions: Dict[str, float]
-    ablation_effects: Dict[str, float]
+    shap_contributions: dict[str, float]
+    ablation_effects: dict[str, float]
     intercept: float
     predicted_score: float
 
 
-def _solve_linear_system(matrix: List[List[float]], vector: List[float]) -> List[float]:
+def _solve_linear_system(matrix: list[list[float]], vector: list[float]) -> list[float]:
     """Gaussian elimination with partial pivoting."""
 
     n = len(vector)
@@ -60,12 +60,12 @@ def _solve_linear_system(matrix: List[List[float]], vector: List[float]) -> List
     return solution
 
 
-def _fit_linear_model(log: RetrievalLog) -> Tuple[List[str], Dict[str, float]]:
+def _fit_linear_model(log: RetrievalLog) -> tuple[list[str], dict[str, float]]:
     feature_names = sorted(log.feature_names())
     if not feature_names:
         return [], {"__intercept__": 0.0}
-    rows: List[List[float]] = []
-    targets: List[float] = []
+    rows: list[list[float]] = []
+    targets: list[float] = []
     for query in log.queries:
         for doc in query.results:
             rows.append([1.0] + [doc.features.get(name, 0.0) for name in feature_names])
@@ -79,13 +79,15 @@ def _fit_linear_model(log: RetrievalLog) -> Tuple[List[str], Dict[str, float]]:
             for j in range(cols):
                 xtx[i][j] += row[i] * row[j]
     weights = _solve_linear_system(xtx, xty)
-    params = {feature: weight for feature, weight in zip(["__intercept__"] + feature_names, weights)}
+    params = {
+        feature: weight for feature, weight in zip(["__intercept__"] + feature_names, weights)
+    }
     return feature_names, params
 
 
-def _compute_means(log: RetrievalLog, feature_names: Iterable[str]) -> Dict[str, float]:
-    totals = {name: 0.0 for name in feature_names}
-    counts = {name: 0 for name in feature_names}
+def _compute_means(log: RetrievalLog, feature_names: Iterable[str]) -> dict[str, float]:
+    totals = dict.fromkeys(feature_names, 0.0)
+    counts = dict.fromkeys(feature_names, 0)
     for query in log.queries:
         for doc in query.results:
             for name in feature_names:
@@ -95,11 +97,11 @@ def _compute_means(log: RetrievalLog, feature_names: Iterable[str]) -> Dict[str,
 
 
 def _shap_contributions(
-    features: Dict[str, float],
-    weights: Dict[str, float],
-    means: Dict[str, float],
-) -> Dict[str, float]:
-    contributions: Dict[str, float] = {}
+    features: dict[str, float],
+    weights: dict[str, float],
+    means: dict[str, float],
+) -> dict[str, float]:
+    contributions: dict[str, float] = {}
     for name, value in features.items():
         weight = weights.get(name, 0.0)
         baseline = means.get(name, 0.0)
@@ -108,10 +110,10 @@ def _shap_contributions(
 
 
 def _ablation_effects(
-    features: Dict[str, float],
-    weights: Dict[str, float],
-) -> Dict[str, float]:
-    effects: Dict[str, float] = {}
+    features: dict[str, float],
+    weights: dict[str, float],
+) -> dict[str, float]:
+    effects: dict[str, float] = {}
     for name, value in features.items():
         effects[name] = weights.get(name, 0.0) * value
     return effects
@@ -121,19 +123,19 @@ def explain_rank_shift(
     baseline: RetrievalLog,
     candidate: RetrievalLog,
     top_n: int = 5,
-) -> List[Explanation]:
+) -> list[Explanation]:
     """Generate explanations for the largest absolute rank shifts."""
 
     random.seed(1729)
     feature_names, weights = _fit_linear_model(candidate)
     means = _compute_means(candidate, feature_names)
 
-    baseline_index: Dict[Tuple[str, str], RankedDocument] = {}
+    baseline_index: dict[tuple[str, str], RankedDocument] = {}
     for query in baseline.queries:
         for doc in query.results:
             baseline_index[(query.query_id, doc.doc_id)] = doc
 
-    shifts: List[Tuple[int, str, str, RankedDocument]] = []
+    shifts: list[tuple[int, str, str, RankedDocument]] = []
     for query in candidate.queries:
         for doc in query.results:
             key = (query.query_id, doc.doc_id)
@@ -145,13 +147,15 @@ def explain_rank_shift(
     shifts.sort(key=lambda item: (item[0], item[1], item[2]), reverse=True)
     selected = shifts[:top_n]
 
-    explanations: List[Explanation] = []
+    explanations: list[Explanation] = []
     for _, query_id, doc_id, doc in selected:
         baseline_doc = baseline_index[(query_id, doc_id)]
         shap_values = _shap_contributions(doc.features, weights, means)
         ablations = _ablation_effects(doc.features, weights)
         intercept = weights.get("__intercept__", 0.0)
-        predicted = intercept + sum(weights.get(name, 0.0) * doc.features.get(name, 0.0) for name in feature_names)
+        predicted = intercept + sum(
+            weights.get(name, 0.0) * doc.features.get(name, 0.0) for name in feature_names
+        )
         explanations.append(
             Explanation(
                 query_id=query_id,

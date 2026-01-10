@@ -4,12 +4,11 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Union
 
 from .evaluation import BenchmarkResult
 
 
-def export_scorecard(result: BenchmarkResult, destination: Union[str, Path]) -> Path:
+def export_scorecard(result: BenchmarkResult, destination: str | Path) -> Path:
     """Write the benchmark result to a JSON scorecard."""
 
     path = Path(destination)

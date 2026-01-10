@@ -2,7 +2,7 @@
 import { Router, Response } from 'express';
 import { z } from 'zod';
 import { ensureAuthenticated } from '../../middleware/auth.js';
-import { tenantService, createTenantSchema } from '../../services/TenantService.js';
+import { tenantService, createTenantSchema, createTenantBaseSchema } from '../../services/TenantService.js';
 import { tenantProvisioningService } from '../../services/tenants/TenantProvisioningService.js';
 import { tenantIsolationGuard } from '../../tenancy/TenantIsolationGuard.js';
 import logger from '../../utils/logger.js';
@@ -10,7 +10,7 @@ import { AuthenticatedRequest } from '../types.js';
 
 const router = Router();
 
-const provisionSchema = createTenantSchema.extend({
+const provisionSchema = createTenantBaseSchema.extend({
   plan: z.enum(['FREE', 'STARTER', 'PRO', 'ENTERPRISE']).default('STARTER'),
   environment: z.enum(['prod', 'staging', 'dev']).default('prod'),
   requestedSeats: z.number().int().min(1).max(10000).optional(),

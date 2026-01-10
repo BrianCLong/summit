@@ -21,7 +21,10 @@ jest.mock('../webhook.queue.js', () => ({
   },
 }));
 
-describe('Webhook API', () => {
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('Webhook API', () => {
   let app: any;
   const tenantId = 'test-tenant-id';
 

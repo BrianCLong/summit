@@ -352,3 +352,5 @@ eval-artifacts/
 artifacts/agent-lab
 bin/
 .evidence/
+release-assets/
+evidence-staging/

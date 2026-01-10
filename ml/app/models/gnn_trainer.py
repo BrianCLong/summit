@@ -78,9 +78,7 @@ class GNNTrainer:
 
         if task_type in ["node_classification", "graph_classification"]:
             return F.cross_entropy(predictions, targets)
-        elif task_type == "link_prediction":
-            return F.binary_cross_entropy(predictions.squeeze(), targets.float())
-        elif task_type == "anomaly_detection":
+        elif task_type == "link_prediction" or task_type == "anomaly_detection":
             return F.binary_cross_entropy(predictions.squeeze(), targets.float())
         else:
             return F.mse_loss(predictions, targets)
@@ -152,9 +150,7 @@ class GNNTrainer:
                 targets = batch.y
             elif task_type == "link_prediction":
                 targets = batch.edge_label
-            elif task_type == "graph_classification":
-                targets = batch.y
-            elif task_type == "anomaly_detection":
+            elif task_type == "graph_classification" or task_type == "anomaly_detection":
                 targets = batch.y
             else:
                 targets = batch.y
@@ -205,9 +201,7 @@ class GNNTrainer:
                     targets = batch.y
                 elif task_type == "link_prediction":
                     targets = batch.edge_label
-                elif task_type == "graph_classification":
-                    targets = batch.y
-                elif task_type == "anomaly_detection":
+                elif task_type == "graph_classification" or task_type == "anomaly_detection":
                     targets = batch.y
                 else:
                     targets = batch.y
@@ -298,9 +292,7 @@ class GNNTrainer:
                     f"Val   - Loss: {val_metrics['loss']:.4f}, "
                     f"Acc: {val_metrics.get('accuracy', 0):.4f}"
                 )
-                print(
-                    f"LR: {self.optimizer.param_groups[0]['lr']:.6f}, " f"Time: {epoch_time:.2f}s"
-                )
+                print(f"LR: {self.optimizer.param_groups[0]['lr']:.6f}, Time: {epoch_time:.2f}s")
 
             # Early stopping
             if self.early_stopping_counter >= self.early_stopping_patience:

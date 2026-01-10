@@ -1,9 +1,12 @@
 import os
-from .miner import MotifMiner, MiningConfig, SimpleGraph
+
+from .miner import MiningConfig, MotifMiner, SimpleGraph
 
 FEATURE_FLAG = "MOTIF_MINER_ENABLED"
+
 
 def is_enabled() -> bool:
     return os.getenv(FEATURE_FLAG, "false").lower() in {"1", "true", "yes", "on"}
 
-__all__ = ["MotifMiner", "MiningConfig", "SimpleGraph", "is_enabled", "FEATURE_FLAG"]
+
+__all__ = ["FEATURE_FLAG", "MiningConfig", "MotifMiner", "SimpleGraph", "is_enabled"]

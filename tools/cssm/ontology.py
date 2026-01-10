@@ -1,10 +1,11 @@
 """Ontology primitives for CSSM."""
+
 from __future__ import annotations
 
-from dataclasses import dataclass
 import json
 import pathlib
-from typing import Dict, Iterable, List, Optional
+from collections.abc import Iterable
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -12,12 +13,12 @@ class CanonicalAttribute:
     name: str
     description: str
     classification: str
-    entity: Optional[str]
+    entity: str | None
     semantic_type: str
-    data_type: Optional[str]
-    unit: Optional[str] = None
+    data_type: str | None
+    unit: str | None = None
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "name": self.name,
             "description": self.description,
@@ -31,9 +32,9 @@ class CanonicalAttribute:
 
 @dataclass
 class CanonicalOntology:
-    entities: List[Dict[str, object]]
-    metrics: List[Dict[str, object]]
-    units: List[Dict[str, object]]
+    entities: list[dict[str, object]]
+    metrics: list[dict[str, object]]
+    units: list[dict[str, object]]
 
     def iter_attributes(self) -> Iterable[CanonicalAttribute]:
         for entity in self.entities:

@@ -1,7 +1,5 @@
 
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { ForesightService } from '../services/ForesightService';
-import * as db from '../../config/database';
+import { describe, it, expect, jest, beforeEach, beforeAll } from '@jest/globals';
 
 // Mock DB
 const mockSession = {
@@ -13,10 +11,20 @@ const mockDriver = {
   session: jest.fn(() => mockSession)
 };
 
-jest.spyOn(db, 'getNeo4jDriver').mockReturnValue(mockDriver as any);
+let ForesightService: typeof import('../services/ForesightService').ForesightService;
 
 describe('ForesightService', () => {
-  let service: ForesightService;
+  let service: ReturnType<typeof ForesightService.getInstance>;
+
+  beforeAll(async () => {
+    const dbSpec = '../../config/database.js';
+    jest.resetModules();
+    // @ts-ignore - unstable API is sufficient for tests
+    await (jest as any).unstable_mockModule(dbSpec, () => ({
+      getNeo4jDriver: () => mockDriver,
+    }));
+    ({ ForesightService } = await import('../services/ForesightService.js'));
+  });
 
   beforeEach(() => {
     (ForesightService as any).instance = undefined;

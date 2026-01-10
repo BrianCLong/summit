@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Audit open issues to assign severity, owners, and SLA targets."""
+
 from __future__ import annotations
 
 import json
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Iterable, List, Optional
 
 SEVERITY_KEYWORDS = {
     "sev1_data_loss": re.compile(r"data loss|corrupt|corruption", re.IGNORECASE),
@@ -31,12 +32,12 @@ class IssueAssessment:
     number: int
     title: str
     html_url: str
-    labels: List[str]
-    severity: Optional[str]
-    sla_label: Optional[str]
-    owners: List[str]
-    runbook: Optional[str]
-    blockers: List[str] = field(default_factory=list)
+    labels: list[str]
+    severity: str | None
+    sla_label: str | None
+    owners: list[str]
+    runbook: str | None
+    blockers: list[str] = field(default_factory=list)
 
 
 def load_issues(path: Path) -> list[dict]:
@@ -50,7 +51,7 @@ def is_bug_issue(issue: dict) -> bool:
     return any(BUG_LABEL_PATTERN.search(label.get("name", "")) for label in issue.get("labels", []))
 
 
-def infer_severity(text: str) -> Optional[str]:
+def infer_severity(text: str) -> str | None:
     if SEVERITY_KEYWORDS["sev1_data_loss"].search(text):
         return "SEV-1"
     if SEVERITY_KEYWORDS["sev1_crash_start"].search(text):
@@ -62,7 +63,7 @@ def infer_severity(text: str) -> Optional[str]:
     return None
 
 
-def sla_for_severity(severity: Optional[str]) -> Optional[str]:
+def sla_for_severity(severity: str | None) -> str | None:
     if severity == "SEV-1":
         return "SLA-24h"
     if severity == "SEV-2":
@@ -70,7 +71,7 @@ def sla_for_severity(severity: Optional[str]) -> Optional[str]:
     return None
 
 
-def owners_for_issue(labels: Iterable[str]) -> List[str]:
+def owners_for_issue(labels: Iterable[str]) -> list[str]:
     for label in labels:
         owners = AREA_OWNER_MAP.get(label.lower())
         if owners:
@@ -78,7 +79,7 @@ def owners_for_issue(labels: Iterable[str]) -> List[str]:
     return ["@intelgraph-core"]
 
 
-def runbook_for_issue(severity: Optional[str]) -> Optional[str]:
+def runbook_for_issue(severity: str | None) -> str | None:
     if severity == "SEV-1":
         return "RUNBOOKS/INCIDENT_RESPONSE_PLAYBOOK.md"
     return None
@@ -96,7 +97,9 @@ def assess_issue(issue: dict) -> IssueAssessment:
         blockers.append(f"Add {severity} label")
     if sla_label and sla_label not in labels:
         blockers.append(f"Add {sla_label} label")
-    incident_labels = [label for label in labels if "incident" in label.lower() or "postmortem" in label.lower()]
+    incident_labels = [
+        label for label in labels if "incident" in label.lower() or "postmortem" in label.lower()
+    ]
     if severity and not incident_labels:
         blockers.append("Confirm and tag incident/postmortem linkage")
     if runbook:
@@ -117,7 +120,7 @@ def assess_issue(issue: dict) -> IssueAssessment:
 
 
 def summarize(assessments: list[IssueAssessment]) -> str:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     sev_counts = {"SEV-1": 0, "SEV-2": 0}
     for assessment in assessments:
         if assessment.severity in sev_counts:
@@ -146,7 +149,9 @@ def summarize(assessments: list[IssueAssessment]) -> str:
             lines.append(f"  - Owners: {', '.join(assessment.owners)}")
             if assessment.runbook:
                 lines.append(f"  - Runbook: {assessment.runbook}")
-                deadline = now + (timedelta(hours=24) if assessment.severity == "SEV-1" else timedelta(hours=72))
+                deadline = now + (
+                    timedelta(hours=24) if assessment.severity == "SEV-1" else timedelta(hours=72)
+                )
                 lines.append(f"  - Page/escalate by: {deadline.isoformat()}")
             blockers = assessment.blockers or ["No outstanding actions detected."]
             lines.append(f"  - Blockers: {'; '.join(blockers)}")

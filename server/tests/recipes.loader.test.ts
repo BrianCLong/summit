@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { jest } from '@jest/globals';
-import { listRecipes, loadRecipe } from '../src/recipes/loader.js';
+let listRecipes: typeof import('../src/recipes/loader.js').listRecipes;
+let loadRecipe: typeof import('../src/recipes/loader.js').loadRecipe;
 
 // Mock fs and path modules
 jest.mock('node:fs');
@@ -11,6 +12,12 @@ const mockFs = fs as jest.Mocked<typeof fs>;
 const mockPath = path as jest.Mocked<typeof path>;
 
 describe('Recipe Loader', () => {
+  beforeAll(async () => {
+    const loader = await import('../src/recipes/loader.js');
+    listRecipes = loader.listRecipes;
+    loadRecipe = loader.loadRecipe;
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockPath.join.mockImplementation((...segments) => segments.join('/'));
@@ -73,28 +80,11 @@ steps:
     });
 
     it('should load and parse a valid YAML recipe', async () => {
-      // Mock dynamic import of yaml module
-      const mockYAML = {
-        parse: jest.fn().mockReturnValue({
-          name: 'Test Recipe',
-          description: 'A test recipe',
-          version: '1.0',
-          inputs: {
-            param1: { required: true, type: 'string' },
-            param2: { required: false, type: 'number', default: 42 }
-          },
-          steps: [{ name: 'Step 1', action: 'test' }]
-        }),
-        default: {
-          parse: jest.fn().mockReturnValue({
-            name: 'Test Recipe',
-            description: 'A test recipe'
-          })
-        }
-      };
-
-      // Mock the dynamic import
-      global.import = jest.fn().mockResolvedValue({ default: mockYAML.default });
+      const yamlModule = await import('yaml');
+      jest.spyOn(yamlModule.default, 'parse').mockReturnValue({
+        name: 'Test Recipe',
+        description: 'A test recipe',
+      });
 
       const recipe = await loadRecipe('test-recipe.yaml');
 
@@ -104,20 +94,20 @@ steps:
       });
       expect(mockPath.join).toHaveBeenCalledWith(process.cwd(), 'recipes', 'test-recipe.yaml');
       expect(mockFs.readFileSync).toHaveBeenCalledWith(
-        'test-recipe.yaml',
-        'utf8'
+        expect.stringContaining('recipes/test-recipe.yaml'),
+        'utf8',
       );
 
-      // Restore original import
-      global.import = originalImport;
     });
 
     it('should return error object when YAML module is not available', async () => {
       const yamlContent = 'name: Test Recipe\ndescription: A test recipe';
       mockFs.readFileSync.mockReturnValue(yamlContent);
 
-      // Mock failed dynamic import
-      global.import = jest.fn().mockRejectedValue(new Error('Module not found'));
+      const yamlModule = await import('yaml');
+      jest.spyOn(yamlModule.default, 'parse').mockImplementation(() => {
+        throw new Error('Module not found');
+      });
 
       const recipe = await loadRecipe('test-recipe.yaml');
 
@@ -137,15 +127,10 @@ steps:
     });
 
     it('should handle YAML parsing errors gracefully', async () => {
-      const mockYAML = {
-        default: {
-          parse: jest.fn().mockImplementation(() => {
-            throw new Error('Invalid YAML syntax');
-          })
-        }
-      };
-
-      global.import = jest.fn().mockResolvedValue(mockYAML);
+      const yamlModule = await import('yaml');
+      jest.spyOn(yamlModule.default, 'parse').mockImplementation(() => {
+        throw new Error('Invalid YAML syntax');
+      });
 
       const recipe = await loadRecipe('invalid.yaml');
 
@@ -156,13 +141,8 @@ steps:
     });
 
     it('should work with different file extensions', async () => {
-      const mockYAML = {
-        default: {
-          parse: jest.fn().mockReturnValue({ name: 'YML Recipe' })
-        }
-      };
-
-      global.import = jest.fn().mockResolvedValue(mockYAML);
+      const yamlModule = await import('yaml');
+      jest.spyOn(yamlModule.default, 'parse').mockReturnValue({ name: 'YML Recipe' });
 
       await loadRecipe('recipe.yml');
 
@@ -173,7 +153,10 @@ steps:
       const originalContent = 'name: Test\ninvalid: yaml: content';
       mockFs.readFileSync.mockReturnValue(originalContent);
 
-      global.import = jest.fn().mockRejectedValue(new Error('Module not found'));
+      const yamlModule = await import('yaml');
+      jest.spyOn(yamlModule.default, 'parse').mockImplementation(() => {
+        throw new Error('Module not found');
+      });
 
       const recipe = await loadRecipe('test.yaml');
 
@@ -190,16 +173,11 @@ steps:
       // Setup load operation
       mockFs.readFileSync.mockReturnValue('name: Recipe 1\ndescription: First recipe');
 
-      const mockYAML = {
-        default: {
-          parse: jest.fn().mockReturnValue({
-            name: 'Recipe 1',
-            description: 'First recipe'
-          })
-        }
-      };
-
-      global.import = jest.fn().mockResolvedValue(mockYAML);
+      const yamlModule = await import('yaml');
+      jest.spyOn(yamlModule.default, 'parse').mockReturnValue({
+        name: 'Recipe 1',
+        description: 'First recipe',
+      });
 
       // List recipes
       const recipes = await listRecipes();

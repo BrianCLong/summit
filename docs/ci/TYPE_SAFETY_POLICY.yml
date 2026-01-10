@@ -1,0 +1,135 @@
+# Type Safety Audit Policy
+# Configures TypeScript strict mode checking and `any` type detection
+#
+# This policy file is read by scripts/release/type_safety_audit.sh
+# See docs/ci/TYPE_SAFETY_AUDIT.md for full documentation.
+
+version: "1.0.0"
+
+# Audit configuration
+audit:
+  # TypeScript compiler to use
+  compiler: tsc
+
+  # Additional strict flags to enforce
+  strict_flags:
+    - "--noImplicitAny"
+    - "--strictNullChecks"
+    - "--strictFunctionTypes"
+    - "--strictBindCallApply"
+    - "--strictPropertyInitialization"
+    - "--noImplicitThis"
+    - "--useUnknownInCatchVariables"
+    - "--noUncheckedIndexedAccess"
+
+  # Paths to audit (relative to repo root)
+  paths:
+    - "server/src/**/*.ts"
+    - "cli/src/**/*.ts"
+    - "packages/*/src/**/*.ts"
+
+  # Paths to exclude
+  exclude_paths:
+    - "**/*.test.ts"
+    - "**/*.spec.ts"
+    - "**/node_modules/**"
+    - "**/dist/**"
+    - "**/__mocks__/**"
+    - "**/generated/**"
+
+# Any type detection
+any_detection:
+  # Maximum allowed explicit `any` types
+  max_explicit_any: 50
+
+  # Maximum allowed implicit `any` (from noImplicitAny errors)
+  max_implicit_any: 0
+
+  # Paths that are more strictly enforced (lower thresholds)
+  strict_paths:
+    - "server/src/security/**"
+    - "server/src/auth/**"
+    - "server/src/policy/**"
+    - "packages/tasks-core/src/**"
+
+  # Max `any` in strict paths
+  max_any_strict_paths: 5
+
+  # Patterns to detect
+  detect_patterns:
+    - ": any"
+    - ": any;"
+    - ": any)"
+    - ": any,"
+    - "as any"
+    - "<any>"
+    - "any[]"
+
+  # Allowed patterns (won't count against threshold)
+  allowed_patterns:
+    - "// @ts-expect-error"
+    - "// eslint-disable"
+    - "// TODO: fix any"
+
+# Type coverage
+coverage:
+  # Enable type coverage calculation
+  enabled: true
+
+  # Minimum required type coverage percentage
+  min_coverage: 85
+
+  # Tool to use (type-coverage package)
+  tool: type-coverage
+
+# Reporting
+reporting:
+  # Generate detailed report
+  generate_report: true
+
+  # Report format: markdown, json
+  format: markdown
+
+  # Upload as artifact
+  upload_artifact: true
+
+  # Post to PR as comment
+  post_pr_comment: true
+
+  # Create issues for new violations
+  create_issues: false
+
+# Gates
+gates:
+  # Fail on any type errors
+  fail_on_type_errors: true
+
+  # Fail if any threshold exceeded
+  fail_on_threshold: true
+
+  # Strict mode for release branches
+  strict_on_release: true
+
+# Schedule
+schedule:
+  # Regular scheduled scans
+  enabled: true
+  cron: "0 7 * * *"  # Daily at 7 AM UTC
+
+  # Scan on PRs
+  on_pull_request: true
+
+  # Scan on push to main
+  on_push_main: true
+
+# Integration
+integration:
+  # Block releases if audit fails
+  block_release: true
+
+  # Add to release checklist
+  include_in_checklist: true
+
+# State tracking
+state:
+  path: "docs/releases/_state/type_safety_state.json"

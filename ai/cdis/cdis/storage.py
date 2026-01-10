@@ -1,25 +1,23 @@
 from __future__ import annotations
 
-from typing import Dict, Optional
-
 from .models import InterventionResult, Simulation
 
 
 class SimulationStore:
     def __init__(self) -> None:
-        self._sims: Dict[str, Simulation] = {}
-        self._interventions: Dict[str, InterventionResult] = {}
+        self._sims: dict[str, Simulation] = {}
+        self._interventions: dict[str, InterventionResult] = {}
 
     def put(self, simulation: Simulation) -> None:
         self._sims[simulation.sim_id] = simulation
 
-    def get(self, sim_id: str) -> Optional[Simulation]:
+    def get(self, sim_id: str) -> Simulation | None:
         return self._sims.get(sim_id)
 
     def record_intervention(self, result: InterventionResult) -> None:
         self._interventions[result.sim_id] = result
 
-    def get_last_intervention(self, sim_id: str) -> Optional[InterventionResult]:
+    def get_last_intervention(self, sim_id: str) -> InterventionResult | None:
         return self._interventions.get(sim_id)
 
 

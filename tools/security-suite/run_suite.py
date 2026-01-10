@@ -11,6 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent.parent
 SUITE_DIR = ROOT / "tools" / "security-suite"
 
+
 def run_tool(script_name):
     script_path = SUITE_DIR / script_name
     print(f"\n=== Running {script_name} ===")
@@ -21,6 +22,7 @@ def run_tool(script_name):
         return False
     return True
 
+
 def main():
     print("Starting Summit Security Suite...")
 
@@ -29,7 +31,7 @@ def main():
         "data_flow_gen.py",
         "security_scorecard.py",
         "checklist_gen.py",
-        "vuln_scanner.py"
+        "vuln_scanner.py",
     ]
 
     success = True
@@ -43,6 +45,7 @@ def main():
     else:
         print("Some tools failed.")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

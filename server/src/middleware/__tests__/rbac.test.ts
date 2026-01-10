@@ -9,22 +9,33 @@ import {
   requireRole,
 } from '../rbac';
 import AuthService from '../../services/AuthService';
-import {
-  requestFactory,
-  responseFactory,
-  nextFactory,
-} from '../../../../tests/factories/requestFactory';
-import { userFactory } from '../../../../tests/factories/userFactory';
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+import { jest, describe, it, expect } from '@jest/globals';
 
 jest.mock('../../services/AuthService');
 
 describe('RBAC Middleware', () => {
-  let mockAuthService: jest.Mocked<AuthService>;
+  const requestFactory = (overrides: Record<string, unknown> = {}) => ({
+    user: undefined,
+    ...overrides,
+  });
+  const responseFactory = () =>
+    ({
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    }) as any;
+  const nextFactory = () => jest.fn();
+  const userFactory = (overrides: Record<string, unknown> = {}) => ({
+    id: 'user-1',
+    email: 'user@example.com',
+    role: 'viewer',
+    permissions: [],
+    scopes: [],
+    isActive: true,
+    ...overrides,
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockAuthService = new AuthService() as jest.Mocked<AuthService>;
   });
 
   describe('requirePermission', () => {
@@ -34,12 +45,14 @@ describe('RBAC Middleware', () => {
       const res = responseFactory();
       const next = nextFactory();
 
-      mockAuthService.hasPermission = jest.fn().mockReturnValue(true);
+      const hasPermissionSpy = jest
+        .spyOn(AuthService.prototype, 'hasPermission')
+        .mockReturnValue(true);
 
       const middleware = requirePermission('write');
       middleware(req as any, res, next);
 
-      expect(mockAuthService.hasPermission).toHaveBeenCalledWith(user, 'write');
+      expect(hasPermissionSpy).toHaveBeenCalledWith(user as any, 'write');
       expect(next).toHaveBeenCalled();
       expect(res.status).not.toHaveBeenCalled();
     });
@@ -50,7 +63,7 @@ describe('RBAC Middleware', () => {
       const res = responseFactory();
       const next = nextFactory();
 
-      mockAuthService.hasPermission = jest.fn().mockReturnValue(false);
+      jest.spyOn(AuthService.prototype, 'hasPermission').mockReturnValue(false);
 
       const middleware = requirePermission('write');
       middleware(req as any, res, next);

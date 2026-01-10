@@ -14,12 +14,10 @@ import json
 import os
 import subprocess
 import sys
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from typing import Optional
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
-from urllib.error import HTTPError
 
 
 @dataclass
@@ -59,7 +57,7 @@ class KPIReport:
     improvements: list
 
 
-def query_prometheus(query: str, time: Optional[datetime] = None) -> Optional[float]:
+def query_prometheus(query: str, time: datetime | None = None) -> float | None:
     """Query Prometheus for a metric value."""
     prometheus_url = os.environ.get(
         "PROMETHEUS_URL", "http://prometheus.monitoring.svc.cluster.local:9090"
@@ -83,7 +81,7 @@ def query_prometheus(query: str, time: Optional[datetime] = None) -> Optional[fl
     return None
 
 
-def get_error_rate(version: str, time: Optional[datetime] = None) -> float:
+def get_error_rate(version: str, time: datetime | None = None) -> float:
     """Get error rate for a specific version."""
     query = f"""
     sum(rate(http_requests_total{{status=~"5..",version="{version}"}}[1h]))
@@ -95,7 +93,7 @@ def get_error_rate(version: str, time: Optional[datetime] = None) -> float:
     return result if result is not None else 0.0
 
 
-def get_p95_latency(version: str, time: Optional[datetime] = None) -> float:
+def get_p95_latency(version: str, time: datetime | None = None) -> float:
     """Get P95 latency for a specific version."""
     query = f"""
     histogram_quantile(0.95,
@@ -106,7 +104,7 @@ def get_p95_latency(version: str, time: Optional[datetime] = None) -> float:
     return result if result is not None else 0.0
 
 
-def get_p99_latency(version: str, time: Optional[datetime] = None) -> float:
+def get_p99_latency(version: str, time: datetime | None = None) -> float:
     """Get P99 latency for a specific version."""
     query = f"""
     histogram_quantile(0.99,
@@ -117,7 +115,7 @@ def get_p99_latency(version: str, time: Optional[datetime] = None) -> float:
     return result if result is not None else 0.0
 
 
-def get_throughput(version: str, time: Optional[datetime] = None) -> float:
+def get_throughput(version: str, time: datetime | None = None) -> float:
     """Get request throughput for a specific version."""
     query = f"""
     sum(rate(http_requests_total{{version="{version}"}}[1h]))
@@ -126,7 +124,7 @@ def get_throughput(version: str, time: Optional[datetime] = None) -> float:
     return result if result is not None else 0.0
 
 
-def get_cpu_usage(version: str, time: Optional[datetime] = None) -> float:
+def get_cpu_usage(version: str, time: datetime | None = None) -> float:
     """Get CPU usage for a specific version."""
     query = f"""
     avg(rate(container_cpu_usage_seconds_total{{version="{version}"}}[5m])) * 100
@@ -135,7 +133,7 @@ def get_cpu_usage(version: str, time: Optional[datetime] = None) -> float:
     return result if result is not None else 0.0
 
 
-def get_memory_usage(version: str, time: Optional[datetime] = None) -> float:
+def get_memory_usage(version: str, time: datetime | None = None) -> float:
     """Get memory usage in MB for a specific version."""
     query = f"""
     avg(container_memory_working_set_bytes{{version="{version}"}}) / 1024 / 1024
@@ -220,7 +218,7 @@ def create_regression_issue(
     version: str,
     baseline_version: str,
     metric: KPIMetric,
-) -> Optional[str]:
+) -> str | None:
     """Create a GitHub issue for a regression."""
     gh_token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
     repo = os.environ.get("GITHUB_REPOSITORY", "brianclong/summit")
@@ -307,8 +305,7 @@ def generate_report(
     improvements = [
         m
         for m in metrics
-        if not m.is_regression
-        and abs(m.delta_percent) > 5  # Only note significant improvements
+        if not m.is_regression and abs(m.delta_percent) > 5  # Only note significant improvements
     ]
 
     return KPIReport(
@@ -324,7 +321,7 @@ def generate_report(
 def print_report(report: KPIReport):
     """Print the KPI report in a readable format."""
     print("\n" + "=" * 60)
-    print(f"KPI Comparison Report")
+    print("KPI Comparison Report")
     print(f"Version: v{report.version} vs v{report.baseline_version}")
     print(f"Generated: {report.generated_at}")
     print("=" * 60 + "\n")
@@ -420,9 +417,7 @@ def main():
                 text=True,
             )
             tags = [t for t in result.stdout.strip().split("\n") if t and "rc." not in t]
-            current_idx = next(
-                (i for i, t in enumerate(tags) if t == f"v{args.version}"), -1
-            )
+            current_idx = next((i for i, t in enumerate(tags) if t == f"v{args.version}"), -1)
             if current_idx >= 0 and current_idx + 1 < len(tags):
                 baseline_version = tags[current_idx + 1].lstrip("v")
         except Exception:

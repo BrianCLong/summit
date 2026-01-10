@@ -39,7 +39,7 @@ def fetch_range(base_url: str, query: str, window: str, step: str) -> float:
     if token:
         request.add_header("Authorization", f"Bearer {token}")
 
-    with urllib.request.urlopen(request) as response:  # noqa: S310
+    with urllib.request.urlopen(request) as response:
         payload = json.loads(response.read().decode())
 
     if payload.get("status") != "success":
@@ -74,4 +74,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

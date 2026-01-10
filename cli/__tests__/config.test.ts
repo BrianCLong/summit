@@ -6,6 +6,36 @@ import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+
+// Mock conf module (ESM-only package)
+const mockStore = new Map<string, unknown>();
+jest.mock('conf', () => {
+  return {
+    __esModule: true,
+    default: class MockConf<T extends object> {
+      private defaults: T;
+      constructor(options: { projectName: string; defaults: T }) {
+        this.defaults = options.defaults;
+        mockStore.set('config', this.defaults);
+      }
+      get store(): T {
+        return (mockStore.get('config') as T) ?? this.defaults;
+      }
+      set store(val: T) {
+        mockStore.set('config', val);
+      }
+      get<K extends keyof T>(key: K): T[K] {
+        return (this.store as T)[key];
+      }
+      set<K extends keyof T>(key: K, val: T[K]): void {
+        const current = this.store;
+        (current as T)[key] = val;
+        mockStore.set('config', current);
+      }
+    },
+  };
+});
+
 import { loadConfig, getProfile, type CLIConfig } from '../src/lib/config.js';
 
 describe('Config', () => {

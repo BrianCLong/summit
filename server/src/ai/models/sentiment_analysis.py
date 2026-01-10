@@ -16,7 +16,7 @@ try:
     from textblob import TextBlob
     from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
 except ImportError as e:
-    print(json.dumps({"error": f"Required packages not installed: {str(e)}"}))
+    print(json.dumps({"error": f"Required packages not installed: {e!s}"}))
     sys.exit(1)
 
 warnings.filterwarnings("ignore")
@@ -76,7 +76,7 @@ class SentimentAnalyzer:
             }
 
         except Exception as e:
-            return {"error": f"Sentiment analysis failed: {str(e)}"}
+            return {"error": f"Sentiment analysis failed: {e!s}"}
 
     def _analyze_primary_sentiment(self, text: str) -> dict[str, Any]:
         """Analyze primary sentiment"""
@@ -214,10 +214,7 @@ class SentimentAnalyzer:
             return emotions
 
         except Exception:
-            return {
-                emotion: 0.0
-                for emotion in ["joy", "anger", "fear", "sadness", "surprise", "disgust"]
-            }
+            return dict.fromkeys(["joy", "anger", "fear", "sadness", "surprise", "disgust"], 0.0)
 
     def _calculate_subjectivity(self, text: str) -> float:
         """Calculate text subjectivity"""

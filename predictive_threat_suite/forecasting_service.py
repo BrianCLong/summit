@@ -6,9 +6,10 @@ Supports multiple forecast models (ARIMA, Exponential Smoothing) and signal type
 """
 
 import logging
+from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Any, Literal, Optional
-from dataclasses import dataclass, asdict
+from typing import Any, Literal
+
 import numpy as np
 from scipy import stats
 
@@ -23,6 +24,7 @@ ModelType = Literal["arima", "exponential_smoothing", "linear_trend"]
 @dataclass
 class ForecastPoint:
     """A single forecast data point with confidence intervals."""
+
     timestamp: datetime
     predicted_value: float
     lower_bound: float
@@ -33,15 +35,17 @@ class ForecastPoint:
 @dataclass
 class ModelMetrics:
     """Model accuracy and performance metrics."""
+
     mape: float  # Mean Absolute Percentage Error
     rmse: float  # Root Mean Square Error
-    mae: float   # Mean Absolute Error
+    mae: float  # Mean Absolute Error
     r_squared: float  # Coefficient of determination
 
 
 @dataclass
 class ModelInfo:
     """Information about the forecasting model used."""
+
     type: ModelType
     parameters: dict[str, Any]
     accuracy_metrics: ModelMetrics
@@ -50,6 +54,7 @@ class ModelInfo:
 @dataclass
 class ForecastResult:
     """Complete forecast result with metadata."""
+
     signal_type: SignalType
     entity_id: str
     forecast_horizon: ForecastHorizon
@@ -78,8 +83,8 @@ class ARIMAForecaster:
         self.p = p
         self.d = d
         self.q = q
-        self.coefficients: Optional[np.ndarray] = None
-        self.residuals: Optional[np.ndarray] = None
+        self.coefficients: np.ndarray | None = None
+        self.residuals: np.ndarray | None = None
 
     def fit(self, data: np.ndarray) -> None:
         """
@@ -93,11 +98,8 @@ class ARIMAForecaster:
 
         # Simple AR model using least squares
         if len(diff_data) > self.p:
-            X = np.column_stack([
-                np.roll(diff_data, i)[self.p:]
-                for i in range(1, self.p + 1)
-            ])
-            y = diff_data[self.p:]
+            X = np.column_stack([np.roll(diff_data, i)[self.p :] for i in range(1, self.p + 1)])
+            y = diff_data[self.p :]
 
             # Least squares estimation
             self.coefficients = np.linalg.lstsq(X, y, rcond=None)[0]
@@ -111,10 +113,7 @@ class ARIMAForecaster:
             self.residuals = np.array([0.0])
 
     def forecast(
-        self,
-        data: np.ndarray,
-        steps: int,
-        confidence: float = 0.95
+        self, data: np.ndarray, steps: int, confidence: float = 0.95
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Generate forecast with confidence intervals.
@@ -131,16 +130,13 @@ class ARIMAForecaster:
             self.fit(data)
 
         forecasts = []
-        last_values = np.diff(data[-self.p:], n=0)  # Use original scale
+        last_values = np.diff(data[-self.p :], n=0)  # Use original scale
 
         # Generate forecasts
         for _ in range(steps):
             if len(last_values) >= self.p and self.coefficients is not None:
                 # AR prediction
-                diff_forecast = np.dot(
-                    last_values[-self.p:],
-                    self.coefficients
-                )
+                diff_forecast = np.dot(last_values[-self.p :], self.coefficients)
             else:
                 # Fallback to last value
                 diff_forecast = 0
@@ -182,8 +178,8 @@ class ExponentialSmoothingForecaster:
         """
         self.alpha = alpha
         self.beta = beta
-        self.level: Optional[float] = None
-        self.trend: Optional[float] = None
+        self.level: float | None = None
+        self.trend: float | None = None
 
     def fit(self, data: np.ndarray) -> None:
         """
@@ -208,10 +204,7 @@ class ExponentialSmoothingForecaster:
             self.trend = self.beta * (self.level - prev_level) + (1 - self.beta) * self.trend
 
     def forecast(
-        self,
-        data: np.ndarray,
-        steps: int,
-        confidence: float = 0.95
+        self, data: np.ndarray, steps: int, confidence: float = 0.95
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Generate forecast with confidence intervals.
@@ -228,10 +221,7 @@ class ExponentialSmoothingForecaster:
             self.fit(data)
 
         # Generate forecasts
-        forecasts = np.array([
-            self.level + (i + 1) * self.trend
-            for i in range(steps)
-        ])
+        forecasts = np.array([self.level + (i + 1) * self.trend for i in range(steps)])
 
         # Calculate confidence intervals
         z_score = stats.norm.ppf((1 + confidence) / 2)
@@ -263,18 +253,14 @@ class ForecastingService:
             Tuple of (steps, timedelta per step)
         """
         horizon_map = {
-            "1h": (4, timedelta(minutes=15)),      # 4 points, 15min each
-            "6h": (12, timedelta(minutes=30)),     # 12 points, 30min each
-            "24h": (24, timedelta(hours=1)),       # 24 points, 1h each
-            "7d": (28, timedelta(hours=6)),        # 28 points, 6h each
+            "1h": (4, timedelta(minutes=15)),  # 4 points, 15min each
+            "6h": (12, timedelta(minutes=30)),  # 12 points, 30min each
+            "24h": (24, timedelta(hours=1)),  # 24 points, 1h each
+            "7d": (28, timedelta(hours=6)),  # 28 points, 6h each
         }
         return horizon_map[horizon]
 
-    def _calculate_metrics(
-        self,
-        actual: np.ndarray,
-        predicted: np.ndarray
-    ) -> ModelMetrics:
+    def _calculate_metrics(self, actual: np.ndarray, predicted: np.ndarray) -> ModelMetrics:
         """
         Calculate model accuracy metrics.
 
@@ -305,10 +291,7 @@ class ForecastingService:
         r_squared = 1 - (ss_res / (ss_tot + 1e-10))
 
         return ModelMetrics(
-            mape=float(mape),
-            rmse=float(rmse),
-            mae=float(mae),
-            r_squared=float(r_squared)
+            mape=float(mape), rmse=float(rmse), mae=float(mae), r_squared=float(r_squared)
         )
 
     def generate_forecast(
@@ -318,7 +301,7 @@ class ForecastingService:
         historical_data: np.ndarray,
         horizon: ForecastHorizon = "24h",
         confidence_level: float = 0.95,
-        model_type: ModelType = "arima"
+        model_type: ModelType = "arima",
     ) -> ForecastResult:
         """
         Generate a forecast for a given signal.
@@ -353,9 +336,7 @@ class ForecastingService:
 
         # Generate forecasts
         forecasts, lower_bounds, upper_bounds = model.forecast(
-            historical_data,
-            steps=steps,
-            confidence=confidence_level
+            historical_data, steps=steps, confidence=confidence_level
         )
 
         # Create forecast points
@@ -366,7 +347,7 @@ class ForecastingService:
                 predicted_value=float(forecasts[i]),
                 lower_bound=float(lower_bounds[i]),
                 upper_bound=float(upper_bounds[i]),
-                confidence=confidence_level
+                confidence=confidence_level,
             )
             for i in range(steps)
         ]
@@ -393,7 +374,7 @@ class ForecastingService:
                 "alpha": getattr(model, "alpha", None),
                 "beta": getattr(model, "beta", None),
             },
-            accuracy_metrics=metrics
+            accuracy_metrics=metrics,
         )
 
         return ForecastResult(
@@ -402,15 +383,12 @@ class ForecastingService:
             forecast_horizon=horizon,
             generated_at=datetime.utcnow(),
             forecasts=forecast_points,
-            model_info=model_info
+            model_info=model_info,
         )
 
 
 # Utility functions for data preparation
-def prepare_event_count_data(
-    events: list[dict[str, Any]],
-    window_minutes: int = 60
-) -> np.ndarray:
+def prepare_event_count_data(events: list[dict[str, Any]], window_minutes: int = 60) -> np.ndarray:
     """
     Prepare event count time series data.
 
@@ -437,19 +415,14 @@ def prepare_event_count_data(
 
     while current_window <= end_time:
         next_window = current_window + window_delta
-        count = sum(
-            1 for e in sorted_events
-            if current_window <= e["timestamp"] < next_window
-        )
+        count = sum(1 for e in sorted_events if current_window <= e["timestamp"] < next_window)
         counts.append(float(count))
         current_window = next_window
 
     return np.array(counts) if counts else np.array([0.0])
 
 
-def prepare_latency_data(
-    latency_metrics: list[dict[str, Any]]
-) -> np.ndarray:
+def prepare_latency_data(latency_metrics: list[dict[str, Any]]) -> np.ndarray:
     """
     Prepare latency time series data.
 
@@ -459,15 +432,10 @@ def prepare_latency_data(
     Returns:
         Array of latency values
     """
-    return np.array([
-        m.get("p95", m.get("value", 0.0))
-        for m in latency_metrics
-    ])
+    return np.array([m.get("p95", m.get("value", 0.0)) for m in latency_metrics])
 
 
-def prepare_error_rate_data(
-    request_metrics: list[dict[str, Any]]
-) -> np.ndarray:
+def prepare_error_rate_data(request_metrics: list[dict[str, Any]]) -> np.ndarray:
     """
     Prepare error rate time series data.
 
@@ -507,7 +475,7 @@ if __name__ == "__main__":
         historical_data=historical_data,
         horizon="24h",
         confidence_level=0.95,
-        model_type="arima"
+        model_type="arima",
     )
 
     print(f"\nForecast generated at: {result.generated_at}")
@@ -516,11 +484,11 @@ if __name__ == "__main__":
     print(f"Model: {result.model_info.type}")
     print(f"Accuracy - MAPE: {result.model_info.accuracy_metrics.mape:.2f}%")
     print(f"Accuracy - RMSE: {result.model_info.accuracy_metrics.rmse:.2f}")
-    print(f"\nFirst 5 forecast points:")
+    print("\nFirst 5 forecast points:")
     for i, fp in enumerate(result.forecasts[:5]):
         print(
             f"  {fp.timestamp.strftime('%Y-%m-%d %H:%M')}: "
             f"{fp.predicted_value:.2f} "
             f"[{fp.lower_bound:.2f}, {fp.upper_bound:.2f}] "
-            f"({fp.confidence*100:.0f}% confidence)"
+            f"({fp.confidence * 100:.0f}% confidence)"
         )

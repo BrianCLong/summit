@@ -4,11 +4,10 @@ import json
 import os
 import sys
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Callable, Dict, List, Optional
-
 
 METRIC_DIR = Path(os.getenv("BACKUP_METRIC_DIR", "/tmp/backup-metrics"))
 ARTIFACT_DIR = Path(os.getenv("BACKUP_ARTIFACT_DIR", "/tmp/backup-artifacts"))
@@ -22,10 +21,10 @@ class BackupTarget:
 
 
 def _timestamp() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
-def _write_metric(metric: str, value: float, labels: Optional[Dict[str, str]] = None) -> None:
+def _write_metric(metric: str, value: float, labels: dict[str, str] | None = None) -> None:
     labels = labels or {}
     METRIC_DIR.mkdir(parents=True, exist_ok=True)
     label_str = "".join([f'{{{k}="{v}"}}' for k, v in sorted(labels.items())])
@@ -92,7 +91,7 @@ def _verify_typesense(path: Path) -> bool:
     return path.exists()
 
 
-def build_targets() -> List[BackupTarget]:
+def build_targets() -> list[BackupTarget]:
     return [
         BackupTarget("postgres", _backup_postgres, _verify_postgres),
         BackupTarget("neo4j", _backup_neo4j, _verify_neo4j),
@@ -118,7 +117,7 @@ def run_backup(store: str) -> Path:
     return artifact
 
 
-def run_verify(store: str, artifact: Optional[Path]) -> bool:
+def run_verify(store: str, artifact: Path | None) -> bool:
     targets = {t.name: t for t in build_targets()}
     target = targets.get(store)
     if not target:
@@ -134,7 +133,7 @@ def run_verify(store: str, artifact: Optional[Path]) -> bool:
     return ok
 
 
-def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Backup orchestrator")
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -148,7 +147,7 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     if args.command == "backup":
         run_backup(args.store)

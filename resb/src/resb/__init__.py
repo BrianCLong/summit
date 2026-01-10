@@ -7,14 +7,14 @@ from .constraints import (
     LessEqualConstraint,
     RangeConstraint,
 )
-from .generator import RESBGenerator, BoostResult
+from .generator import BoostResult, RESBGenerator
 
 __all__ = [
-    "RESBConfig",
+    "BoostResult",
     "DenialConstraint",
     "GreaterEqualConstraint",
     "LessEqualConstraint",
-    "RangeConstraint",
+    "RESBConfig",
     "RESBGenerator",
-    "BoostResult",
+    "RangeConstraint",
 ]

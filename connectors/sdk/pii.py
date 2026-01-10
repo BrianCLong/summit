@@ -3,7 +3,7 @@
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class PIISeverity(Enum):
@@ -32,8 +32,8 @@ class PIIField:
     description: str
     severity: PIISeverity
     redaction_policy: RedactionPolicy
-    legal_basis: Optional[str] = None
-    pattern: Optional[str] = None  # Regex pattern for detection
+    legal_basis: str | None = None
+    pattern: str | None = None  # Regex pattern for detection
 
 
 class PIIDetector:
@@ -51,11 +51,11 @@ class PIIDetector:
         "name": r"\b[A-Z][a-z]+ [A-Z][a-z]+\b",  # Simple name pattern
     }
 
-    def __init__(self, pii_fields: List[PIIField]):
+    def __init__(self, pii_fields: list[PIIField]):
         self.pii_fields = {field.field_name: field for field in pii_fields}
         self.detection_log = []
 
-    def scan_value(self, value: Any, field_name: str = None) -> Dict[str, Any]:
+    def scan_value(self, value: Any, field_name: str = None) -> dict[str, Any]:
         """
         Scan a value for PII.
 
@@ -87,7 +87,7 @@ class PIIDetector:
 
         return {"contains_pii": False, "pii_types": [], "severity": None}
 
-    def _get_max_severity(self, field_name: str) -> Optional[PIISeverity]:
+    def _get_max_severity(self, field_name: str) -> PIISeverity | None:
         """Get the maximum severity for a field."""
         if field_name and field_name in self.pii_fields:
             return self.pii_fields[field_name].severity
@@ -151,7 +151,7 @@ class PIIDetector:
         else:
             return "*" * len(value)
 
-    def process_record(self, record: Dict[str, Any]) -> tuple[Dict[str, Any], List[Dict]]:
+    def process_record(self, record: dict[str, Any]) -> tuple[dict[str, Any], list[dict]]:
         """
         Process a full record, applying PII policies.
 
@@ -175,7 +175,7 @@ class PIIDetector:
 
         return processed, detections
 
-    def get_pii_report(self) -> Dict[str, Any]:
+    def get_pii_report(self) -> dict[str, Any]:
         """Get a summary report of PII detections."""
         return {
             "total_actions": len(self.detection_log),
@@ -183,6 +183,6 @@ class PIIDetector:
             "fields_with_pii": list(set(entry["field"] for entry in self.detection_log)),
         }
 
-    def get_field_info(self, field_name: str) -> Optional[PIIField]:
+    def get_field_info(self, field_name: str) -> PIIField | None:
         """Get PII configuration for a specific field."""
         return self.pii_fields.get(field_name)
