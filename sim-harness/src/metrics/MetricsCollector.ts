@@ -3,7 +3,6 @@
  * Collects and aggregates performance and quality metrics
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import {
   SessionMetrics,
   AggregatedMetrics,

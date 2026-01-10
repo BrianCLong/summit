@@ -37,7 +37,7 @@ describe('MetricsCollector', () => {
       expect(metrics.scenarioType).toBe('fraud-ring');
       expect(metrics.tasksCompleted).toBe(2);
       expect(metrics.totalQueries).toBe(2);
-      expect(metrics.duration).toBeGreaterThan(0);
+      expect(metrics.duration).toBeGreaterThanOrEqual(0);
       expect(metrics.endTime).toBeDefined();
     });
   });

@@ -3,7 +3,7 @@
  * Generates synthetic graph/case data for various investigation scenarios
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import {
   ScenarioData,
   ScenarioParameters,
@@ -141,7 +141,7 @@ export class ScenarioGenerator {
     for (let i = 0; i < accountCount; i++) {
       entities.push({
         type: 'ACCOUNT',
-        name: `Account-${uuidv4().substring(0, 8)}`,
+        name: `Account-${randomUUID().substring(0, 8)}`,
         properties: {
           account_number: this.generateAccountNumber(),
           bank: this.generateBankName(),
@@ -246,6 +246,31 @@ export class ScenarioGenerator {
           role: this.rng.choice(['supporter', 'courier', 'contact']),
           involvement_level: this.rng.choice(['suspected', 'confirmed']),
           surveillance_status: this.rng.choice(['active', 'inactive', 'pending']),
+        },
+      });
+    }
+
+    if (!entities.some((e) => e.type === 'PERSON' && e.properties.role === 'cell_leader')) {
+      entities.push({
+        type: 'PERSON',
+        name: this.generatePersonName(),
+        properties: {
+          role: 'cell_leader',
+          radicalization_date: this.generateDate(params.temporalSpan),
+          threat_level: 'critical',
+          known_movements: this.rng.nextInt(3, 9),
+        },
+      });
+    }
+
+    if (!entities.some((e) => e.type === 'PERSON' && e.properties.role === 'operative')) {
+      entities.push({
+        type: 'PERSON',
+        name: this.generatePersonName(),
+        properties: {
+          role: 'operative',
+          involvement_level: 'confirmed',
+          surveillance_status: 'active',
         },
       });
     }
@@ -412,7 +437,7 @@ export class ScenarioGenerator {
       } else if (rand < 0.7) {
         entities.push({
           type: 'ACCOUNT',
-          name: `Account-${uuidv4().substring(0, 8)}`,
+          name: `Account-${randomUUID().substring(0, 8)}`,
           properties: {
             account_type: this.rng.choice(['offshore', 'domestic', 'shell']),
             suspicious_transfers: this.rng.nextInt(5, 50),
@@ -546,7 +571,7 @@ export class ScenarioGenerator {
     for (let i = 0; i < placementCount; i++) {
       entities.push({
         type: 'ACCOUNT',
-        name: `Account-${uuidv4().substring(0, 8)}`,
+        name: `Account-${randomUUID().substring(0, 8)}`,
         properties: {
           stage: 'placement',
           bank: this.generateBankName(),
@@ -572,7 +597,7 @@ export class ScenarioGenerator {
       } else {
         entities.push({
           type: 'ACCOUNT',
-          name: `Account-${uuidv4().substring(0, 8)}`,
+          name: `Account-${randomUUID().substring(0, 8)}`,
           properties: {
             stage: 'layering',
             complexity_score: this.rng.nextInt(50, 95),

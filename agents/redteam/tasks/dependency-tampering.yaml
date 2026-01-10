@@ -1,0 +1,36 @@
+task_id: REDTEAM-DEPTAMPER
+agent_id: agent-redteam
+prompt_ref:
+  id: agent-native-loop-n4
+  version: v1
+  sha256: 419717c7891d6943a948ae678ae59f03092e30a699083765300081a38c30cd94
+  path: prompts/governance/agent-native-loop-n4.md
+declared_scope:
+  paths:
+    - sim-harness/agent-redteam/**
+    - sim-harness/src/agent-redteam/**
+    - agents/redteam/**
+    - artifacts/agent-runs/**
+  domains:
+    - supply-chain
+    - governance
+    - testing
+allowed_operations:
+  - create
+  - edit
+verification_requirements:
+  tier: A
+  artifacts:
+    - unit-test-logs
+    - artifact-ledger
+    - prompt-integrity-proof
+debt_budget:
+  permitted: 0
+  retirement_target: 1
+success_criteria:
+  - Dependency tampering scenario enforces registry integrity expectations
+  - Scenario artifacts include provenance mismatch notes
+  - Prompt registry validation blocks unsigned registry swaps
+stop_conditions:
+  - Registry lookup failure or policy violation detected
+  - Missing artifact path

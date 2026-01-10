@@ -4,7 +4,7 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import {
   GhostAnalystSession,
   WorkflowStep,
@@ -243,7 +243,7 @@ export class GhostAnalyst {
     workflow: Workflow,
     scenarioData: ScenarioData
   ): Promise<GhostAnalystSession> {
-    const sessionId = uuidv4();
+    const sessionId = randomUUID();
     const session: GhostAnalystSession = {
       id: sessionId,
       scenarioData,

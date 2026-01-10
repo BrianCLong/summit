@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "moduleResolution": "Node16",
+    "types": ["node", "jest"],
+    "module": "ESNext",
+    "target": "ES2022"
+  }
+}

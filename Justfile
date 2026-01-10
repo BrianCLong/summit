@@ -293,3 +293,8 @@ promote:
 
 rollback service="intelgraph":
     bash scripts/rollback.sh {{service}}
+
+# Redteam harness smoke test
+redteam:smoke:
+	pnpm -C sim-harness build
+	node sim-harness/dist/agent-redteam/runner.js --scenario exfiltration
