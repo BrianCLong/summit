@@ -504,6 +504,21 @@ if [[ -f "${SCRIPT_DIR}/emit_governance_identity_block.sh" ]]; then
     fi
 fi
 
+# Generate release artifact inventory
+if [[ -f "${SCRIPT_DIR}/generate_artifact_inventory.mjs" ]]; then
+    log_info "Generating release artifact inventory..."
+    node "${SCRIPT_DIR}/generate_artifact_inventory.mjs" \
+        --dir "${OUTPUT_DIR}" \
+        --output "${OUTPUT_DIR}/release-artifacts"
+
+    if [[ -d "${OUTPUT_DIR}/evidence" ]]; then
+        mkdir -p "${OUTPUT_DIR}/evidence/release-artifacts"
+        cp -a "${OUTPUT_DIR}/release-artifacts/." "${OUTPUT_DIR}/evidence/release-artifacts/"
+    fi
+else
+    log_warn "Release artifact inventory script not found"
+fi
+
 # Generate SHA256SUMS
 log_info "Generating SHA256SUMS..."
 cd "${OUTPUT_DIR}"

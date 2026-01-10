@@ -11,6 +11,7 @@ This is the canonical runbook for operators to perform releases.
   - `release-bundle/compliance-bundle-v*.tgz`
   - `evidence-bundle.tar.gz`
   - `sbom.json`
+  - `release-artifacts/inventory.json` + `release-artifacts/SHA256SUMS` (artifact inventory + hashes)
 - **RC vs GA behavior:**
   - RC releases (e.g., `v1.0.0-rc.1`) are marked as "prerelease" in GitHub Releases.
   - GA releases (e.g., `v1.0.0`) are marked as "latest" (unless configured otherwise).
@@ -91,6 +92,7 @@ This governance gate ensures that every release is explicitly verified against k
 - **Preflight:** Checks branch ancestry and ensures `package.json` version matches the git tag.
 - **Freeze:** Checks if the current time falls within a "deployment freeze" window. Requires `override_freeze=true` to bypass.
 - **Verify:** Validates checksums (`SHA256SUMS`) and ensures all required files exist in the bundle.
+- **Artifact Inventory:** Validates `release-artifacts/inventory.json` and `release-artifacts/SHA256SUMS` against the bundle contents.
 - **Security:**
   - **Canonical Repo Guard:** Ensures release is not running from a fork.
   - **SHA Pinned Actions:** Verifies that GitHub Actions uses immutable SHAs.
@@ -112,6 +114,10 @@ This governance gate ensures that every release is explicitly verified against k
   - RCs are for testing. Only stable `vX.Y.Z` tags update the "latest" pointer in package managers and GitHub.
 - **Where is `SHA256SUMS` used?**
   - It is used by downstream consumers and the `Verify` gate to ensure artifact integrity.
+- **How do I generate and verify the artifact inventory locally?**
+  - Generate: `node scripts/release/generate_artifact_inventory.mjs --dir <artifact-output-dir>`
+  - Verify: `node scripts/release/verify_artifact_inventory.mjs --dir <artifact-output-dir>`
+  - Inventory output: `release-artifacts/inventory.json` and `release-artifacts/SHA256SUMS` (bundled under `release-artifacts/` in CI artifacts).
 - **How to download artifacts?**
   - Go to the **Releases** page in GitHub and expand the "Assets" section for the specific version.
 

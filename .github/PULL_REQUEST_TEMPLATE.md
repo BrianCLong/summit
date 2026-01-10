@@ -52,4 +52,5 @@
 - [ ] `scripts/ci/verify-prompt-integrity.ts` run against current diff
 - [ ] Tests executed and linked in evidence
 - [ ] Documentation updated (if applicable)
+- [ ] Release artifact inventory generated/verified (if release pipeline changes)
 - [ ] Debt plan honored (budget respected or retired)

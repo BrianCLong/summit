@@ -74,6 +74,7 @@ Creates the comprehensive GA release bundle:
 - Generates release notes, operator script, checklist
 - Creates `ga_metadata.json` with release information
 - Generates `SHA256SUMS` for all artifacts
+- Generates deterministic release artifact inventory (`release-artifacts/inventory.json` + `release-artifacts/SHA256SUMS`)
 
 ### Stage 5: Publish Guard
 
@@ -82,6 +83,7 @@ Final verification before publishing:
 - Uses `publish_guard.sh` script
 - Verifies bundle completeness
 - Validates checksums
+- Verifies release artifact inventory consistency
 - Confirms lineage
 - Produces pass/fail report
 
@@ -108,6 +110,7 @@ The pipeline produces a single artifact: `ga-release-bundle-{tag}`
 | `publish_to_ga.sh`        | Operator script for publishing    |
 | `GA_RELEASE_CHECKLIST.md` | Step-by-step release checklist    |
 | `SHA256SUMS`              | Checksums for all artifacts       |
+| `release-artifacts/`      | Release artifact inventory + sums |
 | `verify-rc-lineage.sh`    | Lineage verification script       |
 | `verify-green-for-tag.sh` | CI verification script            |
 | `pipeline_metadata.json`  | Pipeline execution metadata       |
@@ -133,7 +136,8 @@ The pipeline produces a single artifact: `ga-release-bundle-{tag}`
     "release_notes": "github_release.md",
     "publish_script": "publish_to_ga.sh",
     "checklist": "GA_RELEASE_CHECKLIST.md",
-    "checksums": "SHA256SUMS"
+    "checksums": "SHA256SUMS",
+    "inventory": "release-artifacts/inventory.json"
   },
   "verification": {
     "lineage_required": true,

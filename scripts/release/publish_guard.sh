@@ -297,7 +297,20 @@ if [[ -n "$BUNDLE_DIR" && -d "$BUNDLE_DIR" ]]; then
         fi
     done
 
-    # Check 7: Operator script
+    # Check 7: Artifact inventory
+    if [[ -f "${BUNDLE_DIR}/release-artifacts/inventory.json" ]]; then
+        check_pass "Artifact inventory exists"
+    else
+        check_fail "Artifact inventory" "release-artifacts/inventory.json not found"
+    fi
+
+    if [[ -f "${BUNDLE_DIR}/release-artifacts/SHA256SUMS" ]]; then
+        check_pass "Artifact inventory checksums exist"
+    else
+        check_fail "Artifact inventory checksums" "release-artifacts/SHA256SUMS not found"
+    fi
+
+    # Check 8: Operator script
     if [[ -f "${BUNDLE_DIR}/publish_to_ga.sh" ]]; then
         if [[ -x "${BUNDLE_DIR}/publish_to_ga.sh" ]]; then
             check_pass "Operator script executable"
@@ -308,7 +321,7 @@ if [[ -n "$BUNDLE_DIR" && -d "$BUNDLE_DIR" ]]; then
         check_warn "Operator script" "publish_to_ga.sh not found"
     fi
 
-    # Check 8: Checksum verification
+    # Check 9: Checksum verification
     if [[ -f "${BUNDLE_DIR}/SHA256SUMS" ]]; then
         log_verbose "Verifying checksums..."
         cd "${BUNDLE_DIR}"
@@ -320,7 +333,19 @@ if [[ -n "$BUNDLE_DIR" && -d "$BUNDLE_DIR" ]]; then
         cd - > /dev/null
     fi
 
-    # Check 9: Metadata validation
+    # Check 10: Artifact inventory verification
+    if [[ -f "${SCRIPT_DIR}/verify_artifact_inventory.mjs" ]]; then
+        log_verbose "Verifying artifact inventory..."
+        if node "${SCRIPT_DIR}/verify_artifact_inventory.mjs" --dir "${BUNDLE_DIR}" > /dev/null 2>&1; then
+            check_pass "Artifact inventory verified"
+        else
+            check_fail "Artifact inventory" "Verification failed"
+        fi
+    else
+        check_fail "Artifact inventory" "verify_artifact_inventory.mjs not found"
+    fi
+
+    # Check 11: Metadata validation
     if [[ -f "${BUNDLE_DIR}/ga_metadata.json" ]]; then
         if command -v jq > /dev/null 2>&1; then
             if jq -e '.release.ga_tag' "${BUNDLE_DIR}/ga_metadata.json" > /dev/null 2>&1; then
@@ -338,15 +363,15 @@ if [[ -n "$BUNDLE_DIR" && -d "$BUNDLE_DIR" ]]; then
         fi
     fi
 
-    # Check 10: Governance lockfile exists (required for GA)
+    # Check 12: Governance lockfile exists (required for GA)
     if [[ -f "${BUNDLE_DIR}/governance/governance_lockfile.json" ]]; then
         check_pass "Governance lockfile exists"
 
-        # Check 11: Governance SHA256SUMS exists
+        # Check 13: Governance SHA256SUMS exists
         if [[ -f "${BUNDLE_DIR}/governance/governance_SHA256SUMS" ]]; then
             check_pass "Governance checksums exist"
 
-            # Check 12: Verify governance checksums
+            # Check 14: Verify governance checksums
             log_verbose "Verifying governance lockfile checksums..."
             cd "${BUNDLE_DIR}/governance"
             if sha256sum -c governance_SHA256SUMS > /dev/null 2>&1; then
@@ -359,7 +384,7 @@ if [[ -n "$BUNDLE_DIR" && -d "$BUNDLE_DIR" ]]; then
             check_fail "Governance checksums" "governance_SHA256SUMS not found"
         fi
 
-        # Check 13: Governance lockfile has valid structure
+        # Check 15: Governance lockfile has valid structure
         if command -v jq > /dev/null 2>&1; then
             if jq -e '.version and .sha and .files' "${BUNDLE_DIR}/governance/governance_lockfile.json" > /dev/null 2>&1; then
                 LOCKFILE_SHA=$(jq -r '.sha' "${BUNDLE_DIR}/governance/governance_lockfile.json")
@@ -380,7 +405,7 @@ if [[ -n "$BUNDLE_DIR" && -d "$BUNDLE_DIR" ]]; then
             fi
         fi
 
-        # Check 14: Governance signature verification (if signatures exist)
+        # Check 16: Governance signature verification (if signatures exist)
         if [[ -d "${BUNDLE_DIR}/governance/signatures" ]]; then
             if [[ -f "${BUNDLE_DIR}/governance/signatures/metadata.json" ]]; then
                 check_pass "Governance signature metadata exists"
