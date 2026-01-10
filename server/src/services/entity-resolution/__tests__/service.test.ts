@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { EntityResolutionService } from '../service';
 import { EntityInput } from '../models';
 import { provenanceLedger } from '../../../provenance/ledger';

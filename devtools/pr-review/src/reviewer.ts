@@ -46,11 +46,11 @@ export class Reviewer {
   private checkMissingTests() {
     const sourceFiles = this.diffs
       .filter(d => d.to && d.to.match(/\.(ts|js|py|go|rs)$/) && !d.to.match(/\.test\.|_test\.|spec\./))
-      .map(d => d.to!);
+      .map(d => d.to as string);
 
     const testFiles = this.diffs
       .filter(d => d.to && (d.to.match(/\.test\.|_test\.|spec\./) || d.to.includes('/tests/') || d.to.includes('/test/')))
-      .map(d => d.to!);
+      .map(d => d.to as string);
 
     // Simple heuristic: if source code changed but no test code changed, flag it.
     // This is a naive check; a better one would map src/foo.ts to tests/foo.test.ts

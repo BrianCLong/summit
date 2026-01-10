@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { timeSeriesIntelligence } from '../services/TimeSeriesIntelligenceService.js';
 import { provenanceLedger } from '../provenance/ledger.js';
 

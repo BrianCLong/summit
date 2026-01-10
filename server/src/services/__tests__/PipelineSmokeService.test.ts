@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { PipelineSmokeService } from '../../services/PipelineSmokeService.js';
 import { runsRepo } from '../../maestro/runs/runs-repo.js';
 

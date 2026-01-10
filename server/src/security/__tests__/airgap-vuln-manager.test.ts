@@ -3,6 +3,7 @@
  * @module server/src/security/__tests__/airgap-vuln-manager.test
  */
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 

@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { TenantRepository } from '../../db/tenant_repository.js';
 
 // Mock getPostgresPool

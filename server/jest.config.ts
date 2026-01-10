@@ -4,6 +4,7 @@ const config: Config = {
   preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
+  setupFiles: ['<rootDir>/tests/setup/env.ts'],
   setupFilesAfterEnv: [
     '<rootDir>/tests/setup/jest.setup.cjs',
     'jest-extended/all',

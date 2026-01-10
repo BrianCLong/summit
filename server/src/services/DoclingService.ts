@@ -35,7 +35,7 @@ class DoclingService {
   constructor() {
     this.http = axios.create({
       baseURL: env.DOCLING_SVC_URL,
-      timeout: parseInt(env.DOCLING_SVC_TIMEOUT_MS, 10),
+      timeout: env.DOCLING_SVC_TIMEOUT_MS,
     });
   }
 

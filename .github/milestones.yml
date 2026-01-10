@@ -1,3 +1,19 @@
+- title: GA Hard Gate
+  description: Issues that block the GA release
+  state: open
+
+- title: 30-Day
+  description: Next 30-day priorities
+  state: open
+
+- title: 60-Day
+  description: Expanding the roadmap with medium-term priorities
+  state: open
+
+- title: Backlog
+  description: Lower-priority or grooming items
+  state: open
+
 - title: Assistant v1.1
   description: IntelGraph Assistant v1.1 Roadmap (6-week cycle)
   state: open

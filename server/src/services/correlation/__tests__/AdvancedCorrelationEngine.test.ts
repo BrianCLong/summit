@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { AdvancedCorrelationEngine } from '../AdvancedCorrelationEngine.js';
 import EntityCorrelationEngine from '../../EntityCorrelationEngine.js';
 

@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { budgetTracker } from '../budget-tracker.js';
 import { CostDomain } from '../types.js';
 

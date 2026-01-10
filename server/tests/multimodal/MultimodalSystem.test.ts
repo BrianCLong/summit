@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { AudioSentimentAnalyzer } from '../../src/services/audio/AudioSentimentAnalyzer';
 import { VisualEmotionAnalyzer } from '../../src/services/vision/VisualEmotionAnalyzer';
 import { MultimodalSentimentFusion } from '../../src/services/multimodal/MultimodalSentimentFusion';
