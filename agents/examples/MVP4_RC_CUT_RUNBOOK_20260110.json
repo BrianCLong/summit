@@ -1,0 +1,32 @@
+{
+  "task_id": "MVP4_RC_CUT_RUNBOOK_20260110",
+  "agent_id": "Jules",
+  "prompt_ref": {
+    "id": "runbooks-docs-update",
+    "version": "v1",
+    "sha256": "d8fa2fa89f5bb30b954a8fc1735794033cd55be52bc8aedce76dcb57948fac11",
+    "path": "prompts/docs/runbooks-update@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/releases/MVP4_RC_CUT_RUNBOOK.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/MVP4_RC_CUT_RUNBOOK_20260110.json"
+    ],
+    "domains": ["documentation", "operations", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["release-policy validation output", "release gating command logs"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "MVP4 RC cut runbook exists with deterministic steps and verification commands",
+    "Roadmap status timestamp updated to reflect RC runbook work"
+  ],
+  "stop_conditions": ["Release policy validation fails", "Governance compliance gate fails"]
+}
