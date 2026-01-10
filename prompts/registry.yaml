@@ -28,3 +28,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: malfunction-amplification-guard
+    version: v1
+    path: prompts/security/malfunction-amplification-guard.md
+    sha256: 48f68e9231a625d4ee09d1268282fef1fc1705f939e62bf313b4c74b43949108
+    description: Guardrails and regression harness prompt for malfunction amplification defenses.
+    scope:
+      paths:
+        - ga-graphai/packages/workcell-runtime/
+        - ga-graphai/packages/common-types/
+        - ga-graphai/packages/gateway/
+        - .github/workflows/
+        - SECURITY.md
+        - docs/roadmap/
+      domains:
+        - safety
+        - runtime
+        - ci
+        - provenance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

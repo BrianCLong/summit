@@ -150,6 +150,50 @@ const GraphNodeType = new GraphQLObjectType({
   },
 });
 
+const ProgressSignalType = new GraphQLObjectType({
+  name: 'ProgressSignal',
+  fields: {
+    goalStateHash: { type: GraphQLString },
+    artifactCount: { type: GraphQLInt },
+    outcomeFingerprint: { type: GraphQLString },
+  },
+});
+
+const GuardIncidentReasonType = new GraphQLObjectType({
+  name: 'GuardIncidentReason',
+  fields: {
+    type: { type: new GraphQLNonNull(GraphQLString) },
+    detail: { type: new GraphQLNonNull(GraphQLString) },
+  },
+});
+
+const GuardIncidentType = new GraphQLObjectType({
+  name: 'GuardIncident',
+  fields: {
+    incidentId: { type: new GraphQLNonNull(GraphQLString) },
+    orderId: { type: new GraphQLNonNull(GraphQLString) },
+    taskId: { type: GraphQLString },
+    triggeredAt: { type: new GraphQLNonNull(GraphQLString) },
+    replanRequired: { type: new GraphQLNonNull(GraphQLBoolean) },
+    reasons: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(GuardIncidentReasonType)),
+      ),
+    },
+  },
+});
+
+const SelfCheckResultType = new GraphQLObjectType({
+  name: 'SelfCheckResult',
+  fields: {
+    check: { type: new GraphQLNonNull(GraphQLString) },
+    flagged: { type: new GraphQLNonNull(GraphQLBoolean) },
+    promptUsed: { type: new GraphQLNonNull(GraphQLString) },
+    instruction: { type: new GraphQLNonNull(GraphQLString) },
+    rationale: { type: GraphQLString },
+  },
+});
+
 const ServiceContextType = new GraphQLObjectType({
   name: 'ServiceContext',
   fields: {
@@ -364,6 +408,7 @@ const WorkTaskResultType = new GraphQLObjectType({
       ),
     },
     output: { type: new GraphQLNonNull(GraphQLJSON) },
+    progress: { type: ProgressSignalType },
   },
 });
 
@@ -391,6 +436,12 @@ const WorkOrderResultType = new GraphQLObjectType({
       type: new GraphQLNonNull(
         new GraphQLList(new GraphQLNonNull(GraphQLString)),
       ),
+    },
+    guardIncidents: {
+      type: new GraphQLList(new GraphQLNonNull(GuardIncidentType)),
+    },
+    selfChecks: {
+      type: new GraphQLList(new GraphQLNonNull(SelfCheckResultType)),
     },
   },
 });
@@ -425,6 +476,15 @@ const PolicyEvaluationInput = new GraphQLInputObjectType({
   },
 });
 
+const ProgressSignalInputType = new GraphQLInputObjectType({
+  name: 'ProgressSignalInput',
+  fields: {
+    goalStateHash: { type: GraphQLString },
+    artifactCount: { type: GraphQLInt },
+    outcomeFingerprint: { type: GraphQLString },
+  },
+});
+
 const WorkTaskInputType = new GraphQLInputObjectType({
   name: 'WorkTaskInput',
   fields: {
@@ -434,6 +494,7 @@ const WorkTaskInputType = new GraphQLInputObjectType({
     resource: { type: new GraphQLNonNull(GraphQLString) },
     payload: { type: new GraphQLNonNull(GraphQLJSON) },
     requiredAuthority: { type: GraphQLInt },
+    progress: { type: ProgressSignalInputType },
   },
 });
 

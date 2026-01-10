@@ -411,6 +411,12 @@ export interface ControlEvidenceBundle {
   readOnly: boolean;
 }
 
+export interface ProgressSignal {
+  goalStateHash?: string;
+  artifactCount?: number;
+  outcomeFingerprint?: string;
+}
+
 export type WorkTaskStatus = 'success' | 'rejected' | 'failed';
 
 export interface WorkTaskInput {
@@ -420,6 +426,7 @@ export interface WorkTaskInput {
   resource: string;
   payload: Record<string, unknown>;
   requiredAuthority?: number;
+  progress?: ProgressSignal;
 }
 
 export interface WorkTaskResult {
@@ -427,6 +434,7 @@ export interface WorkTaskResult {
   status: WorkTaskStatus;
   logs: string[];
   output: Record<string, unknown>;
+  progress?: ProgressSignal;
 }
 
 export interface WorkOrderSubmission {
@@ -440,6 +448,46 @@ export interface WorkOrderSubmission {
   attributes?: Record<string, string | number | boolean>;
   tasks: WorkTaskInput[];
   metadata?: Record<string, unknown>;
+}
+
+export interface GuardIncidentReason {
+  type:
+    | 'repetition'
+    | 'semantic-repetition'
+    | 'no-progress'
+    | 'budget-exhausted'
+    | 'malfunction-detected';
+  detail: string;
+}
+
+export interface GuardIncident {
+  incidentId: string;
+  orderId: string;
+  taskId?: string;
+  triggeredAt: string;
+  reasons: GuardIncidentReason[];
+  replanRequired: boolean;
+}
+
+export interface SelfCheckResult {
+  check: 'policy' | 'malfunction';
+  flagged: boolean;
+  promptUsed: string;
+  instruction: string;
+  rationale?: string;
+}
+
+export interface MalfunctionCheckPrompts {
+  policyViolationPrompt: string;
+  malfunctionPrompt: string;
+}
+
+export interface WorkcellGuardrailConfig {
+  identicalActionThreshold: number;
+  semanticSimilarityThreshold: number;
+  noProgressWindow: number;
+  toolCallBudget: number;
+  malfunctionPrompts: MalfunctionCheckPrompts;
 }
 
 export type SelfEditStatus =
@@ -512,6 +560,8 @@ export interface WorkOrderResult {
   tasks: WorkTaskResult[];
   obligations: PolicyObligation[];
   reasons: string[];
+  guardIncidents?: GuardIncident[];
+  selfChecks?: SelfCheckResult[];
 }
 
 export interface WorkcellToolHandlerContext {
