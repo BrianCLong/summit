@@ -48,3 +48,10 @@ Centralized index of commands, outputs, and artifact locations for GA verificati
 - **SBOM**: `sbom.json` in repo root.
 - **Provenance**: `artifacts/provenance/` (if generated).
 - **Screenshots/Reports**: Store under `artifacts/evidence/` with date-stamped subfolders.
+
+
+## Proposed Claims
+
+| Command | Status | Evidence | Notes |
+| --- | --- | --- | --- |
+| `TBD` | ⚠️ Pending | Claim SEC-001: Summit ensures total zero-know... | test needed |
