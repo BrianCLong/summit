@@ -228,6 +228,17 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Security Guardrails
+        run: |
+          echo "🛡️ Running Security Guardrails..."
+
+          echo "1. Secrets Scan"
+          chmod +x scripts/ci/scan_secrets.sh
+          ./scripts/ci/scan_secrets.sh --full
+
+          echo "2. Dependency Audit"
+          node scripts/ci/security_audit_gate.mjs
+
       - name: Run Release Ready
         id: ready
         run: |
@@ -344,6 +355,21 @@ jobs:
               --workflow-run "${{ github.run_id }}" || true
           fi
 
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.3.0
+        with:
+          cosign-release: "v2.2.2"
+
+      - name: Sign Provenance (Keyless)
+        run: |
+          echo "Signing provenance.json with Keyless OIDC..."
+          cosign sign-blob --yes \
+            staging/ga-bundle/provenance.json \
+            --output-signature staging/ga-bundle/provenance.json.sig \
+            --output-certificate staging/ga-bundle/provenance.json.pem
+
+          echo "Signature created: staging/ga-bundle/provenance.json.sig"
+
       - name: Upload GA Bundle
         uses: actions/upload-artifact@v4
         with:
@@ -382,6 +408,18 @@ jobs:
         with:
           name: verification-output
           path: staging/verification
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.3.0
+        with:
+          cosign-release: "v2.2.2"
+
+      - name: Verify Signed Bundle (Strict)
+        env:
+          EXPECTED_OIDC_ISSUER: https://token.actions.githubusercontent.com
+        run: |
+          chmod +x scripts/release/verify-release-bundle.mjs
+          node scripts/release/verify-release-bundle.mjs --path staging/ga-bundle --strict
 
       - name: Run Publish Guard
         id: guard
