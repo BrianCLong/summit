@@ -1,0 +1,12 @@
+sequenceDiagram
+  participant Dev as Developer
+  participant Make as Makefile
+  participant UI as UI (http://localhost:3000)
+  participant GW as Gateway (http://localhost:8080/healthz)
+
+  Dev->>Make: make smoke
+  Make->>UI: GET /
+  UI-->>Make: 200 OK
+  Make->>GW: GET /healthz
+  GW-->>Make: 200 OK
+  Make-->>Dev: Smoke test complete

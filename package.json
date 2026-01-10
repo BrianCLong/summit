@@ -47,6 +47,7 @@
     "db:reset": "npm run db:migrate && npm run db:seed",
     "db:migrate:neo4j": "npx ts-node --esm scripts/migrate.ts",
     "health": "chmod +x scripts/health-check.sh && scripts/health-check.sh",
+    "docs:check": "scripts/docs/check.sh",
     "install:pm": "node scripts/select-pm.js",
     "schema:diff": "npx ts-node scripts/schema-diff.ts --version=v1 --output=json",
     "schema:diff:text": "npx ts-node scripts/schema-diff.ts --version=v1 --output=text",

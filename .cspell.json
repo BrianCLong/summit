@@ -1,0 +1,28 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "IntelGraph",
+    "Neo4j",
+    "Runbook",
+    "runbooks",
+    "runbook",
+    "Maestro",
+    "prov",
+    "NLQ",
+    "OTLP",
+    "OTEL",
+    "GraphQL",
+    "Redis",
+    "PostgreSQL",
+    "pnpm",
+    "Docker",
+    "Compose",
+    "Runstate",
+    "Mermaid",
+    "Neo",
+    "pg_isready",
+    "telemetry"
+  ],
+  "ignorePaths": ["node_modules", "pnpm-lock.yaml", "**/.git/**"]
+}

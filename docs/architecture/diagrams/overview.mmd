@@ -1,0 +1,22 @@
+graph TD
+  subgraph DevStack["docker-compose.dev.yaml (make up)"]
+    GW[Gateway :8080]
+    UI[UI :3000]
+    PL[Prov Ledger :8101]
+    PC[Policy Compiler :8102]
+    NLQ[AI NLQ :8103]
+    ER[ER Service :8104]
+    ING[Ingest :8105]
+    ZK[ZK-TX :8106]
+    PRED[Predictd :4001]
+  end
+
+  subgraph BaseStack["docker-compose.yml"]
+    NEO[(Neo4j :7474/7687)]
+    PG[(Postgres :5432)]
+    REDIS[(Redis :6379)]
+    PL2[Prov Ledger :4010]
+    PLC[Policy LAC :4000]
+    NL2[NL2Cypher :4020]
+    RS[Report Studio :3000]
+  end

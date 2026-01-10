@@ -13,18 +13,7 @@ SHELL_SERVICE ?= gateway
 VENV_DIR ?= .venv
 VENV_BIN = $(VENV_DIR)/bin
 PYTHON ?= python3
-PACKAGE_VERSION ?= $(shell $(PYTHON) - <<'PY'
-import tomllib
-from pathlib import Path
-
-pyproject = Path("pyproject.toml")
-try:
-    with pyproject.open('rb') as f:
-	data = tomllib.load(f)
-    print(data.get("project", {}).get("version", "latest"))
-except FileNotFoundError:
-    print("latest")
-PY)
+PACKAGE_VERSION ?= $(shell $(PYTHON) -c "import tomllib; from pathlib import Path; p=Path('pyproject.toml'); print((tomllib.load(p.open('rb')).get('project', {}).get('version', 'latest')) if p.exists() else 'latest')")
 IMAGE_NAME ?= intelgraph-platform
 IMAGE_TAG ?= $(PACKAGE_VERSION)
 IMAGE ?= $(IMAGE_NAME):$(IMAGE_TAG)
@@ -98,7 +87,7 @@ smoke: bootstrap up ## Fresh clone smoke test: bootstrap -> up -> health check
 	@echo "Checking UI health..."
 	@curl -s -f http://localhost:3000 > /dev/null && echo "✅ UI is up" || (echo "❌ UI failed" && exit 1)
 	@echo "Checking Gateway health..."
-	@curl -s -f http://localhost:8080/health > /dev/null && echo "✅ Gateway is up" || (echo "❌ Gateway failed" && exit 1)
+	@curl -s -f http://localhost:8080/healthz > /dev/null && echo "✅ Gateway is up" || (echo "❌ Gateway failed" && exit 1)
 	@echo "Smoke test complete."
 
 rollback: ## Rollback deployment (Usage: make rollback v=v3.0.0 env=prod)

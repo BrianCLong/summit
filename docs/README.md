@@ -1,46 +1,33 @@
-# Summit Documentation Index
+---
+title: "Documentation index"
+summary: "Navigation hub for MVP-4 GA with links to tutorials, how-tos, reference, and operations."
+version: "MVP-4-GA"
+lastUpdated: "2025-12-30"
+owner: "docs"
+---
 
-Use this page as the fast path to the docs you need. The golden path details live in `README.md`; onboarding mirrors it with only the steps required to get productive.
+# Summit documentation index
 
-## If you only have 30 minutes
+Use this page to reach any MVP-4 answer in three clicks or fewer.
 
-- Spin up the stack: follow **[Developer Onboarding](ONBOARDING.md#-quickstart-30-minutes-to-productive)** and run `make bootstrap && make up && make smoke`.
-- Run tests: `pnpm test` for the suite, `pnpm smoke` for the golden path harness.
-- Skim architecture: **[ARCHITECTURE.md](ARCHITECTURE.md)** for high-level components, data stores, and boundaries.
+## Information architecture
 
-## Getting Started
+- **[Get Started](get-started/get-started.md)** – install, run, and confirm first success.
+- **[Tutorials](tutorials/first-runbook.md)** – guided happy-path walk-through.
+- **[How-tos](how-tos/README.md)** – targeted tasks (smoke tests, config validation, migrations).
+- **[Reference](reference/README.md)** – CLI, config, API, and error catalog.
+- **[Concepts](concepts/README.md)** – core terminology and glossary anchors.
+- **[Architecture](architecture/overview.md)** – high-level component map and data flow.
+- **[Operations](operations/README.md)** – deployment, runbooks, and observability hooks.
+- **[Troubleshooting](troubleshooting/README.md)** – fix-it playbook for common symptoms.
+- **[Release Notes](release-notes/mvp-4-ga.md)** – GA highlights, changes, and known items.
+- **[Glossary](glossary.md)** – terms and abbreviations.
 
-- **[README.md](../README.md)** – Single source of truth for prerequisites, golden path commands, and service endpoints.
-- **[ONBOARDING.md](ONBOARDING.md)** – Day-one setup that mirrors the README without duplicating every detail.
-- **[GOLDEN_PATH.md](GOLDEN_PATH.md)** – Additional context on the Investigation → Entities → Relationships → Copilot → Results workflow.
+## Latest docs
 
-## Runbooks & Operations
+The `docs/latest/` alias mirrors this GA set so external links remain stable.
 
-- **[RUNBOOKS/INDEX.md](../RUNBOOKS/INDEX.md)** – Operational guides and incident playbooks.
-- **[RUNBOOKS/dev-bootstrap.md](../RUNBOOKS/dev-bootstrap.md)** – Local stack bring-up with verification steps.
-- **[RUNBOOKS/schema-migration-playbook.md](../RUNBOOKS/schema-migration-playbook.md)** – Safe database migration procedures.
+## Next steps
 
-## Security & Governance
-
-- **[SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md)** – Security posture and privacy controls.
-- **[AI_GOVERNANCE_AGENT_FLEET.md](AI_GOVERNANCE_AGENT_FLEET.md)** – AI governance framework, agent fleet management, and incident response procedures.
-- **[COMPLIANCE.md](COMPLIANCE.md)** and **[DATA_RETENTION_POLICY.md](DATA_RETENTION_POLICY.md)** – Compliance, retention, and auditing references.
-- **[CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md)** – Expected behavior and reporting channels.
-
-## Communications
-
-- **[Communications Playbook](./communications/communications-playbook-execution-layer.md)** - The canonical communications standard for Summit/Intelgraph.
-
-## Product & Architecture References
-
-- **[RFI_CAPABILITIES_SUMMARY.md](RFI_CAPABILITIES_SUMMARY.md)** – RFI-ready capabilities summary with metrics and differentiators.
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** – Core components, data flows, and dependencies.
-- **[DATA_MODEL.md](DATA_MODEL.md)** – Graph schema and storage expectations.
-- **[DEPLOYMENT.md](DEPLOYMENT.md)** and **[README-DEPLOY.md](README-DEPLOY.md)** – Deployment topologies and environment guidance.
-- **[ROADMAP.md](ROADMAP.md)** – Current objectives and sequencing (historical plans live under `docs/archived/`).
-- **[suite_unification_architecture.md](suite_unification_architecture.md)** – Blueprint for unifying modules, contracts, identity, billing, UX shell, and governance into a cohesive suite.
-
-## Archived & Historical Material
-
-- `docs/archived/` – Historical documents retained for context; not authoritative for current workflows.
-- See [`docs/archived/README.md`](archived/README.md) for archive conventions and retrieval hints.
+- Start with the [Get Started guide](get-started/get-started.md).
+- If you hit a failure, jump to [Troubleshooting](troubleshooting/README.md) for targeted fixes.

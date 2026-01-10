@@ -1,128 +1,44 @@
-[![Copilot Playbook](https://img.shields.io/badge/Copilot-Playbook-blue)](docs/Copilot-Playbook.md)
-[![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/BrianCLong/summit?utm_source=oss&utm_medium=github&utm_campaign=BrianCLong%2Fsummit&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)](https://coderabbit.ai)
-[![CI (Lint & Unit)](https://github.com/BrianCLong/summit/actions/workflows/ci-lint-and-unit.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/ci-lint-and-unit.yml)
-[![CI (Golden Path)](https://github.com/BrianCLong/summit/actions/workflows/ci-golden-path.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/ci-golden-path.yml)
-[![Developer Radar](https://img.shields.io/badge/Developer%20Radar-Active-blue)](docs/dev/radar-dashboard.md)
-[![Security](https://github.com/BrianCLong/summit/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/security.yml)
-[![Release](https://github.com/BrianCLong/summit/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/release.yml)
-[![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
-
-## 🎉 **NEW in v2.0.0** (December 2025)
-
-**Summit v2.0.0 is a major release** consolidating 12,000+ PRs into an enterprise-grade intelligence platform:
-
-- ✅ **Enterprise Infrastructure**: Load balancing, multi-tier caching, telemetry
-- ✅ **Advanced AI/ML**: Multimodal extraction with 8 Black Projects modules
-- ✅ **Security Hardening**: Rate limiting, GraphQL complexity limits, IDOR fixes
-- ✅ **Real-Time Systems**: Narrative simulation engine with REST API
-
-**[View Release Notes](CHANGELOG-v2.0.0.md)** | **[Migration Guide](docs/MIGRATION-v0.1-to-v2.0.md)** | **[Roadmap](docs/roadmap.md)**
-
----
-
 # Summit (IntelGraph)
 
-> **Enterprise Intelligence Platform** - Graph analytics, real-time collaboration, and AI-driven insights for high-stakes environments.
+> Enterprise intelligence platform delivering graph analytics, real-time collaboration, and AI-assisted investigations.
 
-## 🚀 Quickstart (< 60 Seconds)
+## What is inside
 
-We follow a **"Golden Path"** philosophy. If the build breaks, we stop and fix it.
+- **Data and orchestration**: Neo4j for graph state, PostgreSQL for structured data, Redis for caching and rate limits. (See `server/.env.example`.)
+- **APIs**: GraphQL surface for runbook execution (see `packages/graphql/schema.graphql`).
+- **Tooling**: Make targets and npm scripts for bootstrap, smoke testing, schema validation, and releases (`Makefile`, `package.json`).
 
-**Prerequisites:** Docker Desktop ≥ 4.x, Node 18+, pnpm 9, Python 3.11+.
+## Quickstart (copy/paste)
+
+Prerequisites: Docker, Node 18+, pnpm, Python 3.11+.
 
 ```bash
-# 1. Clone & Bootstrap
-git clone https://github.com/BrianCLong/summit.git
-cd summit
+# 1) Clone and bootstrap dependencies
 make bootstrap
 
-# 2. Start the Stack (Docker)
+# 2) Start the developer stack (Docker Compose)
 make up
 
-# 3. Verify (Smoke Test)
+# 3) Verify the stack
 make smoke
 ```
 
-**That's it.** You now have a running stack with API, UI, Graph DB, and Relational DB.
+You know it worked when `make smoke` reports the UI at `http://localhost:3000` and the gateway at `http://localhost:8080/healthz` as healthy.
 
-### Service Endpoints
+## Configuration
 
-- **Frontend**: http://localhost:3000
-- **GraphQL API**: http://localhost:4000/graphql (Apollo Playground)
-- **Neo4j Browser**: http://localhost:7474 (User: `neo4j`, Pass: `devpassword`)
-- **Adminer**: http://localhost:8080 (Postgres Admin)
-- **Grafana**: http://localhost:3001 (Observability)
+- Copy `.env.example` and `server/.env.example` to provide Neo4j, PostgreSQL, Redis, and OIDC values. Key variables include `DATABASE_URL`, `NEO4J_URI`, `REDIS_HOST`, `JWT_SECRET`, and `CORS_ORIGIN`.
+- Run `pnpm --filter intelgraph-server run config:validate` to confirm env files meet validation rules.
+- Set OpenTelemetry exporters with `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` and `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` if you want traces and metrics during local runs.
 
-👉 **[Detailed Onboarding Guide](docs/ONBOARDING.md)**
+## Common errors + fixes
 
----
+- **Smoke test UI check fails**: Ensure Docker is running and ports 3000/8080 are free before `make up`; rerun `make smoke` after containers stabilize.
+- **Database connection errors**: Verify `DATABASE_URL` in `server/.env.example` points to the running Postgres container (`postgres:16-alpine` in `docker-compose.yml`).
+- **GraphQL playground unreachable**: Confirm the server is running on the expected port (4000 for `npm run server:dev`, or the `PORT` set in `server/.env`) and that `CORS_ORIGIN` includes the UI origin.
 
-## 🏗️ Architecture
+## Support & contributing
 
-Summit is built on a modern, distributed stack designed for scalability and auditability.
-
-- **Frontend**: React 18, Vite, Material-UI.
-- **Backend**: Node.js, Express, Apollo GraphQL.
-- **Data Layer**:
-  - **Neo4j**: Graph relationships (Entities, Events).
-  - **PostgreSQL**: Structured data, Audit logs, Vector embeddings.
-  - **TimescaleDB**: Telemetry and metrics.
-  - **Redis**: Caching, Rate limiting, Real-time Pub/Sub.
-- **Orchestration**: Maestro (BullMQ) for background jobs and AI pipelines.
-
-👉 **[Read the full Architecture Guide](docs/ARCHITECTURE.md)**
-
----
-
-## 📦 Release Cadence
-
-We operate on a **2-week sprint cycle** managed by our automated Release Captain, **Jules**.
-
-- **Current Status**: Q4 2025 Strategic Sprints (Sprint 25+).
-- **Process**: Merge Train -> Golden Path CI -> Automated Release.
-- **Versioning**: Semantic Versioning (vX.Y.Z).
-
-👉 **[View Release Cadence & Process](docs/RELEASE_CADENCE.md)**
-
----
-
-## 🤝 Contributing
-
-We welcome contributions from humans and AI agents alike!
-
-- **Atomic PRs**: One feature per PR.
-- **Golden Path**: Ensure `make smoke` passes before submitting.
-- **Bots/Co-authors**: Please sign your commits and follow our [Agent Guidelines](AGENTS.md).
-
-👉 **[Read the Contributing Guide](CONTRIBUTING.md)**
-
----
-
-## ✅ CI & Quality Gates
-
-Our CI pipeline ("Fast Lane") enforces high standards:
-
-1.  **Lint & Unit**: Fast static analysis and unit tests.
-2.  **Golden Path**: Full-stack integration test (`make smoke`) in a clean environment.
-3.  **Security**: SAST, Dependency Scanning, Secret Detection.
-
----
-
-## 📚 Documentation
-
-- **[Documentation Index](docs/README.md)**: The central hub for all docs.
-- **[Onboarding](docs/ONBOARDING.md)**: Detailed setup guide.
-- **[API Reference](docs/api/README.md)**: GraphQL and REST API details.
-- **[Security](SECURITY.md)**: Security policy and reporting.
-
----
-
-## 📄 License
-
-**Summit Enterprise Edition**: Proprietary (see [LICENSE](LICENSE)).
-**Historical Open Source**: MIT (see [OSS-MIT-LICENSE](OSS-MIT-LICENSE)).
-
----
-
-**Summit Platform** - Next-Generation Intelligence Analysis
+- Read [CONTRIBUTING.md](CONTRIBUTING.md) for workflows and coding standards.
+- Follow the golden path targets in the Makefile (`make smoke`, `make test`) before opening a PR.
+- Security issues should be reported via [SECURITY.md](SECURITY.md).
