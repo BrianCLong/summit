@@ -1,0 +1,39 @@
+{
+  "task_id": "AGENTIC_ERA_BLUEPRINT_20260110",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "agentic-era-blueprint",
+    "version": "v1",
+    "sha256": "9e31afc0099c255cbe80116771aa1802727edf70efbfeddb7c375a113ae48e09",
+    "path": "prompts/agents/agentic-era-blueprint.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/agentic_trends_summit_blueprint.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/agents/agentic-era-blueprint.md",
+      "prompts/registry.yaml",
+      "agents/examples/AGENTIC_ERA_BLUEPRINT_TASK.json"
+    ],
+    "domains": ["documentation", "governance", "roadmap"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/agentic_trends_summit_blueprint.md", "docs/roadmap/STATUS.json"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Blueprint reflects governance-aligned guardrails and delivery checklist.",
+    "Roadmap status metadata updated with current revision note.",
+    "Prompt registry entry and task spec match declared scope."
+  ],
+  "stop_conditions": [
+    "Prompt hash mismatch against registry.",
+    "CI policy violation or governance drift detected.",
+    "PII or secret exposure risk identified."
+  ]
+}

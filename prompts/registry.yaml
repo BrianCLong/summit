@@ -28,3 +28,28 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: agentic-era-blueprint
+    version: v1
+    path: prompts/agents/agentic-era-blueprint.md
+    sha256: 9e31afc0099c255cbe80116771aa1802727edf70efbfeddb7c375a113ae48e09
+    description: Update the Summit agentic-era blueprint and roadmap status with governance alignment.
+    scope:
+      paths:
+        - docs/agentic_trends_summit_blueprint.md
+        - docs/roadmap/STATUS.json
+        - prompts/agents/agentic-era-blueprint.md
+        - prompts/registry.yaml
+        - agents/examples/AGENTIC_ERA_BLUEPRINT_TASK.json
+      domains:
+        - documentation
+        - governance
+        - roadmap
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
