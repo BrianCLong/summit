@@ -1,0 +1,42 @@
+{
+  "task_id": "COUNTER_INTEL_OSINT_V1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "counter-intel-osint",
+    "version": "v1",
+    "sha256": "47815c692c095e7d96d0f8c3f662d22e866a403318e8900f6c30a2c34885bfdb",
+    "path": "prompts/counter-intel-osint@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/playbooks/counter-intel-osint.md",
+      "scripts/osint/",
+      "docs/roadmap/STATUS.json",
+      "prompts/",
+      "agents/examples/"
+    ],
+    "domains": ["security", "documentation", "tooling", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "scripts/check-boundaries.cjs output",
+      "manual review of playbook and script help"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Playbook documents org enumeration, corporate-domain checks, and multi-manifest scanning.",
+    "Passive recon script supports org repo discovery and manifest scanning without intrusive access.",
+    "Roadmap status updated with the OSINT enhancement note."
+  ],
+  "stop_conditions": [
+    "CI failure in main.",
+    "Detection of PII in output.",
+    "Sandbox violation alert."
+  ]
+}

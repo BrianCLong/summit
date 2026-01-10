@@ -28,3 +28,29 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: counter-intel-osint
+    version: v1
+    path: prompts/counter-intel-osint@v1.md
+    sha256: 47815c692c095e7d96d0f8c3f662d22e866a403318e8900f6c30a2c34885bfdb
+    description: Enhance counter-intel OSINT playbook and passive recon tooling with org enumeration and manifest scanning.
+    scope:
+      paths:
+        - docs/playbooks/
+        - scripts/osint/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/
+      domains:
+        - security
+        - documentation
+        - tooling
+        - governance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
