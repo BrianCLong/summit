@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ReactFlow, {
   Node as FlowNode,
@@ -12,6 +12,7 @@ import ReactFlow, {
   Position,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 
 interface RunStep {
   id: string;
@@ -69,7 +70,15 @@ const getStatusIcon = (state: string) => {
   }
 };
 
-const CustomNode = ({ data }: { data: any }) => {
+interface CustomNodeData {
+  name: string;
+  state: RunStep['state'];
+  duration?: number;
+  traceId?: string;
+  traceUrl?: string | null;
+}
+
+const CustomNode = ({ data }: { data: CustomNodeData }) => {
   const colors = getNodeColor(data.state);
   const icon = getStatusIcon(data.state);
 
@@ -122,8 +131,22 @@ export default function RunViewer() {
   const [runData, setRunData] = useState<RunData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { isOffline } = useNetworkStatus();
+  const inFlightRef = useRef(false);
+  const runDataRef = useRef<RunData | null>(null);
+  const isOfflineRef = useRef(isOffline);
+  const [nodes, setNodes, onNodesChange] = useNodesState<CustomNodeData>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const previousOffline = useRef(isOffline);
+
+  useEffect(() => {
+    runDataRef.current = runData;
+  }, [runData]);
+
+  useEffect(() => {
+    isOfflineRef.current = isOffline;
+  }, [isOffline]);
 
   // Fetch run data with polling
   const fetchRunData = useCallback(async () => {
@@ -132,6 +155,22 @@ export default function RunViewer() {
       setLoading(false);
       return;
     }
+
+    if (isOfflineRef.current || inFlightRef.current) {
+      if (isOfflineRef.current) {
+        if (!runDataRef.current) {
+          setError(
+            'You are offline. Connect to load this run and resume auto-refresh.',
+          );
+          setLoading(false);
+        }
+      }
+      return;
+    }
+
+    inFlightRef.current = true;
+    setIsRefreshing(true);
+    setLoading((prev) => prev || !runDataRef.current);
 
     try {
       const response = await fetch(`/api/maestro/v1/runs/${runId}`);
@@ -146,6 +185,8 @@ export default function RunViewer() {
       console.error('Failed to fetch run data:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch run data');
     } finally {
+      inFlightRef.current = false;
+      setIsRefreshing(false);
       setLoading(false);
     }
   }, [runId]);
@@ -156,13 +197,25 @@ export default function RunViewer() {
 
     // Set up polling every 5 seconds if run is still active
     const pollInterval = setInterval(() => {
-      if (runData?.status === 'running' || runData?.status === 'pending') {
+      const status = runDataRef.current?.status;
+      if (
+        !isOfflineRef.current &&
+        (status === 'running' || status === 'pending')
+      ) {
         fetchRunData();
       }
     }, 5000);
 
     return () => clearInterval(pollInterval);
-  }, [fetchRunData, runData?.status]);
+  }, [fetchRunData]);
+
+  // Refresh once when coming back online
+  useEffect(() => {
+    if (previousOffline.current && !isOffline) {
+      fetchRunData();
+    }
+    previousOffline.current = isOffline;
+  }, [fetchRunData, isOffline]);
 
   // Generate nodes and edges from run data
   const { flowNodes, flowEdges } = useMemo(() => {
@@ -209,7 +262,10 @@ export default function RunViewer() {
 
     // Generate trace URL helper
     const generateTraceUrl = (traceId: string) => {
-      const tempoUrl = import.meta.env.VITE_OBS_TEMPO_URL;
+      const tempoUrl =
+        (typeof window !== 'undefined' &&
+          (window as any).__VITE_OBS_TEMPO_URL) ||
+        (globalThis as any)?.process?.env?.VITE_OBS_TEMPO_URL;
       if (tempoUrl && traceId) {
         return `${tempoUrl}/trace/${traceId}`;
       }
@@ -217,7 +273,7 @@ export default function RunViewer() {
     };
 
     // Create nodes with positions
-    const flowNodes: any[] = runData.steps.map((step, index) => {
+    const flowNodes: FlowNode<CustomNodeData>[] = runData.steps.map((step) => {
       const level = levels.get(step.id) || 0;
       const levelSteps = levelGroups.get(level) || [];
       const indexInLevel = levelSteps.indexOf(step.id);
@@ -242,7 +298,7 @@ export default function RunViewer() {
     });
 
     // Create edges
-    const flowEdges: any[] = [];
+    const flowEdges: FlowEdge[] = [];
     runData.steps.forEach((step) => {
       step.parents.forEach((parentId) => {
         flowEdges.push({
@@ -270,6 +326,23 @@ export default function RunViewer() {
     setEdges(flowEdges);
   }, [flowNodes, flowEdges, setNodes, setEdges]);
 
+  const offlineBanner = isOffline ? (
+    <div
+      role="status"
+      aria-live="polite"
+      className="bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2 flex items-center justify-between"
+      data-testid="offline-banner"
+    >
+      <div className="flex items-center gap-2">
+        <span aria-hidden="true">📡</span>
+        <span>
+          Offline: auto-refresh paused. Reconnect to sync the latest run graph.
+        </span>
+      </div>
+      <div className="text-sm text-amber-800">Retry is disabled while offline.</div>
+    </div>
+  ) : null;
+
   if (!runId) {
     return (
       <div className="p-6">
@@ -283,10 +356,11 @@ export default function RunViewer() {
     );
   }
 
-  if (loading) {
+  if (loading && !runData) {
     return (
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-4">Run Viewer</h1>
+        {offlineBanner}
         <div className="flex items-center justify-center h-64">
           <div className="text-lg">Loading run data...</div>
         </div>
@@ -294,19 +368,28 @@ export default function RunViewer() {
     );
   }
 
-  if (error) {
+  if (error && !runData) {
     return (
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-4">Run Viewer</h1>
+        {offlineBanner}
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <p className="text-red-800 font-semibold">Error loading run data:</p>
           <p className="text-red-600 mt-1">{error}</p>
           <button
             onClick={fetchRunData}
-            className="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            className="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed"
+            disabled={isOffline || isRefreshing}
+            aria-disabled={isOffline || isRefreshing}
+            data-testid="retry-button"
           >
-            Retry
+            {isRefreshing ? 'Retrying…' : 'Retry'}
           </button>
+          {isOffline && (
+            <p className="text-sm text-red-700 mt-2">
+              You are offline. Reconnect to enable retry and resume polling.
+            </p>
+          )}
         </div>
       </div>
     );
@@ -327,6 +410,7 @@ export default function RunViewer() {
 
   return (
     <div className="h-screen flex flex-col">
+      {offlineBanner}
       {/* Header */}
       <div className="p-4 border-b bg-white">
         <div className="flex items-center justify-between">
@@ -357,18 +441,45 @@ export default function RunViewer() {
           <div className="flex gap-2">
             <button
               onClick={fetchRunData}
-              className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled={isOffline || isRefreshing}
+              aria-disabled={isOffline || isRefreshing}
+              title={
+                isOffline
+                  ? 'Offline: refresh is paused until connectivity returns.'
+                  : undefined
+              }
+              data-testid="refresh-button"
             >
-              Refresh
+              {isRefreshing ? 'Refreshing…' : 'Refresh'}
             </button>
             {runData.status === 'running' && (
-              <div className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded">
-                Auto-refreshing (5s)
+              <div
+                className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded"
+                aria-live="polite"
+              >
+                {isOffline ? 'Auto-refresh paused (offline)' : 'Auto-refreshing (5s)'}
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {error && runData && (
+        <div className="px-4 py-2 bg-red-50 border-b border-red-200 text-red-800" role="status">
+          <div className="flex justify-between items-center">
+            <span>Latest refresh failed: {error}</span>
+            <button
+              onClick={fetchRunData}
+              className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled={isOffline || isRefreshing}
+              aria-disabled={isOffline || isRefreshing}
+            >
+              {isRefreshing ? 'Retrying…' : 'Retry now'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* DAG Visualization */}
       <div className="flex-1" role="region" aria-label="Run graph">
