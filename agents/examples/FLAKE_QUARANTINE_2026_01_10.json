@@ -1,0 +1,46 @@
+{
+  "task_id": "FLAKE_QUARANTINE_2026_01_10",
+  "agent_id": "Jules",
+  "prompt_ref": {
+    "id": "flake-quarantine-governance",
+    "version": "v1",
+    "sha256": "2a47cd388867d787a504c0a851663899f6d727993d42c07a058f99318023f135",
+    "path": "prompts/ci/flake-quarantine-governance.md"
+  },
+  "declared_scope": {
+    "paths": [
+      ".github/",
+      "scripts/ci/",
+      "schemas/",
+      "docs/release/",
+      "docs/roadmap/",
+      "tests/utils/",
+      "prompts/",
+      "agents/"
+    ],
+    "domains": ["governance", "ci", "quality"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "A",
+    "artifacts": [
+      "artifacts/flake/flake-registry-report.json",
+      "artifacts/flake/flake-encounters-report.json",
+      "artifacts/flake/flake-debt.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 1
+  },
+  "success_criteria": [
+    "Flake registry is schema-validated with enforced expirations.",
+    "Soft gates require registry-backed exceptions.",
+    "Release SLO reporting includes flake debt metrics.",
+    "Flake Debt issue automation updates owners with expiring entries."
+  ],
+  "stop_conditions": [
+    "CI validation fails on flake registry enforcement.",
+    "Governance checks detect scope violations."
+  ]
+}

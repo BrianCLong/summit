@@ -53,7 +53,7 @@ jobs:
         run: npx snyk test --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        continue-on-error: true # Non-blocking (token may not be available)
+        continue-on-error: true # Non-blocking (token may not be available) # flake-id: coe-ci-verify-snyk
 
       - name: Upload security scan results
         uses: actions/upload-artifact@v6
@@ -117,7 +117,7 @@ jobs:
 
       - name: Check governance compliance
         run: npm run check:governance || echo "Governance check skipped (script may not exist)"
-        continue-on-error: true # Non-blocking until governance engine is stable
+        continue-on-error: true # Non-blocking until governance engine is stable # flake-id: coe-ci-verify-governance
 
       - name: Validate agent contracts
         run: |
@@ -126,7 +126,7 @@ jobs:
           else
             echo "Agent contract validation skipped (script not yet implemented)"
           fi
-        continue-on-error: true # Non-blocking until implementation complete
+        continue-on-error: true # Non-blocking until implementation complete # flake-id: coe-ci-verify-agent-contracts
 
       - name: Check audit exception expiry
         run: |
@@ -135,7 +135,7 @@ jobs:
           else
             echo "Audit exception check skipped (script not yet implemented)"
           fi
-        continue-on-error: true # Non-blocking until implementation complete
+        continue-on-error: true # Non-blocking until implementation complete # flake-id: coe-ci-verify-audit-exceptions
 
   provenance:
     name: Provenance & SBOM
@@ -160,7 +160,7 @@ jobs:
             echo "Placeholder SBOM for CI validation"
             echo '{"bomFormat":"CycloneDX","specVersion":"1.4","version":1}' > sbom.json
           fi
-        continue-on-error: true # Non-blocking for PRs, required for releases
+        continue-on-error: true # Non-blocking for PRs, required for releases # flake-id: coe-ci-verify-sbom
 
       - name: Generate SLSA provenance
         run: |
@@ -171,7 +171,7 @@ jobs:
             echo "Placeholder provenance for CI validation"
             echo '{"_type":"https://in-toto.io/Statement/v0.1"}' > provenance.json
           fi
-        continue-on-error: true # Non-blocking for PRs, required for releases
+        continue-on-error: true # Non-blocking for PRs, required for releases # flake-id: coe-ci-verify-slsa
 
       - name: Upload SBOM
         uses: actions/upload-artifact@v6
@@ -213,7 +213,7 @@ jobs:
           else
             echo "GraphQL schema check skipped (may not be configured)"
           fi
-        continue-on-error: true # Non-blocking until graphql-inspector is fixed
+        continue-on-error: true # Non-blocking until graphql-inspector is fixed # flake-id: coe-ci-verify-graphql-schema
 
       - name: API schema validation
         run: |
@@ -222,7 +222,7 @@ jobs:
           else
             echo "API schema validation skipped (script not yet implemented)"
           fi
-        continue-on-error: true # Non-blocking until implementation complete
+        continue-on-error: true # Non-blocking until implementation complete # flake-id: coe-ci-verify-api-schema
 
   compliance-evidence:
     name: Compliance Evidence
@@ -245,7 +245,7 @@ jobs:
           else
             echo "Control coverage verification skipped (script not yet implemented)"
           fi
-        continue-on-error: true # Non-blocking until implementation complete
+        continue-on-error: true # Non-blocking until implementation complete # flake-id: coe-ci-verify-control-coverage
 
       - name: Generate evidence bundle (dry run)
         run: |
@@ -254,7 +254,7 @@ jobs:
           else
             echo "Evidence bundle generation skipped (script not yet implemented)"
           fi
-        continue-on-error: true # Non-blocking for PRs
+        continue-on-error: true # Non-blocking for PRs # flake-id: coe-ci-verify-evidence-bundle
 
   ci-verify-gate:
     name: CI Verify Gate ✅

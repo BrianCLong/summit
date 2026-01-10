@@ -61,7 +61,7 @@ jobs:
           SLO_P95_MS: ${{ inputs['canary-slo-p95-ms'] }}
           ERR_RATE: ${{ inputs['canary-error-rate'] }}
           SAT_MAX: ${{ inputs['canary-saturation-max'] }}
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-golden-path-canary-guard
 
       - name: Trigger rollback
         if: ${{ steps.canary.outcome == 'failure' && inputs['rollback-enabled'] }}

@@ -693,6 +693,7 @@ main() {
         if [[ -f "${site_dir}/redaction_metrics_timeseries.json" ]]; then
             "${SCRIPT_DIR}/compute_release_ops_slo.sh" \
                 --timeseries "${site_dir}/redaction_metrics_timeseries.json" \
+                --flake-registry "${REPO_ROOT}/.github/flake-registry.yml" \
                 --out "${site_dir}/release_ops_slo.json" \
                 ${verbose:+--verbose} 2>/dev/null || {
                     log_warn "Failed to compute SLO metrics"

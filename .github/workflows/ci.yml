@@ -76,7 +76,7 @@ jobs:
     # Both unit and integration tests are non-blocking until TypeScript/ESM issues are resolved
     # EXPIRY: 2026-01-15 - Must fix underlying TypeScript errors in test files
     # TICKET: See docs/release/GA_DECISIONS.md for follow-up plan
-    continue-on-error: true
+    continue-on-error: true # flake-id: coe-ci-test
     strategy:
       matrix:
         test-suite: [unit, integration]
@@ -95,6 +95,13 @@ jobs:
       - name: Run API authz e2e tests
         if: matrix.test-suite == 'integration'
         run: pnpm --filter @intelgraph/api test
+      - name: Upload flake encounters
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: flake-encounters
+          path: artifacts/flake/flake-encounters.jsonl
+          if-no-files-found: ignore
 
   golden-path:
     name: Golden Path
@@ -147,7 +154,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     # Non-blocking until ESM test infrastructure is resolved
-    continue-on-error: true
+    continue-on-error: true # flake-id: coe-ci-governance
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -166,7 +173,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     # Non-blocking until ESM test infrastructure is resolved
-    continue-on-error: true
+    continue-on-error: true # flake-id: coe-ci-provenance
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -182,7 +189,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     # Non-blocking until graphql-inspector loader issues are resolved
-    continue-on-error: true
+    continue-on-error: true # flake-id: coe-ci-schema-diff
     steps:
       - uses: actions/checkout@v6
         with:

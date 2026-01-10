@@ -60,7 +60,7 @@ jobs:
 
       - name: Run canary checks
         id: canary
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-reusable-canary-checks
         run: node ${{ inputs.canary-script }}
 
       - name: Rollback on canary failure

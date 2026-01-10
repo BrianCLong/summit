@@ -71,7 +71,7 @@ jobs:
           merge-multiple: true
       - name: Download governance reports
         uses: actions/download-artifact@v4
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-reusable-release-governance-reports
         with:
           name: governance-gate-reports-${{ github.run_number }}
           path: governance-reports

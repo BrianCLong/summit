@@ -83,7 +83,7 @@ jobs:
 
       - name: Run Security Audit
         id: audit
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-dependency-audit
         run: |
           chmod +x scripts/release/dependency_audit.sh
 

@@ -76,7 +76,7 @@ jobs:
 
       - name: Run Type Safety Audit
         id: audit
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-type-safety-audit
         run: |
           chmod +x scripts/release/type_safety_audit.sh
 

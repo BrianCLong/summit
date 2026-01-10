@@ -9,6 +9,39 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  flake-registry-validate:
+    name: Flake Registry Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate flake registry
+        run: npx tsx scripts/ci/validate_flake_registry.ts --report artifacts/flake/flake-registry-report.json
+
+      - name: Enforce soft gate policy
+        run: npx tsx scripts/ci/enforce_no_soft_gates.ts
+
+      - name: Validate lint suppressions
+        run: npx tsx scripts/ci/validate_flake_suppressions.ts
+
+      - name: Upload flake registry report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: flake-registry-report
+          path: artifacts/flake/flake-registry-report.json
+          if-no-files-found: warn
+
   validate-release-policy:
     name: Validate Release Policy
     runs-on: ubuntu-latest
@@ -76,7 +109,7 @@ jobs:
         run: bash scripts/generate-sbom.sh . artifacts/sbom/sbom.json
 
       - name: SBOM policy check (non-blocking)
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-pr-quality-gate-sbom-policy
         env:
           SBOM_FILE: artifacts/sbom/sbom.json
         run: node scripts/sbom-policy-check.mjs

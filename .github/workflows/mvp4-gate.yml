@@ -32,7 +32,7 @@ jobs:
   quarantine-tests:
     name: "Quarantine Tests (Flaky)"
     runs-on: ubuntu-latest
-    continue-on-error: true
+    continue-on-error: true # flake-id: coe-mvp4-quarantine-tests
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -67,7 +67,7 @@ jobs:
   policy-check:
     name: "Governance Policy Check"
     runs-on: ubuntu-latest
-    continue-on-error: true # Allow to fail until policies are updated to modern Rego syntax
+    continue-on-error: true # Allow to fail until policies are updated to modern Rego syntax # flake-id: coe-mvp4-policy-check
     steps:
       - uses: actions/checkout@v6
       - name: Setup OPA

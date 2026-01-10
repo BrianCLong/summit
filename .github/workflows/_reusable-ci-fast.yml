@@ -36,7 +36,7 @@ jobs:
 
       - name: Run fast lane
         run: ${{ inputs.test-command }}
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-reusable-ci-fast
 
       - name: Upload Jest results (debug)
         if: always()

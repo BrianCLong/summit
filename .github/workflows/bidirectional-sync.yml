@@ -34,7 +34,7 @@ jobs:
 
       - name: Attempt to merge fork changes
         id: merge
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-bidirectional-merge
         run: |
           git checkout main
           git merge fork/main --no-edit -X theirs

@@ -30,6 +30,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: flake-quarantine-governance
+    version: v1
+    path: prompts/ci/flake-quarantine-governance.md
+    sha256: 2a47cd388867d787a504c0a851663899f6d727993d42c07a058f99318023f135
+    description: Controlled flake quarantine registry with enforced expirations, reporting, and CI gating.
+    scope:
+      paths:
+        - .github/
+        - scripts/ci/
+        - schemas/
+        - docs/release/
+        - docs/roadmap/
+        - tests/utils/
+        - prompts/
+      domains:
+        - governance
+        - ci
+        - quality
+    verification:
+      tiers_required:
+        - A
+      debt_budget:
+        permitted: 0
+        retirement_target: 1
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md

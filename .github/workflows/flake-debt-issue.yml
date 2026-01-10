@@ -1,0 +1,87 @@
+name: Flake Debt Issue
+
+on:
+  schedule:
+    - cron: "0 10 * * 1" # Weekly Monday 10:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  flake-debt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate flake debt issue body
+        run: npx tsx scripts/ci/flake-debt-issue.ts --out artifacts/flake/flake-debt.md --report artifacts/flake/flake-debt.json
+
+      - name: Upsert Flake Debt issue
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('artifacts/flake/flake-debt.md', 'utf8');
+            const report = JSON.parse(fs.readFileSync('artifacts/flake/flake-debt.json', 'utf8'));
+            const title = 'Flake Debt';
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100,
+            });
+
+            const existing = issues.find((issue) => issue.title === title);
+            if (existing) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                title,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['release-ops', 'flake-debt', 'ci-flake'],
+              });
+            }
+
+            if (report.expiring_soon_total > 0 && report.owner_mentions) {
+              const reminderBody = [
+                '⚠️ Flake debt expiring soon:',
+                report.owner_mentions,
+                '',
+                ...report.expiring_soon.map((entry) => `- ${entry.id} (${entry.expires}) ${entry.owner} ${entry.target}`),
+              ].join('\n');
+
+              const issueNumber = existing ? existing.number : (await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                per_page: 100,
+              })).data.find((issue) => issue.title === title).number;
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: reminderBody,
+              });
+            }

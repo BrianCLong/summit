@@ -1,0 +1,497 @@
+version: 1
+flakes:
+  - id: coe-reusable-ci-fast
+    scope: workflow-job
+    target: workflow:_reusable-ci-fast.yml#fast
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Fast lane tests intermittently fail during infra migrations.
+    mitigation: retry wrapper
+  - id: coe-mvp4-quarantine-tests
+    scope: workflow-job
+    target: workflow:mvp4-gate.yml#quarantine-tests
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Quarantine suite contains known flaky tests awaiting deflake.
+    mitigation: temporary skip with guard
+  - id: coe-mvp4-policy-check
+    scope: workflow-job
+    target: workflow:mvp4-gate.yml#policy-check
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Legacy Rego syntax check fails until policy engine upgrade.
+    mitigation: rerun allowed
+  - id: coe-ci-test
+    scope: workflow-job
+    target: workflow:ci.yml#test
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: ESM transition causes intermittent test instability.
+    mitigation: retry wrapper
+  - id: coe-ci-governance
+    scope: workflow-job
+    target: workflow:ci.yml#governance
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Governance suite is still stabilizing across ESM migration.
+    mitigation: rerun allowed
+  - id: coe-ci-provenance
+    scope: workflow-job
+    target: workflow:ci.yml#provenance
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Provenance tests intermittently fail under CI load.
+    mitigation: retry wrapper
+  - id: coe-ci-schema-diff
+    scope: workflow-job
+    target: workflow:ci.yml#schema-diff
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: GraphQL inspector loader intermittently fails in CI.
+    mitigation: rerun allowed
+  - id: coe-api-determinism-start-server
+    scope: workflow-job
+    target: workflow:api-determinism-check.yml#determinism-check
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Scheduled server bootstrap can time out under shared runners.
+    mitigation: retry wrapper
+  - id: coe-api-determinism-check
+    scope: workflow-job
+    target: workflow:api-determinism-check.yml#determinism-check
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Determinism checks intermittently fail during warm-up.
+    mitigation: rerun allowed
+  - id: coe-redaction-trend-download
+    scope: workflow-job
+    target: workflow:redaction-trend-alerts.yml#check-trends
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Release-ops artifact downloads occasionally race with publish.
+    mitigation: rerun allowed
+  - id: coe-mirror-sync-branches
+    scope: workflow-job
+    target: workflow:mirror-to-personal.yml#mirror
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Mirror pushes can fail due to transient auth throttles.
+    mitigation: retry wrapper
+  - id: coe-mirror-sync-tags
+    scope: workflow-job
+    target: workflow:mirror-to-personal.yml#mirror
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Tag sync may fail on temporary GitHub API hiccups.
+    mitigation: retry wrapper
+  - id: coe-ga-risk-trivy
+    scope: workflow-job
+    target: workflow:ga-risk-gate.yml#ga-risk-gate
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Trivy secrets scan can exceed rate limits in shared CI.
+    mitigation: rerun allowed
+  - id: coe-ga-risk-grype
+    scope: workflow-job
+    target: workflow:ga-risk-gate.yml#ga-risk-gate
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Grype SBOM scan intermittently fails on upstream feed lag.
+    mitigation: rerun allowed
+  - id: coe-bidirectional-merge
+    scope: workflow-job
+    target: workflow:bidirectional-sync.yml#sync
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Fork merge can fail during transient network errors.
+    mitigation: retry wrapper
+  - id: coe-codeql-manual-build
+    scope: workflow-job
+    target: workflow:codeql.yml#analyze
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Manual build phase can fail for pnpm workspace edge cases.
+    mitigation: rerun allowed
+  - id: coe-docker-build-trivy
+    scope: workflow-job
+    target: workflow:docker-build.yml#build-and-scan
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Trivy SARIF upload intermittently fails due to registry lag.
+    mitigation: rerun allowed
+  - id: coe-ga-ready-gitleaks
+    scope: workflow-job
+    target: workflow:ga-ready.yml#ga-ready
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Gitleaks scan may fail on transient checkout inconsistencies.
+    mitigation: rerun allowed
+  - id: coe-ga-ready-trivy
+    scope: workflow-job
+    target: workflow:ga-ready.yml#ga-ready
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Trivy filesystem scan may fail on transient network issues.
+    mitigation: rerun allowed
+  - id: coe-dependency-audit
+    scope: workflow-job
+    target: workflow:dependency-audit.yml#audit
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Dependency audit script can fail due to registry timeouts.
+    mitigation: rerun allowed
+  - id: coe-ci-verify-snyk
+    scope: workflow-job
+    target: workflow:ci-verify.yml#security-scan
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Snyk token availability is intermittent in forks.
+    mitigation: rerun allowed
+  - id: coe-ci-verify-governance
+    scope: workflow-job
+    target: workflow:ci-verify.yml#governance-checks
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Governance scripts are stabilizing during migration.
+    mitigation: rerun allowed
+  - id: coe-ci-verify-agent-contracts
+    scope: workflow-job
+    target: workflow:ci-verify.yml#governance-checks
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Agent contract validation not fully implemented yet.
+    mitigation: temporary skip with guard
+  - id: coe-ci-verify-audit-exceptions
+    scope: workflow-job
+    target: workflow:ci-verify.yml#governance-checks
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Audit exception checker is in staged rollout.
+    mitigation: temporary skip with guard
+  - id: coe-ci-verify-sbom
+    scope: workflow-job
+    target: workflow:ci-verify.yml#provenance
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: SBOM generation is non-blocking until tooling is stable.
+    mitigation: rerun allowed
+  - id: coe-ci-verify-slsa
+    scope: workflow-job
+    target: workflow:ci-verify.yml#provenance
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: SLSA provenance generation is rolling out in phases.
+    mitigation: rerun allowed
+  - id: coe-ci-verify-graphql-schema
+    scope: workflow-job
+    target: workflow:ci-verify.yml#schema-validation
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: GraphQL inspector is unstable in current CI environment.
+    mitigation: rerun allowed
+  - id: coe-ci-verify-api-schema
+    scope: workflow-job
+    target: workflow:ci-verify.yml#schema-validation
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: API schema validator is still being implemented.
+    mitigation: temporary skip with guard
+  - id: coe-ci-verify-control-coverage
+    scope: workflow-job
+    target: workflow:ci-verify.yml#compliance-evidence
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Control coverage verification is in pilot stage.
+    mitigation: temporary skip with guard
+  - id: coe-ci-verify-evidence-bundle
+    scope: workflow-job
+    target: workflow:ci-verify.yml#compliance-evidence
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Evidence bundle generator is non-blocking during rollout.
+    mitigation: temporary skip with guard
+  - id: coe-reusable-release-governance-reports
+    scope: workflow-job
+    target: workflow:_reusable-release.yml#release
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Governance report artifacts may be missing in retries.
+    mitigation: rerun allowed
+  - id: coe-reusable-test-codecov
+    scope: workflow-job
+    target: workflow:_reusable-test.yml#test
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Codecov upload can fail due to rate limits.
+    mitigation: rerun allowed
+  - id: coe-pr-quality-gate-sbom-policy
+    scope: workflow-job
+    target: workflow:pr-quality-gate.yml#sbom
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: SBOM policy check is warn-only during stabilization.
+    mitigation: rerun allowed
+  - id: coe-ci-security-codeql-autobuild
+    scope: workflow-job
+    target: workflow:ci-security.yml#sast
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: CodeQL autobuild may fail on mixed language matrix runs.
+    mitigation: rerun allowed
+  - id: coe-ci-core-codecov
+    scope: workflow-job
+    target: workflow:ci-core.yml#unit-tests
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Codecov upload can fail during coverage processing.
+    mitigation: rerun allowed
+  - id: coe-pre-release-dependency-audit
+    scope: workflow-job
+    target: workflow:pre-release-health-check.yml#run-fresh-audits
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Dependency audit script can fail under registry load.
+    mitigation: rerun allowed
+  - id: coe-pre-release-type-safety
+    scope: workflow-job
+    target: workflow:pre-release-health-check.yml#run-fresh-audits
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Type safety audit is non-blocking during refactor.
+    mitigation: temporary skip with guard
+  - id: coe-error-budget-download
+    scope: workflow-job
+    target: workflow:error-budget-alerts.yml#check-budget
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Error budget artifact download can race with publish.
+    mitigation: rerun allowed
+  - id: coe-perf-slo-probe
+    scope: workflow-job
+    target: workflow:perf.yml#perf
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: k6 SLO probe is report-only and may fail on load spikes.
+    mitigation: rerun allowed
+  - id: coe-perf-golden-path
+    scope: workflow-job
+    target: workflow:perf.yml#perf
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: k6 golden path check is report-only during tuning.
+    mitigation: rerun allowed
+  - id: coe-release-ops-download-site
+    scope: workflow-job
+    target: workflow:release-ops-slo-issue.yml#create-slo-issue
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Release ops site artifact may not be available yet.
+    mitigation: rerun allowed
+  - id: coe-ci-legacy-quarantine-tests
+    scope: workflow-job
+    target: workflow:ci-legacy.yml#quarantine-tests
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Legacy quarantine suite contains known flakes.
+    mitigation: temporary skip with guard
+  - id: coe-ci-legacy-jest-suite
+    scope: workflow-job
+    target: workflow:ci-legacy.yml#jest-legacy-suite
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Jest ESM loader issues remain unresolved.
+    mitigation: temporary skip with guard
+  - id: coe-ci-legacy-experimental
+    scope: workflow-job
+    target: workflow:ci-legacy.yml#experimental-checks
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Experimental checks are non-blocking by policy.
+    mitigation: rerun allowed
+  - id: coe-ci-legacy-deprecated
+    scope: workflow-job
+    target: workflow:ci-legacy.yml#deprecated-checks
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Deprecated checks are awaiting migration.
+    mitigation: temporary skip with guard
+  - id: coe-ci-legacy-performance
+    scope: workflow-job
+    target: workflow:ci-legacy.yml#performance-regression
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Performance regression suite is non-blocking during tuning.
+    mitigation: rerun allowed
+  - id: coe-ci-legacy-accessibility
+    scope: workflow-job
+    target: workflow:ci-legacy.yml#accessibility-audit
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Accessibility audit is non-blocking until infra stabilizes.
+    mitigation: rerun allowed
+  - id: coe-reusable-canary-checks
+    scope: workflow-job
+    target: workflow:canary-rollback.yml#canary
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Canary check scripts can be noisy during rollout.
+    mitigation: rerun allowed
+  - id: coe-reusable-security-scan
+    scope: workflow-job
+    target: workflow:security.yml#security-scan
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Reusable security scan is advisory while tuning.
+    mitigation: rerun allowed
+  - id: coe-reusable-smoke-download-build
+    scope: workflow-job
+    target: workflow:smoke.yml#golden-path
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Build artifact downloads can race with upload.
+    mitigation: rerun allowed
+  - id: coe-reusable-e2e-download-build
+    scope: workflow-job
+    target: workflow:e2e.yml#run
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: E2E build artifact downloads may lag in CI.
+    mitigation: rerun allowed
+  - id: coe-reusable-sast-sca
+    scope: workflow-job
+    target: workflow:sast_sca.yml#run
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Reusable SAST/SCA is advisory during rollout.
+    mitigation: rerun allowed
+  - id: coe-type-safety-audit
+    scope: workflow-job
+    target: workflow:type-safety-audit.yml#audit
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Type safety audit remains non-blocking while backlog clears.
+    mitigation: rerun allowed
+  - id: coe-golden-path-canary-guard
+    scope: workflow-job
+    target: workflow:_canary-rollback.yml#canary
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Canary SLO guard can be noisy during threshold tuning.
+    mitigation: rerun allowed
+  - id: coe-golden-path-dependency-audit
+    scope: workflow-job
+    target: workflow:_golden-path-pipeline.yml#security
+    owner: "@summit-release"
+    ticket: https://github.com/summit/IntelGraph/issues/12999
+    created: 2026-01-10
+    expires: 2026-01-24
+    rationale: Dependency audit is report-only during remediations.
+    mitigation: rerun allowed

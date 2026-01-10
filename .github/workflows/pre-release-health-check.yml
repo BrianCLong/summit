@@ -72,11 +72,11 @@ jobs:
 
       - name: Run Dependency Audit
         run: ./scripts/release/dependency_audit.sh --threshold high || true
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-pre-release-dependency-audit
 
       - name: Run Type Safety Audit
         run: ./scripts/release/type_safety_audit.sh || true
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-pre-release-type-safety
 
   health-check:
     name: Aggregate Health Check

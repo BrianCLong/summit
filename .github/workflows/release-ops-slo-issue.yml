@@ -67,7 +67,7 @@ jobs:
         with:
           name: release-ops-site
           path: ${{ env.SITE_DIR }}
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-release-ops-download-site
 
       - name: Fallback - Build Site
         if: steps.download.outcome == 'failure'
@@ -84,6 +84,7 @@ jobs:
           if [[ -x "./scripts/release/compute_release_ops_slo.sh" ]]; then
             ./scripts/release/compute_release_ops_slo.sh \
               --timeseries "${{ env.SITE_DIR }}/redaction_metrics_timeseries.json" \
+              --flake-registry ".github/flake-registry.yml" \
               --out "${{ env.SITE_DIR }}/release_ops_slo.json" || true
           fi
 
@@ -160,6 +161,9 @@ jobs:
           WEEKLY_STATUS=$(echo "${SLO_JSON}" | jq -r '.weekly.status')
           MONTHLY_STATUS=$(echo "${SLO_JSON}" | jq -r '.monthly.status')
           CURRENT_STREAK=$(echo "${SLO_JSON}" | jq -r '.current_streak')
+          FLAKE_ACTIVE=$(echo "${SLO_JSON}" | jq -r '.flake_debt.active_total // 0')
+          FLAKE_EXPIRING=$(echo "${SLO_JSON}" | jq -r '.flake_debt.expiring_soon_total // 0')
+          FLAKE_ENCOUNTERED=$(echo "${SLO_JSON}" | jq -r '.flake_debt.encountered_last_window_total // 0')
 
           # Build body
           cat > issue_body.md << 'BODY_START'
@@ -199,6 +203,44 @@ BODY_START
               "| WARNs | \($m.warn_count) (\($m.warn_rate_pct)%) | - | - |",
               "| MTBR | \($m.mtbr_hours // "N/A") hrs | ≥\($t.mtbr_target_hours) hrs | \(if ($m.mtbr_hours // 0) >= $t.mtbr_target_hours then "Met" elif $m.mtbr_hours == null then "-" else "Not Met" end) |",
               "| Longest Streak | \($m.longest_ok_streak) | ≥\($t.ok_streak_target) | \(if $m.longest_ok_streak >= $t.ok_streak_target then "Met" else "Not Met" end) |"
+          ' >> issue_body.md
+
+          cat >> issue_body.md << FLAKE_EOF
+
+          ---
+
+          ### Flake Debt (Quarantine)
+
+          | Metric | Value |
+          |--------|-------|
+          | Active Flakes | ${FLAKE_ACTIVE} |
+          | Expiring in 7d | ${FLAKE_EXPIRING} |
+          | Encountered (7d) | ${FLAKE_ENCOUNTERED} |
+
+FLAKE_EOF
+
+          if [[ "${FLAKE_EXPIRING}" != "0" ]]; then
+            echo "${SLO_JSON}" | jq -r '
+                .flake_debt.expiring_soon as $e |
+                "#### Flakes Expiring Soon (7d)",
+                "",
+                "| ID | Owner | Expires | Target |",
+                "|----|-------|---------|--------|",
+                ($e[] | "| \(.id) | \(.owner) | \(.expires) | \(.target) |")
+            ' >> issue_body.md
+          fi
+
+          echo "${SLO_JSON}" | jq -r '
+              .flake_debt.longest_lived as $l |
+              "",
+              "#### Longest-Lived Flakes",
+              if ($l | length) == 0 then
+                "None"
+              else
+                "| ID | Owner | Age (days) |",
+                "|----|-------|------------|",
+                ($l[] | "| \(.id) | \(.owner) | \(.age_days) |")
+              end
           ' >> issue_body.md
 
           cat >> issue_body.md << 'FOOTER_EOF'

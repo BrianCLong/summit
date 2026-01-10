@@ -97,7 +97,7 @@ jobs:
           # TypeScript compilation helps CodeQL understand the codebase structure
           pnpm --filter intelgraph-server build || echo "Server build failed (non-blocking)"
           pnpm --filter client build || echo "Client build failed (non-blocking)"
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-codeql-manual-build
 
       - name: Autobuild (Python/Go)
         if: matrix.language != 'javascript-typescript'

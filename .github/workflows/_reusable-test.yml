@@ -253,7 +253,7 @@ jobs:
           fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-reusable-test-codecov
 
       - name: Test summary
         if: always()

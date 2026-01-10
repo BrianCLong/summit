@@ -1,23 +1,29 @@
 name: Reusable E2E
 on:
   workflow_call:
+    secrets:
+      NODE_AUTH_TOKEN:
+        required: false
+
+permissions:
+  contents: read
 
 env:
   PNPM_CACHE_FOLDER: ~/.pnpm-store
-  NODE_VERSION: '20.x'
+  NODE_VERSION: "20.x"
 
 jobs:
   run:
     runs-on: ubuntu-latest
     env:
-      DOCKER_BUILDKIT: '1'
-      COMPOSE_DOCKER_CLI_BUILD: '1'
+      DOCKER_BUILDKIT: "1"
+      COMPOSE_DOCKER_CLI_BUILD: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
       - name: Enable corepack
         run: corepack enable
       - uses: pnpm/action-setup@v4
@@ -36,7 +42,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-reusable-e2e-download-build
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Bootstrap repo (make bootstrap)
@@ -67,7 +73,6 @@ jobs:
           push: false
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-      # Move cache to prevent unbounded growth
       - name: Rotate Docker cache
         run: |
           rm -rf /tmp/.buildx-cache
@@ -82,23 +87,12 @@ jobs:
       - name: Tear down stack
         if: always()
         run: ./scripts/run-compose.sh -f docker-compose.dev.yml down -v
-name: e2e
 
-on:
-  workflow_call:
-    secrets:
-      NODE_AUTH_TOKEN:
-        required: false
-
-permissions:
-  contents: read
-
-jobs:
   e2e:
     name: e2e
     runs-on: ubuntu-latest
     env:
-      NODE_VERSION: '20.x'
+      NODE_VERSION: "20.x"
       PNPM_CACHE_FOLDER: ~/.pnpm-store
     steps:
       - name: Checkout
@@ -110,7 +104,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Enable corepack
         run: corepack enable

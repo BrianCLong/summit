@@ -38,7 +38,7 @@ jobs:
 
       - name: Sync Release Branches
         if: success()
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-mirror-sync-branches
         run: |
           for branch in $(git branch -r | grep 'origin/release/' | sed 's|origin/||'); do
             echo "Syncing branch: $branch"
@@ -48,7 +48,7 @@ jobs:
 
       - name: Sync Tags
         if: success()
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-mirror-sync-tags
         run: |
           git push personal --tags --force
 

@@ -4,10 +4,10 @@ on:
   workflow_call:
     inputs:
       ref:
-        description: 'Git reference to checkout'
+        description: "Git reference to checkout"
         required: false
         type: string
-        default: ''
+        default: ""
 
 permissions:
   contents: read
@@ -30,7 +30,7 @@ jobs:
       - name: Setup Tools (OPA, Cosign, Syft, Grype)
         uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
         with:
-          go-version: '1.21'
+          go-version: "1.21"
 
       - name: Install OPA
         uses: open-policy-agent/setup-opa@34a30e8a924d1b03ce2cf7abe97250bbb1f332b5 # v2.2.0
@@ -59,15 +59,15 @@ jobs:
       - name: Run Trivy vulnerability scanner (Secrets)
         uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # v0.24.0
         id: trivy
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-ga-risk-trivy
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          scanners: 'secret'
-          severity: 'CRITICAL,HIGH'
-          format: 'json'
-          output: 'trivy-results.json'
-          exit-code: '1'
+          scan-type: "fs"
+          scan-ref: "."
+          scanners: "secret"
+          severity: "CRITICAL,HIGH"
+          format: "json"
+          output: "trivy-results.json"
+          exit-code: "1"
 
       # 3. Dependency Review
       - name: Dependency Review
@@ -83,7 +83,7 @@ jobs:
 
       - name: SBOM Vulnerability Scan (Grype)
         id: grype
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-ga-risk-grype
         run: |
           grype sbom:./sbom.cdx.json -o json > grype-results.json
 

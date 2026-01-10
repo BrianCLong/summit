@@ -100,6 +100,14 @@ render_markdown() {
     monthly_status=$(echo "${slo_json}" | jq -r '.monthly.status')
     current_streak=$(echo "${slo_json}" | jq -r '.current_streak')
     governance_hash=$(echo "${slo_json}" | jq -r '.governance_hash // empty')
+    local flake_active flake_expiring flake_encountered
+    flake_active=$(echo "${slo_json}" | jq -r '.flake_debt.active_total // empty')
+    flake_expiring=$(echo "${slo_json}" | jq -r '.flake_debt.expiring_soon_total // empty')
+    flake_encountered=$(echo "${slo_json}" | jq -r '.flake_debt.encountered_last_window_total // empty')
+    local flake_active flake_expiring flake_encountered
+    flake_active=$(echo "${slo_json}" | jq -r '.flake_debt.active_total // empty')
+    flake_expiring=$(echo "${slo_json}" | jq -r '.flake_debt.expiring_soon_total // empty')
+    flake_encountered=$(echo "${slo_json}" | jq -r '.flake_debt.encountered_last_window_total // empty')
 
     # Load governance changes from file
     local gov_changes
@@ -219,6 +227,51 @@ EOF
 | Current Hash | \`${gov_hash_short}\` |
 
 _Governance changes indicate policy configuration updates. Correlate with incidents for root cause analysis._
+
+---
+
+EOF
+
+    if [[ -n "${flake_active}" ]]; then
+        cat >> "${output_file}" <<EOF
+
+## Flake Debt (Quarantine)
+
+| Metric | Value |
+|--------|-------|
+| Active Flakes | ${flake_active} |
+| Expiring in 7d | ${flake_expiring} |
+| Encountered (7d) | ${flake_encountered} |
+
+EOF
+
+        if [[ "${flake_expiring}" != "0" ]]; then
+            echo "${slo_json}" | jq -r '
+              .flake_debt.expiring_soon as $e |
+              "### Flakes Expiring Soon (7d)",
+              "",
+              "| ID | Owner | Expires | Target |",
+              "|----|-------|---------|--------|",
+              ($e[] | "| \(.id) | \(.owner) | \(.expires) | \(.target) |")
+            ' >> "${output_file}"
+        else
+            echo "No flakes expiring in the next 7 days." >> "${output_file}"
+        fi
+
+        echo "${slo_json}" | jq -r '
+          .flake_debt.longest_lived as $l |
+          "",
+          "### Longest-Lived Flakes",
+          if ($l | length) == 0 then
+            "None"
+          else
+            "| ID | Owner | Age (days) |",
+            "|----|-------|------------|",
+            ($l[] | "| \(.id) | \(.owner) | \(.age_days) |")
+          end
+        ' >> "${output_file}"
+
+        cat >> "${output_file}" <<EOF
 
 ---
 
@@ -568,6 +621,87 @@ HTMLEOF
     <p style="font-size: 0.8em; color: #57606a; margin-top: 8px;">
       <em>Governance changes indicate policy configuration updates. Correlate with incidents for root cause analysis.</em>
     </p>
+
+HTMLEOF
+
+    if [[ -n "${flake_active}" ]]; then
+        cat >> "${output_file}" <<HTMLEOF
+
+    <h2>Flake Debt (Quarantine)</h2>
+    <div class="kpi-highlight">
+      <div class="kpi-grid">
+        <div class="kpi-item">
+          <div class="kpi-value">${flake_active}</div>
+          <div class="kpi-label">Active Flakes</div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-value">${flake_expiring}</div>
+          <div class="kpi-label">Expiring in 7d</div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-value">${flake_encountered}</div>
+          <div class="kpi-label">Encountered (7d)</div>
+        </div>
+      </div>
+    </div>
+HTMLEOF
+
+        if [[ "${flake_expiring}" != "0" ]]; then
+            cat >> "${output_file}" <<'HTMLEOF'
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Owner</th>
+          <th>Expires</th>
+          <th>Target</th>
+        </tr>
+      </thead>
+      <tbody>
+HTMLEOF
+            echo "${slo_json}" | jq -r '
+              .flake_debt.expiring_soon[] |
+              "<tr><td>\(.id)</td><td>\(.owner)</td><td>\(.expires)</td><td>\(.target)</td></tr>"
+            ' >> "${output_file}"
+            cat >> "${output_file}" <<'HTMLEOF'
+      </tbody>
+    </table>
+HTMLEOF
+        else
+            echo "    <p>No flakes expiring in the next 7 days.</p>" >> "${output_file}"
+        fi
+
+        cat >> "${output_file}" <<'HTMLEOF'
+    <h3>Longest-Lived Flakes</h3>
+HTMLEOF
+        local longest_count
+        longest_count=$(echo "${slo_json}" | jq '.flake_debt.longest_lived | length')
+        if [[ "${longest_count}" -eq 0 ]]; then
+            echo "    <p>No active flakes.</p>" >> "${output_file}"
+        else
+            cat >> "${output_file}" <<'HTMLEOF'
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Owner</th>
+          <th>Age (days)</th>
+        </tr>
+      </thead>
+      <tbody>
+HTMLEOF
+            echo "${slo_json}" | jq -r '
+              .flake_debt.longest_lived[] |
+              "<tr><td>\(.id)</td><td>\(.owner)</td><td>\(.age_days)</td></tr>"
+            ' >> "${output_file}"
+            cat >> "${output_file}" <<'HTMLEOF'
+      </tbody>
+    </table>
+HTMLEOF
+        fi
+    fi
+
+    cat >> "${output_file}" <<'HTMLEOF'
 
     <div class="footer">
       <a href="redaction_metrics_trend.html">Trend Page</a> |

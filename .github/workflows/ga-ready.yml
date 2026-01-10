@@ -63,14 +63,14 @@ jobs:
 
       - name: Run Gitleaks
         id: gitleaks
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-ga-ready-gitleaks
         uses: gitleaks/gitleaks-action@5ee6c46da3db5c6d5b7b8af4564c3ccaf16c5b88 # v2.3.2
         with:
           args: "detect --source . --report-format json --report-path gitleaks.json"
 
       - name: Run Trivy
         id: trivy
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-ga-ready-trivy
         uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # v0.24.0
         with:
           scan-type: "fs"
@@ -85,6 +85,19 @@ jobs:
         id: ga_check
         run: |
           ./bin/ga-check.mjs
+
+      - name: Report flake quarantine usage
+        if: always()
+        env:
+          FAIL_ON_QUARANTINE: ${{ github.ref == 'refs/heads/main' && 'true' || '' }}
+        run: |
+          FLAGS=""
+          if [[ -n "${FAIL_ON_QUARANTINE}" ]]; then
+            FLAGS="--fail-on-quarantine"
+          fi
+          npx tsx scripts/ci/report_flake_encounters.ts \
+            --report artifacts/flake/flake-encounters-report.json \
+            ${FLAGS}
 
       - name: Enforce scan status
         if: always()

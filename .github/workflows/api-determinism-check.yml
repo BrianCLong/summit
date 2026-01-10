@@ -90,11 +90,11 @@ jobs:
             fi
             sleep 1
           done
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-api-determinism-start-server
 
       - name: Run Determinism Check
         id: check
-        continue-on-error: true
+        continue-on-error: true # flake-id: coe-api-determinism-check
         run: |
           chmod +x scripts/release/api_determinism_check.sh
 

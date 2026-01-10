@@ -40,6 +40,8 @@ OPTIONS:
     --timeseries FILE     Time series JSON file (required)
     --policy FILE         SLO policy YAML file (optional)
     --governance-hash     SHA256 of governance lockfile (optional)
+    --flake-registry FILE Flake registry YAML file (optional)
+    --flake-encounters FILE Flake encounters JSONL file (optional)
     --out FILE            Output JSON file (default: stdout)
     --verbose             Enable verbose logging
     --help                Show this help message
@@ -278,12 +280,41 @@ compute_slo_metrics() {
     ' "${timeseries_file}"
 }
 
+# --- Flake Debt ---
+
+generate_flake_report() {
+    local registry_file="$1"
+    local encounters_file="$2"
+    local output_file="$3"
+
+    if [[ -z "${registry_file}" ]]; then
+        return
+    fi
+
+    if [[ ! -f "${registry_file}" ]]; then
+        log_warn "Flake registry not found at ${registry_file}. Skipping flake report."
+        return
+    fi
+
+    local encounters_arg=()
+    if [[ -n "${encounters_file}" ]]; then
+        encounters_arg=(--encounters "${encounters_file}")
+    fi
+
+    npx tsx scripts/ci/flake-registry-report.ts \
+      --registry "${registry_file}" \
+      "${encounters_arg[@]}" \
+      --out "${output_file}" >/dev/null
+}
+
 # --- Main ---
 main() {
     local timeseries_file=""
     local policy_file=""
     local output_file=""
     local governance_hash=""
+    local flake_registry=""
+    local flake_encounters=""
     local verbose=false
 
     local weekly_days="${DEFAULT_WEEKLY_DAYS}"
@@ -302,6 +333,14 @@ main() {
                 ;;
             --governance-hash)
                 governance_hash="$2"
+                shift 2
+                ;;
+            --flake-registry)
+                flake_registry="$2"
+                shift 2
+                ;;
+            --flake-encounters)
+                flake_encounters="$2"
                 shift 2
                 ;;
             --out)
@@ -368,6 +407,17 @@ main() {
         mkdir -p "${out_dir}"
         echo "${slo_json}" | jq -S . > "${output_file}"
         [[ "${verbose}" == "true" ]] && log_info "Wrote SLO JSON: ${output_file}"
+
+        if [[ -n "${flake_registry}" ]]; then
+            local flake_report_path
+            flake_report_path="${out_dir}/flake_report.json"
+            generate_flake_report "${flake_registry}" "${flake_encounters}" "${flake_report_path}"
+            if [[ -f "${flake_report_path}" ]]; then
+                jq --slurpfile flake "${flake_report_path}" '. + {flake_debt: $flake[0]}' "${output_file}" > "${output_file}.tmp"
+                mv "${output_file}.tmp" "${output_file}"
+                [[ "${verbose}" == "true" ]] && log_info "Attached flake debt report: ${flake_report_path}"
+            fi
+        fi
     else
         echo "${slo_json}" | jq -S .
     fi
