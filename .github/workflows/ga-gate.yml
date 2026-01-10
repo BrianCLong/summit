@@ -72,6 +72,10 @@ jobs:
             --include-ci \
             --include-release
 
+      - name: Check Artifact Size
+        if: always()
+        run: node scripts/ci/check_artifact_size.cjs artifacts/ga 50
+
       - name: Upload GA Report
         if: always()
         uses: actions/upload-artifact@v6

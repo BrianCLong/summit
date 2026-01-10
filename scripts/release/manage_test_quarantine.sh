@@ -14,6 +14,7 @@
 #   list        List currently quarantined tests
 #   report      Generate quarantine report
 #   sync        Sync quarantine state with test results
+#   export-jest Export quarantined tests as Jest ignore regex
 #
 # Options:
 #   --policy <path>      Path to policy file
@@ -43,7 +44,7 @@ REPO="${GITHUB_REPOSITORY:-$(git remote get-url origin 2>/dev/null | sed 's/.*gi
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case $1 in
-    analyze|quarantine|unquarantine|list|report|sync)
+    analyze|quarantine|unquarantine|list|report|sync|export-jest)
       COMMAND="$1"
       shift
       ;;
@@ -404,6 +405,26 @@ do_report() {
   fi
 }
 
+# Export as Jest ignore regex
+do_export_jest() {
+  ensure_files
+
+  local quarantine
+  quarantine=$(load_quarantine)
+
+  local count
+  count=$(echo "$quarantine" | jq '.quarantined | length')
+
+  if [[ $count -eq 0 ]]; then
+    echo ""
+    return
+  fi
+
+  # Join names with | and escape strict regex chars if needed
+  # Assuming names are file paths or test names
+  echo "$quarantine" | jq -r '.quarantined[].name' | tr '\n' '|' | sed 's/|$//'
+}
+
 # Sync with test results (placeholder for integration)
 do_sync() {
   ensure_files
@@ -477,6 +498,9 @@ case "$COMMAND" in
     ;;
   sync)
     do_sync
+    ;;
+  export-jest)
+    do_export_jest
     ;;
   *)
     echo "Unknown command: $COMMAND" >&2
