@@ -1,6 +1,11 @@
-category,reference,notes,differentiator
-vision-language,BLIP-2 / LLaVA,"image-text pretraining, chat VLM","graph projection + tool-native curriculum"
-doc_qa,LayoutLM / DocVQA,"layout-aware text tokens","IntelGraph mapping + telemetry-driven sampling"
-chart_qa,UniChart / ChartLLM,"chart-specific question answering","tool-orchestrated parsers + numeric verification traces"
-ui_understanding,Screen2Words / NLSA,"UI captioning/navigation","UI graph schema with action affordances and safety guardrails"
-multimodal_rag,MM-RAG (various),"retrieval over images/docs","graph-indexed retrieval with region-level provenance"
+wedge,category,reference,notes,differentiator,delta_summary,risk_level
+ANFIS,coordination_detection,Network visualization + botnet clustering studies,"centrality, burst detection, community detection","multi-signal coordination fingerprints + counterfactual intervention simulation + replay tokens","adds intervention simulation and auditable attribution artifacts","medium"
+ANFIS,content_similarity,Near-duplicate detection via LSH / perceptual hashing,"pairwise similarity without narrative graph","fuses similarity with temporal narrative graph + link laundering features","extends similarity into multi-feature coordination fingerprints","low"
+ILC-PWD,threat_intel_lifecycle,IOC scoring frameworks and lifecycle scoring,"single-score risk ratings","explicit lifecycle state machine + provenance-weighted decay + transition proofs","adds provable transitions with replayable artifacts","medium"
+ILC-PWD,confidence_decay,Freshness decay in threat feeds,"generic decay without provenance weighting","source-trust + evidence-class weighted decay with conflict measures","introduces provenance-weighted decay and minimal support proofs","low"
+OAEAC,ontology_governance,Schema-driven APIs (OpenAPI/GraphQL),"schema validation without action contracts","ontology-derived ABI + action contracts + witnessed execution","adds pre/postcondition enforcement and effect signatures","medium"
+OAEAC,audit_logging,API gateways with audit logs,"logs without determinism or contract verification","witness ledger with hash commitments and determinism tokens","adds tamper-evident witness records tied to policy decisions","low"
+ITD-OIP,investigation_workflow,Manual playbooks/macros,"human-authored steps without optimization","trace distillation + optimized execution plans + witness chains","adds automated plan optimization and replayable macro artifacts","medium"
+ITD-OIP,workflow_optimization,ETL and query optimizers,"data pipelines without investigative trace provenance","policy+license verification with witness chains","adds governance gates and provenance for investigative workflows","low"
+FOPB-LG,osint_scanners,Generic OSINT scanners,"unbounded active probing and opaque logs","passive-first gating + privacy budgets + signed scan capsules","adds compliance-first selection and auditable scan artifacts","medium"
+FOPB-LG,privacy_governance,Privacy budget systems,"privacy budgets not tied to OSINT module selection","privacy budgets + legal/ToS module gating + replay tokens","integrates budgets with governance and module registry","low"

@@ -1,27 +1,96 @@
-# TECHNICAL DISCLOSURE: Summit Reasoning Evaluator (SRE)
+# Technical Disclosure: Summit Intelligence Governance Portfolio
 
 ## 1. Field of the Invention
-The present disclosure relates to the field of Artificial Intelligence (AI) and Machine Learning (ML), specifically to systems and methods for evaluating the reasoning capabilities, tool usage efficiency, and multi-agent coordination of Large Language Models (LLMs) and autonomous agents.
+
+The present disclosure relates to computer-implemented intelligence analysis systems, including
+coordination detection, threat intelligence lifecycle management, ontology-driven action governance,
+optimized investigation workflows, and policy-governed OSINT collection.
 
 ## 2. Background
-Current evaluation methodologies for LLMs primarily focus on "final answer" accuracy (Exact Match, F1 score) or reference-free quality assessment using another LLM as a judge. These methods treat the reasoning process as a "black box" or a linear sequence of text tokens. They lack the structural fidelity to evaluate *how* an agent arrived at a conclusion, particularly in complex scenarios involving backtracking, self-correction, parallel tool execution, and multi-agent debate. Furthermore, evaluation datasets are typically static, failing to adapt to the specific failure modes of the model under test.
 
-## 3. Summary of the Invention
-The Summit Reasoning Evaluator (SRE) introduces a novel evaluation framework based on two core innovations:
+Modern intelligence platforms must integrate heterogeneous data sources, enforce governance
+constraints, and provide reproducible analytical outcomes. Existing tools often provide scoring
+or visualization without auditable reasoning artifacts, and they lack mechanisms for policy-aware
+counterfactual analysis, action contract enforcement, and privacy-budgeted collection. This creates
+gaps in compliance, reproducibility, and operational decisioning.
 
-### 3.1. Graph-Structured Reasoning Episodes
-Unlike linear logs, SRE represents a reasoning episode as a Directed Acyclic Graph (DAG) $G = (V, E)$, where nodes $V$ represent discrete cognitive or operational states (e.g., *Thought*, *ToolCall*, *Observation*, *Communication*) and edges $E$ represent causal dependencies (e.g., *Follows*, *DependsOn*, *Corrects*).
+## 3. Summary of the Portfolio
 
-This representation enables:
-*   **Topological Metrics**: Measuring "Reasoning Efficiency" by comparing the number of nodes in the executed graph versus an optimal path subgraph.
-*   **Backtracking Analysis**: Explicitly identifying *Correction* edges to quantify an agent's self-healing capability.
-*   **Parallelism Scoring**: Evaluating the agent's ability to schedule non-dependent tool calls concurrently.
+The portfolio introduces five complementary wedges that formalize governance artifacts, replay
+controls, and policy-aware execution:
 
-### 3.2. Curriculum-Guided Evaluation Policy
-SRE implements an "Active Evaluation" protocol. Instead of iterating through a static list of test cases, a *Curriculum Policy* (a meta-agent) dynamically selects the next task based on the history of the current evaluation run.
+- **ANFIS (Coordination Fingerprinting + Intervention Simulation)** detects coordinated narrative
+  activity using multi-signal fingerprints, simulates counterfactual interventions, and emits
+  attribution artifacts bound to replay tokens.
+- **ILC-PWD (IOC Lifecycle Compiler + Provenance-Weighted Decay)** replaces opaque IOC scores with
+  explicit lifecycle states backed by provenance-weighted decay, conflict measures, and transition
+  proofs.
+- **OAEAC (Ontology ABI + Enforced Action Contracts)** derives machine-enforceable ABIs from
+  ontologies and validates action execution with preconditions, postconditions, and witnessed
+  execution artifacts.
+- **ITD-OIP (Trace Distillation → Optimized Investigation Plans)** compiles interactive investigation
+  traces into optimized execution plans with policy and license verification plus witness chains.
+- **FOPB-LG (Federated OSINT + Privacy Budgets + Legal Gates)** enforces passive-first collection,
+  legal gating, privacy budgets, and signed scan capsules for auditable OSINT results.
 
-*   **Frontier Discovery**: The policy seeks to identify the "frontier of capability"—the specific complexity level where the agent begins to fail—optimizing the information gain per compute unit.
-*   **Adversarial Injection**: The policy can inject "Probabilistic Faults" (e.g., simulated tool timeouts, misleading observations) into the graph execution to test resilience.
+## 4. Common Architecture Patterns
 
-## 4. Detailed Description of Embodiments
-[See /spec/sre_spec.md for data models and interfaces]
+Across the wedges, the system enforces a set of shared governance and reproducibility primitives:
+
+- **Policy-as-code enforcement:** All authorization and compliance logic is executed via policy
+  engines with versioned rules and decision logs.
+- **Replay tokens:** Deterministic tokens bind outputs to snapshots, schema versions, and evaluation
+  windows to enable reproducible analysis.
+- **Witness artifacts:** Execution artifacts include hash commitments to inputs/outputs and policy
+  decisions, enabling tamper-evident audit trails.
+- **Budget controls:** Intervention, computation, privacy, and proof budgets are enforced to bound
+  resource usage and compliance scope.
+
+## 5. Wedge Descriptions and Technical Effects
+
+### 5.1 ANFIS
+
+ANFIS ingests content items and actor identifiers, builds a temporal interaction graph, and
+computes coordination fingerprints using multiple signals. It generates intervention plans and
+simulates counterfactual impact on spread metrics. Outputs include attribution artifacts with
+provenance references, cryptographic commitments, and replay tokens.
+
+### 5.2 ILC-PWD
+
+ILC-PWD aggregates evidence items for intelligence entities, applies provenance-weighted decay,
+computes conflict measures, and assigns lifecycle states. It produces transition proofs and
+lifecycle artifacts that encode state, support sets, and replayability tied to policy versions.
+
+### 5.3 OAEAC
+
+OAEAC derives ABIs from ontologies, defines action contracts with explicit preconditions and
+postconditions, and authorizes effect signatures with policy engines. Execution generates witness
+records and determinism tokens bound to graph state changes.
+
+### 5.4 ITD-OIP
+
+ITD-OIP records investigation traces, compiles them into intermediate representations, and applies
+optimization rules such as deduplication, batching, join reordering, and filter pushdown. Optimized
+plans are verified against policy and license constraints, executed, and captured in witness chains.
+
+### 5.5 FOPB-LG
+
+FOPB-LG enforces passive-first scan modes, validates authorization tokens for active probing, and
+selects OSINT modules using legal and terms-of-service constraints. It applies privacy budgets and
+produces scan capsules with replay tokens and audit-ready ledgers.
+
+## 6. Governance and Compliance Alignment
+
+The wedges integrate with policy-as-code engines and provenance ledgers to satisfy compliance
+requirements for reproducibility, least privilege access, and auditable decisioning. Each wedge
+exposes compliance hooks for data minimization, redaction, and purpose-based access control.
+
+## 7. References to Supporting Specifications
+
+Detailed claims, advantages, and embodiments are provided in the following locations:
+
+- `/spec/anfis/`
+- `/spec/ilc-pwd/`
+- `/spec/oaeac/`
+- `/spec/itd-oip/`
+- `/spec/fopb-lg/`
