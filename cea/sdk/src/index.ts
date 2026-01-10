@@ -163,7 +163,7 @@ export class ConsentAwareAllocator {
     return [...this.ledger];
   }
 
-  private async rebalance(experimentId: string): Promise<void> {
+  private rebalance(experimentId: string): void {
     const experiment = this.experiments.get(experimentId);
     if (!experiment) {
       return;
@@ -291,7 +291,11 @@ export class ConsentAwareAllocator {
         }
         return a.hash > b.hash ? -1 : 1;
       });
-      const moving = candidates.shift()!;
+      const moving = candidates.shift();
+      if (!moving) {
+        // This should not occur if algorithm conditions are correct
+        throw new Error('Unexpected empty candidates during movement');
+      }
       assignmentsByVariant.set(surplus, candidates);
       currentCounts.set(surplus, (currentCounts.get(surplus) ?? 1) - 1);
       currentCounts.set(deficit, (currentCounts.get(deficit) ?? 0) + 1);

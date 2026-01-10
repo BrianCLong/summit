@@ -239,7 +239,7 @@ export function createRoutes(engine: EREngine): Router {
   /**
    * GET /stats - Get statistics
    */
-  router.get('/stats', async (_req: Request, res: Response) => {
+  router.get('/stats', (_req: Request, res: Response) => {
     const stats = engine.getStats();
     res.json(stats);
   });
@@ -247,7 +247,7 @@ export function createRoutes(engine: EREngine): Router {
   /**
    * GET /health - Health check
    */
-  router.get('/health', async (_req: Request, res: Response) => {
+  router.get('/health', (_req: Request, res: Response) => {
     res.json({ status: 'healthy', timestamp: new Date().toISOString() });
   });
 

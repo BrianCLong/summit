@@ -80,10 +80,10 @@ export async function fetchAndVerify({
 // Example usage when run directly
 if (process.env.NODE_ENV !== 'test' && process.argv[2]) {
   fetchAndVerify({ url: process.argv[2] })
-    .then((dir) => process.stdout.write('verified pack at: ' + dir + '\n'))
+    .then((dir) => process.stdout.write(`verified pack at: ${dir}\n`))
     .catch((e) => {
       const errorMessage = e instanceof Error ? e.message : String(e);
-      process.stderr.write(errorMessage + '\n');
+      process.stderr.write(`${errorMessage}\n`);
       process.exit(1);
     });
 }
