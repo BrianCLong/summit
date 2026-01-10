@@ -87,14 +87,63 @@ describe('PlaybookRunBundleExporter', () => {
       ]),
     );
 
+    const manifestEntry = entries.find(
+      (entry) => entry.name === 'provenance-manifest.json',
+    );
+    const logEntry = entries.find((entry) => entry.name === 'run-log.json');
+    const outputEntry = entries.find((entry) => entry.name === 'outputs.json');
+
+    expect(manifestEntry).toBeDefined();
+    expect(logEntry).toBeDefined();
+    expect(outputEntry).toBeDefined();
+
+    const logPayload = JSON.parse(logEntry!.data);
+    expect(logPayload).toMatchObject({
+      runId: 'run-1',
+      playbookId: 'playbook-1',
+      caseId: 'case-22',
+      triggeredBy: 'analyst-1',
+      status: 'completed',
+    });
+    expect(logPayload.steps).toHaveLength(2);
+
+    const outputsPayload = JSON.parse(outputEntry!.data);
+    expect(outputsPayload).toMatchObject({
+      context: { caseId: 'case-22' },
+      result: { outcome: 'success' },
+    });
+    expect(outputsPayload.steps).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          stepId: 'step-1',
+          status: 'completed',
+          output: { message: 'done' },
+        }),
+        expect.objectContaining({
+          stepId: 'step-2',
+          status: 'completed',
+          output: { summary: 'ok' },
+        }),
+      ]),
+    );
+
     playbookRunManifestSchema.parse(manifest);
     const lineageEdges = manifest.provenance.edges.filter(
       (edge: { relation?: string }) => edge.relation === 'DERIVED_FROM',
     );
-    expect(lineageEdges).toHaveLength(1);
-    expect(lineageEdges[0]).toMatchObject({
-      sourceId: 'playbook-step:step-1',
-      targetId: 'playbook-step:step-2',
-    });
+    expect(lineageEdges).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          sourceId: 'playbook-step:step-1',
+          targetId: 'playbook-step:step-2',
+          properties: expect.objectContaining({ lineage: 'step-order' }),
+        }),
+        expect.objectContaining({
+          sourceId: 'playbook-step:step-1',
+          targetId: 'playbook-step:step-2',
+          properties: expect.objectContaining({ lineage: 'workflow' }),
+        }),
+      ]),
+    );
   });
 });
