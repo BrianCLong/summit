@@ -229,6 +229,80 @@ export interface AggregatedMetrics {
   averageLeakageIncidents?: number;
 }
 
+export type AttackVector =
+  | 'prompt-injection'
+  | 'data-exfiltration'
+  | 'supply-chain'
+  | 'backdoor-pr'
+  | 'comm-mitm'
+  | 'workflow-hijack';
+
+export interface DetectionRule {
+  id: string;
+  description: string;
+  pattern: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  vector?: AttackVector;
+  controlExpectation?: string;
+}
+
+export interface RedTeamScenarioDefinition {
+  id: string;
+  name: string;
+  description: string;
+  severity: 'medium' | 'high' | 'critical';
+  attackVectors: AttackVector[];
+  objectives: string[];
+  entryPoints: Array<'api' | 'agent-mesh' | 'copilot' | 'artifact-store' | 'workflow'>;
+  expectedDetections?: string[];
+  requiredControls?: string[];
+  playbook?: string[];
+}
+
+export interface RedTeamProbe {
+  id: string;
+  scenarioId: string;
+  vector: AttackVector;
+  payload: string;
+  channel:
+    | 'copilot'
+    | 'agent-comm'
+    | 'api'
+    | 'workflow'
+    | 'artifact'
+    | 'dependency';
+  metadata?: Record<string, any>;
+}
+
+export interface DetectionEvent {
+  ruleId: string;
+  description: string;
+  triggered: boolean;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  signal?: number;
+  evidence?: string;
+}
+
+export interface AttackProbeResult {
+  probe: RedTeamProbe;
+  blocked: boolean;
+  detections: DetectionEvent[];
+  residualRisk: string[];
+  recommendation: string;
+}
+
+export interface RedTeamRunResult {
+  scenario: RedTeamScenarioDefinition;
+  attemptId: string;
+  startedAt: string;
+  finishedAt: string;
+  probes: AttackProbeResult[];
+  controlsMissing: string[];
+  passed: boolean;
+  notes?: string;
+  artifactPath?: string;
+}
+
 export interface HarnessConfig {
   api: {
     baseUrl: string;
@@ -264,6 +338,11 @@ export interface HarnessConfig {
     nonProdOnly: boolean;
     maxConcurrentSessions: number;
     requireConfirmation: boolean;
+  };
+  redteam?: {
+    outputDir: string;
+    defaultDetectionRules: DetectionRule[];
+    persistArtifacts: boolean;
   };
 }
 

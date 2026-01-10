@@ -7,6 +7,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
 import { HarnessConfig, GraphSize, WorkflowStrategy } from '../types/index.js';
+import { DEFAULT_DETECTION_RULES } from '../redteam/defaults.js';
 
 const DEFAULT_CONFIG: HarnessConfig = {
   api: {
@@ -41,6 +42,11 @@ const DEFAULT_CONFIG: HarnessConfig = {
     nonProdOnly: true,
     maxConcurrentSessions: 5,
     requireConfirmation: false,
+  },
+  redteam: {
+    outputDir: './reports/redteam',
+    defaultDetectionRules: DEFAULT_DETECTION_RULES,
+    persistArtifacts: true,
   },
 };
 
@@ -155,6 +161,20 @@ export class ConfigLoader {
       (global as any).SIM_LOG_LEVEL = process.env.SIM_LOG_LEVEL;
     }
 
+    if (process.env.SIM_REDTEAM_OUTPUT_DIR) {
+      config.redteam = {
+        ...(config.redteam || DEFAULT_CONFIG.redteam),
+        outputDir: process.env.SIM_REDTEAM_OUTPUT_DIR,
+      };
+    }
+
+    if (process.env.SIM_REDTEAM_PERSIST === 'false') {
+      config.redteam = {
+        ...(config.redteam || DEFAULT_CONFIG.redteam),
+        persistArtifacts: false,
+      };
+    }
+
     return this.mergeWithDefaults(config);
   }
 
@@ -186,6 +206,10 @@ export class ConfigLoader {
       safety: {
         ...DEFAULT_CONFIG.safety,
         ...config.safety,
+      },
+      redteam: {
+        ...DEFAULT_CONFIG.redteam,
+        ...config.redteam,
       },
     };
   }

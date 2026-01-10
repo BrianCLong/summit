@@ -47,6 +47,12 @@ pnpm sim:run --scenario all --report --output ./reports/
 
 # Run a mission suite regression harness
 pnpm sim:run --mission-suite investigation-quality --output ./reports/ --baseline-metrics ./reports/investigation-quality-main-metrics.json
+
+# Run the red-team harness (default plan)
+pnpm sim:run --redteam all --config config/default.yaml
+
+# Run a specific red-team scenario using a custom plan file
+pnpm sim:run --redteam prompt-injection-copilot --redteam-plan config/redteam.default.yaml --output ./reports/redteam
 ```
 
 ## Safety Features

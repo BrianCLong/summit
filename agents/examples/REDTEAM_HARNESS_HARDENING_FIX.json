@@ -1,0 +1,37 @@
+{
+  "task_id": "REDTEAM_HARNESS_HARDENING_FIX",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "agent-native-loop-n4",
+    "version": "v1",
+    "sha256": "419717c7891d6943a948ae678ae59f03092e30a699083765300081a38c30cd94",
+    "path": "prompts/governance/agent-native-loop-n4.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "sim-harness/src/redteam/DetectionEngine.ts",
+      "sim-harness/src/redteam/defaults.ts",
+      "sim-harness/config/redteam.default.yaml",
+      "docs/roadmap/STATUS.json"
+    ],
+    "domains": ["security", "testing"]
+  },
+  "allowed_operations": ["edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["scripts/check-boundaries.cjs output"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Red-team detection rules compile as valid JavaScript regex patterns.",
+    "Required control identifiers align with control expectation tokens.",
+    "Invalid regex rules log warnings without crashing evaluation."
+  ],
+  "stop_conditions": [
+    "CI failure on main or in PR checks.",
+    "Detection of policy or governance violations."
+  ]
+}

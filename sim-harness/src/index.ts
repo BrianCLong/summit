@@ -16,6 +16,11 @@ export { MissionSuiteRunner } from './metrics/MissionSuiteRunner.js';
 // Reporters
 export { ComparisonReporter } from './reporters/ComparisonReporter.js';
 
+// Red-team harness
+export { RedTeamHarness } from './redteam/RedTeamHarness.js';
+export { RedTeamPlanLoader } from './redteam/RedTeamPlanLoader.js';
+export { DEFAULT_DETECTION_RULES, DEFAULT_SCENARIOS } from './redteam/defaults.js';
+
 // Utils
 export { Logger } from './utils/Logger.js';
 export { ConfigLoader } from './utils/ConfigLoader.js';
