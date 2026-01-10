@@ -96,6 +96,17 @@ async function main() {
       }
   }
 
+  // 2b. GA Security Sentinel (Golden Path Invariant)
+  console.log('\n🛡️  Running GA Security Sentinel...');
+  try {
+    // We enforce that the codebase itself complies with the Security Baseline before bundling
+    run('pnpm verify', 'GA Security Baseline verification failed. Codebase is not compliant.');
+  } catch (e) {
+    console.error("❌ Release blocked: Security Baseline verification failed.");
+    console.error("   Run 'npm run verify' to see details.");
+    process.exit(2);
+  }
+
   // 3. Policy Lint
   const policyLintScript = resolveScript('policy-lint.sh') || resolveScript('lint-policy.sh'); // checking likely names
   if (policyLintScript) {

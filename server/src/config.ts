@@ -53,6 +53,17 @@ const ENV_VAR_HELP: Record<string, string> = {
 };
 
 export const cfg = (() => {
+  // Golden Path Invariant: Ambiguity Guard
+  // If we detect a cloud/production environment signature but NODE_ENV is ambiguous, fail fast.
+  const isCloudEnv = !!(process.env.KUBERNETES_SERVICE_HOST || process.env.AWS_EXECUTION_ENV || process.env.ECS_CONTAINER_METADATA_URI);
+  if (isCloudEnv && !process.env.NODE_ENV) {
+    console.error('\n🚨 CRITICAL: Ambiguous Environment Detected');
+    console.error('   The application is running in a cloud/container environment but NODE_ENV is not set.');
+    console.error('   This risks running in "development" mode in production.');
+    console.error('   Action: Set NODE_ENV=production explicitly.\n');
+    process.exit(1);
+  }
+
   const parsed = Env.safeParse(process.env);
   if (!parsed.success) {
     console.error('\n❌ Environment Validation Failed\n');

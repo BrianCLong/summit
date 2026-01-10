@@ -53,7 +53,14 @@ const startServer = async () => {
   await bootstrapSecrets();
 
   // Log Config
-
+  if (cfg.NODE_ENV === 'production') {
+    logger.info({
+      msg: 'GA SENTINEL: Production Mode Active',
+      commit: process.env.GIT_COMMIT_SHA || 'unknown',
+      strict: !!process.env.STRICT_SETUP,
+      policy_version: process.env.POLICY_VERSION || 'latest',
+    });
+  }
 
   const app = await createApp();
   const schema = makeExecutableSchema({ typeDefs, resolvers });
