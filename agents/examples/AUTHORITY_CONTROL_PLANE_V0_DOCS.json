@@ -1,0 +1,37 @@
+{
+  "task_id": "AUTHORITY_CONTROL_PLANE_V0_DOCS",
+  "agent_id": "gpt-5.2-codex",
+  "prompt_ref": {
+    "id": "authority-control-plane-v0",
+    "version": "v1",
+    "sha256": "64f87dd315e9f5043d8d62e4224e5a39463305af6d176eb35720e33b9b7a1bce",
+    "path": "prompts/governance/authority-control-plane-v0.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/authority-control-plane-v0.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/registry.yaml",
+      "prompts/governance/authority-control-plane-v0.md",
+      "agents/examples/AUTHORITY_CONTROL_PLANE_V0_DOCS.json"
+    ],
+    "domains": ["governance", "architecture", "observability", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["doc-review"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Authority Control Plane v0 documentation expanded with governance alignment and invariants",
+    "Roadmap status updated with timestamp and revision note"
+  ],
+  "stop_conditions": [
+    "Generated documentation contradicts code",
+    "Policy-as-code requirements cannot be expressed"
+  ]
+}

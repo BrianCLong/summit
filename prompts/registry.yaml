@@ -28,3 +28,25 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: authority-control-plane-v0
+    version: v1
+    path: prompts/governance/authority-control-plane-v0.md
+    sha256: 64f87dd315e9f5043d8d62e4224e5a39463305af6d176eb35720e33b9b7a1bce
+    description: Documentation upgrade for the Authority Control Plane v0 with governance alignment.
+    scope:
+      paths:
+        - docs/authority-control-plane-v0.md
+        - docs/roadmap/STATUS.json
+      domains:
+        - governance
+        - architecture
+        - observability
+        - documentation
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - edit

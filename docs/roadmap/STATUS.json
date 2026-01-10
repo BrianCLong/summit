@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-10T02:11:48Z",
+  "revision_note": "Expanded Authority Control Plane v0 with invariants, policy-as-code outline, and governed exceptions",
   "initiatives": [
     {
       "id": "A",
@@ -83,7 +83,7 @@
           "name": "Immutable Audit Log",
           "status": "incomplete",
           "owner": "Jules",
-          "evidence": "Audit services exist but logging is console-only (BaseAgentArchetype.ts:343-352)",
+          "evidence": "Audit services exist but logging is console-only (BaseAgentArchetype.ts:343-352); Authority Control Plane v0 design doc (docs/authority-control-plane-v0.md) defines Decision Records, Execution Gateway, and rollback requirements",
           "blockers": [
             "Need persistent append-only storage",
             "No tamper-proof verification",
