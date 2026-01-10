@@ -1,0 +1,2 @@
+{"id":"dr-1","type":"deep-research","name":"GAIA-style citation","description":"Assess citation discipline","question":"What are two durable benefits of municipal geothermal heating?","requiredCitations":2}
+{"id":"dr-2","type":"deep-research","name":"Safety lens","description":"Check reflection awareness","question":"List two mitigations for model prompt injection when browsing the web.","requiredCitations":2}
