@@ -1,0 +1,35 @@
+{
+  "task_id": "SPRINT29_RELIABILITY_PLAN",
+  "agent_id": "chatgpt",
+  "prompt_ref": {
+    "id": "sprint-29-reliability-plan",
+    "version": "v1",
+    "sha256": "0380d69b85a0a8a75a8d5410818dd9edad95fe9bca21c906b9b9fea9539dd7a7",
+    "path": "prompts/sprint-29-reliability-plan.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "sprint/sprint_plan_feb_16_feb_27_2026_america_denver.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/registry.yaml",
+      "prompts/sprint-29-reliability-plan.md",
+      "agents/examples/SPRINT29_RELIABILITY_PLAN.json"
+    ],
+    "domains": ["documentation", "planning", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs update"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Sprint 29 plan includes success criteria, delivery plan, risks, and evidence checklist",
+    "Roadmap status timestamp reflects the latest planning update",
+    "Prompt registry and task spec are recorded for governance compliance"
+  ],
+  "stop_conditions": ["CI failure in main", "Detection of PII in output", "Sandbox violation alert"]
+}

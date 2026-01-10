@@ -28,3 +28,27 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: sprint-29-reliability-plan
+    version: v1
+    path: prompts/sprint-29-reliability-plan.md
+    sha256: 0380d69b85a0a8a75a8d5410818dd9edad95fe9bca21c906b9b9fea9539dd7a7
+    description: Sprint 29 Reliability Rails plan refinement with governance-aligned artifacts.
+    scope:
+      paths:
+        - sprint/
+        - docs/roadmap/STATUS.json
+        - prompts/
+        - agents/examples/
+      domains:
+        - documentation
+        - planning
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
