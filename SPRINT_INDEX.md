@@ -41,6 +41,11 @@
 
 - **Sprint N+7 — Partner Scale** (`SPRINT_N+7_PARTNER_SCALE.md`)
 
+### Upcoming Sprint — CompanyOS Sprint 27 (Governance Fabric)
+
+- **CompanyOS Sprint 27 — "Governance Fabric: Policy + Audit + Disclosure"** (`sprint/sprint_plan_jan_19_jan_30_2026_america_denver.md`)
+- **Focus:** Policy-governed runtime, immutable audit evidence, disclosure packaging, and trace-first observability.
+
 ---
 
 ## Sprint Organization

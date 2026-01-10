@@ -28,3 +28,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: sprint-27-governance-fabric
+    version: v1
+    path: prompts/plans/sprint-27-governance-fabric.md
+    sha256: 25a97d25243e870e2369a458f48b255b8ee8d2f589f989c7a164270fe910ea9b
+    description: Planning prompt for Sprint 27 (Governance Fabric: Policy + Audit + Disclosure) with evidence and metadata guardrails.
+    scope:
+      paths:
+        - sprint/
+        - SPRINT_INDEX.md
+        - docs/roadmap/STATUS.json
+        - prompts/
+        - agents/examples/
+        - artifacts/agent-runs/
+      domains:
+        - planning
+        - governance
+        - compliance
+        - observability
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

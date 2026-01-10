@@ -1,0 +1,52 @@
+task_id: SPRINT27-GOV-FABRIC
+agent_id: summit-governor
+prompt_ref:
+  id: sprint-27-governance-fabric
+  version: v1
+  sha256: 25a97d25243e870e2369a458f48b255b8ee8d2f589f989c7a164270fe910ea9b
+  path: prompts/plans/sprint-27-governance-fabric.md
+declared_scope:
+  paths:
+    - sprint/
+    - SPRINT_INDEX.md
+    - docs/roadmap/STATUS.json
+    - prompts/registry.yaml
+    - agents/examples/
+    - artifacts/agent-runs/
+  domains:
+    - planning
+    - governance
+    - compliance
+    - observability
+allowed_operations:
+  - create
+  - edit
+verification_requirements:
+  tier: B
+  artifacts:
+    - roadmap:status-update
+    - sprint:plan
+    - metadata:agent-run
+    - pr:template-completed
+    - lint:markdown-format
+    - policy:scope-match
+debt_budget:
+  permitted: 0
+  retirement_target: 0
+success_criteria:
+  - Sprint 27 plan documented with goals, epics, acceptance criteria, and evidence depot paths.
+  - Roadmap status reflects the Governance Fabric sprint focus and timelines.
+  - Sprint index references the new plan for discoverability.
+  - Agent-run artifact links task_id, prompt hash, scope, and verification tier B expectation.
+stop_conditions:
+  - Scope paths fall outside declared directories or prompt scope.
+  - Prompt hash mismatch detected against registry entry.
+  - Governance or compliance requirements conflict with requested operations.
+  - Evidence artifacts missing for roadmap status or sprint documentation.
+dependencies:
+  - prompts/registry.yaml
+  - docs/roadmap/STATUS.json
+  - SPRINT_INDEX.md
+  - artifacts/agent-runs/
+approvals:
+  - governance-council

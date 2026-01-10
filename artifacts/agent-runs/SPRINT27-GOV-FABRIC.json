@@ -1,0 +1,40 @@
+{
+  "task_id": "SPRINT27-GOV-FABRIC",
+  "agent_id": "summit-governor",
+  "prompt_hash": "25a97d25243e870e2369a458f48b255b8ee8d2f589f989c7a164270fe910ea9b",
+  "prompt_id": "sprint-27-governance-fabric",
+  "declared_scope": {
+    "paths": [
+      "sprint/",
+      "SPRINT_INDEX.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/registry.yaml",
+      "agents/examples/",
+      "artifacts/agent-runs/"
+    ],
+    "domains": [
+      "planning",
+      "governance",
+      "compliance",
+      "observability"
+    ]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_tiers": ["B"],
+  "debt_delta": 0,
+  "evidence": {
+    "plan": "sprint/sprint_plan_jan_19_jan_30_2026_america_denver.md",
+    "roadmap_status": "docs/roadmap/STATUS.json",
+    "index": "SPRINT_INDEX.md",
+    "registry": "prompts/registry.yaml",
+    "task_spec": "agents/examples/sprint-27-governance-fabric.yaml"
+  },
+  "policies_enforced": [
+    "scope",
+    "prompt-immutability",
+    "debt-budget",
+    "verification-tier-B"
+  ],
+  "status": "completed",
+  "recorded_at": "2026-01-02T00:00:00.000Z"
+}
