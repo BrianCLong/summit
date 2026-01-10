@@ -15,23 +15,17 @@ jest.mock('../db/postgres.js', () => ({
     })),
 }));
 
-const mockAuth = {
-    verifyToken: jest.fn<any>(),
-    hasPermission: jest.fn().mockReturnValue(true),
-};
-jest.mock('../services/AuthService.js', () => {
-    return jest.fn().mockImplementation(() => mockAuth);
-});
+jest.mock('../services/AuthService.js');
 import AuthService from '../services/AuthService.js';
+
+(AuthService.prototype.verifyToken as any) = jest.fn();
+(AuthService.prototype.hasPermission as any) = jest.fn().mockReturnValue(true);
 
 describe('Tenant Isolation Integration', () => {
     let app: express.Application;
 
     beforeEach(() => {
         jest.clearAllMocks();
-        // Mock the prototype methods of AuthService
-        (AuthService.prototype.verifyToken as any) = jest.fn();
-        (AuthService.prototype.hasPermission as any) = jest.fn().mockReturnValue(true);
 
         app = express();
         app.use(express.json());
@@ -107,7 +101,7 @@ describe('Tenant Isolation Integration', () => {
     });
 
     it('ensures strict isolation even for ADMINs (must specify active tenant)', async () => {
-        (AuthService.prototype.verifyToken as any).mockResolvedValue({
+        mockAuth.verifyToken.mockResolvedValue({
             id: 'admin-1',
             email: 'admin@intelgraph.com',
             role: 'ADMIN',
