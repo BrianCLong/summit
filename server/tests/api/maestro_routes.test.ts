@@ -32,6 +32,7 @@ describeIf('Maestro API routes', () => {
     app.use((req, _res, next) => {
       (req as any).correlationId = 'corr-id';
       (req as any).traceId = 'trace-id';
+      (req as any).user = { id: 'user-1', tenantId: 'tenant-1', role: 'user' };
       next();
     });
 
