@@ -1,0 +1,32 @@
+{
+  "name": "@summit/ale",
+  "version": "0.1.0",
+  "description": "ALE-inspired tooling for Summit: trajectories, chunking, sandboxing, and evaluations",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./evaluators": {
+      "types": "./dist/evaluators/index.d.ts",
+      "import": "./dist/evaluators/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.7.3"
+  }
+}

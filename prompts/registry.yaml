@@ -28,3 +28,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ale-sandbox-eval-slice
+    version: v1
+    path: prompts/ale-sandbox-eval-slice.md
+    sha256: 58c1ec17ec015fdc8efd3d74f0b7873d8baded1c5d9acd5b1fba83017fad39de
+    description: ALE-inspired sandbox, trajectory, and evaluation tooling for Summit.
+    scope:
+      paths:
+        - packages/ale/
+        - packages/cli/
+        - docs/ale.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/registry.yaml
+        - types/
+        - tsconfig.test.json
+      domains:
+        - agentic-evaluation
+        - sandboxing
+        - tooling
+        - docs
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

@@ -1,0 +1,50 @@
+{
+  "task_id": "ALE_SANDBOX_EVAL_SLICE",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "ale-sandbox-eval-slice",
+    "version": "v1",
+    "sha256": "58c1ec17ec015fdc8efd3d74f0b7873d8baded1c5d9acd5b1fba83017fad39de",
+    "path": "prompts/ale-sandbox-eval-slice.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/ale/**",
+      "packages/cli/src/commands/ale.ts",
+      "docs/ale.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/ALE_SANDBOX_EVAL_SLICE.json",
+      "prompts/ale-sandbox-eval-slice.md",
+      "prompts/registry.yaml",
+      "types/node/**",
+      "tsconfig.test.json"
+    ],
+    "domains": ["agentic-evaluation", "sandboxing", "tooling", "docs"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "packages/ale/__tests__/trajectory.test.ts",
+      "packages/ale/__tests__/chunker.test.ts",
+      "packages/ale/__tests__/sandbox.test.ts",
+      "packages/ale/__tests__/terminalBenchPro.test.ts"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Trajectory JSONL read/write validates against schema",
+    "Semantic interaction chunking is deterministic",
+    "Sandbox runner enforces safe defaults and records tool steps",
+    "Terminal Bench Pro evaluator fetches tasks and writes deterministic summary reports",
+    "CLI provides ale record/replay/summarize/eval entrypoints"
+  ],
+  "stop_conditions": [
+    "CI failures on main",
+    "Detection of PII in output",
+    "Sandbox policy violations"
+  ]
+}
