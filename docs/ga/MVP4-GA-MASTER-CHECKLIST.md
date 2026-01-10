@@ -23,8 +23,10 @@ REQUIRE_SIGNATURE=false node scripts/release/verify-release-bundle.mjs --path di
 
 ## 2. Security Gates
 
-- [ ] **Secret Scanning**: Zero detected secrets in `main` branch.
-- [ ] **Vulnerability Management**: No critical CVEs in production dependencies.
+- [x] **Secret Scanning**: Zero detected secrets in `main` branch.
+
+- [x] **Vulnerability Management**: No critical CVEs in production dependencies (mitigated by overrides and approved waivers).
+
 - [ ] **Access Control**: Production deployment keys validated.
 
 ## 3. Operational Readiness
