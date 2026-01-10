@@ -1,32 +1,26 @@
-# SRE Integration Guide
+# Integration Package
 
-This directory contains resources for integrating the Summit Reasoning Evaluator (SRE) into the broader Summit/IntelGraph ecosystem.
+This directory contains the integration contract and supporting notes for the five wedges.
+It aligns IntelGraph services, MC guardrails, and Summit UI surfaces with shared evidence,
+witness, and policy primitives.
 
-## Architecture
-SRE is designed as a **sidecar** or **post-processing** step for Summit runs.
-The integration pattern is:
-1.  **Summit** executes a workflow and emits a `RunTrace` (events).
-2.  **Adapter** converts `RunTrace` -> `SRE Episode`.
-3.  **Evaluator** computes metrics on the `Episode`.
-4.  **Telemetry** pushes results to Grafana/Prometheus.
+## IntelGraph API (minimal contract)
 
-## Quick Start
-See `summit_example.py` for a runnable reference implementation of the adapter pattern.
+- `POST /v1/evidence/verify`
+- `POST /v1/witness/append`
+- `GET  /v1/witness/session/{id}`
+- `POST /v1/policy/check`
 
-```bash
-python integration/summit_example.py
-```
+## Structure
 
-## API Hook
-To register SRE as a callback in Summit:
+- `intelgraph/`: OpenAPI contract and service notes for evidence, policy, and witness ledger;
+  connector expectations for social ingest, intel feeds, and OSINT modules.
+- `mc/`: Tool surfaces and guardrails (verify-first, budget enforcement).
+- `summit/`: UI specs for evidence, witness, replay/audit export, and wedge-specific views.
 
-```python
-from summit.core import events
-from sre.sdk import Evaluator
+## Non-Negotiables
 
-@events.on_run_complete
-def run_eval(run_context):
-    evaluator = Evaluator(config_path="sre_config.yaml")
-    report = evaluator.evaluate(run_context.trace)
-    events.emit("eval_complete", report)
-```
+1. Never pass unverified evidence to an LLM (`mc/guardrails/verify_first.md`).
+2. All policy decisions must be recorded with decision IDs in witness chains.
+3. Privacy budgets and rate limits are enforced for OSINT execution.
+4. Determinism tokens are required for any replayable analytics.

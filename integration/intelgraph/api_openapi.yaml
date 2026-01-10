@@ -1,0 +1,218 @@
+openapi: 3.1.0
+info:
+  title: IntelGraph Evidence & Witness API
+  version: 0.2.0
+  description: Minimal contract for evidence verification, witness logging, and policy checks.
+servers:
+  - url: https://api.intelgraph.local
+paths:
+  /v1/evidence/verify:
+    post:
+      summary: Verify evidence bundle integrity and policy tokens
+      operationId: verifyEvidenceBundle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvidenceVerifyRequest'
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvidenceVerifyResponse'
+        '400':
+          description: Invalid bundle
+        '401':
+          description: Unauthorized
+  /v1/witness/append:
+    post:
+      summary: Append step commitment to witness chain
+      operationId: appendWitnessEntry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WitnessAppendRequest'
+      responses:
+        '200':
+          description: Updated witness session anchor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WitnessAppendResponse'
+        '400':
+          description: Invalid commitment
+  /v1/witness/session/{id}:
+    get:
+      summary: Retrieve witness chain session
+      operationId: getWitnessSession
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Witness chain details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WitnessSession'
+        '404':
+          description: Session not found
+  /v1/policy/check:
+    post:
+      summary: Evaluate policy decision for requested effect signature
+      operationId: policyCheck
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyCheckRequest'
+      responses:
+        '200':
+          description: Policy decision token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyCheckResponse'
+        '400':
+          description: Invalid request
+components:
+  schemas:
+    EvidenceBundle:
+      type: object
+      required: [bundle_id, items, policy_tokens, commitments, signature]
+      properties:
+        bundle_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        policy_tokens:
+          type: array
+          items:
+            type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EvidenceItem'
+        commitments:
+          type: object
+          properties:
+            items_merkle_root:
+              type: string
+            schema_version:
+              type: string
+        determinism_token:
+          type: string
+        signature:
+          type: string
+    EvidenceItem:
+      type: object
+      required: [item_id, pointer]
+      properties:
+        item_id:
+          type: string
+        pointer:
+          type: object
+          properties:
+            uri:
+              type: string
+            sha256:
+              type: string
+        redacted_bytes:
+          type: string
+          description: base64 encoded
+        redaction_policy:
+          type: string
+        sensitivity:
+          type: string
+    EvidenceVerifyRequest:
+      type: object
+      required: [bundle]
+      properties:
+        bundle:
+          $ref: '#/components/schemas/EvidenceBundle'
+    EvidenceVerifyResponse:
+      type: object
+      properties:
+        verified:
+          type: boolean
+        witness_append_token:
+          type: string
+        errors:
+          type: array
+          items:
+            type: string
+    WitnessAppendRequest:
+      type: object
+      required: [session_id, commitment]
+      properties:
+        session_id:
+          type: string
+        commitment:
+          type: string
+        policy_decision_id:
+          type: string
+        determinism_token:
+          type: string
+    WitnessAppendResponse:
+      type: object
+      properties:
+        session_id:
+          type: string
+        anchor:
+          type: string
+    WitnessSession:
+      type: object
+      properties:
+        session_id:
+          type: string
+        entries:
+          type: array
+          items:
+            type: object
+            properties:
+              step:
+                type: integer
+              commitment:
+                type: string
+              prev_commitment:
+                type: string
+              timestamp:
+                type: string
+                format: date-time
+    PolicyCheckRequest:
+      type: object
+      required: [subject, purpose, effect]
+      properties:
+        subject:
+          type: object
+          additionalProperties: true
+        purpose:
+          type: string
+        effect:
+          type: string
+        constraints:
+          type: object
+          additionalProperties: true
+    PolicyCheckResponse:
+      type: object
+      properties:
+        decision_id:
+          type: string
+        allowed:
+          type: boolean
+        obligations:
+          type: object
+          additionalProperties: true
+        issued_at:
+          type: string
+          format: date-time
