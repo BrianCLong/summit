@@ -4,6 +4,33 @@ import express, { Response } from 'express';
 import { ensureAuthenticated } from '../middleware/auth';
 import { tenantContextMiddleware } from '../middleware/tenantContext';
 
+// Mock prom-client BEFORE anything else
+jest.mock('prom-client', () => {
+    const mockMetric = {
+        inc: jest.fn(),
+        set: jest.fn(),
+        observe: jest.fn(),
+        labels: jest.fn().mockReturnThis(),
+        startTimer: jest.fn().mockReturnValue(jest.fn())
+    };
+    const mockRegister = {
+        registerMetric: jest.fn(),
+        getSingleMetric: jest.fn(),
+        clear: jest.fn(),
+        metrics: jest.fn().mockReturnValue(''),
+        contentType: 'text/plain'
+    };
+    return {
+        register: mockRegister,
+        Registry: jest.fn().mockImplementation(() => mockRegister),
+        Counter: jest.fn().mockImplementation(() => mockMetric),
+        Histogram: jest.fn().mockImplementation(() => mockMetric),
+        Gauge: jest.fn().mockImplementation(() => mockMetric),
+        Summary: jest.fn().mockImplementation(() => mockMetric),
+        collectDefaultMetrics: jest.fn()
+    };
+});
+
 // Mock the dependencies
 jest.mock('../db/postgres.js', () => ({
     getPostgresPool: jest.fn(() => ({
@@ -15,11 +42,47 @@ jest.mock('../db/postgres.js', () => ({
     })),
 }));
 
-jest.mock('../services/AuthService.js');
-import AuthService from '../services/AuthService.js';
+jest.mock('../monitoring/metrics.js', () => ({
+    metrics: {
+        pbacDecisionsTotal: { inc: jest.fn() }
+    },
+    register: {
+        registerMetric: jest.fn(),
+        clear: jest.fn()
+    },
+    httpRequestDuration: { labels: jest.fn().mockReturnThis(), observe: jest.fn() },
+    httpRequestsTotal: { labels: jest.fn().mockReturnThis(), inc: jest.fn() }
+}));
 
-(AuthService.prototype.verifyToken as any) = jest.fn();
-(AuthService.prototype.hasPermission as any) = jest.fn().mockReturnValue(true);
+jest.mock('../metrics/neo4jMetrics.js', () => ({
+    neo4jQueryLatencyMs: { labels: jest.fn().mockReturnThis(), observe: jest.fn() },
+    neo4jErrorsTotal: { labels: jest.fn().mockReturnThis(), inc: jest.fn() },
+    neo4jConnectionsActive: { set: jest.fn() }
+}));
+
+jest.mock('../audit/advanced-audit-system.js', () => ({
+    getAuditSystem: jest.fn(() => ({
+        recordEvent: jest.fn<any>().mockResolvedValue('test-event-id')
+    }))
+}));
+
+jest.mock('../services/AuthService.js', () => {
+    const mockService = {
+        verifyToken: jest.fn(),
+        hasPermission: jest.fn().mockReturnValue(true),
+        formatUser: jest.fn((u) => u)
+    };
+    const MockAuthService = jest.fn(() => mockService);
+    (MockAuthService as any).getInstance = jest.fn(() => mockService);
+    (global as any).mockAuthService = mockService;
+    return {
+        __esModule: true,
+        default: MockAuthService
+    };
+});
+
+import AuthService from '../services/AuthService.js';
+const mockAuthService = (global as any).mockAuthService;
 
 describe('Tenant Isolation Integration', () => {
     let app: express.Application;
@@ -53,7 +116,7 @@ describe('Tenant Isolation Integration', () => {
     });
 
     it('rejects requests without tenant header', async () => {
-        (AuthService.prototype.verifyToken as any).mockResolvedValue({
+        (mockAuthService.verifyToken as any).mockResolvedValue({
             id: 'user-1',
             email: 'user1@tenant1.com',
             tenantId: 'tenant-1'
@@ -69,7 +132,7 @@ describe('Tenant Isolation Integration', () => {
     });
 
     it('rejects requests where tenant header does not match token tenantId', async () => {
-        (AuthService.prototype.verifyToken as any).mockResolvedValue({
+        (mockAuthService.verifyToken as any).mockResolvedValue({
             id: 'user-1',
             email: 'user1@tenant1.com',
             tenantId: 'tenant-1'
@@ -80,12 +143,13 @@ describe('Tenant Isolation Integration', () => {
             .set('Authorization', 'Bearer valid-token')
             .set('x-tenant-id', 'tenant-2');
 
-        expect(response.status).toBe(403);
-        expect(response.body.error).toContain('Tenant ID mismatch');
+        expect(response.status).toBe(409);
+        expect(response.body.error).toContain('tenant_context_error');
+        expect(response.body.message).toContain('Tenant identifier mismatch');
     });
 
     it('allows requests where tenant header matches token tenantId', async () => {
-        (AuthService.prototype.verifyToken as any).mockResolvedValue({
+        (mockAuthService.verifyToken as any).mockResolvedValue({
             id: 'user-1',
             email: 'user1@tenant1.com',
             tenantId: 'tenant-1'
@@ -101,7 +165,7 @@ describe('Tenant Isolation Integration', () => {
     });
 
     it('ensures strict isolation even for ADMINs (must specify active tenant)', async () => {
-        mockAuth.verifyToken.mockResolvedValue({
+        (mockAuthService.verifyToken as any).mockResolvedValue({
             id: 'admin-1',
             email: 'admin@intelgraph.com',
             role: 'ADMIN',
@@ -117,6 +181,7 @@ describe('Tenant Isolation Integration', () => {
             .set('Authorization', 'Bearer admin-token')
             .set('x-tenant-id', 'tenant-1');
 
-        expect(response.status).toBe(403);
+        expect(response.status).toBe(409);
+        expect(response.body.message).toContain('Tenant identifier mismatch');
     });
 });
