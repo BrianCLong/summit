@@ -1,0 +1,40 @@
+{
+  "task_id": "SECURITY_REMEDIATION_2026_01_10",
+  "agent_id": "Codex-CLI",
+  "prompt_ref": {
+    "id": "review.security-check",
+    "version": "v1",
+    "sha256": "5c417edfece34dfc0034cc2483a92864ac560be4ac8d0b8756f231d4437d542c",
+    "path": "prompts/review.security-check@v1.yaml"
+  },
+  "declared_scope": {
+    "paths": [
+      "server/src/routes/data-residency.ts",
+      "docs/security/SECURITY_REMEDIATION_LEDGER.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/registry.yaml",
+      "agents/examples/SECURITY_REMEDIATION_2026_01_10.json"
+    ],
+    "domains": ["security", "documentation", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "docs/security/SECURITY_REMEDIATION_LEDGER.md",
+      "command logs for pnpm audit/lint/test runs"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Security remediation ledger updated with current findings and verification commands",
+    "KMS credential examples sanitized to remove secret-like tokens"
+  ],
+  "stop_conditions": [
+    "Detection of real secrets in tracked files",
+    "Policy violations against governance constraints"
+  ]
+}

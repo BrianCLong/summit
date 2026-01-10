@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-09T16:00:00Z",
-  "revision_note": "Added scaffolded INSLAW/PROMIS affidavit demo artifacts for provenance-first ingestion",
+  "last_updated": "2026-01-10T00:15:00Z",
+  "revision_note": "Logged security remediation ledger updates and sanitized KMS credential examples",
   "initiatives": [
     {
       "id": "A",

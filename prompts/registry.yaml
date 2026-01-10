@@ -79,3 +79,29 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: review.security-check
+    version: v1
+    path: prompts/review.security-check@v1.yaml
+    sha256: 5c417edfece34dfc0034cc2483a92864ac560be4ac8d0b8756f231d4437d542c
+    description: Perform a security-focused review and remediation pass over code changes.
+    scope:
+      paths:
+        - server/
+        - docs/security/
+        - docs/roadmap/STATUS.json
+        - prompts/review.security-check@v1.yaml
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - security
+        - documentation
+        - governance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
