@@ -1,0 +1,37 @@
+{
+  "task_id": "FMCP_TPCE_COMPLETION_20260110",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "fmcp-tpce-completion",
+    "version": "v1",
+    "sha256": "bfe6a7281a34e4ed9b581581bd027a66b6e395193fa2b69858aa68c4707cf679",
+    "path": "prompts/patents/fmcp-tpce-followup.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/patents/innovation-intake-and-provisionals.md",
+      "docs/patents/patentable-innovations.md",
+      "docs/patents/provisionals/fmcp-tpce.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/patents/fmcp-tpce-followup.md",
+      "prompts/registry.yaml",
+      "agents/examples/FMCP_TPCE_COMPLETION_20260110.json"
+    ],
+    "domains": ["patents", "roadmap", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["doc-review"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "FMCP-TPCE provisional expanded with architecture, capsule schema, trust translation, and verification flow details",
+    "Patent docket entries align with the provisional scope and claims",
+    "Roadmap status timestamp and revision note updated"
+  ],
+  "stop_conditions": ["CI failure in main", "Detection of PII in output", "Sandbox violation alert"]
+}

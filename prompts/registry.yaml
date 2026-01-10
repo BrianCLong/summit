@@ -28,3 +28,25 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: fmcp-tpce-completion
+    version: v1
+    path: prompts/patents/fmcp-tpce-followup.md
+    sha256: bfe6a7281a34e4ed9b581581bd027a66b6e395193fa2b69858aa68c4707cf679
+    description: Expand FMCP-TPCE provisional and docket entries into filing-ready documentation with governance alignment.
+    scope:
+      paths:
+        - docs/patents/
+        - docs/roadmap/STATUS.json
+      domains:
+        - patents
+        - roadmap
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
