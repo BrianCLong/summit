@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-10T03:40:00Z",
+  "revision_note": "Require tracked Gitleaks baseline and tighten SARIF upload conditions for enforced scanning",
   "initiatives": [
     {
       "id": "A",

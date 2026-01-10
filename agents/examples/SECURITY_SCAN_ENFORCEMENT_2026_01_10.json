@@ -1,0 +1,40 @@
+{
+  "task_id": "SECURITY_SCAN_ENFORCEMENT_2026_01_10",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "agent-native-loop-n4",
+    "version": "v1",
+    "sha256": "2fcf3ef5535a5dd116439d1fc8a665e03945e1c6981373895fd9344bd486b658",
+    "path": "prompts/governance/agent-native-loop-n4.md"
+  },
+  "declared_scope": {
+    "paths": [
+      ".github/workflows/secret-scan-warn.yml",
+      "docs/roadmap/STATUS.json",
+      "security/risk-change-log.md",
+      "security/security-remediation-queue.md",
+      "prompts/registry.yaml",
+      "agents/examples/SECURITY_SCAN_ENFORCEMENT_2026_01_10.json"
+    ],
+    "domains": ["security", "ci", "governance"]
+  },
+  "allowed_operations": ["edit", "create"],
+  "verification_requirements": {
+    "tier": "A",
+    "artifacts": ["make smoke", "scripts/check-boundaries.cjs output"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 1
+  },
+  "success_criteria": [
+    "Gitleaks workflow fails when baseline is missing or secrets are detected.",
+    "SARIF uploads occur for push and same-repo pull_request events.",
+    "Roadmap status reflects the security gate adjustment."
+  ],
+  "stop_conditions": [
+    "CI failure in main.",
+    "Sandbox violation alert.",
+    "Detection of PII in output."
+  ]
+}
