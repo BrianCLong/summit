@@ -1,0 +1,47 @@
+{
+  "tenantId": "tenant-alpha",
+  "bundleId": "baseline-sim",
+  "metadata": {
+    "issuedAt": "2026-01-01T00:00:00Z",
+    "source": "baseline-fixture"
+  },
+  "baseProfile": {
+    "id": "base-tenant-profile",
+    "version": "1.0.0",
+    "regoPackage": "intelgraph.authz",
+    "entrypoints": ["intelgraph/authz/allow"],
+    "guardrails": {
+      "defaultDeny": true,
+      "requirePurpose": true,
+      "requireJustification": false
+    },
+    "crossTenant": {
+      "mode": "deny",
+      "allow": [],
+      "requireAgreements": true
+    },
+    "rules": [
+      {
+        "id": "allow-read-own-tenant",
+        "description": "Allow read within tenant boundary",
+        "effect": "allow",
+        "priority": 10,
+        "conditions": {
+          "actions": ["read"],
+          "resourceTenants": ["tenant-alpha"],
+          "subjectTenants": ["tenant-alpha"]
+        }
+      },
+      {
+        "id": "deny-cross-tenant",
+        "description": "Deny cross-tenant actions by default",
+        "effect": "deny",
+        "priority": 20,
+        "conditions": {
+          "actions": ["read", "write"]
+        }
+      }
+    ]
+  },
+  "overlays": []
+}
