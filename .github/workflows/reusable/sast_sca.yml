@@ -1,26 +1,4 @@
-name: Reusable SAST/SCA
-on:
-  workflow_call:
-
-jobs:
-  run:
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-      - name: Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          scan-type: fs
-          format: table
-          severity: CRITICAL,HIGH
-          ignore-unfixed: true
-          exit-code: '0'
-          vuln-type: 'os,library'
 name: sast_sca
-
 on:
   workflow_call:
     secrets:
@@ -36,7 +14,7 @@ jobs:
     name: sast_sca
     runs-on: ubuntu-latest
     env:
-      NODE_VERSION: '20.x'
+      NODE_VERSION: "20.x"
       PNPM_CACHE_FOLDER: ~/.pnpm-store
     steps:
       - name: Checkout
@@ -48,7 +26,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Enable corepack
         run: corepack enable
@@ -58,6 +36,16 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # v0.24.0
+        with:
+          scan-type: fs
+          format: table
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "0"
+          vuln-type: "os,library"
 
       - name: Lint for vulnerabilities and quality
         run: pnpm run lint:check

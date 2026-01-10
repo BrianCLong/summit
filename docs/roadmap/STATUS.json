@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-09T16:00:00Z",
-  "revision_note": "Added scaffolded INSLAW/PROMIS affidavit demo artifacts for provenance-first ingestion",
+  "last_updated": "2026-01-10T00:35:00Z",
+  "revision_note": "Pinned Trivy action SHAs in reusable workflows and upgraded form-data in ingest starter",
   "initiatives": [
     {
       "id": "A",
