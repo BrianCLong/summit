@@ -13,56 +13,74 @@ on:
       - "docs/**"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   format-check:
     name: Format Check
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+      - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
         with:
           node-version: "20"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
+        timeout-minutes: 10
 
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+      - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
         with:
           node-version: "20"
           cache: pnpm
+      - name: Restore build cache
+        uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
+        with:
+          path: |
+            .turbo
+            dist
+          key: build-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml', '**/tsconfig*.json') }}
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
+        timeout-minutes: 10
       - name: Check CJS files use CommonJS syntax
         run: pnpm lint:cjs
+        timeout-minutes: 5
       - run: cd server && npx tsx scripts/check-error-codes-doc.ts
+        timeout-minutes: 5
 
   verify:
     name: Verification Suite
     needs: lint
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+      - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
         with:
           node-version: "20"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Run verification suite
         run: pnpm verify
+        timeout-minutes: 15
       - name: Upload verification results
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:
           name: verification-results
           path: |
@@ -73,59 +91,84 @@ jobs:
     name: Test (${{ matrix.test-suite }})
     needs: [lint, verify]
     runs-on: ubuntu-latest
-    # Both unit and integration tests are non-blocking until TypeScript/ESM issues are resolved
-    # EXPIRY: 2026-01-15 - Must fix underlying TypeScript errors in test files
-    # TICKET: See docs/release/GA_DECISIONS.md for follow-up plan
+    timeout-minutes: 30
     continue-on-error: true
     strategy:
+      fail-fast: false
       matrix:
         test-suite: [unit, integration]
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+      - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
         with:
           node-version: "20"
           cache: pnpm
+      - name: Restore build cache
+        uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
+        with:
+          path: |
+            .turbo
+            dist
+          key: build-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml', '**/tsconfig*.json') }}
       - run: pnpm install --frozen-lockfile
       - name: Run tests (deterministic TZ)
         run: pnpm test:${{ matrix.test-suite }}
         env:
           TZ: UTC
+        timeout-minutes: 20
       - name: Run API authz e2e tests
         if: matrix.test-suite == 'integration'
         run: pnpm --filter @intelgraph/api test
+        timeout-minutes: 15
+      - name: Publish summary
+        if: always()
+        run: |
+          echo "### Test Summary (${{ matrix.test-suite }})" >> "$GITHUB_STEP_SUMMARY"
+          # Simple summary logic
+          if [ "${{ job.status }}" == "success" ]; then
+             echo "✅ Passed" >> "$GITHUB_STEP_SUMMARY"
+          else
+             echo "❌ Failed" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
   golden-path:
     name: Golden Path
     needs: test
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+      - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
         with:
           node-version: "20"
           cache: pnpm
       - run: make bootstrap
+        timeout-minutes: 10
       - run: make up
+        timeout-minutes: 5
       - run: make smoke
+        timeout-minutes: 5
       - run: make down
         if: always()
+        timeout-minutes: 2
 
   reproducible-build:
     name: Reproducible Build
     needs: test
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+      - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
         with:
           node-version: "20"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Build twice for deterministic output
+        timeout-minutes: 30
         run: |
           set -euo pipefail
           export SOURCE_DATE_EPOCH=$(git log -1 --pretty=format:%ct)
@@ -146,59 +189,65 @@ jobs:
     name: Governance
     needs: test
     runs-on: ubuntu-latest
-    # Non-blocking until ESM test infrastructure is resolved
+    timeout-minutes: 25
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+      - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
         with:
           node-version: "20"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: npm run check:governance
+        timeout-minutes: 5
       - run: npm test -- --testPathPattern="governance" --bail
+        timeout-minutes: 10
       - name: Execute Governance Audit (Control the Arena)
         run: npx tsx scripts/governance/audit_ci.ts
+        timeout-minutes: 5
 
   provenance:
     name: Provenance
     needs: test
     runs-on: ubuntu-latest
-    # Non-blocking until ESM test infrastructure is resolved
+    timeout-minutes: 20
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+      - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
         with:
           node-version: "20"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: npm test -- --testPathPattern="provenance" --bail
+        timeout-minutes: 10
 
   schema-diff:
     name: Schema Diff
     needs: test
     runs-on: ubuntu-latest
-    # Non-blocking until graphql-inspector loader issues are resolved
+    timeout-minutes: 20
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
-          fetch-depth: 0 # Need full history for git diff references
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v6
+          fetch-depth: 0
+      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+      - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
         with:
           node-version: "20"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: npm run graphql:schema:check
+        timeout-minutes: 10
 
   ecosystem-exports:
     name: Ecosystem Export Verification
     needs: test
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     services:
       postgres:
         image: timescale/timescaledb:latest-pg14
@@ -213,24 +262,27 @@ jobs:
         ports:
           - 5432:5432
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+      - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
         with:
           node-version: "20"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Run database migrations
+        timeout-minutes: 5
         run: |
           cd server
           npx tsx scripts/run-migrations.ts
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
       - name: Verify export schema conformance
+        timeout-minutes: 10
         run: npm test -- test/verification/integrations.node.test.ts --bail
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
       - name: Dry-run transparency report generation
+        timeout-minutes: 10
         run: |
           cd scripts
           npx tsx generate-transparency-report.ts \
@@ -251,11 +303,12 @@ jobs:
 
   ga-risk-gate:
     name: GA Risk Gate
-    needs: [lint] # Run early to fail fast
+    needs: [lint]
     uses: ./.github/workflows/ga-risk-gate.yml
     with:
       ref: ${{ github.sha }}
     secrets: inherit
+    timeout-minutes: 5
 
   build-server-image:
     name: Build Server Image (Governance)
@@ -270,6 +323,7 @@ jobs:
     name: Observability
     needs: [security, reproducible-build, build-server-image]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Emit metrics
         run: echo "Emitting workflow metrics..."

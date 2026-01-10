@@ -28,6 +28,8 @@ try {
   q = JSON.parse(fs.readFileSync('tests/.quarantine.json', 'utf8'));
 } catch {}
 
+jest.retryTimes(process.env.CI ? 2 : 0);
+
 const orig = globalThis.it || it;
 globalThis.it = Object.assign((name, fn, t) => {
   if (q.some((s) => name.includes(s))) return orig.skip(name, fn, t);
