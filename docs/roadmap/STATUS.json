@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-10T04:25:00Z",
+  "revision_note": "Refined dependency monitoring guardrails (PR-only dependency review, fork-safe Snyk SARIF, token fallback)",
   "initiatives": [
     {
       "id": "A",

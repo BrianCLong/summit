@@ -1,0 +1,82 @@
+name: Dependency Monitoring
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: read
+
+env:
+  REPORT_DIR: dependency-monitoring
+
+jobs:
+  dependency-review:
+    name: Block vulnerable dependency changes
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' }}
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Dependency review
+        uses: actions/dependency-review-action@5a2ce3f5b92ee19cbb1541a4984c76d921601d7c # v4.3.4
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: true
+          deny-licenses: AGPL-3.0, GPL-3.0, LGPL-3.0
+
+  snyk-scan:
+    name: Snyk dependency vulnerability scan
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN || secrets.snyk_token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+
+      - name: Prepare report directory
+        run: mkdir -p "$REPORT_DIR"
+
+      - name: Ensure SNYK_TOKEN is configured
+        run: |
+          if [ -z "${SNYK_TOKEN:-}" ]; then
+            echo "::error::SNYK_TOKEN is required for Snyk dependency scanning."
+            echo "Add the secret in repository settings (SNYK_TOKEN or snyk_token) to enforce dependency vulnerability gating."
+            exit 1
+          fi
+
+      - name: Run Snyk test across all manifests
+        uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04 # 1.0.0
+        env:
+          SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
+        with:
+          command: test
+          args: >-
+            --all-projects
+            --severity-threshold=high
+            --fail-on=all
+            --sarif-file-output=${{ env.REPORT_DIR }}/snyk.sarif
+
+      - name: Upload Snyk SARIF
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: ${{ env.REPORT_DIR }}/snyk.sarif
+
+      - name: Persist Snyk report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-monitoring
+          path: ${{ env.REPORT_DIR }}/snyk.sarif
