@@ -7,10 +7,125 @@ on:
         description: "Comma-separated list of regions to deploy to (e.g., us-east-1,eu-west-1). Leave blank for all."
         required: false
         default: ""
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: deploy-multi-region-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  deploy:
+  coverage-and-integration:
+    name: Coverage + integration gate
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run server coverage suite
+        working-directory: server
+        run: pnpm test:coverage -- --runInBand
+
+      - name: Enforce coverage thresholds
+        working-directory: server
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+
+          const summary = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
+          const thresholds = { lines: 80, statements: 80, branches: 70, functions: 80 };
+          const totals = summary.total || {};
+
+          for (const [metric, target] of Object.entries(thresholds)) {
+            const value = (totals[metric] && totals[metric].pct) || 0;
+            if (value < target) {
+              throw new Error(`Coverage gate failed for ${metric}: ${value}% < ${target}%`);
+            }
+          }
+          NODE
+
+      - name: Run authz integration enforcement
+        working-directory: server
+        run: pnpm test:integration
+
+      - name: Upload coverage summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-coverage-summary
+          path: server/coverage/coverage-summary.json
+
+  cve-scan:
+    name: CVE gate (no bypass)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies for audit
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Enforce high/critical CVE gate
+        run: pnpm audit --audit-level high
+
+  smoke-tests:
+    name: Smoke test gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run smoke tests
+        env:
+          CI: true
+        run: pnpm run test:smoke
+
+  deploy:
+    name: Deploy after gates
+    runs-on: ubuntu-latest
+    needs: [coverage-and-integration, cve-scan, smoke-tests]
     environment:
       name: production
       url: https://summit.example
@@ -38,7 +153,6 @@ jobs:
         run: |
           for region in $REGIONS_TO_DEPLOY; do
             echo "--- Deploying to $region ---"
-            # In a real scenario, you'd remove --dry-run
             ./deploy/deploy-multi-region.sh $region
 
             echo "--- Running performance test for $region ---"
