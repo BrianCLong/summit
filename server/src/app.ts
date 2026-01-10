@@ -137,6 +137,8 @@ import { v4Router } from './routes/v4/index.js';
 import vectorStoreRouter from './routes/vector-store.js';
 import intelGraphRouter from './routes/intel-graph.js';
 import graphragRouter from './routes/graphrag.js';
+import { getPostgresPool } from './db/postgres.js';
+import { createCaseWorkflowRouter } from './routes/case-workflow.js';
 
 export const createApp = async () => {
   // Initialize OpenTelemetry tracing
@@ -392,6 +394,7 @@ export const createApp = async () => {
   app.use('/api/support', supportTicketsRouter);
   app.use('/api', ticketLinksRouter);
   app.use('/api/cases', caseRouter);
+  app.use('/api', createCaseWorkflowRouter(getPostgresPool()));
   app.use('/api/entities', entityCommentsRouter);
   app.use('/api/aurora', auroraRouter);
   app.use('/api/oracle', oracleRouter);

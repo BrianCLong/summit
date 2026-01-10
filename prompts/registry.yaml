@@ -28,3 +28,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: case-ops-perf-harness
+    version: v1
+    path: prompts/perf/case-ops-flow.md
+    sha256: 489e9203b65c6d6f2458da2029feb2eb2073033d4c5d0d9a7192a6278165ca2c
+    description: Perf harness and telemetry updates for case start/cancel/approve/export flows.
+    scope:
+      paths:
+        - apps/web/
+        - server/
+        - tests/k6/
+        - perf/
+        - docs/runbooks/
+        - docs/roadmap/
+        - agents/
+        - prompts/
+      domains:
+        - performance
+        - telemetry
+        - docs
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

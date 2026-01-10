@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import config from '../config'
+import { trackSwitchboardEvent } from '@/telemetry/metrics'
 
 export interface WebSocketMessage {
   type: string
@@ -316,6 +317,10 @@ export function useApprovalUpdates() {
   useEffect(() => {
     const unsubscribeRequests = ws.subscribe('approval_request', data => {
       setPendingApprovals(prev => [...prev, data])
+      void trackSwitchboardEvent('approval_requested', {
+        runId: data?.runId || 'unknown',
+        stepId: data?.stepId || 'unknown',
+      })
     })
 
     const unsubscribeResponses = ws.subscribe('approval_response', data => {
@@ -325,6 +330,11 @@ export function useApprovalUpdates() {
             !(approval.runId === data.runId && approval.stepId === data.stepId)
         )
       )
+      void trackSwitchboardEvent('approval_voted', {
+        runId: data?.runId || 'unknown',
+        stepId: data?.stepId || 'unknown',
+        decision: data?.decision || 'unknown',
+      })
     })
 
     return () => {

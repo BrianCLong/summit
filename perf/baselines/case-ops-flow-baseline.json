@@ -1,0 +1,35 @@
+{
+  "suite": "case-ops-flow",
+  "generated_at": "2026-01-01T00:00:00Z",
+  "source": "k6",
+  "environment": {
+    "base_url": "http://localhost:4000",
+    "tenant_id": "perf-tenant",
+    "user_id": "perf-user",
+    "legal_basis": "investigation"
+  },
+  "metrics": {
+    "case_start_duration_ms": {
+      "p95_ms": null,
+      "p99_ms": null
+    },
+    "case_approval_request_duration_ms": {
+      "p95_ms": null,
+      "p99_ms": null
+    },
+    "case_approval_vote_duration_ms": {
+      "p95_ms": null,
+      "p99_ms": null
+    },
+    "case_export_duration_ms": {
+      "p95_ms": null,
+      "p99_ms": null
+    },
+    "case_cancel_duration_ms": {
+      "p95_ms": null,
+      "p99_ms": null
+    }
+  },
+  "status": "pending_run",
+  "notes": "Deferred pending perf run."
+}

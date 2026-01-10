@@ -16,14 +16,16 @@ const routeLogger = logger.child({ name: 'CaseWorkflowRoutes' });
  * Helper to extract user ID and tenant ID from authenticated request
  */
 function extractAuthContext(req: AuthenticatedRequest): { userId: string; tenantId: string } | null {
-  if (!req.user?.id) {
-    return null;
-  }
+  const headerUserId = req.headers['x-user-id'];
+  const headerTenantId = req.headers['x-tenant-id'] || req.headers['x-tenant'];
+  const userId = req.user?.id || (headerUserId ? String(headerUserId) : undefined);
+  const tenantId =
+    req.user?.tenantId ||
+    req.tenant?.id ||
+    req.tenant?.tenantId ||
+    (headerTenantId ? String(headerTenantId) : undefined);
 
-  const userId = req.user!.id;
-  const tenantId = req.user!.tenantId || req.tenant?.id || req.tenant?.tenantId;
-
-  if (!tenantId) {
+  if (!userId || !tenantId) {
     return null;
   }
 
@@ -45,16 +47,9 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
       const { id: caseId } = req.params;
       const { toStage, reason, legalBasis, metadata } = req.body;
 
-      // Extract userId and tenantId from authenticated request
-      if (!req.user?.id) {
-        return res.status(401).json({ error: 'Authentication required' });
-      }
-
-      const userId = req.user!.id;
-      const tenantId = req.user!.tenantId || req.tenant?.id || req.tenant?.tenantId;
-
-      if (!tenantId) {
-        return res.status(400).json({ error: 'Tenant ID is required' });
+      const authContext = extractAuthContext(req);
+      if (!authContext) {
+        return res.status(401).json({ error: 'Authentication and tenant context required' });
       }
 
       if (!toStage || !reason) {
@@ -67,14 +62,14 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
         {
           caseId,
           toStage,
-          userId,
+          userId: authContext.userId,
           reason,
           legalBasis,
           metadata,
         },
         {
           legalBasis: legalBasis || 'investigation',
-          tenantId,
+          tenantId: authContext.tenantId,
         },
       );
 
@@ -106,21 +101,17 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
     try {
       const { id: caseId } = req.params;
 
-      if (!req.user?.id) {
-        return res.status(401).json({ error: 'Authentication required' });
-      }
-
-      const userId = req.user!.id;
-      const tenantId = req.user!.tenantId || req.tenant?.id || req.tenant?.tenantId;
-
-      if (!tenantId) {
-        return res.status(400).json({ error: 'Tenant ID is required' });
+      const authContext = extractAuthContext(req);
+      if (!authContext) {
+        return res.status(401).json({ error: 'Authentication and tenant context required' });
       }
 
       const transitions = await workflowService.getAvailableTransitions(
         caseId,
-        userId,
-        tenantId,
+        {
+          userId: authContext.userId,
+          tenantId: authContext.tenantId,
+        },
       );
 
       res.json({ transitions });

@@ -1,0 +1,44 @@
+{
+  "task_id": "PERF_CASE_OPS_FLOW_20260102",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "case-ops-perf-harness",
+    "version": "v1",
+    "sha256": "489e9203b65c6d6f2458da2029feb2eb2073033d4c5d0d9a7192a6278165ca2c",
+    "path": "prompts/perf/case-ops-flow.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "apps/web/src/telemetry/",
+      "apps/web/src/hooks/",
+      "server/src/",
+      "tests/k6/",
+      "perf/",
+      "docs/runbooks/",
+      "docs/roadmap/",
+      "prompts/",
+      "agents/examples/"
+    ],
+    "domains": ["performance", "telemetry", "docs"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["perf/baselines/case-ops-flow-baseline.json", "docs/runbooks/perf-case-ops.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "k6 case ops flow script exercises start/cancel/approve/export endpoints",
+    "baseline report captures p95/p99 metrics",
+    "Switchboard telemetry hooks are present in the web metrics layer",
+    "runbook documents execution and interpretation"
+  ],
+  "stop_conditions": [
+    "CI gate failures in pr-quality-gate.yml",
+    "PII detected in perf output",
+    "sandbox violation alert"
+  ]
+}
