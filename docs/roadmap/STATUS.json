@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-09T16:00:00Z",
-  "revision_note": "Added scaffolded INSLAW/PROMIS affidavit demo artifacts for provenance-first ingestion",
+  "last_updated": "2026-01-09T16:30:00Z",
+  "revision_note": "Deferred A1-A3/C1-C2 to pending merge verification to align ledger and roadmap evidence",
   "initiatives": [
     {
       "id": "A",
@@ -9,23 +9,35 @@
         {
           "id": "A1",
           "name": "Local Vector Store",
-          "status": "rc-ready",
+          "status": "deferred-pending-merge",
           "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/lib/data-platform/ingest/service.ts (embedding ingestion + PGVector formatting), server/src/lib/data-platform/retrieval/service.ts (vector retrieval), server/src/memory/repositories/pageRepository.ts (pgvector storage)"
+          "evidence": "Deferred pending merge verification; PR_MERGE_LEDGER lacks PR number and default-branch commit hash cdfacf7e not found in local history.",
+          "blockers": [
+            "Deferred pending merge verification in PR_MERGE_LEDGER",
+            "Default-branch merge commit hash cdfacf7e not found in local history"
+          ]
         },
         {
           "id": "A2",
           "name": "RAG Ingestion Pipeline",
-          "status": "rc-ready",
+          "status": "deferred-pending-merge",
           "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/lib/data-platform/rag/service.ts (RAG orchestration), server/src/lib/data-platform/ingest/service.ts (embedding ingest), server/src/maestro/graphrag-service.ts (GraphRAG assistant pipeline)"
+          "evidence": "Deferred pending merge verification; PR_MERGE_LEDGER lacks PR number and default-branch commit hash cdfacf7e not found in local history.",
+          "blockers": [
+            "Deferred pending merge verification in PR_MERGE_LEDGER",
+            "Default-branch merge commit hash cdfacf7e not found in local history"
+          ]
         },
         {
           "id": "A3",
           "name": "Copilot Query Service",
-          "status": "rc-ready",
+          "status": "deferred-pending-merge",
           "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/services/CopilotIntegrationService.ts and server/src/services/CopilotNLQueryService.ts"
+          "evidence": "Deferred pending merge verification; PR_MERGE_LEDGER lacks PR number and default-branch commit hash cdfacf7e not found in local history.",
+          "blockers": [
+            "Deferred pending merge verification in PR_MERGE_LEDGER",
+            "Default-branch merge commit hash cdfacf7e not found in local history"
+          ]
         }
       ]
     },
@@ -69,17 +81,25 @@
         {
           "id": "C1",
           "name": "Policy-as-Code Engine",
-          "status": "rc-ready",
+          "status": "deferred-pending-merge",
           "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/data-governance/policy/PolicyEngine.ts and server/src/middleware/opa.ts (OPA integration)",
+          "evidence": "Deferred pending merge verification; PR_MERGE_LEDGER lacks PR number and default-branch commit hash cdfacf7e not found in local history.",
+          "blockers": [
+            "Deferred pending merge verification in PR_MERGE_LEDGER",
+            "Default-branch merge commit hash cdfacf7e not found in local history"
+          ],
           "notes": "Policy re-evaluation at execute time added 2025-12-30"
         },
         {
           "id": "C2",
           "name": "Immutable Audit Log",
-          "status": "rc-ready",
+          "status": "deferred-pending-merge",
           "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/security/zero-trust/ImmutableAuditService.ts (immutable audit ledger), server/src/federal/worm-audit-chain.ts (WORM segments), server/src/provenance/ledger.ts (hash-chained provenance)"
+          "evidence": "Deferred pending merge verification; PR_MERGE_LEDGER lacks PR number and default-branch commit hash cdfacf7e not found in local history.",
+          "blockers": [
+            "Deferred pending merge verification in PR_MERGE_LEDGER",
+            "Default-branch merge commit hash cdfacf7e not found in local history"
+          ]
         },
         {
           "id": "C3",
@@ -139,9 +159,11 @@
     }
   ],
   "summary": {
-    "rc_ready": 5,
+    "rc_ready": 0,
     "partial": 1,
     "incomplete": 0,
+    "in_progress": 1,
+    "deferred_pending_merge": 5,
     "not_started": 6,
     "total": 12,
     "ga_blockers": []
