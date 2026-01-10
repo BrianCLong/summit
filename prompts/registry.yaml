@@ -10,6 +10,7 @@ prompts:
         - agents/
         - prompts/
         - scripts/ci/
+        - docs/roadmap/STATUS.json
         - docs/ga/
         - artifacts/
         - metrics/

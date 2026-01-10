@@ -65,7 +65,8 @@ function extractMetadata(body: string): AgentMetadata {
   }
 
   const metadataBlock = snippet.substring(codeFenceStart + 3, codeFenceEnd).trim();
-  const parsed = JSON.parse(metadataBlock) as AgentMetadata;
+  const normalizedBlock = metadataBlock.replace(/^\s*json\s*\n/i, '');
+  const parsed = JSON.parse(normalizedBlock) as AgentMetadata;
 
   return parsed;
 }
