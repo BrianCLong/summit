@@ -1,3 +1,62 @@
+#!/usr/bin/env bash
+
+# --- Start User Provided Guard Logic ---
+# Run in a subshell with strict mode to avoid affecting existing logic
+(
+set -euo pipefail
+
+BRANCH="$(git rev-parse --abbrev-ref HEAD || echo 'UNKNOWN')"
+HEAD_PATH="$(git rev-parse --git-path HEAD)"
+USER_NAME="$(git config user.name || echo 'unknown')"
+USER_EMAIL="$(git config user.email || echo 'unknown')"
+STAMP="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+TRACE="/tmp/commit-trace.log"
+
+# Record trace early
+{
+  echo "ts=${STAMP} repo=${REPO_ROOT} branch=${BRANCH} user=${USER_NAME} <${USER_EMAIL}> hook=pre-commit"
+} >> "${TRACE}"
+
+# Detect HEAD immutability (macOS). On Linux this will just ignore.
+is_head_locked() {
+  # chflags shows uchg when locked; on non-darwin, this command fails harmlessly
+  if command -v ls >/dev/null 2>&1 && ls -lO "${HEAD_PATH}" 2>/dev/null | grep -q 'uchg'; then
+    return 0
+  fi
+  return 1
+}
+
+# Policy:
+# - By default, commits on main are blocked.
+# - Allow only if CI_GREEN=1 is set *and* HEAD is not locked.
+# - Override escape hatch: ALLOW_MAIN_COMMIT=1 (still logs it).
+if [[ "${BRANCH}" == "main" || "${BRANCH}" == "master" ]]; then
+  HEAD_LOCKED=no
+  if is_head_locked; then HEAD_LOCKED=yes; fi
+
+  {
+    echo "ts=${STAMP} policy_check branch=${BRANCH} head_locked=${HEAD_LOCKED} ci_green=${CI_GREEN:-0} allow_override=${ALLOW_MAIN_COMMIT:-0}"
+  } >> "${TRACE}"
+
+  if [[ "${ALLOW_MAIN_COMMIT:-0}" != "1" ]]; then
+    if [[ "${CI_GREEN:-0}" != "1" ]]; then
+      echo "⛔ Commit blocked: CI is not marked green for ${BRANCH}. Set CI_GREEN=1 (or use ALLOW_MAIN_COMMIT=1 once, with care)."
+      exit 1
+    fi
+    if [[ "${HEAD_LOCKED}" == "yes" ]]; then
+      echo "⛔ Commit blocked: HEAD is locked (uchg). Unlock with: chflags nouchg \"${HEAD_PATH}\""
+      exit 1
+    fi
+  fi
+fi
+
+# Normal pre-commit tasks can continue (linters, tests, etc.)
+) || exit 1
+# --- End User Provided Guard Logic ---
+
+# --- Start Existing Logic ---
+
 LOG_FILE="git-hook.log"
 
 log() {
