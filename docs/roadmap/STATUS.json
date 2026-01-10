@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-09T16:00:00Z",
-  "revision_note": "Added scaffolded INSLAW/PROMIS affidavit demo artifacts for provenance-first ingestion",
+  "last_updated": "2026-01-10T12:00:00Z",
+  "revision_note": "Enhanced playbook run bundles with richer logs, outputs, and workflow lineage verification",
   "initiatives": [
     {
       "id": "A",

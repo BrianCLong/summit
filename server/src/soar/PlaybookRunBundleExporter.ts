@@ -36,6 +36,8 @@ export class PlaybookRunBundleExporter {
     const logPayload = {
       runId: run.id,
       playbookId: run.playbookId,
+      caseId: run.caseId ?? null,
+      triggeredBy: run.triggeredBy ?? null,
       status: run.status,
       startedAt: run.startedAt?.toISOString() ?? null,
       completedAt: run.completedAt?.toISOString() ?? null,
@@ -48,6 +50,9 @@ export class PlaybookRunBundleExporter {
       result: run.result ?? null,
       steps: (run.stepsState ?? []).map((step) => ({
         stepId: step.stepId,
+        status: step.status,
+        startedAt: step.startedAt?.toISOString() ?? null,
+        completedAt: step.completedAt?.toISOString() ?? null,
         output: step.output ?? null,
         error: step.error ?? null,
       })),
@@ -188,6 +193,7 @@ export class PlaybookRunBundleExporter {
     });
 
     this.addStepLineageEdges(edges, stepsState);
+    this.addWorkflowLineageEdges(edges, playbook, stepsState);
 
     return { nodes, edges };
   }
@@ -214,6 +220,58 @@ export class PlaybookRunBundleExporter {
         },
       });
     }
+  }
+
+  private addWorkflowLineageEdges(
+    edges: CanonicalEdge[],
+    playbook: Playbook,
+    stepsState: StepExecutionState[],
+  ) {
+    const stepStateIds = new Set(stepsState.map((step) => step.stepId));
+    const stepMap = new Map(
+      playbook.workflow.steps.map((step) => [step.id, step]),
+    );
+    const seen = new Set<string>();
+
+    playbook.workflow.steps.forEach((step) => {
+      if (!stepStateIds.has(step.id)) {
+        return;
+      }
+
+      const nextIds = [
+        step.nextStepId,
+        ...(step.branches?.map((branch) => branch.nextStepId) ?? []),
+      ].filter(Boolean) as string[];
+
+      nextIds.forEach((nextId) => {
+        if (!stepStateIds.has(nextId)) {
+          return;
+        }
+
+        const dedupeKey = `${step.id}->${nextId}`;
+        if (seen.has(dedupeKey)) {
+          return;
+        }
+        seen.add(dedupeKey);
+        const nextStep = stepMap.get(nextId);
+        const timestamp =
+          stepsState.find((state) => state.stepId === nextId)?.startedAt ??
+          stepsState.find((state) => state.stepId === step.id)?.completedAt ??
+          new Date();
+
+        edges.push({
+          sourceId: `playbook-step:${step.id}`,
+          targetId: `playbook-step:${nextId}`,
+          relation: 'DERIVED_FROM',
+          timestamp: timestamp.toISOString(),
+          properties: {
+            lineage: 'workflow',
+            fromStepType: step.type,
+            toStepType: nextStep?.type ?? 'unknown',
+          },
+        });
+      });
+    });
   }
 
   private async fetchRun(

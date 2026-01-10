@@ -996,11 +996,15 @@ const IncidentForensicsDashboard: React.FC<IncidentForensicsDashboardProps> = ({
       if (!response.ok) {
         throw new Error('Failed to download bundle');
       }
+      const contentDisposition = response.headers.get('content-disposition') ?? '';
+      const filenameMatch = contentDisposition.match(/filename="([^"]+)"/);
+      const downloadName =
+        filenameMatch?.[1] ?? `playbook-run-${runId}.zip`;
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `playbook-run-${runId}.zip`;
+      link.download = downloadName;
       document.body.appendChild(link);
       link.click();
       link.remove();
