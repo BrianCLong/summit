@@ -1,0 +1,120 @@
+{
+  "release": {
+    "name": "Summit MVP GA",
+    "commit": "HEAD",
+    "status": "GO",
+    "date": "2025-08-24"
+  },
+  "claims": [
+    {
+      "id": "Secure Supply Chain",
+      "publicText": "**Secure Supply Chain**: Verified via provenance/slsa-attestation.json.",
+      "evidence": {
+        "type": "doc",
+        "path": "docs/ga/claims-vs-evidence.md",
+        "repro": "Verify signature with Cosign."
+      },
+      "scope": "ga"
+    },
+    {
+      "id": "No Critical Vulnerabilities",
+      "publicText": "**No Critical Vulnerabilities**: Verified via SBOM scanning (Grype/Trivy).",
+      "evidence": {
+        "type": "doc",
+        "path": "docs/ga/claims-vs-evidence.md",
+        "repro": "Scan SBOM with Grype/Trivy."
+      },
+      "scope": "ga"
+    },
+    {
+      "id": "Functional Correctness",
+      "publicText": "**Functional Correctness**: 0 failures in JUnit test results.",
+      "evidence": {
+        "type": "doc",
+        "path": "docs/ga/claims-vs-evidence.md",
+        "repro": "Check for 0 failures."
+      },
+      "scope": "ga"
+    },
+    {
+      "id": "Policy Compliance",
+      "publicText": "**Policy Compliance**: OPA output confirmed \"allow: true\".",
+      "evidence": {
+        "type": "doc",
+        "path": "docs/ga/claims-vs-evidence.md",
+        "repro": "Check OPA output for \"allow: true\"."
+      },
+      "scope": "ga"
+    },
+    {
+      "id": "Immutable History",
+      "publicText": "**Immutable History**: Provenance log signature chain verified.",
+      "evidence": {
+        "type": "doc",
+        "path": "docs/ga/claims-vs-evidence.md",
+        "repro": "Verify hash chain continuity."
+      },
+      "scope": "ga"
+    },
+    {
+      "id": "Verifiable Process",
+      "publicText": "MVP-4 GA delivers a verifiable release process for Summit/IntelGraph: deterministic gates, explicit evidence capture, and operator-ready rollback.",
+      "evidence": {
+        "type": "doc",
+        "path": "docs/releases/MVP-4_LAUNCH_ANNOUNCEMENT.md",
+        "repro": "Read Announcement"
+      },
+      "scope": "ga"
+    },
+    {
+      "id": "Quickstart",
+      "publicText": "`make bootstrap`, `cp .env.example .env`, `make up`, `make smoke`",
+      "evidence": {
+        "type": "repro",
+        "path": "docs/releases/MVP-4_LAUNCH_ANNOUNCEMENT.md",
+        "repro": "make bootstrap && make up && make smoke"
+      },
+      "scope": "ga"
+    },
+    {
+      "id": "Smoke Tests",
+      "publicText": "Verified HTTP /health, GraphQL persisted query, and Cypher acceptance.",
+      "evidence": {
+        "type": "doc",
+        "path": "docs/ga/commanders-go-packet.md",
+        "repro": "make smoke"
+      },
+      "scope": "ga"
+    },
+    {
+      "id": "Post-GA Audit",
+      "publicText": "Enable `pnpm audit` in CI at critical level.",
+      "evidence": {
+        "type": "doc",
+        "path": "docs/releases/MVP-4_POST_GA_STABILIZATION_PLAN.md",
+        "repro": "Day 4-7 Commitment"
+      },
+      "scope": "post-ga"
+    },
+    {
+      "id": "Post-GA Error Budgets",
+      "publicText": "Implement error budgets in Prometheus.",
+      "evidence": {
+        "type": "doc",
+        "path": "docs/releases/MVP-4_POST_GA_STABILIZATION_PLAN.md",
+        "repro": "Day 4-7 Commitment"
+      },
+      "scope": "post-ga"
+    },
+    {
+      "id": "Post-GA Determinism",
+      "publicText": "API determinism audit.",
+      "evidence": {
+        "type": "doc",
+        "path": "docs/releases/MVP-4_POST_GA_STABILIZATION_PLAN.md",
+        "repro": "Day 8-14 Commitment"
+      },
+      "scope": "post-ga"
+    }
+  ]
+}
