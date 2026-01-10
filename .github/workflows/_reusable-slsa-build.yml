@@ -57,6 +57,9 @@ on:
       sbom_digest:
         description: "SBOM digest"
         value: ${{ jobs.build.outputs.sbom-digest }}
+      trivy_report:
+        description: "Trivy SARIF report path"
+        value: ${{ jobs.build.outputs.trivy-report }}
       slsa_level:
         description: "Achieved SLSA level"
         value: ${{ jobs.build.outputs.slsa-level }}
@@ -85,6 +88,7 @@ jobs:
       digest: ${{ steps.build.outputs.digest }}
       image-uri: ${{ steps.image-uri.outputs.uri }}
       sbom-digest: ${{ steps.sbom.outputs.digest }}
+      trivy-report: ${{ steps.trivy-output.outputs.report }}
       slsa-level: ${{ steps.slsa-check.outputs.level }}
     steps:
       - name: Checkout
@@ -150,6 +154,26 @@ jobs:
           URI="${{ env.REGISTRY }}/${{ inputs.image_name }}@${{ steps.build.outputs.digest }}"
           echo "uri=$URI" >> "$GITHUB_OUTPUT"
 
+      - name: Scan image for CVEs (Trivy)
+        id: trivy
+        if: inputs.push
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: ${{ steps.image-uri.outputs.uri }}
+          format: "sarif"
+          output: trivy-${{ inputs.image_name }}.sarif
+          severity: "CRITICAL,HIGH"
+          ignore-unfixed: false
+          vuln-type: "os,library"
+          exit-code: "1"
+          timeout: 10m
+
+      - name: Upload Trivy report to code scanning
+        if: inputs.push
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-${{ inputs.image_name }}.sarif
+
       - name: Install Cosign
         if: inputs.sign
         uses: sigstore/cosign-installer@v3
@@ -202,6 +226,12 @@ jobs:
           SBOM_DIGEST=$(sha256sum sbom.cdx.json | cut -d' ' -f1)
           echo "digest=$SBOM_DIGEST" >> "$GITHUB_OUTPUT"
 
+      - name: Capture Trivy report metadata
+        id: trivy-output
+        if: inputs.push
+        run: |
+          echo "report=trivy-${{ inputs.image_name }}.sarif" >> "$GITHUB_OUTPUT"
+
       - name: Attest SBOM
         if: inputs.sbom && inputs.sign && inputs.push
         run: |
@@ -243,7 +273,9 @@ jobs:
           path: |
             sbom.cdx.json
             sbom.spdx.json
+            trivy-${{ inputs.image_name }}.sarif
           retention-days: 90
+          if-no-files-found: warn
 
   # SLSA provenance generation using official generator
   provenance:
