@@ -6,400 +6,418 @@ This document provides a comprehensive inventory of all Summit services and thei
 
 ## Service Catalog
 
-### Core Services
+### Active Services (MVP-4 GA)
 
-<!-- LIVING_DOCUMENTS:START -->
-<!-- This section is automatically generated. Do not edit manually. -->
+These services are currently deployed and subject to active governance controls.
+
 | Service | Port | Governance Hooks | Authority | Provenance | PII Detection |
 |---------|------|------------------|-----------|------------|---------------|
-| abp | TBD | TBD | TBD | TBD | TBD |
-| acc | TBD | TBD | TBD | TBD | TBD |
-| addn | TBD | TBD | TBD | TBD | TBD |
-| admin | TBD | TBD | TBD | TBD | TBD |
-| admin-api | TBD | TBD | TBD | TBD | TBD |
-| admin-automation | TBD | TBD | TBD | TBD | TBD |
-| agent-execution-platform | TBD | TBD | TBD | TBD | TBD |
-| agent-gateway | TBD | TBD | TBD | TBD | TBD |
-| agent-runtime | TBD | TBD | TBD | TBD | TBD |
-| agentic-mesh-evaluation | TBD | TBD | TBD | TBD | TBD |
-| agents | TBD | TBD | TBD | TBD | TBD |
-| agsm | TBD | TBD | TBD | TBD | TBD |
-| ai-copilot | TBD | TBD | TBD | TBD | TBD |
-| ai-marketplace | TBD | TBD | TBD | TBD | TBD |
-| ai-nlq | TBD | TBD | TBD | TBD | TBD |
-| ai-sandbox | TBD | TBD | TBD | TBD | TBD |
-| ai-security-scanner | TBD | TBD | TBD | TBD | TBD |
-| ai-service-platform | TBD | TBD | TBD | TBD | TBD |
-| alert-engine | TBD | TBD | TBD | TBD | TBD |
-| aml | TBD | TBD | TBD | TBD | TBD |
-| analytics | TBD | TBD | TBD | TBD | TBD |
-| analytics-service | TBD | TBD | TBD | TBD | TBD |
-| anomaly | TBD | TBD | TBD | TBD | TBD |
-| api | TBD | TBD | TBD | TBD | TBD |
-| api-gateway | TBD | TBD | TBD | TBD | TBD |
-| approvals | TBD | TBD | TBD | TBD | TBD |
-| attest | TBD | TBD | TBD | TBD | TBD |
-| audio-service | TBD | TBD | TBD | TBD | TBD |
-| audit | TBD | TBD | TBD | TBD | TBD |
-| audit-blackbox-service | TBD | TBD | TBD | TBD | TBD |
-| audit-log | TBD | TBD | TBD | TBD | TBD |
-| audit_svc | TBD | TBD | TBD | TBD | TBD |
-| auditlake | TBD | TBD | TBD | TBD | TBD |
-| auth | TBD | TBD | TBD | TBD | TBD |
-| auth-gateway | TBD | TBD | TBD | TBD | TBD |
-| authenticity-service | TBD | TBD | TBD | TBD | TBD |
-| authz-gateway | TBD | TBD | TBD | TBD | TBD |
-| autonomy | TBD | TBD | TBD | TBD | TBD |
-| autonomy-sandbox | TBD | TBD | TBD | TBD | TBD |
-| autonomy-tier3 | TBD | TBD | TBD | TBD | TBD |
-| autoscale | TBD | TBD | TBD | TBD | TBD |
-| backfill | TBD | TBD | TBD | TBD | TBD |
-| backup-encryption | TBD | TBD | TBD | TBD | TBD |
-| battle-api | TBD | TBD | TBD | TBD | TBD |
-| battle-command-service | TBD | TBD | TBD | TBD | TBD |
-| battle-fusion-service | TBD | TBD | TBD | TBD | TBD |
-| battle-ingest-service | TBD | TBD | TBD | TBD | TBD |
-| billing | TBD | TBD | TBD | TBD | TBD |
-| biometric-service | TBD | TBD | TBD | TBD | TBD |
-| bitemporal | TBD | TBD | TBD | TBD | TBD |
-| blockchain | TBD | TBD | TBD | TBD | TBD |
-| brief | TBD | TBD | TBD | TBD | TBD |
-| broker | TBD | TBD | TBD | TBD | TBD |
-| build-hub | TBD | TBD | TBD | TBD | TBD |
-| bundle-pipeline-service | TBD | TBD | TBD | TBD | TBD |
-| cab | TBD | TBD | TBD | TBD | TBD |
-| case-report | TBD | TBD | TBD | TBD | TBD |
-| cases | TBD | TBD | TBD | TBD | TBD |
-| catalog-service | TBD | TBD | TBD | TBD | TBD |
-| cdr-gateway | TBD | TBD | TBD | TBD | TBD |
-| cep | TBD | TBD | TBD | TBD | TBD |
-| chatops | TBD | TBD | TBD | TBD | TBD |
-| citizen-ai | TBD | TBD | TBD | TBD | TBD |
-| citizen-service | TBD | TBD | TBD | TBD | TBD |
-| client | TBD | TBD | TBD | TBD | TBD |
-| cloud-orchestrator | TBD | TBD | TBD | TBD | TBD |
-| cloud-platform-service | TBD | TBD | TBD | TBD | TBD |
-| coa-planner | TBD | TBD | TBD | TBD | TBD |
-| collab | TBD | TBD | TBD | TBD | TBD |
-| collaboration-service | TBD | TBD | TBD | TBD | TBD |
-| common | TBD | TBD | TBD | TBD | TBD |
-| companyos-sync | TBD | TBD | TBD | TBD | TBD |
-| compliance | TBD | TBD | TBD | TBD | TBD |
-| compliance-evaluator | TBD | TBD | TBD | TBD | TBD |
-| conductor | TBD | TBD | TBD | TBD | TBD |
-| confidential | TBD | TBD | TBD | TBD | TBD |
-| config-service | TBD | TBD | TBD | TBD | TBD |
-| control-tower-service | TBD | TBD | TBD | TBD | TBD |
-| copilot | TBD | TBD | TBD | TBD | TBD |
-| cost-guard | TBD | TBD | TBD | TBD | TBD |
-| cost-optimization | TBD | TBD | TBD | TBD | TBD |
-| counterterrorism-service | TBD | TBD | TBD | TBD | TBD |
-| crm | TBD | TBD | TBD | TBD | TBD |
-| crp | TBD | TBD | TBD | TBD | TBD |
-| crypto | TBD | TBD | TBD | TBD | TBD |
-| crypto-service | TBD | TBD | TBD | TBD | TBD |
-| csr | TBD | TBD | TBD | TBD | TBD |
-| cyber-intel-service | TBD | TBD | TBD | TBD | TBD |
-| dashboard-service | TBD | TBD | TBD | TBD | TBD |
-| data-discovery-fusion | TBD | TBD | TBD | TBD | TBD |
-| data-factory-service | TBD | TBD | TBD | TBD | TBD |
-| data-marketplace | TBD | TBD | TBD | TBD | TBD |
-| data-monetization-engine | TBD | TBD | TBD | TBD | TBD |
-| data-pool | TBD | TBD | TBD | TBD | TBD |
-| data-quality | TBD | TBD | TBD | TBD | TBD |
-| data-spine | TBD | TBD | TBD | TBD | TBD |
-| datalab-service | TBD | TBD | TBD | TBD | TBD |
-| deception-detection-service | TBD | TBD | TBD | TBD | TBD |
-| decision-api | TBD | TBD | TBD | TBD | TBD |
-| deepfake-detection-service | TBD | TBD | TBD | TBD | TBD |
-| detect | TBD | TBD | TBD | TBD | TBD |
-| dev-gateway | TBD | TBD | TBD | TBD | TBD |
-| dialectic-agents | TBD | TBD | TBD | TBD | TBD |
-| digital-twin | TBD | TBD | TBD | TBD | TBD |
-| digital-twin-cognition | TBD | TBD | TBD | TBD | TBD |
-| diplomacy-service | TBD | TBD | TBD | TBD | TBD |
-| disaster-recovery | TBD | TBD | TBD | TBD | TBD |
-| disclosure | TBD | TBD | TBD | TBD | TBD |
-| disclosure-packager | TBD | TBD | TBD | TBD | TBD |
-| distributed-registry | TBD | TBD | TBD | TBD | TBD |
-| dl-training-service | TBD | TBD | TBD | TBD | TBD |
-| dlc | TBD | TBD | TBD | TBD | TBD |
-| docling-svc | TBD | TBD | TBD | TBD | TBD |
-| docs-api | TBD | TBD | TBD | TBD | TBD |
-| dp | TBD | TBD | TBD | TBD | TBD |
-| dr-orchestrator | TBD | TBD | TBD | TBD | TBD |
-| drift-sentinel | TBD | TBD | TBD | TBD | TBD |
-| econ | TBD | TBD | TBD | TBD | TBD |
-| edge-gateway | TBD | TBD | TBD | TBD | TBD |
-| edge-kit | TBD | TBD | TBD | TBD | TBD |
-| edge-orchestrator | TBD | TBD | TBD | TBD | TBD |
-| election-integrity-service | TBD | TBD | TBD | TBD | TBD |
-| engintel | TBD | TBD | TBD | TBD | TBD |
-| enrichment | TBD | TBD | TBD | TBD | TBD |
-| enrichment-service | TBD | TBD | TBD | TBD | TBD |
-| enterprise | TBD | TBD | TBD | TBD | TBD |
-| entity-resolution | TBD | TBD | TBD | TBD | TBD |
-| er | TBD | TBD | TBD | TBD | TBD |
-| er-service | TBD | TBD | TBD | TBD | TBD |
-| escp | TBD | TBD | TBD | TBD | TBD |
-| esg-reporting-service | TBD | TBD | TBD | TBD | TBD |
-| espionage-service | TBD | TBD | TBD | TBD | TBD |
-| etl-service | TBD | TBD | TBD | TBD | TBD |
-| evals | TBD | TBD | TBD | TBD | TBD |
-| event-bus-service | TBD | TBD | TBD | TBD | TBD |
-| evidence | TBD | TBD | TBD | TBD | TBD |
-| exp | TBD | TBD | TBD | TBD | TBD |
-| exporter | TBD | TBD | TBD | TBD | TBD |
-| fabric | TBD | TBD | TBD | TBD | TBD |
-| fae | TBD | TBD | TBD | TBD | TBD |
-| feature-flags | TBD | TBD | TBD | TBD | TBD |
-| federation | TBD | TBD | TBD | TBD | TBD |
-| federation-planner | TBD | TBD | TBD | TBD | TBD |
-| federation-service | TBD | TBD | TBD | TBD | TBD |
-| feed-processor | TBD | TBD | TBD | TBD | TBD |
-| fhem | TBD | TBD | TBD | TBD | TBD |
-| file-storage-backup | TBD | TBD | TBD | TBD | TBD |
-| finance-normalizer-service | TBD | TBD | TBD | TBD | TBD |
-| finops | TBD | TBD | TBD | TBD | TBD |
-| foreign-intel-service | TBD | TBD | TBD | TBD | TBD |
-| foreign-relations-service | TBD | TBD | TBD | TBD | TBD |
-| foresight-analysis-service | TBD | TBD | TBD | TBD | TBD |
-| fusionhub | TBD | TBD | TBD | TBD | TBD |
-| futures-intelligence-service | TBD | TBD | TBD | TBD | TBD |
-| ga-adminsec | TBD | TBD | TBD | TBD | TBD |
-| ga-forensics | TBD | TBD | TBD | TBD | TBD |
-| ga-policy-engine | TBD | TBD | TBD | TBD | TBD |
-| gateway | TBD | TBD | TBD | TBD | TBD |
-| gateway-service | TBD | TBD | TBD | TBD | TBD |
-| geocoding-api | TBD | TBD | TBD | TBD | TBD |
-| geoint-threat-platform | TBD | TBD | TBD | TBD | TBD |
-| geospatial | TBD | TBD | TBD | TBD | TBD |
-| geotemporal-api | TBD | TBD | TBD | TBD | TBD |
-| global-integration | TBD | TBD | TBD | TBD | TBD |
-| golden-sample | TBD | TBD | TBD | TBD | TBD |
-| gov-ai-governance | TBD | TBD | TBD | TBD | TBD |
-| govtech-export-engine | TBD | TBD | TBD | TBD | TBD |
-| graph | TBD | TBD | TBD | TBD | TBD |
-| graph-algos | TBD | TBD | TBD | TBD | TBD |
-| graph-analytics | TBD | TBD | TBD | TBD | TBD |
-| graph-api | TBD | TBD | TBD | TBD | TBD |
-| graph-compute | TBD | TBD | TBD | TBD | TBD |
-| graph-core | TBD | TBD | TBD | TBD | TBD |
-| graph-db-service | TBD | TBD | TBD | TBD | TBD |
-| graph-xai | TBD | TBD | TBD | TBD | TBD |
-| graphrag | TBD | TBD | TBD | TBD | TBD |
-| graphrag-copilot | TBD | TBD | TBD | TBD | TBD |
-| green | TBD | TBD | TBD | TBD | TBD |
-| guard | TBD | TBD | TBD | TBD | TBD |
-| health-aggregator | TBD | TBD | TBD | TBD | TBD |
-| hello-service | TBD | TBD | TBD | TBD | TBD |
-| humint-service | TBD | TBD | TBD | TBD | TBD |
-| hypothesis-workbench | TBD | TBD | TBD | TBD | TBD |
-| i18n-service | TBD | TBD | TBD | TBD | TBD |
-| identity-fusion | TBD | TBD | TBD | TBD | TBD |
-| identity-spiffe | TBD | TBD | TBD | TBD | TBD |
-| idtl | TBD | TBD | TBD | TBD | TBD |
-| ig-rl | TBD | TBD | TBD | TBD | TBD |
-| ingest | TBD | TBD | TBD | TBD | TBD |
-| ingest-adapters | TBD | TBD | TBD | TBD | TBD |
-| ingest-orchestrator | TBD | TBD | TBD | TBD | TBD |
-| ingest-runner | TBD | TBD | TBD | TBD | TBD |
-| ingest-sandbox | TBD | TBD | TBD | TBD | TBD |
-| ingest-wizard | TBD | TBD | TBD | TBD | TBD |
-| innovation-sandbox | TBD | TBD | TBD | TBD | TBD |
-| insight-ai | TBD | TBD | TBD | TBD | TBD |
-| insights | TBD | TBD | TBD | TBD | TBD |
-| integrations | TBD | TBD | TBD | TBD | TBD |
-| intel | TBD | TBD | TBD | TBD | TBD |
-| intelgraph-server | TBD | TBD | TBD | TBD | TBD |
-| interop | TBD | TBD | TBD | TBD | TBD |
-| jitae | TBD | TBD | TBD | TBD | TBD |
-| kb-service | TBD | TBD | TBD | TBD | TBD |
-| kkp | TBD | TBD | TBD | TBD | TBD |
-| knowledge-service | TBD | TBD | TBD | TBD | TBD |
-| krpcp | TBD | TBD | TBD | TBD | TBD |
-| labeling-service | TBD | TBD | TBD | TBD | TBD |
-| lac-compiler | TBD | TBD | TBD | TBD | TBD |
-| lakehouse-service | TBD | TBD | TBD | TBD | TBD |
-| law-enforcement-service | TBD | TBD | TBD | TBD | TBD |
-| learner | TBD | TBD | TBD | TBD | TBD |
-| lib | TBD | TBD | TBD | TBD | TBD |
-| license-registry | TBD | TBD | TBD | TBD | TBD |
-| logging-pipeline | TBD | TBD | TBD | TBD | TBD |
-| logistics-automation-service | TBD | TBD | TBD | TBD | TBD |
-| lsc | TBD | TBD | TBD | TBD | TBD |
-| lsc-service | TBD | TBD | TBD | TBD | TBD |
-| market | TBD | TBD | TBD | TBD | TBD |
-| marketplace | TBD | TBD | TBD | TBD | TBD |
-| mdm-service | TBD | TBD | TBD | TBD | TBD |
-| media-pipeline-service | TBD | TBD | TBD | TBD | TBD |
-| memory | TBD | TBD | TBD | TBD | TBD |
-| mesh-orchestrator | TBD | TBD | TBD | TBD | TBD |
-| metadata-service | TBD | TBD | TBD | TBD | TBD |
-| mission-coordination-service | TBD | TBD | TBD | TBD | TBD |
-| ml-inference | TBD | TBD | TBD | TBD | TBD |
-| ml-serving | TBD | TBD | TBD | TBD | TBD |
-| ml-training | TBD | TBD | TBD | TBD | TBD |
-| mlops-service | TBD | TBD | TBD | TBD | TBD |
-| model-hub-service | TBD | TBD | TBD | TBD | TBD |
-| model-registry-service | TBD | TBD | TBD | TBD | TBD |
-| model-serving-service | TBD | TBD | TBD | TBD | TBD |
-| model-training | TBD | TBD | TBD | TBD | TBD |
-| mstc | TBD | TBD | TBD | TBD | TBD |
-| mtfs | TBD | TBD | TBD | TBD | TBD |
-| mtif | TBD | TBD | TBD | TBD | TBD |
-| neo4j-backup | TBD | TBD | TBD | TBD | TBD |
-| nl-cypher | TBD | TBD | TBD | TBD | TBD |
-| nlp-service | TBD | TBD | TBD | TBD | TBD |
-| nlq | TBD | TBD | TBD | TBD | TBD |
-| nlq-copilot | TBD | TBD | TBD | TBD | TBD |
-| nonproliferation-service | TBD | TBD | TBD | TBD | TBD |
-| notification-router | TBD | TBD | TBD | TBD | TBD |
-| obs-demo-service | TBD | TBD | TBD | TBD | TBD |
-| okr | TBD | TBD | TBD | TBD | TBD |
-| opa | TBD | TBD | TBD | TBD | TBD |
-| operations-c2-service | TBD | TBD | TBD | TBD | TBD |
-| ops-guard | TBD | TBD | TBD | TBD | TBD |
-| orchestration | TBD | TBD | TBD | TBD | TBD |
-| orchestrator | TBD | TBD | TBD | TBD | TBD |
-| organized-crime-service | TBD | TBD | TBD | TBD | TBD |
-| osint-service | TBD | TBD | TBD | TBD | TBD |
-| pca-verifier | TBD | TBD | TBD | TBD | TBD |
-| pcpr | TBD | TBD | TBD | TBD | TBD |
-| placement | TBD | TBD | TBD | TBD | TBD |
-| plugin-executor | TBD | TBD | TBD | TBD | TBD |
-| plugin-registry | TBD | TBD | TBD | TBD | TBD |
-| policy | TBD | TBD | TBD | TBD | TBD |
-| policy-audit | TBD | TBD | TBD | TBD | TBD |
-| policy-aware-cache | TBD | TBD | TBD | TBD | TBD |
-| policy-compiler | TBD | TBD | TBD | TBD | TBD |
-| policy-enforcer | TBD | TBD | TBD | TBD | TBD |
-| policy-engine | TBD | TBD | TBD | TBD | TBD |
-| policy-sidecar | TBD | TBD | TBD | TBD | TBD |
-| policyhub | TBD | TBD | TBD | TBD | TBD |
-| portfolio | TBD | TBD | TBD | TBD | TBD |
-| postgres-pitr | TBD | TBD | TBD | TBD | TBD |
-| postmortem | TBD | TBD | TBD | TBD | TBD |
-| prd-generator | TBD | TBD | TBD | TBD | TBD |
-| predictd | TBD | TBD | TBD | TBD | TBD |
-| prediction-service | TBD | TBD | TBD | TBD | TBD |
-| predictive-analytics | TBD | TBD | TBD | TBD | TBD |
-| prer | TBD | TBD | TBD | TBD | TBD |
-| privacy | TBD | TBD | TBD | TBD | TBD |
-| privacy-analytics-service | TBD | TBD | TBD | TBD | TBD |
-| privacy-labeler | TBD | TBD | TBD | TBD | TBD |
-| procurement-automation | TBD | TBD | TBD | TBD | TBD |
-| program | TBD | TBD | TBD | TBD | TBD |
-| prov-ledger | TBD | TBD | TBD | TBD | TBD |
-| provenance | TBD | TBD | TBD | TBD | TBD |
-| provenance-cli | TBD | TBD | TBD | TBD | TBD |
-| provenance-service | TBD | TBD | TBD | TBD | TBD |
-| proxy | TBD | TBD | TBD | TBD | TBD |
-| psi | TBD | TBD | TBD | TBD | TBD |
-| q3c | TBD | TBD | TBD | TBD | TBD |
-| qawe | TBD | TBD | TBD | TBD | TBD |
-| qpg | TBD | TBD | TBD | TBD | TBD |
-| quantum-service | TBD | TBD | TBD | TBD | TBD |
-| queue-manager | TBD | TBD | TBD | TBD | TBD |
-| rag | TBD | TBD | TBD | TBD | TBD |
-| rca | TBD | TBD | TBD | TBD | TBD |
-| rcsi | TBD | TBD | TBD | TBD | TBD |
-| realtime | TBD | TBD | TBD | TBD | TBD |
-| receipt-signer | TBD | TBD | TBD | TBD | TBD |
-| receipt-worker | TBD | TBD | TBD | TBD | TBD |
-| red-team-service | TBD | TBD | TBD | TBD | TBD |
-| redteam | TBD | TBD | TBD | TBD | TBD |
-| ref-data-service | TBD | TBD | TBD | TBD | TBD |
-| regulatory-compliance-agents | TBD | TBD | TBD | TBD | TBD |
-| release | TBD | TBD | TBD | TBD | TBD |
-| releaseorchestrator | TBD | TBD | TBD | TBD | TBD |
-| replicator | TBD | TBD | TBD | TBD | TBD |
-| repograph | TBD | TBD | TBD | TBD | TBD |
-| report-assembly | TBD | TBD | TBD | TBD | TBD |
-| reporting | TBD | TBD | TBD | TBD | TBD |
-| resilient-orchestrator | TBD | TBD | TBD | TBD | TBD |
-| retentiond | TBD | TBD | TBD | TBD | TBD |
-| risk-assessment-service | TBD | TBD | TBD | TBD | TBD |
-| rlhf | TBD | TBD | TBD | TBD | TBD |
-| router | TBD | TBD | TBD | TBD | TBD |
-| routing-gateway | TBD | TBD | TBD | TBD | TBD |
-| rules | TBD | TBD | TBD | TBD | TBD |
-| runbook-prover | TBD | TBD | TBD | TBD | TBD |
-| runbooks | TBD | TBD | TBD | TBD | TBD |
-| safe-analytics-workbench | TBD | TBD | TBD | TBD | TBD |
-| safejoin | TBD | TBD | TBD | TBD | TBD |
-| sandbox | TBD | TBD | TBD | TBD | TBD |
-| sandbox-gateway | TBD | TBD | TBD | TBD | TBD |
-| sandbox-tenant-profile | TBD | TBD | TBD | TBD | TBD |
-| satellite | TBD | TBD | TBD | TBD | TBD |
-| scenario-engine-service | TBD | TBD | TBD | TBD | TBD |
-| scenario-registry | TBD | TBD | TBD | TBD | TBD |
-| scheduler | TBD | TBD | TBD | TBD | TBD |
-| schema-ingest-wizard | TBD | TBD | TBD | TBD | TBD |
-| schema-registry | TBD | TBD | TBD | TBD | TBD |
-| scim | TBD | TBD | TBD | TBD | TBD |
-| scoring-engine | TBD | TBD | TBD | TBD | TBD |
-| scout | TBD | TBD | TBD | TBD | TBD |
-| search | TBD | TBD | TBD | TBD | TBD |
-| search-indexer | TBD | TBD | TBD | TBD | TBD |
-| secure-elections | TBD | TBD | TBD | TBD | TBD |
-| sei | TBD | TBD | TBD | TBD | TBD |
-| sei-collector | TBD | TBD | TBD | TBD | TBD |
-| self-upgrading-infrastructure | TBD | TBD | TBD | TBD | TBD |
-| server | TBD | TBD | TBD | TBD | TBD |
-| sigint-service | TBD | TBD | TBD | TBD | TBD |
-| sigint-telemetry | TBD | TBD | TBD | TBD | TBD |
-| signal-bus-service | TBD | TBD | TBD | TBD | TBD |
-| sim | TBD | TBD | TBD | TBD | TBD |
-| smart-contracting-service | TBD | TBD | TBD | TBD | TBD |
-| spacetime-service | TBD | TBD | TBD | TBD | TBD |
-| spar | TBD | TBD | TBD | TBD | TBD |
-| sparql-endpoint | TBD | TBD | TBD | TBD | TBD |
-| spom | TBD | TBD | TBD | TBD | TBD |
-| src | TBD | TBD | TBD | TBD | TBD |
-| sss | TBD | TBD | TBD | TBD | TBD |
-| stix-taxii-ingestion | TBD | TBD | TBD | TBD | TBD |
-| strategic-foresight | TBD | TBD | TBD | TBD | TBD |
-| stream-processor | TBD | TBD | TBD | TBD | TBD |
-| streaming-ingest | TBD | TBD | TBD | TBD | TBD |
-| sum | TBD | TBD | TBD | TBD | TBD |
-| supply-chain-service | TBD | TBD | TBD | TBD | TBD |
-| sync-service | TBD | TBD | TBD | TBD | TBD |
-| synthdata | TBD | TBD | TBD | TBD | TBD |
-| synthesis-service | TBD | TBD | TBD | TBD | TBD |
-| synthesizer | TBD | TBD | TBD | TBD | TBD |
-| talent-magnet | TBD | TBD | TBD | TBD | TBD |
-| tats | TBD | TBD | TBD | TBD | TBD |
-| tenant-admin | TBD | TBD | TBD | TBD | TBD |
-| tgo | TBD | TBD | TBD | TBD | TBD |
-| threat-assessment-service | TBD | TBD | TBD | TBD | TBD |
-| threat-hunting-service | TBD | TBD | TBD | TBD | TBD |
-| threat-library-service | TBD | TBD | TBD | TBD | TBD |
-| time | TBD | TBD | TBD | TBD | TBD |
-| timeseries-metrics | TBD | TBD | TBD | TBD | TBD |
-| tpfr | TBD | TBD | TBD | TBD | TBD |
-| transcription-service | TBD | TBD | TBD | TBD | TBD |
-| trr | TBD | TBD | TBD | TBD | TBD |
-| trust | TBD | TBD | TBD | TBD | TBD |
-| twin | TBD | TBD | TBD | TBD | TBD |
-| unified-audit | TBD | TBD | TBD | TBD | TBD |
-| universal-ingestion | TBD | TBD | TBD | TBD | TBD |
-| vision-api | TBD | TBD | TBD | TBD | TBD |
-| warehouse-service | TBD | TBD | TBD | TBD | TBD |
-| web-agent | TBD | TBD | TBD | TBD | TBD |
-| web-ingest | TBD | TBD | TBD | TBD | TBD |
-| web-orchestrator | TBD | TBD | TBD | TBD | TBD |
-| websocket-server | TBD | TBD | TBD | TBD | TBD |
-| wmd-intelligence-service | TBD | TBD | TBD | TBD | TBD |
-| worker | TBD | TBD | TBD | TBD | TBD |
-| worker-queue | TBD | TBD | TBD | TBD | TBD |
-| workers | TBD | TBD | TBD | TBD | TBD |
-| workflow | TBD | TBD | TBD | TBD | TBD |
-| zk-deconfliction | TBD | TBD | TBD | TBD | TBD |
-| zk-tx | TBD | TBD | TBD | TBD | TBD |
-| zk-tx-svc | TBD | TBD | TBD | TBD | TBD |
-| zktx | TBD | TBD | TBD | TBD | TBD |
-<!-- LIVING_DOCUMENTS:END -->
+| `apps/web` | 3000 | Client-Side | OIDC | Client-Side | None |
+| `apps/gateway` | 8080 | Middleware | OPA | Trace-ID | Header-Scan |
+| `apps/intelgraph-api` | 4000 | GraphQL | RBAC/ABAC | Ledger | Field-Level |
+| `apps/server` | 4000 | Legacy | JWT | Ledger | None |
+| `apps/workflow-engine` | N/A | Worker | System | Ledger | None |
+| `apps/analytics-engine` | 5000 | RPC | System | Ledger | None |
+| `apps/compliance-console`| 3001 | Client-Side | OIDC | Client-Side | None |
+
+### Reserved Service Namespace (Future / Planned)
+
+The following service identifiers are reserved for future roadmap items (PsyOps, Information Warfare, etc.) and are not currently active. Governance controls for these are TBD until activation.
+
+<details>
+<summary>View Reserved Namespace</summary>
+
+| Service | Status |
+|---------|--------|
+| abp | Reserved |
+| acc | Reserved |
+| addn | Reserved |
+| admin | Reserved |
+| admin-api | Reserved |
+| admin-automation | Reserved |
+| agent-execution-platform | Reserved |
+| agent-gateway | Reserved |
+| agent-runtime | Reserved |
+| agentic-mesh-evaluation | Reserved |
+| agents | Reserved |
+| agsm | Reserved |
+| ai-copilot | Reserved |
+| ai-marketplace | Reserved |
+| ai-nlq | Reserved |
+| ai-sandbox | Reserved |
+| ai-security-scanner | Reserved |
+| ai-service-platform | Reserved |
+| alert-engine | Reserved |
+| aml | Reserved |
+| analytics | Reserved |
+| analytics-service | Reserved |
+| anomaly | Reserved |
+| api | Reserved |
+| api-gateway | Reserved |
+| approvals | Reserved |
+| attest | Reserved |
+| audio-service | Reserved |
+| audit | Reserved |
+| audit-blackbox-service | Reserved |
+| audit-log | Reserved |
+| audit_svc | Reserved |
+| auditlake | Reserved |
+| auth | Reserved |
+| auth-gateway | Reserved |
+| authenticity-service | Reserved |
+| authz-gateway | Reserved |
+| autonomy | Reserved |
+| autonomy-sandbox | Reserved |
+| autonomy-tier3 | Reserved |
+| autoscale | Reserved |
+| backfill | Reserved |
+| backup-encryption | Reserved |
+| battle-api | Reserved |
+| battle-command-service | Reserved |
+| battle-fusion-service | Reserved |
+| battle-ingest-service | Reserved |
+| billing | Reserved |
+| biometric-service | Reserved |
+| bitemporal | Reserved |
+| blockchain | Reserved |
+| brief | Reserved |
+| broker | Reserved |
+| build-hub | Reserved |
+| bundle-pipeline-service | Reserved |
+| cab | Reserved |
+| case-report | Reserved |
+| cases | Reserved |
+| catalog-service | Reserved |
+| cdr-gateway | Reserved |
+| cep | Reserved |
+| chatops | Reserved |
+| citizen-ai | Reserved |
+| citizen-service | Reserved |
+| client | Reserved |
+| cloud-orchestrator | Reserved |
+| cloud-platform-service | Reserved |
+| coa-planner | Reserved |
+| collab | Reserved |
+| collaboration-service | Reserved |
+| common | Reserved |
+| companyos-sync | Reserved |
+| compliance | Reserved |
+| compliance-evaluator | Reserved |
+| conductor | Reserved |
+| confidential | Reserved |
+| config-service | Reserved |
+| control-tower-service | Reserved |
+| copilot | Reserved |
+| cost-guard | Reserved |
+| cost-optimization | Reserved |
+| counterterrorism-service | Reserved |
+| crm | Reserved |
+| crp | Reserved |
+| crypto | Reserved |
+| crypto-service | Reserved |
+| csr | Reserved |
+| cyber-intel-service | Reserved |
+| dashboard-service | Reserved |
+| data-discovery-fusion | Reserved |
+| data-factory-service | Reserved |
+| data-marketplace | Reserved |
+| data-monetization-engine | Reserved |
+| data-pool | Reserved |
+| data-quality | Reserved |
+| data-spine | Reserved |
+| datalab-service | Reserved |
+| deception-detection-service | Reserved |
+| decision-api | Reserved |
+| deepfake-detection-service | Reserved |
+| detect | Reserved |
+| dev-gateway | Reserved |
+| dialectic-agents | Reserved |
+| digital-twin | Reserved |
+| digital-twin-cognition | Reserved |
+| diplomacy-service | Reserved |
+| disaster-recovery | Reserved |
+| disclosure | Reserved |
+| disclosure-packager | Reserved |
+| distributed-registry | Reserved |
+| dl-training-service | Reserved |
+| dlc | Reserved |
+| docling-svc | Reserved |
+| docs-api | Reserved |
+| dp | Reserved |
+| dr-orchestrator | Reserved |
+| drift-sentinel | Reserved |
+| econ | Reserved |
+| edge-gateway | Reserved |
+| edge-kit | Reserved |
+| edge-orchestrator | Reserved |
+| election-integrity-service | Reserved |
+| engintel | Reserved |
+| enrichment | Reserved |
+| enrichment-service | Reserved |
+| enterprise | Reserved |
+| entity-resolution | Reserved |
+| er | Reserved |
+| er-service | Reserved |
+| escp | Reserved |
+| esg-reporting-service | Reserved |
+| espionage-service | Reserved |
+| etl-service | Reserved |
+| evals | Reserved |
+| event-bus-service | Reserved |
+| evidence | Reserved |
+| exp | Reserved |
+| exporter | Reserved |
+| fabric | Reserved |
+| fae | Reserved |
+| feature-flags | Reserved |
+| federation | Reserved |
+| federation-planner | Reserved |
+| federation-service | Reserved |
+| feed-processor | Reserved |
+| fhem | Reserved |
+| file-storage-backup | Reserved |
+| finance-normalizer-service | Reserved |
+| finops | Reserved |
+| foreign-intel-service | Reserved |
+| foreign-relations-service | Reserved |
+| foresight-analysis-service | Reserved |
+| fusionhub | Reserved |
+| futures-intelligence-service | Reserved |
+| ga-adminsec | Reserved |
+| ga-forensics | Reserved |
+| ga-policy-engine | Reserved |
+| gateway | Reserved |
+| gateway-service | Reserved |
+| geocoding-api | Reserved |
+| geoint-threat-platform | Reserved |
+| geospatial | Reserved |
+| geotemporal-api | Reserved |
+| global-integration | Reserved |
+| golden-sample | Reserved |
+| gov-ai-governance | Reserved |
+| govtech-export-engine | Reserved |
+| graph | Reserved |
+| graph-algos | Reserved |
+| graph-analytics | Reserved |
+| graph-api | Reserved |
+| graph-compute | Reserved |
+| graph-core | Reserved |
+| graph-db-service | Reserved |
+| graph-xai | Reserved |
+| graphrag | Reserved |
+| graphrag-copilot | Reserved |
+| green | Reserved |
+| guard | Reserved |
+| health-aggregator | Reserved |
+| hello-service | Reserved |
+| humint-service | Reserved |
+| hypothesis-workbench | Reserved |
+| i18n-service | Reserved |
+| identity-fusion | Reserved |
+| identity-spiffe | Reserved |
+| idtl | Reserved |
+| ig-rl | Reserved |
+| ingest | Reserved |
+| ingest-adapters | Reserved |
+| ingest-orchestrator | Reserved |
+| ingest-runner | Reserved |
+| ingest-sandbox | Reserved |
+| ingest-wizard | Reserved |
+| innovation-sandbox | Reserved |
+| insight-ai | Reserved |
+| insights | Reserved |
+| integrations | Reserved |
+| intel | Reserved |
+| intelgraph-server | Reserved |
+| interop | Reserved |
+| jitae | Reserved |
+| kb-service | Reserved |
+| kkp | Reserved |
+| knowledge-service | Reserved |
+| krpcp | Reserved |
+| labeling-service | Reserved |
+| lac-compiler | Reserved |
+| lakehouse-service | Reserved |
+| law-enforcement-service | Reserved |
+| learner | Reserved |
+| lib | Reserved |
+| license-registry | Reserved |
+| logging-pipeline | Reserved |
+| logistics-automation-service | Reserved |
+| lsc | Reserved |
+| lsc-service | Reserved |
+| market | Reserved |
+| marketplace | Reserved |
+| mdm-service | Reserved |
+| media-pipeline-service | Reserved |
+| memory | Reserved |
+| mesh-orchestrator | Reserved |
+| metadata-service | Reserved |
+| mission-coordination-service | Reserved |
+| ml-inference | Reserved |
+| ml-serving | Reserved |
+| ml-training | Reserved |
+| mlops-service | Reserved |
+| model-hub-service | Reserved |
+| model-registry-service | Reserved |
+| model-serving-service | Reserved |
+| model-training | Reserved |
+| mstc | Reserved |
+| mtfs | Reserved |
+| mtif | Reserved |
+| neo4j-backup | Reserved |
+| nl-cypher | Reserved |
+| nlp-service | Reserved |
+| nlq | Reserved |
+| nlq-copilot | Reserved |
+| nonproliferation-service | Reserved |
+| notification-router | Reserved |
+| obs-demo-service | Reserved |
+| okr | Reserved |
+| opa | Reserved |
+| operations-c2-service | Reserved |
+| ops-guard | Reserved |
+| orchestration | Reserved |
+| orchestrator | Reserved |
+| organized-crime-service | Reserved |
+| osint-service | Reserved |
+| pca-verifier | Reserved |
+| pcpr | Reserved |
+| placement | Reserved |
+| plugin-executor | Reserved |
+| plugin-registry | Reserved |
+| policy | Reserved |
+| policy-audit | Reserved |
+| policy-aware-cache | Reserved |
+| policy-compiler | Reserved |
+| policy-enforcer | Reserved |
+| policy-engine | Reserved |
+| policy-sidecar | Reserved |
+| policyhub | Reserved |
+| portfolio | Reserved |
+| postgres-pitr | Reserved |
+| postmortem | Reserved |
+| prd-generator | Reserved |
+| predictd | Reserved |
+| prediction-service | Reserved |
+| predictive-analytics | Reserved |
+| prer | Reserved |
+| privacy | Reserved |
+| privacy-analytics-service | Reserved |
+| privacy-labeler | Reserved |
+| procurement-automation | Reserved |
+| program | Reserved |
+| prov-ledger | Reserved |
+| provenance | Reserved |
+| provenance-cli | Reserved |
+| provenance-service | Reserved |
+| proxy | Reserved |
+| psi | Reserved |
+| q3c | Reserved |
+| qawe | Reserved |
+| qpg | Reserved |
+| quantum-service | Reserved |
+| queue-manager | Reserved |
+| rag | Reserved |
+| rca | Reserved |
+| rcsi | Reserved |
+| realtime | Reserved |
+| receipt-signer | Reserved |
+| receipt-worker | Reserved |
+| red-team-service | Reserved |
+| redteam | Reserved |
+| ref-data-service | Reserved |
+| regulatory-compliance-agents | Reserved |
+| release | Reserved |
+| releaseorchestrator | Reserved |
+| replicator | Reserved |
+| repograph | Reserved |
+| report-assembly | Reserved |
+| reporting | Reserved |
+| resilient-orchestrator | Reserved |
+| retentiond | Reserved |
+| risk-assessment-service | Reserved |
+| rlhf | Reserved |
+| router | Reserved |
+| routing-gateway | Reserved |
+| rules | Reserved |
+| runbook-prover | Reserved |
+| runbooks | Reserved |
+| safe-analytics-workbench | Reserved |
+| safejoin | Reserved |
+| sandbox | Reserved |
+| sandbox-gateway | Reserved |
+| sandbox-tenant-profile | Reserved |
+| satellite | Reserved |
+| scenario-engine-service | Reserved |
+| scenario-registry | Reserved |
+| scheduler | Reserved |
+| schema-ingest-wizard | Reserved |
+| schema-registry | Reserved |
+| scim | Reserved |
+| scoring-engine | Reserved |
+| scout | Reserved |
+| search | Reserved |
+| search-indexer | Reserved |
+| secure-elections | Reserved |
+| sei | Reserved |
+| sei-collector | Reserved |
+| self-upgrading-infrastructure | Reserved |
+| server | Reserved |
+| sigint-service | Reserved |
+| sigint-telemetry | Reserved |
+| signal-bus-service | Reserved |
+| sim | Reserved |
+| smart-contracting-service | Reserved |
+| spacetime-service | Reserved |
+| spar | Reserved |
+| sparql-endpoint | Reserved |
+| spom | Reserved |
+| src | Reserved |
+| sss | Reserved |
+| stix-taxii-ingestion | Reserved |
+| strategic-foresight | Reserved |
+| stream-processor | Reserved |
+| streaming-ingest | Reserved |
+| sum | Reserved |
+| supply-chain-service | Reserved |
+| sync-service | Reserved |
+| synthdata | Reserved |
+| synthesis-service | Reserved |
+| synthesizer | Reserved |
+| talent-magnet | Reserved |
+| tats | Reserved |
+| tenant-admin | Reserved |
+| tgo | Reserved |
+| threat-assessment-service | Reserved |
+| threat-hunting-service | Reserved |
+| threat-library-service | Reserved |
+| time | Reserved |
+| timeseries-metrics | Reserved |
+| tpfr | Reserved |
+| transcription-service | Reserved |
+| trr | Reserved |
+| trust | Reserved |
+| twin | Reserved |
+| unified-audit | Reserved |
+| universal-ingestion | Reserved |
+| vision-api | Reserved |
+| warehouse-service | Reserved |
+| web-agent | Reserved |
+| web-ingest | Reserved |
+| web-orchestrator | Reserved |
+| websocket-server | Reserved |
+| wmd-intelligence-service | Reserved |
+| worker | Reserved |
+| worker-queue | Reserved |
+| workers | Reserved |
+| workflow | Reserved |
+| zk-deconfliction | Reserved |
+| zk-tx | Reserved |
+| zk-tx-svc | Reserved |
+| zktx | Reserved |
+
+</details>
 
 ### Data Stores
 

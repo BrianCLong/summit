@@ -1,7 +1,7 @@
 # Summit GA: Frequently Asked Questions
 
 **Version:** 1.0
-**Last Updated:** [To be determined]
+**Last Updated:** October 2025
 **Audience:** Customers, Prospects, Partners
 
 ---
@@ -447,9 +447,9 @@ Clients can query either `type` or `entityType` during the migration period.
 **Required for continued support.** MVP-3 will reach End-of-Life (EOL) **6 months after GA release**.
 
 **Timeline:**
-- **GA Release**: [Date TBD]
+- **GA Release**: October 31, 2025
 - **MVP-3 EOL Announcement**: Same day as GA release
-- **MVP-3 Support Ends**: 6 months after GA release
+- **MVP-3 Support Ends**: April 30, 2026
 - **MVP-3 Deprecated**: No security updates or bug fixes after EOL
 
 ### What's involved in the migration?
@@ -628,7 +628,7 @@ Audit logs are **immutable and tamper-evident**:
 ### Is Summit certified for government use?
 
 **Current Status:**
-- ✅ **SOC 2 Type II**: Alignment in progress, certification expected [Date TBD]
+- ✅ **SOC 2 Type II**: Alignment in progress, certification expected Q1 2026
 - ✅ **SLSA Level 3**: Supply chain compliance implemented
 - ⏸️ **FedRAMP**: Not yet certified; air-gap deployment guide available for federal use cases
 - ⏸️ **ISO 27001**: Alignment in progress
@@ -1014,5 +1014,5 @@ See `/docs/GA_CORE_OVERVIEW.md` Section 1.3 for full "Won't Build" list.
 
 ---
 
-*Last Updated: [To be determined]*
+*Last Updated: October 2025*
 *Document Version: 1.0*

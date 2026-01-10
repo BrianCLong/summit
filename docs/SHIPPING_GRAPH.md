@@ -6,16 +6,16 @@ This document captures the buildable units that currently "ship" from this repos
 
 | Name | Type | Path | Purpose | Entrypoint | Owner |
 | --- | --- | --- | --- | --- | --- |
-| Web App | frontend | `apps/web` | Primary analyst-facing UI for the Summit/IntelGraph workflow. | _TODO: pnpm scope + build target_ | _TBD_
-| Gateway | edge/service | `apps/gateway` | Front-door API gateway that fronts web + internal services. | _TODO: start/build target_ | _TBD_
-| IntelGraph API | backend | `apps/intelgraph-api` | GraphQL/REST surface for investigations, entities, relationships, and copilot flows. | _TODO: start/build target_ | _TBD_
-| Server (legacy) | backend | `apps/server` | Legacy API surface kept for backward compatibility while traffic migrates to IntelGraph API. | _TODO: start/build target_ | _TBD_
-| Observability bundle | tooling | `apps/observability` | Dashboards, alerting rules, and probes that ship with the platform. | _TODO: packaging target_ | _TBD_
-| Workflow Engine | service | `apps/workflow-engine` | Orchestrates longer-running workflows and scheduled jobs. | _TODO: start/build target_ | _TBD_
-| Analytics Engine | service | `apps/analytics-engine` | Graph/ML analytics services consumed by the API layer. | _TODO: start/build target_ | _TBD_
-| Compliance Console | frontend | `apps/compliance-console` | Governance + compliance surface area for administrators. | _TODO: pnpm scope + build target_ | _TBD_
-| Packages (shared) | libraries | `packages/` | Shared SDKs, domain models, and helpers used across shipping apps/services. | _TODO: publish/build target_ | _TBD_
-| Services (shared) | services | `services/` | Specialized deployables (e.g., authz-gateway) consumed behind the gateway. | _TODO: start/build target_ | _TBD_
+| Web App | frontend | `apps/web` | Primary analyst-facing UI for the Summit/IntelGraph workflow. | `pnpm --filter @intelgraph/web build` | Platform Engineering |
+| Gateway | edge/service | `apps/gateway` | Front-door API gateway that fronts web + internal services. | `pnpm --filter @intelgraph/gateway build` | Platform Engineering |
+| IntelGraph API | backend | `apps/intelgraph-api` | GraphQL/REST surface for investigations, entities, relationships, and copilot flows. | `pnpm --filter @intelgraph/api build` | Platform Engineering |
+| Server (legacy) | backend | `apps/server` | Legacy API surface kept for backward compatibility while traffic migrates to IntelGraph API. | `pnpm --filter apps-server build` | Platform Engineering |
+| Observability bundle | tooling | `apps/observability` | Dashboards, alerting rules, and probes that ship with the platform. | `pnpm --filter @intelgraph/observability build` | DevOps |
+| Workflow Engine | service | `apps/workflow-engine` | Orchestrates longer-running workflows and scheduled jobs. | `pnpm --filter @intelgraph/workflow-engine build` | Backend Core |
+| Analytics Engine | service | `apps/analytics-engine` | Graph/ML analytics services consumed by the API layer. | `pnpm --filter @intelgraph/analytics-engine build` | Data Science |
+| Compliance Console | frontend | `apps/compliance-console` | Governance + compliance surface area for administrators. | `pnpm --filter @intelgraph/compliance-console build` | Governance |
+| Packages (shared) | libraries | `packages/` | Shared SDKs, domain models, and helpers used across shipping apps/services. | `pnpm build` | Platform Engineering |
+| Services (shared) | services | `services/` | Specialized deployables (e.g., authz-gateway) consumed behind the gateway. | `docker compose up` | Platform Engineering |
 
 > Tip: keep entries coarse-grained; list only buildable units that have a release artifact or deployment target.
 
