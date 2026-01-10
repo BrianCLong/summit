@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-10T04:10:00Z",
+  "revision_note": "Refined issue triage automation status-comment behavior",
   "initiatives": [
     {
       "id": "A",
