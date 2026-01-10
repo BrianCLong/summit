@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="520" viewBox="0 0 960 520" fill="none">
+  <style>
+    .title { font: bold 20px 'Arial', sans-serif; fill: #0b2545; }
+    .label { font: 14px 'Arial', sans-serif; fill: #0b2545; }
+    .box { fill: #e8f0fe; stroke: #1a73e8; stroke-width: 2; rx: 8; ry: 8; }
+    .accent { fill: #e8f5e9; stroke: #2e7d32; stroke-width: 2; rx: 8; ry: 8; }
+    .alert { fill: #fff4e5; stroke: #fb8c00; stroke-width: 2; rx: 8; ry: 8; }
+    .arrow { stroke: #0b2545; stroke-width: 2; marker-end: url(#arrowhead); }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#0b2545" />
+    </marker>
+  </defs>
+
+  <text x="30" y="40" class="title">Summit Truth Operations Flow</text>
+
+  <rect class="box" x="40" y="80" width="200" height="80" />
+  <text x="70" y="110" class="label">Ingress &amp; Enrichment</text>
+  <text x="70" y="135" class="label">Source fingerprints · schema guards</text>
+
+  <rect class="box" x="320" y="80" width="200" height="80" />
+  <text x="340" y="110" class="label">Integrity Scoring</text>
+  <text x="340" y="135" class="label">Volatility · correlation · authority</text>
+
+  <rect class="box" x="600" y="80" width="200" height="80" />
+  <text x="630" y="110" class="label">Narrative Collision</text>
+  <text x="630" y="135" class="label">Diversity · convergence velocity</text>
+
+  <line class="arrow" x1="240" y1="120" x2="320" y2="120" />
+  <line class="arrow" x1="520" y1="120" x2="600" y2="120" />
+
+  <rect class="accent" x="320" y="200" width="200" height="80" />
+  <text x="345" y="230" class="label">Authority Continuity Ledger</text>
+  <text x="345" y="255" class="label">Keys · behavior · overrides</text>
+
+  <rect class="accent" x="600" y="200" width="200" height="80" />
+  <text x="635" y="230" class="label">Temporal Truth Protection</text>
+  <text x="635" y="255" class="label">Relevance windows · partial truths</text>
+
+  <line class="arrow" x1="420" y1="160" x2="420" y2="200" />
+  <line class="arrow" x1="700" y1="160" x2="700" y2="200" />
+
+  <rect class="alert" x="320" y="320" width="200" height="80" />
+  <text x="350" y="350" class="label">Truth Impact Containment</text>
+  <text x="350" y="375" class="label">Quarantine · revocation · re-eval</text>
+
+  <rect class="alert" x="600" y="320" width="200" height="80" />
+  <text x="635" y="350" class="label">Strategic Silence</text>
+  <text x="635" y="375" class="label">Deliberate non-action with audit</text>
+
+  <line class="arrow" x1="420" y1="280" x2="420" y2="320" />
+  <line class="arrow" x1="700" y1="280" x2="700" y2="320" />
+
+  <line class="arrow" x1="520" y1="360" x2="600" y2="360" />
+
+  <text x="40" y="470" class="label">Outputs: integrity annotations, collision alerts, temporal relevance scores, authority continuity status, containment tickets.</text>
+</svg>

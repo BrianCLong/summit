@@ -1,0 +1,34 @@
+{
+  "task_id": "TRUTH_OPERATIONS_ADVERSARIAL_PACK",
+  "agent_id": "gpt-5.2-codex",
+  "prompt_hash": "f5f8de22b56b8ff69718a65a177d5a9846d141098c2439cc513f76a8c9908af6",
+  "prompt_id": "truth-operations-sprint",
+  "declared_scope": {
+    "paths": [
+      "docs/truth-operations/*",
+      "policies/truth-defense.rego",
+      "schemas/integrity-metadata.schema.json",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/TRUTH_OPERATIONS_ADVERSARIAL_PACK.json",
+      "prompts/governance/truth-operations-sprint.md",
+      "prompts/registry.yaml",
+      "artifacts/agent-runs/TRUTH_OPERATIONS_ADVERSARIAL_PACK.json"
+    ],
+    "domains": ["docs", "policy", "schema", "governance", "provenance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_tiers": ["C"],
+  "debt_delta": 0,
+  "evidence": {
+    "prompt_integrity": "prompts/registry.yaml",
+    "metadata_validation": "agents/examples/TRUTH_OPERATIONS_ADVERSARIAL_PACK.json",
+    "artifacts": [
+      "docs/truth-operations/",
+      "policies/truth-defense.rego",
+      "schemas/integrity-metadata.schema.json"
+    ]
+  },
+  "policies_enforced": ["scope", "prompt-immutability", "policy-as-code"],
+  "status": "ready-for-merge",
+  "recorded_at": "2026-01-10T03:45:00.000Z"
+}

@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "IntegrityMetadata",
+  "type": "object",
+  "required": [
+    "source_id",
+    "integrity_score",
+    "authority_continuity",
+    "narrative_cluster_id",
+    "temporal",
+    "signals"
+  ],
+  "properties": {
+    "source_id": {
+      "type": "string",
+      "description": "Unique identifier for the originating source"
+    },
+    "integrity_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Composite adversarial-aware integrity score"
+    },
+    "authority_continuity": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Continuity score from the Authority Continuity Ledger"
+    },
+    "narrative_cluster_id": {
+      "type": "string",
+      "description": "Narrative Collision Graph cluster identifier"
+    },
+    "temporal": {
+      "type": "object",
+      "required": ["observed_at", "ingested_at", "latency_ms", "relevance_window_ms"],
+      "properties": {
+        "observed_at": { "type": "string", "format": "date-time" },
+        "ingested_at": { "type": "string", "format": "date-time" },
+        "latency_ms": { "type": "number", "minimum": 0 },
+        "relevance_window_ms": { "type": "number", "minimum": 0 }
+      }
+    },
+    "signals": {
+      "type": "object",
+      "properties": {
+        "source_volatility": { "type": "number", "minimum": 0, "maximum": 1 },
+        "correlation": { "type": "number", "minimum": 0, "maximum": 1 },
+        "historical_adversarial": { "type": "number", "minimum": 0, "maximum": 1 },
+        "narrative_shift_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "temporal_freshness": { "type": "number", "minimum": 0, "maximum": 1 },
+        "authority_continuity": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "dissent_preserved": {
+      "type": "boolean",
+      "description": "True if alternate narratives were retained"
+    },
+    "containment": {
+      "type": "object",
+      "properties": {
+        "quarantined": { "type": "boolean" },
+        "reasons": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "signature"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string" },
+          "signature": { "type": "string" },
+          "authority_score": { "type": "number", "minimum": 0, "maximum": 100 }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,45 @@
+{
+  "task_id": "TRUTH_OPERATIONS_ADVERSARIAL_PACK",
+  "agent_id": "gpt-5.2-codex",
+  "prompt_ref": {
+    "id": "truth-operations-sprint",
+    "version": "v1",
+    "sha256": "f5f8de22b56b8ff69718a65a177d5a9846d141098c2439cc513f76a8c9908af6",
+    "path": "prompts/governance/truth-operations-sprint.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/truth-operations/*",
+      "policies/truth-defense.rego",
+      "schemas/integrity-metadata.schema.json",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/TRUTH_OPERATIONS_ADVERSARIAL_PACK.json",
+      "prompts/governance/truth-operations-sprint.md",
+      "prompts/registry.yaml",
+      "artifacts/agent-runs/TRUTH_OPERATIONS_ADVERSARIAL_PACK.json"
+    ],
+    "domains": ["docs", "policy", "schema", "governance", "provenance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/truth-operations/*",
+      "policies/truth-defense.rego",
+      "schemas/integrity-metadata.schema.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Truth Operations documentation and policy/schema anchors are aligned",
+    "Prompt registry entry matches the prompt SHA-256 hash",
+    "Agent run artifact and task spec are recorded"
+  ],
+  "stop_conditions": [
+    "Detected policy or schema contradiction with governance mandates",
+    "Prompt hash mismatch or scope deviation"
+  ]
+}
