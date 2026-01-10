@@ -30,6 +30,7 @@ import { gql } from '@apollo/client';
 
 import DashboardOverview from '../components/admin/DashboardOverview';
 import UserManagement from '../components/admin/UserManagement';
+import DataExportTools from '../components/admin/DataExportTools';
 // TODO: Implement missing admin components
 // import ModerationQueue from '../components/admin/ModerationQueue';
 // import FeatureFlagsPanel from '../components/admin/FeatureFlagsPanel';
@@ -330,7 +331,7 @@ export default function AdminDashboard() {
       </TabPanel>
 
       <TabPanel value={currentTab} index={5}>
-        <Typography>Data Export Tools (Coming Soon)</Typography>
+        <DataExportTools />
       </TabPanel>
 
       <TabPanel value={currentTab} index={6}>
