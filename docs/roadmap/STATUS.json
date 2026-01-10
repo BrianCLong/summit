@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-10T04:30:00Z",
+  "revision_note": "Normalized server TypeScript coverage by lifting exclusions for reporting, theming, and federal sources",
   "initiatives": [
     {
       "id": "A",
