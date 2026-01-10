@@ -35,6 +35,11 @@ log_error() {
 
 # Check prerequisites
 check_prerequisites() {
+    if [ "$MOCK_MODE" = "true" ]; then
+        log_warning "Mock/CI mode enabled. Skipping environment validation and Docker checks."
+        return 0
+    fi
+
     log_info "Running environment validator..."
     if ! "$SCRIPT_DIR/validate-env.sh"; then
         log_error "Environment validation failed. Please address the issues above."
@@ -232,6 +237,11 @@ EOF
 start_environment() {
     log_info "Starting IntelGraph development environment..."
 
+    if [ "$MOCK_MODE" = "true" ]; then
+        log_warning "Mock/CI mode enabled. Skipping Docker startup."
+        return 0
+    fi
+
     cd "$PROJECT_ROOT"
 
     # Pull the latest images
@@ -276,6 +286,16 @@ start_environment() {
 
 # Display access information
 show_access_info() {
+    if [ "$MOCK_MODE" = "true" ]; then
+        log_success "🌐 IntelGraph Platform Ready (Mock/CI Mode)"
+        echo
+        echo "⚠️  Services were NOT started (Docker skipped)."
+        echo "   To run tests against a remote API, ensure API_BASE_URL is set."
+        echo "   Example: API_BASE_URL=http://... ./scripts/smoke-test.js"
+        echo
+        return
+    fi
+
     log_success "🌐 IntelGraph Platform Development Environment Started!"
     echo
     echo "📊 Access Points:"
@@ -318,6 +338,24 @@ main() {
     echo "🚀 IntelGraph Platform - Development Environment Setup"
     echo "═══════════════════════════════════════════════════════"
     echo
+
+    # Parse arguments for flags
+    export MOCK_MODE=false
+    local positional_args=()
+
+    for arg in "$@"; do
+        case $arg in
+            --mock|--ci)
+                export MOCK_MODE=true
+                ;;
+            *)
+                positional_args+=("$arg")
+                ;;
+        esac
+    done
+
+    # Reset positional args
+    set -- "${positional_args[@]}"
 
     case "${1:-start}" in
         "start")
