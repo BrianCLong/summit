@@ -1,0 +1,122 @@
+name: CI Performance Budgets
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - main
+      - "release/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  ci-perf-budget-check:
+    name: ci-perf:budget-check
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Evaluate CI performance budgets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node scripts/release/evaluate_ci_budgets.mjs \
+            --budget-file release/CI_PERF_BUDGET.yml \
+            --overrides-file .github/ci-budget-overrides.yml \
+            --repo "${{ github.repository }}" \
+            --current-sha "${{ github.event.pull_request.head.sha }}" \
+            --current-branch "${{ github.head_ref }}" \
+            --event-name "${{ github.event_name }}" \
+            --out-dir dist/ci-perf
+
+      - name: Upload CI performance evaluation
+        uses: actions/upload-artifact@v6
+        with:
+          name: ci-perf-budget-eval-${{ github.run_id }}
+          path: dist/ci-perf
+          retention-days: 14
+
+      - name: Summarize evaluation
+        if: always()
+        run: |
+          if [[ -f dist/ci-perf/budget-eval.md ]]; then
+            cat dist/ci-perf/budget-eval.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  ci-perf-collect:
+    name: ci-perf:collect
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Collect CI durations
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node scripts/release/collect_ci_durations.mjs \
+            --budget-file release/CI_PERF_BUDGET.yml \
+            --repo "${{ github.repository }}" \
+            --token "${{ secrets.GITHUB_TOKEN }}" \
+            --branch "${{ github.ref_name }}" \
+            --out-dir dist/ci-perf
+
+      - name: Generate CI performance report
+        run: |
+          node scripts/release/generate_ci_perf_report.mjs \
+            --summary dist/ci-perf/ci-durations-summary.json \
+            --budget-file release/CI_PERF_BUDGET.yml \
+            --overrides-file .github/ci-budget-overrides.yml \
+            --out-dir dist/ci-perf
+
+      - name: Upload CI performance artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: ci-perf-durations-${{ github.run_id }}
+          path: dist/ci-perf
+          retention-days: 30

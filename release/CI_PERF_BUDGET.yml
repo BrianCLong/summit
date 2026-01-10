@@ -1,0 +1,62 @@
+version: 1
+budgets:
+  - id: pr-quality-gate::gate
+    workflow_file: pr-quality-gate.yml
+    job: __gate__
+    scope: PR
+    budget_seconds_p50: 1200
+    budget_seconds_p95: 1800
+    hard_limit_seconds: 2700
+    regression_threshold_percent: 15
+    owner: release-ops
+    ticket: CI-PERF-0001
+  - id: pr-quality-gate::validate-release-policy
+    workflow_file: pr-quality-gate.yml
+    job: Validate Release Policy
+    scope: PR
+    budget_seconds_p50: 240
+    budget_seconds_p95: 420
+    hard_limit_seconds: 600
+    regression_threshold_percent: 15
+    owner: release-ops
+    ticket: CI-PERF-0001
+  - id: pr-quality-gate::lint-reason-codes
+    workflow_file: pr-quality-gate.yml
+    job: Lint Release Reason Codes
+    scope: PR
+    budget_seconds_p50: 180
+    budget_seconds_p95: 300
+    hard_limit_seconds: 480
+    regression_threshold_percent: 15
+    owner: release-ops
+    ticket: CI-PERF-0001
+  - id: pr-quality-gate::ga-risk-gate
+    workflow_file: pr-quality-gate.yml
+    job: GA Risk Gate
+    scope: PR
+    budget_seconds_p50: 240
+    budget_seconds_p95: 420
+    hard_limit_seconds: 600
+    regression_threshold_percent: 15
+    owner: release-ops
+    ticket: CI-PERF-0001
+  - id: pr-quality-gate::security-scan
+    workflow_file: pr-quality-gate.yml
+    job: Vulnerability and Security Scan
+    scope: PR
+    budget_seconds_p50: 600
+    budget_seconds_p95: 900
+    hard_limit_seconds: 1200
+    regression_threshold_percent: 15
+    owner: release-ops
+    ticket: CI-PERF-0001
+  - id: pr-quality-gate::sbom
+    workflow_file: pr-quality-gate.yml
+    job: SBOM (warn-only policy)
+    scope: PR
+    budget_seconds_p50: 240
+    budget_seconds_p95: 360
+    hard_limit_seconds: 540
+    regression_threshold_percent: 15
+    owner: release-ops
+    ticket: CI-PERF-0001

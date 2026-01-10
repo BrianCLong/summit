@@ -65,6 +65,39 @@ load_governance_changes() {
     fi
 }
 
+append_ci_perf_markdown() {
+    local out_dir="$1"
+    local output_file="$2"
+    local report_file="${out_dir}/ci_perf_report.md"
+
+    echo "" >> "${output_file}"
+    echo "---" >> "${output_file}"
+    echo "" >> "${output_file}"
+    echo "## CI Performance Trend (Weekly)" >> "${output_file}"
+    echo "" >> "${output_file}"
+
+    if [[ -f "${report_file}" ]]; then
+        tail -n +2 "${report_file}" >> "${output_file}"
+    else
+        echo "Deferred pending CI performance trend artifact." >> "${output_file}"
+    fi
+}
+
+load_ci_perf_html() {
+    local out_dir="$1"
+    local report_file="${out_dir}/ci_perf_report.html"
+    if [[ -f "${report_file}" ]]; then
+        cat "${report_file}"
+    else
+        cat <<'HTML'
+<section>
+  <h2>CI Performance Trend (Weekly)</h2>
+  <p>Deferred pending CI performance trend artifact.</p>
+</section>
+HTML
+    fi
+}
+
 # --- Status Helpers ---
 
 get_status_emoji() {
@@ -221,6 +254,12 @@ EOF
 _Governance changes indicate policy configuration updates. Correlate with incidents for root cause analysis._
 
 ---
+
+EOF
+
+    append_ci_perf_markdown "${out_dir}" "${output_file}"
+
+    cat >> "${output_file}" <<EOF
 
 ## Definitions
 
@@ -568,6 +607,8 @@ HTMLEOF
     <p style="font-size: 0.8em; color: #57606a; margin-top: 8px;">
       <em>Governance changes indicate policy configuration updates. Correlate with incidents for root cause analysis.</em>
     </p>
+
+    $(load_ci_perf_html "${out_dir}")
 
     <div class="footer">
       <a href="redaction_metrics_trend.html">Trend Page</a> |

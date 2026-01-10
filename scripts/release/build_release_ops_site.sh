@@ -25,6 +25,10 @@ ALLOWLIST=(
     "index.html"
     "release_ops_single_page.html"
     "release_ops_single_page.md"
+    "ci_perf_report.html"
+    "ci_perf_report.json"
+    "ci_perf_report.md"
+    "ci_perf_trend.svg"
     "cycle_summary.md"
     "dashboard_summary.json"       # Sanitized excerpt, not full dashboard.json
     "redaction_health.json"        # Counts-only health status
@@ -685,6 +689,32 @@ main() {
                     log_warn "Failed to render redaction metrics trend"
                 }
             [[ "${verbose}" == "true" ]] && log_info "Generated: redaction_metrics_trend.html, redaction_metrics_trend.md"
+        fi
+    fi
+
+    # Generate CI performance trend report
+    if [[ "${dry_run}" == "false" ]]; then
+        if [[ -z "${GITHUB_TOKEN:-}" ]] || [[ -z "${GITHUB_REPOSITORY:-}" ]]; then
+            log_warn "Deferred pending CI performance trend collection (missing GitHub context)."
+        elif [[ -x "${SCRIPT_DIR}/collect_ci_durations.mjs" ]] && [[ -x "${SCRIPT_DIR}/generate_ci_perf_report.mjs" ]]; then
+            local ci_perf_out="${REPO_ROOT}/dist/ci-perf"
+            node "${SCRIPT_DIR}/collect_ci_durations.mjs" \
+                --budget-file "${REPO_ROOT}/release/CI_PERF_BUDGET.yml" \
+                --repo "${GITHUB_REPOSITORY}" \
+                --token "${GITHUB_TOKEN}" \
+                --branch "main" \
+                --out-dir "${ci_perf_out}" 2>/dev/null || {
+                    log_warn "CI performance duration collection deferred pending GitHub API availability."
+                }
+            if [[ -f "${ci_perf_out}/ci-durations-summary.json" ]]; then
+                node "${SCRIPT_DIR}/generate_ci_perf_report.mjs" \
+                    --summary "${ci_perf_out}/ci-durations-summary.json" \
+                    --budget-file "${REPO_ROOT}/release/CI_PERF_BUDGET.yml" \
+                    --overrides-file "${REPO_ROOT}/.github/ci-budget-overrides.yml" \
+                    --out-dir "${site_dir}" 2>/dev/null || {
+                        log_warn "CI performance report rendering deferred pending toolchain readiness."
+                    }
+            fi
         fi
     fi
 

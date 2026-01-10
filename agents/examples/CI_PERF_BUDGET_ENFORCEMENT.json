@@ -1,0 +1,45 @@
+{
+  "task_id": "CI_PERF_BUDGET_ENFORCEMENT_20260110",
+  "agent_id": "jules",
+  "prompt_ref": {
+    "id": "ci-performance-budgets",
+    "version": "v1",
+    "sha256": "44e3052542c4e5418a527a9c17cba8f6b2f30e85dd3a03abe57d7b4709bbae1d",
+    "path": "prompts/ci/ci-performance-budgets-v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "release/",
+      "scripts/release/",
+      "docs/release/",
+      "schemas/",
+      ".github/",
+      "prompts/ci/"
+    ],
+    "domains": ["ci", "release-ops", "performance", "governance"],
+    "exclusions": ["apps/web/", "server/", "client/"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "dist/ci-perf/ci-durations-summary.json",
+      "dist/ci-perf/budget-eval.json",
+      "site/release-ops/ci_perf_report.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 1
+  },
+  "success_criteria": [
+    "CI performance budgets are defined with schemas and documentation.",
+    "PRs fail on CI performance budget regressions without governed exceptions.",
+    "Weekly Release Ops SLO report includes CI performance trend insights."
+  ],
+  "stop_conditions": [
+    "CI failure on main.",
+    "Detection of PII in generated artifacts.",
+    "Sandbox violation alert."
+  ]
+}

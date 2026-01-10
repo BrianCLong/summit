@@ -30,6 +30,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ci-performance-budgets
+    version: v1
+    path: prompts/ci/ci-performance-budgets-v1.md
+    sha256: 44e3052542c4e5418a527a9c17cba8f6b2f30e85dd3a03abe57d7b4709bbae1d
+    description: Enforce CI performance budgets with regression detection and governed exceptions.
+    scope:
+      paths:
+        - release/
+        - scripts/release/
+        - docs/release/
+        - schemas/
+        - .github/
+        - prompts/ci/
+      domains:
+        - ci
+        - release-ops
+        - governance
+        - performance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 1
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md

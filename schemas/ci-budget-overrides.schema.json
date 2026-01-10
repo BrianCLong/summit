@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/ci-budget-overrides.schema.json",
+  "title": "CI Budget Overrides",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "overrides"],
+  "properties": {
+    "version": { "type": "integer", "const": 1 },
+    "overrides": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "target",
+          "owner",
+          "ticket",
+          "created",
+          "expires",
+          "rationale",
+          "allowed_overage_percent"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "target": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["workflow_file", "job"],
+            "properties": {
+              "workflow_file": { "type": "string", "minLength": 1 },
+              "job": { "type": "string", "minLength": 1 },
+              "step_group": { "type": "string" }
+            }
+          },
+          "owner": { "type": "string", "minLength": 1 },
+          "ticket": { "type": "string", "minLength": 1 },
+          "created": { "type": "string", "format": "date-time" },
+          "expires": { "type": "string", "format": "date-time" },
+          "rationale": { "type": "string", "minLength": 1 },
+          "allowed_overage_percent": { "type": "number", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

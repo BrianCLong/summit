@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-09T16:00:00Z",
-  "revision_note": "Added scaffolded INSLAW/PROMIS affidavit demo artifacts for provenance-first ingestion",
+  "last_updated": "2026-01-10T00:00:00Z",
+  "revision_note": "Defined CI performance budgets with regression enforcement and governed exceptions",
   "initiatives": [
     {
       "id": "A",
