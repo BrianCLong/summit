@@ -28,3 +28,24 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ledger-authority-alignment
+    version: v1
+    path: prompts/governance/ledger-authority-alignment.md
+    sha256: c488a52de1df5a32e54a47a179811ea4807d951c17249b04ed2b5ec7b4a5644f
+    description: Align backlog ledger and roadmap status with governance authority references.
+    scope:
+      paths:
+        - docs/ops/
+        - docs/roadmap/
+      domains:
+        - documentation
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

@@ -1,0 +1,40 @@
+{
+  "task_id": "LEDGER_AUTHORITY_ALIGNMENT",
+  "agent_id": "gpt-5.2-codex",
+  "prompt_ref": {
+    "id": "ledger-authority-alignment",
+    "version": "v1",
+    "sha256": "c488a52de1df5a32e54a47a179811ea4807d951c17249b04ed2b5ec7b4a5644f",
+    "path": "prompts/governance/ledger-authority-alignment.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ops/BACKLOG_EXECUTION_LEDGER.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/registry.yaml",
+      "prompts/governance/ledger-authority-alignment.md",
+      "agents/examples/LEDGER_AUTHORITY_ALIGNMENT.json"
+    ],
+    "domains": ["documentation", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["scripts/check-boundaries.cjs output", "make smoke output (network dependent)"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Ledger references governance authority sources",
+    "STATUS.json revision note and timestamp reflect ledger alignment",
+    "Prompt registry entry added for this task"
+  ],
+  "stop_conditions": [
+    "Policy enforcement requires escalation",
+    "Sandbox or network restrictions prevent required verification"
+  ],
+  "dependencies": ["prompts/registry.yaml"],
+  "approvals": []
+}
