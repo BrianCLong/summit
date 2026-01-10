@@ -67,7 +67,7 @@ export class StrategicPlanRepo {
   ): Promise<StrategicPlan> {
     const id = uuidv4();
 
-    const { rows } = await this.pg.query(
+    const queryRes = await this.pg.query(
       `INSERT INTO strategic_plans (
         id, tenant_id, investigation_id, name, description, priority,
         time_horizon, start_date, end_date, assumptions, constraints,
@@ -91,6 +91,7 @@ export class StrategicPlanRepo {
         userId,
       ],
     );
+    const rows = queryRes?.rows || [];
 
     const plan = this.mapPlanRow(rows[0]);
 
