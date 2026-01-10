@@ -1,14 +1,12 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
-// Simulation of evidence generation script
-// Parses compliance/control-map.yaml dynamically.
+import { createCommand, logger, handleExit } from '../_lib/cli.js';
+import { ArtifactManager } from '../_lib/artifacts.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT_DIR = path.resolve(__dirname, '../../');
-const EVIDENCE_DIR = path.join(ROOT_DIR, 'evidence');
 const CONTROL_MAP_PATH = path.join(ROOT_DIR, 'compliance/control-map.yaml');
 
 interface ControlEvidence {
@@ -90,46 +88,56 @@ function parseControlMap(): ControlEvidence[] {
   return controls;
 }
 
-async function generateEvidence(controlId?: string, startDate?: string, endDate?: string) {
-  console.log(`Generating evidence... Control: ${controlId || 'ALL'}, Range: ${startDate || 'N/A'} - ${endDate || 'N/A'}`);
-  console.log(`Root Dir: ${ROOT_DIR}`);
+async function generateEvidence(options: any) {
+  const { control, startDate, endDate, outDir, mode, json, verbose } = options;
+  const artifactManager = new ArtifactManager(outDir);
+
+  logger.section('Evidence Generation');
+  logger.info(`Mode: ${mode}`);
+  logger.verbose(verbose, `Root Dir: ${ROOT_DIR}`);
 
   const controls = parseControlMap();
-  console.log(`Loaded ${controls.length} controls from map.`);
+  logger.info(`Loaded ${controls.length} controls from map.`);
+
+  if (mode === 'plan') {
+      logger.success('Plan mode: parsed controls successfully. Would generate evidence for:');
+      const controlsToProcess = control
+        ? controls.filter(c => c.controlId === control)
+        : controls;
+
+      controlsToProcess.forEach(c => console.log(` - ${c.controlId}: ${c.description}`));
+      return;
+  }
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const bundleName = `auditor-bundle-${timestamp}`;
-  const bundlePath = path.join(EVIDENCE_DIR, bundleName);
+  // Use artifacts manager to create directory structure
+  // artifacts/evidence/auditor-bundle-DATE/
+  const bundlePath = artifactManager.ensureDir(path.join('evidence', bundleName));
 
-  if (!fs.existsSync(EVIDENCE_DIR)) {
-    fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
-  }
-  fs.mkdirSync(bundlePath, { recursive: true });
-
-  const controlsToProcess = controlId
-    ? controls.filter(c => c.controlId === controlId)
+  const controlsToProcess = control
+    ? controls.filter(c => c.controlId === control)
     : controls;
 
-  if (controlsToProcess.length === 0 && controlId) {
-    console.error(`Control ${controlId} not found.`);
-    return;
+  if (controlsToProcess.length === 0 && control) {
+    throw new Error(`Control ${control} not found.`);
   }
 
-  for (const control of controlsToProcess) {
-    const controlDir = path.join(bundlePath, control.controlId);
+  for (const ctrl of controlsToProcess) {
+    const controlDir = path.join(bundlePath, ctrl.controlId);
     fs.mkdirSync(controlDir, { recursive: true });
 
     // Create a metadata file for the control
     const metadata = {
-      controlId: control.controlId,
-      description: control.description,
+      controlId: ctrl.controlId,
+      description: ctrl.description,
       generatedAt: new Date().toISOString(),
       scope: { startDate, endDate }
     };
     fs.writeFileSync(path.join(controlDir, 'metadata.json'), JSON.stringify(metadata, null, 2));
 
     // Copy artifacts (Simulated)
-    for (const artifact of control.artifacts) {
+    for (const artifact of ctrl.artifacts) {
       const sourcePath = path.join(ROOT_DIR, artifact);
       const destPath = path.join(controlDir, path.basename(artifact));
 
@@ -151,23 +159,32 @@ async function generateEvidence(controlId?: string, startDate?: string, endDate?
     bundleId: bundleName,
     generatedAt: new Date().toISOString(),
     controlsIncluded: controlsToProcess.map(c => c.controlId),
-    parameters: { controlId, startDate, endDate }
+    parameters: { control, startDate, endDate }
   };
   fs.writeFileSync(path.join(bundlePath, 'manifest.json'), JSON.stringify(manifest, null, 2));
 
-  console.log(`Evidence bundle generated at: ${bundlePath}`);
+  logger.success(`Evidence bundle generated at: ${bundlePath}`);
+  if (json) {
+      logger.json({
+          status: 'success',
+          bundlePath,
+          manifest
+      });
+  }
 }
 
-// Simple CLI parsing
-const args = process.argv.slice(2);
-let controlIdArg: string | undefined;
-let startDateArg: string | undefined;
-let endDateArg: string | undefined;
+const program = createCommand('evidence:generate', 'Generates compliance evidence bundle');
 
-for (let i = 0; i < args.length; i++) {
-  if (args[i] === '--control') controlIdArg = args[i + 1];
-  if (args[i] === '--start-date') startDateArg = args[i + 1];
-  if (args[i] === '--end-date') endDateArg = args[i + 1];
-}
+program
+  .option('--control <id>', 'Specific control ID to generate evidence for')
+  .option('--start-date <date>', 'Start date for evidence collection')
+  .option('--end-date <date>', 'End date for evidence collection')
+  .action(async (options) => {
+    try {
+      await generateEvidence(options);
+    } catch (error: any) {
+      handleExit(1, error);
+    }
+  });
 
-generateEvidence(controlIdArg, startDateArg, endDateArg).catch(console.error);
+program.parse(process.argv);
