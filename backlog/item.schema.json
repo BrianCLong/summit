@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.intelgraph/backlog/item.schema.json",
+  "title": "Autonomous Backlog Item",
+  "type": "object",
+  "required": [
+    "item_id",
+    "source_signals",
+    "category",
+    "affected_domains",
+    "estimated_effort",
+    "estimated_risk_reduction",
+    "urgency",
+    "dependencies",
+    "verification_requirements",
+    "eligible_agents"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "item_id": {
+      "type": "string",
+      "pattern": "^[A-Z0-9_-]+$",
+      "description": "Immutable backlog identifier"
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable summary of the work item"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed rationale and expected remediation"
+    },
+    "source_signals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "severity"],
+        "additionalProperties": true,
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string" },
+          "severity": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+          "evidence": { "type": "string" },
+          "detected_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "category": {
+      "type": "string",
+      "enum": ["debt", "risk", "feature", "governance", "reliability", "security"],
+      "description": "Primary classification for prioritization"
+    },
+    "affected_domains": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Services, components, or domains touched by the change"
+    },
+    "estimated_effort": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 5,
+      "description": "Relative t-shirt size from 0 (trivial) to 5 (major)"
+    },
+    "estimated_risk_reduction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Normalized (0-1) expected reduction in risk exposure"
+    },
+    "urgency": {
+      "type": "object",
+      "required": ["time_criticality", "rationale"],
+      "additionalProperties": false,
+      "properties": {
+        "time_criticality": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Normalized urgency multiplier"
+        },
+        "due_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "rationale": {
+          "type": "string",
+          "description": "Why timing matters (e.g., compliance window, expiring exception)"
+        }
+      }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Other backlog item IDs or external constraints"
+    },
+    "verification_requirements": {
+      "type": "object",
+      "required": ["required_tier", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "required_tier": {
+          "type": "string",
+          "enum": ["dev", "qa", "ga", "audit"],
+          "description": "Minimum verification gate the assignee must satisfy"
+        },
+        "tests": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "evidence": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "eligible_agents": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Agents allowed to pull this item"
+    },
+    "suggested_playbook": {
+      "type": "string",
+      "description": "Optional playbook or runbook to follow"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "debt_severity": { "type": "number", "minimum": 0, "maximum": 5 },
+        "debt_age_days": { "type": "number", "minimum": 0 },
+        "governance_impact": { "type": "number", "minimum": 0, "maximum": 5 },
+        "blast_radius": { "type": "number", "minimum": 0, "maximum": 5 },
+        "strategic_alignment": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "residual_risk": { "type": "number", "minimum": 0, "maximum": 1 },
+        "budget_impact": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "risk": { "type": "number", "minimum": 0, "maximum": 1 },
+            "debt": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      }
+    }
+  }
+}

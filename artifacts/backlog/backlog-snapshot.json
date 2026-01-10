@@ -1,0 +1,209 @@
+{
+  "generated_at": "2026-01-10T04:06:02.345Z",
+  "weights_version": 1,
+  "items": [
+    {
+      "item_id": "BL-0001",
+      "title": "Stabilize GA pipelines after flake spike",
+      "description": "Recent GA pipeline flakiness exceeded SLO; enforce retry guardrails and capture remediation evidence.",
+      "source_signals": [
+        {
+          "id": "ci:ga-flake",
+          "type": "ci-flaky",
+          "severity": "high",
+          "evidence": "reports/ci/flakes/ga-latest.json",
+          "detected_at": "2025-12-29T11:00:00Z"
+        }
+      ],
+      "category": "reliability",
+      "affected_domains": [
+        "ci",
+        "release-engineering"
+      ],
+      "estimated_effort": 2.5,
+      "estimated_risk_reduction": 0.62,
+      "urgency": {
+        "time_criticality": 0.8,
+        "due_date": "2026-01-05T00:00:00Z",
+        "rationale": "Flake rate breaching GA readiness gate"
+      },
+      "dependencies": [],
+      "verification_requirements": {
+        "required_tier": "ga",
+        "tests": [
+          "npm run test:server",
+          "npm run lint"
+        ],
+        "evidence": [
+          "ci-green",
+          "flake-rate<5%",
+          "audit-log"
+        ]
+      },
+      "eligible_agents": [
+        "Jules",
+        "ReliabilityOps"
+      ],
+      "suggested_playbook": "playbooks/ci/flake-response.md",
+      "metadata": {
+        "debt_severity": 3,
+        "debt_age_days": 45,
+        "governance_impact": 3,
+        "blast_radius": 4,
+        "strategic_alignment": [
+          "Reliability",
+          "GA"
+        ],
+        "residual_risk": 0.38,
+        "budget_impact": {
+          "risk": 0.25,
+          "debt": 0.2
+        }
+      },
+      "priority_score": 0.567,
+      "priority_band": "P1",
+      "rationale": "Risk reduction 0.22, debt 0.11 + age 0.01, governance 0.06, blast 0.06, urgency 0.10, alignment 0.05, effort penalty 0.04."
+    },
+    {
+      "item_id": "BL-0002",
+      "title": "Retire expiring encryption exception",
+      "description": "Exception for legacy encryption module expires soon; migrate to approved cipher suite and refresh attestations.",
+      "source_signals": [
+        {
+          "id": "exception:crypto-expiry",
+          "type": "exception-expiring",
+          "severity": "high",
+          "evidence": "exceptions/crypto/EXP-442.yaml",
+          "detected_at": "2025-12-28T09:00:00Z"
+        },
+        {
+          "id": "policy:drift-opa",
+          "type": "policy-drift",
+          "severity": "high",
+          "evidence": "policies/drift/opa-crypto.json",
+          "detected_at": "2025-12-28T09:00:00Z"
+        }
+      ],
+      "category": "governance",
+      "affected_domains": [
+        "security",
+        "policy-engine",
+        "crypto"
+      ],
+      "estimated_effort": 3,
+      "estimated_risk_reduction": 0.8,
+      "urgency": {
+        "time_criticality": 0.9,
+        "due_date": "2026-01-02T00:00:00Z",
+        "rationale": "Exception expires within 7 days; audit window imminent"
+      },
+      "dependencies": [
+        "BL-0001"
+      ],
+      "verification_requirements": {
+        "required_tier": "audit",
+        "tests": [
+          "npm run compliance:check"
+        ],
+        "evidence": [
+          "c2pa-attestation",
+          "audit-log",
+          "policy-drift-0"
+        ]
+      },
+      "eligible_agents": [
+        "Jules",
+        "Governance"
+      ],
+      "suggested_playbook": "playbooks/security/crypto-exception-removal.md",
+      "metadata": {
+        "debt_severity": 5,
+        "debt_age_days": 180,
+        "governance_impact": 5,
+        "blast_radius": 5,
+        "strategic_alignment": [
+          "GA",
+          "Audit",
+          "ZeroTrust"
+        ],
+        "residual_risk": 0.6,
+        "budget_impact": {
+          "risk": 0.4,
+          "debt": 0.35
+        }
+      },
+      "priority_score": 0.815,
+      "priority_band": "P0",
+      "rationale": "Risk reduction 0.28, debt 0.18 + age 0.04, governance 0.10, blast 0.08, urgency 0.11, alignment 0.07, effort penalty 0.04."
+    },
+    {
+      "item_id": "BL-0003",
+      "title": "Increase analytics_layer coverage and remove flaky tests",
+      "description": "Coverage dropped below 80% after recent refactors and a flaky test masks regression risk.",
+      "source_signals": [
+        {
+          "id": "coverage:analytics-gap",
+          "type": "coverage-gap",
+          "severity": "medium",
+          "evidence": "coverage/analytics_layer/lcov.info",
+          "detected_at": "2025-12-29T08:00:00Z"
+        },
+        {
+          "id": "reliability:flaky-analytics-report",
+          "type": "flaky-test",
+          "severity": "high",
+          "evidence": "reports/flaky/analytics-report.json",
+          "detected_at": "2025-12-29T08:15:00Z"
+        }
+      ],
+      "category": "debt",
+      "affected_domains": [
+        "analytics_layer",
+        "testing"
+      ],
+      "estimated_effort": 1.5,
+      "estimated_risk_reduction": 0.45,
+      "urgency": {
+        "time_criticality": 0.5,
+        "rationale": "Coverage debt is aging and flake blocks deterministic baselines"
+      },
+      "dependencies": [],
+      "verification_requirements": {
+        "required_tier": "qa",
+        "tests": [
+          "npm run test:unit",
+          "npm run test:server"
+        ],
+        "evidence": [
+          "coverage>85%",
+          "flake-rate<2%",
+          "ci-green"
+        ]
+      },
+      "eligible_agents": [
+        "Jules",
+        "ReliabilityOps",
+        "Amp"
+      ],
+      "suggested_playbook": "playbooks/qa/coverage-hardening.md",
+      "metadata": {
+        "debt_severity": 4,
+        "debt_age_days": 120,
+        "governance_impact": 2,
+        "blast_radius": 3,
+        "strategic_alignment": [
+          "Reliability",
+          "Quality"
+        ],
+        "residual_risk": 0.3,
+        "budget_impact": {
+          "risk": 0.2,
+          "debt": 0.15
+        }
+      },
+      "priority_score": 0.501,
+      "priority_band": "P2",
+      "rationale": "Risk reduction 0.16, debt 0.14 + age 0.03, governance 0.04, blast 0.05, urgency 0.06, alignment 0.05, effort penalty 0.02."
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "item_id": "BL-0002",
+  "agent_id": "Jules",
+  "priority_band": "P0",
+  "priority_score": 0.815,
+  "contract": {
+    "category": "governance",
+    "scope": [
+      "security",
+      "policy-engine",
+      "crypto"
+    ],
+    "dependencies": [
+      "BL-0001"
+    ],
+    "urgency": {
+      "time_criticality": 0.9,
+      "due_date": "2026-01-02T00:00:00Z",
+      "rationale": "Exception expires within 7 days; audit window imminent"
+    }
+  },
+  "budgets": {
+    "risk_budget_cost": 0.4,
+    "debt_budget_cost": 0.35,
+    "effort_estimate": 3
+  },
+  "verification": {
+    "required_tier": "audit",
+    "tests": [
+      "npm run compliance:check"
+    ],
+    "evidence": [
+      "c2pa-attestation",
+      "audit-log",
+      "policy-drift-0"
+    ]
+  },
+  "success_criteria": {
+    "risk_reduction_target": 0.8,
+    "evidence": [
+      "c2pa-attestation",
+      "audit-log",
+      "policy-drift-0"
+    ],
+    "tests": [
+      "npm run compliance:check"
+    ]
+  },
+  "provenance": {
+    "snapshot_source": "artifacts/backlog/backlog-snapshot.json",
+    "generated_at": "2025-12-30T06:15:01.159Z",
+    "source_signals": [
+      {
+        "id": "exception:crypto-expiry",
+        "type": "exception-expiring",
+        "severity": "high",
+        "evidence": "exceptions/crypto/EXP-442.yaml",
+        "detected_at": "2025-12-28T09:00:00Z"
+      },
+      {
+        "id": "policy:drift-opa",
+        "type": "policy-drift",
+        "severity": "high",
+        "evidence": "policies/drift/opa-crypto.json",
+        "detected_at": "2025-12-28T09:00:00Z"
+      }
+    ]
+  },
+  "prompt_lock": {
+    "title": "Retire expiring encryption exception",
+    "description": "Exception for legacy encryption module expires soon; migrate to approved cipher suite and refresh attestations.",
+    "suggested_playbook": "playbooks/security/crypto-exception-removal.md",
+    "eligible_agents": [
+      "Jules",
+      "Governance"
+    ]
+  }
+}

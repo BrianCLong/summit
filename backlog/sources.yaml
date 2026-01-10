@@ -1,0 +1,90 @@
+version: 1
+signal_groups:
+  ci:
+    description: Canonical CI results including failures, retries, and near-miss timeouts.
+    signals:
+      - id: ci-failure
+        severity: critical
+        fields: [pipeline, job, branch, commit, duration, failure_reason]
+        normalization: Align job identifiers to canonical pipeline names; attach commit SHAs and blame metadata.
+      - id: ci-flaky
+        severity: high
+        fields: [pipeline, job, branch, commit, flake_index, reruns]
+        normalization: Track flake index over rolling 14-day window; emit when crossing threshold.
+      - id: ci-slowdown
+        severity: medium
+        fields: [pipeline, job, duration_ms, p95_delta]
+        normalization: Emit when runtime exceeds SLO by >15% for 3 consecutive runs.
+  risk:
+    description: Predictive risk drift and live risk posture changes.
+    signals:
+      - id: risk-drift
+        severity: high
+        fields: [model, feature, delta, baseline, observation_window]
+        normalization: Use z-score over baseline window; attach affected domains and controls.
+      - id: risk-hotspot
+        severity: critical
+        fields: [component, risk_score, confidence, blast_radius]
+        normalization: Standardize risk_score to 0-1; map components to service catalog IDs.
+  debt:
+    description: Known debt registry including aged or high-severity items.
+    signals:
+      - id: debt-aged
+        severity: high
+        fields: [registry_id, age_days, severity, owner]
+        normalization: Normalize severity to 1-5 scale; age derived from first_seen.
+      - id: debt-sprawl
+        severity: medium
+        fields: [area, count, entropy, trend]
+        normalization: Emit when entropy or count grows >20% month over month.
+  exceptions:
+    description: Temporary exceptions and expirations.
+    signals:
+      - id: exception-expiring
+        severity: high
+        fields: [control_id, expires_at, owner, exception_reason]
+        normalization: Emit 14/7/1-day pre-expiry alerts with rollup ownership mapping.
+  coverage:
+    description: Automated coverage and testing gaps.
+    signals:
+      - id: coverage-gap
+        severity: medium
+        fields: [module, coverage_delta, baseline, test_owner]
+        normalization: Normalize coverage_delta as negative percentage; attach historical volatility.
+      - id: verification-mismatch
+        severity: high
+        fields: [artifact, required_tier, current_tier]
+        normalization: Resolve required tier from control map; compare to observed evidence.
+  reliability:
+    description: Flaky or regressing test signals.
+    signals:
+      - id: flaky-test
+        severity: high
+        fields: [suite, test, flake_rate, retries]
+        normalization: Rolling 30-day flake rate; severity escalates above 10% flake.
+      - id: perf-regression
+        severity: critical
+        fields: [scenario, p95_delta, p99_delta, error_budget_impact]
+        normalization: Convert deltas to budget impact; align scenario IDs to SLO catalog.
+  security:
+    description: Security scan warnings and control regressions.
+    signals:
+      - id: vuln-warning
+        severity: critical
+        fields: [cve, package, severity, fix_available, exploitability]
+        normalization: Map severity to CVSS; include exploit maturity and SBOM component ID.
+      - id: secret-leak-warning
+        severity: critical
+        fields: [path, detector, confidence, rotation_required]
+        normalization: Include rotation policy and blast radius; ensure no plaintext is stored.
+  governance:
+    description: Governance invariants and soft warnings.
+    signals:
+      - id: invariant-soft-violation
+        severity: medium
+        fields: [invariant_id, description, evidence_path, remediation_slo]
+        normalization: Align invariant IDs to RULEBOOK; convert remediation SLO to ISO-8601 durations.
+      - id: policy-drift
+        severity: high
+        fields: [policy_id, control, delta, impacted_services]
+        normalization: Map controls to COMPLIANCE_* references; express drift as structured diff.

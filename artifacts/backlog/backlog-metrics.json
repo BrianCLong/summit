@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-01-10T04:06:02.345Z",
+  "weights_version": 1,
+  "summary": {
+    "totals": {
+      "items": 3,
+      "estimated_effort": 7,
+      "estimated_risk_reduction": 1.87,
+      "average_score": 0.628
+    },
+    "categories": {
+      "reliability": 1,
+      "governance": 1,
+      "debt": 1
+    },
+    "bands": {
+      "P1": 1,
+      "P0": 1,
+      "P2": 1
+    }
+  }
+}

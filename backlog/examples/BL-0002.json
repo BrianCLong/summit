@@ -1,0 +1,47 @@
+{
+  "item_id": "BL-0002",
+  "title": "Retire expiring encryption exception",
+  "description": "Exception for legacy encryption module expires soon; migrate to approved cipher suite and refresh attestations.",
+  "source_signals": [
+    {
+      "id": "exception:crypto-expiry",
+      "type": "exception-expiring",
+      "severity": "high",
+      "evidence": "exceptions/crypto/EXP-442.yaml",
+      "detected_at": "2025-12-28T09:00:00Z"
+    },
+    {
+      "id": "policy:drift-opa",
+      "type": "policy-drift",
+      "severity": "high",
+      "evidence": "policies/drift/opa-crypto.json",
+      "detected_at": "2025-12-28T09:00:00Z"
+    }
+  ],
+  "category": "governance",
+  "affected_domains": ["security", "policy-engine", "crypto"],
+  "estimated_effort": 3,
+  "estimated_risk_reduction": 0.8,
+  "urgency": {
+    "time_criticality": 0.9,
+    "due_date": "2026-01-02T00:00:00Z",
+    "rationale": "Exception expires within 7 days; audit window imminent"
+  },
+  "dependencies": ["BL-0001"],
+  "verification_requirements": {
+    "required_tier": "audit",
+    "tests": ["npm run compliance:check"],
+    "evidence": ["c2pa-attestation", "audit-log", "policy-drift-0"]
+  },
+  "eligible_agents": ["Jules", "Governance"],
+  "suggested_playbook": "playbooks/security/crypto-exception-removal.md",
+  "metadata": {
+    "debt_severity": 5,
+    "debt_age_days": 180,
+    "governance_impact": 5,
+    "blast_radius": 5,
+    "strategic_alignment": ["GA", "Audit", "ZeroTrust"],
+    "residual_risk": 0.6,
+    "budget_impact": { "risk": 0.4, "debt": 0.35 }
+  }
+}

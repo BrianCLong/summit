@@ -1,5 +1,5 @@
 {
-  "last_updated": "2025-12-29T12:30:00Z",
+  "last_updated": "2026-01-10T04:06:12Z",
   "initiatives": [
     {
       "id": "A",
@@ -63,6 +63,18 @@
           "id": "C2",
           "name": "Immutable Audit Log",
           "status": "rc-ready",
+          "owner": "Jules"
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "name": "Autonomous Backlog Engine",
+      "epics": [
+        {
+          "id": "D1",
+          "name": "Backlog automation & agent pull",
+          "status": "in-validation",
           "owner": "Jules"
         }
       ]
