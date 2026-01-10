@@ -1,0 +1,37 @@
+{
+  "task_id": "RLVR_PEFT_GUARDRAILS_V2",
+  "agent_id": "gpt-5.2-codex",
+  "prompt_ref": {
+    "id": "rlvr-peft-guardrails",
+    "version": "v1",
+    "sha256": "998f54285d77a870150f1dd041d9b7f7ab107d51c031c5120d3b6902ce0d4d35",
+    "path": "prompts/rlvr-peft-guardrails.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/model-optimization/**",
+      "docs/ADMIN-CONFIG.md",
+      "docs/research/peft-rlvr-2512.23165.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/rlvr-peft-guardrails.md",
+      "prompts/registry.yaml",
+      "agents/examples/rlvr-peft-guardrails.json"
+    ],
+    "domains": ["modelops", "peft", "rlvr", "telemetry", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["npx jest packages/model-optimization/src/rlvrAdapterPolicy.test.ts --runInBand"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "RLVR PEFT policy normalizes adapter identifiers and logs governed exceptions.",
+    "Guardrail evaluation supports warn-only mode for experimental overrides.",
+    "Documentation reflects normalization and governed exception guidance."
+  ],
+  "stop_conditions": ["CI failure in main", "Detection of PII in output", "Sandbox violation alert"]
+}

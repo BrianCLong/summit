@@ -28,3 +28,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: rlvr-peft-guardrails
+    version: v1
+    path: prompts/rlvr-peft-guardrails.md
+    sha256: 998f54285d77a870150f1dd041d9b7f7ab107d51c031c5120d3b6902ce0d4d35
+    description: RLVR PEFT adapter defaults and guardrails based on arXiv:2512.23165.
+    scope:
+      paths:
+        - packages/model-optimization/
+        - docs/ADMIN-CONFIG.md
+        - docs/research/peft-rlvr-2512.23165.md
+        - docs/roadmap/STATUS.json
+        - prompts/rlvr-peft-guardrails.md
+        - prompts/registry.yaml
+        - agents/examples/rlvr-peft-guardrails.json
+      domains:
+        - modelops
+        - peft
+        - rlvr
+        - telemetry
+        - documentation
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
