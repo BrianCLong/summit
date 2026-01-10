@@ -1,0 +1,85 @@
+openapi: 3.0.3
+info:
+  title: CEG API
+  version: 0.2.0
+paths:
+  /ceg/egress:
+    post:
+      summary: Execute scoped OSINT request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EgressRequest'
+      responses:
+        '200':
+          description: Scoped results with egress receipt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EgressResponse'
+components:
+  schemas:
+    EgressRequest:
+      type: object
+      required:
+        - target
+        - scope_token
+      properties:
+        target:
+          type: string
+        scope_token:
+          $ref: '#/components/schemas/ScopeToken'
+        egress_policy:
+          type: object
+    EgressResponse:
+      type: object
+      required:
+        - results
+        - egress_receipt
+      properties:
+        results:
+          type: object
+        egress_receipt:
+          $ref: '#/components/schemas/EgressReceipt'
+        replay_token:
+          $ref: '#/components/schemas/ReplayToken'
+    ScopeToken:
+      type: object
+      required:
+        - token_id
+        - classification
+        - expiration
+      properties:
+        token_id:
+          type: string
+        classification:
+          type: string
+        expiration:
+          type: integer
+    EgressReceipt:
+      type: object
+      required:
+        - receipt_id
+        - egress_bytes
+      properties:
+        receipt_id:
+          type: string
+        egress_bytes:
+          type: integer
+        entity_count:
+          type: integer
+    ReplayToken:
+      type: object
+      required:
+        - token_id
+        - policy_version
+        - input_hash
+      properties:
+        token_id:
+          type: string
+        policy_version:
+          type: string
+        input_hash:
+          type: string

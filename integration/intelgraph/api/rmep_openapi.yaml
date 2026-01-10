@@ -1,0 +1,152 @@
+openapi: 3.0.3
+info:
+  title: RMEP API
+  version: 0.2.0
+paths:
+  /rmep/packs:
+    post:
+      summary: Generate releasability evidence packs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackRequest'
+      responses:
+        '200':
+          description: Evidence packs with manifest and replay token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackResponse'
+components:
+  schemas:
+    PackRequest:
+      type: object
+      required:
+        - narrative
+        - policy
+        - scope_token
+      properties:
+        narrative:
+          type: string
+        policy:
+          $ref: '#/components/schemas/ReleasabilityPolicy'
+        scope_token:
+          $ref: '#/components/schemas/ScopeToken'
+        provenance:
+          type: array
+          items:
+            type: string
+    PackResponse:
+      type: object
+      required:
+        - packs
+        - manifest
+        - replay_token
+      properties:
+        packs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReleasabilityPack'
+        manifest:
+          $ref: '#/components/schemas/PackManifest'
+        redaction_delta:
+          $ref: '#/components/schemas/RedactionDelta'
+        replay_token:
+          $ref: '#/components/schemas/ReplayToken'
+        transparency_log_digest:
+          type: string
+    ReleasabilityPolicy:
+      type: object
+      required:
+        - scopes
+      properties:
+        scopes:
+          type: array
+          items:
+            type: string
+        jurisdiction:
+          type: string
+        byte_budget:
+          type: integer
+        entity_budget:
+          type: integer
+    ScopeToken:
+      type: object
+      required:
+        - token_id
+        - tenant
+        - purpose
+        - classification
+        - expiration
+      properties:
+        token_id:
+          type: string
+        tenant:
+          type: string
+        purpose:
+          type: string
+        classification:
+          type: string
+        expiration:
+          type: integer
+    ReleasabilityPack:
+      type: object
+      required:
+        - pack_id
+        - scope
+        - manifest_hash
+      properties:
+        pack_id:
+          type: string
+        scope:
+          type: string
+        manifest_hash:
+          type: string
+        markings:
+          type: object
+    PackManifest:
+      type: object
+      required:
+        - manifest_id
+        - merkle_root
+        - policy_version
+      properties:
+        manifest_id:
+          type: string
+        merkle_root:
+          type: string
+        policy_version:
+          type: string
+        attestation_quote:
+          type: string
+    RedactionDelta:
+      type: object
+      required:
+        - delta_id
+        - from_scope
+        - to_scope
+        - hash
+      properties:
+        delta_id:
+          type: string
+        from_scope:
+          type: string
+        to_scope:
+          type: string
+        hash:
+          type: string
+    ReplayToken:
+      type: object
+      required:
+        - token_id
+        - policy_version
+        - input_hash
+      properties:
+        token_id:
+          type: string
+        policy_version:
+          type: string
+        input_hash:
+          type: string

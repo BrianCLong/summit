@@ -1,0 +1,98 @@
+openapi: 3.0.3
+info:
+  title: SCAF API
+  version: 0.2.0
+paths:
+  /scaf/connectors:
+    post:
+      summary: Validate and execute connector package
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectorRequest'
+      responses:
+        '200':
+          description: Assurance report and execution receipt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorResponse'
+components:
+  schemas:
+    ConnectorRequest:
+      type: object
+      required:
+        - package_id
+        - sbom
+        - attestation
+      properties:
+        package_id:
+          type: string
+        sbom:
+          $ref: '#/components/schemas/SbomDocument'
+        attestation:
+          $ref: '#/components/schemas/Attestation'
+        execution_policy:
+          type: object
+    ConnectorResponse:
+      type: object
+      required:
+        - assurance_report
+        - execution_receipt
+      properties:
+        assurance_report:
+          $ref: '#/components/schemas/AssuranceReport'
+        execution_receipt:
+          $ref: '#/components/schemas/ExecutionReceipt'
+        transparency_log_digest:
+          type: string
+    SbomDocument:
+      type: object
+      required:
+        - format
+        - hash
+      properties:
+        format:
+          type: string
+        hash:
+          type: string
+        licenses_ok:
+          type: boolean
+    Attestation:
+      type: object
+      required:
+        - quote
+        - measurement_hash
+      properties:
+        quote:
+          type: string
+        measurement_hash:
+          type: string
+    AssuranceReport:
+      type: object
+      required:
+        - package_id
+        - attestation_status
+      properties:
+        package_id:
+          type: string
+        attestation_status:
+          type: string
+        sbom_status:
+          type: string
+    ExecutionReceipt:
+      type: object
+      required:
+        - receipt_id
+        - egress_bytes
+      properties:
+        receipt_id:
+          type: string
+        egress_bytes:
+          type: integer
+        destinations:
+          type: array
+          items:
+            type: string

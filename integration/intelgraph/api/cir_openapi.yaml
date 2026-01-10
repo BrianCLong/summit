@@ -1,0 +1,92 @@
+openapi: 3.0.3
+info:
+  title: CIR API
+  version: 0.2.0
+paths:
+  /cir/incidents:
+    post:
+      summary: Detect and package cyber incident
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncidentRequest'
+      responses:
+        '200':
+          description: Incident packet with preservation chain
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncidentResponse'
+components:
+  schemas:
+    IncidentRequest:
+      type: object
+      required:
+        - trigger
+        - scope_token
+      properties:
+        trigger:
+          type: object
+        scope_token:
+          $ref: '#/components/schemas/ScopeToken'
+    IncidentResponse:
+      type: object
+      required:
+        - incident_packet
+        - replay_token
+      properties:
+        incident_packet:
+          $ref: '#/components/schemas/IncidentPacket'
+        replay_token:
+          $ref: '#/components/schemas/ReplayToken'
+        transparency_log_digest:
+          type: string
+    IncidentPacket:
+      type: object
+      required:
+        - incident_id
+        - timeline
+        - impacted_assets
+      properties:
+        incident_id:
+          type: string
+        timeline:
+          type: array
+          items:
+            type: object
+        impacted_assets:
+          type: array
+          items:
+            type: string
+        preservation_manifest_hash:
+          type: string
+        reporting_checklist:
+          type: object
+    ScopeToken:
+      type: object
+      required:
+        - token_id
+        - classification
+        - expiration
+      properties:
+        token_id:
+          type: string
+        classification:
+          type: string
+        expiration:
+          type: integer
+    ReplayToken:
+      type: object
+      required:
+        - token_id
+        - policy_version
+        - input_hash
+      properties:
+        token_id:
+          type: string
+        policy_version:
+          type: string
+        input_hash:
+          type: string

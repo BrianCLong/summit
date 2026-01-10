@@ -1,0 +1,15 @@
+control_id,control_family,evidence_signal,owner,artifact
+3.1.1,Access Control,Scope token issuance and validation logs,Security,scope_tokens
+3.1.2,Access Control,Role assignments and policy decision logs,Security,access_decisions
+3.3.1,Audit and Accountability,Audit log entries for export actions,Security,audit_log
+3.3.7,Audit and Accountability,Transparency log entries for packs and incidents,Security,transparency_log
+3.4.1,Configuration Management,Policy-as-code bundle versions,Platform,policy_bundle
+3.6.1,Configuration Management,Connector SBOM/provenance validations,SRE,sbom_attestation
+3.6.2,Configuration Management,Change approvals for connector execution policies,Platform,policy_changes
+3.8.1,Media Protection,Releasability pack manifests with markings,Security,releasability_pack
+3.10.1,Physical Protection,Facility handling notes in SSP,Facilities,ssp_section
+3.12.4,Security Assessment,Control-evidence compiler output,Security,assessment_bundle
+3.13.2,System and Communications Protection,Egress receipts with policy enforcement,Security,egress_receipts
+3.13.11,System and Communications Protection,Scoped network allowlists,SRE,egress_policy
+3.14.1,System and Information Integrity,Incident packets with preservation chain,IR,incident_packet
+3.14.6,System and Information Integrity,Malicious code alerting summary,IR,security_alerts

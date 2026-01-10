@@ -1,0 +1,104 @@
+openapi: 3.0.3
+info:
+  title: AEC API
+  version: 0.2.0
+paths:
+  /aec/assessments:
+    post:
+      summary: Compile assessment evidence bundle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssessmentRequest'
+      responses:
+        '200':
+          description: Assessment artifact with control evidence bundle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssessmentResponse'
+components:
+  schemas:
+    AssessmentRequest:
+      type: object
+      required:
+        - window
+        - controls
+      properties:
+        window:
+          $ref: '#/components/schemas/AssessmentWindow'
+        controls:
+          type: array
+          items:
+            type: string
+        telemetry_sources:
+          type: array
+          items:
+            type: string
+    AssessmentResponse:
+      type: object
+      required:
+        - bundle
+        - replay_token
+        - status
+      properties:
+        bundle:
+          $ref: '#/components/schemas/ControlEvidenceBundle'
+        status:
+          $ref: '#/components/schemas/AssessmentStatus'
+        replay_token:
+          $ref: '#/components/schemas/ReplayToken'
+        transparency_log_digest:
+          type: string
+    AssessmentWindow:
+      type: object
+      required:
+        - start
+        - end
+      properties:
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+    ControlEvidenceBundle:
+      type: object
+      required:
+        - control_ids
+        - sufficiency
+      properties:
+        control_ids:
+          type: array
+          items:
+            type: string
+        sufficiency:
+          type: boolean
+        ssp_reference:
+          type: string
+        poam_delta:
+          type: string
+    AssessmentStatus:
+      type: object
+      required:
+        - readiness
+      properties:
+        readiness:
+          type: string
+        sprs_score:
+          type: number
+    ReplayToken:
+      type: object
+      required:
+        - token_id
+        - policy_version
+        - input_hash
+      properties:
+        token_id:
+          type: string
+        policy_version:
+          type: string
+        input_hash:
+          type: string
