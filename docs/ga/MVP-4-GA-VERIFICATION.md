@@ -13,6 +13,15 @@ This sweep captures the minimum credible verification for the GA-hardening surfa
 | Policy Preflight & Receipts      | `scripts/ga/verify-ga-surface.mjs` (schema validation for verification map + provenance doc presence)                       | C    | `make ga-verify`          | Policy-as-code validation without depending on the test runner.                                               |
 | Ingestion Security Hardening     | `testing/ga-verification/ga-features.ga.test.mjs` (checks ingestion hardening evidence)                                     | B    | `make ga-verify`          | Ensures security expectations remain documented and discoverable.                                             |
 
+## Privacy & Data Governance (New)
+
+| Requirement | Evidence Artifact | Verification Check |
+| :--- | :--- | :--- |
+| **Data Inventory** | [`docs/data/DATA_INVENTORY.md`](../data/DATA_INVENTORY.md) | `test -f docs/data/DATA_INVENTORY.md` |
+| **Access Model** | [`docs/data/DATA_ACCESS_MODEL.md`](../data/DATA_ACCESS_MODEL.md) | `grep "ensureAuthenticated" server/src/middleware/auth.ts` |
+| **Retention Policy** | [`docs/data/DATA_RETENTION_POLICY.md`](../data/DATA_RETENTION_POLICY.md) | `grep "AUDIT_RETENTION_DAYS" server/src/audit/advanced-audit-system.ts` |
+| **Privacy Risks** | [`docs/data/PRIVACY_RISKS.md`](../data/PRIVACY_RISKS.md) | `test -f docs/data/PRIVACY_RISKS.md` |
+
 ## Deferred / To-Improve Items
 
 - Promote Tier B checks to Tier A Jest suites once the runner stabilizes.
