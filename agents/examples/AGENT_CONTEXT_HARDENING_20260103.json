@@ -1,0 +1,44 @@
+{
+  "task_id": "AGENT_CONTEXT_HARDENING_20260103",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "agent-context-hardening",
+    "version": "v1",
+    "sha256": "5edca9ca8ba3f3be5fd28f3997741a1207f64b0cdf3ffc473ccae87e5e87c20c",
+    "path": "prompts/agent-context-hardening.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/agent-context/",
+      "server/src/services/llm/",
+      "server/src/config/",
+      "server/src/monitoring/",
+      "server/src/observability/",
+      "server/db/managed-migrations/",
+      "docs/agent-context.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/",
+      "agents/examples/"
+    ],
+    "domains": ["llm", "observability", "persistence", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["packages/agent-context test output"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Agent context turns are persisted to PostgreSQL.",
+    "Context metrics are emitted for tokens, summaries, costs, and turn counts.",
+    "Stop conditions for max turns or max cost are enforced.",
+    "Documentation reflects the updated context management behavior."
+  ],
+  "stop_conditions": [
+    "Database connectivity unavailable for persistence.",
+    "Context manager tests fail or exceed budget constraints."
+  ]
+}

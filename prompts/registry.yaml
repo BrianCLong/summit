@@ -28,3 +28,34 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: agent-context-hardening
+    version: v1
+    path: prompts/agent-context-hardening.md
+    sha256: 5edca9ca8ba3f3be5fd28f3997741a1207f64b0cdf3ffc473ccae87e5e87c20c
+    description: Harden agent context middleware with persistence, telemetry, and guardrails.
+    scope:
+      paths:
+        - packages/agent-context/
+        - server/src/services/llm/
+        - server/src/config/
+        - server/src/monitoring/
+        - server/src/observability/
+        - server/db/managed-migrations/
+        - docs/agent-context.md
+        - docs/roadmap/STATUS.json
+        - prompts/
+        - agents/examples/
+      domains:
+        - llm
+        - observability
+        - persistence
+        - governance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

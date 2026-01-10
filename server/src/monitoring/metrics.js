@@ -465,6 +465,49 @@ const llmRequestDuration = new client.Histogram({
   labelNames: ['model'],
 });
 
+// Agent context metrics
+const agentContextTokensIn = new client.Histogram({
+  name: 'agent_context_tokens_in',
+  help: 'Estimated tokens before context packing',
+  labelNames: ['strategy', 'task_type'],
+});
+
+const agentContextTokensOut = new client.Histogram({
+  name: 'agent_context_tokens_out',
+  help: 'Estimated tokens after context packing',
+  labelNames: ['strategy', 'task_type'],
+});
+
+const agentContextMaskedObservationTokens = new client.Histogram({
+  name: 'agent_context_masked_observation_tokens',
+  help: 'Estimated tokens masked from observations',
+  labelNames: ['strategy', 'task_type'],
+});
+
+const agentContextSummaryTokens = new client.Histogram({
+  name: 'agent_context_summary_tokens',
+  help: 'Estimated tokens in summaries',
+  labelNames: ['strategy', 'task_type'],
+});
+
+const agentContextSummaryCalls = new client.Counter({
+  name: 'agent_context_summary_calls_total',
+  help: 'Total number of summary calls issued by context manager',
+  labelNames: ['strategy', 'task_type'],
+});
+
+const agentContextEstimatedCostUsd = new client.Histogram({
+  name: 'agent_context_estimated_cost_usd',
+  help: 'Estimated USD cost of packed context',
+  labelNames: ['strategy', 'task_type'],
+});
+
+const agentContextTurnCount = new client.Histogram({
+  name: 'agent_context_turn_count',
+  help: 'Number of turns observed by context manager',
+  labelNames: ['strategy', 'task_type'],
+});
+
 const intelgraphJobQueueDepth = new client.Gauge({
   name: 'intelgraph_job_queue_depth',
   help: 'Current depth of job queues',
@@ -566,6 +609,13 @@ register.registerMetric(maestroDagExecutionDurationSeconds);
 register.registerMetric(maestroJobExecutionDurationSeconds);
 register.registerMetric(llmTokensTotal);
 register.registerMetric(llmRequestDuration);
+register.registerMetric(agentContextTokensIn);
+register.registerMetric(agentContextTokensOut);
+register.registerMetric(agentContextMaskedObservationTokens);
+register.registerMetric(agentContextSummaryTokens);
+register.registerMetric(agentContextSummaryCalls);
+register.registerMetric(agentContextEstimatedCostUsd);
+register.registerMetric(agentContextTurnCount);
 
 const metrics = {
   graphExpandRequestsTotal,
@@ -598,6 +648,13 @@ const metrics = {
   maestroJobExecutionDurationSeconds,
   llmTokensTotal,
   llmRequestDuration,
+  agentContextTokensIn,
+  agentContextTokensOut,
+  agentContextMaskedObservationTokens,
+  agentContextSummaryTokens,
+  agentContextSummaryCalls,
+  agentContextEstimatedCostUsd,
+  agentContextTurnCount,
   rateLimitExceededTotal,
   breakerState,
   intelgraphJobQueueDepth,
@@ -695,6 +752,13 @@ module.exports = {
   maestroJobExecutionDurationSeconds,
   llmTokensTotal,
   llmRequestDuration,
+  agentContextTokensIn,
+  agentContextTokensOut,
+  agentContextMaskedObservationTokens,
+  agentContextSummaryTokens,
+  agentContextSummaryCalls,
+  agentContextEstimatedCostUsd,
+  agentContextTurnCount,
   rateLimitExceededTotal,
   breakerState,
   intelgraphJobQueueDepth
