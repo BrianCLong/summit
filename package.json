@@ -7,7 +7,8 @@
   "packageManager": "pnpm@10.0.0",
   "scripts": {
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
-    "verify": "npx tsx server/scripts/verify-ga-security.ts",
+    "verify": "npx tsx server/scripts/verify-ga-security.ts && npm run verify:hygiene",
+    "verify:hygiene": "npx tsx scripts/ops/check_repo_hygiene.ts",
     "verify:verbose": "tsx scripts/verify.ts --verbose",
     "verify:runtime": "tsx scripts/verification/verify_runtime.ts",
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",

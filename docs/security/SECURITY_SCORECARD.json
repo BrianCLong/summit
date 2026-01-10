@@ -1,5 +1,5 @@
 {
-  "overall_score": 42.27,
+  "overall_score": 36.7,
   "metrics": {
     "authentication_coverage": {
       "score": 32.66,
@@ -8,14 +8,17 @@
     "secrets_management": {
       "score": 70,
       "issues": [
-        "Found committed .env file at .env",
-        "Potential hardcoded secret in server/src/pii/sensitivity.ts",
-        "Potential hardcoded secret in server/src/backup/BackupService.ts"
+        "Potential GitHub token found in source code"
       ]
     },
     "input_validation_coverage": {
       "score": 24.14,
       "details": "14/58 controllers/routes use validation libs"
+    },
+    "repo_hygiene": {
+      "score": 20,
+      "details": "0 untracked, 8 modified files"
     }
-  }
+  },
+  "last_updated": "2026-01-10T00:26:18.646Z"
 }
