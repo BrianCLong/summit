@@ -40,7 +40,7 @@ jobs:
         run: cd server && npx tsx scripts/check-error-codes-doc.ts
 
   unit-tests:
-    name: Unit Tests
+    name: Unit Tests & Coverage Gate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -53,16 +53,31 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run unit tests
-        run: pnpm test:unit
+      - name: Run unit tests with deterministic coverage
+        env:
+          TZ: UTC
+          COVERAGE_THRESHOLD: 85
+          COVERAGE_SUMMARY_PATH: server/coverage/coverage-summary.json
+        run: |
+          set -euo pipefail
+          pnpm --filter intelgraph-server run test:unit -- --coverage --coverageReporters=text --coverageReporters=json-summary
+          node scripts/ci/check-coverage-threshold.mjs
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         if: always()
         continue-on-error: true
         with:
-          files: ./coverage/coverage-final.json
+          files: ./server/coverage/coverage-final.json
           flags: unit
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-coverage
+          path: server/coverage/
+          retention-days: 14
 
   integration-tests:
     name: Integration Tests
@@ -199,6 +214,39 @@ jobs:
           path: build-checksums-*.txt
           retention-days: 30
 
+  api-fuzz-contracts:
+    name: API Fuzz Contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run graph guardrail fuzz suite (bounded)
+        env:
+          GRAPH_GUARDRAIL_FUZZ_ITERATIONS: 120
+          GRAPH_GUARDRAIL_FUZZ_SEED: 1337
+          TZ: UTC
+        run: |
+          pnpm test:fuzz:graph-guardrails -- --runInBand
+
+      - name: Upload fuzz artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fuzz-artifacts
+          path: |
+            artifacts/fuzz/**
+          if-no-files-found: ignore
+          retention-days: 7
+
   golden-path:
     name: Golden Path Smoke Test
     runs-on: ubuntu-latest
@@ -213,17 +261,17 @@ jobs:
 
       - name: Bootstrap and smoke test
         run: |
+          set -euo pipefail
+          trap 'make down || true' EXIT
+
           echo "=== Bootstrap ==="
-          make bootstrap || echo "Bootstrap step skipped or failed (non-critical)"
+          make bootstrap
 
           echo "=== Starting Services ==="
-          make up || echo "Service startup skipped (Docker may not be available)"
+          make up
 
           echo "=== Smoke Test ==="
-          make smoke || echo "Smoke test skipped (services may not be running)"
-
-          echo "=== Cleanup ==="
-          make down || true
+          make smoke
         timeout-minutes: 10
 
       - name: Upload smoke test logs
@@ -246,6 +294,7 @@ jobs:
       - verification-suite
       - deterministic-build
       - golden-path
+      - api-fuzz-contracts
     if: always()
     steps:
       - name: Check all gates passed
@@ -257,6 +306,7 @@ jobs:
           echo "Verification Suite: ${{ needs.verification-suite.result }}"
           echo "Deterministic Build: ${{ needs.deterministic-build.result }}"
           echo "Golden Path: ${{ needs.golden-path.result }}"
+          echo "API Fuzz Contracts: ${{ needs.api-fuzz-contracts.result }}"
           echo ""
 
           # All jobs must succeed (no continue-on-error allowed)
@@ -290,6 +340,11 @@ jobs:
             exit 1
           fi
 
+          if [[ "${{ needs.api-fuzz-contracts.result }}" != "success" ]]; then
+            echo "::error::API Fuzz Contracts FAILED"
+            exit 1
+          fi
+
           echo ""
           echo "✅ CI CORE GATE: PASSED"
           echo "All gates green. PR is mergeable (pending ci-verify)."
@@ -305,5 +360,6 @@ jobs:
           echo "- ✅ Verification Suite" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Deterministic Build" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Golden Path Smoke Test" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ API Fuzz Contracts" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Status**: Ready for merge (pending ci-verify)" >> $GITHUB_STEP_SUMMARY
