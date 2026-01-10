@@ -1,0 +1,444 @@
+{
+  "actions": [
+    {
+      "action": "update",
+      "resolves": [
+        {
+          "id": 1111906,
+          "path": "packages__strands-agents>@strands-agents/sdk>@modelcontextprotocol/sdk",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": "@modelcontextprotocol/sdk",
+      "target": "1.25.2",
+      "depth": 3
+    },
+    {
+      "action": "update",
+      "resolves": [
+        {
+          "id": 1111982,
+          "path": "apps__mobile-interface>react-force-graph-2d>force-graph>float-tooltip>preact",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": "preact",
+      "target": "10.28.2",
+      "depth": 5
+    },
+    {
+      "action": "review",
+      "module": "react-router",
+      "resolves": [
+        {
+          "id": 1111964,
+          "path": "apps__field-kit>react-router-dom>react-router",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1111964,
+          "path": "client>react-router-dom>react-router",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1111966,
+          "path": "apps__field-kit>react-router-dom>react-router",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1111966,
+          "path": "client>react-router-dom>react-router",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1111979,
+          "path": "apps__field-kit>react-router-dom>react-router",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1111979,
+          "path": "client>react-router-dom>react-router",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "action": "review",
+      "module": "@remix-run/router",
+      "resolves": [
+        {
+          "id": 1111965,
+          "path": "apps__labeling-ui>react-router-dom>@remix-run/router",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "action": "review",
+      "module": "aws-sdk",
+      "resolves": [
+        {
+          "id": 1111997,
+          "path": "packages__tasks-core>aws-sdk",
+          "dev": false,
+          "bundled": false,
+          "optional": false
+        }
+      ]
+    },
+    {
+      "action": "review",
+      "module": "elliptic",
+      "resolves": [
+        {
+          "id": 1112030,
+          "path": "packages__blockchain>elliptic",
+          "dev": false,
+          "bundled": false,
+          "optional": false
+        }
+      ]
+    }
+  ],
+  "advisories": {
+    "1111906": {
+      "findings": [
+        {
+          "version": "1.25.1",
+          "paths": []
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2026-0621\n- https://github.com/modelcontextprotocol/typescript-sdk/issues/965\n- https://www.vulncheck.com/advisories/mcp-typescript-sdk-uritemplate-exploded-array-pattern-redos\n- https://github.com/modelcontextprotocol/typescript-sdk/security/advisories/GHSA-cqwc-fm46-7fff\n- https://github.com/modelcontextprotocol/typescript-sdk/commit/b392f02ffcf37c088dbd114fedf25026ec3913d3\n- https://github.com/modelcontextprotocol/typescript-sdk/releases/tag/v1.25.2\n- https://github.com/advisories/GHSA-8r9q-7v3j-jr4g",
+      "created": "2026-01-05T21:30:33.000Z",
+      "id": 1111906,
+      "npm_advisory_id": null,
+      "overview": "### Impact\n\nA ReDoS vulnerability in the `UriTemplate` class allows attackers to cause denial of service. The `partToRegExp()` function generates a regex pattern with nested quantifiers (`([^/]+(?:,[^/]+)*)`) for exploded template variables (e.g., `{/id*}`, `{?tags*}`), causing catastrophic backtracking on malicious input.\n\n**Who is affected:** MCP servers that register resource templates with exploded array patterns and accept requests from untrusted clients.\n\n**Attack result:** An attacker sends a crafted URI via `resources/read` request, causing 100% CPU utilization, server hang/crash, and denial of service for all clients.\n\n### Affected Versions\n\nAll versions of `@modelcontextprotocol/sdk` prior to the patched release.\n\n### Patches\n\nv1.25.2 contains b392f02ffcf37c088dbd114fedf25026ec3913d3 the fix modifies the regex pattern to prevent backtracking.\n\n### Workarounds\n\n- Avoid using exploded patterns (`{/id*}`, `{?tags*}`) in resource templates\n- Implement request timeouts and rate limiting\n- Validate URIs before processing to reject suspicious patterns",
+      "reported_by": null,
+      "title": "Anthropic's MCP TypeScript SDK has a ReDoS vulnerability",
+      "metadata": null,
+      "cves": [
+        "CVE-2026-0621"
+      ],
+      "access": "public",
+      "severity": "high",
+      "module_name": "@modelcontextprotocol/sdk",
+      "vulnerable_versions": "<1.25.2",
+      "github_advisory_id": "GHSA-8r9q-7v3j-jr4g",
+      "recommendation": "Upgrade to version 1.25.2 or later",
+      "patched_versions": ">=1.25.2",
+      "updated": "2026-01-07T16:16:29.000Z",
+      "cvss": {
+        "score": 0,
+        "vectorString": null
+      },
+      "cwe": [
+        "CWE-1333"
+      ],
+      "url": "https://github.com/advisories/GHSA-8r9q-7v3j-jr4g"
+    },
+    "1111964": {
+      "findings": [
+        {
+          "version": "7.10.1",
+          "paths": []
+        },
+        {
+          "version": "7.10.1",
+          "paths": []
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://github.com/remix-run/react-router/security/advisories/GHSA-h5cw-625j-3rxh\n- https://github.com/advisories/GHSA-h5cw-625j-3rxh",
+      "created": "2026-01-08T20:57:09.000Z",
+      "id": 1111964,
+      "npm_advisory_id": null,
+      "overview": "React Router (or Remix v2) is vulnerable to CSRF attacks on document POST requests to UI routes when using server-side route `action` handlers in [Framework Mode](https://reactrouter.com/start/modes#framework), or when using React Server Actions in the new unstable RSC modes.\n\n> [!NOTE]\n> This does not impact applications that use [Declarative Mode](https://reactrouter.com/start/modes#declarative) (`<BrowserRouter>`) or [Data Mode](https://reactrouter.com/start/modes#data) (`createBrowserRouter`/`<RouterProvider>`).",
+      "reported_by": null,
+      "title": "React Router has CSRF issue in Action/Server Action Request Processing",
+      "metadata": null,
+      "cves": [
+        "CVE-2026-22030"
+      ],
+      "access": "public",
+      "severity": "moderate",
+      "module_name": "react-router",
+      "vulnerable_versions": ">=7.0.0 <=7.11.0",
+      "github_advisory_id": "GHSA-h5cw-625j-3rxh",
+      "recommendation": "Upgrade to version 7.12.0 or later",
+      "patched_versions": ">=7.12.0",
+      "updated": "2026-01-08T20:57:10.000Z",
+      "cvss": {
+        "score": 6.5,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:H/A:N"
+      },
+      "cwe": [
+        "CWE-346",
+        "CWE-352"
+      ],
+      "url": "https://github.com/advisories/GHSA-h5cw-625j-3rxh"
+    },
+    "1111965": {
+      "findings": [
+        {
+          "version": "1.23.1",
+          "paths": []
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://github.com/remix-run/react-router/security/advisories/GHSA-2w69-qvjg-hvjx\n- https://github.com/advisories/GHSA-2w69-qvjg-hvjx",
+      "created": "2026-01-08T20:54:18.000Z",
+      "id": 1111965,
+      "npm_advisory_id": null,
+      "overview": "React Router (and Remix v1/v2) SPA open navigation redirects originating from loaders or actions in [Framework Mode](https://reactrouter.com/start/modes#framework), [Data Mode](https://reactrouter.com/start/modes#data), or the unstable RSC modes can result in unsafe URLs causing unintended javascript execution on the client. This is only an issue if developers are creating redirect paths from untrusted content or via an open redirect.\n\n> [!NOTE]\n> This does not impact applications that use [Declarative Mode](https://reactrouter.com/start/modes#declarative) (`<BrowserRouter>`).",
+      "reported_by": null,
+      "title": "React Router vulnerable to XSS via Open Redirects",
+      "metadata": null,
+      "cves": [
+        "CVE-2026-22029"
+      ],
+      "access": "public",
+      "severity": "high",
+      "module_name": "@remix-run/router",
+      "vulnerable_versions": "<=1.23.1",
+      "github_advisory_id": "GHSA-2w69-qvjg-hvjx",
+      "recommendation": "Upgrade to version 1.23.2 or later",
+      "patched_versions": ">=1.23.2",
+      "updated": "2026-01-08T20:54:18.000Z",
+      "cvss": {
+        "score": 8,
+        "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:N"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "url": "https://github.com/advisories/GHSA-2w69-qvjg-hvjx"
+    },
+    "1111966": {
+      "findings": [
+        {
+          "version": "7.10.1",
+          "paths": []
+        },
+        {
+          "version": "7.10.1",
+          "paths": []
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://github.com/remix-run/react-router/security/advisories/GHSA-2w69-qvjg-hvjx\n- https://github.com/advisories/GHSA-2w69-qvjg-hvjx",
+      "created": "2026-01-08T20:54:18.000Z",
+      "id": 1111966,
+      "npm_advisory_id": null,
+      "overview": "React Router (and Remix v1/v2) SPA open navigation redirects originating from loaders or actions in [Framework Mode](https://reactrouter.com/start/modes#framework), [Data Mode](https://reactrouter.com/start/modes#data), or the unstable RSC modes can result in unsafe URLs causing unintended javascript execution on the client. This is only an issue if developers are creating redirect paths from untrusted content or via an open redirect.\n\n> [!NOTE]\n> This does not impact applications that use [Declarative Mode](https://reactrouter.com/start/modes#declarative) (`<BrowserRouter>`).",
+      "reported_by": null,
+      "title": "React Router vulnerable to XSS via Open Redirects",
+      "metadata": null,
+      "cves": [
+        "CVE-2026-22029"
+      ],
+      "access": "public",
+      "severity": "high",
+      "module_name": "react-router",
+      "vulnerable_versions": ">=7.0.0 <=7.11.0",
+      "github_advisory_id": "GHSA-2w69-qvjg-hvjx",
+      "recommendation": "Upgrade to version 7.12.0 or later",
+      "patched_versions": ">=7.12.0",
+      "updated": "2026-01-08T20:54:18.000Z",
+      "cvss": {
+        "score": 8,
+        "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:N"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "url": "https://github.com/advisories/GHSA-2w69-qvjg-hvjx"
+    },
+    "1111979": {
+      "findings": [
+        {
+          "version": "7.10.1",
+          "paths": []
+        },
+        {
+          "version": "7.10.1",
+          "paths": []
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://github.com/remix-run/react-router/security/advisories/GHSA-8v8x-cx79-35w7\n- https://github.com/advisories/GHSA-8v8x-cx79-35w7",
+      "created": "2026-01-08T20:50:05.000Z",
+      "id": 1111979,
+      "npm_advisory_id": null,
+      "overview": "A XSS vulnerability exists in in React Router's `<ScrollRestoration>` API in [Framework Mode](https://reactrouter.com/start/modes#framework) when using the `getKey`/`storageKey` props during Server-Side Rendering which could allow arbitrary JavaScript execution during SSR if untrusted content is used to generate the keys.\n\n> [!NOTE]\n> This does not impact applications if developers have [disabled server-side rendering](https://reactrouter.com/how-to/spa) in Framework Mode, or if they are using [Declarative Mode](https://reactrouter.com/start/modes#declarative) (`<BrowserRouter>`) or [Data Mode](https://reactrouter.com/start/modes#data) (`createBrowserRouter`/`<RouterProvider>`).",
+      "reported_by": null,
+      "title": "React Router SSR XSS in ScrollRestoration",
+      "metadata": null,
+      "cves": [
+        "CVE-2026-21884"
+      ],
+      "access": "public",
+      "severity": "high",
+      "module_name": "react-router",
+      "vulnerable_versions": ">=7.0.0 <7.12.0",
+      "github_advisory_id": "GHSA-8v8x-cx79-35w7",
+      "recommendation": "Upgrade to version 7.12.0 or later",
+      "patched_versions": ">=7.12.0",
+      "updated": "2026-01-08T21:21:22.000Z",
+      "cvss": {
+        "score": 8.2,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:L/A:N"
+      },
+      "cwe": [
+        "CWE-79"
+      ],
+      "url": "https://github.com/advisories/GHSA-8v8x-cx79-35w7"
+    },
+    "1111982": {
+      "findings": [
+        {
+          "version": "10.28.1",
+          "paths": []
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://github.com/preactjs/preact/security/advisories/GHSA-36hm-qxxp-pg3m\n- https://nvd.nist.gov/vuln/detail/CVE-2026-22028\n- https://github.com/advisories/GHSA-36hm-qxxp-pg3m",
+      "created": "2026-01-07T19:28:15.000Z",
+      "id": 1111982,
+      "npm_advisory_id": null,
+      "overview": "## Impact\n\n**Vulnerability Type:** HTML Injection via JSON Type Confusion\n\n**Affected Versions:** Preact 10.26.5 through 10.28.1\n\n**Severity:** Low to Medium (see below)\n\n### Who is Impacted?\n\nApplications using affected Preact versions are vulnerable if they meet **all** of the following conditions:\n\n1. **Pass unmodified, unsanitized values** from user-modifiable data sources (APIs, databases, local storage, etc.) directly into the render tree\n2. **Assume these values are strings** but the data source could return actual JavaScript objects instead of JSON strings\n3. The data source either:\n   - Fails to perform type sanitization **AND** blindly stores/returns raw objects interchangeably with strings, OR\n   - Is compromised (e.g., poisoned local storage, filesystem, or database)\n\n### Technical Details\n\nPreact includes JSON serialization protection to prevent Virtual DOM elements from being constructed from arbitrary JSON. A regression introduced in Preact 10.26.5 caused this protection to be softened. In applications where values from JSON payloads are assumed to be strings and passed unmodified to Preact as children, a specially-crafted JSON payload could be constructed that would be incorrectly treated as a valid VNode. When this chain of failures occurs it can result in HTML injection, which can allow arbitrary script execution if not mitigated by CSP or other means.\n\n**Important Notes:**\n- This regression was never present in `preact-render-to-string`\n- This is primarily an \"expanded attack surface\" issue rather than a standalone vulnerability\n- Exploitation requires either insecure API design (no type validation) or a compromised data source\n\n## Patches\n\n**Patched Versions:**\n- **10.26.10** (for 10.26.x users)\n- **10.27.3** (for 10.27.x users)\n- **10.28.2** (for 10.28.x users)\n\nUsers should upgrade to the latest patch version of whatever minor version they are on, which can be done via `npm update preact` or by installing one of the above versions directly.\n\nThe patch versions simply restore the previous strict equality checks that prevent JSON-parsed objects from being treated as valid VNodes.\n\n## Mitigations\n\nIf you cannot upgrade immediately, implement the following mitigations:\n\n- **Validate input types:** Don't accept arbitrary objects as inputs in your API and blindly store them. Enforce strict type contracts at API boundaries.\n- **Cast or validate network data:** Don't assume strings are strings if your code got them from the network. Always cast to the expected type or validate before rendering.\n- **Sanitize external data:** Validate that data from external sources (APIs, storage, databases) matches expected types before passing it to preact.\n- **Use Content Security Policy (CSP):** Implement a strict CSP to prevent inline script execution as a defense-in-depth measure.\n\n## References\n\n- **Reporter:** [YoungGeun Choi](https://github.com/Xvezda)\n- **Affected Versions:** 10.26.5 - 10.28.1\n- **Patched Versions:** 10.26.10, 10.27.3, 10.28.2\n\n## Credits\n\nPreact thanks **YoungGeun Choi (Xvezda)** for the responsible disclosure of this vulnerability and for providing detailed reproduction steps and proof-of-concept demonstrations.\n\n## Timeline\n\n- **2026-01-04:** Initial vulnerability report received\n- **2026-01-05:** Clarification requested regarding network/serialization boundary\n- **2026-01-06:** Network PoC provided demonstrating real-world exploitatibility\n- **2026-01-06:** Hotfix patches released (10.26.10, 10.27.3, 10.28.2)\n\n---\n\n**Recommendation:** All users of Preact 10.26.5 through 10.28.1 should upgrade to the appropriate patched version (10.26.10, 10.27.3, or 10.28.2) as soon as possible, and review their applications for proper input validation and sanitization practices.",
+      "reported_by": null,
+      "title": "Preact has JSON VNode Injection issue",
+      "metadata": null,
+      "cves": [
+        "CVE-2026-22028"
+      ],
+      "access": "public",
+      "severity": "high",
+      "module_name": "preact",
+      "vulnerable_versions": ">=10.28.0 <10.28.2",
+      "github_advisory_id": "GHSA-36hm-qxxp-pg3m",
+      "recommendation": "Upgrade to version 10.28.2 or later",
+      "patched_versions": ">=10.28.2",
+      "updated": "2026-01-08T21:19:14.000Z",
+      "cvss": {
+        "score": 0,
+        "vectorString": null
+      },
+      "cwe": [
+        "CWE-843"
+      ],
+      "url": "https://github.com/advisories/GHSA-36hm-qxxp-pg3m"
+    },
+    "1111997": {
+      "findings": [
+        {
+          "version": "2.1693.0",
+          "paths": []
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://github.com/aws/aws-sdk-js/security/advisories/GHSA-j965-2qgj-vjmq\n- https://github.com/advisories/GHSA-j965-2qgj-vjmq",
+      "created": "2026-01-08T22:04:26.000Z",
+      "id": 1111997,
+      "npm_advisory_id": null,
+      "overview": "CVSSv3.1 Rating: 3.7 (LOW)\n\nSummary\nThis notification is related to the use of specific values for the region input field when calling AWS services. An actor with access to the environment in which the SDK is used could set the region input field to an invalid value. Per the AWS shared responsibility model, customer applications should protect instances appropriately, or implement proper input sanitization checks. The AWS SDK for JavaScript v2 reached end-of-support on September 8, 2025, but a defense-in-depth enhancement has been implemented in AWS SDK for JavaScript v3. Please migrate to that version.\n\nImpact\nCustomer applications could be configured to improperly route AWS API calls to non-existent or non-AWS hosts. While the SDK itself is functioning as designed, we recommend customers migrate to AWS SDK for JavaScript v3 for continued support and enhanced security features.\n\nImpacted versions: All versions of AWS SDK for JavaScript v2\n\nPatches\nNo security patch is required, this is an informational advisory.\n\nWorkarounds\n- Implement proper input sanitization in your application code\n- Migrate to AWS SDK for JavaScript v3\n- Follow AWS security best practices for SDK configuration\n\nReferences\nContact AWS Security via the vulnerability reporting page or email [aws-security@amazon.com](mailto:aws-security@amazon.com).\n\nAcknowledgement\nAWS Security thanks Guy Arazi for bringing these customer security considerations to our attention through the coordinated disclosure process.",
+      "reported_by": null,
+      "title": "JavaScript SDK v2 users should add validation to the region parameter value in or migrate to v3",
+      "metadata": null,
+      "cves": [],
+      "access": "public",
+      "severity": "low",
+      "module_name": "aws-sdk",
+      "vulnerable_versions": ">=2.0.0 <=3.0.0",
+      "github_advisory_id": "GHSA-j965-2qgj-vjmq",
+      "recommendation": "None",
+      "patched_versions": "<0.0.0",
+      "updated": "2026-01-08T22:04:28.000Z",
+      "cvss": {
+        "score": 3.7,
+        "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N"
+      },
+      "cwe": [
+        "CWE-20"
+      ],
+      "url": "https://github.com/advisories/GHSA-j965-2qgj-vjmq"
+    },
+    "1112030": {
+      "findings": [
+        {
+          "version": "6.6.1",
+          "paths": []
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2025-14505\n- https://github.com/indutny/elliptic/issues/321\n- https://www.herodevs.com/vulnerability-directory/cve-2025-14505\n- https://github.com/advisories/GHSA-848j-6mx2-7j84",
+      "created": "2026-01-08T21:30:34.000Z",
+      "id": 1112030,
+      "npm_advisory_id": null,
+      "overview": "The ECDSA implementation of the Elliptic package generates incorrect signatures if an interim value of 'k' (as computed based on step 3.2 of  RFC 6979 https://datatracker.ietf.org/doc/html/rfc6979 ) has leading zeros and is susceptible to cryptanalysis, which can lead to secret key exposure. This happens, because the byte-length of 'k' is incorrectly computed, resulting in its getting truncated during the computation. Legitimate transactions or communications will be broken as a result. Furthermore, due to the nature of the fault, attackers could–under certain conditions–derive the secret key, if they could get their hands on both a faulty signature generated by a vulnerable version of Elliptic and a correct signature for the same inputs.\n\nThis issue affects all known versions of Elliptic (at the time of writing, versions less than or equal to 6.6.1).",
+      "reported_by": null,
+      "title": "Elliptic Uses a Cryptographic Primitive with a Risky Implementation",
+      "metadata": null,
+      "cves": [
+        "CVE-2025-14505"
+      ],
+      "access": "public",
+      "severity": "low",
+      "module_name": "elliptic",
+      "vulnerable_versions": "<=6.6.1",
+      "github_advisory_id": "GHSA-848j-6mx2-7j84",
+      "recommendation": "None",
+      "patched_versions": "<0.0.0",
+      "updated": "2026-01-09T20:19:43.000Z",
+      "cvss": {
+        "score": 5.6,
+        "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L"
+      },
+      "cwe": [
+        "CWE-1240"
+      ],
+      "url": "https://github.com/advisories/GHSA-848j-6mx2-7j84"
+    }
+  },
+  "muted": [],
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 2,
+      "moderate": 2,
+      "high": 7,
+      "critical": 0
+    },
+    "dependencies": 5786,
+    "devDependencies": 0,
+    "optionalDependencies": 0,
+    "totalDependencies": 5786
+  }
+}
