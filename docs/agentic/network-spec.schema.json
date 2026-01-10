@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.intelgraph/agentic/network-spec.schema.json",
+  "title": "Summit Agent Network Spec",
+  "type": "object",
+  "required": [
+    "version",
+    "metadata",
+    "agents",
+    "workflows",
+    "security",
+    "observability",
+    "governance"
+  ],
+  "properties": {
+    "version": { "type": "string" },
+    "metadata": {
+      "type": "object",
+      "required": ["name", "description", "owner", "labels", "created_at"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "owner": { "type": "string" },
+        "labels": { "type": "array", "items": { "type": "string" } },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "channels": {
+      "type": "object",
+      "properties": {
+        "natural_language": { "type": "object" },
+        "control": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "agents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "role",
+          "capability_contract",
+          "model",
+          "prompt_ref",
+          "task_spec_ref",
+          "tools",
+          "policies",
+          "channels"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "role": { "type": "string" },
+          "capability_contract": { "type": "string" },
+          "model": { "type": "string" },
+          "prompt_ref": { "type": "string" },
+          "task_spec_ref": { "type": "string" },
+          "tools": { "type": "array", "items": { "type": "string" } },
+          "policies": { "type": "array", "items": { "type": "string" } },
+          "channels": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": false
+      }
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "adapter",
+          "capability_contract",
+          "policies",
+          "secrets",
+          "redaction"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string", "enum": ["internal", "external"] },
+          "adapter": { "type": "string" },
+          "capability_contract": { "type": "string" },
+          "policies": { "type": "array", "items": { "type": "string" } },
+          "secrets": { "type": "array", "items": { "type": "string" } },
+          "redaction": { "type": "object" },
+          "observability": { "type": "object" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "policies": { "type": "array", "items": { "type": "string" } },
+    "workflows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "trigger", "entry_agent", "steps"],
+        "properties": {
+          "id": { "type": "string" },
+          "trigger": { "type": "string" },
+          "entry_agent": { "type": "string" },
+          "steps": { "type": "array", "items": { "type": "object" } },
+          "handoffs": { "type": "array", "items": { "type": "object" } },
+          "escalations": { "type": "array", "items": { "type": "object" } }
+        },
+        "additionalProperties": true
+      }
+    },
+    "security": {
+      "type": "object",
+      "required": ["secret_broker", "redaction_rules", "budget", "capability_receipts"],
+      "properties": {
+        "secret_broker": { "type": "object" },
+        "redaction_rules": { "type": "array", "items": { "type": "string" } },
+        "budget": { "type": "object" },
+        "capability_receipts": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "observability": {
+      "type": "object",
+      "required": ["trace", "metrics", "logs"],
+      "properties": {
+        "trace": { "type": "object" },
+        "metrics": { "type": "object" },
+        "logs": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "governance": {
+      "type": "object",
+      "required": ["prompt_registry", "task_contracts", "evidence"],
+      "properties": {
+        "prompt_registry": { "type": "string" },
+        "task_contracts": { "type": "string" },
+        "evidence": {
+          "type": "object",
+          "required": ["traces", "receipts", "redaction_reports"],
+          "properties": {
+            "traces": { "type": "string" },
+            "receipts": { "type": "string" },
+            "redaction_reports": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "governed_exceptions": { "type": "array", "items": { "type": "object" } }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

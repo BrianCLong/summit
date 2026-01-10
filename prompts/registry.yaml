@@ -8,6 +8,8 @@ prompts:
     scope:
       paths:
         - agents/
+        - docs/agentic/
+        - docs/roadmap/
         - prompts/
         - scripts/ci/
         - docs/ga/
