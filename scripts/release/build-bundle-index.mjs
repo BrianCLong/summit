@@ -11,7 +11,7 @@ function getSha256(content) {
 }
 
 async function buildBundleIndex(dir) {
-  const files = await fs.readdir(dir);
+  const files = (await fs.readdir(dir)).sort();
   const fileDetails = [];
 
   for (const file of files) {
@@ -27,6 +27,7 @@ async function buildBundleIndex(dir) {
       });
     }
   }
+  fileDetails.sort((a, b) => a.path.localeCompare(b.path));
 
   const tag = process.env.GITHUB_REF_NAME || 'local';
   const channel = tag.includes('-rc') ? 'rc' : 'stable';
