@@ -1,0 +1,114 @@
+name: Branch Protection Policy
+
+on:
+  pull_request:
+    paths:
+      - 'policy/required-checks/**'
+      - 'policy/opa/branch_protection.rego'
+      - '.github/workflows/branch-protection-policy.yml'
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  verify-branch-protection:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install yaml
+      - name: Resolve required checks
+        id: req
+        run: |
+          node -e "
+            const fs=require('fs');
+            const y=require('yaml');
+            const p=y.parse(fs.readFileSync('policy/required-checks/REQUIRED_CHECKS_POLICY.yml','utf8'));
+            const branch=(process.env.GITHUB_BASE_REF || process.env.GITHUB_REF_NAME || 'main');
+            let req=p.required_checks||[];
+            if(p.branches){
+              for(const k of Object.keys(p.branches)){
+                const re=new RegExp('^'+k.replace('*','.*')+'$');
+                if(re.test(branch)) req=p.branches[k].required_checks||req;
+              }
+            }
+            fs.writeFileSync('required.json', JSON.stringify({branch, required_checks:req}));
+          "
+      - name: Fetch current GitHub branch protection
+        id: cur
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OWNER=${GITHUB_REPOSITORY%/*}
+          REPO=${GITHUB_REPOSITORY#*/}
+          BRANCH=$(jq -r .branch required.json)
+
+          # Fetch protection settings. If 404 (no protection), return empty structure
+          gh api \
+            repos/$OWNER/$REPO/branches/$BRANCH/protection \
+            --jq '{required_checks: (.required_status_checks.contexts // [])}' \
+            > current.json || echo '{"required_checks":[]}' > current.json
+
+      - name: Prepare Conftest Input
+        run: |
+          jq -n \
+            --slurpfile req required.json \
+            --slurpfile cur current.json \
+            '{required_checks: $req[0].required_checks, branch_protection: $cur[0]}' \
+            > input.json
+
+      - name: Conftest check
+        uses: instrumenta/conftest-action@v1
+        with:
+          files: input.json
+          policy: policy/opa/branch_protection.rego
+
+      - name: Diff (human-friendly)
+        if: failure()
+        run: |
+          echo "Policy Required Checks:"
+          jq -r '.required_checks[]' required.json | sort
+          echo ""
+          echo "Currently Configured Checks:"
+          jq -r '.required_checks[]' current.json | sort
+          echo ""
+          echo "Missing checks:"
+          comm -23 <(jq -r '.required_checks[]' required.json | sort) <(jq -r '.required_checks[]' current.json | sort)
+
+  reconcile:
+    needs: verify-branch-protection
+    if: ${{ failure() && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install yaml
+      - name: Resolve required checks again
+        run: |
+          node -e "
+            const fs=require('fs');
+            const y=require('yaml');
+            const p=y.parse(fs.readFileSync('policy/required-checks/REQUIRED_CHECKS_POLICY.yml','utf8'));
+            const branch=process.env.GITHUB_REF_NAME || 'main';
+            let req=p.required_checks||[];
+            if(p.branches){
+              for(const k of Object.keys(p.branches)){
+                const re=new RegExp('^'+k.replace('*','.*')+'$');
+                if(re.test(branch)) req=p.branches[k].required_checks||req;
+              }
+            }
+            fs.writeFileSync('required.json', JSON.stringify({branch, required_checks:req}));
+          "
+      - run: bash scripts/release/enforce_branch_policy.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_REPO_ADMIN }}

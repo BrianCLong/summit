@@ -1,0 +1,28 @@
+version: 1
+required_checks:
+  - Lint
+  - Test (unit)
+  - Verification Suite
+  - Golden Path
+  - Provenance
+  - Reproducible Build
+
+# per-branch overrides
+branches:
+  main:
+    required_checks:
+      - Lint
+      - Test (unit)
+      - Verification Suite
+      - Golden Path
+      - Provenance
+      - Reproducible Build
+  release/*:
+    required_checks:
+      - Lint
+      - Test (unit)
+      - Verification Suite
+      - Golden Path
+      - Provenance
+      - Reproducible Build
+      - GA Risk Gate
