@@ -301,7 +301,10 @@ export class HSMAdapter extends EventEmitter {
     attestation?: any;
   }> {
     const key = await this.validateKeyOperation(keyId, 'encrypt');
-    const provider = this.providers.get(key.providerId)!;
+    const provider = this.providers.get(key.providerId);
+    if (!provider) {
+      throw new Error(`Provider not found: ${key.providerId}`);
+    }
 
     // Perform encryption in HSM
     const result = await this.performHSMEncryption(
@@ -344,7 +347,10 @@ export class HSMAdapter extends EventEmitter {
     attestation?: any;
   }> {
     const key = await this.validateKeyOperation(keyId, 'decrypt');
-    const provider = this.providers.get(key.providerId)!;
+    const provider = this.providers.get(key.providerId);
+    if (!provider) {
+      throw new Error(`Provider not found: ${key.providerId}`);
+    }
 
     // Perform decryption in HSM
     const result = await this.performHSMDecryption(
@@ -505,70 +511,70 @@ export class HSMAdapter extends EventEmitter {
     }
   }
 
-  private async generateHSMKey(
-    provider: HSMProvider,
-    options: any,
-  ): Promise<string> {
+  private generateHSMKey(
+    _provider: HSMProvider,
+    _options: any,
+  ): string {
     // Generate key in HSM and return key ID
     return `hsm-key-${crypto.randomUUID()}`;
   }
 
-  private async rotateHSMKey(
-    provider: HSMProvider,
-    oldKeyId: string,
-  ): Promise<string> {
+  private rotateHSMKey(
+    _provider: HSMProvider,
+    _oldKeyId: string,
+  ): string {
     // Rotate key in HSM and return new key ID
     return `hsm-key-${crypto.randomUUID()}`;
   }
 
-  private async performHSMEncryption(
-    provider: HSMProvider,
-    keyId: string,
+  private performHSMEncryption(
+    _provider: HSMProvider,
+    _keyId: string,
     plaintext: Buffer,
-    context?: Record<string, string>,
-  ): Promise<{ ciphertext: Buffer; attestation?: any }> {
+    _context?: Record<string, string>,
+  ): { ciphertext: Buffer; attestation?: any } {
     // Perform encryption in HSM
     const ciphertext = crypto.randomBytes(plaintext.length + 16); // Mock encrypted data
     return {
       ciphertext,
       attestation: {
         timestamp: new Date(),
-        hsmId: provider.name,
-        keyId,
+        hsmId: _provider.name,
+        keyId: _keyId,
       },
     };
   }
 
-  private async performHSMDecryption(
-    provider: HSMProvider,
-    keyId: string,
+  private performHSMDecryption(
+    _provider: HSMProvider,
+    _keyId: string,
     ciphertext: Buffer,
-    context?: Record<string, string>,
-  ): Promise<{ plaintext: Buffer; attestation?: any }> {
+    _context?: Record<string, string>,
+  ): { plaintext: Buffer; attestation?: any } {
     // Perform decryption in HSM
     const plaintext = ciphertext.slice(16); // Mock decrypted data
     return {
       plaintext,
       attestation: {
         timestamp: new Date(),
-        hsmId: provider.name,
-        keyId,
+        hsmId: _provider.name,
+        keyId: _keyId,
       },
     };
   }
 
-  private async deleteHSMKey(
-    provider: HSMProvider,
+  private deleteHSMKey(
+    _provider: HSMProvider,
     keyId: string,
-  ): Promise<void> {
+  ): void {
     // Delete key from HSM
-    console.log(`Deleting key ${keyId} from HSM ${provider.name}`);
+    process.stdout.write(`Deleting key ${keyId} from HSM ${_provider.name}\n`);
   }
 
-  private async validateKeyOperation(
+  private validateKeyOperation(
     keyId: string,
     operation: string,
-  ): Promise<CMKKey> {
+  ): CMKKey {
     const key = this.keys.get(keyId);
     if (!key) {
       throw new Error('Key not found');
@@ -585,11 +591,11 @@ export class HSMAdapter extends EventEmitter {
     return key;
   }
 
-  private async recordOperation(
+  private recordOperation(
     operation: Omit<KeyOperation, 'id' | 'audit'> & {
       status: KeyOperation['status'];
     },
-  ): Promise<KeyOperation> {
+  ): KeyOperation {
     const fullOperation: KeyOperation = {
       ...operation,
       id: crypto.randomUUID(),
@@ -618,7 +624,7 @@ export class HSMAdapter extends EventEmitter {
     }
   }
 
-  private async calculateDatasetHash(datasets: string[]): Promise<string> {
+  private calculateDatasetHash(datasets: string[]): string {
     // Calculate hash of dataset contents for verification
     const hash = crypto.createHash('sha256');
     for (const dataset of datasets) {
@@ -627,7 +633,7 @@ export class HSMAdapter extends EventEmitter {
     return hash.digest('hex');
   }
 
-  private async countKeyUsage(keyId: string): Promise<number> {
+  private countKeyUsage(keyId: string): number {
     // Count records encrypted with this key
     return this.operations.filter(
       (op) =>
@@ -638,23 +644,23 @@ export class HSMAdapter extends EventEmitter {
   }
 
   // HSM-specific connection testers
-  private async testLunaConnection(provider: HSMProvider): Promise<void> {
+  private testLunaConnection(_provider: HSMProvider): void {
     // Test SafeNet Luna HSM connection
   }
 
-  private async testCloudHSMConnection(provider: HSMProvider): Promise<void> {
+  private testCloudHSMConnection(_provider: HSMProvider): void {
     // Test AWS CloudHSM connection
   }
 
-  private async testThalesConnection(provider: HSMProvider): Promise<void> {
+  private testThalesConnection(_provider: HSMProvider): void {
     // Test Thales HSM connection
   }
 
-  private async testKeyVaultConnection(provider: HSMProvider): Promise<void> {
+  private testKeyVaultConnection(_provider: HSMProvider): void {
     // Test Azure Key Vault HSM connection
   }
 
-  private async testCloudKMSConnection(provider: HSMProvider): Promise<void> {
+  private testCloudKMSConnection(_provider: HSMProvider): void {
     // Test Google Cloud KMS connection
   }
 }

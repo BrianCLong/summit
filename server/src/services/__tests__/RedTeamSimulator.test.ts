@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { RedTeamSimulator } from '../RedTeamSimulator';
 import { SimulationEngineService } from '../SimulationEngineService';
 import { EventEmitter } from 'events';

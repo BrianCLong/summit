@@ -18,7 +18,8 @@
     "lib": ["ES2022", "DOM"],
     "types": ["node", "jest"],
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "isolatedModules": true
   },
   "ts-node": {
     "esm": true

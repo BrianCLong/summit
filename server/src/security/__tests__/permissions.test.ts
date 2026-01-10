@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { PERMISSIONS, normalizePermission, permissionsForRole, userHasPermission } from '../permissions';
 
 describe('permissions map', () => {

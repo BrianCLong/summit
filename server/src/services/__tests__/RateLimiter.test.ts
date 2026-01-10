@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { RateLimiter } from '../RateLimiter.js';
 
 const store = new Map<string, { count: number; expiresAt: number }>();

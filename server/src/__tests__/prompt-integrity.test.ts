@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { PromptRegistry } from '../../prompts/registry';
 import fs from 'fs/promises';
 import path from 'path';

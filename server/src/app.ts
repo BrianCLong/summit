@@ -199,8 +199,9 @@ export const createApp = async () => {
   app.use(publicRateLimit);
 
   // Enhanced Pino HTTP logger with correlation and trace context
+  const pinoHttpInstance = typeof pinoHttp === 'function' ? pinoHttp : (pinoHttp as any).pinoHttp;
   app.use(
-    pinoHttp({
+    pinoHttpInstance({
       logger: appLogger,
       // Redaction is handled by the logger config itself, but we keep this consistent if needed
       // logger config already has redact paths, so we can omit here or merge.
@@ -212,7 +213,7 @@ export const createApp = async () => {
         traceId: req.traceId,
         spanId: req.spanId,
         userId: req.user?.sub || req.user?.id,
-        tenantId: req.user?.tenant_id,
+        tenantId: req.user?.tenant_id || req.user?.tenantId,
       }),
     }),
   );

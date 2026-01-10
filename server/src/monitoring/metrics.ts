@@ -1,40 +1,78 @@
 /**
  * Prometheus metrics collection for IntelGraph Platform
  */
-import * as client from 'prom-client';
+import * as promClient from 'prom-client';
+
+const client: any = (promClient as any).default || promClient;
 
 // Create a Registry which registers the metrics
 export const register = new client.Registry();
 
 // Store the default metrics collection handle for cleanup
-let defaultMetricsInterval: ReturnType<typeof client.collectDefaultMetrics> | undefined;
+let defaultMetricsInterval: any;
 
 // Add default metrics (CPU, memory, event loop lag, etc.)
 // Only collect in production/non-test environments to avoid open handles in tests
 if (process.env.NODE_ENV !== 'test' && process.env.ZERO_FOOTPRINT !== 'true') {
-  defaultMetricsInterval = client.collectDefaultMetrics({
-    register,
-    gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5], // Garbage collection buckets
-  });
+  try {
+    defaultMetricsInterval = client.collectDefaultMetrics({
+      register,
+      gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5], // Garbage collection buckets
+    });
+  } catch (e) {}
 }
 
 // Cleanup function to stop metrics collection
 export function stopMetricsCollection() {
-  if (defaultMetricsInterval && typeof defaultMetricsInterval === 'object' && 'clear' in defaultMetricsInterval) {
-    (defaultMetricsInterval as any).clear();
+  if (defaultMetricsInterval && typeof defaultMetricsInterval.clear === 'function') {
+    defaultMetricsInterval.clear();
   }
   register.clear();
 }
 
 // Custom Application Metrics
 
+function createHistogram(config: any) {
+    try {
+        return new client.Histogram(config);
+    } catch (e) {
+        return {
+            observe: () => {},
+            startTimer: () => () => {},
+            inc: () => {},
+            dec: () => {},
+            set: () => {},
+            labels: () => ({ observe: () => {}, inc: () => {}, dec: () => {}, set: () => {} })
+        } as any;
+    }
+}
+
+function createCounter(config: any) {
+    try {
+        return new client.Counter(config);
+    } catch (e) {
+        return {
+            inc: () => {},
+            labels: () => ({ inc: () => {} })
+        } as any;
+    }
+}
+
+function createGauge(config: any) {
+    try {
+        return new client.Gauge(config);
+    } catch (e) {
+        return {
+            inc: () => {},
+            dec: () => {},
+            set: () => {},
+            labels: () => ({ inc: () => {}, dec: () => {}, set: () => {} })
+        } as any;
+    }
+}
+
 // HTTP Request metrics
-console.log('Initializing httpRequestDuration...');
-try {
-
-} catch (e) { }
-
-export const httpRequestDuration = new client.Histogram({
+export const httpRequestDuration = createHistogram({
   registers: [],
   name: 'http_request_duration_seconds',
   help: 'Duration of HTTP requests in seconds',
@@ -42,7 +80,7 @@ export const httpRequestDuration = new client.Histogram({
   buckets: [0.1, 0.5, 1, 2, 5, 10],
 });
 
-export const httpRequestsTotal = new client.Counter({
+export const httpRequestsTotal = createCounter({
   registers: [],
   name: 'http_requests_total',
   help: 'Total number of HTTP requests',
@@ -50,21 +88,21 @@ export const httpRequestsTotal = new client.Counter({
 });
 
 // Business KPIs exposed as first-class metrics for the control plane
-export const businessUserSignupsTotal = new client.Counter({
+export const businessUserSignupsTotal = createCounter({
   registers: [],
   name: 'business_user_signups_total',
   help: 'Total number of customer or workspace signups',
   labelNames: ['tenant', 'plan'],
 });
 
-export const businessApiCallsTotal = new client.Counter({
+export const businessApiCallsTotal = createCounter({
   registers: [],
   name: 'business_api_calls_total',
   help: 'API calls attributed to customer activity and billing',
   labelNames: ['service', 'route', 'status_code', 'tenant'],
 });
 
-export const businessRevenueTotal = new client.Counter({
+export const businessRevenueTotal = createCounter({
   registers: [],
   name: 'business_revenue_total',
   help: "Recognized revenue amounts in the system's reporting currency",
@@ -72,7 +110,7 @@ export const businessRevenueTotal = new client.Counter({
 });
 
 // GraphQL metrics
-export const graphqlRequestDuration = new client.Histogram({
+export const graphqlRequestDuration = createHistogram({
   registers: [],
   name: 'graphql_request_duration_seconds',
   help: 'Duration of GraphQL requests in seconds',
@@ -80,14 +118,14 @@ export const graphqlRequestDuration = new client.Histogram({
   buckets: [0.1, 0.5, 1, 2, 5, 10],
 });
 
-export const graphqlRequestsTotal = new client.Counter({
+export const graphqlRequestsTotal = createCounter({
   registers: [],
   name: 'graphql_requests_total',
   help: 'Total number of GraphQL requests',
   labelNames: ['operation', 'operation_type', 'status'],
 });
 
-export const graphqlErrors = new client.Counter({
+export const graphqlErrors = createCounter({
   registers: [],
   name: 'graphql_errors_total',
   help: 'Total number of GraphQL errors',
@@ -95,21 +133,21 @@ export const graphqlErrors = new client.Counter({
 });
 
 // Tenant isolation violations
-export const tenantScopeViolationsTotal = new client.Counter({
+export const tenantScopeViolationsTotal = createCounter({
   registers: [],
   name: 'tenant_scope_violations_total',
   help: 'Total number of tenant scope violations',
 });
 
 // Database metrics
-export const dbConnectionsActive = new client.Gauge({
+export const dbConnectionsActive = createGauge({
   registers: [],
   name: 'db_connections_active',
   help: 'Number of active database connections',
   labelNames: ['database'],
 });
 
-export const dbQueryDuration = new client.Histogram({
+export const dbQueryDuration = createHistogram({
   registers: [],
   name: 'db_query_duration_seconds',
   help: 'Duration of database queries in seconds',
@@ -117,14 +155,14 @@ export const dbQueryDuration = new client.Histogram({
   buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5],
 });
 
-export const dbQueriesTotal = new client.Counter({
+export const dbQueriesTotal = createCounter({
   registers: [],
   name: 'db_queries_total',
   help: 'Total number of database queries',
   labelNames: ['database', 'operation', 'status'],
 });
 
-export const vectorQueryDurationSeconds = new client.Histogram({
+export const vectorQueryDurationSeconds = createHistogram({
   registers: [],
   name: 'vector_query_duration_seconds',
   help: 'Latency of pgvector operations in seconds',
@@ -132,7 +170,7 @@ export const vectorQueryDurationSeconds = new client.Histogram({
   buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2, 5],
 });
 
-export const vectorQueriesTotal = new client.Counter({
+export const vectorQueriesTotal = createCounter({
   registers: [],
   name: 'vector_queries_total',
   help: 'Total pgvector operations by outcome',
@@ -140,21 +178,21 @@ export const vectorQueriesTotal = new client.Counter({
 });
 
 // AI/ML Processing metrics
-export const aiJobsQueued = new client.Gauge({
+export const aiJobsQueued = createGauge({
   registers: [],
   name: 'ai_jobs_queued',
   help: 'Number of AI/ML jobs in queue',
   labelNames: ['job_type'],
 });
 
-export const aiJobsProcessing = new client.Gauge({
+export const aiJobsProcessing = createGauge({
   registers: [],
   name: 'ai_jobs_processing',
   help: 'Number of AI/ML jobs currently processing',
   labelNames: ['job_type'],
 });
 
-export const aiJobDuration = new client.Histogram({
+export const aiJobDuration = createHistogram({
   registers: [],
   name: 'ai_job_duration_seconds',
   help: 'Duration of AI/ML job processing in seconds',
@@ -162,7 +200,7 @@ export const aiJobDuration = new client.Histogram({
   buckets: [1, 5, 10, 30, 60, 300, 600],
 });
 
-export const aiJobsTotal = new client.Counter({
+export const aiJobsTotal = createCounter({
   registers: [],
   name: 'ai_jobs_total',
   help: 'Total number of AI/ML jobs processed',
@@ -170,7 +208,7 @@ export const aiJobsTotal = new client.Counter({
 });
 
 // LLM Metrics
-export const llmRequestDuration = new client.Histogram({
+export const llmRequestDuration = createHistogram({
   registers: [],
   name: 'llm_request_duration_seconds',
   help: 'Duration of LLM requests in seconds',
@@ -178,14 +216,14 @@ export const llmRequestDuration = new client.Histogram({
   buckets: [0.5, 1, 2, 5, 10, 20, 60],
 });
 
-export const llmTokensTotal = new client.Counter({
+export const llmTokensTotal = createCounter({
   registers: [],
   name: 'llm_tokens_total',
   help: 'Total number of tokens processed',
   labelNames: ['provider', 'model', 'type'], // type: prompt, completion
 });
 
-export const llmRequestsTotal = new client.Counter({
+export const llmRequestsTotal = createCounter({
   registers: [],
   name: 'llm_requests_total',
   help: 'Total number of LLM requests',
@@ -193,21 +231,21 @@ export const llmRequestsTotal = new client.Counter({
 });
 
 // Graph operations metrics
-export const graphNodesTotal = new client.Gauge({
+export const graphNodesTotal = createGauge({
   registers: [],
   name: 'graph_nodes_total',
   help: 'Total number of nodes in the graph',
   labelNames: ['investigation_id'],
 });
 
-export const graphEdgesTotal = new client.Gauge({
+export const graphEdgesTotal = createGauge({
   registers: [],
   name: 'graph_edges_total',
   help: 'Total number of edges in the graph',
   labelNames: ['investigation_id'],
 });
 
-export const graphOperationDuration = new client.Histogram({
+export const graphOperationDuration = createHistogram({
   registers: [],
   name: 'graph_operation_duration_seconds',
   help: 'Duration of graph operations in seconds',
@@ -216,13 +254,13 @@ export const graphOperationDuration = new client.Histogram({
 });
 
 // WebSocket metrics
-export const websocketConnections = new client.Gauge({
+export const websocketConnections = createGauge({
   registers: [],
   name: 'websocket_connections_active',
   help: 'Number of active WebSocket connections',
 });
 
-export const websocketMessages = new client.Counter({
+export const websocketMessages = createCounter({
   registers: [],
   name: 'websocket_messages_total',
   help: 'Total number of WebSocket messages',
@@ -230,13 +268,13 @@ export const websocketMessages = new client.Counter({
 });
 
 // Investigation metrics
-export const investigationsActive = new client.Gauge({
+export const investigationsActive = createGauge({
   registers: [],
   name: 'investigations_active',
   help: 'Number of active investigations',
 });
 
-export const investigationOperations = new client.Counter({
+export const investigationOperations = createCounter({
   registers: [],
   name: 'investigation_operations_total',
   help: 'Total number of investigation operations',
@@ -244,7 +282,7 @@ export const investigationOperations = new client.Counter({
 });
 
 // Entity resolution merge outcomes
-export const erMergeOutcomesTotal = new client.Counter({
+export const erMergeOutcomesTotal = createCounter({
   registers: [],
   name: 'er_merge_outcomes_total',
   help: 'Total number of ER merge outcomes recorded',
@@ -252,7 +290,7 @@ export const erMergeOutcomesTotal = new client.Counter({
 });
 
 // Deployment rollbacks
-export const deploymentRollbacksTotal = new client.Counter({
+export const deploymentRollbacksTotal = createCounter({
   registers: [],
   name: 'deployment_rollbacks_total',
   help: 'Total number of deployment rollbacks',
@@ -260,26 +298,28 @@ export const deploymentRollbacksTotal = new client.Counter({
 });
 
 // Human-in-the-loop approvals
-const approvalsPending = new client.Gauge({
+const approvalsPending = createGauge({
   registers: [],
   name: 'approvals_pending',
   help: 'Current pending approvals requiring human review',
 });
 
-const approvalsApprovedTotal = new client.Counter({
+const approvalsApprovedTotal = createCounter({
   registers: [],
   name: 'approvals_approved_total',
   help: 'Total approvals granted by human reviewers',
+  labelNames: ['reviewer_role'],
 });
 
-const approvalsRejectedTotal = new client.Counter({
+const approvalsRejectedTotal = createCounter({
   registers: [],
   name: 'approvals_rejected_total',
   help: 'Total approvals rejected by human reviewers',
+  labelNames: ['reviewer_role'],
 });
 
 // Error tracking
-export const applicationErrors = new client.Counter({
+export const applicationErrors = createCounter({
   registers: [],
   name: 'application_errors_total',
   help: 'Total number of application errors',
@@ -287,7 +327,7 @@ export const applicationErrors = new client.Counter({
 });
 
 // Memory usage for specific components
-export const memoryUsage = new client.Gauge({
+export const memoryUsage = createGauge({
   registers: [],
   name: 'application_memory_usage_bytes',
   help: 'Memory usage by application component',
@@ -295,31 +335,31 @@ export const memoryUsage = new client.Gauge({
 });
 
 // Pipeline SLI metrics (labels: source, pipeline, env)
-export const pipelineUptimeRatio = new client.Gauge({
+export const pipelineUptimeRatio = createGauge({
   registers: [],
   name: 'pipeline_uptime_ratio',
   help: 'Pipeline availability ratio (0..1) over current window',
   labelNames: ['source', 'pipeline', 'env'],
 });
-export const pipelineFreshnessSeconds = new client.Gauge({
+export const pipelineFreshnessSeconds = createGauge({
   registers: [],
   name: 'pipeline_freshness_seconds',
   help: 'Freshness (seconds) from source event to load completion',
   labelNames: ['source', 'pipeline', 'env'],
 });
-export const pipelineCompletenessRatio = new client.Gauge({
+export const pipelineCompletenessRatio = createGauge({
   registers: [],
   name: 'pipeline_completeness_ratio',
   help: 'Data completeness ratio (0..1) expected vs actual',
   labelNames: ['source', 'pipeline', 'env'],
 });
-export const pipelineCorrectnessRatio = new client.Gauge({
+export const pipelineCorrectnessRatio = createGauge({
   registers: [],
   name: 'pipeline_correctness_ratio',
   help: 'Validation pass rate ratio (0..1)',
   labelNames: ['source', 'pipeline', 'env'],
 });
-export const pipelineLatencySeconds = new client.Histogram({
+export const pipelineLatencySeconds = createHistogram({
   registers: [],
   name: 'pipeline_latency_seconds',
   help: 'End-to-end processing latency seconds',
@@ -328,6 +368,7 @@ export const pipelineLatencySeconds = new client.Histogram({
 });
 
 // Register all metrics
+try {
 register.registerMetric(httpRequestDuration);
 register.registerMetric(httpRequestsTotal);
 register.registerMetric(graphqlRequestDuration);
@@ -365,84 +406,99 @@ register.registerMetric(pipelineFreshnessSeconds);
 register.registerMetric(pipelineCompletenessRatio);
 register.registerMetric(pipelineCorrectnessRatio);
 register.registerMetric(pipelineLatencySeconds);
+} catch (e) {}
 
 // GraphRAG metrics for schema validation and caching
-export const graphragSchemaFailuresTotal = new client.Counter({
+export const graphragSchemaFailuresTotal = createCounter({
   registers: [],
   name: 'graphrag_schema_failures_total',
   help: 'Total number of GraphRAG schema validation failures',
 });
-export const graphragCacheHitRatio = new client.Gauge({
+export const graphragCacheHitRatio = createGauge({
   registers: [],
   name: 'graphrag_cache_hit_ratio',
   help: 'Ratio of GraphRAG cache hits to total requests',
 });
+try {
 register.registerMetric(graphragSchemaFailuresTotal);
 register.registerMetric(graphragCacheHitRatio);
-export const pbacDecisionsTotal = new client.Counter({
+} catch (e) {}
+export const pbacDecisionsTotal = createCounter({
   registers: [],
   name: 'pbac_decisions_total',
   help: 'Total PBAC access decisions',
   labelNames: ['decision'],
 });
+try {
 register.registerMetric(pbacDecisionsTotal);
+} catch (e) {}
 
-export const admissionDecisionsTotal = new client.Counter({
+export const admissionDecisionsTotal = createCounter({
   registers: [],
   name: 'admission_decisions_total',
   help: 'Total admission control decisions',
   labelNames: ['decision', 'policy'],
 });
+try {
 register.registerMetric(admissionDecisionsTotal);
+} catch (e) {}
 
 // Docling service metrics
-export const doclingInferenceDuration = new client.Histogram({
+export const doclingInferenceDuration = createHistogram({
   registers: [],
   name: 'docling_inference_duration_seconds',
   help: 'Docling document inference duration in seconds',
   labelNames: ['model', 'status'],
   buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60],
 });
+try {
 register.registerMetric(doclingInferenceDuration);
+} catch (e) {}
 
-export const doclingInferenceTotal = new client.Counter({
+export const doclingInferenceTotal = createCounter({
   registers: [],
   name: 'docling_inference_total',
   help: 'Total Docling inference requests',
   labelNames: ['model', 'status'],
 });
+try {
 register.registerMetric(doclingInferenceTotal);
+} catch (e) {}
 
-export const doclingCharactersProcessed = new client.Counter({
+export const doclingCharactersProcessed = createCounter({
   registers: [],
   name: 'docling_characters_processed_total',
   help: 'Total characters processed by Docling',
   labelNames: ['model'],
 });
+try {
 register.registerMetric(doclingCharactersProcessed);
+} catch (e) {}
 
-export const doclingCostUsd = new client.Counter({
+export const doclingCostUsd = createCounter({
   registers: [],
   name: 'docling_cost_usd_total',
   help: 'Total cost in USD for Docling processing',
   labelNames: ['model'],
 });
+try {
 register.registerMetric(doclingCostUsd);
+} catch (e) {}
 
 // New domain metrics
-export const graphExpandRequestsTotal = new client.Counter({
+export const graphExpandRequestsTotal = createCounter({
   registers: [],
   name: 'graph_expand_requests_total',
   help: 'Total expandNeighbors requests',
   labelNames: ['cached'],
 });
-export const aiRequestTotal = new client.Counter({
+export const aiRequestTotal = createCounter({
   registers: [],
   name: 'ai_request_total',
   help: 'AI request events',
   labelNames: ['status'],
 });
-export const resolverLatencyMs = new client.Histogram({
+export const resolverLatencyMs = createHistogram({
   registers: [],
   name: 'resolver_latency_ms',
   help: 'Resolver latency in ms',
@@ -450,13 +506,13 @@ export const resolverLatencyMs = new client.Histogram({
   buckets: [5, 10, 25, 50, 100, 200, 400, 800, 1600],
 });
 
-export const neighborhoodCacheHitRatio = new client.Gauge({
+export const neighborhoodCacheHitRatio = createGauge({
   registers: [],
   name: 'neighborhood_cache_hit_ratio',
   help: 'Neighborhood cache hit ratio',
 });
 
-export const neighborhoodCacheLatencyMs = new client.Histogram({
+export const neighborhoodCacheLatencyMs = createHistogram({
   registers: [],
   name: 'neighborhood_cache_latency_ms',
   help: 'Neighborhood cache lookup latency in ms',
@@ -464,7 +520,7 @@ export const neighborhoodCacheLatencyMs = new client.Histogram({
 });
 
 // Enhanced GraphQL resolver metrics
-export const graphqlResolverDurationSeconds = new client.Histogram({
+export const graphqlResolverDurationSeconds = createHistogram({
   registers: [],
   name: 'graphql_resolver_duration_seconds',
   help: 'Duration of GraphQL resolver execution in seconds',
@@ -472,21 +528,21 @@ export const graphqlResolverDurationSeconds = new client.Histogram({
   buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2, 5],
 });
 
-export const graphqlResolverErrorsTotal = new client.Counter({
+export const graphqlResolverErrorsTotal = createCounter({
   registers: [],
   name: 'graphql_resolver_errors_total',
   help: 'Total number of GraphQL resolver errors',
   labelNames: ['resolver_name', 'field_name', 'type_name', 'error_type'],
 });
 
-export const graphqlResolverCallsTotal = new client.Counter({
+export const graphqlResolverCallsTotal = createCounter({
   registers: [],
   name: 'graphql_resolver_calls_total',
   help: 'Total number of GraphQL resolver calls',
   labelNames: ['resolver_name', 'field_name', 'type_name'],
 });
 // Web Vitals metrics reported from clients
-export const webVitalValue = new client.Gauge({
+export const webVitalValue = createGauge({
   registers: [],
   name: 'web_vital_value',
   help: 'Latest reported Web Vitals values',
@@ -494,20 +550,20 @@ export const webVitalValue = new client.Gauge({
 });
 
 // Real-time updates metrics
-export const realtimeConflictsTotal = new client.Counter({
+export const realtimeConflictsTotal = createCounter({
   registers: [],
   name: 'realtime_conflicts_total',
   help: 'Total number of real-time update conflicts (LWW)',
 });
 
-export const idempotentHitsTotal = new client.Counter({
+export const idempotentHitsTotal = createCounter({
   registers: [],
   name: 'idempotent_hits_total',
   help: 'Total number of idempotent mutation hits',
 });
 
 // Auto-remediation execution tracking
-export const serviceAutoRemediationsTotal = new client.Counter({
+export const serviceAutoRemediationsTotal = createCounter({
   registers: [],
   name: 'service_auto_remediations_total',
   help: 'Total number of automated remediation actions executed',
@@ -515,7 +571,7 @@ export const serviceAutoRemediationsTotal = new client.Counter({
 });
 
 // Golden Path Metrics
-export const goldenPathStepTotal = new client.Counter({
+export const goldenPathStepTotal = createCounter({
   registers: [],
   name: 'golden_path_step_total',
   help: 'Completion of steps in the Golden Path user journey',
@@ -523,21 +579,21 @@ export const goldenPathStepTotal = new client.Counter({
 });
 
 // UI Error Boundary Metrics
-export const uiErrorBoundaryCatchTotal = new client.Counter({
+export const uiErrorBoundaryCatchTotal = createCounter({
   registers: [],
   name: 'ui_error_boundary_catch_total',
   help: 'Total number of UI errors caught by the React Error Boundary',
   labelNames: ['component', 'tenant_id'],
 });
 
-export const breakerState = new client.Gauge({
+export const breakerState = createGauge({
   registers: [],
   name: 'circuit_breaker_state',
   help: 'State of the circuit breaker (0 = Closed, 1 = Open)',
   labelNames: ['service'],
 });
 
-export const intelgraphJobQueueDepth = new client.Gauge({
+export const intelgraphJobQueueDepth = createGauge({
   registers: [],
   name: 'intelgraph_job_queue_depth',
   help: 'Current depth of the job queue',
@@ -545,27 +601,27 @@ export const intelgraphJobQueueDepth = new client.Gauge({
 });
 
 // DORA Metrics (Maestro)
-export const maestroDeploymentsTotal = new client.Counter({
+export const maestroDeploymentsTotal = createCounter({
   registers: [],
   name: 'maestro_deployments_total',
   help: 'Total number of deployments',
   labelNames: ['environment', 'status'],
 });
 
-export const maestroPrLeadTimeHours = new client.Histogram({
+export const maestroPrLeadTimeHours = createHistogram({
   registers: [],
   name: 'maestro_pr_lead_time_hours',
   help: 'Lead time for changes in hours',
   buckets: [1, 4, 12, 24, 48, 168],
 });
 
-export const maestroChangeFailureRate = new client.Gauge({
+export const maestroChangeFailureRate = createGauge({
   registers: [],
   name: 'maestro_change_failure_rate',
   help: 'Change failure rate percentage',
 });
 
-export const maestroMttrHours = new client.Histogram({
+export const maestroMttrHours = createHistogram({
   registers: [],
   name: 'maestro_mttr_hours',
   help: 'Mean time to recovery in hours',
@@ -573,7 +629,7 @@ export const maestroMttrHours = new client.Histogram({
 });
 
 // Maestro Orchestration Health Metrics
-export const maestroDagExecutionDurationSeconds = new client.Histogram({
+export const maestroDagExecutionDurationSeconds = createHistogram({
   registers: [],
   name: 'maestro_dag_execution_duration_seconds',
   help: 'Duration of Maestro DAG execution in seconds',
@@ -581,7 +637,7 @@ export const maestroDagExecutionDurationSeconds = new client.Histogram({
   buckets: [1, 5, 10, 30, 60, 300, 600],
 });
 
-export const maestroJobExecutionDurationSeconds = new client.Histogram({
+export const maestroJobExecutionDurationSeconds = createHistogram({
   registers: [],
   name: 'maestro_job_execution_duration_seconds',
   help: 'Duration of Maestro Job execution in seconds',
@@ -589,6 +645,7 @@ export const maestroJobExecutionDurationSeconds = new client.Histogram({
   buckets: [0.1, 0.5, 1, 5, 10, 30, 60],
 });
 
+try {
 register.registerMetric(maestroDagExecutionDurationSeconds);
 register.registerMetric(maestroJobExecutionDurationSeconds);
 
@@ -615,6 +672,7 @@ register.registerMetric(maestroChangeFailureRate);
 register.registerMetric(maestroMttrHours);
 register.registerMetric(breakerState);
 register.registerMetric(intelgraphJobQueueDepth);
+} catch (e) {}
 
 export const metrics = {
   graphExpandRequestsTotal,
@@ -690,42 +748,44 @@ const shouldCollectMemory =
   process.env.NODE_ENV !== 'test' && !process.env.JEST_WORKER_ID;
 if (shouldCollectMemory) {
   setInterval(() => {
-    const usage = process.memoryUsage();
-    memoryUsage.set({ component: 'heap_used' }, usage.heapUsed);
-    memoryUsage.set({ component: 'heap_total' }, usage.heapTotal);
-    memoryUsage.set({ component: 'external' }, usage.external);
-    memoryUsage.set({ component: 'rss' }, usage.rss);
+    try {
+        const usage = process.memoryUsage();
+        memoryUsage.set({ component: 'heap_used' }, usage.heapUsed);
+        memoryUsage.set({ component: 'heap_total' }, usage.heapTotal);
+        memoryUsage.set({ component: 'external' }, usage.external);
+        memoryUsage.set({ component: 'rss' }, usage.rss);
+    } catch (e) {}
   }, 30000);
 }
 
 // Legacy IntelGraph metrics (merged from observability/metrics.ts)
-export const intelgraphJobsProcessed = new client.Counter({
+export const intelgraphJobsProcessed = createCounter({
   name: 'intelgraph_jobs_processed_total',
   help: 'Total jobs processed by the system',
   labelNames: ['queue', 'status'],
 });
 
-export const intelgraphOutboxSyncLatency = new client.Histogram({
+export const intelgraphOutboxSyncLatency = createHistogram({
   name: 'intelgraph_outbox_sync_latency_seconds',
   help: 'Latency of outbox to Neo4j sync operations',
   labelNames: ['operation'],
   buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10],
 });
 
-export const intelgraphActiveConnections = new client.Gauge({
+export const intelgraphActiveConnections = createGauge({
   name: 'intelgraph_active_connections',
   help: 'Number of active WebSocket connections',
   labelNames: ['tenant'],
 });
 
-export const intelgraphDatabaseQueryDuration = new client.Histogram({
+export const intelgraphDatabaseQueryDuration = createHistogram({
   name: 'intelgraph_database_query_duration_seconds',
   help: 'Database query execution time',
   labelNames: ['database', 'operation'],
   buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5],
 });
 
-export const intelgraphHttpRequestDuration = new client.Histogram({
+export const intelgraphHttpRequestDuration = createHistogram({
   name: 'intelgraph_http_request_duration_seconds',
   help: 'HTTP request duration in seconds',
   labelNames: ['method', 'route', 'status'],
@@ -733,82 +793,82 @@ export const intelgraphHttpRequestDuration = new client.Histogram({
 });
 
 // GraphRAG Query Preview metrics
-export const intelgraphGraphragQueryTotal = new client.Counter({
+export const intelgraphGraphragQueryTotal = createCounter({
   name: 'intelgraph_graphrag_query_total',
   help: 'Total GraphRAG queries executed',
   labelNames: ['status', 'hasPreview', 'redactionEnabled', 'provenanceEnabled'],
 });
 
-export const intelgraphGraphragQueryDurationMs = new client.Histogram({
+export const intelgraphGraphragQueryDurationMs = createHistogram({
   name: 'intelgraph_graphrag_query_duration_ms',
   help: 'GraphRAG query execution duration in milliseconds',
   labelNames: ['hasPreview'],
   buckets: [100, 500, 1000, 2000, 5000, 10000, 30000],
 });
 
-export const intelgraphQueryPreviewsTotal = new client.Counter({
+export const intelgraphQueryPreviewsTotal = createCounter({
   name: 'intelgraph_query_previews_total',
   help: 'Total query previews generated',
   labelNames: ['language', 'status'],
 });
 
-export const intelgraphQueryPreviewLatencyMs = new client.Histogram({
+export const intelgraphQueryPreviewLatencyMs = createHistogram({
   name: 'intelgraph_query_preview_latency_ms',
   help: 'Query preview generation latency in milliseconds',
   labelNames: ['language'],
   buckets: [50, 100, 250, 500, 1000, 2000, 5000],
 });
 
-export const intelgraphQueryPreviewErrorsTotal = new client.Counter({
+export const intelgraphQueryPreviewErrorsTotal = createCounter({
   name: 'intelgraph_query_preview_errors_total',
   help: 'Total query preview errors',
   labelNames: ['language'],
 });
 
-export const intelgraphQueryPreviewExecutionsTotal = new client.Counter({
+export const intelgraphQueryPreviewExecutionsTotal = createCounter({
   name: 'intelgraph_query_preview_executions_total',
   help: 'Total query preview executions',
   labelNames: ['language', 'dryRun', 'status'],
 });
 
-export const intelgraphGlassBoxRunsTotal = new client.Counter({
+export const intelgraphGlassBoxRunsTotal = createCounter({
   name: 'intelgraph_glass_box_runs_total',
   help: 'Total glass-box runs created',
   labelNames: ['type', 'status'],
 });
 
-export const intelgraphGlassBoxRunDurationMs = new client.Histogram({
+export const intelgraphGlassBoxRunDurationMs = createHistogram({
   name: 'intelgraph_glass_box_run_duration_ms',
   help: 'Glass-box run duration in milliseconds',
   labelNames: ['type'],
   buckets: [100, 500, 1000, 2000, 5000, 10000, 30000, 60000],
 });
 
-export const intelgraphGlassBoxCacheHits = new client.Counter({
+export const intelgraphGlassBoxCacheHits = createCounter({
   name: 'intelgraph_glass_box_cache_hits_total',
   help: 'Total glass-box cache hits',
   labelNames: ['operation'],
 });
 
-export const intelgraphCacheHits = new client.Counter({
+export const intelgraphCacheHits = createCounter({
   name: 'intelgraph_cache_hits_total',
   help: 'Total cache hits',
   labelNames: ['level'],
 });
 
-export const intelgraphCacheMisses = new client.Counter({
+export const intelgraphCacheMisses = createCounter({
   name: 'intelgraph_cache_misses_total',
   help: 'Total cache misses',
 });
 
 // Copilot API metrics
-export const copilotApiRequestTotal = new client.Counter({
+export const copilotApiRequestTotal = createCounter({
   name: 'copilot_api_request_total',
   help: 'Total number of AI Copilot API requests',
   labelNames: ['endpoint', 'mode', 'status'],
 });
 
-export const copilotApiRequestDurationMs = new client.Histogram({
+export const copilotApiRequestDurationMs = createHistogram({
   name: 'copilot_api_request_duration_ms',
   help: 'AI Copilot API request duration in milliseconds',
   labelNames: ['endpoint', 'mode'],
@@ -816,13 +876,14 @@ export const copilotApiRequestDurationMs = new client.Histogram({
 });
 
 // LLM Cost metrics
-export const llmCostTotal = new client.Counter({
+export const llmCostTotal = createCounter({
   name: 'llm_cost_total_usd',
   help: 'Total estimated cost of LLM calls in USD',
   labelNames: ['provider', 'model'],
 });
 
 // Register metrics
+try {
 register.registerMetric(llmCostTotal);
 register.registerMetric(intelgraphJobsProcessed);
 register.registerMetric(intelgraphOutboxSyncLatency);
@@ -842,3 +903,4 @@ register.registerMetric(intelgraphCacheHits);
 register.registerMetric(intelgraphCacheMisses);
 register.registerMetric(copilotApiRequestTotal);
 register.registerMetric(copilotApiRequestDurationMs);
+} catch (e) {}

@@ -1,4 +1,5 @@
 // server/src/services/IntelGraphService.test.ts
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { IntelGraphService } from './IntelGraphService';
 import { getNeo4jDriver } from '../config/database';
 import { v4 as uuidv4 } from 'uuid';

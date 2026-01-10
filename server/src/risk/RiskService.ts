@@ -1,8 +1,8 @@
-import { FeatureStore } from './FeatureStore';
-import { RiskEngine, RiskResult } from './RiskEngine';
-import { verifyWeights } from './WeightsVerifier';
-import { RiskRepository } from '../db/repositories/RiskRepository';
-import { RiskScoreInput, RiskLevel } from './types';
+import { FeatureStore } from './FeatureStore.js';
+import { RiskEngine, RiskResult } from './RiskEngine.js';
+import { verifyWeights } from './WeightsVerifier.js';
+import { RiskRepository } from '../db/repositories/RiskRepository.js';
+import { RiskScoreInput, RiskLevel } from './types.js';
 import path from 'path';
 
 const modelsDir = path.join(__dirname, '..', '..', 'models');

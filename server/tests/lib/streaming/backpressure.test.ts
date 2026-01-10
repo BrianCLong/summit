@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { BackpressureStream } from '../../../src/lib/streaming/backpressure';
 import v8 from 'v8';
 

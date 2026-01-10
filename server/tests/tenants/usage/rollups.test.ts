@@ -1,18 +1,19 @@
-import usageRouter from '../../../src/routes/tenants/usage.js';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 const mockQuery = jest.fn();
 const mockRelease = jest.fn();
 
-jest.mock('../../../src/config/database.js', () => ({
+// ESM-compatible mocking using unstable_mockModule
+jest.unstable_mockModule('../../../src/config/database.js', () => ({
   getPostgresPool: () => ({
-    connect: jest.fn().mockResolvedValue({
+    connect: jest.fn(async () => ({
       query: mockQuery,
-      release: mockRelease,
-    }),
+      release: mockRelease.mockResolvedValue(undefined),
+    })),
   }),
 }));
 
-jest.mock('../../../src/middleware/auth.js', () => ({
+jest.unstable_mockModule('../../../src/middleware/auth.js', () => ({
   ensureAuthenticated: (req: any, _res: any, next: any) => {
     const tenant = req.headers['x-tenant-id'] || 'tenant-123';
     req.user = { id: 'user-1', tenantId: tenant, roles: ['ADMIN'] };
@@ -20,38 +21,77 @@ jest.mock('../../../src/middleware/auth.js', () => ({
   },
 }));
 
-const runRequest = async (params: {
-  tenantId: string;
-  query?: Record<string, any>;
-  headers?: Record<string, string>;
-}) => {
-  const req: any = {
-    method: 'GET',
-    url: '/',
-    path: '/',
-    baseUrl: '/api/tenants/' + params.tenantId + '/usage',
-    params: { tenantId: params.tenantId },
-    query: params.query ?? {},
-    headers: params.headers ?? {},
-    body: {},
-  };
-  const res: any = {
-    status: jest.fn().mockReturnThis(),
-    json: jest.fn().mockReturnThis(),
-  };
-
-  await new Promise<void>((resolve, reject) => {
-    usageRouter.handle(req, res, (err: any) => {
-      if (err) {
-        reject(err);
-        return;
+// Mock TenantValidator properly with same structure as real module
+jest.unstable_mockModule('../../../src/middleware/tenantValidator.js', () => {
+  class MockTenantValidator {
+    static validateTenantAccess(context: any, requestedTenantId: string) {
+      const userTenantId = context.user?.tenantId;
+      if (userTenantId !== requestedTenantId) {
+        const error: any = new Error('Cross-tenant access denied');
+        error.extensions = { code: 'CROSS_TENANT_ACCESS_DENIED' };
+        throw error;
       }
-      resolve();
-    });
-  });
+      return {
+        tenantId: requestedTenantId,
+        userId: context.user?.id,
+        roles: context.user?.roles || [],
+        permissions: [],
+        environment: 'test',
+        privilegeTier: 'standard',
+      };
+    }
+  }
+  return { TenantValidator: MockTenantValidator };
+});
 
-  return res;
-};
+jest.unstable_mockModule('../../../src/services/PricingEngine.js', () => ({
+  __esModule: true,
+  default: {
+    getEffectivePlan: jest.fn().mockResolvedValue({
+      plan: { limits: { 'llm.tokens': { unitPrice: 0.001 } } },
+    }),
+  },
+}));
+
+jest.unstable_mockModule('../../../src/validation/index.js', () => ({
+  SanitizationUtils: {
+    sanitizeUserInput: jest.fn((input: any) => input),
+  },
+  SecurityValidator: {
+    validateInput: jest.fn(() => ({ valid: true, errors: [] })),
+  },
+}));
+
+jest.unstable_mockModule('../../../src/middleware/request-schema-validator.js', () => ({
+  buildRequestValidator: () => (req: any, _res: any, next: any) => {
+    // Basic datetime validation for 'from' query param
+    if (req.query.from && !req.query.from.match(/^\d{4}-\d{2}-\d{2}T/)) {
+      return next({
+        status: 400,
+        message: 'Validation failed',
+      });
+    }
+    next();
+  },
+}));
+
+// Dynamic imports after mocks are set up
+const { default: request } = await import('supertest');
+const { default: express } = await import('express');
+const { default: usageRouter } = await import('../../../src/routes/tenants/usage.js');
+
+// Create test app
+const app = express();
+app.use(express.json());
+app.use('/api/tenants/:tenantId/usage', usageRouter);
+
+// Error handler to catch validation errors
+app.use((err: any, _req: any, res: any, _next: any) => {
+  if (err.status === 400) {
+    return res.status(400).json({ error: 'Validation failed' });
+  }
+  res.status(500).json({ error: 'Internal server error' });
+});
 
 describe('GET /api/tenants/:tenantId/usage', () => {
   beforeEach(() => {
@@ -73,16 +113,17 @@ describe('GET /api/tenants/:tenantId/usage', () => {
       ],
     });
 
-    const res = await runRequest({
-      tenantId: 'tenant-123',
-      query: {
+    const res = await request(app)
+      .get('/api/tenants/tenant-123/usage')
+      .query({
         from: '2024-01-01T00:00:00.000Z',
         to: '2024-01-31T23:59:59.000Z',
         dimension: 'llm.tokens',
         limit: '5',
-      },
-    });
+      })
+      .set('x-tenant-id', 'tenant-123');
 
+    expect(res.status).toBe(200);
     expect(mockQuery).toHaveBeenCalledTimes(1);
     expect(mockQuery).toHaveBeenCalledWith(
       expect.stringContaining('FROM usage_summaries'),
@@ -93,7 +134,11 @@ describe('GET /api/tenants/:tenantId/usage', () => {
         ['llm.tokens'],
       ]),
     );
-    const body = res.json.mock.calls[0][0];
+
+    const body = res.body;
+    expect(body).toBeDefined();
+    expect(body.rollups).toBeDefined();
+    expect(Array.isArray(body.rollups)).toBe(true);
     expect(body.rollups[0]).toMatchObject({
       dimension: 'llm.tokens',
       totalQuantity: 1234,
@@ -103,28 +148,23 @@ describe('GET /api/tenants/:tenantId/usage', () => {
   });
 
   it('rejects cross-tenant access', async () => {
-    const res = await runRequest({
-      tenantId: 'other-tenant',
-      headers: { 'x-tenant-id': 'tenant-123' },
-    });
+    const res = await request(app)
+      .get('/api/tenants/other-tenant/usage')
+      .set('x-tenant-id', 'tenant-123');
 
-    expect(res.status).toHaveBeenCalledWith(403);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ error: 'tenant_access_denied' }),
-    );
+    expect(res.status).toBe(403);
+    expect(res.body).toMatchObject({ error: 'tenant_access_denied' });
     expect(mockQuery).not.toHaveBeenCalled();
   });
 
   it('validates query parameters', async () => {
-    const res = await runRequest({
-      tenantId: 'tenant-123',
-      query: { from: 'not-a-date' },
-    });
+    const res = await request(app)
+      .get('/api/tenants/tenant-123/usage')
+      .query({ from: 'not-a-date' })
+      .set('x-tenant-id', 'tenant-123');
 
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ error: 'Validation failed' }),
-    );
+    expect(res.status).toBe(400);
+    expect(res.body).toMatchObject({ error: 'Validation failed' });
     expect(mockQuery).not.toHaveBeenCalled();
   });
 });

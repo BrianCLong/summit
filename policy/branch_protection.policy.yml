@@ -1,0 +1,20 @@
+
+name: Branch Protection Policy
+version: 1.0.0
+targets:
+  - main
+requirements:
+  reviews:
+    required: true
+    count: 1
+    dismiss_stale: true
+  status_checks:
+    required: true
+    strict: true
+    contexts:
+      - "GA Governance Gate Pack"
+  enforcement:
+    admin_enforce: true
+    linear_history: true
+    allow_force_push: false
+    allow_deletion: false

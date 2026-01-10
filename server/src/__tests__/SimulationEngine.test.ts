@@ -2,6 +2,7 @@
  * Simulation Engine Tests
  */
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { SimulationEngine } from '../simulation/SimulationEngine';
 import { ScenarioType, DisasterSubtype, AssetType, HealthStatus, TwinSyncState, DigitalTwinAsset } from '../types/digitalTwin';
 

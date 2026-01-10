@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { MigrationOrchestrator } from '../MigrationOrchestrator';
 import { MigrationConfig } from '../types';
 

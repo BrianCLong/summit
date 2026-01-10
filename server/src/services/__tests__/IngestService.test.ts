@@ -2,6 +2,7 @@
  * IngestService Unit Tests
  */
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { IngestService, IngestInput } from '../IngestService';
 import { Pool } from 'pg';
 

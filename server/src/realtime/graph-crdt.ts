@@ -62,12 +62,14 @@ const redisOptions = {
 };
 
 const pub = new Redis(redisOptions);
-const sub = pub.duplicate();
+const sub = typeof pub.duplicate === 'function' ? pub.duplicate() : new Redis(redisOptions);
 let ioRef: Namespace | null = null;
 
 export function initGraphSync(ns: Namespace): void {
   ioRef = ns;
-  sub.psubscribe('graph:op:*');
+  if (typeof sub.psubscribe === 'function') {
+    sub.psubscribe('graph:op:*');
+  }
   sub.on('pmessage', (_pattern: string, channel: string, message: string): void => {
     const graphId = channel.split(':')[2];
     const op: GraphOperation = JSON.parse(message);

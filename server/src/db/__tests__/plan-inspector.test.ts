@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { assertIndexUsage, collectSeqScans } from '../plan-inspector';
 
 describe('plan-inspector', () => {

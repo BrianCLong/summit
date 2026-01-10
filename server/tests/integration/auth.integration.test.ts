@@ -9,6 +9,7 @@
  * - Multi-user scenarios
  */
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import AuthService from '../../src/services/AuthService';
 import { ensureAuthenticated, requirePermission } from '../../src/middleware/auth';
 import { Request, Response } from 'express';

@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import type { QueryConfig } from 'pg';
 import {
   buildCandidateQuery,

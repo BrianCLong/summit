@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { ContractError, ErrorCode, BaseResponse } from '../../src/contracts/index.js';
 
 describe('Contracts Serialization', () => {
