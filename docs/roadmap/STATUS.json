@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-10T02:08:00Z",
+  "revision_note": "Expanded Arion reality-check prompt with full-delivery mode and deeper implication guidance",
   "initiatives": [
     {
       "id": "A",

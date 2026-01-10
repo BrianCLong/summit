@@ -28,3 +28,26 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: summit-agentic-reality-check
+    version: v1
+    path: prompts/implement.summit-arion-reality-check@v1.md
+    sha256: 297f7cbc0667b72fd4dd2b904c43e5114045495afbfa7ee99d72c64cfb00a1f6
+    description: Reality-check prompt to translate Arion 2025 lessons into Summit-specific architecture deltas and backlog.
+    scope:
+      paths:
+        - prompts/implement.summit-arion-reality-check@v1.md
+        - docs/roadmap/STATUS.json
+      domains:
+        - governance
+        - planning
+        - reliability
+        - backlog
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
