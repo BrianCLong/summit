@@ -1,0 +1,116 @@
+name: Weekly Ops Evidence Pack
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref to package"
+        required: false
+        default: "main"
+      week_label:
+        description: "Optional ISO week label (YYYY-WWW). If omitted, computed in UTC"
+        required: false
+      status:
+        description: "Status flag for the evidence entry (pass|fail|partial)"
+        required: false
+        default: "pass"
+      notes:
+        description: "Optional context notes for the evidence entry"
+        required: false
+
+jobs:
+  build-weekly-pack:
+    name: Generate weekly ops evidence pack
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref || 'main' }}
+          fetch-depth: 0
+
+      - name: Compute week label
+        id: week
+        run: |
+          set -euo pipefail
+          LABEL_INPUT="${{ github.event.inputs.week_label }}"
+          if [[ -z "$LABEL_INPUT" ]]; then
+            WEEK_OUTPUT=$(./scripts/ops/compute_iso_week.sh --json)
+            WEEK_LABEL=$(echo "$WEEK_OUTPUT" | jq -r '.week_label')
+            GENERATED_AT=$(echo "$WEEK_OUTPUT" | jq -r '.generated_at_utc')
+          else
+            if [[ ! "$LABEL_INPUT" =~ ^[0-9]{4}-W[0-9]{2}$ ]]; then
+              echo "Invalid week_label format. Expected YYYY-WWW." >&2
+              exit 1
+            fi
+            WEEK_LABEL="$LABEL_INPUT"
+            NOW_OUTPUT=$(./scripts/ops/compute_iso_week.sh --json)
+            GENERATED_AT=$(echo "$NOW_OUTPUT" | jq -r '.generated_at_utc')
+          fi
+          echo "week_label=$WEEK_LABEL" >> "$GITHUB_OUTPUT"
+          echo "generated_at=$GENERATED_AT" >> "$GITHUB_OUTPUT"
+
+      - name: Capture git metadata
+        id: gitinfo
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          FULL_SHA=$(git rev-parse HEAD)
+          echo "short_sha=$SHORT_SHA" >> "$GITHUB_OUTPUT"
+          echo "commit_sha=$FULL_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Generate ops evidence pack
+        id: generate
+        run: |
+          WEEK_DIR="artifacts/ops-evidence/weekly/${{ steps.week.outputs.week_label }}_${{ steps.gitinfo.outputs.short_sha }}"
+          mkdir -p "$WEEK_DIR"
+          ./scripts/verification/generate_ops_evidence_pack.sh \
+            --output-dir "$WEEK_DIR" \
+            --status "${{ github.event.inputs.status || 'pass' }}" \
+            --notes "${{ github.event.inputs.notes }}"
+          SOURCE_TARBALL="$WEEK_DIR/ops-evidence-pack.tar.gz"
+          FINAL_TARBALL="$WEEK_DIR/ops-evidence_${{ steps.week.outputs.week_label }}_${{ steps.gitinfo.outputs.short_sha }}.tar.gz"
+          mv "$SOURCE_TARBALL" "$FINAL_TARBALL"
+          echo "tarball_path=$FINAL_TARBALL" >> "$GITHUB_OUTPUT"
+
+      - name: Upload ops evidence artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ops-evidence_${{ steps.week.outputs.week_label }}_${{ steps.gitinfo.outputs.short_sha }}.tar.gz
+          path: ${{ steps.generate.outputs.tarball_path }}
+          if-no-files-found: error
+
+      - name: Emit evidence index JSON snippet
+        id: evidence
+        run: |
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          ARTIFACT_NAME="ops-evidence_${{ steps.week.outputs.week_label }}_${{ steps.gitinfo.outputs.short_sha }}.tar.gz"
+          jq -n \
+            --arg generated_at "${{ steps.week.outputs.generated_at }}" \
+            --arg commit_sha "${{ steps.gitinfo.outputs.commit_sha }}" \
+            --arg week_label "${{ steps.week.outputs.week_label }}" \
+            --arg run_url "$RUN_URL" \
+            --arg status "${{ github.event.inputs.status || 'pass' }}" \
+            --arg notes "${{ github.event.inputs.notes }}" \
+            --arg artifact_name "$ARTIFACT_NAME" \
+            '{
+              week_label: $week_label,
+              generated_at_utc: $generated_at,
+              commit_sha: $commit_sha,
+              status: $status,
+              notes: $notes,
+              artifact: {
+                name: $artifact_name,
+                url: $run_url,
+                type: "workflow_run_artifact"
+              }
+            }' | tee evidence_index_entry.json
+          echo "json_snippet<<EOF" >> "$GITHUB_OUTPUT"
+          cat evidence_index_entry.json >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Summary output
+        run: |
+          echo "Week label: ${{ steps.week.outputs.week_label }}"
+          echo "Short SHA: ${{ steps.gitinfo.outputs.short_sha }}"
+          echo "Artifact name: ops-evidence_${{ steps.week.outputs.week_label }}_${{ steps.gitinfo.outputs.short_sha }}.tar.gz"
+          echo "Index JSON snippet:\n${{ steps.evidence.outputs.json_snippet }}"

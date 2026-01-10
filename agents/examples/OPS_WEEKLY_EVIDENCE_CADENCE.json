@@ -1,0 +1,42 @@
+{
+  "task_id": "OPS_WEEKLY_EVIDENCE_CADENCE",
+  "agent_id": "Jules",
+  "prompt_ref": {
+    "id": "agent-native-loop-n4",
+    "version": "v1",
+    "sha256": "2fcf3ef5535a5dd116439d1fc8a665e03945e1c6981373895fd9344bd486b658",
+    "path": "prompts/governance/agent-native-loop-n4.md"
+  },
+  "declared_scope": {
+    "paths": [
+      ".github/workflows/weekly-ops-evidence.yml",
+      "scripts/ops/compute_iso_week.sh",
+      "scripts/verification/generate_ops_evidence_pack.sh",
+      "docs/ops/EVIDENCE_INDEX.json",
+      "docs/ops/EVIDENCE_INDEX.md",
+      "docs/ops/WEEKLY_EVIDENCE_RUNBOOK.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/OPS_WEEKLY_EVIDENCE_CADENCE.json"
+    ],
+    "domains": ["ops", "governance", "evidence"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "A",
+    "artifacts": ["scripts/ops/compute_iso_week.sh --json", "scripts/check-boundaries.cjs"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Weekly ops evidence workflow validates week labels and packages evidence under artifacts/ops-evidence/weekly",
+    "Runbook and evidence index references align with emitted workflow snippet",
+    "Required evidence index files are enforced in the pack generator"
+  ],
+  "stop_conditions": [
+    "Supply-chain integrity workflows are modified",
+    "Coverage or fuzzing gates are modified",
+    "Required evidence index files are missing"
+  ]
+}
