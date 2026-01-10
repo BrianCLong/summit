@@ -50,3 +50,24 @@ We do not "try" features; we certify capabilities.
 We do not "hope" for stability; we engineer resilience.
 
 **This assertion stands until formally revoked by a V2 Governance Override.**
+
+## Release Captain Acceptance
+
+*   **Candidate Commit:** 3bdd8370e1c1cc6137220065fc627f8c66429d4a
+*   **Proof Command Executed:** (Attempted) `bash -lc '...'`
+*   **Outcome:** **NO-GO**
+
+**Blockers and Required Actions:**
+
+The release is **BLOCKED** due to missing critical artifacts and verification scripts.
+
+1.  **Missing Verification Scripts:** The hard-gate verification scripts (`scripts/ci/check_repo_hygiene.sh`, etc.) are missing.
+2.  **Missing GA Artifacts:** The canonical GA artifacts (`MVP4_GA_BASELINE.md`, `evidence_map.yml`, etc.) are not present in `docs/ga/` or `docs/security/`.
+3.  **Missing Runbook:** `docs/releases/MVP4_RC_CUT_RUNBOOK.md` is missing.
+
+**Owners:**
+*   CI/CD Team (Verification Scripts)
+*   Codex/Release Team (GA Artifacts & Runbook)
+
+**Action:**
+Restoration of these artifacts is required before re-submission.
