@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-09T16:00:00Z",
-  "revision_note": "Added scaffolded INSLAW/PROMIS affidavit demo artifacts for provenance-first ingestion",
+  "last_updated": "2026-01-10T01:46:31Z",
+  "revision_note": "Added release artifact inventory generation for GA bundle verification",
   "initiatives": [
     {
       "id": "A",

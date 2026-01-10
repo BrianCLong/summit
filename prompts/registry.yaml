@@ -30,6 +30,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: release-artifact-inventory
+    version: v1
+    path: prompts/release/generate-artifact-inventory@v1.md
+    sha256: 00be1125605bdbcb8a24082d370527c5d929452451603de9e9e175e22cbad8fd
+    description: Deterministic release artifact inventory generation for GA bundles.
+    scope:
+      paths:
+        - scripts/release/generate_artifact_inventory.mjs
+        - scripts/release/build-ga-bundle.sh
+        - docs/roadmap/STATUS.json
+        - prompts/release/generate-artifact-inventory@v1.md
+        - prompts/registry.yaml
+        - agents/examples/RELEASE_ARTIFACT_INVENTORY.json
+      domains:
+        - release
+        - governance
+        - provenance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md
