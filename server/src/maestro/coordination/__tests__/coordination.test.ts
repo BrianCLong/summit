@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { coordinationService } from '../service';
 import { budgetManager } from '../budget-manager';
 import { CoordinationSchema, SharedBudget } from '../types';

@@ -1,4 +1,5 @@
 // Mock dependencies
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 jest.mock('../../config/database.js', () => ({
   getNeo4jDriver: jest.fn(),
 }));

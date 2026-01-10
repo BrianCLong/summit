@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { otelService } from '../../src/lib/observability/otel';
 import { metrics } from '../../src/lib/observability/metrics';
 

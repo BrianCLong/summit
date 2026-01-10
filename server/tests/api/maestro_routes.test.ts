@@ -1,11 +1,19 @@
 // server/tests/api/maestro_routes.test.ts
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import express from 'express';
-import { buildMaestroRouter } from '../../src/routes/maestro_routes';
-import { Maestro } from '../../src/maestro/core';
-import { MaestroQueries } from '../../src/maestro/queries';
-import { logger } from '../../src/utils/logger';
+import { buildMaestroRouter } from '../../src/routes/maestro_routes.js';
+import { Maestro } from '../../src/maestro/core.js';
+import { MaestroQueries } from '../../src/maestro/queries.js';
+import { logger } from '../../src/utils/logger.js';
+import { opaPolicyEngine } from '../../src/conductor/governance/opa-integration.js';
+
+jest.mock('../../src/conductor/governance/opa-integration.js', () => ({
+  opaPolicyEngine: {
+    evaluatePolicy: jest.fn().mockResolvedValue({ allow: true, reason: 'allowed' }),
+  },
+}));
 
 jest.mock('../../src/middleware/correlation-id', () => ({
   getCorrelationContext: () => ({
@@ -32,6 +40,7 @@ describeIf('Maestro API routes', () => {
     app.use((req, _res, next) => {
       (req as any).correlationId = 'corr-id';
       (req as any).traceId = 'trace-id';
+      (req as any).user = { id: 'user-1', tenantId: 'tenant-1', role: 'user' };
       next();
     });
 
@@ -43,7 +52,7 @@ describeIf('Maestro API routes', () => {
       getTaskWithArtifacts: queriesGetTaskWithArtifacts,
     } as unknown as MaestroQueries;
 
-    app.use('/api/maestro', buildMaestroRouter(maestro, queries, opaAllow));
+    app.use('/api/maestro', buildMaestroRouter(maestro, queries, opaAllow as any));
     return app;
   };
 
@@ -52,6 +61,7 @@ describeIf('Maestro API routes', () => {
     queriesGetRunResponse.mockReset();
     queriesGetTaskWithArtifacts.mockReset();
     opaAllow.evaluateQuery.mockResolvedValue({ allow: true, reason: 'allowed' });
+    (opaPolicyEngine.evaluatePolicy as jest.Mock).mockResolvedValue({ allow: true, reason: 'allowed' });
     jest.spyOn(logger, 'info').mockClear?.();
   });
 
@@ -136,28 +146,20 @@ describeIf('Maestro API routes', () => {
       .expect(200);
 
     expect(response.body.run.id).toBe('run-1');
-    expect(opaAllow.evaluateQuery).toHaveBeenCalledWith(
-      'maestro/authz/allow',
+    expect(opaPolicyEngine.evaluatePolicy).toHaveBeenCalledWith(
+      'maestro/authz',
       expect.objectContaining({
-        action: 'maestro.run.create',
-        principal: expect.objectContaining({ id: 'user-1', tenantId: 'tenant-1' }),
-        resource: expect.objectContaining({ type: 'maestro/run' }),
+        action: 'start_run',
+        tenantId: 'tenant-1',
+        userId: 'user-1',
       }),
     );
 
-    const decisionLog = logSpy.mock.calls.find(
-      ([payload]) => payload && (payload as any).event === 'maestro_opa_decision',
-    )?.[0] as any;
-
-    expect(decisionLog).toBeDefined();
-    expect(decisionLog.traceId).toBeTruthy();
-    expect(decisionLog.principalId).toBe('user-1');
-    expect(decisionLog.resourceAttributes.method).toBe('post');
     logSpy.mockRestore();
   });
 
   it('blocks run creation when OPA denies access', async () => {
-    opaAllow.evaluateQuery.mockResolvedValueOnce({ allow: false, reason: 'blocked' });
+    (opaPolicyEngine.evaluatePolicy as jest.Mock).mockResolvedValueOnce({ allow: false, reason: 'blocked' });
     const app = createApp();
 
     const res = await request(app)

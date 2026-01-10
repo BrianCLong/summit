@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { QuietExitService } from '../../src/services/QuietExitService';
 import fs from 'fs';
 import path from 'path';

@@ -9,6 +9,7 @@
  * - Edge cases and security scenarios
  */
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { Request, Response, NextFunction } from 'express';
 import { ensureAuthenticated, requirePermission, authMiddleware, auth } from '../../src/middleware/auth';
 

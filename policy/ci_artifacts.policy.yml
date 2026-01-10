@@ -1,0 +1,12 @@
+
+name: CI Artifact Retention Policy
+version: 1.0.0
+storage:
+  max_retention_days: 90
+  default_retention_days: 14
+enforcement:
+  require_retention_days: true
+  allow_default_retention: false
+  max_allowed_retention: 90
+naming:
+  pattern: "^summit-.*"

@@ -5,6 +5,7 @@
  * market data, and regulatory reporting services.
  */
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { Pool } from 'pg';
 import { TradeSurveillanceService } from '../surveillance/TradeSurveillanceService.js';
 import { RiskAnalyticsService } from '../risk/RiskAnalyticsService.js';

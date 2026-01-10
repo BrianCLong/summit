@@ -61,6 +61,10 @@ export default class Redis {
     return count;
   }
 
+  async psubscribe(pattern: string) {
+    return Promise.resolve();
+  }
+
   async keys(pattern: string) {
     const regex = new RegExp(pattern.replace('*', '.*'));
     return Array.from(mockRedisStorage.keys()).filter((k) => regex.test(k));

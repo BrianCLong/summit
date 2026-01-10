@@ -7,6 +7,7 @@
  * SOC 2 Controls: CC4.1 (Monitoring), CC3.1 (Risk Assessment)
  */
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import {
   getFrameworkMetadata,
   getFedRAMPControlsService,

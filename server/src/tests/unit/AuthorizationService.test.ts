@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { AuthorizationServiceImpl } from '../../services/AuthorizationService.js';
 import { MultiTenantRBACManager } from '../../auth/multi-tenant-rbac.js';
 import { Principal } from '../../types/identity.js';

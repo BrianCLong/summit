@@ -73,18 +73,19 @@ jobs:
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Run Gitleaks
-        uses: zricethezav/gitleaks-action@v2
+        uses: zricethezav/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc # v2
         with:
           args: detect --source . --report-format sarif --report-path ${{ env.REPORT_DIR }}/gitleaks.sarif
       - name: Upload SARIF to GitHub Security
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
         with:
           sarif_file: ${{ env.REPORT_DIR }}/gitleaks.sarif
       - name: Persist report artifact
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
+          retention-days: 14
           name: security-reports
           path: ${{ env.REPORT_DIR }}/gitleaks.sarif
 
@@ -103,14 +104,14 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
         with:
           languages: ${{ matrix.language }}
       - name: Autobuild (best effort)
-        uses: github/codeql-action/autobuild@v4
+        uses: github/codeql-action/autobuild@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
         continue-on-error: true
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
         with:
           category: "/language:${{ matrix.language }}"
 
@@ -126,7 +127,7 @@ jobs:
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Run Semgrep CI ruleset
-        uses: returntocorp/semgrep-action@v1
+        uses: returntocorp/semgrep-action@713efdd345f3035192eaa63f56867b88e63e4e5d # v1
         with:
           config: p/ci
           generateSarif: true
@@ -134,13 +135,14 @@ jobs:
           auditOn: push
       - name: Upload Semgrep SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
         with:
           sarif_file: ${{ env.REPORT_DIR }}/semgrep.sarif
       - name: Persist Semgrep report
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
+          retention-days: 14
           name: security-reports
           path: ${{ env.REPORT_DIR }}/semgrep.sarif
 
@@ -173,13 +175,14 @@ jobs:
             --sarif-file-output=${{ env.REPORT_DIR }}/snyk.sarif
       - name: Upload Snyk SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
         with:
           sarif_file: ${{ env.REPORT_DIR }}/snyk.sarif
       - name: Persist Snyk report
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
+          retention-days: 14
           name: security-reports
           path: ${{ env.REPORT_DIR }}/snyk.sarif
 
@@ -207,13 +210,14 @@ jobs:
             .
       - name: Upload filesystem SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
         with:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-fs.sarif
       - name: Persist filesystem report
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
+          retention-days: 14
           name: security-reports
           path: ${{ env.REPORT_DIR }}/trivy-fs.sarif
 
@@ -242,7 +246,7 @@ jobs:
           ignore-unfixed: true
       - name: Upload server SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
         with:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-server.sarif
       - name: Scan client image
@@ -255,13 +259,14 @@ jobs:
           ignore-unfixed: true
       - name: Upload client SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
         with:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-client.sarif
       - name: Persist container reports
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
+          retention-days: 14
           name: security-reports
           path: |
             ${{ env.REPORT_DIR }}/trivy-server.sarif
@@ -286,8 +291,9 @@ jobs:
             .
       - name: Persist license report
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
+          retention-days: 14
           name: security-reports
           path: ${{ env.REPORT_DIR }}/trivy-license.json
 
@@ -310,13 +316,14 @@ jobs:
             --output sarif
       - name: Upload Checkov SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
         with:
           sarif_file: ${{ env.REPORT_DIR }}/results.sarif
       - name: Persist Checkov report
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
+          retention-days: 14
           name: security-reports
           path: ${{ env.REPORT_DIR }}/results.sarif
 
@@ -327,7 +334,7 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Install Helm
-        uses: azure/setup-helm@v4
+        uses: azure/setup-helm@bf6a7d304bc2fdb57e0331155b7ebf2c504acf0a # v4
         with:
           version: "3.12.0"
       - name: Install Conftest
@@ -346,8 +353,9 @@ jobs:
         run: conftest test rendered --policy policies/opa
       - name: Persist rendered manifests
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
+          retention-days: 14
           name: security-reports
           path: rendered
 
@@ -360,7 +368,7 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Install Helm
-        uses: azure/setup-helm@v4
+        uses: azure/setup-helm@bf6a7d304bc2fdb57e0331155b7ebf2c504acf0a # v4
         with:
           version: "3.12.0"
       - uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1 # v0.2.4
@@ -384,8 +392,9 @@ jobs:
           fi
       - name: Persist CIS report
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
+          retention-days: 14
           name: security-reports
           path: ${{ env.REPORT_DIR }}/trivy-cis.json
 
@@ -401,8 +410,9 @@ jobs:
           REPORT_DIR="$REPORT_DIR" scripts/security/baseline-check.sh
       - name: Persist baseline report
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
+          retention-days: 14
           name: security-reports
           path: ${{ env.REPORT_DIR }}/baseline-report.json
 
@@ -430,7 +440,7 @@ jobs:
           echo "Application did not become ready in time" >&2
           exit 1
       - name: OWASP ZAP baseline scan
-        uses: zaproxy/action-baseline@v0.15.0
+        uses: zaproxy/action-baseline@6c5a007541891231cd9e0ddec25d4f25c59c9874 # v0.15.0
         with:
           target: "http://localhost:3000"
           cmd_options: "-a -m 5"
@@ -446,8 +456,9 @@ jobs:
         run: docker compose -f docker-compose.yml down
       - name: Persist ZAP reports
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
+          retention-days: 14
           name: security-reports
           path: |
             ${{ env.REPORT_DIR }}/zap-report.html
@@ -475,7 +486,7 @@ jobs:
       dashboard_url: ${{ steps.dashboard.outputs.dashboard_url }}
     steps:
       - name: Download all security reports
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           name: security-reports
           path: aggregated-security
@@ -528,7 +539,7 @@ jobs:
                 json.dump(summary, fh, indent=2)
           PY
       - name: Publish job summary
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
             const fs = require('fs');
@@ -547,8 +558,9 @@ jobs:
               .write();
       - name: Upload aggregated summary
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
+          retention-days: 14
           name: security-reports
           path: aggregated-security/security-summary.json
       - name: Record dashboard location
