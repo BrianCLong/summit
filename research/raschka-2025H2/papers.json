@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.1",
+  "access_status": "deferred-pending-input",
+  "source": "https://magazine.sebastianraschka.com/p/llm-research-papers-2025-part2",
+  "retrieved_at": "2026-01-03T00:00:00Z",
+  "pipeline": {
+    "version": "1.0",
+    "script": "tools/research/raschka2025h2_pipeline.py",
+    "run_id": "deferred"
+  },
+  "governance": {
+    "summit_readiness_assertion": "docs/SUMMIT_READINESS_ASSERTION.md",
+    "governed_exception": "Governed Exception: input access intentionally constrained pending authorized source.",
+    "policy_as_code": "Required for regulatory logic; no exemptions."
+  },
+  "notes": [
+    "Deferred pending authorized access or pasted paper list.",
+    "Taxonomy scaffold preserved for deterministic ingestion.",
+    "Downstream backlog and ADRs are intentionally constrained until content arrives."
+  ],
+  "categories": [
+    { "id": "1a", "name": "Training Reasoning Models", "papers": [] },
+    { "id": "1b", "name": "Inference-Time Reasoning Strategies", "papers": [] },
+    { "id": "1c", "name": "Evaluating LLMs and/or Understanding Reasoning", "papers": [] },
+    { "id": "2", "name": "Other Reinforcement Learning Methods for LLMs", "papers": [] },
+    { "id": "3", "name": "Other Inference-Time Scaling Methods", "papers": [] },
+    { "id": "4", "name": "Model Releases / Technical Reports", "papers": [] },
+    { "id": "5", "name": "Architectures", "papers": [] },
+    { "id": "6", "name": "Efficient Training", "papers": [] },
+    { "id": "7", "name": "Diffusion-Based Language Models", "papers": [] },
+    { "id": "8", "name": "Multimodal & Vision-Language Models", "papers": [] },
+    { "id": "9", "name": "Data & Pre-training Datasets", "papers": [] }
+  ]
+}

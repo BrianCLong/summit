@@ -1,0 +1,13 @@
+{
+  "task_id": "RASCHKA_2025H2_PIPELINE",
+  "agent_id": "gpt-5.2-codex",
+  "status": "completed",
+  "summary": "Implemented Raschka 2025H2 research intake pipeline with parsing, scoring, and tests; intake remains deferred pending authorized input.",
+  "artifacts": [
+    "tools/research/raschka2025h2_pipeline.py",
+    "tests/research/test_raschka2025h2_pipeline.py",
+    "research/raschka-2025H2/papers.json",
+    "research/raschka-2025H2/backlog.csv",
+    "research/raschka-2025H2/backlog.md"
+  ]
+}

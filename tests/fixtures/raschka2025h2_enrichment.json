@@ -1,0 +1,34 @@
+[
+  {
+    "id": "paper-alpha-training-reasoners",
+    "title": "Paper Alpha: Training Reasoners",
+    "url": "https://arxiv.org/abs/1234.5678",
+    "authors": ["A. Example", "B. Example"],
+    "venue": "arXiv",
+    "year": 2025,
+    "claim": "Demonstrates a curriculum that improves multi-step reasoning reliability.",
+    "tags": ["TRAINING", "EVAL"],
+    "scores": {
+      "value": 4,
+      "differentiation": 4,
+      "effort": 2,
+      "risk": 2,
+      "impact": 4
+    },
+    "next_steps": "Prototype curriculum-weighted evaluation harness."
+  },
+  {
+    "url": "https://example.com/paper-beta",
+    "title": "Paper Beta",
+    "claim": "Shows inference-time self-consistency gains with bounded sampling.",
+    "tags": ["INFERENCE", "COST"],
+    "scores": {
+      "value": 3,
+      "differentiation": 3,
+      "effort": 2,
+      "risk": 3,
+      "impact": 3
+    },
+    "next_steps": "Add bounded-sampling policy gate to router."
+  }
+]

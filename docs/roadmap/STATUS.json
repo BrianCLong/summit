@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-10T00:00:00Z",
+  "revision_note": "Implemented Raschka 2025H2 intake pipeline; ingestion remains a governed exception pending authorized source input.",
   "initiatives": [
     {
       "id": "A",
@@ -146,6 +146,24 @@
           "target_completion": "Q4"
         }
       ]
+    },
+    {
+      "id": "F",
+      "name": "External Research Intake",
+      "epics": [
+        {
+          "id": "F1",
+          "name": "Raschka 2025H2 Research Intake",
+          "status": "blocked",
+          "owner": "Jules",
+          "evidence": "Pipeline implemented in tools/research/raschka2025h2_pipeline.py; input list still paywalled",
+          "blockers": [
+            "Need authorized paper list or access token",
+            "Pending enrichment for tags/claims/scoring"
+          ],
+          "target_completion": "Sprint N+1 after access provided"
+        }
+      ]
     }
   ],
   "summary": {
@@ -153,7 +171,11 @@
     "partial": 2,
     "incomplete": 2,
     "not_started": 6,
-    "total": 12,
-    "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
+    "blocked": 1,
+    "total": 13,
+    "ga_blockers": [
+      "C2: Immutable Audit Log must be completed for GA compliance",
+      "F1: Raschka 2025H2 research intake blocked pending access"
+    ]
   }
 }
