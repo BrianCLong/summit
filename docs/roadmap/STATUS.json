@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-09T16:00:00Z",
-  "revision_note": "Added scaffolded INSLAW/PROMIS affidavit demo artifacts for provenance-first ingestion",
+  "last_updated": "2026-01-10T00:20:00Z",
+  "revision_note": "Added MVP-4 GA evidence map, demo runbook, and quick proof references",
   "initiatives": [
     {
       "id": "A",

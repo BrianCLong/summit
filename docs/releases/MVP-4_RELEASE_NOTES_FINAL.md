@@ -57,6 +57,15 @@ npm run generate:provenance
 
 Also review `docs/SUMMIT_READINESS_ASSERTION.md` as part of the GA assertion packet.
 
+## GA evidence quick proof (restricted profile)
+
+```bash
+export CI=1 ZERO_FOOTPRINT=true NO_NETWORK_LISTEN=true
+test -f e2e/a11y-keyboard/a11y-gate.spec.ts && test -f .github/workflows/a11y-keyboard-smoke.yml
+node --test testing/ga-verification/ga-features.ga.test.mjs
+node scripts/ga/verify-ga-surface.mjs
+```
+
 ## Known limitations
 
 - Load testing evidence is deferred pending a `k6`-enabled environment. (Evidence: `docs/releases/v4.0.0/MVP4-GA-READINESS.md`.)
