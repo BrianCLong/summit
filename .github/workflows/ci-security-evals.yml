@@ -1,0 +1,42 @@
+name: Agent Security Evaluations
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  security-evals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run repository smoke tests
+        run: pnpm test
+
+      - name: Run agent security evaluations
+        run: pnpm security:eval --json > agent-security-evals.json
+
+      - name: Upload agent security eval results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: agent-security-evals
+          path: agent-security-evals.json
+
+      - name: Run eval harness unit tests
+        working-directory: server
+        run: pnpm test -- --runTestsByPath src/security/evals/__tests__/scenarioRunner.test.ts

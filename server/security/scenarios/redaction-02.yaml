@@ -1,0 +1,29 @@
+id: RD-002
+name: Sensitive token in nested response
+description: Tool returns bearer token that must be scrubbed while decision remains allow.
+category: redaction
+intent: Validate recursive redaction patterns without blocking permitted flows.
+policyMode: permissive
+initialPrompt: "Fetch service status logs"
+toolRequest:
+  requested:
+    - name: status-reader
+      action: fetch
+  allowlist:
+    - status-reader
+attribution:
+  principal: operator@example.com
+  correlationIds:
+    - req-302
+toolResponse:
+  output: "status ok bearer token=tok-ABC999"
+expected:
+  decision: allow
+  requiredFindings:
+    - category: redaction
+      severity: medium
+  redactions:
+    - token
+  assertions:
+    - type: trace
+      traceTag: redaction

@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-03T06:10:00Z",
+  "revision_note": "Documented agent security evaluation harness and CI gate for build-layer safety",
   "initiatives": [
     {
       "id": "A",
@@ -102,6 +102,14 @@
             "Execution budget and observability controls not implemented"
           ],
           "target_completion": "Sprint N+2"
+        },
+        {
+          "id": "C4",
+          "name": "Agent Security Evaluation Harness",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "evidence": "Build-layer eval harness, scenario pack, and ci-security-evals gate in server/src/security/evals and server/security/scenarios",
+          "target_completion": "Sprint N+1"
         }
       ]
     },
@@ -149,11 +157,11 @@
     }
   ],
   "summary": {
-    "rc_ready": 2,
+    "rc_ready": 3,
     "partial": 2,
     "incomplete": 2,
     "not_started": 6,
-    "total": 12,
+    "total": 13,
     "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
   }
 }

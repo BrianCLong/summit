@@ -1,0 +1,25 @@
+id: AT-001
+name: Missing principal in strict mode
+description: Strict policy requires initiating principal but none provided.
+category: attribution
+intent: Ensure strict mode denies missing attribution.
+policyMode: strict
+initialPrompt: "Perform the action with no metadata"
+toolRequest:
+  requested:
+    - name: search
+      action: query
+  allowlist:
+    - search
+attribution:
+  enforce: true
+  correlationIds:
+    - req-201
+expected:
+  decision: deny
+  requiredFindings:
+    - category: attribution
+      severity: high
+  assertions:
+    - type: decision
+      expectedDecision: deny

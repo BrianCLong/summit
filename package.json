@@ -61,6 +61,7 @@
     "schema:diff:strict": "npx ts-node scripts/schema-diff.ts --version=v1 --output=json --strict",
     "schema:validate": "npm run schema:diff:strict",
     "update:golden": "ts-node --esm scripts/update-golden.ts",
+    "security:eval": "pnpm --filter intelgraph-server run security:eval",
     "e2e": "playwright test",
     "graphql:schema:check": "graphql-inspector diff packages/graphql/schema.graphql origin/main:packages/graphql/schema.graphql --fail-on-breaking",
     "graphql:codegen": "graphql-codegen",
