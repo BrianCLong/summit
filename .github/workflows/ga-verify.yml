@@ -1,0 +1,67 @@
+name: GA Verify (Consistency)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tenant:
+        description: 'Tenant ID (optional)'
+        required: false
+        type: string
+      batch_since:
+        description: 'Batch Since ISO (optional)'
+        required: false
+        type: string
+  schedule:
+    - cron: "17 * * * *" # Hourly canary
+
+jobs:
+  graph-consistency:
+    name: Graph↔SQL Consistency
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Graph↔SQL consistency (tenant-scope)
+        shell: bash
+        run: |
+          export PGHOST=${{ secrets.PGHOST }} PGDATABASE=${{ secrets.PGDATABASE }} PGUSER=${{ secrets.PGUSER }} PGPASSWORD=${{ secrets.PGPASSWORD }}
+          export NEO4J_URI=${{ secrets.NEO4J_URI }} NEO4J_USER=${{ secrets.NEO4J_USER }} NEO4J_PASSWORD=${{ secrets.NEO4J_PASSWORD }}
+          export TENANT_ID=${{ inputs.tenant || '' }}
+
+          # Handle schedule or manual input
+          if [ "${{ github.event_name }}" == "schedule" ]; then
+             # Target the previous FULL hour to ensure immutable window
+             # If now is 10:17, we want 09:00:00 to 10:00:00
+             export BATCH_UNTIL=$(date -u +%Y-%m-%dT%H:00:00Z)
+             export BATCH_SINCE=$(date -u -d '1 hour ago' +%Y-%m-%dT%H:00:00Z)
+          else
+             export BATCH_SINCE=${{ inputs.batch_since || '' }}
+             # If BATCH_UNTIL is not set manually, it defaults to null (unbounded) which is fine for ad-hoc checks
+             # unless the user wants to check a specific window.
+          fi
+
+          # Run check and capture output
+          set -o pipefail
+          pnpm -C server ops:verify-consistency | tee /tmp/graph_sql_consistency.json
+
+      - name: Upload Evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: consistency-evidence
+          path: /tmp/graph_sql_consistency.json
+          retention-days: 7

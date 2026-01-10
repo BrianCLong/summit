@@ -36,7 +36,8 @@
     "seed:small": "SEED_ENTITIES=1000 SEED_RELATIONSHIPS=5000 ts-node scripts/seed-data.ts",
     "seed:large": "SEED_ENTITIES=50000 SEED_RELATIONSHIPS=250000 ts-node scripts/seed-data.ts",
     "partition:maintain": "ts-node scripts/partition-maintenance.ts",
-    "db:migration:check": "node --loader ts-node/esm scripts/migration_check.ts"
+    "db:migration:check": "node --loader ts-node/esm scripts/migration_check.ts",
+    "ops:verify-consistency": "node ./scripts/ops/verify-consistency.mjs"
   },
   "dependencies": {
     "@apollo/server": "5.2.0",
