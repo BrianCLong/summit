@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { systemMonitor } from '../../src/lib/system-monitor';
 import type { AgentTask } from '../../src/orchestrator/types';
 

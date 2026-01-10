@@ -12,6 +12,7 @@
  * - Security headers
  */
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import AuthService from '../../src/services/AuthService';
 import { ensureAuthenticated, requirePermission } from '../../src/middleware/auth';
 import { securityTestVectors, createMockRequest, createMockResponse } from '../utils/auth-test-helpers';

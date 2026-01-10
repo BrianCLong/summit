@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import fc from 'fast-check';
 import { checkScope, requireScopes } from '../../src/api/scopeGuard.js';
 

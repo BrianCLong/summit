@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { BehavioralAnalyzer } from '../BehavioralAnalyzer';
 import { Actor, SocialPost } from '../types';
 

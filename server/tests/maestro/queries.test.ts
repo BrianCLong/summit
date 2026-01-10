@@ -1,5 +1,6 @@
 // server/tests/maestro/queries.test.ts
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { MaestroQueries } from '../../src/maestro/queries';
 import type { IntelGraphClient } from '../../src/intelgraph/client';
 

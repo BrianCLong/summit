@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { QueryIntentPolicyMapper } from '../../services/qic-pm/query-intent-policy-mapper';
 import { createRsrAdapter } from '../../services/qic-pm/adapters/rsr-adapter';
 import { createPpcAdapter } from '../../services/qic-pm/adapters/ppc-adapter';

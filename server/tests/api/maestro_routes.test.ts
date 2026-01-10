@@ -1,5 +1,6 @@
 // server/tests/api/maestro_routes.test.ts
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import express from 'express';
 import { buildMaestroRouter } from '../../src/routes/maestro_routes.js';

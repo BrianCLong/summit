@@ -1,4 +1,5 @@
 // server/tests/case-spaces.test.js
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { pool } from '../src/db/pg';
 import { caseSpacesResolvers } from '../src/graphql/resolvers.case-spaces';
 

@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { CorrelationService } from '../CorrelationService.js';
 import { AlertEvent } from '../../../types/alerts.js';
 

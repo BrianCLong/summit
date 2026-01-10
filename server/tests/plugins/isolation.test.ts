@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { MarketplaceService } from '../../src/marketplace/service';
 import { runPlugin } from '../../src/plugins/index';
 import { PluginStatus, PluginPackage, PluginManifest } from '../../src/plugins/types';
