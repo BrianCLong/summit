@@ -293,6 +293,7 @@ export interface RTBFRequest {
   id: string;
   state: RTBFRequestState;
   scope: RTBFScope;
+  tenantId?: string;
 
   /** Who submitted the request */
   requester: {
@@ -323,13 +324,20 @@ export interface RTBFRequest {
 
   /** Approval workflow */
   approval?: {
-    approvedBy?: string;
+    approvals?: Array<{
+      actorId: string;
+      approvedAt: Date;
+      notes?: string;
+    }>;
+    approvedBy?: string[];
     approvedAt?: Date;
     rejectedBy?: string;
     rejectedAt?: Date;
     rejectionReason?: string;
     requiredApprovers?: string[];
     approvalNotes?: string;
+    executeAfter?: Date;
+    requiredApprovals?: number;
   };
 
   /** Execution tracking */
@@ -339,6 +347,8 @@ export interface RTBFRequest {
     completedAt?: Date;
     failedAt?: Date;
     errorMessage?: string;
+    purgeManifestId?: string;
+    purgeManifest?: PurgeManifest;
   };
 
   /** Whether to use soft delete or hard delete */
@@ -399,6 +409,36 @@ export interface RTBFDryRunResults {
     operation: RedactionOperation;
     fieldCount: number;
   }[];
+}
+
+export interface PurgeManifest {
+  id: string;
+  requestId: string;
+  tenantId: string;
+  createdAt: Date;
+  executeAfter?: Date;
+  scope: RTBFScope;
+  deletionType: RTBFRequest['deletionType'];
+  target: RTBFRequest['target'];
+  approvals: Array<{
+    actorId: string;
+    approvedAt: Date;
+    notes?: string;
+  }>;
+  jobs: Array<{
+    id: string;
+    storageSystem: StorageSystem;
+    operation: RTBFJob['operation']['type'];
+    recordsAffected: number;
+  }>;
+  totals: {
+    totalJobs: number;
+    totalRecordsAffected: number;
+    completedAt?: Date;
+  };
+  signature: string;
+  signatureAlgorithm: string;
+  hash: string;
 }
 
 /**

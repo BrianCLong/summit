@@ -22,7 +22,12 @@ describe('RTBFOrchestrator', () => {
     } as any;
 
     repository = new DataRetentionRepository(pool);
-    orchestrator = new RTBFOrchestrator({ pool, repository });
+    orchestrator = new RTBFOrchestrator({
+      pool,
+      repository,
+      approvalDelayMs: 0,
+      signingKey: 'test-secret',
+    });
   });
 
   describe('RTBF Request Submission', () => {
@@ -247,11 +252,19 @@ describe('RTBFOrchestrator', () => {
         'Approved for compliance',
       );
 
+      const midRequest = orchestrator.getRequest(request.id);
+      expect(midRequest?.state).toBe('pending_approval');
+
+      await orchestrator.approveRequest(
+        request.id,
+        'admin456',
+        'Second approval',
+      );
+
       const updatedRequest = orchestrator.getRequest(request.id);
       expect(updatedRequest?.state).toBe('approved');
-      expect(updatedRequest?.approval?.approvedBy).toBe('admin123');
-      expect(updatedRequest?.approval?.approvalNotes).toBe(
-        'Approved for compliance',
+      expect(updatedRequest?.approval?.approvedBy).toEqual(
+        expect.arrayContaining(['admin123', 'admin456']),
       );
     });
 
@@ -314,10 +327,11 @@ describe('RTBFOrchestrator', () => {
 
       const request = await orchestrator.submitRTBFRequest(requestData);
       await orchestrator.approveRequest(request.id, 'admin123');
+      await orchestrator.approveRequest(request.id, 'admin456');
 
       // Try to approve again
       await expect(
-        orchestrator.approveRequest(request.id, 'admin123'),
+        orchestrator.approveRequest(request.id, 'admin789'),
       ).rejects.toThrow('is not pending approval');
     });
   });
@@ -459,6 +473,7 @@ describe('RTBFOrchestrator', () => {
       ).toBe(true);
 
       await orchestrator.approveRequest(request.id, 'admin123');
+      await orchestrator.approveRequest(request.id, 'admin456');
 
       const updatedRequest = orchestrator.getRequest(request.id);
       expect(
@@ -561,10 +576,207 @@ describe('RTBFOrchestrator', () => {
       // First approval should succeed
       await orchestrator.approveRequest(request.id, 'admin1');
 
-      // Second approval should fail
+      // Second approval should succeed with distinct actor
+      await orchestrator.approveRequest(request.id, 'admin2');
+
+      // Duplicate approval should fail after request is approved
       await expect(
         orchestrator.approveRequest(request.id, 'admin2'),
-      ).rejects.toThrow();
+      ).rejects.toThrow('not pending approval');
+    });
+  });
+
+  describe('Two-Actor Approval and Purge Manifest', () => {
+    it('should require two distinct approvers before approval', async () => {
+      const requestData: Omit<
+        RTBFRequest,
+        'id' | 'state' | 'auditEvents' | 'createdAt' | 'updatedAt'
+      > = {
+        scope: 'dataset',
+        requester: {
+          type: 'user',
+          userId: 'user123',
+        },
+        target: {
+          datasetIds: ['dataset-1'],
+        },
+        justification: {
+          legalBasis: 'GDPR Article 17',
+          reason: 'User request',
+        },
+        deletionType: 'hard',
+        dryRun: true,
+      };
+
+      const request = await orchestrator.submitRTBFRequest(requestData);
+
+      await orchestrator.approveRequest(request.id, 'admin1');
+
+      const pendingRequest = orchestrator.getRequest(request.id);
+      expect(pendingRequest?.state).toBe('pending_approval');
+
+      await expect(
+        orchestrator.approveRequest(request.id, 'admin1'),
+      ).rejects.toThrow('already approved');
+
+      await orchestrator.approveRequest(request.id, 'admin2');
+
+      const approvedRequest = orchestrator.getRequest(request.id);
+      expect(approvedRequest?.state).toBe('approved');
+      expect(approvedRequest?.approval?.approvedBy).toEqual(
+        expect.arrayContaining(['admin1', 'admin2']),
+      );
+    });
+
+    it('should generate signed purge manifest after execution', async () => {
+      const record: RetentionRecord = {
+        metadata: {
+          datasetId: 'dataset-1',
+          name: 'Test Dataset',
+          dataType: 'analytics',
+          containsPersonalData: true,
+          jurisdictions: ['EU'],
+          tags: ['postgres:table:users'],
+          storageSystems: ['postgres'],
+          owner: 'test',
+          createdAt: new Date(),
+          tenantId: 'tenant-1',
+        },
+        policy: {
+          datasetId: 'dataset-1',
+          templateId: 'standard',
+          retentionDays: 365,
+          purgeGraceDays: 30,
+          legalHoldAllowed: true,
+          storageTargets: ['postgres'],
+          classificationLevel: 'restricted',
+          safeguards: [],
+          appliedAt: new Date(),
+          appliedBy: 'system',
+        },
+        archiveHistory: [],
+        lastEvaluatedAt: new Date(),
+      };
+
+      jest.spyOn(repository, 'getRecord').mockReturnValue(record);
+      const mockQuery = pool.query as jest.MockedFunction<Pool['query']>;
+      mockQuery.mockResolvedValue({ rowCount: 2, rows: [] } as any);
+
+      const requestData: Omit<
+        RTBFRequest,
+        'id' | 'state' | 'auditEvents' | 'createdAt' | 'updatedAt'
+      > = {
+        scope: 'dataset',
+        requester: {
+          type: 'admin',
+          userId: 'admin123',
+        },
+        target: {
+          datasetIds: ['dataset-1'],
+        },
+        justification: {
+          legalBasis: 'GDPR Article 17',
+          reason: 'Compliance request',
+        },
+        deletionType: 'hard',
+        tenantId: 'tenant-1',
+      };
+
+      const request = await orchestrator.submitRTBFRequest(requestData);
+      await orchestrator.approveRequest(request.id, 'admin1');
+      await orchestrator.approveRequest(request.id, 'admin2');
+
+      const updatedRequest = orchestrator.getRequest(request.id);
+      expect(updatedRequest?.state).toBe('completed');
+      expect(updatedRequest?.execution?.purgeManifest).toBeDefined();
+      expect(updatedRequest?.execution?.purgeManifest?.signature).toBeDefined();
+      expect(updatedRequest?.execution?.purgeManifest?.tenantId).toBe('tenant-1');
+
+      const manifests = repository.getPurgeManifests('tenant-1');
+      expect(manifests.length).toBe(1);
+      expect(manifests[0].id).toBe(updatedRequest?.execution?.purgeManifestId);
+    });
+
+    it('should enforce approval delay before hard delete execution', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-01-01T00:00:00Z'));
+
+      try {
+        const delayOrchestrator = new RTBFOrchestrator({
+          pool,
+          repository,
+          approvalDelayMs: 60_000,
+          signingKey: 'test-secret',
+        });
+
+        const record: RetentionRecord = {
+          metadata: {
+            datasetId: 'dataset-2',
+            name: 'Test Dataset',
+            dataType: 'analytics',
+            containsPersonalData: true,
+            jurisdictions: ['EU'],
+            tags: ['postgres:table:users'],
+            storageSystems: ['postgres'],
+            owner: 'test',
+            createdAt: new Date(),
+            tenantId: 'tenant-1',
+          },
+          policy: {
+            datasetId: 'dataset-2',
+            templateId: 'standard',
+            retentionDays: 365,
+            purgeGraceDays: 30,
+            legalHoldAllowed: true,
+            storageTargets: ['postgres'],
+            classificationLevel: 'restricted',
+            safeguards: [],
+            appliedAt: new Date(),
+            appliedBy: 'system',
+          },
+          archiveHistory: [],
+          lastEvaluatedAt: new Date(),
+        };
+
+        jest.spyOn(repository, 'getRecord').mockReturnValue(record);
+        const mockQuery = pool.query as jest.MockedFunction<Pool['query']>;
+        mockQuery.mockResolvedValue({ rowCount: 1, rows: [] } as any);
+
+        const requestData: Omit<
+          RTBFRequest,
+          'id' | 'state' | 'auditEvents' | 'createdAt' | 'updatedAt'
+        > = {
+          scope: 'dataset',
+          requester: {
+            type: 'admin',
+            userId: 'admin123',
+          },
+          target: {
+            datasetIds: ['dataset-2'],
+          },
+          justification: {
+            legalBasis: 'GDPR Article 17',
+            reason: 'Compliance request',
+          },
+          deletionType: 'hard',
+          tenantId: 'tenant-1',
+        };
+
+        const request = await delayOrchestrator.submitRTBFRequest(requestData);
+        await delayOrchestrator.approveRequest(request.id, 'admin1');
+        await delayOrchestrator.approveRequest(request.id, 'admin2');
+
+        await expect(
+          delayOrchestrator.executeRequest(request.id, 'admin2'),
+        ).rejects.toThrow('cannot execute until');
+
+        jest.setSystemTime(new Date('2026-01-01T00:01:01Z'));
+
+        await delayOrchestrator.executeRequest(request.id, 'admin2');
+        const updatedRequest = delayOrchestrator.getRequest(request.id);
+        expect(updatedRequest?.state).toBe('completed');
+      } finally {
+        jest.useRealTimers();
+      }
     });
   });
 });

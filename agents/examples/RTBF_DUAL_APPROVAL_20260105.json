@@ -1,0 +1,37 @@
+{
+  "task_id": "RTBF_DUAL_APPROVAL_20260105",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "rtbf-dual-approval",
+    "version": "v1",
+    "sha256": "adac8aeb4799dd08a82e4fa5781e341eb00e0f8a481c649600369031e6aef1bf",
+    "path": "prompts/tasks/rtbf-dual-approval.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "server/src/governance/retention/",
+      "server/src/db/retention/",
+      "docs/roadmap/STATUS.json",
+      "prompts/registry.yaml",
+      "prompts/tasks/rtbf-dual-approval.md",
+      "agents/examples/RTBF_DUAL_APPROVAL_20260105.json"
+    ],
+    "domains": ["governance", "retention", "compliance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["pnpm --filter intelgraph-server test -- rtbfOrchestrator.test.ts", "make smoke"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "RTBF requests require two distinct approvals before execution",
+    "Execution enforces an approval delay",
+    "Signed purge manifest is generated and stored per tenant",
+    "Tests validate dual-actor approval and manifest output"
+  ],
+  "stop_conditions": ["CI failure in main", "Detection of PII in output", "Sandbox violation alert"]
+}

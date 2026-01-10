@@ -6,6 +6,7 @@ import {
   DatasetMetadata,
   LegalHold,
   PendingDeletion,
+  PurgeManifest,
   RetentionRecord,
   RetentionSchedule,
 } from './types.js';
@@ -14,6 +15,7 @@ export class DataRetentionRepository {
   private readonly pool: Pool;
   private readonly logger = (pino as any)({ name: 'data-retention-repository' });
   private readonly records = new Map<string, RetentionRecord>();
+  private readonly purgeManifests = new Map<string, PurgeManifest[]>();
 
   constructor(pool: Pool) {
     this.pool = pool;
@@ -134,6 +136,52 @@ export class DataRetentionRepository {
       this.logger.error({ error }, 'Failed to delete data retention record.');
       throw error;
     }
+  }
+
+  async storePurgeManifest(
+    tenantId: string,
+    manifest: PurgeManifest,
+  ): Promise<void> {
+    const entries = this.purgeManifests.get(tenantId) ?? [];
+    entries.push(manifest);
+    this.purgeManifests.set(tenantId, entries);
+
+    try {
+      await this.pool.query(
+        `INSERT INTO rtbf_purge_manifests (
+          id,
+          tenant_id,
+          request_id,
+          manifest,
+          signature,
+          signature_algorithm,
+          created_at
+        ) VALUES ($1, $2, $3, $4::jsonb, $5, $6, $7)`,
+        [
+          manifest.id,
+          tenantId,
+          manifest.requestId,
+          JSON.stringify(manifest),
+          manifest.signature,
+          manifest.signatureAlgorithm,
+          manifest.createdAt,
+        ],
+      );
+    } catch (error: any) {
+      if (this.isIgnorablePersistenceError(error)) {
+        this.logger.debug(
+          { error: error.message },
+          'Falling back to in-memory purge manifest storage.',
+        );
+        return;
+      }
+      this.logger.error({ error }, 'Failed to persist purge manifest.');
+      throw error;
+    }
+  }
+
+  getPurgeManifests(tenantId: string): PurgeManifest[] {
+    return this.purgeManifests.get(tenantId) ?? [];
   }
 
   private async persistRecord(record: RetentionRecord): Promise<void> {
