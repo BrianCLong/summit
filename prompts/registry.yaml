@@ -28,3 +28,29 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ai-guidelines-docs
+    version: v1
+    path: prompts/ai/agent-guidelines-docs.md
+    sha256: 9274d922c416271fca06043454dd5e1e92ff51016474db6e1d054fdec5c8cd5e
+    description: Summit guidance updates for AI agent documentation and contributor links.
+    scope:
+      paths:
+        - docs/ai/
+        - docs/roadmap/STATUS.json
+        - CONTRIBUTING.md
+        - README.md
+        - prompts/
+        - agents/examples/
+      domains:
+        - docs
+        - governance
+        - contributor-experience
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

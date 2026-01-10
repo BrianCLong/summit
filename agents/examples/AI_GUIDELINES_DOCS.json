@@ -1,0 +1,43 @@
+{
+  "task_id": "AI_GUIDELINES_DOCS",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "ai-guidelines-docs",
+    "version": "v1",
+    "sha256": "9274d922c416271fca06043454dd5e1e92ff51016474db6e1d054fdec5c8cd5e",
+    "path": "prompts/ai/agent-guidelines-docs.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ai/AGENT_GUIDELINES.md",
+      "docs/ai/AGENT_GUIDELINES_PYTHON.md",
+      "CONTRIBUTING.md",
+      "README.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/registry.yaml",
+      "prompts/ai/agent-guidelines-docs.md",
+      "agents/examples/AI_GUIDELINES_DOCS.json"
+    ],
+    "domains": ["docs", "governance", "contributor-experience"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["docs-review"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "AI agent guidance documents are updated and linked from CONTRIBUTING/README",
+    "Readiness and governance references are added where required",
+    "docs/roadmap/STATUS.json updated to reflect documentation change"
+  ],
+  "stop_conditions": [
+    "CI failure in main",
+    "Detection of PII in output",
+    "Sandbox violation alert",
+    "Generated documentation contradicts code (drift check)"
+  ]
+}
