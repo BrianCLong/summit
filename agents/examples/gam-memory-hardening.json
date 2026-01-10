@@ -1,0 +1,34 @@
+{
+  "task_id": "GAM_MEMORY_HARDENING_20260103",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "agent-native-loop-n4",
+    "version": "v1",
+    "sha256": "2fcf3ef5535a5dd116439d1fc8a665e03945e1c6981373895fd9344bd486b658",
+    "path": "prompts/governance/agent-native-loop-n4.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "server/src/memory/gam/",
+      "server/src/memory/__tests__/gamMemory.test.ts",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/gam-memory-hardening.json"
+    ],
+    "domains": ["memory", "retrieval", "observability", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "A",
+    "artifacts": ["test-logs", "metrics"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Session-anchored context builds return evidence from stored pages without leaking tenants.",
+    "Evidence excerpts include page content for session anchors.",
+    "Budgets are enforced deterministically in the researcher loop."
+  ],
+  "stop_conditions": ["CI failure in main", "Detection of PII in output", "Sandbox violation alert"]
+}
