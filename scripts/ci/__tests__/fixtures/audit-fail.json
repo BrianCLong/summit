@@ -1,0 +1,30 @@
+{
+    "advisories": {
+        "123": {
+            "id": 123,
+            "title": "Critical Prototype Pollution",
+            "severity": "critical",
+            "module_name": "example-lib",
+            "vulnerable_versions": "<2.0.0",
+            "cwe": "CWE-1321",
+            "github_advisory_id": "GHSA-xxxx-yyyy-zzzz",
+            "url": "https://github.com/advisories/GHSA-xxxx-yyyy-zzzz",
+            "findings": [
+                {
+                    "paths": [
+                        "example-lib@1.0.0"
+                    ]
+                }
+            ]
+        }
+    },
+    "metadata": {
+        "vulnerabilities": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 1
+        }
+    }
+}

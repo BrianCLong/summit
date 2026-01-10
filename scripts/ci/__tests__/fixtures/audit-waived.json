@@ -1,0 +1,30 @@
+{
+    "advisories": {
+        "456": {
+            "id": 456,
+            "title": "High Severity Issue",
+            "severity": "high",
+            "module_name": "waived-lib",
+            "vulnerable_versions": "<1.5.0",
+            "cwe": "CWE-22",
+            "github_advisory_id": "GHSA-aaaa-bbbb-cccc",
+            "url": "https://github.com/advisories/GHSA-aaaa-bbbb-cccc",
+            "findings": [
+                {
+                    "paths": [
+                        "waived-lib@1.4.0"
+                    ]
+                }
+            ]
+        }
+    },
+    "metadata": {
+        "vulnerabilities": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 1,
+            "critical": 0
+        }
+    }
+}
