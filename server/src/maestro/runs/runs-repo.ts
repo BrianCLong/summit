@@ -174,6 +174,19 @@ class RunsRepo {
     const result = await getPool().query(query, [pipelineId, tenantId, limit]);
     return result.rows;
   }
+
+  async countByStatus(
+    tenantId: string,
+    statuses: Run['status'][],
+  ): Promise<number> {
+    const query = `
+      SELECT COUNT(*) as count
+      FROM runs
+      WHERE tenant_id = $1 AND status = ANY($2::text[])
+    `;
+    const result = await getPool().query(query, [tenantId, statuses]);
+    return parseInt(result.rows[0]?.count || '0', 10);
+  }
 }
 
 let _runsRepo: RunsRepo | null = null;
@@ -217,6 +230,13 @@ export const runsRepo = {
     limit = 20,
   ): Promise<Run[]> {
     return this.instance.getByPipeline(pipelineId, tenantId, limit);
+  },
+
+  async countByStatus(
+    tenantId: string,
+    statuses: Run['status'][],
+  ): Promise<number> {
+    return this.instance.countByStatus(tenantId, statuses);
   },
 
   /**

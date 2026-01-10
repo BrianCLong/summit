@@ -3,7 +3,8 @@ export type QuotaCategory =
   | 'evidenceCount'
   | 'exportCount'
   | 'jobConcurrency'
-  | 'apiRequests';
+  | 'apiRequests'
+  | 'receiptBacklog';
 
 type QuotaCounters = {
   storageBytes: number;
@@ -11,6 +12,7 @@ type QuotaCounters = {
   exportCount: number;
   jobConcurrency: number;
   apiRequests: number;
+  receiptBacklog: number;
 };
 
 type WindowCounter = {
@@ -22,11 +24,13 @@ export class QuotaStore {
   private counters: Map<string, QuotaCounters> = new Map();
   private uniqueKeys: Map<string, Map<QuotaCategory, Set<string>>> = new Map();
   private apiWindows: Map<string, WindowCounter> = new Map();
+  private stepWindows: Map<string, WindowCounter> = new Map();
 
   reset(): void {
     this.counters.clear();
     this.uniqueKeys.clear();
     this.apiWindows.clear();
+    this.stepWindows.clear();
   }
 
   getCounter(tenantId: string): QuotaCounters {
@@ -37,6 +41,7 @@ export class QuotaStore {
         exportCount: 0,
         jobConcurrency: 0,
         apiRequests: 0,
+        receiptBacklog: 0,
       });
     }
     return this.counters.get(tenantId)!;
@@ -83,6 +88,18 @@ export class QuotaStore {
     return counter.jobConcurrency;
   }
 
+  incrementReceiptBacklog(tenantId: string, delta = 1): number {
+    const counter = this.getCounter(tenantId);
+    counter.receiptBacklog += delta;
+    return counter.receiptBacklog;
+  }
+
+  decrementReceiptBacklog(tenantId: string, delta = 1): number {
+    const counter = this.getCounter(tenantId);
+    counter.receiptBacklog = Math.max(0, counter.receiptBacklog - delta);
+    return counter.receiptBacklog;
+  }
+
   trackApiRequest(tenantId: string, windowMs: number): { count: number; windowStart: number } {
     const now = Date.now();
     const windowStart = now - (now % windowMs);
@@ -96,6 +113,23 @@ export class QuotaStore {
     window.count += 1;
     const counter = this.getCounter(tenantId);
     counter.apiRequests = window.count;
+    return window;
+  }
+
+  trackStepThroughput(
+    tenantId: string,
+    windowMs: number,
+  ): { count: number; windowStart: number } {
+    const now = Date.now();
+    const windowStart = now - (now % windowMs);
+    const existing = this.stepWindows.get(tenantId);
+
+    if (!existing || existing.windowStart !== windowStart) {
+      this.stepWindows.set(tenantId, { windowStart, count: 0 });
+    }
+
+    const window = this.stepWindows.get(tenantId)!;
+    window.count += 1;
     return window;
   }
 }

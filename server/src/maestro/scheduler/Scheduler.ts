@@ -3,6 +3,8 @@ import { executorsRepo } from '../executors/executors-repo.js';
 import pino from 'pino';
 import { QueueHelper, PrioritizedItem } from './QueueHelper.js';
 import { ExecutorSelector } from './ExecutorSelector.js';
+import { quotaService } from '../../quota/service.js';
+import { emitQuotaDenialReceipt } from '../../services/quota/emit-quota-denial-receipt.js';
 
 const logger = (pino as any)({ name: 'maestro-scheduler' });
 
@@ -92,6 +94,29 @@ export class MaestroScheduler {
         const candidateExecutor = this.executorSelector.selectExecutor(executors, item.tenantId);
 
         if (candidateExecutor) {
+            const runningCount = await runsRepo.countByStatus(item.tenantId, [
+              'running',
+            ]);
+            const quotaDecision = quotaService.checkRunConcurrency(
+              item.tenantId,
+              runningCount,
+              1,
+            );
+            if (!quotaDecision.allowed) {
+              await emitQuotaDenialReceipt({
+                tenantId: item.tenantId,
+                actorId: 'maestro.scheduler',
+                ruleKey: 'concurrentRuns',
+                decision: quotaDecision,
+                resource: 'maestro.run.start',
+                metadata: { runId: item.runId },
+              });
+              logger.warn(
+                { runId: item.runId, tenantId: item.tenantId },
+                'Concurrent run quota exceeded; delaying dispatch',
+              );
+              break;
+            }
             const updatedExecutor = await executorsRepo.update(candidateExecutor.id, { status: 'busy' }, item.tenantId);
 
             if (updatedExecutor && updatedExecutor.status === 'busy') {

@@ -13,6 +13,12 @@ import type { Pool } from 'pg';
 import type { Redis } from 'ioredis';
 import { logger } from '../utils/logger.js';
 import { metrics } from '../observability/metrics.js';
+import { quotaService } from '../quota/service.js';
+import {
+  quotaPolicyRules,
+  QuotaPolicyError,
+} from '../policies/quota.js';
+import { emitQuotaDenialReceipt } from './quota/emit-quota-denial-receipt.js';
 
 export type RunStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 
@@ -114,6 +120,36 @@ export class GlassBoxRunService {
    */
   async createRun(input: CreateRunInput): Promise<GlassBoxRun> {
     const startTime = Date.now();
+    const activeRunCount = await this.countActiveRuns(input.tenantId, [
+      'pending',
+      'running',
+    ]);
+    const concurrencyDecision = quotaService.checkRunConcurrency(
+      input.tenantId,
+      activeRunCount,
+      1,
+    );
+
+    if (!concurrencyDecision.allowed) {
+      const receipt = await emitQuotaDenialReceipt({
+        tenantId: input.tenantId,
+        actorId: input.userId,
+        ruleKey: 'concurrentRuns',
+        decision: concurrencyDecision,
+        resource: 'glassbox.run.create',
+        metadata: {
+          investigationId: input.investigationId,
+          runType: input.type,
+        },
+      });
+      const error = new QuotaPolicyError(
+        'Concurrent run quota exceeded',
+        quotaPolicyRules.concurrentRuns,
+        concurrencyDecision,
+      );
+      error.receipt = receipt;
+      throw error;
+    }
 
     const run: GlassBoxRun = {
       id: uuidv4(),
@@ -191,6 +227,24 @@ export class GlassBoxRunService {
     const run = await this.getRun(runId);
     if (!run) {
       throw new Error(`Run ${runId} not found`);
+    }
+    const stepDecision = quotaService.checkStepThroughput(run.tenantId);
+    if (!stepDecision.allowed) {
+      const receipt = await emitQuotaDenialReceipt({
+        tenantId: run.tenantId,
+        actorId: run.userId,
+        ruleKey: 'stepThroughput',
+        decision: stepDecision,
+        resource: 'glassbox.run.step',
+        metadata: { runId, stepType: step.type },
+      });
+      const error = new QuotaPolicyError(
+        'Step throughput quota exceeded',
+        quotaPolicyRules.stepThroughput,
+        stepDecision,
+      );
+      error.receipt = receipt;
+      throw error;
     }
 
     const newStep: RunStep = {
@@ -354,6 +408,27 @@ export class GlassBoxRunService {
     const run = await this.getRun(runId);
     if (!run) {
       throw new Error(`Run ${runId} not found`);
+    }
+    if (status === 'running') {
+      const runningCount = await this.countActiveRuns(run.tenantId, ['running']);
+      const decision = quotaService.checkRunConcurrency(run.tenantId, runningCount, 1);
+      if (!decision.allowed) {
+        const receipt = await emitQuotaDenialReceipt({
+          tenantId: run.tenantId,
+          actorId: run.userId,
+          ruleKey: 'concurrentRuns',
+          decision,
+          resource: 'glassbox.run.start',
+          metadata: { runId },
+        });
+        const quotaError = new QuotaPolicyError(
+          'Concurrent run quota exceeded',
+          quotaPolicyRules.concurrentRuns,
+          decision,
+        );
+        quotaError.receipt = receipt;
+        throw quotaError;
+      }
     }
 
     const durationMs = endTime
@@ -600,5 +675,19 @@ export class GlassBoxRunService {
     }, 'Cleaned up old runs');
 
     return result.rowCount || 0;
+  }
+
+  private async countActiveRuns(
+    tenantId: string,
+    statuses: RunStatus[],
+  ): Promise<number> {
+    const query = `
+      SELECT COUNT(*) as count
+      FROM glass_box_runs
+      WHERE tenant_id = $1
+      AND status = ANY($2::text[])
+    `;
+    const result = await this.pool.query(query, [tenantId, statuses]);
+    return parseInt(result.rows[0]?.count || '0', 10);
   }
 }

@@ -49,6 +49,19 @@ describe('QuotaService integration', () => {
       exportCount: 1,
       jobConcurrency: 1,
       apiRatePerMinute: 2,
+      runConcurrency: 1,
+      stepThroughputPerMinute: 2,
+      receiptBacklog: 1,
+    },
+    beta: {
+      storageBytes: 2048,
+      evidenceCount: 3,
+      exportCount: 2,
+      jobConcurrency: 2,
+      apiRatePerMinute: 4,
+      runConcurrency: 2,
+      stepThroughputPerMinute: 3,
+      receiptBacklog: 2,
     },
   });
 
@@ -147,5 +160,42 @@ describe('QuotaService integration', () => {
     const third = service.checkEvidence('alpha', 'evidence-new', 900);
     expect(third.allowed).toBe(false);
     expect(third.reason).toBe('evidence_exceeded');
+  });
+
+  test('enforces concurrent run limits per tenant', () => {
+    const alphaDenied = service.checkRunConcurrency('alpha', 1, 1);
+    expect(alphaDenied.allowed).toBe(false);
+    expect(alphaDenied.reason).toBe('concurrent_runs_exceeded');
+
+    const betaAllowed = service.checkRunConcurrency('beta', 1, 1);
+    expect(betaAllowed.allowed).toBe(true);
+    expect(betaAllowed.remaining).toBe(0);
+  });
+
+  test('enforces step throughput per tenant', () => {
+    const first = service.checkStepThroughput('alpha');
+    const second = service.checkStepThroughput('alpha');
+    const third = service.checkStepThroughput('alpha');
+
+    expect(first.allowed).toBe(true);
+    expect(second.allowed).toBe(true);
+    expect(third.allowed).toBe(false);
+    expect(third.reason).toBe('step_throughput_exceeded');
+
+    const betaFirst = service.checkStepThroughput('beta');
+    expect(betaFirst.allowed).toBe(true);
+  });
+
+  test('enforces receipt backlog per tenant', () => {
+    const first = service.reserveReceiptBacklog('alpha');
+    const second = service.reserveReceiptBacklog('alpha');
+
+    expect(first.allowed).toBe(true);
+    expect(second.allowed).toBe(false);
+    expect(second.reason).toBe('receipt_backlog_exceeded');
+
+    service.releaseReceiptBacklog('alpha', 1);
+    const third = service.reserveReceiptBacklog('alpha');
+    expect(third.allowed).toBe(true);
   });
 });

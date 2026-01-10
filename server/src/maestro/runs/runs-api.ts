@@ -15,6 +15,12 @@ import { maestroAuthzMiddleware } from '../../middleware/maestro-authz.js';
 import { recordEndpointResult } from '../../observability/reliability-metrics.js';
 import { flagService } from '../../services/FlagService.js';
 import { MaestroEvents } from '../../realtime/maestro.js';
+import { quotaService } from '../../quota/service.js';
+import {
+  quotaPolicyRules,
+  QuotaPolicyError,
+} from '../../policies/quota.js';
+import { emitQuotaDenialReceipt } from '../../services/quota/emit-quota-denial-receipt.js';
 
 const router = express.Router();
 router.use(express.json());
@@ -130,6 +136,42 @@ router.post('/runs', authorize('run_maestro'), async (req, res) => {
         code: 'budget_exceeded',
         budgetRemaining: admissionDecision.budgetRemaining,
         retryAfterMs: admissionDecision.retryAfterMs,
+      });
+    }
+
+    const activeRuns = await runsRepo.countByStatus(tenantId, [
+      'queued',
+      'running',
+    ]);
+    const quotaDecision = quotaService.checkRunConcurrency(
+      tenantId,
+      activeRuns,
+      1,
+    );
+    if (!quotaDecision.allowed) {
+      const receipt = await emitQuotaDenialReceipt({
+        tenantId,
+        actorId: (req as any).user?.id || 'system',
+        ruleKey: 'concurrentRuns',
+        decision: quotaDecision,
+        resource: 'maestro.run.create',
+        metadata: { pipelineId: validation.data.pipeline_id },
+      });
+      const error = new QuotaPolicyError(
+        'Concurrent run quota exceeded',
+        quotaPolicyRules.concurrentRuns,
+        quotaDecision,
+      );
+      error.receipt = receipt;
+
+      return res.status(429).json({
+        error: 'Quota Exceeded',
+        message: error.message,
+        code: quotaDecision.reason,
+        limit: quotaDecision.limit,
+        used: quotaDecision.used,
+        remaining: quotaDecision.remaining,
+        receipt,
       });
     }
 

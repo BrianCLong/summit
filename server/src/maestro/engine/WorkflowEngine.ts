@@ -1,6 +1,12 @@
 import { randomUUID } from 'crypto';
 import { metrics } from '../../observability/metrics.js';
 import logger from '../../utils/logger.js';
+import { quotaService } from '../../quota/service.js';
+import {
+  quotaPolicyRules,
+  QuotaPolicyError,
+} from '../../policies/quota.js';
+import { emitQuotaDenialReceipt } from '../../services/quota/emit-quota-denial-receipt.js';
 
 export interface WorkflowDefinition {
   id: string;
@@ -79,6 +85,24 @@ export class WorkflowEngine {
       for (const step of definition.steps) {
         logger.debug({ stepId: step.id, tool: step.tool, runId: context.runId }, 'Executing step');
         const stepStartTime = Date.now();
+        const stepDecision = quotaService.checkStepThroughput(tenantId);
+        if (!stepDecision.allowed) {
+          const receipt = await emitQuotaDenialReceipt({
+            tenantId,
+            actorId: 'maestro.workflow',
+            ruleKey: 'stepThroughput',
+            decision: stepDecision,
+            resource: 'maestro.step.execute',
+            metadata: { runId: context.runId, stepId: step.id, tool: step.tool },
+          });
+          const error = new QuotaPolicyError(
+            'Step throughput quota exceeded',
+            quotaPolicyRules.stepThroughput,
+            stepDecision,
+          );
+          error.receipt = receipt;
+          throw error;
+        }
 
         const tool = this.registry.get(step.tool);
         if (!tool) {
