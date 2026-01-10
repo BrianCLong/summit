@@ -109,6 +109,7 @@
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
     "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
+    "board:deck": "node scripts/slides/generate_mvp_ga_board_deck.mjs",
     "prepare": "husky"
   },
   "keywords": [
@@ -169,6 +170,7 @@
     "markdownlint-cli": "^0.45.0",
     "minimatch": "^10.1.1",
     "pg-mem": "^3.0.5",
+    "pptxgenjs": "^4.0.1",
     "prettier": "^3.6.2",
     "semantic-release": "^24.2.7",
     "ts-jest": "^29.4.6",
