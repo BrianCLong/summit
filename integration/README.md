@@ -1,32 +1,34 @@
-# SRE Integration Guide
+# Integration Repository Drop
 
-This directory contains resources for integrating the Summit Reasoning Evaluator (SRE) into the broader Summit/IntelGraph ecosystem.
+This directory describes how the wedge specifications integrate with the
+IntelGraph platform, Mission Control (MC) tools, and Summit UI surfaces.
 
-## Architecture
-SRE is designed as a **sidecar** or **post-processing** step for Summit runs.
-The integration pattern is:
-1.  **Summit** executes a workflow and emits a `RunTrace` (events).
-2.  **Adapter** converts `RunTrace` -> `SRE Episode`.
-3.  **Evaluator** computes metrics on the `Episode`.
-4.  **Telemetry** pushes results to Grafana/Prometheus.
+## Layout
 
-## Quick Start
-See `summit_example.py` for a runnable reference implementation of the adapter pattern.
-
-```bash
-python integration/summit_example.py
+```
+/integration
+  intelgraph/
+    api/            # OpenAPI stubs for wedge-specific endpoints
+    services/       # Service responsibilities + policy integration notes
+  mc/
+    tools/          # Tooling contracts and operator guidance
+    guardrails/     # Policy enforcement and budget validation
+  summit/
+    ui_specs/       # UI concepts for artifact inspection and audit
 ```
 
-## API Hook
-To register SRE as a callback in Summit:
+## Integration Contract Checklist
 
-```python
-from summit.core import events
-from sre.sdk import Evaluator
+- Every API returns a **replay token** and **policy decision reference**.
+- Every artifact is logged to the **transparency log** with commitments.
+- Guardrails enforce **budgets, scope, and authorization**.
+- MC tools verify attestation and evidence before acting.
+- UI views surface **uncertainty, proofs, and policy status** by default.
 
-@events.on_run_complete
-def run_eval(run_context):
-    evaluator = Evaluator(config_path="sre_config.yaml")
-    report = evaluator.evaluate(run_context.trace)
-    events.emit("eval_complete", report)
-```
+## Change Management
+
+Updates to any wedge spec should include:
+
+1. A matching integration artifact update (API, service, MC tool, or UI).
+2. An updated `docs/roadmap/STATUS.json` timestamp.
+3. Regression checks for budgets and replay determinism.

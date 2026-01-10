@@ -1,0 +1,39 @@
+openapi: 3.1.0
+info:
+  title: OMCP Migration Compiler API
+  version: 1.1.0
+paths:
+  /omcp/compile:
+    post:
+      summary: Compile schema migration and compatibility proof
+      operationId: compileMigration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompileRequest'
+      responses:
+        '200':
+          description: Migration artifact
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompileResponse'
+components:
+  schemas:
+    CompileRequest:
+      type: object
+      properties:
+        priorSchema: { type: object }
+        updatedSchema: { type: object }
+        policyContext: { type: object }
+      required: [priorSchema, updatedSchema]
+    CompileResponse:
+      type: object
+      properties:
+        migrationPlan: { type: object }
+        compatibilityShim: { type: object }
+        compatibilityProof: { type: object }
+        replayToken: { type: string }
+        policyDecisionId: { type: string }

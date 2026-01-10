@@ -1,0 +1,38 @@
+openapi: 3.1.0
+info:
+  title: TCGI Macro Synthesis API
+  version: 1.1.0
+paths:
+  /tcgi/macros:
+    post:
+      summary: Generate macro from graph grammar
+      operationId: generateMacro
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MacroRequest'
+      responses:
+        '200':
+          description: Macro artifact
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MacroResponse'
+components:
+  schemas:
+    MacroRequest:
+      type: object
+      properties:
+        sessionTraces: { type: array, items: { type: object } }
+        objective: { type: string }
+        policyContext: { type: object }
+      required: [sessionTraces, objective]
+    MacroResponse:
+      type: object
+      properties:
+        macroArtifact: { type: object }
+        expectedCost: { type: number }
+        replayToken: { type: string }
+        policyDecisionId: { type: string }

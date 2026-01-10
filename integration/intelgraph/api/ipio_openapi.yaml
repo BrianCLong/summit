@@ -1,0 +1,90 @@
+openapi: 3.1.0
+info:
+  title: IPIO Origin Certificate API
+  version: 1.1.0
+paths:
+  /ipio/origins:
+    post:
+      summary: Compute origin certificate via inverse diffusion
+      operationId: computeOriginCertificate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OriginRequest'
+      responses:
+        '200':
+          description: Origin certificate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OriginResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Policy denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    OriginRequest:
+      type: object
+      properties:
+        narrativeWindow:
+          type: object
+          properties:
+            start: { type: string, format: date-time }
+            end: { type: string, format: date-time }
+          required: [start, end]
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/InteractionEvent'
+        budgets:
+          $ref: '#/components/schemas/BudgetProfile'
+      required: [narrativeWindow, events]
+    InteractionEvent:
+      type: object
+      properties:
+        actorId: { type: string }
+        contentId: { type: string }
+        interaction: { type: string }
+        timestamp: { type: string, format: date-time }
+        provenance: { type: string }
+      required: [actorId, contentId, interaction, timestamp]
+    BudgetProfile:
+      type: object
+      properties:
+        maxEdges: { type: integer }
+        maxRuntimeMs: { type: integer }
+        maxMemoryMb: { type: integer }
+    OriginResponse:
+      type: object
+      properties:
+        originCertificate:
+          type: object
+          properties:
+            originSet:
+              type: array
+              items: { type: string }
+            uncertainty:
+              type: object
+              properties:
+                posterior: { type: array, items: { type: number } }
+                interval: { type: array, items: { type: number } }
+            replayToken: { type: string }
+            merkleRoot: { type: string }
+            policyDecisionId: { type: string }
+            attestationQuote: { type: string, nullable: true }
+    ErrorResponse:
+      type: object
+      properties:
+        error: { type: string }
+        message: { type: string }

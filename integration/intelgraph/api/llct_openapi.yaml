@@ -1,0 +1,41 @@
+openapi: 3.1.0
+info:
+  title: LLCT Correlation Token API
+  version: 1.1.0
+paths:
+  /llct/token:
+    post:
+      summary: Issue or validate correlation token
+      operationId: issueCorrelationToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+      responses:
+        '200':
+          description: Correlation token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+components:
+  schemas:
+    TokenRequest:
+      type: object
+      properties:
+        tenant: { type: string }
+        purpose: { type: string }
+        allowedIdentifierTypes: { type: array, items: { type: string } }
+        maxHops: { type: integer }
+        ttlSeconds: { type: integer }
+        egressBudget: { type: integer }
+        jurisdiction: { type: string }
+      required: [tenant, purpose]
+    TokenResponse:
+      type: object
+      properties:
+        token: { type: string }
+        replayToken: { type: string }
+        policyDecisionId: { type: string }
