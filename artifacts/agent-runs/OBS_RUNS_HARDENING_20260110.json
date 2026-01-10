@@ -1,0 +1,12 @@
+{
+  "task_id": "OBS_RUNS_HARDENING_20260110",
+  "agent_id": "codex",
+  "prompt_ref": "request-first-run-observability-hardening@v1",
+  "status": "completed",
+  "timestamp": "2026-01-10T12:00:00Z",
+  "summary": [
+    "Fixed observability routes to align with client fetch paths",
+    "Hardened span buffering and PII tag validation",
+    "Added tag registry tests and updated observability docs/roadmap"
+  ]
+}

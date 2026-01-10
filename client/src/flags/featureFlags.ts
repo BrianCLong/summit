@@ -15,7 +15,7 @@ export const getFeatureFlags = (): FeatureFlagConfig => {
         if (typeof process !== 'undefined' && process.env && process.env[envKey] === 'true') {
             return true;
         }
-      } catch (e) {
+      } catch {
         // ignore
       }
 
@@ -27,7 +27,7 @@ export const getFeatureFlags = (): FeatureFlagConfig => {
         if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[envKey] === 'true') {
             return true;
         }
-      } catch (e) {
+      } catch {
         // ignore
       }
 
@@ -38,6 +38,7 @@ export const getFeatureFlags = (): FeatureFlagConfig => {
     FEATURE_INVESTIGATION_UI: getVal('FEATURE_INVESTIGATION_UI'),
     FEATURE_TIMELINE_UI: getVal('FEATURE_TIMELINE_UI'),
     FEATURE_REPORT_DOWNLOAD: getVal('FEATURE_REPORT_DOWNLOAD'),
+    FEATURE_OBSERVABILITY_RUNS: getVal('FEATURE_OBSERVABILITY_RUNS'),
   };
 };
 

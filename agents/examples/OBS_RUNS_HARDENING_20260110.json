@@ -1,0 +1,42 @@
+{
+  "task_id": "OBS_RUNS_HARDENING_20260110",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "request-first-run-observability-hardening",
+    "version": "v1",
+    "sha256": "4067653212b392a5b16b8125e3f629c5119233893c2732fde56dbf4a13b419e2",
+    "path": "prompts/implement.request-first-run-observability@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "server/src/observability/**",
+      "server/src/routes/**",
+      "docs/observability/**",
+      "docs/roadmap/STATUS.json",
+      "prompts/**",
+      "agents/examples/**",
+      "artifacts/agent-runs/**"
+    ],
+    "domains": ["observability", "governance", "api", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "scripts/check-boundaries.cjs log",
+      "jest run-span-aggregator",
+      "jest tag-registry"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Observability runs API routes resolve under /api/observability/runs",
+    "Span buffer flush persists when OBS_SPAN_DEV_BUFFER=true",
+    "PII tag guardrails enforced unless explicitly allowed",
+    "Docs and roadmap updated to reflect hardening"
+  ],
+  "stop_conditions": ["CI failure in main", "Detection of PII in output", "Sandbox violation alert"]
+}

@@ -28,3 +28,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: request-first-run-observability-hardening
+    version: v1
+    path: prompts/implement.request-first-run-observability@v1.md
+    sha256: 4067653212b392a5b16b8125e3f629c5119233893c2732fde56dbf4a13b419e2
+    description: Harden request-first run observability routes, tag guardrails, and buffering behavior.
+    scope:
+      paths:
+        - server/src/observability/
+        - server/src/routes/
+        - docs/observability/
+        - docs/roadmap/STATUS.json
+        - prompts/
+        - agents/
+        - artifacts/
+      domains:
+        - observability
+        - governance
+        - api
+        - ui
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
