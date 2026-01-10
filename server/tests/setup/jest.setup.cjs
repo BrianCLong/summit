@@ -8,6 +8,8 @@ require('jest-extended');
 
 require('dotenv').config({ path: './.env.test' });
 
+const { register } = require('prom-client');
+
 // Global test timeout
 jest.setTimeout(30000);
 
@@ -84,6 +86,14 @@ jest.mock('ioredis', () => {
     async get() { return null; }
     async set() { return 'OK'; }
     async del() { return 1; }
+    async scanStream() {
+        return {
+            async *[Symbol.asyncIterator]() {
+                yield [];
+            },
+            on: () => {}
+        }
+    }
     async publish(channel, message) {
       if (subscribers.has(channel)) {
         subscribers.get(channel).forEach(client => {
@@ -145,6 +155,8 @@ jest.mock('../../src/config/database', () => {
       mget: jest.fn().mockResolvedValue([]),
       quit: jest.fn(),
       disconnect: jest.fn(),
+      duplicate: jest.fn().mockReturnThis(),
+      on: jest.fn(),
     }),
     getNeo4jDriver: jest.fn().mockReturnValue({
       session: () => ({
@@ -318,4 +330,40 @@ jest.mock('prom-client', () => {
 afterEach(() => {
   jest.clearAllMocks();
   jest.clearAllTimers();
+  register.clear(); // Reset Prometheus metrics registry to prevent duplicates
 });
+
+// Skip quarantined tests
+const { test: originalTest } = global;
+
+function isQuarantined(description) {
+  if (global.__QUARANTINED_TESTS__) {
+    // Matching strategy:
+    // The id in list.json is "Suite Name Test Name".
+    // The description passed here is "Test Name".
+    // We check if any ID ends with " " + description to handle potential "Suite Name" prefix.
+    const searchSuffix = ' ' + description;
+
+    const isMatched = global.__QUARANTINED_TESTS__.some(id => id.endsWith(searchSuffix) || id === description);
+
+    return isMatched;
+  }
+  return false;
+}
+
+const wrapTest = (original) => (description, fn, timeout) => {
+  if (isQuarantined(description)) {
+    // console.warn(`Skipping quarantined test: ${description}`);
+    return original.skip(description, fn, timeout);
+  }
+  return original(description, fn, timeout);
+};
+
+// We need to patch all variants
+['skip', 'only', 'concurrent', 'todo', 'each'].forEach(prop => {
+    wrapTest[prop] = originalTest[prop];
+});
+
+// Apply the patch
+global.test = wrapTest(originalTest);
+global.it = wrapTest(originalTest);

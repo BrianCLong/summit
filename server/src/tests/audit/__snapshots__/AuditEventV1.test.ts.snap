@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`AuditEventV1 schema matches the audit.v1 schema (golden snapshots) 1`] = `
 {

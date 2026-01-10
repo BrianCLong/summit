@@ -13,7 +13,7 @@
     "test": "jest --config jest.config.ts",
     "test:watch": "jest --config jest.config.ts --watch",
     "test:coverage": "jest --config jest.config.ts --coverage",
-    "test:quarantine": "jest --config jest.quarantine.config.js --passWithNoTests",
+    "test:quarantine": "jest --config jest.quarantine.config.cjs --passWithNoTests",
     "test:integration": "jest --config jest.config.js --testPathPattern=integration --passWithNoTests",
     "test:unit": "jest --config jest.config.js --testPathIgnorePatterns=integration --passWithNoTests",
     "test:marketplace": "tsx --test tests/plugins/marketplace.sandbox.test.ts",

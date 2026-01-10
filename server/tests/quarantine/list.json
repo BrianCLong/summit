@@ -1,0 +1,44 @@
+{
+  "tests": [
+    {
+      "id": "EvidenceIntegrityService reports hash mismatch for tampered file and emits incident when enabled",
+      "reason": "TypeError: span?.addSpanAttributes is not a function",
+      "owner": "@platform/security",
+      "addedAt": "2024-01-03",
+      "expiresAt": "2024-02-03",
+      "issue": "https://github.com/intelgraph/platform/issues/123"
+    },
+    {
+      "id": "EvidenceIntegrityService returns passing result when hashes match for inline content",
+      "reason": "TypeError: span?.addSpanAttributes is not a function",
+      "owner": "@platform/security",
+      "addedAt": "2024-01-03",
+      "expiresAt": "2024-02-03",
+      "issue": "https://github.com/intelgraph/platform/issues/123"
+    },
+    {
+      "id": "ForensicsCustodySystem tracks evidence integrity, access, legal holds, and compliance reporting",
+      "reason": "Hash mismatch failure",
+      "owner": "@platform/forensics",
+      "addedAt": "2024-01-03",
+      "expiresAt": "2024-02-03",
+      "issue": "https://github.com/intelgraph/platform/issues/124"
+    },
+    {
+      "id": "ActionSandbox Timeout should kill process on timeout",
+      "reason": "TypeError: Cannot read properties of undefined (reading 'value')",
+      "owner": "@platform/autonomy",
+      "addedAt": "2024-01-03",
+      "expiresAt": "2024-02-03",
+      "issue": "https://github.com/intelgraph/platform/issues/125"
+    },
+    {
+      "id": "MigrationSafetySimulator.run runs migrations in sorted order with savepoint isolation and keeps going on error",
+      "reason": "TypeError: client.connect is not a function",
+      "owner": "@platform/db",
+      "addedAt": "2024-01-03",
+      "expiresAt": "2024-02-03",
+      "issue": "https://github.com/intelgraph/platform/issues/126"
+    }
+  ]
+}

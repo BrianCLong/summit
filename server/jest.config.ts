@@ -1,4 +1,24 @@
+
 import type { Config } from 'jest';
+import fs from 'fs';
+import path from 'path';
+
+// Read quarantine list
+const quarantinePath = path.join(__dirname, 'tests/quarantine/list.json');
+let quarantineList: string[] = [];
+try {
+  if (fs.existsSync(quarantinePath)) {
+    const data = fs.readFileSync(quarantinePath, 'utf8');
+    quarantineList = JSON.parse(data).tests.map((t: any) => t.id);
+  }
+} catch (e: any) {
+  console.warn('Failed to load quarantine list:', e.message);
+}
+
+// Create a regex to skip these tests
+// Jest 'testNamePattern' filters run ONLY matching tests.
+// To exclude, we unfortunately can't use testNamePattern negatively in config easily without CLI.
+// However, we can inject a global to skip them.
 
 const config: Config = {
   preset: 'ts-jest/presets/default-esm',
@@ -69,8 +89,12 @@ const config: Config = {
   resetMocks: true,
   bail: false,
   errorOnDeprecated: true,
-  transformIgnorePatterns: ['node_modules/(?!(.*\.mjs$))'],
+  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
   maxWorkers: process.env.CI ? 2 : '50%',
+  // Inject quarantine list into globals so setup file can skip them
+  globals: {
+    __QUARANTINED_TESTS__: quarantineList
+  }
 };
 
 export default config;

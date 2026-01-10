@@ -1,28 +1,20 @@
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Request, Response } from 'express';
+import { AbuseGuard } from '../../src/middleware/abuseGuard';
 
-// Define spies first so they can be hoisted/used in the factory if needed
-// However, variables initialized here are not hoisted into the mock factory.
-// We must use `vi.hoisted()` or define the mock factory to return the object.
+// Shared mocks
+const mockRedisMethods = {
+    zadd: jest.fn(),
+    expire: jest.fn(),
+    zcount: jest.fn(),
+    zrange: jest.fn(),
+    del: jest.fn(),
+    pipeline: jest.fn().mockReturnThis(),
+    exec: jest.fn(),
+};
 
-const { mockRedisMethods } = vi.hoisted(() => {
-    return {
-        mockRedisMethods: {
-            zadd: vi.fn(),
-            expire: vi.fn(),
-            zcount: vi.fn(),
-            zrange: vi.fn(),
-            del: vi.fn(),
-            pipeline: vi.fn().mockReturnThis(),
-            exec: vi.fn(),
-        }
-    }
-});
-
-
-// Mock ioredis to return an object containing these shared spies
-vi.mock('ioredis', () => {
+// Mock ioredis
+jest.mock('ioredis', () => {
     return {
         default: class {
             constructor() {
@@ -33,43 +25,40 @@ vi.mock('ioredis', () => {
 });
 
 // Mock Metrics
-vi.mock('../src/utils/metrics', () => ({
-    PrometheusMetrics: vi.fn().mockImplementation(() => ({
-        createCounter: vi.fn(),
-        createGauge: vi.fn(),
-        createHistogram: vi.fn(),
-        incrementCounter: vi.fn(),
-        setGauge: vi.fn(),
-        observeHistogram: vi.fn(),
+jest.mock('../../src/utils/metrics', () => ({
+    PrometheusMetrics: jest.fn().mockImplementation(() => ({
+        createCounter: jest.fn(),
+        createGauge: jest.fn(),
+        createHistogram: jest.fn(),
+        incrementCounter: jest.fn(),
+        setGauge: jest.fn(),
+        observeHistogram: jest.fn(),
     })),
 }));
 
 // Mock Logger
-vi.mock('../src/utils/logger', () => ({
+jest.mock('../../src/utils/logger', () => ({
     default: {
-        info: vi.fn(),
-        warn: vi.fn(),
-        error: vi.fn(),
-        debug: vi.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+        error: jest.fn(),
+        debug: jest.fn(),
     },
 }));
 
 // Mock Tracing
-vi.mock('../src/utils/tracing', () => ({
+jest.mock('../../src/utils/tracing', () => ({
     tracer: {
-        startActiveSpan: vi.fn((name, callback) => {
+        startActiveSpan: jest.fn((name, callback) => {
             const span = {
-                setAttributes: vi.fn(),
-                recordException: vi.fn(),
-                end: vi.fn(),
+                setAttributes: jest.fn(),
+                recordException: jest.fn(),
+                end: jest.fn(),
             };
             return callback(span);
         }),
     },
 }));
-
-// Import after mocks
-import { AbuseGuard } from '../../src/middleware/abuseGuard';
 
 describe('AbuseGuard Middleware', () => {
     let abuseGuard: AbuseGuard;
@@ -78,7 +67,7 @@ describe('AbuseGuard Middleware', () => {
     let next: any;
 
     beforeEach(() => {
-        vi.clearAllMocks();
+        jest.clearAllMocks();
         abuseGuard = new AbuseGuard({
             enabled: true,
             windowSizeMinutes: 1,
@@ -93,10 +82,10 @@ describe('AbuseGuard Middleware', () => {
             query: {},
         };
         res = {
-            status: vi.fn().mockReturnThis(),
-            json: vi.fn(),
+            status: jest.fn().mockReturnThis() as any,
+            json: jest.fn(),
         };
-        next = vi.fn();
+        next = jest.fn();
     });
 
     it('should allow normal traffic', async () => {
