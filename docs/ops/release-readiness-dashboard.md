@@ -176,7 +176,7 @@ The release readiness service:
 3. **Aggregates Status**:
    - `pass`: All critical files exist
    - `fail`: One or more critical files missing
-   - `warn`: Files exist but are stale (future enhancement)
+   - `warn`: Files exist but are stale (detection pending)
 
 4. **Caches Results**:
    - In-memory cache (server-side, 5 min TTL)
