@@ -8,9 +8,18 @@ mkdir -p "${OUT_DIR}"
 echo "==> Running SOC control verification suites…"
 
 # SOC control verification tests
+# Supports both structure conventions (headless/unit vs integration)
 if [ -f "server/tests/soc-controls/soc-controls.test.ts" ]; then
   pnpm --filter intelgraph-server test:unit -- --runTestsByPath \
     tests/soc-controls/soc-controls.test.ts \
+    --reporters=default \
+    --reporters=jest-junit \
+    --outputFile="${OUT_DIR}/server-soc-controls.xml"
+elif [ -d "server/__tests__/soc-controls" ]; then
+  # Fallback/Alternative structure from feature branch
+  pnpm --filter intelgraph-server test:unit -- --runTestsByPath \
+    server/__tests__/soc-controls/auth \
+    server/__tests__/soc-controls/crypto \
     --reporters=default \
     --reporters=jest-junit \
     --outputFile="${OUT_DIR}/server-soc-controls.xml"
@@ -23,6 +32,15 @@ if [ -f "server/src/services/__tests__/SOC2ComplianceService.test.ts" ]; then
     --reporters=default \
     --reporters=jest-junit \
     --outputFile="${OUT_DIR}/soc2-compliance-service.xml"
+fi
+
+# Monorepo-level verification tests
+if [ -f "test/verification/soc-controls.test.ts" ]; then
+  pnpm test -- --runTestsByPath \
+    test/verification/soc-controls.test.ts \
+    --reporters=default \
+    --reporters=jest-junit \
+    --outputFile="${OUT_DIR}/monorepo-soc-controls.xml"
 fi
 
 echo "==> SOC control verification complete. Reports in ${OUT_DIR}"

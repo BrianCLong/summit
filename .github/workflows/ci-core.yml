@@ -354,7 +354,6 @@ jobs:
           name: branch-protection-drift
           path: artifacts/governance/branch-protection-drift
           retention-days: 30
-
   ci-core-gate:
     name: CI Core Gate ✅
     runs-on: ubuntu-latest
@@ -436,7 +435,6 @@ jobs:
             echo "::error::Branch Protection Drift FAILED"
             exit 1
           fi
-
           echo ""
           echo "✅ CI CORE GATE: PASSED"
           echo "All gates green. PR is mergeable (pending ci-verify)."
