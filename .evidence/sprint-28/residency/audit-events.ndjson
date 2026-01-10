@@ -1,0 +1,2 @@
+{"event_type":"residency_check","tenant":"acme","requested_region":"us-east-1","allowed_regions":["us-east-1"],"decision":"allow","reason_code":"residency.allowed","trace_id":"trace-0001"}
+{"event_type":"residency_check","tenant":"acme","requested_region":"eu-west-1","allowed_regions":["us-east-1"],"decision":"deny","reason_code":"residency.region_not_allowed","trace_id":"trace-0002"}

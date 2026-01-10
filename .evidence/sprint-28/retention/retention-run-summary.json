@@ -1,0 +1,22 @@
+{
+  "run_id": "retention-2026-02-03T02:00:00Z",
+  "status": "success",
+  "datasets": [
+    {
+      "dataset_id": "case-events",
+      "action": "delete",
+      "records_processed": 12450,
+      "records_deleted": 12450,
+      "legal_hold_skipped": 0
+    },
+    {
+      "dataset_id": "export-packs",
+      "action": "archive",
+      "records_processed": 320,
+      "records_archived": 320,
+      "legal_hold_skipped": 4
+    }
+  ],
+  "duration_seconds": 184,
+  "errors": []
+}

@@ -1,0 +1,6 @@
+{
+  "dataset_id": "export-packs",
+  "legal_hold_ids": ["hold-0299", "hold-0300", "hold-0301", "hold-0302"],
+  "reason": "Active litigation hold: export packs tied to case 4021.",
+  "expires_at": "2026-06-30T00:00:00Z"
+}

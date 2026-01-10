@@ -1,0 +1,15 @@
+job:
+  id: retention-cleanup
+  schedule: "0 2 * * *"
+  datasets:
+    - dataset_id: case-events
+      action: delete
+      retention_ttl_days: 365
+    - dataset_id: export-packs
+      action: archive
+      retention_ttl_days: 30
+  legal_hold:
+    enabled: true
+    hold_flag_field: legal_hold
+  reporting:
+    output_path: .evidence/sprint-28/retention/retention-run-summary.json

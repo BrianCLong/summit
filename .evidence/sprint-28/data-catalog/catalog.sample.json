@@ -1,0 +1,33 @@
+{
+  "catalog_version": "v1",
+  "datasets": [
+    {
+      "dataset_id": "case-events",
+      "owner": "data-platform@companyos.internal",
+      "classification": "confidential",
+      "pii": {
+        "contains_pii": true,
+        "pii_categories": ["email", "name"]
+      },
+      "residency_allowed_regions": ["us-east-1", "us-west-2"],
+      "retention_ttl_days": 365,
+      "encryption_required": true,
+      "description": "Event stream for case activity and audit trail.",
+      "tags": ["events", "case-management"]
+    },
+    {
+      "dataset_id": "export-packs",
+      "owner": "platform-exports@companyos.internal",
+      "classification": "restricted",
+      "pii": {
+        "contains_pii": false,
+        "pii_categories": []
+      },
+      "residency_allowed_regions": ["us-east-1"],
+      "retention_ttl_days": 30,
+      "encryption_required": true,
+      "description": "Generated export archives for downstream delivery.",
+      "tags": ["exports", "delivery"]
+    }
+  ]
+}

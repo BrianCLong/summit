@@ -1,0 +1,2 @@
+{"event_type":"retention_run","run_id":"retention-2026-02-03T02:00:00Z","dataset_id":"case-events","action":"delete","processed":12450,"deleted":12450,"legal_hold_skipped":0}
+{"event_type":"retention_run","run_id":"retention-2026-02-03T02:00:00Z","dataset_id":"export-packs","action":"archive","processed":320,"archived":320,"legal_hold_skipped":4}

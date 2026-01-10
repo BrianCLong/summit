@@ -1,0 +1,10 @@
+{
+  "error": "RESIDENCY_DENY",
+  "message": "Export blocked: requested region is not allowed for tenant.",
+  "details": {
+    "tenant": "acme",
+    "requested_region": "eu-west-1",
+    "allowed_regions": ["us-east-1"],
+    "reason_code": "residency.region_not_allowed"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "dataset_id": "case-events",
+  "owner": "data-platform@companyos.internal",
+  "classification": "confidential",
+  "pii": {
+    "contains_pii": true,
+    "pii_categories": ["email", "name"]
+  },
+  "residency_allowed_regions": ["us-east-1", "us-west-2"],
+  "retention_ttl_days": 365,
+  "encryption_required": true,
+  "description": "Event stream for case activity and audit trail.",
+  "tags": ["events", "case-management"]
+}

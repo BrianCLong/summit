@@ -1,0 +1,10 @@
+{
+  "output_dataset": "export-packs",
+  "job_id": "export-pack-compiler",
+  "inputs": ["case-events", "case-attachments"],
+  "code_version": "git:792cc34f",
+  "policy_version": "policy:2026-01-10",
+  "actor": "service:exporter",
+  "trace_id": "trace-9001",
+  "timestamp": "2026-02-04T12:05:00Z"
+}

@@ -1,0 +1,6 @@
+[INFO] catalog-validator v1.0.0 (sample output)
+[INFO] loading catalog: .evidence/sprint-28/data-catalog/catalog.sample.json
+[INFO] schema: .evidence/sprint-28/data-catalog/schema.json
+[PASS] dataset_id=case-events classification=confidential retention_ttl_days=365
+[PASS] dataset_id=export-packs classification=restricted retention_ttl_days=30
+[SUMMARY] status=success datasets=2 violations=0

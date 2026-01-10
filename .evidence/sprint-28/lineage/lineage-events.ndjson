@@ -1,0 +1,2 @@
+{"event_type":"lineage_event","output_dataset":"export-packs","input_datasets":["case-events","case-attachments"],"job_id":"export-pack-compiler","code_version":"git:792cc34f","policy_version":"policy:2026-01-10","actor":"service:exporter","trace_id":"trace-9001","timestamp":"2026-02-04T12:05:00Z"}
+{"event_type":"lineage_event","output_dataset":"case-digest","input_datasets":["case-events"],"job_id":"case-digest-rollup","code_version":"git:792cc34f","policy_version":"policy:2026-01-10","actor":"service:maestro","trace_id":"trace-9002","timestamp":"2026-02-04T12:10:00Z"}

@@ -1,6 +1,6 @@
 # Sprint Planning Index
 
-**Last Updated:** 2025-10-27 (Sprint N+55 Update)
+**Last Updated:** 2026-01-10 (Sprint 28 evidence expansion)
 **Total Sprints Documented:** 101+
 **Status:** Active Planning ✅ (historical sprints sealed)
 
@@ -30,6 +30,10 @@
 - **E2E validation:** Regression suites and critical user journeys were exercised in CI (docs site build, API smoke, UI navigation), with artifacts stored beside each sprint record for traceability.
 - **Governance:** Closure evidence archived in corresponding sprint artifacts under `docs/sprints/` and linked scorecards; no pending compliance or dependency handoffs.
 - **Maintenance posture:** Any future work is net-new scope, not reopenings of the sealed sprints.
+
+### Newly Added Artifact
+
+- **CompanyOS Sprint 28 — Data Spine:** Recorded under `docs/sprints/COMPANYOS_SPRINT_28_DATA_SPINE.md` with deterministic sample artifacts under `.evidence/sprint-28/` for catalog, residency, retention, and lineage enforcement.
 
 ### Current Sprint (N+55)
 

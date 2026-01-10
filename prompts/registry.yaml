@@ -28,3 +28,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: docs-data-spine-sprint-plan
+    version: v1
+    path: prompts/docs/data-spine-sprint-plan.md
+    sha256: 096a81ac38fe14756df20b6330706686d857649c96e32d5be550ce9c37cffb99
+    description: Document CompanyOS Sprint 28 Data Spine plan, evidence scaffolding, and roadmap metadata update.
+    scope:
+      paths:
+        - docs/sprints/
+        - .evidence/sprint-28/
+        - docs/roadmap/STATUS.json
+        - SPRINT_INDEX.md
+        - prompts/docs/
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - documentation
+        - governance
+        - data-platform
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 1
+    allowed_operations:
+      - create
+      - edit
