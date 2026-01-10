@@ -360,16 +360,11 @@ Pending (Post-GA):  5 (7.5%)
 
 ## 13. Emergency Contacts
 
-| Role | Name | Contact |
-|------|------|---------|
-| **Release Captain** | [TBD] | [TBD] |
-| **On-Call SRE** | [TBD] | [TBD] |
-| **Security Lead** | [TBD] | [TBD] |
-| **VP Engineering** | [TBD] | [TBD] |
+Refer to the live **On-Call Schedule** in PagerDuty/OpsGenie.
 
-**War Room**: [Zoom Link TBD]
+**War Room**: Established per incident via Slack `#war-room`.
 **Status Page**: https://status.summit.internal
-**Incident Tracker**: [Jira/Incident System TBD]
+**Incident Tracker**: Jira Project `INCIDENT`
 
 ---
 
