@@ -1,0 +1,50 @@
+- id: ga-001
+  claim: Secure supply chain verification is enforced for release artifacts.
+  paths:
+    - docs/SUPPLY_CHAIN_SECURITY.md
+    - scripts/ci/verify-sbom-signature.sh
+  verify: "bash scripts/ci/verify-sbom-signature.sh <IMAGE_REF>"
+  success: "✅ Supply chain verification passed."
+  scope: ga
+  severity: high
+  notes: "Cosign receipts are emitted for signature and SBOM attestations."
+- id: ga-002
+  claim: No critical vulnerabilities remain in the release target.
+  paths:
+    - scripts/scan-vulnerabilities.sh
+    - .github/workflows/_reusable-ci-security.yml
+  verify: "bash scripts/scan-vulnerabilities.sh"
+  success: "✅ Vulnerability scan PASSED"
+  scope: security
+  severity: high
+  notes: "The scan fails when Critical findings are present."
+- id: ga-003
+  claim: Functional correctness is validated by automated tests.
+  paths:
+    - docs/ga/TESTING-STRATEGY.md
+    - .github/workflows/ci.yml
+  verify: "pnpm test:unit"
+  success: "exit 0"
+  scope: ga
+  severity: med
+  notes: "Unit test execution anchors the GA correctness signal."
+- id: ga-004
+  claim: Policy compliance is enforced through governance checks.
+  paths:
+    - scripts/ci/evaluate-policies.ts
+    - docs/ga/GATE_POLICY.md
+  verify: "npx tsx scripts/ci/evaluate-policies.ts"
+  success: "✅ Governance checks passed."
+  scope: ga
+  severity: med
+  notes: "Governance evaluation writes pr-provenance.json with the verdict."
+- id: ga-005
+  claim: Immutable history is protected by provenance exports.
+  paths:
+    - provenance/export-manifest.json
+    - docs/prov-ledger.md
+  verify: "jq -e '.' provenance/export-manifest.json"
+  success: "exit 0"
+  scope: ga
+  severity: med
+  notes: "Export manifests anchor provenance bundles to immutable hashes."

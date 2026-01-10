@@ -86,6 +86,10 @@ jobs:
         run: |
           ./bin/ga-check.mjs
 
+      - name: Verify GA evidence map
+        run: |
+          node scripts/ci/verify_evidence_map.mjs
+
       - name: Enforce scan status
         if: always()
         run: |

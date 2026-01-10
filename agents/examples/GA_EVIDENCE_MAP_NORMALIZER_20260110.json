@@ -1,0 +1,45 @@
+{
+  "task_id": "GA_EVIDENCE_MAP_NORMALIZER_20260110",
+  "agent_id": "Codex",
+  "prompt_ref": {
+    "id": "agent-native-loop-n4",
+    "version": "v1",
+    "sha256": "2fcf3ef5535a5dd116439d1fc8a665e03945e1c6981373895fd9344bd486b658",
+    "path": "prompts/governance/agent-native-loop-n4.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ga/",
+      "scripts/ci/",
+      ".github/workflows/ga-ready.yml",
+      "docs/roadmap/STATUS.json",
+      "agent-contract.json",
+      "agents/examples/GA_EVIDENCE_MAP_NORMALIZER_20260110.json"
+    ],
+    "domains": ["governance", "ci", "provenance", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "A",
+    "artifacts": [
+      "docs/ga/evidence_map.yml",
+      "docs/ga/MVP4_GA_EVIDENCE_MAP.md",
+      "scripts/ci/verify_evidence_map.mjs",
+      "make ga-verify"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 1
+  },
+  "success_criteria": [
+    "Evidence map YAML is present and schema-complete.",
+    "Evidence map verifier passes and reports scope counts.",
+    "GA readiness workflow executes the evidence map verifier."
+  ],
+  "stop_conditions": [
+    "Tooling instability that blocks deterministic verification",
+    "Requests to bypass Legacy Mode guardrails",
+    "Detection of PII in PR diffs"
+  ]
+}
