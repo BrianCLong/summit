@@ -25,6 +25,9 @@
       "path": "packages/feature-flags"
     },
     {
+      "path": "packages/agent-eval-harness"
+    },
+    {
       "path": "packages/maestro-cli"
     },
     {

@@ -1,0 +1,41 @@
+{
+  "task_id": "AGENT_EVAL_HARNESS_20260104",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "agent-eval-harness-fix",
+    "version": "v1",
+    "sha256": "1d9158063489758dfcfc20e424582cb1c39eab96331ded7a766a4ac7f4431738",
+    "path": "prompts/agent-eval-harness-fix.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/agent-eval-harness/",
+      "docs/roadmap/STATUS.json",
+      ".lintstagedrc.json",
+      "prompts/agent-eval-harness-fix.md",
+      "prompts/registry.yaml",
+      "agents/examples/AGENT_EVAL_HARNESS_20260104.json"
+    ],
+    "domains": ["evaluation", "governance", "tooling"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["packages/agent-eval-harness/__tests__/agent-eval-harness.test.ts"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Registry parsing is typed and has no TypeScript suppression.",
+    "CLI entrypoint guard prevents unintended execution on import.",
+    "Agent evaluation harness tests pass for the tool-use-mini suite.",
+    "Roadmap status reflects the hardened harness."
+  ],
+  "stop_conditions": [
+    "CI failure on main.",
+    "Policy or governance validation failures.",
+    "Detection of PII in output."
+  ]
+}

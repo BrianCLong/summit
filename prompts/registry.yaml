@@ -28,3 +28,29 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: agent-eval-harness-fix
+    version: v1
+    path: prompts/agent-eval-harness-fix.md
+    sha256: 1d9158063489758dfcfc20e424582cb1c39eab96331ded7a766a4ac7f4431738
+    description: Harden the agent evaluation harness registry parsing and CLI entrypoint handling.
+    scope:
+      paths:
+        - packages/agent-eval-harness/
+        - docs/roadmap/STATUS.json
+        - .lintstagedrc.json
+        - prompts/agent-eval-harness-fix.md
+        - prompts/registry.yaml
+        - agents/examples/AGENT_EVAL_HARNESS_20260104.json
+      domains:
+        - evaluation
+        - governance
+        - tooling
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

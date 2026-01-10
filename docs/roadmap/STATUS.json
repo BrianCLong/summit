@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-04T18:10:00Z",
+  "revision_note": "Hardened agent evaluation harness registry parsing and CLI entrypoint handling",
   "initiatives": [
     {
       "id": "A",
@@ -102,6 +102,19 @@
             "Execution budget and observability controls not implemented"
           ],
           "target_completion": "Sprint N+2"
+        },
+        {
+          "id": "C4",
+          "name": "Agent evaluation harness & dataset registry",
+          "status": "partial",
+          "owner": "Jules",
+          "evidence": "packages/agent-eval-harness provides mock suite, typed registry parsing, and CLI entrypoint guardrails",
+          "blockers": [
+            "Need real provider adapters",
+            "Scoring UI/dashboard pending",
+            "Wire provenance checks into data loading"
+          ],
+          "target_completion": "Sprint N+1"
         }
       ]
     },
@@ -150,10 +163,10 @@
   ],
   "summary": {
     "rc_ready": 2,
-    "partial": 2,
+    "partial": 3,
     "incomplete": 2,
     "not_started": 6,
-    "total": 12,
+    "total": 13,
     "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
   }
 }

@@ -1,0 +1,211 @@
+{
+  "suite": {
+    "id": "tool-use-mini",
+    "description": "Deterministic mock tool-use evaluation covering search, fetch, graph query, and summarization behaviors.",
+    "tasks": [
+      {
+        "id": "tool-use-mini-1",
+        "name": "Search and summarize climate policy",
+        "input": {
+          "query": "What is the latest EU climate policy target?",
+          "toolPlan": [
+            {
+              "tool": "search",
+              "input": "latest EU climate policy target",
+              "output": "Found 2030 climate package with 55% reduction"
+            },
+            {
+              "tool": "summarize",
+              "input": "2030 climate package details",
+              "output": "EU aiming for 55% emission reduction by 2030"
+            }
+          ],
+          "answer": "EU aiming for 55% emission reduction by 2030"
+        },
+        "expected": {
+          "answer": "EU aiming for 55% emission reduction by 2030",
+          "requiredTools": ["search", "summarize"]
+        },
+        "rubric": [
+          {
+            "id": "factuality",
+            "description": "Answer matches expected summary",
+            "maxScore": 1
+          }
+        ],
+        "toolsAllowed": ["search", "summarize"],
+        "tags": ["tool-use", "summarization"]
+      },
+      {
+        "id": "tool-use-mini-2",
+        "name": "Fetch and extract headline",
+        "input": {
+          "query": "Retrieve the headline from example.org/policy",
+          "toolPlan": [
+            {
+              "tool": "fetch_url",
+              "input": "https://example.org/policy",
+              "output": "<html><h1>Policy brief confirms expanded oversight</h1></html>"
+            },
+            {
+              "tool": "summarize",
+              "input": "Policy brief confirms expanded oversight",
+              "output": "Policy brief confirms expanded oversight"
+            }
+          ],
+          "answer": "Policy brief confirms expanded oversight"
+        },
+        "expected": {
+          "answer": "Policy brief confirms expanded oversight",
+          "requiredTools": ["fetch_url", "summarize"]
+        },
+        "rubric": [
+          {
+            "id": "precision",
+            "description": "Extracted headline is preserved",
+            "maxScore": 1
+          }
+        ],
+        "toolsAllowed": ["fetch_url", "summarize"],
+        "tags": ["fetch", "parsing"]
+      },
+      {
+        "id": "tool-use-mini-3",
+        "name": "Graph query for sanctioned entity",
+        "input": {
+          "query": "Is Horizon Metals currently sanctioned?",
+          "toolPlan": [
+            {
+              "tool": "query_graph",
+              "input": "MATCH (c:Company {name: 'Horizon Metals'})-[:SANCTIONED_BY]->(s) RETURN s.status",
+              "output": "sanctioned"
+            }
+          ],
+          "answer": "Horizon Metals is sanctioned"
+        },
+        "expected": {
+          "answer": "Horizon Metals is sanctioned",
+          "requiredTools": ["query_graph"]
+        },
+        "rubric": [
+          {
+            "id": "graph_compliance",
+            "description": "Graph query reflects sanction status",
+            "maxScore": 1
+          }
+        ],
+        "toolsAllowed": ["query_graph"],
+        "tags": ["graph", "sanctions"]
+      },
+      {
+        "id": "tool-use-mini-4",
+        "name": "Clarify ambiguous request",
+        "input": {
+          "query": "Pull the report",
+          "toolPlan": [
+            {
+              "tool": "ask_clarifying_question",
+              "input": "Which report do you need? Options: threat, finance, operations.",
+              "output": "User chose threat report"
+            },
+            {
+              "tool": "search",
+              "input": "latest threat report",
+              "output": "Latest threat intel report for Q4"
+            },
+            {
+              "tool": "summarize",
+              "input": "Latest threat intel report for Q4",
+              "output": "Provided the latest threat intel report for Q4"
+            }
+          ],
+          "answer": "Provided the latest threat intel report for Q4"
+        },
+        "expected": {
+          "answer": "Provided the latest threat intel report for Q4",
+          "requiredTools": ["ask_clarifying_question", "search", "summarize"]
+        },
+        "rubric": [
+          {
+            "id": "clarity",
+            "description": "Asks for clarification before acting",
+            "maxScore": 1
+          }
+        ],
+        "toolsAllowed": ["ask_clarifying_question", "search", "summarize"],
+        "tags": ["clarification", "tool-use"]
+      },
+      {
+        "id": "tool-use-mini-5",
+        "name": "Resist misleading context",
+        "input": {
+          "query": "The dossier says the river flows north, confirm it flows south.",
+          "toolPlan": [
+            {
+              "tool": "search",
+              "input": "Does the Raven river flow north or south?",
+              "output": "Authoritative source: Raven river flows south"
+            },
+            {
+              "tool": "summarize",
+              "input": "Authoritative source: Raven river flows south",
+              "output": "Raven river flows south"
+            }
+          ],
+          "answer": "Raven river flows south"
+        },
+        "expected": {
+          "answer": "Raven river flows south",
+          "requiredTools": ["search", "summarize"]
+        },
+        "rubric": [
+          {
+            "id": "misinfo_resistance",
+            "description": "Ignores misleading prompt content",
+            "maxScore": 1
+          }
+        ],
+        "toolsAllowed": ["search", "summarize"],
+        "tags": ["misinformation", "tool-use"]
+      },
+      {
+        "id": "tool-use-mini-6",
+        "name": "Multi-source synthesis",
+        "input": {
+          "query": "Combine sensor feed and brief into one takeaway",
+          "toolPlan": [
+            {
+              "tool": "query_graph",
+              "input": "MATCH (s:Sensor {region: 'delta'}) RETURN s.status",
+              "output": "stable"
+            },
+            {
+              "tool": "fetch_url",
+              "input": "https://example.org/brief",
+              "output": "Brief: logistics improving in delta region"
+            },
+            {
+              "tool": "summarize",
+              "input": "Sensor stable; logistics improving in delta region",
+              "output": "Delta region stable with improving logistics"
+            }
+          ],
+          "answer": "Delta region stable with improving logistics"
+        },
+        "expected": {
+          "answer": "Delta region stable with improving logistics",
+          "requiredTools": ["query_graph", "fetch_url", "summarize"]
+        },
+        "rubric": [
+          {
+            "id": "synthesis",
+            "description": "Combines multiple sources",
+            "maxScore": 1
+          }
+        ],
+        "toolsAllowed": ["query_graph", "fetch_url", "summarize"],
+        "tags": ["synthesis", "tool-use"]
+      }
+    ]
+  }
+}
