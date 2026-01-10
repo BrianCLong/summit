@@ -1,5 +1,6 @@
 {
   "version": "1.0",
+  "description": "Performance budgets for GA readiness enforcement.",
   "global": {
     "default_p95_budget_ms": 200,
     "default_p99_budget_ms": 500,

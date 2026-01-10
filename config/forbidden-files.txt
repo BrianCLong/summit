@@ -1,0 +1,17 @@
+# Forbidden file patterns (one per line). Lines starting with # are ignored.
+# Repository hygiene: keep sensitive or unmanaged artifacts out of source control.
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+secrets/**/*.pem
+sealed-secrets/**/*.pem
+security/**/*.pem
+secrets/**/*.key
+sealed-secrets/**/*.key
+security/**/*.key
+*.p12
+*.pfx
+id_rsa
+id_dsa

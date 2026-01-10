@@ -1,0 +1,31 @@
+version: 1
+last_updated: 2026-01-12T00:00:00Z
+claims:
+  - id: GA-EVIDENCE-001
+    statement: Evidence map is complete and machine-verifiable for GA readiness.
+    paths:
+      - docs/ga/evidence_map.yml
+    verify: node scripts/ci/verify_evidence_map.mjs
+    indicator: Evidence map validator reports success.
+    owner: Release Captain
+  - id: GA-BASELINE-001
+    statement: GA baseline is frozen and referenced by commit.
+    paths:
+      - docs/ga/MVP4_GA_BASELINE.md
+    verify: rg "Baseline Commit" docs/ga/MVP4_GA_BASELINE.md
+    indicator: Baseline commit and scope recorded.
+    owner: Release Captain
+  - id: GA-RELEASE-NOTES-001
+    statement: GA release notes are recorded and aligned to baseline scope.
+    paths:
+      - docs/ga/MVP4_GA_RELEASE_NOTES.md
+    verify: rg "Release Notes" docs/ga/MVP4_GA_RELEASE_NOTES.md
+    indicator: Release notes include scope and constraints.
+    owner: Release Captain
+  - id: GA-SECURITY-LEDGER-001
+    statement: Security ledger enumerates open, deferred, and closed items with owners.
+    paths:
+      - docs/security/security_ledger.yml
+    verify: node scripts/ci/verify_security_ledger.mjs --mode=hard
+    indicator: Security ledger validator reports zero open high/critical items.
+    owner: Security Council

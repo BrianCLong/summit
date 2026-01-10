@@ -8,9 +8,24 @@
       "notes": "Safe for Tier B/C verification updates and governance docs."
     },
     {
+      "name": "AgentSpecs",
+      "paths": ["agents/"],
+      "notes": "Task specs and execution contracts for agent runs."
+    },
+    {
+      "name": "CIGates",
+      "paths": ["scripts/ci/"],
+      "notes": "Deterministic CI gates for GA readiness and hygiene validation."
+    },
+    {
       "name": "VerificationScripts",
       "paths": ["scripts/ga/", "testing/ga-verification/"],
       "notes": "Node-native checks only; no global test runner changes."
+    },
+    {
+      "name": "OpsVerification",
+      "paths": ["scripts/ops/", "docs/ops/"],
+      "notes": "Operational readiness dashboards and hard-gate evidence outputs."
     }
   ],
   "verificationRules": {
@@ -72,11 +87,7 @@
       "description": "Credit Card Number"
     }
   ],
-  "requiredChecks": [
-    "restricted-path-check",
-    "pr-metadata-check",
-    "pii-scan"
-  ],
+  "requiredChecks": ["restricted-path-check", "pr-metadata-check", "pii-scan"],
   "activityTracking": {
     "ledger": "AGENT_ACTIVITY.md",
     "backlog": "TASK_BACKLOG.md",

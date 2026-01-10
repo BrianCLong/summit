@@ -1,0 +1,30 @@
+version: 1
+description: Security ledger of GA readiness findings and status.
+last_updated: 2026-01-12T00:00:00Z
+entries:
+  - id: SEC-001
+    title: Dependency vulnerability audit completed
+    severity: low
+    status: closed
+    owner: Security Council
+    rationale: Baseline audit completed and documented in GA readiness pack.
+    evidence:
+      - SECURITY_GA_GATE.md
+  - id: SEC-002
+    title: Secrets scanning automation backlog
+    severity: medium
+    status: deferred
+    owner: Security Council
+    rationale: Scanner automation is scheduled after GA freeze to avoid destabilizing gates.
+    deferred_reason: Waiting on governance approval for scanner runtime budgets.
+    deferred_until: "2026-02-15"
+    evidence:
+      - docs/ga/GA_DEFINITION.md
+  - id: SEC-003
+    title: Logging pipeline PII verification
+    severity: low
+    status: open
+    owner: Security Council
+    rationale: PII validation sampling is in progress under current ops window.
+    evidence:
+      - docs/ops/OBSERVABILITY_SIGNALS.md

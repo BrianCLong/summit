@@ -74,5 +74,68 @@
     "evidence": ["docs/security/security-architecture-and-policies.md"],
     "keyword": "ingestion",
     "notes": "Ensures ingestion hardening expectations stay documented."
+  },
+  {
+    "feature": "Evidence Map Completeness",
+    "tier": "B",
+    "artifact": "scripts/ci/verify_evidence_map.mjs",
+    "ciStatus": "wired",
+    "evidence": ["docs/ga/evidence_map.yml"],
+    "keyword": "evidence",
+    "notes": "Blocks GA when evidence claims lack paths, verification commands, or indicators."
+  },
+  {
+    "feature": "Security Ledger Gate",
+    "tier": "B",
+    "artifact": "scripts/ci/verify_security_ledger.mjs",
+    "ciStatus": "wired",
+    "evidence": ["docs/security/security_ledger.yml"],
+    "keyword": "security ledger",
+    "notes": "Blocks GA on open high/critical security items."
+  },
+  {
+    "feature": "Repo Hygiene Gate",
+    "tier": "C",
+    "artifact": "scripts/ci/check_repo_hygiene.sh",
+    "ciStatus": "wired",
+    "evidence": ["config/forbidden-files.txt"],
+    "keyword": "hygiene",
+    "notes": "Ensures no untracked or forbidden files reach GA validation."
+  },
+  {
+    "feature": "Logging Safety Gate",
+    "tier": "C",
+    "artifact": "scripts/ci/check_logging_safety.mjs",
+    "ciStatus": "wired",
+    "evidence": ["scripts/ci/console-log-scan.cjs"],
+    "keyword": "logging",
+    "notes": "Prevent console logging regressions in GA paths."
+  },
+  {
+    "feature": "Extension Governance Gate",
+    "tier": "C",
+    "artifact": "scripts/ci/check_extensions_compliance.mjs",
+    "ciStatus": "wired",
+    "evidence": ["extensions/package.json"],
+    "keyword": "extensions",
+    "notes": "Ensures extension metadata is complete and discoverable."
+  },
+  {
+    "feature": "Integrity Budgets Gate",
+    "tier": "C",
+    "artifact": "scripts/ci/check_integrity_budgets.mjs",
+    "ciStatus": "wired",
+    "evidence": ["performance-budgets.json"],
+    "keyword": "budgets",
+    "notes": "Validates performance budget baselines remain populated."
+  },
+  {
+    "feature": "Trust Dashboard Gate",
+    "tier": "C",
+    "artifact": "scripts/ops/generate_trust_dashboard.mjs",
+    "ciStatus": "wired",
+    "evidence": ["docs/ops/TRUST_DASHBOARD.md"],
+    "keyword": "trust dashboard",
+    "notes": "Aggregates GA hard-gate results into a single report."
   }
 ]
