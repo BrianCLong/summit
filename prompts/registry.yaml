@@ -28,3 +28,34 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: agent-session-explorer-fix
+    version: v1
+    path: prompts/agent-session-explorer-fix.md
+    sha256: e3b4ea16dc0660cf2f2e08abe5d5dcc6c19d11f930e16e1dcb79f864d607f60f
+    description: Harden the Agent Session Explorer MVP with project discovery, streaming resilience, and endpoint updates.
+    scope:
+      paths:
+        - server/src/agent-session-explorer/
+        - server/src/routes/
+        - apps/webapp/src/agent-sessions/
+        - apps/webapp/src/App.tsx
+        - docs/agent-session-explorer.md
+        - docs/roadmap/STATUS.json
+        - prompts/
+        - agents/examples/
+        - artifacts/agent-runs/
+      domains:
+        - ops
+        - ui
+        - backend
+        - docs
+        - governance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

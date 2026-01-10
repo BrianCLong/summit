@@ -26,6 +26,8 @@ export const EnvSchema = z
     CACHE_TTL_DEFAULT: z.coerce.number().default(300), // 5 minutes
     L1_CACHE_MAX_BYTES: z.coerce.number().default(1 * 1024 * 1024 * 1024), // 1 GB
     L1_CACHE_FALLBACK_TTL_SECONDS: z.coerce.number().default(300), // 5 minutes
+    AGENT_SESSION_EXPLORER_ENABLED: z.coerce.boolean().default(false),
+    SUMMIT_AGENT_HISTORY_ROOT: z.string().default(''),
   });
 
 const Env = EnvSchema.passthrough(); // Allow extra env vars
