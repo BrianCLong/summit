@@ -16,5 +16,15 @@ jobs:
         with:
           sbom: sbom.json
           fail-build: true
-          severity-cutoff: critical
+          severity-cutoff: high
+          only-fixed: false
+      - name: Upload SBOM artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-scan-results
+          path: |
+            sbom.json
+            results.sarif
+          retention-days: 90
 # Linked: https://linear.app/summi7/issue/SUM-10197
