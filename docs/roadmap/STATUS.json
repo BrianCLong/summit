@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-03T04:20:00Z",
+  "revision_note": "Documented SecOps autonomy scaffolding and policy hooks for security agents",
   "initiatives": [
     {
       "id": "A",
@@ -146,14 +146,45 @@
           "target_completion": "Q4"
         }
       ]
+    },
+    {
+      "id": "F",
+      "name": "Security Autonomy",
+      "epics": [
+        {
+          "id": "F1",
+          "name": "SOC Autopilot Scaffolding",
+          "status": "in-progress",
+          "owner": "Jules",
+          "evidence": "Architecture and endpoint scaffold captured in docs/security/secops-autonomy.md and server/src/routes/security/secops-autonomy.ts",
+          "target_completion": "Sprint N+1"
+        },
+        {
+          "id": "F2",
+          "name": "Governance & OPA Approvals",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "OPA bundle placeholder in packages/security-agents/src/policy/opa/secops-autonomy.rego",
+          "target_completion": "Sprint N+1"
+        },
+        {
+          "id": "F3",
+          "name": "Eval Harness & Synthetic Incidents",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Harness planned in docs/security/secops-autonomy.md backlog",
+          "target_completion": "Sprint N+2"
+        }
+      ]
     }
   ],
   "summary": {
     "rc_ready": 2,
     "partial": 2,
     "incomplete": 2,
-    "not_started": 6,
-    "total": 12,
+    "in_progress": 1,
+    "not_started": 8,
+    "total": 15,
     "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
   }
 }

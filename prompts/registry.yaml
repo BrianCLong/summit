@@ -1,5 +1,32 @@
 version: 1
 prompts:
+  - id: secops-autonomy-hardening
+    version: v1
+    path: prompts/security/secops-autonomy-hardening.md
+    sha256: 361ad3739a4a1df9d58b842ae6057b7d80cfe78fd2bdd9dcf294bbce4ca07637
+    description: Hardening pass for SecOps Autonomy scaffolding (schema, policy, runtime guardrails, server ingest).
+    scope:
+      paths:
+        - packages/security-agents/
+        - server/src/routes/security/secops-autonomy.ts
+        - server/package.json
+        - prompts/registry.yaml
+        - prompts/security/
+        - agents/examples/
+        - .lintstagedrc.json
+      domains:
+        - security
+        - agents
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: agent-native-loop-n4
     version: v1
     path: prompts/governance/agent-native-loop-n4.md

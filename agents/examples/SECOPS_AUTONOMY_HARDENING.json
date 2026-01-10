@@ -1,0 +1,37 @@
+{
+  "task_id": "SECOPS_AUTONOMY_HARDENING",
+  "agent_id": "chatgpt",
+  "prompt_ref": {
+    "id": "secops-autonomy-hardening",
+    "version": "v1",
+    "sha256": "361ad3739a4a1df9d58b842ae6057b7d80cfe78fd2bdd9dcf294bbce4ca07637",
+    "path": "prompts/security/secops-autonomy-hardening.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/security-agents/**",
+      "server/src/routes/security/secops-autonomy.ts",
+      "server/package.json",
+      "prompts/registry.yaml",
+      "prompts/security/secops-autonomy-hardening.md",
+      "agents/examples/SECOPS_AUTONOMY_HARDENING.json",
+      ".lintstagedrc.json"
+    ],
+    "domains": ["security", "agents", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["scripts/check-boundaries.cjs"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "SecOps ingest handles alerts and events with audit evidence IDs.",
+    "OPA policy bundle expectations match server payload scopes.",
+    "Agent runtime enforces step and cost budgets."
+  ],
+  "stop_conditions": ["Boundary check fails.", "Policy evaluation denies required safety gates."]
+}
