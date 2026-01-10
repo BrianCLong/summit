@@ -17,6 +17,7 @@ This runs:
 3. **Build** (`pnpm build`) - Compiles all packages
 4. **Unit tests** (`pnpm --filter server test:unit`) - Runs server unit tests
 5. **Smoke tests** (`pnpm ga:smoke`) - Integration smoke hook
+6. **Evidence bundle verification** (`make ga-verify`) - Validates SBOM + provenance + checksums in `release-artifacts/`
 
 ## Scoped Verification
 
@@ -35,6 +36,17 @@ pnpm ga:smoke
 | `ga:verify`        | Full platform | CI gates, pre-release  |
 | `ga:verify:server` | Server only   | Backend development    |
 | `ga:smoke`         | Integration   | Smoke/integration hook |
+
+### Evidence Bundle Outputs
+
+`pnpm ga:verify` expects the GA evidence bundle to be present in:
+
+```
+release-artifacts/
+├── sbom.json
+├── provenance.json
+└── checksums.txt
+```
 
 ## Full GA Gate (requires Docker)
 

@@ -30,6 +30,42 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ga-evidence-bundle-integration
+    version: v1
+    path: prompts/governance/ga-evidence-bundle-integration.md
+    sha256: cae45ca485dd0041426c5b6940d8ce836c69be3e140533ff665cf6f876e49d61
+    description: Integrate SBOM/provenance evidence bundle verification into GA governance and release readiness.
+    scope:
+      paths:
+        - docs/ga/
+        - scripts/ga/
+        - testing/ga-verification/
+        - docs/releases/
+        - docs/SUMMIT_READINESS_ASSERTION.md
+        - COMPLIANCE_CONTROLS.md
+        - COMPLIANCE_EVIDENCE_INDEX.md
+        - COMPLIANCE_SOC_MAPPING.md
+        - COMPLIANCE_ISO_MAPPING.md
+        - Makefile
+        - package.json
+        - release-artifacts/
+        - agent-contract.json
+        - docs/roadmap/STATUS.json
+      domains:
+        - governance
+        - compliance
+        - release
+        - supply-chain
+        - ga
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md

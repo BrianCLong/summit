@@ -74,5 +74,18 @@
     "evidence": ["docs/security/security-architecture-and-policies.md"],
     "keyword": "ingestion",
     "notes": "Ensures ingestion hardening expectations stay documented."
+  },
+  {
+    "feature": "Supply-chain Evidence Bundle",
+    "tier": "B",
+    "artifact": "scripts/ga/verify-evidence-bundle.mjs",
+    "ciStatus": "wired",
+    "evidence": [
+      "release-artifacts/sbom.json",
+      "release-artifacts/provenance.json",
+      "release-artifacts/checksums.txt"
+    ],
+    "keywords": ["CycloneDX", "slsa.dev", "sbom.json"],
+    "notes": "Verifies SBOM, provenance, and checksums for the GA evidence bundle."
   }
 ]

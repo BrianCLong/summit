@@ -28,11 +28,12 @@ This document serves as the single source of truth for all enforced controls wit
 
 ## 4. CI/CD & Release Controls
 
-| Control ID | Description                 | Enforcement Mechanism                                                                                                                       | Evidence        | Owner                                                                          |
-| :--------- | :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ | :-------------- | :----------------------------------------------------------------------------- | -------------------- |
-| CICD-001   | **Automated Quality Gates** | All pull requests are subject to a mandatory CI pipeline that runs automated checks for code quality, testing, and security before merging. | CI Pipeline     | [.github/workflows/pr-quality-gate.yml](.github/workflows/pr-quality-gate.yml) | Architecture Council |
-| CICD-002   | **Conventional Commits**    | Commit messages must follow the Conventional Commits specification. This is enforced by pre-commit hooks and CI checks.                     | Pre-commit Hook | [.husky/commit-msg](.husky/commit-msg)                                         | Architecture Council |
-| CICD-003   | **Golden Path Smoke Test**  | All changes must pass a "golden path" smoke test, ensuring core functionality is never broken.                                              | CI Pipeline     | [.github/workflows/pr-quality-gate.yml](.github/workflows/pr-quality-gate.yml) | Architecture Council |
+| Control ID | Description                      | Enforcement Mechanism                                                                                                                       | Evidence        | Owner                                                                          |
+| :--------- | :------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ | :-------------- | :----------------------------------------------------------------------------- | -------------------- |
+| CICD-001   | **Automated Quality Gates**      | All pull requests are subject to a mandatory CI pipeline that runs automated checks for code quality, testing, and security before merging. | CI Pipeline     | [.github/workflows/pr-quality-gate.yml](.github/workflows/pr-quality-gate.yml) | Architecture Council |
+| CICD-002   | **Conventional Commits**         | Commit messages must follow the Conventional Commits specification. This is enforced by pre-commit hooks and CI checks.                     | Pre-commit Hook | [.husky/commit-msg](.husky/commit-msg)                                         | Architecture Council |
+| CICD-003   | **Golden Path Smoke Test**       | All changes must pass a "golden path" smoke test, ensuring core functionality is never broken.                                              | CI Pipeline     | [.github/workflows/pr-quality-gate.yml](.github/workflows/pr-quality-gate.yml) | Architecture Council |
+| CICD-004   | **Supply-Chain Evidence Bundle** | GA verification enforces SBOM + provenance + checksum validation for release evidence bundles.                                              | Script + CI     | [scripts/ga/verify-evidence-bundle.mjs](scripts/ga/verify-evidence-bundle.mjs) | Release Captain      |
 
 ## 5. Security & Data Handling Controls
 

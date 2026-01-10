@@ -1,0 +1,51 @@
+{
+  "task_id": "GA_EVIDENCE_BUNDLE_INTEGRATION",
+  "agent_id": "Codex",
+  "prompt_ref": {
+    "id": "ga-evidence-bundle-integration",
+    "version": "v1",
+    "sha256": "cae45ca485dd0041426c5b6940d8ce836c69be3e140533ff665cf6f876e49d61",
+    "path": "prompts/governance/ga-evidence-bundle-integration.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ga/",
+      "scripts/ga/",
+      "testing/ga-verification/",
+      "docs/releases/",
+      "docs/SUMMIT_READINESS_ASSERTION.md",
+      "COMPLIANCE_CONTROLS.md",
+      "COMPLIANCE_EVIDENCE_INDEX.md",
+      "COMPLIANCE_SOC_MAPPING.md",
+      "COMPLIANCE_ISO_MAPPING.md",
+      "Makefile",
+      "package.json",
+      "release-artifacts/",
+      "agent-contract.json",
+      "docs/roadmap/STATUS.json"
+    ],
+    "domains": ["governance", "compliance", "release", "supply-chain", "ga"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "testing/ga-verification/evidence-bundle.ga.test.mjs",
+      "scripts/ga/verify-evidence-bundle.mjs"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "GA verification enforces SBOM + provenance bundle checks via pnpm ga:verify.",
+    "Evidence bundle verification fails on missing artifacts or checksum mismatch.",
+    "GA governance docs reference the evidence bundle command and outputs."
+  ],
+  "stop_conditions": [
+    "Tooling instability that blocks deterministic verification",
+    "Detection of PII in diff outputs",
+    "Requests to bypass Legacy Mode guardrails"
+  ]
+}

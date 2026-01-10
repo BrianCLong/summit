@@ -26,6 +26,7 @@ This release represents the first stabilization release candidate following MVP-
 - Added path filters and concurrency controls to reduce CI queue contention by ~40%
 - Standardized pnpm version (10.0.0) across all workflows to eliminate cache invalidation issues
 - Upgraded unit test workflows to Node 20.x for better coverage tooling compatibility
+- Enforced GA evidence bundle verification (SBOM + provenance + checksums) via `pnpm ga:verify`
 
 ### Test Infrastructure
 
