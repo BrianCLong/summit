@@ -30,6 +30,7 @@
     "codegen": "graphql-codegen --config codegen.yml",
     "codegen:watch": "graphql-codegen --config codegen.yml --watch",
     "seed": "ts-node scripts/seed-data.ts",
+    "skills:demo": "ts-node src/scripts/run-skills-controller.ts",
     "seed:demo": "ts-node scripts/seed-demo.ts",
     "seed:golden": "ts-node scripts/seed-golden-path.ts",
     "seed:small": "SEED_ENTITIES=1000 SEED_RELATIONSHIPS=5000 ts-node scripts/seed-data.ts",
