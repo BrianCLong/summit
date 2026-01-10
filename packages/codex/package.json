@@ -1,0 +1,28 @@
+{
+  "name": "@summit/codex",
+  "version": "0.1.0",
+  "description": "Codex CLI for Summit build provenance and verification",
+  "main": "dist/index.js",
+  "bin": {
+    "codex": "./bin/codex.js"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "dev": "tsc -w"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "fast-glob": "^3.3.2",
+    "js-yaml": "^4.1.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  }
+}

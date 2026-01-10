@@ -1,0 +1,72 @@
+name: Verify Builds
+
+on:
+  workflow_run:
+    workflows: ["Build and Prove"]
+    types:
+      - completed
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Codex
+        run: pnpm --filter @summit/codex build
+
+      - name: Link Codex
+        run: |
+          chmod +x packages/codex/bin/codex.js
+          echo "$(pwd)/packages/codex/bin" >> $GITHUB_PATH
+
+      - name: Download Proofs
+        uses: actions/download-artifact@v4
+        with:
+          name: build-proofs
+          path: .summit/proofs/
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # We need artifacts to verify against.
+      # In a real scenario, we'd download artifacts from the build job too.
+      # For this quick win, we rebuild (which might defeat the purpose if non-deterministic, but good for testing reproducible build)
+      # OR we assume artifacts are present.
+      # Ideally 'Build and Prove' should upload artifacts too.
+
+      - name: Rebuild Server (to generate artifacts)
+        run: pnpm --filter intelgraph-server build
+
+      - name: Verify Server Proof
+        run: |
+          # Find the proof file for server
+          # Handle potential scope in directory structure
+          PROOF_FILE=$(find .summit/proofs -name "*.buildproof.json" | grep "intelgraph-server" | head -n 1)
+
+          if [ -z "$PROOF_FILE" ]; then
+            echo "No proof file found for server"
+            # Debug output
+            echo "Content of .summit/proofs:"
+            ls -R .summit/proofs
+            exit 1
+          fi
+
+          echo "Verifying $PROOF_FILE"
+          codex verify "$PROOF_FILE" --out ./packages/intelgraph-server/dist

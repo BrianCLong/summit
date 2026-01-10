@@ -1,0 +1,47 @@
+name: Build and Prove
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-prove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Codex
+        run: pnpm --filter @summit/codex build
+
+      - name: Link Codex
+        run: |
+          chmod +x packages/codex/bin/codex.js
+          echo "$(pwd)/packages/codex/bin" >> $GITHUB_PATH
+
+      - name: Build Server with Proof
+        run: codex build ./packages/intelgraph-server --proof --out dist --cmd "pnpm --filter intelgraph-server build"
+
+      - name: Upload Proofs
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-proofs
+          path: .summit/proofs/
+          retention-days: 7
