@@ -1,0 +1,5 @@
+name: Reusable Caller
+on: [workflow_dispatch]
+jobs:
+  call-reusable:
+    uses: org/repo/.github/workflows/reusable.yml@v1

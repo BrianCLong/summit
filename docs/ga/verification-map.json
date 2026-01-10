@@ -74,5 +74,14 @@
     "evidence": ["docs/security/security-architecture-and-policies.md"],
     "keyword": "ingestion",
     "notes": "Ensures ingestion hardening expectations stay documented."
+  },
+  {
+    "feature": "CI Action Pinning Gate",
+    "tier": "C",
+    "artifact": "scripts/ci/action_pinning_gate.mjs",
+    "ciStatus": "pending",
+    "evidence": ["docs/ga/CI_ACTION_PINNING.md", "scripts/ci/action_pinning_gate.mjs"],
+    "keywords": ["pinning", "CI Action Pinning Gate"],
+    "notes": "Pins third-party actions to immutable SHAs and emits the CI action inventory."
   }
 ]
