@@ -150,12 +150,13 @@ export function Navigation({ user }: NavigationProps) {
         <TooltipTrigger asChild>
           <NavLink
             to={item.href}
-            className={cn(
-              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground',
-              isActive
+            className={({ isActive: linkIsActive }) => cn(
+              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
+              linkIsActive || isActive
                 ? 'bg-accent text-accent-foreground'
                 : 'text-muted-foreground'
             )}
+            aria-current={(location.pathname === item.href || (item.href !== '/' && location.pathname.startsWith(item.href))) ? 'page' : undefined}
           >
             <item.icon className="h-4 w-4" />
             <span className="flex-1">{item.name}</span>
