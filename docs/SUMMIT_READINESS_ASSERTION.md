@@ -50,3 +50,11 @@ We do not "try" features; we certify capabilities.
 We do not "hope" for stability; we engineer resilience.
 
 **This assertion stands until formally revoked by a V2 Governance Override.**
+
+---
+
+## Executive Readiness Statement
+
+This statement confirms that the executive materials (`docs/ga/EXEC_*`) are derived exclusively from the GA baseline evidence as of commit `6bb2e0f68e7bcdd96e5ffc114429f57f98938acd`.
+
+The accountability for the integrity of this translation rests with the **Release Captain**.
