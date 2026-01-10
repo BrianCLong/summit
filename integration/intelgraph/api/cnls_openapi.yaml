@@ -1,0 +1,104 @@
+openapi: 3.0.3
+info:
+  title: CNLS Lineage Capsule API
+  version: 0.1.0
+  description: API for creating and retrieving narrative lineage capsules.
+servers:
+  - url: https://intelgraph.example.com
+paths:
+  /v1/cnls/lineage-capsules:
+    post:
+      summary: Create a lineage capsule
+      operationId: createLineageCapsule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LineageCapsuleRequest'
+      responses:
+        '200':
+          description: Lineage capsule created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LineageCapsuleResponse'
+  /v1/cnls/lineage-capsules/{capsuleId}:
+    get:
+      summary: Get a lineage capsule
+      operationId: getLineageCapsule
+      parameters:
+        - in: path
+          name: capsuleId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lineage capsule payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LineageCapsuleResponse'
+components:
+  schemas:
+    LineageCapsuleRequest:
+      type: object
+      required:
+        - timeWindow
+        - snapshotId
+        - policyContext
+      properties:
+        timeWindow:
+          $ref: '#/components/schemas/TimeWindow'
+        snapshotId:
+          type: string
+        policyContext:
+          $ref: '#/components/schemas/PolicyContext'
+        targetTopic:
+          type: string
+    LineageCapsuleResponse:
+      type: object
+      properties:
+        capsuleId:
+          type: string
+        replayToken:
+          type: string
+        merkleRoot:
+          type: string
+        lineagePaths:
+          type: array
+          items:
+            $ref: '#/components/schemas/LineagePath'
+    LineagePath:
+      type: object
+      properties:
+        pathId:
+          type: string
+        nodes:
+          type: array
+          items:
+            type: string
+        stanceDrift:
+          type: boolean
+    TimeWindow:
+      type: object
+      required:
+        - start
+        - end
+      properties:
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+    PolicyContext:
+      type: object
+      properties:
+        subject:
+          type: string
+        purpose:
+          type: string
+        policyVersion:
+          type: string

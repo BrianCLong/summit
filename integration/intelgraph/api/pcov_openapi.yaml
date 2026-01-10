@@ -1,0 +1,59 @@
+openapi: 3.0.3
+info:
+  title: PCOV Ontology View API
+  version: 0.1.0
+  description: API for compiling and retrieving policy-scoped ontology views.
+servers:
+  - url: https://intelgraph.example.com
+paths:
+  /v1/pcov/views:
+    post:
+      summary: Compile a policy-scoped view
+      operationId: compileOntologyView
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ViewRequest'
+      responses:
+        '200':
+          description: View compiled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ViewResponse'
+components:
+  schemas:
+    ViewRequest:
+      type: object
+      required:
+        - policyContext
+        - schemaVersion
+      properties:
+        policyContext:
+          $ref: '#/components/schemas/PolicyContext'
+        schemaVersion:
+          type: string
+    ViewResponse:
+      type: object
+      properties:
+        viewId:
+          type: string
+        abiVersion:
+          type: string
+        replayToken:
+          type: string
+        permittedTypes:
+          type: array
+          items:
+            type: string
+    PolicyContext:
+      type: object
+      properties:
+        subject:
+          type: string
+        purpose:
+          type: string
+        policyVersion:
+          type: string

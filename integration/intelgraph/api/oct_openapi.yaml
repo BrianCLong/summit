@@ -1,0 +1,83 @@
+openapi: 3.0.3
+info:
+  title: OCT Threat Portfolio API
+  version: 0.1.0
+  description: API for generating outcome-calibrated threat portfolios.
+servers:
+  - url: https://intelgraph.example.com
+paths:
+  /v1/oct/portfolios:
+    post:
+      summary: Create a threat portfolio capsule
+      operationId: createThreatPortfolio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PortfolioRequest'
+      responses:
+        '200':
+          description: Threat portfolio created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioResponse'
+components:
+  schemas:
+    PortfolioRequest:
+      type: object
+      required:
+        - entityId
+        - timeWindow
+        - policyContext
+      properties:
+        entityId:
+          type: string
+        timeWindow:
+          $ref: '#/components/schemas/TimeWindow'
+        policyContext:
+          $ref: '#/components/schemas/PolicyContext'
+    PortfolioResponse:
+      type: object
+      properties:
+        portfolioId:
+          type: string
+        replayToken:
+          type: string
+        factors:
+          type: array
+          items:
+            $ref: '#/components/schemas/FactorComponent'
+        backtestSummary:
+          type: string
+    FactorComponent:
+      type: object
+      properties:
+        name:
+          type: string
+        weight:
+          type: number
+        value:
+          type: number
+    TimeWindow:
+      type: object
+      required:
+        - start
+        - end
+      properties:
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+    PolicyContext:
+      type: object
+      properties:
+        subject:
+          type: string
+        purpose:
+          type: string
+        policyVersion:
+          type: string

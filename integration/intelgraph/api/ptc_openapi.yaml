@@ -1,0 +1,91 @@
+openapi: 3.0.3
+info:
+  title: PTC Transform Contract API
+  version: 0.1.0
+  description: API for registering and executing transform contracts.
+servers:
+  - url: https://intelgraph.example.com
+paths:
+  /v1/ptc/transforms:
+    post:
+      summary: Register a transform specification
+      operationId: registerTransform
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransformSpec'
+      responses:
+        '200':
+          description: Transform registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransformSpec'
+  /v1/ptc/transforms/execute:
+    post:
+      summary: Execute a transform
+      operationId: executeTransform
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransformExecutionRequest'
+      responses:
+        '200':
+          description: Transform executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransformExecutionResponse'
+components:
+  schemas:
+    TransformSpec:
+      type: object
+      required:
+        - name
+        - effects
+      properties:
+        name:
+          type: string
+        effects:
+          type: array
+          items:
+            type: string
+        disclosureConstraints:
+          type: string
+    TransformExecutionRequest:
+      type: object
+      required:
+        - transformName
+        - inputEntity
+        - policyContext
+      properties:
+        transformName:
+          type: string
+        inputEntity:
+          type: string
+        policyContext:
+          $ref: '#/components/schemas/PolicyContext'
+    TransformExecutionResponse:
+      type: object
+      properties:
+        outputEntities:
+          type: array
+          items:
+            type: string
+        replayToken:
+          type: string
+        witnessRecordId:
+          type: string
+    PolicyContext:
+      type: object
+      properties:
+        subject:
+          type: string
+        purpose:
+          type: string
+        policyVersion:
+          type: string

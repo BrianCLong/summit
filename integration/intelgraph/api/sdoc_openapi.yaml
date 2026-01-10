@@ -1,0 +1,62 @@
+openapi: 3.0.3
+info:
+  title: SDOC OSINT Capsule API
+  version: 0.1.0
+  description: API for running selective-disclosure OSINT scans.
+servers:
+  - url: https://intelgraph.example.com
+paths:
+  /v1/sdoc/scans:
+    post:
+      summary: Run a selective-disclosure scan
+      operationId: runOsintScan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanRequest'
+      responses:
+        '200':
+          description: Scan completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScanResponse'
+components:
+  schemas:
+    ScanRequest:
+      type: object
+      required:
+        - targets
+        - purpose
+        - policyContext
+      properties:
+        targets:
+          type: array
+          items:
+            type: string
+        purpose:
+          type: string
+        policyContext:
+          $ref: '#/components/schemas/PolicyContext'
+    ScanResponse:
+      type: object
+      properties:
+        capsuleId:
+          type: string
+        replayToken:
+          type: string
+        summary:
+          type: string
+        ledgerRef:
+          type: string
+    PolicyContext:
+      type: object
+      properties:
+        subject:
+          type: string
+        purpose:
+          type: string
+        policyVersion:
+          type: string
