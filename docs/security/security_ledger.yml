@@ -1,0 +1,220 @@
+entries:
+  - id: AUTH-CRIT-001
+    type: code
+    severity: critical
+    status: open
+    summary: JWT tokens accepted without signature verification.
+    evidence:
+      paths:
+        - "services/sandbox-gateway/src/middleware/auth.ts:51-64"
+        - "services/humint-service/src/middleware/auth.ts:35-54"
+        - "services/decision-api/src/middleware/auth.ts:102-114"
+        - "services/marketplace/src/middleware/auth.ts:44"
+      verify: "rg -n \"Buffer.from\\(token, 'base64'\\)\" services/sandbox-gateway/src/middleware/auth.ts services/humint-service/src/middleware/auth.ts services/decision-api/src/middleware/auth.ts services/marketplace/src/middleware/auth.ts"
+      indicator: "Matches indicate base64 decoding without JWT signature verification."
+  - id: AUTH-CRIT-002
+    type: code
+    severity: critical
+    status: open
+    summary: Development auth bypass grants admin privileges when NODE_ENV is not production.
+    evidence:
+      paths:
+        - "services/sandbox-gateway/src/middleware/auth.ts:34-44"
+        - "services/humint-service/src/middleware/auth.ts:61-75"
+        - "services/decision-api/src/middleware/auth.ts:46-60"
+      verify: "rg -n \"NODE_ENV !== 'production'\" services/sandbox-gateway/src/middleware/auth.ts services/humint-service/src/middleware/auth.ts services/decision-api/src/middleware/auth.ts"
+      indicator: "Matches indicate the development bypass path is still present."
+  - id: AUTHZ-CRIT-003
+    type: code
+    severity: critical
+    status: open
+    summary: Tenant IDs sourced from client headers/queries instead of authenticated context.
+    evidence:
+      paths:
+        - "services/scenario-engine-service/src/middleware/tenantGuard.ts:18-20"
+        - "apps/gateway/src/middleware/authz.ts:46-47"
+        - "companyos/services/tenant-api/src/middleware/authContext.ts:176"
+        - "companyos/templates/new-service/src/middleware/tenant.ts:37"
+        - "v24_modules/server/src/ingest/http.ts:47"
+      verify: "rg -n \"x-tenant-id\" services/scenario-engine-service/src/middleware/tenantGuard.ts apps/gateway/src/middleware/authz.ts companyos/services/tenant-api/src/middleware/authContext.ts companyos/templates/new-service/src/middleware/tenant.ts v24_modules/server/src/ingest/http.ts"
+      indicator: "Matches indicate tenant IDs are still read from headers."
+  - id: INJ-CRIT-004
+    type: code
+    severity: critical
+    status: open
+    summary: Command injection risk from subprocess calls using shell=True.
+    evidence:
+      paths:
+        - "tools/symphony.py:166"
+        - "ops/config-auto-remediate.py:274"
+        - "tools/anomaly_healer.py:254"
+        - "tools/anomaly_healer.py:577"
+        - "tools/anomaly_healer.py:593"
+      verify: "rg -n \"shell=True\" tools/symphony.py ops/config-auto-remediate.py tools/anomaly_healer.py"
+      indicator: "Matches indicate shell=True usage still present."
+  - id: INJ-CRIT-005
+    type: code
+    severity: critical
+    status: open
+    summary: Insecure deserialization via pickle.loads.
+    evidence:
+      paths:
+        - "server/data-pipelines/performance/caching.py:451"
+        - "server/data-pipelines/performance/caching.py:676"
+        - "server/data-pipelines/deduplication/minhash_dedup.py:380"
+      verify: "rg -n \"pickle.loads\" server/data-pipelines/performance/caching.py server/data-pipelines/deduplication/minhash_dedup.py"
+      indicator: "Matches indicate unsafe pickle deserialization remains."
+  - id: WEB-CRIT-006
+    type: code
+    severity: critical
+    status: open
+    summary: CORS wildcard origins with credentials enabled.
+    evidence:
+      paths:
+        - "ml/app/api.py:9"
+        - "cognitive_nlp_engine/api/main.py"
+        - "services/cyber-intel-service/main.py"
+        - "services/graph-xai/app/main.py"
+        - "services/insight-ai/app.py"
+      verify: "rg -n \"allow_origins=\\[\"\\*\"\\]\" ml/app/api.py cognitive_nlp_engine/api/main.py services/cyber-intel-service/main.py services/graph-xai/app/main.py services/insight-ai/app.py"
+      indicator: "Matches indicate wildcard origins with credentials are enabled."
+  - id: SECRET-CRIT-007
+    type: secret
+    severity: critical
+    status: open
+    summary: Hardcoded default API key fallback in API service.
+    evidence:
+      paths:
+        - "api/main.py:277"
+      verify: "rg -n \"supersecretapikey\" api/main.py"
+      indicator: "Matches indicate the default API key remains in code."
+  - id: SECRET-CRIT-008
+    type: secret
+    severity: critical
+    status: open
+    summary: Weak default HMAC secret used when SYMPHONY_SECRET_KEY is unset.
+    evidence:
+      paths:
+        - "tools/security_framework.py:256-257"
+      verify: "rg -n \"default-dev-key-change-in-production\" tools/security_framework.py"
+      indicator: "Matches indicate the default HMAC secret remains."
+  - id: RATE-CRIT-009
+    type: code
+    severity: critical
+    status: open
+    summary: Rate limiter fails open when Redis is unavailable.
+    evidence:
+      paths:
+        - "packages/rate-limiter/src/rate-limiter.ts:137"
+        - "services/api/src/middleware/rateLimit.ts:160"
+        - "server/src/middleware/rateLimit.ts:193-195"
+      verify: "rg -n \"allowed: true\" packages/rate-limiter/src/rate-limiter.ts services/api/src/middleware/rateLimit.ts server/src/middleware/rateLimit.ts"
+      indicator: "Matches indicate fail-open rate limiting behavior."
+  - id: RATE-HIGH-001
+    type: code
+    severity: high
+    status: open
+    summary: Search endpoints lack rate limiting protection.
+    evidence:
+      paths:
+        - "server/src/routes/search.ts:17"
+      verify: "sed -n '1,120p' server/src/routes/search.ts"
+      indicator: "Route file shows no rate limiting middleware applied."
+  - id: RATE-HIGH-002
+    type: code
+    severity: high
+    status: open
+    summary: Graph analysis endpoints lack rate limiting protection.
+    evidence:
+      paths:
+        - "server/src/routes/graphAnalysis.ts:18"
+      verify: "sed -n '1,120p' server/src/routes/graphAnalysis.ts"
+      indicator: "Route file shows no rate limiting middleware applied."
+  - id: INJ-HIGH-003
+    type: code
+    severity: high
+    status: open
+    summary: Dynamic table names risk SQL injection.
+    evidence:
+      paths:
+        - "server/data-pipelines/performance/analytics.py:432"
+      verify: "sed -n '400,460p' server/data-pipelines/performance/analytics.py"
+      indicator: "Dynamic table name construction remains visible in the analytics pipeline."
+  - id: INJ-HIGH-004
+    type: code
+    severity: high
+    status: open
+    summary: CSV loader path traversal risk in file operations.
+    evidence:
+      paths:
+        - "server/data-pipelines/connectors/csv_loader.py:58-60"
+      verify: "sed -n '40,80p' server/data-pipelines/connectors/csv_loader.py"
+      indicator: "File path handling lacks normalization or allow-listing."
+  - id: INJ-HIGH-005
+    type: code
+    severity: high
+    status: open
+    summary: CSV loader SSRF risk from unvalidated HTTP requests.
+    evidence:
+      paths:
+        - "server/data-pipelines/connectors/csv_loader.py:137"
+      verify: "sed -n '120,160p' server/data-pipelines/connectors/csv_loader.py"
+      indicator: "HTTP requests remain unvalidated for SSRF protections."
+  - id: SECRET-HIGH-006
+    type: secret
+    severity: high
+    status: open
+    summary: Default database passwords present in API configuration.
+    evidence:
+      paths:
+        - "api/main.py:157"
+      verify: "rg -n \"password\" api/main.py"
+      indicator: "Default password fallbacks remain in configuration."
+  - id: AUTHZ-HIGH-007
+    type: code
+    severity: high
+    status: open
+    summary: Admin routes guarded by read-level permission checks.
+    evidence:
+      paths:
+        - "server/src/routes/admin.ts:100-108"
+      verify: "sed -n '90,130p' server/src/routes/admin.ts"
+      indicator: "Admin route permissions remain overly permissive."
+  - id: RATE-HIGH-008
+    type: code
+    severity: high
+    status: open
+    summary: Role-based rate limit bypass lacks audit trail.
+    evidence:
+      paths:
+        - "companyos/services/companyos-api/src/services/rate-limiter.service.ts:156"
+      verify: "sed -n '140,180p' companyos/services/companyos-api/src/services/rate-limiter.service.ts"
+      indicator: "Rate limiter bypass remains without audit logging."
+  - id: AUTH-MED-001
+    type: code
+    severity: med
+    status: open
+    summary: Tenant tier manipulation risk enables feature access bypass.
+    evidence:
+      paths: []
+      verify: "rg -n \"AUTH-MED-001\" docs/security/SECURITY-ISSUE-LEDGER.md"
+      indicator: "Ledger entry requires code-level mapping to close the risk."
+  - id: INJ-MED-002
+    type: code
+    severity: med
+    status: open
+    summary: GraphQL input validation gaps enable injection risks.
+    evidence:
+      paths: []
+      verify: "rg -n \"INJ-MED-002\" docs/security/SECURITY-ISSUE-LEDGER.md"
+      indicator: "Ledger entry requires code-level mapping to close the risk."
+  - id: CONFIG-MED-003
+    type: secret
+    severity: med
+    status: open
+    summary: Weak passwords configured in versioned YAML config.
+    evidence:
+      paths:
+        - "config/versioned/app.v1.yaml:10"
+      verify: "sed -n '1,40p' config/versioned/app.v1.yaml"
+      indicator: "Weak password defaults remain in config."

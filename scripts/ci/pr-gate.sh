@@ -44,6 +44,9 @@ run_cmd install --frozen-lockfile
 log "Validating severity ledger zero-tolerance gate"
 run_cmd exec tsx scripts/ci/validate-severity-ledger.ts --ledger governance/severity-ledger.yaml --base "${TARGET_REF}" --report artifacts/severity-ledger-report.json
 
+log "Validating security remediation ledger"
+run_cmd exec node scripts/ci/verify_security_ledger.mjs --mode=hard
+
 if ! run_cmd run lint; then
   log "lint script unavailable; falling back to eslint ."
   run_cmd exec eslint .

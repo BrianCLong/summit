@@ -79,3 +79,29 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: security-ledger-verifier
+    version: v1
+    path: prompts/security/security-ledger-verifier.md
+    sha256: 2e56dbd94c1e24fcdd083e07aa5db3d6039524afb1c572e4462a70c7599a8938
+    description: Normalize the security remediation ledger into YAML and enforce verification gates.
+    scope:
+      paths:
+        - docs/security/
+        - docs/roadmap/STATUS.json
+        - scripts/ci/
+        - prompts/security/
+        - agents/examples/
+      domains:
+        - security
+        - governance
+        - ci
+        - documentation
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

@@ -1,0 +1,44 @@
+{
+  "task_id": "SECURITY_LEDGER_VERIFIER_20260110",
+  "agent_id": "Codex",
+  "prompt_ref": {
+    "id": "security-ledger-verifier",
+    "version": "v1",
+    "sha256": "2e56dbd94c1e24fcdd083e07aa5db3d6039524afb1c572e4462a70c7599a8938",
+    "path": "prompts/security/security-ledger-verifier.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/security/SECURITY-ISSUE-LEDGER.md",
+      "docs/security/security_ledger.yml",
+      "scripts/ci/verify_security_ledger.mjs",
+      "scripts/ci/pr-gate.sh",
+      "docs/roadmap/STATUS.json",
+      "prompts/security/security-ledger-verifier.md",
+      "prompts/registry.yaml",
+      "agents/examples/security-ledger-verifier.task.json"
+    ],
+    "domains": ["security", "governance", "ci", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "node scripts/ci/verify_security_ledger.mjs --mode=report",
+      "node scripts/ci/verify_security_ledger.mjs --mode=hard"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Security ledger YAML reflects all markdown entries without additions.",
+    "Security ledger verifier script enforces required fields and hard gate for open high/critical issues.",
+    "PR gate invokes security ledger verification in hard mode."
+  ],
+  "stop_conditions": [
+    "Ledger parsing fails or schema validation errors persist.",
+    "Required evidence paths are missing from the repository."
+  ]
+}
