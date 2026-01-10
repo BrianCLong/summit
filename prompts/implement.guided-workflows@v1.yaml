@@ -1,0 +1,41 @@
+meta:
+  id: implement.guided-workflows@v1
+  owner: summit-core
+  purpose: 'Harden guided workflow orchestration with policy, traceability, and resilient mappings'
+  tags: ['guided-workflows', 'agent-lab', 'orchestration']
+  guardrails:
+    - 'Honor guidedWorkflows feature flag'
+    - 'Require policy checks before step/tool execution'
+    - 'Emit append-only action trace events with redactions'
+
+modelConfig:
+  model: 'gpt-5.2-codex'
+  temperature: 0.2
+  maxTokens: 6000
+
+inputs:
+  target_paths: string
+  verification_tier: string
+
+template: |
+  You are implementing hardened guided workflows for Summit.
+
+  ## Objective
+
+  Strengthen the guided workflow orchestrator to support input/output mappings, policy hooks, traceability, and resilient fallback handling while keeping the blueprint format stable.
+
+  ## Target Paths
+
+  {{target_paths}}
+
+  ## Requirements
+
+  - Enforce guidedWorkflows feature flag and access policy metadata.
+  - Support JSON Schema-backed input validation and input/output mapping.
+  - Emit step runs, tool calls, and policy checks into the action trace.
+  - Provide debug-handler hooks for in situ recovery loops.
+  - Update documentation and tests for new behavior.
+
+  ## Verification
+
+  Execute tests consistent with {{verification_tier}} tier expectations for the modified package.

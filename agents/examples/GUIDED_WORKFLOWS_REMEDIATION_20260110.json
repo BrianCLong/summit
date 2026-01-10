@@ -1,0 +1,40 @@
+{
+  "task_id": "GUIDED_WORKFLOWS_REMEDIATION_20260110",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "implement.guided-workflows",
+    "version": "v1",
+    "sha256": "707f04b8551cb57d7734e6b3f11ef4f30987948f2100648f93812ef18fe8f53b",
+    "path": "prompts/implement.guided-workflows@v1.yaml"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/agent-lab/**",
+      "docs/guided-workflows.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/**",
+      "agents/examples/**",
+      ".lintstagedrc.json"
+    ],
+    "domains": ["agent-lab", "orchestration", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["tests:packages/agent-lab"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Guided workflow orchestration enforces mapping, policy hooks, and action trace events",
+    "Blueprint inputs validate against JSON Schema with required fields",
+    "Documentation reflects new safety hooks and trace model"
+  ],
+  "stop_conditions": [
+    "Policy evaluator denies execution",
+    "Guided workflows feature flag disabled",
+    "Runtime exceeds configured limits"
+  ]
+}

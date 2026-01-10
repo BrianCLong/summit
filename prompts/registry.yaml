@@ -28,3 +28,29 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: implement.guided-workflows
+    version: v1
+    path: prompts/implement.guided-workflows@v1.yaml
+    sha256: 707f04b8551cb57d7734e6b3f11ef4f30987948f2100648f93812ef18fe8f53b
+    description: Harden guided workflow orchestration with policy, traceability, and resilient mappings.
+    scope:
+      paths:
+        - packages/agent-lab/
+        - workflows/blueprints/
+        - docs/
+        - prompts/
+        - agents/
+        - .lintstagedrc.json
+      domains:
+        - agent-lab
+        - orchestration
+        - governance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
