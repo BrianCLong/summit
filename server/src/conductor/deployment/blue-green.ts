@@ -7,10 +7,14 @@ import { spawn } from 'child_process';
 import Redis from 'ioredis';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import { multiRegionFailoverManager } from '../failover/multi-region.js';
+import { RampController, RampPolicy } from './ramp-controller.js';
+import { httpRequestsTotal, ingestBacklog } from '../../metrics.js';
 
 export interface DeploymentConfig {
   strategy: 'blue-green' | 'canary' | 'rolling';
   environment: 'development' | 'staging' | 'production';
+  tenantId?: string;
+  serviceName?: string;
   imageTag: string;
   services: DeploymentService[];
   healthChecks: HealthCheck[];
@@ -24,6 +28,7 @@ export interface DeploymentConfig {
     incrementPercent: number;
     promoteThreshold: number;
   };
+  rampPolicy?: RampPolicy;
   validation: {
     smokeTests: boolean;
     integrationTests: boolean;
@@ -112,6 +117,7 @@ export interface HealthMetrics {
   cpuUsage: number;
   memoryUsage: number;
   activeConnections: number;
+  receiptBacklog: number;
 }
 
 export class BlueGreenDeploymentEngine extends EventEmitter {
@@ -336,7 +342,10 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
       this.emit('deployment:failed', { execution, error });
 
       // Attempt rollback for production deployments
-      if (execution.config.environment === 'production') {
+      if (
+        execution.config.environment === 'production' &&
+        execution.status !== 'rolled_back'
+      ) {
         await this.rollbackDeployment(execution, error.message);
       }
 
@@ -662,6 +671,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
     execution: DeploymentExecution,
   ): Promise<void> {
     const { rollbackThreshold } = execution.config;
+    const rampController = this.createRampController(execution.config);
     const monitoringDuration = 300000; // 5 minutes
     const startTime = Date.now();
 
@@ -679,6 +689,39 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
         );
       }
 
+      const decision = await rampController.evaluate(
+        {
+          errorRate: metrics.errorRate,
+          receiptBacklog: metrics.receiptBacklog,
+        },
+        {
+          tenantId: execution.config.tenantId ?? 'system',
+          serviceName:
+            execution.config.serviceName ??
+            execution.config.services[0]?.name ??
+            'conductor',
+          deploymentId: execution.id,
+          rampPercent: execution.config.trafficSplit.canaryPercent,
+        },
+        async (rollbackDecision) => {
+          await this.rollbackDeployment(
+            execution,
+            `Ramp rollback triggered: ${rollbackDecision.reasons.join(', ')}`,
+          );
+        },
+      );
+
+      if (decision.action === 'reduce') {
+        await this.updateTrafficSplit('green', decision.nextPercent);
+        execution.config.trafficSplit.canaryPercent = decision.nextPercent;
+      }
+
+      if (decision.action === 'rollback') {
+        throw new Error(
+          `Ramp rollback triggered: ${decision.reasons.join(', ')}`,
+        );
+      }
+
       await new Promise((resolve) => setTimeout(resolve, 10000)); // Wait 10 seconds
     }
   }
@@ -687,6 +730,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
     execution: DeploymentExecution,
   ): Promise<void> {
     const { trafficSplit } = execution.config;
+    const rampController = this.createRampController(execution.config);
     let currentPercent = trafficSplit.canaryPercent;
 
     while (currentPercent < 100) {
@@ -700,9 +744,36 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
       await new Promise((resolve) => setTimeout(resolve, 60000)); // Wait 1 minute
 
       const metrics = await this.collectHealthMetrics();
-      if (metrics.errorRate > execution.config.rollbackThreshold.errorRate) {
+      const decision = await rampController.evaluate(
+        {
+          errorRate: metrics.errorRate,
+          receiptBacklog: metrics.receiptBacklog,
+        },
+        {
+          tenantId: execution.config.tenantId ?? 'system',
+          serviceName:
+            execution.config.serviceName ??
+            execution.config.services[0]?.name ??
+            'conductor',
+          deploymentId: execution.id,
+          rampPercent: currentPercent,
+        },
+        async (rollbackDecision) => {
+          await this.rollbackDeployment(
+            execution,
+            `Traffic increment rollback triggered: ${rollbackDecision.reasons.join(', ')}`,
+          );
+        },
+      );
+
+      if (decision.action === 'reduce') {
+        currentPercent = decision.nextPercent;
+        await this.updateTrafficSplit('green', currentPercent);
+      }
+
+      if (decision.action === 'rollback') {
         throw new Error(
-          `Traffic increment failed: Error rate ${metrics.errorRate}%`,
+          `Traffic increment rollback triggered: ${decision.reasons.join(', ')}`,
         );
       }
     }
@@ -1014,10 +1085,10 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
   }
 
   private async collectHealthMetrics(): Promise<HealthMetrics> {
-    // Collect metrics from Prometheus or application monitoring
-    // This is a placeholder implementation
+    const errorRate = this.calculateErrorRate();
+    const backlog = this.getReceiptBacklog();
     return {
-      errorRate: Math.random() * 0.005, // 0-0.5% error rate
+      errorRate,
       latencyP50: 50 + Math.random() * 50,
       latencyP95: 100 + Math.random() * 100,
       latencyP99: 200 + Math.random() * 200,
@@ -1025,7 +1096,49 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
       cpuUsage: 30 + Math.random() * 40,
       memoryUsage: 40 + Math.random() * 30,
       activeConnections: 50 + Math.random() * 100,
+      receiptBacklog: backlog,
     };
+  }
+
+  private createRampController(config: DeploymentConfig): RampController {
+    const rampPolicy: RampPolicy = {
+      maxErrorRate: config.rampPolicy?.maxErrorRate ?? config.rollbackThreshold.errorRate,
+      maxReceiptBacklog: config.rampPolicy?.maxReceiptBacklog ?? 1000,
+      reductionStepPercent:
+        config.rampPolicy?.reductionStepPercent ??
+        config.trafficSplit.incrementPercent,
+      rollbackFloorPercent:
+        config.rampPolicy?.rollbackFloorPercent ??
+        Math.min(5, config.trafficSplit.canaryPercent),
+    };
+
+    return new RampController(rampPolicy);
+  }
+
+  private calculateErrorRate(): number {
+    const samples = httpRequestsTotal.get().values;
+    if (!samples.length) {
+      return 0;
+    }
+
+    let total = 0;
+    let errors = 0;
+
+    for (const sample of samples) {
+      const value = Number(sample.value || 0);
+      total += value;
+      const status = Number(sample.labels?.status_code);
+      if (Number.isFinite(status) && status >= 500) {
+        errors += value;
+      }
+    }
+
+    return total > 0 ? errors / total : 0;
+  }
+
+  private getReceiptBacklog(): number {
+    const samples = ingestBacklog.get().values;
+    return samples.length > 0 ? Number(samples[0].value || 0) : 0;
   }
 
   private parseK6Results(output: string): {
