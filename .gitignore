@@ -347,3 +347,6 @@ policy/bin/
 policy/test_report.json
 .Jules/
 dry-run-artifacts/
+
+# Maestro runtime artifacts
+var/maestro/

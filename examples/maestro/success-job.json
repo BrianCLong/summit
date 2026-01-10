@@ -1,0 +1,14 @@
+{
+  "name": "demo-success",
+  "owner": "maestro@example.com",
+  "environment": "dev",
+  "required_policies": ["owner-present", "no-destruction"],
+  "steps": [
+    {
+      "id": "echo",
+      "name": "Echo message",
+      "command": "echo 'maestro run succeeded'",
+      "timeout_seconds": 30
+    }
+  ]
+}
