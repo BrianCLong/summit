@@ -122,6 +122,7 @@ import opsRouter from './routes/ops.js';
 import featureFlagsRouter from './routes/feature-flags.js';
 import mlReviewRouter from './routes/ml_review.js';
 import adminFlagsRouter from './routes/admin-flags.js';
+import adminPolicyDriftRouter from './routes/admin-policy-drift.js';
 import auditEventsRouter from './routes/audit-events.js';
 import { centralizedErrorHandler } from './middleware/error-handling-middleware.js';
 import pluginAdminRouter from './routes/plugins/plugin-admin.js';
@@ -444,6 +445,7 @@ export const createApp = async () => {
   app.use('/api/feature-flags', featureFlagsRouter);
   app.use('/api/ml-reviews', mlReviewRouter);
   app.use('/api/admin/flags', adminFlagsRouter);
+  app.use('/api/admin', adminPolicyDriftRouter);
   app.use('/api', auditEventsRouter);
   app.use('/api/plugins', pluginAdminRouter);
   app.use('/api/integrations', integrationAdminRouter);

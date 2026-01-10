@@ -17,6 +17,7 @@
     "test:integration": "jest --config jest.config.js --testPathPattern=integration --passWithNoTests",
     "test:unit": "jest --config jest.config.js --testPathIgnorePatterns=integration --passWithNoTests",
     "test:marketplace": "tsx --test tests/plugins/marketplace.sandbox.test.ts",
+    "policy-drift:test": "jest --config jest.config.ts --runTestsByPath src/security/policyDrift/__tests__/policyDrift.test.ts --runInBand --detectOpenHandles --forceExit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

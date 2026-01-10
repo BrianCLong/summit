@@ -24,6 +24,7 @@ import { startOSINTWorkers } from './services/OSINTQueueService.js';
 import { ingestionService } from './services/IngestionService.js';
 import { BackupManager } from './backup/BackupManager.js';
 import { checkNeo4jIndexes } from './db/indexManager.js';
+import { PolicyDriftMonitor } from './security/policyDrift/monitor.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import { bootstrapSecrets } from './bootstrap-secrets.js';
@@ -56,6 +57,10 @@ const startServer = async () => {
 
 
   const app = await createApp();
+  if (process.env.POLICY_DRIFT_MONITOR_ENABLED !== 'false') {
+    const driftMonitor = new PolicyDriftMonitor({ warnOnly: true });
+    driftMonitor.start();
+  }
   const schema = makeExecutableSchema({ typeDefs, resolvers });
   const httpServer = http.createServer(app);
 

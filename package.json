@@ -85,6 +85,7 @@
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
+    "security:policy-drift:test": "pnpm --filter intelgraph-server policy-drift:test",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "prepare": "husky"
   },

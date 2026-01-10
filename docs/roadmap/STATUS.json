@@ -76,7 +76,7 @@
           "status": "rc-ready",
           "owner": "Jules",
           "evidence": "PolicyEngine.ts, PolicyManagementService.ts, PolicySimulatorService.ts exist and functional; OPA integration verified",
-          "notes": "Policy re-evaluation at execute time added 2025-12-30"
+          "notes": "Policy re-evaluation at execute time added 2025-12-30; policy drift monitor + snapshot endpoint landed"
         },
         {
           "id": "C2",

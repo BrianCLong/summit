@@ -1,0 +1,35 @@
+name: Policy Drift Monitor
+
+on:
+  pull_request:
+    paths:
+      - "server/src/security/policyDrift/**"
+      - "docs/security/policy-*"
+      - "docs/research/policy-drift/**"
+      - "package.json"
+      - "server/package.json"
+      - ".github/workflows/policy-drift.yml"
+  push:
+    branches: [main]
+    paths:
+      - "server/src/security/policyDrift/**"
+      - "docs/security/policy-*"
+      - "docs/research/policy-drift/**"
+      - "package.json"
+      - "server/package.json"
+      - ".github/workflows/policy-drift.yml"
+
+jobs:
+  policy-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install pnpm
+        run: npm install -g pnpm@10.0.0
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run policy drift tests
+        run: pnpm security:policy-drift:test
