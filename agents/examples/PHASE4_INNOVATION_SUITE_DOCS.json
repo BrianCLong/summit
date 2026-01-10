@@ -1,0 +1,32 @@
+{
+  "task_id": "PHASE4_INNOVATION_SUITE_DOCS",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "phase4-innovation-suite-docs",
+    "version": "v1",
+    "sha256": "0e5549499b4114a630da8a6a5c0248d03a9ac219820cf33191fbfc18f0c47e04",
+    "path": "prompts/docs/phase4-innovation-suite.md"
+  },
+  "declared_scope": {
+    "paths": ["docs/innovation/", "docs/roadmap/", "prompts/", "agents/examples/"],
+    "domains": ["docs", "governance"]
+  },
+  "allowed_operations": ["edit", "create"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["make smoke output", "updated PRD documentation"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Phase 4 innovation suite PRDs are implementation-forcing and complete.",
+    "Agent launch specs and delivery readiness matrix are updated.",
+    "Prompt registry and task spec entries are valid and consistent."
+  ],
+  "stop_conditions": [
+    "Scope violation detected by prompt integrity check.",
+    "Governance or policy compliance ambiguity identified."
+  ]
+}

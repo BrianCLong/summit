@@ -28,3 +28,23 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: phase4-innovation-suite-docs
+    version: v1
+    path: prompts/docs/phase4-innovation-suite.md
+    sha256: 0e5549499b4114a630da8a6a5c0248d03a9ac219820cf33191fbfc18f0c47e04
+    description: Documentation refresh for the Phase 4 innovation suite PRDs and delivery guidance.
+    scope:
+      paths:
+        - docs/innovation/
+        - docs/roadmap/
+        - prompts/
+        - agents/examples/
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
