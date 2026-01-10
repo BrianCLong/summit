@@ -1,10 +1,10 @@
 # Browser Support Matrix
 
-This document outlines the certified browser and operating system configurations for Intelgraph Maestro, along with known limitations and specific considerations for "Tor mode."
+This document outlines the targeted browser and operating system configurations for Intelgraph Maestro, along with known limitations and specific considerations for "Tor mode."
 
-## Certified Browsers and Operating Systems
+## Targeted Browsers and Operating Systems
 
-We certify the following browser and operating system combinations for optimal performance and full feature compatibility.
+We target the following browser and operating system combinations for optimal performance and full feature compatibility.
 
 | Browser | Version Range           | Operating Systems           |
 | :------ | :---------------------- | :-------------------------- |

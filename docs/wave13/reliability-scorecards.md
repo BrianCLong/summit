@@ -3,7 +3,7 @@
 ## Tier Rubric
 - **Tier 0**: hard real-time/security-critical (authz, provenance). Requirements: 99.95% SLO, paging 24/7, chaos monthly, DR Tier 0 targets.
 - **Tier 1**: user-facing core (search, ingest). Requirements: 99.9% SLO, paging business hours + weekends, chaos quarterly, DR Tier 1 targets.
-- **Tier 2**: analytics/UX. Requirements: 99.5% SLO, best-effort paging, chaos semi-annual.
+- **Tier 2**: analytics/UX. Requirements: 99.5% SLO, best-effort paging (non-guaranteed), chaos semi-annual.
 
 ## Scorecard Inputs
 - SLO burn rate (last 28d)

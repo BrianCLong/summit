@@ -38,7 +38,7 @@ The following features are **explicitly deferred** to the V2 roadmap. Their abse
 
 The Continuous Integration (CI) pipeline enforces the following invariants. No code enters the `main` branch without satisfying these conditions:
 
-*   **Security:** Zero high-severity vulnerabilities in production dependencies (verified by Trivy/Snyk).
+*   **Security:** Zero known high-severity vulnerabilities in production dependencies (scanned by Trivy/Snyk).
 *   **Quality:** 100% pass rate on the "Golden Path" smoke test suite.
 *   **Compliance:** All API endpoints must have a corresponding OpenAPI specification entry.
 *   **Governance:** Every Pull Request must be linked to a certified Roadmap Item or Issue.
@@ -50,3 +50,13 @@ We do not "try" features; we certify capabilities.
 We do not "hope" for stability; we engineer resilience.
 
 **This assertion stands until formally revoked by a V2 Governance Override.**
+
+---
+
+## TRUST SYSTEM SUMMARY
+
+The Summit Trust System unifies security, privacy, and reliability into a verifiable contract.
+
+*   **System Map:** [Trust System Map](trust/TRUST_SYSTEM_MAP.md)
+*   **Verification:** [Trust Verification Entry Point](trust/README.md)
+*   **Evidence:** [GA Control Evidence](ga/GA_CONTROL_EVIDENCE_BUNDLE.md)
