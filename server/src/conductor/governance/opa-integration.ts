@@ -127,6 +127,10 @@ class OpaPolicyEngine {
       prometheusConductorMetrics.recordOperationalEvent(
         'opa_policy_evaluation',
       );
+      prometheusConductorMetrics.recordOperationalEvent(
+        'opa_policy_decision',
+        { success: decision.allow },
+      );
       prometheusConductorMetrics.recordOperationalMetric(
         'opa_evaluation_time',
         Date.now() - startTime,

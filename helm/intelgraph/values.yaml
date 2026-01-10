@@ -26,11 +26,33 @@ ingress:
 env:
   NODE_ENV: production
   GRAPH_URI: bolt://neo4j.intelgraph-dev.svc.cluster.local:7687
+  GRAPH_ENDPOINT: http://neo4j.intelgraph-dev.svc.cluster.local:7474
   GRAPH_USER: neo4j
   GRAPH_PASSWORD_SECRET: neo4j-auth
   POSTGRES_URI_SECRET: pg-uri
   REDIS_URI_SECRET: redis-uri
   S3_BUCKET: intelgraph-dev-artifacts
+  OPA_URL: http://opa.intelgraph-dev.svc.cluster.local:8181
+  OPA_BASE_URL: http://opa.intelgraph-dev.svc.cluster.local:8181
+  NOTARY_URL: https://notary.intelgraph.dev
+  NOTARY_KEY_SECRET: notary-signer-key
+  SECRETS_PREFIX: /intelgraph/dev
+
+opa:
+  url: http://opa.intelgraph-dev.svc.cluster.local:8181
+
+notary:
+  url: https://notary.intelgraph.dev
+  keySecret: notary-signer-key
+  trustStoreSecret: notary-trust-store
+
+graph:
+  endpoint: http://neo4j.intelgraph-dev.svc.cluster.local:7474
+
+secrets:
+  opaTokenSecret: opa-access-token
+  notaryTokenSecret: notary-access-token
+  graphCredentialsSecret: neo4j-auth
 
 signer:
   enabled: true

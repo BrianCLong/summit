@@ -5,4 +5,9 @@ module "policy_signer" {
   signer_key_id   = "opa-signer-dev"
   alerts_version  = "v0.3.9"
   dashboards_path = "grafana/dashboards"
+  opa_url         = "http://opa.intelgraph-dev.svc.cluster.local:8181"
+  notary_url      = "https://notary.intelgraph.dev"
+  notary_key_secret = "notary-signer-key"
+  graph_endpoint  = "http://neo4j.intelgraph-dev.svc.cluster.local:7474"
+  secrets_prefix  = "/intelgraph/dev"
 }
