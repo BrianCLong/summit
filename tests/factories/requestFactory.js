@@ -3,11 +3,11 @@
  *
  * Generates test HTTP request objects for middleware testing
  */
-import { randomUUID } from 'crypto';
+const { randomUUID } = require('crypto');
 /**
  * Create a mock HTTP request for testing
  */
-export function requestFactory(options = {}) {
+function requestFactory(options = {}) {
     const requestId = randomUUID();
     return {
         id: requestId,
@@ -35,7 +35,7 @@ export function requestFactory(options = {}) {
 /**
  * Create a mock HTTP response for testing
  */
-export function responseFactory() {
+function responseFactory() {
     const res = {
         statusCode: 200,
         headers: {},
@@ -58,13 +58,13 @@ export function responseFactory() {
 /**
  * Create a next function for middleware testing
  */
-export function nextFactory() {
+function nextFactory() {
     return jest.fn();
 }
 /**
  * Create an authenticated request
  */
-export function authenticatedRequestFactory(user, options = {}) {
+function authenticatedRequestFactory(user, options = {}) {
     return requestFactory({
         ...options,
         user,
@@ -77,7 +77,7 @@ export function authenticatedRequestFactory(user, options = {}) {
 /**
  * Create a GraphQL request
  */
-export function graphqlRequestFactory(query, variables = {}, options = {}) {
+function graphqlRequestFactory(query, variables = {}, options = {}) {
     return requestFactory({
         ...options,
         method: 'POST',
@@ -89,4 +89,11 @@ export function graphqlRequestFactory(query, variables = {}, options = {}) {
         },
     });
 }
-//# sourceMappingURL=requestFactory.js.map
+
+module.exports = {
+    requestFactory,
+    responseFactory,
+    nextFactory,
+    authenticatedRequestFactory,
+    graphqlRequestFactory,
+};

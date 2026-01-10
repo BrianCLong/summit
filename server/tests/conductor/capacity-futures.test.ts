@@ -284,6 +284,28 @@ describeNetwork('capacity routes auth', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
+    setupMockQuery();
+    const pgMock = jest.requireMock('pg');
+    pgMock.__setReservations([]);
+    const poolsMock = jest.requireMock('../../src/conductor/scheduling/pools.js');
+    poolsMock.__setPools([
+      { id: 'pool-1', region: 'us-east', labels: [], capacity: 10 },
+      { id: 'pool-2', region: 'us-east', labels: [], capacity: 10 },
+    ]);
+    poolsMock.__setPricing({
+      'pool-1': {
+        pool_id: 'pool-1',
+        cpu_sec_usd: 0.0005,
+        gb_sec_usd: 0,
+        egress_gb_usd: 0,
+      },
+      'pool-2': {
+        pool_id: 'pool-2',
+        cpu_sec_usd: 0.0006,
+        gb_sec_usd: 0,
+        egress_gb_usd: 0,
+      },
+    });
   });
 
   it('rejects unauthenticated reserve requests', async () => {
