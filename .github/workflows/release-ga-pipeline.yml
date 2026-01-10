@@ -647,6 +647,10 @@ jobs:
             exit 1
           fi
 
+      - name: Verify Artifact Inventory
+        run: |
+          node scripts/release/verify_artifact_inventory.mjs --bundle-dir "ga-release-bundle"
+
       - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
