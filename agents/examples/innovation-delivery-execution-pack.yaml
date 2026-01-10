@@ -1,0 +1,41 @@
+task_id: INNOVATION_DELIVERY_EXEC_PACK_20260110
+agent_id: codex
+prompt_ref:
+  id: innovation-delivery-execution-pack
+  version: v1
+  sha256: 01f244407eda3345699bbed965c117c40e2d86b91528cdcc3a08cf03525029ae
+  path: prompts/tasks/innovation-delivery-execution-pack.md
+declared_scope:
+  paths:
+    - INNOVATION_DELIVERY_EXECUTION.md
+    - docs/roadmap/STATUS.json
+    - prompts/tasks/innovation-delivery-execution-pack.md
+    - prompts/registry.yaml
+    - agents/examples/innovation-delivery-execution-pack.yaml
+  domains:
+    - documentation
+    - governance
+    - roadmap
+allowed_operations:
+  - create
+  - edit
+verification_requirements:
+  tier: C
+  artifacts:
+    - scripts/check-boundaries.cjs output
+    - lint-staged/prettier output
+    - updated STATUS.json revision note
+    - updated execution pack sections
+
+debt_budget:
+  permitted: 0
+  retirement_target: 0
+success_criteria:
+  - Innovation execution pack includes implication stack and governance artifacts.
+  - Roadmap status metadata updated with revision note and timestamp.
+  - Prompt registry entry added with correct hash.
+  - Task spec created and matches schema requirements.
+stop_conditions:
+  - CI failure on main
+  - Prompt hash mismatch in registry
+  - Evidence or metadata requirements unmet

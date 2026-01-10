@@ -1,30 +1,57 @@
 version: 1
 prompts:
-  - id: agent-native-loop-n4
-    version: v1
-    path: prompts/governance/agent-native-loop-n4.md
-    sha256: 419717c7891d6943a948ae678ae59f03092e30a699083765300081a38c30cd94
-    description: Closed-loop, agent-native development lifecycle with CI-governed prompts and deterministic archives.
-    scope:
-      paths:
-        - agents/
-        - prompts/
-        - scripts/ci/
-        - docs/ga/
-        - artifacts/
-        - metrics/
-        - .github/
-      domains:
-        - governance
-        - ci
-        - provenance
-        - quality
-    verification:
-      tiers_required:
-        - A
-      debt_budget:
-        permitted: 0
-        retirement_target: 1
-    allowed_operations:
-      - create
-      - edit
+- id: agent-native-loop-n4
+  version: v1
+  path: prompts/governance/agent-native-loop-n4.md
+  sha256: 419717c7891d6943a948ae678ae59f03092e30a699083765300081a38c30cd94
+  description: Closed-loop, agent-native development lifecycle with CI-governed prompts
+    and deterministic archives.
+  scope:
+    paths:
+    - agents/
+    - prompts/
+    - scripts/ci/
+    - docs/ga/
+    - artifacts/
+    - metrics/
+    - .github/
+    domains:
+    - governance
+    - ci
+    - provenance
+    - quality
+  verification:
+    tiers_required:
+    - A
+    debt_budget:
+      permitted: 0
+      retirement_target: 1
+  allowed_operations:
+  - create
+  - edit
+- id: innovation-delivery-execution-pack
+  version: v1
+  path: prompts/tasks/innovation-delivery-execution-pack.md
+  sha256: 01f244407eda3345699bbed965c117c40e2d86b91528cdcc3a08cf03525029ae
+  description: Expand the innovation delivery execution pack documentation with governance,
+    evidence, and roadmap updates.
+  scope:
+    paths:
+    - INNOVATION_DELIVERY_EXECUTION.md
+    - docs/roadmap/STATUS.json
+    - agents/examples/
+    - prompts/tasks/
+    - prompts/registry.yaml
+    domains:
+    - documentation
+    - governance
+    - roadmap
+  verification:
+    tiers_required:
+    - C
+    debt_budget:
+      permitted: 0
+      retirement_target: 0
+  allowed_operations:
+  - create
+  - edit
