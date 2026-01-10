@@ -1,0 +1,30 @@
+name: CDC Drift Check
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Daily
+  workflow_dispatch:
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    services:
+      # This example assumes you have a way to access your staging environment.
+      # If running in a self-contained CI, you would need to spin up the stack here.
+      pass:
+        image: alpine
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: cd ops/cdc/scripts && npm install
+      - name: Run Drift Check
+        run: node ops/cdc/scripts/drift-check.js
+        env:
+          PGHOST: ${{ secrets.STAGING_PG_HOST }}
+          PGPASSWORD: ${{ secrets.STAGING_PG_PASSWORD }}
+          NEO4J_URI: ${{ secrets.STAGING_NEO4J_URI }}
+          NEO4J_PASSWORD: ${{ secrets.STAGING_NEO4J_PASSWORD }}

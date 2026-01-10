@@ -1,0 +1,7 @@
+FROM confluentinc/cp-kafka-connect:7.5.3
+
+# Install Debezium Postgres Connector
+RUN confluent-hub install --no-prompt debezium/debezium-connector-postgresql:2.5.0
+
+# Install Neo4j Connector
+RUN confluent-hub install --no-prompt neo4j/kafka-connect-neo4j:5.0.3

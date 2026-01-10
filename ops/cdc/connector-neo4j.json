@@ -1,0 +1,15 @@
+{
+  "name": "neo4j-sink",
+  "config": {
+    "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
+    "topics": "cdc.maestro.users",
+    "neo4j.server.uri": "bolt://neo4j:7687",
+    "neo4j.authentication.basic.username": "neo4j",
+    "neo4j.authentication.basic.password": "testtest1",
+    "neo4j.topic.cdc.maestro.users.cypher": "MERGE (u:User {id: event.after.id}) SET u += { email: event.after.email, name: event.after.name, updatedAt: event.after.updated_at }",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false"
+  }
+}

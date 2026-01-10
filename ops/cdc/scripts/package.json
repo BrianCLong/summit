@@ -1,0 +1,12 @@
+{
+  "name": "cdc-drift-check",
+  "version": "1.0.0",
+  "main": "drift-check.js",
+  "scripts": {
+    "check": "node drift-check.js"
+  },
+  "dependencies": {
+    "pg": "^8.11.0",
+    "neo4j-driver": "^5.14.0"
+  }
+}

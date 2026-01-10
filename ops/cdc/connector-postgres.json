@@ -1,0 +1,22 @@
+{
+  "name": "postgres-cdc",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "replicator",
+    "database.password": "replicator-secret",
+    "database.dbname": "maestro",
+    "topic.prefix": "cdc",
+    "slot.name": "maestro_cdc_slot",
+    "publication.autocreate.mode": "filtered",
+    "tombstones.on.delete": "false",
+    "include.schema.changes": "false",
+    "table.include.list": "maestro.users",
+    "column.exclude.list": ".*password.*,.*secret.*,.*token.*",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false"
+  }
+}
