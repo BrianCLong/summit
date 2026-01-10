@@ -392,8 +392,7 @@ export class StrategicPlanRepo {
 
     const planMap = new Map(rows.map((row: any) => [row.id, this.mapPlanRow(row)]));
 
-
-    return ids.map((id) => plansMap.get(id) || null);
+    return ids.map((id) => planMap.get(id) || null);
   }
 
   // ============================================================================
@@ -505,7 +504,7 @@ export class StrategicPlanRepo {
     const rows = (queryRes as any)?.rows || [];
 
     return rows.map((row: any) => this.mapObjectiveRow(row));
-
+  }
 
   async deleteObjective(id: string, userId: string): Promise<boolean> {
     const queryRes = await this.pg.query(
@@ -590,6 +589,7 @@ export class StrategicPlanRepo {
     const rows = (queryRes as any)?.rows || [];
 
     return rows[0] ? this.mapKeyResultRow(rows[0]) : null;
+  }
 
   // ============================================================================
   // INITIATIVES
