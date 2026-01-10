@@ -1,0 +1,43 @@
+{
+  "task_id": "MCP_GOVERNANCE_CCR_IMPL",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "mcp-governance-ccr-implementation",
+    "version": "v1",
+    "sha256": "b7cfff04e199377434f3f52bc910c480568b7afb6eb5a72f9c661f6ffee755aa",
+    "path": "prompts/governance/mcp-governance-ccr-implementation.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "src/context/",
+      "intelgraph/context/",
+      "tests/",
+      "docs/adr/",
+      "docs/roadmap/STATUS.json",
+      "prompts/",
+      "agents/examples/"
+    ],
+    "domains": ["governance", "context-assembly", "poisoning-resistance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "tests/test_ccr_basic.py",
+      "tests/test_trust_weighted_assembly.py",
+      "src/context/*.test.ts",
+      "scripts/check-boundaries.cjs",
+      "make smoke"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Deterministic trust-weighted assembly with invariant enforcement is available in TS and Python.",
+    "CCR variants include isolation and produce stable divergence scoring.",
+    "Tests cover CCR variants and trust-weighted enforcement."
+  ],
+  "stop_conditions": ["CI failures on main", "Detected PII in output", "Sandbox violation alert"]
+}

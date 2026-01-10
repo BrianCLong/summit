@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T10:00:00Z",
-  "revision_note": "Roadmap priorities update; all GA features merged",
+  "last_updated": "2026-01-02T12:00:00Z",
+  "revision_note": "Expanded MCP governance scaffolding with invariant enforcement, isolation variants, and richer tests.",
   "initiatives": [
     {
       "id": "A",
@@ -12,10 +12,7 @@
           "status": "incomplete",
           "owner": "Jules",
           "evidence": "No dedicated vector store service found in /server/src/services/",
-          "blockers": [
-            "Need to implement vector store service",
-            "No storage backend configured"
-          ],
+          "blockers": ["Need to implement vector store service", "No storage backend configured"],
           "target_completion": "Sprint N+1"
         },
         {
@@ -24,10 +21,7 @@
           "status": "partial",
           "owner": "Jules",
           "evidence": "GraphRAGService.ts exists; ingestion incomplete",
-          "blockers": [
-            "Missing source connectors",
-            "Incomplete processing pipeline"
-          ],
+          "blockers": ["Missing source connectors", "Incomplete processing pipeline"],
           "target_completion": "Sprint N+1"
         },
         {
@@ -49,10 +43,7 @@
           "status": "partial",
           "owner": "Jules",
           "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
-          "blockers": [
-            "Need connector registry",
-            "Missing connector lifecycle management"
-          ],
+          "blockers": ["Need connector registry", "Missing connector lifecycle management"],
           "target_completion": "Sprint N+2"
         },
         {
@@ -61,9 +52,7 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No RSS/Atom connector implementation found",
-          "blockers": [
-            "No implementation exists"
-          ],
+          "blockers": ["No implementation exists"],
           "target_completion": "Sprint N+3"
         },
         {
@@ -72,9 +61,7 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No STIX/TAXII connector implementation found",
-          "blockers": [
-            "No implementation exists"
-          ],
+          "blockers": ["No implementation exists"],
           "target_completion": "Sprint N+3"
         }
       ]
@@ -147,16 +134,37 @@
           "target_completion": "Q4"
         }
       ]
+    },
+    {
+      "id": "F",
+      "name": "MCP Governance & Poisoning Resistance",
+      "epics": [
+        {
+          "id": "F1",
+          "name": "Context governance scaffolding (CPG, IC\u00b3, TWCA)",
+          "status": "rc-ready",
+          "owner": "Codex",
+          "evidence": "TypeScript primitives under src/context and Python under intelgraph/context with invariant enforcement and deterministic assembly.",
+          "target_completion": "Sprint N+1"
+        },
+        {
+          "id": "F2",
+          "name": "Counterfactual poisoning detection (CCR) ADRs and tests",
+          "status": "in-progress",
+          "owner": "Codex",
+          "evidence": "ADRs 0001-0005 updated with isolation variants; tests cover CCR variants and trust-weighted enforcement.",
+          "target_completion": "Sprint N+2"
+        }
+      ]
     }
   ],
   "summary": {
-    "rc_ready": 2,
+    "rc_ready": 3,
     "partial": 2,
     "incomplete": 2,
     "not_started": 5,
-    "total": 11,
-    "ga_blockers": [
-      "C2: Immutable Audit Log must be completed for GA compliance"
-    ]
+    "in_progress": 2,
+    "total": 14,
+    "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
   }
 }

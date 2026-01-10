@@ -28,3 +28,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: mcp-governance-ccr-implementation
+    version: v1
+    path: prompts/governance/mcp-governance-ccr-implementation.md
+    sha256: b7cfff04e199377434f3f52bc910c480568b7afb6eb5a72f9c661f6ffee755aa
+    description: MCP governance scaffolding enhancements for CPG/IC3/TWCA/CCR across TypeScript and Python.
+    scope:
+      paths:
+        - src/context/
+        - intelgraph/context/
+        - tests/
+        - docs/adr/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/
+      domains:
+        - governance
+        - context-assembly
+        - poisoning-resistance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
