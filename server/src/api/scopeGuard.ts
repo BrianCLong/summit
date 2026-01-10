@@ -1,6 +1,11 @@
 
 // src/api/scopeGuard.ts
-type Scope = 'read:graph'|'write:case'|'run:analytics'|'export:bundle'|'manage:keys';
+export type Scope =
+  | 'read:graph'
+  | 'write:case'
+  | 'run:analytics'
+  | 'export:bundle'
+  | 'manage:keys';
 
 export function checkScope(userScopes: string[], scope: string): boolean {
   if (userScopes.includes(scope)) return true;

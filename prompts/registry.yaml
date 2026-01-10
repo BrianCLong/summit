@@ -28,3 +28,26 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ci-coverage-contract-fuzz
+    version: v1
+    path: prompts/qa/ci-coverage-contract-fuzz.md
+    sha256: b19e55fac0ec70756729645407d34989ae5e0f6ce1c9cec2379655bc82015ede
+    description: Align CI coverage artifacts, status endpoint naming, and contract/fuzz test typing.
+    scope:
+      paths:
+        - .github/
+        - docs/roadmap/
+        - server/
+      domains:
+        - testing
+        - qa
+        - ci
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
