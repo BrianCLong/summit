@@ -1,5 +1,30 @@
 version: 1
 prompts:
+  - id: doctrine-enforcement-hardening
+    version: v1
+    path: prompts/governance/doctrine-enforcement-hardening.md
+    sha256: 3169e755e9fcc96dd3db2f2083dd53712e594ef99606ea7b3645e7195244a78d
+    description: Harden Phase 1 doctrine enforcement validators, tests, and documentation.
+    scope:
+      paths:
+        - packages/doctrine-enforcement/
+        - docs/roadmap/STATUS.json
+        - prompts/registry.yaml
+        - prompts/governance/doctrine-enforcement-hardening.md
+        - agents/examples/doctrine-enforcement-hardening.json
+      domains:
+        - governance
+        - runtime-law
+        - quality
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: agent-native-loop-n4
     version: v1
     path: prompts/governance/agent-native-loop-n4.md

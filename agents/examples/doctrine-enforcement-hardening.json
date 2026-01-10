@@ -1,0 +1,43 @@
+{
+  "task_id": "DOCTRINE_ENFORCEMENT_HARDENING",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "doctrine-enforcement-hardening",
+    "version": "v1",
+    "sha256": "3169e755e9fcc96dd3db2f2083dd53712e594ef99606ea7b3645e7195244a78d",
+    "path": "prompts/governance/doctrine-enforcement-hardening.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/doctrine-enforcement/**",
+      "docs/roadmap/STATUS.json",
+      "prompts/registry.yaml",
+      "prompts/governance/doctrine-enforcement-hardening.md",
+      "agents/examples/doctrine-enforcement-hardening.json"
+    ],
+    "domains": ["governance", "runtime-law", "quality"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "pnpm --filter @summit/doctrine-enforcement test",
+      "make smoke (if environment permits)"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Decision and admissibility validators include stricter checks without breaking API contracts.",
+    "Refusal records validate inputs and remain auditable.",
+    "Focused unit tests cover new enforcement behavior.",
+    "Roadmap status updated to reflect validator hardening."
+  ],
+  "stop_conditions": [
+    "CI failures on main block progress.",
+    "Policy-as-code requirements cannot be met.",
+    "Evidence of PII exposure or sandbox violation."
+  ]
+}
