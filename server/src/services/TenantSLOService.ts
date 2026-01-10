@@ -11,6 +11,7 @@ import { PrometheusMetrics } from '../utils/metrics';
 import logger from '../utils/logger';
 import { tracer, Span } from '../utils/tracing';
 import { DatabaseService } from './DatabaseService';
+import { eventBus } from '../lib/events/event-bus.js';
 
 // SLO configuration
 interface TenantSLOConfig {
@@ -1015,6 +1016,7 @@ export class TenantSLOService extends EventEmitter {
 
     // Emit alert event
     this.emit('sloAlert', alert);
+    this.publishSLOBreach(alert);
 
     logger.warn('SLO alert generated', {
       tenantId,
@@ -1023,6 +1025,36 @@ export class TenantSLOService extends EventEmitter {
       sloType: details.sloType,
       currentValue: details.currentValue,
       targetValue: details.targetValue,
+    });
+  }
+
+  private publishSLOBreach(alert: SLOAlert): void {
+    const breachTypes: Array<SLOAlert['type']> = [
+      'slo_violation',
+      'budget_exhaustion',
+      'burn_rate',
+    ];
+    if (!breachTypes.includes(alert.type)) {
+      return;
+    }
+
+    if (alert.type === 'burn_rate' && alert.severity !== 'critical') {
+      return;
+    }
+
+    eventBus.publish('slo.breach', {
+      tenantId: alert.tenantId,
+      alertId: alert.id,
+      alertType: alert.type,
+      severity: alert.severity,
+      sloType: alert.details.sloType,
+      currentValue: alert.details.currentValue,
+      targetValue: alert.details.targetValue,
+      burnRate: alert.details.burnRate,
+      affectedServices: alert.context.affectedServices,
+      recommendedActions: alert.context.recommendedActions,
+      timestamp: alert.timestamp.toISOString(),
+      environment: process.env.NODE_ENV || 'unknown',
     });
   }
 

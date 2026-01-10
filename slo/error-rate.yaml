@@ -1,18 +1,20 @@
 apiVersion: sloth.slok.dev/v1
 kind: PrometheusServiceLevel
 metadata:
-  name: summit-availability
+  name: summit-error-rate
 spec:
   service: summit
   slos:
-    - name: availability
-      objective: 99.5
+    - name: error-rate
+      objective: 99
       sli:
         events:
           errorQuery: sum(rate(http_requests_total{status_code=~"5.."}[5m]))
           totalQuery: sum(rate(http_requests_total[5m]))
       alerting:
-        name: AppAvailability
-        labels: { severity: critical, slo: availability }
+        name: AppErrorRate
+        labels:
+          severity: critical
+          slo: error_rate
         annotations:
-          summary: "App availability SLO burn"
+          summary: "App error rate SLO burn"

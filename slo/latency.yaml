@@ -10,4 +10,15 @@ spec:
       sli:
         raw:
           errorRatioQuery: |
-            histogram_quantile(0.95, sum by(le) (rate(http_request_duration_seconds_bucket{app="summit"}[5m]))) > 1.5
+            1 - (
+              sum(rate(http_request_duration_seconds_bucket{le="1.5"}[5m]))
+              /
+              sum(rate(http_request_duration_seconds_count[5m]))
+            )
+      alerting:
+        name: AppLatency
+        labels:
+          severity: warning
+          slo: latency
+        annotations:
+          summary: "App latency SLO burn"

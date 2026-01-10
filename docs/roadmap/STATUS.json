@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-05T02:10:29Z",
+  "revision_note": "Bound SLO policies to monitoring and added auto-ramp breach handling with incident receipts",
   "initiatives": [
     {
       "id": "A",

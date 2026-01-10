@@ -1,0 +1,74 @@
+groups:
+  - name: summit.slo
+    interval: 30s
+    rules:
+      - record: summit:slo_availability_target
+        expr: 0.995
+      - record: summit:slo_latency_p95_target_ms
+        expr: 1500
+      - record: summit:slo_error_rate_target
+        expr: 0.01
+      - record: summit:slo_throughput_target_rps
+        expr: 50
+
+      - record: summit:availability_5m
+        expr: |
+          (
+            sum(rate(http_requests_total{status_code!~"5.."}[5m]))
+          ) /
+          sum(rate(http_requests_total[5m]))
+      - record: summit:latency_p95_5m
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+          ) * 1000
+      - record: summit:error_rate_5m
+        expr: |
+          sum(rate(http_requests_total{status_code=~"5.."}[5m])) /
+          sum(rate(http_requests_total[5m]))
+      - record: summit:throughput_rps_5m
+        expr: sum(rate(http_requests_total[5m]))
+
+      - alert: SummitSLOAvailabilityBreach
+        expr: summit:availability_5m < summit:slo_availability_target
+        for: 5m
+        labels:
+          severity: critical
+          slo: availability
+        annotations:
+          summary: "Summit availability SLO breach"
+          description: |
+            Availability is {{ $value | humanizePercentage }} below target {{ query "summit:slo_availability_target" | first | value | humanizePercentage }}.
+
+      - alert: SummitSLOLatencyBreach
+        expr: summit:latency_p95_5m > summit:slo_latency_p95_target_ms
+        for: 10m
+        labels:
+          severity: warning
+          slo: latency
+        annotations:
+          summary: "Summit latency SLO breach"
+          description: |
+            P95 latency is {{ $value | printf "%.0f" }}ms above target {{ query "summit:slo_latency_p95_target_ms" | first | value }}ms.
+
+      - alert: SummitSLOErrorRateBreach
+        expr: summit:error_rate_5m > summit:slo_error_rate_target
+        for: 5m
+        labels:
+          severity: critical
+          slo: error_rate
+        annotations:
+          summary: "Summit error rate SLO breach"
+          description: |
+            Error rate is {{ $value | humanizePercentage }} above target {{ query "summit:slo_error_rate_target" | first | value | humanizePercentage }}.
+
+      - alert: SummitSLOThroughputBreach
+        expr: summit:throughput_rps_5m < summit:slo_throughput_target_rps
+        for: 10m
+        labels:
+          severity: warning
+          slo: throughput
+        annotations:
+          summary: "Summit throughput SLO breach"
+          description: |
+            Throughput is {{ $value | printf "%.2f" }} rps below target {{ query "summit:slo_throughput_target_rps" | first | value }} rps.

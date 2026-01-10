@@ -4,6 +4,7 @@ global:
 
 rule_files:
   - "/etc/prometheus/alerts.yaml"
+  - "/etc/prometheus/rules/*.yml"
 
 scrape_configs:
   - job_name: 'summit-server'
