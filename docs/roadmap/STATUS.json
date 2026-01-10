@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-03T04:10:00Z",
+  "revision_note": "Added intrinsic memory feature flag for multi-agent runners and documented template strategy",
   "initiatives": [
     {
       "id": "A",
@@ -113,7 +113,8 @@
           "id": "D1",
           "name": "KTOON core libraries",
           "status": "in-progress",
-          "owner": "Amp"
+          "owner": "Amp",
+          "notes": "Feature-flagged intrinsic memory layer added to agent runner with per-turn JSON updates"
         }
       ]
     },
