@@ -28,6 +28,10 @@ jobs:
           node-version: "20"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Validate Observability Artifacts
+        run: |
+          ./scripts/verification/verify_prometheus_rules.sh
+          pnpm tsx scripts/verification/verify_grafana_dashboards.ts
       - run: pnpm lint
       - run: cd server && npx tsx scripts/check-error-codes-doc.ts
 
