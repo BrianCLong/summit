@@ -49,4 +49,10 @@ We do not "fix" bugs; we resolve deviations.
 We do not "try" features; we certify capabilities.
 We do not "hope" for stability; we engineer resilience.
 
+## Stewardship & Ownership
+
+To ensure the long-term integrity and sustainability of the Summit platform, all critical controls and artifacts are assigned to specific owner roles. This role-based ownership model ensures clear accountability.
+
+The definitive guide to these roles, their responsibilities, and their review cadences can be found in the [Stewardship Ownership Map](ops/STEWARDSHIP_OWNERSHIP_MAP.md).
+
 **This assertion stands until formally revoked by a V2 Governance Override.**
