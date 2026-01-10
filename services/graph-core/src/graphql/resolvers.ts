@@ -524,7 +524,7 @@ export const resolvers = {
       }
       return {
         valid: false,
-        errors: result.error.errors.map((e) => `${e.path.join('.')}: ${e.message}`),
+        errors: result.error.errors.map((e: { path: (string | number)[]; message: string }) => `${e.path.join('.')}: ${e.message}`),
         warnings: [],
       };
     },
@@ -547,7 +547,7 @@ export const resolvers = {
 
       if (!validation.success) {
         const errors = validation.error.errors
-          .map((e) => `${e.path.join('.')}: ${e.message}`)
+          .map((e: { path: (string | number)[]; message: string }) => `${e.path.join('.')}: ${e.message}`)
           .join('; ');
         throw new Error(`Validation failed: ${errors}`);
       }
@@ -567,7 +567,7 @@ export const resolvers = {
 
       if (!validation.success) {
         const errors = validation.error.errors
-          .map((e) => `${e.path.join('.')}: ${e.message}`)
+          .map((e: { path: (string | number)[]; message: string }) => `${e.path.join('.')}: ${e.message}`)
           .join('; ');
         throw new Error(`Validation failed: ${errors}`);
       }
@@ -627,7 +627,7 @@ export const resolvers = {
       const validation = validatePolicyLabels(args.policyLabels);
       if (!validation.success) {
         const errors = validation.error.errors
-          .map((e) => `${e.path.join('.')}: ${e.message}`)
+          .map((e: { path: (string | number)[]; message: string }) => `${e.path.join('.')}: ${e.message}`)
           .join('; ');
         throw new Error(`Policy labels validation failed: ${errors}`);
       }
@@ -653,7 +653,7 @@ export const resolvers = {
       const validation = validatePolicyLabels(args.policyLabels);
       if (!validation.success) {
         const errors = validation.error.errors
-          .map((e) => `${e.path.join('.')}: ${e.message}`)
+          .map((e: { path: (string | number)[]; message: string }) => `${e.path.join('.')}: ${e.message}`)
           .join('; ');
         throw new Error(`Policy labels validation failed: ${errors}`);
       }

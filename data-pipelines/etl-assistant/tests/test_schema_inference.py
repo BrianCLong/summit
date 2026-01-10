@@ -1,13 +1,13 @@
 """Tests for schema inference and mapping suggestions."""
 
 import json
-import pytest
 from pathlib import Path
 
+import pytest
 from src.schema_inference import (
-    SchemaInferenceEngine,
     CanonicalEntity,
     FieldType,
+    SchemaInferenceEngine,
 )
 
 
@@ -70,8 +70,7 @@ def test_schema_inference_person_data(sample_person_data, expected_person_mappin
 
     # Verify Person entity mappings
     person_mappings = [
-        m for m in result.suggested_mappings
-        if m.canonical_entity == CanonicalEntity.PERSON
+        m for m in result.suggested_mappings if m.canonical_entity == CanonicalEntity.PERSON
     ]
     assert len(person_mappings) >= 5  # At least first_name, last_name, email, phone, ssn
 
@@ -99,8 +98,7 @@ def test_schema_inference_org_data(sample_org_data):
 
     # Check Organization mappings
     org_mappings = [
-        m for m in result.suggested_mappings
-        if m.canonical_entity == CanonicalEntity.ORG
+        m for m in result.suggested_mappings if m.canonical_entity == CanonicalEntity.ORG
     ]
     assert len(org_mappings) >= 1
 
@@ -115,8 +113,7 @@ def test_schema_inference_org_data(sample_org_data):
 
     # Check Location mappings for address fields
     location_mappings = [
-        m for m in result.suggested_mappings
-        if m.canonical_entity == CanonicalEntity.LOCATION
+        m for m in result.suggested_mappings if m.canonical_entity == CanonicalEntity.LOCATION
     ]
     assert len(location_mappings) >= 2  # city, state, country
 
@@ -238,28 +235,30 @@ def test_csv_mapping_within_10_minutes():
     # Simulate realistic CSV with mixed types
     rows = []
     for i in range(100):
-        rows.append({
-            "id": i,
-            "first_name": f"User{i}",
-            "last_name": f"Last{i}",
-            "email": f"user{i}@example.com",
-            "phone": f"+1-555-{i:04d}",
-            "company": f"Company {i % 10}",
-            "city": "Springfield",
-            "state": "IL",
-            "zip_code": "62701",
-            "created_at": "2024-01-01T12:00:00Z",
-            "score": i * 1.5,
-            "active": i % 2 == 0,
-            "tags": "tag1,tag2",
-            "notes": "Some notes here",
-            "amount": 100.50,
-            "quantity": 5,
-            "status": "active",
-            "priority": "high",
-            "category": "A",
-            "subcategory": "A1",
-        })
+        rows.append(
+            {
+                "id": i,
+                "first_name": f"User{i}",
+                "last_name": f"Last{i}",
+                "email": f"user{i}@example.com",
+                "phone": f"+1-555-{i:04d}",
+                "company": f"Company {i % 10}",
+                "city": "Springfield",
+                "state": "IL",
+                "zip_code": "62701",
+                "created_at": "2024-01-01T12:00:00Z",
+                "score": i * 1.5,
+                "active": i % 2 == 0,
+                "tags": "tag1,tag2",
+                "notes": "Some notes here",
+                "amount": 100.50,
+                "quantity": 5,
+                "status": "active",
+                "priority": "high",
+                "category": "A",
+                "subcategory": "A1",
+            }
+        )
 
     start = time.time()
     result = engine.infer_schema(rows)

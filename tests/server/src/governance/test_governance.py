@@ -20,7 +20,6 @@ from server.src.governance.audit_logger import (
 
 
 class TestGovernanceStubs(unittest.TestCase):
-
     def test_check_access_opa_reader_allowed(self):
         user = {"id": "reader_user", "roles": ["reader"]}
         self.assertTrue(check_access(user, "data", "read"))

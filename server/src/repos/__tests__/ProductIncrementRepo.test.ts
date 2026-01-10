@@ -54,6 +54,7 @@ import {
   Deliverable,
   TeamAssignment,
 } from '../ProductIncrementRepo.js';
+import { provenanceLedger } from '../../provenance/ledger.js';
 
 describe('ProductIncrementRepo', () => {
   let repo: ProductIncrementRepo;
@@ -61,6 +62,10 @@ describe('ProductIncrementRepo', () => {
   let mockClient: any;
 
   beforeEach(() => {
+    (Pool as unknown as jest.Mock).mockImplementation(() => ({
+      query: mockQuery,
+      connect: mockConnect,
+    }));
     mockClient = {
       query: jest.fn<any>(),
       release: mockRelease,
@@ -70,12 +75,13 @@ describe('ProductIncrementRepo', () => {
     mockPool = new Pool();
     repo = new ProductIncrementRepo(mockPool);
 
-    // Clear all mocks
     jest.clearAllMocks();
+    const appendEntryMock = provenanceLedger.appendEntry as jest.Mock;
+    appendEntryMock.mockImplementation(async () => undefined);
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   // ===========================================================================

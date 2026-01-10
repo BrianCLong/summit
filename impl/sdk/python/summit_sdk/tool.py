@@ -1,9 +1,10 @@
 """Tool decorator and runtime helper."""
+
 from __future__ import annotations
 
-import inspect
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, Optional
+from typing import Any
 
 from pydantic import BaseModel, ValidationError, create_model
 
@@ -12,7 +13,9 @@ from .telemetry import TraceEmitter
 
 def _schema_from_signature(fn: Callable[..., Any]) -> type[BaseModel]:
     annotations = fn.__annotations__
-    fields = {name: (annotation, ...) for name, annotation in annotations.items() if name != "return"}
+    fields = {
+        name: (annotation, ...) for name, annotation in annotations.items() if name != "return"
+    }
     if not fields:
         return create_model(f"{fn.__name__.capitalize()}Input")
     return create_model(f"{fn.__name__.capitalize()}Input", **fields)
@@ -23,9 +26,9 @@ class ToolSpec:
     name: str
     fn: Callable[..., Any]
     schema: type[BaseModel]
-    audit_tags: Dict[str, Any] = field(default_factory=dict)
+    audit_tags: dict[str, Any] = field(default_factory=dict)
 
-    def invoke(self, payload: Dict[str, Any], emitter: TraceEmitter) -> Any:
+    def invoke(self, payload: dict[str, Any], emitter: TraceEmitter) -> Any:
         span = emitter.span("tool", {"tool": self.name, **self.audit_tags})
         try:
             model = self.schema(**payload)
@@ -49,7 +52,12 @@ class ToolSpec:
         return self.fn(*args, **kwargs)
 
 
-def tool(name: Optional[str] = None, *, schema: Optional[type[BaseModel]] = None, audit_tags: Optional[Dict[str, Any]] = None) -> Callable[[Callable[..., Any]], ToolSpec]:
+def tool(
+    name: str | None = None,
+    *,
+    schema: type[BaseModel] | None = None,
+    audit_tags: dict[str, Any] | None = None,
+) -> Callable[[Callable[..., Any]], ToolSpec]:
     """Decorator that registers a function as a Summit tool."""
 
     def decorator(fn: Callable[..., Any]) -> ToolSpec:
@@ -58,4 +66,3 @@ def tool(name: Optional[str] = None, *, schema: Optional[type[BaseModel]] = None
         return ToolSpec(name=tool_name, fn=fn, schema=tool_schema, audit_tags=audit_tags or {})
 
     return decorator
-

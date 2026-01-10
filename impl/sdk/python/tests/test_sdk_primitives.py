@@ -1,7 +1,6 @@
 import json
 
 import pytest
-
 from summit_sdk import KnowledgeBase, PolicyContext, SummitClient, flow, tool
 
 

@@ -11,7 +11,7 @@ import json
 import random
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -310,7 +310,7 @@ class GreenOpsOptimizer:
             lcc_score=best_score,
             decision_rationale=rationale,
             counterfactuals=counterfactuals,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
         )
 
         # Track decision
@@ -396,7 +396,7 @@ async def main():
             model_requirements={"model_class": "gpt-4o", "context_length": 8192},
             residency_constraints=["us-east-1", "us-west-2"],
             slo_requirements={"max_latency_ms": 400, "min_availability": 0.995},
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
         ),
         # Latency-critical workload
         SchedulingRequest(
@@ -405,7 +405,7 @@ async def main():
             model_requirements={"model_class": "claude-3-5-sonnet", "context_length": 4096},
             residency_constraints=["us-west-2"],
             slo_requirements={"max_latency_ms": 200, "min_availability": 0.999},
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
         ),
         # Carbon-conscious workload
         SchedulingRequest(
@@ -414,7 +414,7 @@ async def main():
             model_requirements={"model_class": "gpt-4o", "context_length": 4096},
             residency_constraints=["eu-west-1", "eu-north-1"],
             slo_requirements={"max_latency_ms": 300, "min_availability": 0.997},
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
         ),
     ]
 
@@ -440,7 +440,7 @@ async def main():
                 ]
             ),
             slo_requirements={"max_latency_ms": random.randint(200, 400)},
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
         )
 
         await optimizer.optimize_scheduling(request)

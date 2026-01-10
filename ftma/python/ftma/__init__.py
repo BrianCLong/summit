@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import importlib
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from typing import Iterable, List, Sequence
+from typing import List
 
 ftma_core = importlib.import_module("ftma_core")
 
@@ -13,9 +14,9 @@ ftma_core = importlib.import_module("ftma_core")
 class AggregationResult:
     """Typed wrapper around the C++ aggregation result."""
 
-    sum: List[float]
-    mean: List[float]
-    variance: List[float]
+    sum: list[float]
+    mean: list[float]
+    variance: list[float]
     participants: int
     survivors: int
     threshold: int
@@ -24,7 +25,9 @@ class AggregationResult:
 class Coordinator:
     """High-level coordinator orchestrating FTMA sessions."""
 
-    def __init__(self, num_clients: int, threshold: int, metric_dimension: int, scale: int = 1_000_000) -> None:
+    def __init__(
+        self, num_clients: int, threshold: int, metric_dimension: int, scale: int = 1_000_000
+    ) -> None:
         if threshold <= 0 or threshold > num_clients:
             raise ValueError("threshold must be within (0, num_clients]")
         self._core = ftma_core.FtmaCoordinator(num_clients, threshold, metric_dimension, scale)
@@ -40,7 +43,7 @@ class Coordinator:
     def scale(self) -> int:
         return self._scale
 
-    def register_client(self, client_id: int, metrics: Sequence[float]) -> List[int]:
+    def register_client(self, client_id: int, metrics: Sequence[float]) -> list[int]:
         if len(metrics) != self._dimension:
             raise ValueError("metrics dimension mismatch")
         masked = self._core.register_client(client_id, list(metrics))

@@ -6,8 +6,8 @@ import { prometheusConductorMetrics } from '../../observability/prometheus';
 jest.mock('../cost-aware-scheduler', () => ({
   costAwareScheduler: {
     getNextTask: jest.fn(),
-    completeTask: jest.fn().mockResolvedValue(undefined),
-    failTask: jest.fn().mockResolvedValue(undefined),
+    completeTask: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+    failTask: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
   },
 }));
 
@@ -22,10 +22,10 @@ jest.mock('../../observability/prometheus', () => ({
 
 const mockCompleteTask = costAwareScheduler.completeTask as jest.Mock;
 const mockFailTask = costAwareScheduler.failTask as jest.Mock;
-const mockRecordScheduledTask =
-  prometheusConductorMetrics.recordScheduledTask as jest.Mock;
-const mockObserveScheduledTaskLatency =
-  prometheusConductorMetrics.observeScheduledTaskLatency as jest.Mock;
+const mockRecordOperationalEvent =
+  prometheusConductorMetrics.recordOperationalEvent as jest.Mock;
+const mockRecordOperationalMetric =
+  prometheusConductorMetrics.recordOperationalMetric as jest.Mock;
 
 describe('queue-worker pool labeling', () => {
   const config = {
@@ -44,7 +44,7 @@ describe('queue-worker pool labeling', () => {
 
   it('uses unknown pool label when poolId is absent', async () => {
     const worker = new QueueWorker(config);
-    (worker as any).executeTask = jest.fn().mockResolvedValue({
+    (worker as any).executeTask = jest.fn<() => Promise<any>>().mockResolvedValue({
       success: true,
       actualCost: 0.5,
       processingTime: 25,
@@ -61,20 +61,19 @@ describe('queue-worker pool labeling', () => {
     });
 
     expect(mockCompleteTask).toHaveBeenCalled();
-    expect(mockRecordScheduledTask).toHaveBeenCalledWith(
-      'light_normal',
-      'unknown',
-      'completed',
+    expect(mockRecordOperationalEvent).toHaveBeenCalledWith(
+      'worker_task_completed',
+      { success: true },
     );
-    expect(mockObserveScheduledTaskLatency).toHaveBeenCalledWith(
-      'unknown',
-      expect.any(Number),
+    expect(mockRecordOperationalMetric).toHaveBeenCalledWith(
+      'worker_task_success_rate',
+      1,
     );
   });
 
   it('tags metrics with provided poolId', async () => {
     const worker = new QueueWorker(config);
-    (worker as any).executeTask = jest.fn().mockResolvedValue({
+    (worker as any).executeTask = jest.fn<() => Promise<any>>().mockResolvedValue({
       success: false,
       error: 'boom',
       actualCost: 0,
@@ -94,14 +93,13 @@ describe('queue-worker pool labeling', () => {
     });
 
     expect(mockFailTask).toHaveBeenCalled();
-    expect(mockRecordScheduledTask).toHaveBeenCalledWith(
-      'light_normal',
-      'pool-123',
-      'failed',
+    expect(mockRecordOperationalEvent).toHaveBeenCalledWith(
+      'worker_task_failed',
+      { success: false },
     );
-    expect(mockObserveScheduledTaskLatency).toHaveBeenCalledWith(
-      'pool-123',
-      10,
+    expect(mockRecordOperationalMetric).toHaveBeenCalledWith(
+      'worker_task_success_rate',
+      0,
     );
   });
 });

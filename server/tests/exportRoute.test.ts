@@ -3,6 +3,9 @@ import { createApp } from '../src/app.js';
 import { describe, test, expect, beforeAll } from '@jest/globals';
 import crypto from 'crypto';
 
+const NO_NETWORK_LISTEN = process.env.NO_NETWORK_LISTEN === 'true';
+const describeIf = NO_NETWORK_LISTEN ? describe.skip : describe;
+
 function sign(params: Record<string, string>, secret: string): string {
   const base = Object.keys(params)
     .sort()
@@ -11,7 +14,7 @@ function sign(params: Record<string, string>, secret: string): string {
   return crypto.createHmac('sha256', secret).update(base).digest('hex');
 }
 
-describe('GET /export/provenance', () => {
+describeIf('GET /export/provenance', () => {
   const secret = 'test-secret';
   const baseParams = {
     scope: 'investigation',
@@ -29,7 +32,7 @@ describe('GET /export/provenance', () => {
   });
 
   test('400 when tenant missing', async () => {
-    const params = { ...baseParams };
+    const params: typeof baseParams = { ...baseParams };
     const sig = sign(params, secret);
     const res = await request(app)
       .get('/export/provenance')
@@ -39,7 +42,7 @@ describe('GET /export/provenance', () => {
   });
 
   test('403 when tenant mismatch', async () => {
-    const params = { ...baseParams };
+    const params: typeof baseParams = { ...baseParams };
     const sig = sign(params, secret);
     const res = await request(app)
       .get('/export/provenance')
@@ -49,7 +52,7 @@ describe('GET /export/provenance', () => {
   });
 
   test('403 when signature invalid', async () => {
-    const params = { ...baseParams };
+    const params: typeof baseParams = { ...baseParams };
     const res = await request(app)
       .get('/export/provenance')
       .query({ ...params, sig: 'bad' })
@@ -58,7 +61,10 @@ describe('GET /export/provenance', () => {
   });
 
   test('403 when expired', async () => {
-    const params = { ...baseParams, ts: String(Date.now() - 16 * 60 * 1000) };
+    const params: typeof baseParams = {
+      ...baseParams,
+      ts: String(Date.now() - 16 * 60 * 1000),
+    };
     const sig = sign(params, secret);
     const res = await request(app)
       .get('/export/provenance')

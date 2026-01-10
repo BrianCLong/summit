@@ -1,19 +1,21 @@
-import time
-import json
 import asyncio
+import json
 import logging
-import yaml
-import redis.asyncio as redis
-from typing import List, Dict, Any
 from collections import defaultdict
+from typing import Any
+
+import redis.asyncio as redis
+import yaml
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger("BatchProcessor")
 
 # Load configuration
 try:
-    with open("config/ai-models.yml", "r") as f:
+    with open("config/ai-models.yml") as f:
         CONFIG = yaml.safe_load(f)
 except FileNotFoundError:
     logger.warning("config/ai-models.yml not found, using defaults")
@@ -23,10 +25,11 @@ REDIS_URL = "redis://localhost:6379"
 QUEUE_NAME = "ai_inference_queue"
 RESULT_PREFIX = "ai_result:"
 
+
 class BatchProcessor:
     def __init__(self):
         self.redis = redis.from_url(REDIS_URL, decode_responses=True)
-        self.queues: Dict[str, List[Dict]] = defaultdict(list)
+        self.queues: dict[str, list[dict]] = defaultdict(list)
         self.batch_configs = {}
         self._load_configs()
 
@@ -34,7 +37,7 @@ class BatchProcessor:
         for model, cfg in CONFIG.get("models", {}).items():
             self.batch_configs[model] = {
                 "size": cfg.get("batch_size", 1),
-                "timeout": cfg.get("timeout_ms", 100) / 1000.0
+                "timeout": cfg.get("timeout_ms", 100) / 1000.0,
             }
         logger.info(f"Loaded batch configs: {self.batch_configs}")
 
@@ -54,11 +57,11 @@ class BatchProcessor:
                         self.queues[model_name].append(job)
                         await self.check_batch(model_name)
                 else:
-                    await asyncio.sleep(0.01) # Avoid tight loop if empty
+                    await asyncio.sleep(0.01)  # Avoid tight loop if empty
 
                 # Periodically check all queues for timeouts
                 for model in list(self.queues.keys()):
-                     await self.check_batch(model, force=False)
+                    await self.check_batch(model, force=False)
 
             except Exception as e:
                 logger.error(f"Error in processing loop: {e}")
@@ -69,15 +72,17 @@ class BatchProcessor:
         config = self.batch_configs.get(model_name, {"size": 1, "timeout": 0.1})
 
         # Check if batch is full or forced
-        if len(queue) >= config["size"]: # OR timeout logic (omitted for brevity in this loop structure, need better loop)
-            await self.process_batch(model_name, queue[:config["size"]])
-            self.queues[model_name] = queue[config["size"]:]
+        if (
+            len(queue) >= config["size"]
+        ):  # OR timeout logic (omitted for brevity in this loop structure, need better loop)
+            await self.process_batch(model_name, queue[: config["size"]])
+            self.queues[model_name] = queue[config["size"] :]
 
         # Note: A real implementation would need a separate timer per batch to respect 'timeout_ms' accurately.
         # Here we simplify: if there are items, we process them immediately if batch is full,
         # or we could add a flush mechanism. For MVP, strict size-based triggering.
 
-    async def process_batch(self, model_name: str, batch: List[Dict]):
+    async def process_batch(self, model_name: str, batch: list[dict]):
         logger.info(f"Processing batch of {len(batch)} for {model_name}")
 
         inputs = [job["input"] for job in batch]
@@ -92,8 +97,8 @@ class BatchProcessor:
                 pipe.set(f"{RESULT_PREFIX}{job_id}", json.dumps(result), ex=3600)
             await pipe.execute()
 
-    async def mock_inference(self, model_name: str, inputs: List[Any]) -> List[Any]:
-        await asyncio.sleep(0.05) # Simulate inference time
+    async def mock_inference(self, model_name: str, inputs: list[Any]) -> list[Any]:
+        await asyncio.sleep(0.05)  # Simulate inference time
         if model_name == "yolo":
             return [{"detections": [{"class": "person", "conf": 0.95}]} for _ in inputs]
         elif model_name == "whisper":
@@ -103,6 +108,7 @@ class BatchProcessor:
         elif model_name == "sentence_transformers":
             return [{"embedding": [0.1] * 384} for _ in inputs]
         return [{"error": "Unknown model"} for _ in inputs]
+
 
 if __name__ == "__main__":
     processor = BatchProcessor()

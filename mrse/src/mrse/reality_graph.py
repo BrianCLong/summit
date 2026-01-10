@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict, deque
-from typing import DefaultDict, Dict, Iterable, List, Tuple
+from collections.abc import Iterable
 
 from .world_state import WorldState
 
@@ -10,8 +10,8 @@ class RealityGraph:
     """Directed graph of world states across simulation horizons."""
 
     def __init__(self) -> None:
-        self.nodes: Dict[str, WorldState] = {}
-        self.edges: DefaultDict[str, List[str]] = defaultdict(list)
+        self.nodes: dict[str, WorldState] = {}
+        self.edges: defaultdict[str, list[str]] = defaultdict(list)
 
     def add_state(self, state: WorldState) -> None:
         self.nodes[state.id] = state
@@ -23,9 +23,9 @@ class RealityGraph:
         for child_id in self.edges.get(node_id, []):
             yield self.nodes[child_id]
 
-    def paths_from(self, root_id: str) -> List[List[WorldState]]:
-        paths: List[List[WorldState]] = []
-        queue: deque[Tuple[str, List[WorldState]]] = deque()
+    def paths_from(self, root_id: str) -> list[list[WorldState]]:
+        paths: list[list[WorldState]] = []
+        queue: deque[tuple[str, list[WorldState]]] = deque()
         queue.append((root_id, [self.nodes[root_id]]))
 
         while queue:

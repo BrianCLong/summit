@@ -1,4 +1,5 @@
 """Core primitives for the Pipeline Flakiness Detector (PFD)."""
+
 from __future__ import annotations
 
 import dataclasses
@@ -10,8 +11,9 @@ import random
 import statistics
 import time
 from collections import Counter
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Sequence
+from typing import Any
 
 try:  # Optional numpy support for better numeric handling.
     import numpy as _np  # type: ignore
@@ -34,8 +36,8 @@ class StepRun:
     step_name: str
     value_repr: str
     value_hash: str
-    numeric_vector: Optional[List[float]]
-    exception: Optional[str] = None
+    numeric_vector: list[float] | None
+    exception: str | None = None
     skipped: bool = False
 
 
@@ -48,15 +50,15 @@ class StepAnalysis:
     difference_ratio: float
     failure_ratio: float
     normalized_variance: float
-    mean: Optional[float]
-    variance: Optional[float]
+    mean: float | None
+    variance: float | None
     num_runs: int
     failures: int
-    unique_value_samples: List[Mapping[str, Any]]
+    unique_value_samples: list[Mapping[str, Any]]
     flagged: bool
-    blame_file: Optional[str]
-    blame_line: Optional[int]
-    exceptions: List[str]
+    blame_file: str | None
+    blame_line: int | None
+    exceptions: list[str]
 
 
 def _seed_environment(base_seed: int, run_id: int) -> None:
@@ -111,7 +113,7 @@ def _is_bool(value: Any) -> bool:
     return isinstance(value, bool)
 
 
-def _extract_numeric_vector(value: Any) -> Optional[List[float]]:
+def _extract_numeric_vector(value: Any) -> list[float] | None:
     """Attempt to flatten a value into a list of floats for statistics."""
 
     if _is_bool(value):
@@ -124,7 +126,7 @@ def _extract_numeric_vector(value: Any) -> Optional[List[float]]:
         except Exception:
             return None
     if isinstance(value, Mapping):
-        flattened: List[float] = []
+        flattened: list[float] = []
         for key in sorted(value.keys(), key=str):
             component = _extract_numeric_vector(value[key])
             if component is None:
@@ -132,7 +134,7 @@ def _extract_numeric_vector(value: Any) -> Optional[List[float]]:
             flattened.extend(component)
         return flattened
     if isinstance(value, (list, tuple)):
-        flattened_list: List[float] = []
+        flattened_list: list[float] = []
         for item in value:
             component = _extract_numeric_vector(item)
             if component is None:
@@ -142,8 +144,8 @@ def _extract_numeric_vector(value: Any) -> Optional[List[float]]:
     return None
 
 
-def _compute_statistics(vectors: Iterable[Optional[List[float]]]) -> Mapping[str, Optional[float]]:
-    values: List[float] = []
+def _compute_statistics(vectors: Iterable[list[float] | None]) -> Mapping[str, float | None]:
+    values: list[float] = []
     for vector in vectors:
         if vector is None:
             continue
@@ -179,10 +181,10 @@ class PipelineFlakinessDetector:
         self.threshold = threshold
         self.set_seeds = set_seeds
 
-    def run(self, initial_input: Any = None) -> List[StepAnalysis]:
+    def run(self, initial_input: Any = None) -> list[StepAnalysis]:
         """Execute the configured pipeline and return per-step analyses."""
 
-        step_runs: Dict[str, List[StepRun]] = {step.name: [] for step in self.steps}
+        step_runs: dict[str, list[StepRun]] = {step.name: [] for step in self.steps}
         for run_index in range(self.runs):
             if self.set_seeds:
                 _seed_environment(self.seed, run_index)
@@ -214,7 +216,7 @@ class PipelineFlakinessDetector:
                         )
                     )
                     context = value
-                except Exception as exc:  # noqa: BLE001
+                except Exception as exc:
                     exc_repr = f"{type(exc).__name__}: {exc}"
                     step_runs[step.name].append(
                         StepRun(
@@ -229,8 +231,8 @@ class PipelineFlakinessDetector:
             time.sleep(0)  # Yield to ensure consistent scheduling in tests.
         return self._analyze_runs(step_runs)
 
-    def _analyze_runs(self, step_runs: Mapping[str, List[StepRun]]) -> List[StepAnalysis]:
-        analyses: List[StepAnalysis] = []
+    def _analyze_runs(self, step_runs: Mapping[str, list[StepRun]]) -> list[StepAnalysis]:
+        analyses: list[StepAnalysis] = []
         for step in self.steps:
             runs = step_runs[step.name]
             value_counter: Counter[str] = Counter(run.value_hash for run in runs)
@@ -242,7 +244,7 @@ class PipelineFlakinessDetector:
             stats = _compute_statistics(run.numeric_vector for run in runs)
             normalized_variance = float(stats.get("normalized_variance", 0.0))
             exceptions = sorted({run.exception for run in runs if run.exception})
-            unique_samples: List[Mapping[str, Any]] = []
+            unique_samples: list[Mapping[str, Any]] = []
             # Deterministic order: by descending count then lexicographic repr.
             for value_hash, count in sorted(
                 value_counter.items(),
@@ -261,8 +263,8 @@ class PipelineFlakinessDetector:
                 )
             flakiness_score = difference_ratio + normalized_variance + failure_ratio
             flagged = flakiness_score >= self.threshold
-            blame_file: Optional[str] = None
-            blame_line: Optional[int] = None
+            blame_file: str | None = None
+            blame_line: int | None = None
             try:
                 source_file = inspect.getsourcefile(step.func)
                 if source_file:

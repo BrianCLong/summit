@@ -1,5 +1,7 @@
 import unittest
+
 from src.roi_engine import ROIEngine
+
 
 class TestROIForge(unittest.TestCase):
     def test_roi_calculation(self):
@@ -13,7 +15,7 @@ class TestROIForge(unittest.TestCase):
         print(f"ROI: {metrics['roi_percentage']}%")
 
         # Expect ROI > 45% as per prompt requirement
-        self.assertGreater(metrics['roi_percentage'], 45.0)
+        self.assertGreater(metrics["roi_percentage"], 45.0)
 
     def test_efficiency_uplift(self):
         engine = ROIEngine()
@@ -27,7 +29,8 @@ class TestROIForge(unittest.TestCase):
             engine.record_transaction(cycle_time_ms=50, cost_saved=10)
 
         metrics = engine.get_metrics()
-        self.assertGreater(metrics['cycle_time_reduction'], 40.0)
+        self.assertGreater(metrics["cycle_time_reduction"], 40.0)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

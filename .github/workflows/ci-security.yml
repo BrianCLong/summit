@@ -83,7 +83,7 @@ jobs:
           sarif_file: ${{ env.REPORT_DIR }}/gitleaks.sarif
       - name: Persist report artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: ${{ env.REPORT_DIR }}/gitleaks.sarif
@@ -139,7 +139,7 @@ jobs:
           sarif_file: ${{ env.REPORT_DIR }}/semgrep.sarif
       - name: Persist Semgrep report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: ${{ env.REPORT_DIR }}/semgrep.sarif
@@ -178,7 +178,7 @@ jobs:
           sarif_file: ${{ env.REPORT_DIR }}/snyk.sarif
       - name: Persist Snyk report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: ${{ env.REPORT_DIR }}/snyk.sarif
@@ -212,7 +212,7 @@ jobs:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-fs.sarif
       - name: Persist filesystem report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: ${{ env.REPORT_DIR }}/trivy-fs.sarif
@@ -233,7 +233,7 @@ jobs:
       - name: Build client image for scanning
         run: docker build -t security-suite/client ./client
       - name: Scan server image
-        uses: aquasecurity/trivy-action@b95621a837499832c705591a4924e4b10b34332e # 0.16.0
+        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # 0.16.0
         with:
           image-ref: security-suite/server
           format: sarif
@@ -246,7 +246,7 @@ jobs:
         with:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-server.sarif
       - name: Scan client image
-        uses: aquasecurity/trivy-action@b95621a837499832c705591a4924e4b10b34332e # 0.16.0
+        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # 0.16.0
         with:
           image-ref: security-suite/client
           format: sarif
@@ -260,7 +260,7 @@ jobs:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-client.sarif
       - name: Persist container reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: |
@@ -286,7 +286,7 @@ jobs:
             .
       - name: Persist license report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: ${{ env.REPORT_DIR }}/trivy-license.json
@@ -315,7 +315,7 @@ jobs:
           sarif_file: ${{ env.REPORT_DIR }}/results.sarif
       - name: Persist Checkov report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: ${{ env.REPORT_DIR }}/results.sarif
@@ -346,7 +346,7 @@ jobs:
         run: conftest test rendered --policy policies/opa
       - name: Persist rendered manifests
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: rendered
@@ -384,7 +384,7 @@ jobs:
           fi
       - name: Persist CIS report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: ${{ env.REPORT_DIR }}/trivy-cis.json
@@ -401,7 +401,7 @@ jobs:
           REPORT_DIR="$REPORT_DIR" scripts/security/baseline-check.sh
       - name: Persist baseline report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: ${{ env.REPORT_DIR }}/baseline-report.json
@@ -446,7 +446,7 @@ jobs:
         run: docker compose -f docker-compose.yml down
       - name: Persist ZAP reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: |
@@ -475,7 +475,7 @@ jobs:
       dashboard_url: ${{ steps.dashboard.outputs.dashboard_url }}
     steps:
       - name: Download all security reports
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: security-reports
           path: aggregated-security
@@ -547,7 +547,7 @@ jobs:
               .write();
       - name: Upload aggregated summary
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security-reports
           path: aggregated-security/security-summary.json

@@ -1,0 +1,274 @@
+name: Hotfix Post-Mortem Enforcer
+
+# POST-MORTEM ENFORCEMENT WORKFLOW
+# Ensures all hotfix releases have corresponding post-mortem documentation.
+# Runs daily and can be triggered manually.
+#
+# See docs/releases/HOTFIX_OVERRIDE.md for post-mortem requirements.
+
+on:
+  schedule:
+    # Run daily at 9:00 AM UTC (Monday-Friday business hours overlap)
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+    inputs:
+      create_issues:
+        description: "Create GitHub issues for missing post-mortems?"
+        type: boolean
+        default: true
+      tag_pattern:
+        description: "Tag pattern to check (default: hotfix tags)"
+        type: string
+        default: "*-hotfix.*"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  enforce-postmortems:
+    name: Check Post-Mortems
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # Need all history for tags
+
+      - name: Find Hotfix Tags Without Post-Mortems
+        id: check
+        run: |
+          echo "🔍 Scanning for hotfix tags without post-mortems..."
+          echo ""
+
+          PATTERN="${{ inputs.tag_pattern || '*-hotfix.*' }}"
+          POSTMORTEM_DIR="docs/releases/HOTFIX_POSTMORTEMS"
+          MISSING_COUNT=0
+          MISSING_TAGS=""
+
+          # Create output directory
+          mkdir -p artifacts/postmortem-check
+
+          # Check each hotfix tag
+          for tag in $(git tag -l "${PATTERN}" 2>/dev/null | sort -V); do
+            POSTMORTEM_FILE="${POSTMORTEM_DIR}/${tag}.md"
+
+            if [ ! -f "${POSTMORTEM_FILE}" ]; then
+              echo "❌ Missing: ${POSTMORTEM_FILE}"
+              MISSING_COUNT=$((MISSING_COUNT + 1))
+              MISSING_TAGS="${MISSING_TAGS}${tag}\n"
+
+              # Get tag info for report
+              TAG_DATE=$(git log -1 --format="%ci" "${tag}" 2>/dev/null || echo "unknown")
+              TAG_SHA=$(git rev-list -n 1 "${tag}" 2>/dev/null || echo "unknown")
+
+              # Add to missing list
+              cat >> artifacts/postmortem-check/missing_postmortems.txt <<EOF
+          Tag: ${tag}
+          Date: ${TAG_DATE}
+          Commit: ${TAG_SHA}
+          Expected File: ${POSTMORTEM_FILE}
+          ---
+          EOF
+            else
+              echo "✅ Found: ${POSTMORTEM_FILE}"
+            fi
+          done
+
+          echo ""
+          echo "missing_count=${MISSING_COUNT}" >> $GITHUB_OUTPUT
+
+          if [ ${MISSING_COUNT} -gt 0 ]; then
+            echo "::warning::Found ${MISSING_COUNT} hotfix tags without post-mortems"
+            echo "missing=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ All hotfix tags have post-mortem documentation"
+            echo "missing=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate Report
+        id: report
+        run: |
+          mkdir -p artifacts/postmortem-check
+
+          MISSING_COUNT="${{ steps.check.outputs.missing_count }}"
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          cat > artifacts/postmortem-check/enforcement_report.md <<'EOF'
+          # Hotfix Post-Mortem Enforcement Report
+
+          **Generated:** $TIMESTAMP
+          **Workflow Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          ## Summary
+
+          EOF
+
+          if [ "${{ steps.check.outputs.missing }}" = "true" ]; then
+            cat >> artifacts/postmortem-check/enforcement_report.md <<EOF
+          ⚠️ **${MISSING_COUNT} post-mortem(s) missing**
+
+          ## Missing Post-Mortems
+
+          | Tag | Expected File |
+          |-----|---------------|
+          EOF
+
+            # Parse missing file and add to table
+            if [ -f artifacts/postmortem-check/missing_postmortems.txt ]; then
+              grep "^Tag:" artifacts/postmortem-check/missing_postmortems.txt | while read -r line; do
+                TAG=$(echo "$line" | cut -d' ' -f2)
+                echo "| \`${TAG}\` | \`docs/releases/HOTFIX_POSTMORTEMS/${TAG}.md\` |" >> artifacts/postmortem-check/enforcement_report.md
+              done
+            fi
+
+            cat >> artifacts/postmortem-check/enforcement_report.md <<'EOF'
+
+          ## Action Required
+
+          Each missing post-mortem must be created within 24 hours of the hotfix release.
+
+          ### Template
+
+          Use the template from `docs/releases/HOTFIX_OVERRIDE.md`:
+
+          ```markdown
+          # Hotfix Post-Mortem: <TAG>
+
+          **Date:** YYYY-MM-DD
+          **Author:** @engineer
+          **Reviewed By:** @team-lead
+
+          ## Incident Summary
+
+          Brief description of what happened and why a hotfix was needed.
+
+          ## Timeline
+
+          | Time (UTC) | Event |
+          |------------|-------|
+          | HH:MM | Issue discovered |
+          | HH:MM | Hotfix deployed |
+
+          ## Root Cause
+
+          Technical explanation.
+
+          ## Fix Description
+
+          What changed.
+
+          ## Verification
+
+          How it was tested.
+
+          ## Preventive Measures
+
+          - [ ] Action item 1
+          - [ ] Action item 2
+          ```
+
+          EOF
+
+          else
+            cat >> artifacts/postmortem-check/enforcement_report.md <<'EOF'
+          ✅ **All hotfix tags have post-mortem documentation**
+
+          No action required.
+          EOF
+          fi
+
+          echo "Report generated: artifacts/postmortem-check/enforcement_report.md"
+
+      - name: Create Issue for Missing Post-Mortems
+        if: steps.check.outputs.missing == 'true' && inputs.create_issues != false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if an open issue already exists
+          EXISTING_ISSUE=$(gh issue list \
+            --repo "$GITHUB_REPOSITORY" \
+            --label "postmortem-required" \
+            --state open \
+            --json number,title \
+            --jq '.[0].number // empty')
+
+          MISSING_COUNT="${{ steps.check.outputs.missing_count }}"
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          ISSUE_BODY=$(cat <<'EOF'
+          ## Missing Hotfix Post-Mortems
+
+          **Detected:** $TIMESTAMP
+          **Missing Count:** $MISSING_COUNT
+
+          The following hotfix releases are missing required post-mortem documentation:
+
+          EOF
+          )
+
+          # Add missing tags to body
+          if [ -f artifacts/postmortem-check/missing_postmortems.txt ]; then
+            ISSUE_BODY+=$'\n\n```\n'
+            ISSUE_BODY+=$(cat artifacts/postmortem-check/missing_postmortems.txt)
+            ISSUE_BODY+=$'\n```\n'
+          fi
+
+          ISSUE_BODY+=$(cat <<'EOF'
+
+          ## Required Action
+
+          For each missing post-mortem:
+
+          1. Create file: `docs/releases/HOTFIX_POSTMORTEMS/<tag>.md`
+          2. Fill in the template from [HOTFIX_OVERRIDE.md](docs/releases/HOTFIX_OVERRIDE.md)
+          3. Get review from team lead
+          4. Commit and push
+
+          ## Template
+
+          See docs/releases/HOTFIX_OVERRIDE.md for the full template.
+
+          ---
+
+          **This issue was automatically created by the Hotfix Post-Mortem Enforcer.**
+          Workflow Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          EOF
+          )
+
+          if [ -n "${EXISTING_ISSUE}" ]; then
+            echo "📝 Updating existing issue #${EXISTING_ISSUE}"
+            gh issue comment "${EXISTING_ISSUE}" \
+              --repo "$GITHUB_REPOSITORY" \
+              --body "## Update: ${TIMESTAMP}
+
+          Still missing ${MISSING_COUNT} post-mortem(s).
+
+          See workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          else
+            echo "📝 Creating new issue"
+            gh issue create \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "[Governance] Missing Hotfix Post-Mortems (${MISSING_COUNT} outstanding)" \
+              --body "${ISSUE_BODY}" \
+              --label "postmortem-required,governance,priority:high" \
+              || echo "::warning::Could not create issue - check permissions"
+          fi
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v6
+        with:
+          name: postmortem-enforcement-report
+          path: artifacts/postmortem-check/
+          retention-days: 30
+
+      - name: Job Summary
+        run: |
+          cat artifacts/postmortem-check/enforcement_report.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail if Missing Post-Mortems
+        if: steps.check.outputs.missing == 'true'
+        run: |
+          echo "::error::${MISSING_COUNT} hotfix post-mortems are missing"
+          echo "See the enforcement report for details"
+          exit 1

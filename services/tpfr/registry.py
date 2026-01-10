@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any
 
 from .fingerprint import (
-    ColumnSketch,
     TableFingerprint,
     TableFingerprintBuilder,
     hamming_distance,
@@ -17,10 +17,10 @@ from .fingerprint import (
 class RegistryEntry:
     identifier: str
     fingerprint: TableFingerprint
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None
 
 
-def schema_set(fingerprint: TableFingerprint) -> Sequence[Tuple[str, str]]:
+def schema_set(fingerprint: TableFingerprint) -> Sequence[tuple[str, str]]:
     return tuple(sorted((name, sketch.dtype) for name, sketch in fingerprint.columns.items()))
 
 
@@ -64,7 +64,7 @@ class TabularPerceptualFingerprintRegistry:
 
     def __init__(self, *, similarity_threshold: float = 0.75, num_permutations: int = 128) -> None:
         self._builder = TableFingerprintBuilder(num_permutations=num_permutations)
-        self._entries: Dict[str, RegistryEntry] = {}
+        self._entries: dict[str, RegistryEntry] = {}
         self._threshold = similarity_threshold
 
     @property
@@ -74,32 +74,38 @@ class TabularPerceptualFingerprintRegistry:
     def compute_fingerprint(self, table: Any) -> TableFingerprint:
         return self._builder.build(table)
 
-    def add(self, identifier: str, table: Any, metadata: Optional[Dict[str, Any]] = None) -> RegistryEntry:
+    def add(
+        self, identifier: str, table: Any, metadata: dict[str, Any] | None = None
+    ) -> RegistryEntry:
         fingerprint = self.compute_fingerprint(table)
         entry = RegistryEntry(identifier=identifier, fingerprint=fingerprint, metadata=metadata)
         self._entries[identifier] = entry
         return entry
 
-    def query(self, table: Any, *, k: int = 5) -> List[Tuple[RegistryEntry, float]]:
+    def query(self, table: Any, *, k: int = 5) -> list[tuple[RegistryEntry, float]]:
         fingerprint = self.compute_fingerprint(table)
         return self.search(fingerprint, k=k)
 
-    def search(self, fingerprint: TableFingerprint, *, k: int = 5) -> List[Tuple[RegistryEntry, float]]:
-        scored: List[Tuple[RegistryEntry, float]] = []
+    def search(
+        self, fingerprint: TableFingerprint, *, k: int = 5
+    ) -> list[tuple[RegistryEntry, float]]:
+        scored: list[tuple[RegistryEntry, float]] = []
         for entry in self._entries.values():
             similarity = fingerprint_similarity(fingerprint, entry.fingerprint)
             scored.append((entry, similarity))
         scored.sort(key=lambda item: item[1], reverse=True)
         return scored[:k]
 
-    def find_similar(self, table: Any, *, threshold: Optional[float] = None) -> List[Tuple[RegistryEntry, float]]:
+    def find_similar(
+        self, table: Any, *, threshold: float | None = None
+    ) -> list[tuple[RegistryEntry, float]]:
         effective_threshold = threshold if threshold is not None else self._threshold
         candidates = self.query(table, k=len(self._entries))
         return [candidate for candidate in candidates if candidate[1] >= effective_threshold]
 
     def explain_difference(
         self, lhs: Any, rhs: Any, *, include_all_columns: bool = False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         left_fp = lhs if isinstance(lhs, TableFingerprint) else self.compute_fingerprint(lhs)
         right_fp = rhs if isinstance(rhs, TableFingerprint) else self.compute_fingerprint(rhs)
         schema_similarity = jaccard(schema_set(left_fp), schema_set(right_fp))
@@ -117,7 +123,7 @@ class TabularPerceptualFingerprintRegistry:
             for column in sorted(left_columns & right_columns)
             if left_fp.columns[column].dtype != right_fp.columns[column].dtype
         }
-        column_details: List[Dict[str, Any]] = []
+        column_details: list[dict[str, Any]] = []
         shared = sorted(left_columns & right_columns)
         for column in shared:
             left_sketch = left_fp.columns[column]
@@ -131,7 +137,9 @@ class TabularPerceptualFingerprintRegistry:
                 "density_rhs": round(right_sketch.density, 4),
             }
             if left_sketch.dtype == right_sketch.dtype == "numeric":
-                entry["mean_delta"] = round((right_sketch.mean or 0.0) - (left_sketch.mean or 0.0), 4)
+                entry["mean_delta"] = round(
+                    (right_sketch.mean or 0.0) - (left_sketch.mean or 0.0), 4
+                )
                 entry["deviation_delta"] = round(
                     (right_sketch.deviation or 0.0) - (left_sketch.deviation or 0.0), 4
                 )
@@ -149,4 +157,3 @@ class TabularPerceptualFingerprintRegistry:
             "column_differences": column_details,
         }
         return explanation
-

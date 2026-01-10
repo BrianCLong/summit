@@ -89,7 +89,7 @@ describe('PlaybookRunBundleExporter', () => {
 
     playbookRunManifestSchema.parse(manifest);
     const lineageEdges = manifest.provenance.edges.filter(
-      (edge) => edge.relation === 'DERIVED_FROM',
+      (edge: { relation?: string }) => edge.relation === 'DERIVED_FROM',
     );
     expect(lineageEdges).toHaveLength(1);
     expect(lineageEdges[0]).toMatchObject({

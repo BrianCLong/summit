@@ -8,6 +8,9 @@ const ACTOR_TWO = 'support-comment-other';
 let getPostgresPool: () => Pool;
 let supportRouter: express.Router;
 
+const describeIf =
+  process.env.RUN_ACCEPTANCE === 'true' ? describe : describe.skip;
+
 async function ensureSoftDeleteColumns(pg: Pool) {
   await pg.query(`
     ALTER TABLE support_ticket_comments
@@ -43,7 +46,7 @@ async function cleanupTicket(pg: Pool, ticketId: string) {
   await pg.query('DELETE FROM support_tickets WHERE id = $1', [ticketId]);
 }
 
-describe('Support ticket comment safe delete lifecycle', () => {
+describeIf('Support ticket comment safe delete lifecycle', () => {
   let app: express.Express;
   let pg: Pool;
   let ticketId: string;

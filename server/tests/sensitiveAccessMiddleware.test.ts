@@ -1,5 +1,3 @@
-import express from 'express';
-import request from 'supertest';
 import fs from 'fs';
 import path from 'path';
 
@@ -32,13 +30,10 @@ jest.mock('../src/conductor/governance/opa-integration.js', () => ({
 import { AppendOnlyAuditStore } from '../src/audit/appendOnlyAuditStore.js';
 import { createSensitiveContextMiddleware } from '../src/middleware/sensitive-context.js';
 
-const buildApp = (auditPath: string, allow = true) => {
+const buildMiddleware = (auditPath: string, allow = true) => {
   if (fs.existsSync(auditPath)) {
     fs.unlinkSync(auditPath);
   }
-  const app = express();
-  app.use(express.json());
-
   const auditStore = new AppendOnlyAuditStore({ filePath: auditPath });
 
   const middleware = createSensitiveContextMiddleware({
@@ -50,11 +45,7 @@ const buildApp = (auditPath: string, allow = true) => {
     action: 'test_sensitive',
   });
 
-  app.post('/api/test', middleware, (_req, res) => {
-    res.json({ ok: true, accessContext: (res.locals as any).sensitiveAccessContext });
-  });
-
-  return { app, auditPath };
+  return { middleware, auditPath };
 };
 
 const readAuditFile = (auditPath: string) => {
@@ -63,18 +54,36 @@ const readAuditFile = (auditPath: string) => {
     .readFileSync(auditPath, 'utf8')
     .split('\n')
     .filter(Boolean)
-    .map((line) => JSON.parse(line));
+    .map((line: string) => JSON.parse(line));
 };
 
 describe('sensitive context middleware', () => {
   it('rejects missing context fields', async () => {
     const auditPath = path.join(__dirname, 'tmp-audit-deny.jsonl');
-    const { app } = buildApp(auditPath);
+    const { middleware } = buildMiddleware(auditPath);
+    const req: any = {
+      method: 'POST',
+      path: '/api/test',
+      baseUrl: '',
+      headers: {},
+      body: {},
+      params: {},
+      ip: '127.0.0.1',
+    };
+    const res: any = {
+      locals: {},
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis(),
+    };
+    const next = jest.fn();
 
-    const response = await request(app).post('/api/test').send({});
+    await middleware(req, res, next);
 
-    expect(response.status).toBe(400);
-    expect(response.body.code).toBe('SENSITIVE_CONTEXT_REQUIRED');
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ code: 'SENSITIVE_CONTEXT_REQUIRED' }),
+    );
+    expect(next).not.toHaveBeenCalled();
 
     const records = readAuditFile(auditPath);
     expect(records.length).toBe(1);
@@ -83,17 +92,42 @@ describe('sensitive context middleware', () => {
 
   it('allows when all fields provided and records audit', async () => {
     const auditPath = path.join(__dirname, 'tmp-audit-allow.jsonl');
-    const { app } = buildApp(auditPath, true);
+    const { middleware } = buildMiddleware(auditPath, true);
+    const req: any = {
+      method: 'POST',
+      path: '/api/test',
+      baseUrl: '',
+      headers: {
+        'x-purpose': 'investigation',
+        'x-justification': 'Case triage',
+        'x-case-id': 'CASE-42',
+      },
+      body: {},
+      params: {},
+      ip: '127.0.0.1',
+    };
+    const res: any = {
+      locals: {},
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis(),
+    };
+    const next = jest.fn();
 
-    const response = await request(app)
-      .post('/api/test')
-      .set('x-purpose', 'investigation')
-      .set('x-justification', 'Case triage')
-      .set('x-case-id', 'CASE-42')
-      .send({});
+    await middleware(req, res, next);
+    if (next.mock.calls.length) {
+      res.json({
+        ok: true,
+        accessContext: (res.locals as any).sensitiveAccessContext,
+      });
+    }
 
-    expect(response.status).toBe(200);
-    expect(response.body.accessContext.purpose).toBe('investigation');
+    expect(next).toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ok: true,
+        accessContext: expect.objectContaining({ purpose: 'investigation' }),
+      }),
+    );
 
     const records = readAuditFile(auditPath);
     expect(records.length).toBe(1);

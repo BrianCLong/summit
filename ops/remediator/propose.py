@@ -15,7 +15,7 @@ import subprocess
 import time
 import uuid
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -203,7 +203,7 @@ class AutonomousRemediator:
             "per_request_limit_ms": current_budget["per_request_limit_ms"],
             "throttle_threshold": min(0.95, current_budget["throttle_threshold"] + 0.1),
             "temporary_increase_until": (
-                datetime.now(timezone.utc) + timedelta(minutes=duration_minutes)
+                datetime.now(UTC) + timedelta(minutes=duration_minutes)
             ).isoformat(),
         }
 
@@ -258,7 +258,7 @@ class AutonomousRemediator:
             policy_input = {
                 "remediation_request": {
                     "actions": [asdict(action) for action in actions],
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                 }
             }
 
@@ -366,7 +366,7 @@ class AutonomousRemediator:
         proposal = RemediationProposal(
             proposal_id=proposal_id,
             incident_id=alert.alert_id,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             actions=actions,
             estimated_mttr_minutes=playbook["mttr_estimate"],
             confidence_score=playbook["confidence"],
@@ -405,7 +405,7 @@ class AutonomousRemediator:
             execution_id=execution_id,
             proposal_id=proposal_id,
             approved_by=approver,
-            approved_at=datetime.now(timezone.utc).isoformat(),
+            approved_at=datetime.now(UTC).isoformat(),
             executed_at="",
             status="pending",
             execution_logs=[],
@@ -414,11 +414,13 @@ class AutonomousRemediator:
 
         try:
             execution.status = "executing"
-            execution.executed_at = datetime.now(timezone.utc).isoformat()
+            execution.executed_at = datetime.now(UTC).isoformat()
 
             # Execute each action
             for i, action in enumerate(proposal.actions):
-                log_entry = f"Executing action {i+1}/{len(proposal.actions)}: {action.action_type}"
+                log_entry = (
+                    f"Executing action {i + 1}/{len(proposal.actions)}: {action.action_type}"
+                )
                 execution.execution_logs.append(log_entry)
                 print(f"🔧 {log_entry}")
 
@@ -454,7 +456,7 @@ class AutonomousRemediator:
 
         except Exception as e:
             execution.status = "failed"
-            execution.execution_logs.append(f"❌ Execution failed: {str(e)}")
+            execution.execution_logs.append(f"❌ Execution failed: {e!s}")
 
         # Save execution record
         execution_file = self.evidence_dir / f"execution-{execution_id}.json"

@@ -1,46 +1,47 @@
-import os
-import shutil
 import json
-import yaml
+import os
 import re
+import shutil
+
+import yaml
 
 REPO_ROOT = os.getcwd()
 PACKS_DIR = os.path.join(REPO_ROOT, "prompts", "packs")
 MAPPING_LOG = os.path.join(REPO_ROOT, "prompts", "migration_log.json")
+
 
 def ensure_pack_dir(pack_id):
     path = os.path.join(PACKS_DIR, pack_id)
     os.makedirs(path, exist_ok=True)
     return path
 
+
 def extract_vars(content):
-    jinja_matches = re.findall(r'\{\{\s*(\w+)\s*\}\}', content)
-    format_matches = re.findall(r'(?<!\{)\{(\w+)\}(?!\})', content)
+    jinja_matches = re.findall(r"\{\{\s*(\w+)\s*\}\}", content)
+    format_matches = re.findall(r"(?<!\{)\{(\w+)\}(?!\})", content)
     vars_found = set(jinja_matches + format_matches)
     return list(vars_found)
+
 
 def create_manifest(pack_dir, pack_id, template_file=None, roles=None, model="gpt-4", tags=None):
     manifest = {
         "id": pack_id,
         "version": "1.0.0",
         "description": f"Imported from legacy structure: {pack_id}",
-        "model_config": {
-            "model": model,
-            "temperature": 0.0
-        },
+        "model_config": {"model": model, "temperature": 0.0},
         "vars": {},
-        "guardrails": {
-            "tags": tags or ["legacy-import"]
-        }
+        "guardrails": {"tags": tags or ["legacy-import"]},
     }
     if template_file:
         manifest["template_path"] = template_file
         # Extract vars from template
         try:
-            with open(os.path.join(pack_dir, template_file), "r") as f:
+            with open(os.path.join(pack_dir, template_file)) as f:
                 content = f.read()
                 detected_vars = extract_vars(content)
-                manifest["vars"] = {v: {"type": "string", "description": "Auto-detected"} for v in detected_vars}
+                manifest["vars"] = {
+                    v: {"type": "string", "description": "Auto-detected"} for v in detected_vars
+                }
         except Exception:
             pass
 
@@ -50,10 +51,11 @@ def create_manifest(pack_dir, pack_id, template_file=None, roles=None, model="gp
         for r, content in roles.items():
             detected_vars = extract_vars(content)
             for v in detected_vars:
-                 manifest["vars"][v] = {"type": "string", "description": "Auto-detected"}
+                manifest["vars"][v] = {"type": "string", "description": "Auto-detected"}
 
     with open(os.path.join(pack_dir, "manifest.json"), "w") as f:
         json.dump(manifest, f, indent=2)
+
 
 def migrate_claude_prompts():
     src_base = os.path.join(REPO_ROOT, ".claude", "prompts")
@@ -67,9 +69,12 @@ def migrate_claude_prompts():
                 pack_id = file.replace(".md", "").lower()
                 dest_dir = ensure_pack_dir(pack_id)
                 shutil.copy2(os.path.join(root, file), os.path.join(dest_dir, "template.md"))
-                create_manifest(dest_dir, pack_id, template_file="template.md", tags=["claude", "legacy"])
+                create_manifest(
+                    dest_dir, pack_id, template_file="template.md", tags=["claude", "legacy"]
+                )
                 mapping[os.path.join(root, file)] = dest_dir
     return mapping
+
 
 def migrate_agentic_prompts():
     src_base = os.path.join(REPO_ROOT, ".agentic-prompts")
@@ -82,9 +87,12 @@ def migrate_agentic_prompts():
             pack_id = file.replace(".md", "").lower().replace("_", "-")
             dest_dir = ensure_pack_dir(pack_id)
             shutil.copy2(os.path.join(src_base, file), os.path.join(dest_dir, "template.md"))
-            create_manifest(dest_dir, pack_id, template_file="template.md", tags=["agentic", "legacy"])
+            create_manifest(
+                dest_dir, pack_id, template_file="template.md", tags=["agentic", "legacy"]
+            )
             mapping[os.path.join(src_base, file)] = dest_dir
     return mapping
+
 
 def migrate_agents():
     src_base = os.path.join(REPO_ROOT, "agents")
@@ -102,9 +110,12 @@ def migrate_agents():
             pack_id = f"agent.{agent_name}"
             dest_dir = ensure_pack_dir(pack_id)
             shutil.copy2(prompt_file, os.path.join(dest_dir, "system.md"))
-            create_manifest(dest_dir, pack_id, template_file="system.md", tags=["agent", "system-prompt"])
+            create_manifest(
+                dest_dir, pack_id, template_file="system.md", tags=["agent", "system-prompt"]
+            )
             mapping[prompt_file] = dest_dir
     return mapping
+
 
 def migrate_prompts_yaml():
     src_base = os.path.join(REPO_ROOT, "prompts")
@@ -114,7 +125,7 @@ def migrate_prompts_yaml():
             # Try to read and see if it matches our desired schema or if we can adapt it
             src_path = os.path.join(src_base, file)
             try:
-                with open(src_path, 'r') as f:
+                with open(src_path) as f:
                     content = yaml.safe_load(f)
 
                 # If it looks like core.jules-copilot@v4.yaml
@@ -130,8 +141,10 @@ def migrate_prompts_yaml():
                         "model_config": content.get("modelConfig", {}),
                         "guardrails": {
                             "tags": content["meta"].get("tags", []),
-                            "blocked_terms": content["meta"].get("guardrails", []) # This is lossy but ok for now
-                        }
+                            "blocked_terms": content["meta"].get(
+                                "guardrails", []
+                            ),  # This is lossy but ok for now
+                        },
                     }
                     if "template" in content:
                         with open(os.path.join(dest_dir, "template.md"), "w") as f:
@@ -139,8 +152,8 @@ def migrate_prompts_yaml():
                         manifest["template_path"] = "template.md"
 
                     if "inputs" in content:
-                         # Very loose adaptation of vars
-                         manifest["vars"] = {k: {"type": "string"} for k in content["inputs"]}
+                        # Very loose adaptation of vars
+                        manifest["vars"] = {k: {"type": "string"} for k in content["inputs"]}
 
                     with open(os.path.join(dest_dir, "manifest.json"), "w") as f:
                         json.dump(manifest, f, indent=2)
@@ -150,6 +163,7 @@ def migrate_prompts_yaml():
                 print(f"Skipping {file}: {e}")
                 continue
     return mapping
+
 
 def main():
     print("Starting migration...")
@@ -166,6 +180,7 @@ def main():
 
     print(f"Migration complete. Mapped {len(all_mappings)} files.")
     print(f"See {MAPPING_LOG} for details.")
+
 
 if __name__ == "__main__":
     main()

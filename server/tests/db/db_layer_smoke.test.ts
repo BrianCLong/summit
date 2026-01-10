@@ -21,7 +21,7 @@ describe('Database Layer', () => {
   });
 
   it('should load configuration correctly', () => {
-    expect(dbConfig.host).toBeDefined();
+    expect(dbConfig.connectionConfig.host).toBeDefined();
     expect(dbConfig.maxPoolSize).toBeGreaterThan(0);
   });
 

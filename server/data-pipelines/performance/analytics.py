@@ -97,7 +97,6 @@ class ColumnarAnalytics:
         cache_manager: CacheManager | None = None,
         enable_duckdb: bool = True,
     ):
-
         if not ARROW_AVAILABLE:
             raise ImportError("pyarrow is required for columnar analytics")
 
@@ -293,7 +292,7 @@ class ColumnarAnalytics:
         sql = f"""
         SELECT 
             DATE_TRUNC('{window_sql}', {time_column}) as time_window,
-            {', '.join(agg_expressions)}
+            {", ".join(agg_expressions)}
         FROM {table_name}
         GROUP BY DATE_TRUNC('{window_sql}', {time_column})
         ORDER BY time_window
@@ -371,7 +370,7 @@ class ColumnarAnalytics:
                     {
                         "type": "file_consolidation",
                         "priority": "high",
-                        "description": f'Consider consolidating {stats["file_count"]} files',
+                        "description": f"Consider consolidating {stats['file_count']} files",
                         "potential_benefit": "Reduced query latency",
                     }
                 )
@@ -381,7 +380,7 @@ class ColumnarAnalytics:
                     {
                         "type": "partitioning",
                         "priority": "medium",
-                        "description": f'Consider partitioning by {query_patterns["frequent_filters"]}',
+                        "description": f"Consider partitioning by {query_patterns['frequent_filters']}",
                         "potential_benefit": "Improved filter performance",
                     }
                 )
@@ -871,10 +870,10 @@ def benchmark_query_performance(
                 execution_time = (time.time() - start_time) * 1000
                 execution_times.append(execution_time)
 
-                logger.debug(f"Iteration {i+1}: {execution_time:.1f}ms, {len(result)} rows")
+                logger.debug(f"Iteration {i + 1}: {execution_time:.1f}ms, {len(result)} rows")
 
             except Exception as e:
-                logger.error(f"Query failed on iteration {i+1}: {e}")
+                logger.error(f"Query failed on iteration {i + 1}: {e}")
                 execution_times.append(float("inf"))
 
         # Calculate statistics

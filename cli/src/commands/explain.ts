@@ -15,6 +15,12 @@ interface CLIConfig {
   tenantId?: string;
 }
 
+interface ApiResponse<T = unknown> {
+  success: boolean;
+  data?: T;
+  errors?: Array<{ message: string }>;
+}
+
 interface ExplainableRun {
   run_id: string;
   run_type: string;
@@ -84,7 +90,7 @@ export function registerExplainCommands(program: Command, config: CLIConfig): vo
           },
         });
 
-        const result = await response.json();
+        const result = await response.json() as ApiResponse<ExplainableRun[]>;
         spinner.stop();
 
         if (!result.success) {
@@ -138,7 +144,7 @@ export function registerExplainCommands(program: Command, config: CLIConfig): vo
           },
         });
 
-        const result = await response.json();
+        const result = await response.json() as ApiResponse<ExplainableRun>;
         spinner.stop();
 
         if (!result.success) {
@@ -146,7 +152,7 @@ export function registerExplainCommands(program: Command, config: CLIConfig): vo
           process.exit(1);
         }
 
-        const run: ExplainableRun = result.data;
+        const run: ExplainableRun = result.data!;
 
         if (options.json) {
           console.log(JSON.stringify(run, null, 2));
@@ -228,7 +234,7 @@ export function registerExplainCommands(program: Command, config: CLIConfig): vo
           },
         });
 
-        const result = await response.json();
+        const result = await response.json() as ApiResponse<ExplainableRun>;
 
         if (!result.success) {
           spinner.stop();
@@ -265,7 +271,15 @@ export function registerExplainCommands(program: Command, config: CLIConfig): vo
           },
         });
 
-        const result = await response.json();
+        const result = await response.json() as ApiResponse<{
+          run_id: string;
+          verified: boolean;
+          checks: Record<string, boolean>;
+          issues?: string[];
+          provenance_hash?: string;
+          sbom_hash?: string;
+          links?: Array<{ source: string; target: string; type: string }>;
+        }>;
         spinner.stop();
 
         if (!result.success) {
@@ -273,7 +287,7 @@ export function registerExplainCommands(program: Command, config: CLIConfig): vo
           process.exit(1);
         }
 
-        const verification = result.data;
+        const verification = result.data!;
 
         if (options.json) {
           console.log(JSON.stringify(verification, null, 2));
@@ -325,7 +339,18 @@ export function registerExplainCommands(program: Command, config: CLIConfig): vo
           },
         });
 
-        const result = await response.json();
+        const result = await response.json() as ApiResponse<{
+          run_a: ExplainableRun;
+          run_b: ExplainableRun;
+          deltas: {
+            confidence_delta: number;
+            duration_delta_ms: number | null;
+            different_capabilities: string[];
+            different_policies: string[];
+            input_diff: Record<string, unknown>;
+            output_diff: Record<string, unknown>;
+          };
+        }>;
         spinner.stop();
 
         if (!result.success) {
@@ -333,7 +358,7 @@ export function registerExplainCommands(program: Command, config: CLIConfig): vo
           process.exit(1);
         }
 
-        const comparison = result.data;
+        const comparison = result.data!;
 
         if (options.json) {
           console.log(JSON.stringify(comparison, null, 2));

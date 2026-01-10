@@ -1,0 +1,224 @@
+name: API Determinism Check
+
+# API RESPONSE CONSISTENCY VERIFICATION
+# Verifies that API endpoints return deterministic responses.
+#
+# See docs/ci/API_DETERMINISM.md for full documentation.
+
+on:
+  # Scheduled daily check
+  schedule:
+    - cron: "0 8 * * *" # 8 AM UTC daily
+
+  # After deployment (manual trigger)
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Base URL to check"
+        type: string
+        default: "http://localhost:3000"
+      iterations:
+        description: "Number of iterations per endpoint"
+        type: number
+        default: 3
+      strict:
+        description: "Strict mode (fail on any variance)"
+        type: boolean
+        default: false
+
+  # Can be called by deployment workflow
+  workflow_call:
+    inputs:
+      base_url:
+        type: string
+        required: true
+        description: "Base URL to check"
+
+permissions:
+  contents: write
+
+jobs:
+  determinism-check:
+    name: Check API Determinism
+    runs-on: ubuntu-latest
+    outputs:
+      total: ${{ steps.check.outputs.total }}
+      passed: ${{ steps.check.outputs.passed }}
+      failed: ${{ steps.check.outputs.failed }}
+      status: ${{ steps.check.outputs.status }}
+
+    services:
+      # Start test server if running scheduled check
+      server:
+        image: node:20
+        options: --workdir /app
+        ports:
+          - 3000:3000
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Start Server (for scheduled runs)
+        if: github.event_name == 'schedule'
+        run: |
+          # Start server in background
+          pnpm --filter intelgraph-server start &
+          SERVER_PID=$!
+          echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
+
+          # Wait for server to be ready
+          echo "Waiting for server to start..."
+          for i in {1..30}; do
+            if curl -s http://localhost:3000/health > /dev/null 2>&1; then
+              echo "Server is ready"
+              break
+            fi
+            sleep 1
+          done
+        continue-on-error: true
+
+      - name: Run Determinism Check
+        id: check
+        continue-on-error: true
+        run: |
+          chmod +x scripts/release/api_determinism_check.sh
+
+          BASE_URL="${{ inputs.base_url || 'http://localhost:3000' }}"
+          ITERATIONS="${{ inputs.iterations || 3 }}"
+          ARGS="--base-url $BASE_URL --iterations $ITERATIONS --report"
+
+          if [[ "${{ inputs.strict }}" == "true" ]]; then
+            ARGS="$ARGS --strict"
+          fi
+
+          # Run check and capture exit code
+          EXIT_CODE=0
+          ./scripts/release/api_determinism_check.sh $ARGS || EXIT_CODE=$?
+
+          # Parse results from state file
+          if [[ -f docs/releases/_state/determinism_state.json ]]; then
+            TOTAL=$(jq -r '.last_result.total // 0' docs/releases/_state/determinism_state.json)
+            PASSED=$(jq -r '.last_result.passed // 0' docs/releases/_state/determinism_state.json)
+            FAILED=$(jq -r '.last_result.failed // 0' docs/releases/_state/determinism_state.json)
+            STATUS=$(jq -r '.last_result.status // "unknown"' docs/releases/_state/determinism_state.json)
+          else
+            TOTAL=0
+            PASSED=0
+            FAILED=0
+            STATUS="unknown"
+          fi
+
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+          echo "passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+
+          exit $EXIT_CODE
+
+      - name: Stop Server
+        if: always() && env.SERVER_PID
+        run: |
+          if [[ -n "$SERVER_PID" ]]; then
+            kill $SERVER_PID 2>/dev/null || true
+          fi
+
+      - name: Upload Report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: determinism-report-${{ github.run_id }}
+          path: artifacts/determinism-check/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Job Summary
+        if: always()
+        run: |
+          TOTAL="${{ steps.check.outputs.total || 0 }}"
+          PASSED="${{ steps.check.outputs.passed || 0 }}"
+          FAILED="${{ steps.check.outputs.failed || 0 }}"
+          STATUS="${{ steps.check.outputs.status || 'unknown' }}"
+
+          echo "### API Determinism Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Total endpoints | $TOTAL |" >> $GITHUB_STEP_SUMMARY
+          echo "| Passed | $PASSED |" >> $GITHUB_STEP_SUMMARY
+          echo "| Failed | $FAILED |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "$STATUS" == "passed" ]]; then
+            echo "**Status:** ✅ PASSED" >> $GITHUB_STEP_SUMMARY
+          elif [[ "$STATUS" == "skipped" ]]; then
+            echo "**Status:** ⏭️ SKIPPED (server unavailable)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Status:** ❌ FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  notify-on-failure:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: determinism-check
+    if: needs.determinism-check.outputs.status == 'failed'
+
+    steps:
+      - name: Create Issue
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const title = 'API Determinism Check Failed';
+            const body = `## API Determinism Check Failed
+
+            The API determinism check detected non-deterministic responses.
+
+            ### Results
+            - Total endpoints: ${{ needs.determinism-check.outputs.total }}
+            - Passed: ${{ needs.determinism-check.outputs.passed }}
+            - Failed: ${{ needs.determinism-check.outputs.failed }}
+
+            ### Action Required
+            1. Review the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            2. Check which endpoints are non-deterministic
+            3. Investigate root cause (random values, timestamps, etc.)
+            4. Fix the issue or add to ignore list if expected
+
+            ### Labels
+            - \`release-blocker\` - This blocks GA release
+            - \`api\` - API related issue
+
+            ---
+            _Created by API Determinism Check workflow_`;
+
+            // Check for existing open issue
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'api-determinism',
+              state: 'open'
+            });
+
+            if (issues.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['release-blocker', 'api', 'api-determinism', 'automated']
+              });
+            }

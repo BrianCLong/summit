@@ -20,7 +20,24 @@ const config: Config = {
     '/coverage/',
     '/playwright-tests/',
   ],
+  modulePathIgnorePatterns: ['<rootDir>/dist/'],
   moduleNameMapper: {
+    '^jsdom$': '<rootDir>/tests/mocks/jsdom.ts',
+    '.*diagnostic-snapshotter(\\.js)?$': '<rootDir>/tests/mocks/diagnostic-snapshotter.ts',
+    '.*DeterministicExportService(\\.js)?$': '<rootDir>/tests/mocks/deterministic-export-service.ts',
+    '.*PolicyEngine(\\.js)?$': '<rootDir>/tests/mocks/policy-engine.ts',
+    '.*prompts/registry(\\.js)?$': '<rootDir>/tests/mocks/prompts-registry.ts',
+    '.*insights/engagementCascade(\\.js)?$': '<rootDir>/tests/mocks/engagement-cascade.ts',
+    '.*packages/shared/provenance(\\.js)?$': '<rootDir>/tests/mocks/provenance.ts',
+    '.*logger(\\.js)?$': '<rootDir>/tests/mocks/logger.ts',
+    '.*metrics/dbMetrics(\\.js)?$': '<rootDir>/tests/mocks/db-metrics.ts',
+    '.*workers/eventBus(\\.js)?$': '<rootDir>/tests/mocks/eventBus.ts',
+    '.*health/aggregator(\\.js)?$': '<rootDir>/tests/mocks/health-aggregator.ts',
+    '^ioredis$': '<rootDir>/tests/mocks/ioredis.ts',
+    '^pg-boss$': '<rootDir>/tests/mocks/pg-boss.ts',
+    '.*scripts/maintenance(\\.js)?$': '<rootDir>/tests/mocks/maintenance.ts',
+
+    '@intelgraph/feature-flags': '<rootDir>/tests/mocks/feature-flags.ts',
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
     '^(\\.{1,2}/.*)\\.js$': '$1',
@@ -34,7 +51,11 @@ const config: Config = {
     '!src/**/index.ts',
     '!src/config/**',
     '!src/database/**',
+    '!src/generated/**',
+    '!src/**/__mocks__/**',
+    '!src/**/*.d.ts',
   ],
+  coverageProvider: 'v8',
   coverageThreshold: {
     global: {
       branches: 85,
@@ -69,8 +90,16 @@ const config: Config = {
   resetMocks: true,
   bail: false,
   errorOnDeprecated: true,
-  transformIgnorePatterns: ['node_modules/(?!(.*\.mjs$))'],
+  transform: {
+    '^.+\\.tsx?$': ['ts-jest', { useESM: true }],
+    '^.+\\.js$': ['ts-jest', { useESM: true }],
+  },
+  transformIgnorePatterns: [
+    'node_modules/(?!(\\.pnpm|p-limit|yocto-queue|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|pptxgenjs|jszip|@exodus/bytes|jsdom|html-encoding-sniffer|pg-boss)/)',
+  ],
   maxWorkers: process.env.CI ? 2 : '50%',
+  // Limit worker memory to prevent OOM in CI
+  workerIdleMemoryLimit: process.env.CI ? '512MB' : undefined,
   // Open handle detection - helps identify hanging tests
   detectOpenHandles: process.env.JEST_DETECT_HANDLES === 'true',
   // Force exit after tests complete (CI safety net for orphan handles)

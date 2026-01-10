@@ -2,22 +2,22 @@
 Ensemble threat detector combining multiple models
 """
 
-import numpy as np
-from typing import List, Dict, Optional
 from dataclasses import dataclass
+
+import numpy as np
 
 
 @dataclass
 class EnsembleConfig:
-    aggregation_method: str = 'voting'  # 'voting', 'averaging', 'weighted'
-    weights: Optional[List[float]] = None
+    aggregation_method: str = "voting"  # 'voting', 'averaging', 'weighted'
+    weights: list[float] | None = None
     threshold: float = 0.5
 
 
 class EnsembleDetector:
     """Ensemble detector combining multiple threat detection models"""
 
-    def __init__(self, models: List, config: EnsembleConfig):
+    def __init__(self, models: list, config: EnsembleConfig):
         """
         Args:
             models: List of trained models (must have predict_proba or predict_anomaly_score)
@@ -36,9 +36,9 @@ class EnsembleDetector:
         all_probas = []
 
         for model in self.models:
-            if hasattr(model, 'predict_proba'):
+            if hasattr(model, "predict_proba"):
                 probas = model.predict_proba(X)
-            elif hasattr(model, 'predict_anomaly_score'):
+            elif hasattr(model, "predict_anomaly_score"):
                 scores = model.predict_anomaly_score(X)
                 probas = np.column_stack([1 - scores, scores])
             else:
@@ -46,9 +46,9 @@ class EnsembleDetector:
 
             all_probas.append(probas)
 
-        if self.config.aggregation_method == 'averaging':
+        if self.config.aggregation_method == "averaging":
             return np.mean(all_probas, axis=0)
-        elif self.config.aggregation_method == 'weighted':
+        elif self.config.aggregation_method == "weighted":
             weighted_probas = [p * w for p, w in zip(all_probas, self.config.weights)]
             return np.sum(weighted_probas, axis=0)
         else:
@@ -56,7 +56,7 @@ class EnsembleDetector:
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         """Predict classes using ensemble"""
-        if self.config.aggregation_method == 'voting':
+        if self.config.aggregation_method == "voting":
             # Hard voting
             all_predictions = []
             for model in self.models:
@@ -66,9 +66,7 @@ class EnsembleDetector:
             all_predictions = np.array(all_predictions)
             # Return majority vote
             return np.apply_along_axis(
-                lambda x: np.bincount(x).argmax(),
-                axis=0,
-                arr=all_predictions
+                lambda x: np.bincount(x).argmax(), axis=0, arr=all_predictions
             )
         else:
             # Soft voting

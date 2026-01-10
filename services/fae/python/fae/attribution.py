@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Dict, Mapping, Tuple
+from collections.abc import Mapping
 
-Path = Tuple[str, ...]
+Path = tuple[str, ...]
 
 
-def shapley_attribution(path_conversions: Mapping[Path, float]) -> Dict[str, float]:
-    contributions: Dict[str, float] = defaultdict(float)
+def shapley_attribution(path_conversions: Mapping[Path, float]) -> dict[str, float]:
+    contributions: dict[str, float] = defaultdict(float)
     total = 0.0
     for path, conversions in path_conversions.items():
         unique = []
@@ -27,12 +27,12 @@ def shapley_attribution(path_conversions: Mapping[Path, float]) -> Dict[str, flo
     return {channel: value / total for channel, value in contributions.items()}
 
 
-def markov_attribution(path_conversions: Mapping[Path, float]) -> Dict[str, float]:
+def markov_attribution(path_conversions: Mapping[Path, float]) -> dict[str, float]:
     total = sum(path_conversions.values())
     if total <= 0:
         return {}
 
-    removal_effects: Dict[str, float] = defaultdict(float)
+    removal_effects: dict[str, float] = defaultdict(float)
     channels = set(channel for path in path_conversions for channel in path)
 
     for channel in channels:
@@ -44,6 +44,5 @@ def markov_attribution(path_conversions: Mapping[Path, float]) -> Dict[str, floa
 
     effect_sum = sum(removal_effects.values())
     if effect_sum == 0:
-        return {channel: 0.0 for channel in removal_effects}
+        return dict.fromkeys(removal_effects, 0.0)
     return {channel: effect / effect_sum for channel, effect in removal_effects.items()}
-

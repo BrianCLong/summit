@@ -1,14 +1,14 @@
 import argparse
 import json
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from .engine import RunbookEngine
 from .storage import Storage
 
 
-def parse_params(param_list) -> Dict[str, Any]:
-    params: Dict[str, Any] = {}
+def parse_params(param_list) -> dict[str, Any]:
+    params: dict[str, Any] = {}
     for item in param_list or []:
         if "=" not in item:
             continue

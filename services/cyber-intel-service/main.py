@@ -3,17 +3,18 @@ Cyber Intelligence Service
 Main API service for threat intelligence platform
 """
 
-from fastapi import FastAPI, HTTPException, Depends
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
+from typing import Any
+
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
 
 app = FastAPI(
     title="Cyber Intelligence Service",
     description="Enterprise Cyber Threat Intelligence Platform API",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # CORS middleware
@@ -25,6 +26,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Enums
 class ThreatSeverity(str, Enum):
     CRITICAL = "CRITICAL"
@@ -33,12 +35,14 @@ class ThreatSeverity(str, Enum):
     LOW = "LOW"
     INFO = "INFO"
 
+
 class IOCType(str, Enum):
     IP_ADDRESS = "IP_ADDRESS"
     DOMAIN = "DOMAIN"
     URL = "URL"
     FILE_HASH = "FILE_HASH"
     EMAIL = "EMAIL_ADDRESS"
+
 
 class TLP(str, Enum):
     RED = "RED"
@@ -48,14 +52,16 @@ class TLP(str, Enum):
     WHITE = "WHITE"
     CLEAR = "CLEAR"
 
+
 # Request/Response Models
 class ThreatIntelRequest(BaseModel):
     title: str
     description: str
     severity: ThreatSeverity
     tlp: TLP = TLP.AMBER
-    tags: List[str] = []
-    iocs: List[str] = []
+    tags: list[str] = []
+    iocs: list[str] = []
+
 
 class ThreatIntelResponse(BaseModel):
     id: str
@@ -64,18 +70,20 @@ class ThreatIntelResponse(BaseModel):
     severity: ThreatSeverity
     tlp: TLP
     confidence: int
-    tags: List[str]
-    iocs: List[str]
+    tags: list[str]
+    iocs: list[str]
     created_at: datetime
     updated_at: datetime
+
 
 class IOCRequest(BaseModel):
     type: IOCType
     value: str
     severity: ThreatSeverity
     confidence: int = Field(ge=0, le=100)
-    tags: List[str] = []
-    description: Optional[str] = None
+    tags: list[str] = []
+    description: str | None = None
+
 
 class IOCResponse(BaseModel):
     id: str
@@ -84,10 +92,11 @@ class IOCResponse(BaseModel):
     severity: ThreatSeverity
     confidence: int
     status: str
-    tags: List[str]
+    tags: list[str]
     first_seen: datetime
     last_seen: datetime
-    enrichment: Optional[Dict[str, Any]] = None
+    enrichment: dict[str, Any] | None = None
+
 
 class ThreatFeedRequest(BaseModel):
     name: str
@@ -95,16 +104,18 @@ class ThreatFeedRequest(BaseModel):
     source_type: str
     refresh_interval: int
     enabled: bool = True
-    api_key: Optional[str] = None
+    api_key: str | None = None
+
 
 class SearchQuery(BaseModel):
-    query: Optional[str] = None
-    types: Optional[List[str]] = None
-    severities: Optional[List[ThreatSeverity]] = None
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
+    query: str | None = None
+    types: list[str] | None = None
+    severities: list[ThreatSeverity] | None = None
+    start_date: datetime | None = None
+    end_date: datetime | None = None
     limit: int = Field(default=100, ge=1, le=1000)
     offset: int = Field(default=0, ge=0)
+
 
 # Health check
 @app.get("/health")
@@ -113,8 +124,9 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "cyber-intel-service",
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.utcnow().isoformat(),
     }
+
 
 # Threat Intelligence endpoints
 @app.post("/api/v1/threats", response_model=ThreatIntelResponse)
@@ -131,18 +143,16 @@ async def create_threat_intelligence(threat: ThreatIntelRequest):
         tags=threat.tags,
         iocs=threat.iocs,
         created_at=datetime.utcnow(),
-        updated_at=datetime.utcnow()
+        updated_at=datetime.utcnow(),
     )
 
-@app.get("/api/v1/threats", response_model=List[ThreatIntelResponse])
-async def list_threats(
-    severity: Optional[ThreatSeverity] = None,
-    limit: int = 100,
-    offset: int = 0
-):
+
+@app.get("/api/v1/threats", response_model=list[ThreatIntelResponse])
+async def list_threats(severity: ThreatSeverity | None = None, limit: int = 100, offset: int = 0):
     """List threat intelligence items"""
     # Placeholder implementation
     return []
+
 
 @app.get("/api/v1/threats/{threat_id}", response_model=ThreatIntelResponse)
 async def get_threat(threat_id: str):
@@ -150,11 +160,13 @@ async def get_threat(threat_id: str):
     # Placeholder implementation
     raise HTTPException(status_code=404, detail="Threat not found")
 
-@app.post("/api/v1/threats/search", response_model=List[ThreatIntelResponse])
+
+@app.post("/api/v1/threats/search", response_model=list[ThreatIntelResponse])
 async def search_threats(query: SearchQuery):
     """Search threat intelligence"""
     # Placeholder implementation
     return []
+
 
 # IOC Management endpoints
 @app.post("/api/v1/iocs", response_model=IOCResponse)
@@ -171,19 +183,21 @@ async def create_ioc(ioc: IOCRequest):
         tags=ioc.tags,
         first_seen=datetime.utcnow(),
         last_seen=datetime.utcnow(),
-        enrichment={}
+        enrichment={},
     )
 
-@app.get("/api/v1/iocs", response_model=List[IOCResponse])
+
+@app.get("/api/v1/iocs", response_model=list[IOCResponse])
 async def list_iocs(
-    type: Optional[IOCType] = None,
-    severity: Optional[ThreatSeverity] = None,
+    type: IOCType | None = None,
+    severity: ThreatSeverity | None = None,
     limit: int = 100,
-    offset: int = 0
+    offset: int = 0,
 ):
     """List IOCs"""
     # Placeholder implementation
     return []
+
 
 @app.get("/api/v1/iocs/{ioc_id}", response_model=IOCResponse)
 async def get_ioc(ioc_id: str):
@@ -191,22 +205,20 @@ async def get_ioc(ioc_id: str):
     # Placeholder implementation
     raise HTTPException(status_code=404, detail="IOC not found")
 
+
 @app.post("/api/v1/iocs/{ioc_id}/enrich")
-async def enrich_ioc(ioc_id: str, providers: List[str]):
+async def enrich_ioc(ioc_id: str, providers: list[str]):
     """Enrich IOC with threat intelligence"""
     # Placeholder implementation
     return {"ioc_id": ioc_id, "enriched": True, "providers": providers}
 
-@app.post("/api/v1/iocs/bulk", response_model=Dict[str, Any])
-async def bulk_import_iocs(iocs: List[IOCRequest]):
+
+@app.post("/api/v1/iocs/bulk", response_model=dict[str, Any])
+async def bulk_import_iocs(iocs: list[IOCRequest]):
     """Bulk import IOCs"""
     # Placeholder implementation
-    return {
-        "imported": len(iocs),
-        "successful": len(iocs),
-        "failed": 0,
-        "errors": []
-    }
+    return {"imported": len(iocs), "successful": len(iocs), "failed": 0, "errors": []}
+
 
 # Threat Feed Management
 @app.post("/api/v1/feeds")
@@ -216,8 +228,9 @@ async def create_feed(feed: ThreatFeedRequest):
     return {
         "id": f"feed-{datetime.utcnow().timestamp()}",
         "name": feed.name,
-        "enabled": feed.enabled
+        "enabled": feed.enabled,
     }
+
 
 @app.get("/api/v1/feeds")
 async def list_feeds():
@@ -225,11 +238,13 @@ async def list_feeds():
     # Placeholder implementation
     return []
 
+
 @app.post("/api/v1/feeds/{feed_id}/sync")
 async def sync_feed(feed_id: str):
     """Trigger feed synchronization"""
     # Placeholder implementation
     return {"feed_id": feed_id, "status": "syncing"}
+
 
 # Malware Analysis
 @app.post("/api/v1/malware/submit")
@@ -239,14 +254,16 @@ async def submit_malware_sample(file_hash: str, file_name: str):
     return {
         "sample_id": f"sample-{datetime.utcnow().timestamp()}",
         "status": "submitted",
-        "file_hash": file_hash
+        "file_hash": file_hash,
     }
+
 
 @app.get("/api/v1/malware/{sample_id}")
 async def get_malware_analysis(sample_id: str):
     """Get malware analysis results"""
     # Placeholder implementation
     raise HTTPException(status_code=404, detail="Sample not found")
+
 
 # Threat Actor Tracking
 @app.get("/api/v1/threat-actors")
@@ -255,27 +272,30 @@ async def list_threat_actors():
     # Placeholder implementation
     return []
 
+
 @app.get("/api/v1/threat-actors/{actor_id}")
 async def get_threat_actor(actor_id: str):
     """Get threat actor details"""
     # Placeholder implementation
     raise HTTPException(status_code=404, detail="Threat actor not found")
 
+
 # Vulnerability Intelligence
 @app.get("/api/v1/vulnerabilities")
 async def list_vulnerabilities(
-    severity: Optional[ThreatSeverity] = None,
-    exploit_available: Optional[bool] = None
+    severity: ThreatSeverity | None = None, exploit_available: bool | None = None
 ):
     """List vulnerabilities"""
     # Placeholder implementation
     return []
+
 
 @app.get("/api/v1/vulnerabilities/{cve_id}")
 async def get_vulnerability(cve_id: str):
     """Get vulnerability details"""
     # Placeholder implementation
     raise HTTPException(status_code=404, detail="Vulnerability not found")
+
 
 # Attack Surface Monitoring
 @app.get("/api/v1/attack-surface/assets")
@@ -284,11 +304,13 @@ async def list_external_assets():
     # Placeholder implementation
     return []
 
+
 @app.post("/api/v1/attack-surface/discover")
 async def discover_assets(domain: str):
     """Discover external assets"""
     # Placeholder implementation
     return {"domain": domain, "assets_discovered": 0}
+
 
 # Statistics and Dashboards
 @app.get("/api/v1/statistics/overview")
@@ -301,8 +323,9 @@ async def get_statistics_overview():
         "active_campaigns": 0,
         "threat_actors": 0,
         "vulnerabilities": 0,
-        "external_assets": 0
+        "external_assets": 0,
     }
+
 
 @app.get("/api/v1/statistics/trends")
 async def get_trends(days: int = 30):
@@ -312,9 +335,11 @@ async def get_trends(days: int = 30):
         "period_days": days,
         "threats_by_day": [],
         "iocs_by_type": {},
-        "severity_distribution": {}
+        "severity_distribution": {},
     }
+
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

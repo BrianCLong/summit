@@ -440,14 +440,20 @@ export class RunbookRuntimeEngine implements RunbookRuntime {
     timeoutMs: number,
     stepId: string
   ): Promise<T> {
+    let timeoutId: NodeJS.Timeout | undefined;
+    const timeoutPromise = new Promise<T>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error(`Step ${stepId} timed out after ${timeoutMs}ms`));
+      }, timeoutMs);
+    });
+
     return Promise.race([
-      promise,
-      new Promise<T>((_, reject) =>
-        setTimeout(
-          () => reject(new Error(`Step ${stepId} timed out after ${timeoutMs}ms`)),
-          timeoutMs
-        )
-      ),
+      promise.finally(() => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      }),
+      timeoutPromise,
     ]);
   }
 

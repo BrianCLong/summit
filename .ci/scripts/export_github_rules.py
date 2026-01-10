@@ -3,9 +3,11 @@
 Export GitHub branch protection and rulesets to JSON for audit artifacts.
 Requires GH_TOKEN with repo admin:read permissions.
 """
+
 import json
 import os
 from pathlib import Path
+
 import requests
 
 REPO = os.environ.get("GITHUB_REPOSITORY")
@@ -41,12 +43,12 @@ artifacts = {}
 
 try:
     artifacts["main_branch_protection"] = fetch(branch_protection_url)
-except Exception as exc:  # noqa: BLE001
+except Exception as exc:
     artifacts["main_branch_protection_error"] = str(exc)
 
 try:
     artifacts["rulesets"] = fetch(release_rules_url)
-except Exception as exc:  # noqa: BLE001
+except Exception as exc:
     artifacts["rulesets_error"] = str(exc)
 
 output_file = OUTPUT_DIR / "branch-protection.json"

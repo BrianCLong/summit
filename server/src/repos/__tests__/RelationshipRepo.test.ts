@@ -139,6 +139,7 @@ describe('RelationshipRepo', () => {
     it('should throw error if source entity does not exist', async () => {
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
       mockPgClient.query.mockResolvedValueOnce({ rows: [] } as any); // Source entity check (not found)
+      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-dst' }] } as any); // Dest entity check
 
       await expect(
         relationshipRepo.create(mockRelationshipInput, mockUserId),
@@ -185,8 +186,8 @@ describe('RelationshipRepo', () => {
       await relationshipRepo.create(mockRelationshipInput, mockUserId);
 
       // Verify outbox event was created
-      const outboxCall = mockPgClient.query.mock.calls.find((call) =>
-        call[0].includes('relationship.upsert'),
+      const outboxCall = mockPgClient.query.mock.calls.find((call: unknown[]) =>
+        String(call[0]).includes('outbox_events'),
       );
       expect(outboxCall).toBeDefined();
       expect(outboxCall?.[0]).toContain('outbox_events');
@@ -331,8 +332,8 @@ describe('RelationshipRepo', () => {
 
       await relationshipRepo.delete(relationshipId);
 
-      const outboxCall = mockPgClient.query.mock.calls.find((call) =>
-        call[0].includes('relationship.delete'),
+      const outboxCall = mockPgClient.query.mock.calls.find((call: unknown[]) =>
+        String(call[0]).includes('outbox_events'),
       );
       expect(outboxCall).toBeDefined();
     });
@@ -405,7 +406,7 @@ describe('RelationshipRepo', () => {
       expect(result).not.toBeNull();
       expect(result?.id).toBe(relationshipId);
       expect(mockPgPool.query).toHaveBeenCalledWith(
-        expect.stringContaining('SELECT * FROM relationships WHERE id = $1'),
+        expect.stringContaining('FROM relationships WHERE id = $1'),
         [relationshipId],
       );
     });

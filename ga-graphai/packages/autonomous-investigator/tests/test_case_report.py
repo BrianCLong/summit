@@ -2,7 +2,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from autonomous_investigator import (
     build_cypher_preview,
     build_graphrag_summary,

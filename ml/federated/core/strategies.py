@@ -8,11 +8,11 @@ Implements specialized aggregation strategies with:
 """
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from collections.abc import Callable
+from typing import Any
 
-import flwr as fl
+import numpy as np
 from flwr.common import (
-    EvaluateRes,
     FitRes,
     Parameters,
     Scalar,
@@ -21,8 +21,6 @@ from flwr.common import (
 )
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg, FedProx
-
-import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -45,19 +43,19 @@ class OSINTFedAvg(FedAvg):
         min_fit_clients: int = 2,
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
-        evaluate_fn: Optional[Callable] = None,
-        on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
-        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
+        evaluate_fn: Callable | None = None,
+        on_fit_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
+        on_evaluate_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
         accept_failures: bool = True,
-        initial_parameters: Optional[Parameters] = None,
-        fit_metrics_aggregation_fn: Optional[Callable] = None,
-        evaluate_metrics_aggregation_fn: Optional[Callable] = None,
+        initial_parameters: Parameters | None = None,
+        fit_metrics_aggregation_fn: Callable | None = None,
+        evaluate_metrics_aggregation_fn: Callable | None = None,
         # OSINT-specific parameters
         enable_differential_privacy: bool = True,
         privacy_epsilon: float = 1.0,
         privacy_delta: float = 1e-5,
         clip_norm: float = 1.0,
-        jurisdiction_weights: Optional[Dict[str, float]] = None,
+        jurisdiction_weights: dict[str, float] | None = None,
     ):
         super().__init__(
             fraction_fit=fraction_fit,
@@ -85,22 +83,21 @@ class OSINTFedAvg(FedAvg):
         self._rounds_completed = 0
 
         # OSINT metrics tracking
-        self._osint_metrics: List[Dict[str, Any]] = []
+        self._osint_metrics: list[dict[str, Any]] = []
 
     def aggregate_fit(
         self,
         server_round: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        results: list[tuple[ClientProxy, FitRes]],
+        failures: list[tuple[ClientProxy, FitRes] | BaseException],
+    ) -> tuple[Parameters | None, dict[str, Scalar]]:
         """Aggregate model updates with OSINT-specific handling"""
         if not results:
             return None, {}
 
         # Log participation
         logger.info(
-            f"Round {server_round}: Aggregating {len(results)} updates, "
-            f"{len(failures)} failures"
+            f"Round {server_round}: Aggregating {len(results)} updates, {len(failures)} failures"
         )
 
         # Extract parameters and weights
@@ -120,42 +117,42 @@ class OSINTFedAvg(FedAvg):
             weight = num_examples * jurisdiction_weight
 
             weights_results.append((parameters, weight))
-            jurisdiction_info.append({
-                "client_id": client.cid,
-                "jurisdiction": jurisdiction,
-                "num_examples": num_examples,
-                "metrics": metrics,
-            })
+            jurisdiction_info.append(
+                {
+                    "client_id": client.cid,
+                    "jurisdiction": jurisdiction,
+                    "num_examples": num_examples,
+                    "metrics": metrics,
+                }
+            )
 
         # Perform weighted aggregation
         aggregated_parameters = self._weighted_average(weights_results)
 
         # Apply differential privacy
         if self.enable_differential_privacy:
-            aggregated_parameters = self._apply_dp_to_aggregate(
-                aggregated_parameters, len(results)
-            )
+            aggregated_parameters = self._apply_dp_to_aggregate(aggregated_parameters, len(results))
 
         # Compute aggregated metrics
-        aggregated_metrics = self._aggregate_osint_metrics(
-            results, server_round
-        )
+        aggregated_metrics = self._aggregate_osint_metrics(results, server_round)
 
         # Store round info
-        self._osint_metrics.append({
-            "round": server_round,
-            "num_clients": len(results),
-            "jurisdiction_info": jurisdiction_info,
-            "aggregated_metrics": aggregated_metrics,
-        })
+        self._osint_metrics.append(
+            {
+                "round": server_round,
+                "num_clients": len(results),
+                "jurisdiction_info": jurisdiction_info,
+                "aggregated_metrics": aggregated_metrics,
+            }
+        )
 
         self._rounds_completed = server_round
 
         return ndarrays_to_parameters(aggregated_parameters), aggregated_metrics
 
     def _weighted_average(
-        self, weights_results: List[Tuple[List[np.ndarray], float]]
-    ) -> List[np.ndarray]:
+        self, weights_results: list[tuple[list[np.ndarray], float]]
+    ) -> list[np.ndarray]:
         """Compute weighted average of parameters"""
         total_weight = sum(weight for _, weight in weights_results)
 
@@ -163,9 +160,7 @@ class OSINTFedAvg(FedAvg):
             return weights_results[0][0] if weights_results else []
 
         # Initialize aggregated parameters
-        aggregated = [
-            np.zeros_like(param) for param in weights_results[0][0]
-        ]
+        aggregated = [np.zeros_like(param) for param in weights_results[0][0]]
 
         # Weighted sum
         for parameters, weight in weights_results:
@@ -176,9 +171,9 @@ class OSINTFedAvg(FedAvg):
 
     def _apply_dp_to_aggregate(
         self,
-        parameters: List[np.ndarray],
+        parameters: list[np.ndarray],
         num_clients: int,
-    ) -> List[np.ndarray]:
+    ) -> list[np.ndarray]:
         """Apply differential privacy to aggregated parameters"""
         # Calculate noise scale using Gaussian mechanism
         sigma = self._compute_noise_scale(num_clients)
@@ -205,19 +200,15 @@ class OSINTFedAvg(FedAvg):
         sensitivity = self.clip_norm / num_clients
         round_epsilon = self.privacy_epsilon / 100
 
-        sigma = (
-            sensitivity
-            * np.sqrt(2 * np.log(1.25 / self.privacy_delta))
-            / round_epsilon
-        )
+        sigma = sensitivity * np.sqrt(2 * np.log(1.25 / self.privacy_delta)) / round_epsilon
 
         return sigma
 
     def _aggregate_osint_metrics(
         self,
-        results: List[Tuple[ClientProxy, FitRes]],
+        results: list[tuple[ClientProxy, FitRes]],
         server_round: int,
-    ) -> Dict[str, Scalar]:
+    ) -> dict[str, Scalar]:
         """Aggregate OSINT-specific metrics"""
         losses = []
         accuracies = []
@@ -248,7 +239,7 @@ class OSINTFedAvg(FedAvg):
 
         return aggregated
 
-    def get_privacy_status(self) -> Dict[str, float]:
+    def get_privacy_status(self) -> dict[str, float]:
         """Get current privacy budget status"""
         return {
             "total_epsilon": self.privacy_epsilon,
@@ -257,7 +248,7 @@ class OSINTFedAvg(FedAvg):
             "rounds_completed": self._rounds_completed,
         }
 
-    def get_osint_metrics(self) -> List[Dict[str, Any]]:
+    def get_osint_metrics(self) -> list[dict[str, Any]]:
         """Get OSINT-specific training metrics"""
         return self._osint_metrics.copy()
 
@@ -278,13 +269,13 @@ class OSINTFedProx(FedProx):
         min_fit_clients: int = 2,
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
-        evaluate_fn: Optional[Callable] = None,
-        on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
-        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
+        evaluate_fn: Callable | None = None,
+        on_fit_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
+        on_evaluate_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
         accept_failures: bool = True,
-        initial_parameters: Optional[Parameters] = None,
-        fit_metrics_aggregation_fn: Optional[Callable] = None,
-        evaluate_metrics_aggregation_fn: Optional[Callable] = None,
+        initial_parameters: Parameters | None = None,
+        fit_metrics_aggregation_fn: Callable | None = None,
+        evaluate_metrics_aggregation_fn: Callable | None = None,
         proximal_mu: float = 0.01,
         # OSINT-specific parameters
         source_heterogeneity_aware: bool = True,
@@ -313,14 +304,14 @@ class OSINTFedProx(FedProx):
         self.privacy_epsilon = privacy_epsilon
         self.privacy_delta = privacy_delta
 
-        self._source_statistics: Dict[str, Dict[str, float]] = {}
+        self._source_statistics: dict[str, dict[str, float]] = {}
 
     def configure_fit(
         self,
         server_round: int,
         parameters: Parameters,
         client_manager: Any,
-    ) -> List[Tuple[ClientProxy, Any]]:
+    ) -> list[tuple[ClientProxy, Any]]:
         """Configure fit with source-aware settings"""
         config = super().configure_fit(server_round, parameters, client_manager)
 
@@ -393,9 +384,9 @@ class PrivacyPreservingStrategy(FedAvg):
     def aggregate_fit(
         self,
         server_round: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        results: list[tuple[ClientProxy, FitRes]],
+        failures: list[tuple[ClientProxy, FitRes] | BaseException],
+    ) -> tuple[Parameters | None, dict[str, Scalar]]:
         """Privacy-preserving aggregation"""
         if len(results) < self.min_aggregation_threshold:
             logger.warning(
@@ -418,9 +409,7 @@ class PrivacyPreservingStrategy(FedAvg):
             aggregated = self._simple_aggregate(clipped_updates)
 
         # Add calibrated noise
-        noised_aggregated = self._add_calibrated_noise(
-            aggregated, len(results), server_round
-        )
+        noised_aggregated = self._add_calibrated_noise(aggregated, len(results), server_round)
 
         # Update RDP accountant
         self._update_rdp_budget(len(results))
@@ -436,12 +425,10 @@ class PrivacyPreservingStrategy(FedAvg):
 
         return ndarrays_to_parameters(noised_aggregated), metrics
 
-    def _clip_update(self, parameters: List[np.ndarray]) -> List[np.ndarray]:
+    def _clip_update(self, parameters: list[np.ndarray]) -> list[np.ndarray]:
         """Clip parameter updates to bound sensitivity"""
         # Compute global norm
-        global_norm = np.sqrt(
-            sum(np.sum(np.square(p)) for p in parameters)
-        )
+        global_norm = np.sqrt(sum(np.sum(np.square(p)) for p in parameters))
 
         # Clip if necessary
         if global_norm > self.clip_norm:
@@ -450,9 +437,7 @@ class PrivacyPreservingStrategy(FedAvg):
 
         return parameters
 
-    def _secure_aggregate(
-        self, updates: List[Tuple[List[np.ndarray], int]]
-    ) -> List[np.ndarray]:
+    def _secure_aggregate(self, updates: list[tuple[list[np.ndarray], int]]) -> list[np.ndarray]:
         """
         Secure aggregation using secret sharing (simulated)
 
@@ -461,9 +446,7 @@ class PrivacyPreservingStrategy(FedAvg):
         # For simulation, just compute weighted average
         total_examples = sum(n for _, n in updates)
 
-        aggregated = [
-            np.zeros_like(p) for p in updates[0][0]
-        ]
+        aggregated = [np.zeros_like(p) for p in updates[0][0]]
 
         for parameters, num_examples in updates:
             weight = num_examples / total_examples
@@ -472,18 +455,16 @@ class PrivacyPreservingStrategy(FedAvg):
 
         return aggregated
 
-    def _simple_aggregate(
-        self, updates: List[Tuple[List[np.ndarray], int]]
-    ) -> List[np.ndarray]:
+    def _simple_aggregate(self, updates: list[tuple[list[np.ndarray], int]]) -> list[np.ndarray]:
         """Simple weighted averaging"""
         return self._secure_aggregate(updates)
 
     def _add_calibrated_noise(
         self,
-        parameters: List[np.ndarray],
+        parameters: list[np.ndarray],
         num_clients: int,
         server_round: int,
-    ) -> List[np.ndarray]:
+    ) -> list[np.ndarray]:
         """Add noise calibrated for target privacy level"""
         # Gaussian mechanism noise scale
         sensitivity = self.clip_norm / num_clients
@@ -494,9 +475,7 @@ class PrivacyPreservingStrategy(FedAvg):
             noise = np.random.normal(0, sigma, param.shape)
             noised.append(param + noise)
 
-        logger.debug(
-            f"Round {server_round}: Added noise with sigma={sigma:.6f}"
-        )
+        logger.debug(f"Round {server_round}: Added noise with sigma={sigma:.6f}")
 
         return noised
 
@@ -508,7 +487,7 @@ class PrivacyPreservingStrategy(FedAvg):
 
         for i, order in enumerate(self._rdp_orders):
             # RDP for Gaussian mechanism
-            rdp = order * (sensitivity ** 2) / (2 * sigma ** 2)
+            rdp = order * (sensitivity**2) / (2 * sigma**2)
             self._rdp_budget[i] += rdp
 
     def _compute_epsilon_from_rdp(self) -> float:
@@ -519,9 +498,9 @@ class PrivacyPreservingStrategy(FedAvg):
             eps = self._rdp_budget[i] - np.log(self.delta) / (order - 1)
             epsilons.append(eps)
 
-        return min(epsilons) if epsilons else float('inf')
+        return min(epsilons) if epsilons else float("inf")
 
-    def get_privacy_guarantee(self) -> Dict[str, float]:
+    def get_privacy_guarantee(self) -> dict[str, float]:
         """Get current privacy guarantee"""
         epsilon = self._compute_epsilon_from_rdp()
         return {
@@ -554,14 +533,14 @@ class AirgapStrategy(FedAvg):
         self.enable_merkle_verification = enable_merkle_verification
 
         self._current_round = 0
-        self._pending_updates: Dict[str, Dict[str, Any]] = {}
+        self._pending_updates: dict[str, dict[str, Any]] = {}
 
     def aggregate_fit(
         self,
         server_round: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        results: list[tuple[ClientProxy, FitRes]],
+        failures: list[tuple[ClientProxy, FitRes] | BaseException],
+    ) -> tuple[Parameters | None, dict[str, Scalar]]:
         """Staleness-aware aggregation for air-gapped nodes"""
         self._current_round = server_round
 
@@ -580,7 +559,7 @@ class AirgapStrategy(FedAvg):
                 continue
 
             # Apply staleness discount
-            weight = (self.staleness_discount ** staleness) * fit_res.num_examples
+            weight = (self.staleness_discount**staleness) * fit_res.num_examples
 
             # Verify Merkle proof if enabled
             if self.enable_merkle_verification:
@@ -608,10 +587,12 @@ class AirgapStrategy(FedAvg):
 
         metrics = {
             "num_clients": len(weighted_results),
-            "avg_staleness": np.mean([
-                server_round - fr.metrics.get("update_round", server_round)
-                for _, fr, _ in weighted_results
-            ]),
+            "avg_staleness": np.mean(
+                [
+                    server_round - fr.metrics.get("update_round", server_round)
+                    for _, fr, _ in weighted_results
+                ]
+            ),
             "round": server_round,
         }
 
@@ -634,7 +615,7 @@ class AirgapStrategy(FedAvg):
         self,
         node_id: str,
         parameters: Parameters,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         update_round: int,
     ) -> None:
         """Queue an update from an air-gapped node"""
@@ -650,11 +631,11 @@ class AirgapStrategy(FedAvg):
             f"(update_round={update_round}, current={self._current_round})"
         )
 
-    def get_pending_updates(self) -> Dict[str, Dict[str, Any]]:
+    def get_pending_updates(self) -> dict[str, dict[str, Any]]:
         """Get all pending air-gap updates"""
         return self._pending_updates.copy()
 
-    def clear_processed_updates(self, node_ids: List[str]) -> None:
+    def clear_processed_updates(self, node_ids: list[str]) -> None:
         """Clear processed updates"""
         for node_id in node_ids:
             self._pending_updates.pop(node_id, None)

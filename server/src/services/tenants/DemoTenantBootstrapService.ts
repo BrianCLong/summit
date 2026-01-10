@@ -4,7 +4,7 @@ import { tenantService } from '../TenantService.js';
 import { demoTenantTemplate } from './seed/demoTenantTemplate.js';
 import { demoWorkflowSeed } from './seed/demoWorkflowSeed.js';
 import { investigationWorkflowService } from '../investigationWorkflowService.js';
-import { advancedAuditSystem } from '../../audit/advanced-audit-system.js';
+import { advancedAuditSystem } from '../../audit/index.js';
 
 export interface DemoTenantBootstrapResult {
   tenantId: string;

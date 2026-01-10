@@ -1,7 +1,7 @@
 import { EntityResolutionService } from '../service';
 import { EntityInput } from '../models';
 import { provenanceLedger } from '../../../provenance/ledger';
-import { getDriver } from '../../../graph/neo4j';
+import * as neo4jModule from '../../../graph/neo4j.js';
 
 // Mocks
 jest.mock('../../../provenance/ledger', () => ({
@@ -10,27 +10,27 @@ jest.mock('../../../provenance/ledger', () => ({
   }
 }));
 
-jest.mock('../../../graph/neo4j', () => {
-    const runMock = jest.fn().mockResolvedValue({ records: [] });
-    return {
-        getDriver: jest.fn().mockReturnValue({
-            session: jest.fn().mockReturnValue({
-                run: runMock,
-                close: jest.fn().mockResolvedValue(undefined),
-                executeWrite: jest.fn().mockImplementation(async (cb) => {
-                    return cb({ run: runMock });
-                })
-            })
-        })
-    };
-});
-
 describe('EntityResolutionService', () => {
   let service: EntityResolutionService;
+  let mockRun: jest.Mock;
+  let mockSession: { run: jest.Mock; close: jest.Mock; executeWrite: jest.Mock };
+  let mockDriver: { session: jest.Mock };
 
   beforeEach(() => {
     service = new EntityResolutionService();
     jest.clearAllMocks();
+    mockRun = jest.fn().mockResolvedValue({ records: [] });
+    mockSession = {
+      run: mockRun,
+      close: jest.fn().mockResolvedValue(undefined),
+      executeWrite: jest.fn().mockImplementation(async (cb) => {
+        return cb({ run: mockRun });
+      }),
+    };
+    mockDriver = {
+      session: jest.fn().mockReturnValue(mockSession),
+    };
+    jest.spyOn(neo4jModule, 'getDriver').mockReturnValue(mockDriver as any);
   });
 
   it('should identify a merge candidate', async () => {
@@ -42,10 +42,7 @@ describe('EntityResolutionService', () => {
     };
 
     // Mock findCandidates to return a high-scoring match
-    const mockDriver = getDriver();
     const session = mockDriver.session();
-
-    const mockRun = session.run as jest.Mock;
 
     mockRun.mockResolvedValueOnce({
         records: [{

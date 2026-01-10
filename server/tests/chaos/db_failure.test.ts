@@ -21,7 +21,7 @@ const mockPrisma = {
 const mockRedis = {
   get: jest.fn(),
   setex: jest.fn(),
-} as unknown as MockRedis;
+} as MockRedis;
 
 const mockLogger = {
   info: jest.fn(),
@@ -49,7 +49,7 @@ describe('Chaos Resilience: Alert Triage Service DB Failure', () => {
 
   it('should fallback gracefully when Redis cache fails', async () => {
     // Simulate Redis failure
-    (mockRedis.get as jest.Mock).mockRejectedValue(new Error('Redis connection timed out'));
+    mockRedis.get.mockRejectedValue(new Error('Redis connection timed out'));
 
     // We expect the service to log the warning and proceed to calculation (or fallback)
     // without crashing
@@ -67,7 +67,7 @@ describe('Chaos Resilience: Alert Triage Service DB Failure', () => {
     // So isTriageV2Enabled SWALLOWS the error and returns false!
     // This means scoreAlert does NOT catch an error, it just sees "false" and returns fallback 'feature_disabled'.
 
-    (mockRedis.get as jest.Mock).mockRejectedValue(new Error('Redis/DB Failure'));
+    mockRedis.get.mockRejectedValue(new Error('Redis/DB Failure'));
 
     const result = await service.scoreAlert('alert-123', alertData);
 
@@ -86,11 +86,11 @@ describe('Chaos Resilience: Alert Triage Service DB Failure', () => {
 
   it('should return error fallback if ML Model completely crashes', async () => {
       // Bypass cache
-      (mockRedis.get as jest.Mock).mockResolvedValue(null);
+      mockRedis.get.mockResolvedValue(null);
 
       // Mock feature flag enabled
       // The first call to get returns null (cache miss), second call returns 'true' (feature flag)
-      (mockRedis.get as jest.Mock)
+      mockRedis.get
           .mockResolvedValueOnce(null)
           .mockResolvedValueOnce('true');
 

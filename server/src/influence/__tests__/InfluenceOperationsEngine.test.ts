@@ -1,5 +1,6 @@
 
 import { InfluenceOperationsEngine } from '../InfluenceOperationsEngine';
+import { BehavioralAnalyzer } from '../BehavioralAnalyzer';
 import { Driver } from 'neo4j-driver';
 import { SocialPost, Actor } from '../types';
 
@@ -19,8 +20,35 @@ describe('InfluenceOperationsEngine', () => {
     let engine: InfluenceOperationsEngine;
 
     beforeEach(() => {
-        engine = new InfluenceOperationsEngine(mockDriver);
         mockRun.mockClear();
+        jest.restoreAllMocks();
+        jest.spyOn(BehavioralAnalyzer.prototype, 'detectBot').mockReturnValue({
+          isAnomalous: true,
+          score: 1,
+          reason: 'bot fingerprint',
+        });
+        jest
+          .spyOn(BehavioralAnalyzer.prototype, 'detectTemporalCoordination')
+          .mockReturnValue({
+            isAnomalous: true,
+            score: 0.9,
+            reason: 'temporal spike',
+          });
+        jest
+          .spyOn(BehavioralAnalyzer.prototype, 'detectGeoTemporalAnomalies')
+          .mockReturnValue({
+            isAnomalous: false,
+            score: 0,
+            reason: 'normal',
+          });
+        engine = new InfluenceOperationsEngine(mockDriver);
+        jest
+          .spyOn((engine as any).graphDetector, 'detectCoordinatedCliques')
+          .mockResolvedValue({
+            isAnomalous: true,
+            score: 0.9,
+            reason: 'mocked clique density',
+          });
     });
 
     it('should detect campaigns', async () => {

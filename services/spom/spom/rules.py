@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable, List
 
 from .models import FieldObservation
 
@@ -42,21 +42,65 @@ class Rule:
         return None
 
 
-NAME_RULES: List[Rule] = [
+NAME_RULES: list[Rule] = [
     Rule(re.compile(r"email"), "EMAIL", 0.7, "Field name contains 'email'", "name"),
     Rule(re.compile(r"phone|mobile"), "PHONE", 0.7, "Field name references phone", "name"),
-    Rule(re.compile(r"ip(_)?address|client_ip|signup_ip"), "IP", 0.65, "Field name references IP address", "name"),
-    Rule(re.compile(r"ssn|social[_\s]?security"), "GOV_ID", 0.8, "Field name references Social Security", "name"),
-    Rule(re.compile(r"passport|driver"), "GOV_ID", 0.65, "Field name references government ID", "name"),
+    Rule(
+        re.compile(r"ip(_)?address|client_ip|signup_ip"),
+        "IP",
+        0.65,
+        "Field name references IP address",
+        "name",
+    ),
+    Rule(
+        re.compile(r"ssn|social[_\s]?security"),
+        "GOV_ID",
+        0.8,
+        "Field name references Social Security",
+        "name",
+    ),
+    Rule(
+        re.compile(r"passport|driver"),
+        "GOV_ID",
+        0.65,
+        "Field name references government ID",
+        "name",
+    ),
     Rule(re.compile(r"name"), "NAME", 0.55, "Field name references personal name", "name"),
-    Rule(re.compile(r"address|street|city"), "ADDRESS", 0.55, "Field name references address", "name"),
-    Rule(re.compile(r"token|jwt|session"), "ACCESS_TOKEN", 0.75, "Field name references token", "name"),
-    Rule(re.compile(r"api[_-]?key|client[_-]?secret"), "API_KEY", 0.75, "Field name references API key", "name"),
-    Rule(re.compile(r"card|payment|iban"), "PAYMENT_HINTS", 0.6, "Field name references payment", "name"),
+    Rule(
+        re.compile(r"address|street|city"), "ADDRESS", 0.55, "Field name references address", "name"
+    ),
+    Rule(
+        re.compile(r"token|jwt|session"),
+        "ACCESS_TOKEN",
+        0.75,
+        "Field name references token",
+        "name",
+    ),
+    Rule(
+        re.compile(r"api[_-]?key|client[_-]?secret"),
+        "API_KEY",
+        0.75,
+        "Field name references API key",
+        "name",
+    ),
+    Rule(
+        re.compile(r"card|payment|iban"),
+        "PAYMENT_HINTS",
+        0.6,
+        "Field name references payment",
+        "name",
+    ),
 ]
 
-VALUE_RULES: List[Rule] = [
-    Rule(re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$"), "EMAIL", 0.7, "Sample value looks like an email", "sample"),
+VALUE_RULES: list[Rule] = [
+    Rule(
+        re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$"),
+        "EMAIL",
+        0.7,
+        "Sample value looks like an email",
+        "sample",
+    ),
     Rule(
         re.compile(r"^(\+?\d{1,3}[\s-]?)?(\(?\d{3}\)?[\s-]?)?\d{3}[\s-]?\d{4}$"),
         "PHONE",
@@ -87,19 +131,31 @@ VALUE_RULES: List[Rule] = [
     ),
 ]
 
-DESCRIPTION_RULES: List[Rule] = [
+DESCRIPTION_RULES: list[Rule] = [
     Rule(re.compile(r"email"), "EMAIL", 0.5, "Description references email", "description"),
-    Rule(re.compile(r"phone|sms|contact"), "PHONE", 0.45, "Description references phone", "description"),
+    Rule(
+        re.compile(r"phone|sms|contact"),
+        "PHONE",
+        0.45,
+        "Description references phone",
+        "description",
+    ),
     Rule(re.compile(r"address"), "ADDRESS", 0.45, "Description references address", "description"),
     Rule(re.compile(r"name"), "NAME", 0.4, "Description references personal name", "description"),
-    Rule(re.compile(r"government|compliance|id"), "GOV_ID", 0.55, "Description references government ID", "description"),
+    Rule(
+        re.compile(r"government|compliance|id"),
+        "GOV_ID",
+        0.55,
+        "Description references government ID",
+        "description",
+    ),
 ]
 
 
-def evaluate_rules(field: FieldObservation) -> List[RuleMatch]:
+def evaluate_rules(field: FieldObservation) -> list[RuleMatch]:
     """Evaluate all rules against a field."""
 
-    matches: List[RuleMatch] = []
+    matches: list[RuleMatch] = []
     lowered_name = field.name.lower()
     for rule in NAME_RULES:
         match = rule.evaluate(lowered_name)
@@ -123,7 +179,7 @@ def evaluate_rules(field: FieldObservation) -> List[RuleMatch]:
     return matches
 
 
-def summarise_matches(matches: Iterable[RuleMatch]) -> List[str]:
+def summarise_matches(matches: Iterable[RuleMatch]) -> list[str]:
     """Return human-readable text for rule matches."""
 
     return [match.reason for match in matches]

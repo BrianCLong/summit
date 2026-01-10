@@ -22,7 +22,9 @@ def test_regex_detector_matches_baseline(tmp_path: Path) -> None:
     export_scorecard(result, tmp_path / "regex.json")
     baseline_payload = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
     candidate_payload = json.loads((tmp_path / "regex.json").read_text(encoding="utf-8"))
-    assert candidate_payload["summary"] == pytest.approx(baseline_payload["summary"], rel=1e-4, abs=1e-4)
+    assert candidate_payload["summary"] == pytest.approx(
+        baseline_payload["summary"], rel=1e-4, abs=1e-4
+    )
     assert candidate_payload["confusion_matrix"] == baseline_payload["confusion_matrix"]
 
 

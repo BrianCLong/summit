@@ -37,6 +37,9 @@ export const recordPolicyProfileAssignment = async (params: {
     actorId,
     actorType,
     payload: {
+      mutationType: 'CREATE' as const,
+      entityId: profileId,
+      entityType: 'PolicyProfile',
       profileId,
       bundlePointer,
       manifestVersion: manifest.version,

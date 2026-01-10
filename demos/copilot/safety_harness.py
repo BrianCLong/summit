@@ -11,12 +11,12 @@ Enforces:
 """
 
 import json
-import re
 import logging
-from typing import Dict, Any, List, Optional
+import re
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SafetyViolation(Exception):
     """Raised when safety policy is violated."""
+
     message: str
     violation_type: str
 
@@ -33,6 +34,7 @@ class SafetyViolation(Exception):
 @dataclass
 class AuthorizationError(Exception):
     """Raised when user lacks required permissions."""
+
     message: str
 
 
@@ -41,15 +43,15 @@ class PIIDetector:
 
     # Regex patterns for common PII
     PATTERNS = {
-        "email": r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
-        "phone": r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b',
-        "ssn": r'\b\d{3}-\d{2}-\d{4}\b',
-        "credit_card": r'\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b',
-        "ip_address": r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b',
+        "email": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",
+        "phone": r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b",
+        "ssn": r"\b\d{3}-\d{2}-\d{4}\b",
+        "credit_card": r"\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b",
+        "ip_address": r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b",
     }
 
     @classmethod
-    def detect(cls, text: str) -> List[str]:
+    def detect(cls, text: str) -> list[str]:
         """Detect PII types in text."""
         found = []
         for pii_type, pattern in cls.PATTERNS.items():
@@ -71,18 +73,16 @@ class ContentPolicyValidator:
 
     PROHIBITED_PATTERNS = [
         # Harmful generation requests
-        r'\b(generate|create|make|produce)\s+(fake|false|misleading|misinformation)\b',
-        r'\b(how to|tutorial|guide)\s+(deepfake|manipulate|deceive)\b',
-
+        r"\b(generate|create|make|produce)\s+(fake|false|misleading|misinformation)\b",
+        r"\b(how to|tutorial|guide)\s+(deepfake|manipulate|deceive)\b",
         # Dangerous instructions
-        r'\bstep[- ]by[- ]step\b.*\b(fraud|scam|hack)\b',
-
+        r"\bstep[- ]by[- ]step\b.*\b(fraud|scam|hack)\b",
         # Personal attacks
-        r'\b(insult|mock|demean|ridicule)\s+(customer|user|person)\b',
+        r"\b(insult|mock|demean|ridicule)\s+(customer|user|person)\b",
     ]
 
     @classmethod
-    def validate(cls, text: str) -> List[str]:
+    def validate(cls, text: str) -> list[str]:
         """Check if text violates content policy."""
         violations = []
         text_lower = text.lower()
@@ -117,7 +117,7 @@ class EvidenceGrounder:
     """Ensures copilot responses are grounded in evidence."""
 
     @staticmethod
-    def has_evidence_citations(response: str, evidence: List[Dict[str, Any]]) -> bool:
+    def has_evidence_citations(response: str, evidence: list[dict[str, Any]]) -> bool:
         """Check if response references provided evidence."""
         if not evidence:
             return False
@@ -137,7 +137,9 @@ class EvidenceGrounder:
     @staticmethod
     def add_evidence_disclaimer(response: str) -> str:
         """Add disclaimer if evidence is weak."""
-        disclaimer = "\n\n[Note: This analysis should be verified against additional evidence sources.]"
+        disclaimer = (
+            "\n\n[Note: This analysis should be verified against additional evidence sources.]"
+        )
         return response + disclaimer
 
     @staticmethod
@@ -147,7 +149,9 @@ class EvidenceGrounder:
             warning = f"\n\n⚠️ Low confidence ({confidence:.1%}). Recommend manual review."
             return response + warning
         elif confidence < 0.7:
-            warning = f"\n\n⚠️ Moderate confidence ({confidence:.1%}). Consider additional verification."
+            warning = (
+                f"\n\n⚠️ Moderate confidence ({confidence:.1%}). Consider additional verification."
+            )
             return response + warning
         return response
 
@@ -163,10 +167,10 @@ class AuditLogger:
         self,
         user_id: str,
         operation: str,
-        input_data: Dict[str, Any],
-        output_data: Dict[str, Any],
-        safety_checks: Dict[str, Any],
-        violations: List[str] = None
+        input_data: dict[str, Any],
+        output_data: dict[str, Any],
+        safety_checks: dict[str, Any],
+        violations: list[str] = None,
     ):
         """Log a copilot interaction."""
         log_entry = {
@@ -175,14 +179,14 @@ class AuditLogger:
             "operation": operation,
             "input_summary": {
                 "length": len(str(input_data)),
-                "has_pii": bool(PIIDetector.detect(str(input_data)))
+                "has_pii": bool(PIIDetector.detect(str(input_data))),
             },
             "output_summary": {
                 "length": len(str(output_data)),
-                "filtered": safety_checks.get("output_filtered", False)
+                "filtered": safety_checks.get("output_filtered", False),
             },
             "safety_checks": safety_checks,
-            "violations": violations or []
+            "violations": violations or [],
         }
 
         # Append to audit log
@@ -206,12 +210,8 @@ class SafetyHarness:
         self.audit_logger = AuditLogger(audit_log_path)
 
     def validate_request(
-        self,
-        user_id: str,
-        user_role: str,
-        operation: str,
-        request_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, user_id: str, user_role: str, operation: str, request_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Validate copilot request before processing.
 
@@ -225,12 +225,8 @@ class SafetyHarness:
         validation_result = {
             "valid": False,
             "processed_data": None,
-            "checks": {
-                "authority": False,
-                "pii_redacted": False,
-                "content_policy": False
-            },
-            "violations": []
+            "checks": {"authority": False, "pii_redacted": False, "content_policy": False},
+            "violations": [],
         }
 
         # Check authority
@@ -250,7 +246,9 @@ class SafetyHarness:
             if "text" in request_data:
                 request_data["text"] = PIIDetector.redact(request_data["text"])
             if "customer_message" in request_data:
-                request_data["customer_message"] = PIIDetector.redact(request_data["customer_message"])
+                request_data["customer_message"] = PIIDetector.redact(
+                    request_data["customer_message"]
+                )
 
         validation_result["checks"]["pii_redacted"] = True
 
@@ -260,7 +258,7 @@ class SafetyHarness:
             validation_result["violations"].extend(policy_violations)
             raise SafetyViolation(
                 message=f"Content policy violations: {policy_violations}",
-                violation_type="content_policy"
+                violation_type="content_policy",
             )
 
         validation_result["checks"]["content_policy"] = True
@@ -270,10 +268,7 @@ class SafetyHarness:
         return validation_result
 
     def filter_response(
-        self,
-        response: str,
-        evidence: List[Dict[str, Any]] = None,
-        confidence: float = None
+        self, response: str, evidence: list[dict[str, Any]] = None, confidence: float = None
     ) -> str:
         """
         Filter copilot response before returning to user.
@@ -307,11 +302,11 @@ class SafetyHarness:
         user_id: str,
         user_role: str,
         operation: str,
-        request_data: Dict[str, Any],
+        request_data: dict[str, Any],
         copilot_function: callable,
-        evidence: List[Dict[str, Any]] = None,
-        confidence: float = None
-    ) -> Dict[str, Any]:
+        evidence: list[dict[str, Any]] = None,
+        confidence: float = None,
+    ) -> dict[str, Any]:
         """
         Execute copilot request with full safety harness.
 
@@ -332,10 +327,7 @@ class SafetyHarness:
         result = {
             "success": False,
             "response": None,
-            "metadata": {
-                "safety_checks": {},
-                "violations": []
-            }
+            "metadata": {"safety_checks": {}, "violations": []},
         }
 
         try:
@@ -361,7 +353,7 @@ class SafetyHarness:
             logger.error(f"Unexpected error in copilot request: {e}")
             result["success"] = False
             result["response"] = "An error occurred processing your request."
-            result["metadata"]["violations"].append(f"internal_error: {str(e)}")
+            result["metadata"]["violations"].append(f"internal_error: {e!s}")
 
         finally:
             # Always log interaction
@@ -371,7 +363,7 @@ class SafetyHarness:
                 input_data=request_data,
                 output_data={"response": result.get("response", "")},
                 safety_checks=result["metadata"]["safety_checks"],
-                violations=result["metadata"]["violations"]
+                violations=result["metadata"]["violations"],
             )
 
         return result
@@ -384,7 +376,7 @@ def demo_safe_copilot_call():
     harness = SafetyHarness()
 
     # Mock copilot function
-    def mock_copilot_explain(data: Dict[str, Any]) -> str:
+    def mock_copilot_explain(data: dict[str, Any]) -> str:
         return f"Analysis of content: {data.get('text', 'N/A')}"
 
     # Example: Safe request
@@ -392,12 +384,10 @@ def demo_safe_copilot_call():
         user_id="demo_user_001",
         user_role="analyst",
         operation="copilot_explain",
-        request_data={
-            "text": "This is a test post about misinformation detection"
-        },
+        request_data={"text": "This is a test post about misinformation detection"},
         copilot_function=mock_copilot_explain,
         evidence=[{"type": "text_analysis", "title": "Suspicious patterns"}],
-        confidence=0.85
+        confidence=0.85,
     )
 
     print(json.dumps(result, indent=2))

@@ -70,8 +70,8 @@ export type ScimProvisioningResponse = {
  *   "tenantId": "tenant-123",
  *   "baseUrl": "https://idp.example.com/scim/v2",
  *   "bearerTokenRef": "vault://identity/scim/token",
- *   "userSyncSchedule": "0 */4 * * *",
- *   "groupSyncSchedule": "15 */6 * * *",
+ *   "userSyncSchedule": "0 0,4,8,12,16,20 * * *",
+ *   "groupSyncSchedule": "15 0,6,12,18 * * *",
  *   "userFilter": "active eq true"
  * }
  *

@@ -25,7 +25,9 @@ export function GlobalSearch() {
 
   // Mock search function
   const searchFunction = async (query: string): Promise<SearchResult[]> => {
-    if (!query.trim()) {return []}
+    if (!query.trim()) {
+      return []
+    }
     if (!query || !query.trim()) return []
 
     if (!isDemoMode) {
@@ -165,7 +167,9 @@ export function GlobalSearch() {
     }
   }
 
-  if (!isOpen) {return null}
+  if (!isOpen) {
+    return null
+  }
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
@@ -215,7 +219,9 @@ export function GlobalSearch() {
                 {['command', 'entity', 'investigation', 'alert', 'case'].map(
                   type => {
                     const typeResults = results.filter(r => r.type === type)
-                    if (typeResults.length === 0) {return null}
+                    if (typeResults.length === 0) {
+                      return null
+                    }
 
                     return (
                       <Command.Group
@@ -263,7 +269,10 @@ export function GlobalSearch() {
             )}
           </Command.List>
 
-          <div className="border-t px-3 py-2 text-xs text-muted-foreground">
+          <div
+            className="border-t px-3 py-2 text-xs text-muted-foreground"
+            aria-hidden="true"
+          >
             <div className="flex items-center justify-between">
               <span>Press Enter to select, Esc to close</span>
               <div className="flex items-center gap-1">

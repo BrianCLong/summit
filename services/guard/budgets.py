@@ -9,7 +9,7 @@ import logging
 import random
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -166,7 +166,7 @@ class BudgetGuardService:
                 monthly_spent=0.0,
                 query_count_1h=0,
                 epsilon_consumed_1h=0.0,
-                last_updated=datetime.now(timezone.utc),
+                last_updated=datetime.now(UTC),
                 status=BudgetStatus.HEALTHY,
             )
 
@@ -235,7 +235,7 @@ class BudgetGuardService:
         consumption.monthly_spent += cost
         consumption.query_count_1h += query_count
         consumption.epsilon_consumed_1h += epsilon_cost
-        consumption.last_updated = datetime.now(timezone.utc)
+        consumption.last_updated = datetime.now(UTC)
 
         # Check limits and enforce
         enforcement_result = self._enforce_budget_limits(tenant_id)
@@ -376,7 +376,7 @@ class BudgetGuardService:
             remaining_budget = limit.daily_limit - consumption.daily_spent
             hours_remaining = remaining_budget / (consumption.daily_spent / 24)  # Rough estimate
             if hours_remaining > 0:
-                projected_exhaustion = datetime.now(timezone.utc) + timedelta(hours=hours_remaining)
+                projected_exhaustion = datetime.now(UTC) + timedelta(hours=hours_remaining)
 
         # Generate recommendation
         recommendation = self._generate_recommendation(tenant_id, alert_type, current_usage)
@@ -390,7 +390,7 @@ class BudgetGuardService:
             projected_exhaustion=projected_exhaustion,
             recommendation=recommendation,
             auto_action_taken=None,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
         )
 
         self.alert_history.append(alert)
@@ -546,7 +546,7 @@ class BudgetGuardService:
         """Generate comprehensive budget guard report"""
         return {
             "report_metadata": {
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "platform_version": "v0.3.4-mc",
                 "report_type": "budget_guard",
                 "tenants_monitored": len(self.budget_consumption),

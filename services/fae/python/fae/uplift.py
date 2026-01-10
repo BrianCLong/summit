@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict
 
 from .aggregates import CupedAggregate
 
@@ -17,7 +16,7 @@ class CupedResult:
     variance: float
 
 
-def _theta_and_mean_x(control: CupedAggregate) -> Dict[str, float]:
+def _theta_and_mean_x(control: CupedAggregate) -> dict[str, float]:
     if control.n == 0:
         return {"theta": 0.0, "mean_x": 0.0}
     mean_x = control.sum_x / control.n
@@ -35,8 +34,7 @@ def _adjusted_moments(agg: CupedAggregate, theta: float, baseline_mean_x: float)
     sum_z2 = (
         agg.sum_y2
         - 2 * theta * (agg.sum_xy - baseline_mean_x * agg.sum_y)
-        + theta**2
-        * (agg.sum_x2 - 2 * baseline_mean_x * agg.sum_x + agg.n * baseline_mean_x**2)
+        + theta**2 * (agg.sum_x2 - 2 * baseline_mean_x * agg.sum_x + agg.n * baseline_mean_x**2)
     )
     mean_z = sum_z / agg.n
     var_z = sum_z2 / agg.n - mean_z**2
@@ -60,4 +58,3 @@ def compute_cuped_uplift(control: CupedAggregate, treatment: CupedAggregate) -> 
         theta=theta,
         variance=variance,
     )
-

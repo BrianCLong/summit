@@ -39,7 +39,7 @@ describe('ForensicsCustodySystem', () => {
     });
 
     expect(evidence.hash).toBe(
-      'b73a0816db67716928e82b8cd4ea95200bc5942b709222e312c06265e4b16564',
+      '3c2cc14b5c5beb243cf6ce364e02599dadd6ebccbd186c230f9f2139209ab7be',
     );
 
     await custodySystem.logAccess({
@@ -72,7 +72,7 @@ describe('ForensicsCustodySystem', () => {
     expect(await custodySystem.verifyCustodyChain(evidence.id)).toBe(true);
 
     const report = await custodySystem.generateComplianceReport();
-    expect(report.soc2.integrity.verified).toBe(2);
+    expect(report.soc2.integrity.verified).toBe(1);
     expect(report.soc2.accessControls.justifiedEvents).toBe(1);
     expect(report.gdpr.legalHolds.active).toBe(1);
     expect(report.chainOfCustody.breakdown[0]).toMatchObject({

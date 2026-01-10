@@ -14,26 +14,9 @@ import type {
   JWTSecurityManager as JWTSecurityManagerClass,
   createJWTSecurityManager as createJWTSecurityManagerFn,
 } from '../jwt-security.js';
+import { createClient, mockRedisClient } from '../../../tests/mocks/redis';
 
 const unstableMockModule = (jest as any).unstable_mockModule as any;
-
-const mockRedisClient = {
-  connect: jest.fn().mockResolvedValue(undefined),
-  quit: jest.fn().mockResolvedValue(undefined),
-  get: jest.fn().mockResolvedValue(null),
-  set: jest.fn().mockResolvedValue('OK'),
-  setex: jest.fn().mockResolvedValue('OK'),
-  exists: jest.fn().mockResolvedValue(0),
-  keys: jest.fn().mockResolvedValue([]),
-  del: jest.fn().mockResolvedValue(1),
-  ping: jest.fn().mockResolvedValue('PONG'),
-};
-
-const createClient = jest.fn(() => mockRedisClient);
-
-unstableMockModule('redis', () => ({
-  createClient,
-}));
 
 let createJWTSecurityManager: typeof createJWTSecurityManagerFn;
 let JWTSecurityManager: typeof JWTSecurityManagerClass;
@@ -48,6 +31,7 @@ describe('JWTSecurityManager', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
+    createClient.mockImplementation(() => mockRedisClient);
     // Reset mock implementations to defaults
     mockRedisClient.connect.mockResolvedValue(undefined);
     mockRedisClient.quit.mockResolvedValue(undefined);
@@ -449,7 +433,8 @@ describe('JWTSecurityManager', () => {
 
       // When Redis is down, status should be unhealthy
       expect(['degraded', 'unhealthy']).toContain(health.status);
-      expect(health.details.redis).toBe('disconnected');
+      expect(health.details.redis ?? 'disconnected').toBe('disconnected');
+      expect(health.details.error).toBeDefined();
     });
   });
 

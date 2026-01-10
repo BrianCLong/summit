@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Dict, Mapping
 
 
 @dataclass(frozen=True)
@@ -14,7 +14,7 @@ class FairnessEnvelope:
     tpr_gap: float
     fpr_gap: float
 
-    def as_dict(self) -> Dict[str, float]:
+    def as_dict(self) -> dict[str, float]:
         return {
             "demographic_parity_diff": self.demographic_parity_diff,
             "tpr_gap": self.tpr_gap,
@@ -26,9 +26,7 @@ class PolicyViolation(RuntimeError):
     """Raised when metrics fall outside the approved fairness envelope."""
 
     def __init__(self, metric: str, value: float, limit: float) -> None:
-        message = (
-            f"Metric '{metric}' with value {value:.4f} exceeds the approved envelope of {limit:.4f}."
-        )
+        message = f"Metric '{metric}' with value {value:.4f} exceeds the approved envelope of {limit:.4f}."
         super().__init__(message)
         self.metric = metric
         self.value = value

@@ -1,12 +1,12 @@
-import sys
-from pathlib import Path
 import random
+import sys
 import unittest
+from pathlib import Path
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PACKAGE_ROOT))
 
-from lrt import LRTHarness, LRTConfig, ProtectedAPI, generate_canaries
+from lrt import LRTConfig, LRTHarness, ProtectedAPI, generate_canaries
 from lrt.agents.prompt_craft import PromptCraftAgent
 from lrt.agents.query_chain import QueryChainingAgent
 from lrt.defenses import RSRDefense
@@ -39,7 +39,9 @@ class HarnessTests(unittest.TestCase):
             rng=random.Random(10),
         )
         agents = self._build_agents()
-        harness = LRTHarness(api=api, canaries=self.catalog, config=LRTConfig(seed=7, agents=agents))
+        harness = LRTHarness(
+            api=api, canaries=self.catalog, config=LRTConfig(seed=7, agents=agents)
+        )
         result = harness.run()
 
         self.assertAlmostEqual(result.recall, 1.0)
@@ -57,7 +59,9 @@ class HarnessTests(unittest.TestCase):
             rng=random.Random(10),
         )
         agents = self._build_agents()
-        harness = LRTHarness(api=api, canaries=self.catalog, config=LRTConfig(seed=7, agents=agents))
+        harness = LRTHarness(
+            api=api, canaries=self.catalog, config=LRTConfig(seed=7, agents=agents)
+        )
         result = harness.run()
 
         self.assertEqual(result.recall, 0.0)
@@ -72,7 +76,9 @@ class HarnessTests(unittest.TestCase):
             rng=random.Random(10),
         )
         agents = self._build_agents()
-        harness = LRTHarness(api=api, canaries=self.catalog, config=LRTConfig(seed=7, agents=agents))
+        harness = LRTHarness(
+            api=api, canaries=self.catalog, config=LRTConfig(seed=7, agents=agents)
+        )
         first = harness.run()
         second = harness.run()
 

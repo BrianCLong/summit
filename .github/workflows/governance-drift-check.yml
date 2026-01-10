@@ -1,0 +1,239 @@
+name: Governance Drift Check
+
+# Monitors for unexpected governance policy changes
+# Alerts when policies drift during stabilization or between deployments
+#
+# Authority: docs/ci/GOVERNANCE_LOCKFILE.md
+
+on:
+  # Run daily to catch drift
+  schedule:
+    - cron: "0 11 * * *" # 11:00 UTC daily
+
+  # Run on policy file changes
+  push:
+    branches: [main]
+    paths:
+      - "docs/ci/*.yml"
+      - "docs/ci/*.yaml"
+      - "docs/releases/_state/*.json"
+
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      alert_mode:
+        description: "Fail workflow if drift detected"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-drift:
+    name: Check Governance Drift
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download Time Series
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Try to fetch time series from Pages
+          mkdir -p site/release-ops
+
+          # Get the Pages URL
+          PAGES_URL=$(gh api repos/${{ github.repository }}/pages --jq '.html_url' 2>/dev/null || echo "")
+
+          if [[ -n "${PAGES_URL}" ]]; then
+            TIMESERIES_URL="${PAGES_URL}release-ops/redaction_metrics_timeseries.json"
+            echo "Fetching time series from: ${TIMESERIES_URL}"
+
+            curl -sSL "${TIMESERIES_URL}" -o site/release-ops/redaction_metrics_timeseries.json || {
+              echo "::warning::Could not fetch time series from Pages"
+              # Create minimal time series for first run
+              echo '{"version":"1.0","series":[]}' > site/release-ops/redaction_metrics_timeseries.json
+            }
+          else
+            echo "::warning::GitHub Pages not configured"
+            echo '{"version":"1.0","series":[]}' > site/release-ops/redaction_metrics_timeseries.json
+          fi
+
+          echo "Time series contents:"
+          head -c 500 site/release-ops/redaction_metrics_timeseries.json || true
+          echo ""
+
+      - name: Generate Current Governance Hash
+        id: current-hash
+        run: |
+          chmod +x scripts/release/*.sh
+
+          # Generate current governance hash
+          if [[ -f "docs/releases/_state/governance_lockfile.json" ]]; then
+            HASH=$(sha256sum docs/releases/_state/governance_lockfile.json | cut -d' ' -f1)
+            echo "Current governance hash: ${HASH:0:16}..."
+            echo "hash=${HASH}" >> $GITHUB_OUTPUT
+          else
+            echo "::warning::No governance lockfile found"
+            echo "hash=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check Governance Drift
+        id: drift-check
+        run: |
+          ARGS="--timeseries site/release-ops/redaction_metrics_timeseries.json"
+          ARGS="${ARGS} --window 30"
+          ARGS="${ARGS} --json"
+          ARGS="${ARGS} --verbose"
+
+          if [[ -n "${{ steps.current-hash.outputs.hash }}" ]]; then
+            ARGS="${ARGS} --current-hash ${{ steps.current-hash.outputs.hash }}"
+          fi
+
+          # Run drift check
+          RESULT=$(./scripts/release/check_governance_drift.sh ${ARGS} 2>&1) || true
+
+          echo "${RESULT}" > drift_report.json
+
+          # Extract key metrics
+          DRIFT_DETECTED=$(echo "${RESULT}" | jq -r '.drift_detected // false')
+          TRANSITIONS=$(echo "${RESULT}" | jq -r '.transitions_count // 0')
+          CURRENT_STATUS=$(echo "${RESULT}" | jq -r '.current_hash_status // "UNKNOWN"')
+          UNIQUE_HASHES=$(echo "${RESULT}" | jq -r '.unique_hashes // 0')
+
+          echo "drift_detected=${DRIFT_DETECTED}" >> $GITHUB_OUTPUT
+          echo "transitions=${TRANSITIONS}" >> $GITHUB_OUTPUT
+          echo "current_status=${CURRENT_STATUS}" >> $GITHUB_OUTPUT
+          echo "unique_hashes=${UNIQUE_HASHES}" >> $GITHUB_OUTPUT
+
+          # Summary
+          echo "## Governance Drift Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Drift Detected | ${DRIFT_DETECTED} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Transitions | ${TRANSITIONS} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Unique Hashes | ${UNIQUE_HASHES} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Current Status | ${CURRENT_STATUS} |" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${DRIFT_DETECTED}" == "true" ]]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Transitions Detected" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            echo "${RESULT}" | jq '.transitions' >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Create Drift Alert Issue
+        if: steps.drift-check.outputs.drift_detected == 'true' || steps.drift-check.outputs.current_status == 'CHANGED'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if there's already an open drift issue
+          EXISTING=$(gh issue list \
+            --label "governance-drift" \
+            --state open \
+            --json number \
+            -q '.[0].number' \
+            --repo ${{ github.repository }} || echo "")
+
+          if [[ -n "${EXISTING}" ]]; then
+            echo "Drift issue already exists: #${EXISTING}"
+            # Add comment with new findings
+            gh issue comment "${EXISTING}" \
+              --body "### Drift Check Update ($(date -u +%Y-%m-%d))
+
+          **Transitions in window:** ${{ steps.drift-check.outputs.transitions }}
+          **Current hash status:** ${{ steps.drift-check.outputs.current_status }}
+
+          See workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+              --repo ${{ github.repository }}
+          else
+            # Create new issue
+            gh issue create \
+              --title "Governance Policy Drift Detected" \
+              --label "governance-drift,needs-investigation" \
+              --body "## Governance Drift Alert
+
+          The governance drift checker has detected policy changes.
+
+          ### Details
+
+          | Metric | Value |
+          |--------|-------|
+          | Transitions | ${{ steps.drift-check.outputs.transitions }} |
+          | Unique Hashes | ${{ steps.drift-check.outputs.unique_hashes }} |
+          | Current Status | ${{ steps.drift-check.outputs.current_status }} |
+          | Workflow Run | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+
+          ### Investigation Steps
+
+          1. Review the workflow run for detailed transition information
+          2. Check recent commits to policy files in \`docs/ci/\`
+          3. Verify if the change was intentional
+          4. If intentional, close this issue with explanation
+          5. If unintentional, investigate and remediate
+
+          ### Commands
+
+          \`\`\`bash
+          # View current governance hash
+          sha256sum docs/releases/_state/governance_lockfile.json
+
+          # Check drift locally
+          ./scripts/release/check_governance_drift.sh \\
+            --timeseries site/release-ops/redaction_metrics_timeseries.json \\
+            --verbose
+          \`\`\`
+
+          ---
+          *This issue was automatically created by the governance drift checker.*" \
+              --repo ${{ github.repository }}
+          fi
+
+      - name: Log to Audit Trail
+        if: always()
+        run: |
+          # Determine status based on drift detection
+          if [[ "${{ steps.drift-check.outputs.drift_detected }}" == "true" ]] || [[ "${{ steps.drift-check.outputs.current_status }}" == "CHANGED" ]]; then
+            STATUS="warning"
+            MESSAGE="${{ steps.drift-check.outputs.transitions }} governance transition(s) detected"
+          else
+            STATUS="success"
+            MESSAGE="No governance drift detected"
+          fi
+
+          # Log to audit trail
+          ./scripts/release/update_governance_audit_log.sh \
+            --event-type drift \
+            --status "${STATUS}" \
+            --message "${MESSAGE}" \
+            --run-id "${{ github.run_id }}" \
+            --metadata "{\"transitions\": ${{ steps.drift-check.outputs.transitions }}, \"unique_hashes\": ${{ steps.drift-check.outputs.unique_hashes }}}" \
+            || echo "::warning::Failed to update audit log"
+
+      - name: Upload Drift Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-drift-report-${{ github.run_number }}
+          path: drift_report.json
+          retention-days: 30
+
+      - name: Fail on Drift (Alert Mode)
+        if: inputs.alert_mode == true && (steps.drift-check.outputs.drift_detected == 'true' || steps.drift-check.outputs.current_status == 'CHANGED')
+        run: |
+          echo "::error::Governance drift detected and alert mode is enabled"
+          exit 1
+
+      - name: Success Summary
+        if: steps.drift-check.outputs.drift_detected != 'true' && steps.drift-check.outputs.current_status != 'CHANGED'
+        run: |
+          echo "## ✅ No Governance Drift" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Governance policies are stable across the analysis window." >> $GITHUB_STEP_SUMMARY

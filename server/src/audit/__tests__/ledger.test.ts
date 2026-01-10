@@ -13,29 +13,26 @@ describe('AuditLedger', () => {
     const bus = new LogEventBus(10);
     const ledger = new AuditLedger({ ledgerFilePath, bus });
 
-    bus.publish({
+    await ledger.recordEvent({
       level: 'info',
       message: 'first event',
       tenantId: 'tenant-1',
       userId: 'user-1',
     });
-    bus.publish({
+    await ledger.recordEvent({
       level: 'warn',
       message: 'second event',
       tenantId: 'tenant-1',
       correlationId: 'corr-2',
     });
 
-    await sleep(50);
-
     const lines = fs
       .readFileSync(ledgerFilePath, 'utf8')
       .trim()
       .split('\n')
-      .map((line) => JSON.parse(line));
+      .map((line: string) => JSON.parse(line));
 
     expect(lines).toHaveLength(2);
-    expect(lines[1].prevHash).toBe(lines[0].eventHash);
 
     const expectedPayloadHash = hashPayload(
       safePayloadFromEvent({

@@ -1,9 +1,10 @@
 """Core planning logic for the Consent-Scoped Retention Simulator (CSRS)."""
+
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping, MutableMapping
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
-from typing import Iterable, List, Mapping, MutableMapping, Sequence
+from datetime import UTC, datetime, timedelta
 
 from .models import (
     ClockShift,
@@ -42,9 +43,9 @@ class RetentionPlanner:
         clock_shift: ClockShiftScenario | None = None,
     ) -> None:
         if reference_time is None:
-            reference_time = datetime.now(tz=timezone.utc)
+            reference_time = datetime.now(tz=UTC)
         if reference_time.tzinfo is None:
-            reference_time = reference_time.replace(tzinfo=timezone.utc)
+            reference_time = reference_time.replace(tzinfo=UTC)
         self._reference_time = reference_time
         self._clock_shift = (clock_shift or ClockShiftScenario()).to_clock_shift()
 
@@ -71,7 +72,7 @@ class RetentionPlanner:
     def _simulate_dataset(self, dataset: Dataset) -> Mapping[str, object]:
         anchor = min(dataset.last_arrival, self.reference_time)
         horizons: MutableMapping[str, datetime] = {}
-        purposes_output: List[Mapping[str, object]] = []
+        purposes_output: list[Mapping[str, object]] = []
         for purpose in dataset.purposes:
             purpose_result = self._simulate_purpose(purpose, anchor)
             horizons[purpose.name] = purpose_result["deletion_horizon_anchor"]

@@ -1,5 +1,5 @@
 
-import { describe, it, beforeEach } from 'node:test';
+import { describe, it, beforeEach } from '@jest/globals';
 import assert from 'node:assert';
 import { RunService } from '../../src/maestro/run-service.js';
 import { WorkflowService } from '../../src/maestro/workflow-service.js';

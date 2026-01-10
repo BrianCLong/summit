@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Iterable, List, Optional, Tuple
+from collections.abc import Iterable
 
 import numpy as np
 import pandas as pd
@@ -24,7 +24,7 @@ class CausalDiscoveryService:
             "granger": (GrangerCausality(), granger_confidence),
         }
 
-    def _load_data(self, records: List[Dict[str, float]]) -> pd.DataFrame:
+    def _load_data(self, records: list[dict[str, float]]) -> pd.DataFrame:
         if not records:
             raise ValueError("records are required")
         df = pd.DataFrame(records)
@@ -34,7 +34,7 @@ class CausalDiscoveryService:
         return df
 
     def discover(
-        self, records: List[Dict[str, float]], algorithm: Optional[str] = None
+        self, records: list[dict[str, float]], algorithm: str | None = None
     ) -> Simulation:
         df = self._load_data(records)
         algo = (algorithm or self.settings.default_algorithm).lower()
@@ -56,9 +56,9 @@ class CausalDiscoveryService:
     def intervene(
         self,
         sim_id: str,
-        interventions: Dict[str, float],
-        target: Optional[str],
-    ) -> Tuple[Simulation, DoCalculusSimulator]:
+        interventions: dict[str, float],
+        target: str | None,
+    ) -> tuple[Simulation, DoCalculusSimulator]:
         simulation = self.store.get(sim_id)
         if not simulation:
             raise KeyError(f"simulation {sim_id} not found")

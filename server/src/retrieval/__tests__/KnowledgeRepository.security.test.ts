@@ -1,10 +1,10 @@
 
-import { test } from 'node:test';
-import assert from 'node:assert';
 import { KnowledgeRepository } from '../KnowledgeRepository.js';
 import { RetrievalQuery } from '../types.js';
+import { describe, it, expect } from '@jest/globals';
 
-test('KnowledgeRepository: Security Regression Test (SQL Injection)', async (t) => {
+describe('KnowledgeRepository security', () => {
+  it('blocks SQL injection in topK', async () => {
   let executedSql = '';
   let executedParams: any[] = [];
 
@@ -32,12 +32,12 @@ test('KnowledgeRepository: Security Regression Test (SQL Injection)', async (t) 
 
   await repo.searchKeyword(maliciousQuery);
 
-  assert.doesNotMatch(executedSql, /DROP TABLE/, 'Malicious SQL should NOT be in the query string');
-  assert.match(executedSql, /LIMIT \$\d+/, 'LIMIT should be parameterized');
-  assert.strictEqual(executedParams[executedParams.length - 1], 10, 'Should fall back to default limit of 10 when input is invalid');
-});
+  expect(executedSql).not.toMatch(/DROP TABLE/);
+  expect(executedSql).toMatch(/LIMIT \$\d+/);
+  expect(executedParams[executedParams.length - 1]).toBe(10);
+  });
 
-test('KnowledgeRepository: Handles String topK', async (t) => {
+  it('parses string topK', async () => {
   let executedParams: any[] = [];
 
   const mockClient = {
@@ -63,5 +63,6 @@ test('KnowledgeRepository: Handles String topK', async (t) => {
 
   await repo.searchKeyword(query);
 
-  assert.strictEqual(executedParams[executedParams.length - 1], 50, 'Should parse string topK');
+  expect(executedParams[executedParams.length - 1]).toBe(50);
+  });
 });

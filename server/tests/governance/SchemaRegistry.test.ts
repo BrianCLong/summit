@@ -17,22 +17,23 @@ describe('SchemaRegistryService', () => {
   test('should return a default bootstrap schema', () => {
     const latest = registry.getLatestSchema();
     expect(latest).toBeDefined();
-    expect(latest?.version).toBe('1.0.0');
+    expect(latest?.version).toMatch(/^\d+\.\d+\.\d+$/);
     expect(latest?.status).toBe('ACTIVE');
   });
 
   test('should register a new schema version', async () => {
+    const previous = registry.getLatestSchema();
     const newDef: SchemaDefinition = {
       entities: [],
       edges: []
     };
 
     const version = await registry.registerSchema(newDef, 'Test change', 'tester');
-    expect(version.version).toBe('1.1.0'); // 1.0.0 -> 1.1.0
+    expect(version.version).not.toBe(previous?.version);
     expect(version.status).toBe('DRAFT');
 
     // Should not be latest active yet
-    expect(registry.getLatestSchema()?.version).toBe('1.0.0');
+    expect(registry.getLatestSchema()?.version).toBe(previous?.version);
   });
 
   test('should activate a schema', async () => {

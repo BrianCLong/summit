@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """Analyze behavioral telemetry sessions to extract UX and threat insights."""
+
 from __future__ import annotations
 
 import json
 from collections import Counter, defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from statistics import fmean, median
-from typing import Iterable, List
 
 DATA_PATH = Path(__file__).with_name("events.json")
 OUTPUT_PATH = Path(__file__).with_name("insights.md")
@@ -27,8 +28,8 @@ class Session:
     hover_time_sec: float
     scroll_depth_pct: float
     latency_ms_avg: float
-    feature_usage: List[str]
-    security_flags: List[str]
+    feature_usage: list[str]
+    security_flags: list[str]
     timestamp: datetime
 
     @property
@@ -50,9 +51,9 @@ class Session:
         return 0.65 * self.click_rate_per_min + 0.35 * (self.edit_rate * 10)
 
 
-def load_sessions() -> List[Session]:
+def load_sessions() -> list[Session]:
     raw = json.loads(DATA_PATH.read_text())
-    sessions: List[Session] = []
+    sessions: list[Session] = []
     for row in raw:
         sessions.append(
             Session(
@@ -88,12 +89,14 @@ def summarize_numeric(values: Iterable[float]) -> dict[str, float]:
     }
 
 
-def build_markdown(sessions: List[Session]) -> str:
+def build_markdown(sessions: list[Session]) -> str:
     total_sessions = len(sessions)
     unique_users = {s.user_id for s in sessions}
     # Investigative depth threshold calibrated to highlight the most engaged humans
     high_intensity = [s for s in sessions if s.interaction_intensity >= 25]
-    scanning_sessions = [s for s in sessions if s.click_rate_per_min < 5 and s.time_in_view_sec >= 480]
+    scanning_sessions = [
+        s for s in sessions if s.click_rate_per_min < 5 and s.time_in_view_sec >= 480
+    ]
 
     device_stats = {}
     for device, group in group_by(sessions, key=lambda s: s.device).items():
@@ -118,9 +121,7 @@ def build_markdown(sessions: List[Session]) -> str:
         feature_counter.update(s.feature_usage)
 
     latency_hotspots = []
-    for (region, device), group in group_by(
-        sessions, key=lambda s: (s.region, s.device)
-    ).items():
+    for (region, device), group in group_by(sessions, key=lambda s: (s.region, s.device)).items():
         stats = summarize_numeric(s.latency_ms_avg for s in group)
         latency_hotspots.append(((region, device), stats))
     latency_hotspots.sort(key=lambda item: item[1]["avg"], reverse=True)
@@ -139,9 +140,7 @@ def build_markdown(sessions: List[Session]) -> str:
         if s.click_rate_per_min >= 35 and s.focus_ratio <= 0.1 and s.edit_rate >= 6
     ]
 
-    low_latency_power_users = [
-        s for s in high_intensity if s.latency_ms_avg <= 190
-    ]
+    low_latency_power_users = [s for s in high_intensity if s.latency_ms_avg <= 190]
 
     markdown = [
         "# Behavioral Telemetry Insights",
@@ -176,9 +175,7 @@ def build_markdown(sessions: List[Session]) -> str:
         ]
     )
     for role, stats in role_focus.items():
-        markdown.append(
-            f"| {role} | {stats['avg_focus']:.2f} | {stats['avg_intensity']:.2f} |"
-        )
+        markdown.append(f"| {role} | {stats['avg_focus']:.2f} | {stats['avg_intensity']:.2f} |")
 
     markdown.extend(
         [
@@ -211,9 +208,7 @@ def build_markdown(sessions: List[Session]) -> str:
         ]
     )
     for (region, device), stats in latency_hotspots:
-        markdown.append(
-            f"| {region} | {device} | {stats['avg']} | {stats['p90']} |"
-        )
+        markdown.append(f"| {region} | {device} | {stats['avg']} | {stats['p90']} |")
 
     markdown.extend(
         [

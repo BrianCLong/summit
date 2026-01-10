@@ -8,7 +8,10 @@ jest.mock('../index.js', () => ({
   getNlGraphQueryService: jest.fn(),
 }));
 
-describe('nl-graph-query routes', () => {
+const run = process.env.NO_NETWORK_LISTEN !== 'true';
+const describeIf = run ? describe : describe.skip;
+
+describeIf('nl-graph-query routes', () => {
   const app = express();
   app.use(express.json());
   beforeAll(async () => {

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import re
-from typing import List
 
 try:
     import magic
@@ -13,10 +12,10 @@ PHONE_RE = re.compile(r"\b\+?\d[\d\s().-]{7,}\d\b")
 SSN_RE = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
 
 
-def detect_pii(value: str) -> List[str]:
+def detect_pii(value: str) -> list[str]:
     """Return a list of PII types detected in the given value."""
 
-    types: List[str] = []
+    types: list[str] = []
     if EMAIL_RE.search(value):
         types.append("email")
     if PHONE_RE.search(value):
@@ -33,7 +32,7 @@ def detect_pii(value: str) -> List[str]:
     return types
 
 
-def apply_redaction(value: str, pii_types: List[str], rules: dict[str, str]) -> str:
+def apply_redaction(value: str, pii_types: list[str], rules: dict[str, str]) -> str:
     for t in pii_types:
         if t in rules:
             return rules[t]

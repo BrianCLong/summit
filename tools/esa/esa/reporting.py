@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from .evaluation import Evaluation
@@ -12,7 +12,7 @@ def render_markdown(
     dataset_path: Path | None = None,
     title: str = "Sampling Audit Report",
 ) -> str:
-    timestamp = datetime.now(timezone.utc).isoformat()
+    timestamp = datetime.now(UTC).isoformat()
     lines = [
         f"# {title}",
         "",

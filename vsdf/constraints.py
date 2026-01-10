@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -42,11 +42,11 @@ class DenialConstraint:
 class ConstraintSet:
     """Container for all compiled constraints."""
 
-    marginals: Dict[str, MarginalConstraint] = field(default_factory=dict)
-    correlations: List[CorrelationConstraint] = field(default_factory=list)
-    denial_constraints: List[DenialConstraint] = field(default_factory=list)
-    numeric_stats: Dict[str, Dict[str, float]] = field(default_factory=dict)
-    correlation_matrix: Optional[pd.DataFrame] = None
+    marginals: dict[str, MarginalConstraint] = field(default_factory=dict)
+    correlations: list[CorrelationConstraint] = field(default_factory=list)
+    denial_constraints: list[DenialConstraint] = field(default_factory=list)
+    numeric_stats: dict[str, dict[str, float]] = field(default_factory=dict)
+    correlation_matrix: pd.DataFrame | None = None
     dp_epsilon: float = 5.0
 
 
@@ -54,11 +54,11 @@ class ConstraintSet:
 class ConstraintSpecification:
     """Specification describing which constraints to learn or enforce."""
 
-    marginal_columns: Optional[Sequence[str]] = None
-    correlation_pairs: Optional[Sequence[Tuple[str, str]]] = None
-    denial_predicates: Optional[Sequence[str]] = None
-    provided_marginals: Optional[Mapping[str, Mapping[str, float]]] = None
-    provided_correlations: Optional[Sequence[Mapping[str, object]]] = None
+    marginal_columns: Sequence[str] | None = None
+    correlation_pairs: Sequence[tuple[str, str]] | None = None
+    denial_predicates: Sequence[str] | None = None
+    provided_marginals: Mapping[str, Mapping[str, float]] | None = None
+    provided_correlations: Sequence[Mapping[str, object]] | None = None
     dp_epsilon: float = 5.0
     marginal_tolerance: float = 0.05
     correlation_tolerance: float = 0.05
@@ -68,13 +68,13 @@ class ConstraintSpecification:
 class ConstraintCompiler:
     """Compiles user specifications and empirical measurements into constraints."""
 
-    def __init__(self, schema: Optional[TabularSchema] = None) -> None:
+    def __init__(self, schema: TabularSchema | None = None) -> None:
         self.schema = schema
 
     def learn(
         self,
         frame: pd.DataFrame,
-        specification: Optional[ConstraintSpecification] = None,
+        specification: ConstraintSpecification | None = None,
     ) -> ConstraintSet:
         """Learn constraints from the supplied frame and specification."""
 
@@ -91,7 +91,7 @@ class ConstraintCompiler:
     def compile_from_specs(
         self,
         specification: ConstraintSpecification,
-        frame: Optional[pd.DataFrame] = None,
+        frame: pd.DataFrame | None = None,
     ) -> ConstraintSet:
         """Compile constraints from explicitly provided specifications."""
 
@@ -125,7 +125,7 @@ class ConstraintCompiler:
                     )
                 )
 
-        numeric_stats: Dict[str, Dict[str, float]] = {}
+        numeric_stats: dict[str, dict[str, float]] = {}
         for name in schema.numeric_columns:
             stats = schema.columns[name]
             numeric_stats[name] = {
@@ -176,7 +176,7 @@ class ConstraintCompiler:
         constraint_set: ConstraintSet,
     ) -> None:
         numeric_columns = schema.numeric_columns
-        numeric_stats: Dict[str, Dict[str, float]] = {}
+        numeric_stats: dict[str, dict[str, float]] = {}
 
         if not numeric_columns:
             constraint_set.numeric_stats = {}
@@ -192,7 +192,7 @@ class ConstraintCompiler:
             }
 
         correlation_pairs = specification.correlation_pairs
-        correlations: List[CorrelationConstraint] = []
+        correlations: list[CorrelationConstraint] = []
         matrix = numeric_frame.corr().fillna(0.0)
 
         if correlation_pairs:
@@ -243,7 +243,7 @@ class ConstraintCompiler:
         self,
         numeric_columns: Sequence[str],
         correlations: Iterable[CorrelationConstraint],
-    ) -> Optional[pd.DataFrame]:
+    ) -> pd.DataFrame | None:
         if not numeric_columns:
             return None
 

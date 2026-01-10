@@ -1,10 +1,11 @@
 """Timing side-channel agent stub."""
+
 from __future__ import annotations
 
 import math
 
-from .base import AttackAgent
 from ..api import AttackSession, ProtectedAPI
+from .base import AttackAgent
 
 
 class TimingSideChannelAgent(AttackAgent):

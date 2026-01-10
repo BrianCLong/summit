@@ -105,7 +105,7 @@ describe('MigrationManager', () => {
 
   it('guards against destructive migrations by default', () => {
     expect(() => MigrationManager.validateOnlineSafety('DROP TABLE users;')).toThrow(
-      /breaking change/i,
+      /migration safety check failed/i,
     );
   });
 

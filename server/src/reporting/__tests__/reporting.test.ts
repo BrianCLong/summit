@@ -5,8 +5,10 @@ import { DeliveryService } from '../delivery-service';
 import { TemplateEngine } from '../template-engine';
 import { ReportScheduler } from '../scheduler';
 import { ReportingService } from '../service';
-import { ReportRequest, ReportTemplate } from '../types';
+import { AccessRule, ReportRequest, ReportTemplate } from '../types';
 import { VersionStore } from '../version-store';
+import { provenanceLedger } from '../../provenance/ledger.js';
+import cron from 'node-cron';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -19,21 +21,23 @@ const baseTemplate: ReportTemplate = {
 };
 
 const access = { userId: 'u-1', roles: ['analyst'] };
-const rules = [
+const rules: AccessRule[] = [
   { resource: 'report', action: 'view', roles: ['analyst', 'admin'] },
   { resource: 'report', action: 'deliver', roles: ['analyst', 'admin'] },
 ];
 
 const noDeliverAccess = { userId: 'u-2', roles: ['viewer'] };
-const limitedRules = [
+const limitedRules: AccessRule[] = [
   { resource: 'report', action: 'view', roles: ['viewer', 'analyst', 'admin'] },
   { resource: 'report', action: 'deliver', roles: ['analyst', 'admin'] },
 ];
 
-function createService() {
-  const transporter = { sendMail: jest.fn().mockResolvedValue({ messageId: 'm-1' }) } as any;
+function createService(customRules: AccessRule[] = rules) {
+  const transporter = {
+    sendMail: jest.fn().mockImplementation(async () => ({ messageId: 'm-1' })),
+  } as any;
   const delivery = new DeliveryService(transporter);
-  const accessControl = new AccessControlService(rules);
+  const accessControl = new AccessControlService(customRules);
   const versions = new VersionStore();
   const engine = new TemplateEngine();
   return { delivery, accessControl, versions, engine, service: new ReportingService(accessControl, delivery, versions, engine) };
@@ -53,6 +57,10 @@ describe('TemplateEngine', () => {
 });
 
 describe('ReportingService', () => {
+  beforeEach(() => {
+    jest.spyOn(provenanceLedger, 'appendEntry').mockResolvedValue(undefined as any);
+  });
+
   it('generates artifacts, records versions, and delivers to multiple channels', async () => {
     mockedAxios.post.mockResolvedValue({ status: 200 });
     const { service, versions, delivery } = createService();
@@ -81,7 +89,7 @@ describe('ReportingService', () => {
   });
 
   it('rejects delivery attempts without sufficient role', async () => {
-    const { service } = createService();
+    const { service } = createService(limitedRules);
     const request: ReportRequest = {
       template: baseTemplate,
       context: {},
@@ -110,13 +118,17 @@ describe('ReportingService', () => {
 });
 
 describe('ReportScheduler', () => {
+  beforeEach(() => {
+    jest.spyOn(cron, 'validate').mockReturnValue(true);
+  });
+
   it('registers and cancels cron-driven jobs', () => {
     const { service } = createService();
     const scheduler = new ReportScheduler(service);
     const job = {
       id: 'job-1',
       name: 'hourly-threat-watch',
-      cron: '*/5 * * * * *',
+      cron: '*/5 * * * *',
       request: { template: baseTemplate, context: {} },
     };
 
@@ -137,6 +149,7 @@ describe('ReportScheduler', () => {
       request: { template: baseTemplate, context: {} },
     };
 
+    (cron.validate as jest.Mock).mockReturnValueOnce(false);
     expect(() => scheduler.schedule(badJob, access)).toThrow(/Invalid cron expression/);
   });
 });

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, List
 
 
 @dataclass
@@ -30,15 +30,21 @@ def _reverse_order(text: str) -> str:
 
 
 def _remove_units(text: str) -> str:
-    return text.replace("6-month", "six month").replace("45-minute", "45m").replace("lead times", "lead")
+    return (
+        text.replace("6-month", "six month")
+        .replace("45-minute", "45m")
+        .replace("lead times", "lead")
+    )
 
 
 def _push_edge_case(text: str) -> str:
-    return f"{text} Assume worst-case data sparsity and contradictory telemetry." \
+    return (
+        f"{text} Assume worst-case data sparsity and contradictory telemetry."
         f" Require explicit uncertainty quantification."
+    )
 
 
-PERTURBATIONS: List[Perturbation] = [
+PERTURBATIONS: list[Perturbation] = [
     Perturbation(
         name="noisy-channel",
         description="Inject logging noise and channel markers to evaluate resilience to clutter.",

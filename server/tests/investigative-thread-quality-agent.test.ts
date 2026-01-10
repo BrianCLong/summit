@@ -5,7 +5,10 @@ import InvestigativeThreadQualityAgent, {
 
 describe('InvestigativeThreadQualityAgent', () => {
   test('scores and updates graph metadata', async () => {
-    const run = jest.fn().mockResolvedValue({});
+    const run = jest.fn() as jest.MockedFunction<
+      (...args: unknown[]) => Promise<Record<string, unknown>>
+    >;
+    run.mockResolvedValue({});
     const close = jest.fn();
     const session = { run, close } as any;
     const driver = { session: () => session } as any;

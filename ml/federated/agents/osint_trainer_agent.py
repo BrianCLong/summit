@@ -7,10 +7,11 @@ Autonomous agent for local OSINT model training in federated learning.
 import asyncio
 import logging
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 
@@ -42,7 +43,7 @@ class AgentConfig:
     learning_rate: float = 0.001
 
     # Data settings
-    data_sources: List[str] = field(default_factory=list)
+    data_sources: list[str] = field(default_factory=list)
     max_samples_per_round: int = 10000
 
     # Privacy settings
@@ -59,8 +60,8 @@ class AgentConfig:
     max_training_time: float = 600.0
 
     # Callbacks
-    on_round_complete: Optional[Callable] = None
-    on_error: Optional[Callable] = None
+    on_round_complete: Callable | None = None
+    on_error: Callable | None = None
 
 
 @dataclass
@@ -70,8 +71,8 @@ class TrainingTask:
     task_id: str
     round_number: int
     global_parameters: Any
-    config: Dict[str, Any]
-    deadline: Optional[float] = None
+    config: dict[str, Any]
+    deadline: float | None = None
 
 
 class OSINTTrainerAgent:
@@ -89,9 +90,9 @@ class OSINTTrainerAgent:
         self.config = config
         self.state = AgentState.IDLE
 
-        self._current_task: Optional[TrainingTask] = None
+        self._current_task: TrainingTask | None = None
         self._model = None
-        self._training_history: List[Dict[str, Any]] = []
+        self._training_history: list[dict[str, Any]] = []
         self._task_queue: asyncio.Queue = asyncio.Queue()
 
         # Privacy tracking
@@ -147,7 +148,7 @@ class OSINTTrainerAgent:
                 await self._execute_task(task)
                 self._current_task = None
 
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 # No task, continue waiting
                 continue
             except Exception as e:
@@ -155,7 +156,7 @@ class OSINTTrainerAgent:
                 if self.config.on_error:
                     self.config.on_error(e)
 
-    async def _execute_task(self, task: TrainingTask) -> Dict[str, Any]:
+    async def _execute_task(self, task: TrainingTask) -> dict[str, Any]:
         """Execute a training task"""
         start_time = time.time()
         logger.info(f"Executing task {task.task_id} (round {task.round_number})")
@@ -232,7 +233,7 @@ class OSINTTrainerAgent:
         logger.info("Initializing OSINT model")
         self._model = {"type": "osint_classifier", "initialized": True}
 
-    async def _load_osint_data(self) -> List[Any]:
+    async def _load_osint_data(self) -> list[Any]:
         """Load local OSINT data for training"""
         # Placeholder - would load from configured data sources
         logger.info(f"Loading data from sources: {self.config.data_sources}")
@@ -247,9 +248,9 @@ class OSINTTrainerAgent:
 
     async def _train_local(
         self,
-        train_data: List[Any],
+        train_data: list[Any],
         epochs: int,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """Perform local training"""
         logger.info(f"Training for {epochs} epochs on {len(train_data)} samples")
 
@@ -265,7 +266,7 @@ class OSINTTrainerAgent:
             "epochs_completed": epochs,
         }
 
-    async def _evaluate_local(self) -> Dict[str, float]:
+    async def _evaluate_local(self) -> dict[str, float]:
         """Evaluate model on local test data"""
         # Simulate evaluation
         accuracy = min(0.5 + np.random.uniform(0, 0.4), 0.95)
@@ -307,10 +308,10 @@ class OSINTTrainerAgent:
 
         return original_params + gradient + noise
 
-    async def _export_for_airgap(self, result: Dict[str, Any]) -> str:
+    async def _export_for_airgap(self, result: dict[str, Any]) -> str:
         """Export training result for air-gap synchronization"""
-        import pickle
         import json
+        import pickle
 
         export_path = Path(self.config.sync_path)
 
@@ -335,20 +336,18 @@ class OSINTTrainerAgent:
 
         return str(params_file)
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get agent status"""
         return {
             "agent_id": self.config.agent_id,
             "node_id": self.config.node_id,
             "state": self.state.value,
-            "current_task": (
-                self._current_task.task_id if self._current_task else None
-            ),
+            "current_task": (self._current_task.task_id if self._current_task else None),
             "tasks_completed": len(self._training_history),
             "privacy_spent": self._privacy_spent,
             "airgap_mode": self.config.airgap_mode,
         }
 
-    def get_training_history(self) -> List[Dict[str, Any]]:
+    def get_training_history(self) -> list[dict[str, Any]]:
         """Get training history"""
         return self._training_history.copy()

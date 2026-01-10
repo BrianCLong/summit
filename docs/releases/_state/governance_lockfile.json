@@ -1,0 +1,116 @@
+{
+  "files": [
+    {
+      "bytes": 2650,
+      "path": "snapshot/docs/ci/API_DETERMINISM_POLICY.yml",
+      "sha256": "f4cd9ee66119f42df482d0b6c94ddc696d1598946fdcd1979ca3f5e2acbc8193"
+    },
+    {
+      "bytes": 3123,
+      "path": "snapshot/docs/ci/BLOCKER_ESCALATION_POLICY.yml",
+      "sha256": "968ce86f2674f34420dc77f63e71cd2992ced77933eb4260792c7aa9bd797032"
+    },
+    {
+      "bytes": 3131,
+      "path": "snapshot/docs/ci/CHANGELOG_POLICY.yml",
+      "sha256": "49e8d1303c2d280db4060759773c870e91fb806bae663042d372c5dd6de93377"
+    },
+    {
+      "bytes": 2689,
+      "path": "snapshot/docs/ci/DEPENDENCY_AUDIT_POLICY.yml",
+      "sha256": "4edd6616e88cc519caa4e51a8b3bbce7b6f0b7a9f01fd7be4ef96eebbb752220"
+    },
+    {
+      "bytes": 5029,
+      "path": "snapshot/docs/ci/ERROR_BUDGET_POLICY.yml",
+      "sha256": "33d3f518a2cfd2b90733ae403a7a03244bf9909ead0d9d88d9262880250db32d"
+    },
+    {
+      "bytes": 2511,
+      "path": "snapshot/docs/ci/ONCALL_HANDOFF_POLICY.yml",
+      "sha256": "39e63c8a6a414bd05f402763f588d62351555c63370e0ff0d11469c67eb9d678"
+    },
+    {
+      "bytes": 7576,
+      "path": "snapshot/docs/ci/PAGES_PUBLISH_ALLOWLIST.md",
+      "sha256": "b547b2792bc0a3357d58de80de3be865700ab8b03f965488eb55a12f51195a8d"
+    },
+    {
+      "bytes": 5721,
+      "path": "snapshot/docs/ci/REDACTION_POLICY.yml",
+      "sha256": "01cb561f43cb52daa2b521f7f334f3d7f894a9821d5a49e6c45ed69539f2bedd"
+    },
+    {
+      "bytes": 3198,
+      "path": "snapshot/docs/ci/REDACTION_TREND_ALERT_POLICY.yml",
+      "sha256": "b14bd793a9b4553862f8ed67925c2cc916c73068b84ccdd37f54974209f5c23f"
+    },
+    {
+      "bytes": 2801,
+      "path": "snapshot/docs/ci/RELEASE_OPS_SLO_POLICY.yml",
+      "sha256": "716b870f8f77383869286cea841e3f9092148a698ba3160c1ec880f0ef1a0695"
+    },
+    {
+      "bytes": 9436,
+      "path": "snapshot/docs/ci/REMEDIATION_PLAYBOOKS.yml",
+      "sha256": "6927ef6b64331bac755039e347ea415cdd69560e354a09a0a25313ce974d8371"
+    },
+    {
+      "bytes": 2523,
+      "path": "snapshot/docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml",
+      "sha256": "4868bc705a15ab5598a7eb27042810d47ba8e27e4402d34c6aa5ba73281c2254"
+    },
+    {
+      "bytes": 7676,
+      "path": "snapshot/docs/ci/REQUIRED_CHECKS_POLICY.yml",
+      "sha256": "3ffcf2bf86db676fc1551ab930cd25b923681c4408ac3d239627f06a0a3485d2"
+    },
+    {
+      "bytes": 1747,
+      "path": "snapshot/docs/ci/TEST_QUARANTINE_POLICY.yml",
+      "sha256": "8e65a397b252f3442349420f88857c545a160f675c8b974a029ba23ab3d658f8"
+    },
+    {
+      "bytes": 4452,
+      "path": "snapshot/docs/ci/TRIAGE_ROUTING_POLICY.yml",
+      "sha256": "9e9ea51a00f60f9f677c64227910272d0b58b46edefecbf0f726a0bcdcce096b"
+    },
+    {
+      "bytes": 2790,
+      "path": "snapshot/docs/ci/TYPE_SAFETY_POLICY.yml",
+      "sha256": "652639f5554a68e0724d6d822e00ea7f6847874279997a7f87ef98ede03ad498"
+    },
+    {
+      "bytes": 105,
+      "path": "snapshot/docs/releases/_state/error_budget_state.json",
+      "sha256": "f29d395fa2a2ebd3dfbdb235192e34cf4a582a9e7a293805f4baa99efe8f6ea4"
+    },
+    {
+      "bytes": 237,
+      "path": "snapshot/docs/releases/_state/freeze_mode.json",
+      "sha256": "aa125bb48a6273974b4970e1e24a40b8baee46bd5aff10cd17bc68bf60c5e163"
+    },
+    {
+      "bytes": 195,
+      "path": "snapshot/docs/releases/_state/governance_tight_mode.json",
+      "sha256": "bc2436200a02f4f3940142c891355a052be1f7933f6aaaf1014358c4fe5d9780"
+    },
+    {
+      "bytes": 269,
+      "path": "snapshot/docs/releases/_state/release_override.json",
+      "sha256": "23d3bee454511765378a29c9ee6d4c62336262313c3efb50dd9dcc3ab2065105"
+    }
+  ],
+  "generated_at_utc": "2026-01-08T21:40:16Z",
+  "generator": "generate_governance_lockfile.sh v1.0.0",
+  "schema_version": "1.0.0",
+  "sha": "9ed06ffd41937de92865e0f90079f69dd5db84e7",
+  "summary": {
+    "missing_files": 0,
+    "policy_files": 16,
+    "state_files": 4,
+    "total_files": 20
+  },
+  "tag": null,
+  "version": "1.0"
+}

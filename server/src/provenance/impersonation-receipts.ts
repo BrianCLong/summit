@@ -70,6 +70,9 @@ export async function recordImpersonationReceipt(params: {
     actorId: params.actor.id,
     actorType: 'user',
     payload: {
+      mutationType: params.action === 'start' ? 'CREATE' : 'UPDATE',
+      entityId: params.sessionId,
+      entityType: 'SupportImpersonationSession',
       ...inputPayload,
     },
     metadata: {
@@ -96,7 +99,7 @@ export async function recordImpersonationReceipt(params: {
     policy: {
       id: params.policy.id,
       decisionId: params.policy.decisionId,
-      outcome: params.policy.allow ? 'ALLOW' : 'DENY',
+      outcome: params.policy.allow ? 'ALLOW' as const : 'DENY' as const,
     },
     provenanceEntryId: entry.id,
     signer: { kid: signerInfo.kid, alg: signerInfo.alg },

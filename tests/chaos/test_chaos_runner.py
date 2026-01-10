@@ -8,8 +8,8 @@ import pytest
 
 sys.path.append(str(Path(__file__).resolve().parents[2]))
 
-from non_functional_targets.chaos_runner import ChaosRunner, run_pod_kill_chaos_test  # noqa: E402
-from ops import chaos_hooks  # noqa: E402
+from non_functional_targets.chaos_runner import ChaosRunner, run_pod_kill_chaos_test
+from ops import chaos_hooks
 
 
 class _StubHookResult(chaos_hooks.HookExecutionResult):

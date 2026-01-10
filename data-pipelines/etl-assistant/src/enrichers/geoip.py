@@ -1,7 +1,7 @@
 """GeoIP enricher for IP address geolocation."""
 
 import re
-from typing import Any, Dict, Optional
+from typing import Any
 
 from .base import BaseEnricher, EnricherResult, EnrichmentContext
 
@@ -23,25 +23,25 @@ class GeoIPEnricher(BaseEnricher):
 
     # IP address pattern
     IP_PATTERN = re.compile(
-        r'\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}'
-        r'(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b'
+        r"\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}"
+        r"(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b"
     )
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         super().__init__(config)
-        self.enabled = self.config.get('enabled', True)
-        self.max_latency_ms = self.config.get('max_latency_ms', 10)
+        self.enabled = self.config.get("enabled", True)
+        self.max_latency_ms = self.config.get("max_latency_ms", 10)
 
-    def can_enrich(self, data: Dict[str, Any]) -> bool:
+    def can_enrich(self, data: dict[str, Any]) -> bool:
         """Check if data contains IP addresses."""
         if not self.enabled:
             return False
 
         # Check for common IP address fields
-        ip_fields = ['ip', 'ip_address', 'source_ip', 'dest_ip', 'client_ip', 'server_ip']
+        ip_fields = ["ip", "ip_address", "source_ip", "dest_ip", "client_ip", "server_ip"]
 
         for field in ip_fields:
-            if field in data and data[field]:
+            if data.get(field):
                 return True
 
         # Check all string values for IP patterns
@@ -51,7 +51,7 @@ class GeoIPEnricher(BaseEnricher):
 
         return False
 
-    def enrich(self, data: Dict[str, Any], context: EnrichmentContext) -> EnricherResult:
+    def enrich(self, data: dict[str, Any], context: EnrichmentContext) -> EnricherResult:
         """Enrich IP addresses with geo data."""
         result = EnricherResult(success=True)
 
@@ -74,29 +74,29 @@ class GeoIPEnricher(BaseEnricher):
                 result.metadata[f"{field_name}_original"] = ip_address
 
             except Exception as e:
-                result.add_warning(f"Failed to enrich {field_name}: {str(e)}")
+                result.add_warning(f"Failed to enrich {field_name}: {e!s}")
 
         # Add geo data to result
-        result.add_enrichment('geo', geo_data)
+        result.add_enrichment("geo", geo_data)
 
         return result
 
-    def _extract_ip_addresses(self, data: Dict[str, Any]) -> Dict[str, str]:
+    def _extract_ip_addresses(self, data: dict[str, Any]) -> dict[str, str]:
         """Extract IP addresses from data."""
         ip_addresses = {}
 
         # Common IP field names
-        ip_fields = ['ip', 'ip_address', 'source_ip', 'dest_ip', 'client_ip', 'server_ip']
+        ip_fields = ["ip", "ip_address", "source_ip", "dest_ip", "client_ip", "server_ip"]
 
         for field in ip_fields:
-            if field in data and data[field]:
+            if data.get(field):
                 value = str(data[field])
                 if self.IP_PATTERN.match(value):
                     ip_addresses[field] = value
 
         return ip_addresses
 
-    def _lookup_geoip(self, ip_address: str) -> Dict[str, Any]:
+    def _lookup_geoip(self, ip_address: str) -> dict[str, Any]:
         """
         Lookup geographical information for an IP address.
 
@@ -104,7 +104,7 @@ class GeoIPEnricher(BaseEnricher):
         In production, use MaxMind GeoIP2, IP2Location, or similar service.
         """
         # For now, return dummy data based on IP range
-        octets = [int(x) for x in ip_address.split('.')]
+        octets = [int(x) for x in ip_address.split(".")]
         first_octet = octets[0]
 
         # Dummy data generation based on first octet
@@ -130,14 +130,14 @@ class GeoIPEnricher(BaseEnricher):
             timezone = "Europe/Berlin"
 
         return {
-            'ip': ip_address,
-            'country_code': country,
-            'city': city,
-            'latitude': lat,
-            'longitude': lon,
-            'timezone': timezone,
-            'asn': 'AS15169',  # Dummy ASN
-            'asn_org': 'Example ISP',
-            'is_stub': True,  # Mark as stub data
-            'enricher': 'geoip-stub-v1',
+            "ip": ip_address,
+            "country_code": country,
+            "city": city,
+            "latitude": lat,
+            "longitude": lon,
+            "timezone": timezone,
+            "asn": "AS15169",  # Dummy ASN
+            "asn_org": "Example ISP",
+            "is_stub": True,  # Mark as stub data
+            "enricher": "geoip-stub-v1",
         }

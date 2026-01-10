@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 import json
 import math
+from collections.abc import Iterable, Sequence
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Iterable, List, Sequence
 
 from .models import (
     AutoscalingPlan,
@@ -40,15 +40,15 @@ class PlannerConfig:
 @dataclass(frozen=True)
 class PlanningRequest:
     endpoints: Sequence[EndpointState]
-    metadata: Dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
 class PlanningResult:
     summary: PlanningSummary
-    metadata: Dict[str, object]
+    metadata: dict[str, object]
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "summary": {
                 "total_baseline_cost": self.summary.total_baseline_cost(),
@@ -100,10 +100,10 @@ class PlanningResult:
     def to_json(self, indent: int = 2) -> str:
         return json.dumps(self.to_dict(), indent=indent, sort_keys=True if indent else False)
 
-    def hpa_specs(self) -> List[Dict[str, object]]:
+    def hpa_specs(self) -> list[dict[str, object]]:
         return self.summary.hpa_specs()
 
-    def quantization_recipes(self) -> List[Dict[str, object]]:
+    def quantization_recipes(self) -> list[dict[str, object]]:
         return self.summary.quantization_recipes()
 
 
@@ -118,7 +118,7 @@ class Planner:
         if self.config.deterministic:
             endpoints.sort(key=lambda e: (e.model, e.endpoint))
 
-        planned_endpoints: List[EndpointPlan] = []
+        planned_endpoints: list[EndpointPlan] = []
         for endpoint in endpoints:
             choice = self._choose_quantization(endpoint)
             autoscaling = self._build_autoscaling(endpoint, choice)
@@ -142,17 +142,23 @@ class Planner:
         }
         return PlanningResult(summary=summary, metadata=metadata)
 
-    def simulate(self, request: PlanningRequest, load_multipliers: Iterable[float]) -> Dict[str, List[Dict[str, float]]]:
+    def simulate(
+        self, request: PlanningRequest, load_multipliers: Iterable[float]
+    ) -> dict[str, list[dict[str, float]]]:
         result = self.plan(request)
-        simulations: Dict[str, List[Dict[str, float]]] = {}
+        simulations: dict[str, list[dict[str, float]]] = {}
         for plan in result.summary.plans:
             endpoint_key = f"{plan.endpoint.model}:{plan.endpoint.endpoint}"
-            series: List[Dict[str, float]] = []
+            series: list[dict[str, float]] = []
             for multiplier in load_multipliers:
                 simulated_qps = plan.endpoint.projected_qps * multiplier
-                effective_capacity = plan.quantization.qps_capacity * plan.autoscaling.target_replicas
+                effective_capacity = (
+                    plan.quantization.qps_capacity * plan.autoscaling.target_replicas
+                )
                 utilization = simulated_qps / effective_capacity if effective_capacity else 0
-                latency = plan.quantization.latency_ms * min(utilization / self.config.target_utilization, 1)
+                latency = plan.quantization.latency_ms * min(
+                    utilization / self.config.target_utilization, 1
+                )
                 series.append(
                     {
                         "load_multiplier": multiplier,
@@ -194,9 +200,13 @@ class Planner:
         assert best_choice is not None
         return best_choice
 
-    def _build_autoscaling(self, endpoint: EndpointState, choice: QuantizationChoice) -> AutoscalingPlan:
+    def _build_autoscaling(
+        self, endpoint: EndpointState, choice: QuantizationChoice
+    ) -> AutoscalingPlan:
         replicas_needed = self._replicas_needed(endpoint.projected_qps, choice.qps_capacity)
-        min_replicas = max(self.config.min_replicas_floor, min(replicas_needed, endpoint.baseline_replicas))
+        min_replicas = max(
+            self.config.min_replicas_floor, min(replicas_needed, endpoint.baseline_replicas)
+        )
         max_replicas = max(min_replicas, int(math.ceil(replicas_needed * self.config.scale_buffer)))
         return AutoscalingPlan(
             min_replicas=min_replicas,
@@ -225,7 +235,7 @@ class Planner:
         return PlanningRequest(endpoints=endpoints, metadata=metadata)
 
 
-def _parse_endpoint(payload: Dict[str, object]) -> EndpointState:
+def _parse_endpoint(payload: dict[str, object]) -> EndpointState:
     options = [
         QuantizationOption(
             name=opt["name"],
@@ -251,4 +261,3 @@ def _parse_endpoint(payload: Dict[str, object]) -> EndpointState:
         quantization_options=options,
         metadata={str(k): str(v) for k, v in payload.get("metadata", {}).items()},
     )
-

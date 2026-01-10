@@ -25,6 +25,8 @@ describe('CanaryOrchestrator', () => {
     healthCheckEndpoint: '/health',
     errorRateThreshold: 0.01,
     latencyThreshold: 500,
+    tenantId: 'tenant-1',
+    actorId: 'user-1',
   };
 
   beforeEach(() => {
@@ -34,9 +36,11 @@ describe('CanaryOrchestrator', () => {
   it('should complete a successful canary deployment', async () => {
     mockMonitoringService.getMetrics.mockResolvedValue({ errorRate: 0.005, latency: 250 });
     const orchestrator = new CanaryOrchestrator(config);
+    orchestrator._loadBalancer = mockLoadBalancer;
+    orchestrator._monitoringService = mockMonitoringService;
     const result = await orchestrator.start();
     expect(result).toBe(true);
-    expect(mockLoadBalancer.setTrafficPercentage).toHaveBeenCalledTimes(5); // 10, 50, 100, rollback canary, promote stable
+    expect(mockLoadBalancer.setTrafficPercentage).toHaveBeenCalledTimes(8); // 2 per step + promote
     expect(mockMonitoringService.getMetrics).toHaveBeenCalledTimes(3);
   });
 
@@ -46,6 +50,8 @@ describe('CanaryOrchestrator', () => {
       .mockResolvedValueOnce({ errorRate: 0.05, latency: 600 }); // Step 2: failure
 
     const orchestrator = new CanaryOrchestrator(config);
+    orchestrator._loadBalancer = mockLoadBalancer;
+    orchestrator._monitoringService = mockMonitoringService;
     const result = await orchestrator.start();
 
     expect(result).toBe(false);

@@ -91,6 +91,7 @@ class OSINTEnrichmentRequest(BaseModel):
     ip: str
     actor_name: str
 
+
 # --- Mining Schemas ---
 class MiningRequest(BaseModel):
     text: str

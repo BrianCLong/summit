@@ -12,7 +12,7 @@ import shutil
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ class AirgapSyncAgent:
 
         logger.info(f"Airgap sync agent {config.agent_id} initialized")
 
-    def export_model(self, model_data: Dict[str, Any], round_number: int) -> str:
+    def export_model(self, model_data: dict[str, Any], round_number: int) -> str:
         """Export model for transfer to air-gapped nodes"""
         export_file = Path(self.config.export_path) / f"model_round_{round_number}.pkl"
 
@@ -68,7 +68,7 @@ class AirgapSyncAgent:
         logger.info(f"Exported model round {round_number} to {export_file}")
         return str(export_file)
 
-    def import_updates(self, round_number: int) -> List[Dict[str, Any]]:
+    def import_updates(self, round_number: int) -> list[dict[str, Any]]:
         """Import updates from air-gapped nodes"""
         import_path = Path(self.config.import_path)
         updates = []
@@ -121,15 +121,12 @@ class AirgapSyncAgent:
         if manifest.exists():
             shutil.move(str(manifest), str(archive_dest.with_suffix(".manifest.json")))
 
-    def get_pending_imports(self) -> List[str]:
+    def get_pending_imports(self) -> list[str]:
         """List pending import files"""
         import_path = Path(self.config.import_path)
-        return [
-            f.name for f in import_path.glob("*.pkl")
-            if str(f) not in self._processed_files
-        ]
+        return [f.name for f in import_path.glob("*.pkl") if str(f) not in self._processed_files]
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get sync agent status"""
         return {
             "agent_id": self.config.agent_id,

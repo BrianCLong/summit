@@ -650,7 +650,7 @@ export class AnomalyDetectionService {
     sensitivityMultiplier: number
   ): number {
     // Base confidence on statistical significance (z-score)
-    let confidence = Math.min(1.0, analysis.zScore / 3); // 3 z-scores = 100% confidence
+    let confidence = Math.min(1.0, (analysis.zScore ?? 0) / 3); // 3 z-scores = 100% confidence
 
     // Boost confidence with larger historical datasets
     const dataConfidence = Math.min(0.3, Math.log10(Math.max(1, historicalDataSize)) / 10);

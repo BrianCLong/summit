@@ -51,8 +51,8 @@ describe('StripeWebhook', () => {
     expect(calls).toEqual([
       'paid:order123',
       'issue:order123-ent',
-      'revoke:order123-ent',
       'revoked:order123-ent',
+      'revoke:order123-ent',
     ]);
   });
 });

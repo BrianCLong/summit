@@ -105,6 +105,23 @@ export const pricingReadLatencyMs = new client.Histogram({
   buckets: [5, 10, 25, 50, 100, 250, 500, 1000, 2000, 5000],
 });
 
+export const capacityReservationsCounter = new client.Counter({
+  name: 'capacity_reservations_total',
+  help: 'Total capacity reservation actions',
+  labelNames: ['action', 'status'],
+});
+
+export const capacityReserveLatencyMs = new client.Histogram({
+  name: 'capacity_reserve_latency_ms',
+  help: 'Latency of capacity reservation requests in milliseconds',
+  buckets: [5, 10, 25, 50, 100, 250, 500, 1000, 2000, 5000],
+});
+
+export const capacityActiveReservationsGauge = new client.Gauge({
+  name: 'capacity_active_reservations',
+  help: 'Number of active capacity reservations',
+});
+
 // Register all conductor metrics with the main registry
 [
   conductorRouterDecisionsTotal,
@@ -123,6 +140,9 @@ export const pricingReadLatencyMs = new client.Histogram({
   conductorTaskTimeoutTotal,
   pricingReadRequestsTotal,
   pricingReadLatencyMs,
+  capacityReservationsCounter,
+  capacityReserveLatencyMs,
+  capacityActiveReservationsGauge,
 ].forEach((metric) => register.registerMetric(metric));
 
 // Helper functions to work with confidence buckets

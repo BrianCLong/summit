@@ -3,8 +3,9 @@ from __future__ import annotations
 import base64
 import json
 import time
+from collections.abc import MutableMapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Dict, MutableMapping, Optional, Sequence
+from typing import Any
 
 import requests
 from nacl.exceptions import BadSignatureError
@@ -19,7 +20,7 @@ class TokenClaims:
     aud: str
     backend: str
     key_id: str
-    policy_claims: Dict[str, Any]
+    policy_claims: dict[str, Any]
     exp: int
     iat: int
     jti: str
@@ -28,18 +29,18 @@ class TokenClaims:
 class KkpClient:
     """HTTP helper for talking to the Keyless KMS Proxy."""
 
-    def __init__(self, base_url: str, session: Optional[requests.Session] = None) -> None:
-        self.base_url = base_url.rstrip('/')
+    def __init__(self, base_url: str, session: requests.Session | None = None) -> None:
+        self.base_url = base_url.rstrip("/")
         self.session = session or requests.Session()
 
-    def issue_token(self, payload: MutableMapping[str, Any]) -> Dict[str, Any]:
-        response = self.session.post(
-            f"{self.base_url}/token", json=payload, timeout=10
-        )
+    def issue_token(self, payload: MutableMapping[str, Any]) -> dict[str, Any]:
+        response = self.session.post(f"{self.base_url}/token", json=payload, timeout=10)
         response.raise_for_status()
         return response.json()
 
-    def decrypt(self, envelope: Dict[str, Any], token: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def decrypt(
+        self, envelope: dict[str, Any], token: str, context: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         response = self.session.post(
             f"{self.base_url}/envelope/decrypt",
             json={"envelope": envelope, "token": token, "context": context or {}},
@@ -48,7 +49,7 @@ class KkpClient:
         response.raise_for_status()
         return response.json()
 
-    def fetch_jwks(self) -> Sequence[Dict[str, str]]:
+    def fetch_jwks(self) -> Sequence[dict[str, str]]:
         response = self.session.get(f"{self.base_url}/keys/jwks", timeout=10)
         response.raise_for_status()
         data = response.json()
@@ -56,15 +57,15 @@ class KkpClient:
 
 
 def _b64url_decode(segment: str) -> bytes:
-    padding = '=' * ((4 - len(segment) % 4) % 4)
+    padding = "=" * ((4 - len(segment) % 4) % 4)
     return base64.urlsafe_b64decode(segment + padding)
 
 
-def verify_token(token: str, keys: Sequence[Dict[str, str]]) -> TokenClaims:
+def verify_token(token: str, keys: Sequence[dict[str, str]]) -> TokenClaims:
     """Verify an Ed25519 token using JWKS and return its claims."""
 
     try:
-        header_b64, payload_b64, signature_b64 = token.split('.')
+        header_b64, payload_b64, signature_b64 = token.split(".")
     except ValueError as exc:  # pragma: no cover - defensive
         raise ValueError("token format invalid") from exc
 
@@ -82,7 +83,7 @@ def verify_token(token: str, keys: Sequence[Dict[str, str]]) -> TokenClaims:
     public_key = _b64url_decode(jwk["x"])
     verify_key = VerifyKey(public_key)
 
-    message = f"{header_b64}.{payload_b64}".encode("utf-8")
+    message = f"{header_b64}.{payload_b64}".encode()
     signature = _b64url_decode(signature_b64)
 
     try:

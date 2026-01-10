@@ -1,30 +1,26 @@
 import { IncidentManager } from '../../../lib/deployment/incident-manager';
 
-// Mock dependencies
-jest.mock('../../../lib/deployment/incident-manager', () => {
-  const originalModule = jest.requireActual('../../../lib/deployment/incident-manager');
-  return {
-    ...originalModule,
-    mockAlertingSystem: {
-      getAlerts: jest.fn(),
-    },
-    mockPagerDutyClient: {
-      triggerIncident: jest.fn(),
-    },
-    mockSlackClient: {
-      sendMessage: jest.fn(),
-    },
-  };
-});
-
-const { mockAlertingSystem, mockPagerDutyClient, mockSlackClient } = jest.requireMock('../../../lib/deployment/incident-manager');
-
 describe('IncidentManager', () => {
+  const mockAlertingSystem = {
+    getAlerts: jest.fn(),
+  };
+  const mockPagerDutyClient = {
+    triggerIncident: jest.fn(),
+  };
+  const mockSlackClient = {
+    sendMessage: jest.fn(),
+  };
+
   const config = {
     escalationPolicy: {
       critical: { notify: ['pagerduty'], runbook: 'restart-database' },
     },
     slackChannel: 'test-alerts',
+    enablePolling: false,
+    alertingSystem: mockAlertingSystem,
+    pagerDutyClient: mockPagerDutyClient,
+    slackClient: mockSlackClient,
+    runbookDelayMs: 1,
   };
 
   beforeEach(() => {

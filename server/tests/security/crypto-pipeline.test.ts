@@ -6,7 +6,7 @@ import {
   CryptoPipeline,
   InMemoryKeyStore,
   type KeyVersion,
-} from '../src/security/crypto/index.js';
+} from '../../src/security/crypto/index.js';
 
 type AlgorithmCase = {
   algorithm: KeyVersion['algorithm'];

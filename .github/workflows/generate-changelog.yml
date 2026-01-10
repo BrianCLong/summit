@@ -1,0 +1,163 @@
+name: Generate Changelog
+
+# AUTOMATIC CHANGELOG GENERATION
+# Generates changelogs from commits between releases using
+# conventional commit format.
+#
+# See docs/ci/CHANGELOG_GENERATOR.md for full documentation.
+
+on:
+  # Generate on new tags
+  push:
+    tags:
+      - "v*"
+
+  # Generate on release
+  release:
+    types: [created, published]
+
+  # Manual generation
+  workflow_dispatch:
+    inputs:
+      from_ref:
+        description: "Start ref (tag or commit)"
+        type: string
+        required: false
+      to_ref:
+        description: "End ref (tag or commit, default: HEAD)"
+        type: string
+        default: "HEAD"
+      prepend:
+        description: "Prepend to CHANGELOG.md"
+        type: boolean
+        default: false
+      dry_run:
+        description: "Dry run (show without writing)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  generate-changelog:
+    name: Generate Changelog
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # Full history needed for tag comparison
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine Refs
+        id: refs
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            # Tag push - use the tag
+            TO_REF="${{ github.ref_name }}"
+            # Get previous tag
+            FROM_REF=$(git describe --tags --abbrev=0 "$TO_REF^" 2>/dev/null || echo "")
+          elif [[ "${{ github.event_name }}" == "release" ]]; then
+            # Release - use release tag
+            TO_REF="${{ github.event.release.tag_name }}"
+            FROM_REF=$(git describe --tags --abbrev=0 "$TO_REF^" 2>/dev/null || echo "")
+          else
+            # Manual dispatch
+            TO_REF="${{ inputs.to_ref }}"
+            FROM_REF="${{ inputs.from_ref }}"
+          fi
+
+          echo "from_ref=$FROM_REF" >> $GITHUB_OUTPUT
+          echo "to_ref=$TO_REF" >> $GITHUB_OUTPUT
+
+          echo "From: $FROM_REF"
+          echo "To: $TO_REF"
+
+      - name: Generate Changelog
+        id: changelog
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/release/generate_changelog.sh
+
+          ARGS=""
+          ARGS="$ARGS --policy docs/ci/CHANGELOG_POLICY.yml"
+
+          if [[ -n "${{ steps.refs.outputs.from_ref }}" ]]; then
+            ARGS="$ARGS --from ${{ steps.refs.outputs.from_ref }}"
+          fi
+
+          ARGS="$ARGS --to ${{ steps.refs.outputs.to_ref }}"
+
+          if [[ "${{ inputs.prepend }}" == "true" ]]; then
+            ARGS="$ARGS --prepend"
+          fi
+
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            ARGS="$ARGS --dry-run"
+          fi
+
+          ./scripts/release/generate_changelog.sh $ARGS
+
+      - name: Check for Changes
+        id: check_changes
+        if: inputs.dry_run != true
+        run: |
+          if git diff --quiet CHANGELOG.md docs/releases/_state/changelog_state.json 2>/dev/null; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit Changelog
+        if: steps.check_changes.outputs.changed == 'true' && inputs.dry_run != true && inputs.prepend == true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add CHANGELOG.md docs/releases/_state/changelog_state.json
+
+          git commit -m "docs(changelog): update for ${{ steps.refs.outputs.to_ref }}
+
+          Automated changelog generation.
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          [skip ci]"
+
+          git push
+
+      - name: Upload Release Notes Artifact
+        if: inputs.dry_run != true
+        uses: actions/upload-artifact@v6
+        with:
+          name: release-notes-${{ github.run_id }}
+          path: artifacts/release-train/release-notes.md
+          retention-days: 90
+          if-no-files-found: ignore
+
+      - name: Update Release Notes
+        if: github.event_name == 'release' && inputs.dry_run != true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [[ -f artifacts/release-train/release-notes.md ]]; then
+            # Append generated notes to release body
+            NOTES=$(cat artifacts/release-train/release-notes.md)
+            gh release edit "${{ github.event.release.tag_name }}" \
+              --notes "$NOTES" \
+              --repo "${{ github.repository }}" || true
+          fi
+
+      - name: Job Summary
+        run: |
+          echo "### Changelog Generated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**From:** \`${{ steps.refs.outputs.from_ref }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**To:** \`${{ steps.refs.outputs.to_ref }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ -f artifacts/release-train/release-notes.md ]]; then
+            echo "---" >> $GITHUB_STEP_SUMMARY
+            cat artifacts/release-train/release-notes.md >> $GITHUB_STEP_SUMMARY
+          fi

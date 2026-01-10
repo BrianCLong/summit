@@ -1,14 +1,14 @@
 import secrets
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from .models import RunState
 
 
-def build_preconditions(spec: Dict[str, Any]) -> Dict[str, Any]:
+def build_preconditions(spec: dict[str, Any]) -> dict[str, Any]:
     required = ["legal_basis", "license_scope", "data_availability"]
     preconditions = {}
-    missing: List[str] = []
+    missing: list[str] = []
     for key in required:
         value = spec.get("preconditions", {}).get(key)
         preconditions[key] = value
@@ -19,7 +19,7 @@ def build_preconditions(spec: Dict[str, Any]) -> Dict[str, Any]:
     return preconditions
 
 
-def build_postconditions(state: RunState, spec: Dict[str, Any]) -> Dict[str, Any]:
+def build_postconditions(state: RunState, spec: dict[str, Any]) -> dict[str, Any]:
     kpis = spec.get("postconditions", {}).get("kpis", [])
     step_results = []
     for kpi in kpis:
@@ -51,7 +51,7 @@ def build_postconditions(state: RunState, spec: Dict[str, Any]) -> Dict[str, Any
     return {"kpis": step_results, "status": status}
 
 
-def emit_proof_bundle(state: RunState, spec: Dict[str, Any], proofs_dir: Path):
+def emit_proof_bundle(state: RunState, spec: dict[str, Any], proofs_dir: Path):
     proofs_dir.mkdir(parents=True, exist_ok=True)
     preconditions = build_preconditions(spec)
     postconditions = build_postconditions(state, spec)
@@ -73,7 +73,7 @@ def emit_proof_bundle(state: RunState, spec: Dict[str, Any], proofs_dir: Path):
     return path, bundle
 
 
-def json_dumps(data: Dict[str, Any]) -> str:
+def json_dumps(data: dict[str, Any]) -> str:
     try:
         import json
 
