@@ -50,6 +50,7 @@ const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
 // const OnboardingWizard = React.lazy(() => import('@/pages/Onboarding/OnboardingWizard').then(module => ({ default: module.OnboardingWizard })))
 const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboard'))
 const TrustDashboard = React.lazy(() => import('@/pages/TrustDashboard'))
+const OrchestrationRunPage = React.lazy(() => import('@/pages/orchestration/OrchestrationRunPage'))
 
 // Workbench
 import { WorkbenchShell } from '@/workbench/shell/WorkbenchLayout'
@@ -179,6 +180,10 @@ function App() {
                         element={<InternalCommandDashboard />}
                       />
                       <Route path="mission-control" element={<MissionControlPage />} />
+                      <Route
+                        path="orchestration/runs/:id"
+                        element={<OrchestrationRunPage />}
+                      />
 
                       {/* Data & Models */}
                       <Route

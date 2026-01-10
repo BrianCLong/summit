@@ -67,6 +67,7 @@ import { oracleRouter } from './routes/oracle.js';
 import { phantomLimbRouter } from './routes/phantom_limb.js';
 import { actionsRouter } from './routes/actions.js';
 import { echelon2Router } from './routes/echelon2.js';
+import orchestrationRouter from './routes/orchestration.js';
 import { mnemosyneRouter } from './routes/mnemosyne.js';
 import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
@@ -406,6 +407,7 @@ export const createApp = async () => {
   app.use('/api/maestro', maestroRouter);
   app.use('/api/tenants', tenantsRouter);
   app.use('/api/actions', actionsRouter);
+  app.use('/api/orchestration', orchestrationRouter);
   app.use('/api/osint', osintRouter);
   app.use('/api/edge', edgeOpsRouter);
   app.use('/api/meta-orchestrator', metaOrchestratorRouter);

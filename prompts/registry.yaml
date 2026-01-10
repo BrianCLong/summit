@@ -28,3 +28,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: orchestration-control-plane-finish
+    version: v1
+    path: prompts/tasks/orchestration-control-plane-finish.md
+    sha256: 781f7b6ec68dc551083a64e718403a2e5b9baa708d3abd102dd6d467fa246447
+    description: Harden orchestration control plane run tracing, approvals resume, and UI provenance visibility.
+    scope:
+      paths:
+        - packages/orchestration/
+        - server/src/routes/orchestration.ts
+        - apps/web/src/pages/orchestration/
+        - docs/orchestration/
+        - docs/roadmap/STATUS.json
+        - prompts/tasks/orchestration-control-plane-finish.md
+        - prompts/registry.yaml
+        - agents/examples/ORCH_CONTROL_PLANE_20260104.json
+      domains:
+        - orchestration
+        - governance
+        - ui
+        - api
+        - docs
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
