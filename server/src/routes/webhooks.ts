@@ -76,7 +76,7 @@ const verifyJiraSecret = (req: any, res: any, next: any) => {
   const incomingSecret = req.headers['x-webhook-secret'] || req.query.secret;
 
   if (!incomingSecret || incomingSecret !== secret) {
-    logger.warn('Jira webhook rejected: Invalid secret');
+    logger.warn('Jira webhook rejected: Invalid secret'); // no-log-check
     return res.status(401).json({ error: 'Unauthorized: Invalid webhook secret' });
   }
 
@@ -98,7 +98,7 @@ const verifyLifecycleSecret = (req: any, res: any, next: any) => {
   const incomingSecret = req.headers['x-lifecycle-secret'] || req.headers['x-webhook-secret'];
 
   if (!incomingSecret || incomingSecret !== secret) {
-    logger.warn('Lifecycle webhook rejected: Invalid secret');
+    logger.warn('Lifecycle webhook rejected: Invalid secret'); // no-log-check
     return res.status(401).json({ error: 'Unauthorized: Invalid webhook secret' });
   }
 

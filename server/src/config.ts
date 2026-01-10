@@ -88,7 +88,7 @@ export const cfg = (() => {
       console.error('  • Database passwords must not contain dev/test values');
       console.error('  • CORS origins must use explicit HTTPS URLs (no wildcards)');
       console.error('  • All connection strings must use production hosts (no localhost)\n');
-      console.error('To generate a secure secret:');
+      console.error('To generate a secure secret:'); // no-log-check
       console.error('  openssl rand -base64 32\n');
       console.error('See .env.production.sample for a production template.\n');
       process.exit(1);

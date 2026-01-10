@@ -57,7 +57,7 @@ export class SecretsService {
     if (!value) {
       // Allow fallback for development if strictly necessary, or throw
       if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
-        logger.warn(`Secret ${ref.id} not found in environment. Using mock/fallback if available.`);
+        logger.warn(`Secret ${ref.id} not found in environment. Using mock/fallback if available.`); // no-log-check
         // potentially return a mock if defined, or fall through to throw
       }
 

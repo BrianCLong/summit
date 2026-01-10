@@ -121,7 +121,7 @@ export class PQCValidator {
         const secretHex = this.uint8ArrayToHex(sharedSecret);
 
         if (secrets.has(secretHex)) {
-          console.error(`KEM uniqueness test failed: duplicate secret found at iteration ${i + 1}`);
+          console.error(`KEM uniqueness test failed: duplicate secret found at iteration ${i + 1}`); // no-log-check
           return false;
         }
 

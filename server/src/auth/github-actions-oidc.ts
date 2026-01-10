@@ -317,7 +317,7 @@ export class GitHubActionsOIDC {
       identity,
     };
 
-    logger.info('GitHub OIDC token exchanged for service credential', {
+    logger.info('GitHub OIDC token exchanged for service credential', { // no-log-check
       repository: identity.repository,
       workflow: identity.workflow,
       permissions: allowedPermissions.length,

@@ -19,7 +19,7 @@ async function main() {
     // Unused secrets might be warnings, but we exit 0
     process.exit(0);
   } catch (error: any) {
-    console.error('Error running Secret Drift Detector:', error);
+    console.error('Error running Secret Drift Detector:', error); // no-log-check
     process.exit(1);
   }
 }

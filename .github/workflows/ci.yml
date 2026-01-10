@@ -60,6 +60,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Run verification suite
         run: pnpm verify
+      - name: Logging Safety Check
+        run: node scripts/ci/check_logging_safety.mjs
       - name: Upload verification results
         if: always()
         uses: actions/upload-artifact@v6

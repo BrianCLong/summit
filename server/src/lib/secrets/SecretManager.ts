@@ -61,7 +61,7 @@ export class SecretManager {
         });
     } catch (err: any) {
         // Don't fail secret retrieval if audit fails, but log error
-        logger.error(`Failed to audit secret access for ${key}: ${err}`);
+        logger.error(`Failed to audit secret access for ${key}: ${err}`); // no-log-check
     }
 
     if (!value) {

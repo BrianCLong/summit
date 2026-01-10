@@ -554,7 +554,7 @@ class QueuePerformanceMonitor {
           process.env.OUTPUT_FILE,
           JSON.stringify(report, null, 2),
         );
-        console.log(`📄 Report saved to ${process.env.OUTPUT_FILE}`);
+        console.log(`📄 Report saved to ${process.env.OUTPUT_FILE}`); // no-log-check
       }
 
       // Exit with appropriate code

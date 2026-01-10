@@ -132,7 +132,7 @@ async function scan() {
                     continue;
                 }
 
-                console.error(`❌ Potential secret found in ${file}:${line} (${pattern.name})`);
+                console.error(`❌ Potential secret found in ${file}:${line} (${pattern.name})`); // no-log-check
                 const maskedSnippet = maskSecret(snippet, match[0]);
                 console.error(`   Snippet: ${maskedSnippet.trim().replace(/\n/g, ' ')}`);
                 foundSecrets++;

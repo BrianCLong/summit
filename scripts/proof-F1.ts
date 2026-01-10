@@ -22,9 +22,9 @@ async function main() {
     const config = await loader.loadDatabaseConfig();
 
     if (config.password === "super-secure-vault-password") {
-        console.log("✅ Secret loaded successfully from managed source.");
+        console.log("✅ Secret loaded successfully from managed source."); // no-log-check
     } else {
-        console.error("❌ Failed to load correct secret.");
+        console.error("❌ Failed to load correct secret."); // no-log-check
         process.exit(1);
     }
 

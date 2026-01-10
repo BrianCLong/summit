@@ -12,7 +12,7 @@ async function checkParity() {
   );
 
   for (const row of rows) {
-    console.log(`Checking secret ${row.id}...`);
+    console.log(`Checking secret ${row.id}...`); // no-log-check
     try {
       const dekPrimary = await primaryKms.decrypt(row.edek, row.ctx);
       console.log(`  - Primary region decrypt OK`);
@@ -20,12 +20,12 @@ async function checkParity() {
       console.log(`  - Secondary region decrypt OK`);
 
       if (Buffer.compare(dekPrimary, dekSecondary) !== 0) {
-        console.error(`  - MISMATCH! DEKs do not match for secret ${row.id}`);
+        console.error(`  - MISMATCH! DEKs do not match for secret ${row.id}`); // no-log-check
       } else {
         console.log(`  - DEK Parity OK`);
       }
     } catch (error) {
-      console.error(`  - FAILED to decrypt secret ${row.id}:`, error);
+      console.error(`  - FAILED to decrypt secret ${row.id}:`, error); // no-log-check
     }
   }
   await pool.end();

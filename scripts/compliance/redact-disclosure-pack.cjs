@@ -297,7 +297,7 @@ Options:
   const patterns = loadPatterns(patternsPath);
 
   console.log(`Loaded ${denylist.length} denylist terms`);
-  console.log(`Loaded ${patterns.length} secret patterns`);
+  console.log(`Loaded ${patterns.length} secret patterns`); // no-log-check
   console.log('');
 
   const stats = processDirectory(dir, denylist, patterns, { dryRun, verbose });

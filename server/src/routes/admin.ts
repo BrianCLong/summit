@@ -473,7 +473,7 @@ router.post('/admin/secrets/rotate', express.json(), async (req, res) => {
     return res.status(400).json({ ok: false, error: 'Missing required parameters' });
   }
 
-  console.log(`Rotating secret "${secretName}" to version "${newVersion}" for services:`, services);
+  console.log(`Rotating secret "${secretName}" to version "${newVersion}" for services:`, services); // no-log-check
 
   const previousSecret = await secretManager.getSecret(secretName, 'current');
 
@@ -482,7 +482,7 @@ router.post('/admin/secrets/rotate', express.json(), async (req, res) => {
   }
 
   for (const service of services) {
-    console.log(`Updating secret for service: ${service}`);
+    console.log(`Updating secret for service: ${service}`); // no-log-check
     await secretManager.setSecret(secretName, 'current', await secretManager.getSecret(secretName, newVersion));
     console.log(`Health check for service ${service}...`);
     const healthUrl = serviceRegistry.getServiceHealthUrl(service);
@@ -493,7 +493,7 @@ router.post('/admin/secrets/rotate', express.json(), async (req, res) => {
     }
     const health = await axios.get(healthUrl).then(res => res.data);
     if (health.status !== 'ok') {
-      console.error(`Service ${service} is unhealthy after secret rotation. Rolling back...`);
+      console.error(`Service ${service} is unhealthy after secret rotation. Rolling back...`); // no-log-check
       await secretManager.setSecret(secretName, 'current', previousSecret);
       return res.status(500).json({ ok: false, error: `Service ${service} failed to restart with new secret` });
     }

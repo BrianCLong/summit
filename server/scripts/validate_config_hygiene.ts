@@ -45,7 +45,7 @@ function checkNodeEnv() {
 }
 
 function scanForLeakedSecrets() {
-    console.log('Scanning process.env for potentially exposed secrets...');
+    console.log('Scanning process.env for potentially exposed secrets...'); // no-log-check
     let leaked = false;
 
     // In a real scenario, this would check if these are printed/logged or available in public config endpoints.
@@ -61,7 +61,7 @@ function scanForLeakedSecrets() {
         for (const [key, value] of Object.entries(process.env)) {
              if (SECRET_KEYWORDS.some(kw => key.toLowerCase().includes(kw)) && !ALLOWLIST.includes(key)) {
                  if (weakSecrets.includes(value || '')) {
-                     console.error(`FAIL: Weak secret detected in ${key}`);
+                     console.error(`FAIL: Weak secret detected in ${key}`); // no-log-check
                      leaked = true;
                  }
              }

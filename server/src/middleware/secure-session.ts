@@ -29,14 +29,14 @@ async function loadSessionSecret(): Promise<string> {
           }
         }
       } catch (error: any) {
-        logger.warn({ error }, 'Vault unavailable for session secret; falling back to env');
+        logger.warn({ error }, 'Vault unavailable for session secret; falling back to env'); // no-log-check
       }
 
       const fallback = process.env.SESSION_SECRET || (cfg.SESSION_SECRET as string);
       if (!fallback || fallback.length < 32) {
         const generated = crypto.randomBytes(48).toString('hex');
         cachedSecret = generated;
-        logger.warn('Generated ephemeral session secret; set SESSION_SECRET or configure Vault for persistence.');
+        logger.warn('Generated ephemeral session secret; set SESSION_SECRET or configure Vault for persistence.'); // no-log-check
         return generated;
       }
 

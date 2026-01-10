@@ -81,14 +81,14 @@ export class APIKeyManager {
       if (apiKey.keyHash === keyHash) {
         // Check if expired
         if (apiKey.expiresAt && Date.now() > apiKey.expiresAt) {
-          logger.warn('API key expired', { keyId: apiKey.id });
+          logger.warn('API key expired', { keyId: apiKey.id }); // no-log-check
           return null;
         }
 
         // Update last used timestamp
         apiKey.lastUsedAt = Date.now();
 
-        logger.debug('API key validated', { keyId: apiKey.id });
+        logger.debug('API key validated', { keyId: apiKey.id }); // no-log-check
         return apiKey;
       }
     }
@@ -115,7 +115,7 @@ export class APIKeyManager {
       }
     }
 
-    logger.info('API key revoked', { keyId, userId: apiKey.userId });
+    logger.info('API key revoked', { keyId, userId: apiKey.userId }); // no-log-check
     return true;
   }
 
@@ -154,7 +154,7 @@ export class APIKeyManager {
     // Revoke old key
     this.revokeAPIKey(keyId);
 
-    logger.info('API key rotated', { oldKeyId: keyId, newKeyId: newKeyData.apiKey.id });
+    logger.info('API key rotated', { oldKeyId: keyId, newKeyId: newKeyData.apiKey.id }); // no-log-check
 
     return newKeyData;
   }

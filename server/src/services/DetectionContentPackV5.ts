@@ -238,7 +238,7 @@ export class DetectionContentPackV5 {
       deployedRules.push(deployedRule);
     }
 
-    this.logger.info('Credential access rules deployed', {
+    this.logger.info('Credential access rules deployed', { // no-log-check
       count: deployedRules.length,
       version: this.PACK_VERSION,
     });

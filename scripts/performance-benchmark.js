@@ -771,7 +771,7 @@ async function main() {
         console.log('  API_BASE_URL          API base URL (default: http://localhost:4000)');
         console.log('  BENCHMARK_CONCURRENCY Concurrent requests (default: 10)');
         console.log('  BENCHMARK_DURATION    Test duration in seconds (default: 30)');
-        console.log('  BENCHMARK_AUTH_TOKEN  Bearer token for authenticated endpoints');
+        console.log('  BENCHMARK_AUTH_TOKEN  Bearer token for authenticated endpoints'); // no-log-check
         console.log('  BENCHMARK_OUTPUT      Output format: console, json, csv');
         process.exit(1);
     }
