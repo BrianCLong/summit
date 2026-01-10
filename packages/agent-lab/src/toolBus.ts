@@ -38,7 +38,15 @@ export class ToolBus {
     inputs: Record<string, unknown>,
     evidence: EvidenceStore,
     stepName: string,
-  ): Promise<{ decision: PolicyDecision; artifactId?: string; status: 'allowed' | 'denied' | 'error'; message: string }> {
+  ): Promise<{
+    decision: PolicyDecision;
+    artifactId?: string;
+    status: 'allowed' | 'denied' | 'error';
+    message: string;
+    output?: unknown;
+    stdout?: string;
+    stderr?: string;
+  }> {
     const tool = this.registry[toolName];
     if (!tool) {
       return { decision: { allowed: false, reason: 'Unknown tool', policyVersion: '1.0.0' }, status: 'denied', message: 'Tool not registered' };
@@ -48,7 +56,7 @@ export class ToolBus {
     const decision = this.policy.evaluate({ tool: toolName, target, labMode: this.options.labMode });
     if (!decision.allowed) {
       const artifact = evidence.record(stepName, tool.name, tool.version, inputs, { denied: true }, decision, decision.reason);
-      return { decision, artifactId: artifact.id, status: 'denied', message: decision.reason };
+      return { decision, artifactId: artifact.id, status: 'denied', message: decision.reason, output: { denied: true } };
     }
 
     try {
@@ -61,10 +69,25 @@ export class ToolBus {
         timeoutMs: this.options.timeoutMs ?? this.options.policyConfig.defaultTimeoutMs ?? 5000,
       });
       const artifact = evidence.record(stepName, tool.name, tool.version, inputs, result.output, decision, result.notes);
-      return { decision, artifactId: artifact.id, status: 'allowed', message: 'Completed' };
+      return {
+        decision,
+        artifactId: artifact.id,
+        status: 'allowed',
+        message: 'Completed',
+        output: result.output,
+        stdout: result.stdout,
+        stderr: result.stderr,
+      };
     } catch (err: any) {
-      const artifact = evidence.record(stepName, tool.name, tool.version, inputs, { error: err?.message ?? String(err) }, decision);
-      return { decision, artifactId: artifact.id, status: 'error', message: err?.message ?? String(err) };
+      const errorMessage = err?.message ?? String(err);
+      const artifact = evidence.record(stepName, tool.name, tool.version, inputs, { error: errorMessage }, decision);
+      return {
+        decision,
+        artifactId: artifact.id,
+        status: 'error',
+        message: errorMessage,
+        output: { error: errorMessage },
+      };
     }
   }
 }

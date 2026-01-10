@@ -1,0 +1,112 @@
+version: 0.1.0
+metadata:
+  id: docset-claim-report
+  name: Doc set summarization and claim-checked report
+  description: Multi-step doc review that summarizes, verifies claims, and produces a report with citations.
+  risk_level: low
+  tags: [summarization, verification, reporting]
+featureFlag: guidedWorkflows.enabled
+policies:
+  maxAttempts: 3
+  allowDebug: true
+  redactKeys: [secret, token]
+steps:
+  - id: collect-docs
+    title: Collect documents
+    prompt: "Provide documents or links plus context for the report audience."
+    inputSchema:
+      type: object
+      required: [audience, sources]
+      properties:
+        audience:
+          type: string
+        sources:
+          type: array
+          items:
+            type: string
+            format: uri
+        constraints:
+          type: string
+    validations:
+      - path: audience
+        rule: nonEmpty
+      - path: sources
+        rule: minItems
+        value: 1
+    tool:
+      toolId: http_head
+      inputMapping:
+        url: sources.0
+      retries: 1
+
+  - id: summarize
+    title: Summarize documents
+    prompt: "Produce concise summaries for each document and highlight open questions."
+    inputSchema:
+      type: object
+      required: [summary_style]
+      properties:
+        summary_style:
+          type: string
+        keep_quotes:
+          type: boolean
+    validations:
+      - path: summary_style
+        rule: nonEmpty
+    tool:
+      toolId: local_grep
+      inputMapping:
+        pattern: summary_style
+      retries: 1
+
+  - id: claim-check
+    title: Claim check
+    prompt: "List factual claims and mark which sources support them."
+    inputSchema:
+      type: object
+      required: [citation_policy]
+      properties:
+        citation_policy:
+          type: string
+        minimum_sources:
+          type: integer
+    validations:
+      - path: citation_policy
+        rule: nonEmpty
+      - path: minimum_sources
+        rule: min
+        value: 0
+    stopConditions:
+      - path: minimum_sources
+        equals: 0
+    tool:
+      toolId: dns_lookup
+      inputMapping:
+        domain: citation_policy
+      retries: 2
+
+  - id: report
+    title: Produce report
+    prompt: "Assemble the final report with citations, audit notes, and completion sign-off."
+    inputSchema:
+      type: object
+      required: [report_title, delivery_format]
+      properties:
+        report_title:
+          type: string
+        delivery_format:
+          type: string
+          enum: [markdown, docx, pdf]
+        include_appendix:
+          type: boolean
+    validations:
+      - path: report_title
+        rule: nonEmpty
+      - path: delivery_format
+        rule: enum
+        value: [markdown, docx, pdf]
+    tool:
+      toolId: http_head
+      inputMapping:
+        url: report_title
+      retries: 1

@@ -1,0 +1,39 @@
+{
+  "task_id": "GUIDED_WORKFLOWS_STABILIZATION_20260103",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "guided-workflows-stabilization",
+    "version": "v1",
+    "sha256": "fd1c1db56f1e1322bd801de18f1fa3d7426578611b1800e87967b384f40eabe8",
+    "path": "prompts/tasks/guided-workflows-stabilization.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/agent-lab/",
+      "ui/src/components/GuidedWorkflows.jsx",
+      "workflows/blueprints/",
+      "docs/guided-workflows.md",
+      "prompts/",
+      "agents/examples/"
+    ],
+    "domains": ["agent-lab", "guided-workflows", "ui", "governance"]
+  },
+  "allowed_operations": ["edit", "create"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "test:pnpm --filter @intelgraph/agent-lab test",
+      "check:node scripts/check-boundaries.cjs"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Guided workflow validation supports numeric and array constraints.",
+    "Tool output mapping uses tool outputs and respects fallback routing.",
+    "UI wizard validates required fields and handles array/number inputs."
+  ],
+  "stop_conditions": ["CI failure in main", "Sandbox violation alert", "PII detected in output"]
+}

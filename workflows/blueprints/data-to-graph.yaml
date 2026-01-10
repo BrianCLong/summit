@@ -1,0 +1,123 @@
+version: 0.1.0
+metadata:
+  id: data-to-graph
+  name: Data Extraction to Graph Ingest
+  description: Guided data extraction, normalization, entity resolution, and graph ingest.
+  risk_level: medium
+  tags: [extraction, normalization, entity-resolution]
+featureFlag: guidedWorkflows.enabled
+policies:
+  maxAttempts: 3
+  allowDebug: true
+  redactKeys: [password, secret, token]
+  rateLimitPerRun:
+    maxSteps: 25
+    intervalMs: 900000
+steps:
+  - id: ingest-source
+    title: Collect source material
+    prompt: "Upload or link the dataset to ingest, and describe its provenance."
+    inputSchema:
+      type: object
+      required: [source_url, format]
+      properties:
+        source_url:
+          type: string
+          format: uri
+        format:
+          type: string
+          enum: [csv, json, xlsx]
+        notes:
+          type: string
+    validations:
+      - path: format
+        rule: enum
+        value: [csv, json, xlsx]
+    tool:
+      toolId: http_head
+      inputMapping:
+        url: source_url
+      retries: 1
+      fallbackStepId: normalize-records
+
+  - id: normalize-records
+    title: Normalize schema
+    prompt: "Confirm the canonical fields and business keys to normalize extracted rows."
+    inputSchema:
+      type: object
+      required: [primary_key, columns]
+      properties:
+        primary_key:
+          type: string
+        columns:
+          type: array
+          items:
+            type: string
+        null_policy:
+          type: string
+    validations:
+      - path: primary_key
+        rule: nonEmpty
+      - path: columns
+        rule: minItems
+        value: 1
+    tool:
+      toolId: dns_lookup
+      inputMapping:
+        domain: primary_key
+      retries: 0
+
+  - id: resolve-entities
+    title: Resolve entities
+    prompt: "Confirm entity resolution rules (match keys, thresholds, and deduplication strategy)."
+    inputSchema:
+      type: object
+      required: [entity_name_field, similarity_threshold]
+      properties:
+        entity_name_field:
+          type: string
+        similarity_threshold:
+          type: number
+        blocklist:
+          type: array
+          items:
+            type: string
+    validations:
+      - path: similarity_threshold
+        rule: min
+        value: 0
+      - path: similarity_threshold
+        rule: max
+        value: 1
+    tool:
+      toolId: local_grep
+      inputMapping:
+        pattern: entity_name_field
+      retries: 2
+      fallbackStepId: graph-ingest
+
+  - id: graph-ingest
+    title: Graph ingest
+    prompt: "Send normalized entities and relationships to the graph with lineage notes."
+    inputSchema:
+      type: object
+      required: [graph_name, batch_size]
+      properties:
+        graph_name:
+          type: string
+        batch_size:
+          type: integer
+        dry_run:
+          type: boolean
+    validations:
+      - path: batch_size
+        rule: min
+        value: 1
+    stopConditions:
+      - path: dry_run
+        equals: true
+    tool:
+      toolId: http_head
+      inputMapping:
+        url: graph_name
+      retries: 1
