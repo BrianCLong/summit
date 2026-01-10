@@ -1,0 +1,28 @@
+{
+  "task_id": "GA_READINESS_STATUS_REFRESH_2026_01_10",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "runbooks-docs-update",
+    "version": "v1",
+    "sha256": "d8fa2fa89f5bb30b954a8fc1735794033cd55be52bc8aedce76dcb57948fac11",
+    "path": "prompts/docs/runbooks-update@v1.md"
+  },
+  "declared_scope": {
+    "paths": ["docs/roadmap/STATUS.json", "agents/examples/ga-readiness-status-refresh.json"],
+    "domains": ["documentation", "operations", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["check-boundaries output"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "GA blockers are enumerated in docs/roadmap/STATUS.json",
+    "Epic summary counts in docs/roadmap/STATUS.json are reconciled with listed epics"
+  ],
+  "stop_conditions": ["CI failures on main", "Sandbox violation alert", "PII detected in output"]
+}

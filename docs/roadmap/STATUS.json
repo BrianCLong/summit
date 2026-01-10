@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-09T16:00:00Z",
-  "revision_note": "Added scaffolded INSLAW/PROMIS affidavit demo artifacts for provenance-first ingestion",
+  "last_updated": "2026-01-10T12:00:00Z",
+  "revision_note": "Enumerated GA blockers and reconciled epic summary counts for release-readiness gating",
   "initiatives": [
     {
       "id": "A",
@@ -141,9 +141,19 @@
   "summary": {
     "rc_ready": 5,
     "partial": 1,
+    "in_progress": 1,
     "incomplete": 0,
     "not_started": 6,
-    "total": 12,
-    "ga_blockers": []
+    "total": 13,
+    "ga_blockers": [
+      "B1 Connector SDK & Registry (partial): connector registry + lifecycle management required",
+      "B2 RSS/Atom Connector (not-started): implementation missing",
+      "B3 STIX/TAXII Connector (not-started): implementation missing",
+      "C3 Counterfactual Context Reassembly (not-started): perturbation + divergence metrics pending",
+      "D1 KTOON core libraries (in-progress): completion required for serialization targets",
+      "E1 Research Publications (not-started): publication plan execution required",
+      "E2 Public Explainability Benchmarks (not-started): benchmark harness required",
+      "E3 Case Studies (not-started): sector case studies required"
+    ]
   }
 }
