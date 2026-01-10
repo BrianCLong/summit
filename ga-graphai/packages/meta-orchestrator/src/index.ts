@@ -173,6 +173,8 @@ export class TemplateReasoningModel implements ReasoningModel {
   }
 }
 
+export * from './intelGraphGuardrails';
+
 class ActiveRewardShaper {
   private weights: PlannerRewardWeights;
 
