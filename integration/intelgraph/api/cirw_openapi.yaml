@@ -1,0 +1,103 @@
+openapi: 3.0.3
+info:
+  title: CIRW API
+  version: 1.0.0
+paths:
+  /cirw/query:
+    post:
+      summary: Query identity clusters with confidence bounds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CirwQueryRequest'
+      responses:
+        '200':
+          description: Cluster candidates with witnesses
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CirwQueryResponse'
+  /cirw/clusters/{clusterId}:
+    get:
+      summary: Retrieve a cluster by ID
+      parameters:
+        - in: path
+          name: clusterId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cluster detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityCluster'
+  /cirw/witness/{witnessId}:
+    get:
+      summary: Fetch witness entry
+      parameters:
+        - in: path
+          name: witnessId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Witness entry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterWitness'
+components:
+  schemas:
+    CirwQueryRequest:
+      type: object
+      required: [query, minConfidence, tenantScope]
+      properties:
+        query:
+          type: object
+          description: Cluster search criteria
+        minConfidence:
+          type: number
+        tenantScope:
+          type: string
+    CirwQueryResponse:
+      type: object
+      properties:
+        clusters:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityCluster'
+        witnesses:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClusterWitness'
+    IdentityCluster:
+      type: object
+      properties:
+        clusterId:
+          type: string
+        memberHashes:
+          type: array
+          items:
+            type: string
+        confidenceInterval:
+          type: object
+        policyRef:
+          type: string
+    ClusterWitness:
+      type: object
+      properties:
+        witnessId:
+          type: string
+        supportSet:
+          type: array
+          items:
+            type: string
+        identifierCommitment:
+          type: string
+        policyRef:
+          type: string

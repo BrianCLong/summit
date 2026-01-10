@@ -1,0 +1,42 @@
+openapi: 3.0.3
+info:
+  title: SATT API
+  version: 1.0.0
+paths:
+  /satt/execute:
+    post:
+      summary: Execute attested transform template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SattRequest'
+      responses:
+        '200':
+          description: Transform output and license receipt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SattResponse'
+components:
+  schemas:
+    SattRequest:
+      type: object
+      required: [templateId, inputEntity, tenantId]
+      properties:
+        templateId:
+          type: string
+        inputEntity:
+          type: object
+        tenantId:
+          type: string
+    SattResponse:
+      type: object
+      properties:
+        output:
+          type: object
+        receiptId:
+          type: string
+        policyRef:
+          type: string

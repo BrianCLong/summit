@@ -1,0 +1,42 @@
+openapi: 3.0.3
+info:
+  title: PQLA API
+  version: 1.0.0
+paths:
+  /pqla/execute:
+    post:
+      summary: Execute policy-qualified analytics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PqlaRequest'
+      responses:
+        '200':
+          description: Analytics output and compliance artifact
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PqlaResponse'
+components:
+  schemas:
+    PqlaRequest:
+      type: object
+      required: [operation, subjectContext]
+      properties:
+        operation:
+          type: object
+        subjectContext:
+          type: object
+        disclosureConstraints:
+          type: object
+    PqlaResponse:
+      type: object
+      properties:
+        output:
+          type: object
+        complianceArtifactId:
+          type: string
+        policyRef:
+          type: string

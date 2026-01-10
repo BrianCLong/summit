@@ -1,0 +1,46 @@
+openapi: 3.0.3
+info:
+  title: QSDR API
+  version: 1.0.0
+paths:
+  /qsdr/execute:
+    post:
+      summary: Execute recon with canary targets and query-shape enforcement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QsdrRequest'
+      responses:
+        '200':
+          description: Recon output and kill audit record (if halted)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QsdrResponse'
+components:
+  schemas:
+    QsdrRequest:
+      type: object
+      required: [targets, modules, policyScope]
+      properties:
+        targets:
+          type: array
+          items:
+            type: string
+        modules:
+          type: array
+          items:
+            type: string
+        policyScope:
+          type: string
+    QsdrResponse:
+      type: object
+      properties:
+        results:
+          type: object
+        killAuditRecordId:
+          type: string
+        policyRef:
+          type: string

@@ -1,0 +1,80 @@
+openapi: 3.0.3
+info:
+  title: FASC API
+  version: 1.0.0
+paths:
+  /fasc/feeds/status:
+    post:
+      summary: Retrieve feed calibration status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FascStatusRequest'
+      responses:
+        '200':
+          description: Feed calibration status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FascStatusResponse'
+  /fasc/feeds/{feedId}/drift:
+    get:
+      summary: Retrieve drift status for a feed
+      parameters:
+        - in: path
+          name: feedId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Drift status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DriftEvent'
+components:
+  schemas:
+    FascStatusRequest:
+      type: object
+      required: [feedIds, timeWindow]
+      properties:
+        feedIds:
+          type: array
+          items:
+            type: string
+        timeWindow:
+          type: string
+    FascStatusResponse:
+      type: object
+      properties:
+        feeds:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeedScore'
+        calibrationArtifactId:
+          type: string
+    FeedScore:
+      type: object
+      properties:
+        feedId:
+          type: string
+        reliabilityScore:
+          type: number
+        weight:
+          type: number
+        policyRef:
+          type: string
+    DriftEvent:
+      type: object
+      properties:
+        feedId:
+          type: string
+        divergenceMetric:
+          type: number
+        dwellTime:
+          type: string
+        policyRef:
+          type: string
