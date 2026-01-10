@@ -1,6 +1,8 @@
 import { getFeatureFlagService } from '../services/FeatureFlagService';
 import { FlagUser } from '../services/FeatureFlagService';
 
+const isProductionBuild = () => process.env.NODE_ENV === 'production';
+
 export interface Citation {
   locator: string; // e.g., "doc-123", "https://..."
   snippet?: string;
@@ -12,16 +14,16 @@ export interface Statement {
 }
 
 export interface ExportPayload {
-    findings?: (string | Statement)[];
-    evidence?: (string | Statement)[];
-    sections?: any[];
-    [key: string]: any;
+  findings?: (string | Statement)[];
+  evidence?: (string | Statement)[];
+  sections?: any[];
+  [key: string]: any;
 }
 
 export interface GateOptions {
-    tenantId: string;
-    strict?: boolean;
-    userId?: string; // For feature flag context
+  tenantId: string;
+  strict?: boolean;
+  userId?: string; // For feature flag context
 }
 
 export class CitationGate {
@@ -34,95 +36,100 @@ export class CitationGate {
    */
   static async validateCitations(
     payload: ExportPayload,
-    options: GateOptions
+    options: GateOptions,
   ): Promise<ExportPayload> {
     const featureFlagService = getFeatureFlagService();
 
     // Construct user context for feature flag
     const userContext: FlagUser = {
-        key: options.userId || 'system',
-        custom: {
-            tenantId: options.tenantId
-        }
+      key: options.userId || 'system',
+      custom: {
+        tenantId: options.tenantId,
+      },
     };
 
-    const isEnabled = await featureFlagService.isEnabled('CITATION_GATE', userContext);
-
-    if (!isEnabled) {
-      return payload;
-    }
+    const flagEnabled = await featureFlagService.isEnabled(
+      'CITATION_GATE',
+      userContext,
+    );
+    const enforceGate = isProductionBuild() || flagEnabled;
 
     const gaps: Statement[] = [];
     const newPayload = { ...payload };
 
     // Helper to process a list
-    const processList = (list: (string | Statement)[]): (string | Statement)[] => {
-        const validItems: (string | Statement)[] = [];
-        for (const item of list) {
-            if (this.isUncited(item)) {
-                gaps.push(this.toStatement(item));
-            } else {
-                validItems.push(item);
-            }
+    const processList = (
+      list: (string | Statement)[],
+    ): (string | Statement)[] => {
+      const validItems: (string | Statement)[] = [];
+      for (const item of list) {
+        if (this.isUncited(item)) {
+          gaps.push(this.toStatement(item));
+        } else {
+          validItems.push(item);
         }
-        return validItems;
+      }
+      return validItems;
     };
 
     // Process 'findings' (ReportService style)
     if (newPayload.findings && Array.isArray(newPayload.findings)) {
-        newPayload.findings = processList(newPayload.findings);
+      newPayload.findings = processList(newPayload.findings);
     }
 
     // Process 'sections' (ReportingService style)
     if (newPayload.sections && Array.isArray(newPayload.sections)) {
-        for (const section of newPayload.sections) {
-            // Check specific known fields in section data that contain narrative text
-            if (section.data && section.data.keyInsights) {
-                const validInsights: any[] = [];
-                for (const insight of section.data.keyInsights) {
-                     // Check if insight has citations.
-                     // We assume insight object needs a 'citations' array.
-                     if (!insight.citations || insight.citations.length === 0) {
-                         gaps.push({
-                             text: insight.description || JSON.stringify(insight),
-                             citations: []
-                         });
-                     } else {
-                         validInsights.push(insight);
-                     }
-                }
-                section.data.keyInsights = validInsights;
+      for (const section of newPayload.sections) {
+        // Check specific known fields in section data that contain narrative text
+        if (section.data && section.data.keyInsights) {
+          const validInsights: any[] = [];
+          for (const insight of section.data.keyInsights) {
+            // Check if insight has citations.
+            // We assume insight object needs a 'citations' array.
+            if (!insight.citations || insight.citations.length === 0) {
+              gaps.push({
+                text: insight.description || JSON.stringify(insight),
+                citations: [],
+              });
+            } else {
+              validInsights.push(insight);
             }
-            // Add more section types here as needed
+          }
+          section.data.keyInsights = validInsights;
         }
+        // Add more section types here as needed
+      }
     }
 
     // If gaps found
     if (gaps.length > 0) {
-        if (options.strict) {
-             throw new Error(`Export blocked: ${gaps.length} uncited statements found.`);
-        }
+      if (options.strict || enforceGate) {
+        throw new Error(
+          `Export blocked: ${gaps.length} uncited statements found.`,
+        );
+      }
 
-        // Add Gaps Appendix
-        // For ReportService structure
-        if (newPayload.findings) {
-             // Since ReportService renders 'findings' and 'evidence' specifically,
-             // we'll just expose gaps in the payload so the renderer can optionally use it.
-             // We'll also append it to 'evidence' as a text block if we want it to show up without renderer changes,
-             // but the prompt implies "Route uncited statements into a “Gaps Appendix”".
-             // We'll add a 'gaps' property.
-             newPayload.gaps = gaps;
-        }
+      // Add Gaps Appendix
+      // For ReportService structure
+      if (newPayload.findings) {
+        // Since ReportService renders 'findings' and 'evidence' specifically,
+        // we'll just expose gaps in the payload so the renderer can optionally use it.
+        // We'll also append it to 'evidence' as a text block if we want it to show
+        // up without renderer changes, but the prompt implies "Route uncited
+        // statements into a “Gaps Appendix”".
+        // We'll add a 'gaps' property.
+        newPayload.gaps = gaps;
+      }
 
-        // For ReportingService structure
-        if (newPayload.sections && Array.isArray(newPayload.sections)) {
-             newPayload.sections.push({
-                 name: 'gaps_appendix',
-                 title: 'Gaps Appendix (Uncited Statements)',
-                 data: { gaps },
-                 generatedAt: new Date()
-             });
-        }
+      // For ReportingService structure
+      if (newPayload.sections && Array.isArray(newPayload.sections)) {
+        newPayload.sections.push({
+          name: 'gaps_appendix',
+          title: 'Gaps Appendix (Uncited Statements)',
+          data: { gaps },
+          generatedAt: new Date(),
+        });
+      }
     }
 
     return newPayload;

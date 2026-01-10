@@ -20,7 +20,7 @@ const FALLBACK_CITATION_FAILURE =
   'Unable to generate a citation-backed answer from the provided evidence. The system refused to answer without verifiable citations.';
 
 export const isCitationGateEnabled = (): boolean =>
-  process.env.CITATION_GATE === '1';
+  process.env.CITATION_GATE === '1' || process.env.NODE_ENV === 'production';
 
 export function normalizeCitationModel(citation: Citation): Citation {
   // Add snippetHash if snippet is present and hash is missing

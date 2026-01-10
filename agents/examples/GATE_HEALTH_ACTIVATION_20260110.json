@@ -1,0 +1,41 @@
+{
+  "task_id": "GATE_HEALTH_ACTIVATION_20260110",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "gate-activation-health",
+    "version": "v1",
+    "sha256": "94afef0cf84d827eab5d097ab0d1f28bb9da495c17e302c153fb64d7ba9d1b24",
+    "path": "prompts/tasks/gate-activation-health.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "server/src/runtime/gateHealth.ts",
+      "server/src/routes/health.ts",
+      "server/src/gates/CitationGate.ts",
+      "server/tests/gates/citation-gate.test.ts",
+      "docs/roadmap/STATUS.json",
+      "prompts/tasks/gate-activation-health.md",
+      "prompts/registry.yaml",
+      "agents/examples/GATE_HEALTH_ACTIVATION_20260110.json"
+    ],
+    "domains": ["gating", "health", "server"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["scripts/check-boundaries.cjs", "make smoke"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Gate activation status is included in readiness and deployment health responses.",
+    "Citation gate enforcement is mandatory for production exports.",
+    "Gate initialization fails fast when activation requirements are unmet."
+  ],
+  "stop_conditions": [
+    "Health checks indicate gate activation is incomplete.",
+    "Required verification commands fail without remediation."
+  ]
+}

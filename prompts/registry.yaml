@@ -28,3 +28,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: gate-activation-health
+    version: v1
+    path: prompts/tasks/gate-activation-health.md
+    sha256: 94afef0cf84d827eab5d097ab0d1f28bb9da495c17e302c153fb64d7ba9d1b24
+    description: Gate activation health checks and citation enforcement readiness updates.
+    scope:
+      paths:
+        - server/src/runtime/gateHealth.ts
+        - server/src/routes/health.ts
+        - server/src/gates/CitationGate.ts
+        - server/tests/gates/citation-gate.test.ts
+        - docs/roadmap/STATUS.json
+        - prompts/tasks/gate-activation-health.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - gating
+        - health
+        - server
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

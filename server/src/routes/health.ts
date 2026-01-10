@@ -5,6 +5,7 @@ import { logger } from '../utils/logger.js';
 import { getVariant, isEnabled } from '../lib/featureFlags.js';
 import { telemetryService } from '../analytics/telemetry/TelemetryService.js';
 import { auditTrailService } from '../services/audit/AuditTrailService.js';
+import { collectGateHealthSummary } from '../runtime/gateHealth.js';
 
 const router = Router();
 
@@ -319,6 +320,7 @@ router.get('/health/detailed', async (req: Request, res: Response) => {
  */
 router.get('/health/ready', async (_req: Request, res: Response) => {
   const failures: string[] = [];
+  const gateHealth = collectGateHealthSummary();
 
   // Check if critical services are available
   try {
@@ -350,14 +352,23 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
     logger.warn({ error }, 'Readiness check failed: Redis unavailable');
   }
 
+  if (!gateHealth.ok) {
+    failures.push(...gateHealth.issues);
+    logger.warn(
+      { gateHealth },
+      'Readiness check failed: gate activation incomplete',
+    );
+  }
+
   if (failures.length > 0) {
     res.status(503).json({
       status: 'not ready',
       failures,
       message: 'Critical services are unavailable. Check database connections.',
+      gateHealth,
     });
   } else {
-    res.status(200).json({ status: 'ready' });
+    res.status(200).json({ status: 'ready', gateHealth });
   }
 });
 
@@ -397,16 +408,23 @@ router.get('/health/deployment', async (_req: Request, res: Response) => {
   // 1. Check basic connectivity
   // 2. Check migrations (simulated check)
   // 3. Check configuration
+  const gateHealth = collectGateHealthSummary();
   const checks = {
     connectivity: true,
     migrations: true, // In real app, query schema_migrations table
-    config: true
+    config: true,
+    gates: gateHealth.ok,
   };
 
-  if (checks.connectivity && checks.migrations && checks.config) {
-    res.status(200).json({ status: 'ready_for_traffic', checks });
+  if (
+    checks.connectivity &&
+    checks.migrations &&
+    checks.config &&
+    checks.gates
+  ) {
+    res.status(200).json({ status: 'ready_for_traffic', checks, gateHealth });
   } else {
-    res.status(503).json({ status: 'deployment_failed', checks });
+    res.status(503).json({ status: 'deployment_failed', checks, gateHealth });
   }
 });
 
