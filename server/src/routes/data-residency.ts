@@ -188,8 +188,8 @@ router.post('/configure-kms', async (req, res) => {
             'arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012',
           region: 'us-east-1',
           credentials: {
-            accessKey: 'AKIAIOSFODNN7EXAMPLE',
-            secretKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+            accessKey: '<aws-access-key-id>',
+            secretKey: '<aws-secret-access-key>',
           },
         },
       });

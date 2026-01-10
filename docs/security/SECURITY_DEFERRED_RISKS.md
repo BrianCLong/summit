@@ -1,0 +1,8 @@
+# Security Deferred Risks
+
+All deferred items must include owner, rationale, and next action.
+
+| Risk ID        | Description                                                                                | Rationale for Deferral                                                                                                                                 | Owner               | Next Action                                                                                                          | Target Date |
+| -------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------- |
+| SEC-DEFER-0001 | Secret-pattern matches remain in documentation/examples and test fixtures after repo scan. | Governed Exceptions required for example/test data; repository-wide redaction needs governance review to avoid breaking fixtures and validation tests. | Security + Platform | Classify each match, redact non-test docs, and update allowlists/policy scans to distinguish fixtures.               | 2026-02-01  |
+| SEC-DEFER-0002 | Dependency audit and lint/test sweeps not executed under no-network constraint.            | Intentionally constrained by zero-network requirement for this execution window.                                                                       | Release Captain     | Re-run `pnpm -r install`, `pnpm -r audit --audit-level=low`, `pnpm -r lint`, and `pnpm -r test` with network access. | 2026-01-15  |
