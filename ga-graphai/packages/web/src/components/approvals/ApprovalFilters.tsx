@@ -11,9 +11,10 @@ export interface ApprovalFilterState {
 interface Props {
   value: ApprovalFilterState;
   onChange(next: ApprovalFilterState): void;
+  onReset?(): void;
 }
 
-export const ApprovalFilters: React.FC<Props> = ({ value, onChange }) => {
+export const ApprovalFilters: React.FC<Props> = ({ value, onChange, onReset }) => {
   const setField = <K extends keyof ApprovalFilterState>(key: K, v: ApprovalFilterState[K]) =>
     onChange({ ...value, [key]: v });
 
@@ -61,6 +62,15 @@ export const ApprovalFilters: React.FC<Props> = ({ value, onChange }) => {
           onChange={(e) => setField("riskTier", e.target.value)}
         />
       </div>
+
+      <button
+        type="button"
+        className="text-xs border rounded px-3 py-1 h-9 self-end disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+        onClick={() => onReset?.()}
+        disabled={!onReset}
+      >
+        Reset filters
+      </button>
     </div>
   );
 };
