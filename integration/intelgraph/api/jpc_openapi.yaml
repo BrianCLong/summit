@@ -1,0 +1,46 @@
+openapi: 3.0.3
+info:
+  title: JPC Workflow Compilation API
+  version: 0.2.0
+paths:
+  /jpc/compile:
+    post:
+      summary: Compile a workflow into minimal source queries.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JPCCompileRequest'
+      responses:
+        '200':
+          description: Join preservation certificate and output graph.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JPCCompileResponse'
+components:
+  schemas:
+    JPCCompileRequest:
+      type: object
+      required: [workflowSpec]
+      properties:
+        workflowSpec: { type: object }
+        optimizationProfile: { type: string }
+        determinismToken:
+          $ref: '#/components/schemas/DeterminismToken'
+    JPCCompileResponse:
+      type: object
+      properties:
+        outputGraph: { type: object }
+        joinCertificate: { type: object }
+        determinismToken:
+          $ref: '#/components/schemas/DeterminismToken'
+    DeterminismToken:
+      type: object
+      required: [snapshotId, schemaVersion, seed, windowId]
+      properties:
+        snapshotId: { type: string }
+        schemaVersion: { type: string }
+        seed: { type: string }
+        windowId: { type: string }

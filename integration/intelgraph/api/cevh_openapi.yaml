@@ -1,0 +1,67 @@
+openapi: 3.0.3
+info:
+  title: CEVH Forecasting API
+  version: 0.2.0
+paths:
+  /cevh/forecast:
+    post:
+      summary: Generate a hazard forecast and change-point analysis for an asset.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CEVHForecastRequest'
+      responses:
+        '200':
+          description: Forecast artifact with decomposition witness.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CEVHForecastResponse'
+        '400':
+          description: Invalid request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    CEVHForecastRequest:
+      type: object
+      required: [assetId]
+      properties:
+        assetId: { type: string }
+        policyVersion: { type: string }
+        determinismToken:
+          $ref: '#/components/schemas/DeterminismToken'
+        options:
+          type: object
+          properties:
+            includeCounterfactuals: { type: boolean, default: true }
+            maxSignals: { type: integer }
+    CEVHForecastResponse:
+      type: object
+      properties:
+        artifactId: { type: string }
+        hazardValue: { type: number }
+        timeToEventEstimate: { type: number }
+        confidenceInterval: { type: array, items: { type: number }, minItems: 2, maxItems: 2 }
+        decompositionWitness: { type: array, items: { type: object } }
+        changePointDetected: { type: boolean }
+        determinismToken:
+          $ref: '#/components/schemas/DeterminismToken'
+    DeterminismToken:
+      type: object
+      required: [snapshotId, schemaVersion, seed, windowId]
+      properties:
+        snapshotId: { type: string }
+        schemaVersion: { type: string }
+        seed: { type: string }
+        windowId: { type: string }
+    Error:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+        details: { type: object }

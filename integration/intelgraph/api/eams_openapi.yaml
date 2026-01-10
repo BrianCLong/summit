@@ -1,0 +1,60 @@
+openapi: 3.0.3
+info:
+  title: EAMS Sandbox Execution API
+  version: 0.2.0
+paths:
+  /eams/run:
+    post:
+      summary: Execute an OSINT module within a sandbox policy.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EAMSRunRequest'
+      responses:
+        '200':
+          description: Module output with egress receipt and compliance decision.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EAMSRunResponse'
+        '409':
+          description: Policy violation or budget exceeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    EAMSRunRequest:
+      type: object
+      required: [moduleId, target]
+      properties:
+        moduleId: { type: string }
+        target: { type: string }
+        sandboxPolicyId: { type: string }
+        determinismToken:
+          $ref: '#/components/schemas/DeterminismToken'
+    EAMSRunResponse:
+      type: object
+      properties:
+        moduleOutput: { type: object }
+        egressReceipt: { type: object }
+        complianceDecision: { type: string }
+        determinismToken:
+          $ref: '#/components/schemas/DeterminismToken'
+    DeterminismToken:
+      type: object
+      required: [snapshotId, schemaVersion, seed, windowId]
+      properties:
+        snapshotId: { type: string }
+        schemaVersion: { type: string }
+        seed: { type: string }
+        windowId: { type: string }
+    Error:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+        details: { type: object }

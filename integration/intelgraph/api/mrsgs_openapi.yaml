@@ -1,0 +1,88 @@
+openapi: 3.0.3
+info:
+  title: MRSGS Campaign Detection API
+  version: 0.2.0
+paths:
+  /mrsgs/scan:
+    post:
+      summary: Submit interaction window for spectral sketching and anomaly scoring.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MRSGSWindowRequest'
+      responses:
+        '200':
+          description: Campaign artifact and anomaly score.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MRSGSWindowResponse'
+        '400':
+          description: Invalid request payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Budget or policy constraint violation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    MRSGSWindowRequest:
+      type: object
+      required: [windowId, interactions]
+      properties:
+        windowId:
+          type: string
+        baselineId:
+          type: string
+        policyVersion:
+          type: string
+        determinismToken:
+          $ref: '#/components/schemas/DeterminismToken'
+        budgets:
+          type: object
+          properties:
+            maxEdges: { type: integer }
+            maxRuntimeMs: { type: integer }
+        interactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Interaction'
+    Interaction:
+      type: object
+      required: [actorId, contentId, timestamp]
+      properties:
+        actorId: { type: string }
+        contentId: { type: string }
+        weight: { type: number }
+        timestamp: { type: string, format: date-time }
+    MRSGSWindowResponse:
+      type: object
+      properties:
+        artifactId: { type: string }
+        anomalyScore: { type: number }
+        localizedSubgraph: { type: object }
+        commitments: { type: object }
+        determinismToken:
+          $ref: '#/components/schemas/DeterminismToken'
+        attestationQuote: { type: string, nullable: true }
+    DeterminismToken:
+      type: object
+      required: [snapshotId, schemaVersion, seed, windowId]
+      properties:
+        snapshotId: { type: string }
+        schemaVersion: { type: string }
+        seed: { type: string }
+        windowId: { type: string }
+    Error:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+        details: { type: object }

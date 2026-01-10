@@ -1,0 +1,60 @@
+openapi: 3.0.3
+info:
+  title: POAR Proof-Obligation API
+  version: 0.2.0
+paths:
+  /poar/execute:
+    post:
+      summary: Execute an action with proof obligations.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/POARExecuteRequest'
+      responses:
+        '200':
+          description: Transformed output and proof object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/POARExecuteResponse'
+        '403':
+          description: Proof obligations not satisfied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    POARExecuteRequest:
+      type: object
+      required: [actionSpec, subjectContext]
+      properties:
+        actionSpec: { type: object }
+        subjectContext: { type: object }
+        purpose: { type: string }
+        policyVersion: { type: string }
+        determinismToken:
+          $ref: '#/components/schemas/DeterminismToken'
+    POARExecuteResponse:
+      type: object
+      properties:
+        transformedOutput: { type: object }
+        proofObject: { type: object }
+        determinismToken:
+          $ref: '#/components/schemas/DeterminismToken'
+    DeterminismToken:
+      type: object
+      required: [snapshotId, schemaVersion, seed, windowId]
+      properties:
+        snapshotId: { type: string }
+        schemaVersion: { type: string }
+        seed: { type: string }
+        windowId: { type: string }
+    Error:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+        details: { type: object }
