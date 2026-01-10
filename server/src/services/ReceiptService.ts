@@ -10,6 +10,8 @@ export interface Receipt {
   resource: string;
   inputHash: string;
   policyDecisionId?: string;
+  policyId?: string;
+  policyVersion?: string;
   signature: string;
   signerKeyId: string; // Key ID or public key fingerprint
 }
@@ -39,11 +41,23 @@ export class ReceiptService {
   public async generateReceipt(params: {
     action: string;
     actor: { id: string; tenantId: string };
+    actorType?: 'user' | 'system' | 'api' | 'job';
     resource: string;
     input: any;
     policyDecisionId?: string;
+    policy?: { id: string; version: string };
   }): Promise<Receipt> {
-    const { action, actor, resource, input, policyDecisionId } = params;
+    const {
+      action,
+      actor,
+      actorType,
+      resource,
+      input,
+      policyDecisionId,
+      policy,
+    } = params;
+    const resolvedPolicyDecisionId =
+      policyDecisionId ?? (policy ? `${policy.id}@${policy.version}` : undefined);
 
     // 1. Calculate input hash
     const inputStr = typeof input === 'string' ? input : JSON.stringify(input);
@@ -51,13 +65,25 @@ export class ReceiptService {
 
     // 2. Append to Ledger (this is the "truth" store)
     const entry = await this.ledger.appendEntry({
-      action,
+      actionType: action,
       actorId: actor.id,
       tenantId: actor.tenantId,
-      resource,
-      details: { inputHash, policyDecisionId }, // stored in 'details' which maps to metadata or payload
-      timestamp: new Date().toISOString()
-    } as any);
+      actorType: actorType ?? 'system',
+      resourceType: resource,
+      resourceId: resource,
+      payload: {
+        mutationType: 'CREATE',
+        entityId: resource,
+        entityType: resource,
+        inputHash,
+        policyDecisionId: resolvedPolicyDecisionId,
+        policyId: policy?.id,
+        policyVersion: policy?.version,
+        action,
+      },
+      metadata: { purpose: 'receipt' },
+      timestamp: new Date()
+    });
     const entryId = entry.id;
 
     // 3. Create the canonical receipt string to sign
@@ -70,7 +96,7 @@ export class ReceiptService {
       actor.tenantId,
       resource,
       inputHash,
-      policyDecisionId || ''
+      resolvedPolicyDecisionId || ''
     ].join('|');
 
     // 4. Sign it
@@ -83,7 +109,9 @@ export class ReceiptService {
       actor: actor.id,
       resource,
       inputHash,
-      policyDecisionId,
+      policyDecisionId: resolvedPolicyDecisionId,
+      policyId: policy?.id,
+      policyVersion: policy?.version,
       signature,
       signerKeyId: this.signer.getPublicKey().slice(0, 32) + '...' // simplified ID
     };
@@ -115,8 +143,10 @@ export class ReceiptService {
       action: entry.actionType,
       actor: entry.actorId,
       resource: entry.resourceId,
-      inputHash: entry.metadata?.inputHash || 'unknown',
-      policyDecisionId: entry.metadata?.policyDecisionId,
+      inputHash: entry.payload?.inputHash || 'unknown',
+      policyDecisionId: entry.payload?.policyDecisionId,
+      policyId: entry.payload?.policyId,
+      policyVersion: entry.payload?.policyVersion,
       signature: entry.signature || 'unsigned',
       signerKeyId: 'system-key' // metadata
     };
