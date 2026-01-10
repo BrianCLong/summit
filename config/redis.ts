@@ -11,6 +11,7 @@
 
 import Redis from 'ioredis';
 import pino from 'pino';
+import { createHash } from 'crypto';
 
 const logger = pino();
 
@@ -101,7 +102,12 @@ export class RedisCacheManager {
         errors: 0,
       });
     }
-    return this.stats.get(prefix)!;
+    const stats = this.stats.get(prefix);
+    if (!stats) {
+      // This should never happen due to the initialization above
+      throw new Error(`Stats not initialized for prefix: ${prefix}`);
+    }
+    return stats;
   }
 
   /**
@@ -535,9 +541,8 @@ export function createRedisCacheManager(config: RedisCacheConfig): RedisCacheMan
  * GraphQL query hash generator for caching
  */
 export function hashGraphQLQuery(query: string, variables?: any): string {
-  const crypto = require('crypto');
   const content = query + JSON.stringify(variables || {});
-  return crypto.createHash('sha256').update(content).digest('hex');
+  return createHash('sha256').update(content).digest('hex');
 }
 
 export default {

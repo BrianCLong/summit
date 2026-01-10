@@ -139,7 +139,7 @@ describe('Performance Benchmarks', () => {
         const endTime = Date.now();
 
         times.push(endTime - startTime);
-        console.log(`Population ${size}: ${times[times.length - 1]}ms`);
+        // Population ${size}: ${times[times.length - 1]}ms
       }
 
       // Verify reasonable scaling
@@ -174,7 +174,7 @@ describe('Performance Benchmarks', () => {
       const endTime = Date.now();
       const queryTime = endTime - startTime;
 
-      console.log(`Audit log query time: ${queryTime}ms`);
+      // Audit log query time: ${queryTime}ms
       expect(queryTime).toBeLessThan(50);
       expect(auditLog.length).toBe(100);
     });
@@ -187,7 +187,7 @@ describe('Performance Benchmarks', () => {
       const stats = engine.getStats();
       const endTime = Date.now();
 
-      console.log(`Stats retrieval: ${endTime - startTime}ms`);
+      // Stats retrieval: ${endTime - startTime}ms
       expect(endTime - startTime).toBeLessThan(10);
       expect(stats.entities).toBe(1000);
     });
@@ -221,7 +221,7 @@ describe('Performance Benchmarks', () => {
       const durationMs = endTime - startTime;
       const opsPerSecond = (100 / durationMs) * 1000;
 
-      console.log(`Concurrent merges: ${opsPerSecond.toFixed(2)} ops/sec`);
+      // Concurrent merges: ${opsPerSecond.toFixed(2)} ops/sec
       expect(opsPerSecond).toBeGreaterThanOrEqual(100);
     });
   });

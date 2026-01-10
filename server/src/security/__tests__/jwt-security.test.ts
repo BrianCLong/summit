@@ -10,6 +10,7 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import type {
   JWTSecurityManager as JWTSecurityManagerClass,
   createJWTSecurityManager as createJWTSecurityManagerFn,

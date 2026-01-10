@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { PredictiveService } from '../PredictiveService';
 import { getNeo4jDriver } from '../../config/database';
 import { WhatIfRequest } from '../../contracts/predictive/types';

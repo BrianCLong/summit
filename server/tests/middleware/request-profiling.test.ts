@@ -24,12 +24,9 @@ describe('requestProfilingMiddleware', () => {
       baseUrl: '',
       route: { path: '/test' },
     } as Partial<Request>;
-    const res = new EventEmitter() as Partial<Response>;
+    const res = new EventEmitter() as any;
     res.statusCode = 200;
-    res.on = (event: string, handler: (...args: any[]) => void) => {
-      (res as unknown as EventEmitter).on(event, handler);
-      return res as Response;
-    };
+    // Removed recursive res.on
 
     const next = jest.fn();
 

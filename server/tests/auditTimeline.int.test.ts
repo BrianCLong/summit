@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import fs from 'fs';
 import path from 'path';
 import { Pool } from 'pg';

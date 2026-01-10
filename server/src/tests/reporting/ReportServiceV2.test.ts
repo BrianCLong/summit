@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { ReportServiceV2 } from '../../services/reporting/ReportServiceV2.js';
 
 describe('ReportServiceV2', () => {

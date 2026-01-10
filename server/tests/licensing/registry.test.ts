@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { DataLicenseRegistry } from '../../src/licensing/registry';
 import { Pool } from 'pg';
 

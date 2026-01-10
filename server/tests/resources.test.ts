@@ -1,5 +1,6 @@
 // server/tests/resources.test.ts
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import quotaManager from '../src/lib/resources/quota-manager';
 import { budgetTracker } from '../src/lib/resources/budget-tracker';
 import { CostDomain } from '../src/lib/resources/types';

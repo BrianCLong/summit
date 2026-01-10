@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { AdvancedSearchEngine, SearchDocument } from '../advanced-search-engine';
 
 describe('AdvancedSearchEngine', () => {

@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { redact, MASK } from '../../../src/observability/logging/redaction.js';
 
 describe('Logging Redaction', () => {

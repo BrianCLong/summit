@@ -20,15 +20,15 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
           node-version: "20"
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
         with:
           version: 8
 
@@ -41,7 +41,7 @@ jobs:
 
       - name: Upload Client Artifacts
         if: hashFiles('client/dist/**') != ''
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: client-dist
           path: client/dist
@@ -50,7 +50,7 @@ jobs:
 
       - name: Upload Server Artifacts
         if: hashFiles('server/dist/**') != ''
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: server-dist
           path: server/dist
@@ -65,10 +65,10 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
       - name: Install Syft
-        uses: anchore/sbom-action/download-syft@v0
+        uses: anchore/sbom-action/download-syft@0b82b0b1a22399a1c542d4d656f70cd903571b5c # v0
 
       - name: Generate SBOMs
         run: |
@@ -80,7 +80,7 @@ jobs:
           fi
 
       - name: Upload SBOM Artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: sbom-artifacts
           path: compliance/sbom
@@ -95,10 +95,10 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
           node-version: "20"
 
@@ -113,7 +113,7 @@ jobs:
           fi
 
       - name: Upload Evidence Artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: evidence-bundle
           path: evidence

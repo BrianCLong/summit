@@ -444,7 +444,6 @@ export class Neo4jQueryCache {
    * @returns Object containing cache metrics
    */
   getStats() {
-    const total = this.hits + this.misses;
     return {
       size: this.cache.size,
       hits: this.hits,

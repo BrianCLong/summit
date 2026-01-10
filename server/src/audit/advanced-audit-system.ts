@@ -289,7 +289,7 @@ export class AdvancedAuditSystem extends EventEmitter {
       }
 
       AdvancedAuditSystem.instance = new AdvancedAuditSystem(
-        db,
+        db as any,
         redis as Redis, // If null, we'll need to handle it in methods
         logger,
         signingKey || 'dev-signing-key-insecure',
@@ -300,7 +300,7 @@ export class AdvancedAuditSystem extends EventEmitter {
   }
 
   public static createForTest(options: {
-    db: Pool;
+    db: any;
     redis?: Redis | null;
     logger: Logger;
     signingKey?: string;

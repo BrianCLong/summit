@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { scoreEvidence } from '../../../src/connectors/evidence/score';
 import { REQUIRED_FIELDS_RULE, REDACTION_MARKER_PRESENCE_RULE, SOURCE_REFERENCE_RULE } from '../../../src/connectors/evidence/rules';
 
