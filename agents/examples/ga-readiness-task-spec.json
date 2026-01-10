@@ -1,0 +1,44 @@
+{
+  "task_id": "GA_READINESS_TASK_SPEC_20260109",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "runbooks-docs-update",
+    "version": "v1",
+    "sha256": "d8fa2fa89f5bb30b954a8fc1735794033cd55be52bc8aedce76dcb57948fac11",
+    "path": "prompts/docs/runbooks-update@v1.md"
+  },
+  "declared_scope": {
+    "paths": ["agents/examples/ga-readiness-task-spec.json", "docs/roadmap/STATUS.json"],
+    "domains": ["governance", "ga-readiness", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "Golden Path smoke test log (make smoke)",
+      "GA verification log (make ga-verify or node scripts)",
+      "Dependency vulnerability scan report (Trivy/Snyk)",
+      "OpenAPI coverage evidence for all API endpoints",
+      "PR linkage to certified Roadmap Item or Issue"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Golden Path smoke tests pass with a 100% success rate",
+    "Zero high-severity vulnerabilities in production dependencies are reported",
+    "Every API endpoint has a corresponding OpenAPI specification entry",
+    "Pull requests are linked to certified Roadmap Items or Issues",
+    "GA verification artifacts exist for Tier A/B/C as applicable",
+    "Scope stays within the documentation zone unless explicitly expanded",
+    "Change classification recorded as patch"
+  ],
+  "stop_conditions": [
+    "CI failure detected on main",
+    "Prompt hash mismatch against prompts/registry.yaml",
+    "Missing GA verification artifacts for GA-critical changes",
+    "Evidence conflicts with governance requirements"
+  ]
+}
