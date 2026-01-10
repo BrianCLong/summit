@@ -91,10 +91,19 @@ EOF
 check_working_tree() {
     log_info "Checking working tree status..."
 
+    # Check for modified tracked files
     if ! git diff-index --quiet HEAD --; then
-        log_error "Working tree is not clean. Commit or stash changes first."
+        log_error "Working tree is not clean (modified files). Commit or stash changes first."
         log_info "Uncommitted changes:"
         git status --short
+        exit 1
+    fi
+
+    # Check for untracked files
+    if [[ -n $(git status --porcelain) ]]; then
+        log_error "Working tree is not clean (untracked files). Cleanup or ignore them first."
+        log_info "Untracked files:"
+        git status --porcelain
         exit 1
     fi
 
