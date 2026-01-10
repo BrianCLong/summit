@@ -151,6 +151,51 @@ jobs:
             server/scripts/verify-*.log
           retention-days: 7
 
+  coverage-gate:
+    name: Coverage Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Coverage Gate
+        run: pnpm verify:coverage
+        env:
+          COVERAGE_LINES: "0.8"
+          COVERAGE_FUNCTIONS: "0.8"
+          COVERAGE_STATEMENTS: "0.8"
+          COVERAGE_BRANCHES: "0.75"
+          TZ: UTC
+
+  api-fuzz-contracts:
+    name: API Fuzz Contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: API Fuzz Contracts
+        run: pnpm verify:fuzz-contracts
+        env:
+          FUZZ_MODE: ci
+          FUZZ_SEED: "2025"
+          FUZZ_ITERATIONS: "25"
+          FUZZ_TIMEOUT_MS: "35"
+
   deterministic-build:
     name: Deterministic Build
     runs-on: ubuntu-latest
