@@ -7,36 +7,44 @@ This document defines the canonical schema for Summit's Knowledge Graph & Proven
 The schema consolidates all system activity into four atomic entity types:
 
 ### 1. Input (Source of Truth)
+
 Represents data, configuration, or external signals that feed into the system.
-* **Types**: `DataArtifact`, `Configuration`, `PolicyDefinition`, `PromptTemplate`.
-* **Properties**: `hash` (SHA-256), `uri`, `version`, `createdAt`.
+
+- **Types**: `DataArtifact`, `Configuration`, `PolicyDefinition`, `PromptTemplate`.
+- **Properties**: `hash` (SHA-256), `uri`, `version`, `createdAt`.
 
 ### 2. Decision (Logic & Governance)
+
 Represents a choice made by a human or a machine (policy engine, classifier).
-* **Types**: `PolicyEvaluation`, `ManualApproval`, `ClassifierPrediction`, `RoutingDecision`.
-* **Properties**: `result` (ALLOW/DENY/FLAG), `confidence`, `policyVersion`, `evaluator`.
+
+- **Types**: `PolicyEvaluation`, `ManualApproval`, `ClassifierPrediction`, `RoutingDecision`, `OptimizationDecision`.
+- **Properties**: `result` (ALLOW/DENY/FLAG), `confidence`, `policyVersion`, `evaluator`, `loopId`.
 
 ### 3. Action (Execution)
+
 Represents a state-changing operation or a process execution.
-* **Types**: `MaestroRun`, `IngestionJob`, `EnforcementAction` (e.g., Block User), `Deployment`.
-* **Properties**: `status`, `startedAt`, `completedAt`, `durationMs`.
+
+- **Types**: `MaestroRun`, `IngestionJob`, `EnforcementAction` (e.g., Block User), `Deployment`, `OptimizationAction`.
+- **Properties**: `status`, `startedAt`, `completedAt`, `durationMs`, `receiptId`.
 
 ### 4. Outcome (Result)
+
 Represents the observable side-effect or final state resulting from an action.
-* **Types**: `MetricValue`, `SystemState`, `Alert`, `GeneratedArtifact`.
-* **Properties**: `value`, `timestamp`, `dimension`.
+
+- **Types**: `MetricValue`, `SystemState`, `Alert`, `GeneratedArtifact`, `OptimizationReceipt`.
+- **Properties**: `value`, `timestamp`, `dimension`, `loopId`, `expectedOutcome`, `observedOutcome`.
 
 ## Canonical Relationships
 
 Edges represent causality and data flow. All edges are directed.
 
-*   `(:Input)-[:FED_INTO]->(:Decision)`
-*   `(:Input)-[:USED_BY]->(:Action)`
-*   `(:Decision)-[:TRIGGERED]->(:Action)`
-*   `(:Decision)-[:BLOCKED]->(:Action)`
-*   `(:Action)-[:PRODUCED]->(:Outcome)`
-*   `(:Action)-[:GENERATED]->(:Input)` (Cycles allowed for pipelines)
-*   `(:Outcome)-[:AFFECTED]->(:Decision)` (Feedback loops)
+- `(:Input)-[:FED_INTO]->(:Decision)`
+- `(:Input)-[:USED_BY]->(:Action)`
+- `(:Decision)-[:TRIGGERED]->(:Action)`
+- `(:Decision)-[:BLOCKED]->(:Action)`
+- `(:Action)-[:PRODUCED]->(:Outcome)`
+- `(:Action)-[:GENERATED]->(:Input)` (Cycles allowed for pipelines)
+- `(:Outcome)-[:AFFECTED]->(:Decision)` (Feedback loops)
 
 ## Integrity Invariants
 
@@ -55,5 +63,5 @@ The graph is deterministically assembled from the immutable `ProvenanceLedger`.
 
 ## Versioning
 
-*   **Schema Version**: 2.0.0
-*   **Effective Date**: Sprint N+62
+- **Schema Version**: 2.0.0
+- **Effective Date**: Sprint N+62
