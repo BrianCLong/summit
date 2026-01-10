@@ -1,0 +1,9 @@
+# Security Audit Waivers
+# This file tracks approved exceptions for the security audit gate.
+# All waivers must have a rationale and an expiration date.
+
+waivers:
+  - package: "example-pkg"
+    advisory_id: "GHSA-xxxx-xxxx-xxxx"
+    expires: "2026-12-31"
+    rationale: "False positive in our specific usage; package is only used in build-time dev scripts."
