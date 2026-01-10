@@ -1,0 +1,62 @@
+openapi: 3.0.3
+title: PGTT Governance Test API
+version: 0.2.0
+paths:
+  /pgtt/tests:
+    post:
+      summary: Generate policy-graph tests and report regressions.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PgttTestRequest'
+      responses:
+        '200':
+          description: Governance test report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PgttTestResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    PgttTestRequest:
+      type: object
+      properties:
+        policyVersion:
+          type: string
+        ontologyVersion:
+          type: string
+        executionBudget:
+          type: object
+          properties:
+            maxRuntimeSeconds:
+              type: integer
+            maxFixtures:
+              type: integer
+        replayToken:
+          type: object
+          additionalProperties: true
+      required: [policyVersion, ontologyVersion]
+    PgttTestResponse:
+      type: object
+      properties:
+        governanceTestReport:
+          type: object
+        fixtureCommitmentRoot:
+          type: string
+        replayToken:
+          type: object
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string

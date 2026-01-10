@@ -1,0 +1,61 @@
+openapi: 3.0.3
+title: SASA Source Attribution API
+version: 0.2.0
+paths:
+  /sasa/attribution:
+    post:
+      summary: Compute source attribution for a decision.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SasaAttributionRequest'
+      responses:
+        '200':
+          description: Attribution artifact
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SasaAttributionResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    SasaAttributionRequest:
+      type: object
+      properties:
+        decisionRequestId:
+          type: string
+        sourceIds:
+          type: array
+          items:
+            type: string
+        samplingBudget:
+          type: integer
+        replayToken:
+          type: object
+          additionalProperties: true
+      required: [decisionRequestId, sourceIds]
+    SasaAttributionResponse:
+      type: object
+      properties:
+        attributionArtifact:
+          type: object
+        counterfactualOutputs:
+          type: array
+          items:
+            type: object
+        replayToken:
+          type: object
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string

@@ -1,0 +1,77 @@
+openapi: 3.0.3
+title: TRACER Role Attribution API
+version: 0.2.0
+paths:
+  /tracer/roles:
+    post:
+      summary: Compute temporal role attribution and return a role certificate.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TracerRoleRequest'
+      responses:
+        '200':
+          description: Role certificate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TracerRoleResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Replay token mismatch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    TracerRoleRequest:
+      type: object
+      properties:
+        narrativeClusterId:
+          type: string
+        timeWindow:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date-time
+            end:
+              type: string
+              format: date-time
+        constraints:
+          type: object
+          properties:
+            topicCoherenceThreshold:
+              type: number
+            capacityPerEdge:
+              type: number
+            explanationBudget:
+              type: integer
+        replayToken:
+          type: object
+          additionalProperties: true
+      required: [narrativeClusterId, timeWindow]
+    TracerRoleResponse:
+      type: object
+      properties:
+        certificate:
+          type: object
+        supportSubgraph:
+          type: object
+        replayToken:
+          type: object
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string

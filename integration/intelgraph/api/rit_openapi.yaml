@@ -1,0 +1,64 @@
+openapi: 3.0.3
+title: RIT Transform Inversion API
+version: 0.2.0
+paths:
+  /rit/inversion:
+    post:
+      summary: Compute inversion artifacts for transform explainability.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RitInversionRequest'
+      responses:
+        '200':
+          description: Inversion artifact
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RitInversionResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    RitInversionRequest:
+      type: object
+      properties:
+        targetResultSet:
+          type: array
+          items:
+            type: string
+        searchBudget:
+          type: object
+          properties:
+            maxDepth:
+              type: integer
+            maxPlans:
+              type: integer
+        replayToken:
+          type: object
+          additionalProperties: true
+      required: [targetResultSet]
+    RitInversionResponse:
+      type: object
+      properties:
+        inversionArtifact:
+          type: object
+        witnessChain:
+          type: array
+          items:
+            type: object
+        replayToken:
+          type: object
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string

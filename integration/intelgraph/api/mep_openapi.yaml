@@ -1,0 +1,66 @@
+openapi: 3.0.3
+title: MEP Evidence Partitioning API
+version: 0.2.0
+paths:
+  /mep/shards:
+    post:
+      summary: Partition scan outputs into evidence shards.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MepShardRequest'
+      responses:
+        '200':
+          description: Evidence shards and manifest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MepShardResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    MepShardRequest:
+      type: object
+      properties:
+        scanResultId:
+          type: string
+        recipientScopes:
+          type: array
+          items:
+            type: string
+        egressBudget:
+          type: object
+          properties:
+            maxBytes:
+              type: integer
+            maxEntities:
+              type: integer
+        replayToken:
+          type: object
+          additionalProperties: true
+      required: [scanResultId, recipientScopes]
+    MepShardResponse:
+      type: object
+      properties:
+        evidenceShards:
+          type: array
+          items:
+            type: object
+        shardManifest:
+          type: object
+        replayToken:
+          type: object
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string
