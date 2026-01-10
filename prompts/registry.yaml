@@ -79,3 +79,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ga-bundle-release-artifacts
+    version: v1
+    path: prompts/release/ga-bundle-release-artifacts@v1.md
+    sha256: c542d5f3544b9654aedf74f72d6bca7e6711a62452af6d61f7fa9cbd25dc2a77
+    description: Include release-artifacts inventory and checksums in GA bundle assembly and manifests.
+    scope:
+      paths:
+        - scripts/release/
+        - docs/roadmap/STATUS.json
+        - prompts/release/ga-bundle-release-artifacts@v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+        - artifacts/agent-runs/
+        - artifacts/agent-metrics.json
+      domains:
+        - release
+        - provenance
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

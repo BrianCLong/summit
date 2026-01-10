@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-01-01T00:00:00.000Z",
+  "generated_at": "2026-01-10T01:47:41Z",
   "agents": [
     {
       "agent_id": "summit-governor",
@@ -13,6 +13,20 @@
         "tier_a": 1,
         "tier_b": 0,
         "tier_c": 0
+      }
+    },
+    {
+      "agent_id": "codex",
+      "tasks_completed": 1,
+      "merge_success_rate": 1.0,
+      "debt_retired": 0,
+      "debt_created": 0,
+      "policy_violations": 0,
+      "mean_time_to_merge_hours": 1.0,
+      "verification_mix": {
+        "tier_a": 0,
+        "tier_b": 0,
+        "tier_c": 1
       }
     }
   ]
