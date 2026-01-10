@@ -28,3 +28,29 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: autonomous-agents-research-feed
+    version: v1
+    path: prompts/tasks/autonomous-agents-research-feed.md
+    sha256: 2aaa9bf62dff90534db95fa00ca3c03438b8be3dcb4c538a934b3880260f5c38
+    description: Refinements to the Autonomous Agents research feed ingestion pipeline and supporting workflows.
+    scope:
+      paths:
+        - server/
+        - .github/workflows/
+        - docs/roadmap/STATUS.json
+        - server/fixtures/
+        - agents/examples/
+        - prompts/tasks/
+      domains:
+        - ingestion
+        - provenance
+        - workflow
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

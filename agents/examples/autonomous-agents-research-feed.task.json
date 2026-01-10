@@ -1,0 +1,34 @@
+{
+  "task_id": "AA_RESEARCH_FEED_UPDATE_20260102",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "autonomous-agents-research-feed",
+    "version": "v1",
+    "sha256": "2aaa9bf62dff90534db95fa00ca3c03438b8be3dcb4c538a934b3880260f5c38",
+    "path": "prompts/tasks/autonomous-agents-research-feed.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "server/src/ingestion/",
+      "server/fixtures/",
+      ".github/workflows/autonomous-agents-ingest.yml",
+      "docs/roadmap/STATUS.json"
+    ],
+    "domains": ["ingestion", "provenance", "workflow"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["server test output", "boundary check output"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Autonomous Agents feed parsing handles numbered links and star bullets.",
+    "Ingestion is idempotent for already-ingested commits.",
+    "Workflow uses pnpm for installation and execution."
+  ],
+  "stop_conditions": ["CI failure in main", "Sandbox violation alert", "Governance policy mismatch"]
+}

@@ -1,0 +1,36 @@
+type AutonomousAgentPaper {
+  sourceId: ID!
+  sourceName: String!
+  sourceUrl: String!
+  sourcePath: String!
+  sourceCommit: String!
+  extractedAt: DateTime!
+  paperTitle: String!
+  paperUrl: String!
+  paperHost: String
+  publishedOrListedDate: String
+  summaryBullets: [String!]!
+  tags: [String!]!
+  externalIds: JSON
+}
+
+input AutonomousAgentPaperFilter {
+  search: String
+  tags: [String!]
+  startDate: String
+  endDate: String
+  sourceName: String
+}
+
+type AutonomousAgentIngestResult {
+  inserted: Int!
+  commitSha: String!
+}
+
+extend type Query {
+  autonomousAgentPapers(filter: AutonomousAgentPaperFilter, limit: Int = 50): [AutonomousAgentPaper!]!
+}
+
+extend type Mutation {
+  ingestAutonomousAgentPapers(ref: String, commitSha: String): AutonomousAgentIngestResult!
+}
