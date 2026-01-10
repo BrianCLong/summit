@@ -1,5 +1,6 @@
 # MVP-4-GA Master Checklist
 
+> **Canonical Release Bundle**: [docs/releases/MVP4_RELEASE_BUNDLE.md](../releases/MVP4_RELEASE_BUNDLE.md)
 > **Version**: 1.0
 > **Last Updated**: 2025-12-30
 > **Status**: IN PROGRESS

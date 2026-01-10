@@ -50,3 +50,9 @@ We do not "try" features; we certify capabilities.
 We do not "hope" for stability; we engineer resilience.
 
 **This assertion stands until formally revoked by a V2 Governance Override.**
+
+## RELEASE ARTIFACTS
+
+For the complete, human-consumable release package, including the Verification Matrix and Canonical Evidence Map, refer to:
+
+*   **[MVP-4 GA Release Bundle](releases/MVP4_RELEASE_BUNDLE.md)**
