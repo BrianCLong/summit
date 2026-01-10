@@ -49,25 +49,34 @@ Where does trust end?
 *   **SSRF**: Webhook endpoints or "Fetch URL" features.
     *   *Mitigation*: `URLSchema` validation (no localhost/private IPs), egress filtering.
 
-### 4.3 Orchestration Abuse
+### 4.3 Agentic Risks (ASI)
+*   **Goal Hijacking (ASI01)**: Attackers subverting agent instructions.
+    *   *Mitigation*: Strict system/user prompt separation.
+*   **Tool Misuse (ASI02)**: Agents tricked into abusing connected tools (DB, APIs).
+    *   *Mitigation*: Least-privilege tool scopes, human approval for destructive actions.
+*   **Identity Abuse (ASI03)**: Agent token theft or privilege escalation.
+    *   *Mitigation*: Short-lived, scope-restricted service accounts.
+*   *See [OWASP Agentic Top 10](./OWASP_AGENTIC_TOP_10.md) for full list.*
+
+### 4.4 Orchestration Abuse
 *   **Queue Flooding**: Submitting thousands of "light" runs to Maestro.
     *   *Mitigation*: Tenant-based quotas, queue depth monitoring.
 *   **Race Conditions**: Simultaneous requests checking budget limits.
     *   *Mitigation*: Atomic check-and-increment (Lua/Redis).
 
-### 4.4 Impersonation & Auth
+### 4.5 Impersonation & Auth
 *   **Token Theft**: XSS stealing `localStorage` tokens.
     *   *Mitigation*: Short-lived access tokens, `HttpOnly` refresh cookies (planned).
 *   **Tenant Confusion**: Manipulating `X-Tenant-ID`.
     *   *Mitigation*: Deriving `tenantId` strictly from signed JWT `req.user.tenantId`.
 
-### 4.5 Data Exfiltration
+### 4.6 Data Exfiltration
 *   **Logging Leakage**: Logging full request bodies/headers (Secrets/PII).
     *   *Mitigation*: `pino-http` redaction, PII scrubbing.
 *   **Verbose Errors**: Stack traces in GraphQL errors.
     *   *Mitigation*: `formatError` masking in production.
 
-### 4.6 Supply Chain
+### 4.7 Supply Chain
 *   **Malicious Dependencies**: Compromised npm/pypi packages.
     *   *Mitigation*: `pnpm-lock.yaml`, dependency auditing (Wave U).
 

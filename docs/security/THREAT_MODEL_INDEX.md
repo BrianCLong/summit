@@ -64,6 +64,7 @@ Models approaching or past their review dates:
 
 ## Quick Links
 
+- [OWASP Agentic Top 10](./OWASP_AGENTIC_TOP_10.md) (**New Standard**)
 - [Threat Modeling Framework](./threat-modeling-framework.md)
 - [Template](./threat-models/template.md)
 - [Security Guidelines](./SECURITY_GUIDELINES.md)

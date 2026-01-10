@@ -117,16 +117,20 @@
 
 ### 5.2 AI/Agent-Specific Threats
 
-| ID | Category | Threat | Attack Vector | Likelihood | Impact | Risk |
-|----|----------|--------|---------------|------------|--------|------|
-| A01 | Prompt Injection | Direct injection | User input becomes instruction | High | Critical | Critical |
-| A02 | Prompt Injection | Indirect injection | RAG context contains malicious instructions | Medium | Critical | Critical |
-| A03 | Model Abuse | Harmful content generation | Jailbreak prompts bypass guardrails | Medium | High | High |
-| A04 | Model Abuse | Unauthorized data extraction | Prompt designed to extract training data | Low | Medium | Low |
-| A05 | Data Poisoning | RAG corpus poisoning | Inject false information into knowledge base | Low | High | Medium |
-| A06 | Goal Hijacking | Task redirection | Manipulate agent to perform unintended tasks | Medium | Critical | Critical |
-| A07 | Over-Autonomy | Unapproved actions | Agent takes high-risk actions without review | Medium | Critical | Critical |
-| A08 | Chain Escape | Multi-step exploitation | Chain of prompts escalates privileges | Low | Critical | High |
+> **Note**: This table now incorporates the [OWASP Agentic Top 10](../OWASP_AGENTIC_TOP_10.md) (ASI) taxonomy.
+
+| ID | Category | Threat | OWASP ASI | Attack Vector | Likelihood | Impact | Risk |
+|----|----------|--------|-----------|---------------|------------|--------|------|
+| A01 | Prompt Injection | Direct injection | ASI01 | User input becomes instruction | High | Critical | Critical |
+| A02 | Prompt Injection | Indirect injection | ASI01/ASI06 | RAG context contains malicious instructions | Medium | Critical | Critical |
+| A03 | Model Abuse | Harmful content generation | - | Jailbreak prompts bypass guardrails | Medium | High | High |
+| A04 | Model Abuse | Unauthorized data extraction | - | Prompt designed to extract training data | Low | Medium | Low |
+| A05 | Data Poisoning | RAG corpus poisoning | ASI06 | Inject false information into knowledge base | Low | High | Medium |
+| A06 | Goal Hijacking | Task redirection | ASI01 | Manipulate agent to perform unintended tasks | Medium | Critical | Critical |
+| A07 | Over-Autonomy | Unapproved actions | ASI09/ASI10 | Agent takes high-risk actions without review | Medium | Critical | Critical |
+| A08 | Chain Escape | Multi-step exploitation | ASI08 | Chain of prompts escalates privileges | Low | Critical | High |
+| A09 | Tool Misuse | Confused Deputy | ASI02 | Agent abused to misuse connected tools | Medium | Critical | Critical |
+| A10 | Supply Chain | Malicious Plugin | ASI04 | Compromised MCP server injects payload | Low | Critical | High |
 
 ---
 
@@ -282,6 +286,7 @@ class MerkleLedger {
 
 ## 10. References
 
+- [OWASP Agentic Top 10](../OWASP_AGENTIC_TOP_10.md) (**New** Dec 2025)
 - [OWASP LLM Top 10](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
 - [NIST AI Risk Management Framework](https://www.nist.gov/itl/ai-risk-management-framework)
 - [AI Agent Risk Audit](../../../security/ai-agent-risk-audit.md)
