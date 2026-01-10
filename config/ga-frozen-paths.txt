@@ -1,0 +1,10 @@
+docs/releases/MVP-4_GA_BASELINE.md
+docs/ga/MVP4_GA_RELEASE_NOTES.md
+docs/ga/MVP4_GA_EVIDENCE_MAP.md
+docs/ga/evidence_map.yml
+docs/security/SECURITY_REMEDIATION_LEDGER.md
+docs/security/security_ledger.yml
+docs/SUMMIT_READINESS_ASSERTION.md
+docs/releases/MVP4_RELEASE_BUNDLE.md
+docs/releases/MVP4_RELEASE_ARCHIVE.md
+docs/releases/MVP4_RELEASE_HANDOFF_NOTE.md

@@ -228,6 +228,10 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Check for GA Artifact Drift
+        run: |
+          bash scripts/ci/check_ga_drift.sh
+
       - name: Run Release Ready
         id: ready
         run: |
