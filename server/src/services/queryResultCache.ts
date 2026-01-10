@@ -33,6 +33,8 @@ export interface QueryResultCacheConfig {
   maxEntries?: number;
   streamingMaxEntries?: number;
   partialLimit?: number;
+  namespace?: string;
+  enabled?: boolean;
 }
 
 interface CacheFetchResult extends QueryResultPayload {
@@ -45,6 +47,8 @@ const DEFAULT_CONFIG: Required<QueryResultCacheConfig> = {
   maxEntries: 500,
   streamingMaxEntries: 250,
   partialLimit: 25,
+  namespace: 'ig',
+  enabled: true,
 };
 
 /**
@@ -58,8 +62,8 @@ export class QueryResultCache {
   private readonly streamingCache: Map<string, CacheEntry<unknown[]>> = new Map();
   private readonly config: Required<QueryResultCacheConfig>;
   private readonly redis: Redis | null;
-  private readonly prefix = 'ig:query-cache:';
-  private readonly streamingPrefix = 'ig:query-stream:';
+  private readonly prefix: string;
+  private readonly streamingPrefix: string;
   private readonly stats: Record<CacheOperation, { hits: number; misses: number }> = {
     result: { hits: 0, misses: 0 },
     streaming: { hits: 0, misses: 0 },
@@ -68,17 +72,30 @@ export class QueryResultCache {
   constructor(redis: Redis | null, config: QueryResultCacheConfig = {}) {
     this.redis = redis;
     this.config = { ...DEFAULT_CONFIG, ...config };
+    const safeNamespace = this.normaliseNamespace(this.config.namespace);
+    this.prefix = `${safeNamespace}:query-cache:`;
+    this.streamingPrefix = `${safeNamespace}:query-stream:`;
   }
 
+  /**
+   * Build a stable cache signature using a tenant-scoped namespace to prevent cross-tenant leakage.
+   * Redis key format:
+   *   `<namespace>:query-cache:<tenant>:<language>:<queryHash>:<paramHash>`
+   */
   buildSignature(
     language: string,
     query: string,
     parameters: Record<string, unknown> = {},
+    tenantId?: string,
   ): string {
+    const tenantSegment = this.normaliseTenant(tenantId);
+    if (!tenantSegment) {
+      throw new Error('QueryResultCache requires a tenantId to build cache signatures');
+    }
     const normalisedParams = this.normaliseParams(parameters);
     const paramHash = crypto.createHash('sha256').update(normalisedParams).digest('hex');
     const queryHash = crypto.createHash('sha256').update(query.trim()).digest('hex');
-    return `${language}:${queryHash}:${paramHash}`;
+    return `${tenantSegment}:${language}:${queryHash}:${paramHash}`;
   }
 
   getPartialLimit(): number {
@@ -104,6 +121,9 @@ export class QueryResultCache {
     signature: string,
     tenantId?: string,
   ): Promise<CacheFetchResult | undefined> {
+    if (!this.config.enabled) {
+      return undefined;
+    }
     const now = Date.now();
     const started = now;
     const l1Entry = this.l1.get(signature);
@@ -153,6 +173,7 @@ export class QueryResultCache {
     value: QueryResultPayload,
     tenantId?: string,
   ): Promise<void> {
+    if (!this.config.enabled) return;
     this.setL1(signature, value, this.config.ttlSeconds);
     cacheLocalSize.labels('query-signature:result').set(this.l1.size);
     recSet('query-signature', 'result', tenantId);
@@ -176,6 +197,7 @@ export class QueryResultCache {
     rows: unknown[],
     tenantId?: string,
   ): Promise<void> {
+    if (!this.config.enabled) return;
     const trimmed = rows.slice(0, this.config.partialLimit);
     this.setStreamingL1(signature, trimmed, this.config.streamingTtlSeconds);
     cacheLocalSize.labels('query-signature:streaming').set(this.streamingCache.size);
@@ -199,6 +221,9 @@ export class QueryResultCache {
     signature: string,
     tenantId?: string,
   ): Promise<{ rows: unknown[]; tier: CacheTier } | undefined> {
+    if (!this.config.enabled) {
+      return undefined;
+    }
     const now = Date.now();
     const started = now;
     const l1Entry = this.streamingCache.get(signature);
@@ -248,6 +273,10 @@ export class QueryResultCache {
     loader: () => Promise<QueryResultPayload>,
     options: { primeStreaming?: boolean } = {},
   ): Promise<{ payload: QueryResultPayload; fromCache: boolean; tier?: CacheTier }> {
+    if (!this.config.enabled) {
+      const payload = await loader();
+      return { payload, fromCache: false };
+    }
     const cached = await this.getResult(signature, tenantId);
     if (cached) {
       return { payload: cached, fromCache: true, tier: cached.tier };
@@ -338,6 +367,15 @@ export class QueryResultCache {
     };
 
     return JSON.stringify(stabilise(params));
+  }
+
+  private normaliseNamespace(namespace: string): string {
+    return namespace.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase() || 'ig';
+  }
+
+  private normaliseTenant(tenantId?: string): string {
+    if (!tenantId) return '';
+    return tenantId.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
   }
 
   private recordHit(operation: CacheOperation, tenantId?: string) {

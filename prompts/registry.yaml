@@ -28,3 +28,29 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: pr-15381-storage-dr-hardening
+    version: v1
+    path: prompts/pr-15381-storage-dr-hardening.md
+    sha256: 2f3023811474bd36fad1fe555f0948b027edd1f8898502386478f8fafa4994a8
+    description: Safety hardening for Redis cache, partition maintenance, and DR restore validation.
+    scope:
+      paths:
+        - server/
+        - scripts/
+        - docs/roadmap/
+        - prompts/
+        - agents/
+      domains:
+        - storage
+        - cache
+        - dr
+        - governance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

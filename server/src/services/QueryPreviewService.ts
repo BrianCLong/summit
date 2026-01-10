@@ -154,12 +154,17 @@ export class QueryPreviewService {
     this.nlToCypherService = nlToCypherService;
     this.glassBoxService = glassBoxService;
     this.redis = redis || null;
-    this.cacheEnabled = !!redis;
+    this.cacheEnabled =
+      process.env.QUERY_CACHE_DISABLED === '1' || process.env.QUERY_CACHE_DISABLED === 'true'
+        ? false
+        : !!redis;
     this.queryCache = new QueryResultCache(this.redis, {
       ttlSeconds: this.cacheTTL,
       streamingTtlSeconds: 20,
       maxEntries: 2000,
       partialLimit: 20,
+      namespace: process.env.QUERY_CACHE_NAMESPACE || 'ig',
+      enabled: this.cacheEnabled,
     });
   }
 
@@ -476,12 +481,6 @@ export class QueryPreviewService {
       let streamedBatches = 0;
       const executionStartedAt = Date.now();
       let payload: QueryResultPayload | undefined;
-      const signature = this.queryCache.buildSignature(
-        preview.language,
-        queryToExecute,
-        preview.parameters,
-      );
-
       const streamingCached = await this.queryCache.getStreamingPartial(
         signature,
         preview.tenantId,
@@ -974,6 +973,7 @@ export class QueryPreviewService {
       preview.language,
       query,
       preview.parameters,
+      preview.tenantId,
     );
   }
 

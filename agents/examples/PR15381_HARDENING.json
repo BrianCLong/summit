@@ -1,0 +1,30 @@
+{
+  "task_id": "PR15381_HARDENING",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "pr-15381-storage-dr-hardening",
+    "version": "v1",
+    "sha256": "2f3023811474bd36fad1fe555f0948b027edd1f8898502386478f8fafa4994a8",
+    "path": "prompts/pr-15381-storage-dr-hardening.md"
+  },
+  "declared_scope": {
+    "paths": ["server/", "scripts/", "docs/roadmap/", "prompts/", "agents/"],
+    "domains": ["storage", "cache", "dr", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["ci:verification-suite", "pnpm test:resilience"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "DR restore validation defaults to dry-run unless explicitly enabled",
+    "Partition maintenance logs planned actions before execution",
+    "Query cache signature usage is consistent and tenant-scoped",
+    "Roadmap status updated"
+  ],
+  "stop_conditions": ["CI failure in main", "Detection of PII in output", "Sandbox violation alert"]
+}
