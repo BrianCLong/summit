@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-10T03:49:20Z",
+  "revision_note": "Refined Sprint Pack 2026-01-05 verification paths and metadata requirements",
   "initiatives": [
     {
       "id": "A",
