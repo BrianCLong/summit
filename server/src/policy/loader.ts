@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { promises as fs } from 'fs';
 import path from 'path';
 
-type PolicyBundleVerification = {
+export type PolicyBundleVerificationResult = {
   ok: true;
   path: string;
   size: number;
@@ -12,7 +12,7 @@ type PolicyBundleVerification = {
   digest: string;
 };
 
-const DEFAULT_ALLOWED_EXTENSIONS = ['.tar', '.tgz', '.tar.gz', '.bundle'];
+const DEFAULT_ALLOWED_EXTENSIONS = ['.tar', '.tgz', '.tar.gz', '.bundle', '.json'];
 
 function assertNonEmptyString(value: unknown, label: string): asserts value is string {
   if (typeof value !== 'string' || value.trim().length === 0) {
@@ -54,7 +54,7 @@ function digestFileBuffer(buf: Buffer) {
 export async function loadSignedPolicy(
   bundlePath: string,
   sigPath?: string,
-): Promise<PolicyBundleVerification> {
+): Promise<PolicyBundleVerificationResult> {
   assertNonEmptyString(bundlePath, 'bundlePath');
   validateExtension(bundlePath);
 
@@ -91,4 +91,25 @@ export async function loadSignedPolicy(
     signatureVerified,
     digest,
   } as const;
+}
+
+export function policyHotReloadEnabled() {
+  return (process.env.POLICY_HOT_RELOAD || 'false').toLowerCase() === 'true';
+}
+
+export async function loadAndValidatePolicyBundle(
+  bundlePath: string,
+  sigPath?: string,
+) {
+  if (!policyHotReloadEnabled()) {
+    throw new Error('policy hot reload disabled by configuration');
+  }
+
+  const verification = await loadSignedPolicy(bundlePath, sigPath);
+  const raw = await fs.readFile(bundlePath, { encoding: 'utf-8' });
+  const parsed = JSON.parse(String(raw));
+  const { tenantPolicyBundleSchema } = await import('./tenantBundle.js');
+  const bundle = tenantPolicyBundleSchema.parse(parsed);
+
+  return { bundle, verification } as const;
 }
