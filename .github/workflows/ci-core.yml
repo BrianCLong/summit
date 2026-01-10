@@ -267,6 +267,43 @@ jobs:
             logs/
           retention-days: 7
 
+  soc-control-verification:
+    name: SOC Control Verification
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      actions: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run SOC control tests
+        run: |
+          mkdir -p soc-compliance-reports
+          bash scripts/test-soc-controls.sh soc-compliance-reports
+
+      - name: Upload SOC compliance reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: soc-compliance-report
+          path: soc-compliance-reports
+          retention-days: 90
+
   ci-core-gate:
     name: CI Core Gate ✅
     runs-on: ubuntu-latest
@@ -278,6 +315,7 @@ jobs:
       - verification-suite
       - deterministic-build
       - golden-path
+      - soc-control-verification
     if: always()
     steps:
       - name: Check all gates passed
@@ -290,6 +328,7 @@ jobs:
           echo "Verification Suite: ${{ needs.verification-suite.result }}"
           echo "Deterministic Build: ${{ needs.deterministic-build.result }}"
           echo "Golden Path: ${{ needs.golden-path.result }}"
+          echo "SOC Control Verification: ${{ needs.soc-control-verification.result }}"
           echo ""
 
           # All jobs must succeed (no continue-on-error allowed)
@@ -328,6 +367,11 @@ jobs:
             exit 1
           fi
 
+          if [[ "${{ needs.soc-control-verification.result }}" != "success" ]]; then
+            echo "::error::SOC Control Verification FAILED"
+            exit 1
+          fi
+
           echo ""
           echo "✅ CI CORE GATE: PASSED"
           echo "All gates green. PR is mergeable (pending ci-verify)."
@@ -344,5 +388,6 @@ jobs:
           echo "- ✅ Verification Suite" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Deterministic Build" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Golden Path Smoke Test" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ SOC Control Verification" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Status**: Ready for merge (pending ci-verify)" >> $GITHUB_STEP_SUMMARY
