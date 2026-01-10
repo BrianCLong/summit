@@ -32,3 +32,19 @@ jobs:
     steps:
       - name: Verify Major Approval
         run: echo "Checking for Architecture Review (Mock)..."
+
+  extension-governance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Check Extension Governance
+        run: node scripts/ci/check-extensions-compliance.mjs
