@@ -36,4 +36,10 @@ export function lookupApiClient(apiKey: string): ApiClient | null {
   return client;
 }
 
-export const TEST_API_KEY = 'demo-external-key-123';
+// Ensure we export a string to maintain type compatibility, defaulting to empty string in non-prod if missing.
+// In production, the runtime check below ensures we crash if it's missing.
+export const TEST_API_KEY: string = process.env.TEST_API_KEY || '';
+
+if (!process.env.TEST_API_KEY && process.env.NODE_ENV === 'production') {
+   throw new Error('TEST_API_KEY environment variable is not set');
+}
