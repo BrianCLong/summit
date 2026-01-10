@@ -79,3 +79,28 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: mvp4-ga-release-notes
+    version: v1
+    path: prompts/ga/mvp4-ga-release-notes.md
+    sha256: 1dffe8ac131ce8b422a8325ef1fe71d722c63da2822f0a7d322b6ab92f282d20
+    description: Generate MVP-4 GA release notes and a verifiable evidence index with traceability checks.
+    scope:
+      paths:
+        - docs/ga/
+        - docs/roadmap/STATUS.json
+        - prompts/ga/mvp4-ga-release-notes.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - release
+        - evidence
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
