@@ -1,6 +1,12 @@
 # GA Release Manifest (MVP-4-GA)
 
-This directory contains the required artifacts for the GA Release.
+**Canonical Status:**
+*   **Locked Baseline:** `docs/ga/MVP4_GA_BASELINE.md`
+*   **Stabilization Plan:** `docs/releases/MVP-4_POST_GA_STABILIZATION_PLAN.md`
+*   **Active Worksheet:** `docs/ga/POST_GA_ISSUANCE_WORKSHEET.md`
+
+This directory contains artifacts, runbooks, and checklists for the MVP-4 GA Release.
+**Note:** Some files in this directory are historical/working drafts from the release preparation phase (Dec 2025). Refer to the **Locked Baseline** above for the authoritative state.
 
 ## 1. Release Runbooks
 * [ ] [Deployment Runbook](DEPLOY.md)

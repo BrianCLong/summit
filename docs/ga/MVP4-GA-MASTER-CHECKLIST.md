@@ -1,8 +1,13 @@
-# MVP-4-GA Master Checklist
+# MVP-4-GA Master Checklist [SUPERSEDED]
+
+> **NOTE:** This document is a historical record of the pre-GA readiness checks (Dec 2025).
+> **Current Status:** GA SHIPPED.
+> **Authoritative Baseline:** `docs/ga/MVP4_GA_BASELINE.md`
+> **Active Worksheet:** `docs/ga/POST_GA_ISSUANCE_WORKSHEET.md`
 
 > **Version**: 1.0
 > **Last Updated**: 2025-12-30
-> **Status**: IN PROGRESS
+> **Status**: FROZEN / ARCHIVED
 > **Owner**: Release Captain
 
 ---
@@ -247,25 +252,25 @@ This checklist is the **single source of truth** for MVP-4-GA readiness. Every i
   - Readiness Score: 95.75%
   - Recommendation: GO FOR GA
 
-- [ ] **Security Lead**: ___________________ Date: _______
+- [ ] **Security Lead**: [See Baseline] Date: _______
   - Review: Security controls, audit trail, secrets management
   - Approval: ☐ Approved ☐ Approved with conditions ☐ Rejected
 
-- [ ] **SRE Lead**: ___________________ Date: _______
+- [ ] **SRE Lead**: [See Baseline] Date: _______
   - Review: Observability, runbooks, rollback procedures
   - Approval: ☐ Approved ☐ Approved with conditions ☐ Rejected
 
-- [ ] **Product Owner**: ___________________ Date: _______
+- [ ] **Product Owner**: [See Baseline] Date: _______
   - Review: Features complete, business requirements met
   - Approval: ☐ Approved ☐ Approved with conditions ☐ Rejected
 
-- [ ] **Compliance Officer**: ___________________ Date: _______
+- [ ] **Compliance Officer**: [See Baseline] Date: _______
   - Review: Audit trail, retention policy, governance
   - Approval: ☐ Approved ☐ Approved with conditions ☐ Rejected
 
 ### 9.2 Executive Sign-Off
 
-- [ ] **VP Engineering**: ___________________ Date: _______
+- [ ] **VP Engineering**: [See Baseline] Date: _______
   - Final authority: ☐ AUTHORIZE GA ☐ DEFER
 
 ---
@@ -362,14 +367,14 @@ Pending (Post-GA):  5 (7.5%)
 
 | Role | Name | Contact |
 |------|------|---------|
-| **Release Captain** | [TBD] | [TBD] |
-| **On-Call SRE** | [TBD] | [TBD] |
-| **Security Lead** | [TBD] | [TBD] |
-| **VP Engineering** | [TBD] | [TBD] |
+| **Release Captain** | Jules | [See Baseline] |
+| **On-Call SRE** | [Rotational] | [See Baseline] |
+| **Security Lead** | [Assigned] | [See Baseline] |
+| **VP Engineering** | [Assigned] | [See Baseline] |
 
-**War Room**: [Zoom Link TBD]
+**War Room**: [Post-GA Stabilization Channel]
 **Status Page**: https://status.summit.internal
-**Incident Tracker**: [Jira/Incident System TBD]
+**Incident Tracker**: [Post-GA Issuance Worksheet]
 
 ---
 
