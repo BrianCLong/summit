@@ -157,6 +157,25 @@ export interface paths {
         };
       };
     };
+    get: {
+      parameters?: {
+        query?: {
+          tenant?: string;
+          status?: string;
+          limit?: number;
+        };
+      };
+      responses: {
+        /** Run summaries */
+        200: {
+          content: {
+            "application/json": {
+              items: { [key: string]: any }[];
+            };
+          };
+        };
+      };
+    };
   };
 }
 

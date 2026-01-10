@@ -96,6 +96,74 @@ export interface PolicyLabel extends BaseNode {
   sensitivity: Sensitivity;
 }
 
+/**
+ * @interface MaestroRun
+ * @extends BaseNode
+ * @description Represents a Maestro orchestration run in the graph.
+ */
+export interface MaestroRun extends BaseNode {
+  /** Tenant scope for the run. */
+  tenantId: string;
+  /** Current status for the run lifecycle. */
+  status: 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled';
+  /** Request text or input summary for the run. */
+  requestText?: string;
+  /** When the run started. */
+  startedAt?: string;
+  /** When the run completed. */
+  completedAt?: string;
+}
+
+/**
+ * @interface MaestroStep
+ * @extends BaseNode
+ * @description Represents a step (task) within a Maestro run.
+ */
+export interface MaestroStep extends BaseNode {
+  /** Parent run ID. */
+  runId: string;
+  /** Tenant scope for the step. */
+  tenantId: string;
+  /** Status for the step. */
+  status: 'queued' | 'running' | 'succeeded' | 'failed';
+  /** Step kind (planner/action/etc). */
+  kind: string;
+  /** Human-readable summary. */
+  description?: string;
+}
+
+/**
+ * @interface MaestroReceipt
+ * @extends BaseNode
+ * @description Represents a receipt (input/output) produced or consumed by Maestro.
+ */
+export interface MaestroReceipt extends BaseNode {
+  /** Parent run ID. */
+  runId: string;
+  /** Optional step ID associated with the receipt. */
+  stepId?: string;
+  /** Receipt kind (request, artifact, etc.). */
+  kind: string;
+  /** Optional label for display. */
+  label?: string;
+}
+
+/**
+ * @interface MaestroApproval
+ * @extends BaseNode
+ * @description Represents an approval decision in Maestro governance flows.
+ */
+export interface MaestroApproval extends BaseNode {
+  /** Parent run ID. */
+  runId?: string;
+  /** Approval status. */
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled';
+  /** Requester or approver reference. */
+  actorId?: string;
+  /** Approval action type. */
+  action?: string;
+}
+
 // --- Edge Types ---
 
 /**
@@ -132,4 +200,36 @@ export interface InformedByEdge {
  */
 export interface HasPolicyEdge {
   type: 'HAS_POLICY';
+}
+
+/**
+ * @interface TriggeredByEdge
+ * @description Links a Maestro run or step to the user/system that triggered it.
+ */
+export interface TriggeredByEdge {
+  type: 'TRIGGERED_BY';
+}
+
+/**
+ * @interface InTenantEdge
+ * @description Links a Maestro node to its tenant boundary.
+ */
+export interface InTenantEdge {
+  type: 'IN_TENANT';
+}
+
+/**
+ * @interface ConsumedEdge
+ * @description Links a Maestro step to receipts it consumed.
+ */
+export interface ConsumedEdge {
+  type: 'CONSUMED';
+}
+
+/**
+ * @interface ProducedEdge
+ * @description Links a Maestro run/step to receipts it produced.
+ */
+export interface ProducedEdge {
+  type: 'PRODUCED';
 }

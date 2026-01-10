@@ -18,10 +18,13 @@ export class Maestro {
   ) {}
 
   async createRun(userId: string, requestText: string, options?: { tenantId?: string }): Promise<Run> {
+    const now = new Date().toISOString();
     const run: Run = {
       id: crypto.randomUUID(),
       user: { id: userId },
-      createdAt: new Date().toISOString(),
+      createdAt: now,
+      updatedAt: now,
+      status: 'queued',
       requestText,
       // Pass tenant context if available (will need DB schema update for full persistence)
       ...(options?.tenantId ? { tenantId: options.tenantId } : {})
@@ -37,6 +40,7 @@ export class Maestro {
     const planTask: Task = {
       id: crypto.randomUUID(),
       runId: run.id,
+      tenantId,
       status: 'succeeded',        // planning is instant for v0.1
       agent: {
         id: this.config.defaultPlannerAgent,
@@ -56,6 +60,7 @@ export class Maestro {
       id: crypto.randomUUID(),
       runId: run.id,
       parentTaskId: planTask.id,
+      tenantId,
       status: 'queued',
       agent: {
         id: this.config.defaultActionAgent,
@@ -197,6 +202,13 @@ export class Maestro {
 
   async runPipeline(userId: string, requestText: string, options?: { tenantId?: string }) {
     const run = await this.createRun(userId, requestText, options);
+    const startedAt = new Date().toISOString();
+    await this.ig.updateRun(run.id, {
+      status: 'running',
+      startedAt,
+      updatedAt: startedAt,
+      tenantId: run.tenantId,
+    });
     const tasks = await this.planRequest(run);
 
     const executable = tasks.filter(t => t.status === 'queued');
@@ -206,6 +218,17 @@ export class Maestro {
       const res = await this.executeTask(task);
       results.push(res);
     }
+
+    const finishedAt = new Date().toISOString();
+    const runStatus = results.some((res) => res.task.status === 'failed')
+      ? 'failed'
+      : 'succeeded';
+    await this.ig.updateRun(run.id, {
+      status: runStatus,
+      completedAt: finishedAt,
+      updatedAt: finishedAt,
+      tenantId: run.tenantId,
+    });
 
     const costSummary = await this.costMeter.summarize(run.id);
 

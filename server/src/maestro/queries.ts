@@ -3,6 +3,7 @@ import type { IntelGraphClient } from '../intelgraph/client.js';
 import type {
   MaestroRunResponse,
   TaskResult,
+  RunSummary,
 } from './types.js';
 
 export class MaestroQueries {
@@ -57,5 +58,13 @@ export class MaestroQueries {
       results,
       costSummary,
     };
+  }
+
+  async getRunSummaries(
+    tenantId?: string,
+    status?: string,
+    limit?: number,
+  ): Promise<RunSummary[]> {
+    return this.ig.getRunsByTenant(tenantId, status, limit);
   }
 }

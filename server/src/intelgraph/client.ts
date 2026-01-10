@@ -1,4 +1,11 @@
-import { Run, Task, Artifact, CostSample, RunCostSummary } from '../maestro/types';
+import {
+  Run,
+  Task,
+  Artifact,
+  CostSample,
+  RunCostSummary,
+  RunSummary,
+} from '../maestro/types';
 
 export interface IntelGraphClient {
   createRun(run: Run): Promise<void>;
@@ -11,6 +18,17 @@ export interface IntelGraphClient {
 
   recordCostSample(sample: CostSample): Promise<void>;
   getRunCostSummary(runId: string): Promise<RunCostSummary>;
+
+  getRun(runId: string): Promise<Run | null>;
+  getRunsByTenant(
+    tenantId?: string,
+    status?: string,
+    limit?: number,
+  ): Promise<RunSummary[]>;
+  getTasksForRun(runId: string): Promise<Task[]>;
+  getTask(taskId: string): Promise<Task | null>;
+  getArtifactsForRun(runId: string): Promise<Artifact[]>;
+  getArtifactsForTask(taskId: string): Promise<Artifact[]>;
 }
 
 // a very thin, testable class
@@ -73,5 +91,58 @@ export class IntelGraphClientImpl implements IntelGraphClient {
       }
     }
     return summary;
+  }
+
+  async getRun(runId: string): Promise<Run | null> {
+    return this.runs.get(runId) || null;
+  }
+
+  async getRunsByTenant(
+    tenantId?: string,
+    status?: string,
+    limit = 100,
+  ): Promise<RunSummary[]> {
+    const runs = Array.from(this.runs.values())
+      .filter((run) => (tenantId ? run.tenantId === tenantId : true))
+      .filter((run) => (status ? run.status === status : true))
+      .slice(0, limit);
+
+    return runs.map((run) => {
+      const stepCount = Array.from(this.tasks.values()).filter(
+        (task) => task.runId === run.id,
+      ).length;
+      const receiptCount = Array.from(this.artifacts.values()).filter(
+        (artifact) => artifact.runId === run.id,
+      ).length;
+      return {
+        id: run.id,
+        status: run.status,
+        tenantId: run.tenantId,
+        createdAt: run.createdAt,
+        updatedAt: run.updatedAt,
+        stepCount,
+        receiptCount,
+      };
+    });
+  }
+
+  async getTasksForRun(runId: string): Promise<Task[]> {
+    return Array.from(this.tasks.values()).filter((task) => task.runId === runId);
+  }
+
+  async getTask(taskId: string): Promise<Task | null> {
+    return this.tasks.get(taskId) || null;
+  }
+
+  async getArtifactsForRun(runId: string): Promise<Artifact[]> {
+    return Array.from(this.artifacts.values()).filter(
+      (artifact) => artifact.runId === runId,
+    );
+  }
+
+  async getArtifactsForTask(taskId: string): Promise<Artifact[]> {
+    return Array.from(this.artifacts.values()).filter(
+      (artifact) => artifact.taskId === taskId,
+    );
   }
 }
