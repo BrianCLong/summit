@@ -1,5 +1,5 @@
 {
-  "last_updated": "2025-12-29T12:30:00Z",
+  "last_updated": "2025-12-29T23:00:00Z",
   "initiatives": [
     {
       "id": "A",
@@ -63,6 +63,30 @@
           "id": "C2",
           "name": "Immutable Audit Log",
           "status": "rc-ready",
+          "owner": "Jules"
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "name": "Runtime Moat & Adaptive Execution",
+      "epics": [
+        {
+          "id": "D1",
+          "name": "Hybrid Routing, Caching, and Validation",
+          "status": "planned",
+          "owner": "Jules"
+        },
+        {
+          "id": "D2",
+          "name": "Speculative Decoding and Structured Repair",
+          "status": "planned",
+          "owner": "Jules"
+        },
+        {
+          "id": "D3",
+          "name": "Edge Runtime Enablement",
+          "status": "planned",
           "owner": "Jules"
         }
       ]
