@@ -411,6 +411,7 @@ generate_markdown() {
 **Generated:** ${timestamp}
 **Repository:** ${repo}
 **Policy:** [REQUIRED_CHECKS_POLICY.yml](../../docs/ci/REQUIRED_CHECKS_POLICY.yml)
+**Stabilization Plan:** [MVP-4_POST_GA_STABILIZATION_ISSUANCE.md](../../docs/releases/MVP-4_POST_GA_STABILIZATION_ISSUANCE.md)
 
 ---
 
@@ -555,6 +556,7 @@ This dashboard uses the same policy engine as the RC and GA promotion pipelines:
 - [RC Pipeline](../../docs/ci/RELEASE_RC_PIPELINE.md)
 - [GA Pipeline](../../docs/ci/RELEASE_GA_PIPELINE.md)
 - [Promotion Guide](../../docs/releases/MVP-4_STABILIZATION_PROMOTION.md)
+- [**Post-GA Stabilization Issuance**](../../docs/releases/MVP-4_POST_GA_STABILIZATION_ISSUANCE.md) (Status of Deferred Items)
 
 ---
 
