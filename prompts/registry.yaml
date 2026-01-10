@@ -28,3 +28,26 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: roadmap-war-room-execution-alignment
+    version: v1
+    path: prompts/roadmap/war-room-execution-alignment.md
+    sha256: 8fc1f6ed688054af2f5c4afc3a5f42700b0b18978cfe97242a8588e4c89b360b
+    description: Execution-ready documentation package for war-room backlog alignment.
+    scope:
+      paths:
+        - docs/roadmap/
+        - docs/roadmap/strategic/12-months/
+        - prompts/roadmap/
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - roadmap
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
