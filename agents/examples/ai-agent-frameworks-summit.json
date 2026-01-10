@@ -1,0 +1,38 @@
+{
+  "task_id": "AI_AGENT_FRAMEWORKS_SUMMIT_20260103",
+  "agent_id": "gpt-5.2-codex",
+  "prompt_ref": {
+    "id": "ai-agent-frameworks-summit",
+    "version": "v1",
+    "sha256": "586c462641950ff0a5226787d1d460d74d5a2e2c5740b85866d98dc978b60855",
+    "path": "prompts/ai-agent-frameworks-summit.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ai-agent-frameworks-summit.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/ai-agent-frameworks-summit.md",
+      "prompts/registry.yaml",
+      "agents/examples/ai-agent-frameworks-summit.json"
+    ],
+    "domains": ["docs", "roadmap", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/ai-agent-frameworks-summit.md", "docs/roadmap/STATUS.json"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Deliverables 1-5 are complete, actionable, and align to Summit governance.",
+    "Prompt registry entry and task spec validate against their schemas.",
+    "Roadmap STATUS.json updated with current timestamp and revision note."
+  ],
+  "stop_conditions": [
+    "Conflict with Summit governance or GA guardrails.",
+    "Prompt hash mismatch or scope violation."
+  ]
+}
