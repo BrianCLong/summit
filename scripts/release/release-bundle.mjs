@@ -228,7 +228,7 @@ async function main() {
   // 6d. Checksums
   console.log('\n🔏 Generating Checksums...');
   try {
-     const files = runSilent(`find ${DIST_RELEASE} -type f -not -name "checksums.txt"`).split('\n').filter(Boolean);
+     const files = runSilent(`find ${DIST_RELEASE} -type f -not -name "checksums.txt" -not -name "SHA256SUMS"`).split('\n').filter(Boolean);
      let checksums = '';
      for (const file of files) {
          const relPath = file.replace(`${DIST_RELEASE}/`, '');
@@ -237,8 +237,8 @@ async function main() {
              checksums += `${shasum}  ${relPath}\n`;
          }
      }
-     writeFileSync(join(DIST_RELEASE, 'checksums.txt'), checksums);
-     console.log('   Wrote checksums.txt');
+     writeFileSync(join(DIST_RELEASE, 'SHA256SUMS'), checksums);
+     console.log('   Wrote SHA256SUMS');
   } catch (e) {
       console.warn('⚠️  Could not generate checksums (missing shasum/sha256sum?)');
   }
