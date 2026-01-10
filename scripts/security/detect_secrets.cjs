@@ -32,6 +32,7 @@ const IGNORE_FILES = [
     '.env.example',
     '.env.test',
     'detect_secrets.js',
+    'detect_secrets.cjs',
     'secrets.ts', // Allowed to have patterns in comments/regex
     'test',
     'mock',
@@ -45,7 +46,12 @@ const IGNORE_FILES = [
     'CHANGELOG.md',
     'manifest.json', // Often contains hashes
     'SECURITY.md', // Documentation
-    'src/config.ts' // Contains variable descriptions that trigger false positives
+    'src/config.ts', // Contains variable descriptions that trigger false positives
+    'secret-scanner.ts', // Tooling regex
+    'MTLSManager.ts', // Mock keys
+    'ltdim/index.ts', // Legal tool placeholders
+    'persisted-queries.md', // Documentation with hashes
+    'sample-merge-safe-artifact.json' // Artifact sample
 ];
 
 // Directories to ignore
@@ -61,7 +67,11 @@ const IGNORE_DIRS = [
     'charts',
     'deploy',
     'docs', // Docs often have examples
-    'october2025' // Archive/Workstreams often have snippets
+    'october2025', // Archive/Workstreams often have snippets
+    'evidence-bundles', // Generated evidence artifacts
+    'audit', // Audit logs/evidence
+    'reliability', // Test fixtures
+    'fixtures' // General fixtures
 ];
 
 function findFiles(dir, fileList = []) {
