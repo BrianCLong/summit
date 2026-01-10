@@ -20,6 +20,32 @@ import { cn } from '@/lib/utils'
 import type { Entity, Relationship, GraphLayout } from '@/types'
 import { CanvasGraphRenderer } from './CanvasGraphRenderer'
 
+// Entity type to color mapping
+const ENTITY_COLORS: Record<string, string> = {
+  PERSON: '#3b82f6',
+  ORGANIZATION: '#8b5cf6',
+  LOCATION: '#10b981',
+  IP_ADDRESS: '#f59e0b',
+  DOMAIN: '#06b6d4',
+  EMAIL: '#ec4899',
+  FILE: '#ef4444',
+  PROJECT: '#84cc16',
+  SYSTEM: '#6b7280',
+}
+
+// Entity type to icon mapping
+const ENTITY_ICONS: Record<string, string> = {
+  PERSON: '👤',
+  ORGANIZATION: '🏢',
+  LOCATION: '📍',
+  IP_ADDRESS: '🌐',
+  DOMAIN: '🔗',
+  EMAIL: '📧',
+  FILE: '📄',
+  PROJECT: '📊',
+  SYSTEM: '⚙️',
+}
+
 interface GraphCanvasProps {
   entities: Entity[]
   relationships: Relationship[]
@@ -235,34 +261,12 @@ export function GraphCanvas({
 
     // Entity type to color mapping
     const getEntityColor = (type: string) => {
-      const colors: Record<string, string> = {
-        PERSON: '#3b82f6',
-        ORGANIZATION: '#8b5cf6',
-        LOCATION: '#10b981',
-        IP_ADDRESS: '#f59e0b',
-        DOMAIN: '#06b6d4',
-        EMAIL: '#ec4899',
-        FILE: '#ef4444',
-        PROJECT: '#84cc16',
-        SYSTEM: '#6b7280',
-      }
-      return colors[type] || '#6b7280'
+      return ENTITY_COLORS[type] || '#6b7280'
     }
 
     // Entity type to icon mapping
     const getEntityIcon = (type: string) => {
-      const icons: Record<string, string> = {
-        PERSON: '👤',
-        ORGANIZATION: '🏢',
-        LOCATION: '📍',
-        IP_ADDRESS: '🌐',
-        DOMAIN: '🔗',
-        EMAIL: '📧',
-        FILE: '📄',
-        PROJECT: '📊',
-        SYSTEM: '⚙️',
-      }
-      return icons[type] || '📊'
+      return ENTITY_ICONS[type] || '📊'
     }
 
     // Draw nodes
@@ -463,20 +467,7 @@ export function GraphCanvas({
               <div
                 className="w-3 h-3 rounded-full border"
                 style={{
-                  backgroundColor: (() => {
-                    const colors: Record<string, string> = {
-                      PERSON: '#3b82f6',
-                      ORGANIZATION: '#8b5cf6',
-                      LOCATION: '#10b981',
-                      IP_ADDRESS: '#f59e0b',
-                      DOMAIN: '#06b6d4',
-                      EMAIL: '#ec4899',
-                      FILE: '#ef4444',
-                      PROJECT: '#84cc16',
-                      SYSTEM: '#6b7280',
-                    }
-                    return colors[type] || '#6b7280'
-                  })(),
+                  backgroundColor: ENTITY_COLORS[type] || '#6b7280',
                 }}
               />
               <span>{type.replace('_', ' ')}</span>
