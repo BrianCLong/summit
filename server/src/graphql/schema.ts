@@ -770,4 +770,38 @@ input SemanticSearchFilter {
     nodes: [CausalNode!]!
     edges: [CausalEdge!]!
   }
+
+  type RagCitation {
+    sourceId: ID!
+    title: String
+    url: String
+    snippet: String!
+    offsets: RagOffset!
+    score: Float!
+  }
+
+  type RagOffset {
+    start: Int!
+    end: Int!
+  }
+
+  type RagAnswerPayload {
+    answer: String!
+    citations: [RagCitation!]!
+    debug: JSON
+  }
+
+  input RagAnswerInput {
+    query: String!
+    workspaceId: ID
+    filters: JSON
+    mode: String
+    topK: Int
+    useHyDE: Boolean
+    useTools: Boolean
+  }
+
+  extend type Mutation {
+    ragAnswer(input: RagAnswerInput!): RagAnswerPayload!
+  }
 `;

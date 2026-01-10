@@ -1,0 +1,2 @@
+{"query": "summarize the sample corpus", "expectedSources": ["sample-doc"]}
+{"query": "calculate totals from sample", "expectedSources": ["sample-doc"]}

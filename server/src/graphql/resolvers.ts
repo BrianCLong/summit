@@ -10,12 +10,54 @@ import { makePubSub } from '../subscriptions/pubsub';
 import Redis from 'ioredis';
 import { CausalGraphService } from '../services/CausalGraphService';
 import type { GraphQLContext } from './apollo-v5-server.js';
+import { getPostgresPool, getNeo4jDriver, getRedisClient } from '../config/database.js';
+import { RAGOrchestrator, PgVectorStore, Neo4jGraphStore } from '@intelgraph/agentic-rag';
+import { cacheHits } from '@intelgraph/agentic-rag';
 
 const COHERENCE_EVENTS = 'COHERENCE_EVENTS';
 
 const redisClient = process.env.REDIS_URL
   ? new Redis(process.env.REDIS_URL)
   : null;
+
+const normalizeQuery = (query: string) =>
+  query
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ');
+
+const stableStringify = (value: unknown): string => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return JSON.stringify(value);
+  }
+  const entries = Object.entries(value as Record<string, unknown>)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, val]) => [key, val]);
+  return JSON.stringify(Object.fromEntries(entries));
+};
+
+const resolveCorpusVersion = async (pool: any, workspaceId?: string) => {
+  const result = await pool.query(
+    `SELECT corpus_version
+     FROM rag_documents
+     WHERE ($1::text IS NULL OR workspace_id = $1)
+     ORDER BY created_at DESC
+     LIMIT 1`,
+    [workspaceId ?? null]
+  );
+  if (result.rows?.[0]?.corpus_version) {
+    return result.rows[0].corpus_version as string;
+  }
+  const fallback = await pool.query(
+    `SELECT corpus_version
+     FROM rag_chunks
+     WHERE ($1::text IS NULL OR workspace_id = $1)
+     ORDER BY created_at DESC
+     LIMIT 1`,
+    [workspaceId ?? null]
+  );
+  return fallback.rows?.[0]?.corpus_version ?? 'unknown';
+};
 
 export const resolvers = {
   DateTime: new (require('graphql-iso-date').GraphQLDateTime)(),
@@ -169,6 +211,78 @@ export const resolvers = {
       } finally {
         end();
       }
+    },
+    async ragAnswer(_: any, { input }: any) {
+      if (process.env.AGENTIC_RAG_ENABLED !== 'true') {
+        return { answer: 'Agentic RAG disabled', citations: [], debug: { enabled: false } };
+      }
+
+      const rawQuery = input?.query ?? '';
+      const normalizedQuery = normalizeQuery(rawQuery);
+      const normalized = {
+        query: rawQuery,
+        workspaceId: input?.workspaceId,
+        filters: input?.filters,
+        topK: input?.topK ?? Number(process.env.AGENTIC_RAG_TOPK || 8),
+        useHyde: input?.useHyDE ?? process.env.AGENTIC_RAG_USE_HYDE === 'true',
+        useTools: input?.useTools ?? process.env.AGENTIC_RAG_USE_TOOLS !== 'false',
+      };
+
+      const redis = getRedisClient() ?? redisClient;
+      const poolWrapper = getPostgresPool();
+      const pool = (poolWrapper as any).pool ?? poolWrapper;
+      const corpusVersion = await resolveCorpusVersion(pool, normalized.workspaceId);
+      const cacheKey = `rag:cache:${normalizedQuery}:${normalized.workspaceId ?? 'global'}:${corpusVersion}:${normalized.topK}:${stableStringify(
+        normalized.filters ?? {}
+      )}`;
+
+      if (redis) {
+        const cached = await redis.get(cacheKey);
+        if (cached) {
+          cacheHits.labels('hit').inc();
+          return JSON.parse(cached);
+        }
+        cacheHits.labels('miss').inc();
+      }
+
+      let graphStore: Neo4jGraphStore | undefined;
+      try {
+        graphStore = new Neo4jGraphStore({ driver: getNeo4jDriver() as any });
+      } catch (error) {
+        graphStore = undefined;
+      }
+
+      const orchestrator = new RAGOrchestrator({
+        vectorStore: new PgVectorStore({ pool }),
+        graphStore,
+      }, {
+        enableHttpFetch: process.env.AGENTIC_RAG_ENABLE_HTTP_FETCH === 'true',
+        weights: {
+          vector: Number(process.env.HYBRID_VECTOR_WEIGHT || 0.7),
+          graph: Number(process.env.HYBRID_GRAPH_WEIGHT || 0.3),
+        },
+      });
+
+      const result = await orchestrator.answer({
+        query: normalized.query,
+        workspaceId: normalized.workspaceId,
+        filters: normalized.filters,
+        corpusVersion,
+        topK: normalized.topK,
+        useHyde: normalized.useHyde,
+        useTools: normalized.useTools,
+      });
+
+      if (redis) {
+        await redis.set(
+          cacheKey,
+          JSON.stringify(result),
+          'EX',
+          Number(process.env.AGENTIC_RAG_REDIS_TTL_SECONDS || 900)
+        );
+      }
+
+      return result;
     },
   },
   Subscription: {
