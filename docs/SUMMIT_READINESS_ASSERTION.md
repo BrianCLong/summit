@@ -50,3 +50,11 @@ We do not "try" features; we certify capabilities.
 We do not "hope" for stability; we engineer resilience.
 
 **This assertion stands until formally revoked by a V2 Governance Override.**
+
+---
+
+### POST-RELEASE LOCK
+
+As of commit `3bdd8370e1c1cc6137220065fc627f8c66429d4a`, this assertion is locked. The authoritative GA artifacts are archived in `docs/releases/MVP4_RELEASE_ARCHIVE.md`.
+
+Verification of the GA state is available via the `pnpm ga:verify` command.

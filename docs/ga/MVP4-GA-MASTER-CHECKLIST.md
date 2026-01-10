@@ -1,3 +1,8 @@
+> **FROZEN AS OF `3bdd8370e1c1cc6137220065fc627f8c66429d4a`**
+>
+> This document is a read-only record of the MVP-4 GA release. Do not edit.
+> All post-release actions are tracked in `docs/releases/POST_RELEASE_ACTIONS.md`.
+
 # MVP-4-GA Master Checklist
 
 > **Version**: 1.0
