@@ -48,10 +48,10 @@ OPA/Rego packages:
 
 ### CI Workflow
 
-`.github/workflows/governance.yml` runs on PRs and selected branches:
+`.github/workflows/mvp4-gate.yml` runs on PRs and selected branches:
 
 1. Validate schemas and sample documents
-2. Run OPA policy tests
+2. Run OPA policy tests (Non-blocking, see `docs/ga/waivers/WAIVER-001-POLICY-SYNTAX.md`)
 3. Build OPA input from GitHub event (`ci/build-opa-input.js`)
 4. Evaluate deploy, PR, and SBOM policies
 5. Emit `governance-decision.json` as an artifact

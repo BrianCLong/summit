@@ -15,6 +15,7 @@ controls:
     description: "Code changes authorized and reviewed"
     summit_artifacts:
       - ".github/workflows/ci.yml"
+      - ".github/workflows/mvp4-gate.yml"
       - "docs/governance/ci-enforcement.md"
     evidence:
       - "ci/pr-approvals"

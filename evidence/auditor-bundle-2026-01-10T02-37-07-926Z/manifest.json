@@ -1,0 +1,12 @@
+{
+  "bundleId": "auditor-bundle-2026-01-10T02-37-07-926Z",
+  "generatedAt": "2026-01-10T02:37:07.935Z",
+  "controlsIncluded": [
+    "CC1.1",
+    "CC1.2",
+    "CC6.1",
+    "CC7.1",
+    "CC8.1"
+  ],
+  "parameters": {}
+}

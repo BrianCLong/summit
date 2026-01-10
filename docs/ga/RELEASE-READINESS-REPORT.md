@@ -147,12 +147,12 @@ Test Coverage:         Policies have dedicated tests
 ```yaml
 ✅ Security Gate (Gitleaks + Snyk)
   - Gitleaks secret scanning (fetch-depth: 0)
-  - Dependency audit (commented until baseline clean)
+  - Dependency audit (Active)
 ```
 
-**Status**: ✅ **IMPLEMENTED** (audit commented with clear TODO)
+**Status**: ✅ **IMPLEMENTED** (Audit is active in `mvp4-gate.yml`)
 
-**Recommendation**: Uncomment `pnpm audit --audit-level critical` post-GA after CVE baseline established
+**Recommendation**: Maintain zero critical CVE policy.
 
 ### 4.3 Policy Checks
 
@@ -164,7 +164,7 @@ Test Coverage:         Policies have dedicated tests
   - opa test policies/ -v
 ```
 
-**Status**: ✅ **IMPLEMENTED**
+**Status**: ✅ **IMPLEMENTED** (Non-Blocking, see `docs/ga/waivers/WAIVER-001-POLICY-SYNTAX.md`)
 
 ### 4.4 SLSA Provenance & SBOM
 
@@ -346,7 +346,7 @@ deny {
 | **Schema/Type Sync** | ⚠️ Partial | TypeScript strict, no `any` in linting config |
 | **Error Budgets** | ⚠️ Not Implemented | Post-GA: Define in Prometheus/Terraform |
 | **Policy Universality** | ✅ **IMPLEMENTED** | `mvp4_governance.rego` enforces 100% coverage |
-| **Test Determinism** | ⚠️ Environment | Quarantine tests exist (`mvp4-gate.yml:31-45`) |
+| **Test Determinism** | ⚠️ Waived | Quarantine tests exist (See `WAIVER-002-QUARANTINE-TESTS.md`) |
 | **Promotion Gates** | ✅ **IMPLEMENTED** | `mvp4-gate.yml` automated gates |
 | **Secret Hygiene** | ✅ **IMPLEMENTED** | Gitleaks in CI |
 
@@ -429,7 +429,7 @@ deny {
 
 ### 11.1 Week 1 (Critical)
 
-- [ ] **Enable pnpm audit** in CI (uncomment line 62, `mvp4-gate.yml`)
+- [x] **Enable pnpm audit** in CI (Already active in `mvp4-gate.yml`)
 - [ ] **Define Error Budgets** in Prometheus/AlertManager
 - [ ] **Create ADR-009** documenting MVP-4-GA architectural decisions
 - [ ] **Monitor SLOs** hourly for first 72 hours

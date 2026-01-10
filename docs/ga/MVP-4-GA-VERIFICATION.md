@@ -13,8 +13,12 @@ This sweep captures the minimum credible verification for the GA-hardening surfa
 | Policy Preflight & Receipts      | `scripts/ga/verify-ga-surface.mjs` (schema validation for verification map + provenance doc presence)                       | C    | `make ga-verify`          | Policy-as-code validation without depending on the test runner.                                               |
 | Ingestion Security Hardening     | `testing/ga-verification/ga-features.ga.test.mjs` (checks ingestion hardening evidence)                                     | B    | `make ga-verify`          | Ensures security expectations remain documented and discoverable.                                             |
 
-## Deferred / To-Improve Items
+## Active Waivers
 
-- Promote Tier B checks to Tier A Jest suites once the runner stabilizes.
-- Expand schema validation to cover runtime policies (OPA/Rego) when they are landed in-tree.
-- Attach evidence artifacts (logs, receipts) to CI once provenance plumbing is fully wired.
+The following items have been formally waived for the MVP-4 GA Release. See `docs/ga/waivers/` for details.
+
+| Item | Waiver ID | Resolution Plan |
+|------|-----------|-----------------|
+| **Test Runner Stability** | `WAIVER-003` | Containerize CI verification environment. |
+| **OPA Syntax Checks** | `WAIVER-001` | Upgrade OPA policies to modern Rego syntax. |
+| **Quarantine Tests** | `WAIVER-002` | Refactor nondeterministic tests. |
