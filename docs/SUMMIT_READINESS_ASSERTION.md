@@ -50,3 +50,15 @@ We do not "try" features; we certify capabilities.
 We do not "hope" for stability; we engineer resilience.
 
 **This assertion stands until formally revoked by a V2 Governance Override.**
+
+---
+
+### 4. MVP-4 GA SECURITY READINESS
+
+For the MVP-4 GA release, the following security posture is asserted:
+
+*   **Core Security is Strong:** The architectural foundation, including authentication, authorization, policy enforcement, and provenance, is sound and meets GA criteria.
+*   **Explicit Deferrals:** Specific, non-critical security risks have been explicitly deferred. These are documented in `docs/security/SECURITY_DEFERRED_RISKS.md` and are accepted for the GA release.
+*   **Continuous Monitoring:** The security posture will be continuously monitored post-release, with a commitment to address deferred items as prioritized.
+
+This assertion is made against the state of the repository as defined in `docs/ga/MVP4_GA_BASELINE.md`.
