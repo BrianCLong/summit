@@ -1,6 +1,6 @@
 import { Readable, Transform } from 'stream';
 import { parse } from 'csv-parse';
-import AWS from 'aws-sdk';
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { trace, Span } from '@opentelemetry/api';
 import { register, Counter, Histogram, Gauge } from 'prom-client';
 
@@ -83,14 +83,14 @@ class BackpressureQueue implements ProcessingQueue {
 }
 
 export class S3CSVReader {
-  private s3: AWS.S3;
+  private s3: S3Client;
   private queue: BackpressureQueue;
   private workerId: string;
   private metricsInterval?: NodeJS.Timeout;
   private lastRowCount = 0;
 
   constructor(workerId: string, queueConfig?: { high: number; low: number }) {
-    this.s3 = new AWS.S3();
+    this.s3 = new S3Client({});
     this.workerId = workerId;
     this.queue = new BackpressureQueue(
       queueConfig?.high || 10000,
@@ -138,9 +138,14 @@ export class S3CSVReader {
       });
 
       try {
-        const s3Stream = this.s3
-          .getObject({ Bucket: bucket, Key: key })
-          .createReadStream();
+        const command = new GetObjectCommand({ Bucket: bucket, Key: key });
+        const response = await this.s3.send(command);
+        const s3Stream = response.Body as Readable;
+
+        if (!s3Stream) {
+           throw new Error('S3 Object Body is empty');
+        }
+
         let rowCount = 0;
         let batch: CSVRow[] = [];
         const startTime = Date.now();
