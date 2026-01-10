@@ -79,3 +79,27 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: audit-rehearsal-annual
+    version: v1
+    path: prompts/audit/annual-audit-rehearsal-v1.md
+    sha256: 85e77873b269f389a8ed9da5073206ec3b59e393a53caf82723b76d83c3d2877
+    description: Annual audit readiness rehearsal with scoped evidence walkthrough and gap register.
+    scope:
+      paths:
+        - docs/audit/
+        - docs/roadmap/STATUS.json
+        - prompts/audit/
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - compliance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
