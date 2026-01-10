@@ -286,6 +286,7 @@ ga: ## Run Enforceable GA Gate (Lint -> Clean Up -> Deep Health -> Smoke -> Secu
 ga-verify: ## Run GA tier B/C verification sweep (deterministic)
 	@node --test testing/ga-verification/*.ga.test.mjs
 	@node scripts/ga/verify-ga-surface.mjs
+	@node scripts/api/verify-ga-surface.mjs
 
 ops-verify: ## Run unified Ops Verification (Observability + Storage/DR)
 	./scripts/verification/verify_ops.sh

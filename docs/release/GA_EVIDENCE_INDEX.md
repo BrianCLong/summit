@@ -42,6 +42,21 @@ Centralized index of commands, outputs, and artifact locations for GA verificati
 | `make release`                | Pending |            | Docker + wheel artifacts with IMAGE_TAG aligned |
 | `npm run generate:provenance` | Pending |            | Capture provenance if enabled                   |
 
+## API Contract Stability
+
+| Command           | Status  | Evidence                                                                  | Notes                                                              |
+| ----------------- | ------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `make ga-verify`  | Pending | Attach CLI output showing all GA surfaces were successfully verified.       | This command programmatically enforces the API compatibility policy. |
+
+### Supporting Documents
+
+- **GA API Surface Definition**: `docs/api/GA_API_SURFACES.md`
+- **Compatibility Policy**: `docs/api/API_COMPATIBILITY_POLICY.md`
+- **Contract Snapshots**: `docs/api/API_CONTRACT_SNAPSHOTS.md`
+- **Governance Model**: `docs/api/API_GOVERNANCE.md`
+
+---
+
 ## Evidence Storage Locations
 
 - **Logs**: Attach stdout/stderr snippets to this file or link to CI artifacts.
