@@ -79,3 +79,25 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: pr-merge-ledger-update
+    version: v1
+    path: prompts/governance/pr-merge-ledger-update.md
+    sha256: 703296107975cad7f764c5f2b943e209d82d64b5627aba53915560dfef0bb7ac
+    description: Maintain authoritative merge records in PR_MERGE_LEDGER.md with verified evidence or deferred status.
+    scope:
+      paths:
+        - PR_MERGE_LEDGER.md
+        - prompts/governance/pr-merge-ledger-update.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
