@@ -96,9 +96,12 @@ build:  ## Build all images
 	docker compose -f $(COMPOSE_DEV_FILE) build
 
 release: ## Build Python wheel and Docker image tagged with project version
-	$(PYTHON) -m pip wheel . -w dist
-	docker build -t $(IMAGE) -f Dockerfile .
-	docker tag $(IMAGE) $(IMAGE_NAME):latest
+$(PYTHON) -m pip wheel . -w dist
+docker build -t $(IMAGE) -f Dockerfile .
+docker tag $(IMAGE) $(IMAGE_NAME):latest
+
+release-check: ## Validate release version policy and changelog alignment
+	@pnpm run release:version-check
 
 ci: lint test
 

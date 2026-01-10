@@ -11,6 +11,9 @@ prompts:
         - prompts/
         - scripts/ci/
         - docs/ga/
+        - docs/ops/
+        - docs/roadmap/
+        - CHANGELOG.md
         - artifacts/
         - metrics/
         - .github/
