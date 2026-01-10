@@ -28,3 +28,24 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: operational-excellence-ops-cadence
+    version: v1
+    path: prompts/operations/operational-excellence-ops-cadence.md
+    sha256: 6b6f18ecea281e3a492595d40b4f3e798ccc2472b11090ee889fc33f00883136
+    description: Operational excellence documentation updates with cadence, cost, reliability, and security guidance.
+    scope:
+      paths:
+        - docs/operations/
+        - docs/roadmap/STATUS.json
+      domains:
+        - operations
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

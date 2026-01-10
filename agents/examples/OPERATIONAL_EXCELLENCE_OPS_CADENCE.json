@@ -1,0 +1,40 @@
+{
+  "task_id": "OPERATIONAL_EXCELLENCE_OPS_CADENCE",
+  "agent_id": "chatgpt",
+  "prompt_ref": {
+    "id": "operational-excellence-ops-cadence",
+    "version": "v1",
+    "sha256": "6b6f18ecea281e3a492595d40b4f3e798ccc2472b11090ee889fc33f00883136",
+    "path": "prompts/operations/operational-excellence-ops-cadence.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/operations/OPERATING_CADENCE.md",
+      "docs/operations/COST_CONTINUOUS.md",
+      "docs/operations/RELIABILITY_DRIFT.md",
+      "docs/operations/SECURITY_CONTINUOUS.md",
+      "docs/operations/AUTONOMY_HEALTH.md",
+      "docs/operations/IMPROVEMENT_BACKLOG.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/operations/operational-excellence-ops-cadence.md",
+      "prompts/registry.yaml",
+      "agents/examples/OPERATIONAL_EXCELLENCE_OPS_CADENCE.json"
+    ],
+    "domains": ["operations", "documentation", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["documentation updates"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Operational cadence documentation includes templates and evidence expectations",
+    "Cost, reliability, security, and autonomy docs include recurring tasks and controls",
+    "Roadmap status updated with revision note and timestamp"
+  ],
+  "stop_conditions": ["CI failure on main", "Policy violation or scope mismatch"]
+}
