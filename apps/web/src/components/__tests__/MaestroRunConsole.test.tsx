@@ -25,13 +25,6 @@ describe('<MaestroRunConsole />', () => {
       createdAt: new Date().toISOString(),
       requestText: 'test request',
     },
-    tasks: [
-      {
-        id: 'task-1',
-        status: 'succeeded',
-        description: 'Execute user request: test request',
-      },
-    ],
     results: [
       {
         task: {
@@ -46,6 +39,13 @@ describe('<MaestroRunConsole />', () => {
           data: 'hello world',
           createdAt: new Date().toISOString(),
         },
+      },
+    ],
+    tasks: [
+      {
+        id: 'task-1',
+        status: 'succeeded',
+        description: 'Execute user request: test request',
       },
     ],
     costSummary: {
@@ -65,6 +65,41 @@ describe('<MaestroRunConsole />', () => {
 
   beforeEach(() => {
     vi.spyOn(api, 'runMaestroRequest').mockResolvedValue(mockRunResponse);
+  });
+
+  it('renders accessibility attributes correctly', async () => {
+    render(<MaestroRunConsole userId="user-123" />);
+
+    // Check for "Quick Prompts" accessible group
+    const promptsGroup = screen.getByRole('group', { name: /suggested prompts/i });
+    expect(promptsGroup).toBeInTheDocument();
+
+    // Check for "Try:" text within the group
+    expect(screen.getByText('Try:')).toBeInTheDocument();
+
+    // Check for "Quick Prompt" buttons
+    const promptButton = screen.getByRole('button', { name: /use prompt: analyze/i });
+    expect(promptButton).toBeInTheDocument();
+
+    // Submit a run to see status badges
+    const textarea = screen.getByPlaceholderText(/describe what you want/i);
+    fireEvent.change(textarea, { target: { value: 'test request' } });
+    fireEvent.click(screen.getByRole('button', { name: /run with maestro/i }));
+
+    await waitFor(() =>
+      expect(api.runMaestroRequest).toHaveBeenCalled()
+    );
+
+    // Verify status badges have aria-labels
+    const statusBadges = screen.getAllByLabelText(/status: succeeded/i);
+    expect(statusBadges.length).toBeGreaterThan(0);
+    expect(statusBadges[0]).toHaveTextContent('Succeeded');
+
+    // Verify aria-live region exists
+    // The query selector is a bit more manual since `role="log"` wasn't strictly applied, just `aria-live="polite"`
+    // But we can check by looking for the container
+    const liveRegion = document.querySelector('[aria-live="polite"]');
+    expect(liveRegion).toBeInTheDocument();
   });
 
   it('renders quick prompts and runs Maestro pipeline on submit', async () => {
