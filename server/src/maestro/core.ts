@@ -3,6 +3,7 @@ import { Task, Run, Artifact, TaskStatus } from './types';
 import { CostMeter } from './cost_meter';
 import { OpenAILLM } from './adapters/llm_openai';
 import { ResidencyGuard } from '../data-residency/residency-guard';
+import { maestroJobExecutionDurationSeconds } from '../monitoring/metrics.js';
 
 export interface MaestroConfig {
   defaultPlannerAgent: string;   // e.g. "openai:gpt-4.1"
@@ -80,15 +81,15 @@ export class Maestro {
     const now = new Date().toISOString();
     await this.ig.updateTask(task.id, { status: 'running', updatedAt: now });
 
-    try {
-      // Residency Check for Agent Execution
-      // We assume run or task input has tenantId.
-      // If run object isn't passed here, we rely on task input.
-      // Or we should fetch the Run. For v0.1 simplification, we assume context is in task inputs
-      // or we extract it from runId lookup (not efficient here without caching).
-      // Assuming tasks created by createRun have tenantId in their metadata/input if provided.
-      const tenantId = (task.input as any)?.tenantId;
+    // Residency Check for Agent Execution
+    const tenantId = (task.input as any)?.tenantId;
 
+    const endTimer = maestroJobExecutionDurationSeconds.startTimer({
+      job_type: task.kind,
+      tenant_id: tenantId || 'unknown'
+    });
+
+    try {
       if (tenantId) {
           const guard = ResidencyGuard.getInstance();
           await guard.validateAgentExecution(tenantId);
@@ -179,11 +180,14 @@ export class Maestro {
       await this.ig.createArtifact(artifact);
       await this.ig.updateTask(task.id, updatedTask);
 
+      endTimer({ status: 'succeeded' });
+
       return {
         task: { ...task, ...updatedTask } as Task,
         artifact,
       };
     } catch (err: any) {
+      endTimer({ status: 'failed' });
       const updatedTask: Partial<Task> = {
         status: 'failed',
         errorMessage: err?.message ?? String(err),
