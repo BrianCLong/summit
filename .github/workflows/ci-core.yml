@@ -276,10 +276,10 @@ jobs:
       actions: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Use Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "pnpm"
@@ -298,7 +298,7 @@ jobs:
           bash scripts/test-soc-controls.sh soc-compliance-reports
 
       - name: Upload SOC compliance reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: soc-compliance-report
           path: soc-compliance-reports

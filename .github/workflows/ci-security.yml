@@ -67,13 +67,13 @@ jobs:
     needs: context
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
         with:
           fetch-depth: 0
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Run Gitleaks
-        uses: zricethezav/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc # v2
+        uses: zricethezav/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
         with:
           args: detect --source . --report-format sarif --report-path ${{ env.REPORT_DIR }}/gitleaks.sarif
       - name: Upload SARIF to GitHub Security
@@ -102,7 +102,7 @@ jobs:
       matrix:
         language: [javascript, python]
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
       - name: Initialize CodeQL
         uses: github/codeql-action/init@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
         with:
@@ -123,7 +123,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Run Semgrep CI ruleset
@@ -154,7 +154,7 @@ jobs:
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN || secrets.snyk_token }}
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Ensure SNYK_TOKEN is configured
@@ -194,7 +194,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
       - name: Install Trivy
         uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1 # v0.2.4
       - name: Prepare report directory
@@ -229,7 +229,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Build server image for scanning
@@ -277,7 +277,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: context
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
       - uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1 # v0.2.4
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
@@ -302,7 +302,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: context
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
       - name: Install Checkov
         run: pip install --no-cache-dir checkov==3.2.23
       - name: Run Checkov across Terraform and Helm assets
@@ -332,9 +332,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: context
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
       - name: Install Helm
-        uses: azure/setup-helm@bf6a7d304bc2fdb57e0331155b7ebf2c504acf0a # v4
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
         with:
           version: "3.12.0"
       - name: Install Conftest
@@ -366,9 +366,9 @@ jobs:
       - context
       - opa-policy
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
       - name: Install Helm
-        uses: azure/setup-helm@bf6a7d304bc2fdb57e0331155b7ebf2c504acf0a # v4
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
         with:
           version: "3.12.0"
       - uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1 # v0.2.4
@@ -403,7 +403,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: context
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
       - name: Execute baseline checks
         run: |
           chmod +x scripts/security/baseline-check.sh
@@ -423,7 +423,7 @@ jobs:
     if: ${{ needs.context.outputs.run_dast == 'true' }}
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Boot application stack
@@ -440,7 +440,7 @@ jobs:
           echo "Application did not become ready in time" >&2
           exit 1
       - name: OWASP ZAP baseline scan
-        uses: zaproxy/action-baseline@6c5a007541891231cd9e0ddec25d4f25c59c9874 # v0.15.0
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25 # v0.15.0
         with:
           target: "http://localhost:3000"
           cmd_options: "-a -m 5"
