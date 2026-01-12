@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import axios from 'axios';
 
 // Placeholder for SDK client (assuming it's available via import)
 // import { createClient } from '../sdk/typescript/src';
@@ -27,7 +26,7 @@ program
     process.stdout.write(`API Base URL: ${options.base}\n`);
 
     // Load suite configuration
-    const suiteConfig = JSON.parse(fs.readFileSync(options.suite, 'utf8')); // Assuming YAML is JSON for simplicity
+    const _suiteConfig = JSON.parse(fs.readFileSync(options.suite, 'utf8')); // Assuming YAML is JSON for simplicity
 
     // Placeholder for actual evaluation logic
     process.stdout.write('Evaluation logic to be implemented here.\n');

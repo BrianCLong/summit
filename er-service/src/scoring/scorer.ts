@@ -21,14 +21,14 @@ export function buildFeatureContributions(
 ): FeatureContribution[] {
   const entries = Object.entries(weights).map(([feature, weight]) => {
     const rawValue = features[feature as keyof ERFeatures];
-    const numericValue =
-      typeof rawValue === 'boolean'
-        ? rawValue
-          ? 1
-          : 0
-        : typeof rawValue === 'number'
-          ? rawValue
-          : 0;
+    let numericValue = 0;
+    if (typeof rawValue === 'boolean') {
+      numericValue = rawValue ? 1 : 0;
+    } else if (typeof rawValue === 'number') {
+      numericValue = rawValue;
+    } else {
+      numericValue = 0;
+    }
     return {
       feature,
       value: rawValue,
