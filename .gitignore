@@ -354,3 +354,4 @@ bin/
 .evidence/
 release-assets/
 evidence-staging/
+*.txt

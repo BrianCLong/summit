@@ -87,7 +87,8 @@ export class PlaybookRunBundleExporter {
       archive.on('error', reject);
     });
 
-    archive.pipe(stream as unknown as NodeJS.WritableStream);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    archive.pipe(stream as any);
     entries.forEach((entry) => {
       archive.append(entry.data, { name: entry.name });
     });
