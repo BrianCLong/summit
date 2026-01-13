@@ -145,7 +145,6 @@
     "src/graph/**",
     "src/graphql/mutations/**",
     "src/graphql/subscriptions/**",
-    "src/routes/**",
     "src/services/QuantumResistantCryptoService.ts",
     "src/services/ImageProcessingPipeline.ts",
     "src/services/AlertingService.ts",

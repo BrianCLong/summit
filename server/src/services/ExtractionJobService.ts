@@ -91,16 +91,11 @@ export interface MethodPerformance {
 
 export class ExtractionJobService {
   private db: Pool;
-  private redis: any;
-  private extractionQueue: any;
-  private extractionWorker: any;
-  private queueEvents: any;
+  private redis: IORedis;
+  private extractionQueue: Queue;
+  private extractionWorker: Worker;
+  private queueEvents: QueueEvents;
   private extractionEngine: ExtractionEngine;
-  private ocrEngine: OCREngine;
-  private objectDetectionEngine: ObjectDetectionEngine;
-  private speechToTextEngine: SpeechToTextEngine;
-  private faceDetectionEngine: FaceDetectionEngine;
-  private textAnalysisEngine: TextAnalysisEngine;
   private embeddingService: EmbeddingService;
 
   constructor(db: Pool, redisConfig: any) {
@@ -1258,7 +1253,7 @@ export class ExtractionJobService {
   /**
    * Map database row to ExtractionJob object
    */
-  private mapRowToExtractionJob(row): ExtractionJob {
+  private mapRowToExtractionJob(row: any): ExtractionJob {
     return {
       id: row.id,
       investigationId: row.investigation_id,
