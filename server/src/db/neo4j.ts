@@ -9,6 +9,7 @@ import {
   dbPoolUsage,
   dbPoolWaiting
 } from '../metrics/dbMetrics.js';
+import { dbConnectionsActive } from '../monitoring/metrics.js';
 import {
   neo4jConnectivityUp,
   neo4jQueryErrorsTotal,
@@ -119,11 +120,13 @@ export const neo = {
   },
   run: async (query: string, params?: any) => {
     const session = neo.session();
+    dbConnectionsActive.inc({ database: 'neo4j' });
     try {
       const result = await session.run(query, params);
       return result;
     } finally {
       await session.close();
+      dbConnectionsActive.dec({ database: 'neo4j' });
     }
   }
 };
