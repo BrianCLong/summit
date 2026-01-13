@@ -131,7 +131,6 @@
     "src/conductor/admission/**",
     "src/conductor/api/**",
     "src/streaming/**",
-    "src/app.ts",
     "src/optimization/**",
     "src/safety/**",
     "src/conductor/edge/**",

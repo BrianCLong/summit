@@ -704,6 +704,15 @@ global.testCleanup = {
   },
 };
 
+// Mock SecretAuditLogger to prevent filesystem operations
+jest.mock('../../lib/security/secret-audit-logger', () => ({
+  __esModule: true,
+  SecretAuditLogger: class {
+    constructor() {}
+    record() {}
+  },
+}));
+
 // Clean up after each test
 afterEach(async () => {
   jest.clearAllMocks();

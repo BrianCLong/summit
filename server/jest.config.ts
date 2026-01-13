@@ -36,11 +36,13 @@ const config: Config = {
     '.*health/aggregator(\\.js)?$': '<rootDir>/tests/mocks/health-aggregator.ts',
     '^ioredis$': '<rootDir>/tests/mocks/ioredis.ts',
     '^pg-boss$': '<rootDir>/tests/mocks/pg-boss.ts',
+    '^neo4j-driver$': '<rootDir>/tests/mocks/neo4j-driver.ts',
     '.*scripts/maintenance(\\.js)?$': '<rootDir>/tests/mocks/maintenance.ts',
 
     '@intelgraph/feature-flags': '<rootDir>/tests/mocks/feature-flags.ts',
     '@intelgraph/attack-surface': '<rootDir>/tests/mocks/attack-surface.ts',
     '@packages/cache': '<rootDir>/tests/mocks/cache.ts',
+    '.*security/secret-audit-logger(\\.js)?$': '<rootDir>/tests/mocks/secret-audit-logger.ts',
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
     '^(\\.{1,2}/.*)\\.js$': '$1',
