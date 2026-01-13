@@ -13,14 +13,14 @@ const config: Config = {
   ],
   testMatch: gaVerifyMode
     ? [
-        '<rootDir>/src/services/__tests__/GraphRAGService.test.ts',
-        '<rootDir>/src/provenance-integrity-gateway/__tests__/ProvenanceIntegrityGateway.test.ts',
-      ]
+      '<rootDir>/src/services/__tests__/GraphRAGService.test.ts',
+      '<rootDir>/src/provenance-integrity-gateway/__tests__/ProvenanceIntegrityGateway.test.ts',
+    ]
     : [
-        '<rootDir>/tests/**/*.test.ts',
-        '<rootDir>/src/tests/**/*.test.ts',
-        '<rootDir>/src/**/__tests__/**/*.test.ts',
-      ],
+      '<rootDir>/tests/**/*.test.ts',
+      '<rootDir>/src/tests/**/*.test.ts',
+      '<rootDir>/src/**/__tests__/**/*.test.ts',
+    ],
   testPathIgnorePatterns: [
     '/node_modules/',
     '/dist/',
@@ -50,7 +50,7 @@ const config: Config = {
     '^jsonwebtoken$': '<rootDir>/tests/mocks/jsonwebtoken.ts',
     '.*services/rag(\\.js)?$': '<rootDir>/tests/mocks/rag.ts',
     '.*middleware/rateLimit(\\.js)?$': '<rootDir>/tests/mocks/rateLimit.ts',
-    '.*middleware/audit-logger(\\.js)?$': '<rootDir>/tests/mocks/audit-logger.ts',
+    '.*middleware/audit-logger(\\.js)?$': '<rootDir>/tests/mocks/audit-logger.cjs',
     '.*graphql/schema\\.collab(\\.js)?$': '<rootDir>/tests/mocks/schema-collab.ts',
     '.*graphql/resolvers\\.collab(\\.js)?$': '<rootDir>/tests/mocks/resolvers-collab.ts',
     '.*scripts/maintenance(\\.js)?$': '<rootDir>/tests/mocks/maintenance.ts',

@@ -3,29 +3,6 @@ import request from 'supertest';
 import * as dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Calculate absolute paths for mocking
-const auditLoggerMockPath = path.join(__dirname, 'mocks/audit-logger.ts');
-const auditLoggerSrcPath = path.resolve(__dirname, '../src/middleware/audit-logger.js');
-
-// Mock both the source path AND the mapped mock path to be sure
-jest.unstable_mockModule(auditLoggerMockPath, () => ({
-  auditLogger: (req: any, res: any, next: any) => next(),
-  createAuditLogger: () => (req: any, res: any, next: any) => next(),
-  logAuditEvent: async () => { },
-  __esModule: true,
-}));
-
-jest.unstable_mockModule(auditLoggerSrcPath, () => ({
-  auditLogger: (req: any, res: any, next: any) => next(),
-  createAuditLogger: () => (req: any, res: any, next: any) => next(),
-  logAuditEvent: async () => { },
-  __esModule: true,
-}));
 
 dotenv.config({ path: '.env.test' });
 const describeNetwork =
