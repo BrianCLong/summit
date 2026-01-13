@@ -50,7 +50,7 @@ const config: Config = {
     '^jsonwebtoken$': '<rootDir>/tests/mocks/jsonwebtoken.ts',
     '.*services/rag(\\.js)?$': '<rootDir>/tests/mocks/rag.ts',
     '.*middleware/rateLimit(\\.js)?$': '<rootDir>/tests/mocks/rateLimit.ts',
-    '.*middleware/audit-logger(\\.js)?$': '<rootDir>/tests/mocks/audit-logger-esm.js',
+    '.*middleware/audit-logger(\\.js)?$': '<rootDir>/tests/mocks/audit-logger.cjs',
     '.*graphql/schema\\.collab(\\.js)?$': '<rootDir>/tests/mocks/schema-collab.ts',
     '.*graphql/resolvers\\.collab(\\.js)?$': '<rootDir>/tests/mocks/resolvers-collab.ts',
     '.*scripts/maintenance(\\.js)?$': '<rootDir>/tests/mocks/maintenance.ts',

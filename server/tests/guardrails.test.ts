@@ -325,46 +325,6 @@ jest.unstable_mockModule('../src/config/database.js', () => ({
 }));
 
 jest.unstable_mockModule('../src/config/logger.js', () => {
-  const logger = {
-    child: jest.fn().mockReturnThis(),
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  };
-  const correlationStorage = {
-    getStore: jest.fn(),
-    run: (store: any, cb: any) => cb(),
-  };
-  return {
-    __esModule: true,
-    logger,
-    default: logger,
-    correlationStorage,
-  };
-});
-
-jest.unstable_mockModule('jsdom', () => ({
-  __esModule: true,
-  JSDOM: jest.fn().mockImplementation(() => ({
-    window: {
-      document: {
-        createElement: jest.fn(),
-      },
-    },
-  })),
-}));
-jest.unstable_mockModule('dompurify', () => ({
-  __esModule: true,
-  default: jest.fn().mockImplementation(() => ({
-    sanitize: jest.fn((val) => val),
-  })),
-}));
-
-
-describeNetwork('Golden Path Guardrails - Negative Tests', () => {
-  let app: any;
-  let server: any;
   let authToken: string;
   let pg: any;
   let getNeo4jDriver: any;
