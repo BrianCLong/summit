@@ -5,10 +5,11 @@ const auditLogger = (req, res, next) => {
 
 const createAuditLogger = () => auditLogger;
 
-const logAuditEvent = async (_event) => { };
+const logAuditEvent = async (_event) => {};
 
-module.exports = {
-  auditLogger,
-  createAuditLogger,
-  logAuditEvent,
-};
+// ESM-compatible exports
+module.exports = auditLogger;
+module.exports.auditLogger = auditLogger;
+module.exports.createAuditLogger = createAuditLogger;
+module.exports.logAuditEvent = logAuditEvent;
+module.exports.default = auditLogger;
