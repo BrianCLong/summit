@@ -67,7 +67,7 @@ export class MigrationOrchestrator {
 
         const rawRecords = batch.data.records;
 
-        if (!(batch as any).nextCursor || (batch as any).nextCursor === 'DONE') {
+        if (!batch.data.nextCursor || batch.data.nextCursor === 'DONE') {
           hasMore = false;
         } else {
           cursor = batch.data.nextCursor;
