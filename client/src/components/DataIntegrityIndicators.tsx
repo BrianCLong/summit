@@ -314,7 +314,9 @@ export const DataEnvelopeCard: React.FC<DataEnvelopeCardProps> = ({
  */
 // eslint-disable-next-line react-refresh/only-export-components
 export function useDataEnvelopeValidation<T>(envelope: DataEnvelope<T>) {
-  const [isValid, setIsValid] = React.useEffect(() => {
+  const [isValid, setIsValid] = React.useState(true);
+
+  React.useEffect(() => {
     const { validateDataEnvelope } = require('../utils/data-envelope-validator');
     const validation = validateDataEnvelope(envelope);
     setIsValid(validation.valid);
@@ -326,8 +328,6 @@ export function useDataEnvelopeValidation<T>(envelope: DataEnvelope<T>) {
     if (validation.warnings.length > 0) {
       console.warn('[Data Envelope] Validation warnings:', validation.warnings);
     }
-
-    return validation;
   }, [envelope]);
 
   return { isValid };
