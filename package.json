@@ -1,6 +1,6 @@
 {
   "name": "intelgraph-platform",
-  "version": "4.1.1",
+  "version": "4.1.4",
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "type": "module",
@@ -85,6 +85,7 @@
     "db:neo4j:migrate": "node scripts/neo4j-migrate.js",
     "changeset": "changeset",
     "release": "changeset version && changeset publish",
+    "release:cut": "node scripts/release/release.mjs",
     "release:cut-branch": "node scripts/release/cut-release-branch.mjs",
     "release:bundle": "node scripts/release/release-bundle.mjs",
     "release:schema:validate": "node scripts/release/validate-bundle-schemas.mjs --dir dist/release --strict",

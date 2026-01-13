@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/event-sourcing",
-  "version": "1.0.0",
+  "version": "4.1.4",
   "description": "Enterprise event sourcing framework with event store, versioning, and replay",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
