@@ -77,7 +77,7 @@ function main() {
       const flags = parseFlags(flagArgs ?? []);
       const registry = resolveRegistry(flags);
       const diff = registry.diff(metricName, Number(left), Number(right));
-      process.stdout.write(diff + '\n');
+      process.stdout.write(`${diff}\n`);
       return;
     }
 
@@ -111,7 +111,7 @@ function main() {
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    process.stderr.write(message + '\n');
+    process.stderr.write(`${message}\n`);
     process.exitCode = 1;
     return;
   }
