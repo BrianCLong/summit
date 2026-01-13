@@ -806,76 +806,77 @@ export function IntelGraphWorkbench() {
           </div>
         )}
 
-        <ForceGraph2D
-          ref={fgRef}
-          graphData={filteredGraphData}
-          nodeLabel="label"
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          nodeColor={(node: any) => nodeColors[node.id]}
-          nodeAutoColorBy="group" // Fallback if nodeColors not set
-          linkWidth={2}
-          linkDirectionalArrowLength={6}
-          linkDirectionalArrowRelPos={1}
-          onNodeClick={handleNodeClick}
-          onLinkClick={handleLinkClick}
-          onBackgroundClick={() => {
-            setSelectedNode(null);
-            setSelectedLink(null);
-          }}
-          // Adjust simulation parameters for better layout
-          d3AlphaDecay={0.02}
-          d3VelocityDecay={0.3}
-          enableNodeDrag={true}
-          // Conditional rendering for map overlay
-          // If showMap is true, ForceGraph2D should not render nodes/links as they are handled by DeckGL
-          // However, ForceGraph2D is still useful for its simulation and controls
-          // We might need to hide its visual elements when map is active
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          nodeCanvasObject={(node: any, ctx: any, globalScale: any) => {
-            if (showMap) return; // Don't draw nodes if map is active
-            const label = node.label || node.id;
-            const fontSize = 12 / globalScale;
-            ctx.font = `${fontSize}px Sans-Serif`;
-            const textWidth = ctx.measureText(label).width;
-            const bckgDimensions = [textWidth, fontSize].map(
-              (n) => n + fontSize * 0.2,
-            ); // some padding
+        <div className={showMap ? 'opacity-0 pointer-events-none' : ''}>
+          <ForceGraph2D
+            ref={fgRef}
+            graphData={filteredGraphData}
+            nodeLabel="label"
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            nodeColor={(node: any) => nodeColors[node.id]}
+            nodeAutoColorBy="group" // Fallback if nodeColors not set
+            linkWidth={2}
+            linkDirectionalArrowLength={6}
+            linkDirectionalArrowRelPos={1}
+            onNodeClick={handleNodeClick}
+            onLinkClick={handleLinkClick}
+            onBackgroundClick={() => {
+              setSelectedNode(null);
+              setSelectedLink(null);
+            }}
+            // Adjust simulation parameters for better layout
+            d3AlphaDecay={0.02}
+            d3VelocityDecay={0.3}
+            enableNodeDrag={true}
+            // Conditional rendering for map overlay
+            // If showMap is true, ForceGraph2D should not render nodes/links as they are handled by DeckGL
+            // However, ForceGraph2D is still useful for its simulation and controls
+            // We might need to hide its visual elements when map is active
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            nodeCanvasObject={(node: any, ctx: any, globalScale: any) => {
+              if (showMap) return; // Don't draw nodes if map is active
+              const label = node.label || node.id;
+              const fontSize = 12 / globalScale;
+              ctx.font = `${fontSize}px Sans-Serif`;
+              const textWidth = ctx.measureText(label).width;
+              const bckgDimensions = [textWidth, fontSize].map(
+                (n) => n + fontSize * 0.2,
+              ); // some padding
 
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.fillRect(
-              node.x - bckgDimensions[0] / 2,
-              node.y - bckgDimensions[1] / 2,
-              bckgDimensions[0],
-              bckgDimensions[1],
-            );
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+              ctx.fillRect(
+                node.x - bckgDimensions[0] / 2,
+                node.y - bckgDimensions[1] / 2,
+                bckgDimensions[0],
+                bckgDimensions[1],
+              );
 
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = nodeColors[node.id] || '#000000';
-            ctx.fillText(label, node.x, node.y);
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillStyle = nodeColors[node.id] || '#000000';
+              ctx.fillText(label, node.x, node.y);
 
-            node.__bckgDimensions = bckgDimensions; // for hit testing
-          }}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          linkCanvasObject={(link: any, ctx: any, globalScale: any) => {
-            if (showMap) return; // Don't draw links if map is active
-            // Draw link as before
-            const start = link.source as GraphNode;
-            const end = link.target as GraphNode;
-            if (!start || !end || !start.x || !start.y || !end.x || !end.y)
-              return;
+              node.__bckgDimensions = bckgDimensions; // for hit testing
+            }}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            linkCanvasObject={(link: any, ctx: any, globalScale: any) => {
+              if (showMap) return; // Don't draw links if map is active
+              // Draw link as before
+              const start = link.source as GraphNode;
+              const end = link.target as GraphNode;
+              if (!start || !end || !start.x || !start.y || !end.x || !end.y)
+                return;
 
-            ctx.beginPath();
-            ctx.moveTo(start.x, start.y);
-            ctx.lineTo(end.x, end.y);
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-            ctx.lineWidth = 1 / globalScale;
-            ctx.stroke();
-          }}
-          linkCanvasObjectMode={() => 'after'} // Draw links after nodes
+              ctx.beginPath();
+              ctx.moveTo(start.x, start.y);
+              ctx.lineTo(end.x, end.y);
+              ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+              ctx.lineWidth = 1 / globalScale;
+              ctx.stroke();
+            }}
+            linkCanvasObjectMode={() => 'after'} // Draw links after nodes
           // Ensure ForceGraph2D is always rendered, but its visual output is conditional
-          className={showMap ? 'opacity-0 pointer-events-none' : ''} // Hide ForceGraph2D when map is active
-        />
+          />
+        </div>
       </div>
     </div>
   );
