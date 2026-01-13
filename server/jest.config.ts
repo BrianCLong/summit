@@ -1,5 +1,7 @@
 import type { Config } from 'jest';
 
+const gaVerifyMode = process.env.GA_VERIFY_MODE === 'true';
+
 const config: Config = {
   preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
@@ -9,11 +11,16 @@ const config: Config = {
     '<rootDir>/tests/setup/jest.setup.cjs',
     'jest-extended/all',
   ],
-  testMatch: [
-    '<rootDir>/tests/**/*.test.ts',
-    '<rootDir>/src/tests/**/*.test.ts',
-    '<rootDir>/src/**/__tests__/**/*.test.ts',
-  ],
+  testMatch: gaVerifyMode
+    ? [
+        '<rootDir>/src/services/__tests__/GraphRAGService.test.ts',
+        '<rootDir>/src/provenance-integrity-gateway/__tests__/ProvenanceIntegrityGateway.test.ts',
+      ]
+    : [
+        '<rootDir>/tests/**/*.test.ts',
+        '<rootDir>/src/tests/**/*.test.ts',
+        '<rootDir>/src/**/__tests__/**/*.test.ts',
+      ],
   testPathIgnorePatterns: [
     '/node_modules/',
     '/dist/',
@@ -38,7 +45,11 @@ const config: Config = {
     '^ioredis$': '<rootDir>/tests/mocks/ioredis.ts',
     '^pg-boss$': '<rootDir>/tests/mocks/pg-boss.ts',
     '^neo4j-driver$': '<rootDir>/tests/mocks/neo4j-driver.ts',
+    '.*db/neo4j(\\.js)?$': '<rootDir>/tests/mocks/db-neo4j.ts',
     '^pg$': '<rootDir>/tests/mocks/pg.ts',
+    '^jsonwebtoken$': '<rootDir>/tests/mocks/jsonwebtoken.ts',
+    '.*services/rag(\\.js)?$': '<rootDir>/tests/mocks/rag.ts',
+    '.*middleware/rateLimit(\\.js)?$': '<rootDir>/tests/mocks/rateLimit.ts',
     '.*scripts/maintenance(\\.js)?$': '<rootDir>/tests/mocks/maintenance.ts',
 
     '@intelgraph/feature-flags': '<rootDir>/tests/mocks/feature-flags.ts',
