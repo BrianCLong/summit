@@ -188,7 +188,7 @@ export default function () {
     if (readyData.database && readyData.database.connectionTime) {
       dbConnectionTime.add(readyData.database.connectionTime);
     }
-  } catch (e) {
+  } catch (_e) {
     // Ignore parsing errors
   }
 
@@ -336,12 +336,15 @@ export function setup() {
 // Teardown function - runs once at the end
 export function teardown(data) {
   const duration = (new Date() - data.startTime) / 1000;
+  // eslint-disable-next-line no-console -- k6 teardown output
   console.log(`✅ SLO trend monitoring completed in ${duration.toFixed(1)}s`);
+  // eslint-disable-next-line no-console -- k6 teardown output
   console.log(
     '📈 Check output above for detailed SLO compliance and trend data',
   );
 
   if (config.prometheus.enabled) {
+    // eslint-disable-next-line no-console -- k6 teardown output
     console.log(
       `📊 Metrics exported to Prometheus: ${config.prometheus.endpoint}`,
     );
@@ -424,7 +427,7 @@ function generatePrometheusMetrics(data) {
 // Enhanced text summary
 function textSummary(data, options = {}) {
   const indent = options.indent || '';
-  const colors = options.enableColors || false;
+  const _colors = options.enableColors || false;
 
   const slos = {
     p95: data.metrics.api_latency_p95?.values?.['p(95)'] || 0,
