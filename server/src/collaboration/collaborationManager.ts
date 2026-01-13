@@ -43,7 +43,7 @@ export class CollaborationManager {
     // Apply to state (simplified for text)
     if (op.type === 'insert' && op.text && op.position !== undefined && transformedOp.position !== undefined) {
       doc.content = doc.content.slice(0, transformedOp.position) + transformedOp.text + doc.content.slice(transformedOp.position);
-    } else if (op.type === 'delete' && op.count && op.position !== undefined) {
+    } else if (op.type === 'delete' && op.count && op.position !== undefined && transformedOp.position !== undefined && transformedOp.count !== undefined) {
       doc.content = doc.content.slice(0, transformedOp.position) + doc.content.slice(transformedOp.position + transformedOp.count);
     }
 
