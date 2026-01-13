@@ -7,10 +7,12 @@ export const auditLogger = (_req: Request, _res: Response, next: NextFunction) =
 
 export const createAuditLogger = () => auditLogger;
 
-export const logAuditEvent = async (_event: any): Promise<void> => {};
+export const logAuditEvent = async (_event: any): Promise<void> => { };
 
-export default {
+const mock = {
   auditLogger,
   createAuditLogger,
   logAuditEvent,
 };
+
+export = mock;

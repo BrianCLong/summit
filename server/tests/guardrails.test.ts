@@ -1,8 +1,33 @@
 import { jest } from '@jest/globals';
 import request from 'supertest';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Calculate absolute paths for mocking
+const auditLoggerMockPath = path.join(__dirname, 'mocks/audit-logger.ts');
+const auditLoggerSrcPath = path.resolve(__dirname, '../src/middleware/audit-logger.js');
+
+// Mock both the source path AND the mapped mock path to be sure
+jest.unstable_mockModule(auditLoggerMockPath, () => ({
+  auditLogger: (req: any, res: any, next: any) => next(),
+  createAuditLogger: () => (req: any, res: any, next: any) => next(),
+  logAuditEvent: async () => { },
+  __esModule: true,
+}));
+
+jest.unstable_mockModule(auditLoggerSrcPath, () => ({
+  auditLogger: (req: any, res: any, next: any) => next(),
+  createAuditLogger: () => (req: any, res: any, next: any) => next(),
+  logAuditEvent: async () => { },
+  __esModule: true,
+}));
+
+dotenv.config({ path: '.env.test' });
 const describeNetwork =
   process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
 
@@ -84,8 +109,31 @@ jest.unstable_mockModule('../src/db/neo4j.js', () => ({
   initializeNeo4jDriver: jest.fn<any>().mockResolvedValue(undefined),
   isNeo4jMockMode: jest.fn().mockReturnValue(true),
   onNeo4jDriverReady: jest.fn(),
+  neo: {
+    session: jest.fn().mockReturnValue({
+      run: jest.fn().mockResolvedValue({ records: [] }),
+      logAuditEvent: jest.fn().mockResolvedValue(undefined),
+      close: jest.fn().mockResolvedValue(undefined),
+    }),
+    run: jest.fn().mockResolvedValue({ records: [] }),
+  },
+  instrumentSession: jest.fn((s) => s),
 }));
 
+jest.unstable_mockModule('../src/utils/logger.js', () => {
+  const logger = {
+    child: jest.fn().mockReturnThis(),
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
+  return {
+    __esModule: true,
+    logger,
+    default: logger,
+  };
+});
 jest.unstable_mockModule('../src/observability/tracer.js', () => {
   const mockTracer = {
     initialize: (jest.fn() as any).mockResolvedValue(undefined),
@@ -286,6 +334,38 @@ jest.unstable_mockModule('../src/graphql/plugins/rateLimitAndCache.js', () => ({
     requestDidStart: (jest.fn() as any).mockResolvedValue({}),
   }),
 }));
+
+
+
+jest.unstable_mockModule('../src/config/database.js', () => ({
+  connectPostgres: jest.fn().mockResolvedValue({}),
+  connectNeo4j: jest.fn().mockResolvedValue({ session: () => ({ run: jest.fn(), close: jest.fn() }) }),
+  connectRedis: jest.fn().mockResolvedValue({}),
+  getPostgresPool: jest.fn(),
+  getNeo4jDriver: jest.fn(),
+  getRedisClient: jest.fn(),
+  closeConnections: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.unstable_mockModule('../src/config/logger.js', () => {
+  const logger = {
+    child: jest.fn().mockReturnThis(),
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
+  const correlationStorage = {
+    getStore: jest.fn(),
+    run: (store: any, cb: any) => cb(),
+  };
+  return {
+    __esModule: true,
+    logger,
+    default: logger,
+    correlationStorage,
+  };
+});
 
 jest.unstable_mockModule('jsdom', () => ({
   __esModule: true,
