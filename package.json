@@ -291,7 +291,9 @@
       "@modelcontextprotocol/sdk": ">=1.1.0",
       "@remix-run/router": ">=1.21.0",
       "react-router": ">=6.28.0",
-      "preact": ">=10.25.4"
+      "preact": ">=10.25.4",
+      "@types/react": "18.3.11",
+      "@types/react-dom": "18.3.0"
     }
   }
 }

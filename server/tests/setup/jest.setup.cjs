@@ -704,7 +704,8 @@ global.testCleanup = {
   },
 };
 
-// SecretAuditLogger mock is handled via moduleNameMapper in jest.config.ts
+// Mock SecretAuditLogger using __mocks__ directory
+jest.mock('../../lib/security/secret-audit-logger');
 
 // Clean up after each test
 afterEach(async () => {
