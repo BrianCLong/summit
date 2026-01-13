@@ -1,14 +1,14 @@
 {
-  "id": "bb183474-44d8-4895-a712-edf705e391a0",
-  "version": "1.38.0",
+  "id": "587c5c31-1c9d-4dd8-bf97-77a77abbc173",
+  "version": "1.39.0",
   "definition": {
     "entities": [],
     "edges": []
   },
   "changelog": "Activation test",
   "status": "DEPRECATED",
-  "createdAt": "2026-01-10T22:10:22.583Z",
+  "createdAt": "2026-01-13T08:57:33.275Z",
   "createdBy": "tester",
   "approvedBy": "admin",
-  "approvedAt": "2026-01-10T22:10:22.584Z"
+  "approvedAt": "2026-01-13T08:57:33.278Z"
 }
