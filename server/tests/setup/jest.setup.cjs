@@ -237,6 +237,39 @@ jest.mock('ioredis', () => {
   };
 });
 
+// Mock db/neo4j module to provide 'neo' export
+jest.mock('../../src/db/neo4j', () => {
+  const mockSession = {
+    run: jest.fn().mockResolvedValue({ records: [] }),
+    close: jest.fn().mockResolvedValue(undefined),
+    beginTransaction: () => ({
+      run: jest.fn().mockResolvedValue({ records: [] }),
+      commit: jest.fn().mockResolvedValue(undefined),
+      rollback: jest.fn().mockResolvedValue(undefined),
+    }),
+  };
+
+  const mockDriver = {
+    session: () => mockSession,
+    close: jest.fn().mockResolvedValue(undefined),
+    verifyConnectivity: jest.fn().mockResolvedValue(undefined),
+  };
+
+  return {
+    __esModule: true,
+    initializeNeo4jDriver: jest.fn().mockResolvedValue(undefined),
+    getNeo4jDriver: jest.fn().mockReturnValue(mockDriver),
+    isNeo4jMockMode: jest.fn().mockReturnValue(true),
+    closeNeo4jDriver: jest.fn().mockResolvedValue(undefined),
+    onNeo4jDriverReady: jest.fn(),
+    neo: {
+      session: () => mockSession,
+      run: jest.fn().mockResolvedValue({ records: [] }),
+    },
+    instrumentSession: jest.fn((session) => session),
+  };
+});
+
 // Mock database config to bypass initialization checks
 jest.mock('../../src/config/database', () => {
   const mockPool = {

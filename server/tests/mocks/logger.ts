@@ -1,22 +1,22 @@
-// Logger mock with dual ESM/CJS support
-const loggerImpl = {
-  child: function () { return this; },
-  debug: () => {},
-  info: () => {},
-  warn: () => {},
-  error: () => {},
-  trace: () => {},
-  fatal: () => {},
-  silent: () => {},
+const logger = {
+  child() {
+    return this;
+  },
+  debug() {},
+  info() {},
+  warn() {},
+  error() {},
+  trace() {},
+  fatal() {},
+  silent() {},
   level: 'silent',
 };
 
-const correlationStorageImpl = {
+const correlationStorage = {
   getStore: () => undefined,
-  run: (_store: unknown, fn: () => unknown) => fn(),
+  run: (_store: unknown, fn: () => void) => fn(),
   enterWith: () => undefined,
 };
 
-export const logger = loggerImpl;
-export const correlationStorage = correlationStorageImpl;
-export default loggerImpl;
+export { correlationStorage, logger };
+export default logger;
