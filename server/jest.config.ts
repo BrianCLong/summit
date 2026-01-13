@@ -39,6 +39,8 @@ const config: Config = {
     '.*scripts/maintenance(\\.js)?$': '<rootDir>/tests/mocks/maintenance.ts',
 
     '@intelgraph/feature-flags': '<rootDir>/tests/mocks/feature-flags.ts',
+    '@intelgraph/attack-surface': '<rootDir>/tests/mocks/attack-surface.ts',
+    '@packages/cache': '<rootDir>/tests/mocks/cache.ts',
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
     '^(\\.{1,2}/.*)\\.js$': '$1',

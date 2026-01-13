@@ -8,13 +8,15 @@ import {
   hashPersistedQuery,
 } from '../src/middleware/graphqlPersistedAllowlist.js';
 
+// Use process.cwd() since tests run from server directory
+const testsDir = path.join(process.cwd(), 'tests');
 const run = process.env.NO_NETWORK_LISTEN !== 'true';
 const describeIf = run ? describe : describe.skip;
 
 describeIf('GraphqlPersistedAllowlistMiddleware', () => {
-  const manifestPath = path.join(__dirname, 'tmp-manifest.json');
+  const manifestPath = path.join(testsDir, 'tmp-manifest.json');
   const secondaryManifestPath = path.join(
-    __dirname,
+    testsDir,
     'tmp-secondary-manifest.json',
   );
   const query = 'query Test { __typename }';

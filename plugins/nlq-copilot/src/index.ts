@@ -151,7 +151,14 @@ class NLQCompiler {
       regex: /recent\s+(\w+)s?\s+(?:in\s+the\s+)?(?:last\s+)?(\d+)\s+(days?|hours?|weeks?)/i,
       template: (m: RegExpMatchArray) => {
         const unit = m[3].toLowerCase();
-        const duration = unit.startsWith('day') ? 'd' : unit.startsWith('hour') ? 'h' : 'w';
+        let duration = 'w';
+        if (unit.startsWith('day')) {
+          duration = 'd';
+        } else if (unit.startsWith('hour')) {
+          duration = 'h';
+        } else {
+          duration = 'w';
+        }
         return `MATCH (n:${this.capitalize(m[1])}) WHERE n.createdAt > datetime() - duration('P${m[2]}${duration.toUpperCase()}') RETURN n ORDER BY n.createdAt DESC`;
       },
     },
@@ -400,9 +407,12 @@ class NLQCompiler {
     const matchCount = (cypher.match(/MATCH/gi) || []).length;
     const hasWhere = cypher.includes('WHERE');
 
-    let estimatedRows = hasLimit
-      ? parseInt(cypher.match(/LIMIT\s+(\d+)/i)?.[1] || '100')
-      : hasWhere ? 100 : 1000;
+    let estimatedRows = 1000; // Default to 1000
+    if (hasLimit) {
+      estimatedRows = parseInt(cypher.match(/LIMIT\s+(\d+)/i)?.[1] || '100');
+    } else if (hasWhere) {
+      estimatedRows = 100;
+    }
 
     if (hasUnbounded) {
       estimatedRows *= 10;

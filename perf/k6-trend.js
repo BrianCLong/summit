@@ -111,9 +111,9 @@ export const options = {
   },
 };
 
-console.log(`🎯 SLO Trend Monitoring targeting: ${config.target}`);
-console.log(
-  `📊 Prometheus integration: ${config.prometheus.enabled ? 'enabled' : 'disabled'}`,
+process.stdout.write(`🎯 SLO Trend Monitoring targeting: ${config.target}\n`);
+process.stdout.write(
+  `📊 Prometheus integration: ${config.prometheus.enabled ? 'enabled' : 'disabled'}\n`,
 );
 
 // Request headers configuration
@@ -316,16 +316,16 @@ export default function () {
 
 // Setup function - runs once at the start
 export function setup() {
-  console.log('🚀 Starting SLO trend monitoring...');
-  console.log(`📊 Target: ${config.target}`);
-  console.log('🎯 SLO Targets:');
-  console.log('   • p95 latency: <200ms (critical), <150ms (baseline)');
-  console.log('   • Error rate: <1%');
-  console.log('   • Availability: >99%');
-  console.log('   • Health check: <50ms p95');
-  console.log('   • GraphQL: <300ms p95');
-  console.log('   • Entity retrieval: <500ms p95');
-  console.log('   • Search: <1000ms p95');
+  process.stdout.write('🚀 Starting SLO trend monitoring...\n');
+  process.stdout.write(`📊 Target: ${config.target}\n`);
+  process.stdout.write('🎯 SLO Targets:\n');
+  process.stdout.write('   • p95 latency: <200ms (critical), <150ms (baseline)\n');
+  process.stdout.write('   • Error rate: <1%\n');
+  process.stdout.write('   • Availability: >99%\n');
+  process.stdout.write('   • Health check: <50ms p95\n');
+  process.stdout.write('   • GraphQL: <300ms p95\n');
+  process.stdout.write('   • Entity retrieval: <500ms p95\n');
+  process.stdout.write('   • Search: <1000ms p95\n');
 
   return {
     startTime: new Date(),
