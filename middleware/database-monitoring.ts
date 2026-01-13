@@ -10,10 +10,10 @@
  */
 
 import { Pool as PostgresPool } from 'pg';
-import { Driver as Neo4jDriver } from 'neo4j-driver';
-import Redis from 'ioredis';
+import { Driver as _Neo4jDriver } from 'neo4j-driver';
+import _Redis from 'ioredis';
 import pino from 'pino';
-import { register, Counter, Histogram, Gauge } from 'prom-client';
+import { Counter, Histogram, Gauge } from 'prom-client';
 
 const logger = pino();
 

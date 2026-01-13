@@ -87,7 +87,7 @@ export class PlaybookRunBundleExporter {
       archive.on('error', reject);
     });
 
-    archive.pipe(stream);
+    archive.pipe(stream as unknown as NodeJS.WritableStream);
     entries.forEach((entry) => {
       archive.append(entry.data, { name: entry.name });
     });

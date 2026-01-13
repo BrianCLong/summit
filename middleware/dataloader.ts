@@ -431,7 +431,10 @@ export function createEntityRelationshipsLoader(
           if (!relationshipsByEntity.has(row.source_id)) {
             relationshipsByEntity.set(row.source_id, []);
           }
-          relationshipsByEntity.get(row.source_id)!.push(rel);
+          const relList = relationshipsByEntity.get(row.source_id);
+          if (relList) {
+            relList.push(rel);
+          }
         });
 
         const duration = Date.now() - start;

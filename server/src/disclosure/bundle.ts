@@ -21,7 +21,7 @@ export async function makeBundle({
   const out = createWriteStream(outPath);
   const zip = archiver('zip');
 
-  zip.pipe(out);
+  zip.pipe(out as unknown as NodeJS.WritableStream);
 
   const manifest = {
     version: '1',

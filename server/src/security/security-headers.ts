@@ -350,4 +350,5 @@ export function createSecurityMiddleware(
   ];
 }
 
-export { SecurityHeadersManager, SecurityHeadersConfig };
+export { SecurityHeadersManager };
+export type { SecurityHeadersConfig };

@@ -384,4 +384,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   });
 }
 
-export { ProvenanceVerifier, VerificationResult };
+export { ProvenanceVerifier };
+export type { VerificationResult };

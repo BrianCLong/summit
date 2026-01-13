@@ -312,7 +312,7 @@ export class Neo4jCursorPagination {
  */
 export async function getTotalCount(
   queryFn: () => Promise<number>,
-  useCache: boolean = true,
+  _useCache: boolean = true,
 ): Promise<number> {
   try {
     return await queryFn();
@@ -352,9 +352,9 @@ export const paginationFieldResolvers = {
  */
 export const exampleResolver = {
   entities: async (
-    parent: any,
+    _parent: any,
     args: { first?: number; after?: string },
-    context: any,
+    _context: any,
   ): Promise<Connection<any>> => {
     const { limit, isForward, cursor } = validatePaginationInput(args);
 

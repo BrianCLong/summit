@@ -96,13 +96,13 @@ export function buildCli(): Command {
     .option('-o, --output <path>', 'Path to write a TypeScript module (defaults to stdout)')
     .action((compiledCardPath: string, options: { output?: string }) => {
       const card = JSON.parse(readFileSync(compiledCardPath, 'utf8')) as CompiledModelCard;
-      const hooks = createEnforcementHooks(card);
+      const _hooks = createEnforcementHooks(card);
       const moduleBody = `import card from './${compiledCardPath}';\n\nexport function denyIfOutOfScope(purpose: string) {\n  const hooks = (${createEnforcementHooks.toString()})(card);\n  hooks.denyIfOutOfScope({ purpose });\n}\n`;
       if (options.output) {
         writeFileSync(resolve(options.output), moduleBody, 'utf8');
         process.stdout.write(`Hook module written to ${resolve(options.output)}.\n`);
       } else {
-        process.stdout.write(moduleBody + '\n');
+        process.stdout.write(`${moduleBody}\n`);
       }
     });
 

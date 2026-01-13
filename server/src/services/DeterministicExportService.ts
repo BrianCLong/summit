@@ -621,7 +621,7 @@ export class DeterministicExportService {
     const output = createWriteStream(bundlePath);
     const archive = archiver('zip', { zlib: { level: 9 } });
 
-    archive.pipe(output);
+    archive.pipe(output as unknown as NodeJS.WritableStream);
     archive.directory(workDir, false);
     await archive.finalize();
 

@@ -5,11 +5,12 @@ import { MetricRegistry } from './registry';
 import { Dialect } from './types';
 
 function usage(): never {
-  console.error(`Usage:
+  process.stderr.write(`Usage:
   mdr compile <dialect> [--metric <name>] [--specs <path>] [--out <path>]
   mdr diff <metric> <leftVersion> <rightVersion> [--specs <path>]
   mdr test <dialect> [--metric <name>] [--specs <path>] [--golden <path>]
-  mdr golden <dialect> [--metric <name>] [--specs <path>] [--golden <path>]`);
+  mdr golden <dialect> [--metric <name>] [--specs <path>] [--golden <path>]
+`);
   process.exit(1);
 }
 
@@ -45,7 +46,7 @@ function asDialect(value: string | undefined): Dialect {
   throw new Error(`Unsupported dialect ${value ?? '<missing>'}`);
 }
 
-async function main() {
+function main() {
   const [command, ...rest] = process.argv.slice(2);
   if (!command) {
     usage();
@@ -58,11 +59,11 @@ async function main() {
       const registry = resolveRegistry(flags);
       const written = registry.writeCompiledArtifacts(dialect, flags.metric);
       if (written.length === 0) {
-        console.log('No artifacts changed.');
+        process.stdout.write('No artifacts changed.\n');
       } else {
-        console.log('Wrote artifacts:');
+        process.stdout.write('Wrote artifacts:\n');
         for (const file of written) {
-          console.log(`  ${file}`);
+          process.stdout.write(`  ${file}\n`);
         }
       }
       return;
