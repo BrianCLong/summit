@@ -38,6 +38,7 @@ const config: Config = {
     '^ioredis$': '<rootDir>/tests/mocks/ioredis.ts',
     '^pg-boss$': '<rootDir>/tests/mocks/pg-boss.ts',
     '^neo4j-driver$': '<rootDir>/tests/mocks/neo4j-driver.ts',
+    '^pg$': '<rootDir>/tests/mocks/pg.ts',
     '.*scripts/maintenance(\\.js)?$': '<rootDir>/tests/mocks/maintenance.ts',
 
     '@intelgraph/feature-flags': '<rootDir>/tests/mocks/feature-flags.ts',
@@ -101,7 +102,7 @@ const config: Config = {
     '^.+\\.js$': ['ts-jest', { useESM: true }],
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(\\.pnpm|p-limit|yocto-queue|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|pptxgenjs|jszip|@exodus/bytes|jsdom|html-encoding-sniffer|pg-boss|gaxios|gcp-metadata|@opentelemetry)/)',
+    'node_modules/(?!(\\.pnpm|p-limit|yocto-queue|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|pptxgenjs|jszip|@exodus/bytes|jsdom|html-encoding-sniffer|pg-boss|gaxios|gcp-metadata|@opentelemetry|pg)/)',
   ],
   maxWorkers: process.env.CI ? 2 : '50%',
   // Limit worker memory to prevent OOM in CI
