@@ -483,7 +483,7 @@ router.post('/admin/secrets/rotate', express.json(), async (req, res) => {
 
   for (const service of services) {
     console.log(`Updating secret for service: ${service}`);
-    await secretManager.setSecret(secretName, 'current', await secretManager.getSecret(secretName, newVersion as string));
+    await secretManager.setSecret(secretName, 'current', (await secretManager.getSecret(secretName, newVersion as string)) as string);
     console.log(`Health check for service ${service}...`);
     const healthUrl = serviceRegistry.getServiceHealthUrl(service);
     if (!healthUrl) {

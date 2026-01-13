@@ -97,6 +97,11 @@ export class ExtractionJobService {
   private queueEvents: QueueEvents;
   private extractionEngine: ExtractionEngine;
   private embeddingService: EmbeddingService;
+  private ocrEngine: OCREngine;
+  private objectDetectionEngine: ObjectDetectionEngine;
+  private speechToTextEngine: SpeechToTextEngine;
+  private faceDetectionEngine: FaceDetectionEngine;
+  private textAnalysisEngine: TextAnalysisEngine;
 
   constructor(db: Pool, redisConfig: any) {
     this.db = db;
@@ -275,7 +280,7 @@ export class ExtractionJobService {
         values.push(filters.offset);
       }
 
-      const result = await this.db.query(query, values);
+      const result = await this.db.query(query, values); // Map results
       return result.rows.map((row: any) => this.mapRowToExtractionJob(row));
     } catch (error: any) {
       logger.error(
