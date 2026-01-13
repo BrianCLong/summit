@@ -45,10 +45,10 @@ import {
 // Geospatial & DAG layout libs
 import DeckGL from '@deck.gl/react';
 import { ArcLayer, ScatterplotLayer } from '@deck.gl/layers';
+// @ts-ignore
 import Map, { NavigationControl } from 'react-map-gl';
+// @ts-ignore
 import maplibregl from 'maplibre-gl';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import dagre from 'dagre';
 import {
   FormControl as MuiFormControl,
   InputLabel as MuiInputLabel,
@@ -326,7 +326,7 @@ export function IntelGraphWorkbench() {
       } else {
         setGraphData({ nodes: [], links: [] }); // Set empty if no data
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       console.error('Error fetching graph data:', e);
       setError(e.message || 'Failed to fetch graph data.');
@@ -420,7 +420,7 @@ export function IntelGraphWorkbench() {
     const filteredNodes = graphData.nodes.filter((node) => {
       const matchesSearch = searchQuery
         ? node.label?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          node.id.toLowerCase().includes(searchQuery.toLowerCase())
+        node.id.toLowerCase().includes(searchQuery.toLowerCase())
         : true;
       const matchesDegree =
         (node.degree ?? 0) >= minDegree && (node.degree ?? 0) <= maxDegree;
@@ -698,6 +698,7 @@ export function IntelGraphWorkbench() {
               mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json" // Example map style
             >
               <NavigationControl position="top-left" />
+              {/* @ts-ignore */}
               <DeckGL
                 initialViewState={{
                   longitude: -100,
@@ -712,17 +713,17 @@ export function IntelGraphWorkbench() {
                       (n) => n.lat !== undefined && n.lon !== undefined,
                     ),
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    getPosition: (d: any) => [d.lon, d.lat],
+                    getPosition: (d: any) => [d.lon ?? 0, d.lat ?? 0] as [number, number],
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     getFillColor: (d: any) => {
                       const color = nodeColors[d.id];
                       return color
                         ? [
-                            parseInt(color.slice(1, 3), 16),
-                            parseInt(color.slice(3, 5), 16),
-                            parseInt(color.slice(5, 7), 16),
-                            200,
-                          ]
+                          parseInt(color.slice(1, 3), 16),
+                          parseInt(color.slice(3, 5), 16),
+                          parseInt(color.slice(5, 7), 16),
+                          200,
+                        ]
                         : [0, 0, 0, 200];
                     },
                     getRadius: 10000, // Adjust radius based on zoom level
@@ -770,8 +771,8 @@ export function IntelGraphWorkbench() {
                             : d.source),
                       );
                       return sourceNode
-                        ? [sourceNode.lon, sourceNode.lat]
-                        : [0, 0];
+                        ? ([sourceNode.lon ?? 0, sourceNode.lat ?? 0] as [number, number])
+                        : ([0, 0] as [number, number]);
                     },
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     getTargetPosition: (d: any) => {
@@ -783,8 +784,8 @@ export function IntelGraphWorkbench() {
                             : d.target),
                       );
                       return targetNode
-                        ? [targetNode.lon, targetNode.lat]
-                        : [0, 0];
+                        ? ([targetNode.lon ?? 0, targetNode.lat ?? 0] as [number, number])
+                        : ([0, 0] as [number, number]);
                     },
                     getSourceColor: [0, 128, 255, 160],
                     getTargetColor: [255, 0, 128, 160],
