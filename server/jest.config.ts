@@ -30,10 +30,11 @@ const config: Config = {
     '.*prompts/registry(\\.js)?$': '<rootDir>/tests/mocks/prompts-registry.ts',
     '.*insights/engagementCascade(\\.js)?$': '<rootDir>/tests/mocks/engagement-cascade.ts',
     '.*packages/shared/provenance(\\.js)?$': '<rootDir>/tests/mocks/provenance.ts',
-    '.*logger(\\.js)?$': '<rootDir>/tests/mocks/logger.ts',
+    '.*logger(\\.js)?$': '<rootDir>/tests/mocks/logger.cjs',
     '.*metrics/dbMetrics(\\.js)?$': '<rootDir>/tests/mocks/db-metrics.ts',
     '.*workers/eventBus(\\.js)?$': '<rootDir>/tests/mocks/eventBus.ts',
     '.*health/aggregator(\\.js)?$': '<rootDir>/tests/mocks/health-aggregator.ts',
+    '^node-fetch$': '<rootDir>/tests/mocks/node-fetch.cjs',
     '^ioredis$': '<rootDir>/tests/mocks/ioredis.ts',
     '^pg-boss$': '<rootDir>/tests/mocks/pg-boss.ts',
     '^neo4j-driver$': '<rootDir>/tests/mocks/neo4j-driver.ts',
@@ -100,7 +101,7 @@ const config: Config = {
     '^.+\\.js$': ['ts-jest', { useESM: true }],
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(\\.pnpm|p-limit|yocto-queue|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|pptxgenjs|jszip|@exodus/bytes|jsdom|html-encoding-sniffer|pg-boss)/)',
+    'node_modules/(?!(\\.pnpm|p-limit|yocto-queue|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|pptxgenjs|jszip|@exodus/bytes|jsdom|html-encoding-sniffer|pg-boss|gaxios|gcp-metadata|@opentelemetry)/)',
   ],
   maxWorkers: process.env.CI ? 2 : '50%',
   // Limit worker memory to prevent OOM in CI
