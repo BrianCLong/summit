@@ -29,11 +29,6 @@ export class QueueService {
       await job.updateProgress(10); // Started
 
       try {
-        // This line is added based on the instruction, assuming 'text' and 'textMatches' are defined elsewhere.
-        // It explicitly types 's' as a string.
-        let text: string; // Added for compilation, assuming 'text' is meant to be declared here.
-        const textMatches: string[] = []; // Added for compilation, assuming 'textMatches' is meant to be declared here.
-        text = textMatches.map((s: string) => s.slice(1, -1)).join(' ');
         await this.orchestrator.runPipeline(config);
         await job.updateProgress(100); // Completed
         return { status: 'completed', pipeline: config.key };
