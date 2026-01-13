@@ -10,6 +10,7 @@ const steps = [
     name: 'server:test:unit',
     command: 'pnpm',
     args: ['--filter', 'intelgraph-server', 'test:unit'],
+    env: { GA_VERIFY_MODE: 'true' },
   },
   { name: 'ga:smoke', command: 'pnpm', args: ['ga:smoke'] },
 ];
@@ -58,7 +59,7 @@ const runStep = async (step) => {
   console.log(`[ga-verify] Starting ${step.name}: ${step.command} ${step.args.join(' ')}`);
 
   const result = spawnSync(step.command, step.args, {
-    env: process.env,
+    env: { ...process.env, ...(step.env ?? {}) },
     encoding: 'utf8',
     stdio: ['inherit', 'pipe', 'pipe'],
     maxBuffer: 20 * 1024 * 1024,
