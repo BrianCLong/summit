@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- jest-dom matchers require type assertions */
 /**
  * Route Smoke Tests with Console Error Detection
  *
@@ -6,19 +7,30 @@
  */
 
 import React from 'react';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, jest } from '@jest/globals';
 import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { ApolloProvider } from '@apollo/client';
 import { ThemeProvider } from '@mui/material';
-import { store } from '../store';
+import store from '../store';
 import { apolloClient } from '../services/apollo';
 import { getIntelGraphTheme } from '../theme/intelgraphTheme';
 import { AuthProvider } from '../context/AuthContext';
 import ReleaseReadinessRoute from '../routes/ReleaseReadinessRoute';
 
+// Mock apollo client to bypass import.meta check in js file
+jest.mock('../services/apollo', () => ({
+  apolloClient: {
+    query: jest.fn(),
+    mutate: jest.fn(),
+    readQuery: jest.fn(),
+    writeQuery: jest.fn(),
+  },
+}));
+
 // Mock fetch for API calls
-global.fetch = jest.fn();
+global.fetch = jest.fn() as any;
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -45,7 +57,7 @@ Object.defineProperty(window, 'localStorage', {
 // Mock navigator.clipboard
 Object.assign(navigator, {
   clipboard: {
-    writeText: jest.fn().mockResolvedValue(undefined),
+    writeText: jest.fn().mockResolvedValue(undefined as any),
   },
 });
 
@@ -85,7 +97,7 @@ beforeEach(() => {
   localStorageMock.clear();
 
   // Reset fetch mock
-  (global.fetch as jest.Mock).mockClear();
+  (global.fetch as any).mockClear();
 
   // Set up default auth token
   localStorageMock.setItem('token', 'mock-jwt-token');
@@ -154,7 +166,7 @@ describe('Route Smoke Tests - Console Error Detection', () => {
         ],
       };
 
-      (global.fetch as jest.Mock).mockImplementation((url: string) => {
+      (global.fetch as any).mockImplementation((url: string) => {
         if (url.includes('/ops/release-readiness/summary')) {
           return Promise.resolve({
             ok: true,
@@ -179,7 +191,7 @@ describe('Route Smoke Tests - Console Error Detection', () => {
 
       // Wait for initial render
       await waitFor(() => {
-        expect(screen.queryByText(/Loading release readiness data/i)).not.toBeInTheDocument();
+        (expect(screen.queryByText(/Loading release readiness data/i)) as any).not.toBeInTheDocument();
       }, { timeout: 3000 });
 
       // Check for console errors (filter out expected warnings from libraries)
@@ -188,7 +200,8 @@ describe('Route Smoke Tests - Console Error Detection', () => {
           // Filter out known library warnings
           !err[0]?.toString().includes('Warning: ReactDOM.render') &&
           !err[0]?.toString().includes('Warning: useLayoutEffect') &&
-          !err[0]?.toString().includes('Not implemented: HTMLFormElement.prototype.submit')
+          !err[0]?.toString().includes('Not implemented: HTMLFormElement.prototype.submit') &&
+          !err[0]?.toString().includes('ReactDOMTestUtils.act')
       );
 
       expect(actualErrors).toHaveLength(0);
@@ -212,7 +225,7 @@ describe('Route Smoke Tests - Console Error Detection', () => {
       localStorageMock.setItem('release-readiness-timestamp', (Date.now() - 10 * 60 * 1000).toString());
 
       // Mock API to fail (offline simulation)
-      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
+      (global.fetch as any).mockRejectedValue(new Error('Network error') as any);
 
       renderWithProviders(
         <Routes>
@@ -223,7 +236,7 @@ describe('Route Smoke Tests - Console Error Detection', () => {
 
       // Should show cached data
       await waitFor(() => {
-        expect(screen.queryByText(/Loading release readiness data/i)).not.toBeInTheDocument();
+        (expect(screen.queryByText(/Loading release readiness data/i)) as any).not.toBeInTheDocument();
       });
 
       // Check for console errors
@@ -240,7 +253,7 @@ describe('Route Smoke Tests - Console Error Detection', () => {
 
     it('renders without console errors in error state', async () => {
       // Mock API to fail
-      (global.fetch as jest.Mock).mockRejectedValue(new Error('API Error'));
+      (global.fetch as any).mockRejectedValue(new Error('API Error') as any);
 
       renderWithProviders(
         <Routes>
@@ -251,7 +264,7 @@ describe('Route Smoke Tests - Console Error Detection', () => {
 
       // Wait for error state
       await waitFor(() => {
-        expect(screen.queryByText(/Loading release readiness data/i)).not.toBeInTheDocument();
+        (expect(screen.queryByText(/Loading release readiness data/i)) as any).not.toBeInTheDocument();
       });
 
       // Check for console errors (allow the expected API error)
@@ -279,7 +292,7 @@ describe('Route Smoke Tests - Console Error Detection', () => {
         evidence: [],
       };
 
-      (global.fetch as jest.Mock).mockImplementation((url: string) => {
+      (global.fetch as any).mockImplementation((url: string) => {
         if (url.includes('/ops/release-readiness/summary')) {
           return Promise.resolve({
             ok: true,
@@ -295,7 +308,7 @@ describe('Route Smoke Tests - Console Error Detection', () => {
         return Promise.reject(new Error('Unknown URL'));
       });
 
-      const { getByText } = renderWithProviders(
+      renderWithProviders(
         <Routes>
           <Route path="/ops/release-readiness" element={<ReleaseReadinessRoute />} />
         </Routes>,
@@ -303,7 +316,7 @@ describe('Route Smoke Tests - Console Error Detection', () => {
       );
 
       await waitFor(() => {
-        expect(screen.queryByText(/Loading release readiness data/i)).not.toBeInTheDocument();
+        (expect(screen.queryByText(/Loading release readiness data/i)) as any).not.toBeInTheDocument();
       });
 
       // Clear errors from initial render
@@ -312,11 +325,11 @@ describe('Route Smoke Tests - Console Error Detection', () => {
       // Click Evidence Explorer tab (if visible)
       const evidenceTab = screen.queryByText('Evidence Explorer');
       if (evidenceTab) {
-        evidenceTab.click();
+        (evidenceTab as HTMLElement).click();
 
         // Wait a bit for re-render
         await waitFor(() => {
-          expect(evidenceTab).toBeInTheDocument();
+          (expect(evidenceTab) as any).toBeInTheDocument();
         });
       }
 
@@ -340,7 +353,7 @@ describe('Route Smoke Tests - Console Error Detection', () => {
         evidence: [],
       };
 
-      (global.fetch as jest.Mock).mockImplementation((url: string) => {
+      (global.fetch as any).mockImplementation((url: string) => {
         if (url.includes('/ops/release-readiness/summary')) {
           return Promise.resolve({
             ok: true,
@@ -368,7 +381,7 @@ describe('Route Smoke Tests - Console Error Detection', () => {
 
       // Fetch should only be called once (initial load, no polling)
       await waitFor(() => {
-        expect((global.fetch as jest.Mock).mock.calls.length).toBeLessThanOrEqual(2); // summary + evidence
+        expect(((global.fetch as any).mock.calls as any).length).toBeLessThanOrEqual(2); // summary + evidence
       });
 
       unmount();
