@@ -1,5 +1,5 @@
 
-import { test, describe } from 'node:test';
+import { test, describe, beforeEach } from 'node:test';
 import assert from 'node:assert';
 import { UniversalCommentService } from '../../server/src/comments/UniversalCommentService.js';
 
