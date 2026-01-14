@@ -15,6 +15,7 @@ import { SocketProvider } from '@/contexts/SocketContext'
 
 // Lazy load pages for better initial load performance
 const HomePage = React.lazy(() => import('@/pages/HomePage'))
+const GettingStartedPage = React.lazy(() => import('@/pages/GettingStartedPage'))
 const ExplorePage = React.lazy(() => import('@/pages/ExplorePage'))
 const AlertsPage = React.lazy(() => import('@/pages/AlertsPage'))
 const AlertDetailPage = React.lazy(() => import('@/pages/AlertDetailPage'))
@@ -140,6 +141,7 @@ function App() {
                     {/* Protected routes with layout */}
                     <Route path="/" element={<Layout />}>
                       <Route index element={<HomePage />} />
+                      <Route path="getting-started" element={<GettingStartedPage />} />
                       <Route path="explore" element={<ExplorePage />} />
 
                       {/* Tri-Pane Analysis */}
