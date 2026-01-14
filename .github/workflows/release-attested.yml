@@ -1,0 +1,149 @@
+name: release-attested
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-attested-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  assemble-release-assets:
+    name: assemble-release-assets
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+      asset_dir: ${{ steps.meta.outputs.asset_dir }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Generate evidence bundle
+        run: pnpm ci:evidence:bundle
+
+      - name: Verify evidence bundle
+        run: pnpm ci:evidence:verify
+
+      - name: Resolve tag metadata
+        id: meta
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "asset_dir=artifacts/release/${TAG}" >> $GITHUB_OUTPUT
+
+      - name: Zip evidence bundle
+        run: |
+          mkdir -p artifacts/evidence
+          zip -r "artifacts/evidence/evidence-${GITHUB_SHA}.zip" artifacts/evidence -x "artifacts/evidence/*.zip"
+
+      - name: Assemble release assets
+        run: node scripts/release/assemble_release_assets.mjs --tag "${{ steps.meta.outputs.tag }}" --sha "${GITHUB_SHA}"
+
+      - name: Verify release assets
+        run: node scripts/release/verify_release_assets.mjs --dir "${{ steps.meta.outputs.asset_dir }}" --require-attestations=false
+
+      - name: Attest release assets
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: |
+            ${{ steps.meta.outputs.asset_dir }}/packages/*.tgz
+            ${{ steps.meta.outputs.asset_dir }}/sbom/*.json
+            ${{ steps.meta.outputs.asset_dir }}/manifest.json
+
+      - name: Upload release assets
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attested-release-assets-${{ steps.meta.outputs.tag }}
+          path: ${{ steps.meta.outputs.asset_dir }}
+
+  publish-release:
+    name: publish-release
+    runs-on: ubuntu-latest
+    needs: assemble-release-assets
+    permissions:
+      contents: write
+      id-token: write
+    env:
+      PUBLISH_ENABLED: ${{ vars.PUBLISH_ENABLED || '0' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: pnpm
+
+      - name: Download release assets
+        uses: actions/download-artifact@v4
+        with:
+          name: attested-release-assets-${{ needs.assemble-release-assets.outputs.tag }}
+          path: artifacts/release/${{ needs.assemble-release-assets.outputs.tag }}
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ needs.assemble-release-assets.outputs.tag }}"
+          NOTES="artifacts/release/${TAG}/notes.md"
+          ASSET_DIR="artifacts/release/${TAG}"
+          mapfile -t FILES < <(find "${ASSET_DIR}" -type f)
+          if gh release view "${TAG}" >/dev/null 2>&1; then
+            gh release upload "${TAG}" "${FILES[@]}" --clobber
+          else
+            gh release create "${TAG}" --notes-file "${NOTES}" "${FILES[@]}"
+          fi
+
+      - name: Publish packages (opt-in)
+        if: env.PUBLISH_ENABLED == '1'
+        env:
+          NPM_CONFIG_PROVENANCE: true
+        run: |
+          TAG="${{ needs.assemble-release-assets.outputs.tag }}"
+          git fetch origin main --tags
+          TAG_SHA=$(git rev-list -n 1 "${TAG}")
+          if git merge-base --is-ancestor "${TAG_SHA}" origin/main; then
+            echo "Tag ${TAG} is based on main. Proceeding with publish."
+          else
+            echo "Tag ${TAG} is not based on main. Skipping publish."
+            exit 0
+          fi
+          pnpm install --frozen-lockfile
+          pnpm -r publish --access public --no-git-checks

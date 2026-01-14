@@ -1,0 +1,43 @@
+{
+  "task_id": "RELEASE_ATTESTED_GA_2026_01_14",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "release-attested-ga",
+    "version": "v1",
+    "sha256": "e07d81289eaa61e1a0bfaafbc3fdcdb4a33a3ec94db5664a4e1ab978ea385b91",
+    "path": "prompts/release/attested-release@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      ".github/workflows/",
+      "scripts/release/",
+      "scripts/evidence/",
+      "docs/releases/",
+      "docs/roadmap/STATUS.json",
+      "package.json",
+      "prompts/release/",
+      "prompts/registry.yaml",
+      "agents/examples/"
+    ],
+    "domains": ["release", "ci", "provenance", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["release-manifest.json", "attested-release-workflow-log"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Tag-triggered GA release workflow assembles assets and uploads release artifacts.",
+    "Offline verifier validates manifest hashes and evidence bundle.",
+    "Documentation captures release and verification steps."
+  ],
+  "stop_conditions": [
+    "CI failure in main.",
+    "Detection of PII in outputs.",
+    "Sandbox violation alert."
+  ]
+}
