@@ -42,6 +42,7 @@ Use this page as the fast path to the docs you need. The golden path details liv
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** and **[README-DEPLOY.md](README-DEPLOY.md)** – Deployment topologies and environment guidance.
 - **[ROADMAP.md](ROADMAP.md)** – Current objectives and sequencing (historical plans live under `docs/archived/`).
 - **[suite_unification_architecture.md](suite_unification_architecture.md)** – Blueprint for unifying modules, contracts, identity, billing, UX shell, and governance into a cohesive suite.
+- **[agentic-skill-gaps.md](design/agentic-skill-gaps.md)** – Analysis of key skill gaps in agentic platforms vs. Summit's current optimization.
 
 ## Research & Labs
 
