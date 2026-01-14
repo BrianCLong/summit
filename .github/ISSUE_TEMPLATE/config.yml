@@ -1,5 +1,8 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
+  - name: Security disclosure
+    url: https://github.com/${{ github.repository }}/security/policy
+    about: Please report security issues via the security policy.
   - name: Nightly Services Workflow
     url: https://github.com/${{ github.repository }}/actions/workflows/ci-nightly-services.yml
     about: View the nightly services lane runs and artifacts

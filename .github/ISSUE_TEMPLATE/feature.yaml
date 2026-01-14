@@ -1,40 +1,77 @@
-name: Feature Request
-description: Suggest a new feature for the application
-labels: [feature]
+name: Feature Request (Strict)
+description: Strict feature intake
+title: "[FEATURE] "
+labels: ["triage:needed", "type:feature"]
 body:
-  - type: markdown
+  - type: dropdown
+    id: priority
     attributes:
-      value: |
-        Thanks for taking the time to suggest a new feature!
-  - type: input
-    id: contact
-    attributes:
-      label: Contact Details
-      description: How can we get in touch with you if we need more info?
-      placeholder: ex. email@example.com
-    validations:
-      required: false
-  - type: textarea
-    id: feature-description
-    attributes:
-      label: Feature Description
-      description: Describe the feature you'd like to see.
-      placeholder: A clear and concise description of the feature.
+      label: Priority
+      options: ["P0", "P1", "P2", "P3"]
     validations:
       required: true
-  - type: textarea
-    id: problem-solved
+
+  - type: dropdown
+    id: area
     attributes:
-      label: Problem Solved
-      description: What problem would this feature solve?
-      placeholder: A clear and concise description of the problem.
+      label: Area
+      options: ["server", "client", "web", "cli", "ci", "docs", "governance", "security", "release"]
     validations:
       required: true
-  - type: textarea
-    id: alternatives
+
+  - type: dropdown
+    id: type
     attributes:
-      label: Alternatives Considered
-      description: Have you considered any alternative solutions or features?
-      placeholder: A clear and concise description of any alternative solutions or features you've considered.
+      label: Type
+      options: ["feature"]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: reproducibility
+    attributes:
+      label: Reproducibility
+      description: How consistently does the need occur in the field?
+      options: ["always", "often", "sometimes", "rarely", "unable to reproduce"]
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem does this feature solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Outline the desired capability and behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Validation steps or workflow to confirm the feature.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: 2–5 testable bullets.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Supporting context
+      description: Links, research, or mocks.
     validations:
       required: false

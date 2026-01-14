@@ -1,0 +1,40 @@
+{
+  "task_id": "ISSUE_INTAKE_STRICT_20260114",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "issue-intake-strict",
+    "version": "v1",
+    "sha256": "ea040deefd1fb7d1900a3bf719a7998bb2f3583d42f5b626ba31236c3725de52",
+    "path": "prompts/governance/issue-intake-strict@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      ".github/",
+      "docs/triage/",
+      "docs/roadmap/STATUS.json",
+      "prompts/governance/issue-intake-strict@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/issue-intake-strict-task.json"
+    ],
+    "domains": ["governance", "triage", "compliance", "operations"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["manual-review"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Issue forms require priority, area, type, reproducibility, and acceptance criteria.",
+    "Strict triage workflow enforces labels, milestones, and needs-info checklists.",
+    "Scheduled audit enforces compliance without auto-classification."
+  ],
+  "stop_conditions": [
+    "CI failure in main",
+    "Violation of governance constraints",
+    "Missing required metadata fields in automation output"
+  ]
+}
