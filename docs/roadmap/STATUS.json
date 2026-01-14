@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-10T12:02:00Z",
+  "revision_note": "Started CEP Core implementation with context-engineering package scaffold",
   "initiatives": [
     {
       "id": "A",
@@ -104,6 +104,13 @@
           "name": "KTOON core libraries",
           "status": "in-progress",
           "owner": "Amp"
+        },
+        {
+          "id": "D2",
+          "name": "Context Engineering Platform (CEP)",
+          "status": "in-progress",
+          "owner": "Codex",
+          "evidence": "packages/context-engineering (token budgeting, eviction, compression, manifest primitives)"
         }
       ]
     },
@@ -143,7 +150,7 @@
     "partial": 1,
     "incomplete": 0,
     "not_started": 6,
-    "total": 12,
+    "total": 13,
     "ga_blockers": []
   }
 }

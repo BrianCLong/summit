@@ -30,6 +30,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: cep-core-pr1
+    version: v1
+    path: prompts/context/cep-core-pr1.md
+    sha256: 4ebb74aa374a01f9271b57dacb154e3c1bb8ba6a41e020d0e68516d81bb6e366
+    description: CEP Core implementation (budgets, manifests, compression, tests, docs).
+    scope:
+      paths:
+        - packages/context-engineering/
+        - docs/context-engineering/
+        - CHANGELOG.md
+        - docs/roadmap/STATUS.json
+        - artifacts/agent-runs/
+        - agents/examples/
+        - prompts/context/
+        - package.json
+      domains:
+        - maestro
+        - context
+        - governance
+        - observability
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md
@@ -70,56 +99,6 @@ prompts:
         - companyos
         - sprint-planning
         - roadmap
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: adr-pr-template-cleanup
-    version: v1
-    path: prompts/docs/adr-pr-template-cleanup@v1.md
-    sha256: 429dc47c69fb43ee25eff48a54868fc88e2faf48f8de6a213d702794d2cb3d07
-    description: Update PR and ADR templates for current workflow guidance and formatting.
-    scope:
-      paths:
-        - .github/
-        - docs/ADR/
-        - agents/examples/
-        - prompts/docs/adr-pr-template-cleanup@v1.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - governance
-        - quality
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: adr-pr-template-cleanup
-    version: v1
-    path: prompts/docs/adr-pr-template-cleanup@v1.md
-    sha256: 429dc47c69fb43ee25eff48a54868fc88e2faf48f8de6a213d702794d2cb3d07
-    description: Update PR and ADR templates for current workflow guidance and formatting.
-    scope:
-      paths:
-        - .github/
-        - docs/ADR/
-        - agents/examples/
-        - prompts/docs/adr-pr-template-cleanup@v1.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - governance
-        - quality
     verification:
       tiers_required:
         - C
