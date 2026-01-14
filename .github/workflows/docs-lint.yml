@@ -7,7 +7,7 @@ on:
 
 jobs:
   markdown-lint:
-    name: Markdown Linter
+    name: Governance / Docs Integrity
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

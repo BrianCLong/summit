@@ -335,7 +335,7 @@ jobs:
           retention-days: 30
 
   ci-core-gate:
-    name: CI Core Gate ✅
+    name: Governance / Unified Gate
     runs-on: ubuntu-latest
     needs:
       - config-preflight
