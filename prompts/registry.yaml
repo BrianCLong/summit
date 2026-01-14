@@ -55,6 +55,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: agentic-runtime-alignment
+    version: v1
+    path: prompts/docs/agentic-runtime-alignment@v1.md
+    sha256: 164ff10e9d662be9980986fed3a3c33eab54f927c5ba5a8262e21907b5215155
+    description: Document Agentic Mesh architecture alignment with the agentic runtime (AOS) layer.
+    scope:
+      paths:
+        - docs/agentic-mesh/
+        - docs/roadmap/STATUS.json
+        - prompts/docs/agentic-runtime-alignment@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - architecture
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
