@@ -1,0 +1,96 @@
+name: Trusted CI (Privileged)
+
+on:
+  workflow_run:
+    workflows: ["Untrusted CI"]
+    types:
+      - completed
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+  checks: write
+  issues: write
+
+jobs:
+  # 1. Post-process results from Untrusted CI
+  process-results:
+    name: Process Untrusted Results
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: coverage-report
+          path: coverage
+
+      # Example: Upload to Codecov (requires token)
+      # This is safe because it runs in the context of the base repo
+      # - name: Upload to Codecov
+      #   uses: codecov/codecov-action@v4
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     files: ./coverage/coverage-final.json
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const runId = context.payload.workflow_run.id;
+            const prs = context.payload.workflow_run.pull_requests;
+
+            if (prs.length > 0) {
+              const prNumber = prs[0].number;
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body: `✅ **Untrusted CI Passed!**\n\nPrivileged workflow processed results from run [${runId}](${context.payload.workflow_run.html_url}).`
+              });
+            }
+
+  # 2. Privileged Checks (Deployment / Secrets)
+  privileged-checks:
+    name: Privileged Checks
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    environment:
+      name: ci-privileged # Protect this environment with review requirements
+    steps:
+      - uses: actions/checkout@v4
+
+      # Example: Check if user is a maintainer before running expensive/sensitive tasks
+      - name: Check User Trust
+        id: check-trust
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sender = context.payload.workflow_run.actor.login;
+            console.log(`Checking trust for ${sender}`);
+            // Logic to verify user...
+
+  # 3. Handle Failure
+  on-failure:
+    name: Report Failure
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    steps:
+       - name: Comment on PR
+         uses: actions/github-script@v7
+         with:
+           script: |
+             const { owner, repo } = context.repo;
+             const prs = context.payload.workflow_run.pull_requests;
+             if (prs.length > 0) {
+               await github.rest.issues.createComment({
+                 owner,
+                 repo,
+                 issue_number: prs[0].number,
+                 body: `❌ **Untrusted CI Failed.**\n\nPlease check the logs.`
+               });
+             }
