@@ -57,6 +57,7 @@ import { cfg } from './config.js';
 import supportTicketsRouter from './routes/support-tickets.js';
 import ticketLinksRouter from './routes/ticket-links.js';
 import tenantContextMiddleware from './middleware/tenantContext.js';
+import { tenantIsolationMiddleware } from './middleware/tenant_isolation.js';
 import sharingRouter from './routes/sharing.js';
 import { auroraRouter } from './routes/aurora.js';
 import { oracleRouter } from './routes/oracle.js';
@@ -297,7 +298,9 @@ export const createApp = async () => {
       };
 
   // Resolve and enforce tenant context for API and GraphQL surfaces
+  // tenantIsolationMiddleware enforces strict GovernanceVerdict and KillSwitch checks
   app.use(['/api', '/graphql'], tenantContextMiddleware());
+  app.use(['/api', '/graphql'], tenantIsolationMiddleware);
   app.use(['/api', '/graphql'], admissionControl);
 
   // Authenticated rate limiting for API and GraphQL routes

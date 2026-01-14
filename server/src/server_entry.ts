@@ -11,6 +11,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 // import WSPersistedQueriesMiddleware from "./graphql/middleware/wsPersistedQueries.js";
 import { otelService } from './lib/observability/otel.js';
+import { bootstrapGovernance } from './bootstrap/governance.js';
 
 // Initialize OpenTelemetry as early as possible
 otelService.initialize();
@@ -37,6 +38,7 @@ const logger: pino.Logger = (pino as any)();
  * @trace FEAT-BOOTSTRAP
  */
 const startServer = async () => {
+  await bootstrapGovernance();
   // Optional Kafka consumer import - only when AI services enabled
   let startKafkaConsumer: any = null;
   let stopKafkaConsumer: any = null;
