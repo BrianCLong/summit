@@ -49,6 +49,7 @@ import rbacRouter from './routes/rbacRoutes.js';
 // import { licenseRuleValidationMiddleware } from './graphql/middleware/licenseRuleValidationMiddleware.js';
 import { getContext } from './lib/auth.js';
 import { getNeo4jDriver } from './db/neo4j.js';
+import { metrics } from './observability/metrics.js';
 import { initializeTracing, getTracer } from './observability/tracer.js';
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
 import { startTrustWorker } from './workers/trustScoreWorker.js';
@@ -148,6 +149,11 @@ export const createApp = async () => {
     await tracer.initialize();
   }
 
+  // Signal observability stack is healthy
+  if (metrics.observabilityStatus) {
+    metrics.observabilityStatus.set(1);
+  }
+
   const app = express();
   const logger = (pino as any)();
 
@@ -199,9 +205,8 @@ export const createApp = async () => {
   app.use(publicRateLimit);
 
   // Enhanced Pino HTTP logger with correlation and trace context
-  const pinoHttpInstance = typeof pinoHttp === 'function' ? pinoHttp : (pinoHttp as any).pinoHttp;
   app.use(
-    pinoHttpInstance({
+    pinoHttp({
       logger: appLogger,
       // Redaction is handled by the logger config itself, but we keep this consistent if needed
       // logger config already has redact paths, so we can omit here or merge.
@@ -213,7 +218,7 @@ export const createApp = async () => {
         traceId: req.traceId,
         spanId: req.spanId,
         userId: req.user?.sub || req.user?.id,
-        tenantId: req.user?.tenant_id || req.user?.tenantId,
+        tenantId: req.user?.tenant_id,
       }),
     }),
   );

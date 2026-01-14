@@ -124,6 +124,7 @@ export class IntelGraphTracer {
       await this.sdk.start();
       this.initialized = true;
       logger.info('OpenTelemetry tracing initialized successfully');
+      console.log('OpenTelemetry Tracing: Enabled and Active');
     } catch (error: any) {
       logger.error('Failed to initialize tracing:', error as any);
       // Don't throw - allow service to start without tracing
