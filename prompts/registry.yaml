@@ -104,6 +104,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: dependency-risk-gate
+    version: v1
+    path: prompts/governance/dependency-risk-gate.md
+    sha256: eee3c9c0769821ab5cd9731e3fe49c79325117c1e59140b57cbf91464570beeb
+    description: Implement GA-grade dependency and supply-chain risk gate with deterministic evidence.
+    scope:
+      paths:
+        - .github/
+        - docs/roadmap/STATUS.json
+        - docs/security/
+        - package.json
+        - prompts/
+        - scripts/ci/
+    domains:
+      - governance
+      - ci
+      - security
+      - supply-chain
+    verification:
+      tiers_required:
+        - A
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md

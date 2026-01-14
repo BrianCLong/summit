@@ -1,0 +1,27 @@
+schema_version: "1"
+scope:
+  include_workspaces:
+    - "*"
+  exclude_workspaces: []
+network_access: "ci"
+vulnerability_gate:
+  enabled: true
+  max_severity: "high"
+  allowlist: []
+license_gate:
+  enabled: true
+  denylist:
+    - "AGPL-3.0"
+    - "SSPL-1.0"
+  allowlist:
+    - "MIT"
+    - "Apache-2.0"
+    - "BSD-3-Clause"
+    - "ISC"
+  unknown_license_behavior: "fail"
+audit_sources:
+  - type: "pnpm_audit"
+    enabled: true
+    mode: "ci"
+output:
+  out_dir: "artifacts/governance/dependency-risk/${sha}"
