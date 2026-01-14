@@ -24,4 +24,12 @@ describe('McpClient', () => {
     expect(typeof c.listResources).toBe('function');
     expect(typeof c.listPrompts).toBe('function');
   });
+
+  it('tracks transport selection', async () => {
+    const c = new McpClient('http://localhost:8080', 'token', {
+      transport: 'http',
+    });
+    const selection = await c.transportSelection();
+    expect(selection.type).toBe('http');
+  });
 });

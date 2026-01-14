@@ -1,0 +1,139 @@
+syntax = "proto3";
+
+package intelgraph.mcp.transport.v1;
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/empty.proto";
+
+message SessionContext {
+  string session_id = 1;
+  string tool_class = 2;
+  string recording_id = 3;
+}
+
+message McpError {
+  int32 code = 1;
+  string message = 2;
+  string details = 3;
+}
+
+message McpRequest {
+  string id = 1;
+  string method = 2;
+  google.protobuf.Struct params = 3;
+  SessionContext session = 4;
+  string version = 5;
+}
+
+message McpResponse {
+  string id = 1;
+  google.protobuf.Struct result = 2;
+  McpError error = 3;
+  SessionContext session = 4;
+  string version = 5;
+  map<string, string> metadata = 6;
+}
+
+message InitializeRequest {
+  string client_name = 1;
+  string client_version = 2;
+  map<string, string> metadata = 3;
+}
+
+message InitializeResponse {
+  string server_name = 1;
+  string server_version = 2;
+  repeated string transports = 3;
+  map<string, string> metadata = 4;
+}
+
+message Tool {
+  string name = 1;
+  string description = 2;
+  repeated string scopes = 3;
+}
+
+message ToolList {
+  repeated Tool tools = 1;
+}
+
+message Resource {
+  string name = 1;
+  string description = 2;
+  string version = 3;
+}
+
+message ResourceList {
+  repeated Resource resources = 1;
+}
+
+message Prompt {
+  string name = 1;
+  string description = 2;
+  string version = 3;
+}
+
+message PromptList {
+  repeated Prompt prompts = 1;
+}
+
+message InvokeRequest {
+  string id = 1;
+  string tool_name = 2;
+  google.protobuf.Struct args = 3;
+  string session_id = 4;
+  string tool_class = 5;
+  repeated string capability_scopes = 6;
+  bool keep_alive = 7;
+}
+
+message InvokeResponse {
+  string id = 1;
+  google.protobuf.Struct result = 2;
+  McpError error = 3;
+  string session_id = 4;
+  map<string, string> metadata = 5;
+}
+
+message AllocateRequest {
+  string tool_class = 1;
+  repeated string capability_scopes = 2;
+}
+
+message AllocateResponse {
+  string session_id = 1;
+  string tool_class = 2;
+  string transport = 3;
+  string created_at = 4;
+  map<string, string> metadata = 5;
+}
+
+message ReleaseRequest {
+  string session_id = 1;
+}
+
+message ReleaseResponse {
+  bool ok = 1;
+}
+
+message PingRequest {
+  string id = 1;
+}
+
+message PingResponse {
+  string id = 1;
+  bool ok = 2;
+}
+
+service McpTransport {
+  rpc Call(McpRequest) returns (McpResponse);
+  rpc Connect(stream McpRequest) returns (stream McpResponse);
+  rpc Initialize(InitializeRequest) returns (InitializeResponse);
+  rpc ListTools(google.protobuf.Empty) returns (ToolList);
+  rpc ListResources(google.protobuf.Empty) returns (ResourceList);
+  rpc ListPrompts(google.protobuf.Empty) returns (PromptList);
+  rpc Invoke(InvokeRequest) returns (InvokeResponse);
+  rpc Allocate(AllocateRequest) returns (AllocateResponse);
+  rpc Release(ReleaseRequest) returns (ReleaseResponse);
+  rpc Ping(PingRequest) returns (PingResponse);
+}

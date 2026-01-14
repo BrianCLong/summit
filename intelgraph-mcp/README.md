@@ -4,7 +4,7 @@ This workspace seeds the Maestro Conductor differentiation program with runtime,
 
 ## Packages
 
-- `services/runtime-pooler`: Firecracker pooler API skeleton with deterministic sandbox hooks, OTEL bootstrap, and transport adapters (HTTP+SSE, STDIO).
+- `services/runtime-pooler`: Firecracker pooler API skeleton with deterministic sandbox hooks, OTEL bootstrap, and transport adapters (HTTP+SSE, gRPC, STDIO).
 - `services/replay-engine`: Deterministic recorder/replayer service with storage, redaction stubs, and Fastify API.
 - `packages/sdk-ts`: TypeScript SDK for connect/invoke, capability discovery (`listTools/resources/prompts`), SSE streams, and session teardown.
 - `tools/conformance-cli`: CLI harness for marketplace conformance validation including transport & JSON-RPC checks.
@@ -16,6 +16,7 @@ This workspace seeds the Maestro Conductor differentiation program with runtime,
 pnpm install
 pnpm build
 pnpm --filter runtime-pooler dev # port 8080
+MCP_GRPC_ENABLED=true pnpm --filter runtime-pooler dev # gRPC on 9090
 pnpm --filter replay-engine dev  # port 8081
 ```
 
@@ -71,16 +72,24 @@ pnpm --filter @intelgraph/mcp-conformance-cli start -- \
 
 SSE latency benchmark:
 
-```bash
+````bash
 ENDPOINT=http://localhost:8080 TOKEN=dev k6 run benchmarks/harness/k6/sse-latency.js
-```
+
+Transport comparison benchmark (HTTP vs gRPC):
+
+```bash
+MCP_HTTP_URL=http://localhost:8080 MCP_GRPC_ADDRESS=localhost:9090 MCP_TOKEN=dev \
+  pnpm --filter mcp-bench-harness transport:compare
+````
+
+````
 
 Devcontainer (optional) for a fully provisioned toolchain:
 
 ```bash
 docker build -t intelgraph-mcp-dev -f devcontainer/Dockerfile .
 docker run --rm -it -v "$PWD":/workspace -w /workspace intelgraph-mcp-dev bash
-```
+````
 
 ### Policy Simulation
 
@@ -104,6 +113,7 @@ make shootout
 - `FC_KERNEL_PATH`, `FC_ROOTFS_PATH`: production Firecracker artifacts (optional locally when `FC_MOCK=1`).
 - `NSJAIL_BIN`, `NSJAIL_CONFIG`: override sandbox binary/config for STDIO transports.
 - `SSE_BUFFER_SIZE`, `SSE_HEARTBEAT_MS`: tune event buffering + heartbeat cadence.
+- `MCP_GRPC_ENABLED`, `MCP_GRPC_PORT`, `MCP_GRPC_TLS_*`: enable and secure gRPC transport.
 - `REPLAY_ENGINE_URL`: base URL for deterministic replay ingestion (defaults to `http://localhost:8081`).
 - `OPA_URL`: optional Open Policy Agent base URL for on-path authorization decisions.
 

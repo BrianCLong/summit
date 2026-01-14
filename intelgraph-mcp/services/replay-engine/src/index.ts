@@ -51,7 +51,7 @@ app.post('/v1/recordings/:id/events', async (req, reply) => {
       return reply.code(400).send({ error: 'invalid dir' });
     }
     const channel = entry.channel as IOChannel;
-    if (!['jsonrpc', 'sse', 'stdio', 'net', 'env'].includes(channel)) {
+    if (!['jsonrpc', 'sse', 'stdio', 'grpc', 'net', 'env'].includes(channel)) {
       return reply.code(400).send({ error: 'invalid channel' });
     }
     const event = recorder.push(rec, {
