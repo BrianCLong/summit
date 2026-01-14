@@ -120,7 +120,12 @@
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
     "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "graph:snapshot": "node scripts/graph/export_neo4j_snapshot.mjs",
+    "graph:pg-deltas": "node scripts/graph/export_pg_deltas.mjs",
+    "graph:compare": "node scripts/graph/compare_graphs.mjs",
+    "graph:ledger": "node scripts/graph/write_ledger.mjs",
+    "graph:nightly": "npm run graph:snapshot && npm run graph:pg-deltas && npm run graph:compare && npm run graph:ledger"
   },
   "keywords": [
     "intelligence-analysis",
