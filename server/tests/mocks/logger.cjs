@@ -1,13 +1,13 @@
 // Logger mock - CommonJS version for dual ESM/CJS compatibility
 const loggerImpl = {
   child: function () { return this; },
-  debug: () => {},
-  info: () => {},
-  warn: () => {},
-  error: () => {},
-  trace: () => {},
-  fatal: () => {},
-  silent: () => {},
+  debug: () => { },
+  info: () => { },
+  warn: () => { },
+  error: () => { },
+  trace: () => { },
+  fatal: () => { },
+  silent: () => { },
   level: 'silent',
 };
 
@@ -21,3 +21,4 @@ module.exports = loggerImpl;
 module.exports.logger = loggerImpl;
 module.exports.correlationStorage = correlationStorageImpl;
 module.exports.default = loggerImpl;
+module.exports.logger = loggerImpl;

@@ -51,6 +51,7 @@ const config: Config = {
     '.*services/rag(\\.js)?$': '<rootDir>/tests/mocks/rag.ts',
     '.*middleware/rateLimit(\\.js)?$': '<rootDir>/tests/mocks/rateLimit.ts',
     '.*middleware/audit-logger(\\.js)?$': '<rootDir>/tests/mocks/audit-logger.cjs',
+    '.*utils/audit(\\.js)?$': '<rootDir>/tests/mocks/audit.ts',
     '.*graphql/schema\\.collab(\\.js)?$': '<rootDir>/tests/mocks/schema-collab.ts',
     '.*graphql/resolvers\\.collab(\\.js)?$': '<rootDir>/tests/mocks/resolvers-collab.ts',
     '.*scripts/maintenance(\\.js)?$': '<rootDir>/tests/mocks/maintenance.ts',
