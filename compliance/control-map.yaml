@@ -28,6 +28,8 @@ controls:
       - "server/src/middleware/auth.ts"
     evidence:
       - "ci/opa-decisions"
+      - "artifacts/governance/runtime/${sha}/tenant_isolation_report.json"
+      - "artifacts/governance/runtime/${sha}/verdict_schema.json"
     status: covered
     owner: "security-team"
 
@@ -38,6 +40,8 @@ controls:
       - ".github/workflows/ci.yml"
     evidence:
       - "ci/test-reports"
+      - "artifacts/governance/runtime/${sha}/boot_snapshot.json"
+      - "artifacts/governance/runtime/${sha}/kill_switch_report.json"
     status: covered
     owner: "devops-team"
 

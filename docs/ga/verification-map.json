@@ -74,5 +74,14 @@
     "evidence": ["docs/security/security-architecture-and-policies.md"],
     "keyword": "ingestion",
     "notes": "Ensures ingestion hardening expectations stay documented."
+  },
+  {
+    "feature": "Runtime Governance Enforcement",
+    "tier": "A",
+    "artifact": "scripts/ga/verify_evidence_map.ts",
+    "ciStatus": "wired",
+    "evidence": ["docs/ga/RUNTIME_GOVERNANCE_EVIDENCE.md", "docs/ga/evidence_map.yml"],
+    "keyword": "Governance",
+    "notes": "Automated verification of runtime governance evidence artifacts."
   }
 ]
