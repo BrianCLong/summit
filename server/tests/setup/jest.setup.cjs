@@ -237,6 +237,22 @@ jest.mock('ioredis', () => {
   };
 });
 
+// Mock middleware/audit-logger
+jest.mock('../../src/middleware/audit-logger', () => ({
+  __esModule: true,
+  auditLogger: (req, res, next) => next(),
+  createAuditLogger: () => (req, res, next) => next(),
+  logAuditEvent: jest.fn().mockResolvedValue(undefined),
+}));
+
+// Mock utils/audit
+jest.mock('../../src/utils/audit', () => ({
+  __esModule: true,
+  writeAudit: jest.fn().mockResolvedValue(undefined),
+  deepDiff: jest.fn().mockReturnValue({}),
+  signPayload: jest.fn().mockReturnValue('mock-signature'),
+}));
+
 // Mock db/neo4j module to provide 'neo' export
 jest.mock('../../src/db/neo4j', () => {
   const mockSession = {
