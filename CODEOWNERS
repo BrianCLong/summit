@@ -1,59 +1,62 @@
-# Core areas
-/services/prov-ledger/        @acme/provenance-team @alice-dev
-/gateway/policy-lac/          @acme/policy-team
-/server/ai/nl2cypher/         @acme/ai-team @bob-ml
-/apps/web/ingest-wizard/      @acme/ingest-team
-/services/graph-analytics/    @acme/analytics-team
-/services/cases/              @acme/cases-team
-/services/audit/              @acme/cases-team
-/services/auth/               @acme/platform-auth
-/apps/web/report-studio/      @acme/reporting-team
-/services/disclosure/         @acme/reporting-team
-/services/cost-guard/         @acme/ops-team
+# By combining wildcard and direct paths, we can route reviews to the right
+# teams while keeping the file maintainable.
 
-# Capabilities & Agents
-/server/src/agents/           @acme/platform-core
-/server/src/services/         @acme/platform-core
-/tools/ultra-agent/           @acme/platform-core
-/agents/                      @acme/platform-core
+# ---------------------------------------------------------------------------
+# Team: 1. Product Engineering (@product-engineering-team)
+# ---------------------------------------------------------------------------
+/apps/web/
+/client/
+/conductor-ui/
+/services/cases/
+/services/reporting/
 
-# Policies & Entitlements
-/policy/                      @acme/policy-team
-/opa/                         @acme/policy-team
-/server/src/middleware/auth.ts @acme/policy-team
-/server/src/lib/permissions/  @acme/policy-team
+# ---------------------------------------------------------------------------
+# Team: 2. Platform Engineering (@platform-engineering-team)
+# ---------------------------------------------------------------------------
+/server/
+/services/auth/
+/services/prov-ledger/
+/gateway/
+/db/
+/migrations/
+/infra/
+/k8s/
+/terraform/
 
-# Budgets & Cost Domains
-/finops/                      @acme/finops-team
-/server/src/lib/resources/    @acme/finops-team
-/deploy/                      @acme/finops-team
+# ---------------------------------------------------------------------------
+# Team: 3. Security & Trust (@security-trust-team)
+# ---------------------------------------------------------------------------
+/security/
+/audit/
+/compliance/
+/opa/
 
-# Invariants & Proofs
-/security/                    @acme/security-team
-/server/src/provenance/       @acme/security-team
-/server/src/security/         @acme/security-team
+# ---------------------------------------------------------------------------
+# Team: 4. Release & Operations (@release-ops-team)
+# ---------------------------------------------------------------------------
+/.github/workflows/
+/runbooks/
+/observability/
+/monitoring/
+/docs/ga/
 
-# Integrations & Plug-ins
-/integrations/                @acme/integrations-team
-/connectors/                  @acme/integrations-team
-/server/src/connectors/       @acme/integrations-team
+# ---------------------------------------------------------------------------
+# Team: 5. Growth & External Surfaces (@growth-external-surfaces-team)
+# ---------------------------------------------------------------------------
+/website/
+/docs/
 
-# Data & Graph Schema
-/server/src/db/               @acme/data-team
-/migrations/                  @acme/data-team
-/schema/                      @acme/data-team
+# ---------------------------------------------------------------------------
+# Team: 6. AI/ML Features (@ai-ml-features-team)
+# ---------------------------------------------------------------------------
+/ai/
+/ml/
+/server/ai/
+/workers/graph_ai/
 
-# Observability & SLOs
-/observability/               @acme/ops-team
-/monitoring/                  @acme/ops-team
-/server/src/monitoring/       @acme/ops-team
-/server/src/observability/    @acme/ops-team
-
-# Frontend & UX
-/client/                      @acme/frontend-team
-/apps/web/                    @acme/frontend-team
-/conductor-ui/                @acme/frontend-team
-
-# Provenance & Audit
-/audit/                       @acme/provenance-team
-/server/src/audit/            @acme/provenance-team
+# ---------------------------------------------------------------------------
+# Overrides & Special Cases
+# ---------------------------------------------------------------------------
+# The root-level docs directory is owned by the Growth team, but sub-directories
+# that contain GA artifacts are owned by the Release & Ops team.
+/docs/ga/ @release-ops-team
