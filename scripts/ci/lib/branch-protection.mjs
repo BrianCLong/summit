@@ -192,16 +192,79 @@ function loadPolicy(policyPath) {
   };
 }
 
-function computeDiff(policy, actual) {
-  const missing = policy.required_status_checks.required_contexts.filter(
+function loadExceptions(exceptionsPath, branch) {
+  try {
+    const resolved = resolve(exceptionsPath);
+    const raw = readFileSync(resolved, 'utf8');
+    const parsed = yaml.load(raw);
+
+    if (!parsed || typeof parsed !== 'object') {
+      return { allow_missing: [], allow_extra: [], loaded: false };
+    }
+
+    if (!Array.isArray(parsed.exceptions)) {
+      return { allow_missing: [], allow_extra: [], loaded: true, count: 0 };
+    }
+
+    const now = new Date().toISOString().split('T')[0];
+    const allow_missing = [];
+    const allow_extra = [];
+    let count = 0;
+
+    for (const exc of parsed.exceptions) {
+      // Check branch match
+      if (exc.branch !== '*' && exc.branch !== branch) {
+        continue;
+      }
+
+      // Check expiration
+      if (exc.expires_at < now) {
+        continue; // Expired
+      }
+
+      count++;
+      if (exc.direction === 'allow_missing_in_github') {
+        allow_missing.push(exc.check_name);
+      } else if (exc.direction === 'allow_extra_in_github') {
+        allow_extra.push(exc.check_name);
+      }
+    }
+
+    return {
+      allow_missing,
+      allow_extra,
+      loaded: true,
+      count
+    };
+  } catch (error) {
+    // Return empty if file doesn't exist or is invalid
+    return { allow_missing: [], allow_extra: [], loaded: false, error: error.message };
+  }
+}
+
+function computeDiff(policy, actual, exceptions = { allow_missing: [], allow_extra: [] }) {
+  // Find missing (in policy, not in actual)
+  const missingAll = policy.required_status_checks.required_contexts.filter(
     context => !actual.required_contexts.includes(context)
   );
-  const extra = actual.required_contexts.filter(
+
+  // Find extra (in actual, not in policy)
+  const extraAll = actual.required_contexts.filter(
     context => !policy.required_status_checks.required_contexts.includes(context)
   );
+
+  // Apply exceptions
+  const missing = missingAll.filter(c => !exceptions.allow_missing.includes(c));
+  const excepted_missing = missingAll.filter(c => exceptions.allow_missing.includes(c));
+
+  const extra = extraAll.filter(c => !exceptions.allow_extra.includes(c));
+  const excepted_extra = extraAll.filter(c => exceptions.allow_extra.includes(c));
+
   return {
     missing_in_github: missing,
     extra_in_github: extra,
+    excepted_missing,
+    excepted_extra,
     strict_mismatch: policy.required_status_checks.strict !== actual.strict
   };
 }
@@ -222,6 +285,7 @@ export {
   hashObject,
   inferRepoFromGit,
   loadPolicy,
+  loadExceptions,
   normalizeContexts,
   sortKeysDeep,
   stableJson
