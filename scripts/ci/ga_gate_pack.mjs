@@ -6,6 +6,19 @@ import { verifyArtifactPolicy } from './ci_artifact_policy_gate.mjs';
 import { main as runSecurityAudit } from './security_audit_gate.mjs';
 import { validateSbom } from './sbom_quality_gate.mjs';
 import { validateProvenance } from './provenance_quality_gate.mjs';
+import { execSync } from 'child_process';
+import path from 'path';
+
+function checkEvidenceConsistency() {
+    try {
+        const scriptPath = path.resolve('scripts/ci/verify_evidence_consistency.mjs');
+        execSync(`node ${scriptPath} --strict`, { stdio: 'inherit' });
+        return true;
+    } catch (e) {
+        console.error('❌ Evidence Consistency Check FAILED');
+        return false;
+    }
+}
 
 async function main() {
     console.log('🛡️  GA Governance Gate Pack Enforcement');
@@ -24,6 +37,9 @@ async function main() {
     // Additional Evidence Gates (if present)
     if (!validateSbom('sbom.json')) hasFailures = true;
     if (!validateProvenance('provenance.json')) hasFailures = true;
+
+    // Evidence ID Consistency (New Gate)
+    if (!checkEvidenceConsistency()) hasFailures = true;
 
     if (hasFailures) {
         console.error('\n❌ GA Governance Gates FAILED');

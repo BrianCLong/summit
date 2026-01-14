@@ -53,6 +53,9 @@ const getAllFiles = (dirPath, arrayOfFiles) => {
 
 try {
     const allFiles = getAllFiles(ARTIFACTS_DIR);
+    // Sort files to ensure deterministic processing order
+    allFiles.sort();
+
     const filesMap = {};
 
     console.log(`📝 Processing ${allFiles.length} files...`);
@@ -71,13 +74,22 @@ try {
         }
     });
 
+    // Ensure filesMap keys are sorted in the final object for deterministic JSON
+    const sortedFilesMap = Object.keys(filesMap).sort().reduce(
+      (obj, key) => {
+        obj[key] = filesMap[key];
+        return obj;
+      },
+      {}
+    );
+
     const manifest = {
         meta: {
             timestamp: new Date().toISOString(),
             gitSha: process.env.GITHUB_SHA || 'unknown',
             builder: 'summit-evidence-collector-v1'
         },
-        files: filesMap,
+        files: sortedFilesMap,
         signature: '' // Placeholder for actual signing logic
     };
 
