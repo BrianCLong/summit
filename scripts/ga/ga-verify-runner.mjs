@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { sha256File, writeRunManifest } from '../ci/lib/cas.mjs';
 
 const steps = [
   { name: 'typecheck', command: 'pnpm', args: ['typecheck'] },
@@ -24,6 +25,8 @@ const sha = process.env.GA_VERIFY_SHA || gitSha || 'unknown';
 const outDir = path.join('artifacts', 'ga-verify', sha);
 const logsDir = path.join(outDir, 'logs');
 const stampPath = path.join(outDir, 'stamp.json');
+const reportJsonPath = path.join(outDir, 'report.json');
+const reportMarkdownPath = path.join(outDir, 'report.md');
 
 const stamp = {
   sha,
@@ -49,6 +52,50 @@ const writeStamp = async (patch = {}) => {
   Object.assign(stamp, patch);
   await fs.mkdir(path.dirname(stampPath), { recursive: true });
   await fs.writeFile(stampPath, JSON.stringify(stamp, null, 2));
+};
+
+const maybeHash = async (filePath) => {
+  try {
+    return await sha256File(filePath);
+  } catch (error) {
+    return null;
+  }
+};
+
+const writeReport = async (status) => {
+  const report = {
+    schema_version: '1',
+    sha,
+    status,
+    started_at: stamp.startedAt,
+    finished_at: stamp.finishedAt ?? new Date().toISOString(),
+    steps: stamp.steps,
+    failure_summary: stamp.failureSummary ?? null,
+    toolchain: stamp.toolchain,
+  };
+
+  await fs.writeFile(reportJsonPath, `${JSON.stringify(report, null, 2)}\n`);
+
+  const lines = [
+    '# GA Verify Report',
+    '',
+    `- Status: ${status}`,
+    `- SHA: ${sha}`,
+    `- Started: ${report.started_at}`,
+    `- Finished: ${report.finished_at}`,
+    `- Steps: ${stamp.steps.length}`,
+    '',
+  ];
+
+  if (stamp.failureSummary) {
+    lines.push('## Failure Summary');
+    lines.push('');
+    lines.push(`- Step: ${stamp.failureSummary.step || 'unknown'}`);
+    lines.push(`- Message: ${stamp.failureSummary.message || 'unknown'}`);
+    lines.push('');
+  }
+
+  await fs.writeFile(reportMarkdownPath, `${lines.join('\n')}\n`);
 };
 
 const runStep = async (step) => {
@@ -118,20 +165,23 @@ process.on('SIGTERM', () => handleSignal('SIGTERM'));
 
 const main = async () => {
   let currentStep = null;
+  let status = 'running';
   try {
     await writeStamp({ status: 'running' });
     for (const step of steps) {
       currentStep = step.name;
       await runStep(step);
     }
+    status = 'passed';
     await writeStamp({
       finishedAt: new Date().toISOString(),
-      status: 'passed',
+      status,
     });
   } catch (error) {
+    status = 'failed';
     await writeStamp({
       finishedAt: new Date().toISOString(),
-      status: 'failed',
+      status,
       failureSummary: {
         step: currentStep,
         message: error?.message ?? 'Unknown failure',
@@ -140,6 +190,21 @@ const main = async () => {
     throw error;
   } finally {
     clearInterval(heartbeat);
+    await writeReport(status);
+    await writeRunManifest({
+      runRoot: outDir,
+      casRoot: path.join('artifacts', 'cas'),
+      category: 'ga-verify',
+      sha,
+      toolVersions: {
+        node: process.version,
+        pnpm: process.env.npm_config_user_agent ?? null,
+      },
+      policyHashes: {
+        verification_map: await maybeHash('docs/ga/verification-map.json'),
+        cas_spec: await maybeHash('docs/ga/CAS_ARTIFACTS.md'),
+      },
+    });
   }
 };
 
