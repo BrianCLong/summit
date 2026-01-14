@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { getPostgresPool } from '../db/postgres.js';
 import { ProvenanceRepo, ProvenanceFilter } from '../repos/ProvenanceRepo.js';
 import { tenantHeader } from '../middleware/tenantHeader.js';
+import { logger } from '../utils/logger.js';
 
 function sign(params: Record<string, string>, secret: string) {
   const base = Object.keys(params)
@@ -102,7 +103,15 @@ exportRouter.get('/provenance', async (req, res) => {
       } catch {}
     }
 
-    const secret = process.env.EXPORT_SIGNING_SECRET || 'dev-secret';
+    let secret = process.env.EXPORT_SIGNING_SECRET;
+    if (!secret) {
+      if (process.env.NODE_ENV === 'production') {
+        logger.error('EXPORT_SIGNING_SECRET is not set in production');
+        return res.status(500).json({ error: 'configuration_error' });
+      }
+      secret = 'dev-secret';
+    }
+
     const params: Record<string, string> = {
       scope,
       id,
