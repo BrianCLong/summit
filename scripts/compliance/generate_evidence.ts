@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT_DIR = path.resolve(__dirname, '../../');
-const EVIDENCE_DIR = path.join(ROOT_DIR, 'evidence');
+const EVIDENCE_DIR = process.env.EVIDENCE_OUTPUT_DIR || path.join(ROOT_DIR, 'evidence');
 const CONTROL_MAP_PATH = path.join(ROOT_DIR, 'compliance/control-map.yaml');
 
 interface ControlEvidence {
@@ -99,10 +99,15 @@ async function generateEvidence(controlId?: string, startDate?: string, endDate?
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const bundleName = `auditor-bundle-${timestamp}`;
-  const bundlePath = path.join(EVIDENCE_DIR, bundleName);
+  // If EVIDENCE_OUTPUT_DIR is set, treat it as the bundle path directly if it ends in bundle name,
+  // or just use it as base. For simplicity, if env is set, we use it as the specific bundle directory
+  // to ensure deterministic output paths for CI.
+  const bundlePath = process.env.EVIDENCE_OUTPUT_DIR
+    ? process.env.EVIDENCE_OUTPUT_DIR
+    : path.join(EVIDENCE_DIR, bundleName);
 
-  if (!fs.existsSync(EVIDENCE_DIR)) {
-    fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
+  if (!fs.existsSync(path.dirname(bundlePath))) {
+    fs.mkdirSync(path.dirname(bundlePath), { recursive: true });
   }
   fs.mkdirSync(bundlePath, { recursive: true });
 
