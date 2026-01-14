@@ -67,6 +67,15 @@
     "notes": "Validated via schema checks to avoid test runner dependency."
   },
   {
+    "feature": "GA Evidence Map Verification",
+    "tier": "B",
+    "artifact": "scripts/ci/verify_evidence_map.mjs",
+    "ciStatus": "wired",
+    "evidence": ["docs/ga/evidence_map.yml", "artifacts/evidence/<sha>/manifest.json"],
+    "keywords": ["evidence map", "manifest", "ga-verify"],
+    "notes": "Dependency-free evidence map validation with hash and freshness enforcement."
+  },
+  {
     "feature": "Ingestion Security Hardening",
     "tier": "B",
     "artifact": "testing/ga-verification/ga-features.ga.test.mjs",

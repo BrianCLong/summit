@@ -9,9 +9,13 @@ prompts:
       paths:
         - agents/
         - prompts/
+        - scripts/ga/
         - scripts/ci/
         - docs/ga/
         - artifacts/
+        - package.json
+        - agent-contract.json
+        - docs/roadmap/STATUS.json
         - metrics/
         - observability/
         - .github/
