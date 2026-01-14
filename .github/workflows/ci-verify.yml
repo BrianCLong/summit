@@ -65,6 +65,31 @@ jobs:
             snyk-report.json
           retention-days: 90
 
+  dependency-risk-gate:
+    name: Governance / Dependency Risk Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run dependency risk gate
+        run: pnpm ci:dependency-risk
+
+      - name: Upload dependency risk artifacts
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: dependency-risk-${{ github.sha }}
+          path: artifacts/governance/dependency-risk/${{ github.sha }}/
+          retention-days: 90
+
   policy-compliance:
     name: Policy Compliance
     runs-on: ubuntu-latest
@@ -261,6 +286,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - security-scan
+      - dependency-risk-gate
       - policy-compliance
       - governance-checks
       - provenance
@@ -272,6 +298,7 @@ jobs:
         run: |
           echo "=== CI Verify Gate Status ==="
           echo "Security Scan: ${{ needs.security-scan.result }}"
+          echo "Dependency Risk Gate: ${{ needs.dependency-risk-gate.result }}"
           echo "Policy Compliance: ${{ needs.policy-compliance.result }}"
           echo "Governance Checks: ${{ needs.governance-checks.result }}"
           echo "Provenance & SBOM: ${{ needs.provenance.result }}"
@@ -282,6 +309,10 @@ jobs:
           # Critical gates (BLOCKING)
           if [[ "${{ needs.security-scan.result }}" != "success" ]]; then
             echo "::error::Security Scan FAILED - CI BLOCKED"
+            exit 1
+          fi
+          if [[ "${{ needs.dependency-risk-gate.result }}" != "success" ]]; then
+            echo "::error::Dependency Risk Gate FAILED - CI BLOCKED"
             exit 1
           fi
 
@@ -303,6 +334,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Critical Gates (BLOCKING)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Security Scan (Gitleaks, pnpm audit)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Dependency Risk Gate" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Policy Compliance (OPA check + test)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Informational Gates (Non-blocking)" >> $GITHUB_STEP_SUMMARY
