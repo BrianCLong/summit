@@ -104,6 +104,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: issue-intake-strict
+    version: v1
+    path: prompts/governance/issue-intake-strict@v1.md
+    sha256: ea040deefd1fb7d1900a3bf719a7998bb2f3583d42f5b626ba31236c3725de52
+    description: Enforce strict issue intake gates with required metadata and automation-owned escalation labels.
+    scope:
+      paths:
+        - .github/
+        - docs/triage/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/governance/issue-intake-strict@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - triage
+        - compliance
+        - operations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md

@@ -1,8 +1,13 @@
-name: Bug Report (Strict)
-description: Strict bug intake
-title: "[BUG] "
-labels: ["triage:needed", "type:bug"]
+name: Security Report (Strict)
+description: Strict security intake
+title: "[SECURITY] "
+labels: ["triage:needed", "type:security"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        For sensitive reports, use the security policy link in the issue chooser.
+
   - type: dropdown
     id: priority
     attributes:
@@ -23,7 +28,7 @@ body:
     id: type
     attributes:
       label: Type
-      options: ["bug"]
+      options: ["security"]
     validations:
       required: true
 
@@ -36,10 +41,18 @@ body:
       required: true
 
   - type: textarea
-    id: what
+    id: summary
     attributes:
-      label: What happened?
-      description: Describe the observed behavior.
+      label: Summary
+      description: Describe the security concern.
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: What is the risk, exposure, or affected scope?
     validations:
       required: true
 
@@ -48,13 +61,6 @@ body:
     attributes:
       label: Reproduction steps
       description: Exact steps, commands, and inputs.
-    validations:
-      required: true
-
-  - type: textarea
-    id: expected
-    attributes:
-      label: Expected behavior
     validations:
       required: true
 
