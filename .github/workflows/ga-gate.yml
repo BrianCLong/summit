@@ -59,7 +59,9 @@ jobs:
       - name: Run GA Gate
         # CANONICAL ENTRYPOINT: Uses make ga -> scripts/ga-gate.sh
         # This is the official GA verification entrypoint (equivalent to pnpm ga:verify)
+        # UPDATED: Using new unified status check as pre-flight
         run: |
+          npx tsx scripts/ga/status.ts --mode=plan --json
           make ga
 
       - name: Generate GA Snapshot
@@ -78,11 +80,16 @@ jobs:
         with:
           retention-days: 14
           name: ga-report
-          path: artifacts/ga/
+          path: artifacts/
 
       - name: Job Summary
         if: always()
         run: |
           if [ -f artifacts/ga/ga_report.md ]; then
             cat artifacts/ga/ga_report.md >> $GITHUB_STEP_SUMMARY
+          fi
+          # Add Status Summary if available
+          if [ -d artifacts/ga-status ]; then
+            echo "## GA Automation Status" >> $GITHUB_STEP_SUMMARY
+            echo "Status report generated at $(date)" >> $GITHUB_STEP_SUMMARY
           fi

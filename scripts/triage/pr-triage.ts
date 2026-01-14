@@ -1,6 +1,8 @@
 import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import { createCommand, logger, handleExit } from '../_lib/cli.js';
+import { ArtifactManager } from '../_lib/artifacts.js';
 
 interface PR {
   number: number;
@@ -9,25 +11,38 @@ interface PR {
   author: { login: string };
   updatedAt: string;
   labels: { name: string }[];
-  checks: { state: string; appName: string }[]; // Simplified structure
+  checks: { state: string; appName: string }[];
   files?: string[];
 }
 
-function getPRs(): PR[] {
+function getPRs(sourceFile?: string): PR[] {
+  if (sourceFile) {
+      if (fs.existsSync(sourceFile)) {
+          logger.info(`Using provided source file: ${sourceFile}`);
+          return JSON.parse(fs.readFileSync(sourceFile, 'utf-8'));
+      } else {
+          throw new Error(`Source file not found: ${sourceFile}`);
+      }
+  }
+
   try {
-    // Try using gh CLI
-    const output = execSync('gh pr list --state open --json number,title,headRefName,author,updatedAt,labels,checks --limit 50', { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'ignore'] });
+    const cmd = 'gh pr list --state open --json number,title,headRefName,author,updatedAt,labels,checks --limit 50';
+    logger.verbose(process.env.VERBOSE === 'true', `Executing: ${cmd}`);
+    const output = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'ignore'] });
     return JSON.parse(output);
   } catch (e) {
-    // Fallback to local file if gh is missing
     const manualFile = path.join(process.cwd(), 'prs.json');
     if (fs.existsSync(manualFile)) {
-      console.log('Docs: "gh" CLI not found. Using local prs.json for triage.');
+      logger.warn('Docs: "gh" CLI not found. Using local prs.json for triage.');
       return JSON.parse(fs.readFileSync(manualFile, 'utf-8'));
     }
-    console.error('Error: "gh" CLI not found and no prs.json provided.');
-    console.error('To generate a triage report, either install gh CLI or provide a valid prs.json export.');
-    process.exit(1);
+
+    logger.error('Error: "gh" CLI not found and no prs.json provided.');
+    logger.info('To fix this:');
+    logger.info('  1. Install GitHub CLI: https://cli.github.com/');
+    logger.info('  2. Run: gh auth login');
+    logger.info('  3. Or provide a valid export via --source prs.json');
+    throw new Error('"gh" CLI not available');
   }
 }
 
@@ -35,22 +50,15 @@ function analyzePR(pr: PR) {
   let status = 'Unknown';
   let failingChecks: string[] = [];
 
-  // Determine overall status
-  // Note: 'checks' structure varies. Assuming a simplified checkRollup or similar if using generic JSON.
-  // In reality, GH CLI returns detailed check info. For this script, we look for simple indicators.
-
-  // Mock logic for status classification
-  const isGreen = pr.checks?.every(c => c.state === 'PASS' || c.state === 'SUCCESS') ?? false; // This is a simplification
+  const isGreen = pr.checks?.every(c => c.state === 'PASS' || c.state === 'SUCCESS') ?? false;
 
   if (isGreen) {
       status = 'Merge-ready';
   } else {
       status = 'Needs Inspection';
-      // In a real script, we would parse pr.checks to find failing ones
       failingChecks.push('Check logs');
   }
 
-  // Override based on labels
   if (pr.labels.some(l => l.name === 'blocked')) status = 'Blocked';
 
   return {
@@ -63,26 +71,77 @@ function analyzePR(pr: PR) {
   };
 }
 
-function generateReport(prs: PR[]) {
+async function runTriage(options: any) {
+  const { mode, outDir, json, source, verbose } = options;
+  const artifactManager = new ArtifactManager(outDir);
+
+  logger.section('Merge Train Triage');
+  logger.info(`Mode: ${mode}`);
+
+  const prs = getPRs(source);
+  logger.info(`Loaded ${prs.length} PRs.`);
+
   const analyzed = prs.map(analyzePR);
-
-  console.log('# Merge Train Triage Report');
-  console.log(`Generated: ${new Date().toISOString()}`);
-  console.log('');
-  console.log('| PR | Status | Author | Updated |');
-  console.log('| :--- | :--- | :--- | :--- |');
-
   analyzed.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
-  analyzed.forEach(pr => {
-    console.log(`| #${pr.number} ${pr.title.slice(0, 40)}... | ${pr.status} | ${pr.author} | ${new Date(pr.updatedAt).toLocaleDateString()} |`);
-  });
+  // In plan mode, we just print the table to stdout
+  if (mode === 'plan') {
+    logger.section('Triage Plan (Dry Run)');
+    console.table(analyzed.map(p => ({
+        id: `#${p.number}`,
+        status: p.status,
+        author: p.author,
+        updated: new Date(p.updatedAt).toLocaleDateString()
+    })));
+    return;
+  }
 
-  console.log('');
-  console.log('## Action Items');
-  console.log('- **Merge-ready**: Review and merge immediately.');
-  console.log('- **Blocked**: Check specific failures using `pnpm ci:cluster`.');
+  // Apply mode: Generate Artifacts
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const runDirName = `merge-train-${timestamp}`;
+  const runDir = artifactManager.ensureDir(path.join('merge-train', runDirName));
+
+  // Write detailed JSON
+  const reportPath = path.join(runDir, 'triage-report.json');
+  fs.writeFileSync(reportPath, JSON.stringify(analyzed, null, 2));
+
+  // Write Markdown Summary
+  const mdPath = path.join(runDir, 'triage-summary.md');
+  const mdContent = `# Merge Train Triage Report
+Generated: ${new Date().toISOString()}
+
+| PR | Status | Author | Updated |
+| :--- | :--- | :--- | :--- |
+${analyzed.map(pr => `| #${pr.number} ${pr.title.slice(0, 40)}... | ${pr.status} | ${pr.author} | ${new Date(pr.updatedAt).toLocaleDateString()} |`).join('\n')}
+
+## Action Items
+- **Merge-ready**: Review and merge immediately.
+- **Blocked**: Check specific failures using \`pnpm ci:cluster\`.
+`;
+  fs.writeFileSync(mdPath, mdContent);
+
+  logger.success(`Triage report generated at: ${runDir}`);
+  logger.info(`  - JSON: ${reportPath}`);
+  logger.info(`  - Markdown: ${mdPath}`);
+
+  if (json) {
+      logger.json({
+          status: 'success',
+          artifacts: {
+              report: reportPath,
+              summary: mdPath
+          },
+          summary: analyzed
+      });
+  }
 }
 
-const prs = getPRs();
-generateReport(prs);
+const program = createCommand('pr:triage', 'Analyzes PRs for merge train eligibility');
+
+program
+  .option('--source <file>', 'Path to local prs.json file for offline mode')
+  .action(async (options) => {
+    await runTriage(options);
+  });
+
+program.parse(process.argv);
