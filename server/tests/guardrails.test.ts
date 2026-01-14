@@ -111,6 +111,28 @@ jest.unstable_mockModule('../src/utils/logger.js', () => {
     default: logger,
   };
 });
+
+jest.unstable_mockModule('../src/config/logger.js', () => {
+  const logger = {
+    child: jest.fn().mockReturnThis(),
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    isLevelEnabled: jest.fn().mockReturnValue(true),
+    logs: [],
+  };
+  return {
+    __esModule: true,
+    logger,
+    default: logger,
+    correlationStorage: {
+      getStore: jest.fn(),
+      run: jest.fn((store, cb) => cb()),
+    },
+  };
+});
+
 jest.unstable_mockModule('../src/observability/tracer.js', () => {
   const mockTracer = {
     initialize: (jest.fn() as any).mockResolvedValue(undefined),

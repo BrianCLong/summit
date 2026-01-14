@@ -237,25 +237,7 @@ jest.mock('ioredis', () => {
   };
 });
 
-// Mock config/logger
-jest.mock('../../src/config/logger', () => {
-  const loggerImpl = {
-    child: function () { return this; },
-    debug: () => {},
-    info: () => {},
-    warn: () => {},
-    error: () => {},
-    trace: () => {},
-    fatal: () => {},
-    silent: () => {},
-    level: 'silent',
-  };
-  return {
-    __esModule: true,
-    default: loggerImpl,
-    logger: loggerImpl,
-  };
-});
+// Mock config/logger removed to use moduleNameMapper and tests/mocks/logger.ts
 
 // Mock middleware/audit-logger
 jest.mock('../../src/middleware/audit-logger', () => ({
@@ -615,7 +597,7 @@ jest.mock('ws', () => {
     close() {
       this.emit('close');
     }
-    terminate() {}
+    terminate() { }
   }
 
   class MockWebSocketServer extends EventEmitter {
@@ -626,7 +608,7 @@ jest.mock('ws', () => {
     close(callback) {
       if (callback) callback();
     }
-    handleUpgrade() {}
+    handleUpgrade() { }
   }
 
   MockWebSocket.Server = MockWebSocketServer;
@@ -654,7 +636,7 @@ jest.mock('prom-client', () => {
     set(value) {
       this.__value = value;
     },
-    observe() {},
+    observe() { },
     reset() {
       this.__value = 0;
     },
@@ -664,7 +646,7 @@ jest.mock('prom-client', () => {
     labels() {
       return this;
     },
-    startTimer: () => () => {},
+    startTimer: () => () => { },
   };
 
   class MockCounter {

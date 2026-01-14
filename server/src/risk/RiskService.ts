@@ -4,13 +4,23 @@ import { verifyWeights } from './WeightsVerifier.js';
 import { RiskRepository } from '../db/repositories/RiskRepository.js';
 import { RiskScoreInput, RiskLevel } from './types.js';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const modelsDir = path.join(__dirname, '..', '..', 'models');
 const weightsPath = path.join(modelsDir, 'weights.json');
 // Mock checksums if file doesn't exist for now, or handle gracefully
 let checksums: any = {};
 try {
-  checksums = require(path.join(modelsDir, 'checksums.json'));
+  const checksumsPath = path.join(modelsDir, 'checksums.json');
+  if (fs.existsSync(checksumsPath)) {
+    checksums = JSON.parse(fs.readFileSync(checksumsPath, 'utf-8'));
+  } else {
+    checksums = { 'weights.json': 'mock' };
+  }
 } catch (e: any) {
   // Fallback for dev/test environments without models
   checksums = { 'weights.json': 'mock' };

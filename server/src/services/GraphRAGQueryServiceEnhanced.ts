@@ -15,6 +15,7 @@
 import type { Pool } from 'pg';
 import type { Redis } from 'ioredis';
 import type { Driver } from 'neo4j-driver';
+import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../utils/logger.js';
 import { metrics } from '../observability/metrics.js';
 import { GraphRAGService, type GraphRAGRequest, type GraphRAGResponse } from './GraphRAGService.js';
@@ -853,7 +854,7 @@ export class GraphRAGQueryServiceEnhanced {
    * Capture a step in the glass-box run
    */
   private async captureStep(runId: string, description: string): Promise<string> {
-    const stepId = require('uuid').v4();
+    const stepId = uuidv4();
     await this.glassBoxService.addStep(runId, {
       type: 'tool_call',
       description,
