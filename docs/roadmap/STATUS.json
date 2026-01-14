@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-10T11:30:00Z",
+  "revision_note": "Expanded Federated Campaign Radar v1 spec with governance alignment, schema invariants, and KPI extensions",
   "initiatives": [
     {
       "id": "A",
@@ -59,6 +59,14 @@
           "evidence": "No STIX/TAXII connector implementation found",
           "blockers": ["No implementation exists"],
           "target_completion": "Sprint N+3"
+        },
+        {
+          "id": "B4",
+          "name": "Federated Campaign Radar Spec",
+          "status": "partial",
+          "owner": "Jules",
+          "evidence": "docs/federated-campaign-radar-spec.md updated with authority alignment, schema invariants, and KPI extensions",
+          "target_completion": "Sprint N+1"
         }
       ]
     },
@@ -140,10 +148,10 @@
   ],
   "summary": {
     "rc_ready": 5,
-    "partial": 1,
+    "partial": 2,
     "incomplete": 0,
     "not_started": 6,
-    "total": 12,
+    "total": 13,
     "ga_blockers": []
   }
 }

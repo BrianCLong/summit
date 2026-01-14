@@ -1,5 +1,16 @@
 # Federated Campaign Radar (FCR) Specification
 
+## 0. Authority & Alignment
+
+This specification is governed by the Summit Readiness Assertion and the
+Meta-Governance framework. All terms and controls defined here are aligned to
+the repository authority files and must remain consistent with them:
+
+- `docs/SUMMIT_READINESS_ASSERTION.md`
+- `docs/governance/CONSTITUTION.md`
+- `docs/governance/META_GOVERNANCE.md`
+- `docs/governance/AGENT_MANDATES.md`
+
 ## 1. Purpose and Scope
 
 Federated Campaign Radar (FCR) enables multiple organizations to exchange actionable influence-campaign intelligence without disclosing sensitive underlying content. It provides a common signal ontology, privacy-preserving federation protocol, and operational workflows for early warning, investigation, and response routing.
@@ -42,6 +53,35 @@ Minimal fields (extendable via versioned schema):
 - **privacy_budget_cost**: DP budget consumed for the contribution (epsilon/delta attribution).
 - **labels**: Campaign hypothesis tags, threat actor hypotheses, or playbook IDs.
 - **version**: Schema version for forward compatibility.
+
+### 4.1 Schema Invariants
+
+- All federation-bound fields must be explicitly tagged as `public`, `pseudonymous`,
+  or `tenant_private`.
+- `provenance_assertions.c2pa_status` must be one of `valid`, `invalid`, or
+  `missing`. Any other value is rejected at schema validation time.
+- `privacy_budget_cost` is mandatory for all shared indicators to ensure auditable
+  privacy accounting.
+
+### 4.2 Federation Payload Example (redacted)
+
+```json
+{
+  "entity_id": "4fc31a8b-8a7a-4ea6-8f3c-8d40a8fca5c9",
+  "tenant_id": "tenant_hash_9b33",
+  "observed_at": "2026-01-10T10:15:34Z",
+  "signal_type": "media",
+  "narrative_claim": "sha256:cf91e5...",
+  "media_hashes": ["phash:ab13d4..."],
+  "url": "sha256:8e0f7f...",
+  "channel_metadata": { "platform": "video", "language": "en", "reach": "bucket_4" },
+  "coordination_features": { "burstiness": "bucket_3", "co_post_window_s": 900 },
+  "provenance_assertions": { "c2pa_status": "valid", "signature_chain": "sha256:4f2..." },
+  "confidence_local": 0.82,
+  "privacy_budget_cost": { "epsilon": 0.4, "delta": 1e-6 },
+  "version": "1.0.0"
+}
+```
 
 ## 5. Privacy-Preserving Federation Protocol
 
@@ -88,6 +128,7 @@ Minimal fields (extendable via versioned schema):
 - **Model Evasion:** Ensemble similarity (hash + embedding + graph signals) plus adaptive thresholds.
 - **False Attribution Risk:** Explicit TTD/false-attribution optimization; require corroboration before high-severity alerts.
 - **Credential Forgery:** Verify C2PA signatures and maintain signer reputation scores; distrust unverifiable chains.
+- **Membership Inference:** Enforce k-anonymity gates and budget caps; reject low-support clusters.
 
 ## 9. Evaluation & KPIs
 
@@ -97,6 +138,7 @@ Minimal fields (extendable via versioned schema):
 - **Coverage:** Percentage of known campaign artifacts represented by clusters (by type: claims, media, URLs, actors).
 - **Privacy Impact:** DP budget consumption per tenant per week; zero incidents of prohibited field leakage.
 - **Confidence Calibration:** Brier score/expected calibration error for confidence propagation outputs.
+- **Provenance Lift:** Delta in cluster confidence when C2PA-valid artifacts are present.
 
 ## 10. Integration & Extensibility
 
