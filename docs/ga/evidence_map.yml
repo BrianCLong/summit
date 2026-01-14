@@ -1,0 +1,57 @@
+evidence:
+  - id: governance_verdict_schema_json
+    description: "JSON Schema definition for governance verdicts."
+    path: artifacts/governance/runtime/${sha}/verdict_schema.json
+    producer: scripts/governance/generate_schema.ts
+    verifier: json
+    required_fields: ["definitions", "$schema", "type"]
+  - id: runtime_governance_contract_doc
+    description: "Human-readable contract for runtime governance."
+    path: artifacts/governance/runtime/${sha}/contract.md
+    producer: "cp docs/governance/runtime_control_map.md"
+    verifier: exists
+  - id: runtime_governance_boot_snapshot
+    description: "Snapshot of boot-time configuration & policy version."
+    path: artifacts/governance/runtime/${sha}/boot_snapshot.json
+    producer: scripts/governance/generate_boot_snapshot.ts
+    verifier: json
+    required_fields: ["policy_version", "kill_switch_state", "timestamp"]
+  - id: runtime_governance_stamp
+    description: "Cryptographic stamp proving governance checks ran."
+    path: artifacts/governance/runtime/${sha}/governance.stamp
+    producer: scripts/ci/governance_unified_gate.mjs
+    verifier: sha256
+  - id: tenant_isolation_test_report
+    description: "Test results verifying tenant isolation enforcement."
+    path: artifacts/governance/runtime/${sha}/tenant_isolation_report.json
+    producer: "pnpm test:governance:runtime"
+    verifier: json
+    required_fields: ["passed", "failed", "scenarios"]
+  - id: kill_switch_test_report
+    description: "Test results verifying global kill switch functionality."
+    path: artifacts/governance/runtime/${sha}/kill_switch_report.json
+    producer: "pnpm test:kill-switch"
+    verifier: json
+    required_fields: ["kill_switch_enabled", "requests_blocked"]
+  - id: policy_validation_stamp
+    description: "Validation result of the OPA/Governance policy bundle."
+    path: artifacts/governance/runtime/${sha}/policy_validation.stamp
+    producer: scripts/governance/validate_policy.sh
+    verifier: exists
+  - id: runtime_governance_observability_contract_doc
+    description: "Documentation of required governance metrics/logs."
+    path: artifacts/governance/runtime/${sha}/observability_contract.md
+    producer: "cp docs/ops/RUNTIME_GOVERNANCE_PACKET.md"
+    verifier: exists
+  - id: governance_metrics_snapshot
+    description: "Snapshot of governance metrics definitions."
+    path: artifacts/governance/runtime/${sha}/metrics_snapshot.json
+    producer: scripts/governance/dump_metrics.ts
+    verifier: json
+    required_fields: ["metric_names", "labels"]
+  - id: drift_reconciliation_report
+    description: "Report on drift detection and reconciliation."
+    path: artifacts/governance/runtime/${sha}/drift_report.json
+    producer: scripts/release/reconcile_drift_issue.cjs
+    verifier: json
+    required_fields: ["drift_detected", "reconciled"]
