@@ -352,30 +352,7 @@ const __dirname = path.dirname(__filename);
 const auditLoggerSrcPath = path.resolve(__dirname, '../src/middleware/audit-logger.js');
 const auditLoggerSrcUrl = pathToFileURL(auditLoggerSrcPath).href;
 
-const loggerSrcPath = path.resolve(__dirname, '../src/config/logger.js');
-const loggerSrcUrl = pathToFileURL(loggerSrcPath).href;
 
-console.log('Mocking modules at:', { auditLogger: auditLoggerSrcUrl, logger: loggerSrcUrl });
-
-jest.unstable_mockModule(loggerSrcUrl, () => {
-  const logger = {
-    child: jest.fn().mockReturnThis(),
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  };
-  const correlationStorage = {
-    getStore: jest.fn(),
-    run: (store: any, cb: any) => cb(),
-  };
-  return {
-    __esModule: true,
-    logger,
-    default: logger,
-    correlationStorage,
-  };
-});
 
 // Mock using the file URL which ESM uses as the cache key
 jest.unstable_mockModule(auditLoggerSrcUrl, () => ({

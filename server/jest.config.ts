@@ -37,7 +37,7 @@ const config: Config = {
     '.*prompts/registry(\\.js)?$': '<rootDir>/tests/mocks/prompts-registry.ts',
     '.*insights/engagementCascade(\\.js)?$': '<rootDir>/tests/mocks/engagement-cascade.ts',
     '.*packages/shared/provenance(\\.js)?$': '<rootDir>/tests/mocks/provenance.ts',
-    '.*logger(\\.js)?$': '<rootDir>/tests/mocks/logger.cjs',
+    '.*logger(\\.js)?$': '<rootDir>/tests/mocks/logger.ts',
     '.*metrics/dbMetrics(\\.js)?$': '<rootDir>/tests/mocks/db-metrics.ts',
     '.*workers/eventBus(\\.js)?$': '<rootDir>/tests/mocks/eventBus.ts',
     '.*health/aggregator(\\.js)?$': '<rootDir>/tests/mocks/health-aggregator.ts',
