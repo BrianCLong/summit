@@ -104,25 +104,30 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: adr-pr-template-cleanup
+  - id: things3-taskstore-connector
     version: v1
-    path: prompts/docs/adr-pr-template-cleanup@v1.md
-    sha256: 429dc47c69fb43ee25eff48a54868fc88e2faf48f8de6a213d702794d2cb3d07
-    description: Update PR and ADR templates for current workflow guidance and formatting.
+    path: prompts/integrations/things3-taskstore-connector.md
+    sha256: 91b7f0ed83df15eed85dcd801986c53aaf97f4b1ad41077ada8833b816d1fef2
+    description: Build a Summit MCP Things3 TaskStore connector with policy gating, evidence logging, and idempotent behavior.
     scope:
       paths:
-        - .github/
-        - docs/ADR/
+        - packages/mcp-connectors/things3/
+        - docs/integrations/things3-taskstore.md
+        - docs/roadmap/STATUS.json
         - agents/examples/
-        - prompts/docs/adr-pr-template-cleanup@v1.md
-        - prompts/registry.yaml
+        - prompts/integrations/things3-taskstore-connector.md
+        - artifacts/evidence/
+        - pnpm-workspace.yaml
+        - eslint.config.js
+        - .gitignore
       domains:
-        - documentation
+        - connectors
+        - mcp
         - governance
-        - quality
+        - evidence
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
