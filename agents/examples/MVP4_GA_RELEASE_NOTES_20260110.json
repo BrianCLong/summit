@@ -1,0 +1,47 @@
+{
+  "task_id": "MVP4_GA_RELEASE_NOTES_20260110",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "mvp4-ga-release-notes",
+    "version": "v1",
+    "sha256": "1dffe8ac131ce8b422a8325ef1fe71d722c63da2822f0a7d322b6ab92f282d20",
+    "path": "prompts/ga/mvp4-ga-release-notes.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ga/GA_RELEASE_NOTES.md",
+      "docs/ga/GA_EVIDENCE_INDEX.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/ga/mvp4-ga-release-notes.md",
+      "prompts/registry.yaml",
+      "agents/examples/MVP4_GA_RELEASE_NOTES_20260110.json"
+    ],
+    "domains": ["documentation", "governance", "release", "evidence"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["make ga-verify"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "GA release notes and evidence index are evidence-backed with governed exceptions documented",
+    "Prompt is registered with hash and scope in prompts/registry.yaml",
+    "Roadmap status updated with release-notes package entry"
+  ],
+  "stop_conditions": [
+    "Evidence paths are unclear",
+    "Repository readiness artifacts diverge without governance reconciliation",
+    "Required GA verification (make ga-verify) fails"
+  ],
+  "dependencies": [
+    "docs/ga/GA_DEFINITION.md",
+    "docs/SUMMIT_READINESS_ASSERTION.md",
+    "docs/ga/RELEASE-READINESS-REPORT.md",
+    "GA_READINESS_REPORT.md",
+    "GA_TRACKING.md"
+  ]
+}
