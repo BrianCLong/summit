@@ -15,6 +15,7 @@ async function verifyBudgetEnforcement() {
     period: 'daily',
     currency: 'USD',
     alertThresholds: [0.5, 0.8, 1.0],
+    hardStop: false,
   };
   tracker.setBudget(tenantId, config);
 

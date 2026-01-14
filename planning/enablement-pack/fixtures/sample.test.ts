@@ -8,7 +8,7 @@ describe('Smoke Test (TS)', () => {
   });
 
   it('should handle async operations', async () => {
-    const asyncSum = async (a: number, b: number) => Promise.resolve(a + b);
+    const asyncSum = (a: number, b: number) => Promise.resolve(a + b);
     expect(await asyncSum(2, 3)).toBe(5);
   });
 });

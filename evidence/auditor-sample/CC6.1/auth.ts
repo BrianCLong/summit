@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
 import AuthService from '../services/AuthService.js';
 import { getAuditSystem } from '../audit/advanced-audit-system.js';
@@ -22,7 +21,7 @@ export async function ensureAuthenticated(
     if (!user) {return res.status(401).json({ error: 'Unauthorized' });}
     req.user = user;
     next();
-  } catch (e) {
+  } catch (_e) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 }

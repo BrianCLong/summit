@@ -402,11 +402,11 @@ router.post(
             totalViolations: scanResults.length,
             highSeverityViolations: scanResults.filter((r: any) =>
               r.recommendedActions.some(
-                (a) => a.severity === 'high' || a.severity === 'critical',
+                (a: any) => a.severity === 'high' || a.severity === 'critical',
               ),
             ).length,
             wouldBlock: scanResults.some((r: any) =>
-              r.recommendedActions.some((a) => a.type === 'block'),
+              r.recommendedActions.some((a: any) => a.type === 'block'),
             ),
           },
         },

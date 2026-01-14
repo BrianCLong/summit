@@ -2,6 +2,9 @@ import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll 
 import fs from 'fs';
 import path from 'path';
 
+// Use process.cwd() since tests run from server directory
+const testsDir = path.join(process.cwd(), 'tests');
+
 jest.mock('../src/audit/appendOnlyAuditStore.js', () => {
   const fs = require('fs');
   const path = require('path');
@@ -60,7 +63,7 @@ const readAuditFile = (auditPath: string) => {
 
 describe('sensitive context middleware', () => {
   it('rejects missing context fields', async () => {
-    const auditPath = path.join(__dirname, 'tmp-audit-deny.jsonl');
+    const auditPath = path.join(testsDir, 'tmp-audit-deny.jsonl');
     const { middleware } = buildMiddleware(auditPath);
     const req: any = {
       method: 'POST',
@@ -92,7 +95,7 @@ describe('sensitive context middleware', () => {
   });
 
   it('allows when all fields provided and records audit', async () => {
-    const auditPath = path.join(__dirname, 'tmp-audit-allow.jsonl');
+    const auditPath = path.join(testsDir, 'tmp-audit-allow.jsonl');
     const { middleware } = buildMiddleware(auditPath, true);
     const req: any = {
       method: 'POST',

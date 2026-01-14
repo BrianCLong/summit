@@ -2,31 +2,35 @@ import request from 'supertest';
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 
-jest.mock('../../disclosure/export-service.js', () => ({
+// Mock functions declared before mocks
+const mockCreateJob = jest.fn();
+const mockListJobsForTenant = jest.fn();
+const mockGetJob = jest.fn();
+const mockGetDownload = jest.fn();
+const mockUiEvent = jest.fn();
+
+// ESM-compatible mocking using unstable_mockModule
+jest.unstable_mockModule('../../disclosure/export-service.js', () => ({
   disclosureExportService: {
-    createJob: jest.fn(),
-    listJobsForTenant: jest.fn(),
-    getJob: jest.fn(),
-    getDownload: jest.fn(),
+    createJob: mockCreateJob,
+    listJobsForTenant: mockListJobsForTenant,
+    getJob: mockGetJob,
+    getDownload: mockGetDownload,
   },
 }));
 
-jest.mock('../../metrics/disclosureMetrics.js', () => ({
+jest.unstable_mockModule('../../metrics/disclosureMetrics.js', () => ({
   disclosureMetrics: {
-    uiEvent: jest.fn(),
+    uiEvent: mockUiEvent,
   },
 }));
 
-const { disclosureExportService } = jest.requireMock(
-  '../../disclosure/export-service.js',
-) as any;
-const { disclosureMetrics } = jest.requireMock(
-  '../../metrics/disclosureMetrics.js',
-) as any;
-
-import disclosuresRouter from '../disclosures.js';
+// Dynamic imports AFTER mocks are set up
+const disclosuresRouter = (await import('../disclosures.js')).default;
+const { disclosureExportService } = await import('../../disclosure/export-service.js');
+const { disclosureMetrics } = await import('../../metrics/disclosureMetrics.js');
 
 const app = express();
 app.use('/disclosures', disclosuresRouter);
@@ -49,7 +53,7 @@ describeIf('Disclosures routes', () => {
         warnings: [],
         artifactStats: {},
       };
-      disclosureExportService.createJob.mockResolvedValueOnce(job);
+      mockCreateJob.mockResolvedValueOnce(job);
 
       const response = await request(app)
         .post('/disclosures/export')
@@ -94,7 +98,7 @@ describeIf('Disclosures routes', () => {
         warnings: [],
         artifactStats: {},
       };
-      disclosureExportService.getJob.mockReturnValueOnce(job);
+      mockGetJob.mockReturnValueOnce(job);
 
       const response = await request(app)
         .get('/disclosures/export/job-1')
@@ -105,7 +109,7 @@ describeIf('Disclosures routes', () => {
     });
 
     it('returns 404 when job is missing', async () => {
-      disclosureExportService.getJob.mockReturnValueOnce(undefined);
+      mockGetJob.mockReturnValueOnce(undefined);
 
       const response = await request(app)
         .get('/disclosures/export/missing')
@@ -130,7 +134,7 @@ describeIf('Disclosures routes', () => {
         artifactStats: {},
       };
 
-      disclosureExportService.getDownload.mockReturnValueOnce({
+      mockGetDownload.mockReturnValueOnce({
         job,
         filePath,
       });

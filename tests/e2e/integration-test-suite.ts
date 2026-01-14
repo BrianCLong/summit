@@ -30,7 +30,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
   let authToken: string;
   let api!: SuperTest<Test>;
   let state!: IntegrationTestState;
-  let resetState?: () => void;
+  let resetState: (() => void) | undefined;
   let testCorrelationId: string;
 
   before(async function () {

@@ -86,7 +86,7 @@ function main() {
     // Output Markdown
     fs.writeFileSync('review_findings.md', output.summary);
 
-    process.stdout.write(output.summary + '\n');
+    process.stdout.write(`${output.summary}\n`);
 
     if (!output.passed) {
       process.stderr.write('CRITICAL ISSUES FOUND\n');

@@ -404,7 +404,7 @@ export class ThreatDetectionEngine {
       severity: 'high',
       condition: (ctx) => {
         const restrictedExperts: ExpertType[] = ['OSINT_TOOL'];
-        return (
+        return !!(
           ctx.currentRequest.expert &&
           restrictedExperts.includes(ctx.currentRequest.expert) &&
           !ctx.userProfile.baselinePatterns.commonExperts.includes(

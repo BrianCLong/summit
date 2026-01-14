@@ -138,13 +138,11 @@ async function upsertRollup(
 async function main() {
   const window = parseWindow();
   const dryRun = process.argv.includes('--dry-run');
-  console.log(
-    `📊 FinOps daily attribution for ${window.usageDate} (dryRun=${dryRun})`,
-  );
+  process.stdout.write(`📊 FinOps daily attribution for ${window.usageDate} (dryRun=${dryRun})\n`);
 
   const usageRows = await fetchTenantUsage(window);
   if (!usageRows.length) {
-    console.log('No tenant usage found for window; nothing to attribute.');
+    process.stdout.write('No tenant usage found for window; nothing to attribute.\n');
     return;
   }
 
@@ -159,7 +157,7 @@ async function main() {
         },
         defaultMeteringRatios,
       );
-      console.log(
+      process.stdout.write(
         `${row.tenant_id}: $${allocation.totalCostUsd.toFixed(
           4,
         )} | compute=${allocation.buckets.find((b) => b.bucket === 'compute')?.costUsd ?? 0
@@ -173,14 +171,15 @@ async function main() {
     await upsertRollup(window, row);
   }
 
-  console.log(
-    `✅ Processed ${usageRows.length} tenant rollups for ${window.usageDate}`,
+  process.stdout.write(
+    `✅ Processed ${usageRows.length} tenant rollups for ${window.usageDate}\n`,
   );
 }
 
 if (require.main === module) {
   main().catch((error) => {
-    console.error('FinOps daily attribution failed', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`FinOps daily attribution failed ${errorMessage}\n`);
     process.exit(1);
   });
 }

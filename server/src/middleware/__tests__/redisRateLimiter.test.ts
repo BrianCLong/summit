@@ -2,11 +2,16 @@ import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll 
 import express from 'express';
 import request from 'supertest';
 
-jest.mock('../../config/database.js', () => ({
-  getRedisClient: jest.fn(() => null),
+// Mock function declared before mock
+const mockGetRedisClient = jest.fn(() => null);
+
+// ESM-compatible mocking using unstable_mockModule
+jest.unstable_mockModule('../../config/database.js', () => ({
+  getRedisClient: mockGetRedisClient,
 }));
 
-import { createRedisRateLimiter } from '../redisRateLimiter.js';
+// Dynamic import AFTER mock is set up
+const { createRedisRateLimiter } = await import('../redisRateLimiter.js');
 
 describe('createRedisRateLimiter fallback behavior', () => {
   beforeAll(() => {

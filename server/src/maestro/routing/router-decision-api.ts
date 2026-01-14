@@ -271,13 +271,13 @@ router.get(
         analysis: {
           mostUsedModel: rows[0]?.selected_model || null,
           overrideRate: rows.length
-            ? (rows.reduce((sum, r) => sum + r.override_count, 0) /
-                rows.reduce((sum, r) => sum + r.total_selections, 0)) *
-              100
+            ? (rows.reduce((sum: number, r: any) => sum + r.override_count, 0) /
+              rows.reduce((sum: number, r: any) => sum + r.total_selections, 0)) *
+            100
             : 0,
           avgScore: rows.length
-            ? rows.reduce((sum, r) => sum + parseFloat(r.avg_score || 0), 0) /
-              rows.length
+            ? rows.reduce((sum: number, r: any) => sum + parseFloat(r.avg_score || 0), 0) /
+            rows.length
             : 0,
         },
       };

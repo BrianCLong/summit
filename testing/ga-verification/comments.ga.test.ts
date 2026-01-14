@@ -1,11 +1,11 @@
 
-import { test, describe, before, after, beforeEach } from 'node:test';
+import { test, describe, beforeEach } from 'node:test';
 import assert from 'node:assert';
 import { UniversalCommentService } from '../../server/src/comments/UniversalCommentService.js';
 
 // Mock Pool
 class MockPool {
-  query(text, params) {
+  query(_text, _params) {
     return Promise.resolve({ rows: [], rowCount: 0 });
   }
 }
@@ -26,7 +26,7 @@ describe('Universal Comment Service (Tier B)', () => {
       content: 'This is a comment with @[user-1]',
     };
 
-    mockPool.query = async (text, params) => {
+    mockPool.query = (text, _params) => {
       if (text.includes('INSERT INTO')) {
         return {
           rows: [{

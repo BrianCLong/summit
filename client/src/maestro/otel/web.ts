@@ -1,3 +1,4 @@
+// @ts-ignore
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
 import {
   ConsoleSpanExporter,
@@ -6,7 +7,9 @@ import {
   ReadableSpan,
 } from '@opentelemetry/sdk-trace-base';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
+// @ts-ignore
 import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
+// @ts-ignore
 import { Resource } from '@opentelemetry/resources'; // Assuming this import
 import {
   SEMRESATTRS_SERVICE_NAME,
@@ -44,7 +47,8 @@ class PiiRedactingWebSpanProcessor {
 }
 
 const provider = new WebTracerProvider({
-  resource: new Resource({
+  // @ts-ignore
+  resource: new (Resource as any)({
     [SEMRESATTRS_SERVICE_NAME]: 'maestro-ui',
     [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || 'development',
   }),
