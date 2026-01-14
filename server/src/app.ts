@@ -98,6 +98,7 @@ import correctnessProgramRouter from './routes/correctness-program.js';
 import commandConsoleRouter from './routes/internal/command-console.js';
 import searchV1Router from './routes/search-v1.js';
 import ontologyRouter from './routes/ontology.js';
+import { provenanceRoutes } from './conductor/api/provenance-routes.js';
 import searchIndexRouter from './routes/search-index.js'; // New search-index route
 import dataGovernanceRouter from './routes/data-governance-routes.js';
 import tenantBillingRouter from './routes/tenants/billing.js';
@@ -406,6 +407,7 @@ export const createApp = async () => {
   app.use('/api/maestro', maestroRouter);
   app.use('/api/tenants', tenantsRouter);
   app.use('/api/actions', actionsRouter);
+  app.use('/api/ops/provenance', provenanceRoutes);
   app.use('/api/osint', osintRouter);
   app.use('/api/edge', edgeOpsRouter);
   app.use('/api/meta-orchestrator', metaOrchestratorRouter);

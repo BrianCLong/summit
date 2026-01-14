@@ -13,6 +13,7 @@ import {
   History,
   LogOut,
   Command,
+  Shield,
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -110,6 +111,13 @@ const navItems: NavItem[] = [
     href: '/admin',
     icon: Settings as React.ComponentType<{ className?: string }>,
     resource: 'admin',
+    action: 'read',
+  },
+  {
+    name: 'Provenance',
+    href: '/ops/provenance',
+    icon: Shield as React.ComponentType<{ className?: string }>,
+    resource: 'evidence',
     action: 'read',
   },
 ]

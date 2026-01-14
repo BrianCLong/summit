@@ -50,6 +50,7 @@ const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
 // const OnboardingWizard = React.lazy(() => import('@/pages/Onboarding/OnboardingWizard').then(module => ({ default: module.OnboardingWizard })))
 const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboard'))
 const TrustDashboard = React.lazy(() => import('@/pages/TrustDashboard'))
+const ProvenanceExplorerPage = React.lazy(() => import('@/pages/ops/ProvenanceExplorerPage'))
 
 // Workbench
 import { WorkbenchShell } from '@/workbench/shell/WorkbenchLayout'
@@ -192,6 +193,9 @@ function App() {
                       <Route path="admin/*" element={<AdminPage />} />
                       <Route path="admin/consistency" element={<ConsistencyDashboard />} />
                       <Route path="admin/feature-flags" element={<FeatureFlagsPage />} />
+
+                      {/* Ops */}
+                      <Route path="ops/provenance" element={<ProvenanceExplorerPage />} />
 
                       {/* Support */}
                       <Route path="help" element={<HelpPage />} />
