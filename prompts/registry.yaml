@@ -30,6 +30,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: repro-build-gate
+    version: v1
+    path: prompts/governance/repro-build-gate.md
+    sha256: d57ad365f73a3f1b25644f5066cf9a2d25e6d6741a678e230deb2c26c3e38da8
+    description: Reproducible build gate with deterministic evidence artifacts for GA compliance.
+    scope:
+      paths:
+        - scripts/ci/
+        - docs/ci/
+        - .github/
+        - package.json
+        - docs/roadmap/STATUS.json
+        - prompts/governance/repro-build-gate.md
+        - prompts/registry.yaml
+        - artifacts/
+      domains:
+        - governance
+        - ci
+        - provenance
+        - quality
+    verification:
+      tiers_required:
+        - A
+      debt_budget:
+        permitted: 0
+        retirement_target: 1
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md

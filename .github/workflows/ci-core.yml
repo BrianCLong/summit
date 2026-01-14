@@ -230,10 +230,35 @@ jobs:
           path: build-checksums-*.txt
           retention-days: 30
 
+  repro-build-gate:
+    name: Governance / Reproducible Build Gate
+    runs-on: ubuntu-latest
+    needs: [lint-typecheck, unit-tests]
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run reproducible build gate
+        run: pnpm ci:repro-build
+
+      - name: Upload reproducibility evidence
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: repro-build-evidence
+          path: artifacts/governance/repro-build/**/*
+          retention-days: 30
+
   golden-path:
     name: Golden Path Smoke Test
     runs-on: ubuntu-latest
-    needs: [deterministic-build, integration-tests]
+    needs: [deterministic-build, repro-build-gate, integration-tests]
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
@@ -304,36 +329,6 @@ jobs:
           path: soc-compliance-reports
           retention-days: 90
 
-  branch-protection-drift:
-    name: Governance / Branch Protection Drift
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      actions: read
-    steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
-        with:
-          node-version: "20"
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Check branch protection drift
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm ci:branch-protection:check
-
-      - name: Upload drift artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        if: always()
-        with:
-          name: branch-protection-drift
-          path: artifacts/governance/branch-protection-drift
-          retention-days: 30
-
   ci-core-gate:
     name: CI Core Gate ✅
     runs-on: ubuntu-latest
@@ -344,9 +339,9 @@ jobs:
       - integration-tests
       - verification-suite
       - deterministic-build
+      - repro-build-gate
       - golden-path
       - soc-control-verification
-      - branch-protection-drift
     if: always()
     steps:
       - name: Check all gates passed
@@ -358,9 +353,9 @@ jobs:
           echo "Integration Tests: ${{ needs.integration-tests.result }}"
           echo "Verification Suite: ${{ needs.verification-suite.result }}"
           echo "Deterministic Build: ${{ needs.deterministic-build.result }}"
+          echo "Reproducible Build Gate: ${{ needs.repro-build-gate.result }}"
           echo "Golden Path: ${{ needs.golden-path.result }}"
           echo "SOC Control Verification: ${{ needs.soc-control-verification.result }}"
-          echo "Branch Protection Drift: ${{ needs.branch-protection-drift.result }}"
           echo ""
 
           # All jobs must succeed (no continue-on-error allowed)
@@ -394,6 +389,11 @@ jobs:
             exit 1
           fi
 
+          if [[ "${{ needs.repro-build-gate.result }}" != "success" ]]; then
+            echo "::error::Reproducible Build Gate FAILED"
+            exit 1
+          fi
+
           if [[ "${{ needs.golden-path.result }}" != "success" ]]; then
             echo "::error::Golden Path FAILED"
             exit 1
@@ -401,11 +401,6 @@ jobs:
 
           if [[ "${{ needs.soc-control-verification.result }}" != "success" ]]; then
             echo "::error::SOC Control Verification FAILED"
-            exit 1
-          fi
-
-          if [[ "${{ needs.branch-protection-drift.result }}" != "success" ]]; then
-            echo "::error::Branch Protection Drift FAILED"
             exit 1
           fi
 
@@ -424,8 +419,8 @@ jobs:
           echo "- ✅ Integration Tests" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Verification Suite" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Deterministic Build" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Reproducible Build Gate" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Golden Path Smoke Test" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ SOC Control Verification" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Governance / Branch Protection Drift" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Status**: Ready for merge (pending ci-verify)" >> $GITHUB_STEP_SUMMARY

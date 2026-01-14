@@ -1,0 +1,30 @@
+schema_version: "1"
+modes:
+  fast:
+    workspaces:
+      - "server"
+      - "client"
+    artifact_globs:
+      - "server/dist/**"
+      - "client/dist/**"
+    max_total_bytes: 200000000
+  full:
+    workspaces:
+      - "*"
+    artifact_globs:
+      - "**/dist/**"
+      - "**/build/**"
+normalization:
+  ignore_globs:
+    - "**/*.map"
+    - "**/stats.json"
+  text_normalizations:
+    - id: "strip_iso_timestamps"
+      pattern: "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z"
+      replace: "<TS>"
+    - id: "strip_epoch_ms"
+      pattern: "\\b1[0-9]{12,13}\\b"
+      replace: "<EPOCH>"
+  binary_handling: "hash-only"
+output:
+  out_dir: "artifacts/governance/repro-build/${sha}"
