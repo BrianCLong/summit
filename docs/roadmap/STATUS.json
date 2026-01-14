@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-14T04:56:00Z",
+  "revision_note": "Pinned xlsx to registry version and added pnpm patch file for xlsx export metadata",
   "initiatives": [
     {
       "id": "A",
