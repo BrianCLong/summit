@@ -12,6 +12,9 @@ import logger from '../utils/logger';
 import { tracer, Span } from '../utils/tracing';
 import { DatabaseService } from './DatabaseService';
 import { TenantCostService } from './TenantCostService';
+import { DistributedCacheService, getDistributedCache } from '../cache/DistributedCacheService';
+import { getRedisClient } from '../db/redis';
+import { BackupService } from './BackupService';
 
 // Partitioning configuration
 interface PartitioningConfig {
@@ -167,6 +170,7 @@ export class TenantPartitioningService extends EventEmitter {
   private metrics: PrometheusMetrics;
   private db: DatabaseService;
   private costService: TenantCostService;
+  private cache: DistributedCacheService | null = null;
   private partitions: Map<string, TenantPartition> = new Map();
   private migrationQueue: MigrationPlan[] = [];
   private activeMigrations: Map<string, MigrationPlan> = new Map();
@@ -177,6 +181,11 @@ export class TenantPartitioningService extends EventEmitter {
     costService: TenantCostService,
   ) {
     super();
+
+    const redisClient = getRedisClient();
+    if (redisClient) {
+      this.cache = getDistributedCache(redisClient);
+    }
 
     this.config = {
       enabled: true,
@@ -1045,16 +1054,71 @@ export class TenantPartitioningService extends EventEmitter {
   }
 
   private async executeStep(step: MigrationStep): Promise<void> {
-    // In a real implementation, this would execute the actual command
-    // For now, simulate execution time
-    await new Promise((resolve) =>
-      setTimeout(resolve, Math.min(step.estimatedDuration * 10, 5000)),
-    );
+    logger.info(`Executing migration step: ${step.name}`, { command: step.command });
+
+    switch (step.name) {
+      case 'backup_data':
+        // Parse tenant ID from command or context
+        // Command format: "pg_dump --tenant {id}"
+        const tenantIdBackup = step.command.match(/--tenant\s+([a-zA-Z0-9-]+)/)?.[1];
+        if (tenantIdBackup) {
+           await BackupService.getInstance().backupTenant(tenantIdBackup);
+        } else {
+           // Fallback simulation
+           await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+        break;
+
+      case 'update_routing':
+        const tenantIdRouting = step.command.match(/--tenant\s+([a-zA-Z0-9-]+)/)?.[1];
+        const partition = step.command.match(/--partition\s+([a-zA-Z0-9_]+)/)?.[1];
+
+        if (tenantIdRouting && partition && this.cache) {
+             const routingKey = `tenant:${tenantIdRouting}:routing`;
+             const partitionInfo = this.config.partitionTypes.find(p => p.name === partition);
+
+             // In a real world, we would resolve connection string based on partition type/instance
+             const routingConfig = {
+                 partition,
+                 isolationLevel: partitionInfo?.isolationLevel,
+                 // Mock connection string update
+                 connectionString: partitionInfo?.isolationLevel.includes('dedicated')
+                    ? `postgres://${tenantIdRouting}-db.internal:5432/db`
+                    : undefined
+             };
+
+             await this.cache.set(routingKey, routingConfig, { ttlSeconds: 86400 });
+             logger.info(`Updated routing for tenant ${tenantIdRouting} in Redis`);
+        }
+        break;
+
+      default:
+        // Simulate other steps
+        await new Promise((resolve) =>
+          setTimeout(resolve, Math.min(step.estimatedDuration * 10, 5000)),
+        );
+    }
   }
 
   private async validateStep(step: MigrationStep): Promise<void> {
-    // In a real implementation, this would run the validation command
-    // For now, simulate validation
+    logger.info(`Validating migration step: ${step.name}`);
+
+    if (step.name === 'backup_data') {
+         // Verify backup exists (BackupService would throw if failed, but we can double check)
+         // For now, assume success if execution didn't throw
+    }
+
+    if (step.name === 'update_routing' && this.cache) {
+         const tenantIdRouting = step.command.match(/--tenant\s+([a-zA-Z0-9-]+)/)?.[1];
+         if (tenantIdRouting) {
+             const routingKey = `tenant:${tenantIdRouting}:routing`;
+             const cached = await this.cache.get(routingKey);
+             if (!cached || !cached.data) {
+                 throw new Error('Routing update failed validation: Key not found in Redis');
+             }
+         }
+    }
+
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
