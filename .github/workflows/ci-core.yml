@@ -334,6 +334,23 @@ jobs:
           path: artifacts/governance/branch-protection-drift
           retention-days: 30
 
+  docs-integrity:
+    name: Governance / Docs Integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify Docs Integrity
+        run: pnpm ci:docs-governance
+
   ci-core-gate:
     name: CI Core Gate ✅
     runs-on: ubuntu-latest
@@ -347,6 +364,7 @@ jobs:
       - golden-path
       - soc-control-verification
       - branch-protection-drift
+      - docs-integrity
     if: always()
     steps:
       - name: Check all gates passed
@@ -361,6 +379,7 @@ jobs:
           echo "Golden Path: ${{ needs.golden-path.result }}"
           echo "SOC Control Verification: ${{ needs.soc-control-verification.result }}"
           echo "Branch Protection Drift: ${{ needs.branch-protection-drift.result }}"
+          echo "Docs Integrity: ${{ needs.docs-integrity.result }}"
           echo ""
 
           # All jobs must succeed (no continue-on-error allowed)
@@ -409,6 +428,11 @@ jobs:
             exit 1
           fi
 
+          if [[ "${{ needs.docs-integrity.result }}" != "success" ]]; then
+            echo "::error::Docs Integrity FAILED"
+            exit 1
+          fi
+
           echo ""
           echo "✅ CI CORE GATE: PASSED"
           echo "All gates green. PR is mergeable (pending ci-verify)."
@@ -427,5 +451,6 @@ jobs:
           echo "- ✅ Golden Path Smoke Test" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ SOC Control Verification" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Governance / Branch Protection Drift" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Governance / Docs Integrity" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Status**: Ready for merge (pending ci-verify)" >> $GITHUB_STEP_SUMMARY

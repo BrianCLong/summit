@@ -1,0 +1,47 @@
+version: 2
+title: Governance Gates Index
+description: The authoritative source for all Summit governance gates and their enforcement status.
+sections:
+  - title: CI Core Gates (Primary)
+    description: Blocking gates that run on every PR. Defined in `.github/workflows/ci-core.yml`.
+    gates:
+      - name: Config Preflight
+        status: Active
+        owner: Platform Infra
+        enforcement: Blocking
+      - name: Lint & Typecheck
+        status: Active
+        owner: Platform Infra
+        enforcement: Blocking
+      - name: Unit Tests
+        status: Active
+        owner: Platform Infra
+        enforcement: Blocking
+      - name: Integration Tests
+        status: Active
+        owner: Platform Infra
+        enforcement: Blocking
+      - name: Verification Suite
+        status: Active
+        owner: Governance
+        enforcement: Blocking
+      - name: Deterministic Build
+        status: Active
+        owner: Platform Infra
+        enforcement: Blocking
+      - name: Golden Path Smoke Test
+        status: Active
+        owner: Platform Infra
+        enforcement: Blocking
+      - name: SOC Control Verification
+        status: Active
+        owner: Compliance
+        enforcement: Blocking
+      - name: Governance / Branch Protection Drift
+        status: Active
+        owner: Governance
+        enforcement: Blocking
+      - name: Governance / Docs Integrity
+        status: Active
+        owner: Governance
+        enforcement: Blocking
