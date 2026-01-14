@@ -149,6 +149,11 @@ export const createApp = async () => {
   }
 
   const app = express();
+
+  // SEC-HARDENING: Trust proxy is required for correct rate limiting behind LBs.
+  // We assume standard cloud topology (1 hop). If nested, this might need config.
+  app.set('trust proxy', 1);
+
   const logger = (pino as any)();
 
   const isProduction = cfg.NODE_ENV === 'production';
@@ -199,9 +204,8 @@ export const createApp = async () => {
   app.use(publicRateLimit);
 
   // Enhanced Pino HTTP logger with correlation and trace context
-  const pinoHttpInstance = typeof pinoHttp === 'function' ? pinoHttp : (pinoHttp as any).pinoHttp;
   app.use(
-    pinoHttpInstance({
+    pinoHttp({
       logger: appLogger,
       // Redaction is handled by the logger config itself, but we keep this consistent if needed
       // logger config already has redact paths, so we can omit here or merge.
@@ -213,7 +217,7 @@ export const createApp = async () => {
         traceId: req.traceId,
         spanId: req.spanId,
         userId: req.user?.sub || req.user?.id,
-        tenantId: req.user?.tenant_id || req.user?.tenantId,
+        tenantId: req.user?.tenant_id,
       }),
     }),
   );

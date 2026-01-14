@@ -1,5 +1,5 @@
 import { NotificationProvider, NotificationChannel, NotificationPayload, NotificationResult } from '../types.js';
-import axios from 'axios';
+import { safeAxios } from '../../lib/security/outbound-client.js';
 import pino from 'pino';
 
 const logger = (pino as any)({ name: 'WebhookProvider' });
@@ -20,7 +20,8 @@ export class WebhookProvider implements NotificationProvider {
     }
 
     try {
-      await axios.post(webhookUrl, payload);
+      // SEC-HARDENING: Use safeAxios to prevent SSRF
+      await safeAxios.post(webhookUrl, payload);
       logger.info({ webhookUrl }, 'Webhook notification sent');
       return {
         channel: this.channel,

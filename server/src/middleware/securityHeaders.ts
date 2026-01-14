@@ -48,6 +48,7 @@ export function securityHeaders({
           scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
           styleSrc: ["'self'", "'unsafe-inline'"],
           connectSrc,
+          upgradeInsecureRequests: [],
         },
         reportOnly: cspReportOnly,
       }
