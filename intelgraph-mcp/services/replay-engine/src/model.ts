@@ -1,4 +1,4 @@
-export type IOChannel = 'jsonrpc' | 'sse' | 'stdio' | 'net' | 'env';
+export type IOChannel = 'jsonrpc' | 'sse' | 'stdio' | 'grpc' | 'net' | 'env';
 
 export type IOEvent = {
   t: number;
