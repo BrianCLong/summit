@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Download, RefreshCw } from 'lucide-react'
+import { Database, Download, FolderOpen, RefreshCw, Search } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -20,6 +21,7 @@ import mockData from '@/mock/data.json'
 import type { Alert, KPIMetric, AlertStatus } from '@/types'
 
 export default function AlertsPage() {
+  const navigate = useNavigate()
   // GraphQL hooks
   const {
     data: alertsData,
@@ -193,6 +195,27 @@ export default function AlertsPage() {
     }
   }
 
+  const emptyAlertActions = [
+    {
+      id: 'review-cases',
+      label: 'Review cases',
+      onClick: () => navigate('/cases'),
+      icon: FolderOpen,
+    },
+    {
+      id: 'explore-investigations',
+      label: 'Explore investigations',
+      onClick: () => navigate('/explore'),
+      icon: Search,
+    },
+    {
+      id: 'connect-source',
+      label: 'Connect data source',
+      onClick: () => navigate('/data/sources'),
+      icon: Database,
+    },
+  ]
+
   if (error) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -321,6 +344,7 @@ export default function AlertsPage() {
                   setSelectedStatus('')
                 },
               }}
+              quickActions={emptyAlertActions}
             />
           ) : (
             <Table>

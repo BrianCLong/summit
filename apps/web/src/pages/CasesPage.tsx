@@ -161,6 +161,21 @@ export default function CasesPage() {
     return `Due ${due.toLocaleDateString()}`
   }
 
+  const emptyStateActions = [
+    {
+      id: 'review-alerts',
+      label: 'Review alerts',
+      onClick: () => navigate('/alerts'),
+      icon: AlertCircle,
+    },
+    {
+      id: 'explore-investigations',
+      label: 'Explore investigations',
+      onClick: () => navigate('/explore'),
+      icon: Search,
+    },
+  ]
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -256,6 +271,11 @@ export default function CasesPage() {
           title="No cases found"
           description="Try adjusting your search or filters, or create a new case to get started."
           icon="folder"
+          action={{
+            label: 'Create a case',
+            onClick: () => navigate('/cases/new'),
+          }}
+          quickActions={emptyStateActions}
         />
       ) : (
         <div className="grid gap-4">

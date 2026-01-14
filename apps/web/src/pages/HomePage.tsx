@@ -100,6 +100,20 @@ export default function HomePage() {
       color: 'bg-purple-500',
     },
   ]
+  const emptyMetricsActions = [
+    {
+      id: 'review-alerts',
+      label: 'Review alerts',
+      onClick: () => navigate('/alerts'),
+      icon: AlertTriangle,
+    },
+    {
+      id: 'start-investigation',
+      label: 'Start investigation',
+      onClick: () => navigate('/explore'),
+      icon: Search,
+    },
+  ]
 
   const getSeverityBadgeVariant = (severity: string) => {
     switch (severity) {
@@ -177,6 +191,12 @@ export default function HomePage() {
               icon="chart"
               title="No live metrics"
               description="Connect a data source to populate KPI metrics."
+              action={{
+                label: 'Connect data source',
+                onClick: () => navigate('/data/sources'),
+                variant: 'default',
+              }}
+              quickActions={emptyMetricsActions}
             />
           </div>
         )}
@@ -191,17 +211,8 @@ export default function HomePage() {
             return (
               <Card
                 key={action.title}
-                className="cursor-pointer hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                className="cursor-pointer hover:shadow-md transition-shadow"
                 onClick={() => navigate(action.href)}
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    navigate(action.href);
-                  }
-                }}
-                role="button"
-                aria-label={`${action.title}: ${action.description}`}
               >
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3">
@@ -300,14 +311,14 @@ export default function HomePage() {
         </Card>
 
         {/* Recent Alerts */}
-        <Card className="h-full flex flex-col">
+        <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <AlertTriangle className="h-4 w-4" />
               Recent Alerts
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 flex-1">
+          <CardContent className="space-y-3">
             {loading
               ? [...Array(4)].map((_, i) => (
                   <div key={i} className="space-y-2">
@@ -356,14 +367,14 @@ export default function HomePage() {
         </Card>
 
         {/* Recent Cases */}
-        <Card className="h-full flex flex-col">
+        <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Active Cases
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 flex-1">
+          <CardContent className="space-y-3">
             {loading
               ? [...Array(2)].map((_, i) => (
                   <div key={i} className="space-y-2">

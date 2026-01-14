@@ -1,0 +1,42 @@
+{
+  "task_id": "APPS_WEB_EMPTY_STATE_GUIDANCE_20260110",
+  "agent_id": "GPT-5.2-Codex",
+  "prompt_ref": {
+    "id": "apps-web-empty-state-guidance",
+    "version": "v1",
+    "sha256": "a51def4eb849f5aee4bb30274f5adb5fd0c4949fc28439cfd2ed9562fecbecc0",
+    "path": "prompts/ui/empty-state-guidance-v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "apps/web/**",
+      "docs/roadmap/STATUS.json",
+      "prompts/ui/empty-state-guidance-v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/apps-web-empty-state-guidance-task.json"
+    ],
+    "domains": ["web", "ux", "onboarding", "testing", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["apps/web test output", "empty state audit note", "screenshot evidence"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "EmptyState supports quick actions with stable keys and accessible labels",
+    "Home, Alerts, and Cases empty states provide actionable guidance",
+    "Case creation entry route exists and is reachable",
+    "Unit tests cover the updated component and pages",
+    "Roadmap status updated"
+  ],
+  "stop_conditions": [
+    "CI failure detected on main",
+    "Sandbox violation alert",
+    "PII detected in outputs",
+    "Documentation drift detected between code and docs"
+  ]
+}
