@@ -90,68 +90,29 @@ Both RC and GA pipelines use identical base selection rules, ensuring consistent
 
 These workflows **MUST** complete with `conclusion: success` for **every** commit promoted to GA.
 
-### 1. Release Readiness Gate
+### 1. ga / gate (Composite Required Check)
 
-| Field    | Value                                     |
-| -------- | ----------------------------------------- |
-| Workflow | `.github/workflows/release-readiness.yml` |
-| Name     | `Release Readiness Gate`                  |
-| Triggers | Every PR/push to main (NO path filters)   |
+| Field    | Value                                |
+| -------- | ------------------------------------ |
+| Workflow | `.github/workflows/ci.yml`           |
+| Name     | `ga / gate`                          |
+| Triggers | PRs/pushes to main (no path filters) |
 
-**Guarantees**:
+**Guarantees** (aggregated dependency jobs):
 
-- All TypeScript compiles without errors
-- All ESLint and Ruff rules pass
-- All packages build successfully
-- All unit tests pass
-- All integration tests pass with coverage
-- All workflow files are valid (actionlint)
-- Required workflows trigger on critical changes
+- Lint suite (eslint + lint:cjs + error codes doc check)
+- Typecheck (`pnpm typecheck`)
+- Unit & integration tests
+- Reproducible build (double build + checksum diff)
+- Governance checks + governance tests
+- Provenance checks + tests
+- Schema diff validation
+- Golden Path smoke (`make smoke`)
 
-### 2. GA Gate
+**Failure semantics**:
 
-| Field    | Value                                   |
-| -------- | --------------------------------------- |
-| Workflow | `.github/workflows/ga-gate.yml`         |
-| Name     | `GA Gate`                               |
-| Triggers | PRs/pushes to main (docs-only excluded) |
-
-**Guarantees**:
-
-- Executes canonical `make ga` command
-- Generates GA snapshot with CI/release metadata
-- Verifies all GA-readiness criteria
-
-### 3. Unit Tests & Coverage
-
-| Field    | Value                                           |
-| -------- | ----------------------------------------------- |
-| Workflow | `.github/workflows/unit-test-coverage.yml`      |
-| Name     | `Unit Tests & Coverage`                         |
-| Triggers | PRs/pushes to main/develop (docs-only excluded) |
-
-**Guarantees**:
-
-- All server unit tests pass via `pnpm test:ci`
-- Coverage meets minimum thresholds
-- Test results are deterministic
-
-### 4. CI Core (Primary Gate)
-
-| Field    | Value                           |
-| -------- | ------------------------------- |
-| Workflow | `.github/workflows/ci-core.yml` |
-| Name     | `CI Core (Primary Gate)`        |
-| Triggers | PRs/pushes to main, merge queue |
-
-**Guarantees**:
-
-- Lint & Typecheck passes
-- Unit tests pass
-- Integration tests pass (with Postgres + Redis services)
-- Verification suite completes
-- Build is deterministic (bit-for-bit reproducible)
-- Golden path smoke test succeeds
+- Any dependency job with `failure`, `cancelled`, `skipped`, `neutral`, or missing results blocks `ga / gate`.
+- The job emits an ordered summary table of dependency results in the run log and step summary.
 
 ---
 
@@ -243,15 +204,19 @@ These workflows are required **only when specific file paths are changed**.
 
 These workflows provide valuable signals but are **NOT** blocking for promotion:
 
-| Workflow                  | Purpose                         |
-| ------------------------- | ------------------------------- |
-| Release Train             | Automated release orchestration |
-| Post-Release Canary       | Post-deployment smoke tests     |
-| PR Quality Gate           | Additional PR quality metrics   |
-| Release Reliability       | Release success metrics         |
-| AI Copilot Canary         | AI feature monitoring           |
-| Performance Baseline (k6) | Performance benchmarks          |
-| CI Legacy (Non-Blocking)  | Legacy compatibility checks     |
+| Workflow                  | Purpose                               |
+| ------------------------- | ------------------------------------- |
+| Release Readiness Gate    | Comprehensive readiness verification  |
+| GA Gate                   | Canonical `make ga` readiness bundle  |
+| Unit Tests & Coverage     | Coverage reporting for unit tests     |
+| CI Core (Primary Gate)    | Legacy gate superseded by `ga / gate` |
+| Release Train             | Automated release orchestration       |
+| Post-Release Canary       | Post-deployment smoke tests           |
+| PR Quality Gate           | Additional PR quality metrics         |
+| Release Reliability       | Release success metrics               |
+| AI Copilot Canary         | AI feature monitoring                 |
+| Performance Baseline (k6) | Performance benchmarks                |
+| CI Legacy (Non-Blocking)  | Legacy compatibility checks           |
 
 ---
 
@@ -268,10 +233,7 @@ docs/api/endpoints.md
 
 **Required checks**:
 
-- ✅ Release Readiness Gate (always required)
-- ✅ GA Gate (always required)
-- ✅ Unit Tests & Coverage (always required)
-- ✅ CI Core (Primary Gate) (always required)
+- ✅ ga / gate (always required)
 - ⏭️ Workflow Lint (SKIPPED - no workflow changes)
 - ⏭️ CodeQL (SKIPPED - no code changes)
 - ⏭️ SBOM & Vulnerability Scanning (SKIPPED - no dependency changes)
@@ -287,10 +249,7 @@ docs/ci/workflow-guide.md
 
 **Required checks**:
 
-- ✅ Release Readiness Gate (always required)
-- ✅ GA Gate (always required)
-- ✅ Unit Tests & Coverage (always required)
-- ✅ CI Core (Primary Gate) (always required)
+- ✅ ga / gate (always required)
 - ✅ Workflow Lint (**REQUIRED** - `.github/workflows/` changed)
 - ⏭️ CodeQL (SKIPPED - no code changes)
 - ⏭️ SBOM & Vulnerability Scanning (SKIPPED - no dependency changes)
@@ -306,10 +265,7 @@ server/tests/health.test.ts
 
 **Required checks**:
 
-- ✅ Release Readiness Gate (always required)
-- ✅ GA Gate (always required)
-- ✅ Unit Tests & Coverage (always required)
-- ✅ CI Core (Primary Gate) (always required)
+- ✅ ga / gate (always required)
 - ⏭️ Workflow Lint (SKIPPED - no workflow changes)
 - ✅ CodeQL (**REQUIRED** - `server/` changed)
 - ⏭️ SBOM & Vulnerability Scanning (SKIPPED - no dependency changes)
@@ -326,10 +282,7 @@ server/package.json
 
 **Required checks**:
 
-- ✅ Release Readiness Gate (always required)
-- ✅ GA Gate (always required)
-- ✅ Unit Tests & Coverage (always required)
-- ✅ CI Core (Primary Gate) (always required)
+- ✅ ga / gate (always required)
 - ⏭️ Workflow Lint (SKIPPED - no workflow changes)
 - ⏭️ CodeQL (SKIPPED - no code changes)
 - ✅ SBOM & Vulnerability Scanning (**REQUIRED** - dependency files changed)

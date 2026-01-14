@@ -55,6 +55,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ga-gate-composite-check
+    version: v1
+    path: prompts/governance/ga-gate-composite-check.md
+    sha256: a2a0706c05eb51dad94d49716b22e3892c5669b67c7b3f02db3e11883fe6d0c7
+    description: Composite GA gate aggregation and branch protection alignment.
+    scope:
+      paths:
+        - .github/
+        - docs/ci/
+        - docs/release/
+        - docs/roadmap/STATUS.json
+        - scripts/release/
+        - scripts/release/tests/
+        - scripts/release/tests/fixtures/
+      domains:
+        - governance
+        - ci
+        - release
+    verification:
+      tiers_required:
+        - A
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
@@ -70,56 +97,6 @@ prompts:
         - companyos
         - sprint-planning
         - roadmap
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: adr-pr-template-cleanup
-    version: v1
-    path: prompts/docs/adr-pr-template-cleanup@v1.md
-    sha256: 429dc47c69fb43ee25eff48a54868fc88e2faf48f8de6a213d702794d2cb3d07
-    description: Update PR and ADR templates for current workflow guidance and formatting.
-    scope:
-      paths:
-        - .github/
-        - docs/ADR/
-        - agents/examples/
-        - prompts/docs/adr-pr-template-cleanup@v1.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - governance
-        - quality
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: adr-pr-template-cleanup
-    version: v1
-    path: prompts/docs/adr-pr-template-cleanup@v1.md
-    sha256: 429dc47c69fb43ee25eff48a54868fc88e2faf48f8de6a213d702794d2cb3d07
-    description: Update PR and ADR templates for current workflow guidance and formatting.
-    scope:
-      paths:
-        - .github/
-        - docs/ADR/
-        - agents/examples/
-        - prompts/docs/adr-pr-template-cleanup@v1.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - governance
-        - quality
     verification:
       tiers_required:
         - C

@@ -1,11 +1,61 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "1.0.0",
-  "description": "Canonical policy for MVP-4 Stabilization release gate requirements",
-  "last_updated": "2026-01-07",
+  "version": "2.1.0",
+  "description": "Canonical policy for release gate requirements",
+  "last_updated": "2026-01-10",
   "owner": "Platform Engineering",
-
   "always_required": [
+    {
+      "name": "ga / gate",
+      "workflow": "ci.yml",
+      "rationale": "Composite GA gate for lint, typecheck, tests, build, governance, provenance, schema validation, and Golden Path smoke"
+    }
+  ],
+  "conditional_required": [
+    {
+      "name": "Workflow Lint",
+      "workflow": "workflow-lint.yml",
+      "rationale": "Validates GitHub Actions workflow syntax and safety",
+      "when_paths_match": ["^\\.github/workflows/", "^\\.github/actions/"]
+    },
+    {
+      "name": "CodeQL",
+      "workflow": "codeql.yml",
+      "rationale": "Security analysis for server and package code",
+      "when_paths_match": ["^server/", "^packages/", "^cli/"]
+    },
+    {
+      "name": "SBOM & Vulnerability Scanning",
+      "workflow": "sbom-scan.yml",
+      "rationale": "Supply chain security for Docker and dependencies",
+      "when_paths_match": [
+        "^Dockerfile",
+        "^docker-compose",
+        "^package\\.json$",
+        "^pnpm-lock\\.yaml$",
+        "^server/package\\.json$",
+        "^\\.github/workflows/supply-chain",
+        "^scripts/security/"
+      ]
+    },
+    {
+      "name": "Docker Build",
+      "workflow": "docker-build.yml",
+      "rationale": "Docker image build and security validation",
+      "when_paths_match": ["^Dockerfile", "^docker-compose", "^\\.dockerignore$"]
+    },
+    {
+      "name": "Schema Compatibility",
+      "workflow": "schema-compat.yml",
+      "rationale": "API schema backward compatibility checks",
+      "when_paths_match": [
+        "^server/src/graphql/schema",
+        "^server/src/maestro/api-types",
+        "^packages/.*/schema"
+      ]
+    }
+  ],
+  "informational": [
     {
       "name": "Release Readiness Gate",
       "workflow": "release-readiness.yml",
@@ -25,45 +75,7 @@
       "name": "CI Core (Primary Gate)",
       "workflow": "ci-core.yml",
       "rationale": "Primary blocking gate - lint, typecheck, tests, build"
-    }
-  ],
-
-  "conditional_required": [
-    {
-      "name": "Workflow Lint",
-      "workflow": "workflow-lint.yml",
-      "rationale": "Validates GitHub Actions workflow syntax and safety",
-      "required_when_paths_match": ["^\\.github/workflows/.*", "^\\.github/actions/.*"]
     },
-    {
-      "name": "CodeQL",
-      "workflow": "codeql.yml",
-      "rationale": "Security analysis for server and package code",
-      "required_when_paths_match": ["^server/", "^packages/", "^cli/"]
-    },
-    {
-      "name": "SBOM & Vulnerability Scanning",
-      "workflow": "sbom-vuln-scan.yml",
-      "rationale": "Supply chain security for Docker and dependencies",
-      "required_when_paths_match": [
-        "^Dockerfile",
-        "^docker-compose",
-        "^package\\.json$",
-        "^pnpm-lock\\.yaml$",
-        "^server/package\\.json$",
-        "^\\.github/workflows/supply-chain",
-        "^scripts/security/"
-      ]
-    },
-    {
-      "name": "Docker Build & Security Scan",
-      "workflow": "docker-build-scan.yml",
-      "rationale": "Docker image build and security validation",
-      "required_when_paths_match": ["^Dockerfile", "^docker-compose", "^\\.dockerignore$"]
-    }
-  ],
-
-  "informational": [
     {
       "name": "Release Train",
       "workflow": "release-train.yml",
@@ -90,25 +102,47 @@
       "rationale": "AI feature monitoring - informational only"
     },
     {
-      "name": "Performance Baseline (k6)",
-      "workflow": "perf-baseline.yml",
+      "name": "Performance Baseline",
+      "workflow": "perf.yml",
       "rationale": "Performance benchmarks - informational only"
     },
     {
-      "name": "CI Legacy (Non-Blocking)",
+      "name": "CI Legacy",
       "workflow": "ci-legacy.yml",
       "rationale": "Legacy compatibility checks - non-blocking"
     }
   ],
-
+  "base_selection": {
+    "rc_tag": {
+      "description": "For RC tags, base is the previous release or merge-base with main",
+      "algorithm": [
+        "1. Look for previous RC tag with same base version (e.g., v4.1.2-rc.1 for v4.1.2-rc.2)",
+        "2. If no prior RC, look for previous GA tag in same release line (e.g., v4.1.1)",
+        "3. If no prior GA, use merge-base with main branch"
+      ],
+      "fallback": "origin/main"
+    },
+    "ga_tag": {
+      "description": "For GA tags, base is the RC tag SHA (lineage enforced)",
+      "algorithm": [
+        "1. GA SHA must match RC SHA (lineage verification)",
+        "2. Use same base as the RC to ensure identical required checks",
+        "3. This guarantees 'publish what was tested' principle"
+      ],
+      "fallback": "Lineage verification will fail if no matching RC"
+    },
+    "manual": {
+      "description": "For manual runs, --base must be explicitly provided",
+      "fallback": "Error if --base not specified"
+    }
+  },
   "evaluation_rules": {
     "description": "Rules for computing required workflow set for a given commit",
-    "base_ref_default": "origin/main~1",
     "algorithm": [
       "1. Always include all 'always_required' workflows",
       "2. For each 'conditional_required' workflow:",
       "   a. Get changed files: git diff --name-only <base>..<commit>",
-      "   b. For each changed file, check if it matches any regex in 'required_when_paths_match'",
+      "   b. For each changed file, check if it matches any regex in 'when_paths_match'",
       "   c. If any file matches, include the workflow in required set",
       "3. 'informational' workflows are never required for promotion"
     ],
@@ -122,6 +156,28 @@
       "pending": "Workflow pending - blocks promotion (not completed)",
       "skipped": "Workflow skipped by GitHub - treated as success if not required",
       "missing": "Workflow did not run - blocks if required, OK if not required"
+    },
+    "truth_table_states": {
+      "REQUIRED": "Check is required and must be SUCCESS",
+      "NOT_REQUIRED": "Check is not required for this change set",
+      "SUCCESS": "Check passed",
+      "FAILED": "Check failed",
+      "PENDING": "Check queued/in_progress/pending",
+      "MISSING": "Check did not run"
     }
-  }
+  },
+  "notes": [
+    "This file is the authoritative source for required checks",
+    "Both release-rc-pipeline.yml and release-ga-pipeline.yml use this policy",
+    "The verify-green-for-tag.sh script loads this file at runtime",
+    "To add a new required check:",
+    "  1. Ensure the workflow exists and runs on all target commits",
+    "  2. Add to appropriate section (always_required or conditional_required)",
+    "  3. Document the rationale clearly",
+    "  4. Get Platform Engineering approval",
+    "To remove a check:",
+    "  1. Move to informational first (deprecation period)",
+    "  2. After 2 releases, remove entirely",
+    "  3. Document why in the PR"
+  ]
 }
