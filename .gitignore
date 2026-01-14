@@ -360,3 +360,4 @@ release-assets/
 evidence-staging/
 *.txt
 tmp-test/
+playwright-report/

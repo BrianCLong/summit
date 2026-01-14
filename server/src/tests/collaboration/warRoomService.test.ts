@@ -1,4 +1,4 @@
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 
 // Mock the db module
 jest.mock('../../db.js', () => ({
@@ -18,7 +18,9 @@ describe('WarRoomService', () => {
   describe('createWarRoom', () => {
     it('should create a new war room and return it', async () => {
       const mockWarRoom = { id: 1, name: 'Test War Room', created_by: 1 };
-      (db.query as jest.Mock).mockResolvedValue({ rows: [mockWarRoom] });
+      // Use jest.mocked to safely cast and access mock methods
+      const mockedDbQuery = jest.mocked(db.query);
+      mockedDbQuery.mockResolvedValue({ rows: [mockWarRoom] } as any);
 
       const newWarRoom = await warRoomService.createWarRoom('Test War Room', 1);
 

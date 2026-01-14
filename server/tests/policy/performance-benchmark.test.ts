@@ -1,4 +1,8 @@
 import { describe, test, expect } from '@jest/globals';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+
 describe('performance benchmark', () => {
   test('all operations complete within the configured budgets', () => {
     const {
@@ -7,7 +11,7 @@ describe('performance benchmark', () => {
     } = require('../../../scripts/ci/performance-benchmark.cjs');
     const result = runPerformanceBenchmark();
     expect(result.passed).toBe(true);
-    expect(result.details.every((detail) => detail.includes('limit'))).toBe(
+    expect(result.details.every((detail: string) => detail.includes('limit'))).toBe(
       true,
     );
 

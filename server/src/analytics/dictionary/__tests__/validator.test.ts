@@ -1,6 +1,10 @@
 import { describe, it, expect } from '@jest/globals';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { MetricValidator } from '../validator.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const DICT_PATH = path.join(__dirname, '../metrics.yaml');
 

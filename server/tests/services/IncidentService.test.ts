@@ -2,7 +2,11 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { IncidentService } from '../../src/services/IncidentService';
 import { pg } from '../../src/db/pg';
 
-jest.mock('../../src/db/pg');
+jest.mock('../../src/db/pg', () => ({
+    pg: {
+        oneOrNone: jest.fn(),
+    }
+}));
 
 describe('IncidentService', () => {
     beforeEach(() => {
@@ -10,7 +14,8 @@ describe('IncidentService', () => {
     });
 
     it('should create incident', async () => {
-        (pg.oneOrNone as any).mockResolvedValue({
+        const mockedOneOrNone = jest.mocked(pg.oneOrNone);
+        mockedOneOrNone.mockResolvedValue({
             id: 'incident-1',
             title: 'Test Incident'
         });
