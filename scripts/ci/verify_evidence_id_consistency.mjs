@@ -689,10 +689,45 @@ async function main() {
     console.log(`- Report building: ${buildReportDuration}ms`);
     console.log(`- Report writing: ${writeReportsDuration}ms`);
 
+    // Generate AI patches if enabled
+    if (process.env.ENABLE_QWEN_PATCHES === 'true') {
+      try {
+        const { generateAIPatches } = await import('./ai-providers/patch-generator.mjs');
+
+        // Look for AI suggestions file if it was generated
+        const suggestionsPath = join(outputDir, 'ai_suggestions.json');
+        if (await fileExists(suggestionsPath)) {
+          console.log(`\n📝 Generating AI patches from ${suggestionsPath}...`);
+          const suggestionsContent = await fs.readFile(suggestionsPath, 'utf8');
+          const suggestions = JSON.parse(suggestionsContent);
+
+          await generateAIPatches(suggestions, config.repoRoot, outputDir);
+          console.log(`✅ AI patch generation completed`);
+        } else {
+          console.log(`\n📝 AI patches enabled but no suggestions file found at ${suggestionsPath}`);
+        }
+      } catch (patchError) {
+        console.warn(`⚠️  AI patch generation failed: ${patchError.message}`);
+        // Don't fail the main check for patch generation errors
+        if (process.env.DEBUG) {
+          console.error('Patch generation error details:', patchError.stack);
+        }
+      }
+    }
+
     // Exit with appropriate code
     const hasErrors = report.totals.errors > 0;
     if (hasErrors) {
       console.log('\n❌ Evidence ID consistency check FAILED');
+      const shouldFailOnHighPatches = (
+        process.env.QWEN_PATCHES_FAIL_ON_HIGH === 'true' &&
+        report.metadata?.high_severity_patches > 0 &&
+        report.metadata.high_severity_patches > parseInt(process.env.QWEN_PATCHES_MAX_HIGH || '0')
+      );
+      if (shouldFailOnHighPatches) {
+        console.log(`🚫 High severity patches threshold exceeded (${report.metadata?.high_severity_patches} > ${process.env.QWEN_PATCHES_MAX_HIGH}), exiting with error`);
+        process.exit(1);
+      }
       process.exit(1);
     } else {
       const hasWarnings = report.totals.warnings > 0;
@@ -782,6 +817,16 @@ async function processGovernanceDocumentWithAI(filePath, evidenceMap, repoRoot, 
   }
 
   return result;
+}
+
+// Helper function to check if a file exists
+async function fileExists(filePath) {
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 // Run if called directly
