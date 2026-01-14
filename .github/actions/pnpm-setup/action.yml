@@ -1,0 +1,56 @@
+name: pnpm-setup
+
+description: Setup Node + pnpm with group-scoped cache keys
+
+inputs:
+  group:
+    description: Cache group key to isolate pnpm store reuse
+    required: true
+  node-version:
+    description: Node.js version to use
+    required: false
+    default: "20.x"
+  pnpm-version:
+    description: pnpm version to use
+    required: false
+    default: "9"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Enable corepack
+      shell: bash
+      run: corepack enable
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: ${{ inputs.pnpm-version }}
+        run_install: false
+
+    - name: Derive pnpm cache key (group-aware)
+      id: keys
+      shell: bash
+      run: |
+        echo "group=${{ inputs.group }}" >> "$GITHUB_OUTPUT"
+        echo "lock_hash=$(sha256sum pnpm-lock.yaml | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+    - name: Resolve pnpm store path
+      id: pnpm-store
+      shell: bash
+      run: |
+        echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+    - name: Cache pnpm store
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.pnpm-store.outputs.path }}
+        key: ${{ runner.os }}-pnpm-${{ steps.keys.outputs.group }}-${{ steps.keys.outputs.lock_hash }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-${{ steps.keys.outputs.group }}-
+          ${{ runner.os }}-pnpm-
