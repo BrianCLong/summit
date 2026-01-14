@@ -27,6 +27,7 @@
     "test:release-bundle-sdk": "cd packages/release-bundle && pnpm test",
     "test:release-scripts": "node --test scripts/release/__tests__/*.test.mjs",
     "test:docs-governance": "node --test scripts/ci/__tests__/governance_docs_verifier.test.mjs",
+    "test:control-evidence": "PYTHONPATH=. python3 -m unittest scripts.evidence.tests.test_control_evidence_index",
     "test:soc-report": "PYTHONPATH=. python3 -m unittest scripts.evidence.tests.test_soc_report",
     "test:smoke": "npm run test:smoke:backend && npm run test:smoke:frontend",
     "test:smoke:backend": "cd server && npm run test:smoke",
@@ -101,6 +102,7 @@
     "ci:docs-governance:fix": "node scripts/ci/verify_governance_docs.mjs --fix",
     "ci:security-audit-gate": "node scripts/ci/security_audit_gate.mjs",
     "ci:soc-report": "python3 scripts/evidence/generate_soc_report.py --evidence-dir dist/evidence/${GITHUB_SHA}",
+    "ci:ga-validate-evidence": "bash -c 'EVIDENCE_DIR=\"dist/evidence/${GITHUB_SHA:-$(git rev-parse HEAD)}\"; python3 scripts/evidence/generate_control_evidence_index.py --evidence-dir \"$EVIDENCE_DIR\" && python3 scripts/evidence/validate_control_evidence.py --evidence-dir \"$EVIDENCE_DIR\"'",
     "ci:branch-protection:check": "node scripts/ci/check_branch_protection_drift.mjs",
     "ci:branch-protection:apply": "node scripts/ci/apply_branch_protection_policy.mjs --apply",
     "ci:branch-protection:plan": "node scripts/ci/apply_branch_protection_policy.mjs --dry-run",
@@ -120,7 +122,7 @@
     "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
     "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
-    "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
+    "release:ready": "pnpm ga:verify && GA_VERIFY_MODE=true pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
     "prepare": "husky"
   },
   "keywords": [

@@ -10,8 +10,6 @@ on:
     # SAFETY: Conservative paths-ignore to prevent skipping required checks
     # This is the PRIMARY CI GATE - it MUST run on any code/config/dependency changes
     paths-ignore:
-      - "**.md"
-      - "docs/**"
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/PULL_REQUEST_TEMPLATE/**"
       # NOTE: We do NOT ignore:
@@ -21,8 +19,6 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - "**.md"
-      - "docs/**"
   merge_group:
 
 concurrency:
@@ -230,6 +226,31 @@ jobs:
           path: build-checksums-*.txt
           retention-days: 30
 
+  governance-docs-integrity:
+    name: Governance / Docs Integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify governance docs
+        run: pnpm ci:docs-governance
+
+      - name: Upload governance docs integrity report
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: governance-docs-integrity
+          path: artifacts/governance/docs-integrity
+          retention-days: 30
+
   golden-path:
     name: Golden Path Smoke Test
     runs-on: ubuntu-latest
@@ -344,6 +365,7 @@ jobs:
       - integration-tests
       - verification-suite
       - deterministic-build
+      - governance-docs-integrity
       - golden-path
       - soc-control-verification
       - branch-protection-drift
@@ -358,6 +380,7 @@ jobs:
           echo "Integration Tests: ${{ needs.integration-tests.result }}"
           echo "Verification Suite: ${{ needs.verification-suite.result }}"
           echo "Deterministic Build: ${{ needs.deterministic-build.result }}"
+          echo "Governance / Docs Integrity: ${{ needs.governance-docs-integrity.result }}"
           echo "Golden Path: ${{ needs.golden-path.result }}"
           echo "SOC Control Verification: ${{ needs.soc-control-verification.result }}"
           echo "Branch Protection Drift: ${{ needs.branch-protection-drift.result }}"
@@ -394,6 +417,11 @@ jobs:
             exit 1
           fi
 
+          if [[ "${{ needs.governance-docs-integrity.result }}" != "success" ]]; then
+            echo "::error::Governance / Docs Integrity FAILED"
+            exit 1
+          fi
+
           if [[ "${{ needs.golden-path.result }}" != "success" ]]; then
             echo "::error::Golden Path FAILED"
             exit 1
@@ -424,6 +452,7 @@ jobs:
           echo "- ✅ Integration Tests" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Verification Suite" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Deterministic Build" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Governance / Docs Integrity" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Golden Path Smoke Test" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ SOC Control Verification" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Governance / Branch Protection Drift" >> $GITHUB_STEP_SUMMARY

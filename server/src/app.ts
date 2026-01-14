@@ -200,6 +200,13 @@ export const createApp = async () => {
 
   // Enhanced Pino HTTP logger with correlation and trace context
   const pinoHttpInstance = typeof pinoHttp === 'function' ? pinoHttp : (pinoHttp as any).pinoHttp;
+  if (process.env.NODE_ENV === 'test') {
+    console.log('DEBUG: appLogger type:', typeof appLogger);
+    console.log('DEBUG: appLogger has levels:', !!(appLogger as any).levels);
+    if ((appLogger as any).levels) {
+      console.log('DEBUG: appLogger.levels.values:', (appLogger as any).levels.values);
+    }
+  }
   app.use(
     pinoHttpInstance({
       logger: appLogger,
@@ -591,11 +598,13 @@ export const createApp = async () => {
     );
     const { depthLimit } = await import('./graphql/validation/depthLimit.js');
     const { rateLimitAndCachePlugin } = await import('./graphql/plugins/rateLimitAndCache.js');
+    const { httpStatusCodePlugin } = await import('./graphql/plugins/httpStatusCodePlugin.js');
 
     const apollo = new ApolloServer({
       schema,
       // Security plugins - Order matters for execution lifecycle
       plugins: [
+        httpStatusCodePlugin(), // Must be first to set HTTP status codes
         persistedQueriesPlugin as any,
         resolverMetricsPlugin as any,
         auditLoggerPlugin as any,

@@ -13,12 +13,15 @@
  */
 
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { createRequire } from 'module';
 import AuthService from '../../src/services/AuthService';
 import { ensureAuthenticated, requirePermission } from '../../src/middleware/auth';
 import { securityTestVectors, createMockRequest, createMockResponse } from '../utils/auth-test-helpers';
 import type { Pool } from 'pg';
 import GAEnrollmentService from '../../src/services/GAEnrollmentService.js';
 import { secretsService } from '../../src/services/SecretsService.js';
+
+const require = createRequire(import.meta.url);
 
 jest.mock('../../src/config/database', () => ({
     getPostgresPool: jest.fn(() => ({

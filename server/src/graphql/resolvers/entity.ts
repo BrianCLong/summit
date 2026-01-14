@@ -272,6 +272,16 @@ const entityResolvers = {
       { input }: { input: { type: string; props: any } },
       context: GraphQLContext,
     ) => {
+      // Validate required fields before attempting Neo4j operations
+      if (!input.type || typeof input.type !== 'string' || input.type.trim() === '') {
+        throw new GraphQLError('Entity type is required and must be a non-empty string', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            http: { status: 400 },
+          },
+        });
+      }
+
       const session = driver.session();
       try {
         const tenantId = context.user!.tenantId;
@@ -327,8 +337,17 @@ const entityResolvers = {
         return entity;
       } catch (error: any) {
         logger.error({ error, input }, 'Error creating entity');
+        // Re-throw GraphQLErrors as-is to preserve status codes
+        if (error instanceof GraphQLError) {
+          throw error;
+        }
         const message = error instanceof Error ? error.message : 'Unknown error';
-        throw new Error(`Failed to create entity: ${message}`);
+        throw new GraphQLError(`Failed to create entity: ${message}`, {
+          extensions: {
+            code: 'INTERNAL_SERVER_ERROR',
+            http: { status: 500 },
+          },
+        });
       } finally {
         await session.close();
       }

@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 4: Customer-Facing Disclosure & Claims Discipline (don’t create liability)
 
 1.  Define what you will disclose: AI is used, limitations, expected behavior, escalation path.

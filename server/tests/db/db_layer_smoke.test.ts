@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
-import { getPostgresPool, closePostgresPool } from '../../src/db/postgres';
-import { dbConfig } from '../../src/db/config';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
 
 describe('Database Layer', () => {
   // We can't easily test real connection in this unit test environment without a real DB.
@@ -16,12 +17,13 @@ describe('Database Layer', () => {
      jest.resetModules();
   });
 
-  afterAll(async () => {
-    await closePostgresPool();
-  });
+  it('should load configuration correctly', async () => {
+    process.env.DATABASE_URL =
+      process.env.DATABASE_URL ||
+      'postgres://test:test@localhost:5432/test';
 
-  it('should load configuration correctly', () => {
-    expect(dbConfig.connectionConfig.host).toBeDefined();
+    const { dbConfig } = await import('../../src/db/config.js');
+    expect(dbConfig.connectionConfig.connectionString).toBeDefined();
     expect(dbConfig.maxPoolSize).toBeGreaterThan(0);
   });
 

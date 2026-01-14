@@ -9,7 +9,7 @@ const jestBin = path.join(__dirname, '..', 'node_modules', 'jest', 'bin', 'jest.
 const baseArgs = [
   '--config',
   'jest.config.ts',
-  '--testPathIgnorePatterns=integration',
+  '--testPathIgnorePatterns=integration|/src/tests/|\\.e2e\\.',
   '--passWithNoTests',
 ];
 

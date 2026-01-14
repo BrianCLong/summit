@@ -91,6 +91,15 @@ jest.mock('fluent-ffmpeg', () => {
   return ffmpeg;
 });
 
+// Mock src/config/logger.js to provide a proper logger instance
+jest.mock('../../src/config/logger.js', () =\u003e {
+  const loggerMock = require('../mocks/logger.cjs');
+  return {
+    logger: loggerMock.logger || loggerMock,
+    __esModule: true,
+  };
+}, { virtual: false });
+
 // Global test timeout
 jest.setTimeout(30000);
 

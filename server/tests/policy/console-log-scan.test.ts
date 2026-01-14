@@ -1,4 +1,7 @@
 import { describe, test, expect } from '@jest/globals';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
 describe('findConsoleLogViolations', () => {
   test('flags console.log calls on added lines', () => {
     const {

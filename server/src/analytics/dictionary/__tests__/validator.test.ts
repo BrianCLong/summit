@@ -1,8 +1,9 @@
 import { describe, it, expect } from '@jest/globals';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { MetricValidator } from '../validator.js';
 
-const DICT_PATH = path.join(__dirname, '../metrics.yaml');
+const DICT_PATH = path.join(path.dirname(fileURLToPath(import.meta.url)), '../metrics.yaml');
 
 describe('Metric Validator', () => {
     const validator = new MetricValidator(DICT_PATH);

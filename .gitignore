@@ -325,6 +325,8 @@ validation-report-*.txt
 stale_refs_files.txt
 cosign-verify.txt
 dns.txt
+soc-compliance-reports/
+packages/policy-audit/src/*.js.map
 
 # Data Dumps (Root Only)
 # Note: Specific CSVs in subdirectories are allowed, but root CSVs should be ignored

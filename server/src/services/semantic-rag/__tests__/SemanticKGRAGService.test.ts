@@ -4,6 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import { createRequire } from 'module';
 import { SemanticKGRAGService } from '../SemanticKGRAGService.js';
 import { GraphTraversalAlgorithms } from '../GraphTraversalAlgorithms.js';
 import { STIXTAXIIFusionService } from '../STIXTAXIIFusionService.js';
@@ -14,6 +15,8 @@ import {
   TraversalStrategy,
   STIXObject,
 } from '../types.js';
+
+const require = createRequire(import.meta.url);
 
 // ============================================================================
 // Mock Services

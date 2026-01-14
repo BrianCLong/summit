@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 9 — Governance Metrics & Continuous Improvement (run governance like ops)
 
 1.  **Track governance KPIs**: board action closure rate, pre-read timeliness, decision latency.

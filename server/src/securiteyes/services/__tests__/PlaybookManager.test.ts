@@ -6,21 +6,19 @@ const mockSecuriteyesService = {
   createNode: jest.fn().mockResolvedValue({ id: 'mitigation-1' })
 };
 
-jest.mock('../SecuriteyesService', () => {
-    return {
-        SecuriteyesService: {
-            getInstance: jest.fn(() => mockSecuriteyesService)
-        }
-    };
-});
-
 describe('PlaybookManager', () => {
     let manager: PlaybookManager;
+    let getInstanceSpy: jest.SpiedFunction<typeof SecuriteyesService.getInstance>;
 
     beforeEach(() => {
+        getInstanceSpy = jest
+          .spyOn(SecuriteyesService, 'getInstance')
+          .mockReturnValue(mockSecuriteyesService as any);
         manager = PlaybookManager.getInstance();
-        // Force the mock to be returned if the class logic tries to get it again via helper
-        (SecuriteyesService.getInstance as jest.Mock).mockReturnValue(mockSecuriteyesService);
+    });
+
+    afterEach(() => {
+        getInstanceSpy.mockRestore();
     });
 
     it('should list playbooks', () => {
