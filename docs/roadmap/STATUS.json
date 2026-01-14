@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-13T20:30:00Z",
+  "revision_note": "Added Summit MCP server vertical slice with policy gating, skills modules, and evidence bundle fixture",
   "initiatives": [
     {
       "id": "A",

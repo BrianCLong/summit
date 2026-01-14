@@ -104,6 +104,38 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: summit-mcp-server-v1
+    version: v1
+    path: prompts/mcp/summit-mcp-server-v1.md
+    sha256: e8991ef35612bc87b3689b667e2d67797e69f5947efe7eac15253cce907358f9
+    description: Summit MCP server vertical slice with progressive disclosure, policy gating, and evidence bundles.
+    scope:
+      paths:
+        - mcp/summit_server/
+        - skills/mcp/
+        - skills/README.md
+        - docs/mcp-server.md
+        - docs/roadmap/STATUS.json
+        - fixtures/mcp/
+        - tests/mcp/
+        - agents/examples/
+        - prompts/mcp/summit-mcp-server-v1.md
+        - prompts/registry.yaml
+      domains:
+        - mcp
+        - governance
+        - evidence
+        - policy
+        - transport
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
