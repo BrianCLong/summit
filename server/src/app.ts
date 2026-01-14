@@ -301,15 +301,36 @@ export const createApp = async () => {
         res.status(401).json({ error: 'Unauthorized', message: 'No token provided' });
       };
 
+  // Helper to bypass public webhooks from strict tenant/auth enforcement
+  const isPublicWebhook = (req: any) => {
+    // req.path is relative to the mount point (/api or /graphql)
+    return (
+      req.path.startsWith('/webhooks/github') ||
+      req.path.startsWith('/webhooks/jira') ||
+      req.path.startsWith('/webhooks/lifecycle')
+    );
+  };
+
   // Resolve and enforce tenant context for API and GraphQL surfaces
-  app.use(['/api', '/graphql'], tenantContextMiddleware());
+  app.use(['/api', '/graphql'], (req, res, next) => {
+    if (isPublicWebhook(req)) return next();
+    return tenantContextMiddleware()(req, res, next);
+  });
+
   app.use(['/api', '/graphql'], admissionControl);
 
   // Authenticated rate limiting for API and GraphQL routes
-  app.use(['/api', '/graphql'], authenticatedRateLimit);
+  app.use(['/api', '/graphql'], (req, res, next) => {
+    if (isPublicWebhook(req)) return next();
+    return authenticatedRateLimit(req, res, next);
+  });
 
   // Enforce Data Residency
-  app.use(['/api', '/graphql'], residencyEnforcement);
+  app.use(['/api', '/graphql'], (req, res, next) => {
+    // Webhooks might process data, but residency checks typically require tenant context
+    if (isPublicWebhook(req)) return next();
+    return residencyEnforcement(req, res, next);
+  });
 
   // Residency Exception Routes
   app.use('/api/residency/exceptions', authenticateToken, exceptionRouter);

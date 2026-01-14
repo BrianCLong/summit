@@ -1,7 +1,6 @@
 /**
- * Qwen Provider with Deterministic Caching
+ * Qwen OpenAI-compatible Client with Deterministic Caching
  * Implements OpenAI-compatible interface for Qwen models via DashScope
- * with robust caching for deterministic behavior
  */
 
 import OpenAI from 'openai';
@@ -31,6 +30,7 @@ export function validateQwenConfig() {
   }
 }
 
+// Create Qwen client with OpenAI-compatible interface
 export function makeQwenClient() {
   const apiKey = process.env.DASHSCOPE_API_KEY;
   if (!apiKey) {
@@ -44,7 +44,7 @@ export function makeQwenClient() {
 }
 
 // Generate deterministic cache key from request parameters
-function generateCacheKey(model, messages, params, promptVersion = '1.0', inputHash = null) {
+export function generateCacheKey(model, messages, params, promptVersion = '1.0', inputHash = null) {
   // Normalize and sort messages for deterministic hashing
   const normalizedMessages = messages
     .map(msg => ({ role: msg.role, content: msg.content }))
@@ -56,13 +56,12 @@ function generateCacheKey(model, messages, params, promptVersion = '1.0', inputH
     JSON.stringify(params || {}),
     promptVersion,
     inputHash || ''
-  ].join('||');
+  ].join('|');
   
-  return createHash('sha256')
-    .update(keyData, 'utf8')
-    .digest('hex');
+  return createHash('sha256').update(keyData).digest('hex');
 }
 
+// Main function to call Qwen with optional caching
 export async function callQwen(messages, params = {}, inputHash = null) {
   validateQwenConfig();
   
@@ -85,25 +84,23 @@ export async function callQwen(messages, params = {}, inputHash = null) {
   // Generate cache key for deterministic replay
   const cacheKey = generateCacheKey(model, messages, requestParams, '1.0', inputHash);
   
-  // Check cache first (replay mode)
+  // Check cache for replay mode
   const cachedResponse = await cache.get(cacheKey);
   if (cachedResponse) {
+    console.debug(`[QWEN CACHE] Using cached response for key: ${cacheKey.substring(0, 12)}...`);
     return cachedResponse;
   }
 
   // Check if we're in replay-only mode
   if (process.env.QWEN_REPLAY_ONLY === 'true') {
-    throw new Error(
-      `No cached response found for key: ${cacheKey}.\n` +
-      `Run with QWEN_RECORD=true to record new responses or ensure cache is populated.` +
-      `\nModel: ${model}\nMessages: ${JSON.stringify(messages, null, 2)}`
-    );
+    throw new Error(`No cached response found for key: ${cacheKey}.\n` +
+                   `Run with QWEN_RECORD=true to record new responses.`);
   }
   
   console.debug(`[QWEN] Calling API for model: ${model}, cache key: ${cacheKey.substring(0, 12)}...`);
   const response = await client.chat.completions.create(requestParams);
   
-  // Cache response for deterministic replay
+  // Cache response if recording
   if (process.env.QWEN_RECORD !== 'false') {
     await cache.put(cacheKey, response);
   }
@@ -111,18 +108,18 @@ export async function callQwen(messages, params = {}, inputHash = null) {
   return response;
 }
 
-// Convenience function for evidence consistency analysis
-export async function analyzeDocumentWithQwen(documentContent, evidenceRequirements) {
+// Specific function for evidence analysis
+export async function analyzeDocumentWithQwen(documentContent, analysisPrompt) {
   const systemPrompt = `You are a governance compliance expert tasked with validating Evidence-IDs in governance documents. 
   Ensure each Evidence-ID follows the format /^[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)*$/ and corresponds to valid evidence entries.`;
 
   const userPrompt = `
     Document Content: ${documentContent}
     
-    Evidence Requirements: ${evidenceRequirements}
+    Analysis Task: ${analysisPrompt}
     
     Please validate the Evidence-IDs in the document and identify any issues, missing mappings, or format problems.
-    Return your analysis in a structured JSON format.
+    Return your analysis in a structured JSON format with fields: { issues: [...] } where each issue has type, message, and severity.
   `;
 
   const messages = [
@@ -133,5 +130,7 @@ export async function analyzeDocumentWithQwen(documentContent, evidenceRequireme
   // Use the hash of document content as inputHash for cache key
   const inputHash = createHash('sha256').update(documentContent).digest('hex');
   
-  return await callQwen(messages, { response_format: { type: "json_object" } }, inputHash);
+  return await callQwen(messages, { 
+    response_format: { type: "json_object" } 
+  }, inputHash);
 }

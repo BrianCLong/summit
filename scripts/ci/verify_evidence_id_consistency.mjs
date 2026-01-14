@@ -611,10 +611,16 @@ async function main() {
     console.log(`Processing ${documents.length} documents with batch size ${MAX_CONCURRENT_FILES}...`);
     const processStartTime = Date.now();
     const results = [];
+
+    // Choose the appropriate processing function based on AI integration setting
+    const processorFn = process.env.ENABLE_QWEN_ANALYSIS === 'true'
+      ? processGovernanceDocumentWithAI
+      : processGovernanceDocument;
+
     for (let i = 0; i < documents.length; i += MAX_CONCURRENT_FILES) {
       const batch = documents.slice(i, i + MAX_CONCURRENT_FILES);
       const batchResults = await Promise.all(
-        batch.map(docPath => processGovernanceDocument(docPath, evidenceMap, config.repoRoot))
+        batch.map(docPath => processorFn(docPath, evidenceMap, config.repoRoot))
       );
       results.push(...batchResults);
 
@@ -706,6 +712,77 @@ if (process.argv[1] === __filename) {
   });
 }
 
+/**
+ * Process a single governance document with optional AI-assisted analysis
+ */
+async function processGovernanceDocumentWithAI(filePath, evidenceMap, repoRoot) {
+  // First run the standard processing
+  const result = await processGovernanceDocument(filePath, evidenceMap, repoRoot);
+
+  // If Qwen integration is enabled, run additional AI analysis
+  if (process.env.ENABLE_QWEN_ANALYSIS === "true") {
+    try {
+      // Import dynamically since this feature may not always be enabled
+      const qwenModule = await import("./ai-providers/qwen.mjs");
+      const analyzeDocumentWithQwen = qwenModule.analyzeDocumentWithQwen || qwenModule.default;
+
+      const content = await fs.readFile(filePath, "utf8");
+      const aiAnalysisResult = await analyzeDocumentWithQwen(
+        content,
+        "Validate Evidence-IDs compliance and mapping consistency"
+      );
+
+      // Extract AI insights if response contains them
+      if (aiAnalysisResult && aiAnalysisResult.choices && aiAnalysisResult.choices[0]?.message?.content) {
+        try {
+          const aiInsights = JSON.parse(aiAnalysisResult.choices[0].message.content);
+          // Convert AI insights to our violation format
+          if (aiInsights.issues && Array.isArray(aiInsights.issues)) {
+            for (const issue of aiInsights.issues) {
+              result.violations.push({
+                type: `ai_${issue.type || "analysis"}`,
+                message: issue.message || "AI analysis identified potential issue",
+                severity: issue.severity || "info",
+                details: { ai_analysis: issue }
+              });
+            }
+          }
+        } catch (parseError) {
+          // If unable to parse AI response, add as info message
+          result.violations.push({
+            type: "ai_analysis_unparsed",
+            message: "AI analysis completed but response format not recognized",
+            severity: "info",
+            details: {
+              error: parseError.message,
+              raw_response: aiAnalysisResult?.choices[0]?.message?.content || 'Unknown'
+            }
+          });
+        }
+      }
+    } catch (aiError) {
+      // If AI analysis fails, don't break the main functionality
+      debugLog(`AI analysis failed for ${filePath}: ${aiError.message}`);
+      result.violations.push({
+        type: "ai_processing_error",
+        message: `AI analysis failed: ${aiError.message}`,
+        severity: "info", // Don't fail the whole check for AI errors
+        details: { error: aiError.message, stack: aiError.stack }
+      });
+    }
+  }
+
+  return result;
+}
+
+// Run if called directly
+if (process.argv[1] === __filename) {
+  main().catch(error => {
+    console.error('Uncaught exception:', error);
+    process.exit(1);
+  });
+}
+
 export {
   buildConsistencyReport,
   findGovernanceDocuments,
@@ -714,6 +791,9 @@ export {
   parseEvidenceIds,
   parseHeaders,
   processGovernanceDocument,
+  processGovernanceDocumentWithAI,
   removeBOM,
   validateFilePathSafety,
   writeReports
+};
+

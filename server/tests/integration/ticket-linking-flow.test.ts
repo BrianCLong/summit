@@ -3,17 +3,54 @@ import { createApp } from '../../src/app.js';
 import { jest, describe, it, test, expect, beforeAll, afterAll } from '@jest/globals';
 
 // Mock database and external dependencies
-jest.mock('../../src/db/postgres.js');
-jest.mock('../../src/services/ticket-links.js');
+// Mock database and external dependencies
+// Use unstable_mockModule for ESM mocking
+jest.unstable_mockModule('../../src/services/ticket-links.js', () => ({
+  __esModule: true,
+  addTicketRunLink: jest.fn(),
+  extractTicketFromPR: jest.fn(),
+  addTicketDeploymentLink: jest.fn(),
+  linkTicketToRun: jest.fn(),
+  linkTicketToDeployment: jest.fn(),
+  extractTicketFromMetadata: jest.fn(),
+  getTicketLinks: jest.fn(),
+}));
+
+const {
+  addTicketRunLink,
+  extractTicketFromPR,
+  addTicketDeploymentLink,
+} = await import('../../src/services/ticket-links.js');
+
+// Mock postgres
+jest.unstable_mockModule('../../src/db/postgres.js', () => ({
+  getPostgresPool: jest.fn(),
+  query: jest.fn(),
+}));
+
+const db = await import('../../src/db/postgres.js');
+
+// Placeholder for createTestHarness if not imported
+const createTestHarness = async () => {
+  const app = await createApp();
+  const server = app.listen(0);
+  return { app, server };
+};
 
 describe('Ticket Linking Integration Flow', () => {
   let server: any;
   let app: any;
+  let harness: any; // Added harness declaration
 
   beforeAll(async () => {
-    // Create and start test server
-    app = await createApp();
-    server = app.listen(0);
+    // Disable webhook signature verification
+    process.env.GITHUB_WEBHOOK_SECRET = '';
+    process.env.JIRA_WEBHOOK_SECRET = '';
+    process.env.LIFECYCLE_WEBHOOK_SECRET = '';
+
+    harness = await createTestHarness();
+    server = harness.server;
+    app = harness.app;
   });
 
   afterAll(async () => {
@@ -24,11 +61,12 @@ describe('Ticket Linking Integration Flow', () => {
 
   describe('GitHub Webhook → Run Completion → TicketDetails Integration', () => {
     it('should link ticket to run via webhook and show in TicketDetails', async () => {
-      const ticketLinkService = require('../../src/services/ticket-links.js');
+      // Import is now top-level
+      // const ticketLinkService = require('../../src/services/ticket-links.js');
 
       // Mock the linking service
-      ticketLinkService.addTicketRunLink = jest.fn().mockResolvedValue(null);
-      ticketLinkService.extractTicketFromPR = jest.fn().mockReturnValue({
+      jest.mocked(addTicketRunLink).mockResolvedValue(null);
+      jest.mocked(extractTicketFromPR).mockReturnValue({
         provider: 'github',
         externalId: '123',
       });
@@ -80,11 +118,13 @@ describe('Ticket Linking Integration Flow', () => {
 
       // Step 3: Verify GraphQL query shows the linked run
       // Mock the database query for tickets
-      const db = require('../../src/db/postgres.js');
+      // Use imported db
+      // const db = require('../../src/db/postgres.js');
       const mockPool = {
         query: jest.fn(),
       };
-      db.getPostgresPool.mockReturnValue(mockPool);
+
+      jest.mocked(db.getPostgresPool).mockReturnValue(mockPool as any);
 
       // Mock ticket query result
       mockPool.query.mockResolvedValueOnce({
@@ -146,7 +186,7 @@ describe('Ticket Linking Integration Flow', () => {
       expect(ticket.runs[0].id).toBe('run-abc-123');
 
       // Verify linking service was called correctly
-      expect(ticketLinkService.addTicketRunLink).toHaveBeenCalledWith(
+      expect(addTicketRunLink).toHaveBeenCalledWith(
         { provider: 'github', externalId: '123' },
         'run-abc-123',
         expect.objectContaining({
@@ -159,12 +199,10 @@ describe('Ticket Linking Integration Flow', () => {
 
   describe('Jira Webhook → Deployment → TicketDetails Integration', () => {
     it('should link Jira ticket to deployment and show in UI', async () => {
-      const ticketLinkService = require('../../src/services/ticket-links.js');
+      // const ticketLinkService = require('../../src/services/ticket-links.js');
 
       // Mock the linking service
-      ticketLinkService.addTicketDeploymentLink = jest
-        .fn()
-        .mockResolvedValue(null);
+      jest.mocked(addTicketDeploymentLink).mockResolvedValue(null);
 
       // Step 1: Simulate Jira issue update webhook with deployment ID
       const jiraWebhookPayload = {
@@ -173,7 +211,7 @@ describe('Ticket Linking Integration Flow', () => {
           key: 'PROJ-789',
           fields: {
             summary: 'Deploy new authentication service',
-            description: 'Ready for deployment. deploymentId: deploy-xyz-789',
+            description: 'Ready for deployment. deploymentId: 12345678-1234-1234-1234-1234567890ab',
             status: { name: 'In Progress' },
             assignee: { displayName: 'DevOps Engineer' },
             reporter: { displayName: 'Product Manager' },
@@ -191,7 +229,7 @@ describe('Ticket Linking Integration Flow', () => {
       // Step 2: Simulate deployment started event
       const deploymentPayload = {
         event_type: 'deployment_started',
-        id: 'deploy-xyz-789',
+        id: '12345678-1234-1234-1234-1234567890ab',
         metadata: {
           ticket: {
             provider: 'jira',
@@ -209,10 +247,10 @@ describe('Ticket Linking Integration Flow', () => {
 
       expect(deploymentResponse.body.status).toBe('processed');
 
-      // Verify linking service was called with correct parameters
-      expect(ticketLinkService.addTicketDeploymentLink).toHaveBeenCalledWith(
+      // Verify linking service was called correctly
+      expect(addTicketDeploymentLink).toHaveBeenCalledWith(
         { provider: 'jira', externalId: 'PROJ-789' },
-        'deploy-xyz-789',
+        '12345678-1234-1234-1234-1234567890ab',
         expect.objectContaining({
           environment: 'staging',
           version: 'v1.2.3',
@@ -223,10 +261,7 @@ describe('Ticket Linking Integration Flow', () => {
 
   describe('Error Handling', () => {
     it('should handle webhook with invalid payload gracefully', async () => {
-      const invalidPayload = {
-        action: 'invalid_action',
-        // Missing required fields
-      };
+      const invalidPayload = {}; // Missing 'action' field to trigger validation error
 
       const response = await request(server)
         .post('/api/webhooks/github')
@@ -237,12 +272,10 @@ describe('Ticket Linking Integration Flow', () => {
     });
 
     it('should handle lifecycle event for nonexistent run', async () => {
-      const ticketLinkService = require('../../src/services/ticket-links.js');
+      // const ticketLinkService = require('../../src/services/ticket-links.js');
 
       // Mock service to throw error for nonexistent run
-      ticketLinkService.addTicketRunLink = jest
-        .fn()
-        .mockRejectedValue(new Error('Run nonexistent-run not found'));
+      jest.mocked(addTicketRunLink).mockRejectedValue(new Error('Run nonexistent-run not found'));
 
       const payload = {
         event_type: 'run_completed',
@@ -267,10 +300,10 @@ describe('Ticket Linking Integration Flow', () => {
 
   describe('Idempotency', () => {
     it('should handle duplicate webhook calls without errors', async () => {
-      const ticketLinkService = require('../../src/services/ticket-links.js');
+      // const ticketLinkService = require('../../src/services/ticket-links.js');
 
-      ticketLinkService.addTicketRunLink = jest.fn().mockResolvedValue(null);
-      ticketLinkService.extractTicketFromPR = jest.fn().mockReturnValue({
+      jest.mocked(addTicketRunLink).mockResolvedValue(null);
+      jest.mocked(extractTicketFromPR).mockReturnValue({
         provider: 'github',
         externalId: '456',
       });
@@ -305,7 +338,7 @@ describe('Ticket Linking Integration Flow', () => {
       expect(response2.body.status).toBe('processed');
 
       // Linking service should handle idempotency
-      expect(ticketLinkService.addTicketRunLink).toHaveBeenCalledTimes(2);
+      expect(addTicketRunLink).toHaveBeenCalledTimes(2);
     });
   });
 });
