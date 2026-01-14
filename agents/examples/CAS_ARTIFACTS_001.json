@@ -1,0 +1,47 @@
+{
+  "task_id": "CAS_ARTIFACTS_001",
+  "agent_id": "Codex",
+  "prompt_ref": {
+    "id": "cas-artifacts-immutable",
+    "version": "v1",
+    "sha256": "b476ca57ecc2236b056f06214e3455b14267ab0423631fd93e2d9e503fc3088e",
+    "path": "prompts/governance/cas-artifacts-immutable.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "scripts/ci/",
+      "scripts/ga/",
+      "docs/ga/",
+      ".github/workflows/",
+      "package.json",
+      "agent-contract.json",
+      "AGENT_ACTIVITY.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/"
+    ],
+    "domains": ["governance", "ci", "provenance", "verification"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "artifacts/evidence/<sha>/run-manifest.json",
+      "artifacts/ga-verify/<sha>/run-manifest.json",
+      "artifacts/governance/cas-verify/<sha>/report.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "CAS library writes immutable blobs and deterministic manifests",
+    "CAS verifier detects tampering in CAS blobs and run artifacts",
+    "CI runs CAS integrity job on PRs and pushes"
+  ],
+  "stop_conditions": [
+    "Tooling instability that blocks deterministic verification",
+    "Attempts to change Jest or pnpm global configuration",
+    "Detection of PII in PR diffs"
+  ]
+}

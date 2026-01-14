@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { casPutFile, stableStringify } from '../ci/lib/cas.mjs';
 
 const steps = [
   { name: 'typecheck', command: 'pnpm', args: ['typecheck'] },
@@ -24,6 +25,8 @@ const sha = process.env.GA_VERIFY_SHA || gitSha || 'unknown';
 const outDir = path.join('artifacts', 'ga-verify', sha);
 const logsDir = path.join(outDir, 'logs');
 const stampPath = path.join(outDir, 'stamp.json');
+const casRoot = path.join('artifacts', 'cas');
+const runManifestPath = path.join(outDir, 'run-manifest.json');
 
 const stamp = {
   sha,
@@ -48,7 +51,54 @@ const tailFor = (content) =>
 const writeStamp = async (patch = {}) => {
   Object.assign(stamp, patch);
   await fs.mkdir(path.dirname(stampPath), { recursive: true });
-  await fs.writeFile(stampPath, JSON.stringify(stamp, null, 2));
+  await fs.writeFile(stampPath, stableStringify(stamp));
+};
+
+const listFiles = async (dir) => {
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const resolved = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      const childFiles = await listFiles(resolved);
+      files.push(...childFiles);
+    } else if (entry.isFile()) {
+      files.push(resolved);
+    }
+  }
+  return files.sort();
+};
+
+const writeRunManifest = async () => {
+  const files = await listFiles(outDir);
+  const manifestFiles = [];
+
+  for (const filePath of files) {
+    const relPath = path.relative(outDir, filePath);
+    if (relPath === 'run-manifest.json') continue;
+    const casEntry = await casPutFile({ casRoot, filePath });
+    manifestFiles.push({
+      path: relPath,
+      sha256: casEntry.digest,
+      size: casEntry.size,
+      cas: casEntry.casRelativePath,
+    });
+  }
+
+  const manifest = {
+    schema_version: '1',
+    category: 'ga-verify',
+    sha,
+    created_at: new Date().toISOString(),
+    files: manifestFiles.sort((a, b) => a.path.localeCompare(b.path)),
+    tool_versions: {
+      node: process.version,
+      pnpm: process.env.npm_config_user_agent ?? null,
+    },
+    policy_hashes: {},
+  };
+
+  await fs.writeFile(runManifestPath, stableStringify(manifest));
 };
 
 const runStep = async (step) => {
@@ -117,6 +167,7 @@ process.on('SIGINT', () => handleSignal('SIGINT'));
 process.on('SIGTERM', () => handleSignal('SIGTERM'));
 
 const main = async () => {
+  let runError = null;
   let currentStep = null;
   try {
     await writeStamp({ status: 'running' });
@@ -137,9 +188,24 @@ const main = async () => {
         message: error?.message ?? 'Unknown failure',
       },
     });
-    throw error;
+    runError = error;
   } finally {
     clearInterval(heartbeat);
+  }
+
+  let manifestError = null;
+  try {
+    await writeRunManifest();
+  } catch (error) {
+    console.error('[ga-verify] Failed to write run manifest:', error);
+    manifestError = error;
+  }
+
+  if (runError) {
+    throw runError;
+  }
+  if (manifestError) {
+    throw manifestError;
   }
 };
 

@@ -50,3 +50,42 @@ jobs:
 
       - name: Unit Tests
         run: pnpm -w test:unit
+
+  cas-integrity:
+    name: Governance / CAS Integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [config-guard]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node (from .nvmrc)
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install (frozen lockfile)
+        run: pnpm -w install --frozen-lockfile
+
+      - name: Generate evidence bundle
+        run: node scripts/ci/generate_evidence_run.mjs
+
+      - name: Run GA verification
+        run: pnpm ga:verify
+
+      - name: Verify CAS integrity (evidence)
+        run: node scripts/ci/verify_cas_integrity.mjs --mode all --run artifacts/evidence/${{ github.sha }}
+
+      - name: Verify CAS integrity (ga-verify)
+        run: node scripts/ci/verify_cas_integrity.mjs --mode all --run artifacts/ga-verify/${{ github.sha }}
+
+      - name: Upload CAS verification reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: cas-verify-reports
+          path: artifacts/governance/cas-verify/**
+          retention-days: 14

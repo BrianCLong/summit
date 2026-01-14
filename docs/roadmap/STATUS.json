@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-14T02:05:00Z",
+  "revision_note": "CAS-backed evidence manifests and verification added for GA governance artifacts",
   "initiatives": [
     {
       "id": "A",
