@@ -228,6 +228,9 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: LongRunJob Contract Gate (strict)
+        run: node scripts/ci/verify-longrun-contract.mjs
+
       - name: Security Guardrails
         run: |
           echo "🛡️ Running Security Guardrails..."

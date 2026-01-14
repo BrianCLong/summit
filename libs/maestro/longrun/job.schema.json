@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/maestro/longrun/job.schema.json",
+  "title": "Maestro LongRunJob",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "job_id",
+    "goal",
+    "scope_paths",
+    "allowed_tools",
+    "budgets",
+    "model_policy",
+    "quality_gates",
+    "stop_conditions"
+  ],
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "minLength": 3
+    },
+    "goal": {
+      "type": "string",
+      "minLength": 5
+    },
+    "scope_paths": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "allowed_tools": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["advisory", "strict"],
+      "default": "advisory"
+    },
+    "budgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["per_hour_usd", "total_usd", "tokens"],
+      "properties": {
+        "per_hour_usd": { "type": "number", "minimum": 0 },
+        "total_usd": { "type": "number", "minimum": 0 },
+        "tokens": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "model_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["search_model", "build_model", "debug_model"],
+      "properties": {
+        "search_model": { "type": "string" },
+        "build_model": { "type": "string" },
+        "debug_model": { "type": "string" },
+        "max_context_tokens": { "type": "integer", "minimum": 1024 },
+        "routing_notes": { "type": "string" }
+      }
+    },
+    "quality_gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required"],
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "optional": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "stop_conditions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_iterations",
+        "max_stall_iterations",
+        "max_repeat_errors",
+        "max_repeat_diffs",
+        "require_consecutive_done",
+        "manual_stop_file"
+      ],
+      "properties": {
+        "max_iterations": { "type": "integer", "minimum": 1 },
+        "max_stall_iterations": { "type": "integer", "minimum": 1 },
+        "max_repeat_errors": { "type": "integer", "minimum": 1 },
+        "max_repeat_diffs": { "type": "integer", "minimum": 1 },
+        "require_consecutive_done": { "type": "integer", "minimum": 1 },
+        "manual_stop_file": { "type": "string", "minLength": 1 }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "owner": { "type": "string" },
+        "labels": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "created_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

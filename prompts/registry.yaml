@@ -79,50 +79,29 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: adr-pr-template-cleanup
+  - id: maestro-longrun-job-engine
     version: v1
-    path: prompts/docs/adr-pr-template-cleanup@v1.md
-    sha256: 429dc47c69fb43ee25eff48a54868fc88e2faf48f8de6a213d702794d2cb3d07
-    description: Update PR and ADR templates for current workflow guidance and formatting.
+    path: prompts/engineering/maestro-longrun-job-engine.md
+    sha256: 32faf8eb39eea30e6bcaa8645727a9a5f2665bcd335b68e50e87eeb2d5f1e1e3
+    description: Implement Maestro Long-Run Job Engine with governed checkpoints, budgets, and CI gates.
     scope:
       paths:
-        - .github/
-        - docs/ADR/
+        - libs/maestro/longrun/
+        - scripts/ci/
+        - docs/maestro/
+        - .github/workflows/
+        - docs/roadmap/STATUS.json
         - agents/examples/
-        - prompts/docs/adr-pr-template-cleanup@v1.md
+        - prompts/engineering/maestro-longrun-job-engine.md
         - prompts/registry.yaml
       domains:
-        - documentation
+        - maestro
         - governance
-        - quality
+        - ci
+        - evidence
     verification:
       tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: adr-pr-template-cleanup
-    version: v1
-    path: prompts/docs/adr-pr-template-cleanup@v1.md
-    sha256: 429dc47c69fb43ee25eff48a54868fc88e2faf48f8de6a213d702794d2cb3d07
-    description: Update PR and ADR templates for current workflow guidance and formatting.
-    scope:
-      paths:
-        - .github/
-        - docs/ADR/
-        - agents/examples/
-        - prompts/docs/adr-pr-template-cleanup@v1.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - governance
-        - quality
-    verification:
-      tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0

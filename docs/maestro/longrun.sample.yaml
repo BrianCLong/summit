@@ -1,0 +1,39 @@
+job_id: maestro-longrun-demo
+goal: Implement Long-Run Job Engine validation and evidence checkpoints
+scope_paths:
+  - libs/maestro/longrun/
+  - scripts/ci/
+  - docs/maestro/
+allowed_tools:
+  - rg
+  - pnpm
+  - node
+mode: advisory
+budgets:
+  per_hour_usd: 6.5
+  total_usd: 60
+  tokens: 250000
+model_policy:
+  search_model: gpt-4.1-mini
+  build_model: gpt-4.1
+  debug_model: gpt-4.1
+  max_context_tokens: 200000
+  routing_notes: Use search_model for discovery, build_model for code changes.
+quality_gates:
+  required:
+    - pnpm lint
+    - pnpm typecheck
+    - pnpm test
+stop_conditions:
+  max_iterations: 20
+  max_stall_iterations: 3
+  max_repeat_errors: 3
+  max_repeat_diffs: 2
+  require_consecutive_done: 2
+  manual_stop_file: .maestro/STOP
+metadata:
+  owner: maestro-team
+  labels:
+    - longrun
+    - governance
+  created_at: 2026-01-10T00:00:00Z
