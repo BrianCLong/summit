@@ -1,0 +1,43 @@
+{
+  "task_id": "AELAB_DRQ_ENGINE_2026_01_15",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "aelab-drq-engine",
+    "version": "v1",
+    "sha256": "8e5d04ca5d7dc58d38dc7ad166841a20dc9b836f8ba6ed797a5cd6ad3e4269cb",
+    "path": "prompts/aelab/drq-aelab-v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/agent-lab/",
+      "docs/aelab/",
+      "docs/README.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/aelab/",
+      "prompts/registry.yaml",
+      "agents/examples/",
+      "package.json"
+    ],
+    "domains": ["aelab", "governance", "provenance", "testing", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "packages/agent-lab/__tests__/aelab-*.test.ts",
+      "docs/aelab/drq.md",
+      "artifacts/agent-lab/aelab"
+    ]
+  },
+  "debt_budget": {"permitted": 0, "retirement_target": 0},
+  "success_criteria": [
+    "RedQueenEngine runs deterministic rounds with MAP-Elites and checkpoint/resume.",
+    "Toy domain runs offline and emits evidence bundle manifests.",
+    "CLI command pnpm aelab drq --domain=toy succeeds."
+  ],
+  "stop_conditions": [
+    "Policy-gated validation fails.",
+    "Evidence bundle missing required manifest fields.",
+    "Sandbox or safety gate breach detected."
+  ]
+}

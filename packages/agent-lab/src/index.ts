@@ -5,3 +5,4 @@ export * from './toolBus';
 export * from './tools';
 export * from './workflowSpec';
 export * from './judge';
+export * from './aelab';

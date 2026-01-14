@@ -5,6 +5,7 @@ import path from 'path';
 
 import { ContentBoundary } from './contentBoundary';
 import { judgeRun } from './judge';
+import { runDrq } from './aelab/runDrq';
 import { createDefaultBus, runWorkflow } from './toolBus';
 import { builtInTools } from './tools';
 import { loadWorkflowSpec } from './workflowSpec';
@@ -16,6 +17,7 @@ Usage:
   agent-lab judge --run <runId>
   agent-lab tools list
   agent-lab workflows validate <path>
+  agent-lab aelab drq --domain=toy [--rounds 4] [--iters 60] [--seed 0] [--resume]
 `);
 };
 
@@ -119,6 +121,15 @@ const command = process.argv[2];
         }
         const spec = loadWorkflowSpec(wfPath);
         console.log(`Workflow ${spec.name} is valid.`);
+        return;
+      }
+      usage();
+      return;
+    }
+    case 'aelab': {
+      const subcommand = process.argv[3];
+      if (subcommand === 'drq') {
+        await runDrq(process.argv.slice(4));
         return;
       }
       usage();

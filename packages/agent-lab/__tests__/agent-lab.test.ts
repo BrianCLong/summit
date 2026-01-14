@@ -49,8 +49,10 @@ describe('Evidence store determinism', () => {
     store.init();
     const first = store.record('s1', 'tool', '1.0', { a: 1 }, { output: 'value' }, { allowed: true, reason: 'ok', policyVersion: '1.0.0' });
     const second = store.record('s2', 'tool', '1.0', { b: 2 }, { output: 'value2' }, { allowed: true, reason: 'ok', policyVersion: '1.0.0' });
-    expect(path.basename(first.rawOutputPath)).toBe('0001-tool.txt');
-    expect(path.basename(second.rawOutputPath)).toBe('0002-tool.txt');
+    expect(first.rawOutputPath).not.toBeNull();
+    expect(second.rawOutputPath).not.toBeNull();
+    expect(path.basename(first.rawOutputPath ?? '')).toBe('0001-tool.txt');
+    expect(path.basename(second.rawOutputPath ?? '')).toBe('0002-tool.txt');
     const ledger = fs.readFileSync(path.join(base, 'run-123', 'evidence', 'evidence.ndjson'), 'utf-8').trim().split('\n');
     expect(ledger.length).toBe(2);
   });

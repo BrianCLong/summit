@@ -47,6 +47,7 @@ Use this page as the fast path to the docs you need. The golden path details liv
 
 - **[WeDLM Evaluation Note](research/wedlm.md)** – Overview of the diffusion-based WeDLM model, why it matters for Summit, and a validation plan.
 - **[WeDLM Local Demo Harness](labs/wedlm/README.md)** – Hands-on steps to run the official WeDLM container, web demo, and smoke prompts.
+- **[AELab DRQ Engine](aelab/drq.md)** – Governed adversarial evolution lab with MAP-Elites, provenance, and toy domain demo.
 
 ## Archived & Historical Material
 

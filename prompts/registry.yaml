@@ -104,6 +104,102 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: aelab-drq-engine
+    version: v1
+    path: prompts/aelab/drq-aelab-v1.md
+    sha256: 8e5d04ca5d7dc58d38dc7ad166841a20dc9b836f8ba6ed797a5cd6ad3e4269cb
+    description: Governed DRQ-style adversarial evolution engine for Summit AELab.
+    scope:
+      paths:
+        - packages/agent-lab/
+        - docs/aelab/
+        - docs/README.md
+        - docs/roadmap/STATUS.json
+        - prompts/aelab/
+        - prompts/registry.yaml
+        - agents/examples/
+        - package.json
+      domains:
+        - aelab
+        - governance
+        - provenance
+        - testing
+        - documentation
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: aelab-drq-system
+    version: v1
+    path: prompts/aelab/drq-system-v1.md
+    sha256: aba2069b9373791122a0a21cdab207d394da64cdca1214036cbd2af1b484012c
+    description: System prompt for AELab DRQ toy domain candidates.
+    scope:
+      paths:
+        - prompts/aelab/
+        - prompts/registry.yaml
+      domains:
+        - aelab
+        - governance
+        - prompts
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: aelab-drq-new
+    version: v1
+    path: prompts/aelab/drq-new-v1.md
+    sha256: 05a262e8511e2a3f68229db053d1500f9fbba01b3543671dd1b7d4ef729fc71c
+    description: Create prompt for AELab DRQ toy domain candidates.
+    scope:
+      paths:
+        - prompts/aelab/
+        - prompts/registry.yaml
+      domains:
+        - aelab
+        - governance
+        - prompts
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: aelab-drq-mutate
+    version: v1
+    path: prompts/aelab/drq-mutate-v1.md
+    sha256: 08bf720064afcbde5b903b0b0b003863c93711f5c706b96f30603479e2b2e1ee
+    description: Mutation prompt for AELab DRQ toy domain candidates.
+    scope:
+      paths:
+        - prompts/aelab/
+        - prompts/registry.yaml
+      domains:
+        - aelab
+        - governance
+        - prompts
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
