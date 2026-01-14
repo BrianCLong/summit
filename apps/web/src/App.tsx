@@ -19,6 +19,7 @@ const ExplorePage = React.lazy(() => import('@/pages/ExplorePage'))
 const AlertsPage = React.lazy(() => import('@/pages/AlertsPage'))
 const AlertDetailPage = React.lazy(() => import('@/pages/AlertDetailPage'))
 const CasesPage = React.lazy(() => import('@/pages/CasesPage'))
+const CreateCasePage = React.lazy(() => import('@/pages/CreateCasePage'))
 const CaseDetailPage = React.lazy(() => import('@/pages/CaseDetailPage'))
 const CommandCenterDashboard = React.lazy(
   () => import('@/pages/dashboards/CommandCenterDashboard')
@@ -164,6 +165,7 @@ function App() {
 
                       {/* Cases */}
                       <Route path="cases" element={<CasesPage />} />
+                      <Route path="cases/new" element={<CreateCasePage />} />
                       <Route path="cases/:id" element={<CaseDetailPage />} />
 
                       {/* Dashboards */}

@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-10T18:00:00Z",
+  "revision_note": "Hardened apps/web empty-state UX with quick actions, added case creation entry point, and shipped coverage for updated views",
   "initiatives": [
     {
       "id": "A",
