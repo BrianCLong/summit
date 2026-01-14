@@ -104,22 +104,21 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: adr-pr-template-cleanup
+  - id: merge-train-ops
     version: v1
-    path: prompts/docs/adr-pr-template-cleanup@v1.md
-    sha256: 429dc47c69fb43ee25eff48a54868fc88e2faf48f8de6a213d702794d2cb3d07
-    description: Update PR and ADR templates for current workflow guidance and formatting.
+    path: prompts/ops/merge-train-ops@v1.md
+    sha256: bd9fb4211d623bb868c30d788eaf9525093d2c6b00d265a8fcb5bdedde6a7998
+    description: Update merge train operations tooling and status metadata.
     scope:
       paths:
-        - .github/
-        - docs/ADR/
-        - agents/examples/
-        - prompts/docs/adr-pr-template-cleanup@v1.md
+        - scripts/ops/merge-train.ts
+        - docs/roadmap/STATUS.json
+        - prompts/ops/merge-train-ops@v1.md
         - prompts/registry.yaml
       domains:
-        - documentation
+        - operations
+        - ci
         - governance
-        - quality
     verification:
       tiers_required:
         - C

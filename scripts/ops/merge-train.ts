@@ -2,15 +2,81 @@
 
 import { execSync } from 'child_process';
 
+type StatusCheck = {
+  name?: string;
+  conclusion?: string;
+};
+
+type PullRequest = {
+  number: number;
+  mergeable: string | null;
+  additions?: number;
+  deletions?: number;
+  statusCheckRollup?: StatusCheck[];
+};
+
 const args = process.argv.slice(2);
 const prsArg = args.find(a => a.startsWith('prs='));
-
-if (!prsArg) {
-  console.error('Error: prs argument required (e.g. prs=123,456)');
+const limitArg = args.find(a => a.startsWith('limit='));
+const parsedLimit = limitArg ? Number(limitArg.split('=')[1]) : 10;
+if (limitArg && (!Number.isFinite(parsedLimit) || parsedLimit < 1)) {
+  console.error('Deferred pending valid limit input (limit must be a positive number).');
   process.exit(1);
 }
+const limit = Math.max(1, Math.floor(parsedLimit));
 
-const prs = prsArg.split('=')[1].split(',');
+const isAutoMode = !prsArg || prsArg.endsWith('=auto');
+
+const pickAutoPrs = (): string[] => {
+  try {
+    const prsJson = execSync(
+      `gh pr list --state open --limit ${limit} --json number,mergeable,additions,deletions,statusCheckRollup`,
+      { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] },
+    );
+    const prs: PullRequest[] = JSON.parse(prsJson);
+    const eligible = prs
+      .filter(pr => pr.mergeable === 'MERGEABLE')
+      .filter(pr =>
+        (pr.statusCheckRollup ?? []).some(
+          check => check.name === 'fast / fast' && check.conclusion === 'SUCCESS',
+        ),
+      )
+      .sort((a, b) => {
+        const sizeA = (a.additions ?? 0) + (a.deletions ?? 0);
+        const sizeB = (b.additions ?? 0) + (b.deletions ?? 0);
+        if (sizeA !== sizeB) {
+          return sizeA - sizeB;
+        }
+        return a.number - b.number;
+      })
+      .slice(0, limit)
+      .map(pr => pr.number.toString());
+
+    if (eligible.length === 0) {
+      console.error('Deferred pending merge-train eligibility: no green, mergeable PRs found.');
+      process.exit(1);
+    }
+
+    console.log(`Auto-selected PRs: ${eligible.join(', ')}`);
+    return eligible;
+  } catch (error) {
+    console.error('Deferred pending gh availability. Provide prs=123,456 to proceed.');
+    process.exit(1);
+  }
+};
+
+const prs = isAutoMode
+  ? pickAutoPrs()
+  : prsArg
+      .split('=')[1]
+      .split(',')
+      .map(pr => pr.trim())
+      .filter(Boolean);
+
+if (prs.length === 0) {
+  console.error('Deferred pending PR selection. Provide prs=123,456 to proceed.');
+  process.exit(1);
+}
 
 console.log(`🚂 Merge Train Simulation for PRs: ${prs.join(', ')}`);
 console.log('Dry-run mode active (actual merge simulation attempted)');
@@ -34,7 +100,7 @@ try {
     try {
         execSync(`git fetch origin pull/${pr}/head:pr-${pr}`, { stdio: 'pipe' });
     } catch (e) {
-        console.log(`  ⚠️ Could not fetch PR #${pr}. (Remote might be inaccessible). Skipping merge step.`);
+        console.log(`  ⚠️ Could not fetch PR #${pr}. Deferred pending remote access. Skipping merge step.`);
         continue;
     }
 
