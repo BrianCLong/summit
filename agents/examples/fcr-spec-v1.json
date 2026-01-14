@@ -1,0 +1,37 @@
+{
+  "task_id": "FCR_SPEC_V1_20260110",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "federated-campaign-radar-spec",
+    "version": "v1",
+    "sha256": "1f7112f891ba6143039ffc41729deb411395b68e7bebdec21d175686b54f89f7",
+    "path": "prompts/docs/federated-campaign-radar-spec@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/federated-campaign-radar-spec.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/fcr-spec-v1.json",
+      "prompts/docs/federated-campaign-radar-spec@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["documentation", "governance", "roadmap"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/federated-campaign-radar-spec.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "FCR v1 spec includes authority alignment, schema invariants, and KPI extensions.",
+    "Roadmap status updated to reflect spec progress."
+  ],
+  "stop_conditions": [
+    "Prompt registry hash mismatch detected.",
+    "Spec references conflict with Summit governance authority files."
+  ]
+}
