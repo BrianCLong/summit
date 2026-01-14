@@ -1,5 +1,7 @@
 # Governance Rules
 
+<!-- Evidence ID: GOV-001 -->
+
 This document defines the rules for code changes, releases, and approvals within the repository. It is machine-enforced where possible.
 
 ## 1. Release Types & Versioning
