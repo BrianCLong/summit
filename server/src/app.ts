@@ -15,6 +15,7 @@ import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.js';
 import { anomalyDetector } from './lib/telemetry/anomaly-detector.js';
 import { auditLogger } from './middleware/audit-logger.js';
 import { auditFirstMiddleware } from './middleware/audit-first.js';
+import { verdictPropagationMiddleware } from './middleware/verdictPropagation.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
 import { featureFlagContextMiddleware } from './middleware/feature-flag-context.js';
 import { sanitizeInput } from './middleware/sanitization.js';
@@ -238,6 +239,8 @@ export const createApp = async () => {
   app.use(auditLogger);
   // Audit-First middleware for cryptographic stamping of sensitive operations
   app.use(auditFirstMiddleware);
+  // Propagate governance verdicts (if any) to response headers
+  app.use(verdictPropagationMiddleware);
   app.use(httpCacheMiddleware);
 
   // API Versioning Middleware (Epic 2: API v1.1 Default)

@@ -27,9 +27,22 @@ export interface PolicyContext {
   simulation?: boolean; // Request is a simulation
 }
 
+export enum GovernanceReasonCode {
+  POLICY_VIOLATION = 'POLICY_VIOLATION',
+  KILL_SWITCH_ACTIVE = 'KILL_SWITCH_ACTIVE',
+  INSUFFICIENT_PRIVILEGE = 'INSUFFICIENT_PRIVILEGE',
+  INVALID_CONTEXT = 'INVALID_CONTEXT',
+  MANUAL_OVERRIDE = 'MANUAL_OVERRIDE',
+  SYSTEM_ERROR = 'SYSTEM_ERROR',
+  THREAT_DETECTED = 'THREAT_DETECTED',
+  QUOTA_EXCEEDED = 'QUOTA_EXCEEDED',
+  DATA_RESIDENCY_VIOLATION = 'DATA_RESIDENCY_VIOLATION',
+  UNAUTHORIZED_PURPOSE = 'UNAUTHORIZED_PURPOSE'
+}
+
 export interface GovernanceVerdict {
   action: PolicyAction;
-  reasons: string[];
+  reasons: (string | GovernanceReasonCode)[];
   policyIds: string[];
   metadata: {
     timestamp: string;
