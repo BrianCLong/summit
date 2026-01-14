@@ -1,0 +1,16 @@
+{
+  "name": "neo4j-sink-projects",
+  "config": {
+    "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
+    "topics": "outbox.project",
+    "neo4j.server.uri": "neo4j://neo4j:7687",
+    "neo4j.authentication.basic.username": "${NEO4J_USER}",
+    "neo4j.authentication.basic.password": "${NEO4J_PASS}",
+    "neo4j.topic.cypher.outbox.project": "WITH $event AS event\nFOREACH (_ IN CASE event.eventType WHEN 'deleted' THEN [1] ELSE [] END |\n  MATCH (p:Project {biz_id: event.aggregateId})\n  DETACH DELETE p\n)\nFOREACH (_ IN CASE event.eventType WHEN 'deleted' THEN [] ELSE [1] END |\n  MERGE (p:Project {biz_id: event.aggregateId})\n  ON CREATE SET p.createdAt = datetime(event.occurredAt)\n  SET p += event.payload.after, p.version = event.version, p.updatedAt = datetime(event.occurredAt)\n)",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false",
+    "errors.tolerance": "all",
+    "errors.deadletterqueue.topic.name": "dlq.neo4j"
+  }
+}

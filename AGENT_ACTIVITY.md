@@ -8,6 +8,7 @@ This ledger tracks recent agent activity so humans can spot thrash, stalls, or c
 | TB-02   | agentic/codex/task-ledger      | (pending) | Codex | in-progress | Drafting AGENT_ACTIVITY + backlog wiring.       | 2026-01-01 |
 | TB-03   | agentic/codex/task-owner-guide | (pending) | Codex | in-progress | HUMAN_OWNER_GUIDE.md authored.                  | 2026-01-01 |
 | TB-04   | (human-only)                   | n/a       | Human | human-only  | Restricted-path audit; requires override label. | 2026-01-01 |
+| GRAPH_OUTBOX_NEO4J | agentic/codex/graph-outbox-neo4j | (pending) | Codex | in-progress | Postgres outbox + Neo4j bijection guardrails. | 2026-01-15 |
 
 ## How to update
 

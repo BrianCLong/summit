@@ -1,0 +1,75 @@
+name: CI Graph Bijection
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  graph-bijection:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      neo4j:
+        image: neo4j:5
+        env:
+          NEO4J_AUTH: neo4j/test
+        ports:
+          - 7687:7687
+        options: >-
+          --health-cmd="cypher-shell -u neo4j -p test 'RETURN 1'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply migrations
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -f db/migrations/001_initial_schema.sql
+          psql -h localhost -U postgres -d postgres -f db/migrations/20260115_outbox.sql
+
+      - name: Run graph bijection
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+          NEO4J_URI: neo4j://localhost:7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: test
+          BIJECT_APPLY_EVENTS: 'true'
+          BIJECT_TIMEOUT_MS: '15000'
+        run: pnpm graph:test:biject
+
+      - name: Upload bijection report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: graph-bijection-report
+          path: artifacts/graph-bijection

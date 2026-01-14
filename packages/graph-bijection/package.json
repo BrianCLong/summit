@@ -1,0 +1,9 @@
+{
+  "name": "@summit/graph-bijection",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "graph-bijection": "bin/run-bijection.mjs"
+  }
+}

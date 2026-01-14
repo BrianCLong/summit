@@ -1,0 +1,16 @@
+{
+  "name": "neo4j-sink-project-members",
+  "config": {
+    "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
+    "topics": "outbox.edge.projectMember",
+    "neo4j.server.uri": "neo4j://neo4j:7687",
+    "neo4j.authentication.basic.username": "${NEO4J_USER}",
+    "neo4j.authentication.basic.password": "${NEO4J_PASS}",
+    "neo4j.topic.cypher.outbox.edge.projectMember": "WITH $event AS event\nFOREACH (_ IN CASE event.eventType WHEN 'deleted' THEN [1] ELSE [] END |\n  MATCH (u:User {biz_id: event.payload.before.user_biz_id})-[r:MEMBER_OF_PROJECT]->(p:Project {biz_id: event.payload.before.project_biz_id})\n  DELETE r\n)\nFOREACH (_ IN CASE event.eventType WHEN 'deleted' THEN [] ELSE [1] END |\n  MERGE (u:User {biz_id: event.payload.after.user_biz_id})\n  MERGE (p:Project {biz_id: event.payload.after.project_biz_id})\n  MERGE (u)-[r:MEMBER_OF_PROJECT]->(p)\n  SET r.role = event.payload.after.role, r.version = event.version, r.since = coalesce(event.payload.after.created_at, event.occurredAt)\n)",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false",
+    "errors.tolerance": "all",
+    "errors.deadletterqueue.topic.name": "dlq.neo4j"
+  }
+}
