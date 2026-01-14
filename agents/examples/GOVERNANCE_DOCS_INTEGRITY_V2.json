@@ -1,0 +1,42 @@
+{
+  "task_id": "GOVERNANCE_DOCS_INTEGRITY_V2",
+  "agent_id": "Jules",
+  "prompt_ref": {
+    "id": "governance-docs-integrity-v2",
+    "version": "v1",
+    "sha256": "565c03ec860ced2fa539baf541f09e0fa2aca9a4f294f73a52f46553a293b2d4",
+    "path": "prompts/governance/docs-integrity-v2.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "governance/",
+      "docs/ci/",
+      "scripts/ci/",
+      ".github/workflows/"
+    ],
+    "domains": ["governance", "ci", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "artifacts/governance/docs-integrity/report.json",
+      "artifacts/governance/evidence-id-consistency/report.json",
+      "artifacts/governance/docs-integrity-tests/status.txt"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Governance INDEX.yml remains the source of truth with no drift",
+    "Evidence IDs align between governance docs and evidence map",
+    "CI jobs publish artifacts with stable names"
+  ],
+  "stop_conditions": [
+    "CI failure on main",
+    "PII detection in output",
+    "Governance gate reports missing gates"
+  ]
+}

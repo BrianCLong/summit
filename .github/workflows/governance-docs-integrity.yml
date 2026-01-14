@@ -1,0 +1,108 @@
+name: Governance Docs Integrity
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs-integrity:
+    name: Governance / Docs Integrity
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify governance docs integrity
+        run: pnpm ci:docs-governance
+
+      - name: Upload docs integrity artifacts
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: governance-docs-integrity-${{ github.run_number }}
+          path: artifacts/governance/docs-integrity
+          retention-days: 14
+
+  docs-integrity-tests:
+    name: Governance / Docs Integrity (Tests)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        with:
+          node-version: "20"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run docs integrity tests
+        run: node --test scripts/ci/__tests__/governance_docs_verifier.test.mjs
+
+      - name: Capture test status
+        if: always()
+        run: |
+          mkdir -p artifacts/governance/docs-integrity-tests
+          echo "status=${{ job.status }}" > artifacts/governance/docs-integrity-tests/status.txt
+
+      - name: Upload docs integrity test artifacts
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: governance-docs-integrity-tests-${{ github.run_number }}
+          path: artifacts/governance/docs-integrity-tests
+          retention-days: 14
+
+  evidence-id-consistency:
+    name: Governance / Evidence ID Consistency
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify evidence ID consistency
+        run: pnpm ci:evidence-id-consistency
+
+      - name: Upload evidence ID consistency artifacts
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: governance-evidence-id-consistency-${{ github.run_number }}
+          path: artifacts/governance/evidence-id-consistency
+          retention-days: 14

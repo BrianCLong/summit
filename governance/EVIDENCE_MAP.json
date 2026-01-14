@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "evidence_id": "GOV-DOC-001",
+      "path": "governance/README.md",
+      "title": "Governance Overview"
+    },
+    {
+      "evidence_id": "GOV-DOC-002",
+      "path": "governance/AGENT_GOVERNANCE.md",
+      "title": "Agent Governance"
+    },
+    {
+      "evidence_id": "GOV-DOC-003",
+      "path": "governance/AUTONOMOUS_IMPROVEMENT.md",
+      "title": "Autonomous Improvement Charter"
+    },
+    {
+      "evidence_id": "GOV-DOC-004",
+      "path": "governance/GOVERNANCE_VERDICT_SYSTEM.md",
+      "title": "Governance Verdict System"
+    },
+    {
+      "evidence_id": "GOV-DOC-005",
+      "path": "governance/IGAC_SIGN_OFF_OCT2025.md",
+      "title": "IGAC Sign-Off (Oct 2025)"
+    },
+    {
+      "evidence_id": "GOV-DOC-006",
+      "path": "governance/PR_POLICY.md",
+      "title": "PR Policy"
+    },
+    {
+      "evidence_id": "GOV-DOC-007",
+      "path": "governance/SAFETY_RULES.md",
+      "title": "Safety Rules"
+    },
+    {
+      "evidence_id": "GOV-DOC-008",
+      "path": "governance/SEVERITY_LEDGER.md",
+      "title": "Severity Ledger"
+    },
+    {
+      "evidence_id": "GOV-DOC-009",
+      "path": "governance/ethics/CLEAN_HANDS_CHARTER.md",
+      "title": "Clean Hands Charter"
+    },
+    {
+      "evidence_id": "GOV-DOC-010",
+      "path": "governance/ethics/REGULATOR_INTERACTION.md",
+      "title": "Regulator Interaction"
+    },
+    {
+      "evidence_id": "GOV-DOC-011",
+      "path": "governance/ethics/escalation.md",
+      "title": "Governance Escalation"
+    },
+    {
+      "evidence_id": "GOV-DOC-012",
+      "path": "governance/playbooks/drift-scenarios.md",
+      "title": "Governance Drift Scenarios"
+    },
+    {
+      "evidence_id": "GOV-DOC-013",
+      "path": "governance/playbooks/remediation-checklist.md",
+      "title": "Governance Remediation Checklist"
+    },
+    {
+      "evidence_id": "GOV-DOC-014",
+      "path": "governance/public/governance_disclosure.md",
+      "title": "Governance Disclosure"
+    },
+    {
+      "evidence_id": "GOV-DOC-015",
+      "path": "governance/regulatory/DEFINITIONS.md",
+      "title": "Regulatory Definitions"
+    },
+    {
+      "evidence_id": "GOV-DOC-016",
+      "path": "governance/regulatory/RAF_CHARTER.md",
+      "title": "RAF Charter"
+    },
+    {
+      "evidence_id": "GOV-DOC-017",
+      "path": "governance/regulatory/STRATEGY_MEMO.md",
+      "title": "Regulatory Strategy Memo"
+    }
+  ]
+}

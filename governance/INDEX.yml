@@ -1,0 +1,164 @@
+version: 2
+scope:
+  root: governance
+  include:
+    - "**/*"
+  exclude:
+    - "**/.DS_Store"
+    - "**/*.tmp"
+
+gates:
+  - "Governance / Docs Integrity"
+  - "Governance / Docs Integrity (Tests)"
+  - "Governance / Evidence ID Consistency"
+
+entries:
+  - path: governance/AGENT_GOVERNANCE.md
+    type: doc
+    status: active
+    owner: Governance
+    evidence_id: GOV-DOC-002
+  - path: governance/AUTONOMOUS_IMPROVEMENT.md
+    type: doc
+    status: active
+    owner: Governance
+    evidence_id: GOV-DOC-003
+  - path: governance/EVIDENCE_MAP.json
+    type: meta
+    status: active
+    owner: Governance
+  - path: governance/GOV-2025-05665.json
+    type: record
+    status: active
+    owner: Governance
+  - path: governance/GOV-2025-07578.json
+    type: record
+    status: active
+    owner: Governance
+  - path: governance/GOVERNANCE_VERDICT_SYSTEM.md
+    type: doc
+    status: active
+    owner: Governance
+    evidence_id: GOV-DOC-004
+  - path: governance/IGAC_SIGN_OFF_OCT2025.md
+    type: doc
+    status: active
+    owner: Governance
+    evidence_id: GOV-DOC-005
+  - path: governance/INDEX.yml
+    type: meta
+    status: active
+    owner: Governance
+  - path: governance/PR_POLICY.md
+    type: doc
+    status: active
+    owner: Governance
+    evidence_id: GOV-DOC-006
+  - path: governance/README.md
+    type: doc
+    status: active
+    owner: Governance
+    evidence_id: GOV-DOC-001
+  - path: governance/SAFETY_RULES.md
+    type: doc
+    status: active
+    owner: Governance
+    evidence_id: GOV-DOC-007
+  - path: governance/SEVERITY_LEDGER.md
+    type: doc
+    status: active
+    owner: Governance
+    evidence_id: GOV-DOC-008
+  - path: governance/cross-repo-map.yml
+    type: data
+    status: active
+    owner: Governance
+  - path: governance/ethics/CLEAN_HANDS_CHARTER.md
+    type: doc
+    status: active
+    owner: Governance
+    evidence_id: GOV-DOC-009
+  - path: governance/ethics/REGULATOR_INTERACTION.md
+    type: doc
+    status: active
+    owner: Governance
+    evidence_id: GOV-DOC-010
+  - path: governance/ethics/escalation.md
+    type: doc
+    status: active
+    owner: Governance
+    evidence_id: GOV-DOC-011
+  - path: governance/exported-interfaces.json
+    type: data
+    status: active
+    owner: Governance
+  - path: governance/playbooks/drift-scenarios.md
+    type: doc
+    status: active
+    owner: Governance
+    evidence_id: GOV-DOC-012
+  - path: governance/playbooks/remediation-checklist.md
+    type: doc
+    status: active
+    owner: Governance
+    evidence_id: GOV-DOC-013
+  - path: governance/policies/container.rego
+    type: policy
+    status: active
+    owner: Governance
+  - path: governance/policies/deps.rego
+    type: policy
+    status: active
+    owner: Governance
+  - path: governance/policy-bundle-manifest-2025.10.HALLOWEEN.json
+    type: bundle
+    status: active
+    owner: Governance
+  - path: governance/policy-bundle-shas-2025.10.HALLOWEEN.txt
+    type: bundle
+    status: active
+    owner: Governance
+  - path: governance/public/governance_disclosure.md
+    type: doc
+    status: active
+    owner: Governance
+    evidence_id: GOV-DOC-014
+  - path: governance/regulatory/DEFINITIONS.md
+    type: doc
+    status: active
+    owner: Governance
+    evidence_id: GOV-DOC-015
+  - path: governance/regulatory/RAF_CHARTER.md
+    type: doc
+    status: active
+    owner: Governance
+    evidence_id: GOV-DOC-016
+  - path: governance/regulatory/STRATEGY_MEMO.md
+    type: doc
+    status: active
+    owner: Governance
+    evidence_id: GOV-DOC-017
+  - path: governance/sbom/allowed-signers.pub
+    type: key
+    status: active
+    owner: Governance
+  - path: governance/sbom/demo-bom.spdx.json
+    type: data
+    status: active
+    owner: Governance
+  - path: governance/severity-ledger.schema.json
+    type: schema
+    status: active
+    owner: Governance
+  - path: governance/severity-ledger.yaml
+    type: data
+    status: active
+    owner: Governance
+  - path: governance/tests/container_test.rego
+    type: test
+    status: active
+    owner: Governance
+  - path: governance/tests/deps_test.rego
+    type: test
+    status: active
+    owner: Governance

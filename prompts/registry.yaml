@@ -30,6 +30,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: governance-docs-integrity-v2
+    version: v1
+    path: prompts/governance/docs-integrity-v2.md
+    sha256: 565c03ec860ced2fa539baf541f09e0fa2aca9a4f294f73a52f46553a293b2d4
+    description: Implement governance docs integrity v2 gates and evidence ID consistency checks.
+    scope:
+      paths:
+        - governance/
+        - docs/ci/
+        - scripts/ci/
+        - .github/workflows/
+        - prompts/governance/docs-integrity-v2.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - governance
+        - ci
+        - documentation
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md
