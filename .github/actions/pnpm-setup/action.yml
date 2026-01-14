@@ -1,0 +1,36 @@
+name: pnpm-setup
+description: "Setup pnpm with smart caching"
+inputs:
+  group:
+    description: "Cache group key (e.g. server, client)"
+    required: true
+    default: "global"
+runs:
+  using: "composite"
+  steps:
+    - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      with:
+        run_install: false
+
+    - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      with:
+        node-version: '20'
+        # Disable built-in cache as we handle it manually
+        # cache: 'pnpm'
+
+    - name: Derive pnpm cache key (group-aware)
+      id: keys
+      shell: bash
+      run: |
+        echo "group=${{ inputs.group }}" >> $GITHUB_OUTPUT
+        echo "lock_hash=$(sha256sum pnpm-lock.yaml | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+        echo "store_path=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+    - name: pnpm store cache
+      uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+      with:
+        path: ${{ steps.keys.outputs.store_path }}
+        key: pnpm-${{ steps.keys.outputs.group }}-${{ steps.keys.outputs.lock_hash }}
+        restore-keys: |
+          pnpm-${{ steps.keys.outputs.group }}-
+          pnpm-
