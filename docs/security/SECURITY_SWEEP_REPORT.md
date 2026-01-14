@@ -181,7 +181,7 @@ These workflows demonstrate correct pinning and can serve as templates:
 
 ## 5. Code Scanning Alerts (CodeQL/SAST)
 
-**Status:** ⚪ PENDING
+**Status:** 🟡 IN PROGRESS
 **Tools Present:**
 
 - CodeQL (configured in `ci-security.yml` for JavaScript, Python)
@@ -189,7 +189,18 @@ These workflows demonstrate correct pinning and can serve as templates:
 - Trivy filesystem/container scanning
 - Checkov (IaC scanning)
 
-**Discovery Method:** GitHub API access not available; will trigger workflow and analyze SARIF outputs
+**Discovery Method:** Export alert set via `scripts/security/export-code-scanning-alerts.mjs` using a
+token with `security_events` scope, then triage against the generated JSON payload.
+
+**Next Steps:**
+
+1. Run:
+   ```bash
+   GITHUB_TOKEN=... node scripts/security/export-code-scanning-alerts.mjs \
+     --owner BrianCLong --repo summit --output artifacts/code-scanning-alerts.json
+   ```
+2. Review `artifacts/code-scanning-alerts.json` for open alerts and map to remediation owners.
+3. Log the remediation decisions in `docs/security/SECURITY_SWEEP_REPORT.md` with evidence links.
 
 ---
 
