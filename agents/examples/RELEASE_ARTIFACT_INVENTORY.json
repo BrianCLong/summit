@@ -1,0 +1,39 @@
+{
+  "task_id": "RELEASE_ARTIFACT_INVENTORY",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "release-artifact-inventory",
+    "version": "v1",
+    "sha256": "00be1125605bdbcb8a24082d370527c5d929452451603de9e9e175e22cbad8fd",
+    "path": "prompts/release/generate-artifact-inventory@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "scripts/release/generate_artifact_inventory.mjs",
+      "scripts/release/build-ga-bundle.sh",
+      "docs/roadmap/STATUS.json",
+      "prompts/release/generate-artifact-inventory@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/RELEASE_ARTIFACT_INVENTORY.json"
+    ],
+    "domains": ["release", "governance", "provenance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["release-artifact-inventory"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Artifact inventory generator emits deterministic inventory and SHA256SUMS outputs",
+    "GA bundle build invokes inventory generator before finalization",
+    "Roadmap status updated for traceability"
+  ],
+  "stop_conditions": [
+    "Policy or governance validation fails",
+    "Release artifact inventory generation fails"
+  ]
+}

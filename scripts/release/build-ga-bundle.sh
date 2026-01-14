@@ -489,6 +489,19 @@ cat > "${OUTPUT_DIR}/provenance.json" << EOF
 }
 EOF
 
+# Generate artifact inventory
+if [[ -f "${SCRIPT_DIR}/generate_artifact_inventory.mjs" ]]; then
+    log_info "Generating release artifact inventory..."
+    REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+    BUILD_COMMIT_SHA="${GA_SHA}" \
+    BUILD_REF="${GA_TAG}" \
+    node "${SCRIPT_DIR}/generate_artifact_inventory.mjs" \
+        --dir "${OUTPUT_DIR}" \
+        --out "${REPO_ROOT}/artifacts/release-artifacts"
+else
+    log_warn "Artifact inventory generator not found"
+fi
+
 # Append governance identity block to release notes
 if [[ -f "${SCRIPT_DIR}/emit_governance_identity_block.sh" ]]; then
     log_info "Appending governance identity to release notes..."
