@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 20.20.0
           cache: pnpm
 
       - name: Install deps
@@ -75,7 +75,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 20.20.0
 
       - name: Run canary SLO gate
         run: node companyos/scripts/check-canary-slo.mjs

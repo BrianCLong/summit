@@ -24,7 +24,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Ensure this matches project's engine requirement
+          node-version: '20.20.0' # Ensure this matches project's engine requirement
 
       - name: Set up Python
         uses: actions/setup-python@v5

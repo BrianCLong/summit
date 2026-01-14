@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@60edb5dd545a775178f9a8e13bce519e160c7479
         with:
-          node-version: '20'
+          node-version: '20.20.0'
           cache: 'npm'
           cache-dependency-path: services/authz-gateway/package.json
 

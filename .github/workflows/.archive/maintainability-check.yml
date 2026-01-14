@@ -28,7 +28,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.14.x'
+          node-version: '20.20.0'
           cache: 'pnpm'
 
       - name: Enable Corepack
@@ -105,7 +105,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.14.x'
+          node-version: '20.20.0'
 
       - name: Install analysis tools
         run: |
@@ -201,7 +201,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.14.x'
+          node-version: '20.20.0'
           cache: 'pnpm'
 
       - name: Enable Corepack

@@ -16,7 +16,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.20.0"
 
       - name: Install ajv
         run: npm install -g ajv-cli ajv-formats
@@ -67,7 +67,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.20.0"
 
       - uses: open-policy-agent/setup-opa@v2
 

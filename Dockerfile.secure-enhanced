@@ -4,7 +4,7 @@
 # ===================================================================
 
 # Build arguments for reproducible builds
-ARG NODE_VERSION=20.10.0
+ARG NODE_VERSION=20.20.0
 ARG ALPINE_VERSION=3.19
 ARG BUILD_DATE
 ARG BUILD_VERSION

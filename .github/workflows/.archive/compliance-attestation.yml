@@ -79,7 +79,7 @@ jobs:
         id: provenance
         uses: slsa-framework/slsa-github-generator/actions/nodejs/builder@v1.9.0
         with:
-          node-version: '20'
+          node-version: '20.20.0'
       
       - name: Attest Build Provenance
         id: attest

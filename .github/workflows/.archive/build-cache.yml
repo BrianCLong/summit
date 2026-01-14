@@ -59,7 +59,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.20.0'
           cache: 'pnpm'
 
       - name: Get pnpm store directory
@@ -105,7 +105,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.20.0'
           cache: 'pnpm'
 
       - name: Restore node_modules
@@ -154,7 +154,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.20.0'
           cache: 'pnpm'
 
       - name: Restore node_modules
@@ -247,7 +247,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.20.0'
           cache: 'pnpm'
 
       - name: Restore node_modules
@@ -289,7 +289,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.20.0'
           cache: 'pnpm'
 
       - name: Restore node_modules
@@ -328,7 +328,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.20.0'
           cache: 'pnpm'
 
       - name: Restore node_modules
