@@ -1,4 +1,5 @@
 import logger from '../utils/logger.js';
+import { getPostgresPool, ManagedPostgresPool } from '../db/postgres.js';
 
 /**
  * @interface QueryResult
@@ -8,49 +9,48 @@ import logger from '../utils/logger.js';
  */
 export interface QueryResult<T = any> {
   rows: T[];
+  rowCount?: number;
 }
 
 /**
  * @class DatabaseService
- * @description Provides a stubbed implementation of a database service.
- * This class is intended to be a placeholder and does not connect to a real database.
- * Its methods are designed to be extended or replaced by a full implementation.
- *
- * @example
- * ```typescript
- * const dbService = new DatabaseService();
- *
- * async function getUsers() {
- *   // Note: This is a stub and will return an empty array.
- *   const result = await dbService.query('SELECT * FROM users');
- *   console.log(result.rows);
- * }
- * ```
+ * @description Wrapper around ManagedPostgresPool to provide a consistent interface for services.
  */
 export class DatabaseService {
+  private pool: ManagedPostgresPool;
+
+  constructor() {
+    this.pool = getPostgresPool();
+  }
+
   /**
    * @method query
-   * @description Executes a SQL query. This is a stub method that logs the query if debugging is enabled
-   * and returns an empty result set.
+   * @description Executes a SQL query.
    * @template T - The expected type of the result rows.
    * @param {string} sql - The SQL query string to execute.
    * @param {unknown[]} [params=[]] - An array of parameters to be used with the query.
-   * @returns {Promise<QueryResult<T>>} A promise that resolves to a QueryResult with an empty `rows` array.
+   * @returns {Promise<QueryResult<T>>}
    */
   async query<T = any>(
     sql: string,
     params: unknown[] = [],
   ): Promise<QueryResult<T>> {
-    if (process.env.DEBUG_DB_QUERIES) {
-      logger.debug('DatabaseService query (stub)', { sql, params });
+    try {
+      const result = await this.pool.query<T>(sql, params);
+      return {
+        rows: result.rows,
+        rowCount: result.rowCount || 0
+      };
+    } catch (error) {
+      logger.error('Database query failed', { sql, error });
+      throw error;
     }
-    return { rows: [] as T[] };
   }
 
   /**
    * @method getConnectionConfig
-   * @description Returns the configuration for the database connection. This is a stub method.
-   * @returns {Record<string, any>} An empty object.
+   * @description Returns the configuration for the database connection.
+   * @returns {Record<string, any>}
    */
   getConnectionConfig(): Record<string, any> {
     return {};

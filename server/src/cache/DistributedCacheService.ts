@@ -9,8 +9,8 @@
  * @module cache/DistributedCacheService
  */
 
+import crypto from 'node:crypto';
 import { Redis } from 'ioredis';
-import { v4 as uuidv4 } from 'uuid';
 import { LRUCache } from 'lru-cache';
 import {
   DataEnvelope,
@@ -67,7 +67,7 @@ export type CacheStrategy = 'cache-aside' | 'write-through' | 'write-behind';
 
 function createVerdict(result: GovernanceResult, reason?: string): GovernanceVerdict {
   return {
-    verdictId: `verdict-${uuidv4()}`,
+    verdictId: `verdict-${crypto.randomUUID()}`,
     policyId: 'cache-policy',
     result,
     decidedAt: new Date(),
