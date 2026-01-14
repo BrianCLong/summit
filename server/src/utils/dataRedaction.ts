@@ -19,6 +19,17 @@ const PII_DEFINITIONS = {
   // Add more as needed
 };
 
+// Optimization: Build reverse lookup map once to avoid O(N*M) lookup
+const PII_PATH_MAP: Record<string, Array<keyof typeof PII_DEFINITIONS>> = {};
+for (const [type, paths] of Object.entries(PII_DEFINITIONS)) {
+  for (const path of paths) {
+    if (!PII_PATH_MAP[path]) {
+      PII_PATH_MAP[path] = [];
+    }
+    PII_PATH_MAP[path].push(type as keyof typeof PII_DEFINITIONS);
+  }
+}
+
 // Define redaction strategies
 enum RedactionStrategy {
   REDACT = '[REDACTED]',
@@ -71,23 +82,23 @@ export function redactData(data: any, user: User, sensitivity?: string): any {
   let piiRedactedCount = 0;
   const piiFieldsRedacted: string[] = [];
 
-  const applyRedaction = (obj: any, path: string[]) => {
+  const applyRedaction = (obj: any, currentPath: string) => {
     if (typeof obj !== 'object' || obj === null) return;
 
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        const currentPath = [...path, key];
-        const fullPath = currentPath.join('.');
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        // Optimized path construction using string template instead of array ops
+        const fullPath = currentPath ? `${currentPath}.${key}` : key;
 
-        for (const piiType in PII_DEFINITIONS) {
-          const piiPaths =
-            PII_DEFINITIONS[piiType as keyof typeof PII_DEFINITIONS];
-          if (piiPaths.includes(fullPath)) {
+        // O(1) lookup instead of O(M)
+        const piiTypes = PII_PATH_MAP[fullPath];
+        if (piiTypes) {
+          for (const piiType of piiTypes) {
             const strategy = policy[piiType as keyof typeof policy];
             if (strategy) {
               obj[key] = applyStrategy(
                 obj[key],
-                piiType as keyof typeof PII_DEFINITIONS,
+                piiType,
                 strategy,
               );
               piiRedactedCount++;
@@ -101,13 +112,13 @@ export function redactData(data: any, user: User, sensitivity?: string): any {
 
         // Recursively apply redaction to nested objects/arrays
         if (typeof obj[key] === 'object') {
-          applyRedaction(obj[key], currentPath);
+          applyRedaction(obj[key], fullPath);
         }
       }
     }
   };
 
-  applyRedaction(redactedData, []);
+  applyRedaction(redactedData, '');
 
   logger.info(
     `Data redaction complete for user ${user.id} (role: ${userRole}). Redacted ${piiRedactedCount} PII fields.`,
