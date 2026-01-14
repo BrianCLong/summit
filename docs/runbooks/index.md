@@ -29,6 +29,7 @@ Quick reference for operational procedures and incident response.
 ### Intelligence Operations
 
 - [CTI Rapid Attribution](./cti-rapid-attribution.yaml)
+- [Federated Campaign Radar](./federated-campaign-radar.md)
 - [Fraud Ring Detection](./fraud-ring-detection.yaml)
 - [Insider Risk Assessment](./insider-risk-assessment.yaml)
 - [Supply Chain Exposure](./supply-chain-exposure.yaml)
