@@ -1,0 +1,33 @@
+{
+  "task_id": "GA_BUNDLE_RELEASE_ARTIFACTS_20260110",
+  "agent_id": "codex",
+  "prompt_hash": "c542d5f3544b9654aedf74f72d6bca7e6711a62452af6d61f7fa9cbd25dc2a77",
+  "prompt_id": "ga-bundle-release-artifacts",
+  "declared_scope": {
+    "paths": [
+      "scripts/release/",
+      "docs/roadmap/STATUS.json",
+      "prompts/release/ga-bundle-release-artifacts@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/GA_BUNDLE_RELEASE_ARTIFACTS_20260110.json",
+      "artifacts/agent-runs/GA_BUNDLE_RELEASE_ARTIFACTS_20260110.json",
+      "artifacts/agent-metrics.json"
+    ],
+    "domains": ["release", "provenance", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_tiers": ["C"],
+  "debt_delta": 0,
+  "evidence": {
+    "boundary_check": "scripts/check-boundaries.cjs",
+    "artifacts": [
+      "scripts/release/build-ga-bundle.sh",
+      "scripts/release/build-bundle-index.mjs",
+      "scripts/release/generate_provenance_manifest.sh",
+      "scripts/release/release-bundle.mjs"
+    ]
+  },
+  "policies_enforced": ["scope", "prompt-immutability"],
+  "status": "ready-for-merge",
+  "recorded_at": "2026-01-14T04:34:34Z"
+}
