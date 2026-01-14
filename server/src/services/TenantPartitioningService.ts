@@ -12,6 +12,8 @@ import logger from '../utils/logger';
 import { tracer, Span } from '../utils/tracing';
 import { DatabaseService } from './DatabaseService';
 import { TenantCostService } from './TenantCostService';
+import { BackupService } from './BackupService';
+import { spawn } from 'child_process';
 
 // Partitioning configuration
 interface PartitioningConfig {
@@ -1045,17 +1047,47 @@ export class TenantPartitioningService extends EventEmitter {
   }
 
   private async executeStep(step: MigrationStep): Promise<void> {
-    // In a real implementation, this would execute the actual command
-    // For now, simulate execution time
-    await new Promise((resolve) =>
-      setTimeout(resolve, Math.min(step.estimatedDuration * 10, 5000)),
-    );
+    logger.info(`Executing step: ${step.name}`, { command: step.command });
+
+    if (step.name === 'backup_data') {
+       // Using BackupService logic but scoped to tenant
+       // Note: BackupService does full backups currently. We might need a tenant-specific backup or rely on pg_dump directly.
+       const match = step.command.match(/--tenant\s+(\S+)/);
+       if (match) {
+         const tenantId = match[1];
+         await this.runCommand('pg_dump', ['-n', `tenant_${tenantId}`, '-f', `/tmp/backup_${tenantId}.sql`]); // Assuming schema per tenant convention
+       }
+    } else if (step.name === 'migrate_data' || step.name === 'restore_data') {
+       // Logic to move data
+       const match = step.command.match(/--tenant\s+(\S+)/);
+       if (match) {
+           // const tenantId = match[1];
+           // In a real scenario, this would involve piping pg_dump to psql on the new host
+           // For now, we simulate the success of the data movement command
+           await new Promise(resolve => setTimeout(resolve, 1000));
+       }
+    } else {
+        // Generic command execution if it were a shell command
+        // await this.runCommand(step.command.split(' ')[0], step.command.split(' ').slice(1));
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
   }
 
   private async validateStep(step: MigrationStep): Promise<void> {
-    // In a real implementation, this would run the validation command
-    // For now, simulate validation
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    logger.info(`Validating step: ${step.name}`);
+    // Simulate validation success
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+
+  private async runCommand(command: string, args: string[]): Promise<void> {
+      return new Promise((resolve, reject) => {
+          const child = spawn(command, args, { env: process.env });
+          child.on('close', (code) => {
+              if (code === 0) resolve();
+              else reject(new Error(`${command} failed with code ${code}`));
+          });
+          child.on('error', reject);
+      });
   }
 
   private async rollbackMigration(
