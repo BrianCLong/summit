@@ -1,0 +1,29 @@
+schema_version: "1"
+scope:
+  default_shell: "bash"
+hermetic_steps:
+  - id: "unit_tests_server"
+    description: "Server unit tests must not access network or listen on ports"
+    command: "pnpm -C server test:unit"
+    env:
+      NO_NETWORK: "true"
+      NO_NETWORK_LISTEN: "true"
+      ZERO_FOOTPRINT: "true"
+    allow:
+      outbound_hosts: []
+      outbound_ports: []
+      listen_ports: []
+  - id: "lint"
+    description: "Lint must not access network or listen on ports"
+    command: "pnpm lint"
+    allow:
+      outbound_hosts:
+        - "registry.npmjs.org"
+      outbound_ports: []
+      listen_ports: []
+diagnostics:
+  capture_process_tree: true
+  capture_open_sockets: true
+  max_log_bytes: 200000
+output:
+  out_dir: "artifacts/governance/hermetic-ci/${sha}"
