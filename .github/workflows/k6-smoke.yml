@@ -1,0 +1,53 @@
+name: k6 SLO Smoke Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  smoke-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start ephemeral environment
+        run: docker-compose -f docker-compose.test.yml up -d
+
+      - name: Wait for services
+        run: |
+          timeout 60 bash -c 'until curl -f http://localhost:4000/health; do sleep 2; done'
+
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Run k6 smoke tests
+        run: |
+          k6 run --out json=summary.json --summary-export=summary.json tests/k6/smoke.js
+
+      - name: Convert to JUnit
+        if: always()
+        run: |
+          npm install -g k6-junit
+          k6-junit summary.json > k6-results.xml
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-smoke-results
+          path: |
+            summary.json
+            k6-results.xml
+          retention-days: 90
+
+      - name: Cleanup
+        if: always()
+        run: docker-compose -f docker-compose.test.yml down
