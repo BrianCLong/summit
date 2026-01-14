@@ -1,6 +1,6 @@
 {
   "name": "intelgraph-platform",
-  "version": "4.1.4",
+  "version": "4.1.1",
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "type": "module",
@@ -87,7 +87,6 @@
     "db:neo4j:migrate": "node scripts/neo4j-migrate.js",
     "changeset": "changeset",
     "release": "changeset version && changeset publish",
-    "release:cut": "node scripts/release/release.mjs",
     "release:cut-branch": "node scripts/release/cut-release-branch.mjs",
     "release:bundle": "node scripts/release/release-bundle.mjs",
     "release:schema:validate": "node scripts/release/validate-bundle-schemas.mjs --dir dist/release --strict",
@@ -106,7 +105,6 @@
     "ci:evidence-id-consistency": "node scripts/ci/verify_evidence_id_consistency.mjs",
     "verify:living-documents": "node scripts/governance/verify-living-documents.cjs",
     "check:debt": "node scripts/ci/check_debt_regression.cjs",
-    "check:jest-config": "node scripts/ci/validate-jest-config.cjs",
     "partners:check": "node scripts/ci/check_partner_model.js",
     "ops:command-center": "npx tsx scripts/ops/command-center.ts --mode=live",
     "ops:command-center:offline": "npx tsx scripts/ops/command-center.ts --mode=offline --snapshotsDir=scripts/ops/snapshots",
@@ -116,9 +114,9 @@
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
-    "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
+    "ga:verify": "pnpm typecheck && pnpm lint && pnpm build && pnpm --filter intelgraph-server test:unit && pnpm ga:smoke",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
-    "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
+    "ga:smoke": "node scripts/smoke-test.cjs",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
     "prepare": "husky"
   },
@@ -301,9 +299,7 @@
       "@modelcontextprotocol/sdk": ">=1.1.0",
       "@remix-run/router": ">=1.21.0",
       "react-router": ">=6.28.0",
-      "preact": ">=10.25.4",
-      "@types/react": "18.3.11",
-      "@types/react-dom": "18.3.0"
+      "preact": ">=10.25.4"
     }
   }
 }
