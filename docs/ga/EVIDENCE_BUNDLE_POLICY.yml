@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "sbom": {
+    "formats": ["cyclonedx-json"],
+    "workspaces": {
+      "include": ["client", "server", "packages/*"],
+      "include_private": true
+    },
+    "outputs": {
+      "monorepo": "sbom/monorepo.cdx.json",
+      "workspace_dir": "sbom/workspaces"
+    }
+  },
+  "provenance": {
+    "artifact_globs": [
+      "client/dist/**",
+      "server/dist/**",
+      "packages/**/dist/**",
+      "build/**",
+      "dist/**"
+    ]
+  },
+  "bundle": {
+    "required_dirs": ["sbom", "provenance"],
+    "required_files": [
+      "sbom/monorepo.cdx.json",
+      "provenance/ci.json",
+      "provenance/hashes.json",
+      "provenance/slsa-provenance.json",
+      "manifest.json",
+      "receipt.json"
+    ],
+    "required_globs": ["sbom/workspaces/*.cdx.json"],
+    "manifest_exclude": ["provenance/ci.json", "receipt.json"]
+  },
+  "verification": {
+    "required_provenance_fields": {
+      "ci": [
+        "schema_version",
+        "git.sha",
+        "git.ref",
+        "tooling.node",
+        "tooling.pnpm"
+      ],
+      "hashes": ["schema_version", "algorithm", "files"],
+      "slsa": [
+        "_type",
+        "predicateType",
+        "predicate.buildType",
+        "predicate.builder.id",
+        "predicate.invocation.configSource.uri"
+      ]
+    },
+    "secret_patterns": [
+      "ghp_[A-Za-z0-9]{36,}",
+      "github_pat_[A-Za-z0-9_]+",
+      "AKIA[0-9A-Z]{16}",
+      "ASIA[0-9A-Z]{16}",
+      "AIza[0-9A-Za-z-_]{35}",
+      "xox[baprs]-[0-9A-Za-z-]{10,}",
+      "-----BEGIN( [A-Z]+)? PRIVATE KEY-----"
+    ]
+  }
+}
