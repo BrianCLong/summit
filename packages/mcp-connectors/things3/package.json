@@ -1,0 +1,26 @@
+{
+  "name": "@intelgraph/mcp-connectors-things3",
+  "version": "4.1.4",
+  "description": "Summit MCP Things3 TaskStore connector with policy gating and evidence logging",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "lint": "eslint . --ext .ts",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "eslint": "^9.36.0",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.9.2",
+    "vitest": "^2.1.4"
+  }
+}

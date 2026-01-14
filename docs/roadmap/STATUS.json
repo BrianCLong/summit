@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-14T04:36:35Z",
+  "revision_note": "Added MCP Things3 TaskStore connector with policy gating, evidence logging, and idempotent task creation.",
   "initiatives": [
     {
       "id": "A",
@@ -38,7 +38,7 @@
           "name": "Connector SDK & Registry",
           "status": "partial",
           "owner": "Jules",
-          "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
+          "evidence": "Connector SDK still partial; added MCP Things3 TaskStore connector in packages/mcp-connectors/things3 with policy gating and evidence logs.",
           "blockers": ["Need connector registry", "Missing connector lifecycle management"],
           "target_completion": "Sprint N+2"
         },

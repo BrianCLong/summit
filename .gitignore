@@ -86,10 +86,6 @@ logs/
 # Temporary files
 tmp/
 temp/
-tmp-test/
-
-# Test-generated typo directory (tests write to server/server/ by accident)
-server/server/
 
 # Python artifacts
 __pycache__/
@@ -281,6 +277,10 @@ pr-dashboard.html
 pr-backlog-stats.json
 tests/e2e/auth-state.json
 artifacts/
+!artifacts/evidence/
+!artifacts/evidence/evidence-things3-taskstore-sample/
+!artifacts/evidence/evidence-things3-taskstore-sample/things3/
+!artifacts/evidence/evidence-things3-taskstore-sample/things3/sample.json
 /dist
 .env
 sbom.json

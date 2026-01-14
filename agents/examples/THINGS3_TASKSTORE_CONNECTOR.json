@@ -1,0 +1,47 @@
+{
+  "task_id": "THINGS3_TASKSTORE_CONNECTOR",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "things3-taskstore-connector",
+    "version": "v1",
+    "sha256": "91b7f0ed83df15eed85dcd801986c53aaf97f4b1ad41077ada8833b816d1fef2",
+    "path": "prompts/integrations/things3-taskstore-connector.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/mcp-connectors/things3/**",
+      "docs/integrations/things3-taskstore.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/integrations/things3-taskstore-connector.md",
+      "prompts/registry.yaml",
+      "agents/examples/THINGS3_TASKSTORE_CONNECTOR.json",
+      "artifacts/evidence/**",
+      "pnpm-workspace.yaml",
+      "eslint.config.js",
+      ".gitignore"
+    ],
+    "domains": ["connectors", "mcp", "governance", "evidence"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "packages/mcp-connectors/things3/test/things3-taskstore.test.ts",
+      "artifacts/evidence/evidence-things3-taskstore-sample/things3/sample.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Things3 TaskStore connector binds MCP tools dynamically and exposes search/create/update.",
+    "Policy gating blocks writes unless explicitly enabled and logs evidence.",
+    "Idempotent create returns existing tasks when marker is present.",
+    "Documentation describes configuration and safety model."
+  ],
+  "stop_conditions": [
+    "Policy gate violation or evidence log failure.",
+    "Connector tool discovery fails without remediation guidance."
+  ]
+}

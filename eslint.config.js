@@ -91,7 +91,6 @@ const IGNORE = [
   // Core frontend directories with own eslint configs
   'apps/**',
   'client/**',
-  'packages/**',
   'services/**',
   'server/**',
   'streaming/**',
