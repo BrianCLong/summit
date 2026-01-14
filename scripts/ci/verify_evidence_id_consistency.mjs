@@ -11,6 +11,9 @@ import { dirname, join, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
 
+// Define MAX_CONCURRENT_FILES constant if not already defined
+const MAX_CONCURRENT_FILES = 10;
+
 // Debug logging utility
 const DEBUG = process.env.EVIDENCE_DEBUG === 'true' || process.argv.includes('--debug');
 function debugLog(message) {
