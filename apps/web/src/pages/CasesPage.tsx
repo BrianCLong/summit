@@ -256,6 +256,54 @@ export default function CasesPage() {
           title="No cases found"
           description="Try adjusting your search or filters, or create a new case to get started."
           icon="folder"
+          action={{
+            label: 'Create New Case',
+            onClick: () => navigate('/cases/new'),
+          }}
+          quickActions={
+            cases.length === 0
+              ? [
+                  {
+                    label: 'View Alerts',
+                    onClick: () => navigate('/alerts'),
+                    id: 'view-alerts',
+                  },
+                  {
+                    label: 'Start Investigation',
+                    onClick: () => navigate('/explore'),
+                    id: 'investigate',
+                  },
+                  {
+                    label: 'Clear Filters',
+                    onClick: () => {
+                      setSearchQuery('')
+                      setFilterStatus('all')
+                      setFilterPriority('all')
+                    },
+                    id: 'clear-filters',
+                  },
+                ]
+              : [
+                  {
+                    label: 'Clear Filters',
+                    onClick: () => {
+                      setSearchQuery('')
+                      setFilterStatus('all')
+                      setFilterPriority('all')
+                    },
+                    id: 'clear-filters',
+                  },
+                  {
+                    label: 'View All Cases',
+                    onClick: () => {
+                      setSearchQuery('')
+                      setFilterStatus('all')
+                      setFilterPriority('all')
+                    },
+                    id: 'view-all',
+                  },
+                ]
+          }
         />
       ) : (
         <div className="grid gap-4">
