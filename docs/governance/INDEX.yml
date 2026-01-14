@@ -1,0 +1,30 @@
+# Governance Index
+# Source of Truth for Governance Documents
+
+documents:
+  - id: GOV-001
+    title: Constitution
+    path: docs/governance/CONSTITUTION.md
+    status: active
+
+  - id: GOV-002
+    title: Meta Governance
+    path: docs/governance/META_GOVERNANCE.md
+    status: active
+
+  - id: GOV-003
+    title: Ops Evidence Retention Policy
+    path: docs/governance/OPS_EVIDENCE_RETENTION_POLICY.md
+    status: active
+    related_gates:
+      - evidence-id-consistency
+
+  - id: GOV-004
+    title: Runtime Enforcement
+    path: docs/governance/RUNTIME_ENFORCEMENT.md
+    status: active
+
+  - id: GOV-005
+    title: Evidence Schema
+    path: docs/governance/evidence_schema.json
+    status: active

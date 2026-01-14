@@ -46,6 +46,7 @@ All Evidence Packs must follow a canonical naming convention to ensure discovera
 *   **Naming Convention**: `ops-evidence-{LABEL}-{TIMESTAMP}.tar.gz`
     *   Example: `ops-evidence-2024-W40-1727654400.tar.gz`
     *   Example: `release-evidence-v2.1.0-1727654400.tar.gz`
+    *   **Validation**: Must conform to [Evidence Schema](evidence_schema.json).
 
 *   **Required Metadata**: Every pack must contain a `manifest.json` file at the root, including:
     *   `sha256`: Checksum of the pack contents.
