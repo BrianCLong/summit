@@ -30,6 +30,8 @@ import {
   // LLM Metrics
   llmTokensTotal,
   llmRequestDuration,
+  llmCostTotal,
+  observabilityStatus,
   // New Metrics from metrics.js
   intelgraphCacheHits,
   intelgraphCacheMisses,
@@ -78,6 +80,8 @@ export {
   maestroJobExecutionDurationSeconds,
   llmTokensTotal,
   llmRequestDuration,
+  llmCostTotal,
+  observabilityStatus,
   intelgraphCacheHits,
   intelgraphCacheMisses,
   intelgraphActiveConnections,
@@ -123,6 +127,8 @@ export const metrics = {
   maestroJobExecutionDurationSeconds,
   llmTokensTotal,
   llmRequestDuration,
+  llmCostTotal,
+  observabilityStatus,
   intelgraphCacheHits,
   intelgraphCacheMisses,
   intelgraphActiveConnections,

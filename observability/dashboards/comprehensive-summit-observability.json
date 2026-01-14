@@ -1,0 +1,211 @@
+{
+  "dashboard": {
+    "title": "Summit - Comprehensive Observability",
+    "tags": ["summit", "observability", "metrics", "overview"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Health Overview",
+        "type": "row",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+        "collapsed": false,
+        "panels": []
+      },
+      {
+        "id": 2,
+        "title": "HTTP Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total[1m])) by (method, route)",
+            "legendFormat": "{{method}} {{route}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 1 }
+      },
+      {
+        "id": 3,
+        "title": "HTTP Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{status_code=~\"5..\"}[1m])) / sum(rate(http_requests_total[1m]))",
+            "legendFormat": "Error Rate",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 1 }
+      },
+      {
+        "id": 4,
+        "title": "HTTP Latency (P95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, route))",
+            "legendFormat": "{{route}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 1 }
+      },
+      {
+        "id": 5,
+        "title": "Application Metrics",
+        "type": "row",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 },
+        "panels": []
+      },
+      {
+        "id": 6,
+        "title": "GraphQL Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(graphql_requests_total[1m])) by (operation)",
+            "legendFormat": "{{operation}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 10 }
+      },
+      {
+        "id": 7,
+        "title": "GraphQL Errors",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(graphql_errors_total[1m])) by (operation, error_type)",
+            "legendFormat": "{{operation}} - {{error_type}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 10 }
+      },
+      {
+        "id": 8,
+        "title": "Active WebSocket Connections",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "websocket_connections_active",
+            "legendFormat": "Connections",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 10 }
+      },
+      {
+        "id": 9,
+        "title": "Database Performance",
+        "type": "row",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 },
+        "panels": []
+      },
+      {
+        "id": 10,
+        "title": "Active DB Connections",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "db_connections_active",
+            "legendFormat": "{{database}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 19 }
+      },
+      {
+        "id": 11,
+        "title": "DB Query Duration (P95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(db_query_duration_seconds_bucket[5m])) by (le, database, operation))",
+            "legendFormat": "{{database}} - {{operation}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 19 }
+      },
+      {
+        "id": 12,
+        "title": "AI & Maestro",
+        "type": "row",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 27 },
+        "panels": []
+      },
+      {
+        "id": 13,
+        "title": "AI Jobs Processing",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(ai_jobs_processing)",
+            "legendFormat": "Jobs",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 6, "w": 6, "x": 0, "y": 28 }
+      },
+      {
+        "id": 14,
+        "title": "LLM Request Duration (P95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(llm_request_duration_seconds_bucket[5m])) by (le, provider, model))",
+            "legendFormat": "{{provider}} - {{model}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 6, "w": 12, "x": 6, "y": 28 }
+      },
+      {
+        "id": 15,
+        "title": "Total LLM Cost (USD)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(llm_cost_total_usd)",
+            "legendFormat": "USD",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 6, "w": 6, "x": 18, "y": 28 }
+      },
+      {
+        "id": 16,
+        "title": "Maestro Job Failures",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(maestro_job_execution_duration_seconds_count{status=\"failed\"}[5m])",
+            "legendFormat": "{{job_type}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 34 }
+      },
+      {
+        "id": 17,
+        "title": "Maestro DAG Duration",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(maestro_dag_execution_duration_seconds_bucket[5m])) by (le, dag_id))",
+            "legendFormat": "{{dag_id}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 34 }
+      }
+    ],
+    "refresh": "10s",
+    "schemaVersion": 38,
+    "style": "dark",
+    "time": { "from": "now-6h", "to": "now" }
+  }
+}
