@@ -1,0 +1,58 @@
+schema_version: 1
+sections:
+  - id: governance-index
+    title: Governance Index
+    items:
+      - id: governance-docs-index
+        title: Governance Docs Index
+        status: active
+        doc: docs/governance/INDEX.md
+        commands:
+          - ci:docs-governance
+        jobs:
+          - Governance / Docs Integrity
+        evidence:
+          - artifacts/governance/docs-integrity/{sha}/report.json
+          - artifacts/governance/docs-integrity/{sha}/index.rendered.md
+  - id: core-governance
+    title: Core Governance
+    items:
+      - id: constitution
+        title: Constitution of the Ecosystem
+        status: planned
+        doc: docs/governance/CONSTITUTION.md
+      - id: meta-governance
+        title: Meta Governance Framework
+        status: planned
+        doc: docs/governance/META_GOVERNANCE.md
+      - id: agent-mandates
+        title: Agent Mandates
+        status: planned
+        doc: docs/governance/AGENT_MANDATES.md
+      - id: rulebook
+        title: Living Rulebook
+        status: planned
+        doc: docs/governance/RULEBOOK.md
+      - id: green-ci-contract
+        title: Green CI Contract
+        status: planned
+        doc: docs/governance/GREEN_CI_CONTRACT.md
+  - id: operational-governance
+    title: Operational Governance
+    items:
+      - id: documentation-charter
+        title: Documentation Charter
+        status: planned
+        doc: docs/governance/documentation-charter.md
+      - id: change-classes
+        title: Change Classes
+        status: planned
+        doc: docs/governance/change-classes.md
+      - id: controlled-deviations
+        title: Controlled Deviations
+        status: planned
+        doc: docs/governance/CONTROLLED_DEVIATIONS.md
+      - id: exception-register
+        title: Exception Register
+        status: planned
+        doc: docs/governance/EXCEPTION_REGISTER.md

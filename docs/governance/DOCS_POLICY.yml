@@ -1,0 +1,5 @@
+schema_version: 1
+index_yml: docs/governance/INDEX.yml
+enforce_index_drift: true
+enforce_active_gate_existence: true
+allow_best_effort_workflow_parse: true
