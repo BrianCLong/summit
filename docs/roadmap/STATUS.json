@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-13T22:02:28Z",
+  "revision_note": "Reconciled A1–C2 merge evidence to local history commit IDs; PR numbers deferred pending default-branch verification",
   "initiatives": [
     {
       "id": "A",
@@ -11,21 +11,21 @@
           "name": "Local Vector Store",
           "status": "rc-ready",
           "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/lib/data-platform/ingest/service.ts (embedding ingestion + PGVector formatting), server/src/lib/data-platform/retrieval/service.ts (vector retrieval), server/src/memory/repositories/pageRepository.ts (pgvector storage)"
+          "evidence": "Merge evidence: 82fb49c4 (local history) includes server/src/lib/data-platform/ingest/service.ts (embedding ingestion + PGVector formatting), server/src/lib/data-platform/retrieval/service.ts (vector retrieval), server/src/memory/repositories/pageRepository.ts (pgvector storage)"
         },
         {
           "id": "A2",
           "name": "RAG Ingestion Pipeline",
           "status": "rc-ready",
           "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/lib/data-platform/rag/service.ts (RAG orchestration), server/src/lib/data-platform/ingest/service.ts (embedding ingest), server/src/maestro/graphrag-service.ts (GraphRAG assistant pipeline)"
+          "evidence": "Merge evidence: 82fb49c4 (local history) includes server/src/lib/data-platform/rag/service.ts (RAG orchestration) and server/src/services/GraphRAGService.ts (GraphRAG pipeline + caching)"
         },
         {
           "id": "A3",
           "name": "Copilot Query Service",
           "status": "rc-ready",
           "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/services/CopilotIntegrationService.ts and server/src/services/CopilotNLQueryService.ts"
+          "evidence": "Merge evidence: 82fb49c4 (local history) includes server/src/services/CopilotIntegrationService.ts and server/src/services/CopilotNLQueryService.ts"
         }
       ]
     },
@@ -71,7 +71,7 @@
           "name": "Policy-as-Code Engine",
           "status": "rc-ready",
           "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/data-governance/policy/PolicyEngine.ts and server/src/middleware/opa.ts (OPA integration)",
+          "evidence": "Merge evidence: 82fb49c4 (local history) includes server/src/data-governance/policy/PolicyEngine.ts and server/src/middleware/opa.ts (OPA integration)",
           "notes": "Policy re-evaluation at execute time added 2025-12-30"
         },
         {
@@ -79,7 +79,7 @@
           "name": "Immutable Audit Log",
           "status": "rc-ready",
           "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/security/zero-trust/ImmutableAuditService.ts (immutable audit ledger), server/src/federal/worm-audit-chain.ts (WORM segments), server/src/provenance/ledger.ts (hash-chained provenance)"
+          "evidence": "Merge evidence: 82fb49c4 (local history) includes server/src/security/zero-trust/ImmutableAuditService.ts (immutable audit ledger) and server/src/federal/worm-audit-chain.ts (WORM segments); 5121a9e9 includes server/src/provenance/ledger.ts (hash-chained provenance)"
         },
         {
           "id": "C3",
