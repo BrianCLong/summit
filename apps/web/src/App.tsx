@@ -8,6 +8,13 @@ import {
 import { ApolloProvider } from '@apollo/client/react'
 import { TooltipProvider } from '@/components/ui/Tooltip'
 import { Layout } from '@/components/Layout'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/Dialog'
+import { Input } from '@/components/ui/input'
 
 // Apollo Client and Socket Context
 import { apolloClient } from '@/lib/apollo'
@@ -106,17 +113,38 @@ function App() {
                       </div>
                     }
                   >
-                    {/* Explain overlay stub */}
-                    {showPalette && (
-                       <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={()=>setShowPalette(false)}>
-                         <div className="bg-white p-4 rounded shadow-lg w-96" onClick={e=>e.stopPropagation()}>
-                           <input type="text" placeholder="Command..." className="w-full border p-2 mb-2" autoFocus />
-                           <button onClick={()=>{ setShowPalette(false); setShowExplain(true); }} className="block w-full text-left p-2 hover:bg-gray-100">
-                             Explain this view
-                           </button>
-                         </div>
-                       </div>
-                    )}
+                    {/* Command Palette with proper accessibility */}
+                    <Dialog open={showPalette} onOpenChange={setShowPalette}>
+                      <DialogContent className="sm:max-w-[500px]">
+                        <DialogHeader>
+                          <DialogTitle>Command Palette</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <Input
+                            type="text"
+                            placeholder="Type a command..."
+                            className="w-full"
+                            autoFocus
+                            aria-label="Command search input"
+                          />
+                          <div className="space-y-1" role="menu" aria-label="Available commands">
+                            <button
+                              onClick={() => {
+                                setShowPalette(false)
+                                setShowExplain(true)
+                              }}
+                              className="block w-full text-left p-3 rounded hover:bg-accent transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+                              role="menuitem"
+                            >
+                              <div className="font-medium">Explain this view</div>
+                              <div className="text-sm text-muted-foreground">
+                                Get contextual explanation
+                              </div>
+                            </button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                     {showExplain && <Explain facts={["Linked via shared IP (1.2.3.4)", "Match score: 0.98"]} />}
 
                     <Routes>

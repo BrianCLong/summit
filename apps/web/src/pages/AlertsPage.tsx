@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Download, RefreshCw } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Table } from '@/components/ui/Table'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { RetryableErrorState } from '@/components/ui/RetryableErrorState'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { KPIStrip } from '@/components/panels/KPIStrip'
 import { ConnectionStatus } from '@/components/ConnectionStatus'
@@ -18,8 +19,11 @@ import {
 } from '@/hooks/useGraphQL'
 import mockData from '@/mock/data.json'
 import type { Alert, KPIMetric, AlertStatus } from '@/types'
+import { useNavigate } from 'react-router-dom'
 
 export default function AlertsPage() {
+  const navigate = useNavigate()
+
   // GraphQL hooks
   const {
     data: alertsData,
@@ -155,15 +159,21 @@ export default function AlertsPage() {
     }
   }
 
-  const handleRefresh = async () => {
-    if (alertsData) {
-      await refetch()
-    } else {
-      setLoading(true)
-      await new Promise(resolve => setTimeout(resolve, 800))
-      setLoading(false)
+  const handleRefresh = useCallback(async () => {
+    try {
+      setError(null)
+      if (alertsData) {
+        await refetch()
+      } else {
+        setLoading(true)
+        await new Promise(resolve => setTimeout(resolve, 800))
+        setLoading(false)
+      }
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to refresh alerts')
+      setError(error)
     }
-  }
+  }, [alertsData, refetch])
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -195,12 +205,17 @@ export default function AlertsPage() {
 
   if (error) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <EmptyState
-          icon="alert"
-          title="Failed to load alerts"
-          description={error.message}
-          action={{ label: 'Retry', onClick: () => window.location.reload() }}
+      <div className="h-full p-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">Security Alerts</h1>
+        </div>
+        <RetryableErrorState
+          error={error}
+          onRetry={handleRefresh}
+          onNavigateHome={() => navigate('/')}
+          title="Unable to load alerts"
+          description="We encountered an error while loading security alerts. Please try again."
+          showDetails={import.meta.env.DEV}
         />
       </div>
     )
