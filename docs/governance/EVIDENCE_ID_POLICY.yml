@@ -1,0 +1,9 @@
+schema_version: "1"
+evidence_map_path: "docs/ga/evidence_map.yml"
+allowed_special_values:
+  - none
+planned_allows_unknown: false
+deprecated_allows_unknown: false
+active_allows_none: false
+deprecated_evidence_allowed: false
+report_out_dir: "artifacts/governance/evidence-id-consistency/${sha}"

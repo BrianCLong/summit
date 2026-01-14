@@ -10,11 +10,16 @@ prompts:
         - agents/
         - prompts/
         - scripts/ci/
+        - docs/governance/
         - docs/ga/
+        - docs/roadmap/STATUS.json
         - artifacts/
         - metrics/
         - observability/
         - .github/
+        - AGENT_ACTIVITY.md
+        - agent-contract.json
+        - package.json
       domains:
         - governance
         - ci
