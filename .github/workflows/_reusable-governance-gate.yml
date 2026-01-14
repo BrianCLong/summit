@@ -67,6 +67,18 @@ jobs:
       - name: Install Dependencies
         run: pip install pyyaml
 
+      - name: Setup Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+
+      - name: Install Node Dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Make Scripts Executable
         run: chmod +x scripts/release/*.sh
 
@@ -128,6 +140,12 @@ jobs:
 
           echo "validation_status=${STATUS}" >> $GITHUB_OUTPUT
           echo "validation_failed=${FAILED}" >> $GITHUB_OUTPUT
+
+      - name: Verify Governance Docs Integrity
+        run: pnpm ci:docs-governance
+
+      - name: Verify Evidence ID Consistency
+        run: pnpm ci:evidence-id-consistency
 
       - name: Compute Governance Health
         id: health
@@ -224,6 +242,8 @@ jobs:
             governance_health.json
             policy_validation.json
             lockfile_verification.json
+            artifacts/governance/docs-integrity
+            artifacts/governance/evidence-id-consistency
           retention-days: 30
 
       - name: Fail if Gate Failed

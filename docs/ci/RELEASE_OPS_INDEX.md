@@ -57,6 +57,7 @@ This document serves as the central index for all Release Operations tooling and
 | [Governance Policy Validation](GOVERNANCE_LOCKFILE.md)                       | PR + Push    | On change     | Validate policy syntax        |
 | [Governance Dashboard Publish](GOVERNANCE_LOCKFILE.md)                       | Daily + Push | 12:00 UTC     | Publish dashboard to Pages    |
 | [Governance Lockfile Verify](GOVERNANCE_LOCKFILE.md)                         | PR + Push    | On change     | Verify lockfile integrity     |
+| [Governance Docs Integrity](GOVERNANCE_DOCS_INTEGRITY.md)                    | PR + Push    | On change     | Enforce governance doc index  |
 
 ---
 
