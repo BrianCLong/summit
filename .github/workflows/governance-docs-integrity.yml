@@ -1,0 +1,35 @@
+name: Governance / Docs Integrity
+
+on:
+  pull_request:
+    paths:
+      - 'docs/governance/**'
+      - 'scripts/governance/check_docs_integrity.ts'
+  workflow_dispatch:
+
+jobs:
+  check-integrity:
+    name: Docs Integrity Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install -g pnpm && pnpm install --frozen-lockfile
+
+      - name: Check Integrity
+        run: pnpm check:governance:integrity
+
+      - name: Upload Artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-integrity-report
+          path: docs/governance/INDEX.yml
+          retention-days: 7
