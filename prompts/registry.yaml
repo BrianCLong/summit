@@ -30,6 +30,36 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: secrets-hygiene-gate
+    version: v1
+    path: prompts/security/secrets-hygiene-gate.md
+    sha256: 926388901013ca79ca720efbde9b2b7a269af4ecb6300ae949b944244e375321
+    description: Secrets hygiene + redaction gate for GA readiness with deterministic audit outputs.
+    scope:
+      paths:
+        - scripts/ci/
+        - scripts/evidence/
+        - docs/security/
+        - docs/roadmap/STATUS.json
+        - .github/workflows/
+        - package.json
+        - prompts/security/secrets-hygiene-gate.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - security
+        - governance
+        - ci
+        - compliance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md
