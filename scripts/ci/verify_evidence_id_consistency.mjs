@@ -11,6 +11,43 @@ import { dirname, join, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
 
+// Debug logging utility
+const DEBUG = process.env.EVIDENCE_DEBUG === 'true' || process.argv.includes('--debug');
+function debugLog(message) {
+  if (DEBUG) {
+    console.log(`[DEBUG] ${new Date().toISOString()} - ${message}`);
+  }
+}
+
+/**
+ * Validates the configuration object
+ */
+function validateConfig(config) {
+  const errors = [];
+
+  if (!config.governanceDir || typeof config.governanceDir !== 'string') {
+    errors.push('governanceDir must be a valid string');
+  }
+
+  if (!config.evidenceMapPath || typeof config.evidenceMapPath !== 'string') {
+    errors.push('evidenceMapPath must be a valid string');
+  }
+
+  if (!config.outputDir || typeof config.outputDir !== 'string') {
+    errors.push('outputDir must be a valid string');
+  }
+
+  if (!config.repoRoot || typeof config.repoRoot !== 'string') {
+    errors.push('repoRoot must be a valid string');
+  }
+
+  if (errors.length > 0) {
+    throw new Error(`Configuration validation failed: ${errors.join(', ')}`);
+  }
+
+  debugLog(`Configuration validated successfully: ${JSON.stringify(config)}`);
+}
+
 // Determine the script's directory for resolving relative paths
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -94,19 +131,27 @@ function validateFilePathSafety(filePath, basePath) {
  */
 async function loadEvidenceMap(mapPath) {
   try {
+    debugLog(`Attempting to load evidence map from: ${mapPath}`);
+
     if (!existsSync(mapPath)) {
       console.warn(`Evidence map not found at ${mapPath}, proceeding with empty map`);
+      debugLog('Evidence map file does not exist, returning empty map');
       return new Map();
     }
 
     const content = await fs.readFile(mapPath, 'utf8');
+    debugLog(`Loaded evidence map file, size: ${content.length} characters`);
+
     const cleanedContent = removeBOM(content);
     const parsed = yaml.load(cleanedContent) || {};
-    
+
     // Convert to Map for faster lookup
-    return new Map(Object.entries(parsed));
+    const map = new Map(Object.entries(parsed));
+    debugLog(`Parsed evidence map with ${map.size} entries`);
+    return map;
   } catch (error) {
     console.error(`Failed to load evidence map ${mapPath}: ${error.message}`);
+    debugLog(`Load evidence map error: ${error.stack}`);
     throw new Error(`Evidence map loading failed: ${error.message}`);
   }
 }
@@ -116,14 +161,18 @@ async function loadEvidenceMap(mapPath) {
  */
 async function processGovernanceDocument(filePath, evidenceMap, repoRoot) {
   try {
+    debugLog(`Processing document: ${filePath}`);
     const stats = await fs.stat(filePath);
     if (stats.size > MAX_FILE_SIZE_BYTES) {
+      const relativePath = relative(repoRoot, filePath);
+      debugLog(`File too large (${stats.size} bytes): ${relativePath}`);
       return {
-        path: relative(repoRoot, filePath),
+        path: relativePath,
         violations: [{
           type: 'file_size_exceeded',
-          message: `File exceeds maximum size limit of ${MAX_FILE_SIZE_BYTES} bytes`,
-          severity: 'error'
+          message: `File exceeds maximum size limit of ${MAX_FILE_SIZE_BYTES} bytes (${stats.size} bytes)`,
+          severity: 'error',
+          details: { fileSize: stats.size, maxSize: MAX_FILE_SIZE_BYTES }
         }],
         evidence_ids: []
       };
@@ -132,31 +181,35 @@ async function processGovernanceDocument(filePath, evidenceMap, repoRoot) {
     const content = await fs.readFile(filePath, 'utf8');
     const cleanedContent = removeBOM(content);
     const headers = parseHeaders(cleanedContent);
-    
+
     const evidenceRaw = headers['Evidence-IDs'] || headers['Evidence-Ids'] || headers['Evidence-ids'];
     const evidenceIds = parseEvidenceIds(evidenceRaw);
-    
+
+    debugLog(`Document ${filePath} has ${evidenceIds.length} evidence IDs: ${evidenceIds.join(', ')}`);
+
     // Validate evidence ID format and count
     const formatViolations = [];
     if (evidenceIds.length > MAX_EVIDENCE_IDS_PER_DOC) {
       formatViolations.push({
         type: 'too_many_evidence_ids',
         message: `Document contains ${evidenceIds.length} evidence IDs, exceeding limit of ${MAX_EVIDENCE_IDS_PER_DOC}`,
-        severity: 'error'
+        severity: 'error',
+        details: { count: evidenceIds.length, limit: MAX_EVIDENCE_IDS_PER_DOC }
       });
     }
-    
+
     for (const [idx, id] of evidenceIds.entries()) {
       if (!isValidEvidenceIdFormat(id)) {
         formatViolations.push({
           type: 'invalid_evidence_id_format',
           message: `Evidence ID "${id}" at position ${idx} is not properly formatted`,
           evidence_id: id,
-          severity: 'error'
+          severity: 'error',
+          details: { position: idx, format: id }
         });
       }
     }
-    
+
     // Check evidence ID existence in mapping
     const mappingViolations = [];
     for (const id of evidenceIds) {
@@ -165,25 +218,34 @@ async function processGovernanceDocument(filePath, evidenceMap, repoRoot) {
           type: 'missing_evidence_mapping',
           message: `Evidence ID "${id}" has no corresponding mapping in evidence registry`,
           evidence_id: id,
-          severity: 'warning' // Could be warning instead of error depending on policy
+          severity: 'warning', // Could be warning instead of error depending on policy
+          details: { evidenceId: id, registrySize: evidenceMap.size }
         });
       }
     }
 
     const allViolations = [...formatViolations, ...mappingViolations];
-    
+
+    if (allViolations.length > 0) {
+      debugLog(`Document ${filePath} has ${allViolations.length} violations`);
+    }
+
+    const relativePath = relative(repoRoot, filePath);
     return {
-      path: relative(repoRoot, filePath),
+      path: relativePath,
       violations: allViolations,
       evidence_ids: evidenceIds
     };
   } catch (error) {
+    const relativePath = relative(repoRoot, filePath);
+    debugLog(`Error processing document ${filePath}: ${error.message}`);
     return {
-      path: relative(repoRoot, filePath),
+      path: relativePath,
       violations: [{
         type: 'processing_error',
         message: `Failed to process file: ${error.message}`,
-        severity: 'error'
+        severity: 'error',
+        details: { error: error.message, stack: error.stack, filePath }
       }],
       evidence_ids: []
     };
@@ -195,8 +257,10 @@ async function processGovernanceDocument(filePath, evidenceMap, repoRoot) {
  */
 async function findGovernanceDocuments(rootDir, extension = '.md') {
   const documents = [];
+  let totalFilesScanned = 0;
 
   async function walkDirectory(currentPath) {
+    debugLog(`Scanning directory: ${currentPath}`);
     const entries = await fs.readdir(currentPath, { withFileTypes: true });
 
     // Process entries in sorted order for consistency
@@ -207,19 +271,25 @@ async function findGovernanceDocuments(rootDir, extension = '.md') {
       if (entry.isDirectory()) {
         // Skip certain directories
         if (['node_modules', '.git', 'dist', 'build', 'target', '.svn'].includes(entry.name)) {
+          debugLog(`Skipping directory: ${fullPath}`);
           continue;
         }
         await walkDirectory(fullPath);
       } else if (entry.isFile() && relativePath.endsWith(extension)) {
+        totalFilesScanned++;
         // Check if it's in the governance directory
         if (relativePath.includes('governance') || relativePath.includes('/gov/')) {
+          debugLog(`Found governance document: ${relativePath}`);
           documents.push(fullPath);
+        } else {
+          debugLog(`Skipped non-governance document: ${relativePath}`);
         }
       }
     }
   }
 
   await walkDirectory(rootDir);
+  debugLog(`Scanned ${totalFilesScanned} files, found ${documents.length} governance documents`);
   return documents.sort(); // Sort for deterministic processing order
 }
 
@@ -254,20 +324,56 @@ function generateDeterministicHash(obj) {
 /**
  * Build standardized report
  */
-function buildConsistencyReport({ sha, policyHash, results, config }) {
+function buildConsistencyReport({ sha, policyHash, results, config, evidenceMap }) {
   const normalizedResults = [...results]
     .map(result => ({
       path: result.path,
-      violations: result.violations.sort((a, b) => 
+      violations: result.violations.sort((a, b) =>
         a.type.localeCompare(b.type) || a.message.localeCompare(b.message)
       ),
       evidence_ids: result.evidence_ids
     }))
     .sort((a, b) => a.path.localeCompare(b.path));
 
-  const allViolations = normalizedResults.flatMap(result => result.violations);
+  // Extract all evidence IDs referenced in documents (excluding 'none')
+  const referencedEvidenceIds = new Set();
+  for (const result of results) {
+    for (const id of result.evidence_ids) {
+      if (id !== 'none') {
+        referencedEvidenceIds.add(id);
+      }
+    }
+  }
+
+  // Find orphaned evidence IDs (in registry but not referenced anywhere)
+  const orphanedEvidenceIds = [];
+  if (evidenceMap) {
+    for (const [id, _] of evidenceMap.entries()) {
+      if (!referencedEvidenceIds.has(id)) {
+        orphanedEvidenceIds.push(id);
+      }
+    }
+  }
+
+  // Add violations for orphaned evidence IDs if any are found
+  const allViolations = [...normalizedResults.flatMap(result => result.violations)];
+  if (orphanedEvidenceIds.length > 0) {
+    debugLog(`Detected ${orphanedEvidenceIds.length} orphaned evidence IDs: ${orphanedEvidenceIds.join(', ')}`);
+
+    // Add orphaned ID violations to the report (could be in a separate results section or as global violations)
+    for (const orphanedId of orphanedEvidenceIds) {
+      allViolations.push({
+        type: 'orphaned_evidence_id',
+        message: `Evidence ID "${orphanedId}" exists in registry but is not referenced by any governance document`,
+        evidence_id: orphanedId,
+        severity: 'info'  // Or 'warning' depending on governance policy
+      });
+    }
+  }
+
   const errors = allViolations.filter(v => v.severity === 'error');
   const warnings = allViolations.filter(v => v.severity === 'warning');
+  const infos = allViolations.filter(v => v.severity === 'info');
 
   const status = errors.length > 0 ? 'fail' : 'pass';
 
@@ -283,18 +389,23 @@ function buildConsistencyReport({ sha, policyHash, results, config }) {
     totals: {
       documents_checked: normalizedResults.length,
       evidence_ids_found: normalizedResults.reduce((sum, r) => sum + r.evidence_ids.length, 0),
+      evidence_ids_referenced: referencedEvidenceIds.size,
+      evidence_ids_registered: evidenceMap ? evidenceMap.size : 0,
+      evidence_ids_orphaned: orphanedEvidenceIds.length,
       violations: allViolations.length,
       errors: errors.length,
-      warnings: warnings.length
+      warnings: warnings.length,
+      infos: infos.length
     },
     results: normalizedResults,
     metadata: {
-      summary: `Processed ${normalizedResults.length} documents, found ${errors.length} errors and ${warnings.length} warnings`,
-      recommendations: errors.length > 0 
-        ? ['Fix all violations before merging'] 
+      summary: `Processed ${normalizedResults.length} documents, found ${errors.length} errors, ${warnings.length} warnings, and ${infos.length} info messages`,
+      orphaned_ids: orphanedEvidenceIds,
+      recommendations: errors.length > 0
+        ? ['Fix all error violations before merging']
         : warnings.length > 0
-          ? ['Address warnings for optimal governance health'] 
-          : ['No issues detected']
+          ? ['Address warnings for optimal governance health']
+          : ['No critical issues detected']
     }
   };
 }
@@ -317,25 +428,57 @@ async function writeReports(report, outputPath) {
   let mdContent = `# Evidence ID Consistency Report\n\n`;
   mdContent += `Generated: ${report.generated_at}\n`;
   mdContent += `Status: ${report.status.toUpperCase()}\n\n`;
-  
+
   mdContent += `## Summary\n\n`;
   mdContent += `- Documents Checked: ${report.totals.documents_checked}\n`;
   mdContent += `- Evidence IDs Found: ${report.totals.evidence_ids_found}\n`;
+  mdContent += `- Evidence IDs Referenced: ${report.totals.evidence_ids_referenced}\n`;
+  mdContent += `- Evidence IDs Registered: ${report.totals.evidence_ids_registered}\n`;
+  mdContent += `- Evidence IDs Orphaned: ${report.totals.evidence_ids_orphaned}\n`;
   mdContent += `- Violations: ${report.totals.violations}\n`;
   mdContent += `- Errors: ${report.totals.errors}\n`;
-  mdContent += `- Warnings: ${report.totals.warnings}\n\n`;
-  
+  mdContent += `- Warnings: ${report.totals.warnings}\n`;
+  mdContent += `- Info Messages: ${report.totals.infos}\n\n`;
+
   if (report.results.some(r => r.violations.length > 0)) {
     mdContent += `## Issues\n\n`;
     for (const result of report.results) {
       if (result.violations.length > 0) {
-        mdContent += `- **${result.path}**:\n`;
+        const hasErrors = result.violations.some(v => v.severity === 'error');
+        const hasWarnings = result.violations.some(v => v.severity === 'warning');
+        const hasInfos = result.violations.some(v => v.severity === 'info');
+
+        mdContent += `- **${result.path}** `;
+        if (hasErrors) mdContent += `🚨(${result.violations.filter(v => v.severity === 'error').length} errors) `;
+        if (hasWarnings) mdContent += `⚠️(${result.violations.filter(v => v.severity === 'warning').length} warnings) `;
+        if (hasInfos) mdContent += `ℹ️(${result.violations.filter(v => v.severity === 'info').length} info) `;
+        mdContent += `\n`;
+
         for (const violation of result.violations) {
-          mdContent += `  - ${violation.type}: ${violation.message}\n`;
+          let icon = '';
+          if (violation.severity === 'error') icon = '🚨 ';
+          else if (violation.severity === 'warning') icon = '⚠️ ';
+          else if (violation.severity === 'info') icon = 'ℹ️ ';
+
+          mdContent += `  - ${icon}${violation.type}: ${violation.message}\n`;
         }
       }
     }
-  } else {
+    mdContent += `\n`;
+  }
+
+  // Display orphaned IDs separately if any
+  if (report.metadata.orphaned_ids && report.metadata.orphaned_ids.length > 0) {
+    mdContent += `## Orphaned Evidence IDs\n\n`;
+    mdContent += `The following evidence IDs exist in the registry but are not referenced by any governance document:\n\n`;
+    for (const id of report.metadata.orphaned_ids) {
+      mdContent += `- \`${id}\`\n`;
+    }
+    mdContent += `\n💡 Consider removing unused evidence IDs from the registry or referencing them in appropriate documents.\n\n`;
+  }
+
+  if (!report.results.some(r => r.violations.length > 0) &&
+      (!report.metadata.orphaned_ids || report.metadata.orphaned_ids.length === 0)) {
     mdContent += `✅ No issues detected!\n`;
   }
   
@@ -356,6 +499,7 @@ async function writeReports(report, outputPath) {
  * Main execution function
  */
 async function main() {
+  const startTime = Date.now();
   try {
     // Configuration
     const args = process.argv.slice(2);
@@ -365,6 +509,8 @@ async function main() {
       outputDir: 'artifacts/governance/evidence-id-consistency',
       repoRoot: resolve('.')
     };
+
+    validateConfig(config);
 
     // Allow command line override
     let sha = args.find(arg => arg.startsWith('--sha='))?.split('=')[1];
@@ -379,17 +525,23 @@ async function main() {
       config.outputDir = resolve(outputOverride);
     }
 
-    console.log('Starting Evidence ID Consistency Verification...');
-    
+    console.log(`[${new Date().toISOString()}] Starting Evidence ID Consistency Verification...`);
+
     // Load evidence map
+    const evidenceMapStartTime = Date.now();
     const evidenceMap = await loadEvidenceMap(config.evidenceMapPath);
-    console.log(`Loaded evidence map with ${evidenceMap.size} entries`);
+    const evidenceMapDuration = Date.now() - evidenceMapStartTime;
+    console.log(`Loaded evidence map with ${evidenceMap.size} entries (took ${evidenceMapDuration}ms)`);
 
     // Find governance documents
+    const findDocsStartTime = Date.now();
     const documents = await findGovernanceDocuments(resolve(config.repoRoot));
-    console.log(`Found ${documents.length} governance documents`);
+    const findDocsDuration = Date.now() - findDocsStartTime;
+    console.log(`Found ${documents.length} governance documents (took ${findDocsDuration}ms)`);
 
-    // Process documents with concurrency control
+    // Process documents with concurrency control and progress indication
+    console.log(`Processing ${documents.length} documents with batch size ${MAX_CONCURRENT_FILES}...`);
+    const processStartTime = Date.now();
     const results = [];
     for (let i = 0; i < documents.length; i += MAX_CONCURRENT_FILES) {
       const batch = documents.slice(i, i + MAX_CONCURRENT_FILES);
@@ -397,35 +549,58 @@ async function main() {
         batch.map(docPath => processGovernanceDocument(docPath, evidenceMap, config.repoRoot))
       );
       results.push(...batchResults);
+
+      // Progress indication for large repos
+      if (documents.length > 50) {
+        const processed = Math.min(i + MAX_CONCURRENT_FILES, documents.length);
+        const percentage = Math.round((processed / documents.length) * 100);
+        console.log(`Progress: ${processed}/${documents.length} documents processed (${percentage}%)`);
+      }
     }
+    const processDuration = Date.now() - processStartTime;
 
     // Generate policy hash for consistency tracking
+    const hashStartTime = Date.now();
     const policyHash = generateDeterministicHash({
       evidence_map_size: evidenceMap.size,
       document_count: documents.length
     });
+    const hashDuration = Date.now() - hashStartTime;
 
     // Build report
+    const buildReportStartTime = Date.now();
     const report = buildConsistencyReport({
       sha,
       policyHash,
       results,
-      config
+      config,
+      evidenceMap
     });
+    const buildReportDuration = Date.now() - buildReportStartTime;
 
     // Generate output paths based on SHA
     const outputDir = join(config.outputDir, sha);
-    
+
     // Write reports
+    const writeReportsStartTime = Date.now();
     await writeReports(report, outputDir);
-    
-    // Log summary
+    const writeReportsDuration = Date.now() - writeReportsStartTime;
+
+    // Log summary with performance metrics
+    const totalTime = Date.now() - startTime;
     console.log(`\nEvidence ID Consistency Report:`);
     console.log(`- Status: ${report.status.toUpperCase()}`);
     console.log(`- Documents: ${report.totals.documents_checked}`);
     console.log(`- Violations: ${report.totals.violations}`);
     console.log(`- Output: ${outputDir}`);
-    
+    console.log(`\nPerformance Metrics:`);
+    console.log(`- Total time: ${totalTime}ms`);
+    console.log(`- Evidence map load: ${evidenceMapDuration}ms`);
+    console.log(`- Document discovery: ${findDocsDuration}ms`);
+    console.log(`- Document processing: ${processDuration}ms`);
+    console.log(`- Report building: ${buildReportDuration}ms`);
+    console.log(`- Report writing: ${writeReportsDuration}ms`);
+
     // Exit with appropriate code
     const hasErrors = report.totals.errors > 0;
     if (hasErrors) {
@@ -442,6 +617,9 @@ async function main() {
     }
   } catch (error) {
     console.error('Fatal error during evidence ID consistency check:', error.message);
+    if (DEBUG) {
+      console.error('Stack trace:', error.stack);
+    }
     process.exit(1);
   }
 }
