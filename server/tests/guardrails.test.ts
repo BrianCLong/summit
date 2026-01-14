@@ -53,7 +53,7 @@ describeNetwork('Golden Path Guardrails - Negative Tests', () => {
       try { fs.appendFileSync(logFile, 'DEBUG: Server started\n'); } catch (_) { }
 
       // Register a user to get a valid token
-      const registerRes = await request(server)
+      const registerRes = await request(app)
         .post('/graphql')
         .set('x-tenant-id', 'public')
         .send({
@@ -86,7 +86,7 @@ describeNetwork('Golden Path Guardrails - Negative Tests', () => {
 
       const loginRes = await request(app)
         .post('/graphql')
-        .set('x-tenant-id', 'public') // Added this line to match original context
+        .set('x-tenant-id', 'public')
         .send({
           query: `
             mutation Login($input: LoginInput!) {

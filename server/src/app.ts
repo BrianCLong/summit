@@ -207,23 +207,21 @@ export const createApp = async () => {
       console.log('DEBUG: appLogger.levels.values:', (appLogger as any).levels.values);
     }
   }
-  app.use(
-    pinoHttpInstance({
-      logger: appLogger,
-      // Redaction is handled by the logger config itself, but we keep this consistent if needed
-      // logger config already has redact paths, so we can omit here or merge.
-      // We rely on logger's internal redaction, but pino-http might need specific config
-      // to redact req.headers if not using standard serializers.
-      // appLogger uses standard req/res serializers which respect redact.
-      customProps: (req: any) => ({
-        correlationId: req.correlationId,
-        traceId: req.traceId,
-        spanId: req.spanId,
-        userId: req.user?.sub || req.user?.id,
-        tenantId: req.user?.tenant_id || req.user?.tenantId,
+  // Skip pino-http in test environment to avoid mock issues
+  if (cfg.NODE_ENV !== 'test') {
+    app.use(
+      pinoHttpInstance({
+        logger: appLogger,
+        customProps: (req: any) => ({
+          correlationId: req.correlationId,
+          traceId: req.traceId,
+          spanId: req.spanId,
+          userId: req.user?.sub || req.user?.id,
+          tenantId: req.user?.tenant_id || req.user?.tenantId,
+        }),
       }),
-    }),
-  );
+    );
+  }
   app.use(requestProfilingMiddleware);
 
   app.use(

@@ -92,7 +92,7 @@ jest.mock('fluent-ffmpeg', () => {
 });
 
 // Mock src/config/logger.js to provide a proper logger instance
-jest.mock('../../src/config/logger.js', () =\u003e {
+jest.mock('/Users/brianlong/Developer/summit/server/src/config/logger.js', () => {
   const loggerMock = require('../mocks/logger.cjs');
   return {
     logger: loggerMock.logger || loggerMock,

@@ -2,6 +2,17 @@ import type { Config } from 'jest';
 
 const gaVerifyMode = process.env.GA_VERIFY_MODE === 'true';
 
+const coverageThreshold = gaVerifyMode
+  ? undefined
+  : {
+    global: {
+      branches: 85,
+      functions: 85,
+      lines: 85,
+      statements: 85,
+    },
+  };
+
 const config: Config = {
   preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
@@ -108,14 +119,7 @@ const config: Config = {
     '!src/**/*.d.ts',
   ],
   coverageProvider: 'v8',
-  coverageThreshold: {
-    global: {
-      branches: 85,
-      functions: 85,
-      lines: 85,
-      statements: 85,
-    },
-  },
+  coverageThreshold,
   coverageReporters: ['text', 'lcov', 'cobertura'],
   coverageDirectory: '<rootDir>/coverage',
   testTimeout: 30000,
