@@ -104,6 +104,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: mcp-grpc-transport
+    version: v1
+    path: prompts/mcp/grpc-transport.md
+    sha256: 523f006e525d3bd5c05f4ff6aa4a9e931413f25837c6bab642bca9ac018124d5
+    description: Implement MCP gRPC transport, policy receipts, negotiation, and evidence-grade observability.
+    scope:
+      paths:
+        - intelgraph-mcp/
+        - docs/architecture/
+        - docs/runbooks/
+        - docs/roadmap/STATUS.json
+        - benchmarks/harness/
+        - prompts/mcp/grpc-transport.md
+        - prompts/registry.yaml
+      domains:
+        - mcp
+        - transport
+        - security
+        - observability
+        - governance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md

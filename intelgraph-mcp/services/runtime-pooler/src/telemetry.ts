@@ -15,7 +15,7 @@ export async function initTelemetry(serviceName: string) {
 
 export function emitFrame(
   direction: 'in' | 'out',
-  channel: 'jsonrpc' | 'sse' | 'stdio',
+  channel: 'jsonrpc' | 'sse' | 'stdio' | 'grpc',
   attributes: Record<string, unknown> = {},
 ) {
   const span = trace.getSpan(context.active());

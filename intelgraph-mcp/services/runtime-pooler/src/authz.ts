@@ -1,3 +1,6 @@
+import { createHash } from 'node:crypto';
+import { stableStringify } from './utils/stableJson';
+
 export interface PolicyContext {
   action: 'allocate' | 'invoke' | 'stream';
   tenant?: string;
@@ -7,9 +10,17 @@ export interface PolicyContext {
   destination?: string;
 }
 
+export type PolicyReceipt = {
+  hash: string;
+  inputHash: string;
+  decisionHash: string;
+  version: 'v1';
+};
+
 export interface PolicyDecision {
   allow: boolean;
   raw?: unknown;
+  receipt?: PolicyReceipt;
 }
 
 const OPA_URL = process.env.OPA_URL;
@@ -49,7 +60,9 @@ export async function authorize(
   if (!allow) {
     throw new Error('forbidden');
   }
-  return { allow, raw: body.result };
+  const receipt = createPolicyReceipt(payload.input, body.result);
+  emitPolicyDecision(context, receipt);
+  return { allow, raw: body.result, receipt };
 }
 
 function resolveDecision(result: unknown): boolean {
@@ -58,4 +71,29 @@ function resolveDecision(result: unknown): boolean {
     return Boolean((result as { allow?: boolean }).allow);
   }
   return false;
+}
+
+function createPolicyReceipt(input: unknown, decision: unknown): PolicyReceipt {
+  const inputHash = createHash('sha256')
+    .update(stableStringify(input))
+    .digest('hex');
+  const decisionHash = createHash('sha256')
+    .update(stableStringify(decision))
+    .digest('hex');
+  const hash = createHash('sha256')
+    .update(`${inputHash}:${decisionHash}`)
+    .digest('hex');
+  return { hash, inputHash, decisionHash, version: 'v1' };
+}
+
+function emitPolicyDecision(context: PolicyContext, receipt: PolicyReceipt) {
+  console.info(
+    JSON.stringify({
+      event: 'policy.decision',
+      action: context.action,
+      tenant: context.tenant ?? 'unknown',
+      tool: context.toolClass,
+      receipt,
+    }),
+  );
 }
