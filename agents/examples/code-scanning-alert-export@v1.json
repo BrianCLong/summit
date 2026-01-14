@@ -1,0 +1,39 @@
+{
+  "task_id": "CODE_SCANNING_ALERT_EXPORT_V1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "code-scanning-alert-export",
+    "version": "v1",
+    "sha256": "37e280f3907e785a25a5969805e26dad526a2b8d824cb8e284741f91fe46eabf",
+    "path": "prompts/security/code-scanning-alert-export@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "scripts/security/",
+      "docs/security/",
+      "docs/roadmap/STATUS.json",
+      "prompts/security/code-scanning-alert-export@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/code-scanning-alert-export@v1.json"
+    ],
+    "domains": ["security", "governance", "documentation", "tooling"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["scripts/check-boundaries.cjs"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Export Code Scanning alerts to a local artifact without persisting credentials.",
+    "Document the export and triage workflow in security documentation.",
+    "Update roadmap status metadata to reflect the governance change."
+  ],
+  "stop_conditions": [
+    "GitHub API access unavailable without security_events scope.",
+    "Detected secret material in output artifacts."
+  ]
+}

@@ -104,22 +104,24 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: adr-pr-template-cleanup
+  - id: code-scanning-alert-export
     version: v1
-    path: prompts/docs/adr-pr-template-cleanup@v1.md
-    sha256: 429dc47c69fb43ee25eff48a54868fc88e2faf48f8de6a213d702794d2cb3d07
-    description: Update PR and ADR templates for current workflow guidance and formatting.
+    path: prompts/security/code-scanning-alert-export@v1.md
+    sha256: 37e280f3907e785a25a5969805e26dad526a2b8d824cb8e284741f91fe46eabf
+    description: Export GitHub Code Scanning alerts and document triage workflow for remediation.
     scope:
       paths:
-        - .github/
-        - docs/ADR/
+        - scripts/security/
+        - docs/security/
+        - docs/roadmap/STATUS.json
         - agents/examples/
-        - prompts/docs/adr-pr-template-cleanup@v1.md
+        - prompts/security/code-scanning-alert-export@v1.md
         - prompts/registry.yaml
       domains:
-        - documentation
+        - security
         - governance
-        - quality
+        - documentation
+        - tooling
     verification:
       tiers_required:
         - C

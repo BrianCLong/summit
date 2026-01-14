@@ -31,6 +31,13 @@ This repository integrates a comprehensive suite of automated security and quali
 - **Queries:** `security-extended`, `security-and-quality`
 - **Output:** SARIF uploaded to GitHub Security tab.
 
+**Alert Export:** For gated remediation, export the active alert set with:
+
+```bash
+GITHUB_TOKEN=... node scripts/security/export-code-scanning-alerts.mjs \
+  --owner BrianCLong --repo summit --output artifacts/code-scanning-alerts.json
+```
+
 ### 3. Dependency Scanning
 - **Dependabot:** configured in `.github/dependabot.yml` for automated updates.
 - **Snyk/Audit:** Runs in CI pipeline to block builds with critical vulnerabilities.
@@ -66,3 +73,4 @@ To run scans locally:
 - **Secrets:** `pre-commit run --all-files`
 - **Trivy:** `trivy fs .`
 - **Sonar:** Use SonarLint plugin for your IDE.
+- **Code Scanning Export:** `node scripts/security/export-code-scanning-alerts.mjs --output artifacts/code-scanning-alerts.json`

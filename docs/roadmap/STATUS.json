@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-10T01:32:00Z",
+  "revision_note": "Added Code Scanning alert export tooling and triage guidance for security sweep evidence.",
   "initiatives": [
     {
       "id": "A",
