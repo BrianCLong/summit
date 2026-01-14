@@ -1,0 +1,8 @@
+{
+  "allow": ["mcp.playwright.*"],
+  "environments": {
+    "ci": {
+      "deny": ["mcp.playwright.*"]
+    }
+  }
+}

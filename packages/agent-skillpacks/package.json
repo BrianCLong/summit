@@ -1,0 +1,24 @@
+{
+  "name": "@intelgraph/agent-skillpacks",
+  "version": "0.1.0",
+  "description": "Lazy-loaded MCP skillpacks with adaptive shards, policy gating, and evidence outputs.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1",
+    "minimatch": "^9.0.5"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/minimatch": "^5.1.2",
+    "@types/node": "^20.17.9",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.6",
+    "typescript": "^5.7.3"
+  }
+}

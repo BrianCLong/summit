@@ -1,0 +1,21 @@
+{
+  "servers": [
+    {
+      "name": "playwright",
+      "command": "npx",
+      "args": ["playwright", "run-server"],
+      "includeTools": ["mcp.playwright.screenshot", "mcp.playwright.navigate"],
+      "shards": {
+        "default": {
+          "includeTools": ["mcp.playwright.screenshot"]
+        },
+        "deep": {
+          "includeTools": ["mcp.playwright.screenshot", "mcp.playwright.navigate"]
+        },
+        "ci": {
+          "includeTools": []
+        }
+      }
+    }
+  ]
+}
