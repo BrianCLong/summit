@@ -1,0 +1,40 @@
+{
+  "task_id": "LH_LONGHORIZON_MVP_001",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "longhorizon-ai-native-engineering-team",
+    "version": "v1",
+    "sha256": "2fc49a1292583add618fc867a3a3fd70962222b7ae78d82cfcf238cdb1dadf43",
+    "path": "prompts/longhorizon/longhorizon-ai-native-engineering-team.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "src/longhorizon/",
+      "src/cli/maestro-longhorizon.ts",
+      "tests/longhorizon/",
+      "docs/longhorizon.md",
+      "examples/longhorizon/",
+      "prompts/longhorizon/",
+      "prompts/registry.yaml",
+      "agents/examples/longhorizon-task.json",
+      "docs/roadmap/STATUS.json"
+    ],
+    "domains": ["orchestration", "governance", "evidence", "memory", "evaluation"],
+    "exclusions": ["server/", "client/", "apps/web/"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["artifacts/longhorizon/<run-id>/run-report.json"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "LongHorizon orchestration module is implemented with evidence output",
+    "MAP-Elites archive and island model tests pass",
+    "Documentation and examples are added"
+  ],
+  "stop_conditions": ["CI failure in main", "Policy violations detected", "Sandbox violation alert"]
+}
