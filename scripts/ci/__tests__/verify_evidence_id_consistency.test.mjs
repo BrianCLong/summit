@@ -134,8 +134,101 @@ Content`;
     writeTestFile(otherDoc, '# Not Governance');
 
     const documents = await findGovernanceDocuments(root);
-    
+
     assert.ok(documents.includes(testDoc), 'Should find governance document');
     assert.ok(!documents.some(d => d.includes('not_gov')), 'Should not include non-governance document');
+  });
+
+  test('determinism: two runs produce identical results', async () => {
+    const { root, docsRoot } = makeTempRepo();
+    const mapPath = path.join(root, 'evidence', 'map.yml');
+    fs.mkdirSync(path.dirname(mapPath), { recursive: true });
+    fs.writeFileSync(mapPath,
+      'governance-docs-integrity:\n  path: "artifacts/governance/docs-integrity/${sha}/stamp.json"\n  description: "Documentation integrity verification results"\n  generator: "governance_docs_verifier"\n\nbranch-protection-drift:\n  path: "artifacts/governance/branch-protection-drift/stamp.json"\n  description: "Branch protection drift detection results"\n  generator: "branch_protection_checker"\n');
+
+    // Create a test governance document
+    const testDoc1 = path.join(docsRoot, 'test_doc1.md');
+    const testDoc2 = path.join(docsRoot, 'test_doc2.md');
+    fs.writeFileSync(testDoc1, makeHeaderDoc({ 'Evidence-IDs': 'governance-docs-integrity,branch-protection-drift' }));
+    fs.writeFileSync(testDoc2, makeHeaderDoc({ 'Evidence-IDs': 'nonexistent-id' }));
+
+    const evidenceMap = await loadEvidenceMap(mapPath);
+
+    // Run verification twice
+    const result1 = await processGovernanceDocument(testDoc1, evidenceMap, root);
+    const result2 = await processGovernanceDocument(testDoc1, evidenceMap, root);
+
+    // Results should be identical
+    assert.deepStrictEqual(result1, result2, 'Same input should produce identical output');
+
+    // Test with document that has violations
+    const result3 = await processGovernanceDocument(testDoc2, evidenceMap, root);
+    const result4 = await processGovernanceDocument(testDoc2, evidenceMap, root);
+    assert.deepStrictEqual(result3, result4, 'Same input with violations should produce identical output');
+  });
+
+  test('report contains no generated_at field for determinism', async () => {
+    const { root, docsRoot } = makeTempRepo();
+    const mapPath = path.join(root, 'evidence', 'map.yml');
+    fs.mkdirSync(path.dirname(mapPath), { recursive: true });
+    fs.writeFileSync(mapPath, 'valid.id:\n  path: "some/path"\n  description: "Valid ID"\n');
+
+    const testDoc = path.join(docsRoot, 'test_doc.md');
+    fs.writeFileSync(testDoc, makeHeaderDoc({ 'Evidence-IDs': 'valid.id' }));
+
+    const evidenceMap = await loadEvidenceMap(mapPath);
+    const result = await processGovernanceDocument(testDoc, evidenceMap, root);
+
+    const mockSha = 'test-sha';
+    const mockPolicyHash = 'test-policy-hash';
+    const mockConfig = { governanceDir: 'docs/governance', outputDir: 'test/output', repoRoot: root, evidenceMapPath: mapPath };
+
+    const report = buildConsistencyReport({
+      sha: mockSha,
+      policyHash: mockPolicyHash,
+      results: [result],
+      config: mockConfig,
+      evidenceMap
+    });
+
+    // Check that report does not contain generated_at field
+    assert.strictEqual(report.generated_at, undefined, 'Report should not contain generated_at for determinism');
+  });
+
+  test('policy hash is deterministic based on policy content', async () => {
+    const { root, docsRoot } = makeTempRepo();
+    const mapPath = path.join(root, 'evidence', 'map.yml');
+    fs.mkdirSync(path.dirname(mapPath), { recursive: true });
+    fs.writeFileSync(mapPath,
+      'governance-docs-integrity:\n  path: "artifacts/governance/docs-integrity/${sha}/stamp.json"\n  description: "Documentation integrity verification results"\n  generator: "governance_docs_verifier"\n\nbranch-protection-drift:\n  path: "artifacts/governance/branch-protection-drift/stamp.json"\n  description: "Branch protection drift detection results"\n  generator: "branch_protection_checker"\n');
+
+    // Use the loadEvidenceMap function that uses yaml internally
+    const evidenceMap = await loadEvidenceMap(mapPath);
+
+    // Compute policy hash configuration twice
+    const config1 = {
+      evidence_map_size: evidenceMap.size,
+      evidence_map_entries: Array.from(evidenceMap.entries()).sort((a, b) => a[0].localeCompare(b[0])),
+      config_governance_dir: 'docs/governance',
+      config_output_dir: 'test/output',
+      max_evidence_ids_per_doc: 50,
+      max_file_size_bytes: 10 * 1024 * 1024,
+      max_concurrent_files: 10
+    };
+
+    const config2 = {
+      evidence_map_size: evidenceMap.size,
+      evidence_map_entries: Array.from(evidenceMap.entries()).sort((a, b) => a[0].localeCompare(b[0])),
+      config_governance_dir: 'docs/governance',
+      config_output_dir: 'test/output',
+      max_evidence_ids_per_doc: 50,
+      max_file_size_bytes: 10 * 1024 * 1024,
+      max_concurrent_files: 10
+    };
+
+    const hash1 = generateDeterministicHash(config1);
+    const hash2 = generateDeterministicHash(config2);
+
+    assert.strictEqual(hash1, hash2, 'Policy hash should be identical for identical policy content');
   });
 });

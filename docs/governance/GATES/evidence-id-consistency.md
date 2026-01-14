@@ -33,9 +33,11 @@ npm run ci:evidence-id-consistency
 
 The gate produces artifacts in:
 
-- `artifacts/governance/evidence-id-consistency/<sha>/report.json` - Detailed JSON report
+- `artifacts/governance/evidence-id-consistency/<sha>/report.json` - Deterministic JSON report (content-only, no runtime timestamps)
 - `artifacts/governance/evidence-id-consistency/<sha>/report.md` - Human-readable markdown report
-- `artifacts/governance/evidence-id-consistency/<sha>/stamp.json` - CI workflow tracking
+- `artifacts/governance/evidence-id-consistency/<sha>/stamp.json` - Runtime metadata including timestamp, exit status, and generator info
+
+Note: To ensure build determinism, timestamps are included in `stamp.json` only and not in the main `report.json` file.
 
 ## Policy Rules
 

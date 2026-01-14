@@ -253,44 +253,91 @@ async function processGovernanceDocument(filePath, evidenceMap, repoRoot) {
 }
 
 /**
- * Find all governance documents in the repository
+ * Find all governance documents in the repository using git if available, falling back to filesystem
  */
 async function findGovernanceDocuments(rootDir, extension = '.md') {
-  const documents = [];
-  let totalFilesScanned = 0;
+  try {
+    // First, try to use git to get a deterministic list of tracked files
+    const { spawn } = await import('child_process');
+    const gitPromise = new Promise((resolve, reject) => {
+      const gitProc = spawn('git', ['ls-files', '--', 'docs/governance/**/*' + extension], {
+        cwd: rootDir,
+        stdio: ['pipe', 'pipe', 'ignore'] // stdin, stdout, stderr
+      });
 
-  async function walkDirectory(currentPath) {
-    debugLog(`Scanning directory: ${currentPath}`);
-    const entries = await fs.readdir(currentPath, { withFileTypes: true });
+      let stdout = '';
+      gitProc.stdout.on('data', data => {
+        stdout += data.toString();
+      });
 
-    // Process entries in sorted order for consistency
-    for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
-      const fullPath = join(currentPath, entry.name);
-      const relativePath = relative(rootDir, fullPath);
+      gitProc.on('close', (code) => {
+        if (code === 0) {
+          const gitFiles = stdout
+            .split('\n')
+            .filter(line => line.trim() !== '')
+            .map(relPath => join(rootDir, relPath))
+            .filter(absPath => absPath.includes('governance') || absPath.includes('/gov/'));
 
-      if (entry.isDirectory()) {
-        // Skip certain directories
-        if (['node_modules', '.git', 'dist', 'build', 'target', '.svn'].includes(entry.name)) {
-          debugLog(`Skipping directory: ${fullPath}`);
-          continue;
-        }
-        await walkDirectory(fullPath);
-      } else if (entry.isFile() && relativePath.endsWith(extension)) {
-        totalFilesScanned++;
-        // Check if it's in the governance directory
-        if (relativePath.includes('governance') || relativePath.includes('/gov/')) {
-          debugLog(`Found governance document: ${relativePath}`);
-          documents.push(fullPath);
+          if (gitFiles.length > 0) {
+            debugLog(`Found ${gitFiles.length} governance documents via git`);
+            resolve(gitFiles.sort());  // Sort for deterministic order
+          } else {
+            reject(new Error('No governance files found via git'));
+          }
         } else {
-          debugLog(`Skipped non-governance document: ${relativePath}`);
+          reject(new Error(`Git command failed with code ${code}`));
+        }
+      });
+
+      gitProc.on('error', (err) => {
+        reject(err);
+      });
+    });
+
+    return await gitPromise;
+  } catch (gitError) {
+    debugLog(`Git-based file discovery failed: ${gitError.message}, falling back to filesystem scan`);
+
+    // Fallback to filesystem enumeration
+    const documents = [];
+    let totalFilesScanned = 0;
+
+    async function walkDirectory(currentPath) {
+      debugLog(`Scanning directory: ${currentPath}`);
+      const entries = await fs.readdir(currentPath, { withFileTypes: true });
+
+      // Process entries in deterministic, codepoint-based order for consistency
+      for (const entry of entries.sort((a, b) => a.name === b.name ? 0 : a.name < b.name ? -1 : 1)) {
+        const fullPath = join(currentPath, entry.name);
+        const relativePath = relative(rootDir, fullPath);
+
+        if (entry.isDirectory()) {
+          // Skip certain directories deterministically
+          const skipDirs = ['node_modules', '.git', 'dist', 'build', 'target', '.svn', 'artifacts'];
+          if (skipDirs.includes(entry.name)) {
+            debugLog(`Skipping directory: ${fullPath}`);
+            continue;
+          }
+          await walkDirectory(fullPath);
+        } else if (entry.isFile() && relativePath.endsWith(extension)) {
+          totalFilesScanned++;
+          // Check if it's in the governance directory (deterministic check)
+          if (relativePath.includes('governance') || relativePath.includes('/gov/')) {
+            debugLog(`Found governance document: ${relativePath}`);
+            documents.push(fullPath);
+          } else {
+            debugLog(`Skipped non-governance document: ${relativePath}`);
+          }
         }
       }
     }
-  }
 
-  await walkDirectory(rootDir);
-  debugLog(`Scanned ${totalFilesScanned} files, found ${documents.length} governance documents`);
-  return documents.sort(); // Sort for deterministic processing order
+    await walkDirectory(rootDir);
+    debugLog(`Scanned ${totalFilesScanned} files, found ${documents.length} governance documents via filesystem`);
+
+    // Use codepoint-based sorting for platform consistency
+    return documents.sort((a, b) => a === b ? 0 : a < b ? -1 : 1);
+  }
 }
 
 /**
@@ -383,7 +430,6 @@ function buildConsistencyReport({ sha, policyHash, results, config, evidenceMap 
     status,
     sha,
     policy_hash: policyHash,
-    generated_at: new Date().toISOString(),
     source: 'evidence-id-policy',
     config: config,
     totals: {
@@ -426,7 +472,6 @@ async function writeReports(report, outputPath) {
   
   // Write Markdown report
   let mdContent = `# Evidence ID Consistency Report\n\n`;
-  mdContent += `Generated: ${report.generated_at}\n`;
   mdContent += `Status: ${report.status.toUpperCase()}\n\n`;
 
   mdContent += `## Summary\n\n`;
@@ -488,7 +533,7 @@ async function writeReports(report, outputPath) {
   const stamp = {
     sha: report.sha,
     status: report.status,
-    timestamp: report.generated_at,
+    timestamp: new Date().toISOString(),  // Runtime timestamp goes in stamp, not report
     generator: report.generator,
     violations: report.totals.violations
   };
@@ -501,14 +546,37 @@ async function writeReports(report, outputPath) {
 async function main() {
   const startTime = Date.now();
   try {
-    // Configuration
+    // Configuration - implement deterministic evidence map path resolution
     const args = process.argv.slice(2);
     const config = {
       governanceDir: 'docs/governance',
-      evidenceMapPath: 'evidence/map.yml', // default path
       outputDir: 'artifacts/governance/evidence-id-consistency',
       repoRoot: resolve('.')
     };
+
+    // Deterministic evidence map path resolution following priority order:
+    // 1. Explicit command line override (if provided)
+    // 2. evidence/map.yml (main location)
+    // 3. docs/ga/evidence_map.yml (canonical location if it exists)
+    // 4. Hard error if neither exists
+    let evidenceMapPath = args.find(arg => arg.startsWith('--evidence-map-path='))?.split('=')[1];
+    if (!evidenceMapPath) {
+      const fallbackPath = 'evidence/map.yml';
+      const gaPath = 'docs/ga/evidence_map.yml';
+      const fallbackExists = existsSync(join(resolve('.'), fallbackPath));
+      const gaExists = existsSync(join(resolve('.'), gaPath));
+
+      if (fallbackExists) {
+        evidenceMapPath = fallbackPath;
+        debugLog(`Using evidence map at: ${evidenceMapPath}`);
+      } else if (gaExists) {
+        evidenceMapPath = gaPath;
+        debugLog(`Using canonical evidence map at: ${evidenceMapPath}`);
+      } else {
+        throw new Error(`Neither evidence map (${fallbackPath}) nor canonical evidence map (${gaPath}) exists. At least one must be provided.`);
+      }
+    }
+    config.evidenceMapPath = evidenceMapPath;
 
     validateConfig(config);
 
@@ -559,12 +627,18 @@ async function main() {
     }
     const processDuration = Date.now() - processStartTime;
 
-    // Generate policy hash for consistency tracking
+    // Generate policy hash for consistency tracking - based only on static policy, not runtime values
     const hashStartTime = Date.now();
-    const policyHash = generateDeterministicHash({
+    const policyConfig = {
       evidence_map_size: evidenceMap.size,
-      document_count: documents.length
-    });
+      evidence_map_entries: Array.from(evidenceMap.entries()).sort((a, b) => a[0].localeCompare(b[0])),
+      config_governance_dir: config.governanceDir,
+      config_output_dir: config.outputDir,
+      max_evidence_ids_per_doc: MAX_EVIDENCE_IDS_PER_DOC,
+      max_file_size_bytes: MAX_FILE_SIZE_BYTES,
+      max_concurrent_files: MAX_CONCURRENT_FILES
+    };
+    const policyHash = generateDeterministicHash(policyConfig);
     const hashDuration = Date.now() - hashStartTime;
 
     // Build report
