@@ -3,6 +3,7 @@
 ## 1. Introduction
 
 This policy establishes the standards for managing third-party dependencies in the IntelGraph codebase. The goal is to minimize supply chain risks, ensure legal compliance, and maintain a stable build environment.
+It aligns with the Summit Readiness Assertion for enforced dependency integrity controls.
 
 ## 2. Allowed Licenses
 
@@ -57,6 +58,18 @@ To ensure reproducible builds and prevent malicious package injection via floati
 
 - `package-lock.json`, `pnpm-lock.yaml`, `poetry.lock`, and `Cargo.lock` must always be committed.
 - CI pipelines must enforce consistency (e.g., `pnpm install --frozen-lockfile`).
+
+### 3.4 Package Manager Enforcement (.npmrc)
+
+The repository-level `.npmrc` is authoritative for pnpm guardrails and is treated as policy-as-code
+for dependency integrity.
+
+- **`engine-strict=true`** enforces declared Node/pnpm engine ranges and prevents drift.
+- **`legacy-peer-deps=false`**, **`strict-peer-dependencies=true`**, and
+  **`auto-install-peers=false`** require explicit peer alignment and block silent peer resolution.
+- **`verify-store-integrity=true`** validates pnpm store integrity before installs.
+- **`prefer-frozen-lockfile=true`** is mandated for CI to ensure lockfile fidelity in all
+  dependency installs.
 
 ## 4. New Dependency Workflow
 
