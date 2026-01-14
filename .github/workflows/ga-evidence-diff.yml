@@ -1,0 +1,40 @@
+name: GA Evidence Diff
+on:
+  pull_request:
+    paths:
+      - "docs/ga/evidence_map.yml"
+      - ".github/workflows/ga-evidence-diff.yml"
+jobs:
+  diff:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: corepack enable && pnpm -v
+      - run: pnpm install --frozen-lockfile
+      - name: Generate diff (strict)
+        run: |
+          mkdir -p artifacts/ga-diff
+          git fetch origin +refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
+          EVIDENCE_DIFF_BASE=origin/${{ github.base_ref }} \
+          EVIDENCE_DIFF_HEAD=HEAD \
+          EVIDENCE_DIFF_FAIL_ON_REGRESSION=1 \
+          pnpm -s ga:diff | tee artifacts/ga-diff/evidence_diff.json
+      - name: Pretty report
+        run: cat artifacts/ga-diff/evidence_diff.json | node scripts/ga/format_evidence_diff.mjs
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-diff
+          path: artifacts/ga-diff/*
+      - name: PR comment
+        uses: thollander/actions-comment-pull-request@v3
+        with:
+          comment_tag: ga-evidence-diff
+          filePath: artifacts/ga-diff/evidence_diff.md
