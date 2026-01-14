@@ -1,144 +1,195 @@
-# Summit (IntelGraph)
+# 🏔 Summit - Agentic AI OSINT Platform
 
-Enterprise Intelligence Platform: graph analytics, real-time collaboration, and AI-driven insights for high-stakes environments.
+> Open-source intelligence gathering powered by agentic AI, knowledge graphs, and real-time data ingestion.
 
-## NEW in v2.0.0 (December 2025)
+[![Build Status](https://github.com/BrianCLong/summit/workflows/CI/badge.svg)](https://github.com/BrianCLong/summit/actions)
+[![Coverage](https://img.shields.io/codecov/c/github/BrianCLong/summit)](https://codecov.io/gh/BrianCLong/summit)
+[![License](https://img.shields.io/github/license/BrianCLong/summit)](LICENSE)
 
-Summit v2.0.0 consolidates major platform capabilities (infrastructure, AI/ML, security hardening, real-time systems).  
-See: Release Notes | Migration Guide | Roadmap.
+## ✨ Features
 
----
+- **🤖 Agentic AI**: Multi-agent orchestration for autonomous research
+- **🕸 Knowledge Graphs**: Neo4j + GraphRAG for connected intelligence
+- **📡 Real-time Ingest**: Streaming connectors for CSV, S3, REST APIs
+- **🔍 Vector Search**: Semantic retrieval with embeddings
+- **📈 CompanyOS SDK**: Enterprise intelligence APIs
+- **🔒 Security Hardened**: Production-ready CORS, Helmet, observability
 
-## Quickstart (Golden Path)
+## 🚀 Quickstart
 
-Prerequisites: Docker Desktop ≥ 4.x, Node.js 20.11.0 (matches `.tool-versions`), pnpm 9, Python 3.11+.
+### Prerequisites
+
+- Node.js 18+
+- Docker & Docker Compose
+- Neo4j 5.x (via Docker)
+
+### Install & Run
 
 ```bash
-# 1) Clone & Bootstrap
+# Clone repository
 git clone https://github.com/BrianCLong/summit.git
 cd summit
-make bootstrap
 
-# 2) Start the Stack (Docker)
-make up
+# Install dependencies
+pnpm install
 
-# 3) Verify (Smoke Test)
-make smoke
+# Start infrastructure (Neo4j, Postgres, Redis)
+docker-compose up -d
+
+# Run migrations
+pnpm db:migrate
+
+# Start dev server
+pnpm dev
 ```
 
-### GA Gate (Pre-Flight)
+Server runs at `http://localhost:4000`
 
-Before submitting PRs or deploying:
+### First Query
 
 ```bash
-make ga
+# GraphQL playground
+curl -X POST http://localhost:4000/api/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query": "{ health { status version } }"}'
+
+# Or use the web UI
+open http://localhost:3000
 ```
 
-This runs the enforced readiness sequence:
+## 🏛 Architecture
 
-1. Lint & unit tests
-2. Clean environment reset
-3. Deep health checks
-4. End-to-end smoke tests
-5. Security scanning
+Summit follows a modular microservices architecture:
 
-### Release Readiness Artifacts
+```
+┌──────────────────────────────────┐
+│ 👥 User Agents (Jules, Codex)   │
+└──────────┬───────────────────────┘
+           │
+           v
+┌──────────┬────────────────────────┐
+│ API Layer │ GraphQL + REST APIs    │
+└──────────┬────────────────────────┘
+           │
+   ┌───────┼────────┐
+   │       │        │
+   v       v        v
+┌────────┐ ┌────────┐ ┌────────┐
+│ Ingest │ │GraphRAG│ │ Agents │
+│ Engine │ │Pipeline│ │ Orchest│
+└────┬───┘ └───┬────┘ └───┬────┘
+     │         │          │
+     v         v          v
+┌─────────────────────────────────┐
+│ 📊 Data Layer                   │
+│ Neo4j | Postgres | Redis | Qdrant│
+└─────────────────────────────────┘
+```
 
-- **GA Checklist:** `docs/release/GA_CHECKLIST.md` (operator runbook for build, test, security, and rollback)
-- **Readiness Report:** `docs/release/GA_READINESS_REPORT.md` (current go/no-go posture and remaining actions)
-- **Evidence Index:** `docs/release/GA_EVIDENCE_INDEX.md` (commands run with logs and artifact pointers)
+**Deep Dive Docs:**
 
----
+- [🏛 Architecture Overview](docs/architecture/README.md)
+- [🔌 Data Ingestion](docs/architecture/ingestion.md)
+- [🤖 Agent System](docs/architecture/agents.md)
+- [🕸 Knowledge Graphs](docs/architecture/knowledge-graph.md)
+- [🔒 Security](docs/security/README.md)
 
-## Service Endpoints (Local)
+## 📚 Key Components
 
-- Frontend: [http://localhost:3000](http://localhost:3000)
-- GraphQL API: [http://localhost:4000/graphql](http://localhost:4000/graphql)
-- Neo4j Browser: [http://localhost:7474](http://localhost:7474) (User: `neo4j`, Pass: `devpassword`)
-- Adminer: [http://localhost:8080](http://localhost:8080)
-- Grafana: [http://localhost:3001](http://localhost:3001)
+### Connectors
 
----
+Ingest data from multiple sources:
 
-## Architecture (System View)
+- **REST APIs**: Poll external services
+- **CSV/S3**: Batch file processing
+- **Neo4j/Postgres**: Database replication
+- **Webhooks**: Real-time event streaming
 
-Summit is built on a modern distributed stack designed for scalability and auditability:
+See: [Connector Documentation](docs/connectors/README.md)
 
-- Frontend: React 18, Vite, Material-UI (`client/`)
-- Backend: Node.js, Express, Apollo GraphQL (`backend/`, `api/`)
-- Data Layer:
-  - Neo4j (graph relationships)
-  - PostgreSQL (structured data, audit logs, vectors/embeddings)
-  - TimescaleDB (telemetry and metrics)
-  - Redis (caching, rate limiting, real-time Pub/Sub)
+### GraphRAG
 
-- Orchestration: Maestro (BullMQ) for background jobs and AI pipelines (`.maestro/`)
+Retrieval-augmented generation with knowledge graphs:
 
-See also:
+- Entity extraction & linking
+- Multi-hop graph traversal
+- Vector similarity search
+- LLM-powered synthesis
 
-- docs/ARCHITECTURE.md
+See: [GraphRAG Guide](docs/graphrag/README.md)
 
----
+### Agents
 
-## Repo Map (Where Things Live)
+Autonomous AI agents for research and analysis:
 
-This repository is a large monorepo containing:
+- **Jules**: PR reviewer, code analyzer
+- **Codex**: Task brief generator
+- **Observer**: Telemetry and monitoring
 
-1. **Platform Runtime**
-   - `client/` — Primary user-facing UI
-   - `conductor-ui/` — Admin/Ops UI
-   - `backend/` — API runtime services
-   - `api/`, `apis/`, `api-schemas/` — API surfaces, schemas, contracts
-   - `cli/` — Operator/developer CLI tooling
-   - `.maestro/`, `.orchestrator/` — job orchestration, pipelines, worker controls
-   - `compose/`, `charts/`, `config/`, `configs/` — infra, deployment & configuration
+See: [Agent Development](docs/agents/README.md)
 
-2. **Governance, Security, Operations**
-   - `RUNBOOKS/` — incident playbooks, operational procedures
-   - `SECURITY/`, `.security/` — security policies & automation scaffolding
-   - `compliance/` — compliance controls and mapping artifacts
-   - `audit/` — audit readiness artifacts and evidence workflows
-   - `.ci/`, `ci/`, `.ga-check/`, `.github/` — CI and GA readiness gates
-   - `__tests__/`, `__mocks__/`, `GOLDEN/ datasets`, `.evidence/` — tests, fixtures, evidence
+## 📡 API Reference
 
-3. **Agentic Development Tooling**
-   - `.agentic-prompts/`, `.agent-guidance/` — standardized prompts and guidance
-   - `.claude/`, `.gemini/`, `.jules/`, `.qwen/` — per-agent workflows and configuration
-   - `.devcontainer/` — standardized dev environment
+- [GraphQL Schema](docs/api/graphql.md)
+- [REST Endpoints](docs/api/rest.md)
+- [CompanyOS SDK](docs/api/companyos.md)
 
-4. **AI/ML and Domain Modules**
-   - `ai-ml-suite/` plus multiple domain modules (e.g., `cognitive-*`, `active-measures-module/`, etc.)
+## 🧪 Testing
 
----
+```bash
+# Run all tests
+pnpm test
 
-## CI & Quality Gates
+# E2E tests
+pnpm test:e2e
 
-Our CI pipeline ("Fast Lane") enforces:
+# Coverage report
+pnpm test:coverage
+```
 
-1. Lint (ESLint + Ruff)
-2. Verify (deterministic GA verification for critical features)
-3. Test (unit/integration)
-4. Golden Path (full-stack integration via `make smoke`)
-5. Security (SAST, dependency scanning, secret detection)
+## 🛡 Security
 
-See: TESTING.md
+Summit follows security best practices:
 
----
+- Helmet.js for HTTP security headers
+- CORS with explicit origin whitelisting
+- Rate limiting and request validation
+- SQL injection prevention
+- Dependency scanning (Dependabot)
 
-## Contributing
+See: [Security Policy](SECURITY.md)
 
-- Follow the Golden Path and GA Gate requirements.
-- Prefer small, reviewable PRs with explicit scope.
-- If the build breaks, stop and fix it: the Golden Path is enforced.
+## 🚀 Deployment
 
-See:
+```bash
+# Build for production
+pnpm build
 
-- CONTRIBUTING.md
-- docs/ONBOARDING.md
+# Docker deployment
+docker-compose -f docker-compose.prod.yml up -d
 
----
+# Kubernetes
+kubectl apply -f k8s/
+```
 
-## License
+See: [Deployment Guide](docs/deployment/README.md)
 
-Summit Enterprise Edition: Proprietary (see LICENSE).
-Historical Open Source: MIT (see OSS-MIT-LICENSE).
+## 🤝 Contributing
+
+We welcome contributions! Please see:
+
+- [Contributing Guidelines](CONTRIBUTING.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Development Setup](docs/development/setup.md)
+
+## 📄 License
+
+[MIT License](LICENSE)
+
+## 👥 Team & Support
+
+- **GitHub Issues**: [Report bugs](https://github.com/BrianCLong/summit/issues)
+- **Discussions**: [Community forum](https://github.com/BrianCLong/summit/discussions)
+- **Documentation**: [Full docs](docs/)
+
+Built with ❤️ by [@BrianCLong](https://github.com/BrianCLong) and [contributors](https://github.com/BrianCLong/summit/graphs/contributors)
