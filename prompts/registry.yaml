@@ -104,6 +104,36 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: release-attested-ga
+    version: v1
+    path: prompts/release/attested-release@v1.md
+    sha256: e07d81289eaa61e1a0bfaafbc3fdcdb4a33a3ec94db5664a4e1ab978ea385b91
+    description: Attested GA release pipeline with SBOM, evidence bundle, and offline verification.
+    scope:
+      paths:
+        - .github/workflows/
+        - scripts/release/
+        - scripts/evidence/
+        - docs/releases/
+        - docs/roadmap/STATUS.json
+        - package.json
+        - prompts/release/
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - release
+        - ci
+        - provenance
+        - documentation
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
