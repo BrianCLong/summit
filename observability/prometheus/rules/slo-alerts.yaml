@@ -1,0 +1,107 @@
+groups:
+  - name: slo_burn_rate_alerts
+    interval: 30s
+    rules:
+      # Fast burn: 2% error budget consumed in 1 hour
+      - alert: SLOErrorBudgetFastBurn
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[1h]))
+            /
+            sum(rate(http_requests_total[1h]))
+          ) > 0.02
+        for: 5m
+        labels:
+          severity: critical
+          slo: availability
+        annotations:
+          summary: "SLO error budget burning fast"
+          description: "Error rate {{ $value | humanizePercentage }} exceeds 2% threshold. 1h burn rate detected."
+
+      # Slow burn: 5% error budget consumed in 6 hours  
+      - alert: SLOErrorBudgetSlowBurn
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[6h]))
+            /
+            sum(rate(http_requests_total[6h]))
+          ) > 0.05
+        for: 30m
+        labels:
+          severity: warning
+          slo: availability
+        annotations:
+          summary: "SLO error budget burning slowly"
+          description: "Error rate {{ $value | humanizePercentage }} exceeds 5% threshold over 6h window."
+
+      # Latency SLO: p95 > 500ms
+      - alert: SLOLatencyBudgetExceeded
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          slo: latency
+        annotations:
+          summary: "Latency SLO violated"
+          description: "p95 latency {{ $value }}s exceeds 500ms threshold."
+
+      # Error budget exhaustion warning
+      - alert: SLOErrorBudgetCritical
+        expr: |
+          (
+            1 - (
+              sum(rate(http_requests_total{status!~"5.."}[30d]))
+              /
+              sum(rate(http_requests_total[30d]))
+            )
+          ) > 0.90
+        for: 5m
+        labels:
+          severity: critical
+          slo: availability
+        annotations:
+          summary: "90% of monthly error budget consumed"
+          description: "Only {{ $value | humanizePercentage }} error budget remains for the month."
+
+  - name: cost_guardrails
+    interval: 5m
+    rules:
+      # Cost anomaly detection
+      - alert: CostAnomalyDetected  
+        expr: |
+          (
+            sum(rate(api_cost_total[1h]))
+            /
+            sum(rate(api_cost_total[1h] offset 24h))
+          ) > 1.5
+        for: 15m
+        labels:
+          severity: warning
+          type: cost
+        annotations:
+          summary: "API cost spike detected"
+          description: "Hourly cost is {{ $value }}x higher than 24h ago."
+
+      # Daily budget threshold
+      - alert: DailyCostBudgetExceeded
+        expr: sum(increase(api_cost_total[24h])) > 100
+        for: 5m
+        labels:
+          severity: critical
+          type: cost
+        annotations:
+          summary: "Daily cost budget exceeded"
+          description: "24h cost ${{ $value }} exceeds $100 daily budget."
+
+      # LLM token cost spike
+      - alert: LLMTokenCostSpike
+        expr: |
+          rate(llm_tokens_total[5m]) * 0.00003 > 10
+        for: 10m
+        labels:
+          severity: warning
+          type: cost
+          component: llm
+        annotations:
+          summary: "LLM token usage spike"
+          description: "Token consumption rate ${{ $value }}/5m exceeds threshold."
