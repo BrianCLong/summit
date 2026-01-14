@@ -1,0 +1,8 @@
+{
+  "evidenceIds": {
+    "GOV-001": {
+      "description": "Governance Rules Compliance",
+      "status": "active"
+    }
+  }
+}

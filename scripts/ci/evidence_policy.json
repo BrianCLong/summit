@@ -1,0 +1,7 @@
+{
+  "evidenceCatalogPath": "docs/governance/evidence_catalog.json",
+  "docsPath": "docs/governance",
+  "missingIdHandling": "error",
+  "unknownIdHandling": "error",
+  "allowedStatuses": ["active", "planned", "deprecated"]
+}
