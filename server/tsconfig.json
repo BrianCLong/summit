@@ -28,6 +28,11 @@
   "exclude": [
     "node_modules",
     "dist",
+    "tests/**",
+    "src/tests/**",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/__tests__/**",
     "health/**",
     "src/ai/models/cv_integration.ts",
     "src/feature-flags/**",
