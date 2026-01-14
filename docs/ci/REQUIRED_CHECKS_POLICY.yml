@@ -4,7 +4,7 @@
 # Both RC and GA pipelines derive required checks from this file.
 #
 # Authority: Platform Engineering
-# Last Updated: 2026-01-08
+# Last Updated: 2026-01-13
 # Version: 2.0.0
 #
 # How to add/remove checks safely:
@@ -18,8 +18,21 @@
 
 version: "2.0.0"
 description: "Canonical policy for release gate requirements"
-last_updated: "2026-01-08"
+last_updated: "2026-01-13"
 owner: "Platform Engineering"
+
+# Branch Protection Policy
+# ------------------------
+# Defines the required status checks enforced on the main branch.
+branch_protection:
+  branch: "main"
+  required_status_checks:
+    strict: true
+    contexts:
+      - "CI Core (Primary Gate)"
+      - "GA Gate"
+      - "Release Readiness Gate"
+      - "Unit Tests & Coverage"
 
 # Always Required Checks
 # ----------------------
