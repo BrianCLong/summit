@@ -1,0 +1,42 @@
+{
+  "task_id": "CEP_CORE_PR1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "cep-core-pr1",
+    "version": "v1",
+    "sha256": "4ebb74aa374a01f9271b57dacb154e3c1bb8ba6a41e020d0e68516d81bb6e366",
+    "path": "prompts/context/cep-core-pr1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/context-engineering/",
+      "docs/context-engineering/",
+      "CHANGELOG.md",
+      "docs/roadmap/STATUS.json",
+      "artifacts/agent-runs/",
+      "package.json"
+    ],
+    "domains": ["context", "maestro", "governance", "observability"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "artifacts/agent-runs/CEP_CORE_PR1.json",
+      "packages/context-engineering/src/__tests__/context-engineer.test.ts"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Context engineering core builds deterministic manifests with budgets and evictions.",
+    "Tool outputs are truncated before prompt assembly.",
+    "Compression preserves intent and commitment items."
+  ],
+  "stop_conditions": [
+    "Policy enforcement mismatch detected.",
+    "Tests fail or output is non-deterministic."
+  ]
+}
