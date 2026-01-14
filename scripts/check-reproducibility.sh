@@ -105,7 +105,14 @@ $(diff "$FIRST_CHECKSUM_FILE" "$BUILD_CHECKSUM_FILE" || echo "Diff command faile
 done
 
 # Create reproducibility report
-REPORT_FILE="$TEMP_DIR/reproducibility-report-$TIMESTAMP.json"
+if [ -n "$REPRO_OUTPUT_FILE" ]; then
+    REPORT_FILE="$REPRO_OUTPUT_FILE"
+    # Ensure directory exists
+    mkdir -p "$(dirname "$REPORT_FILE")"
+else
+    REPORT_FILE="$TEMP_DIR/reproducibility-report-$TIMESTAMP.json"
+fi
+
 cat > "$REPORT_FILE" << EOF
 {
   "testTimestamp": "$TIMESTAMP",
