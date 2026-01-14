@@ -45,6 +45,7 @@
 3. Issue metadata gaps: add epic/initiative fields, dependencies, owners, priorities, milestones, domain/risk/GA labels.
 4. TODO tracking gaps: extract ~478 TODO sources into tracked issues.
 5. Linear synchronization: configure GitHub↔Linear sync; map Initiative→Project, Epic→Epic, Issue→Issue.
+- **Linear Configuration**: See `docs/project_management/linear/LINEAR_SETUP.md` for authoritative board design and workflow states.
 
 ## TODO Catalog
 
@@ -76,7 +77,7 @@
 - Configure roadmap iteration/date fields and board WIP limits.
 - Normalize issue metadata (owners, priorities, milestones, dependencies, labels).
 - Migrate TODO findings into issues using standardized template with domain labels.
-- Establish Linear sync and field mapping; verify bidirectional updates.
+- Establish Linear sync and field mapping; verify bidirectional updates (see `docs/project_management/linear/LINEAR_SETUP.md`).
 - Keep `docs/roadmaps/master-roadmap-32-prompts.md` aligned with project state.
 
 ## Forward-Looking Enhancements
