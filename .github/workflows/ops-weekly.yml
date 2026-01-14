@@ -1,0 +1,49 @@
+name: Ops Weekly Cadence
+
+on:
+  schedule:
+    - cron: '0 9 * * 1' # 9 AM UTC, Mondays
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  weekly-deep-dive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.node-version'
+
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install --no-frozen-lockfile
+
+      - name: Verify Evidence Bundle (Freshness Check)
+        run: pnpm verify:evidence-bundle || echo "Evidence verification failed (warn-only)"
+        continue-on-error: true
+
+      - name: Security Drift Check (Deep)
+        run: pnpm security:drift-check || echo "Drift detected"
+        continue-on-error: true
+
+      - name: Check Debt Regression
+        run: pnpm check:debt || echo "Debt check failed"
+        continue-on-error: true
+
+      - name: Generate Weekly Summary
+        run: |
+          mkdir -p artifacts/ops/weekly
+          echo "# Weekly Ops Summary" > artifacts/ops/weekly/summary.md
+          echo "Generated on $(date)" >> artifacts/ops/weekly/summary.md
+          echo "See logs for details." >> artifacts/ops/weekly/summary.md
+
+      - name: Upload Weekly Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ops-weekly-report
+          path: artifacts/ops/weekly/
