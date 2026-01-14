@@ -13,6 +13,9 @@ declare module 'express-serve-static-core' {
   }
 }
 
+// Re-export TenantContext type so it can be imported from here
+export type { TenantContext };
+
 type TenantResolutionOptions = TenantContextOptions & {
   /**
    * Route param names that may contain a tenant identifier.
