@@ -17,8 +17,10 @@ const correlationStorageImpl = {
   enterWith: () => undefined,
 };
 
-module.exports = loggerImpl;
-module.exports.logger = loggerImpl;
-module.exports.correlationStorage = correlationStorageImpl;
-module.exports.default = loggerImpl;
-module.exports.logger = loggerImpl;
+// Explicit named exports object to ensure ESM interop works
+module.exports = {
+  ...loggerImpl,
+  default: loggerImpl,
+  logger: loggerImpl,
+  correlationStorage: correlationStorageImpl,
+};

@@ -237,6 +237,26 @@ jest.mock('ioredis', () => {
   };
 });
 
+// Mock config/logger
+jest.mock('../../src/config/logger', () => {
+  const loggerImpl = {
+    child: function () { return this; },
+    debug: () => {},
+    info: () => {},
+    warn: () => {},
+    error: () => {},
+    trace: () => {},
+    fatal: () => {},
+    silent: () => {},
+    level: 'silent',
+  };
+  return {
+    __esModule: true,
+    default: loggerImpl,
+    logger: loggerImpl,
+  };
+});
+
 // Mock middleware/audit-logger
 jest.mock('../../src/middleware/audit-logger', () => ({
   __esModule: true,
