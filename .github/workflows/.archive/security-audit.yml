@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-node@v4
         if: steps.pkg.outputs.manifests == 'true'
         with:
-          node-version: 20
+          node-version: 20.20.0
       - run: npm install --ignore-scripts || true
         if: steps.pkg.outputs.manifests == 'true'
       - run: npm audit --audit-level=critical || true

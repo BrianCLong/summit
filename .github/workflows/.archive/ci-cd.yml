@@ -24,7 +24,7 @@ jobs:
       - name: Set up Node.js for evidence bundle generation
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 20.20.0
 
       - name: Install ts-node runtime
         run: npm install -g ts-node typescript

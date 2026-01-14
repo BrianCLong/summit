@@ -51,7 +51,7 @@ jobs:
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
-          node-version: "20"
+          node-version: "20.20.0"
           cache: pnpm
 
       - name: Install dependencies
@@ -75,7 +75,7 @@ jobs:
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
-          node-version: "20"
+          node-version: "20.20.0"
           cache: pnpm
 
       - name: Install dependencies
@@ -122,7 +122,7 @@ jobs:
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
-          node-version: "20"
+          node-version: "20.20.0"
           cache: pnpm
 
       - name: Install dependencies
@@ -161,7 +161,7 @@ jobs:
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
-          node-version: "20"
+          node-version: "20.20.0"
           cache: pnpm
 
       - name: Install dependencies
@@ -191,7 +191,7 @@ jobs:
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
-          node-version: "20"
+          node-version: "20.20.0"
           cache: pnpm
 
       - name: Install dependencies
@@ -239,7 +239,7 @@ jobs:
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
-          node-version: "20"
+          node-version: "20.20.0"
           cache: pnpm
 
       - name: Bootstrap and smoke test
@@ -281,7 +281,7 @@ jobs:
       - name: Use Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.20.0"
           cache: "pnpm"
 
       - name: Setup pnpm
@@ -315,7 +315,7 @@ jobs:
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
-          node-version: "20"
+          node-version: "20.20.0"
           cache: pnpm
 
       - name: Install dependencies

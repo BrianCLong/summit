@@ -22,7 +22,7 @@ jobs:
       - name: Use Node.js 20
         uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
-          node-version: "20"
+          node-version: "20.20.0"
       - name: Install dependencies
         run: |
           if [ -f package-lock.json ] || [ -f pnpm-lock.yaml ] || [ -f yarn.lock ]; then

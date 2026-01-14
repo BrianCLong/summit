@@ -12,7 +12,7 @@
 # =============================================================================
 # Stage 1: Base Dependencies (cached layer)
 # =============================================================================
-FROM node:23.3.0-alpine3.19 AS base
+FROM node:24.13.0-alpine AS base
 
 # Install system dependencies in a single layer
 RUN apk add --no-cache \
@@ -136,7 +136,7 @@ CMD ["dist/index.js"]
 # =============================================================================
 # Stage 6: Production Runtime (Alpine) - Alternative to distroless
 # =============================================================================
-FROM node:23.3.0-alpine3.19 AS production-alpine
+FROM node:24.13.0-alpine AS production-alpine
 
 # Security hardening
 RUN apk add --no-cache \

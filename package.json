@@ -135,7 +135,7 @@
   "author": "IntelGraph Team",
   "license": "MIT",
   "engines": {
-    "node": ">=18.18",
+    "node": ">=20.20.0",
     "npm": ">=8.0.0"
   },
   "devDependencies": {
