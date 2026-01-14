@@ -4,7 +4,9 @@ module.exports = {
   ...base,
   displayName: 'workflow-engine',
   rootDir: __dirname,
+  roots: ['<rootDir>/src'],
   testMatch: ['<rootDir>/src/**/*.test.ts'],
+  setupFilesAfterEnv: ['<rootDir>/../../tests/utils/jest-setup.cjs'],
   transform: {
     '^.+\\.(t|j)sx?$': [
       'ts-jest',

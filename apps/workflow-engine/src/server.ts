@@ -15,6 +15,7 @@ import {
 import { logger } from './utils/logger';
 import { config } from './config';
 import { authenticate, authorize } from './middleware/auth';
+import { readinessState, registerHealthEndpoints } from './health';
 
 const app = express();
 const PORT = config.server.port || 4005;
@@ -41,15 +42,7 @@ app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    service: 'workflow-engine',
-    version: process.env.npm_package_version || '1.0.0',
-  });
-});
+registerHealthEndpoints(app);
 
 // Database connections
 let pgPool: Pool;
@@ -75,6 +68,7 @@ async function initializeServices() {
     // Test PostgreSQL connection
     await pgPool.query('SELECT NOW()');
     logger.info('PostgreSQL connected successfully');
+    readinessState.postgres = true;
 
     // Neo4j connection
     neo4jDriver = neo4j.driver(
@@ -90,6 +84,7 @@ async function initializeServices() {
     await session.run('RETURN 1');
     await session.close();
     logger.info('Neo4j connected successfully');
+    readinessState.neo4j = true;
 
     // Redis connection
     redisClient = createClient({
@@ -103,9 +98,12 @@ async function initializeServices() {
 
     await redisClient.connect();
     logger.info('Redis connected successfully');
+    readinessState.redis = true;
 
     // Initialize workflow service
     workflowService = new WorkflowService(pgPool, neo4jDriver, redisClient);
+    readinessState.workflowService = true;
+    readinessState.ready = true;
 
     // Set up event listeners
     workflowService.on('workflow.execution.started', (execution) => {

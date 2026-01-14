@@ -1,0 +1,37 @@
+{
+  "task_id": "WF_ENGINE_READINESS_20260110",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "workflow-engine-readiness",
+    "version": "v1",
+    "sha256": "2d9f4e8d45b4d513d37465d3078d431a7b99b83ad78b3984c4026ac8d55105dd",
+    "path": "prompts/engineering/workflow-engine-readiness.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "apps/workflow-engine/src/server.ts",
+      "apps/workflow-engine/src/health.ts",
+      "apps/workflow-engine/src/server.readiness.test.ts",
+      "apps/workflow-engine/src/types/supertest.d.ts",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/WF_ENGINE_READINESS_20260110.json",
+      "prompts/engineering/workflow-engine-readiness.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["control-plane", "observability", "governance", "testing"]
+  },
+  "allowed_operations": ["edit", "create"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["scripts/check-boundaries.cjs output"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Workflow engine exposes /healthz and /readyz with dependency status.",
+    "Roadmap status updated to reflect readiness work."
+  ],
+  "stop_conditions": ["Boundary check failures.", "Policy or security violations detected in CI."]
+}
