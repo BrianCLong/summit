@@ -53,6 +53,9 @@ jobs:
         with:
           node-version: "20"
           cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            **/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -77,6 +80,9 @@ jobs:
         with:
           node-version: "20"
           cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            **/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -124,6 +130,9 @@ jobs:
         with:
           node-version: "20"
           cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            **/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -163,6 +172,9 @@ jobs:
         with:
           node-version: "20"
           cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            **/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -193,6 +205,9 @@ jobs:
         with:
           node-version: "20"
           cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            **/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -241,6 +256,9 @@ jobs:
         with:
           node-version: "20"
           cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            **/pnpm-lock.yaml
 
       - name: Bootstrap and smoke test
         run: |
@@ -278,16 +296,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Use Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "pnpm"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            **/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -317,6 +338,9 @@ jobs:
         with:
           node-version: "20"
           cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            **/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
