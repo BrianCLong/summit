@@ -74,5 +74,14 @@
     "evidence": ["docs/security/security-architecture-and-policies.md"],
     "keyword": "ingestion",
     "notes": "Ensures ingestion hardening expectations stay documented."
+  },
+  {
+    "feature": "CAS Integrity",
+    "tier": "B",
+    "artifact": "scripts/ci/verify_cas_integrity.mjs",
+    "ciStatus": "wired",
+    "evidence": ["docs/ga/CAS_ARTIFACTS.md", ".github/workflows/ci.yml"],
+    "keywords": ["CAS", "CAS"],
+    "notes": "Validates content-addressable storage invariants and run-manifest linkage."
   }
 ]
