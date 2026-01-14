@@ -1,0 +1,14 @@
+id: "tenant-isolation-v1"
+description: "Tenant isolation enforcement"
+strategy: "STRICT"
+policies:
+  - id: "cross-tenant-access"
+    description: "Prevent cross-tenant data access"
+    scope:
+      stages: ["runtime"]
+      tenants: ["*"]
+    action: "DENY"
+    rules:
+      - field: "request.target_tenant"
+        operator: "neq"
+        value: "context.tenant_id"
