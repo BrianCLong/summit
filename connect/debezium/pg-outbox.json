@@ -1,0 +1,21 @@
+{
+  "name": "pg-outbox",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "${PG_HOST}",
+    "database.port": "5432",
+    "database.user": "${PG_USER}",
+    "database.password": "${PG_PASS}",
+    "database.dbname": "${PG_DB}",
+    "slot.name": "dbz_outbox",
+    "publication.autocreate.mode": "filtered",
+    "tombstones.on.delete": "false",
+    "table.include.list": "public.app_outbox",
+    "transforms": "outbox",
+    "transforms.outbox.type": "io.debezium.transforms.outbox.EventRouter",
+    "transforms.outbox.route.by.field": "agg_type",
+    "transforms.outbox.route.topic.replacement": "outbox.${routedBy}",
+    "transforms.outbox.additional.fields": "aggregateId:agg_id,aggregateType:agg_type,eventType:event_type,version:version,occurredAt:occurred_at",
+    "heartbeat.interval.ms": "10000"
+  }
+}

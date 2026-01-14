@@ -1,0 +1,40 @@
+{
+  "task_id": "GRAPH_OUTBOX_NEO4J",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "graph-outbox-neo4j",
+    "version": "v1",
+    "sha256": "95f83610f52d1c963ab13d7854dda5bbdfc9b1894e7112cdeec8ea6910968736",
+    "path": "prompts/engineering/graph-outbox-neo4j.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "db/",
+      "connect/",
+      "packages/graph-bijection/",
+      ".github/workflows/ci-graph-bijection.yml",
+      "docs/roadmap/STATUS.json"
+    ],
+    "domains": ["data", "graph", "ci", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["artifacts/graph-bijection/<sha>/report.json"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Outbox migration and triggers applied to core tables",
+    "Debezium and Neo4j connector configs are committed",
+    "Bijection harness produces report artifacts",
+    "CI workflow runs the bijection harness"
+  ],
+  "stop_conditions": [
+    "CI failure on main",
+    "Sandbox violation alert",
+    "PII detected in outbox payloads"
+  ]
+}

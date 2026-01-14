@@ -104,6 +104,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: graph-outbox-neo4j
+    version: v1
+    path: prompts/engineering/graph-outbox-neo4j.md
+    sha256: 95f83610f52d1c963ab13d7854dda5bbdfc9b1894e7112cdeec8ea6910968736
+    description: Implement Postgres outbox, Debezium routing, Neo4j sinks, and bijection guardrails.
+    scope:
+      paths:
+        - db/
+        - connect/
+        - packages/graph-bijection/
+        - .github/workflows/ci-graph-bijection.yml
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/engineering/graph-outbox-neo4j.md
+        - prompts/registry.yaml
+      domains:
+        - data
+        - governance
+        - graph
+        - ci
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
