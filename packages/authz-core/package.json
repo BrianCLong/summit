@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/authz-core",
-  "version": "4.1.4",
+  "version": "2.0.0",
   "description": "Comprehensive multi-tenant authorization library with warrant and license enforcement",
   "type": "module",
   "main": "./dist/index.js",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/humint-types",
-  "version": "4.1.4",
+  "version": "1.0.0",
   "description": "HUMINT source management types and validation schemas",
   "type": "module",
   "main": "dist/index.js",

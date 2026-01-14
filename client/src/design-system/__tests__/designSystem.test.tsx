@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- jest mocks require type assertions */
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, afterEach, jest } from '@jest/globals';
+import { describe, it, expect, afterEach, jest } from '@jest/globals';
 import { ThemeProvider } from '@mui/material/styles';
 import { PageShell } from '../components/PageShell';
 import { SettingsLayout } from '../components/SettingsLayout';
@@ -35,7 +34,7 @@ describe('Design system components', () => {
   it('tracks sections in SettingsLayout telemetry', () => {
     const telemetry = new DesignSystemTelemetry(
       {
-        send: jest.fn().mockResolvedValue(undefined as any) as any,
+        send: jest.fn().mockResolvedValue(undefined),
       },
       { autoFlushMs: null },
     );

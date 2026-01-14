@@ -111,9 +111,9 @@ export const options = {
   },
 };
 
-process.stdout.write(`🎯 SLO Trend Monitoring targeting: ${config.target}\n`);
-process.stdout.write(
-  `📊 Prometheus integration: ${config.prometheus.enabled ? 'enabled' : 'disabled'}\n`,
+console.log(`🎯 SLO Trend Monitoring targeting: ${config.target}`);
+console.log(
+  `📊 Prometheus integration: ${config.prometheus.enabled ? 'enabled' : 'disabled'}`,
 );
 
 // Request headers configuration
@@ -188,7 +188,7 @@ export default function () {
     if (readyData.database && readyData.database.connectionTime) {
       dbConnectionTime.add(readyData.database.connectionTime);
     }
-  } catch (_e) {
+  } catch (e) {
     // Ignore parsing errors
   }
 
@@ -316,16 +316,16 @@ export default function () {
 
 // Setup function - runs once at the start
 export function setup() {
-  process.stdout.write('🚀 Starting SLO trend monitoring...\n');
-  process.stdout.write(`📊 Target: ${config.target}\n`);
-  process.stdout.write('🎯 SLO Targets:\n');
-  process.stdout.write('   • p95 latency: <200ms (critical), <150ms (baseline)\n');
-  process.stdout.write('   • Error rate: <1%\n');
-  process.stdout.write('   • Availability: >99%\n');
-  process.stdout.write('   • Health check: <50ms p95\n');
-  process.stdout.write('   • GraphQL: <300ms p95\n');
-  process.stdout.write('   • Entity retrieval: <500ms p95\n');
-  process.stdout.write('   • Search: <1000ms p95\n');
+  console.log('🚀 Starting SLO trend monitoring...');
+  console.log(`📊 Target: ${config.target}`);
+  console.log('🎯 SLO Targets:');
+  console.log('   • p95 latency: <200ms (critical), <150ms (baseline)');
+  console.log('   • Error rate: <1%');
+  console.log('   • Availability: >99%');
+  console.log('   • Health check: <50ms p95');
+  console.log('   • GraphQL: <300ms p95');
+  console.log('   • Entity retrieval: <500ms p95');
+  console.log('   • Search: <1000ms p95');
 
   return {
     startTime: new Date(),
@@ -336,15 +336,12 @@ export function setup() {
 // Teardown function - runs once at the end
 export function teardown(data) {
   const duration = (new Date() - data.startTime) / 1000;
-  // eslint-disable-next-line no-console -- k6 teardown output
   console.log(`✅ SLO trend monitoring completed in ${duration.toFixed(1)}s`);
-  // eslint-disable-next-line no-console -- k6 teardown output
   console.log(
     '📈 Check output above for detailed SLO compliance and trend data',
   );
 
   if (config.prometheus.enabled) {
-    // eslint-disable-next-line no-console -- k6 teardown output
     console.log(
       `📊 Metrics exported to Prometheus: ${config.prometheus.endpoint}`,
     );
@@ -427,7 +424,7 @@ function generatePrometheusMetrics(data) {
 // Enhanced text summary
 function textSummary(data, options = {}) {
   const indent = options.indent || '';
-  const _colors = options.enableColors || false;
+  const colors = options.enableColors || false;
 
   const slos = {
     p95: data.metrics.api_latency_p95?.values?.['p(95)'] || 0,

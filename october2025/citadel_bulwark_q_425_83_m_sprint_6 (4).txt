@@ -1,0 +1,94 @@
+# UNIT 83M [CITADEL][BULWARK][ORACLE] SPRINT — Q1'26 • S5 (Feb 26–Mar 10)
+
+## 🎯 Objectives
+- Detect campaign signatures across access/export patterns.
+- Cluster TTPs using telemetry to detect low-and-slow activity.
+- Model user access anomalies against baseline behavior.
+- Replay triggered tripwires for pattern extraction.
+- Build proactive lead indicators from precursor signals.
+- Ship audit graph explorer for export tracing.
+
+---
+
+## ✅ Backlog
+
+| ID | Title | Owner | Definition of Done |
+|----|-------|--------|---------------------|
+| ORC‑31 | Campaign Detection DAG Builder | ORACLE | Graph of related access/export events with labeled links |
+| TTP‑32 | TTP Clustering Engine | ORACLE | Cluster suspicious behaviors via graph + signal correlation |
+| ANM‑33 | Access Anomaly Model (Behavioral) | CITADEL | Alert if deviation from peer/baseline exceeds threshold |
+| TRP‑34 | Tripwire Replay Analyzer | BULWARK | Re-simulate tripwire triggers, extract matching patterns |
+| LID‑35 | Lead Indicator Synth (Heuristics) | ORACLE | Construct heuristics from upstream precursor signals |
+| AUD‑36 | Export Audit Explorer UI | CITADEL | UI with trace graph + filters for export events |
+
+---
+
+## 🧩 Artifacts
+
+### 1. Campaign DAG (NetworkX Sketch)
+```python
+import networkx as nx
+G = nx.DiGraph()
+G.add_node("access:svc1", type="access", actor="user1")
+G.add_node("export:record123", type="export")
+G.add_edge("access:svc1", "export:record123", label="linked_event")
+nx.write_gml(G, "campaign_dag.gml")
+```
+
+### 2. Access Pattern Anomaly Rule (Sketch)
+```json
+{
+  "user": "u123",
+  "baseline": ["/svc/alpha", "/svc/beta"],
+  "current": ["/svc/zeta", "/svc/beta"],
+  "score": 0.72
+}
+```
+→ alert if score > 0.65 & deviation not explained by peer group
+
+### 3. Tripwire Replay YAML
+```yaml
+tripwire_id: tw-104
+replay_window: 7d
+match_pattern: export + record.tag:pii + ip_geoloc:new_country
+outcome:
+  - match_found: 4
+  - pattern_hash: xab992d3
+```
+
+### 4. Lead Indicator Rule (Heuristic)
+```yaml
+if:
+  - geo_hop: true
+  - api_call_burst > 3x
+  - policy_violation == true
+then:
+  trigger: "LEAD_RISK_SURGE"
+```
+
+### 5. Export Audit Explorer Filters (UI Plan)
+- Filter by: `user`, `record_tag`, `geo`, `timestamp`, `policy_label`
+- Graph view: source→sink chains with clickable nodes
+
+---
+
+## 📅 Sprint Exit Criteria (S5)
+- ✅ Campaign DAG created with linked events and actors
+- ✅ TTP clustering identifies grouped behaviors
+- ✅ Access anomalies alert vs baseline + peer
+- ✅ Tripwire replays analyzed, matched
+- ✅ Lead indicators modeled and tested
+- ✅ Audit graph explorer usable + queryable
+
+---
+
+## 📎 References
+- `oracle/campaign_dag_builder.py`
+- `rego/anomaly/access_pattern.rego`
+- `tripwires/replay_log.yaml`
+- `intelgraph/export_traces/*.json`
+- `ui/audit_export_explorer.jsx`
+
+---
+
+# End of Sprint Plan — UNIT 83M Q1'26 S5

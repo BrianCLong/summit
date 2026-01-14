@@ -1,12 +1,13 @@
 
-import { test, describe, beforeEach } from 'node:test';
+import { test, describe, before, after, beforeEach } from 'node:test';
 import assert from 'node:assert';
+import { Pool } from 'pg';
 import { CaseAuditLogRepository } from '../../server/src/cases/domain/CaseAuditLog.js';
 import { CaseSLAService } from '../../server/src/cases/sla/CaseSLAService.js';
 
 // Mock Pool
 class MockPool {
-  query(_text, _params) {
+  query(text, params) {
     return Promise.resolve({ rows: [], rowCount: 0 });
   }
 }
@@ -32,9 +33,9 @@ describe('Case Audit & SLA Verification (Tier B)', () => {
     };
 
     // Mock the queries
-    mockPool.query = (text) => {
-      if (text.includes('SELECT DISTINCT ON')) { return { rows: [] }; } // Init cache
-      if (text.includes('SELECT hash FROM')) { return { rows: [] }; } // Get last hash
+    mockPool.query = async (text) => {
+      if (text.includes('SELECT DISTINCT ON')) return { rows: [] }; // Init cache
+      if (text.includes('SELECT hash FROM')) return { rows: [] }; // Get last hash
       if (text.includes('INSERT INTO')) {
         return {
           rows: [{
@@ -74,7 +75,7 @@ describe('Case Audit & SLA Verification (Tier B)', () => {
       targetDurationSeconds: 86400
     };
 
-    mockPool.query = (text, _params) => {
+    mockPool.query = async (text, params) => {
       if (text.includes('INSERT INTO')) {
         return {
           rows: [{

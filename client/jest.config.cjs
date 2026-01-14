@@ -6,11 +6,6 @@ const config = {
     '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/__mocks__/fileMock.js',
     '^dompurify$': '<rootDir>/__mocks__/dompurify.js',
-    '^react$': '<rootDir>/node_modules/react',
-    '^react-dom$': '<rootDir>/node_modules/react-dom',
-    '^react-redux$': '<rootDir>/node_modules/react-redux',
-    '^@emotion/react$': '<rootDir>/node_modules/@emotion/react',
-    '^@emotion/styled$': '<rootDir>/node_modules/@emotion/styled',
   },
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {

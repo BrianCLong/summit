@@ -60,7 +60,7 @@ export function requestFactory(options: RequestFactoryOptions = {}): MockRequest
     method: options.method || 'GET',
     url: options.url || '/',
     path: options.path || '/',
-    get: function (this: any, name: string) {
+    get: function (name: string) {
       return this.headers[name.toLowerCase()];
     },
   } as unknown as MockRequest;

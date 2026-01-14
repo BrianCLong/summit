@@ -114,12 +114,7 @@ export class MetricRegistry {
     const diff = diffLines(canonicalizeSpec(left), canonicalizeSpec(right));
     const lines: string[] = [];
     for (const part of diff) {
-      let prefix = ' ';
-      if (part.added) {
-        prefix = '+';
-      } else if (part.removed) {
-        prefix = '-';
-      }
+      const prefix = part.added ? '+' : part.removed ? '-' : ' ';
       const value = part.value.replace(/\n$/, '');
       const splitted = value.split('\n');
       for (const line of splitted) {

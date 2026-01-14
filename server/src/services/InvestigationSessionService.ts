@@ -69,20 +69,20 @@ export class InvestigationSessionService {
   }
 
   async listSessions(tenantId: TenantId, principalId?: string, limit = 20): Promise<InvestigationSession[]> {
-    const pool = getPostgresPool();
-    let query = `SELECT * FROM investigation_sessions WHERE tenant_id = $1`;
-    const values: any[] = [tenantId];
+      const pool = getPostgresPool();
+      let query = `SELECT * FROM investigation_sessions WHERE tenant_id = $1`;
+      const values: any[] = [tenantId];
 
-    if (principalId) {
-      query += ` AND created_by_principal_id = $2`;
-      values.push(principalId);
-    }
+      if (principalId) {
+          query += ` AND created_by_principal_id = $2`;
+          values.push(principalId);
+      }
 
-    query += ` ORDER BY updated_at DESC LIMIT $${values.length + 1}`;
-    values.push(limit);
+      query += ` ORDER BY updated_at DESC LIMIT $${values.length + 1}`;
+      values.push(limit);
 
-    const res = await pool.query(query, values);
-    return res.rows.map(this.mapRow);
+      const res = await pool.query(query, values);
+      return res.rows.map(this.mapRow);
   }
 
   async updateSession(
@@ -135,7 +135,7 @@ export class InvestigationSessionService {
     }
   }
 
-  private mapRow(row: any): InvestigationSession {
+  private mapRow(row): InvestigationSession {
     return {
       id: row.id,
       tenantId: row.tenant_id,

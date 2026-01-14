@@ -1,48 +1,44 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import type { Request, Response, NextFunction } from 'express';
+import { rateLimitMiddleware } from '../rateLimit.js';
+import { rateLimiter } from '../../services/RateLimiter.js';
+import { cfg } from '../../config.js';
+import { Request, Response, NextFunction } from 'express';
 
-// Mock functions declared before mocks
-const mockCheckLimit = jest.fn();
-const mockEnforceSeatCap = jest.fn().mockResolvedValue({
-  allowed: true,
-  remaining: 5,
-  limit: 5,
-});
-const mockEnforceStorageBudget = jest.fn();
-const mockAppendEntry = jest.fn().mockResolvedValue(undefined);
-const mockMetricsInc = jest.fn();
-
-// ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../services/RateLimiter.js', () => ({
+// Mock the rateLimiter service
+jest.mock('../../services/RateLimiter.js', () => ({
   rateLimiter: {
-    checkLimit: mockCheckLimit
+    checkLimit: jest.fn()
   }
 }));
 
-jest.unstable_mockModule('../../lib/resources/tenant-limit-enforcer.js', () => ({
+jest.mock('../../lib/resources/tenant-limit-enforcer.js', () => ({
   tenantLimitEnforcer: {
-    enforceSeatCap: mockEnforceSeatCap,
-    enforceStorageBudget: mockEnforceStorageBudget,
+    enforceSeatCap: jest.fn().mockResolvedValue({
+      allowed: true,
+      remaining: 5,
+      limit: 5,
+    }),
+    enforceStorageBudget: jest.fn(),
   },
 }));
 
-jest.unstable_mockModule('../../provenance/ledger.js', () => ({
+jest.mock('../../provenance/ledger.js', () => ({
   provenanceLedger: {
-    appendEntry: mockAppendEntry,
+    appendEntry: jest.fn().mockResolvedValue(undefined),
   },
 }));
 
-jest.unstable_mockModule('../../monitoring/metrics.js', () => ({
+jest.mock('../../monitoring/metrics.js', () => ({
   metrics: {
     rateLimitExceededTotal: {
-      labels: jest.fn(() => ({ inc: mockMetricsInc })),
+      labels: jest.fn(() => ({ inc: jest.fn() })),
     },
   },
 }));
 
-// Dynamic imports AFTER mocks are set up
-const { rateLimitMiddleware } = await import('../rateLimit.js');
-const { rateLimiter } = await import('../../services/RateLimiter.js');
+// Mock config if necessary (though usually importing it works if it's a value)
+// If cfg is a live binding that fails, we might need to mock it too.
+// For now, let's assume imports work but we need to fix relative paths.
 
 describe('rateLimitMiddleware', () => {
   let req: Partial<Request>;
@@ -55,26 +51,27 @@ describe('rateLimitMiddleware', () => {
       originalUrl: '/api/test',
       baseUrl: '/api',
       ip: '127.0.0.1',
-      get: jest.fn() as any
+      get: jest.fn()
     };
     res = {
-      set: jest.fn() as any,
-      status: jest.fn().mockReturnThis() as any,
-      json: jest.fn() as any
+      set: jest.fn(),
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
     };
     next = jest.fn();
     jest.clearAllMocks();
   });
 
   it('should skip rate limiting for health check', async () => {
+    // Cast to any to allow writing to read-only property for test
     (req as any).path = '/health';
     await rateLimitMiddleware(req as Request, res as Response, next);
     expect(next).toHaveBeenCalled();
-    expect(mockCheckLimit).not.toHaveBeenCalled();
+    expect(rateLimiter.checkLimit).not.toHaveBeenCalled();
   });
 
   it('should use IP-based key for unauthenticated requests', async () => {
-    mockCheckLimit.mockResolvedValue({
+    (rateLimiter.checkLimit as jest.Mock).mockResolvedValue({
       allowed: true,
       total: 30,
       remaining: 29,
@@ -83,7 +80,7 @@ describe('rateLimitMiddleware', () => {
 
     await rateLimitMiddleware(req as Request, res as Response, next);
 
-    expect(mockCheckLimit).toHaveBeenCalledWith(
+    expect(rateLimiter.checkLimit).toHaveBeenCalledWith(
       `ip:127.0.0.1:class:DEFAULT`,
       30,
       60000
@@ -92,7 +89,7 @@ describe('rateLimitMiddleware', () => {
   });
 
   it('should use User-based key for authenticated requests without tenant', async () => {
-    mockCheckLimit.mockResolvedValue({
+    (rateLimiter.checkLimit as jest.Mock).mockResolvedValue({
       allowed: true,
       total: 60,
       remaining: 59,
@@ -104,7 +101,7 @@ describe('rateLimitMiddleware', () => {
 
     await rateLimitMiddleware(req as Request, res as Response, next);
 
-    expect(mockCheckLimit).toHaveBeenCalledWith(
+    expect(rateLimiter.checkLimit).toHaveBeenCalledWith(
       `user:user123:class:DEFAULT`,
       60,
       60000
@@ -112,7 +109,7 @@ describe('rateLimitMiddleware', () => {
   });
 
   it('should use Tenant-based key for authenticated requests with tenant', async () => {
-    mockCheckLimit.mockResolvedValue({
+    (rateLimiter.checkLimit as jest.Mock).mockResolvedValue({
       allowed: true,
       total: 60,
       remaining: 59,
@@ -126,7 +123,7 @@ describe('rateLimitMiddleware', () => {
 
     await rateLimitMiddleware(req as Request, res as Response, next);
 
-    expect(mockCheckLimit).toHaveBeenCalledWith(
+    expect(rateLimiter.checkLimit).toHaveBeenCalledWith(
       `tenant:tenantABC:class:DEFAULT`,
       20,
       60000
@@ -134,7 +131,7 @@ describe('rateLimitMiddleware', () => {
   });
 
   it('should block requests when rate limit is exceeded', async () => {
-    mockCheckLimit.mockResolvedValue({
+    (rateLimiter.checkLimit as jest.Mock).mockResolvedValue({
       allowed: false,
       total: 100,
       remaining: 0,
@@ -143,12 +140,12 @@ describe('rateLimitMiddleware', () => {
 
     await rateLimitMiddleware(req as Request, res as Response, next);
 
-    expect(mockCheckLimit).toHaveBeenCalledWith(
+    expect(rateLimiter.checkLimit).toHaveBeenCalledWith(
       `ip:127.0.0.1:class:DEFAULT`,
       30,
       60000
     );
-    const result = await mockCheckLimit.mock.results[0].value;
+    const result = await (rateLimiter.checkLimit as jest.Mock).mock.results[0].value;
     expect(result.allowed).toBe(false);
     if ((res.status as jest.Mock).mock.calls.length === 0) {
       expect(next).toHaveBeenCalled();

@@ -255,7 +255,7 @@ export class ApprovalWorkflowManager<TConfig = Record<string, any>> {
     workflow.approvals.push(approval);
 
     // Check if we have enough approvals
-    const isApproved = workflow.approvals.length >= (workflow.requiredApprovals ?? 1);
+    const isApproved = workflow.approvals.length >= workflow.requiredApprovals;
 
     if (isApproved) {
       workflow.status = 'approved';
@@ -554,7 +554,7 @@ export class ApprovalWorkflowManager<TConfig = Record<string, any>> {
     this.events.on(event, listener);
   }
 
-  private mapRowToWorkflow(row: any): ApprovalWorkflow<TConfig> {
+  private mapRowToWorkflow(row): ApprovalWorkflow<TConfig> {
     return {
       id: row.id,
       changeId: row.change_id,

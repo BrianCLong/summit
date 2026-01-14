@@ -60,17 +60,17 @@ export class MigrationOrchestrator {
         try {
           batch = await source.fetchBatch(ctx, cursor);
         } catch (e: any) {
-          result.errors.push({ stage: 'FETCH', message: e.message });
-          result.status = 'FAILED';
-          break;
+           result.errors.push({ stage: 'FETCH', message: e.message });
+           result.status = 'FAILED';
+           break;
         }
 
-        const rawRecords = batch.data.records;
+        const rawRecords = batch.records;
 
-        if (!batch.data.nextCursor || batch.data.nextCursor === 'DONE') {
+        if (!batch.nextCursor || batch.nextCursor === 'DONE') {
           hasMore = false;
         } else {
-          cursor = batch.data.nextCursor;
+          cursor = batch.nextCursor;
         }
 
         if (rawRecords.length === 0) continue;
@@ -105,8 +105,8 @@ export class MigrationOrchestrator {
             // 6. Write (or simulate if dry-run)
             // Note: Batching writes would be more efficient in production
             if (!ctx.dryRun) {
-              await this.destination.write(ctx, [record]);
-              if (recordId) await this.idempotencyService.markProcessed(ctx, recordId);
+               await this.destination.write(ctx, [record]);
+               if (recordId) await this.idempotencyService.markProcessed(ctx, recordId);
             }
 
             result.recordsSuccess++;

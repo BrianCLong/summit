@@ -122,7 +122,7 @@ const seedRelationships = async (filePath) => {
 
 const boot = async () => {
   app.listen(port, () => {
-    process.stdout.write(`Ingest stub listening on :${port}\n`);
+    console.log(`Ingest stub listening on :${port}`);
   });
 
   if (argv.seed) {
@@ -138,10 +138,10 @@ const boot = async () => {
     }
   });
   const mapping = await loadMapping();
-  process.stdout.write(`Mapping loaded: ${mapping.split('\n')[0]} ...\n`);
+  console.log('Mapping loaded:', mapping.split('\n')[0], '...');
 };
 
 boot().catch((err) => {
-  process.stderr.write(`Failed to start ingest stub ${err}\n`);
+  console.error('Failed to start ingest stub', err);
   process.exit(1);
 });

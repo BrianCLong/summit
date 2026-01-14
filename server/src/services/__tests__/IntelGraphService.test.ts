@@ -1,23 +1,17 @@
-// ESM-compatible test for IntelGraphService
+// Mock dependencies
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-
-// Mock functions declared before mocks
-const mockGetNeo4jDriver = jest.fn();
-const mockAppendEntry = jest.fn();
-
-// ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../config/database.js', () => ({
-  getNeo4jDriver: mockGetNeo4jDriver,
+jest.mock('../../config/database.js', () => ({
+  getNeo4jDriver: jest.fn(),
 }));
 
-jest.unstable_mockModule('../../provenance/ledger.js', () => ({
+jest.mock('../../provenance/ledger.js', () => ({
   provenanceLedger: {
-    appendEntry: mockAppendEntry,
+    appendEntry: jest.fn(),
   },
 }));
 
 // Mock crypto.randomUUID
-jest.unstable_mockModule('crypto', () => ({
+jest.mock('crypto', () => ({
   randomUUID: jest.fn(() => 'generated-uuid'),
 }));
 
@@ -62,17 +56,17 @@ describe('IntelGraphService', () => {
     (promClient.Histogram as any).prototype.startTimer = jest.fn(() => jest.fn());
     (promClient.Counter as any).prototype.inc = jest.fn();
 
-    mockGetNeo4jDriver.mockReturnValue({
+    const dbModule = await import('../../config/database.js');
+    (dbModule.getNeo4jDriver as jest.Mock).mockReturnValue({
       session: jest.fn(() => mockSession),
-    });
-
-    mockAppendEntry.mockResolvedValue({
-      id: 'ledger-123',
-      currentHash: 'hash-abc',
     });
 
     const ledgerModule = await import('../../provenance/ledger.js');
     provenanceLedgerMock = ledgerModule.provenanceLedger;
+    (provenanceLedgerMock.appendEntry as jest.Mock).mockResolvedValue({
+      id: 'ledger-123',
+      currentHash: 'hash-abc',
+    });
 
     const module = await import('../IntelGraphService.js');
     IntelGraphServiceClass = module.IntelGraphService;

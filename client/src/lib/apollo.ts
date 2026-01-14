@@ -1,5 +1,4 @@
 import { ApolloClient, InMemoryCache, HttpLink, split } from '@apollo/client';
-// @ts-ignore
 import { GraphQLWsLink } from 'graphql-ws/lib/useWs';
 import { createClient } from 'graphql-ws';
 import { getMainDefinition } from '@apollo/client/utilities';

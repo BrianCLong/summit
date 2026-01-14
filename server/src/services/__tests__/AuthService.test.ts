@@ -11,25 +11,31 @@
  */
 
 import { jest } from '@jest/globals';
+import AuthService from '../AuthService.js';
+import argon2 from 'argon2';
+import jwt from 'jsonwebtoken';
 import type { Pool } from 'pg';
+import { getPostgresPool } from '../../config/database.js';
 
-// 1. Mock GAEnrollmentService
-const mockCheckUserEnrollmentEligibility = jest.fn();
-jest.unstable_mockModule('../GAEnrollmentService.js', () => ({
-  __esModule: true,
-  default: {
-    checkUserEnrollmentEligibility: mockCheckUserEnrollmentEligibility,
-  },
+// Mock dependencies
+jest.mock('argon2');
+jest.mock('jsonwebtoken');
+var mockCheckUserEnrollmentEligibility: jest.MockedFunction<
+  (email: string) => Promise<{ eligible: boolean; reason?: string }>
+>;
+jest.mock('../GAEnrollmentService.js', () => {
+  mockCheckUserEnrollmentEligibility = jest.fn();
+  return {
+    __esModule: true,
+    default: {
+      checkUserEnrollmentEligibility: mockCheckUserEnrollmentEligibility,
+    },
+  };
+});
+jest.mock('../../config/database.js', () => ({
+  getPostgresPool: jest.fn<() => Pool>(() => mockPool),
 }));
-
-// 2. Mock Database Config
-const mockGetPostgresPool = jest.fn();
-jest.unstable_mockModule('../../config/database.js', () => ({
-  getPostgresPool: mockGetPostgresPool,
-}));
-
-// 3. Mock Config Utils
-jest.unstable_mockModule('../../config/index.js', () => ({
+jest.mock('../../config/index.js', () => ({
   __esModule: true,
   default: {
     jwt: {
@@ -37,44 +43,7 @@ jest.unstable_mockModule('../../config/index.js', () => ({
       expiresIn: '24h',
     },
   },
-  cfg: {
-    JWT_SECRET: 'test-secret-key',
-  },
 }));
-
-// 4. Mock External Libs
-const mockVerify = jest.fn();
-const mockSign = jest.fn();
-const mockHash = jest.fn();
-const mockArgonVerify = jest.fn();
-
-jest.unstable_mockModule('argon2', () => ({
-  __esModule: true,
-  default: {
-    hash: mockHash,
-    verify: mockArgonVerify,
-  },
-  hash: mockHash,
-  verify: mockArgonVerify,
-}));
-
-jest.unstable_mockModule('jsonwebtoken', () => ({
-  __esModule: true,
-  default: {
-    sign: mockSign,
-    verify: mockVerify,
-  },
-  sign: mockSign,
-  verify: mockVerify,
-}));
-
-// 5. Dynamic Imports
-const { AuthService } = await import('../AuthService.js');
-const { default: GAEnrollmentService } = await import('../GAEnrollmentService.js');
-const { getPostgresPool } = await import('../../config/database.js');
-const { default: argon2 } = await import('argon2');
-const { default: jwt } = await import('jsonwebtoken');
-
 
 let mockPool: jest.Mocked<Pool>;
 let mockClient: any;
@@ -84,9 +53,8 @@ describe('AuthService', () => {
 
   beforeEach(() => {
     // Reset mocks
-    // Reset mocks
     jest.clearAllMocks();
-    (GAEnrollmentService.checkUserEnrollmentEligibility as jest.Mock).mockResolvedValue({ eligible: true });
+    mockCheckUserEnrollmentEligibility.mockResolvedValue({ eligible: true });
 
     // Mock PostgreSQL client
     mockClient = {
@@ -121,8 +89,8 @@ describe('AuthService', () => {
       const mockToken = 'jwt-token-123';
       const mockRefreshToken = 'refresh-token-456';
 
-      mockHash.mockResolvedValue(mockHashedPassword);
-      mockSign.mockReturnValue(mockToken);
+      (argon2.hash as any).mockResolvedValue(mockHashedPassword);
+      (jwt.sign as any).mockReturnValue(mockToken);
 
       mockClient.query.mockResolvedValueOnce(undefined); // BEGIN
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // Check existing user
@@ -150,7 +118,7 @@ describe('AuthService', () => {
       expect(result.user.email).toBe(mockUserData.email);
       expect(result.token).toBe(mockToken);
       expect(result.refreshToken).toBeDefined();
-      expect(mockHash).toHaveBeenCalledWith(mockUserData.password);
+      expect(argon2.hash).toHaveBeenCalledWith(mockUserData.password);
       expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
       expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
     });
@@ -177,8 +145,8 @@ describe('AuthService', () => {
       };
 
       const mockHashedPassword = '$argon2id$v=19$m=65536$...';
-      mockHash.mockResolvedValue(mockHashedPassword);
-      mockSign.mockReturnValue('jwt-token');
+      (argon2.hash as any).mockResolvedValue(mockHashedPassword);
+      (jwt.sign as any).mockReturnValue('jwt-token');
 
       mockClient.query.mockResolvedValueOnce(undefined); // BEGIN
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // Check existing user
@@ -204,7 +172,7 @@ describe('AuthService', () => {
     });
 
     it('should rollback on database error', async () => {
-      mockHash.mockResolvedValue('hashed-password');
+      (argon2.hash as any).mockResolvedValue('hashed-password');
 
       mockClient.query.mockResolvedValueOnce(undefined); // BEGIN
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // Check existing user
@@ -219,8 +187,8 @@ describe('AuthService', () => {
 
     it('should hash password using argon2', async () => {
       const mockHashedPassword = '$argon2id$v=19$m=65536$...';
-      mockHash.mockResolvedValue(mockHashedPassword);
-      mockSign.mockReturnValue('jwt-token');
+      (argon2.hash as any).mockResolvedValue(mockHashedPassword);
+      (jwt.sign as any).mockReturnValue('jwt-token');
 
       mockClient.query.mockResolvedValueOnce(undefined); // BEGIN
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // Check existing user
@@ -240,7 +208,7 @@ describe('AuthService', () => {
 
       await authService.register(mockUserData);
 
-      expect(mockHash).toHaveBeenCalledWith(mockUserData.password);
+      expect(argon2.hash).toHaveBeenCalledWith(mockUserData.password);
       expect(argon2.hash).toHaveBeenCalledTimes(1);
     });
   });
@@ -264,8 +232,8 @@ describe('AuthService', () => {
       mockClient.query.mockResolvedValueOnce(undefined); // Update last_login
       mockClient.query.mockResolvedValueOnce(undefined); // Insert session
 
-      mockArgonVerify.mockResolvedValue(true);
-      mockSign.mockReturnValue('jwt-token');
+      (argon2.verify as any).mockResolvedValue(true);
+      (jwt.sign as any).mockReturnValue('jwt-token');
 
       const result = await authService.login(mockEmail, mockPassword);
 
@@ -273,7 +241,7 @@ describe('AuthService', () => {
       expect(result.user.email).toBe(mockEmail);
       expect(result.token).toBeDefined();
       expect(result.refreshToken).toBeDefined();
-      expect(mockArgonVerify).toHaveBeenCalledWith(
+      expect(argon2.verify).toHaveBeenCalledWith(
         mockHashedPassword,
         mockPassword,
       );
@@ -315,7 +283,7 @@ describe('AuthService', () => {
       };
 
       mockClient.query.mockResolvedValueOnce({ rows: [mockUser] });
-      mockArgonVerify.mockResolvedValue(false);
+      (argon2.verify as any).mockResolvedValue(false);
 
       await expect(authService.login(mockEmail, mockPassword)).rejects.toThrow(
         'Invalid credentials',
@@ -336,8 +304,8 @@ describe('AuthService', () => {
       mockClient.query.mockResolvedValueOnce(undefined); // Update last_login
       mockClient.query.mockResolvedValueOnce(undefined); // Insert session
 
-      mockArgonVerify.mockResolvedValue(true);
-      mockSign.mockReturnValue('jwt-token');
+      (argon2.verify as any).mockResolvedValue(true);
+      (jwt.sign as any).mockReturnValue('jwt-token');
 
       await authService.login(mockEmail, mockPassword);
 
@@ -361,8 +329,8 @@ describe('AuthService', () => {
       mockClient.query.mockResolvedValueOnce(undefined); // Update last_login
       mockClient.query.mockResolvedValueOnce(undefined); // Insert session
 
-      mockArgonVerify.mockResolvedValue(true);
-      mockSign.mockReturnValue('jwt-token');
+      (argon2.verify as any).mockResolvedValue(true);
+      (jwt.sign as any).mockReturnValue('jwt-token');
 
       const result = await authService.login(mockEmail, mockPassword);
 
@@ -392,7 +360,7 @@ describe('AuthService', () => {
         created_at: new Date(),
       };
 
-      mockVerify.mockReturnValue(mockPayload);
+      (jwt.verify as any).mockReturnValue(mockPayload);
       (mockPool.query as any).mockResolvedValue({ rows: [] });
       mockClient.query.mockResolvedValue({ rows: [mockUser] });
 
@@ -401,13 +369,13 @@ describe('AuthService', () => {
       expect(result).not.toBeNull();
       expect(result?.id).toBe(mockUser.id);
       expect(result?.email).toBe(mockUser.email);
-      expect(mockVerify).toHaveBeenCalledWith(mockToken, 'test-jwt-secret-for-testing-only');
+      expect(jwt.verify).toHaveBeenCalledWith(mockToken, 'test-jwt-secret-for-testing-only');
     });
 
     it('should return null for invalid token', async () => {
       const mockToken = 'invalid-token';
 
-      mockVerify.mockImplementation(() => {
+      (jwt.verify as any).mockImplementation(() => {
         throw new Error('Invalid token');
       });
 
@@ -430,7 +398,7 @@ describe('AuthService', () => {
         role: 'ANALYST',
       };
 
-      mockVerify.mockReturnValue(mockPayload);
+      (jwt.verify as any).mockReturnValue(mockPayload);
       mockClient.query.mockResolvedValue({ rows: [] } as any);
 
       const result = await authService.verifyToken(mockToken);
@@ -453,7 +421,7 @@ describe('AuthService', () => {
         created_at: new Date(),
       };
 
-      mockVerify.mockReturnValue(mockPayload);
+      (jwt.verify as any).mockReturnValue(mockPayload);
       mockClient.query.mockResolvedValue({ rows: [mockUser] } as any);
 
       const result = await authService.verifyToken(mockToken);
@@ -618,8 +586,8 @@ describe('AuthService', () => {
       };
 
       mockClient.query.mockResolvedValue({ rows: [mockUser] });
-      mockArgonVerify.mockResolvedValue(true);
-      mockSign.mockReturnValue('jwt-token');
+      (argon2.verify as any).mockResolvedValue(true);
+      (jwt.sign as any).mockReturnValue('jwt-token');
 
       const loginPromises = Array.from({ length: 5 }, () =>
         authService.login('test@example.com', 'password'),
@@ -661,7 +629,7 @@ describe('AuthService', () => {
         created_at: new Date(),
       };
 
-      mockVerify.mockReturnValue(mockPayload);
+      (jwt.verify as any).mockReturnValue(mockPayload);
       (mockPool.query as any).mockResolvedValue({ rows: [] });
       mockClient.query.mockResolvedValue({ rows: [mockUser] });
 

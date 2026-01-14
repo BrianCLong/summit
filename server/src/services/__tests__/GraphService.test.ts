@@ -1,19 +1,12 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import type { Entity, Edge } from '../../graph/types';
+import { Neo4jGraphService } from '../GraphService';
+import { runCypher } from '../../graph/neo4j';
+import { Entity, Edge } from '../../graph/types';
 
-// Mock functions declared before mocks
-const mockRunCypher = jest.fn();
-const mockGetDriver = jest.fn();
-
-// ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../graph/neo4j', () => ({
-  runCypher: mockRunCypher,
-  getDriver: mockGetDriver,
+jest.mock('../../graph/neo4j', () => ({
+  runCypher: jest.fn(),
+  getDriver: jest.fn(),
 }));
-
-// Dynamic imports AFTER mocks are set up
-const { Neo4jGraphService } = await import('../GraphService');
-const { runCypher } = await import('../../graph/neo4j');
 
 describe('Neo4jGraphService', () => {
   const service = Neo4jGraphService.getInstance();
@@ -36,7 +29,7 @@ describe('Neo4jGraphService', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      mockRunCypher.mockResolvedValue([{ entity: mockEntity }]);
+      (runCypher as jest.Mock).mockResolvedValue([{ entity: mockEntity }]);
 
       const result = await service.getEntity(tenantId, 'e1');
       expect(result).toEqual(mockEntity);
@@ -44,7 +37,7 @@ describe('Neo4jGraphService', () => {
     });
 
     it('should return null if not found', async () => {
-      mockRunCypher.mockResolvedValue([]);
+      (runCypher as jest.Mock).mockResolvedValue([]);
       const result = await service.getEntity(tenantId, 'e1');
       expect(result).toBeNull();
     });
@@ -53,7 +46,7 @@ describe('Neo4jGraphService', () => {
   describe('findEntities', () => {
     it('should search by ids', async () => {
        const mockEntity = { id: 'e1' };
-       mockRunCypher.mockResolvedValue([{ entity: mockEntity }]);
+       (runCypher as jest.Mock).mockResolvedValue([{ entity: mockEntity }]);
 
        await service.findEntities(tenantId, { ids: ['e1'] });
        expect(runCypher).toHaveBeenCalledWith(expect.stringContaining('n.id IN $ids'), expect.objectContaining({ ids: ['e1'] }));
@@ -65,7 +58,7 @@ describe('Neo4jGraphService', () => {
           const input = { id: 'e1', type: 'person', label: 'Bob' };
           const output = { ...input, tenantId, attributes: {}, metadata: {} };
 
-          mockRunCypher.mockResolvedValue([{ entity: output }]);
+          (runCypher as jest.Mock).mockResolvedValue([{ entity: output }]);
 
           const result = await service.upsertEntity(tenantId, input);
           expect(result).toEqual(output);

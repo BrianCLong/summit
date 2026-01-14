@@ -3,11 +3,10 @@ import path from 'path';
 import { compile } from '../../packages/sdk/nlq-js/src/index.js';
 import { describe, it, expect } from '@jest/globals';
 
-// Use process.cwd() since tests run from server directory
 describe('nlq compile', () => {
   const fixturePath = path.join(
-    process.cwd(),
-    '../tests/fixtures/nlq/golden.json',
+    __dirname,
+    '../../tests/fixtures/nlq/golden.json',
   );
   const fixtures = JSON.parse(fs.readFileSync(fixturePath, 'utf8'));
 

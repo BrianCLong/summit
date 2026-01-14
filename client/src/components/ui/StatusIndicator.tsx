@@ -1,13 +1,15 @@
 // client/src/components/ui/StatusIndicator.tsx
 import React from 'react';
-import { Chip, Tooltip } from '@mui/material';
+import { Chip, Tooltip, Box } from '@mui/material';
 import {
   Circle,
+  Square,
   Diamond,
   Hexagon,
-  ChangeHistory as Triangle,
+  Triangle,
   FiberManualRecord,
-  RadioButtonUnchecked
+  RadioButtonUnchecked,
+  CropSquare
 } from '@mui/icons-material';
 
 interface StatusIndicatorProps {
@@ -18,12 +20,6 @@ interface StatusIndicatorProps {
   sx?: object;
 }
 
-const sizeMap = {
-  small: { fontSize: '1rem', chipSize: 'small' as const },
-  medium: { fontSize: '1.2rem', chipSize: 'medium' as const },
-  large: { fontSize: '1.5rem', chipSize: 'medium' as const }
-};
-
 const StatusIndicator: React.FC<StatusIndicatorProps> = ({
   status,
   size = 'medium',
@@ -32,6 +28,12 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({
   sx = {}
 }) => {
   const getStatusConfig = () => {
+    const sizeMap = {
+      small: { fontSize: '1rem', chipSize: 'small' },
+      medium: { fontSize: '1.2rem', chipSize: 'medium' },
+      large: { fontSize: '1.5rem', chipSize: 'large' }
+    };
+
     const config = sizeMap[size];
 
     switch (status) {
@@ -39,7 +41,7 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({
         return {
           icon: <Diamond sx={{ fontSize: config.fontSize, color: '#9e9e9e' }} />,
           label: label || 'SIM',
-          color: 'default' as const,
+          color: 'default',
           backgroundColor: '#f5f5f5',
           borderColor: '#bdbdbd',
           description: description || 'Simulated data - not connected to real systems'
@@ -48,7 +50,7 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({
         return {
           icon: <FiberManualRecord sx={{ fontSize: config.fontSize, color: '#4caf50' }} />,
           label: label || 'REAL',
-          color: 'success' as const,
+          color: 'success',
           backgroundColor: '#e8f5e9',
           borderColor: '#4caf50',
           description: description || 'Connected to real production systems'
@@ -57,7 +59,7 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({
         return {
           icon: <RadioButtonUnchecked sx={{ fontSize: config.fontSize, color: '#ff9800' }} />,
           label: label || 'PARTIAL',
-          color: 'warning' as const,
+          color: 'warning',
           backgroundColor: '#fff3e0',
           borderColor: '#ff9800',
           description: description || 'Partially connected to real systems'
@@ -66,7 +68,7 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({
         return {
           icon: <Triangle sx={{ fontSize: config.fontSize, color: '#2196f3' }} />,
           label: label || 'TEST',
-          color: 'info' as const,
+          color: 'info',
           backgroundColor: '#e3f2fd',
           borderColor: '#2196f3',
           description: description || 'Under testing - not for production use'
@@ -75,7 +77,7 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({
         return {
           icon: <Hexagon sx={{ fontSize: config.fontSize, color: '#f44336' }} />,
           label: label || 'MAINT',
-          color: 'error' as const,
+          color: 'error',
           backgroundColor: '#ffebee',
           borderColor: '#f44336',
           description: description || 'Under maintenance - limited functionality'
@@ -84,7 +86,7 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({
         return {
           icon: <Circle sx={{ fontSize: config.fontSize, color: '#9e9e9e' }} />,
           label: label || 'N/A',
-          color: 'default' as const,
+          color: 'default',
           backgroundColor: '#f5f5f5',
           borderColor: '#bdbdbd',
           description: description || 'Status not specified'
@@ -92,7 +94,7 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({
     }
   };
 
-  const { icon, label: statusLabel, backgroundColor, borderColor, description: statusDesc } = getStatusConfig();
+  const { icon, label: statusLabel, color, backgroundColor, borderColor, description: statusDesc } = getStatusConfig();
 
   return (
     <Tooltip title={statusDesc} arrow>

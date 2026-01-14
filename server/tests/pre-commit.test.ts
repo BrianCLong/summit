@@ -4,9 +4,8 @@ import { exec } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 
-// Use process.cwd() since tests run from server directory
-const SCRIPT_PATH = path.join(process.cwd(), 'scripts/generate-screenshots.ts');
-const METADATA_PATH = path.join(process.cwd(), '../docs/cookbook/screenshots/metadata.json');
+const SCRIPT_PATH = path.resolve(__dirname, '../scripts/generate-screenshots.ts');
+const METADATA_PATH = path.resolve(__dirname, '../../docs/cookbook/screenshots/metadata.json');
 
 describe('Pre-commit Screenshot Script', () => {
   it('should exit gracefully (code 0) when server is unreachable', (done) => {

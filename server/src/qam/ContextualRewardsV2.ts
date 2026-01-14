@@ -27,7 +27,6 @@ export interface MultiObjectiveReward {
     quality: ObjectiveScore;
     reliability: ObjectiveScore;
     security: ObjectiveScore;
-    [key: string]: ObjectiveScore;
   };
   compositeScore: number;
   paretoRank: number;
@@ -436,7 +435,7 @@ export class ContextualRewardsV2 extends EventEmitter {
     // Normalize weights to sum to 1
     const sum = Object.values(baseWeights).reduce((a, b) => a + b, 0);
     for (const key in baseWeights) {
-      (baseWeights as Record<string, number>)[key] /= sum;
+      baseWeights[key] /= sum;
     }
 
     return baseWeights;
@@ -636,8 +635,8 @@ export class ContextualRewardsV2 extends EventEmitter {
     let strictlyBetterInOne = false;
 
     for (const obj of objectives) {
-      const score1 = (reward1.objectives as Record<string, { normalized: number }>)[obj].normalized;
-      const score2 = (reward2.objectives as Record<string, { normalized: number }>)[obj].normalized;
+      const score1 = reward1.objectives[obj].normalized;
+      const score2 = reward2.objectives[obj].normalized;
 
       if (score1 < score2) {
         betterInAll = false;
@@ -687,7 +686,7 @@ export class ContextualRewardsV2 extends EventEmitter {
     let totalSpread = 0;
 
     for (const obj of objectives) {
-      const values = solutions.map((s) => (s.objectives as Record<string, { normalized: number }>)[obj].normalized);
+      const values = solutions.map((s) => s.objectives[obj].normalized);
       const min = Math.min(...values);
       const max = Math.max(...values);
       totalSpread += max - min;
@@ -816,10 +815,10 @@ export class ContextualRewardsV2 extends EventEmitter {
     for (const obj of objectives) {
       const avgPerformance =
         windowRewards.reduce(
-          (sum, r) => sum + (r.objectives as Record<string, { normalized: number }>)[obj].normalized,
+          (sum, r) => sum + r.objectives[obj].normalized,
           0,
         ) / windowRewards.length;
-      const currentWeight = (this.config.objectiveWeights as Record<string, number>)[obj];
+      const currentWeight = this.config.objectiveWeights[obj];
 
       if (avgPerformance > 0.8) {
         // Good performance - could increase weight

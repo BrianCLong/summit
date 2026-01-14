@@ -17,12 +17,12 @@ function buildRegistry() {
   return createIngestionRegistry('dpic-certifier');
 }
 
-function certify(registry, spec, secret) {
+async function certify(registry, spec, secret) {
   registry.register(spec);
   return registry.certify(spec.id, secret);
 }
 
-export function testContractDrift() {
+export async function testContractDrift() {
   const changes = diffSpecs(fixtures.baseline, fixtures.candidate);
   assert(changes.some((entry) => entry.includes('unit changed')));
   assert(changes.some((entry) => entry.includes('Field errorCode added')));
@@ -52,7 +52,7 @@ export async function testProductionRequiresCertificate() {
   assert.match(outcome.reason ?? '', /certificate/);
 }
 
-export function testPrivacyFlags() {
+export async function testPrivacyFlags() {
   const conformance = validateConformance(fixtures.baseline, {
     deviceId: 'dev-1',
     temperatureC: 20,

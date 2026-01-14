@@ -277,7 +277,7 @@ export class MPCProtocol extends EventEmitter {
   /**
    * Execute private top-k aggregation
    */
-  privateTopK(
+  async privateTopK(
     datasets: Map<string, Record<string, number>[]>,
     participants: string[],
     k: number,
@@ -285,7 +285,7 @@ export class MPCProtocol extends EventEmitter {
     options: {
       differentialPrivacy?: { epsilon: number; delta: number };
     } = {},
-  ): MPCResult {
+  ): Promise<MPCResult> {
     const circuit = this.createCircuit({
       name: 'private-topk',
       operation: 'topk',
@@ -303,7 +303,7 @@ export class MPCProtocol extends EventEmitter {
     });
 
     // Aggregate counts across parties
-    const _combinedCounts = new Map<string, number>();
+    const combinedCounts = new Map<string, number>();
     for (const [partyId, data] of datasets) {
       const shares = this.createAdditiveShares(data, participants, field);
       const inputData = new Map();
@@ -334,7 +334,7 @@ export class MPCProtocol extends EventEmitter {
         Math.max(
           0,
           count +
-            this.generateLaplaceNoise(options.differentialPrivacy.epsilon),
+            this.generateLaplaceNoise(options.differentialPrivacy!.epsilon),
         ),
       ]);
     }
@@ -366,14 +366,14 @@ export class MPCProtocol extends EventEmitter {
   /**
    * Execute private distinct count
    */
-  privateDistinct(
+  async privateDistinct(
     datasets: Map<string, any[]>,
     participants: string[],
     field: string,
     options: {
       differentialPrivacy?: { epsilon: number; delta: number };
     } = {},
-  ): MPCResult {
+  ): Promise<MPCResult> {
     // Use HyperLogLog sketches for scalable distinct counting
     const sketches = new Map<string, Set<string>>();
 
@@ -443,10 +443,10 @@ export class MPCProtocol extends EventEmitter {
   /**
    * Precompute Beaver triples for multiplication
    */
-  precomputeBeaverTriples(
+  async precomputeBeaverTriples(
     count: number,
     parties: string[],
-  ): BeaverTriple[] {
+  ): Promise<BeaverTriple[]> {
     const triples: BeaverTriple[] = [];
 
     for (let i = 0; i < count; i++) {
@@ -486,10 +486,10 @@ export class MPCProtocol extends EventEmitter {
     return triples;
   }
 
-  private setupPhase(
+  private async setupPhase(
     session: MPCSession,
     inputData: Map<string, any>,
-  ): void {
+  ): Promise<void> {
     session.status = 'input-sharing';
 
     // Create input commitments
@@ -512,10 +512,7 @@ export class MPCProtocol extends EventEmitter {
 
   private async computationPhase(session: MPCSession): Promise<void> {
     session.status = 'computation';
-    const circuit = this.circuits.get(session.circuitId);
-    if (!circuit) {
-      throw new Error(`Circuit not found: ${session.circuitId}`);
-    }
+    const circuit = this.circuits.get(session.circuitId)!;
 
     // Execute computation based on operation type
     switch (circuit.operation) {
@@ -535,7 +532,7 @@ export class MPCProtocol extends EventEmitter {
     this.emit('computation_phase_completed', session);
   }
 
-  private outputReconstructionPhase(session: MPCSession): void {
+  private async outputReconstructionPhase(session: MPCSession): Promise<void> {
     session.status = 'output-reconstruction';
 
     // Reconstruct final result from shares
@@ -545,7 +542,7 @@ export class MPCProtocol extends EventEmitter {
     this.emit('output_reconstruction_completed', session);
   }
 
-  private executeCountCircuit(session: MPCSession): void {
+  private async executeCountCircuit(session: MPCSession): Promise<void> {
     // Sum all input shares
     let totalShares: SecretShare[] = [];
 
@@ -561,18 +558,15 @@ export class MPCProtocol extends EventEmitter {
     session.intermediateResults.set(1, totalShares);
   }
 
-  private executeSumCircuit(session: MPCSession): void {
+  private async executeSumCircuit(session: MPCSession): Promise<void> {
     // Similar to count but with actual values
-    this.executeCountCircuit(session);
+    await this.executeCountCircuit(session);
   }
 
-  private executeTopKCircuit(session: MPCSession): void {
+  private async executeTopKCircuit(session: MPCSession): Promise<void> {
     // Simplified top-k - in practice would use MPC-friendly sorting
-    const circuit = this.circuits.get(session.circuitId);
-    if (!circuit) {
-      throw new Error(`Circuit not found: ${session.circuitId}`);
-    }
-    const _k = circuit.parameters.k;
+    const circuit = this.circuits.get(session.circuitId)!;
+    const k = circuit.parameters.k;
 
     // For now, simulate the computation
     session.currentRound = circuit.estimatedCost.rounds;
@@ -683,14 +677,13 @@ export class MPCProtocol extends EventEmitter {
           bandwidthMB: parties * 0.1,
           computeTimeMs: parties * 100,
         };
-      case 'topk': {
+      case 'topk':
         const k = circuit.parameters.k || 10;
         return {
           rounds: baseRounds + Math.log2(k),
           bandwidthMB: parties * 0.5 * k,
           computeTimeMs: parties * 500 * k,
         };
-      }
       default:
         return {
           rounds: baseRounds,
@@ -702,7 +695,7 @@ export class MPCProtocol extends EventEmitter {
 
   private calculatePrecomputeNeeds(
     circuit: Omit<MPCCircuit, 'id' | 'estimatedCost'>,
-    _cost: MPCCircuit['estimatedCost'],
+    cost: MPCCircuit['estimatedCost'],
   ): MPCCircuit['precomputeRequirements'] {
     const parties = circuit.inputs.length;
 
@@ -731,6 +724,7 @@ export class MPCProtocol extends EventEmitter {
   private generateLaplaceNoise(epsilon: number): number {
     // Generate Laplace noise for differential privacy
     const u1 = Math.random();
+    const u2 = Math.random();
     const noise =
       (1 / epsilon) *
       Math.sign(u1 - 0.5) *
@@ -739,10 +733,7 @@ export class MPCProtocol extends EventEmitter {
   }
 
   private formatMPCResult(session: MPCSession, result: any): MPCResult {
-    const circuit = this.circuits.get(session.circuitId);
-    if (!circuit) {
-      throw new Error(`Circuit not found: ${session.circuitId}`);
-    }
+    const circuit = this.circuits.get(session.circuitId)!;
 
     return {
       sessionId: session.id,
@@ -764,7 +755,7 @@ export class MPCProtocol extends EventEmitter {
         ),
       },
       metadata: {
-        computeTime: (session.endTime ?? new Date()).getTime() - session.startTime.getTime(),
+        computeTime: session.endTime!.getTime() - session.startTime.getTime(),
         roundsExecuted: session.currentRound,
         bandwidthUsed: circuit.estimatedCost.bandwidthMB,
         errorRate: 0,

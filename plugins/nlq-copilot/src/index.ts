@@ -151,14 +151,7 @@ class NLQCompiler {
       regex: /recent\s+(\w+)s?\s+(?:in\s+the\s+)?(?:last\s+)?(\d+)\s+(days?|hours?|weeks?)/i,
       template: (m: RegExpMatchArray) => {
         const unit = m[3].toLowerCase();
-        let duration = 'w';
-        if (unit.startsWith('day')) {
-          duration = 'd';
-        } else if (unit.startsWith('hour')) {
-          duration = 'h';
-        } else {
-          duration = 'w';
-        }
+        const duration = unit.startsWith('day') ? 'd' : unit.startsWith('hour') ? 'h' : 'w';
         return `MATCH (n:${this.capitalize(m[1])}) WHERE n.createdAt > datetime() - duration('P${m[2]}${duration.toUpperCase()}') RETURN n ORDER BY n.createdAt DESC`;
       },
     },
@@ -236,7 +229,7 @@ class NLQCompiler {
     };
   }
 
-  explainView(request: z.infer<typeof ExplainViewRequestSchema>): ViewExplanation {
+  async explainView(request: z.infer<typeof ExplainViewRequestSchema>): Promise<ViewExplanation> {
     const { viewId, viewType, currentFilters, selectedNodes } = request;
 
     // Generate explanation based on view type
@@ -330,10 +323,10 @@ class NLQCompiler {
     return `MATCH (n:${this.capitalize(primaryEntity)}) RETURN n LIMIT 25`;
   }
 
-  private extractRagCitations(
-    _nl: string,
+  private async extractRagCitations(
+    nl: string,
     sources?: string[],
-  ): Citation[] {
+  ): Promise<Citation[]> {
     // Simplified: would use vector similarity search
     const citations: Citation[] = [];
 
@@ -382,7 +375,7 @@ class NLQCompiler {
     return { valid: errors.length === 0, errors };
   }
 
-  private fixSyntax(cypher: string, _errors: string[]): string {
+  private fixSyntax(cypher: string, errors: string[]): string {
     let fixed = cypher;
 
     // Fix common typos
@@ -407,12 +400,9 @@ class NLQCompiler {
     const matchCount = (cypher.match(/MATCH/gi) || []).length;
     const hasWhere = cypher.includes('WHERE');
 
-    let estimatedRows = 1000; // Default to 1000
-    if (hasLimit) {
-      estimatedRows = parseInt(cypher.match(/LIMIT\s+(\d+)/i)?.[1] || '100');
-    } else if (hasWhere) {
-      estimatedRows = 100;
-    }
+    let estimatedRows = hasLimit
+      ? parseInt(cypher.match(/LIMIT\s+(\d+)/i)?.[1] || '100')
+      : hasWhere ? 100 : 1000;
 
     if (hasUnbounded) {
       estimatedRows *= 10;
@@ -432,19 +422,10 @@ class NLQCompiler {
       warnings.push('Query has no WHERE clause - may return many results');
     }
 
-    let estimatedTime: string;
-    if (estimatedCost > 1000) {
-      estimatedTime = '>5s';
-    } else if (estimatedCost > 100) {
-      estimatedTime = '1-5s';
-    } else {
-      estimatedTime = '<1s';
-    }
-
     return {
       estimatedRows,
       estimatedCost,
-      estimatedTime,
+      estimatedTime: estimatedCost > 1000 ? '>5s' : estimatedCost > 100 ? '1-5s' : '<1s',
       dbHits,
       indexUsage: hasWhere ? ['node_label_index'] : [],
       warnings,
@@ -523,7 +504,7 @@ class NLQCompiler {
     return alternatives;
   }
 
-  private explainCypher(cypher: string, _nl: string): string {
+  private explainCypher(cypher: string, nl: string): string {
     const parts: string[] = [];
 
     if (cypher.includes('MATCH')) {
@@ -612,7 +593,7 @@ server.register(cors, {
 const compiler = new NLQCompiler();
 
 // Health check
-server.get('/health', () => {
+server.get('/health', async () => {
   return {
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -708,15 +689,11 @@ server.post<{
           },
         ],
         nlqEstimates: nlqResult.estimates,
-        recommendation: (() => {
-          if (identical) {
-            return 'Queries are equivalent';
-          }
-          if (nlqResult.estimates.estimatedCost < 100) {
-            return 'NLQ query is simpler and likely sufficient';
-          }
-          return 'Manual query may be more optimized';
-        })(),
+        recommendation: identical
+          ? 'Queries are equivalent'
+          : nlqResult.estimates.estimatedCost < 100
+          ? 'NLQ query is simpler and likely sufficient'
+          : 'Manual query may be more optimized',
       };
     } catch (error) {
       server.log.error(error, 'Query diff failed');

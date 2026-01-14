@@ -12,6 +12,9 @@ import logger from '../utils/logger';
 import { tracer, Span } from '../utils/tracing';
 import { DatabaseService } from './DatabaseService';
 import { TenantCostService } from './TenantCostService';
+import { getDistributedCache, DistributedCacheService } from '../cache/DistributedCacheService';
+import { getRedisClient } from '../db/redis.js';
+import { BackupService } from './BackupService';
 
 // Partitioning configuration
 interface PartitioningConfig {
@@ -80,6 +83,7 @@ interface TenantPartition {
   currentPartition: string;
   targetPartition: string | null;
   partitionType: PartitionType;
+  shardId?: string; // High-performance sharding
 
   // Resource usage metrics
   metrics: {
@@ -168,8 +172,10 @@ export class TenantPartitioningService extends EventEmitter {
   private db: DatabaseService;
   private costService: TenantCostService;
   private partitions: Map<string, TenantPartition> = new Map();
+  private cache: DistributedCacheService;
   private migrationQueue: MigrationPlan[] = [];
   private activeMigrations: Map<string, MigrationPlan> = new Map();
+  private backupService: BackupService;
 
   constructor(
     config: Partial<PartitioningConfig> = {},
@@ -192,6 +198,17 @@ export class TenantPartitioningService extends EventEmitter {
     this.db = db;
     this.costService = costService;
     this.metrics = new PrometheusMetrics('tenant_partitioning');
+
+    // Initialize services
+    const redisClient = getRedisClient();
+    if (!redisClient) throw new Error("Redis client not initialized");
+
+    this.cache = getDistributedCache(redisClient as any, {
+        keyPrefix: 'tenant:partition:',
+        defaultTTLSeconds: 3600 // 1 hour cache for partition info
+    });
+
+    this.backupService = BackupService.getInstance();
 
     this.initializeMetrics();
     this.loadTenantPartitions();
@@ -334,6 +351,8 @@ export class TenantPartitioningService extends EventEmitter {
       for (const row of results.rows) {
         const partition: TenantPartition = JSON.parse(row.partition_config);
         this.partitions.set(row.tenant_id, partition);
+        // Populate cache
+        await this.cache.set(row.tenant_id, partition);
       }
 
       logger.info('Loaded tenant partitions', { count: results.rows.length });
@@ -712,6 +731,8 @@ export class TenantPartitioningService extends EventEmitter {
       `,
         [tenantId, JSON.stringify(partition)],
       );
+      // Update cache
+      await this.cache.set(tenantId, partition);
     } catch (error: any) {
       logger.error('Failed to save partition info', {
         tenantId,
@@ -1045,11 +1066,33 @@ export class TenantPartitioningService extends EventEmitter {
   }
 
   private async executeStep(step: MigrationStep): Promise<void> {
-    // In a real implementation, this would execute the actual command
-    // For now, simulate execution time
-    await new Promise((resolve) =>
-      setTimeout(resolve, Math.min(step.estimatedDuration * 10, 5000)),
-    );
+    logger.info(`Executing migration step: ${step.name}`);
+
+    switch (step.name) {
+        case 'backup_data':
+            const tenantId = step.command.match(/--tenant\s+(\S+)/)?.[1];
+            if (tenantId) {
+                await this.backupService.backupTenant(tenantId);
+            } else {
+                throw new Error("Could not parse tenantId from backup command");
+            }
+            break;
+
+        case 'allocate_resources':
+        case 'migrate_data':
+        case 'update_routing':
+            // For these steps, we still simulate execution as they depend on infrastructure
+            // that might not be fully controllable from here (e.g. k8s, routing tables)
+             await new Promise((resolve) =>
+                setTimeout(resolve, Math.min(step.estimatedDuration * 10, 2000)),
+            );
+            break;
+
+        default:
+             await new Promise((resolve) =>
+                setTimeout(resolve, Math.min(step.estimatedDuration * 10, 2000)),
+            );
+    }
   }
 
   private async validateStep(step: MigrationStep): Promise<void> {
@@ -1105,6 +1148,11 @@ export class TenantPartitioningService extends EventEmitter {
   public async getTenantPartitionInfo(
     tenantId: string,
   ): Promise<TenantPartition | null> {
+    // Try cache first for high performance
+    const cached = await this.cache.get<TenantPartition>(tenantId);
+    if (cached.data) {
+        return cached.data;
+    }
     return this.partitions.get(tenantId) || null;
   }
 

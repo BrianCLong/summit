@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/extension-api",
-  "version": "4.1.4",
+  "version": "2.0.0",
   "description": "Extension points API for Summit platform plugins",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,11 +12,7 @@
     "lint": "eslint src/**/*.ts",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": [
-    "extension",
-    "api",
-    "extensibility"
-  ],
+  "keywords": ["extension", "api", "extensibility"],
   "author": "IntelGraph Team",
   "license": "MIT",
   "dependencies": {

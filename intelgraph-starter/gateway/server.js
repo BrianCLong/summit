@@ -13,7 +13,7 @@ const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
 const port = Number(process.env.PORT || 4000);
 
 const redis = createClient({ url: redisUrl });
-redis.on('error', (err) => process.stderr.write(`Redis error ${err}\n`));
+redis.on('error', (err) => console.error('Redis error', err));
 redis.connect();
 
 const opaAllow = async (action, subject) => {
@@ -25,13 +25,13 @@ const opaAllow = async (action, subject) => {
       body: JSON.stringify(body)
     });
     if (!res.ok) {
-      process.stderr.write(`OPA returned non-200 ${res.status}\n`);
+      console.warn('OPA returned non-200', res.status);
       return true;
     }
     const json = await res.json();
     return json?.result === true;
   } catch (err) {
-    process.stderr.write(`OPA not reachable, defaulting to allow ${err.message}\n`);
+    console.warn('OPA not reachable, defaulting to allow', err.message);
     return true;
   }
 };
@@ -98,7 +98,7 @@ const resolvers = {
       provenance.set(id, record);
       return record;
     },
-    uploadObject: (_parent, { path, bucket }) => {
+    uploadObject: async (_parent, { path, bucket }) => {
       const targetBucket = bucket || process.env.MINIO_BUCKET || 'intelgraph-data';
       return `s3://${targetBucket}/${path}`;
     }
@@ -116,5 +116,5 @@ server.applyMiddleware({ app, path: '/graphql' });
 
 const httpServer = createServer(app);
 httpServer.listen({ port }, () => {
-  process.stdout.write(`Gateway ready at http://localhost:${port}${server.graphqlPath}\n`);
+  console.log(`Gateway ready at http://localhost:${port}${server.graphqlPath}`);
 });

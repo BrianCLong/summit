@@ -3,9 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { getNeo4jDriver } from '../db/neo4j.js';
 import { getRedisClient } from '../db/redis.js';
-import pino from 'pino';
-
-const logger = (pino as any)({ name: 'BackupService' });
+import logger from '../utils/logger.js';
 
 const BACKUP_DIR = process.env.BACKUP_DIR || '/tmp/backups';
 
@@ -79,25 +77,131 @@ export class BackupService {
       await this.backupPostgres(timestamp);
       results.postgres = true;
     } catch (error: any) {
-      logger.error('PostgreSQL backup failed', error);
+      logger.error('PostgreSQL backup failed', { error });
     }
 
     try {
       await this.backupNeo4j(timestamp);
       results.neo4j = true;
     } catch (error: any) {
-      logger.error('Neo4j backup failed', error);
+      logger.error('Neo4j backup failed', { error });
     }
 
     try {
       await this.backupRedis(timestamp);
       results.redis = true;
     } catch (error: any) {
-      logger.error('Redis backup failed', error);
+      logger.error('Redis backup failed', { error });
     }
 
-    logger.info('Full backup completed', results);
+    logger.info('Full backup completed', { results });
     return results;
+  }
+
+  /**
+   * Backs up a specific tenant's data (assuming schema-based isolation).
+   * @param tenantId The tenant ID (used as schema name).
+   * @returns The path to the backup file.
+   */
+  async backupTenant(tenantId: string): Promise<string> {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `tenant_${tenantId}_${timestamp}.sql`;
+    const filePath = path.join(BACKUP_DIR, filename);
+    const writeStream = fs.createWriteStream(filePath);
+
+    // Extract connection params
+    const env = { ...process.env };
+    // Ensure PGPASSWORD is set
+    if (!env.PGPASSWORD && env.POSTGRES_PASSWORD) {
+      env.PGPASSWORD = env.POSTGRES_PASSWORD;
+    }
+
+    const args: string[] = [];
+    if (env.DATABASE_URL) {
+      args.push(env.DATABASE_URL);
+    } else {
+      if (env.POSTGRES_HOST) args.push('-h', env.POSTGRES_HOST);
+      if (env.POSTGRES_PORT) args.push('-p', env.POSTGRES_PORT);
+      if (env.POSTGRES_USER) args.push('-U', env.POSTGRES_USER);
+      if (env.POSTGRES_DB) args.push(env.POSTGRES_DB);
+    }
+
+    // Dump specific schema (tenantId)
+    // -n selects schema
+    args.push('-n', tenantId);
+
+    return new Promise((resolve, reject) => {
+      const child = spawn('pg_dump', args, { env });
+
+      child.stdout.pipe(writeStream);
+
+      child.stderr.on('data', (data) => {
+        logger.debug(`pg_dump stderr: ${data}`);
+      });
+
+      child.on('error', (err) => reject(err));
+
+      child.on('close', (code) => {
+        if (code === 0) {
+          logger.info(`Tenant backup created at ${filePath}`);
+          resolve(filePath);
+        } else {
+          // If tenant schema doesn't exist, pg_dump might fail or produce empty file.
+          // We treat non-zero as error.
+          reject(new Error(`pg_dump exited with code ${code}`));
+        }
+      });
+    });
+  }
+
+  /**
+   * Restores a PostgreSQL dump to a specific target database.
+   * @param filePath Path to the SQL dump file.
+   * @param targetDb Name of the database to restore into.
+   */
+  async restorePostgres(filePath: string, targetDb: string): Promise<void> {
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`Backup file not found: ${filePath}`);
+    }
+
+    const env = { ...process.env };
+    if (!env.PGPASSWORD && env.POSTGRES_PASSWORD) {
+      env.PGPASSWORD = env.POSTGRES_PASSWORD;
+    }
+
+    // Use psql to execute the SQL dump
+    const args: string[] = [];
+    if (env.POSTGRES_HOST) args.push('-h', env.POSTGRES_HOST);
+    if (env.POSTGRES_PORT) args.push('-p', env.POSTGRES_PORT);
+    if (env.POSTGRES_USER) args.push('-U', env.POSTGRES_USER);
+
+    // Connect to the target DB
+    args.push('-d', targetDb);
+
+    // File input is handled via pipe to stdin to avoid shell argument limit issues with file redirection
+
+    return new Promise((resolve, reject) => {
+      const fileStream = fs.createReadStream(filePath);
+      const child = spawn('psql', args, { env });
+
+      fileStream.pipe(child.stdin);
+
+      child.stderr.on('data', (data) => {
+        // psql prints notices to stderr, log as debug
+        logger.debug(`psql stderr: ${data}`);
+      });
+
+      child.on('error', (err) => reject(err));
+
+      child.on('close', (code) => {
+        if (code === 0) {
+          logger.info(`Restore completed from ${filePath} to ${targetDb}`);
+          resolve();
+        } else {
+          reject(new Error(`psql exited with code ${code}`));
+        }
+      });
+    });
   }
 
   private async backupPostgres(timestamp: string): Promise<void> {

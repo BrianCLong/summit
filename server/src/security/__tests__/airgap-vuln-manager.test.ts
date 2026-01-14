@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- jest mocks require type assertions */
 /**
  * Air-Gap Vulnerability Manager Tests
  * @module server/src/security/__tests__/airgap-vuln-manager.test
@@ -108,13 +107,13 @@ describe('AirGapVulnManager', () => {
     });
 
     // Setup default mocks
-    (fs.mkdir as any).mockResolvedValue(undefined);
-    (fs.writeFile as any).mockResolvedValue(undefined);
+    (fs.mkdir as jest.Mock).mockResolvedValue(undefined);
+    (fs.writeFile as jest.Mock).mockResolvedValue(undefined);
   });
 
   describe('initialization', () => {
     it('should initialize successfully with existing data', async () => {
-      (fs.readFile as any)
+      (fs.readFile as jest.Mock)
         .mockResolvedValueOnce(JSON.stringify(mockVulnerabilities))
         .mockResolvedValueOnce(JSON.stringify(mockSBOMs))
         .mockResolvedValueOnce(JSON.stringify(mockScans));
@@ -128,7 +127,7 @@ describe('AirGapVulnManager', () => {
     });
 
     it('should initialize with empty data when files do not exist', async () => {
-      (fs.readFile as any).mockRejectedValue({ code: 'ENOENT' });
+      (fs.readFile as jest.Mock).mockRejectedValue({ code: 'ENOENT' });
 
       await manager.initialize();
 
@@ -138,7 +137,7 @@ describe('AirGapVulnManager', () => {
     });
 
     it.skip('should throw on non-ENOENT errors', async () => {
-      (fs.readFile as any).mockRejectedValue(new Error('Permission denied'));
+      (fs.readFile as jest.Mock).mockRejectedValue(new Error('Permission denied'));
 
       await expect(manager.initialize()).rejects.toThrow('Permission denied');
     });
@@ -146,7 +145,7 @@ describe('AirGapVulnManager', () => {
 
   describe('vulnerability management', () => {
     beforeEach(async () => {
-      (fs.readFile as any)
+      (fs.readFile as jest.Mock)
         .mockResolvedValueOnce(JSON.stringify(mockVulnerabilities))
         .mockResolvedValueOnce(JSON.stringify([]))
         .mockResolvedValueOnce(JSON.stringify([]));
@@ -245,7 +244,7 @@ describe('AirGapVulnManager', () => {
 
   describe('SBOM management', () => {
     beforeEach(async () => {
-      (fs.readFile as any)
+      (fs.readFile as jest.Mock)
         .mockResolvedValueOnce(JSON.stringify([]))
         .mockResolvedValueOnce(JSON.stringify(mockSBOMs))
         .mockResolvedValueOnce(JSON.stringify([]));
@@ -284,7 +283,7 @@ describe('AirGapVulnManager', () => {
 
   describe('scan history', () => {
     beforeEach(async () => {
-      (fs.readFile as any)
+      (fs.readFile as jest.Mock)
         .mockResolvedValueOnce(JSON.stringify([]))
         .mockResolvedValueOnce(JSON.stringify([]))
         .mockResolvedValueOnce(JSON.stringify(mockScans));
@@ -323,7 +322,7 @@ describe('AirGapVulnManager', () => {
         maxHistoryEntries: 2,
       });
 
-      (fs.readFile as any)
+      (fs.readFile as jest.Mock)
         .mockResolvedValueOnce(JSON.stringify([]))
         .mockResolvedValueOnce(JSON.stringify([]))
         .mockResolvedValueOnce(JSON.stringify([]));
@@ -352,7 +351,7 @@ describe('AirGapVulnManager', () => {
 
   describe('dashboard data', () => {
     beforeEach(async () => {
-      (fs.readFile as any)
+      (fs.readFile as jest.Mock)
         .mockResolvedValueOnce(JSON.stringify(mockVulnerabilities))
         .mockResolvedValueOnce(JSON.stringify(mockSBOMs))
         .mockResolvedValueOnce(JSON.stringify(mockScans));
@@ -394,7 +393,7 @@ describe('AirGapVulnManager', () => {
 
   describe('compliance report', () => {
     beforeEach(async () => {
-      (fs.readFile as any)
+      (fs.readFile as jest.Mock)
         .mockResolvedValueOnce(JSON.stringify(mockVulnerabilities))
         .mockResolvedValueOnce(JSON.stringify(mockSBOMs))
         .mockResolvedValueOnce(JSON.stringify(mockScans));
@@ -431,7 +430,7 @@ describe('AirGapVulnManager', () => {
     });
 
     it('should return healthy when initialized', async () => {
-      (fs.readFile as any).mockRejectedValue({ code: 'ENOENT' });
+      (fs.readFile as jest.Mock).mockRejectedValue({ code: 'ENOENT' });
 
       await manager.initialize();
       const health = manager.healthCheck();

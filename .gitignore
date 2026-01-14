@@ -86,10 +86,6 @@ logs/
 # Temporary files
 tmp/
 temp/
-tmp-test/
-
-# Test-generated typo directory (tests write to server/server/ by accident)
-server/server/
 
 # Python artifacts
 __pycache__/
@@ -358,5 +354,3 @@ bin/
 .evidence/
 release-assets/
 evidence-staging/
-*.txt
-tmp-test/

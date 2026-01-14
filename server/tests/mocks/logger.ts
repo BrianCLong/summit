@@ -1,22 +1,16 @@
-import { jest } from '@jest/globals';
-
 const logger = {
-  child: jest.fn().mockReturnThis(),
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  trace: jest.fn(),
-  fatal: jest.fn(),
-  silent: jest.fn(),
-  level: 'silent',
+  child: () => logger,
+  debug: () => {},
+  info: () => {},
+  warn: () => {},
+  error: () => {},
 };
 
 export const correlationStorage = {
-  getStore: jest.fn(),
-  run: (_store: any, fn: Function) => fn(),
-  enterWith: jest.fn(),
+  getStore: () => undefined,
+  run: () => undefined,
+  enterWith: () => undefined,
 };
 
-export { logger };
 export default logger;
+export { logger };

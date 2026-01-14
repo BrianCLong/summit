@@ -77,22 +77,22 @@ export class CKKSEngine extends EventEmitter {
   /**
    * Generate CKKS encryption context
    */
-  generateContext(
+  async generateContext(
     parameters: CKKSParameters,
     enableBootstrapping = false,
-  ): CKKSContext {
+  ): Promise<CKKSContext> {
     this.validateParameters(parameters);
 
     const contextId = crypto.randomUUID();
 
     // Generate key material (mock implementation)
-    const keyPair = this.generateCKKSKeys(parameters);
-    const relinKeys = this.generateRelinearizationKeys(
+    const keyPair = await this.generateCKKSKeys(parameters);
+    const relinKeys = await this.generateRelinearizationKeys(
       keyPair,
       parameters,
     );
     const galoisKeys = enableBootstrapping
-      ? this.generateGaloisKeys(keyPair, parameters)
+      ? await this.generateGaloisKeys(keyPair, parameters)
       : '';
 
     const context: CKKSContext = {
@@ -114,11 +114,11 @@ export class CKKSEngine extends EventEmitter {
   /**
    * Encode and encrypt real values
    */
-  encrypt(
+  async encrypt(
     contextId: string,
     values: number[],
     scale?: number,
-  ): CKKSCiphertext {
+  ): Promise<CKKSCiphertext> {
     const context = this.contexts.get(contextId);
     if (!context) {
       throw new Error('Context not found');
@@ -137,13 +137,13 @@ export class CKKSEngine extends EventEmitter {
     }
 
     // Encode to plaintext
-    const plaintext = this.encode(paddedValues, actualScale);
+    const plaintext = await this.encode(paddedValues, actualScale);
 
     // Encrypt plaintext
     const ciphertext: CKKSCiphertext = {
       id: crypto.randomUUID(),
       contextId,
-      data: this.performEncryption(
+      data: await this.performEncryption(
         context.publicKey,
         plaintext,
         actualScale,
@@ -168,7 +168,7 @@ export class CKKSEngine extends EventEmitter {
   /**
    * Decrypt ciphertext to real values
    */
-  decrypt(ciphertextId: string): number[] {
+  async decrypt(ciphertextId: string): Promise<number[]> {
     const ciphertext = this.ciphertexts.get(ciphertextId);
     if (!ciphertext) {
       throw new Error('Ciphertext not found');
@@ -180,14 +180,14 @@ export class CKKSEngine extends EventEmitter {
     }
 
     // Decrypt to plaintext
-    const plaintext = this.performDecryption(
+    const plaintext = await this.performDecryption(
       context.secretKey,
       ciphertext.data,
       ciphertext.scale,
     );
 
     // Decode to values
-    const values = this.decode(plaintext, ciphertext.scale);
+    const values = await this.decode(plaintext, ciphertext.scale);
 
     this.emit('data_decrypted', { ciphertextId, resultSize: values.length });
 
@@ -197,12 +197,12 @@ export class CKKSEngine extends EventEmitter {
   /**
    * Homomorphic addition
    */
-  add(
+  async add(
     ciphertextId1: string,
     ciphertextId2: string,
     performer: string,
-  ): CKKSCiphertext {
-    const operation = this.startOperation(
+  ): Promise<CKKSCiphertext> {
+    const operation = await this.startOperation(
       'add',
       [ciphertextId1, ciphertextId2],
       performer,
@@ -221,12 +221,12 @@ export class CKKSEngine extends EventEmitter {
       }
 
       // Ensure same scale and level
-      this.alignCiphertexts(ct1, ct2);
+      await this.alignCiphertexts(ct1, ct2);
 
       const result: CKKSCiphertext = {
         id: crypto.randomUUID(),
         contextId: ct1.contextId,
-        data: this.performHomomorphicAdd(ct1.data, ct2.data),
+        data: await this.performHomomorphicAdd(ct1.data, ct2.data),
         scale: ct1.scale,
         level: Math.min(ct1.level, ct2.level),
         slots: Math.min(ct1.slots, ct2.slots),
@@ -239,7 +239,7 @@ export class CKKSEngine extends EventEmitter {
       };
 
       this.ciphertexts.set(result.id, result);
-      this.completeOperation(operation.id, result.id);
+      await this.completeOperation(operation.id, result.id);
 
       this.emit('homomorphic_addition', {
         operands: [ciphertextId1, ciphertextId2],
@@ -248,7 +248,7 @@ export class CKKSEngine extends EventEmitter {
 
       return result;
     } catch (error) {
-      this.failOperation(operation.id, error.message);
+      await this.failOperation(operation.id, error.message);
       throw error;
     }
   }
@@ -261,7 +261,7 @@ export class CKKSEngine extends EventEmitter {
     ciphertextId2: string,
     performer: string,
   ): Promise<CKKSCiphertext> {
-    const operation = this.startOperation(
+    const operation = await this.startOperation(
       'multiply',
       [ciphertextId1, ciphertextId2],
       performer,
@@ -282,7 +282,7 @@ export class CKKSEngine extends EventEmitter {
       const result: CKKSCiphertext = {
         id: crypto.randomUUID(),
         contextId: ct1.contextId,
-        data: this.performHomomorphicMultiply(ct1.data, ct2.data),
+        data: await this.performHomomorphicMultiply(ct1.data, ct2.data),
         scale: ct1.scale * ct2.scale,
         level: Math.min(ct1.level, ct2.level) - 1, // Consumes one level
         slots: Math.min(ct1.slots, ct2.slots),
@@ -299,7 +299,7 @@ export class CKKSEngine extends EventEmitter {
       // Relinearize to reduce ciphertext size
       const relinearized = await this.relinearize(result.id, performer);
 
-      this.completeOperation(operation.id, relinearized.id);
+      await this.completeOperation(operation.id, relinearized.id);
 
       this.emit('homomorphic_multiplication', {
         operands: [ciphertextId1, ciphertextId2],
@@ -308,7 +308,7 @@ export class CKKSEngine extends EventEmitter {
 
       return relinearized;
     } catch (error) {
-      this.failOperation(operation.id, error.message);
+      await this.failOperation(operation.id, error.message);
       throw error;
     }
   }
@@ -316,10 +316,10 @@ export class CKKSEngine extends EventEmitter {
   /**
    * Relinearization to reduce ciphertext size
    */
-  relinearize(
+  async relinearize(
     ciphertextId: string,
-    _performer: string,
-  ): CKKSCiphertext {
+    performer: string,
+  ): Promise<CKKSCiphertext> {
     const ciphertext = this.ciphertexts.get(ciphertextId);
     if (!ciphertext) {
       throw new Error('Ciphertext not found');
@@ -333,7 +333,7 @@ export class CKKSEngine extends EventEmitter {
     const relinearized: CKKSCiphertext = {
       ...ciphertext,
       id: crypto.randomUUID(),
-      data: this.performRelinearization(
+      data: await this.performRelinearization(
         ciphertext.data,
         context.relinKeys,
       ),
@@ -351,11 +351,11 @@ export class CKKSEngine extends EventEmitter {
   /**
    * Rescale to manage precision and noise
    */
-  rescale(
+  async rescale(
     ciphertextId: string,
     performer: string,
-  ): CKKSCiphertext {
-    const operation = this.startOperation(
+  ): Promise<CKKSCiphertext> {
+    const operation = await this.startOperation(
       'rescale',
       [ciphertextId],
       performer,
@@ -374,7 +374,7 @@ export class CKKSEngine extends EventEmitter {
       const rescaled: CKKSCiphertext = {
         ...ciphertext,
         id: crypto.randomUUID(),
-        data: this.performRescaling(ciphertext.data),
+        data: await this.performRescaling(ciphertext.data),
         scale: ciphertext.scale / this.getModulusAtLevel(ciphertext.level),
         level: ciphertext.level - 1,
         noise: ciphertext.noise * 0.8, // Rescaling reduces noise
@@ -386,11 +386,11 @@ export class CKKSEngine extends EventEmitter {
       };
 
       this.ciphertexts.set(rescaled.id, rescaled);
-      this.completeOperation(operation.id, rescaled.id);
+      await this.completeOperation(operation.id, rescaled.id);
 
       return rescaled;
     } catch (error) {
-      this.failOperation(operation.id, error.message);
+      await this.failOperation(operation.id, error.message);
       throw error;
     }
   }
@@ -398,12 +398,12 @@ export class CKKSEngine extends EventEmitter {
   /**
    * Rotate ciphertext slots for SIMD operations
    */
-  rotate(
+  async rotate(
     ciphertextId: string,
     steps: number,
     performer: string,
-  ): CKKSCiphertext {
-    const operation = this.startOperation(
+  ): Promise<CKKSCiphertext> {
+    const operation = await this.startOperation(
       'rotate',
       [ciphertextId],
       performer,
@@ -423,7 +423,7 @@ export class CKKSEngine extends EventEmitter {
       const rotated: CKKSCiphertext = {
         ...ciphertext,
         id: crypto.randomUUID(),
-        data: this.performRotation(
+        data: await this.performRotation(
           ciphertext.data,
           steps,
           context.galoisKeys,
@@ -436,11 +436,11 @@ export class CKKSEngine extends EventEmitter {
       };
 
       this.ciphertexts.set(rotated.id, rotated);
-      this.completeOperation(operation.id, rotated.id);
+      await this.completeOperation(operation.id, rotated.id);
 
       return rotated;
     } catch (error) {
-      this.failOperation(operation.id, error.message);
+      await this.failOperation(operation.id, error.message);
       throw error;
     }
   }
@@ -452,7 +452,7 @@ export class CKKSEngine extends EventEmitter {
     ciphertextId: string,
     performer: string,
   ): Promise<CKKSCiphertext> {
-    const operation = this.startOperation(
+    const operation = await this.startOperation(
       'bootstrap',
       [ciphertextId],
       performer,
@@ -484,7 +484,7 @@ export class CKKSEngine extends EventEmitter {
       };
 
       this.ciphertexts.set(bootstrapped.id, bootstrapped);
-      this.completeOperation(operation.id, bootstrapped.id);
+      await this.completeOperation(operation.id, bootstrapped.id);
 
       this.emit('ciphertext_bootstrapped', {
         original: ciphertextId,
@@ -493,7 +493,7 @@ export class CKKSEngine extends EventEmitter {
 
       return bootstrapped;
     } catch (error) {
-      this.failOperation(operation.id, error.message);
+      await this.failOperation(operation.id, error.message);
       throw error;
     }
   }
@@ -534,10 +534,10 @@ export class CKKSEngine extends EventEmitter {
     }
   }
 
-  private generateCKKSKeys(_params: CKKSParameters): {
+  private async generateCKKSKeys(params: CKKSParameters): Promise<{
     publicKey: string;
     secretKey: string;
-  } {
+  }> {
     // Mock key generation - in practice, use SEAL or similar library
     return {
       publicKey: `ckks_pk_${crypto.randomBytes(32).toString('hex')}`,
@@ -545,26 +545,26 @@ export class CKKSEngine extends EventEmitter {
     };
   }
 
-  private generateRelinearizationKeys(
-    _keyPair: { publicKey: string; secretKey: string },
-    _params: CKKSParameters,
-  ): string {
+  private async generateRelinearizationKeys(
+    keyPair: { publicKey: string; secretKey: string },
+    params: CKKSParameters,
+  ): Promise<string> {
     // Mock relinearization key generation
     return `ckks_relin_${crypto.randomBytes(64).toString('hex')}`;
   }
 
-  private generateGaloisKeys(
-    _keyPair: { publicKey: string; secretKey: string },
-    _params: CKKSParameters,
-  ): string {
+  private async generateGaloisKeys(
+    keyPair: { publicKey: string; secretKey: string },
+    params: CKKSParameters,
+  ): Promise<string> {
     // Mock Galois key generation
     return `ckks_galois_${crypto.randomBytes(128).toString('hex')}`;
   }
 
-  private encode(
+  private async encode(
     values: number[],
     scale: number,
-  ): CKKSPlaintext {
+  ): Promise<CKKSPlaintext> {
     return {
       id: crypto.randomUUID(),
       values,
@@ -573,18 +573,18 @@ export class CKKSEngine extends EventEmitter {
     };
   }
 
-  private decode(
+  private async decode(
     plaintext: CKKSPlaintext,
-    _scale: number,
-  ): number[] {
+    scale: number,
+  ): Promise<number[]> {
     return plaintext.values;
   }
 
-  private performEncryption(
+  private async performEncryption(
     publicKey: string,
     plaintext: CKKSPlaintext,
     scale: number,
-  ): Buffer {
+  ): Promise<Buffer> {
     // Mock encryption - in practice, use SEAL library
     const data = Buffer.concat([
       Buffer.from(publicKey, 'hex').slice(0, 32),
@@ -594,11 +594,11 @@ export class CKKSEngine extends EventEmitter {
     return crypto.randomBytes(data.length + 256); // Mock ciphertext
   }
 
-  private performDecryption(
-    _secretKey: string,
-    _ciphertext: Buffer,
+  private async performDecryption(
+    secretKey: string,
+    ciphertext: Buffer,
     scale: number,
-  ): CKKSPlaintext {
+  ): Promise<CKKSPlaintext> {
     // Mock decryption
     return {
       id: crypto.randomUUID(),
@@ -608,47 +608,47 @@ export class CKKSEngine extends EventEmitter {
     };
   }
 
-  private performHomomorphicAdd(
+  private async performHomomorphicAdd(
     data1: Buffer,
     data2: Buffer,
-  ): Buffer {
+  ): Promise<Buffer> {
     // Mock homomorphic addition
     return crypto.randomBytes(Math.max(data1.length, data2.length));
   }
 
-  private performHomomorphicMultiply(
+  private async performHomomorphicMultiply(
     data1: Buffer,
     data2: Buffer,
-  ): Buffer {
+  ): Promise<Buffer> {
     // Mock homomorphic multiplication - size grows
     return crypto.randomBytes(data1.length + data2.length);
   }
 
-  private performRelinearization(
+  private async performRelinearization(
     data: Buffer,
-    _relinKeys: string,
-  ): Buffer {
+    relinKeys: string,
+  ): Promise<Buffer> {
     // Mock relinearization - reduces size back to standard
     return crypto.randomBytes(Math.floor(data.length * 0.67));
   }
 
-  private performRescaling(data: Buffer): Buffer {
+  private async performRescaling(data: Buffer): Promise<Buffer> {
     // Mock rescaling
     return crypto.randomBytes(data.length);
   }
 
-  private performRotation(
+  private async performRotation(
     data: Buffer,
-    _steps: number,
-    _galoisKeys: string,
-  ): Buffer {
+    steps: number,
+    galoisKeys: string,
+  ): Promise<Buffer> {
     // Mock rotation
     return crypto.randomBytes(data.length + 32);
   }
 
   private async performBootstrapping(
     data: Buffer,
-    _context: CKKSContext,
+    context: CKKSContext,
   ): Promise<Buffer> {
     // Mock bootstrapping - expensive operation
     await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate cost
@@ -673,21 +673,21 @@ export class CKKSEngine extends EventEmitter {
     return Math.pow(2, 60 - level * 5);
   }
 
-  private alignCiphertexts(
+  private async alignCiphertexts(
     ct1: CKKSCiphertext,
     ct2: CKKSCiphertext,
-  ): void {
+  ): Promise<void> {
     // Ensure ciphertexts have same scale and level for operations
     if (ct1.scale !== ct2.scale || ct1.level !== ct2.level) {
       throw new Error('Ciphertexts must be aligned before operation');
     }
   }
 
-  private startOperation(
+  private async startOperation(
     type: HEOperation['type'],
     operands: string[],
     performer: string,
-  ): HEOperation {
+  ): Promise<HEOperation> {
     const operation: HEOperation = {
       id: crypto.randomUUID(),
       type,
@@ -707,10 +707,10 @@ export class CKKSEngine extends EventEmitter {
     return operation;
   }
 
-  private completeOperation(
+  private async completeOperation(
     operationId: string,
     resultId: string,
-  ): void {
+  ): Promise<void> {
     const operation = this.operations.get(operationId);
     if (operation) {
       operation.result = resultId;
@@ -722,10 +722,10 @@ export class CKKSEngine extends EventEmitter {
     }
   }
 
-  private failOperation(
+  private async failOperation(
     operationId: string,
-    _error: string,
-  ): void {
+    error: string,
+  ): Promise<void> {
     const operation = this.operations.get(operationId);
     if (operation) {
       operation.computation.endTime = new Date();

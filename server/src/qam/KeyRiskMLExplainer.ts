@@ -290,7 +290,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
       }
 
       // Extract trend data for each feature
-      const trends: Record<string, TrendData> = {};
+      const trends: FeatureTrends['trends'] = {} as any;
 
       for (const feature of this.riskFeatures) {
         const values: number[] = [];
@@ -320,7 +320,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
       const featureTrends: FeatureTrends = {
         keyId,
         timeRange,
-        trends: trends as FeatureTrends['trends'],
+        trends,
         correlations,
         anomalies,
       };
@@ -859,7 +859,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
     };
 
     return (
-      (mitigations as Record<string, string>)[featureName] ||
+      mitigations[featureName] ||
       'Monitor feature closely and investigate patterns'
     );
   }
@@ -880,7 +880,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
       provider_reliability: 'Provider Reliability',
     };
 
-    return (humanNames as Record<string, string>)[featureName] || featureName;
+    return humanNames[featureName] || featureName;
   }
 
   private explainContribution(shapValue: SHAPValue): string {
@@ -910,7 +910,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
       provider_reliability: 'Historical reliability score of the key provider',
     };
 
-    return (descriptions as Record<string, string>)[featureName] || 'Feature description not available';
+    return descriptions[featureName] || 'Feature description not available';
   }
 
   private calculateTrend(

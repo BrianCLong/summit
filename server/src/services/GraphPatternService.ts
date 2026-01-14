@@ -125,8 +125,7 @@ export class GraphPatternService {
     const results = await runCypher(scoped.cypher, scoped.params, { tenantId });
 
     // Map results
-    return results.map((rec) => {
-        const record = rec as Record<string, any>;
+    return results.map(record => {
         const nodes: Entity[] = [];
         const edges: Edge[] = [];
 

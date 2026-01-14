@@ -62,12 +62,12 @@ const MatrixGraph: React.FC<{ matrix: RiskMatrix }> = ({ matrix }) => {
       .attr('height', height);
 
     const x = d3
-      .scaleBand<string>()
-      .domain(d3.range(numCols).map(String))
+      .scaleBand()
+      .domain(d3.range(numCols))
       .range([0, width]);
     const y = d3
-      .scaleBand<string>()
-      .domain(d3.range(numRows).map(String))
+      .scaleBand()
+      .domain(d3.range(numRows))
       .range([0, height]);
 
     const maxValue = d3.max(matrix.flat()) ?? 0;
@@ -88,14 +88,14 @@ const MatrixGraph: React.FC<{ matrix: RiskMatrix }> = ({ matrix }) => {
       .data(matrix)
       .enter()
       .append('g')
-      .attr('transform', (d: any, i: number) => `translate(0,${y(String(i))!})`)
+      .attr('transform', (_: number, i: number) => `translate(0,${y(i)!})`)
       .selectAll('rect')
       .data((row: number[], i: number) =>
         row.map((value, j) => ({ value, row: i, col: j })),
       )
       .enter()
       .append('rect')
-      .attr('x', (d: MatrixCell) => x(String(d.col))!)
+      .attr('x', (d: MatrixCell) => x(d.col)!)
       .attr('y', 0)
       .attr('width', x.bandwidth())
       .attr('height', y.bandwidth())
@@ -182,18 +182,18 @@ const StegoAnalyzer: React.FC = () => {
         if (!analysis) return null;
 
         return (
-          <div className="mt-4 p-4 bg-gray-100 rounded">
-            <h3 className="font-semibold">Analysis Results:</h3>
-            <pre className="whitespace-pre-wrap text-sm">
-              {JSON.stringify(analysis, null, 2)}
-            </pre>
-            {riskMatrix && (
-              <div className="mt-4">
-                <h4 className="font-semibold mb-2">Encoded vs Decoded Matrix</h4>
-                <MatrixGraph matrix={riskMatrix} />
-              </div>
-            )}
-          </div>
+        <div className="mt-4 p-4 bg-gray-100 rounded">
+          <h3 className="font-semibold">Analysis Results:</h3>
+          <pre className="whitespace-pre-wrap text-sm">
+            {JSON.stringify(analysis, null, 2)}
+          </pre>
+          {riskMatrix && (
+            <div className="mt-4">
+              <h4 className="font-semibold mb-2">Encoded vs Decoded Matrix</h4>
+              <MatrixGraph matrix={riskMatrix} />
+            </div>
+          )}
+        </div>
         );
       })()}
     </div>

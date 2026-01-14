@@ -1,48 +1,46 @@
 import express from 'express';
 import request from 'supertest';
-import { describe, beforeEach, it, expect, jest, afterEach, beforeAll, afterAll } from '@jest/globals';
-
-// Mock functions declared before mocks
-const mockQuery = jest.fn();
-const mockRelease = jest.fn();
-const mockConnect = jest.fn(async () => ({
-  query: mockQuery,
-  release: mockRelease,
-}));
-const mockGetEffectivePlan = jest.fn();
+import { describe, beforeEach, it, expect } from '@jest/globals';
 
 let currentUser: any = {
   id: 'user-1',
   tenantId: 'tenant-1',
 };
 
-// ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../config/database.js', () => ({
+const queryMock = jest.fn();
+const releaseMock = jest.fn();
+const connectMock = jest.fn(async () => ({
+  query: queryMock,
+  release: releaseMock,
+}));
+
+const getEffectivePlan = jest.fn();
+
+jest.mock('../../config/database.js', () => ({
   getPostgresPool: () => ({
-    connect: mockConnect,
+    connect: connectMock,
   }),
 }));
 
-jest.unstable_mockModule('../../middleware/auth.js', () => ({
+jest.mock('../../middleware/auth.js', () => ({
   ensureAuthenticated: (req: any, _res: any, next: any) => {
     req.user = currentUser;
     return next();
   },
 }));
 
-jest.unstable_mockModule('../../middleware/request-schema-validator.js', () => ({
+jest.mock('../../middleware/request-schema-validator.js', () => ({
   buildRequestValidator: () => (_req: any, _res: any, next: any) => next(),
 }));
 
-jest.unstable_mockModule('../../services/PricingEngine.js', () => ({
+jest.mock('../../services/PricingEngine.js', () => ({
   __esModule: true,
   default: {
-    getEffectivePlan: mockGetEffectivePlan,
+    getEffectivePlan,
   },
 }));
 
-// Dynamic imports AFTER mocks are set up
-const tenantUsageRouter = (await import('../tenants/usage.js')).default;
+import tenantUsageRouter from '../tenants/usage.js';
 
 const run = process.env.NO_NETWORK_LISTEN !== 'true';
 const describeIf = run ? describe : describe.skip;
@@ -55,11 +53,11 @@ describeIf('tenant usage routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     currentUser = { id: 'user-1', tenantId: 'tenant-1' };
-    mockConnect.mockResolvedValue({
-      query: mockQuery,
-      release: mockRelease,
+    connectMock.mockResolvedValue({
+      query: queryMock,
+      release: releaseMock,
     });
-    mockQuery.mockResolvedValue({
+    queryMock.mockResolvedValue({
       rows: [
         {
           period_start: new Date('2025-01-01T00:00:00Z'),
@@ -71,7 +69,7 @@ describeIf('tenant usage routes', () => {
         },
       ],
     });
-    mockGetEffectivePlan.mockResolvedValue({
+    getEffectivePlan.mockResolvedValue({
       plan: {
         limits: {
           api_calls: { unitPrice: 0.25 },

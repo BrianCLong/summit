@@ -25,11 +25,13 @@ export const options = {
   thresholds: {
     // Core performance thresholds
     http_req_failed: ['rate<0.01'], // Error rate < 1%
-    http_req_duration: ['p(95)<800', 'p(99)<1200'], // 95th and 99th percentiles < 800ms and 1200ms
+    http_req_duration: ['p(95)<800'], // 95th percentile < 800ms
+    http_req_duration: ['p(99)<1200'], // 99th percentile < 1.2s
 
     // Conductor-specific thresholds
     routing_errors: ['rate<0.005'], // Routing error rate < 0.5%
-    routing_latency: ['p(95)<600', 'avg<300'], // Routing latency 95th percentile and average < 600ms and 300ms
+    routing_latency: ['p(95)<600'], // Routing latency 95th percentile < 600ms
+    routing_latency: ['avg<300'], // Average routing latency < 300ms
 
     // Checks
     checks: ['rate>0.98'], // Check success rate > 98%
@@ -161,7 +163,7 @@ function testPreviewRouting(scenario) {
       try {
         const data = r.json();
         return data.data && data.data.previewRouting;
-      } catch (_e) {
+      } catch (e) {
         return false;
       }
     },
@@ -169,7 +171,7 @@ function testPreviewRouting(scenario) {
       try {
         const data = r.json();
         return data.data.previewRouting.expert !== null;
-      } catch (_e) {
+      } catch (e) {
         return false;
       }
     },
@@ -177,7 +179,7 @@ function testPreviewRouting(scenario) {
       try {
         const data = r.json();
         return typeof data.data.previewRouting.confidence === 'number';
-      } catch (_e) {
+      } catch (e) {
         return false;
       }
     },
@@ -206,7 +208,7 @@ function testPreviewRouting(scenario) {
         // Routing matched expectation
       }
     }
-  } catch (_e) {
+  } catch (e) {
     // JSON parsing error
     routingErrors.add(1);
   }
@@ -244,7 +246,7 @@ function testConductExecution(scenario) {
       try {
         const data = r.json();
         return data.data && data.data.conduct;
-      } catch (_e) {
+      } catch (e) {
         return false;
       }
     },
@@ -252,7 +254,7 @@ function testConductExecution(scenario) {
       try {
         const data = r.json();
         return data.data.conduct.expertId !== null;
-      } catch (_e) {
+      } catch (e) {
         return false;
       }
     },
@@ -260,7 +262,7 @@ function testConductExecution(scenario) {
       try {
         const data = r.json();
         return data.data.conduct.auditId !== null;
-      } catch (_e) {
+      } catch (e) {
         return false;
       }
     },
@@ -287,9 +289,12 @@ export default function () {
 
 // Setup function - runs once before the test
 export function setup() {
-  // Starting Conductor load test...
-  // Target: ${SRV}
-  // Scenarios: ${scenarios.map((s) => `${s.name} (${s.weight}%)`).join(', ')}
+  console.log('🚀 Starting Conductor load test...');
+  console.log(`Target: ${SRV}`);
+  console.log(
+    'Scenarios:',
+    scenarios.map((s) => `${s.name} (${s.weight}%)`).join(', '),
+  );
 
   // Health check before starting
   const healthCheck = http.get(
@@ -303,8 +308,8 @@ export function setup() {
 }
 
 // Teardown function - runs once after the test
-export function teardown(_data) {
-  // Conductor load test completed
-  // Started at: ${data.timestamp}
-  // Ended at: ${new Date().toISOString()}
+export function teardown(data) {
+  console.log('🏁 Conductor load test completed');
+  console.log(`Started at: ${data.timestamp}`);
+  console.log(`Ended at: ${new Date().toISOString()}`);
 }

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- jest mocks require type assertions */
 import { jest } from '@jest/globals';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { DsarReviewer, type DsarReviewRecord } from '../DsarReviewer';
@@ -28,7 +27,7 @@ describe('DsarReviewer', () => {
   ];
 
   it('renders requests and surfaces replay actions', () => {
-    const onReplay = jest.fn() as any;
+    const onReplay = jest.fn();
     render(<DsarReviewer requests={baseRequests} onReplay={onReplay} />);
 
     expect(screen.getByText('DSAR Review Queue')).toBeInTheDocument();

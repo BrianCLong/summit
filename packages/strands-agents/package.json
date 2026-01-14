@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/strands-agents",
-  "version": "4.1.4",
+  "version": "0.1.0",
   "description": "Strands Agents SDK integration for IntelGraph - AI-powered graph intelligence with type-safe tools",
   "type": "module",
   "main": "./dist/index.js",

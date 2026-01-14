@@ -2,23 +2,22 @@ import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll 
 import express from 'express';
 import request from 'supertest';
 import nock from 'nock';
+import { actionsRouter } from '../actions.js';
+import { calculateRequestHash } from '../../services/ActionPolicyService.js';
 import type { PreflightRequest } from '../../../../packages/policy-audit/src/types';
+import { getPostgresPool } from '../../db/postgres.js';
 
-// Mock functions declared before mocks
-const mockGetPostgresPool = jest.fn();
-
-// ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../db/postgres.js', () => ({
-  getPostgresPool: mockGetPostgresPool,
+jest.mock('../../db/postgres.js', () => ({
+  getPostgresPool: jest.fn(),
 }));
 
-jest.unstable_mockModule('../../middleware/auth.js', () => ({
+jest.mock('../../middleware/auth.js', () => ({
   ensureAuthenticated: (_req: any, _res: any, next: any) => next(),
 }));
 
-// Dynamic imports AFTER mocks are set up
-const { actionsRouter } = await import('../actions.js');
-const { calculateRequestHash } = await import('../../services/ActionPolicyService.js');
+const mockGetPostgresPool = getPostgresPool as jest.MockedFunction<
+  typeof getPostgresPool
+>;
 
 const buildApp = () => {
   const app = express();

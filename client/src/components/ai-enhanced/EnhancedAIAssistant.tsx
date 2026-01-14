@@ -260,7 +260,7 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
             setStreamBuf('');
             streamBufRef.current = '';
           }
-          setStatus('idle');
+          setStatus('Online');
           setIsTyping(false);
           break;
         }
@@ -610,7 +610,7 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
             variant="outlined"
             placeholder="Ask me anything about your data..."
             value={inputValue}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputValue(e.target.value)}
+            onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
             disabled={isTyping}
             inputProps={{

@@ -169,12 +169,12 @@ export class PSIEngine extends EventEmitter {
   /**
    * Register dataset for PSI operations
    */
-  registerDataset(
+  async registerDataset(
     dataset: Omit<
       PSIDataset,
       'id' | 'hashedElements' | 'bloomFilter' | 'metadata'
     >,
-  ): PSIDataset {
+  ): Promise<PSIDataset> {
     const fullDataset: PSIDataset = {
       ...dataset,
       id: crypto.randomUUID(),
@@ -188,7 +188,7 @@ export class PSIEngine extends EventEmitter {
     };
 
     // Normalize and hash elements
-    this.preprocessDataset(fullDataset);
+    await this.preprocessDataset(fullDataset);
 
     this.datasets.set(fullDataset.id, fullDataset);
     this.emit('dataset_registered', fullDataset);
@@ -199,13 +199,13 @@ export class PSIEngine extends EventEmitter {
   /**
    * Execute ECDH-based PSI
    */
-  executeECDHPSI(
+  async executeECDHPSI(
     datasetA: string,
     datasetB: string,
     participantA: string,
     participantB: string,
     config: Partial<PSIProtocolConfig> = {},
-  ): PSIJob {
+  ): Promise<PSIJob> {
     const protocol = this.getOrCreateProtocol('ecdh_psi', config);
 
     const job: PSIJob = {
@@ -258,13 +258,13 @@ export class PSIEngine extends EventEmitter {
   /**
    * Execute OPRF-based PSI
    */
-  executeOPRFPSI(
+  async executeOPRFPSI(
     datasetA: string,
     datasetB: string,
     participantA: string,
     participantB: string,
     config: Partial<PSIProtocolConfig> = {},
-  ): PSIJob {
+  ): Promise<PSIJob> {
     const protocol = this.getOrCreateProtocol('oprf_psi', config);
 
     const job: PSIJob = {
@@ -311,13 +311,13 @@ export class PSIEngine extends EventEmitter {
   /**
    * Execute Bloom filter PSI for large sets
    */
-  executeBloomPSI(
+  async executeBloomPSI(
     datasetA: string,
     datasetB: string,
     participantA: string,
     participantB: string,
     falsePositiveRate: number = 0.001,
-  ): PSIJob {
+  ): Promise<PSIJob> {
     const protocol = this.getOrCreateProtocol('bloom_psi', {
       security: { falsePositiveRate },
     });
@@ -366,11 +366,13 @@ export class PSIEngine extends EventEmitter {
   /**
    * Generate link hints without revealing intersection elements
    */
-  generateLinkHints(
+  async generateLinkHints(
     jobId: string,
     maxHints: number = 1000,
     confidenceThreshold: number = 0.8,
-  ): Array<{ leftHash: string; rightHash: string; confidence: number }> {
+  ): Promise<
+    Array<{ leftHash: string; rightHash: string; confidence: number }>
+  > {
     const job = this.jobs.get(jobId);
     if (!job || job.status !== 'completed' || !job.results) {
       throw new Error('Job not completed or results not available');
@@ -405,12 +407,12 @@ export class PSIEngine extends EventEmitter {
   /**
    * Add differential privacy noise to PSI results
    */
-  addDifferentialPrivacy(
+  async addDifferentialPrivacy(
     jobId: string,
     epsilon: number,
     delta: number = 1e-6,
     mechanism: 'laplace' | 'gaussian' = 'laplace',
-  ): void {
+  ): Promise<void> {
     const job = this.jobs.get(jobId);
     if (!job || !job.results) {
       throw new Error('Job or results not found');
@@ -420,20 +422,18 @@ export class PSIEngine extends EventEmitter {
     let noisySize: number;
 
     switch (mechanism) {
-      case 'laplace': {
+      case 'laplace':
         const laplacianNoise = this.sampleLaplace(0, 1 / epsilon);
         noisySize = Math.max(0, Math.round(originalSize + laplacianNoise));
         break;
-      }
 
-      case 'gaussian': {
+      case 'gaussian':
         const sensitivity = 1; // For set intersection
         const sigma =
           (Math.sqrt(2 * Math.log(1.25 / delta)) * sensitivity) / epsilon;
         const gaussianNoise = this.sampleGaussian(0, sigma);
         noisySize = Math.max(0, Math.round(originalSize + gaussianNoise));
         break;
-      }
 
       default:
         throw new Error(`Unsupported DP mechanism: ${mechanism}`);
@@ -462,10 +462,10 @@ export class PSIEngine extends EventEmitter {
   /**
    * Verify PSI computation integrity
    */
-  verifyComputation(jobId: string): {
+  async verifyComputation(jobId: string): Promise<{
     valid: boolean;
     proofs: Array<{ type: string; valid: boolean; details: any }>;
-  } {
+  }> {
     const job = this.jobs.get(jobId);
     if (!job) {
       throw new Error('Job not found');
@@ -474,19 +474,19 @@ export class PSIEngine extends EventEmitter {
     const proofs: Array<{ type: string; valid: boolean; details: any }> = [];
 
     // Verify protocol adherence
-    const protocolProof = this.verifyProtocolAdherence(job);
+    const protocolProof = await this.verifyProtocolAdherence(job);
     proofs.push(protocolProof);
 
     // Verify participant signatures
-    const signatureProof = this.verifyParticipantSignatures(job);
+    const signatureProof = await this.verifyParticipantSignatures(job);
     proofs.push(signatureProof);
 
     // Verify computation bounds
-    const boundsProof = this.verifyComputationBounds(job);
+    const boundsProof = await this.verifyComputationBounds(job);
     proofs.push(boundsProof);
 
     // Verify privacy guarantees
-    const privacyProof = this.verifyPrivacyGuarantees(job);
+    const privacyProof = await this.verifyPrivacyGuarantees(job);
     proofs.push(privacyProof);
 
     const allValid = proofs.every((proof) => proof.valid);
@@ -573,7 +573,7 @@ export class PSIEngine extends EventEmitter {
     };
   }
 
-  private preprocessDataset(dataset: PSIDataset): void {
+  private async preprocessDataset(dataset: PSIDataset): Promise<void> {
     // Normalize elements
     const normalizedElements = dataset.elements.map((element) => {
       if (dataset.privacy.normalization) {
@@ -681,7 +681,7 @@ export class PSIEngine extends EventEmitter {
     return fullConfig;
   }
 
-  private executeECDHPSIJob(job: PSIJob): void {
+  private async executeECDHPSIJob(job: PSIJob): Promise<void> {
     const startTime = Date.now();
 
     try {
@@ -689,7 +689,7 @@ export class PSIEngine extends EventEmitter {
       job.phases.setup.startTime = new Date();
       job.status = 'setup';
 
-      this.setupECDHKeys(job);
+      await this.setupECDHKeys(job);
 
       job.phases.setup.endTime = new Date();
       job.phases.setup.status = 'completed';
@@ -699,7 +699,7 @@ export class PSIEngine extends EventEmitter {
       job.status = 'running';
 
       const { encryptedSetA, encryptedSetB } =
-        this.performECDHExchange(job);
+        await this.performECDHExchange(job);
 
       job.phases.exchange.endTime = new Date();
       job.phases.exchange.status = 'completed';
@@ -707,7 +707,7 @@ export class PSIEngine extends EventEmitter {
       // Computation phase
       job.phases.computation.startTime = new Date();
 
-      const intersection = this.computeECDHIntersection(
+      const intersection = await this.computeECDHIntersection(
         encryptedSetA,
         encryptedSetB,
       );
@@ -718,7 +718,7 @@ export class PSIEngine extends EventEmitter {
       // Verification phase
       job.phases.verification.startTime = new Date();
 
-      const verified = this.verifyECDHResult(job, intersection);
+      const verified = await this.verifyECDHResult(job, intersection);
       if (!verified) {
         throw new Error('PSI result verification failed');
       }
@@ -767,7 +767,7 @@ export class PSIEngine extends EventEmitter {
     }
   }
 
-  private executeOPRFPSIJob(job: PSIJob): void {
+  private async executeOPRFPSIJob(job: PSIJob): Promise<void> {
     const startTime = Date.now();
 
     try {
@@ -775,7 +775,7 @@ export class PSIEngine extends EventEmitter {
       job.phases.setup.startTime = new Date();
       job.status = 'setup';
 
-      this.setupOPRFKeys(job);
+      await this.setupOPRFKeys(job);
 
       job.phases.setup.endTime = new Date();
       job.phases.setup.status = 'completed';
@@ -785,7 +785,7 @@ export class PSIEngine extends EventEmitter {
       job.status = 'running';
 
       const { blindedElements, oprfOutputs } =
-        this.performOPRFExchange(job);
+        await this.performOPRFExchange(job);
 
       job.phases.exchange.endTime = new Date();
       job.phases.exchange.status = 'completed';
@@ -793,7 +793,7 @@ export class PSIEngine extends EventEmitter {
       // Computation phase
       job.phases.computation.startTime = new Date();
 
-      const intersection = this.computeOPRFIntersection(
+      const intersection = await this.computeOPRFIntersection(
         blindedElements,
         oprfOutputs,
       );
@@ -804,7 +804,7 @@ export class PSIEngine extends EventEmitter {
       // Verification phase
       job.phases.verification.startTime = new Date();
 
-      const verified = this.verifyOPRFResult(job, intersection);
+      const verified = await this.verifyOPRFResult(job, intersection);
       if (!verified) {
         throw new Error('OPRF PSI result verification failed');
       }
@@ -847,7 +847,7 @@ export class PSIEngine extends EventEmitter {
     }
   }
 
-  private executeBloomPSIJob(job: PSIJob): void {
+  private async executeBloomPSIJob(job: PSIJob): Promise<void> {
     const startTime = Date.now();
 
     try {
@@ -855,11 +855,8 @@ export class PSIEngine extends EventEmitter {
       job.phases.setup.startTime = new Date();
       job.status = 'setup';
 
-      const datasetA = this.datasets.get(job.participants[0].dataset);
-      const datasetB = this.datasets.get(job.participants[1].dataset);
-      if (!datasetA || !datasetB) {
-        throw new Error('Datasets not found');
-      }
+      const datasetA = this.datasets.get(job.participants[0].dataset)!;
+      const datasetB = this.datasets.get(job.participants[1].dataset)!;
 
       job.phases.setup.endTime = new Date();
       job.phases.setup.status = 'completed';
@@ -881,7 +878,7 @@ export class PSIEngine extends EventEmitter {
       // Computation phase - estimate intersection using Bloom filters
       job.phases.computation.startTime = new Date();
 
-      const intersection = this.estimateBloomIntersection(
+      const intersection = await this.estimateBloomIntersection(
         filterA,
         filterB,
         datasetA,
@@ -920,7 +917,7 @@ export class PSIEngine extends EventEmitter {
     }
   }
 
-  private setupECDHKeys(job: PSIJob): void {
+  private async setupECDHKeys(job: PSIJob): Promise<void> {
     // Generate ECDH key pairs for each participant
     for (const participant of job.participants) {
       const keyPair = crypto.generateKeyPairSync('ec', {
@@ -937,7 +934,7 @@ export class PSIEngine extends EventEmitter {
     job.telemetry.bandwidth.sent += 64; // Mock bandwidth for key exchange
   }
 
-  private setupOPRFKeys(job: PSIJob): void {
+  private async setupOPRFKeys(job: PSIJob): Promise<void> {
     // Generate OPRF keys
     for (const participant of job.participants) {
       const oprfKey = crypto.randomBytes(32); // 256-bit key
@@ -948,19 +945,16 @@ export class PSIEngine extends EventEmitter {
     job.telemetry.bandwidth.sent += 32;
   }
 
-  private performECDHExchange(job: PSIJob): {
+  private async performECDHExchange(job: PSIJob): Promise<{
     encryptedSetA: Set<string>;
     encryptedSetB: Set<string>;
-  } {
-    const datasetA = this.datasets.get(job.participants[0].dataset);
-    const datasetB = this.datasets.get(job.participants[1].dataset);
-    if (!datasetA?.hashedElements || !datasetB?.hashedElements) {
-      throw new Error('Datasets or hashed elements not found');
-    }
+  }> {
+    const datasetA = this.datasets.get(job.participants[0].dataset)!;
+    const datasetB = this.datasets.get(job.participants[1].dataset)!;
 
     // Mock ECDH encryption of sets
     const encryptedSetA = new Set(
-      datasetA.hashedElements.map((element) =>
+      datasetA.hashedElements!.map((element) =>
         crypto
           .createHash('sha256')
           .update(`${element  }ecdh_a`)
@@ -969,7 +963,7 @@ export class PSIEngine extends EventEmitter {
     );
 
     const encryptedSetB = new Set(
-      datasetB.hashedElements.map((element) =>
+      datasetB.hashedElements!.map((element) =>
         crypto
           .createHash('sha256')
           .update(`${element  }ecdh_b`)
@@ -984,22 +978,19 @@ export class PSIEngine extends EventEmitter {
     return { encryptedSetA, encryptedSetB };
   }
 
-  private performOPRFExchange(job: PSIJob): {
+  private async performOPRFExchange(job: PSIJob): Promise<{
     blindedElements: Map<string, string>;
     oprfOutputs: Map<string, string>;
-  } {
-    const datasetA = this.datasets.get(job.participants[0].dataset);
-    const datasetB = this.datasets.get(job.participants[1].dataset);
-    if (!datasetA?.hashedElements || !datasetB?.hashedElements) {
-      throw new Error('Datasets or hashed elements not found');
-    }
+  }> {
+    const datasetA = this.datasets.get(job.participants[0].dataset)!;
+    const datasetB = this.datasets.get(job.participants[1].dataset)!;
 
     // Mock OPRF blinding and evaluation
     const blindedElements = new Map<string, string>();
     const oprfOutputs = new Map<string, string>();
 
     // Simulate OPRF protocol
-    datasetA.hashedElements.forEach((element) => {
+    datasetA.hashedElements!.forEach((element) => {
       const blinded = crypto
         .createHash('sha256')
         .update(`${element  }blind`)
@@ -1012,7 +1003,7 @@ export class PSIEngine extends EventEmitter {
       oprfOutputs.set(blinded, oprfOutput);
     });
 
-    datasetB.hashedElements.forEach((element) => {
+    datasetB.hashedElements!.forEach((element) => {
       const blinded = crypto
         .createHash('sha256')
         .update(`${element  }blind`)
@@ -1032,10 +1023,10 @@ export class PSIEngine extends EventEmitter {
     return { blindedElements, oprfOutputs };
   }
 
-  private computeECDHIntersection(
+  private async computeECDHIntersection(
     encryptedSetA: Set<string>,
     encryptedSetB: Set<string>,
-  ): { size: number; elements: Set<string> } {
+  ): Promise<{ size: number; elements: Set<string> }> {
     const intersection = new Set<string>();
 
     // Find common elements (mock implementation)
@@ -1053,10 +1044,10 @@ export class PSIEngine extends EventEmitter {
     return { size: intersection.size, elements: intersection };
   }
 
-  private computeOPRFIntersection(
+  private async computeOPRFIntersection(
     blindedElements: Map<string, string>,
     oprfOutputs: Map<string, string>,
-  ): { size: number; elements: Set<string> } {
+  ): Promise<{ size: number; elements: Set<string> }> {
     const intersection = new Set<string>();
 
     // Find intersecting OPRF outputs
@@ -1072,16 +1063,16 @@ export class PSIEngine extends EventEmitter {
     return { size: intersection.size, elements: intersection };
   }
 
-  private estimateBloomIntersection(
+  private async estimateBloomIntersection(
     filterA: NonNullable<PSIDataset['bloomFilter']>,
     filterB: NonNullable<PSIDataset['bloomFilter']>,
     datasetA: PSIDataset,
     datasetB: PSIDataset,
-  ): {
+  ): Promise<{
     estimate: number;
     confidence: number;
     falsePositiveRate: number;
-  } {
+  }> {
     // Calculate intersection of Bloom filters
     const intersectionBits = Buffer.alloc(filterA.bits.length);
 
@@ -1159,9 +1150,9 @@ export class PSIEngine extends EventEmitter {
     return z * sigma + mu;
   }
 
-  private verifyProtocolAdherence(
+  private async verifyProtocolAdherence(
     job: PSIJob,
-  ): { type: string; valid: boolean; details: any } {
+  ): Promise<{ type: string; valid: boolean; details: any }> {
     // Verify that the protocol was executed correctly
     const expectedPhases = ['setup', 'exchange', 'computation', 'verification'];
     const completedPhases = Object.keys(job.phases).filter(
@@ -1184,9 +1175,9 @@ export class PSIEngine extends EventEmitter {
     };
   }
 
-  private verifyParticipantSignatures(
+  private async verifyParticipantSignatures(
     job: PSIJob,
-  ): { type: string; valid: boolean; details: any } {
+  ): Promise<{ type: string; valid: boolean; details: any }> {
     // Mock signature verification
     const signatures = job.participants.map(
       (p) => `sig_${p.id}_${crypto.randomBytes(8).toString('hex')}`,
@@ -1202,9 +1193,9 @@ export class PSIEngine extends EventEmitter {
     };
   }
 
-  private verifyComputationBounds(
+  private async verifyComputationBounds(
     job: PSIJob,
-  ): { type: string; valid: boolean; details: any } {
+  ): Promise<{ type: string; valid: boolean; details: any }> {
     const withinBounds =
       job.telemetry.computation.memory <=
         job.protocol.performance.memoryLimitMB &&
@@ -1223,9 +1214,9 @@ export class PSIEngine extends EventEmitter {
     };
   }
 
-  private verifyPrivacyGuarantees(
+  private async verifyPrivacyGuarantees(
     job: PSIJob,
-  ): { type: string; valid: boolean; details: any } {
+  ): Promise<{ type: string; valid: boolean; details: any }> {
     // Verify that privacy constraints were met
     const noRawDataLeaked = !job.results?.intersectionElements;
     const dpApplied = job.protocol.privacy.differentialPrivacy
@@ -1243,10 +1234,10 @@ export class PSIEngine extends EventEmitter {
     };
   }
 
-  private verifyECDHResult(
+  private async verifyECDHResult(
     job: PSIJob,
     intersection: { size: number; elements: Set<string> },
-  ): boolean {
+  ): Promise<boolean> {
     // Mock verification of ECDH PSI result
     return (
       intersection.size >= 0 &&
@@ -1260,10 +1251,10 @@ export class PSIEngine extends EventEmitter {
     );
   }
 
-  private verifyOPRFResult(
+  private async verifyOPRFResult(
     job: PSIJob,
     intersection: { size: number; elements: Set<string> },
-  ): boolean {
+  ): Promise<boolean> {
     // Mock verification of OPRF PSI result
     return (
       intersection.size >= 0 &&

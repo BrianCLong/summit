@@ -185,14 +185,7 @@ app.post(
   requireRole('admin', 'reviewer'),
   async (req, res) => {
     const { decision, comment } = req.body;
-    let normalizedDecision = null;
-    if (decision === 'approve') {
-      normalizedDecision = 'approve';
-    } else if (decision === 'deny') {
-      normalizedDecision = 'deny';
-    } else {
-      normalizedDecision = null;
-    }
+    const normalizedDecision = decision === 'approve' ? 'approve' : decision === 'deny' ? 'deny' : null;
     if (!normalizedDecision) {
       return res.status(400).json({ error: 'Decision must be approve or deny.' });
     }
@@ -400,5 +393,5 @@ app.get('/queue', requireIdentity, (req, res) => {
 });
 
 app.listen(PORT, () => {
-  process.stdout.write(`hil-review server listening on port ${PORT}\n`);
+  console.log(`hil-review server listening on port ${PORT}`);
 });
