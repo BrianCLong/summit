@@ -79,47 +79,23 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: adr-pr-template-cleanup
+  - id: workflow-engine-readiness
     version: v1
-    path: prompts/docs/adr-pr-template-cleanup@v1.md
-    sha256: 429dc47c69fb43ee25eff48a54868fc88e2faf48f8de6a213d702794d2cb3d07
-    description: Update PR and ADR templates for current workflow guidance and formatting.
+    path: prompts/engineering/workflow-engine-readiness.md
+    sha256: 2d9f4e8d45b4d513d37465d3078d431a7b99b83ad78b3984c4026ac8d55105dd
+    description: Implement workflow-engine readiness endpoints, tests, and governance artifacts.
     scope:
       paths:
-        - .github/
-        - docs/ADR/
+        - apps/workflow-engine/
+        - docs/roadmap/STATUS.json
         - agents/examples/
-        - prompts/docs/adr-pr-template-cleanup@v1.md
+        - prompts/engineering/workflow-engine-readiness.md
         - prompts/registry.yaml
       domains:
-        - documentation
+        - control-plane
+        - observability
         - governance
-        - quality
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: adr-pr-template-cleanup
-    version: v1
-    path: prompts/docs/adr-pr-template-cleanup@v1.md
-    sha256: 429dc47c69fb43ee25eff48a54868fc88e2faf48f8de6a213d702794d2cb3d07
-    description: Update PR and ADR templates for current workflow guidance and formatting.
-    scope:
-      paths:
-        - .github/
-        - docs/ADR/
-        - agents/examples/
-        - prompts/docs/adr-pr-template-cleanup@v1.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - governance
-        - quality
+        - testing
     verification:
       tiers_required:
         - C
