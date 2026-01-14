@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GovernanceVerdict",
+  "type": "object",
+  "required": ["status", "reasons", "tenant_id", "policy_version", "timestamp", "evidence"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["allow", "deny", "degrade"]
+    },
+    "reasons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "message"],
+        "properties": {
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "control": { "type": "string" }
+        }
+      }
+    },
+    "tenant_id": { "type": "string" },
+    "policy_version": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "evidence": {
+      "type": "object",
+      "required": ["request_id"],
+      "properties": {
+        "request_id": { "type": "string" },
+        "actor": { "type": "string" },
+        "route": { "type": "string" },
+        "inputs_hash": { "type": "string" }
+      }
+    }
+  }
+}
