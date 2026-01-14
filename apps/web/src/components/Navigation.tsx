@@ -13,6 +13,7 @@ import {
   History,
   LogOut,
   Command,
+  Sparkles,
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -90,6 +91,11 @@ const navItems: NavItem[] = [
     icon: Command as React.ComponentType<{ className?: string }>,
     resource: 'dashboards',
     action: 'read',
+  },
+  {
+    name: 'Setup',
+    href: '/setup',
+    icon: Sparkles as React.ComponentType<{ className?: string }>,
   },
   {
     name: 'Data Sources',

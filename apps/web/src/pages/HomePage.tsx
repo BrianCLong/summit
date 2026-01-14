@@ -17,11 +17,12 @@ import { Badge } from '@/components/ui/Badge'
 import { KPIStrip } from '@/components/panels/KPIStrip'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { ActivationProgressTile } from '@/components/activation/ActivationProgressTile'
 import { DataIntegrityNotice } from '@/components/common/DataIntegrityNotice'
 import { useDemoMode } from '@/components/common/DemoIndicator'
+import { useFirstRunFunnel } from '@/hooks/useFirstRunFunnel'
 import mockData from '@/mock/data.json'
 import type { KPIMetric, Investigation, Alert, Case } from '@/types'
 
@@ -36,6 +37,8 @@ export default function HomePage() {
   const [recentAlerts, setRecentAlerts] = useState<Alert[]>([])
   const [recentCases, setRecentCases] = useState<Case[]>([])
   const isDemoMode = useDemoMode()
+  const { completionCount, completionPercent, milestones, nextMilestone } =
+    useFirstRunFunnel()
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -159,6 +162,30 @@ export default function HomePage() {
       />
 
       <ActivationProgressTile />
+
+      {completionCount < milestones.length && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Getting started</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">
+                {nextMilestone
+                  ? `Next up: ${nextMilestone.title}`
+                  : 'Finish your setup to unlock full signal coverage.'}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {completionCount} of {milestones.length} milestones complete (
+                {completionPercent}%)
+              </p>
+            </div>
+            <Button asChild variant="outline">
+              <Link to="/setup">Continue setup</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* KPI Metrics */}
       <div>

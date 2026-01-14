@@ -23,6 +23,7 @@ export {
   DrawerTrigger,
 } from './Drawer'
 export { EmptyState } from './EmptyState'
+export { StatePanel } from './StatePanel'
 export { Input } from './input'
 export { Label } from './label'
 export { Pagination } from './Pagination'

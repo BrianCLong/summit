@@ -9,7 +9,7 @@
  * - Export to HTML and PDF
  */
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Plus,
@@ -28,6 +28,8 @@ import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { getMilestoneStatus, setMilestoneStatus } from '@/lib/firstRunFunnel'
+import { trackFirstRunEvent } from '@/telemetry/metrics'
 
 interface Report {
   id: string
@@ -123,6 +125,30 @@ export default function ReportsPage() {
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [showComposer, setShowComposer] = useState(false)
+
+  useEffect(() => {
+    if (getMilestoneStatus('publish_report') === 'not_started') {
+      const nextStatus = setMilestoneStatus('publish_report', 'in_progress')
+      trackFirstRunEvent('first_run_milestone_started', {
+        milestoneId: 'publish_report',
+        status: nextStatus,
+        source: 'reports_page',
+      })
+    }
+  }, [])
+
+  useEffect(() => {
+    if (reports.length > 0) {
+      if (getMilestoneStatus('publish_report') !== 'complete') {
+        const nextStatus = setMilestoneStatus('publish_report', 'complete')
+        trackFirstRunEvent('first_run_milestone_completed', {
+          milestoneId: 'publish_report',
+          status: nextStatus,
+          source: 'report_list',
+        })
+      }
+    }
+  }, [reports.length])
 
   const filteredReports = reports.filter(r => {
     const matchesSearch =

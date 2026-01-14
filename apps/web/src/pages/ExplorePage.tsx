@@ -6,12 +6,13 @@ import { SearchBar } from '@/components/ui/SearchBar'
 import { EntityDrawer } from '@/components/panels/EntityDrawer'
 import { FilterPanel } from '@/components/panels/FilterPanel'
 import { TimelineRail } from '@/components/panels/TimelineRail'
-import { EmptyState } from '@/components/ui/EmptyState'
+import { StatePanel } from '@/components/ui/StatePanel'
 import { GraphCanvas } from '@/graphs/GraphCanvas'
 import { useEntities, useEntityUpdates } from '@/hooks/useGraphQL'
 import { ConnectionStatus } from '@/components/ConnectionStatus'
 import { SnapshotManager } from '@/components/features/investigation/SnapshotManager'
-import { trackGoldenPathStep } from '@/telemetry/metrics'
+import { trackFirstRunEvent, trackGoldenPathStep } from '@/telemetry/metrics'
+import { getMilestoneStatus, setMilestoneStatus } from '@/lib/firstRunFunnel'
 import { DataIntegrityNotice } from '@/components/common/DataIntegrityNotice'
 import { useDemoMode } from '@/components/common/DemoIndicator'
 import mockData from '@/mock/data.json'
@@ -70,6 +71,14 @@ export default function ExplorePage(): React.ReactElement {
   // Load data - prefer GraphQL over mock data in demo mode only
   useEffect(() => {
     trackGoldenPathStep('entities_viewed')
+    if (getMilestoneStatus('run_investigation') === 'not_started') {
+      const nextStatus = setMilestoneStatus('run_investigation', 'in_progress')
+      trackFirstRunEvent('first_run_milestone_started', {
+        milestoneId: 'run_investigation',
+        status: nextStatus,
+        source: 'explore_page',
+      })
+    }
 
     if (entitiesData?.entities) {
       // Use real GraphQL data when available
@@ -106,6 +115,22 @@ export default function ExplorePage(): React.ReactElement {
       loadMockData()
     }
   }, [entitiesData, entitiesLoading, entitiesError, isDemoMode])
+
+  useEffect(() => {
+    if (!loading && entities.length > 0) {
+      if (getMilestoneStatus('run_investigation') !== 'complete') {
+        const nextStatus = setMilestoneStatus(
+          'run_investigation',
+          'complete'
+        )
+        trackFirstRunEvent('first_run_milestone_completed', {
+          milestoneId: 'run_investigation',
+          status: nextStatus,
+          source: 'entities_loaded',
+        })
+      }
+    }
+  }, [entities.length, loading])
 
   // Handle real-time entity updates
   useEffect(() => {
@@ -267,14 +292,12 @@ export default function ExplorePage(): React.ReactElement {
   if (error) {
     return (
       <div className="h-full flex items-center justify-center">
-        <EmptyState
-          icon="alert"
+        <StatePanel
+          variant="error"
           title="Failed to load graph data"
           description={error.message}
-          action={{
-            label: 'Retry',
-            onClick: () => window.location.reload(),
-          }}
+          action={{ label: 'Retry', onClick: () => window.location.reload() }}
+          secondaryAction={{ label: 'Back to setup', href: '/setup' }}
         />
       </div>
     )
@@ -403,17 +426,19 @@ export default function ExplorePage(): React.ReactElement {
         <div className="flex-1 relative">
           {loading ? (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center space-y-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                <p className="text-muted-foreground">Loading graph data...</p>
-              </div>
+              <StatePanel
+                variant="loading"
+                title="Loading graph data"
+                description="Syncing entities and relationships."
+              />
             </div>
           ) : filteredEntities.length === 0 ? (
             <div className="absolute inset-0 flex items-center justify-center">
-              <EmptyState
+              <StatePanel
+                variant="empty"
                 icon="search"
                 title="No entities found"
-                description="Try adjusting your filters or search query"
+                description="Try adjusting your filters or search query."
                 action={{
                   label: 'Clear filters',
                   onClick: () => {
@@ -428,6 +453,7 @@ export default function ExplorePage(): React.ReactElement {
                     setSearchQuery('')
                   },
                 }}
+                secondaryAction={{ label: 'Back to setup', href: '/setup' }}
               />
             </div>
           ) : (
