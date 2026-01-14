@@ -11,9 +11,6 @@ import { dirname, join, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
 
-// Define MAX_CONCURRENT_FILES constant if not already defined
-const MAX_CONCURRENT_FILES = 10;
-
 // Debug logging utility
 const DEBUG = process.env.EVIDENCE_DEBUG === 'true' || process.argv.includes('--debug');
 function debugLog(message) {
@@ -620,10 +617,18 @@ async function main() {
       ? processGovernanceDocumentWithAI
       : processGovernanceDocument;
 
+    // Create a closure with the artifact directory for the AI processor
+    const createProcessor = (artifactDir) => {
+      return process.env.ENABLE_QWEN_ANALYSIS === 'true'
+        ? (docPath, evidenceMap, repoRoot) => processGovernanceDocumentWithAI(docPath, evidenceMap, repoRoot, artifactDir)
+        : processGovernanceDocument;
+    };
+    const processor = createProcessor(join(config.outputDir, sha));
+
     for (let i = 0; i < documents.length; i += MAX_CONCURRENT_FILES) {
       const batch = documents.slice(i, i + MAX_CONCURRENT_FILES);
       const batchResults = await Promise.all(
-        batch.map(docPath => processorFn(docPath, evidenceMap, config.repoRoot))
+        batch.map(docPath => processor(docPath, evidenceMap, config.repoRoot))
       );
       results.push(...batchResults);
 
@@ -718,7 +723,7 @@ if (process.argv[1] === __filename) {
 /**
  * Process a single governance document with optional AI-assisted analysis
  */
-async function processGovernanceDocumentWithAI(filePath, evidenceMap, repoRoot) {
+async function processGovernanceDocumentWithAI(filePath, evidenceMap, repoRoot, artifactDir = './artifacts') {
   // First run the standard processing
   const result = await processGovernanceDocument(filePath, evidenceMap, repoRoot);
 
@@ -732,7 +737,8 @@ async function processGovernanceDocumentWithAI(filePath, evidenceMap, repoRoot) 
       const content = await fs.readFile(filePath, "utf8");
       const aiAnalysisResult = await analyzeDocumentWithQwen(
         content,
-        "Validate Evidence-IDs compliance and mapping consistency"
+        "Validate Evidence-IDs compliance and mapping consistency",
+        artifactDir
       );
 
       // Extract AI insights if response contains them
