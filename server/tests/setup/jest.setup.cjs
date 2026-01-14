@@ -240,7 +240,7 @@ jest.mock('ioredis', () => {
 // Mock config/logger removed to use moduleNameMapper and tests/mocks/logger.ts
 
 // Mock middleware/audit-logger
-jest.mock('../../src/middleware/audit-logger', () => ({
+jest.mock('../../src/middleware/audit-logger.ts', () => ({
   __esModule: true,
   auditLogger: (req, res, next) => next(),
   createAuditLogger: () => (req, res, next) => next(),

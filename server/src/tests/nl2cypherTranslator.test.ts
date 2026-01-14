@@ -1,7 +1,11 @@
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { nl2cypher } from '../nl2cypher/index';
 import { describe, it, expect } from '@jest/globals';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 describe('nl2cypher corpus', () => {
   it('produces expected cypher and AST for corpus', () => {

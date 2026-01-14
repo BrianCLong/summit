@@ -1,7 +1,11 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { verifyWeights } from '../risk/WeightsVerifier';
 import { describe, it, expect } from '@jest/globals';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 describe('WeightsVerifier', () => {
   it('verifies checksum', () => {
