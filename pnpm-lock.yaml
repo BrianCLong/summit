@@ -11557,7 +11557,7 @@ importers:
         version: 3.958.0
       '@intelgraph/maestro-sdk':
         specifier: workspace:*
-        version: link:../../sdk/typescript
+        version: link:../maestro-sdk
       ajv:
         specifier: ^8.17.1
         version: 8.17.1
