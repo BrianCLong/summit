@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { execSync } from 'node:child_process';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { parseArgs } from 'node:util';
 
@@ -201,7 +201,23 @@ async function main() {
        }
   }
 
-  // 6c. Release Manifest
+  // 6c. Release Artifacts Inventory
+  const releaseArtifactsSource = resolve('artifacts', 'release-artifacts');
+  const releaseArtifactsDest = join(DIST_RELEASE, 'release-artifacts');
+  if (existsSync(releaseArtifactsSource)) {
+      console.log('\n📦 Staging Release Artifacts Inventory...');
+      mkdirSync(releaseArtifactsDest, { recursive: true });
+      const inventoryPath = join(releaseArtifactsSource, 'inventory.json');
+      if (existsSync(inventoryPath)) {
+          copyFileSync(inventoryPath, join(releaseArtifactsDest, 'inventory.json'));
+      }
+      const sumsPath = join(releaseArtifactsSource, 'SHA256SUMS');
+      if (existsSync(sumsPath)) {
+          copyFileSync(sumsPath, join(releaseArtifactsDest, 'SHA256SUMS'));
+      }
+  }
+
+  // 6d. Release Manifest
   console.log('\n📜 Creating Release Manifest...');
   const manifest = {
       tag: values.tag,

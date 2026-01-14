@@ -89,6 +89,8 @@ generate_provenance() {
     local container_sbom_path="${bundle_dir}/sbom/container.cdx.json"
     local source_vuln_path="${bundle_dir}/vuln/source-summary.json"
     local container_vuln_path="${bundle_dir}/vuln/container-summary.json"
+    local release_inventory_path="${bundle_dir}/release-artifacts/inventory.json"
+    local release_sums_path="${bundle_dir}/release-artifacts/SHA256SUMS"
 
     # Calculate SHA256 for each file
     local source_sbom_sha256
@@ -99,6 +101,10 @@ generate_provenance() {
     source_vuln_sha256=$(sha256_of_file "${source_vuln_path}")
     local container_vuln_sha256
     container_vuln_sha256=$(sha256_of_file "${container_vuln_path}")
+    local release_inventory_sha256
+    release_inventory_sha256=$(sha256_of_file "${release_inventory_path}")
+    local release_sums_sha256
+    release_sums_sha256=$(sha256_of_file "${release_sums_path}")
 
     # Determine what exists
     local source_sbom_exists="false"
@@ -106,12 +112,16 @@ generate_provenance() {
     local bundle_sbom_exists="false"
     local source_vuln_exists="false"
     local container_vuln_exists="false"
+    local release_inventory_exists="false"
+    local release_sums_exists="false"
 
     [[ -f "${source_sbom_path}" ]] && source_sbom_exists="true"
     [[ -f "${container_sbom_path}" ]] && container_sbom_exists="true"
     [[ -f "${bundle_dir}/sbom/bundle.cdx.json" ]] && bundle_sbom_exists="true"
     [[ -f "${source_vuln_path}" ]] && source_vuln_exists="true"
     [[ -f "${container_vuln_path}" ]] && container_vuln_exists="true"
+    [[ -f "${release_inventory_path}" ]] && release_inventory_exists="true"
+    [[ -f "${release_sums_path}" ]] && release_sums_exists="true"
 
     # Calculate size
     local source_sbom_size
@@ -124,6 +134,10 @@ generate_provenance() {
     source_vuln_size=$(size_of_file "${source_vuln_path}")
     local container_vuln_size
     container_vuln_size=$(size_of_file "${container_vuln_path}")
+    local release_inventory_size
+    release_inventory_size=$(size_of_file "${release_inventory_path}")
+    local release_sums_size
+    release_sums_size=$(size_of_file "${release_sums_path}")
 
     # Calculate bundle SBOM hash
     local bundle_sbom_sha256=""
@@ -187,6 +201,20 @@ generate_provenance() {
       "exists": ${container_vuln_exists},
       "sha256": "${container_vuln_sha256}",
       "size_bytes": ${container_vuln_size}
+    }
+  },
+  "release_artifacts": {
+    "inventory": {
+      "path": "release-artifacts/inventory.json",
+      "exists": ${release_inventory_exists},
+      "sha256": "${release_inventory_sha256}",
+      "size_bytes": ${release_inventory_size}
+    },
+    "checksums": {
+      "path": "release-artifacts/SHA256SUMS",
+      "exists": ${release_sums_exists},
+      "sha256": "${release_sums_sha256}",
+      "size_bytes": ${release_sums_size}
     }
   },
   "verification": {

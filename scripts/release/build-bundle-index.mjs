@@ -10,23 +10,34 @@ function getSha256(content) {
   return crypto.createHash('sha256').update(content).digest('hex');
 }
 
-async function buildBundleIndex(dir) {
-  const files = await fs.readdir(dir);
-  const fileDetails = [];
+async function collectFiles(rootDir, currentDir, fileDetails, relativePaths) {
+  const entries = await fs.readdir(currentDir, { withFileTypes: true });
 
-  for (const file of files) {
-    const filePath = path.join(dir, file);
-    const stat = await fs.stat(filePath);
+  for (const entry of entries) {
+    const entryPath = path.join(currentDir, entry.name);
+    if (entry.isDirectory()) {
+      await collectFiles(rootDir, entryPath, fileDetails, relativePaths);
+      continue;
+    }
 
-    if (stat.isFile()) {
-      const content = await fs.readFile(filePath);
+    if (entry.isFile()) {
+      const stat = await fs.stat(entryPath);
+      const content = await fs.readFile(entryPath);
+      const relativePath = path.relative(rootDir, entryPath);
       fileDetails.push({
-        path: path.join(dir, file),
+        path: path.join(rootDir, relativePath),
         bytes: stat.size,
         sha256: getSha256(content),
       });
+      relativePaths.push(relativePath);
     }
   }
+}
+
+async function buildBundleIndex(dir) {
+  const fileDetails = [];
+  const relativePaths = [];
+  await collectFiles(dir, dir, fileDetails, relativePaths);
 
   const tag = process.env.GITHUB_REF_NAME || 'local';
   const channel = tag.includes('-rc') ? 'rc' : 'stable';
@@ -40,10 +51,12 @@ async function buildBundleIndex(dir) {
     provenance: 'provenance.json',
     checksums: 'SHA256SUMS',
     compatibility: 'compatibility.json',
+    releaseArtifactsInventory: 'release-artifacts/inventory.json',
+    releaseArtifactsChecksums: 'release-artifacts/SHA256SUMS',
   };
 
   for (const [key, file] of Object.entries(pointerCandidates)) {
-    if (files.includes(file)) {
+    if (relativePaths.includes(file)) {
       pointers[key] = path.join(dir, file);
     }
   }
