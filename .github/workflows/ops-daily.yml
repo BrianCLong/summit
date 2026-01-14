@@ -1,0 +1,44 @@
+name: Ops Daily Cadence
+
+on:
+  schedule:
+    - cron: '0 9 * * 1-5' # 9 AM UTC, Mon-Fri
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  daily-ops:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.node-version'
+
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install --no-frozen-lockfile # relaxed for ops scripts
+
+      - name: Run Merge Train Triage
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p artifacts/ops/daily
+          pnpm pr:triage > artifacts/ops/daily/triage-report.md
+        continue-on-error: true
+
+      - name: Generate Daily Ops Report
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/ops/daily_ops_report.mjs
+
+      - name: Upload Ops Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ops-daily-report
+          path: artifacts/ops/daily/
