@@ -281,7 +281,11 @@ claude-preflight: ## Fast local checks before make ga (lint + typecheck + unit t
 .PHONY: ga ga-verify
 ga: ## Run Enforceable GA Gate (Lint -> Clean Up -> Deep Health -> Smoke -> Security)
 	@mkdir -p artifacts/ga
-	@./scripts/ga-gate.sh
+	@./scripts/ga-gate.sh || { echo "❌ GA Gate failed. Collecting evidence before exit..."; $(MAKE) ga-evidence; exit 1; }
+	@$(MAKE) ga-evidence
+
+ga-evidence: ## Collect GA evidence into a bundle (dist/evidence/<sha>)
+	@python3 scripts/evidence/collect_ga_evidence.py
 
 ga-verify: ## Run GA tier B/C verification sweep (deterministic)
 	@node --test testing/ga-verification/*.ga.test.mjs

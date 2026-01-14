@@ -50,3 +50,63 @@ jobs:
 
       - name: Unit Tests
         run: pnpm -w test:unit
+
+  ga-gate:
+    name: ga-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [unit-tests]
+    permissions:
+      id-token: write
+      attestations: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node (from .nvmrc)
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install (frozen lockfile)
+        run: pnpm -w install --frozen-lockfile
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run GA Gate
+        run: make ga
+        env:
+          NODE_ENV: test
+          # Avoid full docker up if possible, or support it
+          # Since CI runner has docker, make ga should work.
+          # However, make ga does `make down` then `make up`.
+          # We might need to ensure docker compose is available.
+
+      - name: Attest Evidence Bundle
+        uses: actions/attest-build-provenance@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          subject-path: dist/evidence-${{ github.sha }}.tar.gz
+
+      - name: Upload Evidence Bundle
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ga-evidence-${{ github.sha }}
+          path: dist/evidence-${{ github.sha }}.tar.gz
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## GA Evidence" >> $GITHUB_STEP_SUMMARY
+          echo "Evidence bundle uploaded as artifact: ga-evidence-${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          if [ -f "dist/evidence/$(git rev-parse HEAD)/EVIDENCE_SUMMARY.md" ]; then
+             cat "dist/evidence/$(git rev-parse HEAD)/EVIDENCE_SUMMARY.md" >> $GITHUB_STEP_SUMMARY
+          fi
