@@ -1,0 +1,39 @@
+{
+  "task_id": "MCP_TRANSPORT_PR1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "mcp-transport-abstraction-pr1",
+    "version": "v1",
+    "sha256": "6ef882e18c8d67020b27be1df9396d41d4fd78ed9fd820bbe1cc5261e677d583",
+    "path": "prompts/mcp/transport-abstraction-pr1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "server/src/conductor/mcp/",
+      "docs/architecture/",
+      "docs/roadmap/STATUS.json",
+      "prompts/mcp/",
+      "prompts/registry.yaml",
+      "agents/examples/"
+    ],
+    "domains": ["mcp", "transport", "documentation", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["unit-test-output"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Transport registry selects configured transport and negotiates fallback.",
+    "Existing MCP JSON-RPC transport remains default.",
+    "Architecture documentation added for MCP transport layer."
+  ],
+  "stop_conditions": [
+    "Transport registry selection fails to preserve existing JSON-RPC behavior.",
+    "Tests introduce skipped or ignored cases."
+  ]
+}
