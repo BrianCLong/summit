@@ -169,8 +169,7 @@ async function processGovernanceDocument(filePath, evidenceMap, repoRoot) {
         });
       }
     }
-    
-    // Also check for orphaned evidence IDs that exist in mapping but not referenced anywhere
+
     const allViolations = [...formatViolations, ...mappingViolations];
     
     return {
@@ -323,8 +322,8 @@ async function writeReports(report, outputPath) {
   mdContent += `- Documents Checked: ${report.totals.documents_checked}\n`;
   mdContent += `- Evidence IDs Found: ${report.totals.evidence_ids_found}\n`;
   mdContent += `- Violations: ${report.totals.violations}\n`;
-  mdContent += `- Errors: ${report.errors || report.totals.errors}\n`;
-  mdContent += `- Warnings: ${report.warnings || report.totals.warnings}\n\n`;
+  mdContent += `- Errors: ${report.totals.errors}\n`;
+  mdContent += `- Warnings: ${report.totals.warnings}\n\n`;
   
   if (report.results.some(r => r.violations.length > 0)) {
     mdContent += `## Issues\n\n`;
@@ -368,7 +367,13 @@ async function main() {
     };
 
     // Allow command line override
-    const sha = args.find(arg => arg.startsWith('--sha='))?.split('=')[1] || process.env.GITHUB_SHA || 'unknown';
+    let sha = args.find(arg => arg.startsWith('--sha='))?.split('=')[1];
+    if (!sha) {
+      sha = process.env.GITHUB_SHA || 'manual-' + Date.now().toString(36);
+    }
+    // Ensure SHA is properly formatted (no special chars that could create unsafe paths)
+    sha = sha.replace(/[^a-zA-Z0-9_-]/g, '_');
+
     const outputOverride = args.find(arg => arg.startsWith('--output='))?.split('=')[1];
     if (outputOverride) {
       config.outputDir = resolve(outputOverride);

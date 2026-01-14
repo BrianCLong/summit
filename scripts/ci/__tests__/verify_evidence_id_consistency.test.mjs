@@ -10,7 +10,8 @@ import {
   loadEvidenceMap,
   parseEvidenceIds,
   parseHeaders,
-  processGovernanceDocument
+  processGovernanceDocument,
+  writeReports
 } from '../verify_evidence_id_consistency.mjs';
 
 function makeTempRepo() {
@@ -99,11 +100,12 @@ Content`;
     writeTestFile(testDocPath, makeHeaderDoc({ 'Evidence-IDs': 'valid.id.format,invalid format!' }));
 
     const result = await processGovernanceDocument(testDocPath, evidenceMap, root);
-    
+
     const formatViolation = result.violations.find(v => v.type === 'invalid_evidence_id_format');
     assert.ok(formatViolation, 'Should detect invalid evidence ID format');
     assert.ok(formatViolation.message.includes('invalid format!'), 'Should mention the invalid ID');
   });
+
 
   test('processGovernanceDocument detects missing evidence mappings', async () => {
     const { root, docsRoot } = makeTempRepo();
