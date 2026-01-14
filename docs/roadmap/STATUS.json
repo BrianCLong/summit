@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-10T12:30:00Z",
+  "revision_note": "Added Maestro Long-Run Job Engine governance scaffolding and CI gates",
   "initiatives": [
     {
       "id": "A",
