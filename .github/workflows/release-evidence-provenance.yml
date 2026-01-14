@@ -1,0 +1,155 @@
+name: Release Evidence Provenance
+# Generates and publishes SLSA-style provenance for the Evidence Bundle on release tags.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to attest (must exist)'
+        required: true
+
+permissions:
+  contents: write # To upload release assets
+  id-token: write # For OIDC signing
+  packages: read  # If needed for container images (not used here)
+
+jobs:
+  provenance:
+    name: Generate & Sign Provenance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        with:
+          node-version: '20'
+
+      - name: Setup Python
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          npm install -g pnpm@9.12.0
+          pnpm install --frozen-lockfile
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@dc72c7d5c4d10195b02b81eb88bd40881fffc95b # v3.7.0
+
+      - name: Resolve Tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "Processing tag: ${TAG}"
+
+      - name: Generate Evidence Bundle
+        run: |
+          # Ensure we generate the evidence bundle for the current commit
+          # We assume the standard evidence generation script
+          # If a bundle for this SHA already exists in artifacts, we might reuse it, but better to regenerate to be safe/fresh in this job
+
+          # Run the evidence generation (this script should produce dist/evidence/<sha>/...)
+          # Adjust the command based on actual repo capability
+          if grep -q "ci:soc-report" package.json; then
+             # Usually the bundle is generated before the report
+             # We look for a script that generates the bundle.
+             # Based on previous exploration: scripts/evidence/generate_evidence_bundle.mjs
+             node scripts/evidence/generate_evidence_bundle.mjs
+
+             # Also generate SOC report
+             python3 scripts/evidence/generate_soc_report.py --evidence-dir dist/evidence/${GITHUB_SHA}
+          else
+             echo "Error: evidence generation scripts not found"
+             exit 1
+          fi
+
+          # Create the tarball if not already created
+          # The prompt says: "Attest the EVIDENCE BUNDLE TARBALL"
+          # We expect dist/evidence/<sha> to be populated.
+
+          cd dist
+          EVIDENCE_DIR="evidence/${GITHUB_SHA}"
+          TARBALL_NAME="ga-evidence-bundle-${{ steps.tag.outputs.tag }}.tar.gz"
+
+          if [ -d "$EVIDENCE_DIR" ]; then
+            tar -czf "$TARBALL_NAME" -C "evidence/${GITHUB_SHA}" .
+            echo "tarball_path=dist/$TARBALL_NAME" >> $GITHUB_ENV
+            echo "tarball_name=$TARBALL_NAME" >> $GITHUB_ENV
+          else
+            echo "Error: Evidence directory $EVIDENCE_DIR not found"
+            ls -R evidence
+            exit 1
+          fi
+
+      - name: Generate Provenance Statement
+        run: |
+          PROVENANCE_FILE="dist/release-evidence-provenance-${{ steps.tag.outputs.tag }}.intoto.json"
+
+          python3 scripts/evidence/generate_release_provenance.py \
+            --tag "${{ steps.tag.outputs.tag }}" \
+            --sha "${GITHUB_SHA}" \
+            --repo "git+${{ github.server_url }}/${{ github.repository }}" \
+            --workflow "${{ github.workflow_ref }}" \
+            --run-id "${{ github.run_id }}" \
+            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --tarball "${{ env.tarball_path }}" \
+            --output "$PROVENANCE_FILE"
+
+          echo "provenance_path=$PROVENANCE_FILE" >> $GITHUB_ENV
+          echo "provenance_name=$(basename $PROVENANCE_FILE)" >> $GITHUB_ENV
+
+      - name: Sign Provenance (Keyless)
+        run: |
+          # Sign the intoto statement
+          cosign sign-blob --yes \
+            --output-signature "${{ env.provenance_path }}.sig" \
+            --output-certificate "${{ env.provenance_path }}.cert" \
+            "${{ env.provenance_path }}"
+
+          echo "signature_path=${{ env.provenance_path }}.sig" >> $GITHUB_ENV
+          echo "certificate_path=${{ env.provenance_path }}.cert" >> $GITHUB_ENV
+
+      - name: Verify (Self-Test)
+        run: |
+          ./scripts/evidence/verify_release_provenance.sh \
+            --attestation "${{ env.provenance_path }}" \
+            --signature "${{ env.signature_path }}" \
+            --certificate "${{ env.certificate_path }}" \
+            --bundle "${{ env.tarball_path }}" \
+            --owner "${{ github.repository_owner }}" \
+            --repo "$(echo ${{ github.repository }} | cut -d'/' -f2)" \
+            --tag "${{ steps.tag.outputs.tag }}"
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.0.1
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          files: |
+            ${{ env.tarball_path }}
+            ${{ env.provenance_path }}
+            ${{ env.signature_path }}
+            ${{ env.certificate_path }}
+          fail_on_unmatched_files: true
+
+      - name: Upload as Artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.1.0
+        with:
+          name: evidence-provenance
+          path: |
+            ${{ env.tarball_path }}
+            ${{ env.provenance_path }}
+            ${{ env.signature_path }}
+            ${{ env.certificate_path }}
