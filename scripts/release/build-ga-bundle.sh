@@ -30,6 +30,9 @@ OUTPUT_DIR=""
 RC_TAG=""
 WORKFLOW_RUN=""
 VERBOSE=false
+RELEASE_ARTIFACTS_SOURCE="artifacts/release-artifacts"
+RELEASE_ARTIFACTS_INVENTORY_HASH=""
+RELEASE_ARTIFACTS_SUMS_HASH=""
 
 # Colors
 RED='\033[0;31m'
@@ -157,6 +160,28 @@ log_info "Output: ${OUTPUT_DIR}"
 
 # Create output directory
 mkdir -p "${OUTPUT_DIR}"
+
+# Stage release artifacts inventory and checksums
+RELEASE_ARTIFACTS_DIR="${OUTPUT_DIR}/release-artifacts"
+if [[ -f "${RELEASE_ARTIFACTS_SOURCE}/inventory.json" || -f "${RELEASE_ARTIFACTS_SOURCE}/SHA256SUMS" ]]; then
+    log_info "Staging release artifacts..."
+    mkdir -p "${RELEASE_ARTIFACTS_DIR}"
+    if [[ -f "${RELEASE_ARTIFACTS_SOURCE}/inventory.json" ]]; then
+        cp "${RELEASE_ARTIFACTS_SOURCE}/inventory.json" "${RELEASE_ARTIFACTS_DIR}/inventory.json"
+        RELEASE_ARTIFACTS_INVENTORY_HASH=$(sha256sum "${RELEASE_ARTIFACTS_DIR}/inventory.json" | cut -d' ' -f1)
+    else
+        log_warn "Missing ${RELEASE_ARTIFACTS_SOURCE}/inventory.json"
+    fi
+
+    if [[ -f "${RELEASE_ARTIFACTS_SOURCE}/SHA256SUMS" ]]; then
+        cp "${RELEASE_ARTIFACTS_SOURCE}/SHA256SUMS" "${RELEASE_ARTIFACTS_DIR}/SHA256SUMS"
+        RELEASE_ARTIFACTS_SUMS_HASH=$(sha256sum "${RELEASE_ARTIFACTS_DIR}/SHA256SUMS" | cut -d' ' -f1)
+    else
+        log_warn "Missing ${RELEASE_ARTIFACTS_SOURCE}/SHA256SUMS"
+    fi
+else
+    log_warn "Release artifacts not found in ${RELEASE_ARTIFACTS_SOURCE}"
+fi
 
 # Auto-detect RC tag if not specified
 if [[ -z "$RC_TAG" ]]; then
@@ -311,6 +336,8 @@ cat > "${OUTPUT_DIR}/GA_RELEASE_CHECKLIST.md" << EOF
 - [ ] \`SHA256SUMS\` - Artifact checksums
 - [ ] \`governance/governance_lockfile.json\` - Policy snapshot
 - [ ] \`governance/governance_SHA256SUMS\` - Policy checksums
+- [ ] \`release-artifacts/inventory.json\` - Release artifacts inventory
+- [ ] \`release-artifacts/SHA256SUMS\` - Release artifacts checksums
 
 ## Publish Steps
 
@@ -367,7 +394,9 @@ cat > "${OUTPUT_DIR}/ga_metadata.json" << EOF
     "publish_script": "publish_to_ga.sh",
     "checklist": "GA_RELEASE_CHECKLIST.md",
     "checksums": "SHA256SUMS",
-    "provenance": "provenance.json"
+    "provenance": "provenance.json",
+    "release_artifacts_inventory": "release-artifacts/inventory.json",
+    "release_artifacts_checksums": "release-artifacts/SHA256SUMS"
   },
   "governance_hash": "${GOVERNANCE_LOCKFILE_HASH:-null}",
   "governance_lockfile": ${GOVERNANCE_JSON},
@@ -476,6 +505,17 @@ cat > "${OUTPUT_DIR}/provenance.json" << EOF
     "cert_path": "governance/signatures/governance_SHA256SUMS.cert",
     "metadata_path": "governance/signatures/metadata.json",
     "identity_policy": "security/sigstore-identity-policy.yml"
+  },
+  "release_artifacts": {
+    "inventory": {
+      "path": "release-artifacts/inventory.json",
+      "sha256": "${RELEASE_ARTIFACTS_INVENTORY_HASH:-null}",
+      "sums_path": "release-artifacts/SHA256SUMS"
+    },
+    "checksums": {
+      "path": "release-artifacts/SHA256SUMS",
+      "sha256": "${RELEASE_ARTIFACTS_SUMS_HASH:-null}"
+    }
   },
   "workflow": {
     "run_id": "${WORKFLOW_RUN:-null}",
