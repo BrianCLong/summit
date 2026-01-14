@@ -1,22 +1,7 @@
-## 2025-10-25 - Maestro Run Console Status & Onboarding
+## 2024-05-23 - Accessibility in Toolbars
+**Learning:** Icon-only buttons in toolbars (like zoom, fit, center) often lack `aria-label` attributes, relying only on `title` tooltips which are insufficient for screen readers.
+**Action:** Always verify that `Button` components with `size="icon"` or similar have a descriptive `aria-label`.
 
-**Learning:** Users often stare at empty text areas with "writer's block". Providing clickable example prompts not only speeds up testing but educates users on the tool's capabilities (e.g., "analyze PRs" vs "summarize risk").
-**Action:** Always provide "Quick Start" chips or buttons for empty states in complex input interfaces.
-
-**Learning:** Color-only status indicators (red/green badges) are insufficient for quick scanning and accessibility.
-**Action:** Augment status badges with semantic icons (Check, AlertTriangle, Loader) to reinforce state.
-
-## 2025-10-28 - Unit Test Priority
-
-**Learning:** When local dev environments are unstable (e.g., 500 errors, MSW conflicts), rely on robust unit tests () to verify logic and UX flows instead of getting blocked by visual verification.
-**Action:** Prioritize writing comprehensive unit tests for UI interactions early in the process.
-
-## 2025-10-28 - Unit Test Priority
-
-**Learning:** When local dev environments are unstable, rely on robust unit tests to verify logic and UX flows.
-**Action:** Prioritize writing comprehensive unit tests for UI interactions early in the process.
-
-## 2025-10-28 - Fixing Legacy Debt
-
-**Learning:** Even when assigned a focused task (e.g., UX), one may inherit a broken branch or be required to fix blocking architectural issues (e.g., API drift, Type mismatches) to land changes.
-**Action:** Be prepared to step outside the assigned persona to unblock the build.
+## 2024-05-23 - Jest Configuration for Path Aliases
+**Learning:** The `client` project uses `@/` path aliases (e.g., `@/lib/utils`) but the Jest configuration (`client/jest.config.cjs`) was missing the corresponding `moduleNameMapper` entry, causing tests to fail when importing files using these aliases.
+**Action:** Ensure `jest.config.cjs` includes `^@/(.*)$': '<rootDir>/src/$1'` when working with projects that use path aliases in `tsconfig.json`.
