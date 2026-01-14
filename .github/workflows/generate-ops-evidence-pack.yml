@@ -17,13 +17,21 @@ jobs:
         with:
           ref: ${{ github.event.inputs.ref }}
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        with:
+          version: '9'
+          run_install: false
+
       - name: Setup Node
         uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
           node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
 
-      - name: Install Dependencies
-        run: npm install -g pnpm && pnpm install
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Generate Ops Evidence Pack
         id: generate

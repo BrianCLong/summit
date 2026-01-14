@@ -55,6 +55,29 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ci-pnpm-cache-standardization
+    version: v1
+    path: prompts/ci/pnpm-ci-cache.md
+    sha256: ecf7df2cdea2240f198116a1988d98895c8038eb39acdcd6b75c29d955d69eac
+    description: Standardize pnpm setup, caching, and deterministic installs in CI workflows.
+    scope:
+      paths:
+        - .github/
+        - docs/roadmap/STATUS.json
+        - prompts/ci/pnpm-ci-cache.md
+        - prompts/registry.yaml
+      domains:
+        - ci
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
