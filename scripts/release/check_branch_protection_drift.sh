@@ -27,6 +27,12 @@ POLICY_FILE="${REPO_ROOT}/docs/ci/REQUIRED_CHECKS_POLICY.yml"
 EXCEPTIONS_FILE="${REPO_ROOT}/docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml"
 OUT_DIR="artifacts/release-train"
 VERBOSE=false
+GA_GATE_WORKFLOW_FILE="${GA_GATE_WORKFLOW_FILE:-${REPO_ROOT}/.github/workflows/ci.yml}"
+GA_GATE_JOB_ID="ga_gate"
+GA_GATE_JOB_NAME="ga / gate"
+GA_GATE_DETECTED_NAME=""
+WORKFLOW_VALIDATION_ERRORS=()
+WORKFLOW_VALID=true
 
 usage() {
     cat << 'EOF'
@@ -40,6 +46,7 @@ Options:
   --policy FILE       Policy file path (default: docs/ci/REQUIRED_CHECKS_POLICY.yml)
   --exceptions FILE   Exceptions file path (default: docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml)
   --out-dir DIR       Output directory (default: artifacts/release-train)
+  --workflow FILE     Workflow file for ga / gate validation (default: .github/workflows/ci.yml)
   --verbose           Enable verbose logging
   --help              Show this help
 
@@ -71,6 +78,30 @@ log_error() {
     echo "[ERROR] $*" >&2
 }
 
+validate_ga_gate_workflow() {
+    local workflow_file="$GA_GATE_WORKFLOW_FILE"
+    local detected_name=""
+
+    if [[ ! -f "$workflow_file" ]]; then
+        WORKFLOW_VALIDATION_ERRORS+=("Workflow file not found: $workflow_file")
+        return
+    fi
+
+    if command -v yq &> /dev/null; then
+        detected_name=$(yq -r ".jobs.${GA_GATE_JOB_ID}.name // \"\"" "$workflow_file" 2>/dev/null || true)
+    else
+        detected_name=$(grep -A6 "^  ${GA_GATE_JOB_ID}:" "$workflow_file" | grep -m1 "name:" | sed -E 's/.*name:\s*//' || true)
+    fi
+
+    GA_GATE_DETECTED_NAME="$detected_name"
+
+    if [[ -z "$detected_name" ]]; then
+        WORKFLOW_VALIDATION_ERRORS+=("Job '${GA_GATE_JOB_ID}' missing in ${workflow_file}")
+    elif [[ "$detected_name" != "$GA_GATE_JOB_NAME" ]]; then
+        WORKFLOW_VALIDATION_ERRORS+=("Job '${GA_GATE_JOB_ID}' name mismatch: expected '${GA_GATE_JOB_NAME}', found '${detected_name}'")
+    fi
+}
+
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -88,6 +119,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --exceptions)
             EXCEPTIONS_FILE="$2"
+            shift 2
+            ;;
+        --workflow)
+            GA_GATE_WORKFLOW_FILE="$2"
             shift 2
             ;;
         --out-dir)
@@ -122,6 +157,7 @@ fi
 log "Repository: $REPO"
 log "Branch: $BRANCH"
 log "Policy: $POLICY_FILE"
+log "GA gate workflow: $GA_GATE_WORKFLOW_FILE"
 
 mkdir -p "$OUT_DIR"
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -144,6 +180,15 @@ POLICY_COUNT=$(echo "$POLICY_JSON" | jq -r '.count')
 
 log "Policy version: $POLICY_VERSION"
 log "Policy requires $POLICY_COUNT always-required checks"
+
+# --- Step 1b: Validate ga / gate workflow presence ---
+validate_ga_gate_workflow
+if [[ ${#WORKFLOW_VALIDATION_ERRORS[@]} -gt 0 ]]; then
+    WORKFLOW_VALID=false
+    for err in "${WORKFLOW_VALIDATION_ERRORS[@]}"; do
+        log_error "Workflow validation: $err"
+    done
+fi
 
 # --- Step 2: Load exceptions ---
 EXCEPTIONS_LOADED=false
@@ -282,6 +327,10 @@ else
     DRIFT_DETECTED=true  # Unknown state is treated as potential drift
 fi
 
+if [[ "$WORKFLOW_VALID" == "false" ]]; then
+    DRIFT_DETECTED=true
+fi
+
 # --- Step 5: Generate reports ---
 log "Generating drift report..."
 
@@ -303,6 +352,14 @@ cat > "$OUT_DIR/branch_protection_drift_report.json" << EOF
   "policy_version": "$POLICY_VERSION",
   "exceptions_file": "$EXCEPTIONS_FILE",
   "exceptions_loaded": $EXCEPTIONS_LOADED,
+  "workflow_validation": {
+    "workflow_file": "$GA_GATE_WORKFLOW_FILE",
+    "ga_gate_job_id": "$GA_GATE_JOB_ID",
+    "expected_name": "$GA_GATE_JOB_NAME",
+    "detected_name": "$GA_GATE_DETECTED_NAME",
+    "valid": $WORKFLOW_VALID,
+    "errors": $(printf '%s\n' "${WORKFLOW_VALIDATION_ERRORS[@]}" | jq -R -s 'split("\n") | map(select(length > 0))')
+  },
   "api_accessible": $API_ACCESSIBLE,
   "api_error": $(jq -n --arg err "$API_ERROR" 'if $err == "" then null else $err end'),
   "drift_detected": $DRIFT_DETECTED,
@@ -348,6 +405,7 @@ cat > "$OUT_DIR/branch_protection_drift_report.md" << EOF
 | Extra in GitHub | ${#EXTRA_IN_GITHUB[@]} |
 | Excepted (Missing) | ${#EXCEPTED_MISSING[@]} |
 | Excepted (Extra) | ${#EXCEPTED_EXTRA[@]} |
+| Workflow Validation | $WORKFLOW_VALID |
 | **Drift Detected** | $DRIFT_DETECTED |
 
 ---
@@ -370,6 +428,29 @@ Unable to read branch protection settings. This could mean:
 1. Ensure branch protection is enabled for \`$BRANCH\`
 2. Verify the GitHub token has appropriate permissions
 3. If using GitHub Actions, ensure the workflow has \`contents: read\` and repository access
+
+---
+
+EOF
+fi
+
+if [[ "$WORKFLOW_VALID" == "false" ]]; then
+    cat >> "$OUT_DIR/branch_protection_drift_report.md" << EOF
+## Workflow Validation Errors
+
+The \`ga / gate\` workflow definition did not pass static validation:
+
+EOF
+    for err in "${WORKFLOW_VALIDATION_ERRORS[@]}"; do
+        echo "- ${err}" >> "$OUT_DIR/branch_protection_drift_report.md"
+    done
+
+    cat >> "$OUT_DIR/branch_protection_drift_report.md" << EOF
+
+### Remediation
+
+1. Ensure \`ga_gate\` exists in \`$GA_GATE_WORKFLOW_FILE\`
+2. Ensure the job name is exactly \`ga / gate\`
 
 ---
 
