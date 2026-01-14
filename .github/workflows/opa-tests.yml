@@ -1,0 +1,73 @@
+name: OPA Policy Tests
+
+on:
+  pull_request:
+    paths:
+      - 'policies/**'
+      - '.github/workflows/opa-tests.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'policies/**'
+
+jobs:
+  test-policies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OPA
+        run: |
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x opa
+          sudo mv opa /usr/local/bin/
+
+      - name: Run OPA Tests
+        run: |
+          cd policies
+          opa test . -v --format=json > test-results.json
+          opa test . -v --coverage --format=json > coverage.json
+
+      - name: Convert to JUnit
+        if: always()
+        run: |
+          cat policies/test-results.json | jq -r '
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+            "<testsuites>",
+            (.[] | 
+              "<testsuite name=\"" + .package + "\" tests=\"" + ([.pass, .fail] | add | tostring) + "\" failures=\"" + (.fail | tostring) + "\">",
+              (.pass_results[]? | "<testcase name=\"" + .name + "\" classname=\"" + .package + "\"/>"),
+              (.fail_results[]? | "<testcase name=\"" + .name + "\" classname=\"" + .package + "\"><failure message=\"Policy test failed\"/></testcase>"),
+              "</testsuite>"
+            ),
+            "</testsuites>"
+          ' > policies/junit.xml
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: policies/junit.xml
+
+      - name: Upload Coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: opa-coverage
+          path: policies/coverage.json
+
+      - name: Upload JUnit Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: opa-junit
+          path: policies/junit.xml
+
+      - name: Fail on Test Failures
+        run: |
+          if jq -e '[.[].fail] | add > 0' policies/test-results.json > /dev/null; then
+            echo "❌ OPA policy tests failed"
+            exit 1
+          fi
+          echo "✅ All OPA policy tests passed"
