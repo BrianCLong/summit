@@ -71,6 +71,31 @@ log_error() {
     echo "[ERROR] $*" >&2
 }
 
+normalize_check_name() {
+    local name="$1"
+
+    name="$(echo "$name" | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')"
+
+    if [[ "$name" =~ ^\".*\"$ ]]; then
+        name="${name:1:${#name}-2}"
+    fi
+
+    if [[ "$name" =~ ^\'.*\'$ ]]; then
+        name="${name:1:${#name}-2}"
+    fi
+
+    echo "$name"
+}
+
+normalize_check_list() {
+    local input="$1"
+
+    while IFS= read -r line; do
+        [[ -z "$line" ]] && continue
+        normalize_check_name "$line"
+    done <<< "$input" | sort -u
+}
+
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -138,7 +163,8 @@ POLICY_JSON=$("${SCRIPT_DIR}/extract_required_checks_from_policy.sh" \
     --policy "$POLICY_FILE" \
     ${VERBOSE:+--verbose})
 
-POLICY_CHECKS=$(echo "$POLICY_JSON" | jq -r '.always_required[]' | sort)
+POLICY_CHECKS_RAW=$(echo "$POLICY_JSON" | jq -r '.always_required[]' | sort)
+POLICY_CHECKS=$(normalize_check_list "$POLICY_CHECKS_RAW")
 POLICY_VERSION=$(echo "$POLICY_JSON" | jq -r '.policy_version')
 POLICY_COUNT=$(echo "$POLICY_JSON" | jq -r '.count')
 
@@ -160,7 +186,7 @@ if [[ -f "$EXCEPTIONS_FILE" ]]; then
         while IFS= read -r line; do
             [[ -z "$line" ]] && continue
             ID=$(echo "$line" | cut -d'|' -f1)
-            CHECK=$(echo "$line" | cut -d'|' -f2)
+            CHECK=$(normalize_check_name "$(echo "$line" | cut -d'|' -f2)")
             DIRECTION=$(echo "$line" | cut -d'|' -f3)
             EXPIRES=$(echo "$line" | cut -d'|' -f4)
             EXC_BRANCH=$(echo "$line" | cut -d'|' -f5)
@@ -227,13 +253,14 @@ if [[ $API_EXIT_CODE -ne 0 ]]; then
     fi
 else
     # Extract required contexts (check names)
-    GITHUB_CHECKS=$(echo "$API_RESPONSE" | jq -r '.contexts[]? // empty' 2>/dev/null | sort || echo "")
+    GITHUB_CHECKS_RAW=$(echo "$API_RESPONSE" | jq -r '.contexts[]? // empty' 2>/dev/null | sort || echo "")
 
     # Also try the newer 'checks' array format
-    if [[ -z "$GITHUB_CHECKS" ]]; then
-        GITHUB_CHECKS=$(echo "$API_RESPONSE" | jq -r '.checks[]?.context // empty' 2>/dev/null | sort || echo "")
+    if [[ -z "$GITHUB_CHECKS_RAW" ]]; then
+        GITHUB_CHECKS_RAW=$(echo "$API_RESPONSE" | jq -r '.checks[]?.context // empty' 2>/dev/null | sort || echo "")
     fi
 
+    GITHUB_CHECKS=$(normalize_check_list "$GITHUB_CHECKS_RAW")
     GITHUB_COUNT=$(echo "$GITHUB_CHECKS" | grep -c . || echo 0)
     log "GitHub requires $GITHUB_COUNT status checks"
 fi
