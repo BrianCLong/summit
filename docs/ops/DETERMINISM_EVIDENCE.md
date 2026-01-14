@@ -83,7 +83,7 @@ Runtime Versions:
 
 Lockfile Verification:
 ✅ pnpm-lock.yaml exists: Present
-✅ Node linker mode: hoisted (default)
+✅ Node linker mode: isolated
 
 ESM Configuration:
 ✅ Root package type: "module" (ESM)

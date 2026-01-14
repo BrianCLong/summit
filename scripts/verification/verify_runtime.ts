@@ -110,12 +110,18 @@ function checkLockfile(): void {
     const npmrcPath = join(ROOT_DIR, '.npmrc');
     if (existsSync(npmrcPath)) {
       const npmrc = readFileSync(npmrcPath, 'utf8');
-      // Check for hoisted node linker (common source of resolution issues)
-      const hasHoisted = npmrc.includes('nodeLinker=hoisted');
+      // Check for explicit node-linker mode (common source of resolution issues)
+      const hasIsolated = npmrc.includes('node-linker=isolated');
+      const hasHoisted = npmrc.includes('node-linker=hoisted');
+      const linkerMode = hasIsolated
+        ? 'isolated'
+        : hasHoisted
+        ? 'hoisted'
+        : 'pnpm default';
       check(
         'Node linker mode',
         true,
-        hasHoisted ? 'hoisted (default)' : 'pnpm default',
+        linkerMode,
         undefined
       );
     }
