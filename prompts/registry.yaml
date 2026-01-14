@@ -30,6 +30,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ga-evidence-bundle-sbom-slsa
+    version: v1
+    path: prompts/governance/ga-evidence-bundle-sbom-slsa.md
+    sha256: 754e8f3482e64eed1bb3061057718e983fec3cffe366abad0304a31e97b7ab88
+    description: Deterministic SBOM + SLSA evidence bundle generation and verification for GA CI.
+    scope:
+      paths:
+        - agents/
+        - prompts/
+        - scripts/ci/
+        - docs/ga/
+        - docs/roadmap/STATUS.json
+        - .github/
+        - package.json
+        - agent-contract.json
+      domains:
+        - governance
+        - ci
+        - provenance
+        - quality
+    verification:
+      tiers_required:
+        - A
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md

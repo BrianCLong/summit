@@ -67,6 +67,20 @@
     "notes": "Validated via schema checks to avoid test runner dependency."
   },
   {
+    "feature": "Evidence Bundle (SBOM + SLSA)",
+    "tier": "A",
+    "artifact": "scripts/ci/verify_evidence_bundle.mjs",
+    "ciStatus": "wired",
+    "evidence": [
+      "docs/ga/EVIDENCE_BUNDLE_POLICY.yml",
+      "docs/ga/EVIDENCE_BUNDLE_SCHEMA.md",
+      "docs/ga/EVIDENCE_BUNDLE_RUNBOOK.md",
+      ".github/workflows/ci-core.yml"
+    ],
+    "keywords": ["sbom", "slsa", "provenance", "evidence bundle"],
+    "notes": "Deterministic SBOM/provenance bundle with offline verification and secret scanning."
+  },
+  {
     "feature": "Ingestion Security Hardening",
     "tier": "B",
     "artifact": "testing/ga-verification/ga-features.ga.test.mjs",
