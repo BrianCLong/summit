@@ -13,6 +13,9 @@ const steps = [
     env: { GA_VERIFY_MODE: 'true' },
   },
   { name: 'ga:smoke', command: 'pnpm', args: ['ga:smoke'] },
+  { name: 'ci:evidence:bundle', command: 'pnpm', args: ['ci:evidence:bundle'] },
+  { name: 'ci:evidence:verify', command: 'pnpm', args: ['ci:evidence:verify'] },
+  { name: 'ci:ga-evidence:verify', command: 'pnpm', args: ['ci:ga-evidence:verify'] },
 ];
 
 const gitSha = spawnSync('git', ['rev-parse', 'HEAD'], {
@@ -23,7 +26,7 @@ const gitSha = spawnSync('git', ['rev-parse', 'HEAD'], {
 const sha = process.env.GA_VERIFY_SHA || gitSha || 'unknown';
 const outDir = path.join('artifacts', 'ga-verify', sha);
 const logsDir = path.join(outDir, 'logs');
-const stampPath = path.join(outDir, 'stamp.json');
+const stampPath = path.join(outDir, 'runner-stamp.json');
 
 const stamp = {
   sha,

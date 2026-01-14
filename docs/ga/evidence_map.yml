@@ -1,0 +1,45 @@
+schema_version: "1"
+scope:
+  repo: "summit"
+  default_ref: "main"
+  manifest_path: "artifacts/evidence/${sha}/manifest.json"
+  evidence_root: "artifacts/evidence/${sha}"
+required_evidence:
+  - id: "sbom_monorepo"
+    description: "CycloneDX monorepo SBOM"
+    path: "artifacts/evidence/${sha}/sbom/monorepo.cdx.json"
+    producer: "pnpm ci:evidence:bundle"
+    verifier:
+      type: "sha256"
+      must_match_manifest: true
+      max_age_hours: 24
+  - id: "slsa_provenance"
+    description: "SLSA provenance statement"
+    path: "artifacts/evidence/${sha}/provenance/slsa-provenance.json"
+    producer: "pnpm ci:evidence:bundle"
+    verifier:
+      type: "json"
+      required_fields: ["subject", "builder", "invocation", "metadata", "sha"]
+      sha_fields: ["sha"]
+      must_match_manifest: true
+      max_age_hours: 24
+  - id: "ga_verify_stamp"
+    description: "GA evidence verification stamp"
+    path: "artifacts/ga-verify/${sha}/stamp.json"
+    producer: "pnpm ci:ga-evidence:verify"
+    verifier:
+      type: "json"
+      required_fields: ["status", "sha", "timestamp"]
+      sha_fields: ["sha"]
+      allow_generated: true
+optional_evidence:
+  - id: "release_attestation"
+    description: "Release attestation for tags"
+    path: "artifacts/evidence/${sha}/attestations/release.json"
+    producer: "pnpm release:bundle"
+    when:
+      ref_prefix: "refs/tags/"
+    verifier:
+      type: "json"
+      required_fields: ["release", "sha", "timestamp"]
+      sha_fields: ["sha"]

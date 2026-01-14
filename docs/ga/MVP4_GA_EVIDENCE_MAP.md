@@ -15,6 +15,7 @@ This map enumerates GA claims and their deterministic verification commands unde
 | Observability taxonomy evidence is present           | VERIFIED | `node --test testing/ga-verification/ga-features.ga.test.mjs`                                      | 0    | `@ga-critical evidence files exist and are keyword-scoped` | `summit_observability/METRICS.md`, `summit_observability/LOGS.md`, `summit_observability/EVENTS.md` |
 | Data classification & governance evidence is present | VERIFIED | `node --test testing/ga-verification/ga-features.ga.test.mjs`                                      | 0    | `@ga-critical evidence files exist and are keyword-scoped` | `docs/DATA_GOVERNANCE.md`                                                                           |
 | Policy preflight & receipts verification succeeds    | VERIFIED | `node scripts/ga/verify-ga-surface.mjs`                                                            | 0    | `GA hardening verification succeeded.`                     | `scripts/ga/verify-ga-surface.mjs`, `docs/ga/verification-map.json`, `PROVENANCE_SCHEMA.md`         |
+| GA evidence map verification succeeds                | VERIFIED | `pnpm ci:evidence:bundle && node scripts/ci/verify_evidence_map.mjs --map docs/ga/evidence_map.yml` | 0    | `report.json written + stamp.json emitted`                 | `docs/ga/evidence_map.yml`, `artifacts/evidence/<sha>/manifest.json`, `artifacts/ga-verify/<sha>/`  |
 | Ingestion security hardening evidence is present     | VERIFIED | `node --test testing/ga-verification/ga-features.ga.test.mjs`                                      | 0    | `@ga-critical evidence files exist and are keyword-scoped` | `docs/security/security-architecture-and-policies.md`                                               |
 
 ## Deferred Pending Verification (Optional Full Proof)
@@ -32,3 +33,5 @@ Run these in order to reproduce the VERIFIED entries above:
 2. `CI=1 ZERO_FOOTPRINT=true NO_NETWORK_LISTEN=true test -f .github/workflows/a11y-keyboard-smoke.yml`
 3. `CI=1 ZERO_FOOTPRINT=true NO_NETWORK_LISTEN=true node --test testing/ga-verification/ga-features.ga.test.mjs`
 4. `CI=1 ZERO_FOOTPRINT=true NO_NETWORK_LISTEN=true node scripts/ga/verify-ga-surface.mjs`
+5. `CI=1 ZERO_FOOTPRINT=true NO_NETWORK_LISTEN=true pnpm ci:evidence:bundle`
+6. `CI=1 ZERO_FOOTPRINT=true NO_NETWORK_LISTEN=true node scripts/ci/verify_evidence_map.mjs --map docs/ga/evidence_map.yml`
