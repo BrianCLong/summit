@@ -104,6 +104,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: graph-consistency-ledger
+    version: v1
+    path: prompts/ops/graph-consistency-ledger@v1.md
+    sha256: 6929658b9b69da664eb7a8208c7a91ebc799651b5de70218040bb3aaf21c6948
+    description: Scaffold nightly Postgres ↔ Neo4j consistency ledger automation and documentation.
+    scope:
+      paths:
+        - .github/workflows/
+        - docs/GA_GRAPH_CONSISTENCY_LEDGER.md
+        - docs/roadmap/STATUS.json
+        - package.json
+        - prompts/ops/graph-consistency-ledger@v1.md
+        - prompts/registry.yaml
+        - scripts/graph/
+      domains:
+        - data-integrity
+        - governance
+        - operations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
