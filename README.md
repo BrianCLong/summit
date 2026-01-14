@@ -80,6 +80,15 @@ See also:
 
 ---
 
+## Design & Research
+
+Key architectural decisions and research specifications:
+
+- **Evaluation and Hallucination Design** (`docs/design/eval-and-hallucination.md`):
+  Treats evaluation as a first-class feature of the agentic runtime, focusing on task success, autonomy, and robustness. Introduces tournament-style evaluation (ArenaRL) and specific hallucination attribution taxonomies (planning, retrieval, reasoning).
+
+---
+
 ## Repo Map (Where Things Live)
 
 This repository is a large monorepo containing:
