@@ -30,6 +30,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: maestro-workboard-pr1
+    version: v1
+    path: prompts/product/maestro-workboard-pr1.md
+    sha256: 642abcaf9b5a815670f7c24ccc7a6720e9bd339351ac051c1a404dfccce19dc7
+    description: Build Maestro Workboard PR-1 MVP scaffold.
+    scope:
+      paths:
+        - apps/maestro-workboard/
+        - .gitignore
+        - docs/maestro-workboard.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/product/maestro-workboard-pr1.md
+        - prompts/registry.yaml
+      domains:
+        - product
+        - maestro
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md
