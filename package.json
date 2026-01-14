@@ -119,6 +119,8 @@
     "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
     "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
+    "ga:claim:scaffold": "node scripts/ga/scaffold_claim.mjs",
+    "ga:claim:list": "grep -E '^\\|.*\\|.*\\|' docs/claims/CLAIMS_REGISTRY.md | grep -v 'Evidence Path' | cut -d '|' -f 2,3,7",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
     "prepare": "husky"
   },

@@ -25,6 +25,7 @@ This registry binds every public claim about Summit to the authoritative evidenc
 | **GOV-002** | **Policy as Code:** All authorization decisions are made by Open Policy Agent (OPA) policies, not hardcoded logic. | `policy/` (Root directory for Rego policies) | Applies to API access and release gates. | Security | **VERIFIED** |
 | **GOV-003** | **Zero Trust Identity:** Short-lived JWTs are required for all API access; tokens are not persisted. | `server/src/services/AuthService.ts` | Access tokens expire in 15m. Refresh tokens are HTTP-only cookies. | Identity Team | **VERIFIED** |
 | **GOV-004** | **Step-Up Authentication:** Critical actions require re-verification (MFA/WebAuthn). | `server/src/auth/webauthn/middleware.ts` | Configurable per route/action. | Identity Team | **VERIFIED** |
+| **SEC-001** | **Summit ensures total zero-knowledge privacy for all users** | `pending` | ga | TBD | **PROPOSED** |
 
 ## Data & Provenance
 
