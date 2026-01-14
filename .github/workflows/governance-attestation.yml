@@ -1,0 +1,89 @@
+name: Governance - Exception Attestation
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  id-token: write # Required for keyless OIDC signing
+  pull-requests: read
+  actions: read
+
+jobs:
+  attest:
+    runs-on: ubuntu-latest
+    name: Generate & Sign Exception Attestation
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Need full history to detect changes and parent commits
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: |
+          npm install -g pnpm
+          pnpm install --no-frozen-lockfile # Ensure scripts deps are available
+          # Install cosign
+          # Note: In a real environment, use the official action or setup-cosign
+          # For this template, we assume cosign is available or install it via tool
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.5.0
+        with:
+          cosign-release: 'v2.2.4'
+
+      - name: Generate Exception Attestation
+        id: generate
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p dist/evidence/${{ github.sha }}/attestations
+          npx tsx scripts/compliance/generate_exception_attestation.ts \
+            --sha ${{ github.sha }} \
+            --output-dir dist/evidence/${{ github.sha }}/attestations
+
+      - name: Sign Attestation
+        env:
+          COSIGN_EXPERIMENTAL: 1
+        run: |
+          ATTESTATION_FILE="dist/evidence/${{ github.sha }}/attestations/exception_approval_attestation.json"
+
+          if [ -f "$ATTESTATION_FILE" ]; then
+            echo "Signing $ATTESTATION_FILE..."
+            cosign sign-blob --yes \
+              --output-certificate "$ATTESTATION_FILE.cert" \
+              --output-signature "$ATTESTATION_FILE.sig" \
+              "$ATTESTATION_FILE"
+
+            echo "Attestation signed successfully."
+          else
+            echo "Attestation file not found (maybe skipped due to no changes). Skipping signing."
+          fi
+
+      - name: Verify Attestation (Sanity Check)
+        run: |
+          bash scripts/compliance/verify_exception_attestation.sh "dist/evidence" "${{ github.sha }}"
+
+      - name: Generate Evidence Bundle (Update Checksums)
+        env:
+          ARTIFACTS_DIR: "dist"
+        run: |
+          # Ensure evidence/scripts knows where to look/write
+          node scripts/evidence/generate_evidence_bundle.mjs
+
+      - name: Upload Evidence Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-evidence-${{ github.sha }}
+          path: dist/evidence/${{ github.sha }}/
+          retention-days: 90
