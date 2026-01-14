@@ -4,13 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Table } from '@/components/ui/Table'
-import { Skeleton } from '@/components/ui/Skeleton'
-import { EmptyState } from '@/components/ui/EmptyState'
+import { StatePanel } from '@/components/ui/StatePanel'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { KPIStrip } from '@/components/panels/KPIStrip'
 import { ConnectionStatus } from '@/components/ConnectionStatus'
 import { DataIntegrityNotice } from '@/components/common/DataIntegrityNotice'
 import { useDemoMode } from '@/components/common/DemoIndicator'
+import { getMilestoneStatus, setMilestoneStatus } from '@/lib/firstRunFunnel'
+import { trackFirstRunEvent } from '@/telemetry/metrics'
 import {
   useAlerts,
   useAlertUpdates,
@@ -40,6 +41,15 @@ export default function AlertsPage() {
 
   // Load data - prefer GraphQL over mock data in demo mode only
   useEffect(() => {
+    if (getMilestoneStatus('review_alerts') === 'not_started') {
+      const nextStatus = setMilestoneStatus('review_alerts', 'in_progress')
+      trackFirstRunEvent('first_run_milestone_started', {
+        milestoneId: 'review_alerts',
+        status: nextStatus,
+        source: 'alerts_page',
+      })
+    }
+
     if (alertsData?.alerts) {
       setAlerts(alertsData.alerts)
       setLoading(alertsLoading)
@@ -68,6 +78,19 @@ export default function AlertsPage() {
       loadMockData()
     }
   }, [alertsData, alertsLoading, alertsError, isDemoMode])
+
+  useEffect(() => {
+    if (!loading && alerts.length > 0) {
+      if (getMilestoneStatus('review_alerts') !== 'complete') {
+        const nextStatus = setMilestoneStatus('review_alerts', 'complete')
+        trackFirstRunEvent('first_run_milestone_completed', {
+          milestoneId: 'review_alerts',
+          status: nextStatus,
+          source: 'alerts_loaded',
+        })
+      }
+    }
+  }, [alerts.length, loading])
 
   // Handle real-time alert updates
   useEffect(() => {
@@ -196,11 +219,12 @@ export default function AlertsPage() {
   if (error) {
     return (
       <div className="h-full flex items-center justify-center">
-        <EmptyState
-          icon="alert"
+        <StatePanel
+          variant="error"
           title="Failed to load alerts"
           description={error.message}
           action={{ label: 'Retry', onClick: () => window.location.reload() }}
+          secondaryAction={{ label: 'Back to setup', href: '/setup' }}
         />
       </div>
     )
@@ -295,32 +319,28 @@ export default function AlertsPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="space-y-4">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="flex items-center space-x-4">
-                  <Skeleton className="h-8 w-8 rounded" />
-                  <div className="space-y-2 flex-1">
-                    <Skeleton className="h-4 w-2/3" />
-                    <Skeleton className="h-3 w-1/2" />
-                  </div>
-                  <Skeleton className="h-6 w-20" />
-                  <Skeleton className="h-6 w-24" />
-                </div>
-              ))}
-            </div>
+            <StatePanel
+              variant="loading"
+              title="Loading alerts"
+              description="Fetching the latest alert stream."
+              className="py-12"
+            />
           ) : filteredAlerts.length === 0 ? (
-            <EmptyState
+            <StatePanel
+              variant="empty"
               icon="search"
               title="No alerts found"
-              description="Try adjusting your filters or search criteria"
+              description="Try adjusting your filters or search criteria."
               action={{
-                label: 'Clear Filters',
+                label: 'Clear filters',
                 onClick: () => {
                   setSearchQuery('')
                   setSelectedSeverity('')
                   setSelectedStatus('')
                 },
               }}
+              secondaryAction={{ label: 'Back to setup', href: '/setup' }}
+              className="py-12"
             />
           ) : (
             <Table>

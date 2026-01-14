@@ -33,6 +33,7 @@ const UsageCostDashboard = React.lazy(
   () => import('@/pages/dashboards/UsageCostDashboard')
 )
 const DataSourcesPage = React.lazy(() => import('@/pages/DataSourcesPage'))
+const SetupPage = React.lazy(() => import('@/pages/SetupPage'))
 const ModelsPage = React.lazy(() => import('@/pages/ModelsPage'))
 const ReportsPage = React.lazy(() => import('@/pages/ReportsPage'))
 const AdminPage = React.lazy(() => import('@/pages/AdminPage'))
@@ -190,6 +191,7 @@ function App() {
                       <Route path="mission-control" element={<MissionControlPage />} />
 
                       {/* Data & Models */}
+                      <Route path="setup" element={<SetupPage />} />
                       <Route
                         path="data/sources"
                         element={<DataSourcesPage />}

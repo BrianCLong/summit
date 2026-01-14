@@ -125,6 +125,54 @@ export const getTelemetryContext = () => ({
     deviceId: getDeviceId(),
 });
 
+export type FirstRunEvent =
+  | 'first_run_funnel_viewed'
+  | 'first_run_milestone_started'
+  | 'first_run_milestone_completed';
+
+export interface FirstRunEventPayload {
+  milestoneId: string
+  status?: 'in_progress' | 'complete'
+  source?: string
+};
+
+export const trackFirstRunEvent = async (
+  event: FirstRunEvent,
+  payload: FirstRunEventPayload
+) => {
+  try {
+    recordAudit('first_run_funnel_event', {
+      event,
+      milestoneId: payload.milestoneId,
+      status: payload.status,
+      source: payload.source,
+    })
+
+    await fetch('/api/monitoring/telemetry/events', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-correlation-id': getSessionId(),
+      },
+      body: JSON.stringify({
+        event,
+        labels: {
+          milestoneId: payload.milestoneId,
+          status: payload.status,
+          source: payload.source,
+        },
+        context: {
+          sessionId: getSessionId(),
+          deviceId: getDeviceId(),
+          url: window.location.href,
+        },
+      }),
+    })
+  } catch (error) {
+    console.error('Failed to track first-run funnel event:', error)
+  }
+}
+
 
 // Tri-pane Telemetry
 export const trackTimeWindowChange = async (

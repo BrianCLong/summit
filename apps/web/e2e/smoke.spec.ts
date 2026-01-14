@@ -24,4 +24,12 @@ test.describe('Summit Console Smoke Test', () => {
     // await authenticatedPage.getByRole('link', { name: /Graph/i }).click();
     // await expect(authenticatedPage).toHaveURL(/\/graph/);
   });
+
+  test('First-run funnel entry', async ({ authenticatedPage }) => {
+    await authenticatedPage.getByRole('link', { name: /setup/i }).click();
+    await expect(authenticatedPage).toHaveURL(/\/setup/);
+
+    await authenticatedPage.getByRole('link', { name: /continue setup/i }).click();
+    await expect(authenticatedPage).toHaveURL(/\/data\/sources/);
+  });
 });

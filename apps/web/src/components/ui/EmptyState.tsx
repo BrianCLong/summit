@@ -1,10 +1,10 @@
 import * as React from 'react'
-import { AlertCircle, FileX, Search, Plus } from 'lucide-react'
+import { AlertCircle, FileX, Search, Plus, BarChart3 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from './Button'
 
 interface EmptyStateProps {
-  icon?: 'search' | 'file' | 'alert' | 'plus' | React.ReactNode
+  icon?: 'search' | 'file' | 'alert' | 'plus' | 'chart' | React.ReactNode
   title: string
   description?: string
   action?: {
@@ -20,6 +20,7 @@ const iconMap = {
   file: FileX,
   alert: AlertCircle,
   plus: Plus,
+  chart: BarChart3,
 }
 
 export function EmptyState({
