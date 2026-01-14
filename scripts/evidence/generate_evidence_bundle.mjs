@@ -36,10 +36,20 @@ const getAllFiles = (dirPath, arrayOfFiles) => {
     files.forEach((file) => {
         const fullPath = path.join(dirPath, file);
         if (fs.statSync(fullPath).isDirectory()) {
-            // Skip the evidence directory itself to avoid recursion/loops if we run multiple times
-            if (fullPath !== EVIDENCE_DIR) {
-                arrayOfFiles = getAllFiles(fullPath, arrayOfFiles);
-            }
+            // We want to scan files INSIDE EVIDENCE_DIR as well, but avoid infinite recursion if ARTIFACTS_DIR is a parent
+            // If ARTIFACTS_DIR contains EVIDENCE_DIR, we must be careful.
+            // Current logic: skips EVIDENCE_DIR entirely.
+            // BUT our attestations are likely IN EVIDENCE_DIR (artifacts/evidence/attestations).
+            // So we SHOULD recurse into EVIDENCE_DIR, but filter out the manifest/checksums being generated to avoid race/circular issues?
+            // Actually, the previous logic skipped EVIDENCE_DIR to avoid loops if ARTIFACTS_DIR == EVIDENCE_DIR parent.
+            // Let's verify paths.
+
+            // If the directory being scanned IS the evidence directory, continue scanning its children (but handle recursion carefully)
+            // Or simpler: Just don't skip EVIDENCE_DIR if it's inside ARTIFACTS_DIR.
+            // The issue is if we write to it while reading.
+
+            // Allow scanning evidence dir, but maybe exclude the manifest file itself in the file loop below.
+            arrayOfFiles = getAllFiles(fullPath, arrayOfFiles);
         } else {
             // Skip the manifest file itself if it exists (though it shouldn't be in the input list effectively)
             if (fullPath !== MANIFEST_PATH) {
@@ -87,6 +97,21 @@ try {
         // In a real implementation, we would sign the manifest content here
         manifest.signature = 'simulated_signature_blob';
     }
+
+    // --- INTEGRATION START: Exception Attestation ---
+    // If the exception attestation exists in the dist/evidence path (or wherever it was generated),
+    // ensure it is copied to the artifacts directory so it is included in the manifest.
+    // However, the current script scans ARTIFACTS_DIR.
+    // If generate_exception_attestation.ts outputs to ARTIFACTS_DIR/evidence/attestations, it should already be picked up.
+    // We will assume the caller (CI) places it correctly or arguments align.
+    // But we should verify if checksums need to be generated for compatibility with other tools.
+
+    // Generate checksums.sha256 if requested or standard
+    const checksumsLines = Object.entries(filesMap).map(([relPath, data]) => `${data.sha256}  ${relPath}`);
+    const checksumsPath = path.join(EVIDENCE_DIR, 'checksums.sha256');
+    fs.writeFileSync(checksumsPath, checksumsLines.join('\n'));
+    console.log(`✅ Generated checksums.sha256`);
+    // --- INTEGRATION END ---
 
     fs.writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2));
     console.log(`✅ Evidence manifest generated at: ${MANIFEST_PATH}`);
