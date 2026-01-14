@@ -34,8 +34,8 @@ export class FileConnector extends BaseConnector implements SourceConnector {
       try {
         const stats = await fs.stat(filePath);
         if (stats.isDirectory()) {
-           // Directory listing logic could go here
-           return { records: [], nextCursor: 'DONE' };
+          // Directory listing logic could go here
+          return { records: [], nextCursor: 'DONE' };
         }
 
         // Determine if binary or text
@@ -45,28 +45,28 @@ export class FileConnector extends BaseConnector implements SourceConnector {
         let records: any[] = [];
 
         if (isBinary) {
-            // Read as buffer
-            const buffer = await fs.readFile(filePath);
-            records = [{
-                path: filePath,
-                content: buffer, // Raw buffer
-                metadata: { size: stats.size, created: stats.birthtime }
-            }];
+          // Read as buffer
+          const buffer = await fs.readFile(filePath);
+          records = [{
+            path: filePath,
+            content: buffer, // Raw buffer
+            metadata: { size: stats.size, created: stats.birthtime }
+          }];
         } else {
-            // Read as text
-            const content = await fs.readFile(filePath, 'utf-8');
-            if (filePath.endsWith('.json')) {
-              try {
-                  const parsed = JSON.parse(content);
-                  records = Array.isArray(parsed) ? parsed : [parsed];
-              } catch (e: any) {
-                  records = [{ text: content, path: filePath, error: 'JSON parse failed' }];
-              }
-            } else if (filePath.endsWith('.csv')) {
-               records = content.split('\n').filter(line => line.trim().length > 0).map(line => ({ raw: line }));
-            } else {
-               records = [{ text: content, path: filePath }];
+          // Read as text
+          const content = await fs.readFile(filePath, 'utf-8');
+          if (filePath.endsWith('.json')) {
+            try {
+              const parsed = JSON.parse(content);
+              records = Array.isArray(parsed) ? parsed : [parsed];
+            } catch (e: any) {
+              records = [{ text: content, path: filePath, error: 'JSON parse failed' }];
             }
+          } else if (filePath.endsWith('.csv')) {
+            records = content.split('\n').filter((line: string) => line.trim().length > 0).map((line: string) => ({ raw: line }));
+          } else {
+            records = [{ text: content, path: filePath }];
+          }
         }
 
         return { records, nextCursor: 'DONE' };

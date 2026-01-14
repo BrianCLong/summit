@@ -208,3 +208,21 @@ export default class Redis {
 }
 
 export { Redis };
+
+// Cluster mock for ioredis Cluster support
+export class Cluster extends Redis {
+  nodes: Redis[];
+
+  constructor(_startupNodes?: any[], _options?: any) {
+    super();
+    this.nodes = [this];
+  }
+
+  async connect() {
+    return Promise.resolve();
+  }
+
+  getNodes() {
+    return this.nodes;
+  }
+}

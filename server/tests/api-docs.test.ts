@@ -5,10 +5,10 @@ import fs from 'fs';
 import request from 'supertest';
 import { createApiDocsRouter } from '../src/routes/api-docs.js';
 
-// Jest provides __dirname in CommonJS mode via ts-jest transform
-const testDir = path.resolve(__dirname);
+// Use process.cwd() since tests run from server directory
+const testDir = path.join(process.cwd(), 'tests');
 
-const fixtureSpecPath = path.join(__dirname, '../../openapi/spec.yaml');
+const fixtureSpecPath = path.join(process.cwd(), '../openapi/spec.yaml');
 
 describe('API documentation routes', () => {
   const app = express();

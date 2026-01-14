@@ -1,6 +1,6 @@
 {
   "name": "intelgraph-platform",
-  "version": "4.1.1",
+  "version": "4.1.4",
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "type": "module",
@@ -85,6 +85,7 @@
     "db:neo4j:migrate": "node scripts/neo4j-migrate.js",
     "changeset": "changeset",
     "release": "changeset version && changeset publish",
+    "release:cut": "node scripts/release/release.mjs",
     "release:cut-branch": "node scripts/release/cut-release-branch.mjs",
     "release:bundle": "node scripts/release/release-bundle.mjs",
     "release:schema:validate": "node scripts/release/validate-bundle-schemas.mjs --dir dist/release --strict",
@@ -291,7 +292,9 @@
       "@modelcontextprotocol/sdk": ">=1.1.0",
       "@remix-run/router": ">=1.21.0",
       "react-router": ">=6.28.0",
-      "preact": ">=10.25.4"
+      "preact": ">=10.25.4",
+      "@types/react": "18.3.11",
+      "@types/react-dom": "18.3.0"
     }
   }
 }

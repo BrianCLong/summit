@@ -40,3 +40,4 @@ describe('Maestro Chaos Engineering - Lease Drop', () => {
     // expect(true).toBe(true); // Conceptual assertion
     // TODO: Implement actual API calls to verify task state transition after lease drop
   }, 20000); // Increase timeout for chaos test
+});

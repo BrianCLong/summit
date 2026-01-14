@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-10T08:27:49Z",
-  "revision_note": "Documented the new triage form + stale guard policy in sync with automation",
+  "last_updated": "2026-01-13T19:58:08Z",
+  "revision_note": "GA verify now uses governed test scope to keep server unit checks deterministic in CI",
   "initiatives": [
     {
       "id": "A",

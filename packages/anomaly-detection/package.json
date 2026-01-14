@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/anomaly-detection",
-  "version": "2.0.0",
+  "version": "4.1.4",
   "description": "Advanced anomaly detection with behavioral analytics (UBA/EBA)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

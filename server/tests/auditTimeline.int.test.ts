@@ -5,6 +5,9 @@ import path from 'path';
 import { Pool } from 'pg';
 import { AuditTimelineRollupService } from '../src/audit/AuditTimelineRollupService.js';
 
+// Use process.cwd() since tests run from server directory
+const testsDir = process.cwd();
+
 let GenericContainer: any;
 try {
   ({ GenericContainer } = require('testcontainers'));
@@ -31,10 +34,7 @@ maybe('Audit timeline BRIN + rollups', () => {
   let pool: Pool;
   let rollups: AuditTimelineRollupService;
   const migrationSql = fs.readFileSync(
-    path.resolve(
-      __dirname,
-      '../db/migrations/postgres/2026-11-05_timeline_rollups_brin.sql',
-    ),
+    path.join(testsDir, 'db/migrations/postgres/2026-11-05_timeline_rollups_brin.sql'),
     'utf8',
   );
 

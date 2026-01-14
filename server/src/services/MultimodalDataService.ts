@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import type { Pool } from 'pg';
 import { randomUUID as uuidv4 } from 'node:crypto';
 import pino from 'pino';
@@ -7,7 +7,7 @@ import {
   MediaMetadata,
   MediaType,
 } from './MediaUploadService.js';
-import { ExtractionJobService } from './ExtractionJobService.js';
+import { ExtractionJobService, ExtractionJobInput } from './ExtractionJobService.js';
 
 const logger = (pino as any)({ name: 'MultimodalDataService' });
 
@@ -771,11 +771,11 @@ export class MultimodalDataService {
     limit?: number;
   }): Promise<unknown[]> {
     if (!filters.investigationId) {
-        return [];
+      return [];
     }
     return this.extractionJobService.getExtractionJobs(filters.investigationId, {
-        status: filters.status as ProcessingStatus,
-        limit: filters.limit
+      status: filters.status as ProcessingStatus,
+      limit: filters.limit
     });
   }
 
@@ -789,7 +789,7 @@ export class MultimodalDataService {
   /**
    * Start an extraction job
    */
-  async startExtractionJob(input: unknown, userId: string): Promise<unknown> {
+  async startExtractionJob(input: ExtractionJobInput, userId: string): Promise<unknown> {
     return this.extractionJobService.startExtractionJob(input, userId);
   }
 
@@ -1010,11 +1010,11 @@ export class MultimodalDataService {
    */
   async uploadMediaSource(upload: unknown, userId: string): Promise<MediaSource> {
     try {
-        const metadata = await this.mediaUploadService.uploadMedia(upload, userId);
-        return this.createMediaSource(metadata, userId);
+      const metadata = await this.mediaUploadService.uploadMedia(upload, userId);
+      return this.createMediaSource(metadata, userId);
     } catch (error: any) {
-        logger.error(error, 'Failed to upload media source:');
-        throw error;
+      logger.error(error, 'Failed to upload media source:');
+      throw error;
     }
   }
 
@@ -1103,28 +1103,28 @@ export class MultimodalDataService {
   ): Promise<CrossModalMatch> {
     const id = uuidv4();
     try {
-        const query = `
+      const query = `
             INSERT INTO cross_modal_matches (
                 id, source_entity_id, target_entity_id, match_type, confidence,
                 algorithm, explanation, similarity_score, created_at
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
             RETURNING *
         `;
-        const values = [
-            id,
-            input.sourceEntityId,
-            input.targetEntityId,
-            input.matchType,
-            input.confidence,
-            input.algorithm,
-            JSON.stringify(input.explanation || {}),
-            input.similarityScore
-        ];
-        const result = await this.db.query(query, values);
-        return this.mapRowToCrossModalMatch(result.rows[0]);
+      const values = [
+        id,
+        input.sourceEntityId,
+        input.targetEntityId,
+        input.matchType,
+        input.confidence,
+        input.algorithm,
+        JSON.stringify(input.explanation || {}),
+        input.similarityScore
+      ];
+      const result = await this.db.query(query, values);
+      return this.mapRowToCrossModalMatch(result.rows[0]);
     } catch (error: any) {
-        logger.error(error, 'Failed to create multimodal relationship:');
-        throw error;
+      logger.error(error, 'Failed to create multimodal relationship:');
+      throw error;
     }
   }
 
@@ -1141,27 +1141,27 @@ export class MultimodalDataService {
     userId: string,
   ): Promise<CrossModalMatch> {
     try {
-        const query = `
+      const query = `
             UPDATE cross_modal_matches
             SET confidence = $1, explanation = $2, similarity_score = $3,
                 verified_by = $4, updated_at = NOW()
             WHERE id = $5
             RETURNING *
         `;
-        const result = await this.db.query(query, [
-            input.confidence,
-            JSON.stringify(input.explanation),
-            input.similarityScore,
-            userId,
-            id
-        ]);
-         if (result.rows.length === 0) {
-            throw new Error(`Match ${id} not found`);
-        }
-        return this.mapRowToCrossModalMatch(result.rows[0]);
+      const result = await this.db.query(query, [
+        input.confidence,
+        JSON.stringify(input.explanation),
+        input.similarityScore,
+        userId,
+        id
+      ]);
+      if (result.rows.length === 0) {
+        throw new Error(`Match ${id} not found`);
+      }
+      return this.mapRowToCrossModalMatch(result.rows[0]);
     } catch (error: any) {
-        logger.error(error, 'Failed to update multimodal relationship:');
-        throw error;
+      logger.error(error, 'Failed to update multimodal relationship:');
+      throw error;
     }
   }
 
@@ -1174,18 +1174,18 @@ export class MultimodalDataService {
     userId: string,
   ): Promise<CrossModalMatch> {
     try {
-        const query = `
+      const query = `
             UPDATE cross_modal_matches
             SET human_verified = $1, verified_by = $2, verified_at = NOW()
             WHERE id = $3
             RETURNING *
         `;
-        const result = await this.db.query(query, [verified, userId, id]);
-        if (result.rows.length === 0) throw new Error(`Match ${id} not found`);
-        return this.mapRowToCrossModalMatch(result.rows[0]);
+      const result = await this.db.query(query, [verified, userId, id]);
+      if (result.rows.length === 0) throw new Error(`Match ${id} not found`);
+      return this.mapRowToCrossModalMatch(result.rows[0]);
     } catch (error: any) {
-        logger.error(error, `Failed to verify relationship ${id}:`);
-        throw error;
+      logger.error(error, `Failed to verify relationship ${id}:`);
+      throw error;
     }
   }
 

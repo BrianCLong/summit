@@ -237,6 +237,57 @@ jest.mock('ioredis', () => {
   };
 });
 
+// Mock config/logger removed to use moduleNameMapper and tests/mocks/logger.ts
+
+// Mock middleware/audit-logger
+jest.mock('../../src/middleware/audit-logger', () => ({
+  __esModule: true,
+  auditLogger: (req, res, next) => next(),
+  createAuditLogger: () => (req, res, next) => next(),
+  logAuditEvent: jest.fn().mockResolvedValue(undefined),
+}));
+
+// Mock utils/audit
+jest.mock('../../src/utils/audit', () => ({
+  __esModule: true,
+  writeAudit: jest.fn().mockResolvedValue(undefined),
+  deepDiff: jest.fn().mockReturnValue({}),
+  signPayload: jest.fn().mockReturnValue('mock-signature'),
+}));
+
+// Mock db/neo4j module to provide 'neo' export
+jest.mock('../../src/db/neo4j', () => {
+  const mockSession = {
+    run: jest.fn().mockResolvedValue({ records: [] }),
+    close: jest.fn().mockResolvedValue(undefined),
+    beginTransaction: () => ({
+      run: jest.fn().mockResolvedValue({ records: [] }),
+      commit: jest.fn().mockResolvedValue(undefined),
+      rollback: jest.fn().mockResolvedValue(undefined),
+    }),
+  };
+
+  const mockDriver = {
+    session: () => mockSession,
+    close: jest.fn().mockResolvedValue(undefined),
+    verifyConnectivity: jest.fn().mockResolvedValue(undefined),
+  };
+
+  return {
+    __esModule: true,
+    initializeNeo4jDriver: jest.fn().mockResolvedValue(undefined),
+    getNeo4jDriver: jest.fn().mockReturnValue(mockDriver),
+    isNeo4jMockMode: jest.fn().mockReturnValue(true),
+    closeNeo4jDriver: jest.fn().mockResolvedValue(undefined),
+    onNeo4jDriverReady: jest.fn(),
+    neo: {
+      session: () => mockSession,
+      run: jest.fn().mockResolvedValue({ records: [] }),
+    },
+    instrumentSession: jest.fn((session) => session),
+  };
+});
+
 // Mock database config to bypass initialization checks
 jest.mock('../../src/config/database', () => {
   const mockPool = {
@@ -546,7 +597,7 @@ jest.mock('ws', () => {
     close() {
       this.emit('close');
     }
-    terminate() {}
+    terminate() { }
   }
 
   class MockWebSocketServer extends EventEmitter {
@@ -557,7 +608,7 @@ jest.mock('ws', () => {
     close(callback) {
       if (callback) callback();
     }
-    handleUpgrade() {}
+    handleUpgrade() { }
   }
 
   MockWebSocket.Server = MockWebSocketServer;
@@ -585,7 +636,7 @@ jest.mock('prom-client', () => {
     set(value) {
       this.__value = value;
     },
-    observe() {},
+    observe() { },
     reset() {
       this.__value = 0;
     },
@@ -595,7 +646,7 @@ jest.mock('prom-client', () => {
     labels() {
       return this;
     },
-    startTimer: () => () => {},
+    startTimer: () => () => { },
   };
 
   class MockCounter {
@@ -703,6 +754,9 @@ global.testCleanup = {
     });
   },
 };
+
+// Mock SecretAuditLogger using __mocks__ directory
+jest.mock('../../lib/security/secret-audit-logger');
 
 // Clean up after each test
 afterEach(async () => {

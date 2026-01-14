@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- jest mocks require type assertions */
 /**
  * Financial Compliance Module - Test Suite
  *
@@ -16,7 +17,7 @@ import { createFinancialServices } from '../index.js';
 import type { Trade, Order, SurveillanceAlert } from '../types.js';
 
 // Mock pg Pool
-const mockQuery = jest.fn();
+const mockQuery = jest.fn() as any;
 const mockPool = {
   query: mockQuery,
   connect: jest.fn(),
@@ -148,11 +149,13 @@ describe('Financial Compliance Module', () => {
         mockQuery
           .mockResolvedValueOnce({ rows: [] }) // loadRestrictedList (constructor)
           .mockResolvedValueOnce({ rows: [] }) // loadPositionLimits (constructor)
-          .mockResolvedValueOnce({ rows: [{
-            cancelled_count: '8',
-            total_count: '10',
-            price_levels: '5'
-          }] }) // detectLayering query - 80% cancel ratio triggers alert
+          .mockResolvedValueOnce({
+            rows: [{
+              cancelled_count: '8',
+              total_count: '10',
+              price_levels: '5'
+            }]
+          }) // detectLayering query - 80% cancel ratio triggers alert
           .mockResolvedValueOnce({ rows: [] }) // detectSpoofing query
           .mockResolvedValue({ rows: [] }); // storeAlert and fallback
 
