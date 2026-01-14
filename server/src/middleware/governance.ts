@@ -37,7 +37,7 @@ const DEFAULT_CONFIG: GovernanceConfig = {
   requirePurpose: true,
   requireReason: true,
   requireLegalBasis: false,
-  strictMode: false, // Start permissive for backward compatibility
+  strictMode: process.env.GOVERNANCE_STRICT_MODE === 'true',
   defaultPurpose: 'general_access',
   defaultLegalBasis: ['legitimate_interest'],
   defaultReason: 'Normal system access (auto-generated for backward compatibility)',
@@ -229,6 +229,17 @@ export function createGovernanceMiddleware(
 
       // Validate governance context
       const validation = validateGovernanceContext(governanceContext, finalConfig, logger);
+
+      // Emit Governance Headers
+      const status = validation.valid ? 'allow' : (finalConfig.strictMode ? 'deny' : 'warn');
+      res.setHeader('X-Governance-Status', status);
+      res.setHeader('X-Governance-Policy-Version', '1.0');
+
+      // Emit Reason Code (first error or OK)
+      const reasonCode = validation.errors.length > 0
+        ? 'GOVERNANCE_INVALID_CONTEXT' // Simplified reason code for header
+        : 'POLICY_OK';
+      res.setHeader('X-Governance-Reason', reasonCode);
 
       if (!validation.valid) {
         if (finalConfig.strictMode) {
