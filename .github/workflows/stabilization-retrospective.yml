@@ -1,0 +1,227 @@
+name: Stabilization Retrospective
+
+on:
+  # Monthly schedule: First day of month at 10:00 UTC
+  schedule:
+    - cron: '0 10 1 * *'
+
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      weeks:
+        description: 'Number of weeks to analyze'
+        required: false
+        default: '4'
+      mode:
+        description: 'Roadmap handoff mode (draft or apply)'
+        required: false
+        default: 'draft'
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: read
+
+jobs:
+  generate-retrospective:
+    name: Generate Stabilization Retrospective
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Retrospective
+        id: retro
+        run: |
+          WEEKS="${{ github.event.inputs.weeks || '4' }}"
+
+          echo "Generating retrospective for last $WEEKS weeks..."
+          node scripts/releases/generate_stabilization_retrospective.mjs \
+            --weeks="$WEEKS" \
+            --out-dir="artifacts/stabilization/retrospective" \
+            --artifacts-dir="artifacts/reports"
+
+          # Find the generated files
+          RETRO_JSON=$(ls -t artifacts/stabilization/retrospective/retro_*.json | head -1)
+          RETRO_MD=$(ls -t artifacts/stabilization/retrospective/RETRO_*.md | head -1)
+
+          echo "retro_json=$RETRO_JSON" >> $GITHUB_OUTPUT
+          echo "retro_md=$RETRO_MD" >> $GITHUB_OUTPUT
+
+      - name: Derive Roadmap Candidates
+        id: candidates
+        run: |
+          RETRO_JSON="${{ steps.retro.outputs.retro_json }}"
+          CANDIDATES_JSON="artifacts/stabilization/retrospective/candidates.json"
+
+          echo "Deriving roadmap candidates..."
+          node scripts/releases/derive_stabilization_roadmap_candidates.mjs \
+            --retro="$RETRO_JSON" \
+            --max-candidates=5 \
+            --out-file="$CANDIDATES_JSON"
+
+          echo "candidates_json=$CANDIDATES_JSON" >> $GITHUB_OUTPUT
+
+      - name: Generate Roadmap Handoff
+        id: handoff
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RETRO_JSON="${{ steps.retro.outputs.retro_json }}"
+          CANDIDATES_JSON="${{ steps.candidates.outputs.candidates_json }}"
+          MODE="${{ github.event.inputs.mode || 'draft' }}"
+
+          echo "Generating roadmap handoff (mode: $MODE)..."
+          node scripts/releases/sync_stabilization_roadmap_handoff.mjs \
+            --candidates="$CANDIDATES_JSON" \
+            --retro="$RETRO_JSON" \
+            --out-dir="artifacts/stabilization/roadmap-handoff" \
+            --mode="$MODE" \
+            --github-token="${GITHUB_TOKEN}"
+
+      - name: Upload Retrospective Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: stabilization-retrospective
+          path: artifacts/stabilization/retrospective/
+          retention-days: 90
+
+      - name: Upload Roadmap Handoff Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: stabilization-roadmap-handoff
+          path: artifacts/stabilization/roadmap-handoff/
+          retention-days: 90
+
+      - name: Generate Job Summary
+        run: |
+          RETRO_JSON="${{ steps.retro.outputs.retro_json }}"
+          CANDIDATES_JSON="${{ steps.candidates.outputs.candidates_json }}"
+
+          echo "# 📊 Stabilization Retrospective" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Extract key metrics from retrospective
+          RISK_INDEX_START=$(jq -r '.series.risk_index[0]' "$RETRO_JSON")
+          RISK_INDEX_END=$(jq -r '.series.risk_index[-1]' "$RETRO_JSON")
+          WEEKS=$(jq -r '.window.weeks' "$RETRO_JSON")
+
+          echo "## Window Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Weeks Analyzed:** $WEEKS" >> $GITHUB_STEP_SUMMARY
+          echo "- **Risk Index Trend:** $RISK_INDEX_START → $RISK_INDEX_END" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "## Top Focus Recommendations" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          jq -r '.focus_themes[:3] | .[] | "- **\(.theme)** (\(.priority)): \(.rationale)"' "$RETRO_JSON" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "## Roadmap Candidates" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          jq -r '.candidates | .[] | "- `\(.slug)` - \(.title) (severity: \(.severity), score: \(.score))"' "$CANDIDATES_JSON" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "## Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Retrospective: \`${{ steps.retro.outputs.retro_md }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Candidates: \`$CANDIDATES_JSON\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Drafts: \`artifacts/stabilization/roadmap-handoff/drafts/\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          MODE="${{ github.event.inputs.mode || 'draft' }}"
+          if [ "$MODE" = "draft" ]; then
+            echo "🔸 **Mode:** Draft only (no GitHub issues created)" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "To create GitHub issues, re-run with \`mode=apply\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **Mode:** Apply (GitHub issues created/updated)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Create PR with Retrospective (draft mode only)
+        if: github.event.inputs.mode != 'apply'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TIMESTAMP=$(date +%Y%m%d)
+          BRANCH="stabilization/retrospective-$TIMESTAMP"
+
+          # Create branch
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+
+          # Add artifacts
+          git add artifacts/stabilization/
+
+          # Only commit if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "docs(stabilization): monthly retrospective $TIMESTAMP
+
+Generated stabilization retrospective for the last ${{ github.event.inputs.weeks || '4' }} weeks.
+
+- Retrospective: ${{ steps.retro.outputs.retro_md }}
+- Candidates: ${{ steps.candidates.outputs.candidates_json }}
+- Drafts: artifacts/stabilization/roadmap-handoff/drafts/
+
+Roadmap candidates are in draft mode. Review and triage before creating issues."
+
+          git push -u origin "$BRANCH"
+
+          # Create PR
+          gh pr create \
+            --title "📊 Stabilization Retrospective $TIMESTAMP" \
+            --body "$(cat <<'EOF'
+## Summary
+
+Monthly stabilization retrospective generated from weekly closeout artifacts.
+
+## Contents
+
+- **Retrospective Report:** Aggregated metrics and trends from the last ${{ github.event.inputs.weeks || '4' }} weeks
+- **Roadmap Candidates:** Rule-based candidates for systemic improvements
+- **Draft Proposals:** Detailed proposals in `artifacts/stabilization/roadmap-handoff/drafts/`
+
+## Next Steps
+
+1. Review the retrospective report: ${{ steps.retro.outputs.retro_md }}
+2. Review candidate proposals in `drafts/`
+3. Triage and assign owners to selected candidates
+4. Optionally re-run workflow with `mode=apply` to create GitHub issues
+
+## Data Sources
+
+- Weekly stabilization closeout artifacts
+- Metrics window: Last ${{ github.event.inputs.weeks || '4' }} weeks
+- Generated: $(date -u +"%Y-%m-%d %H:%M UTC")
+
+---
+
+**Note:** This PR contains artifacts only. No GitHub issues were created (draft mode).
+EOF
+)" \
+            --label "stabilization" \
+            --label "retrospective" \
+            --label "documentation"
