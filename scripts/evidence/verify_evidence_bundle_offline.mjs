@@ -12,6 +12,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
+import { hashMatch } from '../ci/lib/secrets_rules.mjs';
 
 // --- Configuration ---
 const __filename = fileURLToPath(import.meta.url);
@@ -25,6 +26,7 @@ const TARGET_DIR = process.argv[2]
 
 const EVIDENCE_DIR = path.join(TARGET_DIR, 'evidence');
 const MANIFEST_PATH = path.join(EVIDENCE_DIR, 'evidence-manifest.json');
+const SECRETS_POLICY_PATH = path.resolve(__dirname, '../../docs/security/SECRETS_SCAN_POLICY.yml');
 
 // --- Helpers ---
 const red = (text) => `\x1b[31m${text}\x1b[0m`;
@@ -35,6 +37,75 @@ const cyan = (text) => `\x1b[36m${text}\x1b[0m`;
 const fail = (msg) => {
     console.error(`\n${red('⛔ VERIFICATION FAILED')}: ${msg}`);
     process.exit(1);
+};
+
+const warn = (msg) => {
+    console.log(`${yellow('⚠️  WARNING')}: ${msg}`);
+};
+
+const hashFile = (filePath) => {
+    const fileBuffer = fs.readFileSync(filePath);
+    const hashSum = crypto.createHash('sha256');
+    hashSum.update(fileBuffer);
+    return hashSum.digest('hex');
+};
+
+const verifySecretsScanEvidence = (manifest) => {
+    const secretsDir = path.join(TARGET_DIR, 'governance', 'secrets-scan', manifest.meta.gitSha);
+    if (!fs.existsSync(secretsDir)) {
+        warn(`Secrets scan evidence missing at ${secretsDir}`);
+        return 0;
+    }
+
+    const reportPath = path.join(secretsDir, 'report.json');
+    const stampPath = path.join(secretsDir, 'stamp.json');
+
+    if (!fs.existsSync(reportPath) || !fs.existsSync(stampPath)) {
+        warn(`Secrets scan report or stamp missing in ${secretsDir}`);
+        return 0;
+    }
+
+    let stamp;
+    try {
+        stamp = JSON.parse(fs.readFileSync(stampPath, 'utf-8'));
+    } catch (error) {
+        warn(`Secrets scan stamp could not be parsed: ${error.message}`);
+        return 1;
+    }
+
+    const reportHash = hashFile(reportPath);
+    let errorCount = 0;
+
+    if (stamp.report_hash && stamp.report_hash !== reportHash) {
+        console.log(red('SECRETS REPORT HASH MISMATCH'));
+        console.log(`   Expected: ${stamp.report_hash}`);
+        console.log(`   Actual:   ${reportHash}`);
+        errorCount += 1;
+    } else {
+        console.log(green('Secrets scan report hash OK'));
+    }
+
+    if (fs.existsSync(SECRETS_POLICY_PATH)) {
+        try {
+            const policyRaw = fs.readFileSync(SECRETS_POLICY_PATH, 'utf-8');
+            const policyHash = hashMatch(policyRaw);
+            if (stamp.policy_hash && stamp.policy_hash !== policyHash) {
+                console.log(red('SECRETS POLICY HASH MISMATCH'));
+                console.log(`   Expected: ${stamp.policy_hash}`);
+                console.log(`   Actual:   ${policyHash}`);
+                errorCount += 1;
+            } else {
+                console.log(green('Secrets scan policy hash OK'));
+            }
+        } catch (error) {
+            warn(`Secrets scan policy validation failed: ${error.message}`);
+            errorCount += 1;
+        }
+    } else {
+        warn(`Secrets scan policy not found at ${SECRETS_POLICY_PATH}`);
+    }
+
+    return errorCount;
 };
 
 // --- Main ---
@@ -79,10 +150,7 @@ try {
             continue;
         }
 
-        const fileBuffer = fs.readFileSync(fullPath);
-        const hashSum = crypto.createHash('sha256');
-        hashSum.update(fileBuffer);
-        const currentHash = hashSum.digest('hex');
+        const currentHash = hashFile(fullPath);
 
         if (currentHash !== metadata.sha256) {
             console.log(red('HASH MISMATCH'));
@@ -95,6 +163,9 @@ try {
     }
 
     console.log('--------------------------------------------------');
+
+    console.log('\n🔐 Verifying secrets scan evidence...');
+    errorCount += verifySecretsScanEvidence(manifest);
 
     if (errorCount > 0) {
         fail(`${errorCount} artifact(s) failed verification.`);
