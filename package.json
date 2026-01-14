@@ -116,6 +116,9 @@
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
+    "ga:diff": "node scripts/ga/diff_evidence_map.mjs",
+    "ga:diff:strict": "EVIDENCE_DIFF_FAIL_ON_REGRESSION=1 node scripts/ga/diff_evidence_map.mjs",
+    "ga:diff:md": "pnpm -s ga:diff | node scripts/ga/format_evidence_diff.mjs",
     "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
     "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
@@ -256,6 +259,7 @@
     "vitest": "^4.0.16",
     "ws": "^8.18.3",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "yaml": "^2.8.2",
     "zustand": "^5.0.9"
   },
   "private": true,
