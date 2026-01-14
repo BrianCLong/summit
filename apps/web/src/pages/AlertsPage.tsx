@@ -200,7 +200,8 @@ export default function AlertsPage() {
           icon="alert"
           title="Failed to load alerts"
           description={error.message}
-          action={{ label: 'Retry', onClick: () => window.location.reload() }}
+          onRetry={handleRefresh}
+          showHomeButton={true}
         />
       </div>
     )
