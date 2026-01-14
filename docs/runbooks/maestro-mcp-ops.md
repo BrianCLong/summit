@@ -38,6 +38,23 @@
 - Registry POST/PUT/DELETE requires `admin:mcp` or ADMIN role (dev)
 - Redacts `Authorization`, `X-API-Key`, `Set-Cookie`, and token fields from logs
 
+## gRPC Transport Troubleshooting
+
+### Timeouts / DEADLINE_EXCEEDED
+
+- Confirm client deadlines (`MCP_GRPC_DEFAULT_DEADLINE_MS`) match expected tool latency.
+- Validate server-side saturation; reduce `MCP_GRPC_MAX_IN_FLIGHT` if overload occurs.
+
+### TLS / mTLS Errors
+
+- Verify `MCP_GRPC_TLS_CERT`, `MCP_GRPC_TLS_KEY`, and `MCP_GRPC_TLS_CA` paths.
+- Ensure cert CN/SAN matches the gRPC address and client trusts the CA bundle.
+
+### Auth / Policy Denies
+
+- Confirm `authorization: Bearer <token>` is set in gRPC metadata.
+- Check OPA responses and policy receipts (`x-ig-policy-receipt`) for decision context.
+
 ## Persistence
 
 - Optional PG table `mcp_sessions` stores sid/run/scopes/servers/exp/revoked_at when `MCP_SESSIONS_PERSIST=true`
