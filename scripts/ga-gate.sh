@@ -158,7 +158,10 @@ record_check "Deep Health Check" "check_detailed_health" || { generate_report; e
 # We run `make smoke`. It calls bootstrap+up, but up should be fast/noop if already running.
 record_check "Smoke Test" "make smoke" || { generate_report; exit 1; }
 
-# 7. Security Checks
+# 7. Exceptions Governance
+record_check "SOC Exceptions Governance" "make ga-validate-exceptions" || { generate_report; exit 1; }
+
+# 8. Security Checks
 security_gate() {
     make sbom || echo "⚠️ SBOM generation failed (non-critical if tool missing)"
 

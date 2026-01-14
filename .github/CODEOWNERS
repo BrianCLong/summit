@@ -36,6 +36,9 @@
 /server/src/auth/ @intelgraph-security
 /server/src/security/ @intelgraph-security
 
+# Compliance & Exceptions
+/compliance/exceptions/ @intelgraph-security
+
 # GraphQL API & Resolvers
 /server/src/graphql/ @intelgraph-api
 /server/src/resolvers/ @intelgraph-api

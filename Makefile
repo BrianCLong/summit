@@ -283,6 +283,9 @@ ga: ## Run Enforceable GA Gate (Lint -> Clean Up -> Deep Health -> Smoke -> Secu
 	@mkdir -p artifacts/ga
 	@./scripts/ga-gate.sh
 
+ga-validate-exceptions: ## Validate SOC exceptions registry
+	@$(VENV_BIN)/python3 scripts/compliance/validate_exceptions.py
+
 ga-verify: ## Run GA tier B/C verification sweep (deterministic)
 	@node --test testing/ga-verification/*.ga.test.mjs
 	@node scripts/ga/verify-ga-surface.mjs
