@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-14T20:06:01Z",
+  "revision_note": "Added evidence ID consistency verification policy and CI wiring",
   "initiatives": [
     {
       "id": "A",
