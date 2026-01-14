@@ -9,14 +9,19 @@
     },
     {
       "name": "VerificationScripts",
-      "paths": ["scripts/ga/", "testing/ga-verification/"],
+      "paths": ["scripts/ga/", "scripts/ci/", "testing/ga-verification/"],
       "notes": "Node-native checks only; no global test runner changes."
+    },
+    {
+      "name": "CIGovernance",
+      "paths": [".github/workflows/"],
+      "notes": "CI wiring for governance verification and evidence pipelines."
     }
   ],
   "verificationRules": {
     "gaCriticalWork": "Must reference Tier A/B/C artifact before merge.",
     "legacyMode": "New files cannot self-designate legacy mode; exemptions require documented issue and owner.",
-    "ciCommands": ["make ga-verify", "pnpm run test:a11y-gate"],
+    "ciCommands": ["make ga-verify", "pnpm run test:a11y-gate", "pnpm ci:cas:verify"],
     "provenance": "Changes must cite evidence artifacts in PR summaries."
   },
   "restrictedAreas": [
@@ -72,11 +77,7 @@
       "description": "Credit Card Number"
     }
   ],
-  "requiredChecks": [
-    "restricted-path-check",
-    "pr-metadata-check",
-    "pii-scan"
-  ],
+  "requiredChecks": ["restricted-path-check", "pr-metadata-check", "pii-scan"],
   "activityTracking": {
     "ledger": "AGENT_ACTIVITY.md",
     "backlog": "TASK_BACKLOG.md",

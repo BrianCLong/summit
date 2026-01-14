@@ -30,6 +30,37 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: cas-artifacts-immutable
+    version: v1
+    path: prompts/governance/cas-artifacts-immutable.md
+    sha256: b476ca57ecc2236b056f06214e3455b14267ab0423631fd93e2d9e503fc3088e
+    description: Introduce a CAS-backed evidence store with deterministic manifests and verification.
+    scope:
+      paths:
+        - scripts/ci/
+        - scripts/ga/
+        - docs/ga/
+        - .github/workflows/
+        - package.json
+        - agent-contract.json
+        - AGENT_ACTIVITY.md
+        - docs/roadmap/STATUS.json
+        - agents/
+        - prompts/
+      domains:
+        - governance
+        - ci
+        - provenance
+        - verification
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md

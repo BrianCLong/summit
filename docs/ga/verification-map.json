@@ -58,6 +58,15 @@
     "notes": "Guards the canonical governance document."
   },
   {
+    "feature": "CAS Integrity & Artifacts",
+    "tier": "B",
+    "artifact": "scripts/ci/verify_cas_integrity.mjs",
+    "ciStatus": "wired",
+    "evidence": ["docs/ga/CAS_ARTIFACTS.md", "scripts/ci/verify_cas_integrity.mjs"],
+    "keywords": ["cas", "integrity"],
+    "notes": "Verifies content-addressed blobs and run manifests for GA evidence."
+  },
+  {
     "feature": "Policy Preflight & Receipts",
     "tier": "C",
     "artifact": "scripts/ga/verify-ga-surface.mjs",

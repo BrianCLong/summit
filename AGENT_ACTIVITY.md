@@ -2,12 +2,13 @@
 
 This ledger tracks recent agent activity so humans can spot thrash, stalls, or conflicts quickly.
 
-| task_id | branch                         | pr / link | agent | status      | notes                                           | updated    |
-| ------- | ------------------------------ | --------- | ----- | ----------- | ----------------------------------------------- | ---------- |
-| TB-01   | agentic/jules/task-guardrails  | (pending) | Jules | in-progress | Guardrail workflow + contract refresh.          | 2026-01-01 |
-| TB-02   | agentic/codex/task-ledger      | (pending) | Codex | in-progress | Drafting AGENT_ACTIVITY + backlog wiring.       | 2026-01-01 |
-| TB-03   | agentic/codex/task-owner-guide | (pending) | Codex | in-progress | HUMAN_OWNER_GUIDE.md authored.                  | 2026-01-01 |
-| TB-04   | (human-only)                   | n/a       | Human | human-only  | Restricted-path audit; requires override label. | 2026-01-01 |
+| task_id           | branch                         | pr / link | agent | status      | notes                                           | updated    |
+| ----------------- | ------------------------------ | --------- | ----- | ----------- | ----------------------------------------------- | ---------- |
+| CAS_ARTIFACTS_001 | feat/governance/cas-artifacts  | (pending) | Codex | in-progress | CAS-backed evidence manifests + verifier.       | 2026-01-14 |
+| TB-01             | agentic/jules/task-guardrails  | (pending) | Jules | in-progress | Guardrail workflow + contract refresh.          | 2026-01-01 |
+| TB-02             | agentic/codex/task-ledger      | (pending) | Codex | in-progress | Drafting AGENT_ACTIVITY + backlog wiring.       | 2026-01-01 |
+| TB-03             | agentic/codex/task-owner-guide | (pending) | Codex | in-progress | HUMAN_OWNER_GUIDE.md authored.                  | 2026-01-01 |
+| TB-04             | (human-only)                   | n/a       | Human | human-only  | Restricted-path audit; requires override label. | 2026-01-01 |
 
 ## How to update
 
