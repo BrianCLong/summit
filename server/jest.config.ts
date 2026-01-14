@@ -79,6 +79,7 @@ const config: Config = {
     '.*analytics/telemetry/TelemetryService(\\.js)?$': '<rootDir>/tests/mocks/telemetry-service.ts',
     '.*scripts/maintenance(\\.js)?$': '<rootDir>/tests/mocks/maintenance.ts',
     '^argon2$': '<rootDir>/tests/mocks/argon2.ts',
+    '^pkcs11js$': '<rootDir>/tests/mocks/pkcs11js.js',
     '^graphql-iso-date$': '<rootDir>/tests/mocks/graphql-iso-date.cjs',
     '^pptxgenjs$': '<rootDir>/tests/mocks/pptxgenjs.ts',
     '.*config/database(\\.js)?$': '<rootDir>/tests/mocks/db-config.ts',

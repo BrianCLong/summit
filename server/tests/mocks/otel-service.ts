@@ -42,6 +42,7 @@ export const otelService = {
   getTraceId: () => 'mock-trace-id',
   getSpanId: () => 'mock-span-id',
   setAttribute: () => { },
+  addSpanAttributes: () => { },
   addEvent: () => { },
   recordException: () => { },
   extractContext: () => ({}),

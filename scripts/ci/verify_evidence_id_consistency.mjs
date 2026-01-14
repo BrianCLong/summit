@@ -717,4 +717,3 @@ export {
   removeBOM,
   validateFilePathSafety,
   writeReports
-};

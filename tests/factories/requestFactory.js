@@ -4,6 +4,7 @@
  * Generates test HTTP request objects for middleware testing
  */
 import { randomUUID } from 'crypto';
+import { jest } from '@jest/globals';
 /**
  * Create a mock HTTP request for testing
  */
