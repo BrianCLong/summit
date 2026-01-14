@@ -30,7 +30,7 @@ concurrency:
 
 jobs:
   ga-gate:
-    name: GA Readiness Gate
+    name: Governance / GA Readiness
     runs-on: ubuntu-latest
     timeout-minutes: 15
 

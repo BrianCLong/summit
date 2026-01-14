@@ -29,13 +29,14 @@ branch_protection:
   required_status_checks:
     strict: true
     contexts:
-      - "CI Core (Primary Gate)"
+      - "Governance / Unified Gate"
       - "CI / config-guard"
       - "CI / unit-tests"
-      - "GA Gate"
+      - "Governance / GA Readiness"
       - "Release Readiness Gate"
       - "Unit Tests & Coverage"
-      - "ga / gate"
+      - "Governance / Docs Integrity"
+      - "Governance / Evidence ID Consistency"
 
 # Always Required Checks
 # ----------------------
@@ -46,7 +47,7 @@ always_required:
     workflow: "release-readiness.yml"
     rationale: "Comprehensive release readiness verification - runs on every change"
 
-  - name: "GA Gate"
+  - name: "Governance / GA Readiness"
     workflow: "ga-gate.yml"
     rationale: "Official GA verification entrypoint with make ga"
 
@@ -54,9 +55,13 @@ always_required:
     workflow: "unit-test-coverage.yml"
     rationale: "Test suite and coverage gates must pass for all code changes"
 
-  - name: "CI Core (Primary Gate)"
+  - name: "Governance / Unified Gate"
     workflow: "ci-core.yml"
     rationale: "Primary blocking gate - lint, typecheck, tests, build"
+
+  - name: "Governance / Evidence ID Consistency"
+    workflow: "verify-claims.yml"
+    rationale: "Validates that all claims in the registry have valid evidence links"
 
 # Conditional Required Checks
 # ---------------------------
@@ -68,6 +73,12 @@ always_required:
 #   "^\.github/workflows/" - Matches workflow files (escape dots)
 #   "^Dockerfile$" - Matches exactly "Dockerfile" at root
 conditional_required:
+  - name: "Governance / Docs Integrity"
+    workflow: "docs-lint.yml"
+    rationale: "Validates documentation integrity (Markdown syntax, broken links)"
+    when_paths_match:
+      - "^.*\\.md$"
+
   - name: "Workflow Lint"
     workflow: "workflow-lint.yml"
     rationale: "Validates GitHub Actions workflow syntax and safety"
