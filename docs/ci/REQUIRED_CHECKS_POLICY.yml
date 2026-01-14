@@ -30,9 +30,12 @@ branch_protection:
     strict: true
     contexts:
       - "CI Core (Primary Gate)"
+      - "CI / config-guard"
+      - "CI / unit-tests"
       - "GA Gate"
       - "Release Readiness Gate"
       - "Unit Tests & Coverage"
+      - "ga / gate"
 
 # Always Required Checks
 # ----------------------
