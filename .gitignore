@@ -281,6 +281,9 @@ pr-dashboard.html
 pr-backlog-stats.json
 tests/e2e/auth-state.json
 artifacts/
+!artifacts/
+!artifacts/tool-loading-report.json
+!artifacts/tool-loading-report.md
 /dist
 .env
 sbom.json
@@ -296,6 +299,7 @@ tmp-audit/
 reports/
 bug-bash-results/
 *-report.json
+!artifacts/tool-loading-report.json
 lint_output.txt
 
 # Security Scan Results & Audit Artifacts

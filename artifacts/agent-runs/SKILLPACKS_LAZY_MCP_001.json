@@ -1,0 +1,31 @@
+{
+  "task_id": "SKILLPACKS_LAZY_MCP_001",
+  "agent_id": "codex",
+  "prompt_hash": "2fcf3ef5535a5dd116439d1fc8a665e03945e1c6981373895fd9344bd486b658",
+  "prompt_id": "agent-native-loop-n4",
+  "declared_scope": {
+    "paths": [
+      "packages/agent-skillpacks/**",
+      ".summit/skillpacks/**",
+      "docs/Skillpacks_Lazy_MCP_Loading.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/skillpacks-lazy-mcp.json",
+      "artifacts/tool-loading-report.json",
+      "artifacts/tool-loading-report.md"
+    ],
+    "domains": ["governance", "tooling", "observability"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_tiers": ["C"],
+  "debt_delta": 0,
+  "evidence": {
+    "tests": ["pnpm --filter @intelgraph/agent-skillpacks test --updateSnapshot"],
+    "artifacts": [
+      "artifacts/tool-loading-report.json",
+      "artifacts/tool-loading-report.md"
+    ]
+  },
+  "policies_enforced": ["scope", "prompt-immutability", "policy-gate"],
+  "status": "ready-for-review",
+  "recorded_at": "2026-01-20T12:00:00.000Z"
+}
