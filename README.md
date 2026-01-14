@@ -47,6 +47,7 @@ This runs the enforced readiness sequence:
 - **GA Checklist:** `docs/release/GA_CHECKLIST.md` (operator runbook for build, test, security, and rollback)
 - **Readiness Report:** `docs/release/GA_READINESS_REPORT.md` (current go/no-go posture and remaining actions)
 - **Evidence Index:** `docs/release/GA_EVIDENCE_INDEX.md` (commands run with logs and artifact pointers)
+- **GA Hub:** `docs/ga/README.md` (Canonical GA Entry Index)
 
 ---
 
