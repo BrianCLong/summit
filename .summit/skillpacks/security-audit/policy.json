@@ -1,0 +1,17 @@
+{
+  "allow": ["mcp.security.*"],
+  "deny": ["mcp.security.destructive.*"],
+  "environments": {
+    "ci": {
+      "deny": ["mcp.security.*"]
+    }
+  },
+  "breakGlass": [
+    {
+      "tool": "mcp.security.scan",
+      "reason": "Governed exception for CI incident validation.",
+      "expiresAt": "2999-01-01T00:00:00Z",
+      "approvedBy": "security-council"
+    }
+  ]
+}

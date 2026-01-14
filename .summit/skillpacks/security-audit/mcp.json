@@ -1,0 +1,21 @@
+{
+  "servers": [
+    {
+      "name": "security-scanner",
+      "command": "security-mcp",
+      "args": ["--json"],
+      "includeTools": ["mcp.security.scan", "mcp.security.policyReport"],
+      "shards": {
+        "default": {
+          "includeTools": ["mcp.security.scan"]
+        },
+        "deep": {
+          "includeTools": ["mcp.security.scan", "mcp.security.policyReport"]
+        },
+        "ci": {
+          "includeTools": []
+        }
+      }
+    }
+  ]
+}
