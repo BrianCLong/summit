@@ -15,7 +15,7 @@ jest.unstable_mockModule('../../utils/logger.js', () => ({
 
 jest.unstable_mockModule('../../lib/events/event-bus.js', () => {
   const eventBus = new EventEmitter();
-  return { __esModule: true, default: eventBus };
+  return { eventBus };
 });
 
 // Mock SimulationEngineService as a class that extends EventEmitter
@@ -32,7 +32,7 @@ describe('RedTeamSimulator', () => {
 
   beforeAll(async () => {
     ({ RedTeamSimulator } = await import('../RedTeamSimulator'));
-    ({ default: eventBus } = await import('../../lib/events/event-bus.js'));
+    ({ eventBus } = await import('../../lib/events/event-bus.js'));
   });
 
   beforeEach(() => {

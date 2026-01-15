@@ -29,32 +29,36 @@ describe('Evidence ID Consistency - Determinism Verification', () => {
     
     // Verify the deterministic artifacts are identical across runs
     const runDir = join('artifacts', 'governance', 'evidence-id-consistency', testSha);
-    const reportPath = join(runDir, 'report.json');
-    const metricsPath = join(runDir, 'metrics.json');
-    const stampPath = join(runDir, 'stamp.json');
-    
-    const report1 = await fs.readFile(reportPath, 'utf8');
-    const metrics1 = await fs.readFile(metricsPath, 'utf8');
-    
-    // Need to run a second time with same SHA to compare
-    // Actually, we need to run the entire thing again in a different directory
-    // For now, let's just validate that the run produced deterministic artifacts
-    
-    // Verify no timestamp-like keys in report.json and metrics.json
-    const reportObj = JSON.parse(report1);
-    
+    // Verify report.json exists and is structured properly
+    const reportArtifactPath = join('artifacts', 'governance', 'evidence-id-consistency', testSha, 'report.json');
+    const reportExists = await fs.access(reportArtifactPath).then(() => true).catch(() => false);
+    assert.ok(reportExists, `report.json should exist at ${reportArtifactPath}`);
+
+    const reportContent = await fs.readFile(reportArtifactPath, 'utf8');
+    const reportObj = JSON.parse(reportContent);
+
     // Check for timestamp keys in the report structure (not in values)
     assert.ok(!hasTimestampKeys(reportObj), 'report.json should not contain timestamp-like keys');
-    
-    const metricsObj = JSON.parse(metrics1);
+    console.log('✅ No timestamp-like keys found in report.json');
+
+    // Verify metrics.json exists and is structured properly
+    const metricsArtifactPath = join('artifacts', 'governance', 'evidence-id-consistency', testSha, 'metrics.json');
+    const metricsExists = await fs.access(metricsArtifactPath).then(() => true).catch(() => false);
+    assert.ok(metricsExists, `metrics.json should exist at ${metricsArtifactPath}`);
+
+    const metricsContent = await fs.readFile(metricsArtifactPath, 'utf8');
+    const metricsObj = JSON.parse(metricsContent);
     assert.ok(!hasTimestampKeys(metricsObj), 'metrics.json should not contain timestamp-like keys');
-    
-    console.log('✅ No timestamp-like keys found in deterministic artifacts');
-    
+    console.log('✅ No timestamp-like keys found in metrics.json');
+
     // Verify stamp.json has timestamp (it should)
-    const stampObj = JSON.parse(await fs.readFile(stampPath, 'utf8'));
+    const stampArtifactPath = join('artifacts', 'governance', 'evidence-id-consistency', testSha, 'stamp.json');
+    const stampExists = await fs.access(stampArtifactPath).then(() => true).catch(() => false);
+    assert.ok(stampExists, `stamp.json should exist at ${stampArtifactPath}`);
+
+    const stampContent = await fs.readFile(stampArtifactPath, 'utf8');
+    const stampObj = JSON.parse(stampContent);
     assert.ok(stampObj.timestamp, 'stamp.json should contain timestamp field');
-    
     console.log('✅ Timestamp found in stamp.json as expected');
   });
 });

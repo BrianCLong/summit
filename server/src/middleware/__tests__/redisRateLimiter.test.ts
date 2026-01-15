@@ -35,6 +35,8 @@ describe('createRedisRateLimiter fallback behavior', () => {
     let statusCode = 200;
     let body: any;
     const headers: Record<string, string> = {};
+    let resolved = false;
+    let resolvePromise: () => void = () => {};
     const res = {
       status: (code: number) => {
         statusCode = code;
@@ -42,6 +44,18 @@ describe('createRedisRateLimiter fallback behavior', () => {
       },
       json: (payload: any) => {
         body = payload;
+        if (!resolved) {
+          resolved = true;
+          resolvePromise();
+        }
+        return res;
+      },
+      send: (payload: any) => {
+        body = payload;
+        if (!resolved) {
+          resolved = true;
+          resolvePromise();
+        }
         return res;
       },
       setHeader: (key: string, value: string) => {
@@ -50,8 +64,13 @@ describe('createRedisRateLimiter fallback behavior', () => {
     } as any;
 
     await new Promise<void>((resolve) => {
-      middleware(req, res, () => resolve());
-      if (statusCode !== 200) resolve();
+      resolvePromise = resolve;
+      middleware(req, res, () => {
+        if (!resolved) {
+          resolved = true;
+          resolve();
+        }
+      });
     });
 
     return { statusCode, body, headers };

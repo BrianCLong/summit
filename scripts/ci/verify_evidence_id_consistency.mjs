@@ -674,22 +674,11 @@ async function main() {
     await writeReports(report, outputDir);
     const writeReportsDuration = Date.now() - writeReportsStartTime;
 
-    // Generate metrics for monitoring and quality assessment
-    const totalTime = Date.now() - startTime;
+    // Generate deterministic metrics for monitoring/observability (no runtime timestamps or performance data)
     const metrics = {
-      timestamp: new Date().toISOString(),
       sha: report.sha,
       generator: report.generator,
-      gate_version: '1.3.0',
-      performance: {
-        total_time_ms: totalTime,
-        evidence_map_load_ms: evidenceMapDuration,
-        document_discovery_ms: findDocsDuration,
-        document_processing_ms: processDuration,
-        report_building_ms: buildReportDuration,
-        report_writing_ms: writeReportsDuration,
-        average_doc_processing_ms: documents.length > 0 ? Math.round(processDuration / documents.length) : 0
-      },
+      gate_version: '1.3.1',  // Updated version
       totals: {
         documents_checked: report.totals.documents_checked,
         evidence_ids_found: report.totals.evidence_ids_found,
@@ -716,6 +705,31 @@ async function main() {
         debug_enabled: DEBUG
       }
     };
+
+    // Write deterministic metrics
+    const metricsPath = join(outputDir, 'metrics.json');
+    await fs.writeFile(metricsPath, JSON.stringify(metrics, null, 2), 'utf8');
+
+    // Create runtime stamp with performance metrics and timestamps
+    const stamp = {
+      sha: report.sha,
+      status: report.status,
+      timestamp: new Date().toISOString(),  // Runtime timestamp goes in stamp, not metrics
+      generator: report.generator,
+      violations: report.totals.violations,
+      performance: {
+        total_time_ms: totalTime,
+        evidence_map_load_ms: evidenceMapDuration,
+        document_discovery_ms: findDocsDuration,
+        document_processing_ms: processDuration,
+        report_building_ms: buildReportDuration,
+        report_writing_ms: writeReportsDuration,
+        average_doc_processing_ms: documents.length > 0 ? Math.round(processDuration / documents.length) : 0
+      }
+    };
+
+    const stampPath = join(outputDir, 'stamp.json');
+    await fs.writeFile(stampPath, JSON.stringify(stamp, null, 2), 'utf8');
 
     // Write metrics for monitoring/observability
     const metricsPath = join(outputDir, 'metrics.json');
