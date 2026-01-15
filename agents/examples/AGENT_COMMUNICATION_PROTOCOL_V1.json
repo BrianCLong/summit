@@ -1,0 +1,38 @@
+{
+  "task_id": "AGENT_COMMUNICATION_PROTOCOL_V1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "agent-communication-protocol",
+    "version": "v1",
+    "sha256": "a5d2e98c88de4b56e4043b21b464ce9570098ebb7ebaf7c2a1e60847e2416fad",
+    "path": "prompts/docs/agent-communication-protocol@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/communications/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/",
+      "prompts/docs/agent-communication-protocol@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["documentation", "governance", "collaboration", "agent-ops"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/communications/nexus-relay-protocol.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Protocol spec documented with governance alignment and rollout plan.",
+    "Roadmap status updated with revision note.",
+    "Prompt registry entry and task contract recorded."
+  ],
+  "stop_conditions": [
+    "Conflict with governance authority files.",
+    "Scope expansion beyond declared paths."
+  ]
+}
