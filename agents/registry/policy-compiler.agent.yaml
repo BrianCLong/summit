@@ -1,0 +1,30 @@
+identity:
+  name: "policy-compiler"
+  version: "1.0.0"
+  description: "Compiles human-readable governance policies into executable runtime constraints."
+  owner: "governance-team"
+  risk_tier: "high"
+
+interface:
+  inputs:
+    type: "object"
+    required: ["policy_bundle_path"]
+  outputs:
+    type: "object"
+    required: ["compiled_policy_hash", "output_path"]
+  determinism_mode: "strict"
+
+capabilities:
+  tools: ["file-read", "json-schema-compile", "opa-build"]
+  data_classes: ["internal"]
+  network:
+    allowed_domains: []
+
+governance:
+  controls: ["GOV-001", "GOV-002"]
+  provenance_enabled: true
+
+evaluation:
+  gates:
+    - suite: "policy-syntax-check"
+      threshold: 1.0

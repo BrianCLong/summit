@@ -1,0 +1,33 @@
+identity:
+  name: "prompt-injection-firewall"
+  version: "1.0.0"
+  description: "Scans inputs and retrieved context for prompt injection attacks."
+  owner: "security-team"
+  risk_tier: "critical"
+
+interface:
+  inputs:
+    type: "object"
+    required: ["text_content", "source_type"]
+  outputs:
+    type: "object"
+    required: ["is_safe", "sanitized_text", "flags"]
+  determinism_mode: "best_effort"
+
+capabilities:
+  tools: ["injection-classifier", "regex-scanner"]
+  models: ["injection-detect-v1"]
+  data_classes: ["public", "internal", "confidential", "restricted"]
+  network:
+    allowed_domains: []
+
+governance:
+  controls: ["SEC-INJECTION", "INPUT-VALIDATION"]
+  provenance_enabled: true
+
+evaluation:
+  gates:
+    - suite: "injection-detection-rate"
+      threshold: 0.99
+    - suite: "false-positive-rate"
+      threshold: 0.05

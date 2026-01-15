@@ -1,0 +1,30 @@
+identity:
+  name: "provenance-notary"
+  version: "1.0.0"
+  description: "Generates cryptographic receipts for agent executions."
+  owner: "security-team"
+  risk_tier: "critical"
+
+interface:
+  inputs:
+    type: "object"
+    required: ["execution_context", "artifacts"]
+  outputs:
+    type: "object"
+    required: ["receipt_json", "signature"]
+  determinism_mode: "strict"
+
+capabilities:
+  tools: ["sha256", "sign-ecdsa"]
+  data_classes: ["internal", "confidential"]
+  network:
+    allowed_domains: []
+
+governance:
+  controls: ["SEC-001", "AUDIT-LOG"]
+  provenance_enabled: true
+
+evaluation:
+  gates:
+    - suite: "crypto-correctness"
+      threshold: 1.0

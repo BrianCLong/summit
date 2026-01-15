@@ -1,0 +1,30 @@
+identity:
+  name: "deterministic-replay"
+  version: "1.0.0"
+  description: "Replays a previous agent execution using cached artifacts to verify determinism."
+  owner: "platform-engineering"
+  risk_tier: "medium"
+
+interface:
+  inputs:
+    type: "object"
+    required: ["original_run_id", "receipt_hash"]
+  outputs:
+    type: "object"
+    required: ["replay_match", "diff_report"]
+  determinism_mode: "strict"
+
+capabilities:
+  tools: ["cache-read", "agent-runner-isolated"]
+  data_classes: ["internal", "confidential"]
+  network:
+    allowed_domains: []
+
+governance:
+  controls: ["QA-001", "REG-REPLAY"]
+  provenance_enabled: true
+
+evaluation:
+  gates:
+    - suite: "replay-reliability"
+      threshold: 0.99
