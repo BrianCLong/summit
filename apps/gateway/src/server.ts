@@ -1,4 +1,4 @@
-import express from "express";
+import express = require("express");
 import { security } from "./security";
 import { policyGuard } from "./middleware/policyGuard";
 import searchRouter from "./routes/search";
