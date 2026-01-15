@@ -16,6 +16,14 @@ export class CIBDetectionService {
     indicators: [],
   });
 
+  detectCIB = jest.fn().mockResolvedValue({
+    campaignId: 'mock-campaign',
+    identifiedBotClusters: [],
+    anomalies: [],
+    precisionScore: 0,
+    timestamp: new Date(),
+  });
+
   analyze = jest.fn().mockResolvedValue({
     score: 0,
     factors: [],

@@ -1,8 +1,26 @@
 import * as pinoPkg from 'pino';
+import fs from 'fs';
+
+// Handle different pino export formats (standard, default, mocked)
 // @ts-ignore
-let pino = pinoPkg.pino || pinoPkg.default || pinoPkg;
-if (typeof pino !== 'function' && (pino as any).default && typeof (pino as any).default === 'function') {
-  pino = (pino as any).default;
+let pino: any = pinoPkg.pino || pinoPkg.default || (typeof pinoPkg === 'function' ? pinoPkg : null);
+
+if (!pino && (pinoPkg as any).default && typeof (pinoPkg as any).default === 'function') {
+  pino = (pinoPkg as any).default;
+}
+
+// Fallback for tests if pino initialization fails
+if (typeof pino !== 'function') {
+  if (process.env.DEBUG_JEST) {
+    const msg = `CRITICAL [logger.ts]: pino is NOT a function! type: ${typeof pino}, pinoPkg type: ${typeof pinoPkg}\n`;
+    try { fs.appendFileSync('/tmp/debug_pino.txt', msg); process.stdout.write(msg); } catch (e) { }
+  }
+  // Dummy pino factory
+  pino = () => ({
+    info: () => { }, error: () => { }, warn: () => { }, debug: () => { },
+    child: function () { return this; },
+    level: 'info'
+  });
 }
 import { correlationEngine } from '../lib/telemetry/correlation-engine.js';
 

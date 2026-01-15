@@ -1,12 +1,10 @@
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { GraphQLContext } from '../apollo-v5-server';
-import { applyMiddleware } from 'graphql-middleware';
+import { describe, it, expect } from '@jest/globals';
+import type { GraphQLContext } from '../apollo-v5-server.js';
+import { applyMiddleware } from '../graphql-middleware.js';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { graphql } from 'graphql';
 import { gql } from 'graphql-tag';
-// We import directly from CJS to bypass ESM issues if any, though TS should handle it.
-import * as shieldLib from 'graphql-shield';
-const { shield, rule, and, allow } = shieldLib;
+import { shield, rule, and, allow } from '../shield.js';
 
 // Define rules locally for the test to ensure isolation
 const isAuthenticated = rule({ cache: 'contextual' })(
@@ -80,7 +78,7 @@ describe('GraphQL Permissions Integration', () => {
     },
   });
 
-  test('Public queries (health) should be accessible without auth', async () => {
+  it('Public queries (health) should be accessible without auth', async () => {
     const query = `query { health }`;
     const result = await graphql({
         schema: schemaWithPermissions,
@@ -91,7 +89,7 @@ describe('GraphQL Permissions Integration', () => {
     expect(result.errors).toBeUndefined();
   });
 
-  test('Admin queries should be forbidden for anonymous users', async () => {
+  it('Admin queries should be forbidden for anonymous users', async () => {
     const query = `query { listPersistedQueries(tenantId: "t1") }`;
     const result = await graphql({
         schema: schemaWithPermissions,
@@ -102,7 +100,7 @@ describe('GraphQL Permissions Integration', () => {
     expect(result.errors?.[0].message).toMatch(/Not Authorised/i);
   });
 
-  test('Admin queries should be forbidden for regular users', async () => {
+  it('Admin queries should be forbidden for regular users', async () => {
     const query = `query { listPersistedQueries(tenantId: "t1") }`;
     const result = await graphql({
         schema: schemaWithPermissions,
@@ -113,7 +111,7 @@ describe('GraphQL Permissions Integration', () => {
     expect(result.errors?.[0].message).toMatch(/Not Authorised/i);
   });
 
-  test('Admin queries should be allowed for admin users', async () => {
+  it('Admin queries should be allowed for admin users', async () => {
     const query = `query { listPersistedQueries(tenantId: "t1") }`;
     const result = await graphql({
         schema: schemaWithPermissions,

@@ -16,13 +16,14 @@ describe('slow query logging', () => {
       error: jest.fn(),
       child: jest.fn(),
     };
-    jest.spyOn(baseLogger, 'child').mockReturnValue(mockLogger);
+    baseLogger.child.mockReturnValue(mockLogger);
     // @ts-ignore - dynamic import for test harness
     ({ __private } = (await import('../../src/db/postgres')) as any);
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    baseLogger.child.mockReturnValue(mockLogger);
   });
 
   it('emits a structured log for slow queries', () => {

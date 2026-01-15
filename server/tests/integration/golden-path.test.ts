@@ -186,11 +186,13 @@ jest.unstable_mockModule('../../src/db/postgres.js', () => ({
 }));
 
 // Mocks must be before imports
+console.log('LOADING HARNESS...');
 const { createTestHarness } = await import('../harness.js');
+console.log('HARNESS LOADED');
 
-
-// Mocks must be before imports
+console.log('LOADING DB CONFIG...');
 const db = await import('../../src/config/database.js');
+console.log('DB CONFIG LOADED');
 
 // Skip AI routes to avoid pino CJS/ESM interop issues during tests
 process.env.SKIP_AI_ROUTES = 'true';
@@ -201,43 +203,53 @@ describe('Golden Path Integration', () => {
   let app: any;
 
   beforeAll(async () => {
-    // Skip AI routes to avoid pino CJS/ESM interop issues during tests
-    process.env.SKIP_AI_ROUTES = 'true';
+    process.stdout.write('BEGIN beforeAll\n');
+    try {
+      // Skip AI routes to avoid pino CJS/ESM interop issues during tests
+      process.env.SKIP_AI_ROUTES = 'true';
 
-    // Override db connections
-    jest.spyOn(db, 'getRedisClient').mockImplementation(() => ({
-      ping: jest.fn().mockResolvedValue('PONG'),
-      get: jest.fn(),
-      set: jest.fn(),
-      del: jest.fn(),
-      quit: jest.fn(),
-      disconnect: jest.fn(),
-    } as any));
+      // Override db connections
+      jest.spyOn(db, 'getRedisClient').mockImplementation(() => ({
+        ping: jest.fn().mockResolvedValue('PONG'),
+        get: jest.fn(),
+        set: jest.fn(),
+        del: jest.fn(),
+        quit: jest.fn(),
+        disconnect: jest.fn(),
+      } as any));
 
-    jest.spyOn(db, 'getNeo4jDriver').mockImplementation(() => ({
-      verifyConnectivity: jest.fn().mockResolvedValue(true),
-      session: jest.fn().mockReturnValue({
-        run: jest.fn().mockResolvedValue({ records: [] }),
+      jest.spyOn(db, 'getNeo4jDriver').mockImplementation(() => ({
+        verifyConnectivity: jest.fn().mockResolvedValue(true),
+        session: jest.fn().mockReturnValue({
+          run: jest.fn().mockResolvedValue({ records: [] }),
+          close: jest.fn(),
+        }),
         close: jest.fn(),
-      }),
-      close: jest.fn(),
-    } as any));
+      } as any));
 
-    jest.spyOn(db, 'getPostgresPool').mockImplementation(() => ({
-      query: jest.fn().mockResolvedValue({ rows: [{ '?column?': 1 }] }),
-      connect: jest.fn().mockResolvedValue({
-        release: jest.fn(),
-        query: jest.fn().mockResolvedValue({ rows: [] }),
-      }),
-    } as any));
+      jest.spyOn(db, 'getPostgresPool').mockImplementation(() => ({
+        query: jest.fn().mockResolvedValue({ rows: [{ '?column?': 1 }] }),
+        connect: jest.fn().mockResolvedValue({
+          release: jest.fn(),
+          query: jest.fn().mockResolvedValue({ rows: [] }),
+        }),
+      } as any));
 
-    harness = await createTestHarness();
-    server = harness.server;
-    app = harness.app;
+      harness = await createTestHarness();
+      server = harness.server;
+      app = harness.app;
+    } catch (error) {
+      console.error('FAILED TO START HARNESS:', error);
+      throw error;
+    }
   });
 
   afterAll(async () => {
-    await harness.teardown();
+    if (harness) {
+      await harness.teardown();
+    } else {
+      console.error('TEARDOWN SKIPPED: harness is undefined');
+    }
   });
 
   it('Health Check returns 200', async () => {
