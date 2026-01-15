@@ -8,10 +8,10 @@ mkdir -p "${OUT_DIR}"
 echo "==> Running SOC control verification suites…"
 
 # Core server SOC tests
-if [ -d "server/__tests__/soc-controls" ]; then
-  pnpm --filter server test -- --runTestsByPath \
-    server/__tests__/soc-controls/auth \
-    server/__tests__/soc-controls/crypto \
+if [ -d "server/tests/soc-controls" ]; then
+  pnpm --filter intelgraph-server test -- \
+    tests/soc-controls/auth \
+    tests/soc-controls/crypto \
     --reporters=default \
     --reporters=jest-junit \
     --outputFile="${OUT_DIR}/server-soc-controls.xml"
@@ -19,8 +19,8 @@ fi
 
 # SOC2ComplianceService tests
 if [ -f "server/src/services/__tests__/SOC2ComplianceService.test.ts" ]; then
-  pnpm --filter server test -- --runTestsByPath \
-    server/src/services/__tests__/SOC2ComplianceService.test.ts \
+  pnpm --filter intelgraph-server test -- --runTestsByPath \
+    src/services/__tests__/SOC2ComplianceService.test.ts \
     --reporters=default \
     --reporters=jest-junit \
     --outputFile="${OUT_DIR}/soc2-compliance-service.xml"
