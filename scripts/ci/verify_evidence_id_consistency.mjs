@@ -20,6 +20,70 @@ function debugLog(message) {
 }
 
 /**
+ * Deterministic string comparison using codepoint ordering (not locale-dependent)
+ * Provides total order for cross-platform determinism
+ * @param {string} a - First string
+ * @param {string} b - Second string
+ * @returns {number} -1 if a < b, 0 if a === b, 1 if a > b
+ */
+function compareStringsCodepoint(a, b) {
+  if (a === b) return 0;
+  if (typeof a !== 'string' || typeof b !== 'string') {
+    a = String(a || '');
+    b = String(b || '');
+  }
+  return a < b ? -1 : 1;
+}
+
+/**
+ * Canonical JSON serialization to ensure deterministic output
+ * Recursively sorts object keys and avoids nondeterministic ordering
+ */
+function canonicalJsonStringify(obj) {
+  if (obj === null) return 'null';
+
+  if (Array.isArray(obj)) {
+    // Serialize array elements with canonical serialization
+    return '[' + obj.map(canonicalJsonStringify).join(',') + ']';
+  }
+
+  if (typeof obj === 'object') {
+    // Sort keys deterministically using codepoint comparison
+    const sorted = {};
+    const keys = Object.keys(obj).sort(compareStringsCodepoint);
+    for (const key of keys) {
+      sorted[key] = canonicalJsonStringify(obj[key]);
+    }
+
+    const pairs = keys.map(key => {
+      const valueStr = canonicalJsonStringify(obj[key]);
+      return `"${escapeJsonString(key)}":${valueStr}`;
+    });
+    return '{' + pairs.join(',') + '}';
+  }
+
+  // For primitive types, use standard JSON serialization
+  return JSON.stringify(obj);
+}
+
+/**
+ * Escape string for JSON serialization
+ */
+function escapeJsonString(str) {
+  if (typeof str !== 'string') {
+    str = String(str);
+  }
+  return str
+    .replace(/[\\]/g, '\\\\')
+    .replace(/["]/g, '\\"')
+    .replace(/[\b]/g, '\\b')
+    .replace(/[\f]/g, '\\f')
+    .replace(/[\n]/g, '\\n')
+    .replace(/[\r]/g, '\\r')
+    .replace(/[\t]/g, '\\t');
+}
+
+/**
  * Validates the configuration object
  */
 function validateConfig(config) {
@@ -376,11 +440,11 @@ function buildConsistencyReport({ sha, policyHash, results, config, evidenceMap 
     .map(result => ({
       path: result.path,
       violations: result.violations.sort((a, b) =>
-        a.type.localeCompare(b.type) || a.message.localeCompare(b.message)
+        compareStringsCodepoint(a.type, b.type) || compareStringsCodepoint(a.message, b.message)
       ),
-      evidence_ids: result.evidence_ids
+      evidence_ids: result.evidence_ids.sort(compareStringsCodepoint) // Sort evidence IDs deterministically
     }))
-    .sort((a, b) => a.path.localeCompare(b.path));
+    .sort((a, b) => compareStringsCodepoint(a.path, b.path)); // Sort by path using codepoint comparison
 
   // Extract all evidence IDs referenced in documents (excluding 'none')
   const referencedEvidenceIds = new Set();
@@ -467,8 +531,9 @@ async function writeReports(report, outputPath) {
   // Ensure output directory exists
   await fs.mkdir(outputPath, { recursive: true });
   
-  // Write JSON report
-  await fs.writeFile(jsonPath, JSON.stringify(report, null, 2), 'utf8');
+  // Write JSON report with canonical serialization for deterministic output
+  const canonicalReport = canonicalJsonStringify(report);
+  await fs.writeFile(jsonPath, canonicalReport, 'utf8');
   
   // Write Markdown report
   let mdContent = `# Evidence ID Consistency Report\n\n`;
@@ -529,7 +594,7 @@ async function writeReports(report, outputPath) {
   
   await fs.writeFile(mdPath, mdContent, 'utf8');
   
-  // Write stamp file for tracking
+  // Write stamp file for tracking with performance metrics
   const stamp = {
     sha: report.sha,
     status: report.status,
@@ -537,7 +602,10 @@ async function writeReports(report, outputPath) {
     generator: report.generator,
     violations: report.totals.violations
   };
-  await fs.writeFile(stampPath, JSON.stringify(stamp, null, 2), 'utf8');
+
+  // Use canonical serialization for stamp.json too, but allow timestamps since it's runtime metadata
+  const canonicalStamp = canonicalJsonStringify(stamp);
+  await fs.writeFile(stampPath, canonicalStamp, 'utf8');
 }
 
 /**
@@ -716,9 +784,10 @@ async function main() {
       }
     };
 
-    // Write deterministic metrics
+    // Write deterministic metrics with canonical serialization
     const metricsPath = join(outputDir, 'metrics.json');
-    await fs.writeFile(metricsPath, JSON.stringify(metrics, null, 2), 'utf8');
+    const canonicalMetrics = canonicalJsonStringify(metrics);
+    await fs.writeFile(metricsPath, canonicalMetrics, 'utf8');
 
     // Create runtime stamp with performance metrics and timestamps
     const stamp = {
@@ -739,7 +808,9 @@ async function main() {
     };
 
     const stampPath = join(outputDir, 'stamp.json');
-    await fs.writeFile(stampPath, JSON.stringify(stamp, null, 2), 'utf8');
+    // Use canonical serialization for stamp.json too, but allow timestamps since it's runtime metadata
+    const canonicalStamp = canonicalJsonStringify(stamp);
+    await fs.writeFile(stampPath, canonicalStamp, 'utf8');
 
 
     console.log(`\nEvidence ID Consistency Report:`);
