@@ -32,4 +32,12 @@ const integration = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 };
 
-module.exports = { projects: [client, server, services, integration] };
+const libs = {
+  displayName: 'libs',
+  ...base,
+  roots: ['<rootDir>/libs'],
+  testEnvironment: 'node',
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+};
+
+module.exports = { projects: [client, server, services, integration, libs] };
