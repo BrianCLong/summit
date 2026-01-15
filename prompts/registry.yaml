@@ -55,6 +55,36 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ai-engineering-os-pr1-intent-spec
+    version: v1
+    path: prompts/engineering/ai-engineering-os-pr1-intent-spec.md
+    sha256: 8b11050db81300f674512e6f2758ac17e232a66ea4086972b7304afff8767009
+    description: Intent spec schema, validator CLI, and CI gate for AI-assisted changes.
+    scope:
+      paths:
+        - .summit/
+        - .github/workflows/
+        - agents/examples/
+        - docs/
+        - prompts/engineering/ai-engineering-os-pr1-intent-spec.md
+        - prompts/registry.yaml
+        - schemas/
+        - scripts/ci/
+        - scripts/intent/
+      domains:
+        - governance
+        - quality
+        - provenance
+        - documentation
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md

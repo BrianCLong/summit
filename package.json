@@ -75,6 +75,7 @@
     "schema:diff:text": "npx ts-node scripts/schema-diff.ts --version=v1 --output=text",
     "schema:diff:strict": "npx ts-node scripts/schema-diff.ts --version=v1 --output=json --strict",
     "schema:validate": "npm run schema:diff:strict",
+    "summit-intent": "node scripts/intent/summit-intent.mjs",
     "update:golden": "ts-node --esm scripts/update-golden.ts",
     "e2e": "playwright test",
     "graphql:schema:check": "graphql-inspector diff packages/graphql/schema.graphql origin/main:packages/graphql/schema.graphql --fail-on-breaking",

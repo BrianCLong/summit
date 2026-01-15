@@ -1,0 +1,35 @@
+id: intent-spec-pr1
+problem_statement: >-
+  Intent requirements are not enforced consistently for AI-assisted changes, which
+  weakens governance gates and review clarity.
+user_impact: >-
+  Reviewers and release owners get a deterministic intent artifact that describes
+  scope, risks, invariants, and acceptance tests.
+non_goals:
+  - Implement provenance ledger capture or evidence bundling in this PR.
+  - Change release gates beyond intent validation.
+constraints:
+  - category: security
+    detail: Do not emit secrets or sensitive data in validation output.
+  - category: performance
+    detail: Validation must complete in under one second for typical PRs.
+invariants:
+  - Intent specs remain machine-validated against a canonical schema.
+  - Sensitive changes must declare at least one automated acceptance test.
+acceptance_tests:
+  - id: intent-cli
+    description: Validate intent specs with the summit-intent CLI.
+    type: automated
+    command: node scripts/intent/summit-intent.mjs validate
+    evidence: scripts/intent/__tests__/intent-validator.test.mjs
+  - id: intent-ci
+    description: CI job enforces intent spec on AI-tagged or sensitive PRs.
+    type: manual
+risk_level:
+  level: medium
+  rationale: Introduces new governance gate and schema validation.
+owners:
+  - governance
+links:
+  - docs/intent-spec.md
+  - docs/ai-engineering-os.md

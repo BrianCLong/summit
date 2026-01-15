@@ -1,0 +1,44 @@
+{
+  "task_id": "AI_ENGINEERING_OS_PR1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "ai-engineering-os-pr1-intent-spec",
+    "version": "v1",
+    "sha256": "8b11050db81300f674512e6f2758ac17e232a66ea4086972b7304afff8767009",
+    "path": "prompts/engineering/ai-engineering-os-pr1-intent-spec.md"
+  },
+  "declared_scope": {
+    "paths": [
+      ".summit/",
+      ".github/workflows/",
+      "agents/examples/",
+      "docs/",
+      "schemas/",
+      "scripts/ci/",
+      "scripts/intent/",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["governance", "quality", "provenance", "documentation"],
+    "exclusions": ["server/", "client/", "apps/web/"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["intent-validator-tests", "intent-schema-validation"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Intent spec schema and CLI validator are available.",
+    "CI gate enforces intent validation for AI-generated or sensitive changes.",
+    "Documentation describes the intent spec workflow."
+  ],
+  "stop_conditions": [
+    "Validation output includes secrets or sensitive data.",
+    "Governance documentation contradicts implemented behavior."
+  ],
+  "dependencies": ["docs/SUMMIT_READINESS_ASSERTION.md"],
+  "approvals": []
+}
