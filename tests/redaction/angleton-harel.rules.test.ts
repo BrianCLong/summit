@@ -15,7 +15,7 @@ describe('Angleton/Harel redaction rules', () => {
   const sample = {
     email: 'user@example.com',
     phone: '+1-555-867-5309',
-    apiKey: 'sk_live_secret',
+    apiKey: 'placeholder_secret',
     notes: 'private incident details',
     context: { address: '10 Downing St', geo: '51.5034,-0.1276' },
   };

@@ -4,8 +4,10 @@
  */
 
 import { EventEmitter } from 'events';
+import { fileURLToPath } from 'url';
 import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
 import { randomUUID } from 'crypto';
+import { Script } from 'vm';
 import { Logger } from 'pino';
 import { z } from 'zod';
 import Redis from 'ioredis';
@@ -540,7 +542,7 @@ class WorkerPool {
 
   private createWorker(): Worker {
     const workerId = randomUUID();
-    const worker = new Worker(__filename, {
+    const worker = new Worker(fileURLToPath(import.meta.url), {
       workerData: { workerId },
     });
 
@@ -781,7 +783,17 @@ if (!isMainThread && parentPort) {
         const { processorCode } = JSON.parse(processorData);
 
         // Execute processor function
-        const processor = eval(`(${processorCode})`);
+        const script = new Script(`(${processorCode})`);
+        const processor = script.runInNewContext({
+          context,
+          console: {
+            log: (...args) =>
+              parentPort!.postMessage({
+                type: 'log',
+                payload: args,
+              }),
+          },
+        });
         const result = await processor(context);
 
         const endTime = Date.now();
