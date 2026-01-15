@@ -2,16 +2,22 @@
 
 Enterprise Intelligence Platform: graph analytics, real-time collaboration, and AI-driven insights for high-stakes environments.
 
-## NEW in v2.0.0 (December 2025)
+## 🎉 NEW in v4.1.0 GA (January 3, 2026)
 
-Summit v2.0.0 consolidates major platform capabilities (infrastructure, AI/ML, security hardening, real-time systems).  
-See: Release Notes | Migration Guide | Roadmap.
+**Happy Birthday Edition!** Summit v4.1.0 achieves General Availability with:
+
+- ✅ Production-ready build pipeline
+- ✅ Security baseline (SBOM, dependency audit, secret scanning)
+- ✅ TypeScript 5.9 clean compilation
+- ✅ Comprehensive documentation
+
+See: [GA Evidence Pack](./GA_EVIDENCE_PACK.md) | [CHANGELOG](./CHANGELOG.md) | [Release Notes](https://github.com/BrianCLong/summit/releases/tag/v4.1.0)
 
 ---
 
 ## Quickstart (Golden Path)
 
-Prerequisites: Docker Desktop ≥ 4.x, Node.js 20.11.0 (matches `.tool-versions`), pnpm 9, Python 3.11+.
+**Prerequisites:** Docker Desktop ≥ 4.x, Node.js 20.11.0 (matches `.tool-versions`), pnpm 10.0.0, Python 3.11+.
 
 ```bash
 # 1) Clone & Bootstrap
