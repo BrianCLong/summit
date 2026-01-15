@@ -104,6 +104,38 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: context-shell-implementation
+    version: v1
+    path: prompts/engineering/context-shell@v1.md
+    sha256: 27d13229b649d8d2d6d00ebfe397bbb609aa0f0b80ce1ff1929328f2d196d341
+    description: Implement a policy-gated Context Shell package with evidence logging and Maestro integration.
+    scope:
+      paths:
+        - libs/context-shell/
+        - server/src/maestro/engine/WorkflowEngine.ts
+        - server/src/maestro/tools/
+        - server/package.json
+        - tests/context-shell/
+        - docs/context-shell.md
+        - docs/runbooks/context-shell-repo-audit.md
+        - docs/roadmap/STATUS.json
+        - prompts/engineering/context-shell@v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - engineering
+        - maestro
+        - governance
+        - evidence
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
