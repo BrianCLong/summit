@@ -1,0 +1,41 @@
+{
+  "task_id": "SUMMIT_AGENT_CLI_V1",
+  "agent_id": "codex-cli",
+  "prompt_ref": {
+    "id": "summit-agent-cli",
+    "version": "v1",
+    "sha256": "ea60369afb8710777616942acaf1e6fc303da3f4ed851e89037860250d67faa1",
+    "path": "prompts/agentic/summit-agent-cli@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/summit-agent/",
+      ".lintstagedrc.json",
+      "docs/summit-agent.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/",
+      "prompts/agentic/",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["cli", "governance", "agentic", "tooling"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["checklist_report.json", "receipts.jsonl", "summary.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "summit-agent CLI commands plan/run/verify/ship are implemented",
+    "Session receipts and checklist reports are generated",
+    "Ship is blocked unless verify passes",
+    "Docs and roadmap status updated"
+  ],
+  "stop_conditions": [
+    "Policy violations in governance guardrails",
+    "Missing evidence receipts or checklist report"
+  ]
+}
