@@ -104,6 +104,37 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: skills-adoption-pack
+    version: v1
+    path: prompts/skills/skills-adoption-pack.md
+    sha256: beb2c62144b74313735899ab0458eba23c6dcc8eacc26aedc4d3e996fcec0ff2
+    description: Implement Summit Skills intake, policy, and evidence pipeline.
+    scope:
+      paths:
+        - skills/
+        - scripts/skills/
+        - policy/skills/
+        - docs/skills.md
+        - docs/roadmap/STATUS.json
+        - .github/workflows/
+        - agents/examples/
+        - prompts/skills/skills-adoption-pack.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - skills
+        - policy
+        - ci
+        - provenance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
