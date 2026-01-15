@@ -1,26 +1,18 @@
-## Summary
-<!-- What does this PR do? Link to Jira ticket or issue. -->
+# Pull Request
 
-## Type of Change
-- [ ] Bug Fix
-- [ ] New Feature
-- [ ] Refactor
-- [ ] Documentation
-- [ ] Infrastructure
+## 📝 Description
+Please include a summary of the change and which issue is fixed.
 
-## Green CI Contract Checklist
-<!-- Must be checked before merge. See docs/governance/GREEN_CI_CONTRACT.md -->
-- [ ] **Lint**: Ran `pnpm lint` locally.
-- [ ] **Tests**: Ran `pnpm test:unit` locally.
-- [ ] **Determinism**: No leaked singletons or open handles.
-- [ ] **Evidence**: Added at least one test case or verification step.
+## 🔗 Linked Issues
+*   Fixes #
+*   Related to #
 
-## Verification Plan
-<!-- How did you verify this change? -->
-- [ ] Automated Test (Unit/Integration)
-- [ ] Manual Verification (describe steps below)
-- [ ] Snapshot / Screenshot
+## 🧪 Testing
+- [ ] Unit tests passed
+- [ ] Integration tests passed
+- [ ] Verified in Dev environment
 
-```bash
-# Paste verification output here
-```
+## 🛡️ Governance
+- [ ] Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/)
+- [ ] CHANGELOG.md updated (if applicable)
+- [ ] No secrets or sensitive data included

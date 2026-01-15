@@ -1,0 +1,72 @@
+{
+  "datasets": [
+    {
+      "datasetId": "baseline",
+      "description": "Minimal baseline fixtures for ER guardrails.",
+      "pairs": [
+        {
+          "id": "baseline-1",
+          "isMatch": true,
+          "entityA": {
+            "id": "a1",
+            "labels": ["Entity"],
+            "properties": {
+              "name": "Alpha",
+              "validFrom": "2024-01-01T00:00:00.000Z"
+            }
+          },
+          "entityB": {
+            "id": "b1",
+            "labels": ["Entity"],
+            "properties": {
+              "name": "Alpha",
+              "validFrom": "2024-01-02T00:00:00.000Z"
+            }
+          }
+        },
+        {
+          "id": "baseline-2",
+          "isMatch": false,
+          "entityA": {
+            "id": "a2",
+            "labels": ["Entity"],
+            "properties": {
+              "name": "Beta"
+            }
+          },
+          "entityB": {
+            "id": "b2",
+            "labels": ["Entity"],
+            "properties": {
+              "name": "Gamma"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "datasetId": "low-recall",
+      "description": "Fixture set expected to fail high recall thresholds.",
+      "pairs": [
+        {
+          "id": "lowrecall-1",
+          "isMatch": true,
+          "entityA": {
+            "id": "a3",
+            "labels": ["Entity"],
+            "properties": {
+              "name": "Delta"
+            }
+          },
+          "entityB": {
+            "id": "b3",
+            "labels": ["Entity"],
+            "properties": {
+              "name": "Epsilon"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

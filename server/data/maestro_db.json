@@ -1,0 +1,211 @@
+{
+  "loops": [
+    {
+      "id": "cost-optimization",
+      "name": "Cost Optimization Loop",
+      "type": "cost",
+      "status": "active",
+      "lastDecision": "Shifted 20% traffic to Haiku for non-critical tasks",
+      "lastRun": "2026-01-15T04:59:12.877Z",
+      "config": {
+        "threshold": 0.8,
+        "interval": "15m"
+      }
+    },
+    {
+      "id": "reliability-guardian",
+      "name": "Reliability Guardian",
+      "type": "reliability",
+      "status": "active",
+      "lastDecision": "Quarantined node agent-worker-3 due to high error rate",
+      "lastRun": "2026-01-15T04:59:12.877Z",
+      "config": {
+        "maxRetries": 3
+      }
+    },
+    {
+      "id": "safety-sentinel",
+      "name": "Safety Sentinel",
+      "type": "safety",
+      "status": "active",
+      "lastDecision": "Blocked 2 prompts for PII violation",
+      "lastRun": "2026-01-15T04:59:12.877Z",
+      "config": {
+        "strictMode": true
+      }
+    }
+  ],
+  "experiments": [
+    {
+      "id": "exp-001",
+      "name": "Planner Agent V2",
+      "hypothesis": "New prompt structure reduces planning latency by 15%",
+      "status": "running",
+      "variants": [
+        "control",
+        "v2-prompt"
+      ],
+      "metrics": {
+        "latency": -12,
+        "successRate": 2
+      },
+      "startDate": "2026-01-13T04:59:12.877Z"
+    }
+  ],
+  "playbooks": [
+    {
+      "id": "pb-restart-pods",
+      "name": "Restart Stuck Pods",
+      "description": "Automatically restarts pods that are in CrashLoopBackOff for > 10m",
+      "triggers": [
+        "pod_crash_loop"
+      ],
+      "actions": [
+        "k8s.delete_pod"
+      ],
+      "isEnabled": true
+    }
+  ],
+  "auditLog": [
+    {
+      "id": "a1so3",
+      "timestamp": "2026-01-15T04:59:12.889Z",
+      "actor": "agent-1",
+      "action": "coordination_start",
+      "resource": "b5493c6d-887d-4811-a7be-245f3f0bd751",
+      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
+      "status": "allowed"
+    },
+    {
+      "id": "w5nxc9",
+      "timestamp": "2026-01-15T04:59:12.889Z",
+      "actor": "agent-1",
+      "action": "coordination_start",
+      "resource": "e97aaeed-accd-4890-9a71-a4ec04fb602b",
+      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
+      "status": "allowed"
+    },
+    {
+      "id": "hklcr",
+      "timestamp": "2026-01-15T04:59:12.889Z",
+      "actor": "system",
+      "action": "coordination_kill",
+      "resource": "b5493c6d-887d-4811-a7be-245f3f0bd751",
+      "details": "Coordination terminated: Step limit exceeded",
+      "status": "allowed"
+    },
+    {
+      "id": "77vwsd",
+      "timestamp": "2026-01-15T04:59:12.889Z",
+      "actor": "agent-1",
+      "action": "coordination_start",
+      "resource": "b3ee0d30-206e-4037-8f8e-cb224bd9599a",
+      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
+      "status": "allowed"
+    },
+    {
+      "id": "3raske",
+      "timestamp": "2026-01-15T04:59:12.889Z",
+      "actor": "system",
+      "action": "coordination_kill",
+      "resource": "e97aaeed-accd-4890-9a71-a4ec04fb602b",
+      "details": "Coordination terminated: Token limit exceeded",
+      "status": "allowed"
+    },
+    {
+      "id": "fzvokg",
+      "timestamp": "2026-01-15T04:59:12.889Z",
+      "actor": "system",
+      "action": "coordination_kill",
+      "resource": "920577b8-d717-4540-bed8-cce0ad1cb543",
+      "details": "Coordination terminated: Step limit exceeded",
+      "status": "allowed"
+    },
+    {
+      "id": "skglo",
+      "timestamp": "2026-01-15T04:59:12.889Z",
+      "actor": "agent-1",
+      "action": "coordination_start",
+      "resource": "920577b8-d717-4540-bed8-cce0ad1cb543",
+      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
+      "status": "allowed"
+    },
+    {
+      "id": "9mzdmr",
+      "timestamp": "2026-01-15T04:59:12.889Z",
+      "actor": "agent-1",
+      "action": "coordination_start",
+      "resource": "73210c77-f23f-4625-bfe1-c2be65539c30",
+      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
+      "status": "allowed"
+    },
+    {
+      "id": "e6nf5",
+      "timestamp": "2026-01-15T04:59:12.889Z",
+      "actor": "agent-1",
+      "action": "coordination_start",
+      "resource": "0a227b7c-95ca-49f6-8890-ace0cf55b818",
+      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
+      "status": "allowed"
+    },
+    {
+      "id": "dsb4d",
+      "timestamp": "2026-01-15T04:59:12.889Z",
+      "actor": "system",
+      "action": "coordination_kill",
+      "resource": "0a227b7c-95ca-49f6-8890-ace0cf55b818",
+      "details": "Coordination terminated: Manual Stop",
+      "status": "allowed"
+    },
+    {
+      "id": "pauu9h",
+      "timestamp": "2026-01-15T04:59:12.889Z",
+      "actor": "agent-1",
+      "action": "coordination_start",
+      "resource": "065c0e75-792a-419b-8fa4-fa5062d94d49",
+      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
+      "status": "allowed"
+    }
+  ],
+  "agents": [
+    {
+      "id": "planner",
+      "name": "Planner",
+      "role": "Orchestration",
+      "model": "gpt-4-turbo",
+      "status": "healthy",
+      "metrics": {
+        "successRate": 98.5,
+        "latencyP95": 1200,
+        "costPerTask": 0.03
+      },
+      "routingWeight": 100
+    },
+    {
+      "id": "coder",
+      "name": "Coder",
+      "role": "Implementation",
+      "model": "claude-3-opus",
+      "status": "healthy",
+      "metrics": {
+        "successRate": 95.2,
+        "latencyP95": 4500,
+        "costPerTask": 0.15
+      },
+      "routingWeight": 80
+    },
+    {
+      "id": "reviewer",
+      "name": "Reviewer",
+      "role": "Quality Assurance",
+      "model": "gpt-4o",
+      "status": "healthy",
+      "metrics": {
+        "successRate": 99.1,
+        "latencyP95": 2100,
+        "costPerTask": 0.05
+      },
+      "routingWeight": 100
+    }
+  ]
+}

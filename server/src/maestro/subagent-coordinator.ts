@@ -17,6 +17,7 @@
 import { MaestroAgent } from './model.js';
 import { ProvenanceLedgerV2 } from '../provenance/ledger.js';
 import logger from '../utils/logger.js';
+export { agentGovernance } from './governance-service.js';
 
 export interface CoordinationTask {
   id: string;
