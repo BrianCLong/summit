@@ -104,6 +104,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: attn-lab-mhla
+    version: v1
+    path: prompts/attn-lab/mhla-attn-lab@v1.md
+    sha256: e0e3af7bc98c07f21937cea14637fa65f3f656869e72e6f8c6c00b45532fa889
+    description: Stand up the MHLA attention lab, benchmarks, and Summit-specific innovations.
+    scope:
+      paths:
+        - libs/attn_lab/
+        - docs/attn-lab/
+        - artifacts/attn-lab/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/attn-lab/mhla-attn-lab@v1.md
+        - prompts/registry.yaml
+      domains:
+        - attention
+        - benchmarking
+        - governance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
