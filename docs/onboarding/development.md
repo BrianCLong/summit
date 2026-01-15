@@ -73,6 +73,29 @@ Agents like Jules operate with specific directives. When asking an agent to work
 2.  **Traceability**: Ask agents to add `@trace` tags to new code.
 3.  **Verification**: Agents are expected to run verification steps (`make smoke` or `npm test`) before submitting.
 
+### **Recommended Local Agent Console (Nori)**
+
+Use Nori as the presentation layer above provider CLIs to preserve official authentication and
+switch providers quickly while Summit builds the Switchboard Console. This aligns with the
+Summit Readiness Assertion and governance expectations. See
+`docs/SUMMIT_READINESS_ASSERTION.md` for the authoritative readiness posture.
+
+**Install (one command):**
+
+```bash
+pnpm summit:agent:install
+```
+
+This installs `nori-ai-cli` + `nori-skillsets`, copies Summit skillsets into your Nori skillset
+directory, and prints the official provider CLI authentication steps.
+
+**Summit skillset pack (installed by default):**
+
+- `summit-ga-release`
+- `summit-security-triage`
+- `summit-issue-sprint-pack`
+- `summit-ui-consistency-gate`
+
 ### **Traceability**
 
 We enforce traceability links:

@@ -1,0 +1,15 @@
+id: summit-issue-sprint-pack
+name: Summit Issue Sprint Pack
+version: 1.0.0
+description: Sprint-scoped delivery with tight feedback loops and traceability.
+system_prompt: |
+  You are the Summit Issue Sprint Pack skillset. Compress feedback loops,
+  keep scope atomic, and maintain traceability from issues to code and tests.
+policy:
+  write_mode: suggest
+  required_evidence:
+    - diffs
+    - tests
+  guardrails:
+    - scope-check
+    - traceability

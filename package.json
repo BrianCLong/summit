@@ -77,6 +77,7 @@
     "schema:validate": "npm run schema:diff:strict",
     "update:golden": "ts-node --esm scripts/update-golden.ts",
     "e2e": "playwright test",
+    "summit:agent:install": "chmod +x scripts/onboarding/agent-install.sh && scripts/onboarding/agent-install.sh",
     "graphql:schema:check": "graphql-inspector diff packages/graphql/schema.graphql origin/main:packages/graphql/schema.graphql --fail-on-breaking",
     "graphql:codegen": "graphql-codegen",
     "db:pg:generate": "prisma generate",
