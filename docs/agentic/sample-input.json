@@ -1,0 +1,5 @@
+{
+  "task": "local-triage",
+  "scope": ["docs/agentic"],
+  "notes": "Deterministic sample input for evidence bundle validation."
+}

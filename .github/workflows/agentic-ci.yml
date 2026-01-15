@@ -1,0 +1,82 @@
+name: agentic-ci
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Execution mode (plan/apply)"
+        type: choice
+        options:
+          - plan
+          - apply
+        default: plan
+      task_command:
+        description: "Command to run in the agentic job"
+        type: string
+        default: "pnpm test:quick"
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  agentic:
+    runs-on: ubuntu-latest
+    env:
+      AGENTIC_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'plan' }}
+      TASK_COMMAND: ${{ github.event_name == 'workflow_dispatch' && inputs.task_command || 'pnpm test:quick' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run agentic task
+        run: |
+          echo "Running ${TASK_COMMAND}"
+          ${TASK_COMMAND}
+
+      - name: Emit evidence bundle
+        run: |
+          cat > agentic-input.json <<'JSON'
+          {
+            "workflow": "agentic-ci",
+            "mode": "${AGENTIC_MODE}",
+            "task": "agentic-ci",
+            "scopes": ["scripts/agentic", "scripts/ci", "prompts/skills", "docs/agentic", ".github/workflows"]
+          }
+          JSON
+
+          node scripts/agentic/evidence_bundle.mjs \
+            --task agentic-ci \
+            --mode "${AGENTIC_MODE}" \
+            --run-id "${GITHUB_RUN_ID}" \
+            --input agentic-input.json \
+            --command "${TASK_COMMAND}" \
+            --command "pnpm ci:agentic-evidence"
+
+      - name: Verify evidence bundle
+        run: pnpm ci:agentic-evidence -- --path "artifacts/agentic/agentic-ci/${GITHUB_RUN_ID}"
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: agentic-evidence-${{ github.run_id }}
+          path: artifacts/agentic/agentic-ci/${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error

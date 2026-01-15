@@ -99,6 +99,7 @@
     "check:governance": "node scripts/check-governance.cjs",
     "ci:docs-governance": "node scripts/ci/verify_governance_docs.mjs",
     "ci:docs-governance:fix": "node scripts/ci/verify_governance_docs.mjs --fix",
+    "ci:agentic-evidence": "node scripts/ci/verify_agentic_evidence.mjs",
     "ci:soc-report": "python3 scripts/evidence/generate_soc_report.py --evidence-dir dist/evidence/${GITHUB_SHA}",
     "ci:branch-protection:check": "node scripts/ci/check_branch_protection_drift.mjs",
     "ci:branch-protection:apply": "node scripts/ci/apply_branch_protection_policy.mjs --apply",
