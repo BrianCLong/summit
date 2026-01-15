@@ -53,6 +53,9 @@ module "eks" {
   subnet_ids = module.vpc.private_subnets
 
   cluster_endpoint_public_access = true
+  enable_irsa                    = true # Enable OIDC for Service Accounts
+
+  cluster_enabled_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 
   eks_managed_node_group_defaults = {
     instance_types = ["t3.medium"]
@@ -60,9 +63,12 @@ module "eks" {
 
   eks_managed_node_groups = {
     general = {
-      min_size     = 2
-      max_size     = 5
-      desired_size = 3
+      min_size      = 2
+      max_size      = 10
+      desired_size  = 3
+      capacity_type = "SPOT" # Cost Optimization (~70% savings)
+
+      instance_types = ["t3.medium", "t3.large"] # Diversify for Spot availability
     }
     neo4j = {
       min_size       = 3

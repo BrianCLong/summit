@@ -48,6 +48,16 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Security Scan (Trivy)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          trivy-config: trivy.yaml
+          exit-code: '0' # Don't fail build yet, just report
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+
       - name: Build and Push Docker Image
         env:
           ECR_REPOSITORY: summit/${{ matrix.service }}
