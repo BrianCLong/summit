@@ -115,8 +115,11 @@ const SandboxDashboard = React.lazy(() =>
 const ReleaseReadinessRoute = React.lazy(() =>
   import('./routes/ReleaseReadinessRoute')
 );
+const SystemHealthDashboard = React.lazy(() =>
+  import('./pages/SystemHealthDashboard')
+);
 
-import { MilitaryTech, Notifications, Extension, Cable, Key, VerifiedUser, Science } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import { MilitaryTech, Notifications, Extension, Cable, Key, VerifiedUser, Science, MonitorHeart } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { Security } from '@mui/icons-material';
 import { Assignment as AssignmentIcon } from '@mui/icons-material';
 
@@ -173,6 +176,7 @@ const navigationItems = [
     roles: [ADMIN, 'OPERATOR'],
     featureFlag: 'release-readiness-dashboard',
   },
+  { path: '/ops/system-health', label: 'System Health', icon: <MonitorHeart />, roles: [ADMIN], featureFlag: 'FEATURE_SYSTEM_HEALTH_DASHBOARD' },
 ];
 
 // Connection Status Component
@@ -800,6 +804,7 @@ function MainLayout() {
                 <Route path="/compliance" element={<ComplianceCenter />} />
                 <Route path="/sandbox" element={<SandboxDashboard />} />
                 <Route path="/ops/release-readiness" element={<ReleaseReadinessRoute />} />
+                <Route path="/ops/system-health" element={<SystemHealthDashboard />} />
               </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Route>
