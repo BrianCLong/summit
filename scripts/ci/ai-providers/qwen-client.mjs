@@ -37,15 +37,30 @@ export function makeQwenClient() {
   });
 }
 
+// Deterministic string comparison using codepoint ordering (not locale-dependent)
+function compareStringsCodepoint(a, b) {
+  if (a === b) return 0;
+  if (typeof a === 'string' && typeof b === 'string') {
+    return a < b ? -1 : 1;
+  }
+  const strA = String(a || '');
+  const strB = String(b || '');
+  return strA < strB ? -1 : 1;
+}
+
 export function generateCacheKey(model, messages, params, promptVersion = '1.0') {
   // Create deterministic cache key from inputs
   const combined = [
     model || '',
-    JSON.stringify(messages.sort((a, b) => (a.role + a.content).localeCompare(b.role + b.content))),
+    JSON.stringify(messages.sort((a, b) => {
+      const keyA = a.role + a.content;
+      const keyB = b.role + b.content;
+      return compareStringsCodepoint(keyA, keyB);
+    })),
     JSON.stringify(params || {}),
     promptVersion,
   ].join('|');
-  
+
   return createHash('sha256').update(combined).digest('hex');
 }
 

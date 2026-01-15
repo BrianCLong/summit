@@ -101,7 +101,11 @@ export function generateCacheKey(model, messages, params, promptVersion = PROMPT
   // Normalize and sort messages for deterministic hashing (without exposing content)
   const normalizedMessages = messages
     .map(msg => ({ role: msg.role, content_length: msg.content.length })) // Only content length, not content
-    .sort((a, b) => (a.role + String(a.content_length)).localeCompare(b.role + String(b.content_length)));
+    .sort((a, b) => {
+      const keyA = a.role + String(a.content_length);
+      const keyB = b.role + String(b.content_length);
+      return keyA < keyB ? -1 : keyA > keyB ? 1 : 0;
+    });
 
   const keyData = [
     model || '',

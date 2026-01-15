@@ -20,7 +20,11 @@ class AIResponseCache {
     // Normalize messages to ensure deterministic order
     const normalizedMessages = messages
       .map(msg => ({ role: msg.role, content: msg.content }))
-      .sort((a, b) => (a.role + a.content).localeCompare(b.role + b.content));
+      .sort((a, b) => {
+        const keyA = a.role + a.content;
+        const keyB = b.role + b.content;
+        return keyA < keyB ? -1 : keyA > keyB ? 1 : 0;
+      });
 
     const keyData = [
       model,

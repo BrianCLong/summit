@@ -7,6 +7,17 @@ import { promises as fs } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 
+// Deterministic string comparison using codepoint ordering (not locale-dependent)
+function compareStringsCodepoint(a, b) {
+  if (a === b) return 0;
+  if (typeof a === 'string' && typeof b === 'string') {
+    return a < b ? -1 : 1;
+  }
+  const strA = String(a || '');
+  const strB = String(b || '');
+  return strA < strB ? -1 : 1;
+}
+
 class AILedger {
   constructor(artifactDir) {
     this.artifactDir = artifactDir;
@@ -52,7 +63,7 @@ class AILedger {
     
     // Sort entries for deterministic output
     const sortedEntries = [...this.entries].sort((a, b) => 
-      a.cache_key.localeCompare(b.cache_key)
+      compareStringsCodepoint(a.cache_key, b.cache_key)
     );
     
     const ledger = {

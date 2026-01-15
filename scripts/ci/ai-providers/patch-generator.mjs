@@ -7,6 +7,17 @@ import { createHash } from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import { join, dirname, basename, relative } from 'node:path';
 
+// Deterministic string comparison using codepoint ordering (not locale-dependent)
+function compareStringsCodepoint(a, b) {
+  if (a === b) return 0;
+  if (typeof a === 'string' && typeof b === 'string') {
+    return a < b ? -1 : 1;
+  }
+  const strA = String(a || '');
+  const strB = String(b || '');
+  return strA < strB ? -1 : 1;
+}
+
 /**
  * Generate AI patches from suggestions
  */
@@ -45,7 +56,7 @@ export async function generateAIPatches(suggestions, repoRoot, artifactDir) {
     version: '1.0.0',
     generator: 'ai-patch-generator',
     created_at: new Date().toISOString(), // This is metadata only, not part of deterministic report
-    patches: patches.sort((a, b) => a.patch_id.localeCompare(b.patch_id)) // Sort for deterministic order
+    patches: patches.sort((a, b) => compareStringsCodepoint(a.patch_id, b.patch_id)) // Sort for deterministic order
   };
 
   await fs.writeFile(indexPath, JSON.stringify(indexContent, null, 2), 'utf8');

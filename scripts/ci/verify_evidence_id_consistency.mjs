@@ -12,6 +12,22 @@ import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
 
 // Debug logging utility
+
+/**
+ * Deterministic string comparison using codepoint ordering (not locale-dependent)
+ * Provides total order for cross-platform determinism
+ * @param {string} a - First string
+ * @param {string} b - Second string
+ * @returns {number} -1 if a < b, 0 if a === b, 1 if a > b
+ */
+function compareStringsCodepoint(a, b) {
+  if (a === b) return 0;
+  if (typeof a !== 'string' || typeof b !== 'string') {
+    a = String(a || '');
+    b = String(b || '');
+  }
+  return a < b ? -1 : 1;
+}
 const DEBUG = process.env.EVIDENCE_DEBUG === 'true' || process.argv.includes('--debug');
 function debugLog(message) {
   if (DEBUG) {
@@ -376,11 +392,11 @@ function buildConsistencyReport({ sha, policyHash, results, config, evidenceMap 
     .map(result => ({
       path: result.path,
       violations: result.violations.sort((a, b) =>
-        a.type.localeCompare(b.type) || a.message.localeCompare(b.message)
+        compareStringsCodepoint(a.type, b.type) || compareStringsCodepoint(a.message, b.message)
       ),
       evidence_ids: result.evidence_ids
     }))
-    .sort((a, b) => a.path.localeCompare(b.path));
+    .sort((a, b) => compareStringsCodepoint(a.path, b.path));
 
   // Extract all evidence IDs referenced in documents (excluding 'none')
   const referencedEvidenceIds = new Set();
@@ -401,6 +417,9 @@ function buildConsistencyReport({ sha, policyHash, results, config, evidenceMap 
       }
     }
   }
+
+  // Sort orphaned IDs deterministically for consistent output
+  orphanedEvidenceIds.sort(compareStringsCodepoint);
 
   // Add violations for orphaned evidence IDs if any are found
   const allViolations = [...normalizedResults.flatMap(result => result.violations)];
@@ -645,9 +664,9 @@ async function main() {
     const hashStartTime = Date.now();
     const policyConfig = {
       evidence_map_size: evidenceMap.size,
-      evidence_map_entries: Array.from(evidenceMap.entries()).sort((a, b) => a[0].localeCompare(b[0])),
+      evidence_map_entries: Array.from(evidenceMap.entries()).sort((a, b) => compareStringsCodepoint(a[0], b[0])),
       config_governance_dir: config.governanceDir,
-      config_output_dir: config.outputDir,
+      config_output_dir: 'artifacts/governance/evidence-id-consistency', // Use canonical path, not runtime-specific
       max_evidence_ids_per_doc: MAX_EVIDENCE_IDS_PER_DOC,
       max_file_size_bytes: MAX_FILE_SIZE_BYTES,
       max_concurrent_files: MAX_CONCURRENT_FILES
@@ -657,11 +676,19 @@ async function main() {
 
     // Build report
     const buildReportStartTime = Date.now();
+    // Use deterministic config for report (not runtime-specific values)
+    const deterministicConfig = {
+      governanceDir: config.governanceDir,
+      evidenceMapPath: config.evidenceMapPath,
+      outputDir: 'artifacts/governance/evidence-id-consistency', // Use canonical path in report
+      repoRoot: '.'  // Use relative reference in report
+    };
+
     const report = buildConsistencyReport({
       sha,
       policyHash,
       results,
-      config,
+      config: deterministicConfig,
       evidenceMap
     });
     const buildReportDuration = Date.now() - buildReportStartTime;
@@ -669,10 +696,52 @@ async function main() {
     // Generate output paths based on SHA
     const outputDir = join(config.outputDir, sha);
 
+    // Ensure output directory exists before writing
+    await fs.mkdir(outputDir, { recursive: true });
+
     // Write reports
     const writeReportsStartTime = Date.now();
     await writeReports(report, outputDir);
     const writeReportsDuration = Date.now() - writeReportsStartTime;
+
+    // Generate deterministic metrics for monitoring/observability (no runtime timestamps or performance data)
+    const deterministicMetrics = {
+      sha: report.sha,
+      generator: report.generator,
+      gate_version: '1.3.1',  // Updated version
+      totals: {
+        documents_checked: report.totals.documents_checked,
+        evidence_ids_found: report.totals.evidence_ids_found,
+        evidence_ids_referenced: report.totals.evidence_ids_referenced,
+        evidence_ids_registered: report.totals.evidence_ids_registered,
+        evidence_ids_orphaned: report.totals.evidence_ids_orphaned,
+        violations: report.totals.violations,
+        errors: report.totals.errors,
+        warnings: report.totals.warnings,
+        info_messages: report.totals.infos
+      },
+      accuracy: {
+        document_processing_success_rate: documents.length > 0
+          ? (documents.length - results.filter(r =>
+              r.violations.some(v => v.type === 'processing_error')
+            ).length) / documents.length
+          : 1
+      },
+      configuration: {
+        ai_analysis_enabled: process.env.ENABLE_QWEN_ANALYSIS === 'true',
+        ai_patches_enabled: process.env.ENABLE_QWEN_PATCHES === 'true',
+        replay_only_mode: process.env.QWEN_REPLAY_ONLY === 'true',
+        record_mode_allowed: process.env.ALLOW_QWEN_RECORD_IN_CI === 'true',
+        debug_enabled: DEBUG
+      }
+    };
+
+    // Write deterministic metrics
+    const metricsPath = join(outputDir, 'metrics.json');
+    await fs.writeFile(metricsPath, JSON.stringify(deterministicMetrics, null, 2), 'utf8');
+
+    // Ensure metrics file is written before continuing
+    await fs.stat(metricsPath);  // This verifies the file was created
 
     // Log summary with performance metrics
     const totalTime = Date.now() - startTime;

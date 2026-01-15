@@ -14,6 +14,17 @@ import {
   writeReports
 } from '../verify_evidence_id_consistency.mjs';
 
+// Deterministic string comparison using codepoint ordering (not locale-dependent)
+function compareStringsCodepoint(a, b) {
+  if (a === b) return 0;
+  if (typeof a === 'string' && typeof b === 'string') {
+    return a < b ? -1 : 1;
+  }
+  const strA = String(a || '');
+  const strB = String(b || '');
+  return strA < strB ? -1 : 1;
+}
+
 function makeTempRepo() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'evidence-consistency-test-'));
   const docsRoot = path.join(root, 'docs', 'governance');
@@ -208,7 +219,7 @@ Content`;
     // Compute policy hash configuration twice
     const config1 = {
       evidence_map_size: evidenceMap.size,
-      evidence_map_entries: Array.from(evidenceMap.entries()).sort((a, b) => a[0].localeCompare(b[0])),
+      evidence_map_entries: Array.from(evidenceMap.entries()).sort((a, b) => compareStringsCodepoint(a[0], b[0])),
       config_governance_dir: 'docs/governance',
       config_output_dir: 'test/output',
       max_evidence_ids_per_doc: 50,
@@ -218,7 +229,7 @@ Content`;
 
     const config2 = {
       evidence_map_size: evidenceMap.size,
-      evidence_map_entries: Array.from(evidenceMap.entries()).sort((a, b) => a[0].localeCompare(b[0])),
+      evidence_map_entries: Array.from(evidenceMap.entries()).sort((a, b) => compareStringsCodepoint(a[0], b[0])),
       config_governance_dir: 'docs/governance',
       config_output_dir: 'test/output',
       max_evidence_ids_per_doc: 50,
