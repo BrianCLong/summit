@@ -485,10 +485,22 @@ async function writeReports(report, outputPath) {
   
   // Ensure output directory exists
   await fs.mkdir(outputPath, { recursive: true });
-  
-  // Write JSON report
-  await fs.writeFile(jsonPath, JSON.stringify(report, null, 2), 'utf8');
-  
+
+  // Write JSON report with consistent serialization
+  const canonicalReport = JSON.stringify(report, (key, value) => {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      // Create sorted object to ensure consistent key order
+      const sorted = {};
+      const keys = Object.keys(value).sort(compareStringsCodepoint);
+      for (const k of keys) {
+        sorted[k] = value[k];
+      }
+      return sorted;
+    }
+    return value;
+  }, 2);
+  await fs.writeFile(jsonPath, canonicalReport, 'utf8');
+
   // Write Markdown report
   let mdContent = `# Evidence ID Consistency Report\n\n`;
   mdContent += `Status: ${report.status.toUpperCase()}\n\n`;
@@ -545,10 +557,10 @@ async function writeReports(report, outputPath) {
       (!report.metadata.orphaned_ids || report.metadata.orphaned_ids.length === 0)) {
     mdContent += `✅ No issues detected!\n`;
   }
-  
+
   await fs.writeFile(mdPath, mdContent, 'utf8');
-  
-  // Write stamp file for tracking
+
+  // Write basic stamp file (will be updated later with performance data)
   const stamp = {
     sha: report.sha,
     status: report.status,
@@ -743,8 +755,10 @@ async function main() {
     // Ensure metrics file is written before continuing
     await fs.stat(metricsPath);  // This verifies the file was created
 
-    // Log summary with performance metrics
+    // Generate performance metrics for runtime metadata only
     const totalTime = Date.now() - startTime;
+
+    // Log summary with performance metrics
     console.log(`\nEvidence ID Consistency Report:`);
     console.log(`- Status: ${report.status.toUpperCase()}`);
     console.log(`- Documents: ${report.totals.documents_checked}`);
@@ -757,6 +771,39 @@ async function main() {
     console.log(`- Document processing: ${processDuration}ms`);
     console.log(`- Report building: ${buildReportDuration}ms`);
     console.log(`- Report writing: ${writeReportsDuration}ms`);
+
+    // Update stamp file with comprehensive performance metrics
+    const stampPath = join(outputDir, 'stamp.json');
+    const stamp = {
+      sha: report.sha,
+      status: report.status,
+      timestamp: new Date().toISOString(),  // Runtime timestamp goes in stamp, not metrics
+      generator: report.generator,
+      violations: report.totals.violations,
+      performance: {
+        total_time_ms: totalTime,
+        evidence_map_load_ms: evidenceMapDuration,
+        document_discovery_ms: findDocsDuration,
+        document_processing_ms: processDuration,
+        report_building_ms: buildReportDuration,
+        report_writing_ms: writeReportsDuration,
+        average_doc_processing_ms: documents.length > 0 ? Math.round(processDuration / documents.length) : 0
+      }
+    };
+    // Write stamp with canonical ordering using the same method as in writeReports
+    const canonicalStamp = JSON.stringify(stamp, (key, value) => {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        // Create sorted object to ensure consistent key order
+        const sorted = {};
+        const keys = Object.keys(value).sort(compareStringsCodepoint);
+        for (const k of keys) {
+          sorted[k] = value[k];
+        }
+        return sorted;
+      }
+      return value;
+    }, 2);
+    await fs.writeFile(stampPath, canonicalStamp, 'utf8');
 
     // Generate AI patches if enabled
     if (process.env.ENABLE_QWEN_PATCHES === 'true') {
@@ -781,6 +828,18 @@ async function main() {
         if (process.env.DEBUG) {
           console.error('Patch generation error details:', patchError.stack);
         }
+      }
+    }
+
+    // Validate Qwen configuration if AI features are enabled to ensure deterministic behavior
+    if (process.env.ENABLE_QWEN_ANALYSIS === 'true' || process.env.ENABLE_QWEN_PATCHES === 'true') {
+      try {
+        const { validateQwenConfig } = await import('./ai-providers/qwen.mjs');
+        validateQwenConfig();
+        debugLog('Qwen configuration validated successfully');
+      } catch (validationError) {
+        console.error(`❌ Qwen configuration validation failed: ${validationError.message}`);
+        process.exit(1);
       }
     }
 
