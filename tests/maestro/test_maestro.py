@@ -378,3 +378,46 @@ class TestReleaseGate:
         result = response.json()
         assert result["passed"] is True
         assert result["run_id"] == run_id
+
+
+class TestWorkflowOperations:
+    """Test workflow creation and run instantiation."""
+
+    def test_create_workflow(self, client):
+        """Test creating a new workflow template."""
+        workflow_data = {
+            "name": "Test Workflow",
+            "tasks": [
+                {"name": "Task 1", "agent_type": "code_generation"},
+                {"name": "Task 2", "agent_type": "code_review"},
+            ],
+            "dependencies": [],
+        }
+        response = client.post("/maestro/workflows", json=workflow_data)
+        assert response.status_code == 201
+        workflow = response.json()
+        assert workflow["name"] == "Test Workflow"
+        assert len(workflow["tasks"]) == 2
+
+    def test_create_run_from_workflow(self, client, sample_run_data):
+        """Test creating a run from a workflow template."""
+        # Create workflow
+        workflow_data = {
+            "name": "Test Workflow",
+            "tasks": [
+                {"name": "Task 1", "agent_type": "code_generation"},
+                {"name": "Task 2", "agent_type": "code_review"},
+            ],
+            "dependencies": [],
+        }
+        workflow_response = client.post("/maestro/workflows", json=workflow_data)
+        workflow_id = workflow_response.json()["id"]
+
+        # Create run from workflow
+        run_data = {**sample_run_data, "workflow_id": workflow_id}
+        run_response = client.post("/maestro/runs", json=run_data)
+        assert run_response.status_code == 201
+        run = run_response.json()
+        assert run["workflow_id"] == workflow_id
+        assert len(run["task_runs"]) == 2
+        assert run["task_runs"][0]["status"] == "pending"

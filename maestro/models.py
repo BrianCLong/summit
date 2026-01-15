@@ -29,6 +29,24 @@ class ArtifactKind(str, Enum):
     OTHER = "other"
 
 
+class TaskStatus(str, Enum):
+    """Status of a task run."""
+
+    PENDING = "pending"
+    RUNNING = "running"
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
+
+
+class TaskRun(BaseModel):
+    """An instance of a task for a specific run."""
+
+    task_id: str
+    status: TaskStatus = Field(default=TaskStatus.PENDING)
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
+
+
 class Run(BaseModel):
     """A Maestro run tracking computation or workflow execution."""
 
@@ -49,6 +67,10 @@ class Run(BaseModel):
         description="References to IntelGraph decisions (UUID strings)",
     )
     metadata: dict[str, Any] = Field(default_factory=dict, description="Additional run metadata")
+    workflow_id: str | None = Field(None, description="ID of the workflow template for this run")
+    task_runs: list[TaskRun] = Field(
+        default_factory=list, description="State of individual tasks in the workflow"
+    )
 
     class Config:
         json_schema_extra = {
@@ -207,3 +229,29 @@ class Review(BaseModel):
     status: ReviewStatus = Field(..., description="Outcome of the review")
     comments: str | None = Field(None, description="Review comments in Markdown format")
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class Task(BaseModel):
+    """A single task in a workflow."""
+
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    name: str = Field(..., description="Name of the task")
+    agent_type: AgentType = Field(..., description="Type of agent required for this task")
+
+
+class TaskDependency(BaseModel):
+    """Represents a dependency between two tasks."""
+
+    source_task_id: str = Field(..., description="The task that must be completed first")
+    destination_task_id: str = Field(..., description="The task that depends on the source task")
+
+
+class Workflow(BaseModel):
+    """A workflow template consisting of a DAG of tasks."""
+
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    name: str = Field(..., description="Name of the workflow")
+    tasks: list[Task] = Field(default_factory=list, description="List of tasks in the workflow")
+    dependencies: list[TaskDependency] = Field(
+        default_factory=list, description="List of dependencies between tasks"
+    )
