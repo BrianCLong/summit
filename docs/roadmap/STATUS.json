@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-15T04:42:15Z",
+  "revision_note": "Expanded CPG innovation summary with moat extensions for agent memory and MCP orchestration",
   "initiatives": [
     {
       "id": "A",
