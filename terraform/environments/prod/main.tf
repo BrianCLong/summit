@@ -190,6 +190,32 @@ output "cluster_endpoint" {
   value = module.eks.cluster_endpoint
 }
 
-output "database_endpoint" {
-  value = module.aurora.endpoint
+# --- Storage (Neo4j Backups) ---
+module "neo4j_backups" {
+  source  = "terraform-aws-modules/s3-bucket/aws"
+  version = "3.15.1"
+
+  bucket = "summit-prod-neo4j-backups-${module.vpc.vpc_id}" # Unique name
+  acl    = "private"
+
+  control_object_ownership = true
+  object_ownership         = "ObjectWriter"
+
+  versioning = {
+    enabled = true
+  }
+
+  lifecycle_rule = [
+    {
+      id      = "archive-old-backups"
+      enabled = true
+      expiration = {
+        days = 30
+      }
+    }
+  ]
+}
+
+output "backup_bucket_name" {
+  value = module.neo4j_backups.s3_bucket_id
 }

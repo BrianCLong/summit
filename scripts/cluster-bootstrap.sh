@@ -46,10 +46,12 @@ spec:
           class: nginx
 EOF
 
-# 5. Apply Security & Resource Policies
-echo "🛡️ Applying Security & Resource Policies..."
+# 5. Apply Security, Resource, & Alerting Policies
+echo "🛡️ Applying Security, Resource, & Alerting Policies..."
 kubectl apply -f k8s/network-policies.yaml
 kubectl apply -f k8s/resource-quotas.yaml
+kubectl apply -f k8s/prometheus-rules.yaml
+kubectl apply -f k8s/neo4j-backup-job.yaml
 
 echo "✅ Cluster Bootstrap Complete!"
 echo "   - Metrics Server: Installed"

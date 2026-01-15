@@ -1,30 +1,28 @@
-import { describe, it, expect, beforeEach, jest, beforeAll, afterAll } from '@jest/globals';
-import { MeteringService } from '../MeteringService';
-import { pool } from '../../../db/pg';
-import { provenanceLedger } from '../../../provenance/ledger';
+import { describe, it, expect, beforeEach, jest, beforeAll } from '@jest/globals';
 import { BillableEventType } from '../../../lib/billing/types';
 
-// Mock dependencies
-jest.mock('../../../db/pg', () => {
-  const mPool = {
-    connect: jest.fn(),
-    query: jest.fn(),
-  };
-  return { pool: mPool };
-});
+const mockPool = {
+  connect: jest.fn(),
+  query: jest.fn(),
+};
+const mockAppendEntry = jest.fn();
 
-jest.mock('../../../provenance/ledger', () => ({
+jest.unstable_mockModule('../../../db/pg', () => ({ pool: mockPool }));
+jest.unstable_mockModule('../../../provenance/ledger', () => ({
   provenanceLedger: {
-    appendEntry: jest.fn(),
+    appendEntry: mockAppendEntry,
   },
 }));
-
-jest.mock('../../../lib/resources/quota-manager', () => ({
+jest.unstable_mockModule('../../../lib/resources/quota-manager', () => ({
   __esModule: true,
   default: {
     getQuotaForTenant: jest.fn().mockReturnValue({}),
   },
 }));
+
+const { MeteringService } = await import('../MeteringService');
+const { pool } = await import('../../../db/pg');
+const { provenanceLedger } = await import('../../../provenance/ledger');
 
 describe('MeteringService', () => {
   let meteringService: MeteringService;

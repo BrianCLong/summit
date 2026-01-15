@@ -6,7 +6,7 @@
       "type": "cost",
       "status": "active",
       "lastDecision": "Shifted 20% traffic to Haiku for non-critical tasks",
-      "lastRun": "2026-01-15T04:59:12.877Z",
+      "lastRun": "2026-01-15T06:10:41.319Z",
       "config": {
         "threshold": 0.8,
         "interval": "15m"
@@ -18,7 +18,7 @@
       "type": "reliability",
       "status": "active",
       "lastDecision": "Quarantined node agent-worker-3 due to high error rate",
-      "lastRun": "2026-01-15T04:59:12.877Z",
+      "lastRun": "2026-01-15T06:10:41.319Z",
       "config": {
         "maxRetries": 3
       }
@@ -29,7 +29,7 @@
       "type": "safety",
       "status": "active",
       "lastDecision": "Blocked 2 prompts for PII violation",
-      "lastRun": "2026-01-15T04:59:12.877Z",
+      "lastRun": "2026-01-15T06:10:41.319Z",
       "config": {
         "strictMode": true
       }
@@ -49,7 +49,7 @@
         "latency": -12,
         "successRate": 2
       },
-      "startDate": "2026-01-13T04:59:12.877Z"
+      "startDate": "2026-01-13T06:10:41.319Z"
     }
   ],
   "playbooks": [
@@ -68,110 +68,101 @@
   ],
   "auditLog": [
     {
-      "id": "a1so3",
-      "timestamp": "2026-01-15T04:59:12.889Z",
+      "id": "skq2r8",
+      "timestamp": "2026-01-15T06:10:41.536Z",
       "actor": "agent-1",
       "action": "coordination_start",
-      "resource": "b5493c6d-887d-4811-a7be-245f3f0bd751",
+      "resource": "1e329173-a09e-4d87-bddc-a06a384d0f06",
       "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
       "status": "allowed"
     },
     {
-      "id": "w5nxc9",
-      "timestamp": "2026-01-15T04:59:12.889Z",
+      "id": "6acg5a",
+      "timestamp": "2026-01-15T06:10:41.536Z",
       "actor": "agent-1",
       "action": "coordination_start",
-      "resource": "e97aaeed-accd-4890-9a71-a4ec04fb602b",
+      "resource": "be4a9d18-e819-4a49-be4c-a010c2aa61c7",
       "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
       "status": "allowed"
     },
     {
-      "id": "hklcr",
-      "timestamp": "2026-01-15T04:59:12.889Z",
+      "id": "t4mqd",
+      "timestamp": "2026-01-15T06:10:41.536Z",
+      "actor": "agent-1",
+      "action": "coordination_start",
+      "resource": "15f2cc78-c3ad-4fd4-b267-5f28ada812d6",
+      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
+      "status": "allowed"
+    },
+    {
+      "id": "m9lxca",
+      "timestamp": "2026-01-15T06:10:41.536Z",
       "actor": "system",
       "action": "coordination_kill",
-      "resource": "b5493c6d-887d-4811-a7be-245f3f0bd751",
-      "details": "Coordination terminated: Step limit exceeded",
-      "status": "allowed"
-    },
-    {
-      "id": "77vwsd",
-      "timestamp": "2026-01-15T04:59:12.889Z",
-      "actor": "agent-1",
-      "action": "coordination_start",
-      "resource": "b3ee0d30-206e-4037-8f8e-cb224bd9599a",
-      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
-      "status": "allowed"
-    },
-    {
-      "id": "3raske",
-      "timestamp": "2026-01-15T04:59:12.889Z",
-      "actor": "system",
-      "action": "coordination_kill",
-      "resource": "e97aaeed-accd-4890-9a71-a4ec04fb602b",
+      "resource": "fbd053b2-5609-41e2-8de4-697d2e802665",
       "details": "Coordination terminated: Token limit exceeded",
       "status": "allowed"
     },
     {
-      "id": "fzvokg",
-      "timestamp": "2026-01-15T04:59:12.889Z",
+      "id": "dgplgs",
+      "timestamp": "2026-01-15T06:10:41.536Z",
+      "actor": "agent-1",
+      "action": "coordination_start",
+      "resource": "b2fc5b98-19f3-4423-8077-14f40af104d4",
+      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
+      "status": "allowed"
+    },
+    {
+      "id": "wyazwa",
+      "timestamp": "2026-01-15T06:10:41.536Z",
       "actor": "system",
       "action": "coordination_kill",
-      "resource": "920577b8-d717-4540-bed8-cce0ad1cb543",
+      "resource": "be4a9d18-e819-4a49-be4c-a010c2aa61c7",
       "details": "Coordination terminated: Step limit exceeded",
       "status": "allowed"
     },
     {
-      "id": "skglo",
-      "timestamp": "2026-01-15T04:59:12.889Z",
-      "actor": "agent-1",
-      "action": "coordination_start",
-      "resource": "920577b8-d717-4540-bed8-cce0ad1cb543",
-      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
-      "status": "allowed"
-    },
-    {
-      "id": "9mzdmr",
-      "timestamp": "2026-01-15T04:59:12.889Z",
-      "actor": "agent-1",
-      "action": "coordination_start",
-      "resource": "73210c77-f23f-4625-bfe1-c2be65539c30",
-      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
-      "status": "allowed"
-    },
-    {
-      "id": "e6nf5",
-      "timestamp": "2026-01-15T04:59:12.889Z",
-      "actor": "agent-1",
-      "action": "coordination_start",
-      "resource": "0a227b7c-95ca-49f6-8890-ace0cf55b818",
-      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
-      "status": "allowed"
-    },
-    {
-      "id": "dsb4d",
-      "timestamp": "2026-01-15T04:59:12.889Z",
+      "id": "rnbfa",
+      "timestamp": "2026-01-15T06:10:41.536Z",
       "actor": "system",
       "action": "coordination_kill",
-      "resource": "0a227b7c-95ca-49f6-8890-ace0cf55b818",
+      "resource": "15f2cc78-c3ad-4fd4-b267-5f28ada812d6",
       "details": "Coordination terminated: Manual Stop",
       "status": "allowed"
     },
     {
-      "id": "pauu9h",
-      "timestamp": "2026-01-15T04:59:12.889Z",
+      "id": "dej6x5",
+      "timestamp": "2026-01-15T06:10:41.536Z",
       "actor": "agent-1",
       "action": "coordination_start",
-      "resource": "065c0e75-792a-419b-8fa4-fa5062d94d49",
+      "resource": "af5d9883-b314-40fa-a528-df6f257d0d58",
       "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
       "status": "allowed"
     },
     {
-      "id": "ckazrr",
-      "timestamp": "2026-01-15T05:02:35.386Z",
+      "id": "t45lck",
+      "timestamp": "2026-01-15T06:10:41.536Z",
       "actor": "agent-1",
       "action": "coordination_start",
-      "resource": "fd17335b-521e-4a42-b469-e07722b3edf7",
+      "resource": "fbd053b2-5609-41e2-8de4-697d2e802665",
+      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
+      "status": "allowed"
+    },
+    {
+      "id": "23l6ep",
+      "timestamp": "2026-01-15T06:10:41.536Z",
+      "actor": "system",
+      "action": "coordination_kill",
+      "resource": "b2fc5b98-19f3-4423-8077-14f40af104d4",
+      "details": "Coordination terminated: Step limit exceeded",
+      "status": "allowed"
+    },
+    {
+      "id": "neygpr",
+      "timestamp": "2026-01-15T06:10:41.536Z",
+      "actor": "agent-1",
+      "action": "coordination_start",
+      "resource": "5a468ee6-89b5-4b15-af74-edcb8b48c939",
       "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
       "status": "allowed"
     }
@@ -217,4 +208,4 @@
       "routingWeight": 100
     }
   ]
-}}
+}
