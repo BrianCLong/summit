@@ -64,7 +64,9 @@
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
-    "demo": "tsx src/demo.ts"
+    "demo": "tsx src/demo.ts",
+    "server": "tsx src/server.ts",
+    "start": "node dist/server.js"
   },
   "dependencies": {
     "@linear/sdk": "^22.0.0",

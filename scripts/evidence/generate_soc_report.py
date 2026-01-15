@@ -133,6 +133,30 @@ def resolve_baseline(repo_root: Path, env: dict) -> tuple[str | None, str]:
         return None, "none"
 
 
+def get_mapping_changes(repo_root: Path, baseline_sha: str | None) -> list[str]:
+    if not baseline_sha or not (repo_root / ".git").exists():
+        return []
+    try:
+        output = subprocess.check_output(
+            [
+                "git",
+                "diff",
+                "--name-only",
+                f"{baseline_sha}..HEAD",
+                "--",
+                "compliance/control-map.yaml",
+                "compliance/control-exceptions.yml",
+            ],
+            cwd=repo_root,
+            text=True,
+        ).strip()
+    except subprocess.CalledProcessError:
+        return []
+    if not output:
+        return []
+    return sorted({line.strip() for line in output.splitlines() if line.strip()})
+
+
 def select_primary_evidence(entry: dict) -> tuple[str, str]:
     evidence = entry.get("evidence") or []
     if not evidence:
@@ -185,6 +209,10 @@ def generate_markdown(report: dict) -> str:
     delta = report["delta"]
     if delta["status"] == "unavailable":
         lines.append(f"Baseline unavailable: {delta['reason']}")
+        if delta.get("mapping_changes"):
+            lines.append("Control mapping changes detected:")
+            for item in delta["mapping_changes"]:
+                lines.append(f"- {item}")
     else:
         lines.append(f"Baseline SHA: {delta['baseline_sha']} ({delta['method']})")
         lines.append("")
@@ -273,7 +301,14 @@ def write_pdf(path: Path, lines: list[str]) -> None:
     path.write_bytes(pdf)
 
 
-def build_report(evidence_dir: Path, baseline_dir: Path | None, baseline_sha: str | None, baseline_method: str, env: dict) -> dict:
+def build_report(
+    evidence_dir: Path,
+    baseline_dir: Path | None,
+    baseline_sha: str | None,
+    baseline_method: str,
+    env: dict,
+    repo_root: Path,
+) -> dict:
     control_index = read_json(evidence_dir / "control_evidence_index.json")
     validation = read_json(evidence_dir / "validation_report.json")
     meta = read_json(evidence_dir / "meta.json")
@@ -312,7 +347,8 @@ def build_report(evidence_dir: Path, baseline_dir: Path | None, baseline_sha: st
         "newly_covered": [],
         "newly_deferred": [],
         "exceptions_changed": [],
-        "evidence_changes": []
+        "evidence_changes": [],
+        "mapping_changes": []
     }
 
     if baseline_dir and (baseline_dir / "control_evidence_index.json").exists():
@@ -358,9 +394,11 @@ def build_report(evidence_dir: Path, baseline_dir: Path | None, baseline_sha: st
             "newly_covered": newly_covered[:20],
             "newly_deferred": newly_deferred[:20],
             "exceptions_changed": exceptions_changed[:20],
-            "evidence_changes": evidence_changes[:20]
+            "evidence_changes": evidence_changes[:20],
+            "mapping_changes": []
         }
     elif baseline_sha:
+        mapping_changes = get_mapping_changes(repo_root, baseline_sha)
         delta = {
             "status": "unavailable",
             "reason": "Baseline evidence bundle not found",
@@ -369,7 +407,8 @@ def build_report(evidence_dir: Path, baseline_dir: Path | None, baseline_sha: st
             "newly_covered": [],
             "newly_deferred": [],
             "exceptions_changed": [],
-            "evidence_changes": []
+            "evidence_changes": [],
+            "mapping_changes": mapping_changes[:20]
         }
 
     artifacts = [
@@ -446,7 +485,14 @@ def main() -> None:
         if candidate.exists():
             baseline_dir = candidate
 
-    report = build_report(evidence_dir, baseline_dir, baseline_sha, baseline_method, os.environ)
+    report = build_report(
+        evidence_dir,
+        baseline_dir,
+        baseline_sha,
+        baseline_method,
+        os.environ,
+        repo_root,
+    )
     markdown = generate_markdown(report)
 
     md_path = evidence_dir / "SOC_EVIDENCE_REPORT.md"

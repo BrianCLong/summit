@@ -50,6 +50,7 @@ export const CommitmentSchema = BaseNodeSchema.extend({
   title: z.string().min(1),
   description: z.string(),
   customer: z.string(),
+  promisedTo: z.string().optional(),
   dueDate: z.date(),
   status: z.enum(['active', 'at_risk', 'delivered', 'broken']),
   confidence: z.number().min(0).max(100),
@@ -111,6 +112,7 @@ export const TicketSchema = BaseNodeSchema.extend({
   description: z.string(),
   status: z.enum(['backlog', 'ready', 'in_progress', 'review', 'done', 'blocked']),
   priority: z.enum(['P0', 'P1', 'P2', 'P3']),
+  ticketType: z.enum(['bug', 'feature', 'chore', 'refactor', 'docs', 'test', 'unknown']).default('unknown'),
   estimate: z.number().optional(),
   assignee: z.string().optional(),
   assigneeType: z.enum(['human', 'agent']).optional(),
@@ -252,8 +254,11 @@ export const AgentSchema = BaseNodeSchema.extend({
   status: z.enum(['available', 'busy', 'offline', 'error']),
   capabilities: z.array(z.string()).default([]),
   currentTask: z.string().optional(),
+  currentLoad: z.number().default(0),
+  capacityUnits: z.number().default(10),
   completedTasks: z.number().default(0),
   successRate: z.number().min(0).max(100).default(100),
+  qualityScore: z.number().min(0).max(100).default(80),
   averageCompletionTime: z.number().optional(),
   reputation: z.number().min(0).max(100).default(50),
   lastActive: z.date().optional(),
@@ -377,3 +382,6 @@ export const WorkGraphNodeSchema = z.discriminatedUnion('type', [
   PolicySchema,
   SprintSchema,
 ]);
+
+// Node type string literal
+export type NodeType = WorkGraphNode['type'];

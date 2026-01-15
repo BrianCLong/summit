@@ -10,6 +10,21 @@ import type { WorkGraphNode, NodeType } from '../schema/nodes.js';
 import type { WorkGraphEdge, EdgeType } from '../schema/edges.js';
 
 // ============================================
+// Common Interface
+// ============================================
+
+export interface GraphStore {
+  getNode<T>(id: string): Promise<T | null>;
+  getNodes<T>(filter?: Partial<T>): Promise<T[]>;
+  createNode<T>(node: T): Promise<T>;
+  updateNode<T>(id: string, updates: Partial<T>): Promise<T | null>;
+  deleteNode(id: string): Promise<boolean>;
+  createEdge(edge: WorkGraphEdge): Promise<WorkGraphEdge>;
+  getEdges(filter?: { sourceId?: string; targetId?: string; type?: string }): Promise<WorkGraphEdge[]>;
+  deleteEdge(id: string): Promise<boolean>;
+}
+
+// ============================================
 // Types
 // ============================================
 
@@ -606,5 +621,67 @@ export class Neo4jGraphStore {
       }
     }
     return edge as Partial<WorkGraphEdge>;
+  }
+}
+
+// ============================================
+// In-Memory Graph Store (for testing/demo)
+// ============================================
+
+export class InMemoryGraphStore implements GraphStore {
+  private nodes: Map<string, WorkGraphNode> = new Map();
+  private edges: Map<string, WorkGraphEdge> = new Map();
+
+  async createNode<T>(node: T): Promise<T> {
+    this.nodes.set((node as { id: string }).id, node as unknown as WorkGraphNode);
+    return node;
+  }
+
+  async getNode<T>(id: string): Promise<T | null> {
+    return (this.nodes.get(id) as T) ?? null;
+  }
+
+  async getNodes<T>(filter?: Partial<T>): Promise<T[]> {
+    let results = Array.from(this.nodes.values());
+    if (filter) {
+      results = results.filter((node) => {
+        for (const [key, value] of Object.entries(filter)) {
+          if ((node as Record<string, unknown>)[key] !== value) return false;
+        }
+        return true;
+      });
+    }
+    return results as T[];
+  }
+
+  async updateNode<T>(id: string, updates: Partial<T>): Promise<T | null> {
+    const node = this.nodes.get(id);
+    if (!node) return null;
+    const updated = { ...node, ...updates, updatedAt: new Date() };
+    this.nodes.set(id, updated as WorkGraphNode);
+    return updated as T;
+  }
+
+  async deleteNode(id: string): Promise<boolean> {
+    return this.nodes.delete(id);
+  }
+
+  async createEdge(edge: WorkGraphEdge): Promise<WorkGraphEdge> {
+    this.edges.set(edge.id, edge);
+    return edge;
+  }
+
+  async getEdges(filter?: { sourceId?: string; targetId?: string; type?: string }): Promise<WorkGraphEdge[]> {
+    let results = Array.from(this.edges.values());
+    if (filter) {
+      if (filter.sourceId) results = results.filter((e) => e.sourceId === filter.sourceId);
+      if (filter.targetId) results = results.filter((e) => e.targetId === filter.targetId);
+      if (filter.type) results = results.filter((e) => e.type === filter.type);
+    }
+    return results;
+  }
+
+  async deleteEdge(id: string): Promise<boolean> {
+    return this.edges.delete(id);
   }
 }

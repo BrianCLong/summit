@@ -57,9 +57,9 @@ export interface SlackAccessory {
 }
 
 export interface SlackElement {
-  type: 'button' | 'static_select' | 'users_select';
-  text?: { type: 'plain_text'; text: string; emoji?: boolean };
-  action_id: string;
+  type: 'button' | 'static_select' | 'users_select' | 'mrkdwn' | 'plain_text';
+  text?: string | { type: 'plain_text'; text: string; emoji?: boolean };
+  action_id?: string;
   value?: string;
   style?: 'primary' | 'danger';
 }
@@ -376,7 +376,7 @@ export class SlackIntegration {
         {
           type: 'context',
           elements: [
-            { type: 'mrkdwn', text: `Promised by: ${commitment.promisedBy}` },
+            { type: 'mrkdwn', text: `Promised by: ${commitment.createdBy}` },
           ],
         },
         {

@@ -647,7 +647,6 @@ async function main() {
       evidence_map_size: evidenceMap.size,
       evidence_map_entries: Array.from(evidenceMap.entries()).sort((a, b) => a[0].localeCompare(b[0])),
       config_governance_dir: config.governanceDir,
-      config_output_dir: config.outputDir,
       max_evidence_ids_per_doc: MAX_EVIDENCE_IDS_PER_DOC,
       max_file_size_bytes: MAX_FILE_SIZE_BYTES,
       max_concurrent_files: MAX_CONCURRENT_FILES
@@ -657,22 +656,33 @@ async function main() {
 
     // Build report
     const buildReportStartTime = Date.now();
+    // Create a deterministic config for the report (excludes runtime-specific values)
+    const deterministicConfig = {
+      governanceDir: config.governanceDir,
+      evidenceMapPath: config.evidenceMapPath,
+      outputDir: 'artifacts/governance/evidence-id-consistency', // Use canonical output path
+      repoRoot: '.'  // Use relative root to avoid absolute paths
+    };
+
     const report = buildConsistencyReport({
       sha,
       policyHash,
       results,
-      config,
+      config: deterministicConfig,
       evidenceMap
     });
     const buildReportDuration = Date.now() - buildReportStartTime;
 
-    // Generate output paths based on SHA
+    // Generate output paths based on SHA for actual writing
     const outputDir = join(config.outputDir, sha);
 
     // Write reports
     const writeReportsStartTime = Date.now();
     await writeReports(report, outputDir);
     const writeReportsDuration = Date.now() - writeReportsStartTime;
+
+    // Calculate total time for performance metrics (after all major operations complete)
+    const totalTime = Date.now() - startTime;
 
     // Generate deterministic metrics for monitoring/observability (no runtime timestamps or performance data)
     const metrics = {
@@ -731,9 +741,6 @@ async function main() {
     const stampPath = join(outputDir, 'stamp.json');
     await fs.writeFile(stampPath, JSON.stringify(stamp, null, 2), 'utf8');
 
-    // Write metrics for monitoring/observability
-    const metricsPath = join(outputDir, 'metrics.json');
-    await fs.writeFile(metricsPath, JSON.stringify(metrics, null, 2), 'utf8');
 
     console.log(`\nEvidence ID Consistency Report:`);
     console.log(`- Status: ${report.status.toUpperCase()}`);

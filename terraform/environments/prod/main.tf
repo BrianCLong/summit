@@ -94,27 +94,78 @@ module "eks" {
   }
 }
 
-# --- Database (Aurora Postgres) ---
+# --- Database (Aurora Postgres Serverless v2) ---
+
 module "aurora" {
-  source = "../../modules/rds-postgres"
 
-  identifier     = "summit-prod-db"
+  source  = "terraform-aws-modules/rds-aurora/aws"
+
+  version = "9.1.0"
+
+
+
+  name           = "summit-prod-db"
+
+  engine         = "aurora-postgresql"
+
   engine_version = "16.1"
-  vpc_id         = module.vpc.vpc_id
-  subnet_ids     = module.vpc.private_subnets
 
-  instance_class = "db.serverless"
-  min_capacity   = 0.5
-  max_capacity   = 4.0
-
-  database_name   = "summit_prod"
   master_username = "summit_admin"
 
+  database_name   = "summit_prod"
+
+
+
+  vpc_id               = module.vpc.vpc_id
+
+  subnets              = module.vpc.private_subnets
+
+  security_group_rules = {
+
+    ex1_ingress = {
+
+      source_node_security_group = true
+
+      description                = "Allow EKS nodes to connect to Aurora"
+
+    }
+
+  }
+
+
+
+  serverlessv2_scaling_configuration = {
+
+    min_capacity = 0.5
+
+    max_capacity = 4.0
+
+  }
+
+
+
+  instance_class = "db.serverless"
+
+  instances = {
+
+    one = {}
+
+    two = {}
+
+  }
+
+
+
   # --- Data Safety (PITR) ---
-  backup_retention_period = 7             # Days to keep backups
-  preferred_backup_window = "02:00-04:00" # UTC
-  deletion_protection     = true          # Prevent accidental terraform destroy
-  skip_final_snapshot     = false
+
+  backup_retention_period = 7
+
+  preferred_backup_window = "02:00-04:00"
+
+  deletion_protection     = true
+
+  storage_encrypted       = true
+
 }
 
 # --- Caching (Redis) ---

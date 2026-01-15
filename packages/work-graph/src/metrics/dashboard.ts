@@ -265,7 +265,7 @@ export class MetricsDashboard {
     const completed = sprintTickets.filter((t) => t.status === 'done');
     const planned = sprintTickets.filter((t) => t.createdAt <= sprintStart);
     const added = sprintTickets.filter((t) => t.createdAt > sprintStart);
-    const carryOver = sprintTickets.filter((t) => t.status !== 'done' && t.status !== 'canceled');
+    const carryOver = sprintTickets.filter((t) => t.status !== 'done');
 
     const velocity = completed.reduce((sum, t) => sum + (t.estimate ?? 0), 0);
     const plannedPoints = planned.reduce((sum, t) => sum + (t.estimate ?? 0), 0);
@@ -326,7 +326,8 @@ export class MetricsDashboard {
     const byArea: Record<string, number> = {};
 
     completedThisSprint.forEach((t) => {
-      byArea[t.area] = (byArea[t.area] ?? 0) + (t.estimate ?? 0);
+      const area = t.area ?? 'unknown';
+      byArea[area] = (byArea[area] ?? 0) + (t.estimate ?? 0);
     });
 
     let trend: 'improving' | 'stable' | 'declining' = 'stable';
@@ -403,7 +404,8 @@ export class MetricsDashboard {
       if (t.assignee) {
         byAgent[t.assignee] = (byAgent[t.assignee] ?? 0) + 1;
       }
-      byArea[t.area] = (byArea[t.area] ?? 0) + 1;
+      const area = t.area ?? 'unknown';
+      byArea[area] = (byArea[area] ?? 0) + 1;
     });
 
     return {
@@ -425,7 +427,8 @@ export class MetricsDashboard {
 
     inProgress.forEach((t) => {
       byStatus[t.status] = (byStatus[t.status] ?? 0) + 1;
-      byArea[t.area] = (byArea[t.area] ?? 0) + 1;
+      const area = t.area ?? 'unknown';
+      byArea[area] = (byArea[area] ?? 0) + 1;
     });
 
     const overLimit: { area: string; current: number; limit: number }[] = [];
@@ -504,17 +507,17 @@ export class MetricsDashboard {
 
   private calculateCommitmentMetrics(commitments: Commitment[]): CommitmentMetrics {
     const now = new Date();
-    const onTrack = commitments.filter((c) => c.status === 'pending' && c.confidence >= 0.8);
-    const atRisk = commitments.filter((c) => c.status === 'at_risk' || (c.status === 'pending' && c.confidence < 0.8));
+    const onTrack = commitments.filter((c) => c.status === 'active' && c.confidence >= 0.8);
+    const atRisk = commitments.filter((c) => c.status === 'at_risk' || (c.status === 'active' && c.confidence < 0.8));
     const broken = commitments.filter((c) => c.status === 'broken');
     const delivered = commitments.filter((c) => c.status === 'delivered');
 
     const upcomingDeadlines: CommitmentDeadline[] = commitments
-      .filter((c) => c.status === 'pending' || c.status === 'at_risk')
+      .filter((c) => c.status === 'active' || c.status === 'at_risk')
       .map((c) => ({
         id: c.id,
         title: c.title,
-        customer: c.promisedTo,
+        customer: c.promisedTo ?? c.customer,
         dueDate: c.dueDate,
         confidence: c.confidence,
         daysRemaining: Math.ceil((c.dueDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)),

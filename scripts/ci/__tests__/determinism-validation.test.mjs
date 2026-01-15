@@ -29,7 +29,7 @@ describe('Evidence ID Consistency - Determinism Verification', () => {
     
     // Verify the deterministic artifacts are identical across runs
     const runDir = join('artifacts', 'governance', 'evidence-id-consistency', testSha);
-    // Verify report.json exists and is structured properly
+    // Verify report.json exists and is structured properly (using correct output directory)
     const reportArtifactPath = join('artifacts', 'governance', 'evidence-id-consistency', testSha, 'report.json');
     const reportExists = await fs.access(reportArtifactPath).then(() => true).catch(() => false);
     assert.ok(reportExists, `report.json should exist at ${reportArtifactPath}`);

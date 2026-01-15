@@ -420,7 +420,7 @@ export class GitHubIntegration {
 
   private async findPRNode(prNumber: number): Promise<string | null> {
     if (this.prMap.has(prNumber)) {
-      return pullRequest?.id ?? 'unknown';
+      return this.prMap.get(prNumber)!;
     }
 
     const prs = await this.graphStore.getNodes<PR>({ type: 'pr', number: prNumber } as Partial<PR>);

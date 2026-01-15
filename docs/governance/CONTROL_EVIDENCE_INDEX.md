@@ -56,8 +56,9 @@ node scripts/evidence/validate_control_evidence.mjs --evidence-dir dist/evidence
 - Add new evidence types by extending `evidence_type` values in
   `scripts/evidence/generate_control_evidence_index.mjs`.
 - Record exceptions in `compliance/control-exceptions.yml` with owner and expiry.
-- CI can optionally allow stub evidence via `ALLOW_STUB_EVIDENCE=1`, but GA should
-  prefer real evidence bundles for release gates.
+- CI will fall back to a stub evidence bundle when none is present, setting
+  `ALLOW_STUB_EVIDENCE=1` for validation. GA release gates should use real
+  evidence bundles.
 
 ## Policy
 

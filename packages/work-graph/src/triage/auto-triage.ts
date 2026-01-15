@@ -259,23 +259,23 @@ export class AutoTriageEngine {
 
   private classifyType(text: string, input: TriageInput): Ticket['ticketType'] {
     const typeIndicators: Record<Ticket['ticketType'], string[]> = {
-      bug: ['bug', 'error', 'crash', 'broken', 'fix', 'issue', 'not working', 'fails'],
+      bug: ['bug', 'error', 'crash', 'broken', 'fix', 'issue', 'not working', 'fails', 'security', 'vulnerability', 'cve', 'incident', 'outage'],
       feature: ['feature', 'new', 'add', 'implement', 'create', 'build', 'enhance'],
-      tech_debt: ['refactor', 'cleanup', 'debt', 'improve', 'optimize', 'deprecate'],
+      refactor: ['refactor', 'cleanup', 'debt', 'improve', 'optimize', 'deprecate'],
+      chore: ['chore', 'maintenance', 'update', 'upgrade', 'dependency'],
       docs: ['docs', 'documentation', 'readme', 'guide', 'tutorial', 'api docs'],
       test: ['test', 'coverage', 'unit test', 'e2e', 'integration test'],
-      security: ['security', 'vulnerability', 'cve', 'auth', 'encryption', 'breach'],
-      incident: ['incident', 'outage', 'down', 'emergency', 'production issue'],
+      unknown: [],
     };
 
     let bestType: Ticket['ticketType'] = 'feature';
     let bestScore = 0;
 
-    for (const [type, keywords] of Object.entries(typeIndicators)) {
+    for (const [type, keywords] of Object.entries(typeIndicators) as [Ticket['ticketType'], string[]][]) {
       const score = keywords.filter((k) => text.includes(k)).length;
       if (score > bestScore) {
         bestScore = score;
-        bestType = type as Ticket['ticketType'];
+        bestType = type;
       }
     }
 
@@ -284,7 +284,7 @@ export class AutoTriageEngine {
 
   private assessPriority(text: string, input: TriageInput): Ticket['priority'] {
     for (const [priority, keywords] of Object.entries(this.config.priorityKeywords)) {
-      if (keywords.some((k) => text.includes(k.toLowerCase()))) {
+      if (keywords.some((k: string) => text.includes(k.toLowerCase()))) {
         return priority as Ticket['priority'];
       }
     }
@@ -380,7 +380,7 @@ export class AutoTriageEngine {
       security: 1.4,
       ai: 1.5,
     };
-    baseHours *= areaMultipliers[area] ?? 1;
+    baseHours *= areaMultipliers[area ?? 'unknown'] ?? 1;
 
     return Math.round(baseHours);
   }

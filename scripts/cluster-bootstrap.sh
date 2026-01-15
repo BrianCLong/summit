@@ -46,6 +46,11 @@ spec:
           class: nginx
 EOF
 
+# 5. Apply Security & Resource Policies
+echo "🛡️ Applying Security & Resource Policies..."
+kubectl apply -f k8s/network-policies.yaml
+kubectl apply -f k8s/resource-quotas.yaml
+
 echo "✅ Cluster Bootstrap Complete!"
 echo "   - Metrics Server: Installed"
 echo "   - Ingress Controller: Installed (Check ELB in AWS Console)"
