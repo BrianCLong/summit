@@ -1,42 +1,39 @@
-# GA Declaration Checklist
+# Release Captain GA Checklist
 
-Release Captain: **[name]**
-GA Tag: **[vX.Y.Z]**
-Commit SHA: **[sha]**
-Date: **[yyyy-mm-dd]**
+**Version:** 1.0
+**Last Updated:** 2026-01-05
 
----
+This checklist must be completed by the Release Captain before tagging a General Availability (GA) release.
 
-## 1. Prerequisites
+## 1. Pre-Release Verification
 
-- [ ] All **always_required** workflows from `docs/ci/REQUIRED_CHECKS_POLICY.yml` are green for the GA tag.
-- [ ] All applicable **conditional_required** workflows (based on changed paths) are green.
-- [ ] Branch protection on `main` enforces these required checks.
+- [ ] **CI Green**: Main branch build is passing.
+- [ ] **Security Scan**: No critical vulnerabilities in dependencies.
+- [ ] **Change Log**: `CHANGELOG.md` is updated with all features and fixes.
+- [ ] **Versioning**: Semantic versioning rules followed (e.g., `v1.2.0`).
 
-## 2. Quality Gates
+## 2. Evidence Collection (Automated)
 
-- [ ] Unit tests & coverage meet target thresholds.
-- [ ] No open P1 security issues.
-- [ ] No open `priority:ga` issues without explicit deferral.
+The release pipeline will generate the following. Verify their existence after the dry-run:
+- [ ] `sbom.cdx.json` (CycloneDX SBOM)
+- [ ] `vuln-report.json` (Vulnerability Report)
+- [ ] `test-summary.json` (Test Results)
+- [ ] `soc-controls.json` (Control Verification)
 
-## 3. Documentation
+## 3. Governance & Approval
 
-- [ ] README updated and accurate.
-- [ ] ARCHITECTURE.md finalized for this release.
-- [ ] SECURITY.md and OPERATOR_GUIDE.md updated.
-- [ ] Migration or upgrade guide written if needed.
-- [ ] Any new features documented in user‑facing docs.
+- [ ] **Board Approval**: Scheduled/Completed approval session.
+- [ ] **Sign-off**: Release Captain sign-off recorded in `release_log.md` (or equivalent).
+- [ ] **MCP Governance**: Model Context Protocol policies reviewed (if applicable).
 
-## 4. Compliance & Evidence
+## 4. Execution
 
-- [ ] SOC Control Verification job green on GA tag.
-- [ ] SOC evidence bundle generated (`SOC2_EVIDENCE_BUNDLE.md` or equivalent).
-- [ ] Release evidence bundle generated for this GA tag.
-- [ ] Security evidence (SBOM, vulnerability scans, CodeQL) captured.
+- [ ] Run `git tag -a vX.Y.Z -m "GA Release vX.Y.Z"`
+- [ ] Push tag: `git push origin vX.Y.Z`
+- [ ] Monitor `release-ga` workflow.
+- [ ] Verify GitHub Release created with "Evidence Bundle" attached.
 
-## 5. Sign‑off
+## 5. Post-Release
 
-- [ ] Engineering Lead: **[name]** — Date: **[ ]**
-- [ ] Product Lead: **[name]** — Date: **[ ]**
-- [ ] Security Lead: **[name]** — Date: **[ ]**
-- [ ] Compliance / Audit: **[name]** — Date: **[ ]**
+- [ ] Announce on Slack/Teams.
+- [ ] Verify deployment in Staging/Prod.

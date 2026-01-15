@@ -45,6 +45,7 @@ This runs the enforced readiness sequence:
 ### Release Readiness Artifacts
 
 - **GA Checklist:** `docs/release/GA_CHECKLIST.md` (operator runbook for build, test, security, and rollback)
+- **GA Declaration:** `docs/release/GA_DECLARATION_CHECKLIST.md` (formal release captain sign-off)
 - **Readiness Report:** `docs/release/GA_READINESS_REPORT.md` (current go/no-go posture and remaining actions)
 - **Evidence Index:** `docs/release/GA_EVIDENCE_INDEX.md` (commands run with logs and artifact pointers)
 
