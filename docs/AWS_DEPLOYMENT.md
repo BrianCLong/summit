@@ -33,7 +33,19 @@ After `apply`, Terraform will output:
 *   `cluster_endpoint`: The API URL of the EKS cluster.
 *   `database_endpoint`: The connection string for Aurora PostgreSQL.
 
-## 3. Database Secrets
+# 3. Cluster Bootstrap (Day 1 Operations)
+
+After the EKS cluster is created, you must install the core controllers (Ingress, Cert-Manager, Metrics).
+
+```bash
+# Verify you are connected to the correct cluster
+kubectl config current-context
+
+# Run the bootstrap script
+./scripts/cluster-bootstrap.sh
+```
+
+## 4. Database Secrets
 
 Before deploying applications, you must seed the database credentials into AWS Secrets Manager or Kubernetes Secrets.
 

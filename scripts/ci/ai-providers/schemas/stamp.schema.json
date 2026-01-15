@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Runtime Stamp (Non-deterministic)",
+  "description": "Runtime metadata including timestamps and performance metrics - excluded from determinism",
+  "required": ["sha", "status", "timestamp", "generator", "violations"],
+  "properties": {
+    "sha": {"type": "string"},
+    "status": {"type": "string", "enum": ["pass", "fail"]},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "generator": {"type": "string"},
+    "violations": {"type": "integer", "minimum": 0},
+    "performance": {
+      "type": "object",
+      "properties": {
+        "total_time_ms": {"type": "integer", "minimum": 0},
+        "evidence_map_load_ms": {"type": "integer", "minimum": 0},
+        "document_discovery_ms": {"type": "integer", "minimum": 0},
+        "document_processing_ms": {"type": "integer", "minimum": 0},
+        "report_building_ms": {"type": "integer", "minimum": 0},
+        "report_writing_ms": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}
