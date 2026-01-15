@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-15T06:03:38Z",
+  "revision_note": "Added AI operating model gaps memo with prompt registry and task spec",
   "initiatives": [
     {
       "id": "A",
