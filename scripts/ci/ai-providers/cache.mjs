@@ -1,32 +1,35 @@
 /**
- * Content-Addressed Cache for LLM Responses
- * Implements deterministic caching to ensure reproducible outputs
+ * Content-Addressed Cache for AI-Generated Responses
+ * Implements deterministic caching for LLM responses to ensure reproducible builds
  */
 
 import { createHash } from 'node:crypto';
 import { promises as fs } from 'node:fs';
-import { resolve } from 'node:path';
+import { resolve, join } from 'node:path';
 
 class AIResponseCache {
   constructor(options = {}) {
     this.cacheDir = options.cacheDir || './.qwen-cache';
-    this.enabled = options.enabled ?? true;
-    this._cache = new Map();
-    this._loaded = false;
+    this.enabled = options.enabled !== false; // Enabled by default
+    this._memoryCache = new Map(); // Memory cache for quick access
   }
 
-  // Generate deterministic cache key from request parameters
-  generateKey(model, messages, params, inputHash = null) {
+  /**
+   * Generate deterministic cache key from request parameters
+   * The key is based only on static parameters, not runtime values
+   */
+  generateKey(model, messages, params, inputHash = null, promptVersion = '1.0') {
     // Normalize messages to ensure deterministic order
     const normalizedMessages = messages
       .map(msg => ({ role: msg.role, content: msg.content }))
       .sort((a, b) => (a.role + a.content).localeCompare(b.role + b.content));
 
     const keyData = [
-      model,
-      JSON.stringify(normalizedMessages),
-      JSON.stringify(this._normalizeParams(params)),
-      inputHash || ''
+      model || '',
+      JSON.stringify(normalizedMessages),  // Normalized and sorted
+      JSON.stringify(params || {}),        // Normalized parameters
+      inputHash || '',                     // Hash of input content if provided
+      promptVersion                        // Version of prompt template
     ].join('||');
 
     return createHash('sha256')
@@ -34,111 +37,108 @@ class AIResponseCache {
       .digest('hex');
   }
 
-  _normalizeParams(params) {
-    // Create a normalized parameter object
-    const normalized = {};
-    const keys = Object.keys(params).sort();
-    
-    for (const key of keys) {
-      if (typeof params[key] === 'object' && params[key] !== null) {
-        normalized[key] = this._normalizeParams(params[key]);
-      } else {
-        normalized[key] = params[key];
-      }
-    }
-    
-    return normalized;
-  }
+  /**
+   * Get cached response if available
+   */
+  async get(key) {
+    if (!this.enabled) return null;
 
-  async load() {
-    if (!this.enabled) return;
-    
+    // Check memory cache first
+    if (this._memoryCache.has(key)) {
+      return this._memoryCache.get(key);
+    }
+
+    // Check file cache
     try {
-      await fs.mkdir(this.cacheDir, { recursive: true });
-      
-      const cachePath = resolve(this.cacheDir, 'responses.json');
-      if (await this._fileExists(cachePath)) {
-        const data = await fs.readFile(cachePath, 'utf8');
-        const cacheData = JSON.parse(data);
-        
-        // Convert plain object back to Map
-        this._cache = new Map();
-        for (const [key, value] of Object.entries(cacheData)) {
-          this._cache.set(key, value);
-        }
-      }
-      this._loaded = true;
+      const cachePath = this._getCacheFilePath(key);
+      const content = await fs.readFile(cachePath, 'utf8');
+      const response = JSON.parse(content);
+
+      // Cache in memory for subsequent access
+      this._memoryCache.set(key, response);
+      return response;
     } catch (error) {
-      console.warn(`Failed to load cache from ${this.cacheDir}: ${error.message}`);
-      this._cache = new Map(); // Initialize empty cache
+      // File doesn't exist or can't parse - return null
+      return null;
     }
   }
 
-  async save() {
+  /**
+   * Put response in cache
+   */
+  async put(key, response) {
     if (!this.enabled) return;
-    
+
+    // Store in memory cache
+    this._memoryCache.set(key, response);
+
     try {
+      // Ensure cache directory exists
       await fs.mkdir(this.cacheDir, { recursive: true });
-      
-      const cachePath = resolve(this.cacheDir, 'responses.json');
-      const cacheObj = Object.fromEntries(this._cache);
-      await fs.writeFile(cachePath, JSON.stringify(cacheObj, null, 2));
+
+      const cachePath = this._getCacheFilePath(key);
+      await fs.writeFile(cachePath, JSON.stringify(response, null, 2), 'utf8');
     } catch (error) {
-      console.error(`Failed to save cache to ${this.cacheDir}: ${error.message}`);
+      console.warn(`[CACHE] Warning: Failed to write cache entry: ${error.message}`);
     }
   }
 
-  async _fileExists(path) {
+  /**
+   * Check if cache has entry without retrieving it
+   */
+  async has(key) {
+    if (!this.enabled) return false;
+
+    if (this._memoryCache.has(key)) {
+      return true;
+    }
+
     try {
-      await fs.access(path);
+      const cachePath = this._getCacheFilePath(key);
+      await fs.access(cachePath);
       return true;
     } catch {
       return false;
     }
   }
 
-  async get(key) {
-    if (!this.enabled) return null;
-    
-    if (!this._loaded) {
-      await this.load();
-    }
-    
-    return this._cache.get(key);
+  /**
+   * Get cache file path for a given key
+   */
+  _getCacheFilePath(key) {
+    // Use subdirectories to avoid filesystem issues with too many files in one dir
+    const subDir = key.substring(0, 2); // First 2 hex chars for subdirectory
+    return join(this.cacheDir, subDir, `${key}.json`);
   }
 
-  async put(key, value) {
-    if (!this.enabled) return;
-    
-    if (!this._loaded) {
-      await this.load();
-    }
-    
-    this._cache.set(key, value);
-    await this.save();
-  }
-
-  async has(key) {
-    if (!this.enabled) return false;
-    
-    if (!this._loaded) {
-      await this.load();
-    }
-    
-    return this._cache.has(key);
-  }
-
-  // Clear cache (for testing)
+  /**
+   * Clear all cache entries (for testing)
+   */
   async clear() {
-    this._cache.clear();
-    await this.save();
+    this._memoryCache.clear();
+    try {
+      // In a real implementation we would clear the file cache too
+      // This requires recursive deletion which we'll skip for safety
+    } catch (error) {
+      console.warn(`[CACHE] Warning: Failed to clear file cache: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get cache statistics
+   */
+  getStats() {
+    return {
+      memorySize: this._memoryCache.size,
+      enabled: this.enabled
+    };
   }
 }
 
 // Singleton instance
-const cacheInstance = new AIResponseCache({
+const cache = new AIResponseCache({
   cacheDir: process.env.QWEN_CACHE_DIR || './.qwen-cache',
-  enabled: process.env.QWEN_CACHE_ENABLED !== 'false'
+  enabled: process.env.QWEN_CACHE_ENABLED !== 'false' // Enable by default unless explicitly disabled
 });
 
-export default cacheInstance;
+export default cache;

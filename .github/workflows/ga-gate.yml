@@ -62,6 +62,39 @@ jobs:
         run: |
           make ga
 
+      - name: Upload SOC evidence report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          retention-days: 14
+          name: soc-evidence-report-${{ github.sha }}
+          path: |
+            dist/evidence/${{ github.sha }}/SOC_EVIDENCE_REPORT.md
+            dist/evidence/${{ github.sha }}/SOC_EVIDENCE_REPORT.pdf
+            dist/evidence/${{ github.sha }}/SOC_EVIDENCE_REPORT.json
+
+      - name: SOC evidence summary
+        if: always()
+        run: |
+          REPORT="dist/evidence/${GITHUB_SHA}/SOC_EVIDENCE_REPORT.json"
+          if [ -f "$REPORT" ]; then
+            STATUS=$(node -e "const r=require('./'+process.argv[1]); console.log(r.validation_status || 'unknown');" "$REPORT")
+            COVERED=$(node -e "const r=require('./'+process.argv[1]); console.log(r.summary.covered);" "$REPORT")
+            TOTAL=$(node -e "const r=require('./'+process.argv[1]); console.log(r.summary.total_controls);" "$REPORT")
+            PCT=$(node -e "const r=require('./'+process.argv[1]); const pct=r.summary.total_controls ? Math.round((r.summary.covered/r.summary.total_controls)*100) : 0; console.log(pct);" "$REPORT")
+            NEW_COVERED=$(node -e "const r=require('./'+process.argv[1]); console.log((r.delta.newly_covered||[]).length);" "$REPORT")
+            NEW_DEFERRED=$(node -e "const r=require('./'+process.argv[1]); console.log((r.delta.newly_deferred||[]).length);" "$REPORT")
+            EXP_SOON=$(node -e "const r=require('./'+process.argv[1]); console.log(r.summary.exceptions_expiring_soon);" "$REPORT")
+            echo "## SOC Evidence Report" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Status:** ${STATUS}" >> $GITHUB_STEP_SUMMARY
+            echo "**Coverage:** ${COVERED}/${TOTAL} (${PCT}%)" >> $GITHUB_STEP_SUMMARY
+            echo "**Delta:** +${NEW_COVERED} covered, -${NEW_DEFERRED} regressions" >> $GITHUB_STEP_SUMMARY
+            echo "**Exceptions expiring soon:** ${EXP_SOON}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Artifacts: soc-evidence-report-${GITHUB_SHA}" >> $GITHUB_STEP_SUMMARY
+          fi
+
       - name: Generate GA Snapshot
         if: always()
         run: |

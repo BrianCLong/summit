@@ -44,17 +44,17 @@ collection and validated as a required gate.
 make ga-evidence
 
 # Generate index
-python3 scripts/evidence/generate_control_evidence_index.py --evidence-dir dist/evidence/<sha>
+node scripts/evidence/generate_control_evidence_index.mjs --evidence-dir dist/evidence/<sha>
 
 # Validate evidence
-python3 scripts/evidence/validate_control_evidence.py --evidence-dir dist/evidence/<sha>
+node scripts/evidence/validate_control_evidence.mjs --evidence-dir dist/evidence/<sha>
 ```
 
 ## Operator workflow
 
 - Add or update controls in `compliance/control-map.yaml`.
 - Add new evidence types by extending `evidence_type` values in
-  `scripts/evidence/generate_control_evidence_index.py`.
+  `scripts/evidence/generate_control_evidence_index.mjs`.
 - Record exceptions in `compliance/control-exceptions.yml` with owner and expiry.
 - CI can optionally allow stub evidence via `ALLOW_STUB_EVIDENCE=1`, but GA should
   prefer real evidence bundles for release gates.

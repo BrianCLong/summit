@@ -87,5 +87,5 @@ module.exports.correlationStorage = correlationStorage;
 module.exports.pino = pinoMock;
 module.exports.symbols = symbols;
 module.exports.stdSerializers = stdSerializers;
-module.exports.__esModule = true;
+
 module.exports.default = pinoMock;

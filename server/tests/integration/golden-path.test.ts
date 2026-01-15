@@ -1,5 +1,4 @@
 import request from 'supertest';
-import { createTestHarness, TestHarness } from '../harness.js';
 import { jest } from '@jest/globals';
 
 
@@ -66,17 +65,100 @@ jest.unstable_mockModule('prom-client', () => ({
     contentType: 'text/plain',
     metrics: jest.fn().mockResolvedValue('http_requests_total 10'),
     clear: jest.fn(),
+    getSingleMetric: jest.fn(),
   },
   collectDefaultMetrics: jest.fn(),
+  Counter: class { inc() { } },
+  Histogram: class { observe() { } startTimer() { return () => { }; } },
+  Gauge: class { set() { } inc() { } dec() { } },
+  Summary: class { observe() { } startTimer() { return () => { }; } },
+  Registry: class {
+    registerMetric() { }
+    metrics() { return Promise.resolve(''); }
+    getSingleMetric() { }
+    clear() { }
+    resetMetrics() { }
+    setDefaultLabels() { }
+  },
 }));
 
-// Mock utils/logger
-jest.unstable_mockModule('../../src/utils/logger.js', () => ({
-  logger: {
+// Mock pino
+jest.unstable_mockModule('pino', () => ({
+  default: jest.fn(() => ({
     info: jest.fn(),
     error: jest.fn(),
     warn: jest.fn(),
     debug: jest.fn(),
+    trace: jest.fn(),
+    fatal: jest.fn(),
+    child: jest.fn().mockReturnThis(),
+    level: 'debug',
+  })),
+  pino: jest.fn(), // Named export if needed
+}));
+
+
+// Mock utils/logger
+jest.unstable_mockModule('../../src/utils/logger.js', () => {
+  const loggerMock = {
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+  };
+  return {
+    logger: loggerMock,
+    default: loggerMock,
+  };
+});
+
+// Mock config/logger used by production-security
+
+
+// Mock config/logger used by harness and production-security
+const loggerFactory = () => {
+  const loggerMock = {
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+    child: jest.fn().mockReturnThis(),
+    trace: jest.fn(),
+    fatal: jest.fn(),
+    silent: jest.fn(),
+    level: 'debug',
+  };
+  return {
+    logger: loggerMock,
+    correlationStorage: {
+      getStore: jest.fn(),
+      run: jest.fn((store: any, cb: any) => cb()),
+      enterWith: jest.fn(),
+    },
+    default: loggerMock,
+  };
+};
+
+jest.unstable_mockModule('../../src/config/logger.js', loggerFactory);
+jest.unstable_mockModule('../../src/config/logger', loggerFactory);
+jest.unstable_mockModule('../../src/config/logger.ts', loggerFactory);
+
+// Mock TieredRateLimitMiddleware to avoid pino usage
+jest.unstable_mockModule('../../src/middleware/TieredRateLimitMiddleware.ts', () => ({
+  RateLimitTier: {
+    FREE: 'free',
+    BASIC: 'basic',
+    PREMIUM: 'premium',
+    ENTERPRISE: 'enterprise',
+    INTERNAL: 'internal',
+  },
+  RequestPriority: {
+    LOW: 'low',
+    NORMAL: 'normal',
+    HIGH: 'high',
+  },
+  advancedRateLimiter: {
+    getStatus: jest.fn(),
   },
 }));
 
@@ -94,11 +176,24 @@ jest.unstable_mockModule('../../src/services/audit/AuditTrailService.js', () => 
   },
 }));
 
+// Mock db/postgres.js to avoid loading real pino via logger
+jest.unstable_mockModule('../../src/db/postgres.js', () => ({
+  getPostgresPool: jest.fn(() => ({
+    query: jest.fn().mockResolvedValue({ rows: [] }),
+    connect: jest.fn(),
+  })),
+  query: jest.fn(),
+}));
+
+// Mocks must be before imports
+const { createTestHarness } = await import('../harness.js');
+
+
 // Mocks must be before imports
 const db = await import('../../src/config/database.js');
-// The original createTestHarness import is replaced by this one, as it's now an async import
-// const { createTestHarness } = await import('../harness.js');
 
+// Skip AI routes to avoid pino CJS/ESM interop issues during tests
+process.env.SKIP_AI_ROUTES = 'true';
 
 describe('Golden Path Integration', () => {
   let harness: any;
@@ -106,6 +201,9 @@ describe('Golden Path Integration', () => {
   let app: any;
 
   beforeAll(async () => {
+    // Skip AI routes to avoid pino CJS/ESM interop issues during tests
+    process.env.SKIP_AI_ROUTES = 'true';
+
     // Override db connections
     jest.spyOn(db, 'getRedisClient').mockImplementation(() => ({
       ping: jest.fn().mockResolvedValue('PONG'),

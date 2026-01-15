@@ -50,7 +50,7 @@ const config: Config = {
     '.*packages/shared/provenance(\\.js)?$': '<rootDir>/tests/mocks/provenance.ts',
     '.*telemetry/comprehensive-telemetry(\\.js)?$': '<rootDir>/tests/mocks/otel-service.ts',
     '.*lib/telemetry/anomaly-detector(\\.js)?$': '<rootDir>/tests/mocks/otel-service.ts',
-    '.*config/logger(\\.js)?$': '<rootDir>/tests/mocks/logger.cjs',
+    '.*config/logger(\\.[a-zA-Z]+)?$': '<rootDir>/tests/mocks/config-logger.ts',
     '.*utils/logger(\\.js)?$': '<rootDir>/tests/mocks/logger.cjs',
     '.*metrics/dbMetrics(\\.js)?$': '<rootDir>/tests/mocks/db-metrics.ts',
     '.*workers/eventBus(\\.js)?$': '<rootDir>/tests/mocks/eventBus.ts',

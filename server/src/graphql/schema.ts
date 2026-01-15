@@ -1959,6 +1959,9 @@ input CampaignFilter {
     # Copilot Goal Queries
     copilotGoals(investigationId: ID): [Goal!]!
     copilotGoal(id: ID!): Goal
+
+    # Ticket Queries
+    tickets(provider: String!, externalId: String, limit: Int): [Ticket!]!
   }
 
   
@@ -2160,5 +2163,18 @@ input CampaignFilter {
   type CausalGraph {
     nodes: [CausalNode!]!
     edges: [CausalEdge!]!
+  }
+  type Run { id: ID! }
+  type Deployment { id: ID! }
+  type Ticket {
+    provider: String!
+    externalId: String!
+    title: String
+    assignee: String
+    labels: [String!]
+    project: String
+    repo: String
+    runs: [Run!]
+    deployments: [Deployment!]
   }
 `;

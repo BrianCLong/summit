@@ -27,7 +27,7 @@ def normalize_status(value: str | None) -> str:
     val = value.strip().lower()
     if val in {"covered", "pass", "passed", "ok", "success"}:
         return "covered"
-    if val in {"partial", "partially", "partial_covered"}:
+    if val in {"partial", "partially", "partial_covered", "partially_covered"}:
         return "partial"
     if val in {"deferred", "skipped", "not_covered"}:
         return "deferred"

@@ -282,7 +282,9 @@ claude-preflight: ## Fast local checks before make ga (lint + typecheck + unit t
 ga: ## Run Enforceable GA Gate (Lint -> Clean Up -> Deep Health -> Smoke -> Security)
 	@mkdir -p artifacts/ga
 	@./scripts/ga-gate.sh
+	@$(MAKE) ga-evidence
 	@$(MAKE) ga-validate-evidence
+	@$(MAKE) ga-report
 
 ga-verify: ## Run GA tier B/C verification sweep (deterministic)
 	@node --test testing/ga-verification/*.ga.test.mjs
@@ -294,13 +296,25 @@ ga-validate-evidence: ## Validate control evidence completeness for GA
 		echo "Missing evidence bundle at $$EVIDENCE_DIR"; \
 		exit 1; \
 	fi; \
-	python3 scripts/evidence/generate_control_evidence_index.py --evidence-dir "$$EVIDENCE_DIR"; \
-	python3 scripts/evidence/validate_control_evidence.py --evidence-dir "$$EVIDENCE_DIR"
+	node scripts/evidence/generate_control_evidence_index.mjs --evidence-dir "$$EVIDENCE_DIR"; \
+	node scripts/evidence/validate_control_evidence.mjs --evidence-dir "$$EVIDENCE_DIR"
+
+ga-report: ## Generate SOC evidence report for the current bundle
+	@EVIDENCE_DIR="dist/evidence/$$(git rev-parse HEAD)"; \
+	if [ ! -d "$$EVIDENCE_DIR" ]; then \
+		echo "Missing evidence bundle at $$EVIDENCE_DIR"; \
+		exit 1; \
+	fi; \
+	python3 scripts/evidence/generate_soc_report.py --evidence-dir "$$EVIDENCE_DIR"
 
 ga-evidence: ## Create a minimal local evidence bundle for GA validation
 	@set -e; \
 	EVIDENCE_DIR="dist/evidence/$$(git rev-parse HEAD)"; \
-	python3 scripts/evidence/create_stub_evidence_bundle.py --evidence-dir "$$EVIDENCE_DIR"; \
+	if [ -d "$$EVIDENCE_DIR" ] && [ "$$(ls -A "$$EVIDENCE_DIR" 2>/dev/null)" ]; then \
+		echo "Evidence bundle already present at $$EVIDENCE_DIR"; \
+		exit 0; \
+	fi; \
+	node scripts/evidence/create_stub_evidence_bundle.mjs --evidence-dir "$$EVIDENCE_DIR"; \
 	echo "Created stub evidence bundle at $$EVIDENCE_DIR"
 
 ops-verify: ## Run unified Ops Verification (Observability + Storage/DR)

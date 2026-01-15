@@ -721,7 +721,7 @@ if (process.argv[1] === __filename) {
 }
 
 /**
- * Process a single governance document with optional AI-assisted analysis
+ * Process a single governance document with optional AI-assisted analysis and caching
  */
 async function processGovernanceDocumentWithAI(filePath, evidenceMap, repoRoot, artifactDir = './artifacts') {
   // First run the standard processing
@@ -735,9 +735,22 @@ async function processGovernanceDocumentWithAI(filePath, evidenceMap, repoRoot, 
       const analyzeDocumentWithQwen = qwenModule.analyzeDocumentWithQwen || qwenModule.default;
 
       const content = await fs.readFile(filePath, "utf8");
+
+      // Generate hash of the document content for cache key
+      const contentHash = createHash('sha256').update(content).digest('hex');
+
+      // Create AI analysis request parameters
+      const analysisParams = {
+        temperature: 0, // Deterministic setting
+        response_format: { type: "json_object" }
+      };
+
+      // Call AI with caching for deterministic behavior
       const aiAnalysisResult = await analyzeDocumentWithQwen(
         content,
         "Validate Evidence-IDs compliance and mapping consistency",
+        analysisParams,
+        contentHash,
         artifactDir
       );
 

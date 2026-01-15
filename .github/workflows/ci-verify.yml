@@ -268,7 +268,7 @@ jobs:
         if: env.ALLOW_STUB_EVIDENCE == '1'
         run: |
           EVIDENCE_DIR="dist/evidence/${GITHUB_SHA}"
-          python3 scripts/evidence/create_stub_evidence_bundle.py --evidence-dir "$EVIDENCE_DIR"
+          node scripts/evidence/create_stub_evidence_bundle.mjs --evidence-dir "$EVIDENCE_DIR"
       - name: Validate control evidence
         run: |
           EVIDENCE_DIR="dist/evidence/${GITHUB_SHA}"
@@ -276,8 +276,8 @@ jobs:
             echo "::error::Missing evidence bundle at $EVIDENCE_DIR"
             exit 1
           fi
-          python3 scripts/evidence/generate_control_evidence_index.py --evidence-dir "$EVIDENCE_DIR"
-          python3 scripts/evidence/validate_control_evidence.py --evidence-dir "$EVIDENCE_DIR"
+          node scripts/evidence/generate_control_evidence_index.mjs --evidence-dir "$EVIDENCE_DIR"
+          node scripts/evidence/validate_control_evidence.mjs --evidence-dir "$EVIDENCE_DIR"
 
       - name: Upload evidence index
         if: always()
@@ -295,7 +295,7 @@ jobs:
           REPORT="dist/evidence/${GITHUB_SHA}/validation_report.json"
           if [ -f "$REPORT" ]; then
             STATUS=$(node -e "const r=require('./'+process.argv[1]); console.log(r.status);" "$REPORT")
-            FAILS=$(node -e "const r=require('./'+process.argv[1]); console.log(r.summary.failures);" "$REPORT")
+            FAILS=$(node -e "const r=require('./'+process.argv[1]); console.log(r.summary.violations);" "$REPORT")
             WARN=$(node -e "const r=require('./'+process.argv[1]); console.log(r.summary.warnings);" "$REPORT")
             echo "## GA Evidence Completeness" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY

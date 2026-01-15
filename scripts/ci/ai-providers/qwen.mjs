@@ -260,7 +260,7 @@ export async function callQwen(messages, params = {}, inputHash = null, artifact
 }
 
 // Specific function for evidence analysis
-export async function analyzeDocumentWithQwen(documentContent, analysisPrompt, artifactDir = './artifacts') {
+export async function analyzeDocumentWithQwen(documentContent, analysisPrompt, params = {}, inputHash = null, artifactDir = './artifacts') {
   // Apply redaction to document content before sending to AI
   const redactionEnabled = process.env.AI_REDACTION !== 'off';
   let safeDocumentContent = documentContent;
@@ -289,10 +289,15 @@ export async function analyzeDocumentWithQwen(documentContent, analysisPrompt, a
     { role: 'user', content: userPrompt }
   ];
 
-  // Use the hash of original document content as inputHash for cache key (so we can track the real document)
-  const inputHash = createHash('sha256').update(documentContent).digest('hex');
+  // Use provided input hash or generate from document content
+  const contentHash = inputHash || createHash('sha256').update(documentContent).digest('hex');
 
-  return await callQwen(messages, {
-    response_format: { type: "json_object" }
-  }, inputHash, artifactDir);
+  // Merge default parameters with provided ones
+  const mergedParams = {
+    temperature: 0, // Default to deterministic setting
+    response_format: { type: "json_object" },
+    ...params
+  };
+
+  return await callQwen(messages, mergedParams, contentHash, artifactDir);
 }

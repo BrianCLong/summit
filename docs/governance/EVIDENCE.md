@@ -11,6 +11,7 @@ Status: active
 - Branch protection drift: `artifacts/governance/branch-protection-drift/`
 - SOC control verification: `soc-compliance-reports/`
 - Release evidence bundles: `evidence-bundles/`
+- SOC evidence report: `dist/evidence/<sha>/SOC_EVIDENCE_REPORT.md`
 - Control evidence index: `docs/governance/CONTROL_EVIDENCE_INDEX.md`
 
 ## Evidence Collection
@@ -18,4 +19,5 @@ Status: active
 - Run `pnpm ci:docs-governance` to emit docs integrity artifacts.
 - Run `pnpm ci:branch-protection:check` to emit drift artifacts.
 - Run `bash scripts/test-soc-controls.sh soc-compliance-reports` for SOC reports.
+- Run `make ga-report` to emit SOC Evidence Report artifacts.
 - SOC report outputs: `soc-compliance-reports/server-soc-controls.xml`, `soc-compliance-reports/soc2-compliance-service.xml`.

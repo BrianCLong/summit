@@ -1,5 +1,9 @@
-// @ts-nocheck
-import pino from 'pino';
+import * as pinoPkg from 'pino';
+// @ts-ignore
+let pino = pinoPkg.pino || pinoPkg.default || pinoPkg;
+if (typeof pino !== 'function' && (pino as any).default && typeof (pino as any).default === 'function') {
+  pino = (pino as any).default;
+}
 import { correlationEngine } from '../lib/telemetry/correlation-engine.js';
 
 // Custom stream that intercepts logs for the Correlation Engine and passes them to stdout
@@ -8,12 +12,12 @@ const stream = {
     // Optimization: avoid parsing JSON on every log line unless it looks like JSON
     // and we are actually running the correlation engine.
     if (msg.trim().startsWith('{')) {
-        try {
-          const logEntry = JSON.parse(msg);
-          correlationEngine.ingestLog(logEntry);
-        } catch (e: any) {
-          // If parsing fails, ignore for correlation but still print
-        }
+      try {
+        const logEntry = JSON.parse(msg);
+        correlationEngine.ingestLog(logEntry);
+      } catch (e: any) {
+        // If parsing fails, ignore for correlation but still print
+      }
     }
     process.stdout.write(msg);
   },
@@ -56,6 +60,7 @@ export interface SummitLogContext {
   [key: string]: any;
 }
 
+// @ts-ignore
 export const logger = (pino as any)({
   level: process.env.LOG_LEVEL || 'info',
   base: {
@@ -71,13 +76,13 @@ export const logger = (pino as any)({
   mixin(_context: unknown, level: number) {
     const store = correlationStorage.getStore();
     if (store) {
-        return {
-            correlationId: store.get('correlationId'),
-            tenantId: store.get('tenantId'),
-            principalId: store.get('principalId'),
-            requestId: store.get('requestId'),
-            traceId: store.get('traceId'),
-        }
+      return {
+        correlationId: store.get('correlationId'),
+        tenantId: store.get('tenantId'),
+        principalId: store.get('principalId'),
+        requestId: store.get('requestId'),
+        traceId: store.get('traceId'),
+      }
     }
     return {};
   },
@@ -93,9 +98,9 @@ export const logger = (pino as any)({
     },
   },
   serializers: {
-    err: (pino as any).stdSerializers.err,
-    req: (pino as any).stdSerializers.req,
-    res: (pino as any).stdSerializers.res,
+    err: (pino as any).stdSerializers?.err || ((e: any) => e),
+    req: (pino as any).stdSerializers?.req || ((r: any) => r),
+    res: (pino as any).stdSerializers?.res || ((r: any) => r),
   },
   // Remove pino-pretty transport for production readiness
   // In production, logs should be structured JSON for log aggregation

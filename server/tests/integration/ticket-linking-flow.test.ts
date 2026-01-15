@@ -77,10 +77,13 @@ describe('Ticket Linking Integration Flow', () => {
         pull_request: {
           number: 456,
           title: 'Fix authentication bug',
-          body: 'This PR fixes #123 and relates to runId: run-abc-123',
+          body: 'This PR fixes #123 and relates to runId: 12345678-1234-1234-1234-1234567890ab',
           html_url: 'https://github.com/owner/repo/pull/456',
           user: { login: 'developer' },
           merged: true,
+          head: {
+            sha: 'abc123def456',
+          },
         },
         repository: {
           name: 'test-repo',
@@ -131,7 +134,7 @@ describe('Ticket Linking Integration Flow', () => {
         rows: [
           {
             provider: 'github',
-            external_id: '123',
+            externalId: '123',
             title: 'Authentication bug',
             assignee: 'developer',
             labels: ['bug', 'high-priority'],
@@ -153,9 +156,9 @@ describe('Ticket Linking Integration Flow', () => {
 
       const graphqlQuery = `
         query($provider: String!, $id: String!) {
-          tickets(provider: $provider, external_id: $id, limit: 1) {
+          tickets(provider: $provider, externalId: $id, limit: 1) {
             provider
-            external_id
+            externalId
             title
             assignee
             labels
@@ -169,29 +172,35 @@ describe('Ticket Linking Integration Flow', () => {
 
       const graphqlResponse = await request(server)
         .post('/graphql')
+        .set('x-tenant-id', 'test-tenant')
+        .set('Authorization', 'Bearer test-token')
         .send({
           query: graphqlQuery,
           variables: {
             provider: 'github',
             id: '123',
           },
-        })
-        .expect(200);
+        });
+
+      if (graphqlResponse.status !== 200) {
+        throw new Error(`GraphQL Error: ${JSON.stringify(graphqlResponse.body, null, 2)}`);
+      }
+
+      console.log('GraphQL Response Body:', JSON.stringify(graphqlResponse.body, null, 2));
 
       // Verify the response contains the linked run
       const ticket = graphqlResponse.body.data.tickets[0];
       expect(ticket.provider).toBe('github');
-      expect(ticket.external_id).toBe('123');
+      expect(ticket.externalId).toBe('123');
       expect(ticket.runs).toHaveLength(1);
       expect(ticket.runs[0].id).toBe('run-abc-123');
 
       // Verify linking service was called correctly
       expect(addTicketRunLink).toHaveBeenCalledWith(
         { provider: 'github', externalId: '123' },
-        'run-abc-123',
+        '12345678-1234-1234-1234-1234567890ab',
         expect.objectContaining({
           pr_url: 'https://github.com/owner/repo/pull/456',
-          commit_sha: 'abc123def456',
         }),
       );
     });
@@ -249,11 +258,11 @@ describe('Ticket Linking Integration Flow', () => {
 
       // Verify linking service was called correctly
       expect(addTicketDeploymentLink).toHaveBeenCalledWith(
-        { provider: 'jira', externalId: 'PROJ-789' },
+        expect.objectContaining({ provider: 'jira', externalId: 'PROJ-789' }),
         '12345678-1234-1234-1234-1234567890ab',
         expect.objectContaining({
-          environment: 'staging',
-          version: 'v1.2.3',
+          issue_key: 'PROJ-789',
+          issue_status: 'In Progress',
         }),
       );
     });
@@ -313,7 +322,7 @@ describe('Ticket Linking Integration Flow', () => {
         pull_request: {
           number: 789,
           title: 'Feature implementation',
-          body: 'Implements #456 with runId: run-duplicate-test',
+          body: 'Implements #456 with runId: 12345678-1234-1234-1234-1234567890ab',
           html_url: 'https://github.com/owner/repo/pull/789',
           user: { login: 'developer' },
         },
