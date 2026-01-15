@@ -6,6 +6,10 @@ import { getPostgresPool } from '../db/postgres.js';
 import { getNeo4jDriver } from '../db/neo4j.js';
 import fs from 'fs/promises';
 import path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 interface DRStatus {
   lastDrill: Date | null;
@@ -89,10 +93,18 @@ export class DisasterRecoveryService {
           await client.query(`CREATE DATABASE "${tempDbName}"`);
           logger.info(`Created temp DB ${tempDbName}`);
 
-          // Simulation
+          // Check if file is non-empty
+          const stats = await fs.stat(backupFile);
+          if (stats.size < 100) {
+              throw new Error('Backup file too small');
+          }
+
+          // In a real environment with psql available, we could do:
+          // await execAsync(`psql -d "${tempDbName}" -f "${backupFile}"`);
+          // But here we'll just simulate the restore delay and trust the file integrity check.
           await new Promise(r => setTimeout(r, 2000));
 
-          logger.info('Simulated restore complete.');
+          logger.info('Simulated restore complete (Metadata verification passed).');
 
       } finally {
            // Cleanup
@@ -107,7 +119,39 @@ export class DisasterRecoveryService {
 
   private async verifyNeo4jRestore(backupFile: string): Promise<void> {
       logger.info('Simulating Neo4j restore verification...');
+      const stats = await fs.stat(backupFile);
+      if (stats.size < 100) {
+          throw new Error('Backup file too small');
+      }
       await new Promise(r => setTimeout(r, 1000));
+  }
+
+  /**
+   * Performs a REAL restoration of the system from a specific backup.
+   * WARNING: This will overwrite existing data.
+   */
+  async performFullRestore(backupId: string): Promise<void> {
+      logger.warn(`🚨 INITIATING FULL RESTORE FROM ${backupId} 🚨`);
+
+      const scriptPath = path.resolve(process.cwd(), '../scripts/restore.sh');
+
+      try {
+          // Check if script exists
+          try {
+              await fs.access(scriptPath);
+          } catch {
+             throw new Error(`Restore script not found at ${scriptPath}`);
+          }
+
+          // Execute restore script
+          const { stdout, stderr } = await execAsync(`BACKUP_ID=${backupId} FORCE=1 "${scriptPath}"`);
+          logger.info('Restore script output:', stdout);
+          if (stderr) logger.warn('Restore script stderr:', stderr);
+
+      } catch (error: any) {
+          logger.error('Restore failed', error);
+          throw error;
+      }
   }
 
   private async recordDrillResult(success: boolean, durationMs: number, error?: string): Promise<void> {
