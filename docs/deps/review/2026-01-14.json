@@ -1,0 +1,76 @@
+{
+  "date": "2026-01-14",
+  "head_sha": "ac4912fe173558516bc8819790cd51ceff14e253",
+  "candidates": [
+    "react (v18.x -> v19)",
+    "apollo-server-express (EOL v3 -> v4)",
+    "vite (minor update)",
+    "vitest (minor update)"
+  ],
+  "deprecations": [
+    "apollo-server-express v3 is EOL.",
+    "xlsx override points to specific tarball."
+  ],
+  "risks": [
+    {
+      "package": "xlsx",
+      "issue": "Supply chain risk via CDN tarball override.",
+      "severity": "High"
+    },
+    {
+      "package": "apollo-server-express",
+      "issue": "EOL, potential security vulnerabilities.",
+      "severity": "High"
+    }
+  ],
+  "objectives": [
+    {
+      "title": "Resolve Apollo Server EOL",
+      "acceptance_criteria": "Migrate to Apollo Server v4 or equivalent."
+    },
+    {
+      "title": "Mitigate xlsx supply chain risk",
+      "acceptance_criteria": "Vendor dependency or switch to maintained alternative."
+    },
+    {
+      "title": "Upgrade React to v19 (Plan)",
+      "acceptance_criteria": "Create migration plan and compatibility check."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "DEPS-20260114-01",
+      "priority": "P0",
+      "owner": "Codex",
+      "description": "Migrate apollo-server-express to @apollo/server v4."
+    },
+    {
+      "id": "DEPS-20260114-02",
+      "priority": "P1",
+      "owner": "Antigravity",
+      "description": "Vendor xlsx dependency or find secure alternative."
+    },
+    {
+      "id": "DEPS-20260114-03",
+      "priority": "P2",
+      "owner": "Claude Code",
+      "description": "Assess React 19 compatibility and draft migration plan."
+    }
+  ],
+  "decisions": [
+    {
+      "decision": "Prioritize Apollo Server migration due to EOL status.",
+      "rationale": "Security and stability risk."
+    },
+    {
+      "decision": "Lock xlsx version via vendor or strictly controlled mirror.",
+      "rationale": "Prevent CDN hijacking."
+    }
+  ],
+  "cross_system_actions": [
+    "GitHub Projects: Create dependency cards.",
+    "Linear: Create upgrade issues.",
+    "Jira: Epic for Apollo Migration.",
+    "Notion: Update dependency policy."
+  ]
+}

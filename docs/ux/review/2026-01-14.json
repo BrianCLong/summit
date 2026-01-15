@@ -1,0 +1,89 @@
+{
+  "date": "2026-01-14",
+  "head_sha": "ac4912fe173558516bc8819790cd51ceff14e253",
+  "flows": [
+    "IntelGraph Main Dashboard",
+    "Investigation Graph View",
+    "Login/Authentication",
+    "Search & Discovery",
+    "Settings/Admin Panel"
+  ],
+  "issues": [
+    {
+      "flow": "IntelGraph Main Dashboard",
+      "type": "Consistency",
+      "severity": "Medium",
+      "details": "Inconsistent spacing between widgets; not using Grid tokens."
+    },
+    {
+      "flow": "Investigation Graph View",
+      "type": "Accessibility",
+      "severity": "High",
+      "details": "Keyboard navigation trap in canvas area."
+    },
+    {
+      "flow": "Login/Authentication",
+      "type": "Accessibility",
+      "severity": "Medium",
+      "details": "Error messages do not announce to screen readers."
+    },
+    {
+      "flow": "Search & Discovery",
+      "type": "Consistency",
+      "severity": "Low",
+      "details": "Dropdown styles mismatch Design System tokens."
+    },
+    {
+      "flow": "Settings/Admin Panel",
+      "type": "Consistency",
+      "severity": "Low",
+      "details": "Old 'Save' button pattern used."
+    }
+  ],
+  "objectives": [
+    {
+      "title": "Standardize Graph View toolbar to Design System",
+      "acceptance_criteria": "Toolbar uses proper component tokens; no bespoke CSS."
+    },
+    {
+      "title": "Fix keyboard navigation trap in Graph Canvas",
+      "acceptance_criteria": "Tab key enters/exits canvas; arrow keys navigate nodes."
+    },
+    {
+      "title": "Stabilize Dashboard widget spacing",
+      "acceptance_criteria": "All widgets use standard Grid tokens; visual regression tests pass."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "UX-20260114-01",
+      "priority": "P1",
+      "owner": "Codex",
+      "description": "Refactor Graph View toolbar to use Design System components."
+    },
+    {
+      "id": "UX-20260114-02",
+      "priority": "P0",
+      "owner": "Codex",
+      "description": "Implement keyboard trap escape mechanism for Graph Canvas."
+    },
+    {
+      "id": "UX-20260114-03",
+      "priority": "P2",
+      "owner": "Codex",
+      "description": "Update Dashboard layout to use standard Grid system."
+    }
+  ],
+  "decisions": [
+    {
+      "decision": "Adopt standard Grid tokens for all dashboards.",
+      "rationale": "Prevents layout drift and ensures responsive consistency."
+    }
+  ],
+  "cross_system_actions": [
+    "GitHub Projects: Create UX cards for identified issues.",
+    "Linear: Create tasks for accessibility fixes.",
+    "Jira: Log bug for keyboard trap.",
+    "Notion: Update Design System guidelines with Grid usage examples."
+  ]
+}
