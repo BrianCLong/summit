@@ -109,8 +109,13 @@ module "aurora" {
 
   database_name   = "summit_prod"
   master_username = "summit_admin"
-  # Password should be injected via variable or secrets manager in real flow
-}
+  
+  # --- Data Safety (PITR) ---
+  backup_retention_period = 7   # Days to keep backups
+  preferred_backup_window = "02:00-04:00" # UTC
+  deletion_protection     = true # Prevent accidental terraform destroy
+  skip_final_snapshot     = false
+
 
 # --- Caching (Redis) ---
 resource "aws_elasticache_replication_group" "redis" {
