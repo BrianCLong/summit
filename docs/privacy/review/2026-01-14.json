@@ -1,0 +1,39 @@
+{
+  "date": "2026-01-14",
+  "head_sha": "current",
+  "inventory": {
+    "classes": ["PII", "Biometric", "Tenant Data", "Logs"],
+    "locations": ["Postgres", "Neo4j", "S3", "Elasticsearch"]
+  },
+  "policies": {
+    "Border Crossing": "90 Days",
+    "Watchlist Hit": "10 Years",
+    "No Match": "7 Days"
+  },
+  "gaps": [
+    "Manual retention enforcement for Border Crossing",
+    "OSINT PII leakage risk",
+    "Missing cryptographic proof of deletion"
+  ],
+  "objectives": [
+    "Automate 90-Day Retention",
+    "Harden OSINT Privacy",
+    "Verify Deletion Proof"
+  ],
+  "tasks": [
+    { "id": "PRIV-20260114-01", "prio": "P0", "owner": "Codex CLI", "class": "Biometric" },
+    { "id": "PRIV-20260114-02", "prio": "P1", "owner": "Antigravity", "class": "OSINT" },
+    { "id": "PRIV-20260114-03", "prio": "P1", "owner": "Codex CLI", "class": "PII" },
+    { "id": "PRIV-20260114-04", "prio": "P2", "owner": "Claude Code", "class": "Docs" }
+  ],
+  "decisions": [
+    "Automate retention via code (P0)",
+    "Implement Deletion Proof artifacts"
+  ],
+  "cross_system_actions": [
+    "GitHub Projects: Add Retention Automation",
+    "Linear: Create Retention task",
+    "Jira: Log Deletion Proof feature",
+    "Notion: Update Data Flow Diagrams"
+  ]
+}

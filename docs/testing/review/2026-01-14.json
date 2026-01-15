@@ -1,0 +1,37 @@
+{
+  "date": "2026-01-14",
+  "head_sha": "current",
+  "flakes": [
+    { "test": "server/tests/auth/flow.test.ts", "frequency": "low", "status": "emerging" }
+  ],
+  "hangs": [],
+  "slow_suites": [
+    "packages/ai-ml-suite",
+    "connectors/esri_connector"
+  ],
+  "coverage_gaps": [
+    "connectors/rss_news_connector",
+    "connectors/ structure verification"
+  ],
+  "objectives": [
+    "Preempt Flakiness in Auth Flow",
+    "Standardize Connector Verification",
+    "Optimize ESRI Test Performance"
+  ],
+  "tasks": [
+    { "id": "TEST-20260114-01", "prio": "P1", "owner": "Codex CLI", "category": "Flake" },
+    { "id": "TEST-20260114-02", "prio": "P1", "owner": "Antigravity", "category": "Governance" },
+    { "id": "TEST-20260114-03", "prio": "P2", "owner": "Codex CLI", "category": "Performance" },
+    { "id": "TEST-20260114-04", "prio": "P3", "owner": "Claude Code", "category": "Coverage" }
+  ],
+  "decisions": [
+    "Implement automated connector structure verification",
+    "Fix auth flake forward instead of quarantine"
+  ],
+  "cross_system_actions": [
+    "GitHub Projects: Connector Governance card",
+    "Linear: Auth flake task",
+    "Jira: ESRI perf task",
+    "Notion: Update TESTING.md"
+  ]
+}

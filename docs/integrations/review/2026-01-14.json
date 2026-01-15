@@ -1,0 +1,40 @@
+{
+  "date": "2026-01-14",
+  "head_sha": "current",
+  "inventory": [
+    { "id": "elasticsearch", "tier": 0, "status": "green" },
+    { "id": "chronicle", "tier": 0, "status": "yellow" },
+    { "id": "splunk", "tier": 1, "status": "green" },
+    { "id": "duckdb", "tier": 1, "status": "yellow" },
+    { "id": "rss-news", "tier": 2, "status": "yellow" },
+    { "id": "esri", "tier": 1, "status": "yellow" },
+    { "id": "sentinel", "tier": 1, "status": "green" },
+    { "id": "s3csv", "tier": 1, "status": "green" }
+  ],
+  "status": [
+    { "id": "chronicle", "issues": ["SOAR trigger latency", "Certification pending"] },
+    { "id": "duckdb", "issues": ["Memory spikes", "Guardrails pending"] },
+    { "id": "esri", "issues": ["Projection coverage gaps"] }
+  ],
+  "objectives": [
+    "Stabilize Tier 0 Chronicle Integration",
+    "Enforce Resource Limits on DuckDB",
+    "Harden Geospatial Projections (ESRI)"
+  ],
+  "tasks": [
+    { "id": "INTEG-20260114-01", "prio": "P0", "owner": "Codex CLI", "target": "Chronicle" },
+    { "id": "INTEG-20260114-02", "prio": "P0", "owner": "Antigravity", "target": "DuckDB" },
+    { "id": "INTEG-20260114-03", "prio": "P1", "owner": "Codex CLI", "target": "ESRI" },
+    { "id": "INTEG-20260114-04", "prio": "P2", "owner": "Claude Code", "target": "RSS News" }
+  ],
+  "decisions": [
+    "DuckDB memory limits prioritized to P0",
+    "Strict no-live-network policy reaffirmed"
+  ],
+  "cross_system_actions": [
+    "GitHub Projects: Move DuckDB card",
+    "Linear: Create Chronicle SOAR issue",
+    "Notion: Update DuckDB docs",
+    "Jira: Update ESRI ticket"
+  ]
+}
