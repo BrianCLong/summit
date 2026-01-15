@@ -1,0 +1,147 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.tech/schemas/agent_spec_v1.schema.json",
+  "title": "Summit Agent Specification v1",
+  "description": "Authoritative specification for Summit Agents, defining identity, capabilities, controls, and governance requirements.",
+  "type": "object",
+  "required": [
+    "identity",
+    "interface",
+    "capabilities",
+    "governance",
+    "evaluation"
+  ],
+  "properties": {
+    "identity": {
+      "type": "object",
+      "required": ["name", "version", "description", "owner", "risk_tier"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Unique URL-safe name of the agent."
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "description": "Semantic version."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of what the agent does."
+        },
+        "owner": {
+          "type": "string",
+          "description": "Team or individual responsible for the agent."
+        },
+        "risk_tier": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"],
+          "description": "Risk classification affecting required controls."
+        }
+      }
+    },
+    "interface": {
+      "type": "object",
+      "required": ["inputs", "outputs"],
+      "properties": {
+        "inputs": {
+          "type": "object",
+          "description": "JSON Schema for agent inputs",
+          "additionalProperties": true
+        },
+        "outputs": {
+          "type": "object",
+          "description": "JSON Schema for agent outputs",
+          "additionalProperties": true
+        },
+        "determinism_mode": {
+          "type": "string",
+          "enum": ["strict", "best_effort", "none"],
+          "default": "strict",
+          "description": "Required determinism level."
+        }
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "required": ["tools", "network", "data_classes"],
+      "properties": {
+        "tools": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Allowlist of tool names this agent can invoke."
+        },
+        "models": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Allowlist of models this agent can access."
+        },
+        "network": {
+          "type": "object",
+          "properties": {
+            "allowed_domains": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "allow_public_internet": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        },
+        "data_classes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["public", "internal", "confidential", "restricted", "secret"]
+          },
+          "description": "Data classifications the agent is authorized to handle."
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "required": ["controls"],
+      "properties": {
+        "controls": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of governance control IDs (e.g., SOC2-CC6.1) this agent implements or is subject to."
+        },
+        "provenance_enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "retention_policy": {
+          "type": "string",
+          "enum": ["ephemeral", "audit_log", "permanent"],
+          "default": "audit_log"
+        }
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "required": ["gates"],
+      "properties": {
+        "gates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["suite", "threshold"],
+            "properties": {
+              "suite": { "type": "string" },
+              "threshold": { "type": "number" },
+              "critical": { "type": "boolean", "default": true }
+            }
+          }
+        },
+        "test_fixtures": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Paths to required test fixture files."
+        }
+      }
+    }
+  }
+}

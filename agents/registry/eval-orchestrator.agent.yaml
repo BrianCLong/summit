@@ -1,0 +1,30 @@
+identity:
+  name: "eval-orchestrator"
+  version: "1.0.0"
+  description: "Runs evaluation suites against agents and decides on promotion."
+  owner: "platform-engineering"
+  risk_tier: "high"
+
+interface:
+  inputs:
+    type: "object"
+    required: ["target_agent_id", "target_version"]
+  outputs:
+    type: "object"
+    required: ["pass", "score_card", "promotion_verdict"]
+  determinism_mode: "strict"
+
+capabilities:
+  tools: ["test-runner", "metrics-store", "registry-update"]
+  data_classes: ["internal"]
+  network:
+    allowed_domains: []
+
+governance:
+  controls: ["CI-CD-GATES", "QA-AUTO"]
+  provenance_enabled: true
+
+evaluation:
+  gates:
+    - suite: "self-test"
+      threshold: 1.0

@@ -1,0 +1,31 @@
+identity:
+  name: "claim-graph-builder"
+  version: "1.0.0"
+  description: "Extracts claims and entities from documents to build a provenance graph."
+  owner: "intel-team"
+  risk_tier: "medium"
+
+interface:
+  inputs:
+    type: "object"
+    required: ["document_ids"]
+  outputs:
+    type: "object"
+    required: ["graph_nodes", "graph_edges"]
+  determinism_mode: "best_effort"
+
+capabilities:
+  tools: ["text-extract", "ner-model", "relation-extractor"]
+  models: ["gpt-4o", "claude-3-5-sonnet"]
+  data_classes: ["internal", "confidential"]
+  network:
+    allowed_domains: []
+
+governance:
+  controls: ["DATA-INTEGRITY", "SOURCE-TRACKING"]
+  provenance_enabled: true
+
+evaluation:
+  gates:
+    - suite: "extraction-accuracy"
+      threshold: 0.95
