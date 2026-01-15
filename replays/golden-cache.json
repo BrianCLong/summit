@@ -1,0 +1,1 @@
+{"service": "intelgraph", "outcome": {"status": "success"}, "request": {"payload": {"cypher": "MATCH (n:Person) RETURN n"}}, "context": {}, "environment": {}}

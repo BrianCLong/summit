@@ -116,6 +116,14 @@ async function runMaestroReplay(
 }
 
 export async function runReplay(replayPath: string): Promise<ReplayRunResult> {
+  // AI Determinism / Replay-Only Mode Check
+  const isReplayOnly = process.env.ENABLE_QWEN_REPLAY_ONLY === 'true';
+  if (isReplayOnly) {
+     console.log('🔒 AI Replay-Only Mode Active');
+     // Ensure we fail fast if the replay file is missing (enforced below)
+     // and strict drift detection is enabled.
+  }
+
   const fullPath = path.resolve(replayPath);
   if (!fs.existsSync(fullPath)) {
     throw new Error(`Replay file not found: ${fullPath}`);
@@ -147,6 +155,18 @@ if (process.argv[1] && process.argv[1].includes('run-replay')) {
     .then((result) => {
       console.log(`Replay result: ${result.status}`);
       console.log(result.details);
+
+      const isReplayOnly = process.env.ENABLE_QWEN_REPLAY_ONLY === 'true';
+      if (isReplayOnly && result.status !== 'PASS') {
+        console.error('❌ AI Replay Failed in Determinism Mode');
+        console.error('   A cache miss or drift was detected.');
+        console.error('   Run locally with ENABLE_QWEN_RECORD=true to update fixtures.');
+        process.exit(1);
+      }
+
+      if (result.status === 'FAIL') {
+          process.exit(1);
+      }
     })
     .catch((error: unknown) => {
       console.error(error);

@@ -15,7 +15,9 @@
       "@intelgraph/maestro-sdk/*": ["packages/maestro-sdk/src/*"],
       "@summitsec/vcr-kit/*": ["packages/vcr-kit/src/*"],
       "@intelgraph/flags/*": ["libs/flags/node/*"],
-      "@intelgraph/audit/*": ["libs/audit/node/*"]
+      "@intelgraph/audit/*": ["libs/audit/node/*"],
+      "@ga-graphai/common-types": ["ga-graphai/packages/common-types/src/replay.js"],
+      "@ga-graphai/query-copilot/*": ["ga-graphai/packages/query-copilot/src/*"]
     }
   }
 }
