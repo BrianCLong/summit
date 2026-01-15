@@ -30,6 +30,34 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: summit-agent-cli
+    version: v1
+    path: prompts/agentic/summit-agent-cli@v1.md
+    sha256: ea60369afb8710777616942acaf1e6fc303da3f4ed851e89037860250d67faa1
+    description: Scaffold summit-agent CLI with plan/run/verify/ship and evidence receipts.
+    scope:
+      paths:
+        - packages/summit-agent/
+        - .lintstagedrc.json
+        - docs/summit-agent.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/agentic/
+        - prompts/registry.yaml
+      domains:
+        - cli
+        - governance
+        - agentic
+        - tooling
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md
