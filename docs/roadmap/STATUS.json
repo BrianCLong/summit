@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-15T05:49:22Z",
+  "revision_note": "Added first-mover governed agentic operating model spec in docs/strategy.",
   "initiatives": [
     {
       "id": "A",
