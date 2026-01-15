@@ -11,6 +11,7 @@ from typing import Any
 
 try:
     import httpx
+
     HTTPX_AVAILABLE = True
 except ImportError:
     HTTPX_AVAILABLE = False
@@ -19,6 +20,7 @@ except ImportError:
 @dataclass
 class LicenseCheckResult:
     """Result from license compliance check."""
+
     compliance_status: str  # allow, warn, block
     reason: str
     violations: list[dict[str, Any]]
@@ -36,17 +38,12 @@ class LicenseClient:
             base_url: License registry service URL
             authority_id: Authority identifier for policy enforcement
         """
-        self.base_url = base_url or os.environ.get(
-            "LICENSE_REGISTRY_URL", "http://localhost:4030"
-        )
-        self.authority_id = authority_id or os.environ.get(
-            "AUTHORITY_ID", "etl-assistant"
-        )
+        self.base_url = base_url or os.environ.get("LICENSE_REGISTRY_URL", "http://localhost:4030")
+        self.authority_id = authority_id or os.environ.get("AUTHORITY_ID", "etl-assistant")
 
         if not HTTPX_AVAILABLE:
             raise RuntimeError(
-                "httpx library required for license client. "
-                "Install with: pip install httpx"
+                "httpx library required for license client. Install with: pip install httpx"
             )
 
     async def check_compliance(

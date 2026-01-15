@@ -1,0 +1,92 @@
+{
+  "issue_number": 225,
+  "title": "NLP: Accuracy benchmark vs regex",
+  "url": "https://github.com/BrianCLong/summit/issues/225",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767059,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX00w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/documentation",
+      "name": "documentation",
+      "color": "0075ca",
+      "default": true,
+      "description": "Improvements or additions to documentation"
+    },
+    {
+      "id": 9074767070,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX03g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/enhancement",
+      "name": "enhancement",
+      "color": "a2eeef",
+      "default": true,
+      "description": "New feature or request"
+    },
+    {
+      "id": 9103342705,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn8cQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/AI",
+      "name": "AI",
+      "color": "bfdadc",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9108055754,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHmyg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/NLP",
+      "name": "NLP",
+      "color": "6f42c1",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:53:58Z",
+  "createdAt": "2025-08-14T04:53:58Z",
+  "classification": "feature",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11773,
+        "url": "https://github.com/BrianCLong/summit/pull/11773",
+        "mergedAt": "2025-11-16T21:51:34Z",
+        "title": "fix: Achieve zero TypeScript and ESLint no-undef errors + build improvements"
+      },
+      {
+        "number": 15258,
+        "url": "https://github.com/BrianCLong/summit/pull/15258",
+        "mergedAt": "2026-01-01T07:29:50Z",
+        "title": "Predictive Analytics and Multi-Agent Negotiation"
+      },
+      {
+        "number": 11915,
+        "url": "https://github.com/BrianCLong/summit/pull/11915",
+        "mergedAt": null,
+        "title": "Implement SLO-driven alerting system for Summit"
+      },
+      {
+        "number": 1266,
+        "url": "https://github.com/BrianCLong/summit/pull/1266",
+        "mergedAt": "2025-09-16T22:05:41Z",
+        "title": "chore(ci): finalization kit + protections"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

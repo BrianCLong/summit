@@ -6,7 +6,6 @@ import {
   NormalizedCacheObject,
 } from '@apollo/client';
 import { CircularProgress, Box } from '@mui/material';
-import { createApolloClient } from './createApolloClient';
 
 export function WithApollo({ children }: { children: React.ReactNode | React.ReactNode[] }) {
   const [client, setClient] =
@@ -14,7 +13,10 @@ export function WithApollo({ children }: { children: React.ReactNode | React.Rea
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    createApolloClient().then(setClient).catch(setError);
+    import('./createApolloClient')
+      .then(({ createApolloClient }) => createApolloClient())
+      .then(setClient)
+      .catch(setError);
   }, []);
 
   if (error) {

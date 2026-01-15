@@ -25,9 +25,15 @@ resource "aws_glue_catalog_table" "usage_events" {
   database_name = aws_glue_catalog_database.billing.name
   name          = "usage_events"
   table_type    = "EXTERNAL_TABLE"
-  parameters    = { classification = "parquet", "projection.enabled" = "true" }
+  parameters = {
+    classification      = "parquet"
+    "projection.enabled" = "true"
+    "metering.sinks"    = join(",", var.metering_sinks)
+    "storage.prefix"    = var.storage_prefix
+    "partition.tenant"  = var.tenant_partition_key
+  }
   storage_descriptor {
-    location      = "s3://${var.billing_bucket}/parquet/"
+    location      = "s3://${var.billing_bucket}/${var.storage_prefix}"
     input_format  = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
     output_format = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
     ser_de_info   = { name = "parquet", serialization_library = "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe" }
@@ -40,7 +46,10 @@ resource "aws_glue_catalog_table" "usage_events" {
       { name = "metadata",  type = "string" }
     ]
   }
-  partition_keys = [{ name = "ingest_date", type = "string" }, { name = "tenant_id_p", type = "string" }]
+  partition_keys = [
+    { name = var.date_partition_key, type = "string" },
+    { name = var.tenant_partition_key, type = "string" }
+  ]
 }
 
 resource "aws_athena_workgroup" "billing" {

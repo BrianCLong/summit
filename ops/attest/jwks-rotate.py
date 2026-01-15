@@ -119,7 +119,7 @@ class JWKSManager:
 
         for i, key in enumerate(keys[:2]):  # Max 2 samples
             sample = {
-                "sample_id": f"sample_{i+1}_{key['key_id']}",
+                "sample_id": f"sample_{i + 1}_{key['key_id']}",
                 "kid": key["key_id"],
                 "mock_token": f"eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSIsImtpZCI6IiIsIntTZVUu7C60.eyJyZXF1ZXN0SWQiOiJyZXFfMTcyNzM3NjE2NzEyMyIsInRlbmFudElkIjoiVEVOQU5UXzAwMSIsInRpbWVzdGFtcCI6IjIwMjUtMDktMjZUMjA6NTU6MTcuMTIzWiIsImlucHV0SGFzaCI6ImE4YjQ2YWViOWZkZjVlNmIiLCJvdXRwdXRIYXNoIjoiYzlkMmU0ZjZhM2I3OCIsIm1vZGVsIjoiY2xhdWRlLTMuNS1zb25uZXQiLCJjb3N0IjowLjAyMzQsImlzcyI6Im1jLXBsYXRmb3JtLXYwMzUiLCJhdWQiOiJtYy1jbGllbnRzIiwiaWF0IjoxNzI3Mzc2MTY3LCJleHAiOjE3MjczNzYxNjd9.{key['key_id'][:16]}mock_signature",
                 "payload_claims": {

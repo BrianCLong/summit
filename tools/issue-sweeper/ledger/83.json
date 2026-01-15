@@ -1,0 +1,203 @@
+{
+  "issue_number": 83,
+  "title": "Integrate Basic OSINT Connector (e.g., WHOIS API)",
+  "url": "https://github.com/BrianCLong/summit/issues/83",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    },
+    {
+      "id": 9095918371,
+      "node_id": "LA_kwDOPaNncM8AAAACHiizIw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:plugins",
+      "name": "area:plugins",
+      "color": "d93f0b",
+      "default": false,
+      "description": "Plugins area"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:13:29Z",
+  "createdAt": "2025-08-12T04:40:20Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12265,
+        "url": "https://github.com/BrianCLong/summit/pull/12265",
+        "mergedAt": "2025-12-18T03:22:38Z",
+        "title": "Add Financial Warfare Prompts (61-83)"
+      },
+      {
+        "number": 13322,
+        "url": "https://github.com/BrianCLong/summit/pull/13322",
+        "mergedAt": "2025-12-04T14:38:56Z",
+        "title": "fix: Resolve Remaining Critical Security Vulnerabilities"
+      },
+      {
+        "number": 15343,
+        "url": "https://github.com/BrianCLong/summit/pull/15343",
+        "mergedAt": "2026-01-01T11:37:28Z",
+        "title": "Migrate to Vitest and Enforce CI Gates"
+      },
+      {
+        "number": 15127,
+        "url": "https://github.com/BrianCLong/summit/pull/15127",
+        "mergedAt": "2025-12-30T21:20:45Z",
+        "title": "chore(deps): bump docker/setup-qemu-action from 2 to 3"
+      },
+      {
+        "number": 15275,
+        "url": "https://github.com/BrianCLong/summit/pull/15275",
+        "mergedAt": "2026-01-01T05:13:41Z",
+        "title": "Add GA operator handbook and incident runbooks"
+      },
+      {
+        "number": 15342,
+        "url": "https://github.com/BrianCLong/summit/pull/15342",
+        "mergedAt": "2026-01-01T08:47:00Z",
+        "title": "Create eight new product requirement documents"
+      },
+      {
+        "number": 1069,
+        "url": "https://github.com/BrianCLong/summit/pull/1069",
+        "mergedAt": "2025-08-29T15:51:42Z",
+        "title": "docs: describe temporal intelligence layer"
+      },
+      {
+        "number": 1136,
+        "url": "https://github.com/BrianCLong/summit/pull/1136",
+        "mergedAt": "2025-09-17T10:32:40Z",
+        "title": "chore(deps): bump cytoscape-popper from 2.0.0 to 4.0.1 in /client"
+      },
+      {
+        "number": 15341,
+        "url": "https://github.com/BrianCLong/summit/pull/15341",
+        "mergedAt": "2026-01-01T08:47:02Z",
+        "title": "Implement adversarial resistance and truth defense"
+      },
+      {
+        "number": 13311,
+        "url": "https://github.com/BrianCLong/summit/pull/13311",
+        "mergedAt": null,
+        "title": "deps(npm): bump @react-native/metro-config from 0.76.9 to 0.82.1"
+      },
+      {
+        "number": 10123,
+        "url": "https://github.com/BrianCLong/summit/pull/10123",
+        "mergedAt": "2025-10-14T08:40:19Z",
+        "title": "feat: add narrative simulation engine core"
+      },
+      {
+        "number": 10114,
+        "url": "https://github.com/BrianCLong/summit/pull/10114",
+        "mergedAt": "2025-10-14T10:40:23Z",
+        "title": "feat: harden intelgraph helm security controls"
+      },
+      {
+        "number": 10128,
+        "url": "https://github.com/BrianCLong/summit/pull/10128",
+        "mergedAt": "2025-10-14T08:39:43Z",
+        "title": "feat: add community engagement toolkit"
+      },
+      {
+        "number": 11877,
+        "url": "https://github.com/BrianCLong/summit/pull/11877",
+        "mergedAt": "2025-11-20T14:33:29Z",
+        "title": "Build GraphQL schema governance and validation"
+      },
+      {
+        "number": 1312,
+        "url": "https://github.com/BrianCLong/summit/pull/1312",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat(conductor): harden build orchestration fabric"
+      },
+      {
+        "number": 9795,
+        "url": "https://github.com/BrianCLong/summit/pull/9795",
+        "mergedAt": null,
+        "title": "Fix/bulk import lockfile sync"
+      },
+      {
+        "number": 9800,
+        "url": "https://github.com/BrianCLong/summit/pull/9800",
+        "mergedAt": null,
+        "title": "feat(monitoring): Enable error-budget monitoring and Maestro metrics export (EO-1, EO-2)"
+      },
+      {
+        "number": 1277,
+        "url": "https://github.com/BrianCLong/summit/pull/1277",
+        "mergedAt": "2025-09-19T02:20:58Z",
+        "title": "feat: Add Sprint 25 Day-1 deliverables"
+      },
+      {
+        "number": 9796,
+        "url": "https://github.com/BrianCLong/summit/pull/9796",
+        "mergedAt": "2025-10-03T03:51:08Z",
+        "title": "fix: sync lockfile for CI bulk import"
+      },
+      {
+        "number": 11872,
+        "url": "https://github.com/BrianCLong/summit/pull/11872",
+        "mergedAt": "2025-11-20T14:34:03Z",
+        "title": "Build autotriage engine for issues and bugs"
+      },
+      {
+        "number": 1301,
+        "url": "https://github.com/BrianCLong/summit/pull/1301",
+        "mergedAt": "2025-09-23T06:38:37Z",
+        "title": "IntelGraph salvage: total recapture → promote key artifacts"
+      },
+      {
+        "number": 13042,
+        "url": "https://github.com/BrianCLong/summit/pull/13042",
+        "mergedAt": "2025-12-01T19:17:12Z",
+        "title": "chore: Finalize CI/CD consolidation and cleanup"
+      },
+      {
+        "number": 1278,
+        "url": "https://github.com/BrianCLong/summit/pull/1278",
+        "mergedAt": "2025-09-19T02:28:07Z",
+        "title": "feat: Sprint 25 Day-1 Deliverables"
+      },
+      {
+        "number": 1300,
+        "url": "https://github.com/BrianCLong/summit/pull/1300",
+        "mergedAt": "2025-09-23T06:47:22Z",
+        "title": "Total Recapture: enterprise-ready green merge to main"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

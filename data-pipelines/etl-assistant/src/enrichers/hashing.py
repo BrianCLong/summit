@@ -2,7 +2,7 @@
 
 import hashlib
 import json
-from typing import Any, Dict, Optional
+from typing import Any
 
 from .base import BaseEnricher, EnricherResult, EnrichmentContext
 
@@ -20,16 +20,16 @@ class HashingEnricher(BaseEnricher):
     with stubs for advanced hashing (pHash, ssdeep).
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         super().__init__(config)
-        self.enabled = self.config.get('enabled', True)
-        self.hash_algorithms = self.config.get('hash_algorithms', ['sha256'])
-        self.hash_fields = self.config.get('hash_fields', [])  # Specific fields to hash
-        self.hash_all_content = self.config.get('hash_all_content', True)
-        self.enable_perceptual = self.config.get('enable_perceptual', False)
-        self.enable_fuzzy = self.config.get('enable_fuzzy', False)
+        self.enabled = self.config.get("enabled", True)
+        self.hash_algorithms = self.config.get("hash_algorithms", ["sha256"])
+        self.hash_fields = self.config.get("hash_fields", [])  # Specific fields to hash
+        self.hash_all_content = self.config.get("hash_all_content", True)
+        self.enable_perceptual = self.config.get("enable_perceptual", False)
+        self.enable_fuzzy = self.config.get("enable_fuzzy", False)
 
-    def can_enrich(self, data: Dict[str, Any]) -> bool:
+    def can_enrich(self, data: dict[str, Any]) -> bool:
         """Check if data contains hashable content."""
         if not self.enabled:
             return False
@@ -37,7 +37,7 @@ class HashingEnricher(BaseEnricher):
         # Always can hash data
         return bool(data)
 
-    def enrich(self, data: Dict[str, Any], context: EnrichmentContext) -> EnricherResult:
+    def enrich(self, data: dict[str, Any], context: EnrichmentContext) -> EnricherResult:
         """Generate hashes for content."""
         result = EnricherResult(success=True)
 
@@ -47,8 +47,8 @@ class HashingEnricher(BaseEnricher):
             # Generate content hash of entire record
             if self.hash_all_content:
                 content_hash = self._hash_content(data)
-                hash_data['content_hash'] = content_hash
-                result.metadata['content_hash_algorithm'] = 'sha256'
+                hash_data["content_hash"] = content_hash
+                result.metadata["content_hash_algorithm"] = "sha256"
 
             # Hash specific fields
             if self.hash_fields:
@@ -57,29 +57,29 @@ class HashingEnricher(BaseEnricher):
                     if field in data:
                         field_hash = self._hash_value(data[field])
                         field_hashes[f"{field}_hash"] = field_hash
-                hash_data['field_hashes'] = field_hashes
+                hash_data["field_hashes"] = field_hashes
 
             # Perceptual hashing for images (stub)
             if self.enable_perceptual:
-                if 'image' in data or 'image_url' in data:
+                if "image" in data or "image_url" in data:
                     phash = self._perceptual_hash(data)
-                    hash_data['perceptual_hash'] = phash
-                    result.metadata['perceptual_hash_generated'] = True
+                    hash_data["perceptual_hash"] = phash
+                    result.metadata["perceptual_hash_generated"] = True
 
             # Fuzzy hashing for similarity matching (stub)
             if self.enable_fuzzy:
                 fuzzy_hash = self._fuzzy_hash(data)
-                hash_data['fuzzy_hash'] = fuzzy_hash
-                result.metadata['fuzzy_hash_generated'] = True
+                hash_data["fuzzy_hash"] = fuzzy_hash
+                result.metadata["fuzzy_hash_generated"] = True
 
-            result.add_enrichment('hashes', hash_data)
+            result.add_enrichment("hashes", hash_data)
 
         except Exception as e:
-            result.add_error(f"Hashing failed: {str(e)}")
+            result.add_error(f"Hashing failed: {e!s}")
 
         return result
 
-    def _hash_content(self, data: Dict[str, Any]) -> Dict[str, str]:
+    def _hash_content(self, data: dict[str, Any]) -> dict[str, str]:
         """Generate content hash of data."""
         hashes = {}
 
@@ -88,16 +88,16 @@ class HashingEnricher(BaseEnricher):
 
         # Generate hashes with different algorithms
         for algorithm in self.hash_algorithms:
-            if algorithm == 'sha256':
-                hash_obj = hashlib.sha256(content.encode('utf-8'))
-                hashes['sha256'] = hash_obj.hexdigest()
-            elif algorithm == 'sha512':
-                hash_obj = hashlib.sha512(content.encode('utf-8'))
-                hashes['sha512'] = hash_obj.hexdigest()
-            elif algorithm == 'md5':
+            if algorithm == "sha256":
+                hash_obj = hashlib.sha256(content.encode("utf-8"))
+                hashes["sha256"] = hash_obj.hexdigest()
+            elif algorithm == "sha512":
+                hash_obj = hashlib.sha512(content.encode("utf-8"))
+                hashes["sha512"] = hash_obj.hexdigest()
+            elif algorithm == "md5":
                 # MD5 is weak but still useful for non-security purposes
-                hash_obj = hashlib.md5(content.encode('utf-8'))
-                hashes['md5'] = hash_obj.hexdigest()
+                hash_obj = hashlib.md5(content.encode("utf-8"))
+                hashes["md5"] = hash_obj.hexdigest()
 
         return hashes
 
@@ -107,10 +107,10 @@ class HashingEnricher(BaseEnricher):
         value_str = str(value) if not isinstance(value, str) else value
 
         # Generate SHA-256 hash
-        hash_obj = hashlib.sha256(value_str.encode('utf-8'))
+        hash_obj = hashlib.sha256(value_str.encode("utf-8"))
         return hash_obj.hexdigest()
 
-    def _perceptual_hash(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def _perceptual_hash(self, data: dict[str, Any]) -> dict[str, Any]:
         """
         Generate perceptual hash for images.
 
@@ -118,13 +118,13 @@ class HashingEnricher(BaseEnricher):
         In production, use ImageHash library with pHash, dHash, or aHash.
         """
         return {
-            'phash': '0000000000000000',  # Dummy 64-bit hash
-            'algorithm': 'phash-stub',
-            'is_stub': True,
-            'note': 'Integrate with ImageHash library for real pHash',
+            "phash": "0000000000000000",  # Dummy 64-bit hash
+            "algorithm": "phash-stub",
+            "is_stub": True,
+            "note": "Integrate with ImageHash library for real pHash",
         }
 
-    def _fuzzy_hash(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def _fuzzy_hash(self, data: dict[str, Any]) -> dict[str, Any]:
         """
         Generate fuzzy hash for similarity matching.
 
@@ -138,11 +138,11 @@ class HashingEnricher(BaseEnricher):
             char_freq[char] = char_freq.get(char, 0) + 1
 
         # Create a simple signature
-        signature = ''.join([f"{ord(c):02x}" for c in sorted(char_freq.keys())[:8]])
+        signature = "".join([f"{ord(c):02x}" for c in sorted(char_freq.keys())[:8]])
 
         return {
-            'fuzzy_hash': f"3:{signature}:{signature}",  # ssdeep-like format
-            'algorithm': 'fuzzy-stub',
-            'is_stub': True,
-            'note': 'Integrate with ssdeep or TLSH for real fuzzy hashing',
+            "fuzzy_hash": f"3:{signature}:{signature}",  # ssdeep-like format
+            "algorithm": "fuzzy-stub",
+            "is_stub": True,
+            "note": "Integrate with ssdeep or TLSH for real fuzzy hashing",
         }

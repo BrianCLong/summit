@@ -1,0 +1,21 @@
+{
+  "issue_number": 12052,
+  "title": "Implement cost optimization and resource efficiency",
+  "url": "https://github.com/BrianCLong/summit/pull/12052",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-11-22T01:29:58Z",
+  "createdAt": "2025-11-21T01:31:41Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

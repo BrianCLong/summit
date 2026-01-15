@@ -1,0 +1,40 @@
+{
+  "issue_number": 626,
+  "title": "docs: update documentation",
+  "url": "https://github.com/BrianCLong/summit/pull/626",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-19T02:39:14Z",
+  "createdAt": "2025-08-19T02:25:09Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11233,
+        "url": "https://github.com/BrianCLong/summit/pull/11233",
+        "mergedAt": "2025-10-16T16:05:19Z",
+        "title": "fix/msw vector adapter typings"
+      },
+      {
+        "number": 615,
+        "url": "https://github.com/BrianCLong/summit/pull/615",
+        "mergedAt": "2025-08-18T14:31:47Z",
+        "title": "chore(deps): bump web-vitals from 3.5.2 to 5.1.0 in /client"
+      },
+      {
+        "number": 740,
+        "url": "https://github.com/BrianCLong/summit/pull/740",
+        "mergedAt": "2025-08-29T10:30:24Z",
+        "title": "chore(deps): bump graphql-ws from 5.16.2 to 6.0.6"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

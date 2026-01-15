@@ -3,7 +3,8 @@ Ensemble detector that combines results from individual modality detectors.
 """
 
 import logging
-from typing import Any, Dict, Iterable, List
+from collections.abc import Iterable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -15,12 +16,12 @@ class EnsembleDetector:
         self.detectors = list(detectors)
         logger.info("EnsembleDetector initialized with %d detectors", len(self.detectors))
 
-    async def detect(self, media_data: bytes, enable_explanation: bool = False) -> Dict[str, Any]:
+    async def detect(self, media_data: bytes, enable_explanation: bool = False) -> dict[str, Any]:
         if not self.detectors:
             raise ValueError("No detectors configured for ensemble")
 
-        scores: List[float] = []
-        explanations: List[Dict[str, Any]] = []
+        scores: list[float] = []
+        explanations: list[dict[str, Any]] = []
 
         for detector in self.detectors:
             result = await detector.detect(media_data, enable_explanation=enable_explanation)
@@ -31,7 +32,7 @@ class EnsembleDetector:
         avg_score = sum(scores) / len(scores)
         is_synthetic = avg_score >= 0.5
 
-        response: Dict[str, Any] = {
+        response: dict[str, Any] = {
             "is_synthetic": is_synthetic,
             "confidence_score": avg_score,
             "model_version": "ensemble-1.0.0",

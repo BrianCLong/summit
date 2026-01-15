@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import importlib.util
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, List
 
 from .runner import RobustnessRun
 
@@ -16,8 +16,8 @@ def _matplotlib():
     return plt
 
 
-def _pareto_front(runs: Iterable[RobustnessRun]) -> List[RobustnessRun]:
-    frontier: List[RobustnessRun] = []
+def _pareto_front(runs: Iterable[RobustnessRun]) -> list[RobustnessRun]:
+    frontier: list[RobustnessRun] = []
     for candidate in runs:
         dominated = False
         for other in runs:

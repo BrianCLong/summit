@@ -1,0 +1,239 @@
+{
+  "issue_number": 42,
+  "title": "M4: WHOIS enrichment connector (domain → entity)",
+  "url": "https://github.com/BrianCLong/summit/issues/42",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051669,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5lQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:ingest",
+      "name": "area:ingest",
+      "color": "ededed",
+      "default": false,
+      "description": "Data ingestion"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:12:11Z",
+  "createdAt": "2025-08-12T00:15:47Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14825,
+        "url": "https://github.com/BrianCLong/summit/pull/14825",
+        "mergedAt": "2025-12-29T16:14:08Z",
+        "title": "Feature 42: SCIM 2.0 User & Group Provisioning"
+      },
+      {
+        "number": 12263,
+        "url": "https://github.com/BrianCLong/summit/pull/12263",
+        "mergedAt": "2025-12-18T03:23:04Z",
+        "title": "Final Polish: Prompts 41-48 Implementation"
+      },
+      {
+        "number": 15314,
+        "url": "https://github.com/BrianCLong/summit/pull/15314",
+        "mergedAt": "2026-01-01T11:39:25Z",
+        "title": "Initialize Adaptive Advantage Innovation Sprint"
+      },
+      {
+        "number": 14620,
+        "url": "https://github.com/BrianCLong/summit/pull/14620",
+        "mergedAt": "2025-12-27T06:04:45Z",
+        "title": "chore(deps-dev): Bump werkzeug from 3.1.3 to 3.1.4 in /modules/connector-sdk-s3csv"
+      },
+      {
+        "number": 15315,
+        "url": "https://github.com/BrianCLong/summit/pull/15315",
+        "mergedAt": null,
+        "title": "Initialize Pilot Design Innovation Sprint artifacts"
+      },
+      {
+        "number": 15318,
+        "url": "https://github.com/BrianCLong/summit/pull/15318",
+        "mergedAt": null,
+        "title": "Innovative Information Supply Chain: Epistemic Law Engine"
+      },
+      {
+        "number": 15324,
+        "url": "https://github.com/BrianCLong/summit/pull/15324",
+        "mergedAt": null,
+        "title": "Add continuity and succession safeguards"
+      },
+      {
+        "number": 13146,
+        "url": "https://github.com/BrianCLong/summit/pull/13146",
+        "mergedAt": "2025-12-03T04:04:08Z",
+        "title": "C3 - Migration Safety Simulator"
+      },
+      {
+        "number": 1694,
+        "url": "https://github.com/BrianCLong/summit/pull/1694",
+        "mergedAt": "2025-11-20T22:38:12Z",
+        "title": "feat: add immutable training run capsule toolkit"
+      },
+      {
+        "number": 15316,
+        "url": "https://github.com/BrianCLong/summit/pull/15316",
+        "mergedAt": "2026-01-01T11:39:03Z",
+        "title": "feat: Economic Innovation Sprint artifacts"
+      },
+      {
+        "number": 1209,
+        "url": "https://github.com/BrianCLong/summit/pull/1209",
+        "mergedAt": null,
+        "title": "chore(deps): bump cryptography from 42.0.8 to 45.0.7"
+      },
+      {
+        "number": 12024,
+        "url": "https://github.com/BrianCLong/summit/pull/12024",
+        "mergedAt": "2025-11-20T15:29:43Z",
+        "title": "Implement quantum-resistant cryptography and algorithms"
+      },
+      {
+        "number": 1179,
+        "url": "https://github.com/BrianCLong/summit/pull/1179",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps-dev): bump @typescript-eslint/parser from 6.21.0 to 8.42.0 in /client"
+      },
+      {
+        "number": 11841,
+        "url": "https://github.com/BrianCLong/summit/pull/11841",
+        "mergedAt": "2025-11-20T09:48:29Z",
+        "title": "feat: implement IntelGraph ML benchmarking and auto-tuning stack"
+      },
+      {
+        "number": 1173,
+        "url": "https://github.com/BrianCLong/summit/pull/1173",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump @typescript-eslint/eslint-plugin from 6.21.0 to 8.42.0 in /server"
+      },
+      {
+        "number": 10085,
+        "url": "https://github.com/BrianCLong/summit/pull/10085",
+        "mergedAt": null,
+        "title": "feat: add policy compliance simulation analytics"
+      },
+      {
+        "number": 1355,
+        "url": "https://github.com/BrianCLong/summit/pull/1355",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "chore: add hardened ci guardrails"
+      },
+      {
+        "number": 13148,
+        "url": "https://github.com/BrianCLong/summit/pull/13148",
+        "mergedAt": "2025-12-17T05:36:11Z",
+        "title": "C6 — CI Time Budget Enforcer"
+      },
+      {
+        "number": 1077,
+        "url": "https://github.com/BrianCLong/summit/pull/1077",
+        "mergedAt": "2025-08-29T20:17:32Z",
+        "title": "feat: GA-Core Integration Train - Complete Enterprise Intelligence Platform"
+      },
+      {
+        "number": 10103,
+        "url": "https://github.com/BrianCLong/summit/pull/10103",
+        "mergedAt": "2025-10-14T11:53:04Z",
+        "title": "feat: add zero-touch compliance enforcement system"
+      },
+      {
+        "number": 1327,
+        "url": "https://github.com/BrianCLong/summit/pull/1327",
+        "mergedAt": "2025-09-23T06:30:52Z",
+        "title": "chore(deps-dev): bump ts-jest from 29.4.1 to 29.4.4 in /client"
+      },
+      {
+        "number": 1311,
+        "url": "https://github.com/BrianCLong/summit/pull/1311",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat: orchestrate zero spend routing"
+      },
+      {
+        "number": 11913,
+        "url": "https://github.com/BrianCLong/summit/pull/11913",
+        "mergedAt": "2025-11-20T10:25:05Z",
+        "title": "Improve test coverage and organization"
+      },
+      {
+        "number": 13192,
+        "url": "https://github.com/BrianCLong/summit/pull/13192",
+        "mergedAt": "2025-12-04T15:38:41Z",
+        "title": "Add HUMINT source management and debrief workflows"
+      },
+      {
+        "number": 13165,
+        "url": "https://github.com/BrianCLong/summit/pull/13165",
+        "mergedAt": "2025-12-17T05:34:42Z",
+        "title": "Unified prompt governance dashboard 1"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 9795,
+        "url": "https://github.com/BrianCLong/summit/pull/9795",
+        "mergedAt": null,
+        "title": "Fix/bulk import lockfile sync"
+      },
+      {
+        "number": 1272,
+        "url": "https://github.com/BrianCLong/summit/pull/1272",
+        "mergedAt": "2025-09-19T02:20:40Z",
+        "title": "chore(deps-dev): bump @typescript-eslint/eslint-plugin from 6.21.0 to 8.44.0 in /client"
+      },
+      {
+        "number": 1279,
+        "url": "https://github.com/BrianCLong/summit/pull/1279",
+        "mergedAt": null,
+        "title": "feat(ga): artifacts pack for v1.0.0"
+      },
+      {
+        "number": 9800,
+        "url": "https://github.com/BrianCLong/summit/pull/9800",
+        "mergedAt": null,
+        "title": "feat(monitoring): Enable error-budget monitoring and Maestro metrics export (EO-1, EO-2)"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

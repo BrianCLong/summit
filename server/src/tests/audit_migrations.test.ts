@@ -2,7 +2,7 @@ import { describe, it, expect } from '@jest/globals';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { auditMigrations, calculateHash } from '../scripts/audit_migrations.js';
+import { auditMigrations, calculateHash } from '../../scripts/audit_migrations.js';
 
 const createTempDir = (): string => fs.mkdtempSync(path.join(os.tmpdir(), 'audit-migrations-'));
 

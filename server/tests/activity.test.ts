@@ -2,13 +2,15 @@ import request from 'supertest';
 import { createApp } from '../src/app';
 import { describe, it, expect, beforeAll } from '@jest/globals';
 
-let app: any;
+const NO_NETWORK_LISTEN = process.env.NO_NETWORK_LISTEN === 'true';
+const describeIf = NO_NETWORK_LISTEN ? describe.skip : describe;
 
-beforeAll(async () => {
-  app = await createApp();
-});
+describeIf('Activity Feed', () => {
+  let app: any;
 
-describe('Activity Feed', () => {
+  beforeAll(async () => {
+    app = await createApp();
+  });
   // In dev mode (default for tests), auth middleware mocks user if no token or invalid token
   // provided. We can just pass a dummy token.
   let token = 'mock-token';

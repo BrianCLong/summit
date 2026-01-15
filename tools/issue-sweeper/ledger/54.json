@@ -1,0 +1,230 @@
+{
+  "issue_number": 54,
+  "title": "CI: add Node 20 workflow (lint, build, test)",
+  "url": "https://github.com/BrianCLong/summit/issues/54",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T02:39:42Z",
+  "createdAt": "2025-08-12T02:37:55Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14534,
+        "url": "https://github.com/BrianCLong/summit/pull/14534",
+        "mergedAt": "2025-12-27T00:21:46Z",
+        "title": "Sprint N+54: Guarded Agent Incubation Infrastructure"
+      },
+      {
+        "number": 15127,
+        "url": "https://github.com/BrianCLong/summit/pull/15127",
+        "mergedAt": "2025-12-30T21:20:45Z",
+        "title": "chore(deps): bump docker/setup-qemu-action from 2 to 3"
+      },
+      {
+        "number": 12307,
+        "url": "https://github.com/BrianCLong/summit/pull/12307",
+        "mergedAt": "2025-12-18T03:11:14Z",
+        "title": "Revival: GraphQL Security & Performance Overhaul"
+      },
+      {
+        "number": 15172,
+        "url": "https://github.com/BrianCLong/summit/pull/15172",
+        "mergedAt": "2025-12-31T03:31:39Z",
+        "title": "Prepare Summit MVP for general availability"
+      },
+      {
+        "number": 15294,
+        "url": "https://github.com/BrianCLong/summit/pull/15294",
+        "mergedAt": "2026-01-01T05:45:57Z",
+        "title": "Set up autonomous Summit priority system"
+      },
+      {
+        "number": 15290,
+        "url": "https://github.com/BrianCLong/summit/pull/15290",
+        "mergedAt": "2026-01-01T05:46:03Z",
+        "title": "Add Claude Code prompt for priority work"
+      },
+      {
+        "number": 14375,
+        "url": "https://github.com/BrianCLong/summit/pull/14375",
+        "mergedAt": "2025-12-23T04:35:28Z",
+        "title": "Bump playwright from 1.41.1 to 1.55.1 in /services/reporting"
+      },
+      {
+        "number": 13365,
+        "url": "https://github.com/BrianCLong/summit/pull/13365",
+        "mergedAt": "2025-12-06T09:54:02Z",
+        "title": "build(deps): bump playwright and @playwright/test in /intelgraph-mvp/ui"
+      },
+      {
+        "number": 11784,
+        "url": "https://github.com/BrianCLong/summit/pull/11784",
+        "mergedAt": "2025-10-27T10:54:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 21 updates"
+      },
+      {
+        "number": 11776,
+        "url": "https://github.com/BrianCLong/summit/pull/11776",
+        "mergedAt": "2025-10-20T19:09:45Z",
+        "title": "chore(deps): bump playwright and @playwright/test in /intelgraph"
+      },
+      {
+        "number": 11898,
+        "url": "https://github.com/BrianCLong/summit/pull/11898",
+        "mergedAt": null,
+        "title": "Unify apps with graph timeline map interface"
+      },
+      {
+        "number": 1322,
+        "url": "https://github.com/BrianCLong/summit/pull/1322",
+        "mergedAt": "2025-09-23T06:10:11Z",
+        "title": "chore(deps): bump @opentelemetry/auto-instrumentations-node from 0.63.0 to 0.64.1"
+      },
+      {
+        "number": 11839,
+        "url": "https://github.com/BrianCLong/summit/pull/11839",
+        "mergedAt": "2025-11-20T09:47:36Z",
+        "title": "Docs: refresh onboarding and runbooks"
+      },
+      {
+        "number": 1152,
+        "url": "https://github.com/BrianCLong/summit/pull/1152",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump @playwright/test from 1.54.2 to 1.55.0 in /server"
+      },
+      {
+        "number": 11912,
+        "url": "https://github.com/BrianCLong/summit/pull/11912",
+        "mergedAt": null,
+        "title": "Implement structured logging with correlation IDs"
+      },
+      {
+        "number": 1147,
+        "url": "https://github.com/BrianCLong/summit/pull/1147",
+        "mergedAt": "2025-09-17T10:32:40Z",
+        "title": "chore(deps): bump cytoscape-navigator from 1.3.3 to 2.0.2 in /client"
+      },
+      {
+        "number": 1169,
+        "url": "https://github.com/BrianCLong/summit/pull/1169",
+        "mergedAt": null,
+        "title": "chore(deps): bump @opentelemetry/auto-instrumentations-node from 0.39.4 to 0.62.2 in /server"
+      },
+      {
+        "number": 11878,
+        "url": "https://github.com/BrianCLong/summit/pull/11878",
+        "mergedAt": null,
+        "title": "Consolidate CLI and assistant tools into Summit CLI"
+      },
+      {
+        "number": 13058,
+        "url": "https://github.com/BrianCLong/summit/pull/13058",
+        "mergedAt": "2025-12-04T15:40:49Z",
+        "title": "Add delivery guardrails workflows and release assets"
+      },
+      {
+        "number": 10101,
+        "url": "https://github.com/BrianCLong/summit/pull/10101",
+        "mergedAt": "2025-10-14T13:05:03Z",
+        "title": "feat(policy): add governance policy backtesting engine"
+      },
+      {
+        "number": 1352,
+        "url": "https://github.com/BrianCLong/summit/pull/1352",
+        "mergedAt": "2025-09-23T06:56:06Z",
+        "title": "chore(deps): bump parse-url from 6.0.5 to 8.1.0"
+      },
+      {
+        "number": 13165,
+        "url": "https://github.com/BrianCLong/summit/pull/13165",
+        "mergedAt": "2025-12-17T05:34:42Z",
+        "title": "Unified prompt governance dashboard 1"
+      },
+      {
+        "number": 11891,
+        "url": "https://github.com/BrianCLong/summit/pull/11891",
+        "mergedAt": null,
+        "title": "Build Geopolitical Risk Intelligence Platform"
+      },
+      {
+        "number": 15339,
+        "url": "https://github.com/BrianCLong/summit/pull/15339",
+        "mergedAt": "2026-01-01T11:37:58Z",
+        "title": "feat: leverage optimization and friction reduction"
+      },
+      {
+        "number": 1297,
+        "url": "https://github.com/BrianCLong/summit/pull/1297",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "feat(phase-3): implement comprehensive test strategy hardening"
+      },
+      {
+        "number": 1286,
+        "url": "https://github.com/BrianCLong/summit/pull/1286",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "feat(phase-3): comprehensive test strategy hardening"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      },
+      {
+        "number": 13188,
+        "url": "https://github.com/BrianCLong/summit/pull/13188",
+        "mergedAt": "2025-12-04T15:38:53Z",
+        "title": "Build cross-platform TypeScript CLI for graph queries"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 1191,
+        "url": "https://github.com/BrianCLong/summit/pull/1191",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps-dev): bump eslint-config-next from 14.2.32 to 15.5.2"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

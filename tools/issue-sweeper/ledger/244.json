@@ -1,0 +1,146 @@
+{
+  "issue_number": 244,
+  "title": "GraphQL Auth directives & guards",
+  "url": "https://github.com/BrianCLong/summit/issues/244",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767070,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX03g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/enhancement",
+      "name": "enhancement",
+      "color": "a2eeef",
+      "default": true,
+      "description": "New feature or request"
+    },
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-14T04:54:28Z",
+  "createdAt": "2025-08-14T04:54:28Z",
+  "classification": "feature",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13075,
+        "url": "https://github.com/BrianCLong/summit/pull/13075",
+        "mergedAt": "2025-12-03T02:05:47Z",
+        "title": "Security and Compliance Pass"
+      },
+      {
+        "number": 15260,
+        "url": "https://github.com/BrianCLong/summit/pull/15260",
+        "mergedAt": "2026-01-01T07:29:44Z",
+        "title": "Ecosystem integrations and export transparency"
+      },
+      {
+        "number": 11926,
+        "url": "https://github.com/BrianCLong/summit/pull/11926",
+        "mergedAt": "2025-11-20T10:20:02Z",
+        "title": "Build natural language to graph query translator"
+      },
+      {
+        "number": 13173,
+        "url": "https://github.com/BrianCLong/summit/pull/13173",
+        "mergedAt": "2025-12-04T15:39:21Z",
+        "title": "Harden triplet runtime with adversarial attestation moats"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 1331,
+        "url": "https://github.com/BrianCLong/summit/pull/1331",
+        "mergedAt": "2025-09-23T17:10:18Z",
+        "title": "feat: add crystal orchestration services"
+      },
+      {
+        "number": 9795,
+        "url": "https://github.com/BrianCLong/summit/pull/9795",
+        "mergedAt": null,
+        "title": "Fix/bulk import lockfile sync"
+      },
+      {
+        "number": 9800,
+        "url": "https://github.com/BrianCLong/summit/pull/9800",
+        "mergedAt": null,
+        "title": "feat(monitoring): Enable error-budget monitoring and Maestro metrics export (EO-1, EO-2)"
+      },
+      {
+        "number": 9796,
+        "url": "https://github.com/BrianCLong/summit/pull/9796",
+        "mergedAt": "2025-10-03T03:51:08Z",
+        "title": "fix: sync lockfile for CI bulk import"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 1301,
+        "url": "https://github.com/BrianCLong/summit/pull/1301",
+        "mergedAt": "2025-09-23T06:38:37Z",
+        "title": "IntelGraph salvage: total recapture → promote key artifacts"
+      },
+      {
+        "number": 1086,
+        "url": "https://github.com/BrianCLong/summit/pull/1086",
+        "mergedAt": null,
+        "title": "Release 2.5.0: Grafana Release Health dashboard + Playwright smoke pack"
+      },
+      {
+        "number": 1262,
+        "url": "https://github.com/BrianCLong/summit/pull/1262",
+        "mergedAt": "2025-09-19T02:22:35Z",
+        "title": "Release 2.5 dash: merge into merge/all-to-main-20250915-022508 with UI/docs from feature"
+      },
+      {
+        "number": 1300,
+        "url": "https://github.com/BrianCLong/summit/pull/1300",
+        "mergedAt": "2025-09-23T06:47:22Z",
+        "title": "Total Recapture: enterprise-ready green merge to main"
+      },
+      {
+        "number": 1085,
+        "url": "https://github.com/BrianCLong/summit/pull/1085",
+        "mergedAt": null,
+        "title": "chore(compat): seed GraphQL N-1 and N-2\nbaselines for CI schema checks"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

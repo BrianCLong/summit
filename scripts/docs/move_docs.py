@@ -5,14 +5,13 @@ import os
 import re
 import subprocess
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DOCS_ROOT = REPO_ROOT / "docs"
 META_DIR = DOCS_ROOT / "_meta"
 
 # Heuristic routing rules based on filename keywords
-CATEGORY_RULES: List[Tuple[str, str]] = [
+CATEGORY_RULES: list[tuple[str, str]] = [
     # Standards
     (r"(?i)contributing|code_of_conduct|repository-structure|engineering_standard", "standards"),
     # Releases
@@ -28,7 +27,10 @@ CATEGORY_RULES: List[Tuple[str, str]] = [
     # Plans
     (r"(?i)plan|sprint|merge[-_ ]?train|merge[-_ ]plan|roadmap|next", "plans"),
     # Reports (bugs, performance, validation, completion)
-    (r"(?i)bug[-_ ]bash|report|validation|perf|performance|summary|certificate|completion|observ(ation|ability)", "reports"),
+    (
+        r"(?i)bug[-_ ]bash|report|validation|perf|performance|summary|certificate|completion|observ(ation|ability)",
+        "reports",
+    ),
     # Architecture
     (r"(?i)architecture|ecosystem|overview|standard_v\d+", "architecture"),
     # Research
@@ -37,35 +39,35 @@ CATEGORY_RULES: List[Tuple[str, str]] = [
     (r"(?i)announcement|announce|news", "misc"),
 ]
 
-PRODUCT_SUBRULES: List[Tuple[str, str]] = [
+PRODUCT_SUBRULES: list[tuple[str, str]] = [
     (r"(?i)\bprd\b|platform PRD|PRD", "prd"),
     (r"(?i)spec\b|ui[-_ ]spec|api[-_ ]spec", "specs"),
     (r"(?i)template", "templates"),
 ]
 
-REPORTS_SUBRULES: List[Tuple[str, str]] = [
+REPORTS_SUBRULES: list[tuple[str, str]] = [
     (r"(?i)perf|performance|k6|latency|baseline", "perf"),
 ]
 
-PLANS_SUBRULES: List[Tuple[str, str]] = [
+PLANS_SUBRULES: list[tuple[str, str]] = [
     (r"(?i)sprint", "sprints"),
 ]
 
-AMBIGUOUS_PLACEMENTS: Dict[str, str] = {
+AMBIGUOUS_PLACEMENTS: dict[str, str] = {
     "INTELGRAPH_ENGINEERING_STANDARD_V4.md": "standards",
     "UI.md": "product/specs",
 }
 
 SKIP_FILES = {
-    "README.md",   # keep at root
-    "LICENSE",     # keep at root
-    "SECURITY.md", # keep at root for GitHub security policy
+    "README.md",  # keep at root
+    "LICENSE",  # keep at root
+    "SECURITY.md",  # keep at root for GitHub security policy
 }
 
 DOC_EXTS = {".md", ".markdown", ".mdx", ".txt"}
 
 
-def infer_category(relname: str) -> Tuple[str, str]:
+def infer_category(relname: str) -> tuple[str, str]:
     name = relname
     # Explicit ambiguous placements
     if name in AMBIGUOUS_PLACEMENTS:
@@ -79,21 +81,24 @@ def infer_category(relname: str) -> Tuple[str, str]:
             if category == "product":
                 for sp, sc in PRODUCT_SUBRULES:
                     if re.search(sp, name):
-                        sub = sc; break
+                        sub = sc
+                        break
             elif category == "reports":
                 for sp, sc in REPORTS_SUBRULES:
                     if re.search(sp, name):
-                        sub = sc; break
+                        sub = sc
+                        break
             elif category == "plans":
                 for sp, sc in PLANS_SUBRULES:
                     if re.search(sp, name):
-                        sub = sc; break
+                        sub = sc
+                        break
             return f"{category}/{sub}" if sub else category, pattern
 
     return "misc", "fallback"
 
 
-def discover_root_docs() -> List[Path]:
+def discover_root_docs() -> list[Path]:
     items = []
     for entry in REPO_ROOT.iterdir():
         if entry.is_dir():
@@ -105,8 +110,8 @@ def discover_root_docs() -> List[Path]:
     return items
 
 
-def build_mapping(files: List[Path]) -> Dict[str, Dict[str, str]]:
-    mapping: Dict[str, Dict[str, str]] = {}
+def build_mapping(files: list[Path]) -> dict[str, dict[str, str]]:
+    mapping: dict[str, dict[str, str]] = {}
     for f in files:
         category, rule = infer_category(f.name)
         dest_dir = DOCS_ROOT / category
@@ -128,7 +133,7 @@ def build_mapping(files: List[Path]) -> Dict[str, Dict[str, str]]:
     return mapping
 
 
-def apply_moves(mapping: Dict[str, Dict[str, str]], dry_run: bool = True) -> None:
+def apply_moves(mapping: dict[str, dict[str, str]], dry_run: bool = True) -> None:
     for src, info in mapping.items():
         dst = info["to"]
         os.makedirs(os.path.dirname(dst), exist_ok=True)
@@ -140,7 +145,7 @@ def apply_moves(mapping: Dict[str, Dict[str, str]], dry_run: bool = True) -> Non
             subprocess.check_call(["git", "mv", src, dst])
 
 
-def write_plan(mapping: Dict[str, Dict[str, str]]) -> Path:
+def write_plan(mapping: dict[str, dict[str, str]]) -> Path:
     META_DIR.mkdir(parents=True, exist_ok=True)
     plan_path = META_DIR / "move-plan.json"
     with plan_path.open("w", encoding="utf-8") as f:
@@ -149,9 +154,16 @@ def write_plan(mapping: Dict[str, Dict[str, str]]) -> Path:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Discover and move documentation files into docs/ taxonomy.")
+    parser = argparse.ArgumentParser(
+        description="Discover and move documentation files into docs/ taxonomy."
+    )
     parser.add_argument("--apply", action="store_true", help="Apply the moves using git mv.")
-    parser.add_argument("--include-ext", nargs="*", default=[], help="Additional extensions to treat as docs, e.g. .rst")
+    parser.add_argument(
+        "--include-ext",
+        nargs="*",
+        default=[],
+        help="Additional extensions to treat as docs, e.g. .rst",
+    )
     args = parser.parse_args()
 
     if args.include_ext:
@@ -166,6 +178,7 @@ def main():
     apply_moves(mapping, dry_run=not args.apply)
     if not args.apply:
         print("Dry-run complete. Re-run with --apply to perform moves.")
+
 
 if __name__ == "__main__":
     main()

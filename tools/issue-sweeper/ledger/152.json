@@ -1,0 +1,154 @@
+{
+  "issue_number": 152,
+  "title": "Monitoring Setup",
+  "url": "https://github.com/BrianCLong/summit/issues/152",
+  "state": "open",
+  "labels": [],
+  "updatedAt": "2025-08-13T17:08:39Z",
+  "createdAt": "2025-08-13T17:08:39Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15010,
+        "url": "https://github.com/BrianCLong/summit/pull/15010",
+        "mergedAt": "2025-12-30T22:44:33Z",
+        "title": "Analyze repository for MVP-4-GA release"
+      },
+      {
+        "number": 11934,
+        "url": "https://github.com/BrianCLong/summit/pull/11934",
+        "mergedAt": null,
+        "title": "Align documentation with Summit's actual capabilities"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 10088,
+        "url": "https://github.com/BrianCLong/summit/pull/10088",
+        "mergedAt": "2025-10-14T13:07:21Z",
+        "title": "docs: expand intelgraph backend blueprint"
+      },
+      {
+        "number": 11899,
+        "url": "https://github.com/BrianCLong/summit/pull/11899",
+        "mergedAt": "2025-11-20T10:26:05Z",
+        "title": "Set up SLO monitoring for API performance"
+      },
+      {
+        "number": 1146,
+        "url": "https://github.com/BrianCLong/summit/pull/1146",
+        "mergedAt": "2025-09-19T04:54:20Z",
+        "title": "chore(deps): bump react-speech-recognition from 3.10.0 to 4.0.1 in /client"
+      },
+      {
+        "number": 11922,
+        "url": "https://github.com/BrianCLong/summit/pull/11922",
+        "mergedAt": "2025-11-20T10:05:25Z",
+        "title": "Build real-time streaming analytics pipeline"
+      },
+      {
+        "number": 11875,
+        "url": "https://github.com/BrianCLong/summit/pull/11875",
+        "mergedAt": "2025-11-20T14:33:52Z",
+        "title": "Build Extensions and Ecosystem Framework"
+      },
+      {
+        "number": 9795,
+        "url": "https://github.com/BrianCLong/summit/pull/9795",
+        "mergedAt": null,
+        "title": "Fix/bulk import lockfile sync"
+      },
+      {
+        "number": 9800,
+        "url": "https://github.com/BrianCLong/summit/pull/9800",
+        "mergedAt": null,
+        "title": "feat(monitoring): Enable error-budget monitoring and Maestro metrics export (EO-1, EO-2)"
+      },
+      {
+        "number": 11893,
+        "url": "https://github.com/BrianCLong/summit/pull/11893",
+        "mergedAt": null,
+        "title": "Build Advanced Metadata Analysis Platform"
+      },
+      {
+        "number": 9796,
+        "url": "https://github.com/BrianCLong/summit/pull/9796",
+        "mergedAt": "2025-10-03T03:51:08Z",
+        "title": "fix: sync lockfile for CI bulk import"
+      },
+      {
+        "number": 11872,
+        "url": "https://github.com/BrianCLong/summit/pull/11872",
+        "mergedAt": "2025-11-20T14:34:03Z",
+        "title": "Build autotriage engine for issues and bugs"
+      },
+      {
+        "number": 1301,
+        "url": "https://github.com/BrianCLong/summit/pull/1301",
+        "mergedAt": "2025-09-23T06:38:37Z",
+        "title": "IntelGraph salvage: total recapture → promote key artifacts"
+      },
+      {
+        "number": 1300,
+        "url": "https://github.com/BrianCLong/summit/pull/1300",
+        "mergedAt": "2025-09-23T06:47:22Z",
+        "title": "Total Recapture: enterprise-ready green merge to main"
+      },
+      {
+        "number": 1309,
+        "url": "https://github.com/BrianCLong/summit/pull/1309",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Fix docling metrics registration and test scaffolding"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      },
+      {
+        "number": 1338,
+        "url": "https://github.com/BrianCLong/summit/pull/1338",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/workflows"
+      },
+      {
+        "number": 1337,
+        "url": "https://github.com/BrianCLong/summit/pull/1337",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/docs"
+      },
+      {
+        "number": 1336,
+        "url": "https://github.com/BrianCLong/summit/pull/1336",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/deps"
+      },
+      {
+        "number": 1335,
+        "url": "https://github.com/BrianCLong/summit/pull/1335",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/hardening"
+      },
+      {
+        "number": 1334,
+        "url": "https://github.com/BrianCLong/summit/pull/1334",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/features"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

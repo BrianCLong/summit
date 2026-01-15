@@ -1,5 +1,7 @@
 import unittest
+
 from frontier.impl.data_engine.core import DataEngine
+
 
 class TestDataEngine(unittest.TestCase):
     def test_instantiation(self):
@@ -14,5 +16,6 @@ class TestDataEngine(unittest.TestCase):
         self.assertEqual(len(engine.telemetry_log), 1)
         self.assertEqual(engine.telemetry_log[0], telemetry)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

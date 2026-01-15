@@ -1,23 +1,7 @@
 import { jest } from '@jest/globals';
 
-// Define the mock factory
-const mockAuthServiceFactory = () => {
-  const MockAuthService = jest.fn();
-  // Using explicit any to bypass inference issues with mockResolvedValue and 'never'
-  MockAuthService.prototype.externalLogin = jest.fn<any>().mockResolvedValue({
-    user: { id: 'u1', defaultTenantId: 't1' },
-    token: 'tok',
-    refreshToken: 'refresh',
-    expiresIn: 3600
-  });
-  return {
-    AuthService: MockAuthService,
-    default: MockAuthService, // Stub default export
-  };
-};
-
 // Mock dependencies of AuthService to prevent them from crashing
-jest.unstable_mockModule('argon2', () => ({
+jest.mock('argon2', () => ({
   default: {
     hash: jest.fn(),
     verify: jest.fn(),
@@ -25,20 +9,34 @@ jest.unstable_mockModule('argon2', () => ({
   hash: jest.fn(),
   verify: jest.fn(),
 }));
-jest.unstable_mockModule('pg', () => ({
+jest.mock('pg', () => ({
   Pool: jest.fn(),
 }));
 
 // Hoist mock for AuthService - Using regex string for module matching in case of relative path issues
 // But unstable_mockModule requires exact specifier or one that matches what is imported.
-jest.unstable_mockModule('../../../services/AuthService.js', mockAuthServiceFactory);
+jest.mock('../../../services/AuthService.js', () => {
+  class MockAuthService {
+    externalLogin() {
+      return Promise.resolve({
+        user: { id: 'u1', defaultTenantId: 't1' },
+        token: 'tok',
+        refreshToken: 'refresh',
+        expiresIn: 3600,
+      });
+    }
+  }
+  return {
+    AuthService: MockAuthService,
+    default: MockAuthService,
+  };
+});
 
 describe('SSOService', () => {
   let ssoService: any;
   let SSOServiceClass: any;
 
   beforeAll(async () => {
-    // Dynamic import to pick up mock
     const module = await import('../SSOService.js');
     SSOServiceClass = module.SSOService;
   });

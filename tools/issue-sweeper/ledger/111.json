@@ -1,0 +1,107 @@
+{
+  "issue_number": 111,
+  "title": "Implement Basic Entity Modeling in Neo4j",
+  "url": "https://github.com/BrianCLong/summit/issues/111",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    },
+    {
+      "id": 9095918281,
+      "node_id": "LA_kwDOPaNncM8AAAACHiiyyQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:database",
+      "name": "area:database",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Database area"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:15:11Z",
+  "createdAt": "2025-08-12T04:41:06Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 13047,
+        "url": "https://github.com/BrianCLong/summit/pull/13047",
+        "mergedAt": "2025-12-17T21:27:44Z",
+        "title": "Data Governance Authority Implementation"
+      },
+      {
+        "number": 1360,
+        "url": "https://github.com/BrianCLong/summit/pull/1360",
+        "mergedAt": null,
+        "title": "feat(er): deliver explainable entity resolution service"
+      },
+      {
+        "number": 10093,
+        "url": "https://github.com/BrianCLong/summit/pull/10093",
+        "mergedAt": "2025-10-14T13:06:03Z",
+        "title": "feat: add distributed configuration management service"
+      },
+      {
+        "number": 10202,
+        "url": "https://github.com/BrianCLong/summit/pull/10202",
+        "mergedAt": "2025-10-14T21:56:26Z",
+        "title": "ops(merge-train): triage + hotspot + auto-resolve + docs"
+      },
+      {
+        "number": 1353,
+        "url": "https://github.com/BrianCLong/summit/pull/1353",
+        "mergedAt": "2025-09-23T16:45:14Z",
+        "title": "chore(deps): bump axios from 1.11.0 to 1.12.0 in /conductor-ui"
+      },
+      {
+        "number": 10128,
+        "url": "https://github.com/BrianCLong/summit/pull/10128",
+        "mergedAt": "2025-10-14T08:39:43Z",
+        "title": "feat: add community engagement toolkit"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

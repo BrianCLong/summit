@@ -1,0 +1,20 @@
+[
+  {
+    "number": 1024,
+    "title": "feat(platform): new auth provider",
+    "headRefName": "feat/auth-provider",
+    "author": { "login": "dev1" },
+    "updatedAt": "2026-01-03T08:00:00Z",
+    "labels": [],
+    "checks": [{ "state": "PASS", "appName": "GitHub Actions" }]
+  },
+  {
+    "number": 1025,
+    "title": "fix: resolve memory leak in worker",
+    "headRefName": "fix/mem-leak",
+    "author": { "login": "dev2" },
+    "updatedAt": "2026-01-03T07:30:00Z",
+    "labels": [{ "name": "blocked" }],
+    "checks": [{ "state": "FAIL", "appName": "GitHub Actions" }]
+  }
+]

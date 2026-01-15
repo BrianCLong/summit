@@ -17,7 +17,6 @@ from server.src.ai.nl_to_cypher.nl_to_cypher_generator import (
 
 
 class TestNlToCypherStubs(unittest.TestCase):
-
     def test_generate_cypher_query_persons(self):
         query = generate_cypher_query("Find all persons")
         self.assertEqual(query, "MATCH (p:Person) RETURN p")

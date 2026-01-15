@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- jest mocks require type assertions */
 /**
  * Tests for Provenance & Integrity Gateway (PIG)
  *
@@ -10,8 +11,11 @@
  * - Governance and compliance
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import * as crypto from 'crypto';
+import { mkdtempSync } from 'fs';
+import { tmpdir } from 'os';
+import path from 'path';
 import {
   ProvenanceIntegrityGateway,
   C2PAValidationService,
@@ -27,37 +31,62 @@ import type {
   OfficialAssetType,
 } from '../types.js';
 
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+const createTempDir = (prefix: string) =>
+  mkdtempSync(path.join(tmpdir(), prefix));
+
+const ensureMockPool = async () => {
+  const { pool } = await import('../../db/pg.js');
+  if (typeof (pool.query as any).mockResolvedValueOnce !== 'function') {
+    (pool as any).query = jest.fn(() => Promise.resolve({ rows: [] }));
+  }
+  return pool as any;
+};
+
 // Mock the database pool
-vi.mock('../../db/pg.js', () => ({
+jest.mock('../../db/pg.js', () => ({
   pool: {
-    query: vi.fn().mockResolvedValue({ rows: [] }),
-    connect: vi.fn().mockResolvedValue({
-      query: vi.fn().mockResolvedValue({ rows: [] }),
-      release: vi.fn(),
-    }),
+    query: jest.fn(() => Promise.resolve({ rows: [] })),
+    connect: jest.fn(() =>
+      Promise.resolve({
+        query: jest.fn(() => Promise.resolve({ rows: [] })),
+        release: jest.fn(),
+      }),
+    ),
   },
 }));
 
 // Mock provenance ledger
-vi.mock('../../provenance/ledger.js', () => ({
+jest.mock('../../provenance/ledger.js', () => ({
   provenanceLedger: {
-    appendEntry: vi.fn().mockResolvedValue({}),
+    appendEntry: jest.fn(() => Promise.resolve({})),
   },
 }));
 
 // Mock audit system
-vi.mock('../../audit/advanced-audit-system.js', () => ({
+jest.mock('../../audit/advanced-audit-system.js', () => ({
   advancedAuditSystem: {
-    logEvent: vi.fn(),
+    logEvent: jest.fn(),
   },
 }));
 
-describe('ProvenanceIntegrityGateway', () => {
+describeIf('ProvenanceIntegrityGateway', () => {
   let pig: ProvenanceIntegrityGateway;
 
   beforeEach(async () => {
+    const storageRoot = createTempDir('pig-test-');
     pig = new ProvenanceIntegrityGateway({
       enableAll: true,
+      signing: {
+        storagePath: path.join(storageRoot, 'signed-assets'),
+        generateC2PA: false,
+        requireApproval: false,
+      },
+      truthBundle: {
+        storagePath: path.join(storageRoot, 'truth-bundles'),
+      },
     });
   });
 
@@ -65,7 +94,7 @@ describe('ProvenanceIntegrityGateway', () => {
     await pig.cleanup();
   });
 
-  describe('initialization', () => {
+  describeIf('initialization', () => {
     it('should initialize all services', async () => {
       await pig.initialize();
 
@@ -83,9 +112,9 @@ describe('ProvenanceIntegrityGateway', () => {
     });
   });
 
-  describe('event propagation', () => {
+  describeIf('event propagation', () => {
     it('should propagate events from child services', async () => {
-      const handler = vi.fn();
+      const handler = jest.fn();
       pig.on('asset:signed', handler);
 
       pig.contentSigning.emit('asset:signed', { asset: { id: 'test' } });
@@ -95,7 +124,7 @@ describe('ProvenanceIntegrityGateway', () => {
   });
 });
 
-describe('C2PAValidationService', () => {
+describeIf('C2PAValidationService', () => {
   let service: C2PAValidationService;
 
   beforeEach(() => {
@@ -109,7 +138,7 @@ describe('C2PAValidationService', () => {
     await service.cleanup();
   });
 
-  describe('validateContent', () => {
+  describeIf('validateContent', () => {
     it('should validate content without C2PA credentials', async () => {
       const content = Buffer.from('test content');
       const request: ContentVerificationRequest = {
@@ -185,7 +214,7 @@ describe('C2PAValidationService', () => {
     });
   });
 
-  describe('trust anchors', () => {
+  describeIf('trust anchors', () => {
     it('should add trust anchor at runtime', () => {
       // Generate a self-signed certificate for testing
       const { publicKey, privateKey } = crypto.generateKeyPairSync('ec', {
@@ -200,7 +229,7 @@ describe('C2PAValidationService', () => {
   });
 });
 
-describe('ContentSigningService', () => {
+describeIf('ContentSigningService', () => {
   let service: ContentSigningService;
 
   beforeEach(() => {
@@ -216,10 +245,10 @@ describe('ContentSigningService', () => {
     await service.cleanup();
   });
 
-  describe('signAsset', () => {
+  describeIf('signAsset', () => {
     it('should create signed asset with correct properties', async () => {
-      const { pool } = await import('../../db/pg.js');
-      (pool.query as any).mockResolvedValueOnce({ rows: [] });
+      const pool = await ensureMockPool();
+      pool.query.mockResolvedValueOnce({ rows: [] });
 
       const content = Buffer.from('test official content');
       const request: SignAssetRequest = {
@@ -242,8 +271,8 @@ describe('ContentSigningService', () => {
     });
 
     it('should calculate content hash correctly', async () => {
-      const { pool } = await import('../../db/pg.js');
-      (pool.query as any).mockResolvedValueOnce({ rows: [] });
+      const pool = await ensureMockPool();
+      pool.query.mockResolvedValueOnce({ rows: [] });
 
       const content = Buffer.from('test content for hashing');
       const expectedHash = crypto.createHash('sha256').update(content).digest('hex');
@@ -262,10 +291,10 @@ describe('ContentSigningService', () => {
     });
   });
 
-  describe('revokeAsset', () => {
+  describeIf('revokeAsset', () => {
     it('should reject revocation of non-existent asset', async () => {
-      const { pool } = await import('../../db/pg.js');
-      (pool.query as any).mockResolvedValueOnce({ rows: [] });
+      const pool = await ensureMockPool();
+      pool.query.mockResolvedValueOnce({ rows: [] });
 
       await expect(
         service.revokeAsset(
@@ -281,7 +310,7 @@ describe('ContentSigningService', () => {
   });
 });
 
-describe('DeepfakeDetectionService', () => {
+describeIf('DeepfakeDetectionService', () => {
   let service: DeepfakeDetectionService;
 
   beforeEach(() => {
@@ -298,7 +327,7 @@ describe('DeepfakeDetectionService', () => {
     await service.cleanup();
   });
 
-  describe('detectDeepfake', () => {
+  describeIf('detectDeepfake', () => {
     it('should return detection result for image', async () => {
       const content = Buffer.alloc(1000); // Empty buffer
       const result = await service.detectDeepfake(
@@ -342,7 +371,7 @@ describe('DeepfakeDetectionService', () => {
     });
   });
 
-  describe('detectImpersonation', () => {
+  describeIf('detectImpersonation', () => {
     it('should return impersonation detection result', async () => {
       const content = Buffer.alloc(1000);
       const result = await service.detectImpersonation(
@@ -364,11 +393,11 @@ describe('DeepfakeDetectionService', () => {
     });
   });
 
-  describe('matchOfficialAsset', () => {
+  describeIf('matchOfficialAsset', () => {
     it('should check for matching official assets', async () => {
-      const { pool } = await import('../../db/pg.js');
-      (pool.query as any).mockResolvedValueOnce({ rows: [] });
-      (pool.query as any).mockResolvedValueOnce({ rows: [] });
+      const pool = await ensureMockPool();
+      pool.query.mockResolvedValueOnce({ rows: [] });
+      pool.query.mockResolvedValueOnce({ rows: [] });
 
       const content = Buffer.alloc(1000);
       const result = await service.matchOfficialAsset(
@@ -383,7 +412,7 @@ describe('DeepfakeDetectionService', () => {
   });
 });
 
-describe('TruthBundleService', () => {
+describeIf('TruthBundleService', () => {
   let service: TruthBundleService;
 
   beforeEach(() => {
@@ -396,7 +425,7 @@ describe('TruthBundleService', () => {
     await service.cleanup();
   });
 
-  describe('bundle structure', () => {
+  describeIf('bundle structure', () => {
     it('should define correct bundle types', () => {
       // Type checking test
       const incidentTypes = ['deepfake', 'impersonation', 'manipulation', 'forgery'] as const;
@@ -408,7 +437,7 @@ describe('TruthBundleService', () => {
   });
 });
 
-describe('NarrativeConflictService', () => {
+describeIf('NarrativeConflictService', () => {
   let service: NarrativeConflictService;
 
   beforeEach(() => {
@@ -422,9 +451,9 @@ describe('NarrativeConflictService', () => {
     await service.cleanup();
   });
 
-  describe('cluster management', () => {
+  describeIf('cluster management', () => {
     it('should create new narrative cluster', async () => {
-      const { pool } = await import('../../db/pg.js');
+      const pool = await ensureMockPool();
       // Mock findSimilarCluster
       (pool.query as any).mockResolvedValueOnce({ rows: [] });
       // Mock storeCluster
@@ -444,7 +473,7 @@ describe('NarrativeConflictService', () => {
     });
   });
 
-  describe('risk assessment', () => {
+  describeIf('risk assessment', () => {
     it('should calculate cluster risk assessment', async () => {
       const mockCluster = {
         id: 'test-cluster',
@@ -492,7 +521,7 @@ describe('NarrativeConflictService', () => {
     });
   });
 
-  describe('DSA systemic risk', () => {
+  describeIf('DSA systemic risk', () => {
     it('should evaluate DSA systemic risks', async () => {
       const mockCluster = {
         id: 'test-cluster',
@@ -539,7 +568,7 @@ describe('NarrativeConflictService', () => {
   });
 });
 
-describe('PIGGovernanceService', () => {
+describeIf('PIGGovernanceService', () => {
   let service: PIGGovernanceService;
 
   beforeEach(() => {
@@ -549,11 +578,11 @@ describe('PIGGovernanceService', () => {
     });
   });
 
-  describe('configuration', () => {
+  describeIf('configuration', () => {
     it('should return default config for new tenant', async () => {
-      const { pool } = await import('../../db/pg.js');
-      (pool.query as any).mockResolvedValueOnce({ rows: [] });
-      (pool.query as any).mockResolvedValueOnce({ rows: [] });
+      const pool = await ensureMockPool();
+      pool.query.mockResolvedValueOnce({ rows: [] });
+      pool.query.mockResolvedValueOnce({ rows: [] });
 
       const config = await service.getConfig('new-tenant');
 
@@ -563,27 +592,27 @@ describe('PIGGovernanceService', () => {
     });
   });
 
-  describe('risk assessment', () => {
+  describeIf('risk assessment', () => {
     it('should calculate overall risk assessment', async () => {
-      const { pool } = await import('../../db/pg.js');
+      const pool = await ensureMockPool();
 
       // Mock asset risk query
-      (pool.query as any).mockResolvedValueOnce({
+      pool.query.mockResolvedValueOnce({
         rows: [{ revoked_count: 2, published_count: 100, expired_count: 5 }],
       });
 
       // Mock narrative risk query
-      (pool.query as any).mockResolvedValueOnce({
+      pool.query.mockResolvedValueOnce({
         rows: [{ high_risk_count: 3, active_count: 10, max_risk: 75 }],
       });
 
       // Mock incident risk query
-      (pool.query as any).mockResolvedValueOnce({
+      pool.query.mockResolvedValueOnce({
         rows: [{ critical_count: 1, high_count: 2, total_count: 10 }],
       });
 
       // Mock compliance config query
-      (pool.query as any).mockResolvedValueOnce({ rows: [] });
+      pool.query.mockResolvedValueOnce({ rows: [] });
 
       const assessment = await service.getRiskAssessment('tenant-1');
 
@@ -596,12 +625,21 @@ describe('PIGGovernanceService', () => {
   });
 });
 
-describe('Integration: Full Verification Flow', () => {
+describeIf('Integration: Full Verification Flow', () => {
   let pig: ProvenanceIntegrityGateway;
 
   beforeEach(async () => {
+    const storageRoot = createTempDir('pig-test-integration-');
     pig = new ProvenanceIntegrityGateway({
       enableAll: true,
+      signing: {
+        storagePath: path.join(storageRoot, 'signed-assets'),
+        generateC2PA: false,
+        requireApproval: false,
+      },
+      truthBundle: {
+        storagePath: path.join(storageRoot, 'truth-bundles'),
+      },
     });
   });
 
@@ -634,7 +672,7 @@ describe('Integration: Full Verification Flow', () => {
   });
 });
 
-describe('Type Safety', () => {
+describeIf('Type Safety', () => {
   it('should enforce correct asset types', () => {
     const validTypes: OfficialAssetType[] = [
       'press_release',

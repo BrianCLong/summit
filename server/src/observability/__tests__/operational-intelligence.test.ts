@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { ObservabilityFabric } from '../operational-intelligence/fabric.js';
 import { RootCauseAnalyzer } from '../operational-intelligence/root-cause.js';
 import { AnomalyPredictor } from '../operational-intelligence/predictive.js';
@@ -85,7 +86,7 @@ describe('RootCauseAnalyzer', () => {
 
 describe('AnomalyPredictor', () => {
   it('raises anomaly when value deviates from EMA baseline', () => {
-    const predictor = new AnomalyPredictor(0.5, 2);
+    const predictor = new AnomalyPredictor(0.5, 0.5);
     const baseline = buildMetric({ value: 10, timestamp: now - 1000, correlationId: 'corr-3' });
     const moderate = buildMetric({ value: 12, timestamp: now - 500, correlationId: 'corr-3' });
     const spike = buildMetric({ value: 40, timestamp: now, correlationId: 'corr-3' });

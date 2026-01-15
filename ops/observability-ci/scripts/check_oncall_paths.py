@@ -3,10 +3,8 @@
 import argparse
 import sys
 from pathlib import Path
-from typing import Dict, List, Set
 
 import yaml
-
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_ALERTS_FILE = REPO_ROOT / "alerts" / "slo-burn-rules.yml"
@@ -15,15 +13,15 @@ DEFAULT_PAGERDUTY_FILE = REPO_ROOT / "alerts" / "pagerduty-ml-service.yaml"
 DEFAULT_PAYLOAD_DIR = REPO_ROOT / "runbooks" / "generated" / "alerts"
 
 
-def _load_yaml(path: Path) -> Dict:
+def _load_yaml(path: Path) -> dict:
     if not path.exists():
         raise FileNotFoundError(f"Configuration file not found: {path}")
     return yaml.safe_load(path.read_text()) or {}
 
 
-def load_alert_services(alert_file: Path) -> Set[str]:
+def load_alert_services(alert_file: Path) -> set[str]:
     data = _load_yaml(alert_file)
-    services: Set[str] = set()
+    services: set[str] = set()
     for group in data.get("groups", []):
         for rule in group.get("rules", []):
             service = rule.get("labels", {}).get("service")
@@ -32,9 +30,9 @@ def load_alert_services(alert_file: Path) -> Set[str]:
     return services
 
 
-def load_rotations(rotations_file: Path) -> Dict[str, dict]:
+def load_rotations(rotations_file: Path) -> dict[str, dict]:
     data = _load_yaml(rotations_file)
-    rotations: Dict[str, dict] = {}
+    rotations: dict[str, dict] = {}
     for rotation in data.get("spec", {}).get("rotations", []):
         service = rotation.get("service")
         if service:
@@ -57,10 +55,8 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def validate_pagerduty_bridge(
-    rotations_blob: Dict, pagerduty_blob: Dict
-) -> List[str]:
-    errors: List[str] = []
+def validate_pagerduty_bridge(rotations_blob: dict, pagerduty_blob: dict) -> list[str]:
+    errors: list[str] = []
 
     expected_service = rotations_blob.get("spec", {}).get("pagerduty_service")
     pd_service = pagerduty_blob.get("metadata", {}).get("name")
@@ -82,12 +78,12 @@ def validate_pagerduty_bridge(
 
 
 def validate_rotations(
-    services: Set[str],
-    rotations: Dict[str, dict],
+    services: set[str],
+    rotations: dict[str, dict],
     payload_dir: Path,
-    pagerduty_blob: Dict,
-) -> List[str]:
-    errors: List[str] = []
+    pagerduty_blob: dict,
+) -> list[str]:
+    errors: list[str] = []
     if not payload_dir.exists():
         errors.append(f"Payload directory {payload_dir} is missing; run the generator first")
 

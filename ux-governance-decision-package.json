@@ -16,9 +16,7 @@
           "severity": "high"
         }
       ],
-      "sources": [
-        "Qwen"
-      ]
+      "sources": ["Qwen"]
     },
     {
       "id": "UX-002",
@@ -30,9 +28,7 @@
           "severity": "high"
         }
       ],
-      "sources": [
-        "Qwen"
-      ]
+      "sources": ["Qwen"]
     },
     {
       "id": "UX-004",
@@ -49,10 +45,7 @@
           "severity": "critical"
         }
       ],
-      "sources": [
-        "Qwen",
-        "Stakeholder"
-      ]
+      "sources": ["Qwen", "Stakeholder"]
     },
     {
       "id": "GEM-001",
@@ -64,9 +57,7 @@
           "severity": "medium"
         }
       ],
-      "sources": [
-        "Gemini"
-      ]
+      "sources": ["Gemini"]
     },
     {
       "id": "GEM-002",
@@ -78,9 +69,7 @@
           "severity": "high"
         }
       ],
-      "sources": [
-        "Gemini"
-      ]
+      "sources": ["Gemini"]
     },
     {
       "id": "GEM-003",
@@ -92,9 +81,7 @@
           "severity": "medium"
         }
       ],
-      "sources": [
-        "Gemini"
-      ]
+      "sources": ["Gemini"]
     },
     {
       "id": "UX-003",
@@ -106,9 +93,7 @@
           "severity": "critical"
         }
       ],
-      "sources": [
-        "Red Team"
-      ]
+      "sources": ["Red Team"]
     },
     {
       "id": "RT-002",
@@ -120,9 +105,7 @@
           "severity": "high"
         }
       ],
-      "sources": [
-        "Red Team"
-      ]
+      "sources": ["Red Team"]
     },
     {
       "id": "RT-003",
@@ -134,9 +117,7 @@
           "severity": "critical"
         }
       ],
-      "sources": [
-        "Red Team"
-      ]
+      "sources": ["Red Team"]
     },
     {
       "id": "STK-002",
@@ -148,9 +129,7 @@
           "severity": "high"
         }
       ],
-      "sources": [
-        "Stakeholder"
-      ]
+      "sources": ["Stakeholder"]
     },
     {
       "id": "STK-003",
@@ -162,19 +141,14 @@
           "severity": "critical"
         }
       ],
-      "sources": [
-        "Stakeholder"
-      ]
+      "sources": ["Stakeholder"]
     }
   ],
   "resolvedConflictLog": [
     {
       "id": "CF-001",
       "description": "Performance vs Security conflict",
-      "conflictingIssues": [
-        "Performance enhancement",
-        "Security hardening"
-      ],
+      "conflictingIssues": ["Performance enhancement", "Security hardening"],
       "resolution": "Implement secure performance optimizations with proper access controls",
       "justification": "Both performance and security are critical for enterprise adoption"
     }
@@ -195,10 +169,7 @@
           "severity": "critical"
         }
       ],
-      "sources": [
-        "Qwen",
-        "Stakeholder"
-      ],
+      "sources": ["Qwen", "Stakeholder"],
       "priority": "P0"
     },
     {
@@ -211,9 +182,7 @@
           "severity": "critical"
         }
       ],
-      "sources": [
-        "Red Team"
-      ],
+      "sources": ["Red Team"],
       "priority": "P0"
     },
     {
@@ -226,9 +195,7 @@
           "severity": "critical"
         }
       ],
-      "sources": [
-        "Stakeholder"
-      ],
+      "sources": ["Stakeholder"],
       "priority": "P0"
     },
     {
@@ -241,9 +208,7 @@
           "severity": "high"
         }
       ],
-      "sources": [
-        "Qwen"
-      ],
+      "sources": ["Qwen"],
       "priority": "P1"
     },
     {
@@ -256,9 +221,7 @@
           "severity": "medium"
         }
       ],
-      "sources": [
-        "Gemini"
-      ],
+      "sources": ["Gemini"],
       "priority": "P1"
     },
     {
@@ -271,9 +234,7 @@
           "severity": "high"
         }
       ],
-      "sources": [
-        "Gemini"
-      ],
+      "sources": ["Gemini"],
       "priority": "P1"
     },
     {
@@ -286,9 +247,7 @@
           "severity": "high"
         }
       ],
-      "sources": [
-        "Stakeholder"
-      ],
+      "sources": ["Stakeholder"],
       "priority": "P2"
     },
     {
@@ -301,9 +260,7 @@
           "severity": "high"
         }
       ],
-      "sources": [
-        "Qwen"
-      ],
+      "sources": ["Qwen"],
       "priority": "P3"
     },
     {
@@ -316,9 +273,7 @@
           "severity": "medium"
         }
       ],
-      "sources": [
-        "Gemini"
-      ],
+      "sources": ["Gemini"],
       "priority": "P3"
     },
     {
@@ -331,9 +286,7 @@
           "severity": "high"
         }
       ],
-      "sources": [
-        "Red Team"
-      ],
+      "sources": ["Red Team"],
       "priority": "P3"
     },
     {
@@ -346,9 +299,7 @@
           "severity": "critical"
         }
       ],
-      "sources": [
-        "Red Team"
-      ],
+      "sources": ["Red Team"],
       "priority": "P3"
     }
   ],
@@ -415,36 +366,23 @@
       "title": "Accessibility Compliance Gaps",
       "priority": "P0",
       "description": "Implement fix for: Accessibility Compliance Gaps",
-      "sources": [
-        "Qwen",
-        "Stakeholder"
-      ],
-      "requires": [
-        "accessibility-audit",
-        "aria-implementation"
-      ]
+      "sources": ["Qwen", "Stakeholder"],
+      "requires": ["accessibility-audit", "aria-implementation"]
     },
     {
       "id": "UX-003",
       "title": "Critical Actions Lack Sufficient Confirmation",
       "priority": "P0",
       "description": "Implement fix for: Critical Actions Lack Sufficient Confirmation",
-      "sources": [
-        "Red Team"
-      ],
-      "requires": [
-        "confirmation-framework",
-        "audit-logging"
-      ]
+      "sources": ["Red Team"],
+      "requires": ["confirmation-framework", "audit-logging"]
     },
     {
       "id": "STK-003",
       "title": "Security Requirements",
       "priority": "P0",
       "description": "Implement fix for: Security Requirements",
-      "sources": [
-        "Stakeholder"
-      ],
+      "sources": ["Stakeholder"],
       "requires": []
     },
     {
@@ -452,9 +390,7 @@
       "title": "Information Overload on Dashboard",
       "priority": "P1",
       "description": "Implement fix for: Information Overload on Dashboard",
-      "sources": [
-        "Qwen"
-      ],
+      "sources": ["Qwen"],
       "requires": []
     },
     {
@@ -462,9 +398,7 @@
       "title": "Information Architecture Inconsistency",
       "priority": "P1",
       "description": "Implement fix for: Information Architecture Inconsistency",
-      "sources": [
-        "Gemini"
-      ],
+      "sources": ["Gemini"],
       "requires": []
     },
     {
@@ -472,9 +406,7 @@
       "title": "Navigation Flow Issues",
       "priority": "P1",
       "description": "Implement fix for: Navigation Flow Issues",
-      "sources": [
-        "Gemini"
-      ],
+      "sources": ["Gemini"],
       "requires": []
     },
     {
@@ -482,9 +414,7 @@
       "title": "Performance Requirements",
       "priority": "P2",
       "description": "Implement fix for: Performance Requirements",
-      "sources": [
-        "Stakeholder"
-      ],
+      "sources": ["Stakeholder"],
       "requires": []
     },
     {
@@ -492,21 +422,15 @@
       "title": "Mixed Design Systems (MUI/Radix/Tailwind)",
       "priority": "P3",
       "description": "Implement fix for: Mixed Design Systems (MUI/Radix/Tailwind)",
-      "sources": [
-        "Qwen"
-      ],
-      "requires": [
-        "design-system-upgrade"
-      ]
+      "sources": ["Qwen"],
+      "requires": ["design-system-upgrade"]
     },
     {
       "id": "GEM-003",
       "title": "System State Visibility",
       "priority": "P3",
       "description": "Implement fix for: System State Visibility",
-      "sources": [
-        "Gemini"
-      ],
+      "sources": ["Gemini"],
       "requires": []
     },
     {
@@ -514,9 +438,7 @@
       "title": "Trust Boundary Visualization Deficiencies",
       "priority": "P3",
       "description": "Implement fix for: Trust Boundary Visualization Deficiencies",
-      "sources": [
-        "Red Team"
-      ],
+      "sources": ["Red Team"],
       "requires": []
     },
     {
@@ -524,9 +446,7 @@
       "title": "Cognitive Load Under Stress",
       "priority": "P3",
       "description": "Implement fix for: Cognitive Load Under Stress",
-      "sources": [
-        "Red Team"
-      ],
+      "sources": ["Red Team"],
       "requires": []
     }
   ],

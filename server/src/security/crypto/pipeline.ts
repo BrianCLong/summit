@@ -161,14 +161,17 @@ export class CryptoPipeline {
       errors.push(`Key ${key.id} version ${key.version} is expired`);
     }
 
+    if (bundle.certificateChain?.length) {
+      certificateResult = this.certificateValidator.validate(
+        bundle.certificateChain,
+      );
+      if (!certificateResult.valid) {
+        errors.push(...certificateResult.errors);
+      }
+    }
+
     if (!publicKeyPem) {
       if (bundle.certificateChain?.length) {
-        certificateResult = this.certificateValidator.validate(
-          bundle.certificateChain,
-        );
-        if (!certificateResult.valid) {
-          errors.push(...certificateResult.errors);
-        }
         try {
           const leaf = new crypto.X509Certificate(bundle.certificateChain[0]);
           publicKeyPem = leaf.publicKey

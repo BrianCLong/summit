@@ -75,7 +75,10 @@ export interface AuthorizationService {
  */
 export class AuthorizationServiceImpl implements AuthorizationService {
   private rbac: MultiTenantRBACManager;
-  private pool: Pool;
+
+  private get pool(): Pool {
+    return getPostgresPool();
+  }
 
   /**
    * @constructor
@@ -83,7 +86,6 @@ export class AuthorizationServiceImpl implements AuthorizationService {
    */
   constructor() {
     this.rbac = getMultiTenantRBAC();
-    this.pool = getPostgresPool();
   }
 
   /**
@@ -99,14 +101,14 @@ export class AuthorizationServiceImpl implements AuthorizationService {
       if (principal.tenantId !== resource.tenantId && principal.kind !== 'system') {
         // System principals *might* be allowed cross-tenant in very specific cases,
         // but generally tenantId must match.
-         // Specifically check if the user has a global admin role that allows cross-tenant access.
-         const isGlobalAdmin = principal.roles.includes('global-admin');
-         if (!isGlobalAdmin) {
-             logger.warn(
-               `Access denied: Cross-tenant access attempted by ${principal.id} (${principal.tenantId}) on ${resource.tenantId}`,
-             );
-             return false;
-         }
+        // Specifically check if the user has a global admin role that allows cross-tenant access.
+        const isGlobalAdmin = principal.roles.includes('global-admin');
+        if (!isGlobalAdmin) {
+          logger.warn(
+            `Access denied: Cross-tenant access attempted by ${principal.id} (${principal.tenantId}) on ${resource.tenantId}`,
+          );
+          return false;
+        }
       }
 
       // 2. Map high-level Action/Resource to RBAC permission string
@@ -118,25 +120,25 @@ export class AuthorizationServiceImpl implements AuthorizationService {
       // We need to construct a "MultiTenantUser" shaped object from our Principal
       // effectively bridging the two models.
       const multiTenantUser = {
-          id: principal.id,
-          email: principal.user?.email || '',
-          name: principal.user?.username || '',
+        id: principal.id,
+        email: principal.user?.email || '',
+        name: principal.user?.username || '',
+        tenantId: principal.tenantId,
+        tenantIds: [principal.tenantId], // In a real scenario, we'd fetch all memberships
+        primaryTenantId: principal.tenantId,
+        roles: principal.roles.map(r => ({
           tenantId: principal.tenantId,
-          tenantIds: [principal.tenantId], // In a real scenario, we'd fetch all memberships
-          primaryTenantId: principal.tenantId,
-          roles: principal.roles.map(r => ({
-              tenantId: principal.tenantId,
-              role: r,
-              permissions: [],
-              scope: 'full',
-              grantedBy: 'system',
-              grantedAt: new Date(),
-          })),
-          globalRoles: principal.roles, // Assuming roles are flattened for now
-          attributes: {},
-          clearanceLevel: 'unclassified', // Default
-          lastAuthenticated: new Date(),
-          mfaVerified: true, // Assume true for now or pass from context
+          role: r,
+          permissions: [],
+          scope: 'full',
+          grantedBy: 'system',
+          grantedAt: new Date(),
+        })),
+        globalRoles: principal.roles, // Assuming roles are flattened for now
+        attributes: {},
+        clearanceLevel: 'unclassified', // Default
+        lastAuthenticated: new Date(),
+        mfaVerified: true, // Assume true for now or pass from context
       };
 
       // If the underlying RBAC manager returns true, we are good.
@@ -144,13 +146,13 @@ export class AuthorizationServiceImpl implements AuthorizationService {
       // Our mapToPermission needs to align with RBAC permissions.
 
       const hasPermission = this.rbac.hasPermission(
-          // @ts-ignore - mismatch in types is expected during bridging
-          multiTenantUser,
-          permission
+        // @ts-ignore - mismatch in types is expected during bridging
+        multiTenantUser,
+        permission
       );
 
       if (!hasPermission) {
-          return false;
+        return false;
       }
 
       // 4. ABAC / OPA checks (Delegated to RBACManager or called directly)
@@ -160,15 +162,15 @@ export class AuthorizationServiceImpl implements AuthorizationService {
       // However, for high security, we should use evaluateAccess.
 
       const decision = await this.rbac.evaluateAccess(
-           // @ts-ignore
-          multiTenantUser,
-          {
-              type: resource.type,
-              id: resource.id || '',
-              tenantId: resource.tenantId,
-              // attributes: resource.attributes
-          },
-          action
+        // @ts-ignore
+        multiTenantUser,
+        {
+          type: resource.type,
+          id: resource.id || '',
+          tenantId: resource.tenantId,
+          // attributes: resource.attributes
+        },
+        action
       );
 
       return decision.allowed;
@@ -202,29 +204,29 @@ export class AuthorizationServiceImpl implements AuthorizationService {
    * @returns {string} The formatted permission string.
    */
   private mapToPermission(action: Action, resourceType: string): string {
-      // Simple mapping strategy
-      // view -> read
-      // create -> create
-      // update -> update
-      // delete -> delete
-      // execute -> execute
+    // Simple mapping strategy
+    // view -> read
+    // create -> create
+    // update -> update
+    // delete -> delete
+    // execute -> execute
 
-      let verb = 'read';
-      switch(action) {
-          case 'view': verb = 'read'; break;
-          case 'create': verb = 'create'; break;
-          case 'update': verb = 'update'; break;
-          case 'delete': verb = 'delete'; break;
-          case 'execute': verb = 'execute'; break;
-          case 'administer': verb = 'manage'; break;
-          case 'manage_settings': verb = 'manage'; break;
-      }
+    let verb = 'read';
+    switch (action) {
+      case 'view': verb = 'read'; break;
+      case 'create': verb = 'create'; break;
+      case 'update': verb = 'update'; break;
+      case 'delete': verb = 'delete'; break;
+      case 'execute': verb = 'execute'; break;
+      case 'administer': verb = 'manage'; break;
+      case 'manage_settings': verb = 'manage'; break;
+    }
 
-      // Resource type mapping if necessary
-      // e.g. 'maestro.run' -> 'pipeline' or keep as is?
-      // The RBAC system uses: investigation, entity, relationship, report, etc.
-      // Let's assume resourceType matches RBAC resource names or we map them.
+    // Resource type mapping if necessary
+    // e.g. 'maestro.run' -> 'pipeline' or keep as is?
+    // The RBAC system uses: investigation, entity, relationship, report, etc.
+    // Let's assume resourceType matches RBAC resource names or we map them.
 
-      return `${resourceType}:${verb}`;
+    return `${resourceType}:${verb}`;
   }
 }

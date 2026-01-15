@@ -257,7 +257,7 @@ export class OptimizedPostgresClient {
 
   constructor(pool: Pool, config: PostgresOptimizedConfig = {}) {
     this.pool = pool;
-    this.slowQueryThreshold = config.slowQueryThreshold ?? defaultPostgresConfig.slowQueryThreshold!;
+    this.slowQueryThreshold = config.slowQueryThreshold ?? defaultPostgresConfig.slowQueryThreshold ?? 1000;
     this.preparedStatements = new Map();
     this.queryStats = new Map();
   }
@@ -480,7 +480,7 @@ export async function getSlowQueries(client: any, limit: number = 10): Promise<a
   try {
     const result = await client.query(query, [limit]);
     return result.rows;
-  } catch (error) {
+  } catch (_error) {
     // pg_stat_statements extension might not be enabled
     logger.warn('pg_stat_statements not available');
     return [];

@@ -1,16 +1,17 @@
 from __future__ import annotations
+
 import json
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
 
 @dataclass
 class TelemetryLogger:
     path: Path
 
-    def log_event(self, event_type: str, payload: Dict[str, Any]) -> None:
+    def log_event(self, event_type: str, payload: dict[str, Any]) -> None:
         record = {
             "timestamp": datetime.utcnow().isoformat(),
             "event_type": event_type,

@@ -1,0 +1,149 @@
+{
+  "issue_number": 135,
+  "title": "Alerting & Notification System",
+  "url": "https://github.com/BrianCLong/summit/issues/135",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103343056,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn90A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/mvp1",
+      "name": "mvp1",
+      "color": "0e8a16",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103343098,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9-g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/notifications",
+      "name": "notifications",
+      "color": "f9d0c4",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103361940,
+      "node_id": "LA_kwDOPaNncM8AAAACHppHlA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:predictive-ai",
+      "name": "area:predictive-ai",
+      "color": "bfe5bf",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-12-19T20:29:48Z",
+  "createdAt": "2025-08-13T09:20:43Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15184,
+        "url": "https://github.com/BrianCLong/summit/pull/15184",
+        "mergedAt": "2025-12-31T14:21:30Z",
+        "title": "chore(deps): bump docker/setup-buildx-action from 2 to 3"
+      },
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 11841,
+        "url": "https://github.com/BrianCLong/summit/pull/11841",
+        "mergedAt": "2025-11-20T09:48:29Z",
+        "title": "feat: implement IntelGraph ML benchmarking and auto-tuning stack"
+      },
+      {
+        "number": 1316,
+        "url": "https://github.com/BrianCLong/summit/pull/1316",
+        "mergedAt": "2025-09-23T06:11:25Z",
+        "title": "docs: update IG squad sprint plan"
+      },
+      {
+        "number": 10087,
+        "url": "https://github.com/BrianCLong/summit/pull/10087",
+        "mergedAt": "2025-10-14T13:07:24Z",
+        "title": "feat: introduce maestro conductor meta-agent"
+      },
+      {
+        "number": 1292,
+        "url": "https://github.com/BrianCLong/summit/pull/1292",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "fix: workflow pnpm order and cache setup"
+      },
+      {
+        "number": 1291,
+        "url": "https://github.com/BrianCLong/summit/pull/1291",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "fix: workflow pnpm compatibility and topicality.co domains"
+      },
+      {
+        "number": 11919,
+        "url": "https://github.com/BrianCLong/summit/pull/11919",
+        "mergedAt": "2025-11-20T10:05:41Z",
+        "title": "Build Advanced Data Integration and ETL Platform"
+      },
+      {
+        "number": 11884,
+        "url": "https://github.com/BrianCLong/summit/pull/11884",
+        "mergedAt": "2025-11-20T14:33:08Z",
+        "title": "Build connector SDK and sample connectors"
+      },
+      {
+        "number": 1260,
+        "url": "https://github.com/BrianCLong/summit/pull/1260",
+        "mergedAt": null,
+        "title": "Rebrand: integrate feature/rename-summit into merge/all-to-main-20250915-022508"
+      },
+      {
+        "number": 13193,
+        "url": "https://github.com/BrianCLong/summit/pull/13193",
+        "mergedAt": "2025-12-04T15:38:38Z",
+        "title": "Build React Native mobile app with OSINT dashboard"
+      },
+      {
+        "number": 11918,
+        "url": "https://github.com/BrianCLong/summit/pull/11918",
+        "mergedAt": "2025-11-20T10:21:01Z",
+        "title": "Build mobile apps for iOS and Android"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

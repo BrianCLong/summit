@@ -1,0 +1,116 @@
+{
+  "issue_number": 400,
+  "title": "feat: scaffold ingestion bus and red team simulator",
+  "url": "https://github.com/BrianCLong/summit/pull/400",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-17T17:44:29Z",
+  "createdAt": "2025-08-17T07:50:02Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15366,
+        "url": "https://github.com/BrianCLong/summit/pull/15366",
+        "mergedAt": null,
+        "title": "Harden Express input validation and GraphQL guard"
+      },
+      {
+        "number": 15261,
+        "url": "https://github.com/BrianCLong/summit/pull/15261",
+        "mergedAt": "2026-01-01T07:29:41Z",
+        "title": "Expand test coverage and fix issues"
+      },
+      {
+        "number": 11983,
+        "url": "https://github.com/BrianCLong/summit/pull/11983",
+        "mergedAt": "2025-11-20T15:06:02Z",
+        "title": "Implement ABAC governance and audit foundations"
+      },
+      {
+        "number": 15321,
+        "url": "https://github.com/BrianCLong/summit/pull/15321",
+        "mergedAt": "2026-01-01T11:38:40Z",
+        "title": "feat(governance): Implement Living Documents for Service Inventory"
+      },
+      {
+        "number": 15255,
+        "url": "https://github.com/BrianCLong/summit/pull/15255",
+        "mergedAt": "2026-01-01T07:29:52Z",
+        "title": "feat: enforce api auth and rbac protections"
+      },
+      {
+        "number": 11953,
+        "url": "https://github.com/BrianCLong/summit/pull/11953",
+        "mergedAt": "2025-11-20T10:20:52Z",
+        "title": "Review cloud cost optimization opportunities"
+      },
+      {
+        "number": 12240,
+        "url": "https://github.com/BrianCLong/summit/pull/12240",
+        "mergedAt": "2025-12-18T03:33:37Z",
+        "title": "Build graph analytics suite with path finding"
+      },
+      {
+        "number": 12049,
+        "url": "https://github.com/BrianCLong/summit/pull/12049",
+        "mergedAt": "2025-11-21T03:59:08Z",
+        "title": "Add comprehensive tests for new modules"
+      },
+      {
+        "number": 12052,
+        "url": "https://github.com/BrianCLong/summit/pull/12052",
+        "mergedAt": "2025-11-21T03:57:15Z",
+        "title": "Implement cost optimization and resource efficiency"
+      },
+      {
+        "number": 12086,
+        "url": "https://github.com/BrianCLong/summit/pull/12086",
+        "mergedAt": null,
+        "title": "Implement comprehensive accessibility improvements"
+      },
+      {
+        "number": 11976,
+        "url": "https://github.com/BrianCLong/summit/pull/11976",
+        "mergedAt": null,
+        "title": "Document existing and patentable IP in codebase"
+      },
+      {
+        "number": 1205,
+        "url": "https://github.com/BrianCLong/summit/pull/1205",
+        "mergedAt": null,
+        "title": "chore(deps): bump markupsafe from 2.1.5 to 3.0.2"
+      },
+      {
+        "number": 263,
+        "url": "https://github.com/BrianCLong/summit/pull/263",
+        "mergedAt": "2025-08-15T21:10:46Z",
+        "title": "chore(deps): bump @apollo/server from 4.12.2 to 5.0.0 in /server"
+      },
+      {
+        "number": 1266,
+        "url": "https://github.com/BrianCLong/summit/pull/1266",
+        "mergedAt": "2025-09-16T22:05:41Z",
+        "title": "chore(ci): finalization kit + protections"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

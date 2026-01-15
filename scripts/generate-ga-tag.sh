@@ -101,6 +101,21 @@ COMMIT_HASH=$(git rev-parse HEAD)
 
 # Generate release notes
 RELEASE_NOTES_FILE="/tmp/release-notes-$TIMESTAMP.md"
+
+# Determine previous tag using the new semver logic
+echo "🔍 Finding previous tag for $TAG_NAME..."
+PREV_TAG=$(node scripts/release/find-prev-tag.mjs TAG="$TAG_NAME" 2>/dev/null || echo "")
+
+if [ -z "$PREV_TAG" ]; then
+    echo "⚠️  No previous tag found. Using initial commit/history."
+    START_REF=$(git rev-list --max-parents=0 HEAD 2>/dev/null | head -n 1)
+else
+    echo "found previous tag: $PREV_TAG"
+    START_REF="$PREV_TAG"
+fi
+
+CHANGELOG_CONTENT=$(git log --oneline --no-merges "$START_REF..HEAD" 2>/dev/null || echo "No changes to report")
+
 cat > "$RELEASE_NOTES_FILE" << EOF
 # Release $TAG_NAME
 
@@ -109,9 +124,10 @@ cat > "$RELEASE_NOTES_FILE" << EOF
 - **Released**: $TIMESTAMP
 - **Commit**: $COMMIT_HASH
 - **Channel**: General Availability (GA)
+- **Previous Tag**: ${PREV_TAG:-"None (Initial Release)"}
 
 ## Changes
-$(git log --oneline --no-merges $(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD).."HEAD" 2>/dev/null || echo "No changes to report")
+$CHANGELOG_CONTENT
 
 ## Compliance
 This release meets General Availability standards:

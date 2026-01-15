@@ -1,0 +1,113 @@
+{
+  "issue_number": 316,
+  "title": "AI-Suggested Investigation Paths",
+  "url": "https://github.com/BrianCLong/summit/issues/316",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9121349718,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zAVg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type-feature",
+      "name": "type-feature",
+      "color": "0075ca",
+      "default": false,
+      "description": "Feature development"
+    },
+    {
+      "id": 9121349913,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zBGQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area-AI",
+      "name": "area-AI",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Relates to AI/NLP/ML"
+    },
+    {
+      "id": 9121485859,
+      "node_id": "LA_kwDOPaNncM8AAAACH67UIw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-advanced-ai",
+      "name": "epic-advanced-ai",
+      "color": "96CEB4",
+      "default": false,
+      "description": "Advanced AI features"
+    },
+    {
+      "id": 9121486304,
+      "node_id": "LA_kwDOPaNncM8AAAACH67V4A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/sprint-7",
+      "name": "sprint-7",
+      "color": "A29BFE",
+      "default": false,
+      "description": "Sprint 7: Insight Experience Polish & Scaling"
+    }
+  ],
+  "updatedAt": "2025-08-16T18:34:51Z",
+  "createdAt": "2025-08-16T18:34:51Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11907,
+        "url": "https://github.com/BrianCLong/summit/pull/11907",
+        "mergedAt": "2025-11-20T10:25:33Z",
+        "title": "Convert runbooks to DAGs with gates and logs"
+      },
+      {
+        "number": 11817,
+        "url": "https://github.com/BrianCLong/summit/pull/11817",
+        "mergedAt": "2025-11-17T10:00:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 41 updates"
+      },
+      {
+        "number": 1182,
+        "url": "https://github.com/BrianCLong/summit/pull/1182",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group with 2 updates"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      },
+      {
+        "number": 1338,
+        "url": "https://github.com/BrianCLong/summit/pull/1338",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/workflows"
+      },
+      {
+        "number": 1337,
+        "url": "https://github.com/BrianCLong/summit/pull/1337",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/docs"
+      },
+      {
+        "number": 1336,
+        "url": "https://github.com/BrianCLong/summit/pull/1336",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/deps"
+      },
+      {
+        "number": 1335,
+        "url": "https://github.com/BrianCLong/summit/pull/1335",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/hardening"
+      },
+      {
+        "number": 1334,
+        "url": "https://github.com/BrianCLong/summit/pull/1334",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/features"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

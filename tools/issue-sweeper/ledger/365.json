@@ -1,0 +1,68 @@
+{
+  "issue_number": 365,
+  "title": "fix(ui): address accessibility gaps and add tests",
+  "url": "https://github.com/BrianCLong/summit/pull/365",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-17T04:51:06Z",
+  "createdAt": "2025-08-17T00:12:54Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13621,
+        "url": "https://github.com/BrianCLong/summit/pull/13621",
+        "mergedAt": "2025-12-17T01:48:38Z",
+        "title": "Design time-series metrics storage platform"
+      },
+      {
+        "number": 15340,
+        "url": "https://github.com/BrianCLong/summit/pull/15340",
+        "mergedAt": "2026-01-01T08:47:05Z",
+        "title": "Counter-intelligence information dominance sprint"
+      },
+      {
+        "number": 11900,
+        "url": "https://github.com/BrianCLong/summit/pull/11900",
+        "mergedAt": "2025-11-20T10:26:00Z",
+        "title": "Add observability and disaster recovery infrastructure"
+      },
+      {
+        "number": 1142,
+        "url": "https://github.com/BrianCLong/summit/pull/1142",
+        "mergedAt": null,
+        "title": "chore(deps): bump helmet from 7.2.0 to 8.1.0 in /server"
+      },
+      {
+        "number": 11875,
+        "url": "https://github.com/BrianCLong/summit/pull/11875",
+        "mergedAt": "2025-11-20T14:33:52Z",
+        "title": "Build Extensions and Ecosystem Framework"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

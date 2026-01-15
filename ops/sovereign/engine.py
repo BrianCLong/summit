@@ -12,7 +12,7 @@ import json
 import time
 import uuid
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -256,7 +256,7 @@ retention_compliant {{
             opa_rules=combined_rules,
             runtime_checks=runtime_checks,
             audit_hooks=audit_hooks,
-            compilation_timestamp=datetime.now(timezone.utc).isoformat(),
+            compilation_timestamp=datetime.now(UTC).isoformat(),
         )
 
         return compilation
@@ -274,7 +274,7 @@ retention_compliant {{
                 "request_id": request_id,
                 "tenant_id": tenant_id,
                 "policy_hash": policy_hash,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             }
         )
 
@@ -299,9 +299,9 @@ retention_compliant {{
         compilation = self.compiled_policies[tenant_id]
 
         # Timeframe
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         timeframe_start = datetime.fromtimestamp(
-            now.timestamp() - (timeframe_hours * 3600), timezone.utc
+            now.timestamp() - (timeframe_hours * 3600), UTC
         ).isoformat()
 
         # Filter request tags for this tenant and timeframe
@@ -405,7 +405,7 @@ async def main():
         audit_frequency="monthly",
         custom_policies=["analytics", "personalization"],
         signature="",  # Will be set by engine
-        timestamp=datetime.now(timezone.utc).isoformat(),
+        timestamp=datetime.now(UTC).isoformat(),
     )
 
     stance_hash = engine.declare_compliance_stance(stance)

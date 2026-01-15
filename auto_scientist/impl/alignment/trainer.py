@@ -1,25 +1,28 @@
 import os
+
 from .schemas import AlignmentConfig
-from typing import Optional
 
 # Mock imports for TRL/Peft if not available
 TRL_AVAILABLE = False
 try:
     import torch
-    from trl import DPOTrainer
     from peft import LoraConfig
-    from transformers import TrainingArguments, AutoModelForCausalLM, AutoTokenizer
+    from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
+    from trl import DPOTrainer
+
     TRL_AVAILABLE = True
 except ImportError:
     # Check if torch is available at least
     try:
         import torch
+
         TORCH_AVAILABLE = True
     except ImportError:
         TORCH_AVAILABLE = False
 
     # print("Warning: TRL/Transformers/Torch not installed. Running in simulation mode.")
     pass
+
 
 class AlignmentTrainer:
     def __init__(self, config: AlignmentConfig):
@@ -73,7 +76,6 @@ class AlignmentTrainer:
         print(f"[SIMULATION] Config: {self.config}")
         print("[SIMULATION] Loading dataset...")
         print("[SIMULATION] Starting DPO loop...")
-        import time
         for step in range(1, 6):
             # time.sleep(0.1) # removed for speed in CI
             loss = 1.0 / step

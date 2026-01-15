@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/threat-emulation",
-  "version": "1.0.0",
+  "version": "4.1.4",
   "description": "Threat actor emulation and APT TTP libraries",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -228,7 +228,9 @@ class DifferentialPrivacyTelemetry:
             "budget_status": (
                 "healthy"
                 if budget.utilization_percent < 80
-                else "warning" if budget.utilization_percent < 90 else "critical"
+                else "warning"
+                if budget.utilization_percent < 90
+                else "critical"
             ),
         }
 

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
 
 import pandas as pd
 
@@ -14,28 +13,30 @@ class ColumnSchema:
 
     name: str
     kind: str
-    categories: Optional[List[str]] = None
-    minimum: Optional[float] = None
-    maximum: Optional[float] = None
-    mean: Optional[float] = None
-    std: Optional[float] = None
+    categories: list[str] | None = None
+    minimum: float | None = None
+    maximum: float | None = None
+    mean: float | None = None
+    std: float | None = None
 
 
 @dataclass
 class TabularSchema:
     """Schema for a tabular dataset."""
 
-    columns: Dict[str, ColumnSchema]
-    categorical_columns: List[str] = field(default_factory=list)
-    numeric_columns: List[str] = field(default_factory=list)
+    columns: dict[str, ColumnSchema]
+    categorical_columns: list[str] = field(default_factory=list)
+    numeric_columns: list[str] = field(default_factory=list)
 
-    def select(self, columns: List[str]) -> "TabularSchema":
+    def select(self, columns: list[str]) -> TabularSchema:
         """Return a copy of the schema limited to the provided columns."""
 
         subset = {name: self.columns[name] for name in columns if name in self.columns}
         categorical = [c for c in self.categorical_columns if c in subset]
         numeric = [c for c in self.numeric_columns if c in subset]
-        return TabularSchema(columns=subset, categorical_columns=categorical, numeric_columns=numeric)
+        return TabularSchema(
+            columns=subset, categorical_columns=categorical, numeric_columns=numeric
+        )
 
 
 class SchemaLearner:
@@ -47,9 +48,9 @@ class SchemaLearner:
     def learn(self, frame: pd.DataFrame) -> TabularSchema:
         """Infer schema metadata from the supplied frame."""
 
-        columns: Dict[str, ColumnSchema] = {}
-        categorical_columns: List[str] = []
-        numeric_columns: List[str] = []
+        columns: dict[str, ColumnSchema] = {}
+        categorical_columns: list[str] = []
+        numeric_columns: list[str] = []
 
         for column in frame.columns:
             series = frame[column]
@@ -92,7 +93,7 @@ class SchemaLearner:
         )
 
 
-def ensure_dataframe(obj: pd.DataFrame | Dict[str, List]) -> pd.DataFrame:
+def ensure_dataframe(obj: pd.DataFrame | dict[str, list]) -> pd.DataFrame:
     """Utility to coerce dictionaries to pandas ``DataFrame`` objects."""
 
     if isinstance(obj, pd.DataFrame):
@@ -103,7 +104,7 @@ def ensure_dataframe(obj: pd.DataFrame | Dict[str, List]) -> pd.DataFrame:
 
 __all__ = [
     "ColumnSchema",
-    "TabularSchema",
     "SchemaLearner",
+    "TabularSchema",
     "ensure_dataframe",
 ]

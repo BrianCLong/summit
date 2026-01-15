@@ -1,5 +1,5 @@
-export async function seed(): Promise<void> {
-  console.log('Seeding demo data');
+export function seed(): void {
+  process.stdout.write('Seeding demo data\n');
 }
 
 if (require.main === module) {

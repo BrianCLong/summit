@@ -11,7 +11,7 @@ import asyncio
 import logging
 import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from .circuits import ZKFSACircuit, ZKFSAProof
@@ -103,7 +103,7 @@ class ZKFSARunner:
                 self.audit_history[config.tenant_id].append(result)
 
                 # Trim history (keep last 30 days)
-                cutoff = datetime.now(timezone.utc) - timedelta(days=30)
+                cutoff = datetime.now(UTC) - timedelta(days=30)
                 self.audit_history[config.tenant_id] = [
                     r
                     for r in self.audit_history[config.tenant_id]
@@ -182,7 +182,7 @@ class ZKFSARunner:
             result = AuditResult(
                 audit_id=audit_id,
                 tenant_id=config.tenant_id,
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                timestamp=datetime.now(UTC).isoformat(),
                 fairness_proof=fairness_proof,
                 safety_proof=safety_proof,
                 overall_compliance=overall_compliance,
@@ -216,7 +216,7 @@ class ZKFSARunner:
         return [
             {
                 "decision_id": f"dec_{i}",
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "model_output": {"prediction": 0.8, "confidence": 0.9},
                 "input_features": {"age": 35, "income": 50000},
                 "protected_attributes": {"gender": "F", "race": "Hispanic"},
@@ -300,7 +300,7 @@ class ZKFSARunner:
         if tenant_id not in self.audit_history:
             return []
 
-        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+        cutoff = datetime.now(UTC) - timedelta(days=days)
         return [
             result
             for result in self.audit_history[tenant_id]

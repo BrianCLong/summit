@@ -19,7 +19,9 @@ jest.unstable_mockModule('../../../conductor/mcp/client.js', () => ({
   initializeMCPClient: jest.fn(),
 }));
 
-describe('MCP sessions + invoke', () => {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('MCP sessions + invoke', () => {
   const app = express();
   app.use('/api/maestro/v1', sessionsRouter);
   app.use('/api/maestro/v1', invokeRouter);

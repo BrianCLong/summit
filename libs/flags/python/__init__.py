@@ -1,4 +1,5 @@
 """Lightweight feature flag SDK with typed accessors and graceful fallbacks."""
+
 from __future__ import annotations
 
 import hashlib
@@ -22,12 +23,12 @@ FlagPrimitive = Any
 @dataclass
 class FlagContext:
     env: str
-    tenant: Optional[str] = None
-    user_id: Optional[str] = None
-    user_role: Optional[str] = None
-    region: Optional[str] = None
-    canary_weight: Optional[float] = None
-    pr_number: Optional[str] = None
+    tenant: str | None = None
+    user_id: str | None = None
+    user_role: str | None = None
+    region: str | None = None
+    canary_weight: float | None = None
+    pr_number: str | None = None
 
 
 @dataclass
@@ -51,7 +52,7 @@ class CacheEntry:
 class EnvProvider:
     name = "env"
 
-    def get(self, key: str, _ctx: FlagContext) -> Optional[FlagPrimitive]:
+    def get(self, key: str, _ctx: FlagContext) -> FlagPrimitive | None:
         env_key = f"FLAG_{''.join(c if c.isalnum() else '_' for c in key).upper()}"
         if env_key in os.environ:
             raw = os.environ[env_key]
@@ -69,10 +70,10 @@ class FileProvider:
 
     def __init__(self, targets_dir: Path) -> None:
         self.targets_dir = targets_dir
-        self.cache: Dict[Path, Dict[str, Any]] = {}
-        self.mtimes: Dict[Path, float] = {}
+        self.cache: dict[Path, dict[str, Any]] = {}
+        self.mtimes: dict[Path, float] = {}
 
-    def get(self, key: str, ctx: FlagContext) -> Optional[FlagPrimitive]:
+    def get(self, key: str, ctx: FlagContext) -> FlagPrimitive | None:
         file_path = self.targets_dir / f"{ctx.env}.yaml"
         if not file_path.exists():
             return None
@@ -107,15 +108,15 @@ class FileProvider:
 class RemoteProvider:
     name = "remote"
 
-    def __init__(self, endpoint: Optional[str]) -> None:
+    def __init__(self, endpoint: str | None) -> None:
         self.endpoint = endpoint
-        self.cached: Dict[str, FlagPrimitive] = {}
+        self.cached: dict[str, FlagPrimitive] = {}
 
-    def get(self, key: str, ctx: FlagContext) -> Optional[FlagPrimitive]:
+    def get(self, key: str, ctx: FlagContext) -> FlagPrimitive | None:
         if not self.endpoint:
             return None
-        import urllib.request
         import urllib.parse
+        import urllib.request
 
         query = urllib.parse.urlencode({"key": key, "env": ctx.env, "tenant": ctx.tenant or ""})
         try:
@@ -133,12 +134,23 @@ def _percentage_hit(seed: str, salt: str, percent: float) -> bool:
 
 
 class FlagClient:
-    def __init__(self, env: str, targets_dir: str | Path = "flags/targets", catalog_path: str | Path = "flags/catalog.yaml", remote_endpoint: str | None = None, cache_ttl_ms: int = 60000) -> None:
+    def __init__(
+        self,
+        env: str,
+        targets_dir: str | Path = "flags/targets",
+        catalog_path: str | Path = "flags/catalog.yaml",
+        remote_endpoint: str | None = None,
+        cache_ttl_ms: int = 60000,
+    ) -> None:
         self.env = env
         self.cache_ttl_ms = cache_ttl_ms
-        self.cache: Dict[str, CacheEntry] = {}
+        self.cache: dict[str, CacheEntry] = {}
         self.catalog = self._load_catalog(Path(catalog_path))
-        self.providers = [EnvProvider(), FileProvider(Path(targets_dir)), RemoteProvider(remote_endpoint)]
+        self.providers = [
+            EnvProvider(),
+            FileProvider(Path(targets_dir)),
+            RemoteProvider(remote_endpoint),
+        ]
 
     def catalog_key(self, key: str) -> str:
         return key
@@ -146,7 +158,9 @@ class FlagClient:
     def kill(self, key: str) -> None:
         self.cache[key] = CacheEntry(False, "kill-switch", self.cache_ttl_ms)
 
-    def get(self, key: str, default: Optional[FlagPrimitive] = None, ctx: Optional[FlagContext] = None) -> FlagPrimitive:
+    def get(
+        self, key: str, default: FlagPrimitive | None = None, ctx: FlagContext | None = None
+    ) -> FlagPrimitive:
         ctx = ctx or FlagContext(env=self.env)
         cached = self.cache.get(key)
         if cached and cached.valid():
@@ -164,11 +178,11 @@ class FlagClient:
             return default
         raise KeyError(f"flag {key} missing default value")
 
-    def _load_catalog(self, path: Path) -> Dict[str, FlagDefinition]:
+    def _load_catalog(self, path: Path) -> dict[str, FlagDefinition]:
         if not path.exists():
             return {}
         data = load_yaml(path.read_text()) or {}
-        catalog: Dict[str, FlagDefinition] = {}
+        catalog: dict[str, FlagDefinition] = {}
         for item in data.get("flags", []):
             catalog[item["key"]] = FlagDefinition(**item)
         return catalog
@@ -176,7 +190,9 @@ class FlagClient:
 
 default_client = FlagClient(env=os.environ.get("NODE_ENV", "dev"))
 
-def with_flags(key: str, ctx: Optional[FlagContext] = None) -> FlagPrimitive:
+
+def with_flags(key: str, ctx: FlagContext | None = None) -> FlagPrimitive:
     return default_client.get(key, ctx=ctx)
 
-__all__ = ["FlagClient", "FlagContext", "FlagDefinition", "with_flags", "default_client"]
+
+__all__ = ["FlagClient", "FlagContext", "FlagDefinition", "default_client", "with_flags"]

@@ -1,0 +1,230 @@
+{
+  "issue_number": 11,
+  "title": "M1: Branch protection & CODEOWNERS",
+  "url": "https://github.com/BrianCLong/summit/issues/11",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-13T18:12:53Z",
+  "createdAt": "2025-08-12T00:10:01Z",
+  "classification": "security",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15202,
+        "url": "https://github.com/BrianCLong/summit/pull/15202",
+        "mergedAt": "2026-01-01T11:47:02Z",
+        "title": "feat: Operational Excellence & Hardening (Sprint N+11)"
+      },
+      {
+        "number": 15065,
+        "url": "https://github.com/BrianCLong/summit/pull/15065",
+        "mergedAt": "2025-12-30T22:40:59Z",
+        "title": "docs: align Node.js baseline to 20.11.0"
+      },
+      {
+        "number": 12456,
+        "url": "https://github.com/BrianCLong/summit/pull/12456",
+        "mergedAt": "2025-12-18T02:48:19Z",
+        "title": "Expand wave 11 mission briefs"
+      },
+      {
+        "number": 13766,
+        "url": "https://github.com/BrianCLong/summit/pull/13766",
+        "mergedAt": "2025-12-20T03:34:54Z",
+        "title": "docs: add sprint plan for May 11–22, 2026"
+      },
+      {
+        "number": 12339,
+        "url": "https://github.com/BrianCLong/summit/pull/12339",
+        "mergedAt": "2025-12-18T03:04:27Z",
+        "title": "Sprint 11: Influence Tactics Simulation Engine"
+      },
+      {
+        "number": 12311,
+        "url": "https://github.com/BrianCLong/summit/pull/12311",
+        "mergedAt": "2025-12-04T16:28:27Z",
+        "title": "Add security prompts 11-20"
+      },
+      {
+        "number": 12256,
+        "url": "https://github.com/BrianCLong/summit/pull/12256",
+        "mergedAt": "2025-12-18T03:24:39Z",
+        "title": "Add 11 repo-scoped Claude prompts"
+      },
+      {
+        "number": 13849,
+        "url": "https://github.com/BrianCLong/summit/pull/13849",
+        "mergedAt": "2025-12-20T03:45:00Z",
+        "title": "Add Sprint 19 plan for Aug 31–Sep 11 2026"
+      },
+      {
+        "number": 14382,
+        "url": "https://github.com/BrianCLong/summit/pull/14382",
+        "mergedAt": null,
+        "title": "Bump happy-dom from 15.11.7 to 20.0.2"
+      },
+      {
+        "number": 12777,
+        "url": "https://github.com/BrianCLong/summit/pull/12777",
+        "mergedAt": "2025-12-18T00:37:42Z",
+        "title": "MCP+ v1: Goose-Learned Velocity 2025-11-28"
+      },
+      {
+        "number": 12373,
+        "url": "https://github.com/BrianCLong/summit/pull/12373",
+        "mergedAt": "2025-12-18T02:57:27Z",
+        "title": "feat: add 11 Wave 3 predictive/cognitive system prompts"
+      },
+      {
+        "number": 14379,
+        "url": "https://github.com/BrianCLong/summit/pull/14379",
+        "mergedAt": "2025-12-23T04:35:14Z",
+        "title": "Bump happy-dom from 15.11.7 to 20.0.2 in /apps/compliance-console"
+      },
+      {
+        "number": 15059,
+        "url": "https://github.com/BrianCLong/summit/pull/15059",
+        "mergedAt": null,
+        "title": "Align README references and tooling versions"
+      },
+      {
+        "number": 14729,
+        "url": "https://github.com/BrianCLong/summit/pull/14729",
+        "mergedAt": null,
+        "title": "Data Classification and Residency Enforcement"
+      },
+      {
+        "number": 14195,
+        "url": "https://github.com/BrianCLong/summit/pull/14195",
+        "mergedAt": "2025-12-22T08:13:52Z",
+        "title": "feat(strategy): implement Epic 1 Moat Thesis"
+      },
+      {
+        "number": 13079,
+        "url": "https://github.com/BrianCLong/summit/pull/13079",
+        "mergedAt": "2025-12-02T11:19:57Z",
+        "title": "chore(deps): bump nodemailer from 7.0.7 to 7.0.11 in /server"
+      },
+      {
+        "number": 14364,
+        "url": "https://github.com/BrianCLong/summit/pull/14364",
+        "mergedAt": "2025-12-22T07:56:12Z",
+        "title": "[Epic 1] Golden Path Architecture & Boundaries"
+      },
+      {
+        "number": 15013,
+        "url": "https://github.com/BrianCLong/summit/pull/15013",
+        "mergedAt": null,
+        "title": "feat: add MVP-4 GA evaluation harness"
+      },
+      {
+        "number": 14473,
+        "url": "https://github.com/BrianCLong/summit/pull/14473",
+        "mergedAt": "2025-12-25T07:45:54Z",
+        "title": "feat(auto-scientist): Ship Prototype v0 + IP Pack"
+      },
+      {
+        "number": 12776,
+        "url": "https://github.com/BrianCLong/summit/pull/12776",
+        "mergedAt": "2025-12-18T00:38:53Z",
+        "title": "Add API documentation with OpenAPI"
+      },
+      {
+        "number": 14380,
+        "url": "https://github.com/BrianCLong/summit/pull/14380",
+        "mergedAt": "2025-12-23T04:35:02Z",
+        "title": "⚡ Bolt: Optimize SimilarityService batching"
+      },
+      {
+        "number": 13407,
+        "url": "https://github.com/BrianCLong/summit/pull/13407",
+        "mergedAt": "2025-12-17T04:45:43Z",
+        "title": "compliance: Automation skeleton & SOC2/ISO/NIST mapping"
+      },
+      {
+        "number": 13616,
+        "url": "https://github.com/BrianCLong/summit/pull/13616",
+        "mergedAt": "2025-12-16T21:23:51Z",
+        "title": "build(deps): bump github.com/go-chi/chi/v5 from 5.0.11 to 5.2.2 in /templates/golden-path-platform/services/hello-service"
+      },
+      {
+        "number": 12317,
+        "url": "https://github.com/BrianCLong/summit/pull/12317",
+        "mergedAt": "2025-12-05T17:13:58Z",
+        "title": "Add Summit prompt pack for advanced scenario planning"
+      },
+      {
+        "number": 12443,
+        "url": "https://github.com/BrianCLong/summit/pull/12443",
+        "mergedAt": "2025-12-06T23:30:08Z",
+        "title": "Add cyber defense program blueprint"
+      },
+      {
+        "number": 12274,
+        "url": "https://github.com/BrianCLong/summit/pull/12274",
+        "mergedAt": "2025-12-18T03:19:19Z",
+        "title": "feat: Compliance tooling and Observability enhancements"
+      },
+      {
+        "number": 14620,
+        "url": "https://github.com/BrianCLong/summit/pull/14620",
+        "mergedAt": "2025-12-27T06:04:45Z",
+        "title": "chore(deps-dev): Bump werkzeug from 3.1.3 to 3.1.4 in /modules/connector-sdk-s3csv"
+      },
+      {
+        "number": 12402,
+        "url": "https://github.com/BrianCLong/summit/pull/12402",
+        "mergedAt": "2025-12-04T16:22:56Z",
+        "title": "docs: add wave 4 predictive cognitive prompts"
+      },
+      {
+        "number": 13543,
+        "url": "https://github.com/BrianCLong/summit/pull/13543",
+        "mergedAt": "2025-12-17T04:46:32Z",
+        "title": "feat: Connector Catalogue & Ingest Wizard v1"
+      },
+      {
+        "number": 12687,
+        "url": "https://github.com/BrianCLong/summit/pull/12687",
+        "mergedAt": "2025-12-04T15:56:24Z",
+        "title": "Implement multi-tenant security and authorization layer"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -3,7 +3,10 @@ import request from 'supertest';
 import { describe, beforeEach, expect, test, jest } from '@jest/globals';
 import exportRouter from '../../src/routes/export.js';
 
-const mockBy = jest.fn();
+const describeNetwork =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+const mockBy = jest.fn<(...args: any[]) => Promise<any[]>>();
 
 jest.mock('../../src/db/postgres.js', () => ({
   getPostgresPool: jest.fn(() => ({})),
@@ -25,7 +28,7 @@ function sign(params: Record<string, string>, secret: string) {
   return crypto.createHmac('sha256', secret).update(base).digest('hex');
 }
 
-describe('provenance export signing and redaction', () => {
+describeNetwork('provenance export signing and redaction', () => {
   const secret = 'unit-export-secret';
   const baseParams = {
     scope: 'investigation',
@@ -47,7 +50,10 @@ describe('provenance export signing and redaction', () => {
   });
 
   test('rejects tampered parameters even with previously valid signature', async () => {
-    const params = { ...baseParams, ts: String(Date.now()) };
+    const params: Record<string, string> = {
+      ...baseParams,
+      ts: String(Date.now()),
+    };
     const sig = sign(params, secret);
 
     const res = await request(app)
@@ -59,7 +65,10 @@ describe('provenance export signing and redaction', () => {
   });
 
   test('filters out foreign-tenant rows and redacts identifiers', async () => {
-    const params = { ...baseParams, ts: String(Date.now()) };
+    const params: Record<string, string> = {
+      ...baseParams,
+      ts: String(Date.now()),
+    };
     const sig = sign(params, secret);
     const now = new Date().toISOString();
 

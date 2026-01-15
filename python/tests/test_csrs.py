@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import json
+import sys
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
-import sys
 
 import pytest
 
@@ -48,9 +48,7 @@ def test_dependencies_cover_all_expected_impacts() -> None:
     planner = _planner_from_fixture(fixture)
     plan = planner.simulate(fixture["datasets"])
     flattened = [
-        dependency["name"]
-        for dataset in plan["datasets"]
-        for dependency in dataset["dependencies"]
+        dependency["name"] for dataset in plan["datasets"] for dependency in dataset["dependencies"]
     ]
     dependency_names = set(flattened)
     expected = {

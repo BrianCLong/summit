@@ -4,20 +4,32 @@
  * Tests the modern pgvector-based findDuplicateCandidates implementation
  */
 
-import { jest } from '@jest/globals';
-import { SimilarityService } from '../SimilarityService.js';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
 import type { DuplicateCandidate } from '../SimilarityService.js';
 
 // Mock dependencies
-jest.mock('../../config/database.js');
-jest.mock('../../monitoring/opentelemetry.js');
-jest.mock('../../monitoring/metrics.js');
-jest.mock('../../utils/logger.js');
+jest.unstable_mockModule('../../config/database.js', () => ({}));
+jest.unstable_mockModule('../../monitoring/opentelemetry.js', () => ({
+  otelService: {
+    wrapNeo4jOperation: jest.fn((name: string, fn: () => any) => fn()),
+    addSpanAttributes: jest.fn(),
+  },
+}));
+jest.unstable_mockModule('../../monitoring/metrics.js', () => ({}));
+jest.unstable_mockModule('../../utils/logger.js', () => ({
+  default: { info: jest.fn(), debug: jest.fn(), error: jest.fn() },
+}));
 
 describe('SimilarityService - Duplicate Detection', () => {
-  let service: SimilarityService;
+  let SimilarityService: typeof import('../SimilarityService.js').SimilarityService;
+  let service: InstanceType<typeof SimilarityService>;
   let mockPool: any;
   let mockClient: any;
+
+  beforeAll(async () => {
+    const module = await import('../SimilarityService.js');
+    SimilarityService = module.SimilarityService;
+  });
 
   beforeEach(() => {
     // Reset mocks
@@ -30,8 +42,10 @@ describe('SimilarityService - Duplicate Detection', () => {
     };
 
     // Create mock pool
+    const mockPoolConnect = jest.fn();
+    (mockPoolConnect as any).mockResolvedValue(mockClient);
     mockPool = {
-      connect: jest.fn().mockResolvedValue(mockClient),
+      connect: mockPoolConnect,
     };
 
     // Inject mock pool
@@ -175,7 +189,9 @@ describe('SimilarityService - Duplicate Detection', () => {
         });
 
       // Mock telemetry
-      const mockWrapNeo4jOperation = jest.fn((name, fn) => fn());
+      const mockWrapNeo4jOperation = jest.fn((name: string, fn: () => any) =>
+        fn(),
+      );
       const mockAddSpanAttributes = jest.fn();
       (service as any).otelService = {
         wrapNeo4jOperation: mockWrapNeo4jOperation,
@@ -242,7 +258,9 @@ describe('SimilarityService - Duplicate Detection', () => {
           rows: [{ entity_id: 'entity-1', similarity: 0.3 }],
         });
 
-      const mockWrapNeo4jOperation = jest.fn((name, fn) => fn());
+      const mockWrapNeo4jOperation = jest.fn((name: string, fn: () => any) =>
+        fn(),
+      );
       (service as any).otelService = {
         wrapNeo4jOperation: mockWrapNeo4jOperation,
         addSpanAttributes: jest.fn(),
@@ -266,13 +284,13 @@ describe('SimilarityService - Duplicate Detection', () => {
             entity_id: 'entity-1',
             embedding: '[0.1, 0.2, 0.3]',
             text: 'Test',
-            metadata: { neighbor_ids: [], source_system: 'src' },
+            metadata: { neighbor_ids: ['n1'], source_system: 'src' },
           },
           {
             entity_id: 'entity-2',
             embedding: '[0.1, 0.2, 0.3]',
             text: 'Test',
-            metadata: { neighbor_ids: [], source_system: 'src' },
+            metadata: { neighbor_ids: ['n1'], source_system: 'src' },
           },
         ],
       });
@@ -286,7 +304,9 @@ describe('SimilarityService - Duplicate Detection', () => {
           rows: [{ entity_id: 'entity-1', similarity: 0.95 }],
         });
 
-      const mockWrapNeo4jOperation = jest.fn((name, fn) => fn());
+      const mockWrapNeo4jOperation = jest.fn((name: string, fn: () => any) =>
+        fn(),
+      );
       (service as any).otelService = {
         wrapNeo4jOperation: mockWrapNeo4jOperation,
         addSpanAttributes: jest.fn(),
@@ -307,7 +327,9 @@ describe('SimilarityService - Duplicate Detection', () => {
         rows: [],
       });
 
-      const mockWrapNeo4jOperation = jest.fn((name, fn) => fn());
+      const mockWrapNeo4jOperation = jest.fn((name: string, fn: () => any) =>
+        fn(),
+      );
       (service as any).otelService = {
         wrapNeo4jOperation: mockWrapNeo4jOperation,
         addSpanAttributes: jest.fn(),
@@ -347,7 +369,9 @@ describe('SimilarityService - Duplicate Detection', () => {
           rows: [{ entity_id: 'entity-1', similarity: 0.85 }],
         });
 
-      const mockWrapNeo4jOperation = jest.fn((name, fn) => fn());
+      const mockWrapNeo4jOperation = jest.fn((name: string, fn: () => any) =>
+        fn(),
+      );
       (service as any).otelService = {
         wrapNeo4jOperation: mockWrapNeo4jOperation,
         addSpanAttributes: jest.fn(),
@@ -400,7 +424,9 @@ describe('SimilarityService - Duplicate Detection', () => {
         .mockResolvedValueOnce({ rows: [] })
         .mockResolvedValueOnce({ rows: [] });
 
-      const mockWrapNeo4jOperation = jest.fn((name, fn) => fn());
+      const mockWrapNeo4jOperation = jest.fn((name: string, fn: () => any) =>
+        fn(),
+      );
       (service as any).otelService = {
         wrapNeo4jOperation: mockWrapNeo4jOperation,
         addSpanAttributes: jest.fn(),

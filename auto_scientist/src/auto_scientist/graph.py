@@ -1,13 +1,15 @@
 from __future__ import annotations
+
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Dict, List, Iterable, Optional
-from .schemas import Node, Edge, NodeType, EdgeType
+
+from .schemas import Edge, EdgeType, Node, NodeType
 
 
 @dataclass
 class ExperimentGraph:
-    nodes: Dict[str, Node] = field(default_factory=dict)
-    edges: List[Edge] = field(default_factory=list)
+    nodes: dict[str, Node] = field(default_factory=dict)
+    edges: list[Edge] = field(default_factory=list)
 
     def add_node(self, node: Node) -> None:
         if node.id in self.nodes:
@@ -19,12 +21,12 @@ class ExperimentGraph:
             raise ValueError("Both source and target must exist in the graph")
         self.edges.append(edge)
 
-    def successors(self, node_id: str, edge_type: Optional[EdgeType] = None) -> Iterable[Node]:
+    def successors(self, node_id: str, edge_type: EdgeType | None = None) -> Iterable[Node]:
         for e in self.edges:
             if e.source == node_id and (edge_type is None or e.type == edge_type):
                 yield self.nodes[e.target]
 
-    def predecessors(self, node_id: str, edge_type: Optional[EdgeType] = None) -> Iterable[Node]:
+    def predecessors(self, node_id: str, edge_type: EdgeType | None = None) -> Iterable[Node]:
         for e in self.edges:
             if e.target == node_id and (edge_type is None or e.type == edge_type):
                 yield self.nodes[e.source]

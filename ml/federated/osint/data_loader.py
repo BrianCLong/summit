@@ -5,8 +5,9 @@ Handles loading and preprocessing of OSINT data for local training.
 """
 
 import logging
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Any, Dict, Iterator, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -16,18 +17,19 @@ logger = logging.getLogger(__name__)
 @dataclass
 class OSINTSample:
     """A single OSINT data sample"""
+
     sample_id: str
     features: np.ndarray
     label: int
     source: str
     confidence: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 class OSINTDataset:
     """Dataset of OSINT samples for federated training"""
 
-    def __init__(self, samples: List[OSINTSample] = None):
+    def __init__(self, samples: list[OSINTSample] = None):
         self.samples = samples or []
 
     def __len__(self) -> int:
@@ -40,7 +42,7 @@ class OSINTDataset:
         """Add a sample to the dataset"""
         self.samples.append(sample)
 
-    def get_features_labels(self) -> Tuple[np.ndarray, np.ndarray]:
+    def get_features_labels(self) -> tuple[np.ndarray, np.ndarray]:
         """Get all features and labels as arrays"""
         if not self.samples:
             return np.array([]), np.array([])
@@ -49,7 +51,7 @@ class OSINTDataset:
         labels = np.array([s.label for s in self.samples])
         return features, labels
 
-    def split(self, ratio: float = 0.8) -> Tuple["OSINTDataset", "OSINTDataset"]:
+    def split(self, ratio: float = 0.8) -> tuple["OSINTDataset", "OSINTDataset"]:
         """Split dataset into train and test"""
         split_idx = int(len(self.samples) * ratio)
         indices = np.random.permutation(len(self.samples))
@@ -73,14 +75,14 @@ class OSINTDataLoader:
         self.batch_size = batch_size
         self.shuffle = shuffle
 
-    def __iter__(self) -> Iterator[Tuple[np.ndarray, np.ndarray]]:
+    def __iter__(self) -> Iterator[tuple[np.ndarray, np.ndarray]]:
         """Iterate over batches"""
         indices = np.arange(len(self.dataset))
         if self.shuffle:
             np.random.shuffle(indices)
 
         for start_idx in range(0, len(indices), self.batch_size):
-            batch_indices = indices[start_idx:start_idx + self.batch_size]
+            batch_indices = indices[start_idx : start_idx + self.batch_size]
             batch_samples = [self.dataset[i] for i in batch_indices]
 
             features = np.array([s.features for s in batch_samples])

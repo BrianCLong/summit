@@ -1,8 +1,8 @@
+from app.api import endpoints
+from app.core.config import settings
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
-from app.core.config import settings
-from app.api import endpoints
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
@@ -23,4 +23,5 @@ Instrumentator().instrument(app).expose(app)
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

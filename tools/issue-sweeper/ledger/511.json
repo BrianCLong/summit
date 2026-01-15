@@ -1,0 +1,44 @@
+{
+  "issue_number": 511,
+  "title": "feat: add investigation timeline viewer",
+  "url": "https://github.com/BrianCLong/summit/pull/511",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-17T22:34:43Z",
+  "createdAt": "2025-08-17T21:19:20Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15340,
+        "url": "https://github.com/BrianCLong/summit/pull/15340",
+        "mergedAt": "2026-01-01T08:47:05Z",
+        "title": "Counter-intelligence information dominance sprint"
+      },
+      {
+        "number": 11876,
+        "url": "https://github.com/BrianCLong/summit/pull/11876",
+        "mergedAt": "2025-11-20T14:33:36Z",
+        "title": "Wire end-to-end demo stories for two use cases"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

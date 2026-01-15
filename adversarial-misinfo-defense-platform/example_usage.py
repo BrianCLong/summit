@@ -38,7 +38,7 @@ def example_platform_creation():
 
         return platform
     except Exception as e:
-        print(f"❌ Error creating platform: {str(e)}")
+        print(f"❌ Error creating platform: {e!s}")
         return None
 
 
@@ -77,8 +77,8 @@ def example_text_detection(platform):
             is_misinfo = result.get("is_misinfo", False)
 
             status = "MISINFORMATION" if is_misinfo else "LEGITIMATE"
-            print(f"\nSample {i+1}:")
-            print(f"  Text: \"{text[:50]}{'...' if len(text) > 50 else ''}\"")
+            print(f"\nSample {i + 1}:")
+            print(f'  Text: "{text[:50]}{"..." if len(text) > 50 else ""}"')
             print(f"  Misinfo Score: {misinfo_score:.3f}")
             print(f"  Confidence: {confidence:.3f}")
             print(f"  Classification: {status}")
@@ -86,7 +86,7 @@ def example_text_detection(platform):
         print("\n✓ Text detection completed successfully!")
         return results
     except Exception as e:
-        print(f"❌ Error during text detection: {str(e)}")
+        print(f"❌ Error during text detection: {e!s}")
         return None
 
 
@@ -122,7 +122,7 @@ def example_image_detection(platform):
             is_manipulated = result.get("is_manipulated", False)
 
             status = "MANIPULATED" if is_manipulated else "LEGITIMATE"
-            print(f"\nImage {i+1}:")
+            print(f"\nImage {i + 1}:")
             print(f"  Path: {image_path}")
             print(f"  Misinfo Score: {misinfo_score:.3f}")
             print(f"  Confidence: {confidence:.3f}")
@@ -131,7 +131,7 @@ def example_image_detection(platform):
         print("\n✓ Image detection completed successfully!")
         return results
     except Exception as e:
-        print(f"❌ Error during image detection: {str(e)}")
+        print(f"❌ Error during image detection: {e!s}")
         return None
 
 
@@ -163,7 +163,7 @@ def example_audio_detection(platform):
             is_deepfake = result.get("is_deepfake", False)
 
             status = "DEEPFAKE" if is_deepfake else "LEGITIMATE"
-            print(f"\nAudio {i+1}:")
+            print(f"\nAudio {i + 1}:")
             print(f"  Path: {audio_path}")
             print(f"  Misinfo Score: {misinfo_score:.3f}")
             print(f"  Confidence: {confidence:.3f}")
@@ -172,7 +172,7 @@ def example_audio_detection(platform):
         print("\n✓ Audio detection completed successfully!")
         return results
     except Exception as e:
-        print(f"❌ Error during audio detection: {str(e)}")
+        print(f"❌ Error during audio detection: {e!s}")
         return None
 
 
@@ -200,7 +200,7 @@ def example_validation_benchmark():
         print("\n✓ Validation benchmark completed successfully!")
         return results
     except Exception as e:
-        print(f"❌ Error during validation: {str(e)}")
+        print(f"❌ Error during validation: {e!s}")
         return None
 
 
@@ -244,7 +244,7 @@ def example_red_blue_team_exercises():
         print("\n✓ Red/blue team exercises demonstrated successfully!")
         return True
     except Exception as e:
-        print(f"❌ Error during red/blue team exercises: {str(e)}")
+        print(f"❌ Error during red/blue team exercises: {e!s}")
         return False
 
 
@@ -289,7 +289,7 @@ def example_adversarial_training(platform):
         print("\n✓ Adversarial training completed successfully!")
         return training_results
     except Exception as e:
-        print(f"❌ Error during adversarial training: {str(e)}")
+        print(f"❌ Error during adversarial training: {e!s}")
         return None
 
 
@@ -345,7 +345,7 @@ def example_tactic_evolution(platform):
 
         return report
     except Exception as e:
-        print(f"❌ Error during tactic evolution: {str(e)}")
+        print(f"❌ Error during tactic evolution: {e!s}")
         return None
 
 

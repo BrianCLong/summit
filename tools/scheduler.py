@@ -291,11 +291,8 @@ class IntelligentScheduler:
 
         should_offload = False
 
-        if (
-            battery_low
-            and not_plugged
-            or high_load
-            and task in ["embeddings", "batch-rag", "long-cot"]
+        if (battery_low and not_plugged) or (
+            high_load and task in ["embeddings", "batch-rag", "long-cot"]
         ):
             should_offload = True
 

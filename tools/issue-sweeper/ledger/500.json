@@ -1,0 +1,212 @@
+{
+  "issue_number": 500,
+  "title": "feat(obs): client traceparent, Grafana JSON, alert rules",
+  "url": "https://github.com/BrianCLong/summit/pull/500",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-17T22:33:30Z",
+  "createdAt": "2025-08-17T19:16:07Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15366,
+        "url": "https://github.com/BrianCLong/summit/pull/15366",
+        "mergedAt": null,
+        "title": "Harden Express input validation and GraphQL guard"
+      },
+      {
+        "number": 14307,
+        "url": "https://github.com/BrianCLong/summit/pull/14307",
+        "mergedAt": "2025-12-22T08:07:14Z",
+        "title": "Reliability North Star: Tier 0 Journeys & Instrumentation"
+      },
+      {
+        "number": 14515,
+        "url": "https://github.com/BrianCLong/summit/pull/14515",
+        "mergedAt": "2025-12-27T00:19:16Z",
+        "title": "Sprint N+23: Agent Workload SLOs & Scale Testing"
+      },
+      {
+        "number": 14963,
+        "url": "https://github.com/BrianCLong/summit/pull/14963",
+        "mergedAt": "2025-12-30T22:46:33Z",
+        "title": "feat(graph): implement high-performance Canvas+Worker renderer"
+      },
+      {
+        "number": 14216,
+        "url": "https://github.com/BrianCLong/summit/pull/14216",
+        "mergedAt": null,
+        "title": "🛡️ Sentinel: [HIGH] Fix missing GitHub webhook signature verification"
+      },
+      {
+        "number": 14770,
+        "url": "https://github.com/BrianCLong/summit/pull/14770",
+        "mergedAt": null,
+        "title": "Sprint N+4: Release Gates, Kill Switches & Safety Rails"
+      },
+      {
+        "number": 12846,
+        "url": "https://github.com/BrianCLong/summit/pull/12846",
+        "mergedAt": "2025-12-04T15:49:29Z",
+        "title": "Add 90-day gap-closure plan for B2B SaaS and agencies"
+      },
+      {
+        "number": 15294,
+        "url": "https://github.com/BrianCLong/summit/pull/15294",
+        "mergedAt": "2026-01-01T05:45:57Z",
+        "title": "Set up autonomous Summit priority system"
+      },
+      {
+        "number": 12063,
+        "url": "https://github.com/BrianCLong/summit/pull/12063",
+        "mergedAt": "2025-11-21T04:00:31Z",
+        "title": "Implement API rate limiting and throttling system"
+      },
+      {
+        "number": 11971,
+        "url": "https://github.com/BrianCLong/summit/pull/11971",
+        "mergedAt": null,
+        "title": "Analyze test coverage gaps automatically"
+      },
+      {
+        "number": 11983,
+        "url": "https://github.com/BrianCLong/summit/pull/11983",
+        "mergedAt": "2025-11-20T15:06:02Z",
+        "title": "Implement ABAC governance and audit foundations"
+      },
+      {
+        "number": 15348,
+        "url": "https://github.com/BrianCLong/summit/pull/15348",
+        "mergedAt": "2026-01-01T09:53:05Z",
+        "title": "Improve cost and operational efficiency"
+      },
+      {
+        "number": 12689,
+        "url": "https://github.com/BrianCLong/summit/pull/12689",
+        "mergedAt": "2025-12-18T01:39:47Z",
+        "title": "Create copy-paste prompts for Claude Code"
+      },
+      {
+        "number": 11954,
+        "url": "https://github.com/BrianCLong/summit/pull/11954",
+        "mergedAt": "2025-11-20T10:20:47Z",
+        "title": "Define and implement codebase maintainability metrics"
+      },
+      {
+        "number": 1465,
+        "url": "https://github.com/BrianCLong/summit/pull/1465",
+        "mergedAt": "2025-11-20T22:29:56Z",
+        "title": "feat: add Python batching workers for feed-processor"
+      },
+      {
+        "number": 12001,
+        "url": "https://github.com/BrianCLong/summit/pull/12001",
+        "mergedAt": "2025-11-20T15:01:37Z",
+        "title": "Add telemetry and observability to service"
+      },
+      {
+        "number": 12038,
+        "url": "https://github.com/BrianCLong/summit/pull/12038",
+        "mergedAt": "2025-11-21T03:59:50Z",
+        "title": "Optimize GraphQL implementation and resolver performance"
+      },
+      {
+        "number": 12085,
+        "url": "https://github.com/BrianCLong/summit/pull/12085",
+        "mergedAt": "2025-11-21T06:30:38Z",
+        "title": "Build data pipeline and ETL infrastructure"
+      },
+      {
+        "number": 12022,
+        "url": "https://github.com/BrianCLong/summit/pull/12022",
+        "mergedAt": "2025-11-20T15:29:53Z",
+        "title": "Build Advanced Automation and Workflow Engine"
+      },
+      {
+        "number": 11981,
+        "url": "https://github.com/BrianCLong/summit/pull/11981",
+        "mergedAt": "2025-11-20T15:11:44Z",
+        "title": "Set up Predictive Threat Suite and SLO dashboards"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 11233,
+        "url": "https://github.com/BrianCLong/summit/pull/11233",
+        "mergedAt": "2025-10-16T16:05:19Z",
+        "title": "fix/msw vector adapter typings"
+      },
+      {
+        "number": 11879,
+        "url": "https://github.com/BrianCLong/summit/pull/11879",
+        "mergedAt": null,
+        "title": "Create monorepo remediation and dev workflow plan"
+      },
+      {
+        "number": 11919,
+        "url": "https://github.com/BrianCLong/summit/pull/11919",
+        "mergedAt": "2025-11-20T10:05:41Z",
+        "title": "Build Advanced Data Integration and ETL Platform"
+      },
+      {
+        "number": 11877,
+        "url": "https://github.com/BrianCLong/summit/pull/11877",
+        "mergedAt": "2025-11-20T14:33:29Z",
+        "title": "Build GraphQL schema governance and validation"
+      },
+      {
+        "number": 11895,
+        "url": "https://github.com/BrianCLong/summit/pull/11895",
+        "mergedAt": null,
+        "title": "Build Crisis Management and Emergency Response Platform"
+      },
+      {
+        "number": 11883,
+        "url": "https://github.com/BrianCLong/summit/pull/11883",
+        "mergedAt": "2025-11-20T14:33:14Z",
+        "title": "Add canonical entities with bitemporal provenance"
+      },
+      {
+        "number": 11914,
+        "url": "https://github.com/BrianCLong/summit/pull/11914",
+        "mergedAt": "2025-11-20T10:25:00Z",
+        "title": "Consolidate Summit orchestration layer"
+      },
+      {
+        "number": 731,
+        "url": "https://github.com/BrianCLong/summit/pull/731",
+        "mergedAt": null,
+        "title": "chore(deps): bump uvicorn[standard] from 0.24.0 to 0.35.0"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

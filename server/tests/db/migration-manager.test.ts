@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import crypto from 'crypto';
 import fs from 'fs';
 import os from 'os';
@@ -105,7 +106,7 @@ describe('MigrationManager', () => {
 
   it('guards against destructive migrations by default', () => {
     expect(() => MigrationManager.validateOnlineSafety('DROP TABLE users;')).toThrow(
-      /breaking change/i,
+      /migration safety check failed/i,
     );
   });
 

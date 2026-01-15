@@ -5,6 +5,7 @@ Main Entry Point for Adversarial Misinformation Defense Platform
 This script provides the main entry point for running the complete platform,
 including all detection, training, validation, and exercise management components.
 """
+
 import argparse
 import json
 import logging
@@ -167,7 +168,7 @@ def run_detection(args: argparse.Namespace, platform: dict[str, Any]) -> int:
         return 0
 
     except Exception as e:
-        logger.error(f"Error during detection: {str(e)}", exc_info=True)
+        logger.error(f"Error during detection: {e!s}", exc_info=True)
         return 1
 
 
@@ -195,7 +196,7 @@ def run_validation(args: argparse.Namespace, platform: dict[str, Any]) -> int:
         return 0
 
     except Exception as e:
-        logger.error(f"Error during validation: {str(e)}", exc_info=True)
+        logger.error(f"Error during validation: {e!s}", exc_info=True)
         return 1
 
 
@@ -229,7 +230,7 @@ def run_training(args: argparse.Namespace, platform: dict[str, Any]) -> int:
         return 0
 
     except Exception as e:
-        logger.error(f"Error during training: {str(e)}", exc_info=True)
+        logger.error(f"Error during training: {e!s}", exc_info=True)
         return 1
 
 
@@ -270,7 +271,7 @@ def run_exercise(args: argparse.Namespace, platform: dict[str, Any]) -> int:
         return 0
 
     except Exception as e:
-        logger.error(f"Error during exercises: {str(e)}", exc_info=True)
+        logger.error(f"Error during exercises: {e!s}", exc_info=True)
         return 1
 
 
@@ -309,7 +310,7 @@ def run_evolution(args: argparse.Namespace, platform: dict[str, Any]) -> int:
         return 0
 
     except Exception as e:
-        logger.error(f"Error during evolution: {str(e)}", exc_info=True)
+        logger.error(f"Error during evolution: {e!s}", exc_info=True)
         return 1
 
 

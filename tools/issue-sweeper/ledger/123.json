@@ -1,0 +1,215 @@
+{
+  "issue_number": 123,
+  "title": "Copilot Goal Definition UI",
+  "url": "https://github.com/BrianCLong/summit/issues/123",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    },
+    {
+      "id": 9103342747,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn8mw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/UX",
+      "name": "UX",
+      "color": "c5def5",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342986,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9ig",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/frontend",
+      "name": "frontend",
+      "color": "A2EEEF",
+      "default": false,
+      "description": "UI/E2E"
+    },
+    {
+      "id": 9103343056,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn90A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/mvp1",
+      "name": "mvp1",
+      "color": "0e8a16",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103361970,
+      "node_id": "LA_kwDOPaNncM8AAAACHppHsg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:copilot",
+      "name": "area:copilot",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-13T09:25:17Z",
+  "createdAt": "2025-08-13T09:20:23Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14834,
+        "url": "https://github.com/BrianCLong/summit/pull/14834",
+        "mergedAt": "2025-12-29T16:12:13Z",
+        "title": "test: strengthen graph guardrail fuzzing"
+      },
+      {
+        "number": 12762,
+        "url": "https://github.com/BrianCLong/summit/pull/12762",
+        "mergedAt": "2025-12-04T15:56:14Z",
+        "title": "Build retention and right-to-be-forgotten engine"
+      },
+      {
+        "number": 13095,
+        "url": "https://github.com/BrianCLong/summit/pull/13095",
+        "mergedAt": "2025-12-03T01:58:35Z",
+        "title": "Add Unsloth Adapter for Long-Context LLMs"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 12684,
+        "url": "https://github.com/BrianCLong/summit/pull/12684",
+        "mergedAt": "2025-12-04T15:56:25Z",
+        "title": "Build ingestion wizard and ETL connectors"
+      },
+      {
+        "number": 1315,
+        "url": "https://github.com/BrianCLong/summit/pull/1315",
+        "mergedAt": "2025-09-23T16:56:14Z",
+        "title": "docs: refresh build platform sprint plan"
+      },
+      {
+        "number": 1316,
+        "url": "https://github.com/BrianCLong/summit/pull/1316",
+        "mergedAt": "2025-09-23T06:11:25Z",
+        "title": "docs: update IG squad sprint plan"
+      },
+      {
+        "number": 13173,
+        "url": "https://github.com/BrianCLong/summit/pull/13173",
+        "mergedAt": "2025-12-04T15:39:21Z",
+        "title": "Harden triplet runtime with adversarial attestation moats"
+      },
+      {
+        "number": 11852,
+        "url": "https://github.com/BrianCLong/summit/pull/11852",
+        "mergedAt": "2025-11-20T09:48:03Z",
+        "title": "Improve developer experience in summit monorepo"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 10078,
+        "url": "https://github.com/BrianCLong/summit/pull/10078",
+        "mergedAt": "2025-10-04T22:42:55Z",
+        "title": "feat: add analytics threat intelligence layer"
+      },
+      {
+        "number": 1353,
+        "url": "https://github.com/BrianCLong/summit/pull/1353",
+        "mergedAt": "2025-09-23T16:45:14Z",
+        "title": "chore(deps): bump axios from 1.11.0 to 1.12.0 in /conductor-ui"
+      },
+      {
+        "number": 10122,
+        "url": "https://github.com/BrianCLong/summit/pull/10122",
+        "mergedAt": "2025-10-14T08:53:50Z",
+        "title": "feat: add influence mining extractor pipeline"
+      },
+      {
+        "number": 1297,
+        "url": "https://github.com/BrianCLong/summit/pull/1297",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "feat(phase-3): implement comprehensive test strategy hardening"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 10127,
+        "url": "https://github.com/BrianCLong/summit/pull/10127",
+        "mergedAt": "2025-10-17T01:51:15Z",
+        "title": "feat: add Liquid Nano pilot bundle"
+      },
+      {
+        "number": 11760,
+        "url": "https://github.com/BrianCLong/summit/pull/11760",
+        "mergedAt": "2025-10-17T01:15:13Z",
+        "title": "chore(deps): bump esbuild and vitest in /orchestration/packages/intent-engine"
+      },
+      {
+        "number": 1861,
+        "url": "https://github.com/BrianCLong/summit/pull/1861",
+        "mergedAt": "2025-09-30T00:13:35Z",
+        "title": "chore(deps): bump esbuild and vitest in /services/trr"
+      },
+      {
+        "number": 1354,
+        "url": "https://github.com/BrianCLong/summit/pull/1354",
+        "mergedAt": "2025-09-23T16:44:12Z",
+        "title": "chore(deps): bump esbuild and vitest in /contracts"
+      },
+      {
+        "number": 1279,
+        "url": "https://github.com/BrianCLong/summit/pull/1279",
+        "mergedAt": null,
+        "title": "feat(ga): artifacts pack for v1.0.0"
+      },
+      {
+        "number": 13042,
+        "url": "https://github.com/BrianCLong/summit/pull/13042",
+        "mergedAt": "2025-12-01T19:17:12Z",
+        "title": "chore: Finalize CI/CD consolidation and cleanup"
+      },
+      {
+        "number": 1349,
+        "url": "https://github.com/BrianCLong/summit/pull/1349",
+        "mergedAt": "2025-09-23T06:56:23Z",
+        "title": "chore(deps): bump esbuild, vite and vitest in /intelgraph/client"
+      },
+      {
+        "number": 1300,
+        "url": "https://github.com/BrianCLong/summit/pull/1300",
+        "mergedAt": "2025-09-23T06:47:22Z",
+        "title": "Total Recapture: enterprise-ready green merge to main"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

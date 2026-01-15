@@ -1,0 +1,58 @@
+{
+  "issue_number": 10149,
+  "title": "[P1] Advanced Regression Test Matrix & Coverage Enforcement",
+  "url": "https://github.com/BrianCLong/summit/issues/10149",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9107968073,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQSQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P1",
+      "name": "P1",
+      "color": "ff8c00",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107968405,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRlQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/testing",
+      "name": "testing",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108056042,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHn6g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/CI/CD",
+      "name": "CI/CD",
+      "color": "84b6eb",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9402657980,
+      "node_id": "LA_kwDOPaNncM8AAAACMHEsvA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/prd:october",
+      "name": "prd:october",
+      "color": "0366d6",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-06T15:44:11Z",
+  "createdAt": "2025-10-06T15:44:11Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

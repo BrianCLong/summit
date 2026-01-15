@@ -1,0 +1,31 @@
+{
+  "issue_number": 13295,
+  "title": "feat: Secure Air-Gapped OSINT Fusion & Adaptive Prioritization",
+  "url": "https://github.com/BrianCLong/summit/pull/13295",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9710667994,
+      "node_id": "LA_kwDOPaNncM8AAAACQs0I2g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:%20feature",
+      "name": "type: feature",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-12-17T05:56:24Z",
+  "createdAt": "2025-12-04T04:25:54Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

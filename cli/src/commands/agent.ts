@@ -7,7 +7,7 @@ import ora from 'ora';
 import type { CLIConfig } from '../lib/config.js';
 import { getProfile } from '../lib/config.js';
 import { AgentClient, type AgentStatus } from '../lib/agent-client.js';
-import { formatOutput, success, error, formatTable, progress } from '../utils/output.js';
+import { formatOutput, success, error, formatTable } from '../utils/output.js';
 import { handleError, ValidationError } from '../utils/errors.js';
 import { AGENT_TYPES, type AgentType } from '../lib/constants.js';
 

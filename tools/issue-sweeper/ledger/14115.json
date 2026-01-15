@@ -1,0 +1,21 @@
+{
+  "issue_number": 14115,
+  "title": "feat: Access Auditing + RFA Flows",
+  "url": "https://github.com/BrianCLong/summit/pull/14115",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-20T11:02:13Z",
+  "createdAt": "2025-12-20T07:57:06Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

@@ -1,0 +1,41 @@
+{
+  "task_id": "CHAOS_POLICY_SIGNING_DRILLS_20260101",
+  "agent_id": "Codex",
+  "prompt_ref": {
+    "id": "chaos-drills-policy-signing",
+    "version": "v1",
+    "sha256": "167c9301775bec3f94c24f1aa7883a1b3ba839d2a8279be7024dc196fafde583",
+    "path": "prompts/chaos-drills-policy-signing-v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "drills/",
+      "server/src/services/",
+      "server/src/provenance/",
+      "docs/",
+      "agents/examples/",
+      "prompts/"
+    ],
+    "domains": ["resilience", "governance", "provenance", "security"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["scripts/check-boundaries.cjs"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Chaos drill scenarios documented for signer outage, OPA outage, and storage throttling.",
+    "Privileged operations fail-closed when policy or signing is unavailable.",
+    "Receipts and recovery evidence are captured in provenance ledger entries.",
+    "RPO/RTO outcomes recorded in documentation."
+  ],
+  "stop_conditions": [
+    "Policy evaluation cannot be enforced for privileged operations.",
+    "Signing material is unavailable for privileged operation receipts.",
+    "Governance or compliance guardrails are violated."
+  ]
+}

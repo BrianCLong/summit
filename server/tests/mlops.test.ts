@@ -1,14 +1,9 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { ModelRegistry } from '../src/mlops/registry';
-import { ModelServingService } from '../src/mlops/serving';
-import { FeatureStoreService } from '../src/mlops/feature_store';
-import { ModelGovernanceService } from '../src/mlops/governance';
-
 // Mock dependencies
 jest.mock('../src/provenance/ledger', () => ({
   provenanceLedger: {
-    appendEntry: jest.fn().mockResolvedValue({ resourceId: 'mock-id' }),
-    getEntries: jest.fn().mockResolvedValue([]),
+    appendEntry: jest.fn(() => Promise.resolve({ resourceId: 'mock-id' })),
+    getEntries: jest.fn(() => Promise.resolve([])),
   },
 }));
 
@@ -25,7 +20,7 @@ jest.mock('../src/config/logger', () => ({
 jest.mock('ioredis', () => {
     return class MockRedis {
         on = jest.fn();
-        get = jest.fn().mockResolvedValue(null);
+        get = jest.fn(() => Promise.resolve(null));
         set = jest.fn();
         hset = jest.fn();
     };
@@ -34,12 +29,14 @@ jest.mock('ioredis', () => {
 describe('MLOps Platform', () => {
   describe('ModelRegistry', () => {
     it('should register a model', async () => {
+      const { ModelRegistry } = await import('../src/mlops/registry');
       const registry = ModelRegistry.getInstance();
       const id = await registry.registerModel('tenant-1', {
         name: 'test-model',
         description: 'Test Model',
         domain: 'nlp',
-        framework: 'tensorflow'
+        framework: 'tensorflow',
+        owner: 'test-owner',
       });
       expect(id).toBe('mock-id');
     });
@@ -47,6 +44,7 @@ describe('MLOps Platform', () => {
 
   describe('FeatureStore', () => {
     it('should ingest and retrieve features', async () => {
+      const { FeatureStoreService } = await import('../src/mlops/feature_store');
       const store = FeatureStoreService.getInstance();
       // Since Redis mock returns null, it falls back to memory if connection fails or if we manually mock logic
       // But our implementation tries Redis first.
@@ -65,6 +63,7 @@ describe('MLOps Platform', () => {
 
   describe('ModelServing', () => {
     it('should serve predictions', async () => {
+      const { ModelServingService } = await import('../src/mlops/serving');
       const serving = ModelServingService.getInstance();
       const result = await serving.predict('tenant-1', {
         modelName: 'sentiment-v1',
@@ -78,6 +77,7 @@ describe('MLOps Platform', () => {
 
   describe('Governance', () => {
     it('should pass checks', async () => {
+      const { ModelGovernanceService } = await import('../src/mlops/governance');
       const gov = ModelGovernanceService.getInstance();
       const result = await gov.checkFairness('m1', 'd1', ['gender']);
       expect(result.passed).toBe(true);

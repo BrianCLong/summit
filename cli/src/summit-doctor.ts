@@ -75,7 +75,7 @@ export function checkNodeVersion(
   minMajor: number,
   currentVersion = process.versions.node,
 ): DoctorCheckResult {
-  const current = currentVersion;
+  const current = currentVersion.replace(/^v/, '');
   const major = parseInt(current.split('.')[0], 10);
 
   if (Number.isNaN(major)) {

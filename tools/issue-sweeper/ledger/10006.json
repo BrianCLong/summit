@@ -1,0 +1,49 @@
+{
+  "issue_number": 10006,
+  "title": "IntelGraph: Bitemporal Model & Time Travel",
+  "url": "https://github.com/BrianCLong/summit/issues/10006",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9399486280,
+      "node_id": "LA_kwDOPaNncM8AAAACMEDHSA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/track:A",
+      "name": "track:A",
+      "color": "0366d6",
+      "default": false,
+      "description": "Track A"
+    },
+    {
+      "id": 9399486543,
+      "node_id": "LA_kwDOPaNncM8AAAACMEDITw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:graph",
+      "name": "area:graph",
+      "color": "fbca04",
+      "default": false,
+      "description": "Core graph functionality"
+    },
+    {
+      "id": 9399487325,
+      "node_id": "LA_kwDOPaNncM8AAAACMEDLXQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/prio:P0",
+      "name": "prio:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Critical priority"
+    }
+  ],
+  "updatedAt": "2025-10-04T03:21:41Z",
+  "createdAt": "2025-10-04T03:21:41Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

@@ -7,7 +7,7 @@ import hashlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -28,7 +28,9 @@ def sha256_file(path: Path) -> str:
 
 def canonical_json(data: Any) -> bytes:
     """Return the canonical JSON representation of *data* as UTF-8 bytes."""
-    return json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode(
+        "utf-8"
+    )
 
 
 def load_key(path: Path) -> bytes:
@@ -64,7 +66,7 @@ class Attachment:
     sha256: str
 
     @classmethod
-    def from_source(cls, source: Path, capsule_path: str | None = None) -> "Attachment":
+    def from_source(cls, source: Path, capsule_path: str | None = None) -> Attachment:
         source = source.resolve()
         if not source.exists():
             raise FileNotFoundError(f"Attachment source {source} not found")
@@ -88,10 +90,10 @@ def write_bytes_if_changed(path: Path, data: bytes) -> None:
     path.write_bytes(data)
 
 
-def parse_key_value(items: list[str]) -> Dict[str, str]:
+def parse_key_value(items: list[str]) -> dict[str, str]:
     """Convert KEY=VALUE strings into a dictionary."""
 
-    result: Dict[str, str] = {}
+    result: dict[str, str] = {}
     for item in items:
         if "=" not in item:
             raise ValueError(f"Expected KEY=VALUE formatted input, received: {item}")

@@ -1,9 +1,8 @@
-import json
 import hashlib
 import json
 import pathlib
-from datetime import datetime
 from collections.abc import Iterable
+from datetime import datetime
 from typing import Any
 
 from .hashing import sha256_digest
@@ -11,7 +10,9 @@ from .hashing import sha256_digest
 
 def canonical_json_bytes(data: Any) -> bytes:
     """Serialize JSON deterministically for hashing."""
-    return json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode(
+        "utf-8"
+    )
 
 
 def _hash_path(path: pathlib.Path) -> tuple[str, int]:
@@ -75,7 +76,9 @@ def build_bundle_manifest(
     }
 
 
-def verify_bundle_manifest(root_dir: pathlib.Path, manifest: dict[str, Any]) -> tuple[bool, list[str]]:
+def verify_bundle_manifest(
+    root_dir: pathlib.Path, manifest: dict[str, Any]
+) -> tuple[bool, list[str]]:
     errors: list[str] = []
     if manifest.get("algorithm") != "sha256":
         errors.append("unsupported-algorithm")

@@ -1,0 +1,149 @@
+{
+  "issue_number": 129,
+  "title": "Integrated Video Conferencing",
+  "url": "https://github.com/BrianCLong/summit/issues/129",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    },
+    {
+      "id": 9103342828,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn87A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/collaboration",
+      "name": "collaboration",
+      "color": "cfd3d7",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342986,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9ig",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/frontend",
+      "name": "frontend",
+      "color": "A2EEEF",
+      "default": false,
+      "description": "UI/E2E"
+    },
+    {
+      "id": 9103343056,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn90A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/mvp1",
+      "name": "mvp1",
+      "color": "0e8a16",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103361891,
+      "node_id": "LA_kwDOPaNncM8AAAACHppHYw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:collaboration",
+      "name": "area:collaboration",
+      "color": "c5def5",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-13T09:25:08Z",
+  "createdAt": "2025-08-13T09:20:33Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13308,
+        "url": "https://github.com/BrianCLong/summit/pull/13308",
+        "mergedAt": null,
+        "title": "fix: Update Critical Security Vulnerabilities"
+      },
+      {
+        "number": 12313,
+        "url": "https://github.com/BrianCLong/summit/pull/12313",
+        "mergedAt": "2025-11-27T04:48:22Z",
+        "title": "Add Wave 17 codex campaign plan"
+      },
+      {
+        "number": 11878,
+        "url": "https://github.com/BrianCLong/summit/pull/11878",
+        "mergedAt": null,
+        "title": "Consolidate CLI and assistant tools into Summit CLI"
+      },
+      {
+        "number": 10106,
+        "url": "https://github.com/BrianCLong/summit/pull/10106",
+        "mergedAt": "2025-10-14T11:52:55Z",
+        "title": "feat: add uvb76 monitoring toolkit"
+      },
+      {
+        "number": 1292,
+        "url": "https://github.com/BrianCLong/summit/pull/1292",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "fix: workflow pnpm order and cache setup"
+      },
+      {
+        "number": 1291,
+        "url": "https://github.com/BrianCLong/summit/pull/1291",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "fix: workflow pnpm compatibility and topicality.co domains"
+      },
+      {
+        "number": 10103,
+        "url": "https://github.com/BrianCLong/summit/pull/10103",
+        "mergedAt": "2025-10-14T11:53:04Z",
+        "title": "feat: add zero-touch compliance enforcement system"
+      },
+      {
+        "number": 11922,
+        "url": "https://github.com/BrianCLong/summit/pull/11922",
+        "mergedAt": "2025-11-20T10:05:25Z",
+        "title": "Build real-time streaming analytics pipeline"
+      },
+      {
+        "number": 11913,
+        "url": "https://github.com/BrianCLong/summit/pull/11913",
+        "mergedAt": "2025-11-20T10:25:05Z",
+        "title": "Improve test coverage and organization"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 11920,
+        "url": "https://github.com/BrianCLong/summit/pull/11920",
+        "mergedAt": "2025-11-20T10:05:36Z",
+        "title": "Build predictive analytics and forecasting platform"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

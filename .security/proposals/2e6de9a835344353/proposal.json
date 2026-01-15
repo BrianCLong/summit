@@ -1,0 +1,47 @@
+{
+  "id": "2e6de9a835344353",
+  "createdAt": "2023-10-27T10:00:00Z",
+  "createdBy": "policy-auto-tuning-engine",
+  "inputEvidenceRefs": [
+    "ev-1"
+  ],
+  "rationale": "High volume of denials (100) detected for service-a. Proposing temporary exception.",
+  "machineRationale": {
+    "trigger": "deny_spike",
+    "confidence": 0.8,
+    "features": {
+      "count": 100,
+      "subject": "service-a"
+    }
+  },
+  "proposedChanges": [
+    {
+      "target": "policy/allowlist.yaml",
+      "keyPath": "exceptions",
+      "operation": "add",
+      "value": {
+        "id": "auto-1698400800000",
+        "owner": "service-a",
+        "ticket": "AUTO-TUNE",
+        "expires": "2023-11-03T10:00:00.000Z",
+        "reason": "Auto-generated for deny spike: 100 denials for write on db-prod"
+      }
+    }
+  ],
+  "riskAssessment": {
+    "blastRadius": "low",
+    "falsePositiveRisk": "medium",
+    "rollbackSteps": [
+      "Remove the entry from policy/allowlist.yaml"
+    ]
+  },
+  "verification": {
+    "commands": [
+      "curl -X POST http://localhost:4000/verify-access -d '{\"user\": \"service-a\"}'"
+    ],
+    "expectedSignals": [
+      "200 OK"
+    ]
+  },
+  "status": "proposed"
+}

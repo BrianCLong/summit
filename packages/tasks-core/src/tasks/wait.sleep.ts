@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { defineTask, type TaskInput } from '@intelgraph/maestro-sdk';
 
 export default defineTask<{ ms: number }, { slept: number }>({

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List
 
 
 @dataclass(frozen=True)
@@ -22,10 +21,10 @@ class BenchmarkRecord:
     record_id: str
     source_type: str
     content: str
-    entities: List[PIIEntity]
+    entities: list[PIIEntity]
 
 
-DATASET: List[BenchmarkRecord] = [
+DATASET: list[BenchmarkRecord] = [
     BenchmarkRecord(
         record_id="text-001",
         source_type="text",

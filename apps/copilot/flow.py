@@ -1,4 +1,4 @@
-from summit_sdk import SummitClient, flow, tool, rag, PolicyContext
+from summit_sdk import PolicyContext, SummitClient, flow, rag, tool
 
 client = SummitClient(api_key="demo", endpoint="local")
 policy = PolicyContext(tenant="enterprise", region="us-west", sensitivity="internal")
@@ -27,4 +27,3 @@ def doc_graph_copilot(question: str):
 
 if __name__ == "__main__":
     print(doc_graph_copilot("Where is the DR plan?"))
-

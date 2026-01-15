@@ -7,7 +7,7 @@ import argparse
 import json
 import sys
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -90,7 +90,7 @@ def build_summary(manifest: dict[str, object], records: list[ImageRecord]) -> di
     attested = sum(1 for r in records if r.attestations_verified)
     sbom_attached = sum(1 for r in records if r.sbom_present)
 
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
 
     return {
         "release": manifest.get("release"),

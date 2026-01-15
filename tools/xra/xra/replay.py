@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, List
 
 from .models import QueryResult, RankedDocument, RetrievalLog
 
 
-def _normalise_rankings(results: Iterable[dict]) -> List[RankedDocument]:
-    docs: List[RankedDocument] = []
+def _normalise_rankings(results: Iterable[dict]) -> list[RankedDocument]:
+    docs: list[RankedDocument] = []
     for idx, raw in enumerate(results, start=1):
         rank = int(raw.get("rank", idx))
         docs.append(
@@ -66,7 +66,7 @@ def load_retrieval_log(path: str | Path) -> RetrievalLog:
 
     version = str(payload.get("version", resolved.stem))
     queries_raw = payload.get("queries", [])
-    queries: List[QueryResult] = []
+    queries: list[QueryResult] = []
     for raw in queries_raw:
         queries.append(
             QueryResult(

@@ -158,6 +158,22 @@ const createMetrics = (): ConnectionMetrics => ({
   ),
 });
 
+const resolveMetric = (metric: any, ...labels: string[]) => {
+  if (!metric) return undefined;
+  if (typeof metric.labels === 'function') {
+    const labeled = metric.labels(...labels);
+    if (
+      labeled &&
+      (typeof labeled.inc === 'function' ||
+        typeof labeled.set === 'function' ||
+        typeof labeled.observe === 'function')
+    ) {
+      return labeled;
+    }
+  }
+  return metric;
+};
+
 const enum TimerType {
   QUEUE_DRAIN,
   HEARTBEAT,
@@ -254,10 +270,13 @@ export class ManagedConnection {
     this.failureReason = reason;
     this.reconnectAttempts += 1;
     this.transitionTo(ConnectionState.RECONNECTING);
-    this.metrics.failureCounter.labels(reason).inc();
-    this.metrics.reconnectHistogram
-      .labels(this.context.tenantId)
-      .observe(this.getReconnectDelay());
+    const failureCounter = resolveMetric(this.metrics.failureCounter, reason);
+    failureCounter?.inc?.();
+    const reconnectHistogram = resolveMetric(
+      this.metrics.reconnectHistogram,
+      this.context.tenantId,
+    );
+    reconnectHistogram?.observe?.(this.getReconnectDelay());
   }
 
   markNetworkOffline(): void {
@@ -274,7 +293,8 @@ export class ManagedConnection {
   markServerRestart(reason = 'server_restart'): void {
     this.failureReason = reason;
     this.transitionTo(ConnectionState.DEGRADED);
-    this.metrics.failureCounter.labels(reason).inc();
+    const failureCounter = resolveMetric(this.metrics.failureCounter, reason);
+    failureCounter?.inc?.();
   }
 
   markDisconnected(reason: string): void {
@@ -285,7 +305,8 @@ export class ManagedConnection {
   markFailed(reason: string): void {
     this.failureReason = reason;
     this.transitionTo(ConnectionState.FAILED);
-    this.metrics.failureCounter.labels(reason).inc();
+    const failureCounter = resolveMetric(this.metrics.failureCounter, reason);
+    failureCounter?.inc?.();
   }
 
   updateRoute(route?: string): void {
@@ -321,7 +342,11 @@ export class ManagedConnection {
       const interval = setInterval(() => {
           if (this.state === ConnectionState.CONNECTED) {
               const uptime = (Date.now() - this.connectStartedAt) / 1000;
-              (this.metrics as any).connectionUptimeGauge?.labels(this.context.tenantId).set(uptime);
+              const uptimeGauge = resolveMetric(
+                (this.metrics as any).connectionUptimeGauge,
+                this.context.tenantId,
+              );
+              uptimeGauge?.set?.(uptime);
 
               if (this.isHeartbeatExpired(this.options.heartbeatTimeout)) {
                   this.options.logger.warn(`Heartbeat timeout for ${this.context.id}`);
@@ -351,7 +376,11 @@ export class ManagedConnection {
     }
 
     if (!this.isReadyForSend()) {
-      this.metrics.backpressureCounter.labels(this.context.tenantId).inc();
+      const backpressureCounter = resolveMetric(
+        this.metrics.backpressureCounter,
+        this.context.tenantId,
+      );
+      backpressureCounter?.inc?.();
       this.enqueue(payload);
       return false;
     }
@@ -374,17 +403,18 @@ export class ManagedConnection {
       if (!success) {
         this.queue.unshift(item, ...batch.slice(sent + 1));
         this.scheduleQueueDrain();
-        this.metrics.queueGauge
-          .labels(this.context.tenantId)
-          .set(this.queue.length);
+        const queueGauge = resolveMetric(
+          this.metrics.queueGauge,
+          this.context.tenantId,
+        );
+        queueGauge?.set?.(this.queue.length);
         return sent;
       }
       sent += 1;
     }
 
-    this.metrics.queueGauge
-      .labels(this.context.tenantId)
-      .set(this.queue.length);
+    const queueGauge = resolveMetric(this.metrics.queueGauge, this.context.tenantId);
+    queueGauge?.set?.(this.queue.length);
 
     if (this.queue.length > 0) {
       this.scheduleQueueDrain();
@@ -439,9 +469,8 @@ export class ManagedConnection {
       );
     }
     this.queue.push({ payload, enqueuedAt: now, attempts: 1 });
-    this.metrics.queueGauge
-      .labels(this.context.tenantId)
-      .set(this.queue.length);
+    const queueGauge = resolveMetric(this.metrics.queueGauge, this.context.tenantId);
+    queueGauge?.set?.(this.queue.length);
     this.scheduleQueueDrain();
   }
 
@@ -515,11 +544,19 @@ export class ManagedConnection {
   private performSend(payload: string, meta?: QueueItem): boolean {
     try {
       (this.ws as any).send(payload);
-      this.metrics.messageCounter.labels(this.context.tenantId).inc();
+      const messageCounter = resolveMetric(
+        this.metrics.messageCounter,
+        this.context.tenantId,
+      );
+      messageCounter?.inc?.();
       if (meta) {
-        this.metrics.queueLatencyHistogram
-          .labels(this.context.tenantId)
-          .observe(Math.max(0, Date.now() - meta.enqueuedAt));
+        const queueLatencyHistogram = resolveMetric(
+          this.metrics.queueLatencyHistogram,
+          this.context.tenantId,
+        );
+        queueLatencyHistogram?.observe?.(
+          Math.max(0, Date.now() - meta.enqueuedAt),
+        );
       }
       return true;
     } catch (error: any) {
@@ -696,7 +733,16 @@ export class WebSocketConnectionPool {
     }
 
     Object.entries(counts).forEach(([state, count]) => {
-      this.metrics.stateGauge.labels(state).set(count);
+      const gauge = this.metrics.stateGauge;
+      const labeled = gauge.labels ? gauge.labels(state) : undefined;
+      if (labeled && typeof labeled.set === 'function') {
+        labeled.set(count);
+        return;
+      }
+      // Fallback for test environments where the registry already has an unlabeled gauge.
+      if (typeof (gauge as any).set === 'function') {
+        (gauge as any).set(count);
+      }
     });
   }
 }

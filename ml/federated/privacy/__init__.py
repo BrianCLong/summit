@@ -6,25 +6,25 @@ for privacy-preserving embedding storage and retrieval.
 """
 
 from .pgvector_dp import (
+    EmbeddingWithPrivacy,
     PgVectorDifferentialPrivacy,
     PrivacyConfig,
-    EmbeddingWithPrivacy,
-)
-from .secure_aggregation import (
-    SecureAggregator,
-    SecretShare,
 )
 from .privacy_accountant import (
-    RenyiDPAccountant,
     CompositionTheorem,
+    RenyiDPAccountant,
+)
+from .secure_aggregation import (
+    SecretShare,
+    SecureAggregator,
 )
 
 __all__ = [
+    "CompositionTheorem",
+    "EmbeddingWithPrivacy",
     "PgVectorDifferentialPrivacy",
     "PrivacyConfig",
-    "EmbeddingWithPrivacy",
-    "SecureAggregator",
-    "SecretShare",
     "RenyiDPAccountant",
-    "CompositionTheorem",
+    "SecretShare",
+    "SecureAggregator",
 ]

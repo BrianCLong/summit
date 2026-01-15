@@ -465,7 +465,7 @@ class BenchmarkSuite:
         )
 
         analysis["model_rankings"] = {
-            f"rank_{i+1}": {"model": model, **metrics}
+            f"rank_{i + 1}": {"model": model, **metrics}
             for i, (model, metrics) in enumerate(ranked_models)
         }
 

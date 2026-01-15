@@ -1,0 +1,62 @@
+{
+  "issue_number": 591,
+  "title": "feat: stub PSI joins, DP joins, Kafka adapter and model registry",
+  "url": "https://github.com/BrianCLong/summit/pull/591",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T16:17:34Z",
+  "createdAt": "2025-08-18T03:01:36Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1171,
+        "url": "https://github.com/BrianCLong/summit/pull/1171",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps): bump body-parser from 1.20.3 to 2.2.0 in /server"
+      },
+      {
+        "number": 1190,
+        "url": "https://github.com/BrianCLong/summit/pull/1190",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump tailwind-merge from 2.6.0 to 3.3.1"
+      },
+      {
+        "number": 633,
+        "url": "https://github.com/BrianCLong/summit/pull/633",
+        "mergedAt": null,
+        "title": "chore(deps): bump jest-extended from 4.0.2 to 6.0.0"
+      },
+      {
+        "number": 11883,
+        "url": "https://github.com/BrianCLong/summit/pull/11883",
+        "mergedAt": "2025-11-20T14:33:14Z",
+        "title": "Add canonical entities with bitemporal provenance"
+      },
+      {
+        "number": 11774,
+        "url": "https://github.com/BrianCLong/summit/pull/11774",
+        "mergedAt": "2025-10-20T11:06:07Z",
+        "title": "chore(deps): bump the js-dependencies group with 144 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -177,7 +177,7 @@ export class GCSConnector extends EventEmitter {
         });
 
         return new Promise((resolve, reject) => {
-          stream.on('error', (error) => {
+          stream.on('error', (error: Error) => {
             gcsOperations.inc({
               tenant_id: this.tenantId,
               operation: 'upload',
@@ -494,7 +494,7 @@ export class GCSConnector extends EventEmitter {
           versions: options.versions || false,
         });
 
-        const objects = files.map((file) => this.mapFileToMetadata(file));
+        const objects = files.map((file: any) => this.mapFileToMetadata(file));
 
         gcsLatency.observe(
           { operation: 'list', bucket: this.config.bucketName },

@@ -1,0 +1,65 @@
+{
+  "issue_number": 351,
+  "title": "Radiation-Hardened AI Computing Systems",
+  "url": "https://github.com/BrianCLong/summit/issues/351",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9122128940,
+      "node_id": "LA_kwDOPaNncM8AAAACH7ikLA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-interplanetary-ai",
+      "name": "epic-interplanetary-ai",
+      "color": "4ECDC4",
+      "default": false,
+      "description": "Interplanetary AI and space computing"
+    },
+    {
+      "id": 9360062798,
+      "node_id": "LA_kwDOPaNncM8AAAACLec5Tg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/stale",
+      "name": "stale",
+      "color": "e4e669",
+      "default": false,
+      "description": "PR with no activity for 30 days"
+    }
+  ],
+  "updatedAt": "2025-10-02T01:01:51Z",
+  "createdAt": "2025-08-16T22:29:06Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13182,
+        "url": "https://github.com/BrianCLong/summit/pull/13182",
+        "mergedAt": "2025-12-04T15:39:06Z",
+        "title": "Build SIGINT dashboard with live waveform visualization"
+      },
+      {
+        "number": 11911,
+        "url": "https://github.com/BrianCLong/summit/pull/11911",
+        "mergedAt": "2025-11-20T10:25:10Z",
+        "title": "Create Grafana observability dashboard for IntelGraph"
+      },
+      {
+        "number": 11894,
+        "url": "https://github.com/BrianCLong/summit/pull/11894",
+        "mergedAt": null,
+        "title": "Build Advanced Attribution and Identity Resolution Platform"
+      },
+      {
+        "number": 1279,
+        "url": "https://github.com/BrianCLong/summit/pull/1279",
+        "mergedAt": null,
+        "title": "feat(ga): artifacts pack for v1.0.0"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

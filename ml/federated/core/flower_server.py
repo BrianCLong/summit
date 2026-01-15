@@ -8,9 +8,10 @@ with privacy-preserving aggregation and Neo4j result storage.
 import logging
 import pickle
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 import flwr as fl
 from flwr.common import (
@@ -24,14 +25,9 @@ from flwr.common import (
     Parameters,
     Scalar,
     Status,
-    ndarrays_to_parameters,
-    parameters_to_ndarrays,
 )
-from flwr.server.client_manager import ClientManager, SimpleClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import Strategy
-
-import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +86,7 @@ class RoundMetrics:
     aggregated_accuracy: float
     privacy_budget_spent: float
     training_time: float
-    client_metrics: Dict[str, Dict[str, float]] = field(default_factory=dict)
+    client_metrics: dict[str, dict[str, float]] = field(default_factory=dict)
 
 
 class FederatedServer:
@@ -108,15 +104,15 @@ class FederatedServer:
     def __init__(
         self,
         config: ServerConfig,
-        strategy: Optional[Strategy] = None,
-        initial_parameters: Optional[Parameters] = None,
+        strategy: Strategy | None = None,
+        initial_parameters: Parameters | None = None,
     ):
         self.config = config
         self.strategy = strategy
         self.initial_parameters = initial_parameters
-        self.round_metrics: List[RoundMetrics] = []
+        self.round_metrics: list[RoundMetrics] = []
         self.current_round = 0
-        self.global_model_parameters: Optional[Parameters] = None
+        self.global_model_parameters: Parameters | None = None
         self.privacy_budget_remaining = config.privacy_epsilon
 
         # Initialize storage paths
@@ -126,8 +122,8 @@ class FederatedServer:
             Path(config.airgap_import_path).mkdir(parents=True, exist_ok=True)
 
         # Client tracking
-        self._registered_nodes: Dict[str, Dict[str, Any]] = {}
-        self._airgap_queue: List[Dict[str, Any]] = []
+        self._registered_nodes: dict[str, dict[str, Any]] = {}
+        self._airgap_queue: list[dict[str, Any]] = []
 
         logger.info(
             f"Federated server initialized - airgap_mode={config.airgap_mode}, "
@@ -136,8 +132,8 @@ class FederatedServer:
 
     def configure_strategy(
         self,
-        on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
-        on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
+        on_fit_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
+        on_evaluate_config_fn: Callable[[int], dict[str, Scalar]] | None = None,
     ) -> Strategy:
         """Configure default strategy if none provided"""
         if self.strategy is not None:
@@ -145,7 +141,7 @@ class FederatedServer:
 
         from .strategies import OSINTFedAvg
 
-        def default_fit_config(server_round: int) -> Dict[str, Scalar]:
+        def default_fit_config(server_round: int) -> dict[str, Scalar]:
             return {
                 "server_round": server_round,
                 "local_epochs": 1,
@@ -153,7 +149,7 @@ class FederatedServer:
                 "learning_rate": 0.01,
             }
 
-        def default_evaluate_config(server_round: int) -> Dict[str, Scalar]:
+        def default_evaluate_config(server_round: int) -> dict[str, Scalar]:
             return {
                 "server_round": server_round,
             }
@@ -228,14 +224,10 @@ class FederatedServer:
 
                     # Record metrics
                     round_time = time.time() - round_start
-                    metrics = self._compute_round_metrics(
-                        round_num, updates, round_time
-                    )
+                    metrics = self._compute_round_metrics(round_num, updates, round_time)
                     self.round_metrics.append(metrics)
 
-                    history.add_loss_distributed(
-                        round_num, metrics.aggregated_loss
-                    )
+                    history.add_loss_distributed(round_num, metrics.aggregated_loss)
                     history.add_accuracy_distributed(
                         round_num, [(metrics.num_clients, metrics.aggregated_accuracy)]
                     )
@@ -294,15 +286,14 @@ class FederatedServer:
 
         with open(manifest_path, "w") as f:
             import json
+
             json.dump(manifest, f)
 
         logger.info(f"Exported model for air-gap round {round_num} to {export_path}")
 
         return str(export_path)
 
-    def _import_airgap_updates(
-        self, round_num: int, timeout: float = None
-    ) -> List[Dict[str, Any]]:
+    def _import_airgap_updates(self, round_num: int, timeout: float = None) -> list[dict[str, Any]]:
         """Import updates from air-gapped nodes"""
         timeout = timeout or self.config.round_timeout
         import_path = Path(self.config.airgap_import_path)
@@ -322,18 +313,15 @@ class FederatedServer:
                     manifest_file = update_file.with_suffix(".manifest")
                     if manifest_file.exists():
                         import json
-                        with open(manifest_file, "r") as f:
+
+                        with open(manifest_file) as f:
                             manifest = json.load(f)
 
                         if manifest.get("checksum") == self._compute_checksum(update_data):
                             updates.append(update_data)
-                            logger.info(
-                                f"Imported valid update from {update_file.name}"
-                            )
+                            logger.info(f"Imported valid update from {update_file.name}")
                         else:
-                            logger.warning(
-                                f"Checksum mismatch for {update_file.name}, skipping"
-                            )
+                            logger.warning(f"Checksum mismatch for {update_file.name}, skipping")
                     else:
                         # Accept without manifest in development
                         updates.append(update_data)
@@ -354,14 +342,14 @@ class FederatedServer:
         return updates
 
     def _aggregate_airgap_updates(
-        self, updates: List[Dict[str, Any]], strategy: Strategy
-    ) -> Optional[Parameters]:
+        self, updates: list[dict[str, Any]], strategy: Strategy
+    ) -> Parameters | None:
         """Aggregate updates from air-gapped nodes"""
         if not updates:
             return None
 
         # Convert updates to Flower format
-        fit_results: List[Tuple[ClientProxy, FitRes]] = []
+        fit_results: list[tuple[ClientProxy, FitRes]] = []
 
         for update in updates:
             # Create mock client proxy
@@ -370,28 +358,20 @@ class FederatedServer:
                     self.cid = cid
 
                 def get_parameters(
-                    self, ins: GetParametersIns, timeout: Optional[float]
+                    self, ins: GetParametersIns, timeout: float | None
                 ) -> GetParametersRes:
                     raise NotImplementedError()
 
-                def fit(
-                    self, ins: FitIns, timeout: Optional[float]
-                ) -> FitRes:
+                def fit(self, ins: FitIns, timeout: float | None) -> FitRes:
                     raise NotImplementedError()
 
-                def evaluate(
-                    self, ins: EvaluateIns, timeout: Optional[float]
-                ) -> EvaluateRes:
+                def evaluate(self, ins: EvaluateIns, timeout: float | None) -> EvaluateRes:
                     raise NotImplementedError()
 
-                def reconnect(
-                    self, ins: Any, timeout: Optional[float]
-                ) -> Any:
+                def reconnect(self, ins: Any, timeout: float | None) -> Any:
                     raise NotImplementedError()
 
-                def get_properties(
-                    self, ins: Any, timeout: Optional[float]
-                ) -> Any:
+                def get_properties(self, ins: Any, timeout: float | None) -> Any:
                     raise NotImplementedError()
 
             proxy = MockClientProxy(cid=update.get("node_id", "unknown"))
@@ -420,7 +400,7 @@ class FederatedServer:
     def _compute_round_metrics(
         self,
         round_num: int,
-        updates: List[Dict[str, Any]],
+        updates: list[dict[str, Any]],
         training_time: float,
     ) -> RoundMetrics:
         """Compute metrics for a training round"""
@@ -437,8 +417,7 @@ class FederatedServer:
             self.privacy_budget_remaining -= privacy_spent
 
         client_metrics = {
-            u.get("node_id", f"node_{i}"): u.get("metrics", {})
-            for i, u in enumerate(updates)
+            u.get("node_id", f"node_{i}"): u.get("metrics", {}) for i, u in enumerate(updates)
         }
 
         return RoundMetrics(
@@ -474,9 +453,7 @@ class FederatedServer:
 
     def _save_checkpoint(self, round_num: int) -> str:
         """Save model checkpoint"""
-        checkpoint_path = (
-            Path(self.config.model_save_path) / f"checkpoint_round_{round_num}.pkl"
-        )
+        checkpoint_path = Path(self.config.model_save_path) / f"checkpoint_round_{round_num}.pkl"
 
         checkpoint_data = {
             "round_number": round_num,
@@ -500,9 +477,7 @@ class FederatedServer:
         model_data = {
             "parameters": self.global_model_parameters,
             "total_rounds": len(self.round_metrics),
-            "final_metrics": (
-                self.round_metrics[-1].__dict__ if self.round_metrics else {}
-            ),
+            "final_metrics": (self.round_metrics[-1].__dict__ if self.round_metrics else {}),
             "privacy_budget_remaining": self.privacy_budget_remaining,
             "config": self.config.__dict__,
             "timestamp": time.time(),
@@ -546,18 +521,12 @@ class FederatedServer:
                     id=f"training_{int(time.time())}",
                     total_rounds=len(self.round_metrics),
                     final_accuracy=(
-                        self.round_metrics[-1].aggregated_accuracy
-                        if self.round_metrics
-                        else 0
+                        self.round_metrics[-1].aggregated_accuracy if self.round_metrics else 0
                     ),
                     final_loss=(
-                        self.round_metrics[-1].aggregated_loss
-                        if self.round_metrics
-                        else 0
+                        self.round_metrics[-1].aggregated_loss if self.round_metrics else 0
                     ),
-                    privacy_used=(
-                        self.config.privacy_epsilon - self.privacy_budget_remaining
-                    ),
+                    privacy_used=(self.config.privacy_epsilon - self.privacy_budget_remaining),
                     airgap_mode=self.config.airgap_mode,
                 )
 
@@ -595,7 +564,6 @@ class FederatedServer:
     def _compute_checksum(self, data: Any) -> str:
         """Compute checksum for data integrity verification"""
         import hashlib
-        import json
 
         # Serialize data for checksumming
         serialized = pickle.dumps(data)
@@ -604,7 +572,7 @@ class FederatedServer:
     def register_node(
         self,
         node_id: str,
-        capabilities: Dict[str, Any],
+        capabilities: dict[str, Any],
         is_airgapped: bool = False,
     ) -> bool:
         """Register a federated learning node"""
@@ -616,17 +584,15 @@ class FederatedServer:
             "rounds_participated": 0,
         }
 
-        logger.info(
-            f"Registered node {node_id} (airgapped={is_airgapped})"
-        )
+        logger.info(f"Registered node {node_id} (airgapped={is_airgapped})")
 
         return True
 
-    def get_registered_nodes(self) -> Dict[str, Dict[str, Any]]:
+    def get_registered_nodes(self) -> dict[str, dict[str, Any]]:
         """Get all registered nodes"""
         return self._registered_nodes.copy()
 
-    def get_training_status(self) -> Dict[str, Any]:
+    def get_training_status(self) -> dict[str, Any]:
         """Get current training status"""
         return {
             "current_round": self.current_round,
@@ -634,8 +600,6 @@ class FederatedServer:
             "registered_nodes": len(self._registered_nodes),
             "airgap_mode": self.config.airgap_mode,
             "privacy_budget_remaining": self.privacy_budget_remaining,
-            "latest_metrics": (
-                self.round_metrics[-1].__dict__ if self.round_metrics else None
-            ),
+            "latest_metrics": (self.round_metrics[-1].__dict__ if self.round_metrics else None),
             "converged": self._check_convergence() if self.round_metrics else False,
         }

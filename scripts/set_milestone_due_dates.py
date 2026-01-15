@@ -42,7 +42,7 @@ def milestones(slug):
 
 def set_due(slug, number, date_: dt.date):
     due_on = (
-        dt.datetime(date_.year, date_.month, date_.day, 23, 59, 59, tzinfo=dt.timezone.utc)
+        dt.datetime(date_.year, date_.month, date_.day, 23, 59, 59, tzinfo=dt.UTC)
         .isoformat()
         .replace("+00:00", "Z")
     )

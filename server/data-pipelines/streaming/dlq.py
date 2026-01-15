@@ -79,7 +79,6 @@ class DeadLetterQueue:
         max_retries: int = 3,
         retry_backoff_seconds: int = 60,
     ):
-
         self.name = name
         self.storage_backend = storage_backend
         self.max_retries = max_retries
@@ -347,7 +346,6 @@ class DLQManager:
         default_max_retries: int = 3,
         default_backoff_seconds: int = 60,
     ):
-
         self.redis_url = redis_url
         self.default_max_retries = default_max_retries
         self.default_backoff_seconds = default_backoff_seconds

@@ -203,7 +203,7 @@ export class DataResidencyService {
       const kmsConfigId = `kms-${tenantId}-${Date.now()}`;
 
       // Test KMS connectivity before storing config
-      await this.testKMSConnectivity(validatedConfig);
+      await this.testKMSConnectivity(validatedConfig as KMSConfig);
 
       // Store KMS configuration (credentials encrypted at rest)
       const encryptedCredentials = config.credentials

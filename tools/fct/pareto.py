@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable, List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -27,7 +27,7 @@ class ParetoFrontier:
         self,
         constraint: FairnessConstraint,
         tolerances: Iterable[float],
-        seed: Optional[int] = 42,
+        seed: int | None = 42,
     ) -> None:
         self.constraint = constraint
         self.tolerances = sorted(set(float(t) for t in tolerances))
@@ -44,8 +44,8 @@ class ParetoFrontier:
         y_valid: np.ndarray,
         s_valid: np.ndarray,
         epochs: int = 500,
-    ) -> List[ParetoPoint]:
-        results: List[ParetoPoint] = []
+    ) -> list[ParetoPoint]:
+        results: list[ParetoPoint] = []
         for tol in self.tolerances:
             clf = LagrangianFairClassifier(
                 constraint=self.constraint,
@@ -67,7 +67,7 @@ class ParetoFrontier:
         results.sort(key=lambda p: p.fairness_value)
         return results
 
-    def plot(self, points: List[ParetoPoint], ax: Optional[plt.Axes] = None) -> plt.Axes:
+    def plot(self, points: list[ParetoPoint], ax: plt.Axes | None = None) -> plt.Axes:
         if ax is None:
             _, ax = plt.subplots()
         fairness_metric_name = self._fairness_metric_name()

@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from typing import Dict
 
 from .adapters import EchoAdapter, ModelAdapter, TemplateAdapter
 from .models import GoldenSet
@@ -18,14 +17,16 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("baseline", type=str, help="Baseline prompt version key")
     parser.add_argument("candidate", type=str, help="Candidate prompt version key")
     parser.add_argument("--seed", type=int, default=0, help="Base seed for deterministic replays")
-    parser.add_argument("--adapter", type=str, default="echo", choices=["echo", "template"], help="Adapter to use")
+    parser.add_argument(
+        "--adapter", type=str, default="echo", choices=["echo", "template"], help="Adapter to use"
+    )
     parser.add_argument("--template-map", type=Path, help="Optional template mapping JSON")
     parser.add_argument("--shuffle", action="store_true", help="Shuffle case order before replay")
     parser.add_argument("--output", type=Path, help="Write replay report JSON to this path")
     return parser
 
 
-def _adapter_from_args(args: argparse.Namespace) -> Dict[str, ModelAdapter]:
+def _adapter_from_args(args: argparse.Namespace) -> dict[str, ModelAdapter]:
     if args.adapter == "echo":
         return {args.baseline: EchoAdapter(), args.candidate: EchoAdapter()}
     if args.adapter == "template":

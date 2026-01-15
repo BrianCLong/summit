@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List
 
 
 @dataclass(frozen=True)
@@ -35,8 +34,8 @@ class EndpointState:
     slo_latency_ms: float
     slo_accuracy: float
     projected_qps: float
-    quantization_options: List[QuantizationOption]
-    metadata: Dict[str, str] = field(default_factory=dict)
+    quantization_options: list[QuantizationOption]
+    metadata: dict[str, str] = field(default_factory=dict)
 
     @property
     def baseline_cost(self) -> float:
@@ -64,7 +63,7 @@ class AutoscalingPlan:
     target_replicas: int
     target_utilization: float
 
-    def to_k8s_spec(self, name: str, namespace: str = "default") -> Dict[str, object]:
+    def to_k8s_spec(self, name: str, namespace: str = "default") -> dict[str, object]:
         return {
             "apiVersion": "autoscaling/v2",
             "kind": "HorizontalPodAutoscaler",
@@ -109,7 +108,7 @@ class EndpointPlan:
             return 0.0
         return (self.baseline_cost - self.planned_cost) / self.baseline_cost
 
-    def quantization_recipe(self) -> Dict[str, object]:
+    def quantization_recipe(self) -> dict[str, object]:
         return {
             "model": self.endpoint.model,
             "endpoint": self.endpoint.endpoint,
@@ -123,7 +122,7 @@ class EndpointPlan:
     def hpa_name(self) -> str:
         return f"{self.endpoint.model}-{self.endpoint.endpoint}-ico".replace("_", "-")
 
-    def hpa_spec(self, namespace: str = "default") -> Dict[str, object]:
+    def hpa_spec(self, namespace: str = "default") -> dict[str, object]:
         return self.autoscaling.to_k8s_spec(self.hpa_name(), namespace)
 
 
@@ -131,7 +130,7 @@ class EndpointPlan:
 class PlanningSummary:
     """Aggregated summary for a set of endpoint plans."""
 
-    plans: List[EndpointPlan]
+    plans: list[EndpointPlan]
 
     def total_baseline_cost(self) -> float:
         return sum(plan.baseline_cost for plan in self.plans)
@@ -145,9 +144,8 @@ class PlanningSummary:
             return 0.0
         return (baseline - self.total_planned_cost()) / baseline
 
-    def hpa_specs(self, namespace: str = "default") -> List[Dict[str, object]]:
+    def hpa_specs(self, namespace: str = "default") -> list[dict[str, object]]:
         return [plan.hpa_spec(namespace) for plan in self.plans]
 
-    def quantization_recipes(self) -> List[Dict[str, object]]:
+    def quantization_recipes(self) -> list[dict[str, object]]:
         return [plan.quantization_recipe() for plan in self.plans]
-

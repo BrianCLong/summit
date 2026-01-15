@@ -61,13 +61,13 @@ export function registerAdapterCommands(program: Command): void {
           console.log(`  Signature: ${result.signaturePath}`);
           console.log(`  Digest: ${result.bundleDigest}`);
         }
-      } catch (err) {
+      } catch (err: unknown) {
         spinner.fail('Failed to build bundle');
         if (err instanceof BundleValidationError) {
           error(err.message);
           return;
         }
-        handleError(err);
+        handleError(err instanceof Error ? err : new Error(String(err)));
       }
     });
 
@@ -101,13 +101,13 @@ export function registerAdapterCommands(program: Command): void {
             console.log(`  • ${line}`);
           }
         }
-      } catch (err) {
+      } catch (err: unknown) {
         spinner.fail('Bundle verification failed');
         if (err instanceof BundleValidationError) {
           error(err.message);
           return;
         }
-        handleError(err);
+        handleError(err instanceof Error ? err : new Error(String(err)));
       }
     });
 }

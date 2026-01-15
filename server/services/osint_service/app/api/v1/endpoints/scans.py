@@ -1,17 +1,18 @@
-
 from fastapi import APIRouter, BackgroundTasks
 from pydantic import BaseModel
-from typing import Dict
 
 router = APIRouter()
+
 
 class ScanRequest(BaseModel):
     target: str
     modules: list
 
+
 def run_scan(target: str, modules: list):
     # Placeholder for the actual scanning logic
     print(f"Starting scan for {target} with modules: {modules}")
+
 
 @router.post("/")
 def start_scan(scan_request: ScanRequest, background_tasks: BackgroundTasks):

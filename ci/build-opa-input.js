@@ -1,12 +1,12 @@
 // Build OPA input from GitHub Actions context.
 // Usage: node ci/build-opa-input.js "$GITHUB_EVENT_PATH" > ci/input.json
 
-const fs = require("fs");
+import fs from 'fs';
 
 function main() {
   const eventPath = process.argv[2];
   if (!eventPath) {
-    console.error("Usage: node ci/build-opa-input.js <event-path>");
+    process.stderr.write("Usage: node ci/build-opa-input.js <event-path>\n");
     process.exit(1);
   }
 

@@ -1,4 +1,4 @@
-import { Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import { useEffect, useState } from 'react';
 
 export function CommandPalette() {
@@ -17,7 +17,7 @@ export function CommandPalette() {
 
   return (
     <Dialog open={open} onClose={() => setOpen(false)}>
-      <div style={{ padding: 20 }}>Command palette</div>
+      <Box sx={{ p: 3 }}>Command palette</Box>
     </Dialog>
   );
 }

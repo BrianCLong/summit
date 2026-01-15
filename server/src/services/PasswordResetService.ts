@@ -30,12 +30,12 @@ interface PasswordResetRequest {
 }
 
 export class PasswordResetService {
-  private pool: Pool;
+  private get pool(): Pool {
+    return getPostgresPool();
+  }
   private tokenExpirationMs = 60 * 60 * 1000; // 1 hour
 
-  constructor() {
-    this.pool = getPostgresPool();
-  }
+  constructor() { }
 
   /**
    * Generate a secure random token

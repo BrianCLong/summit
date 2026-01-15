@@ -1,7 +1,6 @@
 // @ts-nocheck
 import { jest, describe, beforeAll, afterAll, it, expect, afterEach } from '@jest/globals';
 import request from 'supertest';
-import { createApp } from '../../app.js';
 import { createWriteStream, readFileSync, existsSync, unlinkSync } from 'fs';
 import { join } from 'path';
 import archiver from 'archiver';
@@ -10,13 +9,20 @@ import { getPostgresPool, closeConnections } from '../../config/database.js';
 
 jest.setTimeout(30000);
 
-describe('Airgap Export/Import', () => {
+const describeIf =
+    process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('Airgap Export/Import', () => {
     let app;
     let validBundlePath;
     let tamperedBundlePath;
     let manifest;
+    let createApp: typeof import('../../app.js').createApp;
 
     beforeAll(async () => {
+        if (process.env.NO_NETWORK_LISTEN === 'true') {
+            return;
+        }
         process.env.AIRGAP = 'true';
         process.env.NODE_ENV = 'test';
 
@@ -31,6 +37,7 @@ describe('Airgap Export/Import', () => {
         // Mock the module if possible, or just rely on global mocks if they exist.
         // For now, let's try to run against the app.
 
+        ({ createApp } = await import('../../app.js'));
         app = await createApp();
 
         // Create valid bundle fixture

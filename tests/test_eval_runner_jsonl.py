@@ -1,7 +1,7 @@
-import pytest
 import json
-from pathlib import Path
+
 from intelgraph.eval import run_eval
+
 
 def test_run_eval_jsonl(tmp_path):
     cases = [

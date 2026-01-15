@@ -1,0 +1,239 @@
+{
+  "issue_number": 2,
+  "title": "M0: Normalize filenames and organize repo structure",
+  "url": "https://github.com/BrianCLong/summit/issues/2",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051532,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5DA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:frontend",
+      "name": "area:frontend",
+      "color": "ededed",
+      "default": false,
+      "description": "Frontend work"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-11T23:57:00Z",
+  "createdAt": "2025-08-11T23:57:00Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14021,
+        "url": "https://github.com/BrianCLong/summit/pull/14021",
+        "mergedAt": "2025-12-19T22:35:08Z",
+        "title": "Upgrade paddlepaddle to version 2.6.2"
+      },
+      {
+        "number": 15409,
+        "url": "https://github.com/BrianCLong/summit/pull/15409",
+        "mergedAt": null,
+        "title": "perf: add bounded k6 baseline and reporting workflow"
+      },
+      {
+        "number": 14540,
+        "url": "https://github.com/BrianCLong/summit/pull/14540",
+        "mergedAt": "2025-12-26T23:52:45Z",
+        "title": "chore(deps): Bump multer from 1.4.5-lts.2 to 2.0.2 in /services/vision-api"
+      },
+      {
+        "number": 15396,
+        "url": "https://github.com/BrianCLong/summit/pull/15396",
+        "mergedAt": null,
+        "title": "feat(ui): accessibility hardening and backlog hygiene"
+      },
+      {
+        "number": 14547,
+        "url": "https://github.com/BrianCLong/summit/pull/14547",
+        "mergedAt": "2025-12-27T01:47:43Z",
+        "title": "Sprint N+2: Observability & Extensions"
+      },
+      {
+        "number": 15381,
+        "url": "https://github.com/BrianCLong/summit/pull/15381",
+        "mergedAt": null,
+        "title": "Enhance Storage, Caching and DR Infrastructure"
+      },
+      {
+        "number": 15380,
+        "url": "https://github.com/BrianCLong/summit/pull/15380",
+        "mergedAt": null,
+        "title": "Sprint 2026.02: Hard Gates and Safer Defaults"
+      },
+      {
+        "number": 14639,
+        "url": "https://github.com/BrianCLong/summit/pull/14639",
+        "mergedAt": null,
+        "title": "Summit Phase 2 Integration & Production Readiness"
+      },
+      {
+        "number": 15394,
+        "url": "https://github.com/BrianCLong/summit/pull/15394",
+        "mergedAt": null,
+        "title": "Sprint 2026.02: Hard Gates and Safer Defaults (Decomposed)"
+      },
+      {
+        "number": 15388,
+        "url": "https://github.com/BrianCLong/summit/pull/15388",
+        "mergedAt": null,
+        "title": "fix(ci): pin supply-chain tools and apply security fix"
+      },
+      {
+        "number": 15373,
+        "url": "https://github.com/BrianCLong/summit/pull/15373",
+        "mergedAt": null,
+        "title": "🛡️ Sentinel: [CRITICAL] Fix Path Traversal in Recipe Execution"
+      },
+      {
+        "number": 13317,
+        "url": "https://github.com/BrianCLong/summit/pull/13317",
+        "mergedAt": null,
+        "title": "deps(npm): bump msw from 2.12.2 to 2.12.4"
+      },
+      {
+        "number": 13314,
+        "url": "https://github.com/BrianCLong/summit/pull/13314",
+        "mergedAt": null,
+        "title": "deps(npm): bump turbo from 2.6.1 to 2.6.2"
+      },
+      {
+        "number": 14378,
+        "url": "https://github.com/BrianCLong/summit/pull/14378",
+        "mergedAt": "2025-12-23T04:35:18Z",
+        "title": "Bump next from 14.2.32 to 14.2.35 in /october2025/companyos-switchboard"
+      },
+      {
+        "number": 14407,
+        "url": "https://github.com/BrianCLong/summit/pull/14407",
+        "mergedAt": "2025-12-24T12:52:45Z",
+        "title": "feat: Implement Batch 2 Parallel Prompts"
+      },
+      {
+        "number": 14557,
+        "url": "https://github.com/BrianCLong/summit/pull/14557",
+        "mergedAt": "2025-12-27T04:15:25Z",
+        "title": "chore(deps): Bump requests from 2.31.0 to 2.32.4 in /predictive_threat_suite"
+      },
+      {
+        "number": 14726,
+        "url": "https://github.com/BrianCLong/summit/pull/14726",
+        "mergedAt": "2025-12-29T18:12:53Z",
+        "title": "Investigation Workspace v1.2 - Multi-tab Support"
+      },
+      {
+        "number": 15387,
+        "url": "https://github.com/BrianCLong/summit/pull/15387",
+        "mergedAt": null,
+        "title": "feat: Backlog Orchestrator Init & Phase 1 Delivery"
+      },
+      {
+        "number": 15375,
+        "url": "https://github.com/BrianCLong/summit/pull/15375",
+        "mergedAt": null,
+        "title": "feat: Release Automation & Evidence Bundle"
+      },
+      {
+        "number": 14541,
+        "url": "https://github.com/BrianCLong/summit/pull/14541",
+        "mergedAt": "2025-12-27T00:23:05Z",
+        "title": "Implement Knowledge Graph & Provenance UX 2.0"
+      },
+      {
+        "number": 14595,
+        "url": "https://github.com/BrianCLong/summit/pull/14595",
+        "mergedAt": "2025-12-27T05:49:06Z",
+        "title": "chore(deps): Bump urllib3 from 2.5.0 to 2.6.0 in /modules/connector-sdk-s3csv"
+      },
+      {
+        "number": 14561,
+        "url": "https://github.com/BrianCLong/summit/pull/14561",
+        "mergedAt": "2025-12-27T04:48:07Z",
+        "title": "chore(deps): Bump torch from 2.1.1 to 2.8.0 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 15406,
+        "url": "https://github.com/BrianCLong/summit/pull/15406",
+        "mergedAt": null,
+        "title": "fix(ci): unblock GA by fixing supply-chain workflow pnpm configuration"
+      },
+      {
+        "number": 13313,
+        "url": "https://github.com/BrianCLong/summit/pull/13313",
+        "mergedAt": null,
+        "title": "deps(npm): bump @deck.gl/react from 9.2.2 to 9.2.3"
+      },
+      {
+        "number": 13318,
+        "url": "https://github.com/BrianCLong/summit/pull/13318",
+        "mergedAt": null,
+        "title": "deps(npm): bump @deck.gl/layers from 9.2.2 to 9.2.3"
+      },
+      {
+        "number": 14825,
+        "url": "https://github.com/BrianCLong/summit/pull/14825",
+        "mergedAt": "2025-12-29T16:14:08Z",
+        "title": "Feature 42: SCIM 2.0 User & Group Provisioning"
+      },
+      {
+        "number": 14449,
+        "url": "https://github.com/BrianCLong/summit/pull/14449",
+        "mergedAt": "2025-12-25T03:17:33Z",
+        "title": "Sprint 2: Query Studio, Explainability & Reporting Services"
+      },
+      {
+        "number": 13346,
+        "url": "https://github.com/BrianCLong/summit/pull/13346",
+        "mergedAt": "2025-12-05T17:34:11Z",
+        "title": "build(deps): bump jws from 3.2.2 to 3.2.3 in /deepagent-mvp"
+      },
+      {
+        "number": 13865,
+        "url": "https://github.com/BrianCLong/summit/pull/13865",
+        "mergedAt": "2025-12-20T11:26:52Z",
+        "title": "Epic 2: OSINT Entity Resolution System"
+      },
+      {
+        "number": 15461,
+        "url": "https://github.com/BrianCLong/summit/pull/15461",
+        "mergedAt": null,
+        "title": "docs: establish PR stack plan and ownership boundaries"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

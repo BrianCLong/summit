@@ -2,6 +2,9 @@ import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, jest, beforeAll, beforeEach } from '@jest/globals';
 
+const describeNetwork =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const buildLogger = () => {
   const logger: any = {
     info: jest.fn(),
@@ -31,7 +34,7 @@ beforeAll(async () => {
 
 const loggerMock = buildLogger;
 
-describe('PII guard middleware', () => {
+describeNetwork('PII guard middleware', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

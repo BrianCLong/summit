@@ -1,0 +1,95 @@
+{
+  "issue_number": 205,
+  "title": "GNN LP: Baseline heuristics evaluation suite",
+  "url": "https://github.com/BrianCLong/summit/issues/205",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767070,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX03g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/enhancement",
+      "name": "enhancement",
+      "color": "a2eeef",
+      "default": true,
+      "description": "New feature or request"
+    },
+    {
+      "id": 9103342705,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn8cQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/AI",
+      "name": "AI",
+      "color": "bfdadc",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9107968276,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRFA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/performance",
+      "name": "performance",
+      "color": "D93F0B",
+      "default": false,
+      "description": "Perf/Load"
+    }
+  ],
+  "updatedAt": "2025-08-14T04:53:29Z",
+  "createdAt": "2025-08-14T04:53:29Z",
+  "classification": "feature",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13141,
+        "url": "https://github.com/BrianCLong/summit/pull/13141",
+        "mergedAt": "2025-12-03T04:23:49Z",
+        "title": "G7 - Graph Index Advisor"
+      },
+      {
+        "number": 1275,
+        "url": "https://github.com/BrianCLong/summit/pull/1275",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump @opentelemetry/sdk-node from 0.39.1 to 0.205.0"
+      },
+      {
+        "number": 12024,
+        "url": "https://github.com/BrianCLong/summit/pull/12024",
+        "mergedAt": "2025-11-20T15:29:43Z",
+        "title": "Implement quantum-resistant cryptography and algorithms"
+      },
+      {
+        "number": 13148,
+        "url": "https://github.com/BrianCLong/summit/pull/13148",
+        "mergedAt": "2025-12-17T05:36:11Z",
+        "title": "C6 — CI Time Budget Enforcer"
+      },
+      {
+        "number": 13165,
+        "url": "https://github.com/BrianCLong/summit/pull/13165",
+        "mergedAt": "2025-12-17T05:34:42Z",
+        "title": "Unified prompt governance dashboard 1"
+      },
+      {
+        "number": 13164,
+        "url": "https://github.com/BrianCLong/summit/pull/13164",
+        "mergedAt": "2025-12-17T05:35:09Z",
+        "title": "Resolve merge conflicts via rebase"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

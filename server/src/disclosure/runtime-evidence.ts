@@ -68,7 +68,7 @@ async function resolveDeployedVersion(): Promise<string | undefined> {
 
   try {
     const pkgPath = path.resolve('package.json');
-    const pkg = JSON.parse(await fs.readFile(pkgPath, 'utf8'));
+    const pkg = JSON.parse(String(await fs.readFile(pkgPath, 'utf8')));
     return typeof pkg.version === 'string' ? pkg.version : undefined;
   } catch (error: any) {
     return undefined;
@@ -140,7 +140,7 @@ async function collectJsonlSlice({
       continue;
     }
 
-    const content = await fs.readFile(absolute, 'utf8');
+    const content = String(await fs.readFile(absolute, 'utf8'));
     const lines = content
       .split('\n')
       .map((line) => line.trim())
@@ -373,7 +373,8 @@ class RuntimeEvidenceService {
       archive.on('error', reject);
       stream.on('close', () => resolve());
 
-      archive.pipe(stream);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      archive.pipe(stream as any);
 
       for (const file of files) {
         archive.file(file, { name: path.relative(workingDir, file) });

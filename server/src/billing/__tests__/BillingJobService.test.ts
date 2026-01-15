@@ -55,22 +55,27 @@ describe('BillingJobService', () => {
     await jobService.processBillingClose();
 
     expect(mockConnect).toHaveBeenCalled();
-    expect(mockQuery).toHaveBeenCalledWith(
-      'SELECT pg_try_advisory_lock($1) as acquired',
-      expect.any(Array),
-    );
+    expect(mockQuery.mock.calls[0][0]).toMatch(/pg_try_advisory_lock/i);
+    expect(mockQuery.mock.calls[0][1]).toEqual(expect.any(Array));
     expect(billingService.generateAndExportReport).toHaveBeenCalledTimes(2);
-    expect(mockQuery).toHaveBeenCalledWith('SELECT pg_advisory_unlock($1)', expect.any(Array));
+    const hasUnlock = mockQuery.mock.calls.some(
+      (call: unknown[]) => /pg_advisory_unlock/i.test(call[0] as string),
+    );
+    expect(hasUnlock).toBe(true);
     expect(mockRelease).toHaveBeenCalled();
   });
 
   it('skips processing when advisory lock is held elsewhere', async () => {
     mockQuery.mockResolvedValueOnce({ rows: [{ acquired: false }] });
 
-    await jobService.processBillingClose();
+    await jobService.processBillingClose({ lockTimeoutMs: 1 });
 
     expect(billingService.generateAndExportReport).not.toHaveBeenCalled();
-    expect(mockQuery).toHaveBeenCalledTimes(1);
+    expect(mockQuery).toHaveBeenCalled();
+    const hasUnlock = mockQuery.mock.calls.some(
+      (call: unknown[]) => /pg_advisory_unlock/i.test(call[0] as string),
+    );
+    expect(hasUnlock).toBe(false);
     expect(mockRelease).toHaveBeenCalled();
   });
 });

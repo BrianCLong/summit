@@ -1,0 +1,164 @@
+{
+  "issue_number": 108,
+  "title": "Audit and Harden Docker Configurations",
+  "url": "https://github.com/BrianCLong/summit/issues/108",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:15:00Z",
+  "createdAt": "2025-08-12T04:41:00Z",
+  "classification": "security",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15010,
+        "url": "https://github.com/BrianCLong/summit/pull/15010",
+        "mergedAt": "2025-12-30T22:44:33Z",
+        "title": "Analyze repository for MVP-4-GA release"
+      },
+      {
+        "number": 15130,
+        "url": "https://github.com/BrianCLong/summit/pull/15130",
+        "mergedAt": "2025-12-30T21:30:56Z",
+        "title": "chore(deps): bump thiserror from 1.0.69 to 2.0.17"
+      },
+      {
+        "number": 15344,
+        "url": "https://github.com/BrianCLong/summit/pull/15344",
+        "mergedAt": "2026-01-01T08:46:52Z",
+        "title": "Create execution plan for Summit to GA"
+      },
+      {
+        "number": 13057,
+        "url": "https://github.com/BrianCLong/summit/pull/13057",
+        "mergedAt": "2025-12-04T15:40:52Z",
+        "title": "ci: add golden path gate workflow"
+      },
+      {
+        "number": 15326,
+        "url": "https://github.com/BrianCLong/summit/pull/15326",
+        "mergedAt": null,
+        "title": "Add redteam harness module and scenarios"
+      },
+      {
+        "number": 10114,
+        "url": "https://github.com/BrianCLong/summit/pull/10114",
+        "mergedAt": "2025-10-14T10:40:23Z",
+        "title": "feat: harden intelgraph helm security controls"
+      },
+      {
+        "number": 13148,
+        "url": "https://github.com/BrianCLong/summit/pull/13148",
+        "mergedAt": "2025-12-17T05:36:11Z",
+        "title": "C6 — CI Time Budget Enforcer"
+      },
+      {
+        "number": 10122,
+        "url": "https://github.com/BrianCLong/summit/pull/10122",
+        "mergedAt": "2025-10-14T08:53:50Z",
+        "title": "feat: add influence mining extractor pipeline"
+      },
+      {
+        "number": 10120,
+        "url": "https://github.com/BrianCLong/summit/pull/10120",
+        "mergedAt": "2025-10-14T08:53:59Z",
+        "title": "feat: Build infrastructure monitoring platform"
+      },
+      {
+        "number": 1310,
+        "url": "https://github.com/BrianCLong/summit/pull/1310",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat: orchestrate multi-llm cooperation fabric"
+      },
+      {
+        "number": 13164,
+        "url": "https://github.com/BrianCLong/summit/pull/13164",
+        "mergedAt": "2025-12-17T05:35:09Z",
+        "title": "Resolve merge conflicts via rebase"
+      },
+      {
+        "number": 13165,
+        "url": "https://github.com/BrianCLong/summit/pull/13165",
+        "mergedAt": "2025-12-17T05:34:42Z",
+        "title": "Unified prompt governance dashboard 1"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      },
+      {
+        "number": 1267,
+        "url": "https://github.com/BrianCLong/summit/pull/1267",
+        "mergedAt": "2025-09-17T10:32:37Z",
+        "title": "feat: Apply Codepacks IV-X"
+      },
+      {
+        "number": 1266,
+        "url": "https://github.com/BrianCLong/summit/pull/1266",
+        "mergedAt": "2025-09-16T22:05:41Z",
+        "title": "chore(ci): finalization kit + protections"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

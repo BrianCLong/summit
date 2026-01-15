@@ -2,14 +2,13 @@ import csv
 import io
 import json
 from datetime import datetime
-from typing import Optional, List
 
-from fastapi import FastAPI, HTTPException, Body, UploadFile, File, Header
-from pydantic import BaseModel, Field
-from prov.model import ProvDocument
+from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
-from cryptography.exceptions import InvalidSignature
+from fastapi import FastAPI, File, Header, HTTPException, UploadFile
+from prov.model import ProvDocument
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -19,28 +18,33 @@ class SignedProvDocument(BaseModel):
     document: dict  # PROV-JSON
     signature: str  # Hex-encoded signature
 
+
 class Namespace(BaseModel):
     prefix: str
     uri: str
 
+
 class ClaimIn(BaseModel):
     evidenceId: str
     assertion: str
+
 
 class ClaimOut(BaseModel):
     id: str
     status: str
     timestamp: float
 
+
 class ClaimList(BaseModel):
-    items: List[ClaimOut]
-    nextCursor: Optional[str] = None
+    items: list[ClaimOut]
+    nextCursor: str | None = None
+
 
 # In-memory storage
 _prov_documents: dict[str, SignedProvDocument] = {}
 _public_keys: dict[str, rsa.RSAPublicKey] = {}
 _private_keys: dict[str, rsa.RSAPrivateKey] = {}
-_namespaces: dict[str, str] = {} # For managing cross-domain namespaces
+_namespaces: dict[str, str] = {}  # For managing cross-domain namespaces
 _green_lock_ledger: dict[str, ProvDocument] = {}
 
 # Idempotency storage
@@ -48,7 +52,7 @@ IDEMP_KEYS = set()
 LAST_RESPONSES = {}
 
 # Claims storage (mock)
-_claims: List[ClaimOut] = []
+_claims: list[ClaimOut] = []
 
 # Generate a key pair for demo purposes
 key_id = "default_key"
@@ -65,6 +69,7 @@ async def register_namespace(namespace: Namespace):
     _namespaces[namespace.prefix] = namespace.uri
     return {"message": "Namespace registered"}
 
+
 @app.post("/documents/{doc_id}")
 async def submit_document(doc_id: str, signed_doc: SignedProvDocument):
     if doc_id in _prov_documents:
@@ -76,16 +81,13 @@ async def submit_document(doc_id: str, signed_doc: SignedProvDocument):
         raise HTTPException(status_code=500, detail="Public key not found")
 
     try:
-        message = json.dumps(signed_doc.document, sort_keys=True).encode('utf-8')
+        message = json.dumps(signed_doc.document, sort_keys=True).encode("utf-8")
         signature = bytes.fromhex(signed_doc.signature)
         public_key.verify(
             signature,
             message,
-            padding.PSS(
-                mgf=padding.MGF1(hashes.SHA256()),
-                salt_length=padding.PSS.MAX_LENGTH
-            ),
-            hashes.SHA256()
+            padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.MAX_LENGTH),
+            hashes.SHA256(),
         )
     except InvalidSignature:
         raise HTTPException(status_code=400, detail="Invalid signature")
@@ -102,6 +104,7 @@ async def get_document(doc_id: str):
         raise HTTPException(status_code=404, detail="Document not found")
     return _prov_documents[doc_id]
 
+
 @app.post("/documents/verify/{doc_id}")
 async def verify_document_integrity(doc_id: str):
     if doc_id not in _prov_documents:
@@ -113,16 +116,13 @@ async def verify_document_integrity(doc_id: str):
         raise HTTPException(status_code=500, detail="Public key not found")
 
     try:
-        message = json.dumps(signed_doc.document, sort_keys=True).encode('utf-8')
+        message = json.dumps(signed_doc.document, sort_keys=True).encode("utf-8")
         signature = bytes.fromhex(signed_doc.signature)
         public_key.verify(
             signature,
             message,
-            padding.PSS(
-                mgf=padding.MGF1(hashes.SHA256()),
-                salt_length=padding.PSS.MAX_LENGTH
-            ),
-            hashes.SHA256()
+            padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.MAX_LENGTH),
+            hashes.SHA256(),
         )
         return {"verified": True}
     except InvalidSignature:
@@ -130,10 +130,11 @@ async def verify_document_integrity(doc_id: str):
     except Exception as e:
         return {"verified": False, "reason": str(e)}
 
+
 @app.post("/migrate/green-lock-ledger")
 async def migrate_green_lock_ledger(file: UploadFile = File(...)):
     content = await file.read()
-    reader = csv.reader(io.StringIO(content.decode('utf-8')))
+    reader = csv.reader(io.StringIO(content.decode("utf-8")))
 
     for row in reader:
         pr_id, branch, author, timestamp, title = row
@@ -142,10 +143,7 @@ async def migrate_green_lock_ledger(file: UploadFile = File(...)):
         doc.add_namespace("pr", "https://github.com/pulls/")
         doc.add_namespace("user", "https://github.com/")
 
-        pr_entity = doc.entity(f"pr:{pr_id}", {
-            "pr:branch": branch,
-            "pr:title": title
-        })
+        pr_entity = doc.entity(f"pr:{pr_id}", {"pr:branch": branch, "pr:title": title})
         author_agent = doc.agent(f"user:{author}")
 
         doc.wasAttributedTo(pr_entity, author_agent)
@@ -154,8 +152,9 @@ async def migrate_green_lock_ledger(file: UploadFile = File(...)):
 
     return {"message": f"Migrated {len(_green_lock_ledger)} records from green-lock-ledger"}
 
+
 @app.post("/claim", response_model=ClaimOut, status_code=201)
-def register_claim(body: ClaimIn, idempotency_key: Optional[str] = Header(None)):
+def register_claim(body: ClaimIn, idempotency_key: str | None = Header(None)):
     if not idempotency_key:
         raise HTTPException(400, "missing idempotency-key")
     if idempotency_key in IDEMP_KEYS:
@@ -172,8 +171,9 @@ def register_claim(body: ClaimIn, idempotency_key: Optional[str] = Header(None))
     LAST_RESPONSES[idempotency_key] = resp
     return resp
 
+
 @app.get("/claims", response_model=ClaimList)
-def list_claims(limit: int = 50, after: Optional[str] = None):
+def list_claims(limit: int = 50, after: str | None = None):
     # Mock implementation of cursor pagination
     start_index = 0
     if after:
@@ -190,6 +190,7 @@ def list_claims(limit: int = 50, after: Optional[str] = None):
         next_cursor = items[-1].id if items else None
 
     return {"items": items, "nextCursor": next_cursor}
+
 
 @app.get("/export/manifest/{id}")
 def export_manifest(id: str):

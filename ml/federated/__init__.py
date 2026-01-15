@@ -44,62 +44,61 @@ Tradeoffs:
 __version__ = "1.0.0"
 
 # Core components
-from .core import (
-    FederatedServer,
-    FederatedClient,
-    ServerConfig,
-    ClientConfig,
-    OSINTFedAvg,
-    OSINTFedProx,
-    PrivacyPreservingStrategy,
-    AirgapStrategy,
-    ModelRegistry,
-    ModelVersion,
-)
-
-# Privacy components
-from .privacy import (
-    PgVectorDifferentialPrivacy,
-    PrivacyConfig,
-    EmbeddingWithPrivacy,
-    SecureAggregator,
-    RenyiDPAccountant,
+# Agent components
+from .agents import (
+    AgentConfig,
+    AirgapSyncAgent,
+    CoordinatorConfig,
+    FederatedCoordinatorAgent,
+    OSINTTrainerAgent,
+    SyncConfig,
+    TrainingTask,
 )
 
 # Aggregation components
 from .aggregation import (
-    Neo4jAggregator,
     AggregationConfig,
     FederatedGraphResult,
     GraphMerger,
     MergeStrategy,
+    Neo4jAggregator,
 )
-
-# Agent components
-from .agents import (
-    OSINTTrainerAgent,
-    AgentConfig,
-    TrainingTask,
-    FederatedCoordinatorAgent,
-    CoordinatorConfig,
-    AirgapSyncAgent,
-    SyncConfig,
-)
-
-# Sync components
-from .sync import (
-    SyncManager,
-    SyncState,
-    MerkleTree,
-    verify_merkle_proof,
+from .core import (
+    AirgapStrategy,
+    ClientConfig,
+    FederatedClient,
+    FederatedServer,
+    ModelRegistry,
+    ModelVersion,
+    OSINTFedAvg,
+    OSINTFedProx,
+    PrivacyPreservingStrategy,
+    ServerConfig,
 )
 
 # OSINT components
 from .osint import (
     OSINTClassifier,
-    OSINTEmbedder,
     OSINTDataLoader,
     OSINTDataset,
+    OSINTEmbedder,
+)
+
+# Privacy components
+from .privacy import (
+    EmbeddingWithPrivacy,
+    PgVectorDifferentialPrivacy,
+    PrivacyConfig,
+    RenyiDPAccountant,
+    SecureAggregator,
+)
+
+# Sync components
+from .sync import (
+    MerkleTree,
+    SyncManager,
+    SyncState,
+    verify_merkle_proof,
 )
 
 __all__ = [

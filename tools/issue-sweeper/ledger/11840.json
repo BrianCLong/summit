@@ -1,0 +1,47 @@
+{
+  "issue_number": 11840,
+  "title": "feat(intelgraph-api): add advanced graph analytics endpoints",
+  "url": "https://github.com/BrianCLong/summit/pull/11840",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9215499745,
+      "node_id": "LA_kwDOPaNncM8AAAACJUld4Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%203/5",
+      "name": "Review effort 3/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-11-21T05:53:49Z",
+  "createdAt": "2025-11-20T04:05:45Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11840,
+        "url": "https://github.com/BrianCLong/summit/pull/11840",
+        "mergedAt": null,
+        "title": "feat(intelgraph-api): add advanced graph analytics endpoints"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

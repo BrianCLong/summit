@@ -14,7 +14,10 @@ jest.mock('crypto');
 const mockFs = fs as jest.Mocked<typeof fs>;
 const mockCrypto = require('crypto') as jest.Mocked<typeof import('crypto')>;
 
-describe('Recipes REST API', () => {
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('Recipes REST API', () => {
   let app: express.Application;
 
   beforeEach(() => {

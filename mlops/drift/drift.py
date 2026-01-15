@@ -4,9 +4,11 @@ Computes PSI (Population Stability Index) and KS (Kolmogorov-Smirnov) statistics
 for drift monitoring.
 """
 
+from typing import Any
+
 import numpy as np
 from scipy.stats import ks_2samp
-from typing import List, Dict, Any
+
 
 class DriftDetector:
     def __init__(self):
@@ -16,6 +18,7 @@ class DriftDetector:
         """
         Calculate Population Stability Index (PSI) between two distributions.
         """
+
         def scale_range(input, min_val, max_val):
             input += -(np.min(input))
             input /= np.max(input) / (max_val - min_val)
@@ -41,12 +44,14 @@ class DriftDetector:
         expected_percents = np.clip(expected_percents, a_min=0.0001, a_max=None)
         actual_percents = np.clip(actual_percents, a_min=0.0001, a_max=None)
 
-        psi_values = (expected_percents - actual_percents) * np.log(expected_percents / actual_percents)
+        psi_values = (expected_percents - actual_percents) * np.log(
+            expected_percents / actual_percents
+        )
         psi = np.sum(psi_values)
 
         return float(psi)
 
-    def calculate_ks(self, expected: np.ndarray, actual: np.ndarray) -> Dict[str, float]:
+    def calculate_ks(self, expected: np.ndarray, actual: np.ndarray) -> dict[str, float]:
         """
         Calculate KS statistic and p-value.
         """
@@ -56,7 +61,9 @@ class DriftDetector:
         statistic, p_value = ks_2samp(expected, actual)
         return {"statistic": float(statistic), "p_value": float(p_value)}
 
-    def detect_drift(self, reference_data: Dict[str, List[float]], current_data: Dict[str, List[float]]) -> Dict[str, Any]:
+    def detect_drift(
+        self, reference_data: dict[str, list[float]], current_data: dict[str, list[float]]
+    ) -> dict[str, Any]:
         """
         Detect drift for multiple features.
         """
@@ -73,6 +80,6 @@ class DriftDetector:
                     "psi": psi,
                     "ks_statistic": ks["statistic"],
                     "ks_p_value": ks["p_value"],
-                    "drift_detected": psi > 0.1 or ks["p_value"] < 0.05
+                    "drift_detected": psi > 0.1 or ks["p_value"] < 0.05,
                 }
         return results

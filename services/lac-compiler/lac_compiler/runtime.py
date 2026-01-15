@@ -1,16 +1,16 @@
 from datetime import timedelta
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 from .models import BytecodeInstruction
 
 
 class EnforcementEngine:
-    def __init__(self, bytecode: List[BytecodeInstruction]):
+    def __init__(self, bytecode: list[BytecodeInstruction]):
         self.bytecode = bytecode
-        self._context: Dict[str, Any] = {}
+        self._context: dict[str, Any] = {}
 
-    def evaluate(self, context: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
-        reasons: List[Dict[str, Any]] = []
+    def evaluate(self, context: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+        reasons: list[dict[str, Any]] = []
         idx = 0
 
         while idx < len(self.bytecode):
@@ -63,8 +63,8 @@ class EnforcementEngine:
 
         return "deny", self._reason_panel("deny", reasons)
 
-    def _walk_rule(self, start_idx: int) -> Tuple[List[Dict[str, Any]] | None, int]:
-        reasons: List[Dict[str, Any]] = []
+    def _walk_rule(self, start_idx: int) -> tuple[list[dict[str, Any]] | None, int]:
+        reasons: list[dict[str, Any]] = []
         idx = start_idx
         while idx < len(self.bytecode):
             instr = self.bytecode[idx]
@@ -109,11 +109,13 @@ class EnforcementEngine:
                 return False
         return False
 
-    def _matches(self, context: Dict[str, Any], subject: str, action: str, resource: str) -> bool:
+    def _matches(self, context: dict[str, Any], subject: str, action: str, resource: str) -> bool:
         self._context = context
-        return self._match_token(context.get("subject"), subject) and self._match_token(
-            context.get("action"), action
-        ) and self._match_token(context.get("resource"), resource)
+        return (
+            self._match_token(context.get("subject"), subject)
+            and self._match_token(context.get("action"), action)
+            and self._match_token(context.get("resource"), resource)
+        )
 
     def _match_token(self, value: str, expected: str) -> bool:
         return expected == "*" or value == expected
@@ -137,14 +139,18 @@ class EnforcementEngine:
             return timedelta(minutes=num)
         raise ValueError(f"Unsupported duration: {value}")
 
-    def _clause(self, field: str, detail: Any) -> Dict[str, Any]:
+    def _clause(self, field: str, detail: Any) -> dict[str, Any]:
         return {"field": field, "detail": detail}
 
-    def _reason(self, code: str, reasons: List[Dict[str, Any]], instr: BytecodeInstruction) -> Dict[str, Any]:
+    def _reason(
+        self, code: str, reasons: list[dict[str, Any]], instr: BytecodeInstruction
+    ) -> dict[str, Any]:
         reasons.append({"field": instr.op.lower(), "detail": instr.description or instr.op})
         return self._reason_panel("deny", reasons, code=code)
 
-    def _reason_panel(self, decision: str, reasons: List[Dict[str, Any]], code: str | None = None) -> Dict[str, Any]:
+    def _reason_panel(
+        self, decision: str, reasons: list[dict[str, Any]], code: str | None = None
+    ) -> dict[str, Any]:
         panel = {
             "decision": decision,
             "clauses": reasons,

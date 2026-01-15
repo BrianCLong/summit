@@ -1,0 +1,38 @@
+{
+  "issue_number": 15310,
+  "title": "feat: Implement Information Supply Chain Doctrine and Artifacts",
+  "url": "https://github.com/BrianCLong/summit/pull/15310",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9285861077,
+      "node_id": "LA_kwDOPaNncM8AAAACKXr-1Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%201/5",
+      "name": "Review effort 1/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2026-01-01T11:41:14Z",
+  "createdAt": "2026-01-01T06:22:10Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15310,
+        "url": "https://github.com/BrianCLong/summit/pull/15310",
+        "mergedAt": "2026-01-01T11:39:41Z",
+        "title": "feat: Implement Information Supply Chain Doctrine and Artifacts"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

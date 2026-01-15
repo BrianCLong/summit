@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { CausalGraphService } from '../services/CausalGraphService';
 
 // Mock Neo4j driver and session

@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import time
 from collections import deque
-from typing import Deque
+
 from fastapi import HTTPException, Request
 
 from .config import config
 from .observability import logger
 
-_request_times: Deque[float] = deque()
+_request_times: deque[float] = deque()
 
 
 async def rate_limiter() -> None:

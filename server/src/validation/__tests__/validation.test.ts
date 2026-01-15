@@ -473,7 +473,7 @@ describe('Query Validator', () => {
 
     it('should fail on dangerous patterns', () => {
       const query = 'SELECT * FROM users; DROP TABLE users;';
-      const params = [];
+      const params: unknown[] = [];
       const result = QueryValidator.validateSQLQuery(query, params);
       expect(result.valid).toBe(false);
       expect(result.errors).toContain(

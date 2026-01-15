@@ -18,11 +18,10 @@ class OSINTDataFetcher:
         if not api_key:
             return {}
         url = f"https://api.shodan.io/shodan/host/{ip}?key={api_key}"
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                if response.status == 200:
-                    return await response.json()
-                return {}
+        async with aiohttp.ClientSession() as session, session.get(url) as response:
+            if response.status == 200:
+                return await response.json()
+            return {}
 
     async def fetch_virustotal(self, ip: str) -> dict[str, Any]:
         api_key = os.getenv("VT_API_KEY")

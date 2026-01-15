@@ -24,9 +24,11 @@ import {
   IntegrationAuditEntry,
 } from './types/Integration.js';
 import { Principal } from '../types/identity.js';
-import {
+import type {
   DataEnvelope,
   GovernanceVerdict,
+} from '../types/data-envelope.js';
+import {
   GovernanceResult,
   DataClassification,
   createDataEnvelope,
@@ -241,7 +243,7 @@ export class IntegrationManager {
           confidence: 1.0,
         },
         governance: {
-          verdict: GovernanceVerdict.ALLOW,
+          verdict: GovernanceResult.ALLOW,
           evaluatedPolicies: [],
           enforcedAt: new Date().toISOString(),
         },
@@ -303,7 +305,7 @@ export class IntegrationManager {
         confidence: 1.0,
       },
       governance: {
-        verdict: GovernanceVerdict.ALLOW,
+        verdict: GovernanceResult.ALLOW,
         evaluatedPolicies: [],
         enforcedAt: new Date().toISOString(),
       },
@@ -372,7 +374,7 @@ export class IntegrationManager {
           confidence: 1.0,
         },
         governance: {
-          verdict: requiresApproval ? GovernanceVerdict.REVIEW_REQUIRED : GovernanceVerdict.ALLOW,
+          verdict: requiresApproval ? GovernanceResult.REVIEW_REQUIRED : GovernanceResult.ALLOW,
           evaluatedPolicies: [],
           enforcedAt: new Date().toISOString(),
         },
@@ -413,7 +415,7 @@ export class IntegrationManager {
           confidence: 1.0,
         },
         governance: {
-          verdict: GovernanceVerdict.REVIEW_REQUIRED,
+          verdict: GovernanceResult.REVIEW_REQUIRED,
           evaluatedPolicies: [],
           enforcedAt: new Date().toISOString(),
         },
@@ -481,7 +483,7 @@ export class IntegrationManager {
           confidence: 1.0,
         },
         governance: {
-          verdict: GovernanceVerdict.ALLOW,
+          verdict: GovernanceResult.ALLOW,
           evaluatedPolicies: [],
           enforcedAt: new Date().toISOString(),
         },
@@ -596,7 +598,7 @@ export class IntegrationManager {
         confidence: 1.0,
       },
       governance: {
-        verdict: GovernanceVerdict.ALLOW,
+        verdict: GovernanceResult.ALLOW,
         evaluatedPolicies: [],
         enforcedAt: new Date().toISOString(),
       },
@@ -644,7 +646,7 @@ export class IntegrationManager {
         confidence: 1.0,
       },
       governance: {
-        verdict: GovernanceVerdict.DENY,
+        verdict: GovernanceResult.DENY,
         evaluatedPolicies: [],
         enforcedAt: new Date().toISOString(),
       },
@@ -706,7 +708,7 @@ export class IntegrationManager {
         confidence: 1.0,
       },
       governance: {
-        verdict: GovernanceVerdict.ALLOW,
+        verdict: GovernanceResult.ALLOW,
         evaluatedPolicies: [],
         enforcedAt: new Date().toISOString(),
       },
@@ -786,7 +788,7 @@ export class IntegrationManager {
         confidence: 1.0,
       },
       governance: {
-        verdict: GovernanceVerdict.ALLOW,
+        verdict: GovernanceResult.ALLOW,
         evaluatedPolicies: [],
         enforcedAt: new Date().toISOString(),
       },

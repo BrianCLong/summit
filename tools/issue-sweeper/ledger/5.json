@@ -1,0 +1,248 @@
+{
+  "issue_number": 5,
+  "title": "M0: Normalize filenames and organize repo structure",
+  "url": "https://github.com/BrianCLong/summit/issues/5",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051532,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5DA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:frontend",
+      "name": "area:frontend",
+      "color": "ededed",
+      "default": false,
+      "description": "Frontend work"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:11:09Z",
+  "createdAt": "2025-08-12T00:09:53Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15380,
+        "url": "https://github.com/BrianCLong/summit/pull/15380",
+        "mergedAt": null,
+        "title": "Sprint 2026.02: Hard Gates and Safer Defaults"
+      },
+      {
+        "number": 15358,
+        "url": "https://github.com/BrianCLong/summit/pull/15358",
+        "mergedAt": null,
+        "title": "Create patent-grade MCP protocol innovations"
+      },
+      {
+        "number": 13614,
+        "url": "https://github.com/BrianCLong/summit/pull/13614",
+        "mergedAt": "2025-12-16T21:05:14Z",
+        "title": "build(deps): bump github.com/jackc/pgx/v5 from 5.5.3 to 5.5.4 in /services/retentiond"
+      },
+      {
+        "number": 15375,
+        "url": "https://github.com/BrianCLong/summit/pull/15375",
+        "mergedAt": null,
+        "title": "feat: Release Automation & Evidence Bundle"
+      },
+      {
+        "number": 15446,
+        "url": "https://github.com/BrianCLong/summit/pull/15446",
+        "mergedAt": null,
+        "title": "Add authority control plane v0 design doc"
+      },
+      {
+        "number": 15456,
+        "url": "https://github.com/BrianCLong/summit/pull/15456",
+        "mergedAt": null,
+        "title": "Add doc review closure playbook and automation helper"
+      },
+      {
+        "number": 13736,
+        "url": "https://github.com/BrianCLong/summit/pull/13736",
+        "mergedAt": "2025-12-20T03:32:42Z",
+        "title": "build(deps-dev): bump vite from 4.5.14 to 5.4.21 in /frontend"
+      },
+      {
+        "number": 15440,
+        "url": "https://github.com/BrianCLong/summit/pull/15440",
+        "mergedAt": null,
+        "title": "Add Summit agent framework mapping and backlog"
+      },
+      {
+        "number": 15404,
+        "url": "https://github.com/BrianCLong/summit/pull/15404",
+        "mergedAt": null,
+        "title": "Add backlog execution ledger scaffold"
+      },
+      {
+        "number": 14539,
+        "url": "https://github.com/BrianCLong/summit/pull/14539",
+        "mergedAt": "2025-12-26T23:53:10Z",
+        "title": "chore(deps): Bump github.com/go-chi/chi/v5 from 5.0.10 to 5.2.2 in /services/q3c"
+      },
+      {
+        "number": 15391,
+        "url": "https://github.com/BrianCLong/summit/pull/15391",
+        "mergedAt": null,
+        "title": "Include missing server sources in tsconfig"
+      },
+      {
+        "number": 13251,
+        "url": "https://github.com/BrianCLong/summit/pull/13251",
+        "mergedAt": "2025-12-17T06:25:04Z",
+        "title": "Batch 5: Observability & DevOps Enhancements"
+      },
+      {
+        "number": 15370,
+        "url": "https://github.com/BrianCLong/summit/pull/15370",
+        "mergedAt": null,
+        "title": "Organize workspaces with Turborepo segmentation"
+      },
+      {
+        "number": 13471,
+        "url": "https://github.com/BrianCLong/summit/pull/13471",
+        "mergedAt": "2025-12-07T02:16:04Z",
+        "title": "deps(npm): bump express from 5.1.0 to 5.2.0"
+      },
+      {
+        "number": 15425,
+        "url": "https://github.com/BrianCLong/summit/pull/15425",
+        "mergedAt": null,
+        "title": "ModelOps: RLVR PEFT adapter policy (DoRA/AdaLoRA/MiSS defaults + guardrails)"
+      },
+      {
+        "number": 15363,
+        "url": "https://github.com/BrianCLong/summit/pull/15363",
+        "mergedAt": null,
+        "title": "Enhance onboarding compose presets and hooks"
+      },
+      {
+        "number": 15424,
+        "url": "https://github.com/BrianCLong/summit/pull/15424",
+        "mergedAt": null,
+        "title": "Add agent session explorer for Claude history"
+      },
+      {
+        "number": 15366,
+        "url": "https://github.com/BrianCLong/summit/pull/15366",
+        "mergedAt": null,
+        "title": "Harden Express input validation and GraphQL guard"
+      },
+      {
+        "number": 14602,
+        "url": "https://github.com/BrianCLong/summit/pull/14602",
+        "mergedAt": null,
+        "title": "docs: add CompanyOS Sprint 5 \"Ledger & Lifecycle\" plan and update roadmap"
+      },
+      {
+        "number": 15133,
+        "url": "https://github.com/BrianCLong/summit/pull/15133",
+        "mergedAt": null,
+        "title": "chore(deps): bump aws-actions/configure-aws-credentials from 4 to 5"
+      },
+      {
+        "number": 12395,
+        "url": "https://github.com/BrianCLong/summit/pull/12395",
+        "mergedAt": "2025-12-18T02:53:19Z",
+        "title": "Add wave 5 prompt execution plan"
+      },
+      {
+        "number": 15365,
+        "url": "https://github.com/BrianCLong/summit/pull/15365",
+        "mergedAt": null,
+        "title": "test: enforce coverage gate and add API fuzzing contracts"
+      },
+      {
+        "number": 12893,
+        "url": "https://github.com/BrianCLong/summit/pull/12893",
+        "mergedAt": "2025-12-17T21:51:01Z",
+        "title": "Batch 5: Observability, Documentation, and Production Hardening"
+      },
+      {
+        "number": 12330,
+        "url": "https://github.com/BrianCLong/summit/pull/12330",
+        "mergedAt": "2025-12-18T03:07:30Z",
+        "title": "Update backlog with 5 parallel sprints plan"
+      },
+      {
+        "number": 12324,
+        "url": "https://github.com/BrianCLong/summit/pull/12324",
+        "mergedAt": "2025-12-18T03:08:38Z",
+        "title": "Define 5 Parallel Strategic Sprints for Q4 2025"
+      },
+      {
+        "number": 12401,
+        "url": "https://github.com/BrianCLong/summit/pull/12401",
+        "mergedAt": "2025-12-06T23:55:11Z",
+        "title": "Add Wave 5 predictive intelligence module specs"
+      },
+      {
+        "number": 12861,
+        "url": "https://github.com/BrianCLong/summit/pull/12861",
+        "mergedAt": "2025-12-04T15:48:54Z",
+        "title": "Add Sprint 5 white-label kit plan"
+      },
+      {
+        "number": 14387,
+        "url": "https://github.com/BrianCLong/summit/pull/14387",
+        "mergedAt": "2025-12-24T00:04:01Z",
+        "title": "chore(deps): bump langchain-core from 1.0.7 to 1.2.5"
+      },
+      {
+        "number": 13616,
+        "url": "https://github.com/BrianCLong/summit/pull/13616",
+        "mergedAt": "2025-12-16T21:23:51Z",
+        "title": "build(deps): bump github.com/go-chi/chi/v5 from 5.0.11 to 5.2.2 in /templates/golden-path-platform/services/hello-service"
+      },
+      {
+        "number": 12839,
+        "url": "https://github.com/BrianCLong/summit/pull/12839",
+        "mergedAt": "2025-12-04T15:49:41Z",
+        "title": "Add Maestro Conductor sprint 5 governance/compliance plan"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

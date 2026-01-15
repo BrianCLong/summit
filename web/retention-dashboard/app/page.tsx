@@ -78,30 +78,32 @@ function renderUpcomingTable(runs: Run[]) {
   );
 
   return (
-    <table className="expirations-table">
-      <thead>
-        <tr>
-          <th>Policy</th>
-          <th>Target</th>
-          <th>Type</th>
-          <th>Expired Items</th>
-          <th>Cutoff</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map(row => (
-          <tr key={`${row.policy}-${row.target}`}>
-            <td>{row.policy}</td>
-            <td>{row.target}</td>
-            <td>{row.type}</td>
-            <td>{row.expired}</td>
-            <td>{new Date(row.cutoff).toLocaleString()}</td>
-            <td>{row.dryRun ? 'Dry Run' : 'Deleted'}</td>
+    <div className="table-wrapper" role="region" aria-label="Upcoming expirations">
+      <table className="expirations-table">
+        <thead>
+          <tr>
+            <th scope="col">Policy</th>
+            <th scope="col">Target</th>
+            <th scope="col">Type</th>
+            <th scope="col">Expired Items</th>
+            <th scope="col">Cutoff</th>
+            <th scope="col">Status</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {rows.map(row => (
+            <tr key={`${row.policy}-${row.target}`}>
+              <td data-label="Policy">{row.policy}</td>
+              <td data-label="Target">{row.target}</td>
+              <td data-label="Type">{row.type}</td>
+              <td data-label="Expired Items">{row.expired}</td>
+              <td data-label="Cutoff">{new Date(row.cutoff).toLocaleString()}</td>
+              <td data-label="Status">{row.dryRun ? 'Dry Run' : 'Deleted'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 

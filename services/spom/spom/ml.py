@@ -5,8 +5,7 @@ from __future__ import annotations
 import math
 import re
 from collections import Counter
-from typing import Dict, Iterable, Tuple
-
+from collections.abc import Iterable
 
 _TOKEN_PATTERN = re.compile(r"[a-z0-9]+")
 
@@ -15,7 +14,7 @@ class EmbeddingModel:
     """Deterministic embedding stub used for scoring."""
 
     def __init__(self) -> None:
-        self.ontology_space: Dict[str, Counter[str]] = {
+        self.ontology_space: dict[str, Counter[str]] = {
             "EMAIL": Counter({"email": 2, "mail": 1, "contact": 1, "inbox": 1}),
             "PHONE": Counter({"phone": 2, "mobile": 1, "sms": 1, "dial": 1}),
             "NAME": Counter({"name": 2, "fullname": 1, "first": 1, "last": 1}),
@@ -48,7 +47,7 @@ class EmbeddingModel:
             return 0.0
         return dot / (norm_a * norm_b)
 
-    def best_category(self, text: str, candidates: Iterable[str]) -> Tuple[str | None, float]:
+    def best_category(self, text: str, candidates: Iterable[str]) -> tuple[str | None, float]:
         best_category: str | None = None
         best_score = 0.0
         for category in candidates:

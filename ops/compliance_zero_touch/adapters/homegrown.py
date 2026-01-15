@@ -87,7 +87,7 @@ class HomegrownAdapter(PolicyAdapter):
         economic = max(base - penalty * 0.6, floor)
         risk = max(base - penalty, floor)
         legal = max(base - penalty * 0.8, floor)
-        rationale = "Scores derived from composite of drift severity, incident cost modeling, and regulatory posture."  # noqa: E501
+        rationale = "Scores derived from composite of drift severity, incident cost modeling, and regulatory posture."
         return MultiFactorScore(
             scores={
                 ImpactDimension.ECONOMIC: round(economic, 2),

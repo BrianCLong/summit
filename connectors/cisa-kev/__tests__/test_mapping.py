@@ -4,19 +4,17 @@ Unit tests for CISA KEV schema mapping.
 Tests the map_cisa_kev_to_intelgraph function and related utilities.
 """
 
-import unittest
 import json
 import os
+import unittest
 from pathlib import Path
-from typing import List, Dict, Any
 
 from connectors.cisa_kev.schema_mapping import (
-    map_cisa_kev_to_intelgraph,
-    get_ransomware_vulnerabilities,
-    get_recent_vulnerabilities,
-    _validate_kev_schema,
     _map_vulnerability_to_entity,
-    _parse_ransomware_flag
+    _parse_ransomware_flag,
+    _validate_kev_schema,
+    get_ransomware_vulnerabilities,
+    map_cisa_kev_to_intelgraph,
 )
 
 
@@ -26,9 +24,7 @@ class TestSchemaMapping(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Set up test fixtures."""
-        cls.sample_file = str(
-            Path(__file__).parent.parent / "sample.json"
-        )
+        cls.sample_file = str(Path(__file__).parent.parent / "sample.json")
 
     def test_basic_mapping(self):
         """Test basic entity mapping from sample data."""
@@ -51,17 +47,22 @@ class TestSchemaMapping(unittest.TestCase):
         entity = entities[0]
 
         required_fields = [
-            "id", "cve_id", "name", "vendor_project", "product",
-            "vulnerability_name", "short_description", "date_added",
-            "required_action", "known_ransomware_use", "source", "confidence"
+            "id",
+            "cve_id",
+            "name",
+            "vendor_project",
+            "product",
+            "vulnerability_name",
+            "short_description",
+            "date_added",
+            "required_action",
+            "known_ransomware_use",
+            "source",
+            "confidence",
         ]
 
         for field in required_fields:
-            self.assertIn(
-                field,
-                entity["properties"],
-                f"Missing required field: {field}"
-            )
+            self.assertIn(field, entity["properties"], f"Missing required field: {field}")
 
     def test_cve_id_mapping(self):
         """Test CVE ID mapping."""
@@ -76,23 +77,16 @@ class TestSchemaMapping(unittest.TestCase):
         entities, _ = map_cisa_kev_to_intelgraph(self.sample_file)
 
         # Find Log4j vulnerability (known ransomware use)
-        log4j = next(
-            e for e in entities
-            if e["properties"]["cve_id"] == "CVE-2021-44228"
-        )
+        log4j = next(e for e in entities if e["properties"]["cve_id"] == "CVE-2021-44228")
         self.assertTrue(
-            log4j["properties"]["known_ransomware_use"],
-            "Log4j should have known ransomware use"
+            log4j["properties"]["known_ransomware_use"], "Log4j should have known ransomware use"
         )
 
         # Find Outlook vulnerability (unknown ransomware use)
-        outlook = next(
-            e for e in entities
-            if e["properties"]["cve_id"] == "CVE-2023-23397"
-        )
+        outlook = next(e for e in entities if e["properties"]["cve_id"] == "CVE-2023-23397")
         self.assertFalse(
             outlook["properties"]["known_ransomware_use"],
-            "Outlook vulnerability should not have known ransomware use"
+            "Outlook vulnerability should not have known ransomware use",
         )
 
     def test_parse_ransomware_flag(self):
@@ -122,11 +116,7 @@ class TestSchemaMapping(unittest.TestCase):
 
         for entity in entities:
             confidence = entity["properties"]["confidence"]
-            self.assertEqual(
-                confidence,
-                1.0,
-                "CISA KEV is authoritative, confidence should be 1.0"
-            )
+            self.assertEqual(confidence, 1.0, "CISA KEV is authoritative, confidence should be 1.0")
 
     def test_source_attribution(self):
         """Test source attribution."""
@@ -140,8 +130,7 @@ class TestSchemaMapping(unittest.TestCase):
         """Test ransomware filtering."""
         all_entities, _ = map_cisa_kev_to_intelgraph(self.sample_file)
         ransomware_entities, _ = map_cisa_kev_to_intelgraph(
-            self.sample_file,
-            config={"filter_ransomware": True}
+            self.sample_file, config={"filter_ransomware": True}
         )
 
         # Should have fewer entities when filtering
@@ -151,14 +140,13 @@ class TestSchemaMapping(unittest.TestCase):
         for entity in ransomware_entities:
             self.assertTrue(
                 entity["properties"]["known_ransomware_use"],
-                "Filtered entities should have ransomware flag"
+                "Filtered entities should have ransomware flag",
             )
 
     def test_include_metadata(self):
         """Test including raw record in metadata."""
         entities, _ = map_cisa_kev_to_intelgraph(
-            self.sample_file,
-            config={"include_metadata": True}
+            self.sample_file, config={"include_metadata": True}
         )
 
         entity = entities[0]
@@ -169,19 +157,23 @@ class TestSchemaMapping(unittest.TestCase):
         """Test handling of malformed data."""
         # Missing required field
         with self.assertRaises(ValueError):
-            _validate_kev_schema({
-                "catalogVersion": "1.0",
-                # Missing other required fields
-            })
+            _validate_kev_schema(
+                {
+                    "catalogVersion": "1.0",
+                    # Missing other required fields
+                }
+            )
 
         # Invalid vulnerabilities type
         with self.assertRaises(ValueError):
-            _validate_kev_schema({
-                "catalogVersion": "1.0",
-                "dateReleased": "2025-11-20",
-                "count": 0,
-                "vulnerabilities": "not a list"  # Should be list
-            })
+            _validate_kev_schema(
+                {
+                    "catalogVersion": "1.0",
+                    "dateReleased": "2025-11-20",
+                    "count": 0,
+                    "vulnerabilities": "not a list",  # Should be list
+                }
+            )
 
     def test_missing_file(self):
         """Test handling of missing file."""
@@ -192,7 +184,7 @@ class TestSchemaMapping(unittest.TestCase):
         """Test handling of invalid JSON."""
         import tempfile
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             f.write("{ invalid json }")
             temp_path = f.name
 
@@ -217,20 +209,13 @@ class TestSchemaMapping(unittest.TestCase):
         ids = [e["properties"]["id"] for e in entities]
         unique_ids = set(ids)
 
-        self.assertEqual(
-            len(ids),
-            len(unique_ids),
-            "All entity IDs should be unique"
-        )
+        self.assertEqual(len(ids), len(unique_ids), "All entity IDs should be unique")
 
     def test_vendor_product_mapping(self):
         """Test vendor and product field mapping."""
         entities, _ = map_cisa_kev_to_intelgraph(self.sample_file)
 
-        log4j = next(
-            e for e in entities
-            if e["properties"]["cve_id"] == "CVE-2021-44228"
-        )
+        log4j = next(e for e in entities if e["properties"]["cve_id"] == "CVE-2021-44228")
 
         self.assertEqual(log4j["properties"]["vendor_project"], "Apache")
         self.assertEqual(log4j["properties"]["product"], "Log4j")
@@ -258,10 +243,10 @@ class TestSchemaMapping(unittest.TestCase):
             "catalogVersion": "2025.11.20",
             "dateReleased": "2025-11-20",
             "count": 0,
-            "vulnerabilities": []
+            "vulnerabilities": [],
         }
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(empty_catalog, f)
             temp_path = f.name
 
@@ -287,7 +272,7 @@ class TestUtilityFunctions(unittest.TestCase):
             "shortDescription": "RCE vulnerability",
             "requiredAction": "Patch immediately",
             "dueDate": "2021-12-24",
-            "knownRansomwareCampaignUse": "Known"
+            "knownRansomwareCampaignUse": "Known",
         }
 
         entity = _map_vulnerability_to_entity(vuln, "2025.11.20")

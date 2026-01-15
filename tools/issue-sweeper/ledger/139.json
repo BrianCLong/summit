@@ -1,0 +1,104 @@
+{
+  "issue_number": 139,
+  "title": "Epic: Federated Intelligence Search Across Distributed Graphs",
+  "url": "https://github.com/BrianCLong/summit/issues/139",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342919,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9Rw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic",
+      "name": "epic",
+      "color": "8250DF",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103343056,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn90A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/mvp1",
+      "name": "mvp1",
+      "color": "0e8a16",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103362047,
+      "node_id": "LA_kwDOPaNncM8AAAACHppH_w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:federation",
+      "name": "area:federation",
+      "color": "0e8a16",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-13T09:28:20Z",
+  "createdAt": "2025-08-13T09:20:49Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14375,
+        "url": "https://github.com/BrianCLong/summit/pull/14375",
+        "mergedAt": "2025-12-23T04:35:28Z",
+        "title": "Bump playwright from 1.41.1 to 1.55.1 in /services/reporting"
+      },
+      {
+        "number": 13365,
+        "url": "https://github.com/BrianCLong/summit/pull/13365",
+        "mergedAt": "2025-12-06T09:54:02Z",
+        "title": "build(deps): bump playwright and @playwright/test in /intelgraph-mvp/ui"
+      },
+      {
+        "number": 1476,
+        "url": "https://github.com/BrianCLong/summit/pull/1476",
+        "mergedAt": "2025-11-21T04:03:08Z",
+        "title": "feat: add cross-region database replication artifacts"
+      },
+      {
+        "number": 1152,
+        "url": "https://github.com/BrianCLong/summit/pull/1152",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump @playwright/test from 1.54.2 to 1.55.0 in /server"
+      },
+      {
+        "number": 1153,
+        "url": "https://github.com/BrianCLong/summit/pull/1153",
+        "mergedAt": null,
+        "title": "chore(deps): bump puppeteer from 22.15.0 to 24.18.0 in /server"
+      },
+      {
+        "number": 13193,
+        "url": "https://github.com/BrianCLong/summit/pull/13193",
+        "mergedAt": "2025-12-04T15:38:38Z",
+        "title": "Build React Native mobile app with OSINT dashboard"
+      },
+      {
+        "number": 1312,
+        "url": "https://github.com/BrianCLong/summit/pull/1312",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat(conductor): harden build orchestration fabric"
+      },
+      {
+        "number": 11927,
+        "url": "https://github.com/BrianCLong/summit/pull/11927",
+        "mergedAt": null,
+        "title": "Build workflow orchestration and task scheduling"
+      },
+      {
+        "number": 1266,
+        "url": "https://github.com/BrianCLong/summit/pull/1266",
+        "mergedAt": "2025-09-16T22:05:41Z",
+        "title": "chore(ci): finalization kit + protections"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

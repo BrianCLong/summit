@@ -6,7 +6,7 @@ import base64
 import hashlib
 import json
 import sys
-from typing import Iterable, List
+from collections.abc import Iterable
 from urllib import request
 
 
@@ -18,11 +18,11 @@ def node_hash(left: bytes, right: bytes) -> bytes:
     return hashlib.sha256(b"\x01" + left + right).digest()
 
 
-def decode_proof(values: Iterable[str]) -> List[bytes]:
+def decode_proof(values: Iterable[str]) -> list[bytes]:
     return [base64.b64decode(v) for v in values]
 
 
-def verify_inclusion(index: int, leaf: bytes, proof: List[bytes], root: bytes) -> bool:
+def verify_inclusion(index: int, leaf: bytes, proof: list[bytes], root: bytes) -> bool:
     hash_value = leaf
     idx = index
     for sibling in proof:
@@ -34,7 +34,9 @@ def verify_inclusion(index: int, leaf: bytes, proof: List[bytes], root: bytes) -
     return hash_value == root
 
 
-def verify_consistency(old_size: int, new_size: int, old_root: bytes, new_root: bytes, proof: List[bytes]) -> bool:
+def verify_consistency(
+    old_size: int, new_size: int, old_root: bytes, new_root: bytes, proof: list[bytes]
+) -> bool:
     if old_size > new_size:
         return False
     if old_size == new_size:
@@ -79,7 +81,7 @@ def verify_consistency(old_size: int, new_size: int, old_root: bytes, new_root: 
     return old_hash == old_root and new_hash == new_root
 
 
-def fetch_leaf_hashes(endpoint: str, limit: int) -> List[bytes]:
+def fetch_leaf_hashes(endpoint: str, limit: int) -> list[bytes]:
     url = f"{endpoint.rstrip('/')}/tree/leaves?limit={limit}"
     with request.urlopen(url) as resp:
         if resp.status != 200:
@@ -88,12 +90,12 @@ def fetch_leaf_hashes(endpoint: str, limit: int) -> List[bytes]:
     return [base64.b64decode(item) for item in payload.get("leaf_hashes", [])]
 
 
-def compute_root(leaves: List[bytes]) -> bytes:
+def compute_root(leaves: list[bytes]) -> bytes:
     if not leaves:
         return b""
     nodes = [leaf[:] for leaf in leaves]
     while len(nodes) > 1:
-        nxt: List[bytes] = []
+        nxt: list[bytes] = []
         for idx in range(0, len(nodes), 2):
             if idx + 1 < len(nodes):
                 nxt.append(node_hash(nodes[idx], nodes[idx + 1]))
@@ -130,7 +132,7 @@ def command_consistency(args: argparse.Namespace) -> int:
         try:
             old_hashes = fetch_leaf_hashes(args.endpoint, args.old_size)
             new_hashes = fetch_leaf_hashes(args.endpoint, args.new_size)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             print(f"failed to fetch leaf hashes: {exc}", file=sys.stderr)
             return 1
         if compute_root(old_hashes) != old_root:
@@ -179,7 +181,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: List[str]) -> int:
+def main(argv: list[str]) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     return args.func(args)

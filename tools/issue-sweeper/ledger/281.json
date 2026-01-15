@@ -1,0 +1,86 @@
+{
+  "issue_number": 281,
+  "title": "docs: expand threat assessment engine",
+  "url": "https://github.com/BrianCLong/summit/pull/281",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:24:58Z",
+  "createdAt": "2025-08-15T22:12:26Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13101,
+        "url": "https://github.com/BrianCLong/summit/pull/13101",
+        "mergedAt": "2025-12-17T05:44:01Z",
+        "title": "Add Multi-Tenant Boundary Stress Test Engine"
+      },
+      {
+        "number": 13182,
+        "url": "https://github.com/BrianCLong/summit/pull/13182",
+        "mergedAt": "2025-12-04T15:39:06Z",
+        "title": "Build SIGINT dashboard with live waveform visualization"
+      },
+      {
+        "number": 634,
+        "url": "https://github.com/BrianCLong/summit/pull/634",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump globals from 15.15.0 to 16.3.0"
+      },
+      {
+        "number": 11923,
+        "url": "https://github.com/BrianCLong/summit/pull/11923",
+        "mergedAt": "2025-11-20T10:04:27Z",
+        "title": "Build Advanced Visualization and Dashboard System"
+      },
+      {
+        "number": 11915,
+        "url": "https://github.com/BrianCLong/summit/pull/11915",
+        "mergedAt": null,
+        "title": "Implement SLO-driven alerting system for Summit"
+      },
+      {
+        "number": 11817,
+        "url": "https://github.com/BrianCLong/summit/pull/11817",
+        "mergedAt": "2025-11-17T10:00:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 41 updates"
+      },
+      {
+        "number": 1086,
+        "url": "https://github.com/BrianCLong/summit/pull/1086",
+        "mergedAt": null,
+        "title": "Release 2.5.0: Grafana Release Health dashboard + Playwright smoke pack"
+      },
+      {
+        "number": 1262,
+        "url": "https://github.com/BrianCLong/summit/pull/1262",
+        "mergedAt": "2025-09-19T02:22:35Z",
+        "title": "Release 2.5 dash: merge into merge/all-to-main-20250915-022508 with UI/docs from feature"
+      },
+      {
+        "number": 1085,
+        "url": "https://github.com/BrianCLong/summit/pull/1085",
+        "mergedAt": null,
+        "title": "chore(compat): seed GraphQL N-1 and N-2\nbaselines for CI schema checks"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -5,7 +5,7 @@ from .pipeline import ERPipeline
 
 __all__ = [
     "ERPipeline",
+    "EmbeddingMatcher",
     "double_metaphone",
     "jaro_winkler",
-    "EmbeddingMatcher",
 ]

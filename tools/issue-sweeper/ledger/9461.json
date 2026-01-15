@@ -1,0 +1,40 @@
+{
+  "issue_number": 9461,
+  "title": "IG Oct25 | october2025/dirk_ig_q_425_workstream_prompt_sprint_cadence_summit_intel_graph (3).md | **Bitemporal registry + consent gates** integrated in ER pipeline (med, high).",
+  "url": "https://github.com/BrianCLong/summit/issues/9461",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9382634695,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-kxw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/chore",
+      "name": "type/chore",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9382634865,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-lcQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/program/release-train",
+      "name": "program/release-train",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-02T20:52:23Z",
+  "createdAt": "2025-10-02T20:52:23Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

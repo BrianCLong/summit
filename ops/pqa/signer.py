@@ -14,7 +14,7 @@ import json
 import logging
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, NamedTuple
 
 logger = logging.getLogger(__name__)
@@ -88,7 +88,7 @@ class PQASigner:
         canonical_payload = self._canonicalize(payload)
 
         # Create signature timestamp
-        timestamp = datetime.now(timezone.utc).isoformat()
+        timestamp = datetime.now(UTC).isoformat()
 
         # Create signature payload (includes metadata for integrity)
         sign_data = {
@@ -131,7 +131,7 @@ class PQASigner:
         self.total_sign_time += sign_time
 
         logger.info(
-            f"PQA attestation created: {attestation_id}, " f"sign_time={sign_time*1000:.2f}ms"
+            f"PQA attestation created: {attestation_id}, sign_time={sign_time * 1000:.2f}ms"
         )
 
         return attestation

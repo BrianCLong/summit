@@ -7,7 +7,9 @@ from mrse.world_state import WorldState
 
 
 def test_best_path_returns_highest_scoring_trajectory():
-    state = WorldState.from_sources({"files": 1}, intents=["intent-a"], tasks=["t1"], safety={"risk": 0.0})
+    state = WorldState.from_sources(
+        {"files": 1}, intents=["intent-a"], tasks=["t1"], safety={"risk": 0.0}
+    )
     engine = StateMutationEngine(default_agent_models(), ConstraintEngine())
     manager = HorizonManager(engine)
     graph = manager.generate_trees(state, depth=2)

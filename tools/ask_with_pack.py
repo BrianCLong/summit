@@ -166,8 +166,8 @@ def http_post_llm(payload):
 
     except Exception as e:
         return {
-            "error": f"HTTP request failed: {str(e)}",
-            "choices": [{"message": {"content": f"Error: {str(e)}"}}],
+            "error": f"HTTP request failed: {e!s}",
+            "choices": [{"message": {"content": f"Error: {e!s}"}}],
         }
 
 

@@ -8,7 +8,7 @@
 
 import { Pool, PoolClient } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
-import logger from '../config/logger.js';
+import loggerModule from '../config/logger.js'; const logger = (loggerModule as any).default || loggerModule;
 import { provenanceLedger } from '../provenance/ledger.js';
 import type {
   StrategicPlan,
@@ -52,7 +52,7 @@ import type {
   StakeholderRole,
 } from '../types/strategic-planning.js';
 
-const repoLogger = logger.child({ name: 'StrategicPlanRepo' });
+const repoLogger = typeof logger.child === 'function' ? logger.child({ name: 'StrategicPlanRepo' }) : logger;
 
 export class StrategicPlanRepo {
   constructor(private pg: Pool) {}
@@ -67,7 +67,7 @@ export class StrategicPlanRepo {
   ): Promise<StrategicPlan> {
     const id = uuidv4();
 
-    const { rows } = await this.pg.query(
+    const queryRes = await this.pg.query(
       `INSERT INTO strategic_plans (
         id, tenant_id, investigation_id, name, description, priority,
         time_horizon, start_date, end_date, assumptions, constraints,
@@ -91,6 +91,7 @@ export class StrategicPlanRepo {
         userId,
       ],
     );
+    const rows = queryRes?.rows || [];
 
     const plan = this.mapPlanRow(rows[0]);
 
@@ -201,12 +202,13 @@ export class StrategicPlanRepo {
 
     updateFields.push(`version = version + 1`);
 
-    const { rows } = await this.pg.query(
+    const queryRes = await this.pg.query(
       `UPDATE strategic_plans SET ${updateFields.join(', ')}
        WHERE id = $1
        RETURNING *`,
       params,
     );
+    const rows = (queryRes as any)?.rows || [];
 
     if (!rows[0]) return null;
 
@@ -236,10 +238,11 @@ export class StrategicPlanRepo {
     try {
       await client.query('BEGIN');
 
-      const { rows } = await client.query(
+      const queryRes = await client.query(
         `DELETE FROM strategic_plans WHERE id = $1 RETURNING tenant_id`,
         [id],
       );
+      const rows = (queryRes as any)?.rows || [];
 
       await client.query('COMMIT');
 
@@ -281,7 +284,8 @@ export class StrategicPlanRepo {
       params.push(tenantId);
     }
 
-    const { rows } = await this.pg.query(query, params);
+    const queryRes = await this.pg.query(query, params);
+    const rows = (queryRes as any)?.rows || [];
     if (!rows[0]) return null;
 
     const plan = this.mapPlanRow(rows[0]);
@@ -355,13 +359,14 @@ export class StrategicPlanRepo {
     const total = parseInt(countResult.rows[0].count, 10);
 
     params.push(Math.min(limit, 100), offset);
-    const { rows } = await this.pg.query(
+    const queryRes = await this.pg.query(
       `SELECT * FROM strategic_plans
        WHERE ${whereClause}
        ORDER BY created_at DESC
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
       params,
     );
+    const rows = (queryRes as any)?.rows || [];
 
     const plans = rows.map((row: any) => this.mapPlanRow(row));
 
@@ -382,12 +387,12 @@ export class StrategicPlanRepo {
       params.push(tenantId);
     }
 
-    const { rows } = await this.pg.query(query, params);
-    const plansMap = new Map(
-      rows.map((row: any) => [row.id, this.mapPlanRow(row)]),
-    );
+    const queryRes = await this.pg.query(query, params);
+    const rows = (queryRes as any)?.rows || [];
 
-    return ids.map((id) => plansMap.get(id) || null);
+    const planMap = new Map(rows.map((row: any) => [row.id, this.mapPlanRow(row)]));
+
+    return ids.map((id) => planMap.get(id) || null);
   }
 
   // ============================================================================
@@ -400,37 +405,27 @@ export class StrategicPlanRepo {
   ): Promise<StrategicObjective> {
     const id = uuidv4();
 
-    const { rows } = await this.pg.query(
+    const queryRes = await this.pg.query(
       `INSERT INTO strategic_objectives (
-        id, plan_id, name, description, priority, target_value, unit,
-        start_date, target_date, aligned_intelligence_priorities,
-        success_criteria, created_by
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        id, plan_id, name, description, status, target_value,
+        current_value, unit, due_date, owner, metadata
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING *`,
       [
         id,
         input.planId,
         input.name,
         input.description,
-        input.priority,
+        input.status || 'NOT_STARTED',
         input.targetValue,
+        input.currentValue || 0,
         input.unit,
-        input.startDate,
-        input.targetDate,
-        input.alignedIntelligencePriorities || [],
-        input.successCriteria || [],
+        input.dueDate,
         userId,
+        input.metadata || {},
       ],
     );
-
-    await this.recordActivity(
-      input.planId,
-      'objective',
-      id,
-      'CREATED',
-      userId,
-      { name: input.name },
-    );
+    const rows = (queryRes as any)?.rows || [];
 
     return this.mapObjectiveRow(rows[0]);
   }
@@ -502,26 +497,21 @@ export class StrategicPlanRepo {
   }
 
   async getObjectivesByPlan(planId: string): Promise<StrategicObjective[]> {
-    const { rows } = await this.pg.query(
+    const queryRes = await this.pg.query(
       `SELECT * FROM strategic_objectives WHERE plan_id = $1 ORDER BY created_at ASC`,
       [planId],
     );
+    const rows = (queryRes as any)?.rows || [];
 
-    return Promise.all(
-      rows.map(async (row: any) => {
-        const objective = this.mapObjectiveRow(row);
-        objective.milestones = await this.getMilestones(objective.id, 'objective');
-        objective.keyResults = await this.getKeyResults(objective.id);
-        return objective;
-      }),
-    );
+    return rows.map((row: any) => this.mapObjectiveRow(row));
   }
 
   async deleteObjective(id: string, userId: string): Promise<boolean> {
-    const { rows } = await this.pg.query(
+    const queryRes = await this.pg.query(
       `DELETE FROM strategic_objectives WHERE id = $1 RETURNING plan_id`,
       [id],
     );
+    const rows = (queryRes as any)?.rows || [];
 
     if (rows.length > 0) {
       await this.recordActivity(
@@ -554,7 +544,7 @@ export class StrategicPlanRepo {
   ): Promise<KeyResult> {
     const id = uuidv4();
 
-    const { rows } = await this.pg.query(
+    const queryRes = await this.pg.query(
       `INSERT INTO strategic_key_results (
         id, objective_id, description, target_value, unit, weight, due_date
       ) VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -569,15 +559,17 @@ export class StrategicPlanRepo {
         input.dueDate,
       ],
     );
+    const rows = (queryRes as any)?.rows || [];
 
     return this.mapKeyResultRow(rows[0]);
   }
 
   async getKeyResults(objectiveId: string): Promise<KeyResult[]> {
-    const { rows } = await this.pg.query(
+    const queryRes = await this.pg.query(
       `SELECT * FROM strategic_key_results WHERE objective_id = $1 ORDER BY due_date ASC`,
       [objectiveId],
     );
+    const rows = (queryRes as any)?.rows || [];
 
     return rows.map((row: any) => this.mapKeyResultRow(row));
   }
@@ -587,13 +579,14 @@ export class StrategicPlanRepo {
     currentValue: number,
     status?: ObjectiveStatus,
   ): Promise<KeyResult | null> {
-    const { rows } = await this.pg.query(
+    const queryRes = await this.pg.query(
       `UPDATE strategic_key_results
        SET current_value = $2, status = COALESCE($3, status)
        WHERE id = $1
        RETURNING *`,
       [id, currentValue, status || null],
     );
+    const rows = (queryRes as any)?.rows || [];
 
     return rows[0] ? this.mapKeyResultRow(rows[0]) : null;
   }
@@ -608,7 +601,7 @@ export class StrategicPlanRepo {
   ): Promise<Initiative> {
     const id = uuidv4();
 
-    const { rows } = await this.pg.query(
+    const queryRes = await this.pg.query(
       `INSERT INTO strategic_initiatives (
         id, plan_id, objective_ids, name, description, type, priority,
         start_date, end_date, budget, assigned_to, created_by
@@ -629,6 +622,7 @@ export class StrategicPlanRepo {
         userId,
       ],
     );
+    const rows = (queryRes as any)?.rows || [];
 
     await this.recordActivity(
       input.planId,
@@ -670,12 +664,13 @@ export class StrategicPlanRepo {
       return this.findInitiativeById(id);
     }
 
-    const { rows } = await this.pg.query(
+    const queryRes = await this.pg.query(
       `UPDATE strategic_initiatives SET ${updateFields.join(', ')}
        WHERE id = $1
        RETURNING *`,
       params,
     );
+    const rows = (queryRes as any)?.rows || [];
 
     if (!rows[0]) return null;
 
@@ -694,10 +689,11 @@ export class StrategicPlanRepo {
   }
 
   async findInitiativeById(id: string): Promise<Initiative | null> {
-    const { rows } = await this.pg.query(
+    const queryRes = await this.pg.query(
       `SELECT * FROM strategic_initiatives WHERE id = $1`,
       [id],
     );
+    const rows = (queryRes as any)?.rows || [];
 
     if (!rows[0]) return null;
 

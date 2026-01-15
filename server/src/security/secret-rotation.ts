@@ -482,8 +482,8 @@ export class SecretRotationManager extends EventEmitter {
 
     const versionKeys = await this.redis.keys(`${id}:value:*`);
     const versions = versionKeys
-      .map(k => parseInt(k.split(':').pop() || '0'))
-      .sort((a, b) => b - a);
+      .map((key: string) => parseInt(key.split(':').pop() || '0', 10))
+      .sort((a: number, b: number) => b - a);
 
     // Keep only maxVersionsRetained versions
     const versionsToDelete = versions.slice(this.config.maxVersionsRetained);

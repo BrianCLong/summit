@@ -3,7 +3,7 @@ import { MCPOrchestrator, WorkflowDefinition, WorkflowRecipes } from '../orchest
 
 // Mock MCP client
 const mockClient = {
-  executeTool: jest.fn(),
+  executeTool: jest.fn() as jest.Mock,
 };
 
 describe('MCPOrchestrator', () => {
@@ -31,7 +31,7 @@ describe('MCPOrchestrator', () => {
       expect(workflows[0].id).toBe('test-workflow');
     });
 
-    it('rejects circular dependencies', () => {
+    it('rejects circular dependencies on execution', async () => {
       const workflow: WorkflowDefinition = {
         id: 'circular',
         name: 'Circular',
@@ -41,13 +41,16 @@ describe('MCPOrchestrator', () => {
         ],
       };
 
-      expect(() => orchestrator.registerWorkflow(workflow)).toThrow('Circular');
+      orchestrator.registerWorkflow(workflow);
+      await expect(orchestrator.executeWorkflow('circular')).rejects.toThrow(
+        'Circular',
+      );
     });
   });
 
   describe('workflow execution', () => {
     it('executes steps in dependency order', async () => {
-      mockClient.executeTool.mockResolvedValue({ result: 'ok' });
+      mockClient.executeTool.mockImplementation(async () => ({ result: 'ok' }));
 
       const workflow: WorkflowDefinition = {
         id: 'ordered',
@@ -68,7 +71,7 @@ describe('MCPOrchestrator', () => {
     });
 
     it('provides self-evaluation on completion', async () => {
-      mockClient.executeTool.mockResolvedValue({ data: 'test' });
+      mockClient.executeTool.mockImplementation(async () => ({ data: 'test' }));
 
       const workflow: WorkflowDefinition = {
         id: 'eval-test',
@@ -86,7 +89,7 @@ describe('MCPOrchestrator', () => {
     });
 
     it('passes blackboard context to dynamic args', async () => {
-      mockClient.executeTool.mockImplementation((_s, _t, args) => {
+      mockClient.executeTool.mockImplementation((_s: any, _t: any, args: any) => {
         return Promise.resolve(args);
       });
 
@@ -113,7 +116,7 @@ describe('MCPOrchestrator', () => {
     });
 
     it('skips steps when condition returns false', async () => {
-      mockClient.executeTool.mockResolvedValue({});
+      mockClient.executeTool.mockImplementation(async () => ({}));
 
       const workflow: WorkflowDefinition = {
         id: 'conditional',

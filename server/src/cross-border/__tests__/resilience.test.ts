@@ -168,7 +168,7 @@ describe('CircuitBreaker', () => {
       });
 
       const events: Array<{ from: string; to: string }> = [];
-      cb.on('stateChange', (e) => events.push(e));
+      cb.on('stateChange', (e: { from: string; to: string }) => events.push(e));
 
       // Trip circuit
       await expect(cb.execute(async () => { throw new Error('fail'); })).rejects.toThrow();

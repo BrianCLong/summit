@@ -1,0 +1,53 @@
+{
+  "issue_number": 613,
+  "title": "chore(deps-dev): bump @testing-library/jest-dom from 5.17.0 to 6.7.0 in /client",
+  "url": "https://github.com/BrianCLong/summit/pull/613",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9102204147,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic8w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/javascript",
+      "name": "javascript",
+      "color": "168700",
+      "default": false,
+      "description": "Pull requests that update javascript code"
+    }
+  ],
+  "updatedAt": "2025-08-18T14:25:11Z",
+  "createdAt": "2025-08-18T14:24:59Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12296,
+        "url": "https://github.com/BrianCLong/summit/pull/12296",
+        "mergedAt": "2025-11-25T20:34:22Z",
+        "title": "Bump body-parser from 2.2.0 to 2.2.1 in /conductor-ui/backend"
+      },
+      {
+        "number": 13185,
+        "url": "https://github.com/BrianCLong/summit/pull/13185",
+        "mergedAt": "2025-12-17T05:27:53Z",
+        "title": "Add STIX 2.1 bundle exporter with secure sharing"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

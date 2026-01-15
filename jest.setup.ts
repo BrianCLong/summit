@@ -1,6 +1,34 @@
 import '@testing-library/jest-dom';
 import 'jest-extended';
 
+// ============================================================================
+// TEST RUNTIME DETERMINISM
+// Ensures tests produce consistent results across OS/timezone/locale
+// ============================================================================
+
+// Force UTC timezone for all date operations
+if (typeof process !== 'undefined') {
+  process.env.TZ = 'UTC';
+}
+
+// Deterministic locale for string comparisons and formatting
+if (typeof Intl !== 'undefined') {
+  // Store original for potential restoration
+  const OriginalDateTimeFormat = Intl.DateTimeFormat;
+  const OriginalNumberFormat = Intl.NumberFormat;
+
+  // Patch DateTimeFormat to default to en-US/UTC for consistency
+  (Intl as typeof Intl).DateTimeFormat = function(locales?: string | string[], options?: Intl.DateTimeFormatOptions) {
+    const defaultOptions: Intl.DateTimeFormatOptions = {
+      timeZone: 'UTC',
+      ...options,
+    };
+    return new OriginalDateTimeFormat(locales || 'en-US', defaultOptions);
+  } as typeof Intl.DateTimeFormat;
+  Object.setPrototypeOf(Intl.DateTimeFormat, OriginalDateTimeFormat);
+  (Intl.DateTimeFormat as typeof Intl.DateTimeFormat).supportedLocalesOf = OriginalDateTimeFormat.supportedLocalesOf;
+}
+
 // Minimal shims for jsdom-based suites that expect browser-ish globals
 const globalObj = globalThis || global || window;
 

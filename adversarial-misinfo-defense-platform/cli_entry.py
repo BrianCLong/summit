@@ -166,7 +166,7 @@ def run_detection(args: argparse.Namespace, platform: dict) -> int:
         print("\nDetection Results:")
         print("=" * 50)
         for i, result in enumerate(results):
-            print(f"\nResult {i+1}:")
+            print(f"\nResult {i + 1}:")
             print(f"  Misinfo Score: {result.get('misinfo_score', 0.0):.3f}")
             print(f"  Confidence: {result.get('confidence', 0.0):.3f}")
             print(
@@ -177,7 +177,7 @@ def run_detection(args: argparse.Namespace, platform: dict) -> int:
         return 0
 
     except Exception as e:
-        logger.error(f"Error during detection: {str(e)}", exc_info=True)
+        logger.error(f"Error during detection: {e!s}", exc_info=True)
         return 1
 
 
@@ -205,7 +205,7 @@ def run_validation(args: argparse.Namespace) -> int:
         return 0
 
     except Exception as e:
-        logger.error(f"Error during validation: {str(e)}", exc_info=True)
+        logger.error(f"Error during validation: {e!s}", exc_info=True)
         return 1
 
 
@@ -248,7 +248,7 @@ def run_training(args: argparse.Namespace, platform: dict) -> int:
         return 0
 
     except Exception as e:
-        logger.error(f"Error during training: {str(e)}", exc_info=True)
+        logger.error(f"Error during training: {e!s}", exc_info=True)
         return 1
 
 
@@ -296,7 +296,7 @@ def run_exercise(args: argparse.Namespace) -> int:
         return 0
 
     except Exception as e:
-        logger.error(f"Error during exercise management: {str(e)}", exc_info=True)
+        logger.error(f"Error during exercise management: {e!s}", exc_info=True)
         return 1
 
 
@@ -340,7 +340,7 @@ def run_evolution(args: argparse.Namespace, platform: dict) -> int:
         return 0
 
     except Exception as e:
-        logger.error(f"Error during evolution: {str(e)}", exc_info=True)
+        logger.error(f"Error during evolution: {e!s}", exc_info=True)
         return 1
 
 

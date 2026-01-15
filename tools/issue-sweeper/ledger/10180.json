@@ -1,0 +1,76 @@
+{
+  "issue_number": 10180,
+  "title": "ci(release): strict tag verification for release manifest",
+  "url": "https://github.com/BrianCLong/summit/pull/10180",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9107968384,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRgA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/release",
+      "name": "release",
+      "color": "C5DEF5",
+      "default": false,
+      "description": "Release Train"
+    },
+    {
+      "id": 9278618962,
+      "node_id": "LA_kwDOPaNncM8AAAACKQx9Ug",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/risk:low",
+      "name": "risk:low",
+      "color": "BFDADC",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9425051068,
+      "node_id": "LA_kwDOPaNncM8AAAACMcbdvA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/comet:in-progress",
+      "name": "comet:in-progress",
+      "color": "A63AE9",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9425056273,
+      "node_id": "LA_kwDOPaNncM8AAAACMcbyEQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/infra/ci",
+      "name": "infra/ci",
+      "color": "8F4CD3",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9456882017,
+      "node_id": "LA_kwDOPaNncM8AAAACM6yRYQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/needs-owner-review",
+      "name": "needs-owner-review",
+      "color": "D93F0B",
+      "default": false,
+      "description": "High-touch PR awaiting owner confirmation"
+    }
+  ],
+  "updatedAt": "2025-10-14T06:20:35Z",
+  "createdAt": "2025-10-08T14:37:18Z",
+  "classification": "security",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

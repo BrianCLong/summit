@@ -1,0 +1,76 @@
+{
+  "version": "1.0",
+  "description": "Governance audit log",
+  "created_at": "2026-01-08T20:51:45Z",
+  "entries": [
+    {
+      "id": "0bc49599ec0569c8",
+      "timestamp": "2026-01-08T21:47:44Z",
+      "event_type": "gate",
+      "status": "success",
+      "message": "Governance compliance achieved: COMPLIANT (100%)",
+      "actor": "claude-code",
+      "governance_hash": "ab8b3bb2588620c98e3a6e1ded76ac43a8d7eee8fe5a29d14f612e72f1ec64f8",
+      "git_sha": "9ed06ffd41937de92865e0f90079f69dd5db84e7",
+      "run_id": null,
+      "metadata": {
+        "score": 100,
+        "status": "COMPLIANT"
+      }
+    },
+    {
+      "id": "1320baf02bd2c611",
+      "timestamp": "2026-01-08T21:44:10Z",
+      "event_type": "validation",
+      "status": "success",
+      "message": "All 22 policies valid after schema fixes",
+      "actor": "claude-code",
+      "governance_hash": "ab8b3bb2588620c98e3a6e1ded76ac43a8d7eee8fe5a29d14f612e72f1ec64f8",
+      "git_sha": "9ed06ffd41937de92865e0f90079f69dd5db84e7",
+      "run_id": null,
+      "metadata": {}
+    },
+    {
+      "id": "5256c1ffe3850913",
+      "timestamp": "2026-01-08T20:52:30Z",
+      "event_type": "drift",
+      "status": "warning",
+      "message": "1 governance transition detected",
+      "actor": "system",
+      "governance_hash": null,
+      "git_sha": "9ed06ffd41937de92865e0f90079f69dd5db84e7",
+      "run_id": null,
+      "metadata": {
+        "transitions": 1
+      }
+    },
+    {
+      "id": "c97470e27de13745",
+      "timestamp": "2026-01-08T20:52:30Z",
+      "event_type": "validation",
+      "status": "failure",
+      "message": "2 policy validation failures",
+      "actor": "system",
+      "governance_hash": null,
+      "git_sha": "9ed06ffd41937de92865e0f90079f69dd5db84e7",
+      "run_id": null,
+      "metadata": {
+        "failed": 2,
+        "warnings": 0
+      }
+    },
+    {
+      "id": "b4e24c5d4379b706",
+      "timestamp": "2026-01-08T20:51:45Z",
+      "event_type": "manual",
+      "status": "info",
+      "message": "Audit log initialized",
+      "actor": "claude-code",
+      "governance_hash": null,
+      "git_sha": "9ed06ffd41937de92865e0f90079f69dd5db84e7",
+      "run_id": null,
+      "metadata": {}
+    }
+  ],
+  "last_updated": "2026-01-08T21:47:44Z"
+}

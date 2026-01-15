@@ -1,0 +1,248 @@
+{
+  "issue_number": 36,
+  "title": "M2: JWT auth (access+refresh) with roles (admin, analyst, viewer)",
+  "url": "https://github.com/BrianCLong/summit/issues/36",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051648,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5gA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:security",
+      "name": "area:security",
+      "color": "BFD4F2",
+      "default": false,
+      "description": "Security-related documentation/action"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:11:49Z",
+  "createdAt": "2025-08-12T00:15:39Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14754,
+        "url": "https://github.com/BrianCLong/summit/pull/14754",
+        "mergedAt": "2025-12-29T17:10:19Z",
+        "title": "docs: add 24–36 month strategic options & scenarios (MVP-3-GA)"
+      },
+      {
+        "number": 15249,
+        "url": "https://github.com/BrianCLong/summit/pull/15249",
+        "mergedAt": null,
+        "title": "Add phased roadmap for items 60-95"
+      },
+      {
+        "number": 12827,
+        "url": "https://github.com/BrianCLong/summit/pull/12827",
+        "mergedAt": "2025-12-17T21:59:26Z",
+        "title": "Sprint 36 Deliverables: Quorum, ER v1.7, Explorer 2.4, Tenant Admin"
+      },
+      {
+        "number": 15326,
+        "url": "https://github.com/BrianCLong/summit/pull/15326",
+        "mergedAt": null,
+        "title": "Add redteam harness module and scenarios"
+      },
+      {
+        "number": 14683,
+        "url": "https://github.com/BrianCLong/summit/pull/14683",
+        "mergedAt": "2025-12-27T20:21:48Z",
+        "title": "docs: record staged regression canary drill and refresh roadmap timestamp"
+      },
+      {
+        "number": 14378,
+        "url": "https://github.com/BrianCLong/summit/pull/14378",
+        "mergedAt": "2025-12-23T04:35:18Z",
+        "title": "Bump next from 14.2.32 to 14.2.35 in /october2025/companyos-switchboard"
+      },
+      {
+        "number": 13606,
+        "url": "https://github.com/BrianCLong/summit/pull/13606",
+        "mergedAt": "2025-12-15T16:29:34Z",
+        "title": "build(deps): bump next from 14.2.33 to 14.2.35 in /intelgraph-mvp/ui"
+      },
+      {
+        "number": 15334,
+        "url": "https://github.com/BrianCLong/summit/pull/15334",
+        "mergedAt": "2026-01-01T11:38:19Z",
+        "title": "Delivery of 8 Strategic Innovations"
+      },
+      {
+        "number": 13613,
+        "url": "https://github.com/BrianCLong/summit/pull/13613",
+        "mergedAt": "2025-12-16T20:47:55Z",
+        "title": "build(deps): bump next from 14.2.32 to 14.2.35 in /web/retention-dashboard"
+      },
+      {
+        "number": 13597,
+        "url": "https://github.com/BrianCLong/summit/pull/13597",
+        "mergedAt": "2025-12-13T14:31:19Z",
+        "title": "build(deps): bump next from 14.2.32 to 14.2.35 in /intelgraph-mcp/shootout-ui"
+      },
+      {
+        "number": 13596,
+        "url": "https://github.com/BrianCLong/summit/pull/13596",
+        "mergedAt": "2025-12-13T14:26:33Z",
+        "title": "build(deps): bump next from 14.2.32 to 14.2.35 in /october2025/companyos-switchboard"
+      },
+      {
+        "number": 15336,
+        "url": "https://github.com/BrianCLong/summit/pull/15336",
+        "mergedAt": "2026-01-01T11:37:54Z",
+        "title": "Establish Summit Readiness Assertion and Governance Framework"
+      },
+      {
+        "number": 1541,
+        "url": "https://github.com/BrianCLong/summit/pull/1541",
+        "mergedAt": null,
+        "title": "feat: add freshness scoring library and reranking middleware"
+      },
+      {
+        "number": 15324,
+        "url": "https://github.com/BrianCLong/summit/pull/15324",
+        "mergedAt": null,
+        "title": "Add continuity and succession safeguards"
+      },
+      {
+        "number": 13047,
+        "url": "https://github.com/BrianCLong/summit/pull/13047",
+        "mergedAt": "2025-12-17T21:27:44Z",
+        "title": "Data Governance Authority Implementation"
+      },
+      {
+        "number": 15325,
+        "url": "https://github.com/BrianCLong/summit/pull/15325",
+        "mergedAt": null,
+        "title": "feat: add doctrine spine and enforcement guardrails"
+      },
+      {
+        "number": 15349,
+        "url": "https://github.com/BrianCLong/summit/pull/15349",
+        "mergedAt": "2026-01-01T09:42:36Z",
+        "title": "feat: MVP-4 GA Security Tests and ESM Fixes"
+      },
+      {
+        "number": 12030,
+        "url": "https://github.com/BrianCLong/summit/pull/12030",
+        "mergedAt": "2025-11-20T15:29:27Z",
+        "title": "Build Advanced Computer Vision Analysis Platform"
+      },
+      {
+        "number": 9177,
+        "url": "https://github.com/BrianCLong/summit/pull/9177",
+        "mergedAt": "2025-10-02T20:47:08Z",
+        "title": "Create oct25-bulk-import.yml"
+      },
+      {
+        "number": 732,
+        "url": "https://github.com/BrianCLong/summit/pull/732",
+        "mergedAt": null,
+        "title": "chore(deps): bump opentelemetry-sdk from 1.21.0 to 1.36.0"
+      },
+      {
+        "number": 11794,
+        "url": "https://github.com/BrianCLong/summit/pull/11794",
+        "mergedAt": "2025-11-20T21:12:51Z",
+        "title": "Expand zero-cost control plane references across deployment docs"
+      },
+      {
+        "number": 1262,
+        "url": "https://github.com/BrianCLong/summit/pull/1262",
+        "mergedAt": "2025-09-19T02:22:35Z",
+        "title": "Release 2.5 dash: merge into merge/all-to-main-20250915-022508 with UI/docs from feature"
+      },
+      {
+        "number": 1086,
+        "url": "https://github.com/BrianCLong/summit/pull/1086",
+        "mergedAt": null,
+        "title": "Release 2.5.0: Grafana Release Health dashboard + Playwright smoke pack"
+      },
+      {
+        "number": 11924,
+        "url": "https://github.com/BrianCLong/summit/pull/11924",
+        "mergedAt": "2025-11-20T10:20:18Z",
+        "title": "Build Case Spaces with audit logs and access prompts"
+      },
+      {
+        "number": 1085,
+        "url": "https://github.com/BrianCLong/summit/pull/1085",
+        "mergedAt": null,
+        "title": "chore(compat): seed GraphQL N-1 and N-2\nbaselines for CI schema checks"
+      },
+      {
+        "number": 1755,
+        "url": "https://github.com/BrianCLong/summit/pull/1755",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump the eslint group with 3 updates"
+      },
+      {
+        "number": 1308,
+        "url": "https://github.com/BrianCLong/summit/pull/1308",
+        "mergedAt": "2025-09-23T06:26:26Z",
+        "title": "feat: orchestrate web llm automation workflows"
+      },
+      {
+        "number": 10114,
+        "url": "https://github.com/BrianCLong/summit/pull/10114",
+        "mergedAt": "2025-10-14T10:40:23Z",
+        "title": "feat: harden intelgraph helm security controls"
+      },
+      {
+        "number": 11891,
+        "url": "https://github.com/BrianCLong/summit/pull/11891",
+        "mergedAt": null,
+        "title": "Build Geopolitical Risk Intelligence Platform"
+      },
+      {
+        "number": 1179,
+        "url": "https://github.com/BrianCLong/summit/pull/1179",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps-dev): bump @typescript-eslint/parser from 6.21.0 to 8.42.0 in /client"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

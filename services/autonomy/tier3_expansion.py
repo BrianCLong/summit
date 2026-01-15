@@ -11,7 +11,7 @@ import sqlite3
 import threading
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -195,7 +195,7 @@ class AutonomyTier3Service:
                 },
                 max_actions_per_hour=5,
                 compensation_rate_threshold=0.005,  # 0.5% max compensation
-                last_updated=datetime.now(timezone.utc),
+                last_updated=datetime.now(UTC),
             ),
             "TENANT_005": AutonomyConfiguration(
                 tenant_id="TENANT_005",
@@ -205,7 +205,7 @@ class AutonomyTier3Service:
                 allowed_actions={ActionType.CACHE_MANAGEMENT, ActionType.ALERT_RESPONSE},
                 max_actions_per_hour=3,
                 compensation_rate_threshold=0.003,  # 0.3% max compensation
-                last_updated=datetime.now(timezone.utc),
+                last_updated=datetime.now(UTC),
             ),
         }
 
@@ -291,7 +291,7 @@ class AutonomyTier3Service:
             safety_checks=safety_checks,
             overall_safety_score=overall_safety_score,
             status="pending",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             rollback_plan=rollback_plan,
         )
 
@@ -348,7 +348,9 @@ class AutonomyTier3Service:
         status = (
             SafetyStatus.SAFE
             if safety_score > 0.8
-            else SafetyStatus.WARNING if safety_score > 0.6 else SafetyStatus.CRITICAL
+            else SafetyStatus.WARNING
+            if safety_score > 0.6
+            else SafetyStatus.CRITICAL
         )
 
         return SafetyCheck(
@@ -357,7 +359,7 @@ class AutonomyTier3Service:
             status=status,
             score=safety_score,
             reasoning=f"Estimated impact level: {total_impact:.3f}, complexity: {change_magnitude:.3f}",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             metadata={"impact_level": total_impact, "change_complexity": change_magnitude},
         )
 
@@ -391,7 +393,7 @@ class AutonomyTier3Service:
             status=status,
             score=safety_score,
             reasoning=reasoning,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             metadata={"resource_bounds_ok": resource_safe},
         )
 
@@ -421,7 +423,7 @@ class AutonomyTier3Service:
             status=status,
             score=safety_score,
             reasoning=reasoning,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             metadata={"cross_tenant_risk": action_type in cross_tenant_actions},
         )
 
@@ -456,7 +458,7 @@ class AutonomyTier3Service:
             status=status,
             score=safety_score,
             reasoning=reasoning,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             metadata={"rollbackable": rollback_safe, "irreversible_detected": has_irreversible},
         )
 
@@ -495,7 +497,7 @@ class AutonomyTier3Service:
             status=status,
             score=safety_score,
             reasoning=reasoning,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             metadata={"violations": compliance_violations},
         )
 
@@ -527,7 +529,7 @@ class AutonomyTier3Service:
             status=status,
             score=safety_score,
             reasoning=reasoning,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             metadata={"performance_impact": performance_impact},
         )
 
@@ -538,7 +540,7 @@ class AutonomyTier3Service:
         # Count actions in the last hour
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            one_hour_ago = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+            one_hour_ago = (datetime.now(UTC) - timedelta(hours=1)).isoformat()
 
             cursor.execute(
                 """
@@ -608,7 +610,7 @@ class AutonomyTier3Service:
 
             # Update action status
             action.status = "executed"
-            action.execution_time = datetime.now(timezone.utc)
+            action.execution_time = datetime.now(UTC)
 
             # Save to database
             await self._save_action(action)
@@ -660,7 +662,7 @@ class AutonomyTier3Service:
                 SELECT COUNT(*) FROM autonomous_actions
                 WHERE tenant_id = ? AND timestamp > ?
             """,
-                (tenant_id, (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()),
+                (tenant_id, (datetime.now(UTC) - timedelta(hours=24)).isoformat()),
             )
             actions_24h = cursor.fetchone()[0]
 
@@ -689,7 +691,7 @@ class AutonomyTier3Service:
         """Generate comprehensive autonomy report"""
         report = {
             "report_metadata": {
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "platform_version": "v0.3.4-mc",
                 "report_type": "autonomy_tier3",
             },
@@ -783,7 +785,7 @@ async def main():
 
     # Test action proposals
     for i, scenario in enumerate(test_scenarios):
-        print(f"\n🔄 Test {i+1}: {scenario['description']} ({scenario['tenant_id']})")
+        print(f"\n🔄 Test {i + 1}: {scenario['description']} ({scenario['tenant_id']})")
 
         try:
             action_id = await service.propose_autonomous_action(

@@ -1,7 +1,9 @@
 from __future__ import annotations
-from dataclasses import dataclass
-from ..llm import LLM
+
 import json
+from dataclasses import dataclass
+
+from ..llm import LLM
 
 
 @dataclass
@@ -41,8 +43,8 @@ Respond in JSON:
 
         # Robust JSON parsing
         try:
-            start = result.find('{')
-            end = result.rfind('}') + 1
+            start = result.find("{")
+            end = result.rfind("}") + 1
             if start != -1 and end != -1:
                 json_str = result[start:end]
                 parsed = json.loads(json_str)

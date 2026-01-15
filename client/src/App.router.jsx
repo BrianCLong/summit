@@ -112,9 +112,13 @@ const ComplianceCenter = React.lazy(() =>
 const SandboxDashboard = React.lazy(() =>
   import('./pages/Sandbox/SandboxDashboard')
 );
+const ReleaseReadinessRoute = React.lazy(() =>
+  import('./routes/ReleaseReadinessRoute')
+);
 
 import { MilitaryTech, Notifications, Extension, Cable, Key, VerifiedUser, Science } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { Security } from '@mui/icons-material';
+import { Assignment as AssignmentIcon } from '@mui/icons-material';
 
 // Demo mode components
 import DemoIndicator from './components/common/DemoIndicator';
@@ -162,6 +166,13 @@ const navigationItems = [
   { path: '/security', label: 'Security', icon: <Key />, roles: [ADMIN] },
   { path: '/compliance', label: 'Compliance', icon: <VerifiedUser />, roles: [ADMIN] },
   { path: '/sandbox', label: 'Sandbox', icon: <Science />, roles: [ADMIN] },
+  {
+    path: '/ops/release-readiness',
+    label: 'Release Readiness',
+    icon: <AssignmentIcon />,
+    roles: [ADMIN, 'OPERATOR'],
+    featureFlag: 'release-readiness-dashboard',
+  },
 ];
 
 // Connection Status Component
@@ -212,6 +223,7 @@ function NavigationDrawer({ open, onClose }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { hasRole, hasPermission } = useAuth();
+  const { getFlagValue } = useFeatureFlag();
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -222,6 +234,7 @@ function NavigationDrawer({ open, onClose }) {
     if (item.roles && !item.roles.some((r) => hasRole(r))) return false;
     if (item.permissions && !item.permissions.some((p) => hasPermission(p)))
       return false;
+    if (item.featureFlag && !getFlagValue(item.featureFlag, false)) return false;
     return true;
   });
 
@@ -786,6 +799,7 @@ function MainLayout() {
                 <Route path="/security" element={<SecurityDashboard />} />
                 <Route path="/compliance" element={<ComplianceCenter />} />
                 <Route path="/sandbox" element={<SandboxDashboard />} />
+                <Route path="/ops/release-readiness" element={<ReleaseReadinessRoute />} />
               </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Route>

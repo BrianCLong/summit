@@ -201,7 +201,7 @@ class CounterfactualSimulator:
                     "change_direction": "decrease",
                     "magnitude": 1.0,
                     "confidence": 1.0,
-                    "explanation": f"Scenario execution failed due to: {str(e)}",
+                    "explanation": f"Scenario execution failed due to: {e!s}",
                 }
             ]
 

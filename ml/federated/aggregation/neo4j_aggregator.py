@@ -8,7 +8,7 @@ learning results with support for OSINT entity relationships.
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -44,10 +44,10 @@ class FederatedGraphResult:
     round_number: int
     aggregated_entities: int
     aggregated_relationships: int
-    contributing_nodes: List[str]
-    metrics: Dict[str, float]
+    contributing_nodes: list[str]
+    metrics: dict[str, float]
     timestamp: float
-    graph_stats: Dict[str, Any] = field(default_factory=dict)
+    graph_stats: dict[str, Any] = field(default_factory=dict)
 
 
 class Neo4jAggregator:
@@ -125,10 +125,10 @@ class Neo4jAggregator:
     def store_training_round(
         self,
         round_number: int,
-        metrics: Dict[str, float],
-        contributing_nodes: List[str],
+        metrics: dict[str, float],
+        contributing_nodes: list[str],
         model_parameters_hash: str,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """Store training round results in Neo4j"""
         round_id = f"round_{round_number}_{int(time.time())}"
@@ -192,7 +192,7 @@ class Neo4jAggregator:
 
     def store_osint_entities(
         self,
-        entities: List[Dict[str, Any]],
+        entities: list[dict[str, Any]],
         source_node: str,
         round_number: int,
     ) -> int:
@@ -249,7 +249,7 @@ class Neo4jAggregator:
 
     def store_entity_relationships(
         self,
-        relationships: List[Dict[str, Any]],
+        relationships: list[dict[str, Any]],
         source_node: str,
         round_number: int,
     ) -> int:
@@ -300,7 +300,7 @@ class Neo4jAggregator:
     def aggregate_entity_embeddings(
         self,
         entity_id: str,
-        embeddings: List[Tuple[str, np.ndarray]],  # (node_id, embedding)
+        embeddings: list[tuple[str, np.ndarray]],  # (node_id, embedding)
         aggregation_method: str = "weighted_average",
     ) -> np.ndarray:
         """Aggregate embeddings for an entity from multiple nodes"""
@@ -343,7 +343,7 @@ class Neo4jAggregator:
         self,
         entity_id: str,
         embedding: np.ndarray,
-        sources: List[Tuple[str, np.ndarray]],
+        sources: list[tuple[str, np.ndarray]],
     ) -> None:
         """Store entity embedding in Neo4j"""
         with self._driver.session(database=self.config.database) as session:
@@ -362,7 +362,7 @@ class Neo4jAggregator:
     def get_training_lineage(
         self,
         round_number: int,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Get training lineage for a round"""
         if not self._connected:
             return []
@@ -382,17 +382,19 @@ class Neo4jAggregator:
 
             lineage = []
             for record in records:
-                lineage.append({
-                    "round": dict(record["r"]),
-                    "ancestors": [dict(a) for a in record["ancestors"]],
-                })
+                lineage.append(
+                    {
+                        "round": dict(record["r"]),
+                        "ancestors": [dict(a) for a in record["ancestors"]],
+                    }
+                )
 
             return lineage
 
     def get_node_contributions(
         self,
         node_id: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get contribution summary for a federated node"""
         if not self._connected:
             return {}
@@ -422,7 +424,7 @@ class Neo4jAggregator:
                 "entities_discovered": record["entities_discovered"],
             }
 
-    def get_federated_graph_stats(self) -> Dict[str, Any]:
+    def get_federated_graph_stats(self) -> dict[str, Any]:
         """Get statistics about the federated learning graph"""
         if not self._connected:
             return {}
@@ -466,7 +468,7 @@ class Neo4jAggregator:
         self,
         embedding: np.ndarray,
         limit: int = 10,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Query entities similar to given embedding"""
         if not self._connected:
             return []

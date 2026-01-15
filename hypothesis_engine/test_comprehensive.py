@@ -74,7 +74,7 @@ def test_hypothesis_generation():
 
         # Validate hypothesis structure
         for i, hypothesis in enumerate(hypotheses[:3]):  # Test first 3 hypotheses
-            logger.info(f"   Hypothesis {i+1}: {hypothesis.title}")
+            logger.info(f"   Hypothesis {i + 1}: {hypothesis.title}")
             logger.info(f"     Type: {hypothesis.type}")
             logger.info(f"     Confidence: {hypothesis.confidence:.2f}")
             logger.info(f"     Priority: {hypothesis.priority}")
@@ -185,7 +185,7 @@ def test_evidence_validation():
         if validation_results["recommendations"]:
             logger.info(f"   Recommendations: {len(validation_results['recommendations'])}")
             for i, rec in enumerate(validation_results["recommendations"][:2]):
-                logger.info(f"     {i+1}. {rec}")
+                logger.info(f"     {i + 1}. {rec}")
 
         logger.info("✅ Evidence Validation Framework test completed successfully")
         return True
@@ -283,7 +283,7 @@ def test_counterfactual_simulation():
         # Show some outcomes
         if executed_scenario.outcomes:
             for i, outcome in enumerate(executed_scenario.outcomes[:3]):
-                logger.info(f"   Outcome {i+1}: {outcome.metric}")
+                logger.info(f"   Outcome {i + 1}: {outcome.metric}")
                 logger.info(f"     Baseline: {outcome.baseline_value}")
                 logger.info(f"     Predicted: {outcome.predicted_value}")
                 logger.info(f"     Change: {outcome.change_direction} ({outcome.magnitude:.2f})")
@@ -324,7 +324,7 @@ def test_counterfactual_simulation():
         if comparison["recommendations"]:
             logger.info(f"   Recommendations: {len(comparison['recommendations'])}")
             for i, rec in enumerate(comparison["recommendations"][:2]):
-                logger.info(f"     {i+1}. {rec}")
+                logger.info(f"     {i + 1}. {rec}")
 
         logger.info("✅ Counterfactual Simulation Engine test completed successfully")
         return True

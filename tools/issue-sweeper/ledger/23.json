@@ -1,0 +1,239 @@
+{
+  "issue_number": 23,
+  "title": "M6: Sentry integration (client & server) via env",
+  "url": "https://github.com/BrianCLong/summit/issues/23",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051648,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5gA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:security",
+      "name": "area:security",
+      "color": "BFD4F2",
+      "default": false,
+      "description": "Security-related documentation/action"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T00:10:16Z",
+  "createdAt": "2025-08-12T00:10:16Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13891,
+        "url": "https://github.com/BrianCLong/summit/pull/13891",
+        "mergedAt": "2025-12-20T03:20:39Z",
+        "title": "Epic 23: Alert Hygiene Scaffolding"
+      },
+      {
+        "number": 14759,
+        "url": "https://github.com/BrianCLong/summit/pull/14759",
+        "mergedAt": "2025-12-29T17:10:16Z",
+        "title": "docs: add sprint plan for feb 23 2026"
+      },
+      {
+        "number": 14515,
+        "url": "https://github.com/BrianCLong/summit/pull/14515",
+        "mergedAt": "2025-12-27T00:19:16Z",
+        "title": "Sprint N+23: Agent Workload SLOs & Scale Testing"
+      },
+      {
+        "number": 14573,
+        "url": "https://github.com/BrianCLong/summit/pull/14573",
+        "mergedAt": "2025-12-27T05:27:34Z",
+        "title": "chore(deps): Bump black from 23.12.0 to 24.3.0 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 12799,
+        "url": "https://github.com/BrianCLong/summit/pull/12799",
+        "mergedAt": "2025-12-04T17:42:35Z",
+        "title": "Add Sprint 23 plan for Apr 20–May 1, 2026"
+      },
+      {
+        "number": 15050,
+        "url": "https://github.com/BrianCLong/summit/pull/15050",
+        "mergedAt": null,
+        "title": "Codex-63: Schema generation & drift check"
+      },
+      {
+        "number": 13856,
+        "url": "https://github.com/BrianCLong/summit/pull/13856",
+        "mergedAt": "2025-12-20T03:24:12Z",
+        "title": "Add sprint plan for Oct 26–Nov 6 2026 enterprise platform"
+      },
+      {
+        "number": 13855,
+        "url": "https://github.com/BrianCLong/summit/pull/13855",
+        "mergedAt": "2025-12-20T03:24:16Z",
+        "title": "Add Sprint 22 trust verification sprint plan"
+      },
+      {
+        "number": 1363,
+        "url": "https://github.com/BrianCLong/summit/pull/1363",
+        "mergedAt": null,
+        "title": "Release 2025.09.23.1710"
+      },
+      {
+        "number": 15319,
+        "url": "https://github.com/BrianCLong/summit/pull/15319",
+        "mergedAt": "2026-01-01T11:38:50Z",
+        "title": "Add Summit Decision Governance Pilot Documentation"
+      },
+      {
+        "number": 13094,
+        "url": "https://github.com/BrianCLong/summit/pull/13094",
+        "mergedAt": "2025-12-02T21:21:46Z",
+        "title": "chore(deps): bump validator from 13.15.20 to 13.15.23 in /sdk/typescript"
+      },
+      {
+        "number": 15181,
+        "url": "https://github.com/BrianCLong/summit/pull/15181",
+        "mergedAt": "2025-12-31T14:21:22Z",
+        "title": "chore(deps): bump github/codeql-action from 3 to 4"
+      },
+      {
+        "number": 12271,
+        "url": "https://github.com/BrianCLong/summit/pull/12271",
+        "mergedAt": "2025-12-18T03:20:00Z",
+        "title": "Geopolitical Master Prompts Implementation"
+      },
+      {
+        "number": 12264,
+        "url": "https://github.com/BrianCLong/summit/pull/12264",
+        "mergedAt": "2025-12-18T03:22:51Z",
+        "title": "Add Geopolitical Master Prompts"
+      },
+      {
+        "number": 14634,
+        "url": "https://github.com/BrianCLong/summit/pull/14634",
+        "mergedAt": null,
+        "title": "Prompt 22: Cross-Domain Guard (CDS) - APPROVED"
+      },
+      {
+        "number": 12811,
+        "url": "https://github.com/BrianCLong/summit/pull/12811",
+        "mergedAt": "2025-12-04T17:41:54Z",
+        "title": "Add Sprint 19 plan and execution Q&A"
+      },
+      {
+        "number": 12805,
+        "url": "https://github.com/BrianCLong/summit/pull/12805",
+        "mergedAt": "2025-12-04T17:42:09Z",
+        "title": "Add Sprint 21 ecosystem & enterprise plan"
+      },
+      {
+        "number": 12237,
+        "url": "https://github.com/BrianCLong/summit/pull/12237",
+        "mergedAt": "2025-12-18T03:34:17Z",
+        "title": "Comprehensive codebase audit and issue resolution"
+      },
+      {
+        "number": 15325,
+        "url": "https://github.com/BrianCLong/summit/pull/15325",
+        "mergedAt": null,
+        "title": "feat: add doctrine spine and enforcement guardrails"
+      },
+      {
+        "number": 11848,
+        "url": "https://github.com/BrianCLong/summit/pull/11848",
+        "mergedAt": null,
+        "title": "Performance Optimization for Golden Path"
+      },
+      {
+        "number": 11955,
+        "url": "https://github.com/BrianCLong/summit/pull/11955",
+        "mergedAt": "2025-11-20T10:22:22Z",
+        "title": "Clean up legacy configuration files"
+      },
+      {
+        "number": 1346,
+        "url": "https://github.com/BrianCLong/summit/pull/1346",
+        "mergedAt": "2025-09-23T06:25:26Z",
+        "title": "Add Maestro PRD addenda with 23 patent-grade capabilities"
+      },
+      {
+        "number": 15351,
+        "url": "https://github.com/BrianCLong/summit/pull/15351",
+        "mergedAt": null,
+        "title": "Add SH-MCP provisional patent draft and prompt registration"
+      },
+      {
+        "number": 15318,
+        "url": "https://github.com/BrianCLong/summit/pull/15318",
+        "mergedAt": null,
+        "title": "Innovative Information Supply Chain: Epistemic Law Engine"
+      },
+      {
+        "number": 15255,
+        "url": "https://github.com/BrianCLong/summit/pull/15255",
+        "mergedAt": "2026-01-01T07:29:52Z",
+        "title": "feat: enforce api auth and rbac protections"
+      },
+      {
+        "number": 12100,
+        "url": "https://github.com/BrianCLong/summit/pull/12100",
+        "mergedAt": "2025-11-21T06:30:04Z",
+        "title": "Build canonical graph and entity resolution pipeline"
+      },
+      {
+        "number": 13079,
+        "url": "https://github.com/BrianCLong/summit/pull/13079",
+        "mergedAt": "2025-12-02T11:19:57Z",
+        "title": "chore(deps): bump nodemailer from 7.0.7 to 7.0.11 in /server"
+      },
+      {
+        "number": 15350,
+        "url": "https://github.com/BrianCLong/summit/pull/15350",
+        "mergedAt": null,
+        "title": "docs: add FMCP-TPCE provisional draft and intake updates"
+      },
+      {
+        "number": 15126,
+        "url": "https://github.com/BrianCLong/summit/pull/15126",
+        "mergedAt": "2025-12-30T21:31:10Z",
+        "title": "chore(deps): bump the minor-and-patch group with 4 updates"
+      },
+      {
+        "number": 15317,
+        "url": "https://github.com/BrianCLong/summit/pull/15317",
+        "mergedAt": "2026-01-01T11:38:59Z",
+        "title": "Ecosystem Entry Innovation Sprint Documentation"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

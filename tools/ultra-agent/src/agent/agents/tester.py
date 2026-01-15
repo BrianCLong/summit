@@ -1,5 +1,6 @@
 class TesterAgent:
-    def __init__(self, llm): self.llm = llm
+    def __init__(self, llm):
+        self.llm = llm
 
     async def generate_tests(self, arch: dict, code_map: dict, sys_prompt: str) -> dict:
         prompt = f"""

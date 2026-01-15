@@ -1,29 +1,29 @@
 """ETL Assistant - Interactive mapping and compliance engine."""
 
-from .schema_inference import (
-    SchemaInferenceEngine,
-    InferredSchema,
-    FieldSchema,
-    MappingSuggestion,
-    CanonicalEntity,
-    FieldType,
+from .license_client import LicenseCheckResult, LicenseClient
+from .lineage_recorder import (
+    IngestConfiguration,
+    LicenseDecision,
+    LineageRecorder,
+    MappingDecision,
+    PIIHandling,
 )
 from .pii_detector import (
-    PIIDetector,
-    PIIScanResult,
-    PIIMatch,
     PIICategory,
+    PIIDetector,
+    PIIMatch,
+    PIIScanResult,
     PIISeverity,
     RedactionStrategy,
 )
-from .lineage_recorder import (
-    LineageRecorder,
-    IngestConfiguration,
-    MappingDecision,
-    PIIHandling,
-    LicenseDecision,
+from .schema_inference import (
+    CanonicalEntity,
+    FieldSchema,
+    FieldType,
+    InferredSchema,
+    MappingSuggestion,
+    SchemaInferenceEngine,
 )
-from .license_client import LicenseClient, LicenseCheckResult
 
 __all__ = [
     # Schema inference

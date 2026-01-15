@@ -1,12 +1,13 @@
 from unittest.mock import MagicMock
+
 from app.main import app
-from fastapi.testclient import TestClient
 
 
 def test_health(client):
     resp = client.get("/health")
     assert resp.status_code == 200
     assert resp.json()["status"] == "ok"
+
 
 def test_health_detailed_in_memory(client):
     # Uses InMemoryGraph/Store from fixture, which have no health_check method
@@ -17,6 +18,7 @@ def test_health_detailed_in_memory(client):
     assert data["status"] == "ok"
     assert data["services"]["neo4j"] == "healthy"
     assert data["services"]["postgres"] == "healthy"
+
 
 def test_health_detailed_neo4j_unhealthy(client):
     # Save original state
@@ -34,6 +36,7 @@ def test_health_detailed_neo4j_unhealthy(client):
         assert data["services"]["neo4j"] == "unhealthy"
     finally:
         app.state.graph = orig_graph
+
 
 def test_health_detailed_postgres_unhealthy(client):
     # Save original state

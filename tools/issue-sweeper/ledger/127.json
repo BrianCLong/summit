@@ -1,0 +1,167 @@
+{
+  "issue_number": 127,
+  "title": "Implement AI-based Entity Extraction for Images",
+  "url": "https://github.com/BrianCLong/summit/issues/127",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    },
+    {
+      "id": 9103342705,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn8cQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/AI",
+      "name": "AI",
+      "color": "bfdadc",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103343022,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9rg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/image-processing",
+      "name": "image-processing",
+      "color": "cfd3d7",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103343056,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn90A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/mvp1",
+      "name": "mvp1",
+      "color": "0e8a16",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103361945,
+      "node_id": "LA_kwDOPaNncM8AAAACHppHmQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:core-graph",
+      "name": "area:core-graph",
+      "color": "6f42c1",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-13T09:25:11Z",
+  "createdAt": "2025-08-13T09:20:30Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1465,
+        "url": "https://github.com/BrianCLong/summit/pull/1465",
+        "mergedAt": "2025-11-20T22:29:56Z",
+        "title": "feat: add Python batching workers for feed-processor"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 10109,
+        "url": "https://github.com/BrianCLong/summit/pull/10109",
+        "mergedAt": "2025-10-14T11:52:47Z",
+        "title": "docs: add access + proof execution plan"
+      },
+      {
+        "number": 1257,
+        "url": "https://github.com/BrianCLong/summit/pull/1257",
+        "mergedAt": null,
+        "title": "chore(deps): bump pytest-asyncio from 0.21.1 to 1.2.0"
+      },
+      {
+        "number": 416,
+        "url": "https://github.com/BrianCLong/summit/pull/416",
+        "mergedAt": "2025-08-17T17:43:08Z",
+        "title": "feat(ui): explainability overlay + paths panel + a11y"
+      },
+      {
+        "number": 13186,
+        "url": "https://github.com/BrianCLong/summit/pull/13186",
+        "mergedAt": "2025-12-04T15:38:58Z",
+        "title": "Implement federated learning for distributed OSINT training"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 13164,
+        "url": "https://github.com/BrianCLong/summit/pull/13164",
+        "mergedAt": "2025-12-17T05:35:09Z",
+        "title": "Resolve merge conflicts via rebase"
+      },
+      {
+        "number": 1279,
+        "url": "https://github.com/BrianCLong/summit/pull/1279",
+        "mergedAt": null,
+        "title": "feat(ga): artifacts pack for v1.0.0"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      },
+      {
+        "number": 1338,
+        "url": "https://github.com/BrianCLong/summit/pull/1338",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/workflows"
+      },
+      {
+        "number": 1337,
+        "url": "https://github.com/BrianCLong/summit/pull/1337",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/docs"
+      },
+      {
+        "number": 1336,
+        "url": "https://github.com/BrianCLong/summit/pull/1336",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/deps"
+      },
+      {
+        "number": 1335,
+        "url": "https://github.com/BrianCLong/summit/pull/1335",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/hardening"
+      },
+      {
+        "number": 1334,
+        "url": "https://github.com/BrianCLong/summit/pull/1334",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/features"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

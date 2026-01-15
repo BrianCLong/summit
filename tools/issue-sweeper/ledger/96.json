@@ -1,0 +1,125 @@
+{
+  "issue_number": 96,
+  "title": "Create Roadmap Document for MVP and Beyond",
+  "url": "https://github.com/BrianCLong/summit/issues/96",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051495,
+      "node_id": "LA_kwDOPaNncM8AAAACHht45w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:docs",
+      "name": "type:docs",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Docs"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    },
+    {
+      "id": 9095068559,
+      "node_id": "LA_kwDOPaNncM8AAAACHhu7jw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:docs",
+      "name": "area:docs",
+      "color": "ededed",
+      "default": false,
+      "description": "Docs area"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:14:16Z",
+  "createdAt": "2025-08-12T04:40:42Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15392,
+        "url": "https://github.com/BrianCLong/summit/pull/15392",
+        "mergedAt": null,
+        "title": "Harden GA coverage and fuzz gates with deterministic turbo segmentation"
+      },
+      {
+        "number": 12679,
+        "url": "https://github.com/BrianCLong/summit/pull/12679",
+        "mergedAt": "2025-12-18T01:40:42Z",
+        "title": "Add issue plan for prompts 89-96"
+      },
+      {
+        "number": 12508,
+        "url": "https://github.com/BrianCLong/summit/pull/12508",
+        "mergedAt": "2025-12-02T18:52:46Z",
+        "title": "Create comprehensive 96-prompt engineering roadmap"
+      },
+      {
+        "number": 15353,
+        "url": "https://github.com/BrianCLong/summit/pull/15353",
+        "mergedAt": "2026-01-01T11:36:52Z",
+        "title": "Implement Comprehensive Monitoring and Observability"
+      },
+      {
+        "number": 12502,
+        "url": "https://github.com/BrianCLong/summit/pull/12502",
+        "mergedAt": "2025-12-18T02:39:41Z",
+        "title": "Deepfake detection and defense mechanisms"
+      },
+      {
+        "number": 1077,
+        "url": "https://github.com/BrianCLong/summit/pull/1077",
+        "mergedAt": "2025-08-29T20:17:32Z",
+        "title": "feat: GA-Core Integration Train - Complete Enterprise Intelligence Platform"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 717,
+        "url": "https://github.com/BrianCLong/summit/pull/717",
+        "mergedAt": null,
+        "title": "🚀 IntelGraph GA Core Release - Production Ready (CONDITIONAL GO)"
+      },
+      {
+        "number": 13042,
+        "url": "https://github.com/BrianCLong/summit/pull/13042",
+        "mergedAt": "2025-12-01T19:17:12Z",
+        "title": "chore: Finalize CI/CD consolidation and cleanup"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      },
+      {
+        "number": 1285,
+        "url": "https://github.com/BrianCLong/summit/pull/1285",
+        "mergedAt": "2025-09-20T08:06:30Z",
+        "title": "feat(release): enterprise ci/cd foundation - clean slate"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -8,7 +8,7 @@ import json
 import random
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from ..config import Settings
 from ..processor import FeedProcessor
@@ -108,7 +108,7 @@ async def run_benchmark(settings: Settings, args: argparse.Namespace) -> dict[st
         await queue.close()
 
 
-def main(argv: Optional[list[str]] = None) -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = build_argument_parser()
     args = parser.parse_args(argv)
     base_settings = Settings()

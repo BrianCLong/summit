@@ -6,10 +6,17 @@ import { randomUUID } from 'crypto';
 
 export class PricingEngine {
   private static instance: PricingEngine;
-  private pool: Pool;
+  private _pool?: Pool;
 
   private constructor() {
-    this.pool = getPostgresPool();
+    // Lazy initialization
+  }
+
+  private get pool(): Pool {
+    if (!this._pool) {
+      this._pool = getPostgresPool();
+    }
+    return this._pool;
   }
 
   public static getInstance(): PricingEngine {

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 import ForceGraph2D, { ForceGraphMethods } from 'react-force-graph-2d';
 import { useWorkspaceStore } from '../store/workspaceStore';
 
@@ -37,8 +37,22 @@ const GraphWrapper = ({ children }: GraphWrapperProps) => {
 };
 
 export const GraphPane = () => {
-  const { entities, links, selectedEntityIds, selectEntity } = useWorkspaceStore();
+  const { entities, links, selectedEntityIds, selectEntity, isSyncing, syncError, retrySync } = useWorkspaceStore();
   const graphRef = useRef<ForceGraphMethods | undefined>(undefined);
+
+  // Syncing indicator logic (only show if lag > 250ms)
+  const [showSyncing, setShowSyncing] = useState(false);
+
+  useEffect(() => {
+      let timer: NodeJS.Timeout;
+      if (isSyncing) {
+          timer = setTimeout(() => setShowSyncing(true), 250);
+      } else {
+          setShowSyncing(false);
+      }
+      return () => clearTimeout(timer);
+  }, [isSyncing]);
+
 
   // Prepare graph data
   const graphData = {
@@ -65,6 +79,28 @@ export const GraphPane = () => {
         <div className="absolute top-2 left-2 z-10 bg-slate-900/80 backdrop-blur px-3 py-1 rounded text-xs font-mono text-purple-400 border border-purple-900/50">
             NETWORK ANALYSIS
         </div>
+
+        {/* Syncing Indicator */}
+        {showSyncing && (
+            <div className="absolute top-2 right-2 z-20 bg-yellow-500/80 text-black px-2 py-1 rounded text-xs font-bold animate-pulse">
+                Syncing...
+            </div>
+        )}
+
+        {/* Error Banner */}
+        {syncError && (
+             <div className="absolute top-10 left-1/2 transform -translate-x-1/2 z-30 bg-red-900/90 border border-red-500 text-white px-4 py-3 rounded shadow-lg flex flex-col items-center gap-2">
+                 <div className="font-bold text-sm">Couldn’t refresh results</div>
+                 <div className="text-xs">Your selected time range is unchanged.</div>
+                 <button
+                    onClick={retrySync}
+                    className="bg-red-700 hover:bg-red-600 px-3 py-1 rounded text-xs font-semibold transition-colors"
+                 >
+                     Retry
+                 </button>
+             </div>
+        )}
+
       <GraphWrapper>
         {(width, height) => (
           <ForceGraph2D

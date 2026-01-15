@@ -1,0 +1,74 @@
+{
+  "issue_number": 482,
+  "title": "feat: add hybrid entity resolution pipeline",
+  "url": "https://github.com/BrianCLong/summit/pull/482",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-18T03:28:40Z",
+  "createdAt": "2025-08-17T19:08:04Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15134,
+        "url": "https://github.com/BrianCLong/summit/pull/15134",
+        "mergedAt": null,
+        "title": "chore(deps): bump actions/github-script from 7 to 8"
+      },
+      {
+        "number": 11820,
+        "url": "https://github.com/BrianCLong/summit/pull/11820",
+        "mergedAt": "2025-11-20T21:12:40Z",
+        "title": "feat: add behavioral telemetry analysis report"
+      },
+      {
+        "number": 1142,
+        "url": "https://github.com/BrianCLong/summit/pull/1142",
+        "mergedAt": null,
+        "title": "chore(deps): bump helmet from 7.2.0 to 8.1.0 in /server"
+      },
+      {
+        "number": 11877,
+        "url": "https://github.com/BrianCLong/summit/pull/11877",
+        "mergedAt": "2025-11-20T14:33:29Z",
+        "title": "Build GraphQL schema governance and validation"
+      },
+      {
+        "number": 11876,
+        "url": "https://github.com/BrianCLong/summit/pull/11876",
+        "mergedAt": "2025-11-20T14:33:36Z",
+        "title": "Wire end-to-end demo stories for two use cases"
+      },
+      {
+        "number": 10079,
+        "url": "https://github.com/BrianCLong/summit/pull/10079",
+        "mergedAt": null,
+        "title": "[P0][Delta] Fix CI failures - gitleaks, contract-tests, python deps"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

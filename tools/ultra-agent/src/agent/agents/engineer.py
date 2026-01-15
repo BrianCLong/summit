@@ -1,5 +1,6 @@
 class EngineerAgent:
-    def __init__(self, llm): self.llm = llm
+    def __init__(self, llm):
+        self.llm = llm
 
     async def implement(self, arch: dict, sys_prompt: str) -> dict:
         prompt = f"""

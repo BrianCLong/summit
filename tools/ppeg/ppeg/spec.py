@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 import json
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional
 
 try:  # pragma: no cover - optional dependency guard
     import yaml  # type: ignore
@@ -20,7 +19,7 @@ def _require(condition: bool, message: str) -> None:
         raise ValueError(message)
 
 
-def _hash_payload(payload: Dict[str, object]) -> str:
+def _hash_payload(payload: dict[str, object]) -> str:
     import hashlib
 
     canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
@@ -58,17 +57,17 @@ class SinkSpec:
 class StepSpec:
     id: str
     type: str
-    input: Optional[str] = None
-    output: Optional[str] = None
+    input: str | None = None
+    output: str | None = None
     description: str = ""
-    query: Optional[str] = None
-    code: Optional[str] = None
-    sink: Optional[str] = None
-    parameters: Dict[str, object] = field(default_factory=dict)
+    query: str | None = None
+    code: str | None = None
+    sink: str | None = None
+    parameters: dict[str, object] = field(default_factory=dict)
 
     @property
-    def canonical_payload(self) -> Dict[str, object]:
-        payload: Dict[str, object] = {
+    def canonical_payload(self) -> dict[str, object]:
+        payload: dict[str, object] = {
             "id": self.id,
             "type": self.type,
             "input": self.input,
@@ -93,9 +92,9 @@ class PipelineSpec:
     name: str
     policy_version: str
     description: str
-    sources: Dict[str, SourceSpec]
-    sinks: Dict[str, SinkSpec]
-    steps: List[StepSpec]
+    sources: dict[str, SourceSpec]
+    sinks: dict[str, SinkSpec]
+    steps: list[StepSpec]
 
     def validate(self) -> None:
         _require(self.steps, "The specification must declare at least one step.")
@@ -151,7 +150,7 @@ class SpecLoader:
 
         sources_raw = raw.get("sources") or {}
         _require(isinstance(sources_raw, dict), "'sources' must be a mapping.")
-        sources: Dict[str, SourceSpec] = {}
+        sources: dict[str, SourceSpec] = {}
         for name_key, payload in sources_raw.items():
             _require(isinstance(payload, dict), f"Source '{name_key}' must be a mapping.")
             path_value = payload.get("path")
@@ -167,7 +166,7 @@ class SpecLoader:
 
         sinks_raw = raw.get("sinks") or {}
         _require(isinstance(sinks_raw, dict), "'sinks' must be a mapping.")
-        sinks: Dict[str, SinkSpec] = {}
+        sinks: dict[str, SinkSpec] = {}
         for name_key, payload in sinks_raw.items():
             _require(isinstance(payload, dict), f"Sink '{name_key}' must be a mapping.")
             path_value = payload.get("path")
@@ -183,7 +182,7 @@ class SpecLoader:
 
         steps_raw = raw.get("steps") or []
         _require(isinstance(steps_raw, list), "'steps' must be a list.")
-        steps: List[StepSpec] = []
+        steps: list[StepSpec] = []
         for idx, payload in enumerate(steps_raw):
             _require(isinstance(payload, dict), f"Step #{idx + 1} must be a mapping.")
             step = StepSpec(

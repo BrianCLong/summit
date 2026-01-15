@@ -8,10 +8,8 @@ from dataclasses import asdict
 from pathlib import Path
 from string import Template
 from textwrap import indent
-from typing import Dict, List
 
 from .spec import LoadedSpec, PipelineSpec, SinkSpec, SourceSpec, StepSpec
-
 
 PIPELINE_TEMPLATE = Template('''"""Auto-generated pipeline with provenance instrumentation."""
 
@@ -281,13 +279,13 @@ class PipelineGenerator:
             }
             for name, sink in self.pipeline.sinks.items()
         }
-        step_registry: Dict[str, Dict[str, object]] = {}
-        step_order: List[str] = []
-        python_functions: List[str] = []
+        step_registry: dict[str, dict[str, object]] = {}
+        step_order: list[str] = []
+        python_functions: list[str] = []
 
         for step in self.pipeline.steps:
             step_order.append(step.id)
-            payload: Dict[str, object] = {
+            payload: dict[str, object] = {
                 "id": step.id,
                 "type": step.type,
                 "hash": step.step_hash,
@@ -321,9 +319,11 @@ class PipelineGenerator:
 
     def _render_python_step(self, name: str, code: str) -> str:
         body = code.rstrip() + "\n"
-        return f"def {name}(rows: Iterable[Dict[str, Any]], context: Dict[str, Any]):\n" + indent(body, "    ")
+        return f"def {name}(rows: Iterable[Dict[str, Any]], context: Dict[str, Any]):\n" + indent(
+            body, "    "
+        )
 
-    def _step_manifest(self, step: StepSpec) -> Dict[str, object]:
+    def _step_manifest(self, step: StepSpec) -> dict[str, object]:
         return {
             "id": step.id,
             "type": step.type,
@@ -347,14 +347,14 @@ class PipelineGenerator:
         return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
-def _source_manifest(source: SourceSpec) -> Dict[str, object]:
+def _source_manifest(source: SourceSpec) -> dict[str, object]:
     data = asdict(source)
     data["step_hash"] = source.step_hash
     data["path"] = str(source.path)
     return data
 
 
-def _sink_manifest(sink: SinkSpec) -> Dict[str, object]:
+def _sink_manifest(sink: SinkSpec) -> dict[str, object]:
     data = asdict(sink)
     data["path"] = str(sink.path)
     return data

@@ -12,9 +12,9 @@ from __future__ import annotations
 import logging
 import re
 import time
-from datetime import datetime, timezone
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -466,9 +466,7 @@ class ChaosRunner:
         metrics["objectives_met"] = bool(metrics["rto_met"] and metrics["rpo_met"])
         return metrics
 
-    def _extract_objective_value(
-        self, experiment: ChaosExperimentSpec, key: str
-    ) -> float | None:
+    def _extract_objective_value(self, experiment: ChaosExperimentSpec, key: str) -> float | None:
         for criterion in experiment.success_criteria:
             if isinstance(criterion, dict) and key in criterion:
                 return self._parse_objective_threshold(str(criterion[key]))
@@ -542,9 +540,7 @@ def run_broker_kill_chaos_test(
     results = []
     for broker in target_brokers:
         start = time.time()
-        result = chaos_hooks.inject_broker_kill_hook(
-            broker, namespace=namespace, dry_run=dry_run
-        )
+        result = chaos_hooks.inject_broker_kill_hook(broker, namespace=namespace, dry_run=dry_run)
         finished = time.time()
         result.metadata.update(
             {
@@ -585,9 +581,9 @@ def simulate_pitr_recovery(
         except ValueError:
             parsed_timestamp = None
     if parsed_timestamp and parsed_timestamp.tzinfo is None:
-        parsed_timestamp = parsed_timestamp.replace(tzinfo=timezone.utc)
+        parsed_timestamp = parsed_timestamp.replace(tzinfo=UTC)
 
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     rpo_seconds = abs((now - parsed_timestamp).total_seconds()) if parsed_timestamp else checksum
 
     meets_rto = recovery_time_seconds <= rto_objective_seconds
@@ -644,12 +640,12 @@ def simulate_cross_region_failover(
 
 
 __all__ = [
-    "ChaosRunner",
     "ChaosExperimentResult",
     "ChaosExperimentSpec",
+    "ChaosRunner",
     "ChaosSuite",
-    "run_pod_kill_chaos_test",
     "run_broker_kill_chaos_test",
-    "simulate_pitr_recovery",
+    "run_pod_kill_chaos_test",
     "simulate_cross_region_failover",
+    "simulate_pitr_recovery",
 ]

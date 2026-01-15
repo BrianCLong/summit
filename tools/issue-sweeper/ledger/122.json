@@ -1,0 +1,191 @@
+{
+  "issue_number": 122,
+  "title": "Instance Connection Management UI",
+  "url": "https://github.com/BrianCLong/summit/issues/122",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    },
+    {
+      "id": 9103342747,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn8mw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/UX",
+      "name": "UX",
+      "color": "c5def5",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342986,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9ig",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/frontend",
+      "name": "frontend",
+      "color": "A2EEEF",
+      "default": false,
+      "description": "UI/E2E"
+    },
+    {
+      "id": 9103343056,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn90A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/mvp1",
+      "name": "mvp1",
+      "color": "0e8a16",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103362047,
+      "node_id": "LA_kwDOPaNncM8AAAACHppH_w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:federation",
+      "name": "area:federation",
+      "color": "0e8a16",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-13T09:25:18Z",
+  "createdAt": "2025-08-13T09:20:21Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 15344,
+        "url": "https://github.com/BrianCLong/summit/pull/15344",
+        "mergedAt": "2026-01-01T08:46:52Z",
+        "title": "Create execution plan for Summit to GA"
+      },
+      {
+        "number": 15260,
+        "url": "https://github.com/BrianCLong/summit/pull/15260",
+        "mergedAt": "2026-01-01T07:29:44Z",
+        "title": "Ecosystem integrations and export transparency"
+      },
+      {
+        "number": 1314,
+        "url": "https://github.com/BrianCLong/summit/pull/1314",
+        "mergedAt": null,
+        "title": "docs: refresh sprint 24 plan"
+      },
+      {
+        "number": 13173,
+        "url": "https://github.com/BrianCLong/summit/pull/13173",
+        "mergedAt": "2025-12-04T15:39:21Z",
+        "title": "Harden triplet runtime with adversarial attestation moats"
+      },
+      {
+        "number": 11914,
+        "url": "https://github.com/BrianCLong/summit/pull/11914",
+        "mergedAt": "2025-11-20T10:25:00Z",
+        "title": "Consolidate Summit orchestration layer"
+      },
+      {
+        "number": 10105,
+        "url": "https://github.com/BrianCLong/summit/pull/10105",
+        "mergedAt": "2025-10-14T11:52:58Z",
+        "title": "feat: add govbrief research brief pipeline"
+      },
+      {
+        "number": 13188,
+        "url": "https://github.com/BrianCLong/summit/pull/13188",
+        "mergedAt": "2025-12-04T15:38:53Z",
+        "title": "Build cross-platform TypeScript CLI for graph queries"
+      },
+      {
+        "number": 1310,
+        "url": "https://github.com/BrianCLong/summit/pull/1310",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat: orchestrate multi-llm cooperation fabric"
+      },
+      {
+        "number": 11872,
+        "url": "https://github.com/BrianCLong/summit/pull/11872",
+        "mergedAt": "2025-11-20T14:34:03Z",
+        "title": "Build autotriage engine for issues and bugs"
+      },
+      {
+        "number": 13193,
+        "url": "https://github.com/BrianCLong/summit/pull/13193",
+        "mergedAt": "2025-12-04T15:38:38Z",
+        "title": "Build React Native mobile app with OSINT dashboard"
+      },
+      {
+        "number": 13165,
+        "url": "https://github.com/BrianCLong/summit/pull/13165",
+        "mergedAt": "2025-12-17T05:34:42Z",
+        "title": "Unified prompt governance dashboard 1"
+      },
+      {
+        "number": 11919,
+        "url": "https://github.com/BrianCLong/summit/pull/11919",
+        "mergedAt": "2025-11-20T10:05:41Z",
+        "title": "Build Advanced Data Integration and ETL Platform"
+      },
+      {
+        "number": 11894,
+        "url": "https://github.com/BrianCLong/summit/pull/11894",
+        "mergedAt": null,
+        "title": "Build Advanced Attribution and Identity Resolution Platform"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 1221,
+        "url": "https://github.com/BrianCLong/summit/pull/1221",
+        "mergedAt": null,
+        "title": "Sprint v0.5 – Guarded Rail"
+      },
+      {
+        "number": 11918,
+        "url": "https://github.com/BrianCLong/summit/pull/11918",
+        "mergedAt": "2025-11-20T10:21:01Z",
+        "title": "Build mobile apps for iOS and Android"
+      },
+      {
+        "number": 13164,
+        "url": "https://github.com/BrianCLong/summit/pull/13164",
+        "mergedAt": "2025-12-17T05:35:09Z",
+        "title": "Resolve merge conflicts via rebase"
+      },
+      {
+        "number": 1279,
+        "url": "https://github.com/BrianCLong/summit/pull/1279",
+        "mergedAt": null,
+        "title": "feat(ga): artifacts pack for v1.0.0"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

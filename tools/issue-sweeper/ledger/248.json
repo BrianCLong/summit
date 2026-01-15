@@ -1,0 +1,92 @@
+{
+  "issue_number": 248,
+  "title": "Security scanning in CI (SAST/DAST)",
+  "url": "https://github.com/BrianCLong/summit/issues/248",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9108055903,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHnXw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/devops",
+      "name": "devops",
+      "color": "d4c5f9",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108056042,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHn6g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/CI/CD",
+      "name": "CI/CD",
+      "color": "84b6eb",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-12-19T19:54:54Z",
+  "createdAt": "2025-08-14T04:54:35Z",
+  "classification": "security",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15184,
+        "url": "https://github.com/BrianCLong/summit/pull/15184",
+        "mergedAt": "2025-12-31T14:21:30Z",
+        "title": "chore(deps): bump docker/setup-buildx-action from 2 to 3"
+      },
+      {
+        "number": 15346,
+        "url": "https://github.com/BrianCLong/summit/pull/15346",
+        "mergedAt": "2026-01-01T09:53:10Z",
+        "title": "Draft patent claims for MCP inventions"
+      },
+      {
+        "number": 10081,
+        "url": "https://github.com/BrianCLong/summit/pull/10081",
+        "mergedAt": "2025-10-14T13:08:07Z",
+        "title": "feat: add explainable multi-cloud meta orchestrator"
+      },
+      {
+        "number": 1342,
+        "url": "https://github.com/BrianCLong/summit/pull/1342",
+        "mergedAt": "2025-09-23T11:03:45Z",
+        "title": "feat: extend linearx orchestration manifest"
+      },
+      {
+        "number": 11916,
+        "url": "https://github.com/BrianCLong/summit/pull/11916",
+        "mergedAt": "2025-11-20T10:21:11Z",
+        "title": "Wire CompanyOS for internal operations"
+      },
+      {
+        "number": 11893,
+        "url": "https://github.com/BrianCLong/summit/pull/11893",
+        "mergedAt": null,
+        "title": "Build Advanced Metadata Analysis Platform"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

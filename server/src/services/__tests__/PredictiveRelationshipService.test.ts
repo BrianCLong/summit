@@ -1,7 +1,5 @@
-import { jest } from '@jest/globals';
+import { jest, beforeAll } from '@jest/globals';
 
-// Create mock instances
-// Create mock instances
 const mockRun = jest.fn<any>();
 const mockClose = jest.fn<any>();
 const mockSession = jest.fn<any>().mockReturnValue({
@@ -12,40 +10,44 @@ const mockDriver = {
   session: mockSession,
 };
 
-// Mock dependencies
-jest.unstable_mockModule('../../config/database.js', () => ({
-  getNeo4jDriver: jest.fn().mockReturnValue(mockDriver),
-}));
-
 const mockEmbeddingServiceInstance = {
   generateEmbedding: jest.fn<any>(),
   cosineSimilarity: jest.fn<any>(),
 };
-
-jest.unstable_mockModule('../EmbeddingService.js', () => ({
-  default: jest.fn().mockImplementation(() => mockEmbeddingServiceInstance),
-}));
 
 const mockRelationshipServiceInstance = {
   suggestRelationshipTypes: jest.fn<any>(),
   setDriver: jest.fn<any>(),
 };
 
-// Since RelationshipService is required via createRequire, we can't easily mock it via unstable_mockModule for the require call.
-// However, since we updated PredictiveRelationshipService to accept dependencies in constructor, we can pass mocks there.
-// So we don't strictly need to mock the require if we inject the dependency.
+let PredictiveRelationshipService: typeof import('../PredictiveRelationshipService.js').PredictiveRelationshipService;
 
-// Import the class under test
-const { PredictiveRelationshipService } = await import('../PredictiveRelationshipService.js');
+beforeAll(async () => {
+  const jestAny = jest as any;
+
+  await jestAny.unstable_mockModule('../../config/database.js', () => ({
+    getNeo4jDriver: jest.fn().mockReturnValue(mockDriver),
+  }));
+
+  await jestAny.unstable_mockModule('../EmbeddingService.js', () => ({
+    default: jest.fn().mockImplementation(() => mockEmbeddingServiceInstance),
+  }));
+
+  ({ PredictiveRelationshipService } = await import('../PredictiveRelationshipService.js'));
+});
 
 describe('PredictiveRelationshipService', () => {
   let service: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSession.mockReturnValue({
+      run: mockRun,
+      close: mockClose,
+    });
     service = new PredictiveRelationshipService(
       mockEmbeddingServiceInstance as any,
-      mockRelationshipServiceInstance,
+      mockRelationshipServiceInstance as any,
       mockDriver as any
     );
   });
@@ -71,14 +73,14 @@ describe('PredictiveRelationshipService', () => {
       // 1. Fetch Source
       mockRun.mockResolvedValueOnce({
         records: [{
-          get: (key) => ({ properties: sourceProps })
+          get: (key: string) => ({ properties: sourceProps })
         }]
       });
 
       // 2. Fetch Candidates
       mockRun.mockResolvedValueOnce({
         records: [{
-          get: (key) => {
+          get: (key: string) => {
             if (key === 'target') return { properties: candidateProps };
             if (key === 'embedding') return candidateEmbedding;
             return null;
@@ -120,7 +122,7 @@ describe('PredictiveRelationshipService', () => {
       // 1. Fetch Source (no embedding)
       mockRun.mockResolvedValueOnce({
         records: [{
-          get: (key) => ({ properties: sourceProps })
+          get: (key: string) => ({ properties: sourceProps })
         }]
       });
 

@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { SuppressionService } from '../SuppressionService.js';
 import { SuppressionRule } from '../../../types/alerts.js';
 

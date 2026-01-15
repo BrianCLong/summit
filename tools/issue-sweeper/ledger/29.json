@@ -1,0 +1,239 @@
+{
+  "issue_number": 29,
+  "title": "M0: Add LICENSE, CODE_OF_CONDUCT, CONTRIBUTING, SECURITY.md",
+  "url": "https://github.com/BrianCLong/summit/issues/29",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051495,
+      "node_id": "LA_kwDOPaNncM8AAAACHht45w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:docs",
+      "name": "type:docs",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Docs"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    },
+    {
+      "id": 9095068559,
+      "node_id": "LA_kwDOPaNncM8AAAACHhu7jw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:docs",
+      "name": "area:docs",
+      "color": "ededed",
+      "default": false,
+      "description": "Docs area"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:11:24Z",
+  "createdAt": "2025-08-12T00:15:30Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14002,
+        "url": "https://github.com/BrianCLong/summit/pull/14002",
+        "mergedAt": "2025-12-19T23:08:06Z",
+        "title": "Epic 29: Developer Experience Platform"
+      },
+      {
+        "number": 15167,
+        "url": "https://github.com/BrianCLong/summit/pull/15167",
+        "mergedAt": null,
+        "title": "Add Sprint 29 reliability plan and update roadmap timestamp"
+      },
+      {
+        "number": 13293,
+        "url": "https://github.com/BrianCLong/summit/pull/13293",
+        "mergedAt": "2025-12-17T06:00:04Z",
+        "title": "Sprint 29: Quotas, Entity Resolution, and Schema Governance"
+      },
+      {
+        "number": 14463,
+        "url": "https://github.com/BrianCLong/summit/pull/14463",
+        "mergedAt": "2025-12-25T04:27:10Z",
+        "title": "docs: Add Definition of Production and Repo Map (Sprint Lock 2025-12-29)"
+      },
+      {
+        "number": 14645,
+        "url": "https://github.com/BrianCLong/summit/pull/14645",
+        "mergedAt": null,
+        "title": "[WIP] Fix linting errors in the codebase"
+      },
+      {
+        "number": 15277,
+        "url": "https://github.com/BrianCLong/summit/pull/15277",
+        "mergedAt": "2026-01-01T05:13:38Z",
+        "title": "docs: refresh SummitThreat roadmap narrative"
+      },
+      {
+        "number": 14767,
+        "url": "https://github.com/BrianCLong/summit/pull/14767",
+        "mergedAt": null,
+        "title": "Sprint 12: Ask IntelGraph v1.1, Storybuilder, and Admin Ops"
+      },
+      {
+        "number": 14378,
+        "url": "https://github.com/BrianCLong/summit/pull/14378",
+        "mergedAt": "2025-12-23T04:35:18Z",
+        "title": "Bump next from 14.2.32 to 14.2.35 in /october2025/companyos-switchboard"
+      },
+      {
+        "number": 13606,
+        "url": "https://github.com/BrianCLong/summit/pull/13606",
+        "mergedAt": "2025-12-15T16:29:34Z",
+        "title": "build(deps): bump next from 14.2.33 to 14.2.35 in /intelgraph-mvp/ui"
+      },
+      {
+        "number": 13613,
+        "url": "https://github.com/BrianCLong/summit/pull/13613",
+        "mergedAt": "2025-12-16T20:47:55Z",
+        "title": "build(deps): bump next from 14.2.32 to 14.2.35 in /web/retention-dashboard"
+      },
+      {
+        "number": 13597,
+        "url": "https://github.com/BrianCLong/summit/pull/13597",
+        "mergedAt": "2025-12-13T14:31:19Z",
+        "title": "build(deps): bump next from 14.2.32 to 14.2.35 in /intelgraph-mcp/shootout-ui"
+      },
+      {
+        "number": 13596,
+        "url": "https://github.com/BrianCLong/summit/pull/13596",
+        "mergedAt": "2025-12-13T14:26:33Z",
+        "title": "build(deps): bump next from 14.2.32 to 14.2.35 in /october2025/companyos-switchboard"
+      },
+      {
+        "number": 13635,
+        "url": "https://github.com/BrianCLong/summit/pull/13635",
+        "mergedAt": "2025-12-17T04:30:31Z",
+        "title": "build(deps): bump prismjs and react-syntax-highlighter in /client"
+      },
+      {
+        "number": 12048,
+        "url": "https://github.com/BrianCLong/summit/pull/12048",
+        "mergedAt": "2025-11-21T03:59:12Z",
+        "title": "Update and secure project dependencies"
+      },
+      {
+        "number": 13116,
+        "url": "https://github.com/BrianCLong/summit/pull/13116",
+        "mergedAt": "2025-12-03T03:29:09Z",
+        "title": "feat: Implement Multi-vector Entity Scoring Engine"
+      },
+      {
+        "number": 1269,
+        "url": "https://github.com/BrianCLong/summit/pull/1269",
+        "mergedAt": "2025-09-19T02:20:34Z",
+        "title": "chore(deps-dev): bump ts-jest from 29.4.1 to 29.4.2"
+      },
+      {
+        "number": 1327,
+        "url": "https://github.com/BrianCLong/summit/pull/1327",
+        "mergedAt": "2025-09-23T06:30:52Z",
+        "title": "chore(deps-dev): bump ts-jest from 29.4.1 to 29.4.4 in /client"
+      },
+      {
+        "number": 13112,
+        "url": "https://github.com/BrianCLong/summit/pull/13112",
+        "mergedAt": "2025-12-03T03:30:25Z",
+        "title": "Implement Narrative Drift Detection"
+      },
+      {
+        "number": 13123,
+        "url": "https://github.com/BrianCLong/summit/pull/13123",
+        "mergedAt": "2025-12-17T05:37:30Z",
+        "title": "S5 - Secret Drift Detector"
+      },
+      {
+        "number": 13053,
+        "url": "https://github.com/BrianCLong/summit/pull/13053",
+        "mergedAt": "2025-12-17T21:22:02Z",
+        "title": "Security: Fix dependency vulnerabilities and document findings"
+      },
+      {
+        "number": 14557,
+        "url": "https://github.com/BrianCLong/summit/pull/14557",
+        "mergedAt": "2025-12-27T04:15:25Z",
+        "title": "chore(deps): Bump requests from 2.31.0 to 2.32.4 in /predictive_threat_suite"
+      },
+      {
+        "number": 13127,
+        "url": "https://github.com/BrianCLong/summit/pull/13127",
+        "mergedAt": "2025-12-03T03:24:26Z",
+        "title": "feat: Add Edge Quality Scorer service"
+      },
+      {
+        "number": 12238,
+        "url": "https://github.com/BrianCLong/summit/pull/12238",
+        "mergedAt": "2025-12-18T03:34:03Z",
+        "title": "Agentic Mesh evaluation and benchmarking"
+      },
+      {
+        "number": 15129,
+        "url": "https://github.com/BrianCLong/summit/pull/15129",
+        "mergedAt": "2025-12-30T21:37:18Z",
+        "title": "chore(deps): bump config from 0.13.4 to 0.15.19"
+      },
+      {
+        "number": 13122,
+        "url": "https://github.com/BrianCLong/summit/pull/13122",
+        "mergedAt": "2025-12-03T01:30:35Z",
+        "title": "feat: Counterfactual Scenario Console Backend"
+      },
+      {
+        "number": 13471,
+        "url": "https://github.com/BrianCLong/summit/pull/13471",
+        "mergedAt": "2025-12-07T02:16:04Z",
+        "title": "deps(npm): bump express from 5.1.0 to 5.2.0"
+      },
+      {
+        "number": 10190,
+        "url": "https://github.com/BrianCLong/summit/pull/10190",
+        "mergedAt": "2025-10-14T05:04:01Z",
+        "title": "fix(ci): restore green CI baseline - pnpm setup and Neo4j password"
+      },
+      {
+        "number": 12234,
+        "url": "https://github.com/BrianCLong/summit/pull/12234",
+        "mergedAt": "2025-11-23T00:52:18Z",
+        "title": "Bump prismjs and @react-email/components in /server"
+      },
+      {
+        "number": 15317,
+        "url": "https://github.com/BrianCLong/summit/pull/15317",
+        "mergedAt": "2026-01-01T11:38:59Z",
+        "title": "Ecosystem Entry Innovation Sprint Documentation"
+      },
+      {
+        "number": 12080,
+        "url": "https://github.com/BrianCLong/summit/pull/12080",
+        "mergedAt": "2025-11-21T06:30:49Z",
+        "title": "Optimize mobile app performance and offline support"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

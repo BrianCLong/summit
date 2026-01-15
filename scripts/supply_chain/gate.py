@@ -8,13 +8,13 @@ presence of required attestations/SBOMs as part of the golden-path pipeline.
 import argparse
 import json
 import pathlib
-from typing import Iterable, Set
+from collections.abc import Iterable
 
 LICENSE_SEVERITY_ORDER = ["UNKNOWN", "LOW", "MEDIUM", "HIGH", "CRITICAL"]
 
 
-def _read_list(path: pathlib.Path) -> Set[str]:
-    entries: Set[str] = set()
+def _read_list(path: pathlib.Path) -> set[str]:
+    entries: set[str] = set()
     if not path.exists():
         return entries
     for raw in path.read_text().splitlines():
@@ -26,7 +26,7 @@ def _read_list(path: pathlib.Path) -> Set[str]:
 
 
 def _license_tokens(value: str) -> Iterable[str]:
-    separators = ["AND", "OR", "WITH", "(" ,")", "+"]
+    separators = ["AND", "OR", "WITH", "(", ")", "+"]
     token = value
     for sep in separators:
         token = token.replace(sep, " ")
@@ -34,9 +34,11 @@ def _license_tokens(value: str) -> Iterable[str]:
         yield piece.strip()
 
 
-def find_disallowed_licenses(sbom: pathlib.Path, allowlist: Set[str], overrides: Set[str]) -> Set[str]:
+def find_disallowed_licenses(
+    sbom: pathlib.Path, allowlist: set[str], overrides: set[str]
+) -> set[str]:
     content = json.loads(sbom.read_text())
-    licenses: Set[str] = set()
+    licenses: set[str] = set()
     components = content.get("components", [])
     for component in components:
         for license_info in component.get("licenses", []):
@@ -48,7 +50,7 @@ def find_disallowed_licenses(sbom: pathlib.Path, allowlist: Set[str], overrides:
                 for token in _license_tokens(str(value)):
                     if token:
                         licenses.add(token)
-    disallowed: Set[str] = set()
+    disallowed: set[str] = set()
     for lic in licenses:
         if lic in allowlist or lic in overrides:
             continue
@@ -64,11 +66,11 @@ def _severity_rank(level: str) -> int:
         return 0
 
 
-def find_blocking_cves(grype_report: pathlib.Path, allowlist: Set[str], minimum: str) -> Set[str]:
+def find_blocking_cves(grype_report: pathlib.Path, allowlist: set[str], minimum: str) -> set[str]:
     report = json.loads(grype_report.read_text())
     matches = report.get("matches", [])
     threshold = _severity_rank(minimum)
-    blocked: Set[str] = set()
+    blocked: set[str] = set()
     for match in matches:
         vuln = match.get("vulnerability") or {}
         vuln_id = vuln.get("id")
@@ -84,12 +86,24 @@ def find_blocking_cves(grype_report: pathlib.Path, allowlist: Set[str], minimum:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Golden-path supply chain gate")
-    parser.add_argument("--sbom", required=True, type=pathlib.Path, help="Path to CycloneDX SBOM JSON")
-    parser.add_argument("--grype", required=True, type=pathlib.Path, help="Path to grype JSON report")
-    parser.add_argument("--license-allowlist", required=True, type=pathlib.Path, help="Allowed SPDX licenses")
-    parser.add_argument("--license-overrides", required=True, type=pathlib.Path, help="License allowlist overrides")
-    parser.add_argument("--cve-allowlist", required=True, type=pathlib.Path, help="Allowed CVE identifiers")
-    parser.add_argument("--severity-threshold", default="HIGH", help="Minimum severity to fail on (default: HIGH)")
+    parser.add_argument(
+        "--sbom", required=True, type=pathlib.Path, help="Path to CycloneDX SBOM JSON"
+    )
+    parser.add_argument(
+        "--grype", required=True, type=pathlib.Path, help="Path to grype JSON report"
+    )
+    parser.add_argument(
+        "--license-allowlist", required=True, type=pathlib.Path, help="Allowed SPDX licenses"
+    )
+    parser.add_argument(
+        "--license-overrides", required=True, type=pathlib.Path, help="License allowlist overrides"
+    )
+    parser.add_argument(
+        "--cve-allowlist", required=True, type=pathlib.Path, help="Allowed CVE identifiers"
+    )
+    parser.add_argument(
+        "--severity-threshold", default="HIGH", help="Minimum severity to fail on (default: HIGH)"
+    )
 
     args = parser.parse_args()
 

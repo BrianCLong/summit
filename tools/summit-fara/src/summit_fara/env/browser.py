@@ -1,6 +1,6 @@
 import logging
-import os
 import random
+
 try:
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
@@ -8,6 +8,7 @@ except ImportError:
     webdriver = None
 
 log = logging.getLogger("summit-fara")
+
 
 class BrowserEnv:
     def __init__(self):
@@ -31,7 +32,7 @@ class BrowserEnv:
         """
         Captures a screenshot.
         """
-        path = f"/tmp/screenshot_{int(random.random()*1000)}.png"
+        path = f"/tmp/screenshot_{int(random.random() * 1000)}.png"
 
         if self.driver:
             try:
@@ -58,6 +59,6 @@ class BrowserEnv:
             text = params.get("text", "")
             log.debug(f"Browser: Type '{text}' at ({x}, {y})")
         elif action_type == "scroll":
-            log.debug(f"Browser: Scroll")
+            log.debug("Browser: Scroll")
         else:
             log.warning(f"Browser: Unknown action {action_type}")

@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import json
 from functools import lru_cache
-from typing import Dict
-from pydantic import Field
 
+from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
@@ -36,7 +35,7 @@ class Settings(BaseSettings):
         case_sensitive = False
 
     @property
-    def cf_costs(self) -> Dict[str, float]:
+    def cf_costs(self) -> dict[str, float]:
         return json.loads(self.cf_costs_raw)
 
 

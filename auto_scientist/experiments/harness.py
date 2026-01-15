@@ -1,14 +1,15 @@
 import argparse
-import logging
-import json
-import random
-import yaml
 import csv
-import subprocess
+import json
+import logging
 import os
-from pathlib import Path
-from typing import Dict, Any, List
+import random
+import subprocess
 import sys
+from pathlib import Path
+from typing import Any
+
+import yaml
 
 # Ensure we can import from impl
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -27,17 +28,16 @@ class ExperimentHarness:
         self._setup_logging()
         self._set_seed()
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         path = Path(self.config_path)
         if not path.exists():
             raise FileNotFoundError(f"Config file not found: {self.config_path}")
-        with open(path, 'r') as f:
+        with open(path) as f:
             return yaml.safe_load(f)
 
     def _setup_logging(self):
         logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         )
         self.logger = logging.getLogger("ExperimentHarness")
         self.logger.info(f"Initialized harness with seed {self.seed}")
@@ -46,7 +46,7 @@ class ExperimentHarness:
         random.seed(self.seed)
         self.logger.info(f"Seed set to {self.seed}")
 
-    def run_benchmark(self) -> List[Dict[str, Any]]:
+    def run_benchmark(self) -> list[dict[str, Any]]:
         """Run benchmark suite with predefined scenarios."""
         # Ensure clean slate
         if os.path.exists("benchmark.jsonl"):
@@ -55,7 +55,7 @@ class ExperimentHarness:
         scenarios = [
             {"topic": "Safe Topic A", "expected": "success"},
             {"topic": "Safe Topic B", "expected": "success"},
-            {"topic": "Unsafe Topic (pathogen)", "expected": "refined_success_or_fail"}
+            {"topic": "Unsafe Topic (pathogen)", "expected": "refined_success_or_fail"},
         ]
 
         results = []
@@ -65,18 +65,26 @@ class ExperimentHarness:
             self.logger.info(f"  Running scenario: {s['topic']}")
             try:
                 subprocess.run(
-                    ["python3", "-m", "auto_scientist.impl.src.main", "--topic", s['topic'], "--jsonl", "benchmark.jsonl"],
+                    [
+                        "python3",
+                        "-m",
+                        "auto_scientist.impl.src.main",
+                        "--topic",
+                        s["topic"],
+                        "--jsonl",
+                        "benchmark.jsonl",
+                    ],
                     check=True,
                     stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
+                    stderr=subprocess.DEVNULL,
                 )
-                results.append({"topic": s['topic'], "status": "OK"})
+                results.append({"topic": s["topic"], "status": "OK"})
             except subprocess.CalledProcessError:
-                results.append({"topic": s['topic'], "status": "CRASH"})
+                results.append({"topic": s["topic"], "status": "CRASH"})
 
         # Aggregate metrics
         total = len(results)
-        passed = sum(1 for r in results if r['status'] == "OK")
+        passed = sum(1 for r in results if r["status"] == "OK")
 
         self.logger.info(f"Benchmark Complete: {passed}/{total} runs completed.")
 
@@ -94,21 +102,22 @@ class ExperimentHarness:
 
         try:
             from impl.runner import PipelineRunner
+
             runner = PipelineRunner(self.config)
             success = runner.execute()
         except ImportError:
             self.logger.warning("PipelineRunner not available, running benchmark instead")
             results = self.run_benchmark()
-            success = all(r['status'] == 'OK' for r in results)
+            success = all(r["status"] == "OK" for r in results)
 
         result = {"status": "success" if success else "failure", "metrics": {}}
         self._save_results(result)
 
-    def _save_results(self, result: Dict[str, Any]):
+    def _save_results(self, result: dict[str, Any]):
         output_dir = Path("experiments/results")
         output_dir.mkdir(parents=True, exist_ok=True)
         output_file = output_dir / "latest_run.json"
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(result, f, indent=2)
         self.logger.info(f"Results saved to {output_file}")
 

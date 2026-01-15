@@ -1,0 +1,203 @@
+{
+  "issue_number": 61,
+  "title": "Bootstrap Basic GraphQL Schema and Resolvers",
+  "url": "https://github.com/BrianCLong/summit/issues/61",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:12:34Z",
+  "createdAt": "2025-08-12T04:39:13Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14777,
+        "url": "https://github.com/BrianCLong/summit/pull/14777",
+        "mergedAt": "2025-12-29T05:02:23Z",
+        "title": "Sprint N+61: Autonomous Operations Framework"
+      },
+      {
+        "number": 12265,
+        "url": "https://github.com/BrianCLong/summit/pull/12265",
+        "mergedAt": "2025-12-18T03:22:38Z",
+        "title": "Add Financial Warfare Prompts (61-83)"
+      },
+      {
+        "number": 15127,
+        "url": "https://github.com/BrianCLong/summit/pull/15127",
+        "mergedAt": "2025-12-30T21:20:45Z",
+        "title": "chore(deps): bump docker/setup-qemu-action from 2 to 3"
+      },
+      {
+        "number": 13047,
+        "url": "https://github.com/BrianCLong/summit/pull/13047",
+        "mergedAt": "2025-12-17T21:27:44Z",
+        "title": "Data Governance Authority Implementation"
+      },
+      {
+        "number": 15315,
+        "url": "https://github.com/BrianCLong/summit/pull/15315",
+        "mergedAt": null,
+        "title": "Initialize Pilot Design Innovation Sprint artifacts"
+      },
+      {
+        "number": 15255,
+        "url": "https://github.com/BrianCLong/summit/pull/15255",
+        "mergedAt": "2026-01-01T07:29:52Z",
+        "title": "feat: enforce api auth and rbac protections"
+      },
+      {
+        "number": 15334,
+        "url": "https://github.com/BrianCLong/summit/pull/15334",
+        "mergedAt": "2026-01-01T11:38:19Z",
+        "title": "Delivery of 8 Strategic Innovations"
+      },
+      {
+        "number": 13147,
+        "url": "https://github.com/BrianCLong/summit/pull/13147",
+        "mergedAt": "2025-12-17T05:36:38Z",
+        "title": "Add C7 Resource Leak Detector"
+      },
+      {
+        "number": 13191,
+        "url": "https://github.com/BrianCLong/summit/pull/13191",
+        "mergedAt": "2025-12-04T15:38:44Z",
+        "title": "Deploy anomaly detection for OSINT threat streams"
+      },
+      {
+        "number": 1352,
+        "url": "https://github.com/BrianCLong/summit/pull/1352",
+        "mergedAt": "2025-09-23T06:56:06Z",
+        "title": "chore(deps): bump parse-url from 6.0.5 to 8.1.0"
+      },
+      {
+        "number": 11876,
+        "url": "https://github.com/BrianCLong/summit/pull/11876",
+        "mergedAt": "2025-11-20T14:33:36Z",
+        "title": "Wire end-to-end demo stories for two use cases"
+      },
+      {
+        "number": 11916,
+        "url": "https://github.com/BrianCLong/summit/pull/11916",
+        "mergedAt": "2025-11-20T10:21:11Z",
+        "title": "Wire CompanyOS for internal operations"
+      },
+      {
+        "number": 1333,
+        "url": "https://github.com/BrianCLong/summit/pull/1333",
+        "mergedAt": "2025-09-23T06:25:39Z",
+        "title": "feat: scaffold ig-rl reinforcement learning service"
+      },
+      {
+        "number": 1204,
+        "url": "https://github.com/BrianCLong/summit/pull/1204",
+        "mergedAt": null,
+        "title": "chore(deps): bump the minor-and-patch group with 70 updates"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 11891,
+        "url": "https://github.com/BrianCLong/summit/pull/11891",
+        "mergedAt": null,
+        "title": "Build Geopolitical Risk Intelligence Platform"
+      },
+      {
+        "number": 1169,
+        "url": "https://github.com/BrianCLong/summit/pull/1169",
+        "mergedAt": null,
+        "title": "chore(deps): bump @opentelemetry/auto-instrumentations-node from 0.39.4 to 0.62.2 in /server"
+      },
+      {
+        "number": 11784,
+        "url": "https://github.com/BrianCLong/summit/pull/11784",
+        "mergedAt": "2025-10-27T10:54:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 21 updates"
+      },
+      {
+        "number": 1260,
+        "url": "https://github.com/BrianCLong/summit/pull/1260",
+        "mergedAt": null,
+        "title": "Rebrand: integrate feature/rename-summit into merge/all-to-main-20250915-022508"
+      },
+      {
+        "number": 11815,
+        "url": "https://github.com/BrianCLong/summit/pull/11815",
+        "mergedAt": "2025-11-10T13:08:11Z",
+        "title": "chore(deps): bump the js-dependencies group with 34 updates"
+      },
+      {
+        "number": 11774,
+        "url": "https://github.com/BrianCLong/summit/pull/11774",
+        "mergedAt": "2025-10-20T11:06:07Z",
+        "title": "chore(deps): bump the js-dependencies group with 144 updates"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      },
+      {
+        "number": 1284,
+        "url": "https://github.com/BrianCLong/summit/pull/1284",
+        "mergedAt": "2025-09-20T08:06:31Z",
+        "title": "feat(release): enterprise-grade repo consolidation and golden ci pipeline"
+      },
+      {
+        "number": 1285,
+        "url": "https://github.com/BrianCLong/summit/pull/1285",
+        "mergedAt": "2025-09-20T08:06:30Z",
+        "title": "feat(release): enterprise ci/cd foundation - clean slate"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

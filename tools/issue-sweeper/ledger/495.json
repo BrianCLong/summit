@@ -1,0 +1,44 @@
+{
+  "issue_number": 495,
+  "title": "feat: optimize graph rendering performance",
+  "url": "https://github.com/BrianCLong/summit/pull/495",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-17T22:36:07Z",
+  "createdAt": "2025-08-17T19:15:15Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11902,
+        "url": "https://github.com/BrianCLong/summit/pull/11902",
+        "mergedAt": "2025-11-20T10:25:44Z",
+        "title": "Build Cyber Threat Intelligence Platform"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

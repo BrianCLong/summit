@@ -9,10 +9,7 @@ import { Pool } from 'pg';
 import logger from '../utils/logger';
 import { EventEmitter } from 'events';
 import { ContentAnalyzer, AnalysisResult } from './ContentAnalyzer';
-import { createRequire } from 'module';
-
-const require = createRequire(import.meta.url);
-const eventBus = require('../workers/eventBus.js') as EventEmitter;
+import { eventBus } from '../lib/events/event-bus.js';
 
 export interface PsyOpsThread {
   id: string;

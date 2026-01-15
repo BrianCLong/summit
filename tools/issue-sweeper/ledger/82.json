@@ -1,0 +1,173 @@
+{
+  "issue_number": 82,
+  "title": "Add PWA Support for Mobile Responsiveness",
+  "url": "https://github.com/BrianCLong/summit/issues/82",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051532,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5DA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:frontend",
+      "name": "area:frontend",
+      "color": "ededed",
+      "default": false,
+      "description": "Frontend work"
+    },
+    {
+      "id": 9095918502,
+      "node_id": "LA_kwDOPaNncM8AAAACHiizpg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:enhancement",
+      "name": "type:enhancement",
+      "color": "FBCA04",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095918587,
+      "node_id": "LA_kwDOPaNncM8AAAACHiiz-w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P3",
+      "name": "priority:P3",
+      "color": "fbca04",
+      "default": false,
+      "description": "Medium"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:13:25Z",
+  "createdAt": "2025-08-12T04:40:18Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13311,
+        "url": "https://github.com/BrianCLong/summit/pull/13311",
+        "mergedAt": null,
+        "title": "deps(npm): bump @react-native/metro-config from 0.76.9 to 0.82.1"
+      },
+      {
+        "number": 12096,
+        "url": "https://github.com/BrianCLong/summit/pull/12096",
+        "mergedAt": "2025-12-20T11:53:10Z",
+        "title": "Optimize Summit deployment and infrastructure"
+      },
+      {
+        "number": 12091,
+        "url": "https://github.com/BrianCLong/summit/pull/12091",
+        "mergedAt": "2025-11-21T06:30:22Z",
+        "title": "Design multi-layer caching strategy for Summit"
+      },
+      {
+        "number": 11994,
+        "url": "https://github.com/BrianCLong/summit/pull/11994",
+        "mergedAt": null,
+        "title": "Build AutoML platform with model selection"
+      },
+      {
+        "number": 12235,
+        "url": "https://github.com/BrianCLong/summit/pull/12235",
+        "mergedAt": "2025-11-23T01:04:50Z",
+        "title": "Bump next from 14.1.0 to 14.2.32 in /web/retention-dashboard"
+      },
+      {
+        "number": 12100,
+        "url": "https://github.com/BrianCLong/summit/pull/12100",
+        "mergedAt": "2025-11-21T06:30:04Z",
+        "title": "Build canonical graph and entity resolution pipeline"
+      },
+      {
+        "number": 15254,
+        "url": "https://github.com/BrianCLong/summit/pull/15254",
+        "mergedAt": null,
+        "title": "Enforce gate readiness and reinstate GA smoke/audit checks"
+      },
+      {
+        "number": 15290,
+        "url": "https://github.com/BrianCLong/summit/pull/15290",
+        "mergedAt": "2026-01-01T05:46:03Z",
+        "title": "Add Claude Code prompt for priority work"
+      },
+      {
+        "number": 10243,
+        "url": "https://github.com/BrianCLong/summit/pull/10243",
+        "mergedAt": "2025-10-16T05:43:40Z",
+        "title": "chore(deps): bump next from 13.5.4 to 14.2.32 in /adversarial-misinfo-defense-platform/web"
+      },
+      {
+        "number": 10182,
+        "url": "https://github.com/BrianCLong/summit/pull/10182",
+        "mergedAt": "2025-10-08T17:14:20Z",
+        "title": "chore(deps): bump next from 14.2.3 to 14.2.32 in /intelgraph-mcp/shootout-ui"
+      },
+      {
+        "number": 9797,
+        "url": "https://github.com/BrianCLong/summit/pull/9797",
+        "mergedAt": "2025-10-03T03:57:04Z",
+        "title": "chore(deps): bump next from 14.2.5 to 14.2.32 in /october2025/companyos-switchboard/apps/web"
+      },
+      {
+        "number": 1308,
+        "url": "https://github.com/BrianCLong/summit/pull/1308",
+        "mergedAt": "2025-09-23T06:26:26Z",
+        "title": "feat: orchestrate web llm automation workflows"
+      },
+      {
+        "number": 1313,
+        "url": "https://github.com/BrianCLong/summit/pull/1313",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat: add workflow modeling validation suites"
+      },
+      {
+        "number": 632,
+        "url": "https://github.com/BrianCLong/summit/pull/632",
+        "mergedAt": null,
+        "title": "chore(deps): bump opencv-python from 4.8.1.78 to 4.12.0.88"
+      },
+      {
+        "number": 13165,
+        "url": "https://github.com/BrianCLong/summit/pull/13165",
+        "mergedAt": "2025-12-17T05:34:42Z",
+        "title": "Unified prompt governance dashboard 1"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 13164,
+        "url": "https://github.com/BrianCLong/summit/pull/13164",
+        "mergedAt": "2025-12-17T05:35:09Z",
+        "title": "Resolve merge conflicts via rebase"
+      },
+      {
+        "number": 1083,
+        "url": "https://github.com/BrianCLong/summit/pull/1083",
+        "mergedAt": "2025-08-31T01:16:06Z",
+        "title": "🎯 FINAL CI CONSOLIDATION - 4-Lane Excellence (68 → 4 workflows)"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

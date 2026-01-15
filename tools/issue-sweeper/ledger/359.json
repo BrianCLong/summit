@@ -1,0 +1,70 @@
+{
+  "issue_number": 359,
+  "title": "feat: implement advanced ML infrastructure with GPU acceleration and …",
+  "url": "https://github.com/BrianCLong/summit/pull/359",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-17T04:51:17Z",
+  "createdAt": "2025-08-16T22:56:35Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1182,
+        "url": "https://github.com/BrianCLong/summit/pull/1182",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group with 2 updates"
+      },
+      {
+        "number": 1290,
+        "url": "https://github.com/BrianCLong/summit/pull/1290",
+        "mergedAt": "2025-09-20T16:30:04Z",
+        "title": "Phase 7: Canary Deployment & GA Release v2025.09.19"
+      },
+      {
+        "number": 9795,
+        "url": "https://github.com/BrianCLong/summit/pull/9795",
+        "mergedAt": null,
+        "title": "Fix/bulk import lockfile sync"
+      },
+      {
+        "number": 9800,
+        "url": "https://github.com/BrianCLong/summit/pull/9800",
+        "mergedAt": null,
+        "title": "feat(monitoring): Enable error-budget monitoring and Maestro metrics export (EO-1, EO-2)"
+      },
+      {
+        "number": 9796,
+        "url": "https://github.com/BrianCLong/summit/pull/9796",
+        "mergedAt": "2025-10-03T03:51:08Z",
+        "title": "fix: sync lockfile for CI bulk import"
+      },
+      {
+        "number": 1301,
+        "url": "https://github.com/BrianCLong/summit/pull/1301",
+        "mergedAt": "2025-09-23T06:38:37Z",
+        "title": "IntelGraph salvage: total recapture → promote key artifacts"
+      },
+      {
+        "number": 1204,
+        "url": "https://github.com/BrianCLong/summit/pull/1204",
+        "mergedAt": null,
+        "title": "chore(deps): bump the minor-and-patch group with 70 updates"
+      },
+      {
+        "number": 1300,
+        "url": "https://github.com/BrianCLong/summit/pull/1300",
+        "mergedAt": "2025-09-23T06:47:22Z",
+        "title": "Total Recapture: enterprise-ready green merge to main"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

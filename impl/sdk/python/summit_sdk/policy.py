@@ -1,8 +1,9 @@
 """Policy context modeling."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 @dataclass
@@ -10,12 +11,12 @@ class PolicyContext:
     """Represents governance inputs for a request."""
 
     tenant: str
-    region: Optional[str] = None
-    purpose: Optional[str] = None
-    sensitivity: Optional[str] = None
-    overrides: Dict[str, Any] = field(default_factory=dict)
+    region: str | None = None
+    purpose: str | None = None
+    sensitivity: str | None = None
+    overrides: dict[str, Any] = field(default_factory=dict)
 
-    def merged(self, overrides: Optional[Dict[str, Any]] = None) -> "PolicyContext":
+    def merged(self, overrides: dict[str, Any] | None = None) -> PolicyContext:
         data = {
             "tenant": self.tenant,
             "region": self.region,
@@ -25,7 +26,7 @@ class PolicyContext:
         }
         return PolicyContext(**data)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "tenant": self.tenant,
             "region": self.region,
@@ -33,4 +34,3 @@ class PolicyContext:
             "sensitivity": self.sensitivity,
             "overrides": self.overrides,
         }
-

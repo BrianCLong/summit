@@ -9,6 +9,7 @@ import {
 export async function choosePool(
   est: { cpuSec?: number; gbSec?: number; egressGb?: number },
   residency?: string,
+  _tenantId?: string,
 ) {
   const pools = await listPools();
   const prices = await currentPricing();

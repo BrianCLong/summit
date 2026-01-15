@@ -224,7 +224,7 @@ def normalize_intelcraft_elements(
 __all__ = [
     "IntelCraftElement",
     "IntelCraftRelationship",
-    "integrate_intelcraft_elements",
     "build_intelcraft_graph",
+    "integrate_intelcraft_elements",
     "normalize_intelcraft_elements",
 ]

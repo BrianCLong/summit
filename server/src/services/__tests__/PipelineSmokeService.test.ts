@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { PipelineSmokeService } from '../../services/PipelineSmokeService.js';
 import { runsRepo } from '../../maestro/runs/runs-repo.js';
 
@@ -36,10 +37,12 @@ describe('PipelineSmokeService', () => {
     // Mock create
     (runsRepo.create as jest.Mock).mockResolvedValue(mockRun);
 
-    // Mock polling: queued -> running -> succeeded
-    (runsRepo.get as jest.Mock)
-      .mockResolvedValueOnce({ ...mockRun, status: 'running' })
-      .mockResolvedValueOnce({ ...mockRun, status: 'succeeded', output_data: { foo: 'bar' } });
+    // Mock polling: succeeded on first poll
+    (runsRepo.get as jest.Mock).mockResolvedValueOnce({
+      ...mockRun,
+      status: 'succeeded',
+      output_data: { foo: 'bar' },
+    });
 
     const result = await service.runSmokeTest(tenantId, 'smoke-test-pipeline', 1000);
 

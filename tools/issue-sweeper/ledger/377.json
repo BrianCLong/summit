@@ -1,0 +1,80 @@
+{
+  "issue_number": 377,
+  "title": "chore: fix eslint setup",
+  "url": "https://github.com/BrianCLong/summit/pull/377",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T16:31:38Z",
+  "createdAt": "2025-08-17T03:23:34Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 635,
+        "url": "https://github.com/BrianCLong/summit/pull/635",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump jest-watch-typeahead from 2.2.2 to 3.0.1"
+      },
+      {
+        "number": 1182,
+        "url": "https://github.com/BrianCLong/summit/pull/1182",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group with 2 updates"
+      },
+      {
+        "number": 10079,
+        "url": "https://github.com/BrianCLong/summit/pull/10079",
+        "mergedAt": null,
+        "title": "[P0][Delta] Fix CI failures - gitleaks, contract-tests, python deps"
+      },
+      {
+        "number": 13166,
+        "url": "https://github.com/BrianCLong/summit/pull/13166",
+        "mergedAt": "2025-12-04T15:39:25Z",
+        "title": "Fix Jest ESM config, update CI, and resolve conflicts"
+      },
+      {
+        "number": 13076,
+        "url": "https://github.com/BrianCLong/summit/pull/13076",
+        "mergedAt": "2025-12-03T05:15:02Z",
+        "title": "Fix Jest ESM Configuration and Test Execution"
+      },
+      {
+        "number": 13164,
+        "url": "https://github.com/BrianCLong/summit/pull/13164",
+        "mergedAt": "2025-12-17T05:35:09Z",
+        "title": "Resolve merge conflicts via rebase"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      },
+      {
+        "number": 1285,
+        "url": "https://github.com/BrianCLong/summit/pull/1285",
+        "mergedAt": "2025-09-20T08:06:30Z",
+        "title": "feat(release): enterprise ci/cd foundation - clean slate"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

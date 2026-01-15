@@ -32,7 +32,8 @@ router.post(
   async (req: Request, res: Response) => {
     if (!secret)
       return res.status(503).json({ ok: false, error: 'n8n disabled' });
-    if (allowedIps.length && !allowedIps.includes(req.ip)) {
+    const requestIp = req.ip || '';
+    if (allowedIps.length && !allowedIps.includes(requestIp)) {
       return res.status(403).json({ ok: false, error: 'ip blocked' });
     }
 

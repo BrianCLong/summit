@@ -1,5 +1,5 @@
 // Mock external services for demonstration
-const mockProcessMonitor = {
+export const mockProcessMonitor = {
   getMemoryUsage: async (pid: number): Promise<number> => {
     // Simulate memory usage in MB
     return 500 + Math.random() * 500;
@@ -10,7 +10,7 @@ const mockProcessMonitor = {
   },
 };
 
-const mockOrchestrator = {
+export const mockOrchestrator = {
   restartService: async (serviceName: string): Promise<void> => {
     console.log(`[MockOrchestrator] Restarting service ${serviceName}.`);
     // In a real implementation, this would interact with Kubernetes, Docker, or a process manager.

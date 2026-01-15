@@ -1,0 +1,101 @@
+{
+  "issue_number": 229,
+  "title": "Summarization: LLM-based textual summaries",
+  "url": "https://github.com/BrianCLong/summit/issues/229",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767070,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX03g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/enhancement",
+      "name": "enhancement",
+      "color": "a2eeef",
+      "default": true,
+      "description": "New feature or request"
+    },
+    {
+      "id": 9103342705,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn8cQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/AI",
+      "name": "AI",
+      "color": "bfdadc",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342986,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9ig",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/frontend",
+      "name": "frontend",
+      "color": "A2EEEF",
+      "default": false,
+      "description": "UI/E2E"
+    }
+  ],
+  "updatedAt": "2025-08-14T04:54:04Z",
+  "createdAt": "2025-08-14T04:54:04Z",
+  "classification": "feature",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15184,
+        "url": "https://github.com/BrianCLong/summit/pull/15184",
+        "mergedAt": "2025-12-31T14:21:30Z",
+        "title": "chore(deps): bump docker/setup-buildx-action from 2 to 3"
+      },
+      {
+        "number": 15134,
+        "url": "https://github.com/BrianCLong/summit/pull/15134",
+        "mergedAt": null,
+        "title": "chore(deps): bump actions/github-script from 7 to 8"
+      },
+      {
+        "number": 10096,
+        "url": "https://github.com/BrianCLong/summit/pull/10096",
+        "mergedAt": "2025-10-14T13:05:54Z",
+        "title": "feat: add pii ontology mapping engine"
+      },
+      {
+        "number": 13185,
+        "url": "https://github.com/BrianCLong/summit/pull/13185",
+        "mergedAt": "2025-12-17T05:27:53Z",
+        "title": "Add STIX 2.1 bundle exporter with secure sharing"
+      },
+      {
+        "number": 11895,
+        "url": "https://github.com/BrianCLong/summit/pull/11895",
+        "mergedAt": null,
+        "title": "Build Crisis Management and Emergency Response Platform"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      },
+      {
+        "number": 1280,
+        "url": "https://github.com/BrianCLong/summit/pull/1280",
+        "mergedAt": "2025-09-18T05:21:24Z",
+        "title": "feat(ga): CI/ops hardening (conflict-free from ga-core)"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

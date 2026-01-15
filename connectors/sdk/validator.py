@@ -1,7 +1,7 @@
 """Manifest validator for connector SDK."""
 
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 import yaml
 
@@ -36,7 +36,7 @@ class ManifestValidator:
         self.errors = []
         self.warnings = []
 
-    def _load_manifest(self) -> Dict[str, Any]:
+    def _load_manifest(self) -> dict[str, Any]:
         """Load the manifest file."""
         try:
             with open(self.manifest_path) as f:
@@ -128,9 +128,7 @@ class ManifestValidator:
                     self.errors.append(f"pii_flags[{i}] missing field_name")
 
                 if "severity" in pii_field and pii_field["severity"] not in valid_severities:
-                    self.errors.append(
-                        f"pii_flags[{i}] invalid severity: {pii_field['severity']}"
-                    )
+                    self.errors.append(f"pii_flags[{i}] invalid severity: {pii_field['severity']}")
 
                 if (
                     "redaction_policy" in pii_field
@@ -212,7 +210,7 @@ class ManifestValidator:
             if field not in self.manifest:
                 self.warnings.append(f"Recommended field not present: {field}")
 
-    def get_report(self) -> Dict[str, Any]:
+    def get_report(self) -> dict[str, Any]:
         """Get validation report."""
         return {
             "valid": len(self.errors) == 0,
@@ -222,7 +220,7 @@ class ManifestValidator:
         }
 
 
-def validate_manifest(manifest_path: str) -> Dict[str, Any]:
+def validate_manifest(manifest_path: str) -> dict[str, Any]:
     """
     Validate a connector manifest.
 

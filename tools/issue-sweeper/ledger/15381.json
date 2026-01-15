@@ -1,0 +1,21 @@
+{
+  "issue_number": 15381,
+  "title": "Enhance Storage, Caching and DR Infrastructure",
+  "url": "https://github.com/BrianCLong/summit/pull/15381",
+  "state": "open",
+  "labels": [],
+  "updatedAt": "2026-01-02T10:14:19Z",
+  "createdAt": "2026-01-02T10:14:14Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

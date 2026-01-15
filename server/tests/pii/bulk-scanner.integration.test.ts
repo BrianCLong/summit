@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { BulkScanner } from '../../src/pii/scanner.js';
 import type { ClassificationEngine } from '../../src/pii/classifier.js';
 

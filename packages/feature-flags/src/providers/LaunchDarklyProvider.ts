@@ -190,13 +190,11 @@ export class LaunchDarklyProvider implements FeatureFlagProvider {
     for (const [key, value] of Object.entries(flags)) {
       const flagState = allFlags.getFlagValue(key);
       const reason = allFlags.getFlagReason(key);
-      const variation = null; // allFlags.getVariationIndex(key) not available in v7
-
       result[key] = {
         key,
         value: flagState ?? value,
-        variation: variation?.toString(),
-        exists: variation !== null,
+        variation: undefined,
+        exists: false,
         reason: reason ? this.mapReason(reason) : 'DEFAULT',
         timestamp: Date.now(),
       };

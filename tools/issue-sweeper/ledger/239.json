@@ -1,0 +1,92 @@
+{
+  "issue_number": 239,
+  "title": "Realtime: Security & permissions for collab",
+  "url": "https://github.com/BrianCLong/summit/issues/239",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9108055729,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHmsQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/real-time",
+      "name": "real-time",
+      "color": "1d76db",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:54:21Z",
+  "createdAt": "2025-08-14T04:54:21Z",
+  "classification": "security",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13195,
+        "url": "https://github.com/BrianCLong/summit/pull/13195",
+        "mergedAt": "2025-12-04T15:56:11Z",
+        "title": "Deploy Harbor proxy for air-gapped image pulls"
+      },
+      {
+        "number": 10037,
+        "url": "https://github.com/BrianCLong/summit/pull/10037",
+        "mergedAt": "2025-10-04T22:44:15Z",
+        "title": "feat: launch autonomous investigator overlay"
+      },
+      {
+        "number": 13190,
+        "url": "https://github.com/BrianCLong/summit/pull/13190",
+        "mergedAt": "2025-12-04T15:38:47Z",
+        "title": "Build resilient multi-LLM orchestrator with governance"
+      },
+      {
+        "number": 13165,
+        "url": "https://github.com/BrianCLong/summit/pull/13165",
+        "mergedAt": "2025-12-17T05:34:42Z",
+        "title": "Unified prompt governance dashboard 1"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 13164,
+        "url": "https://github.com/BrianCLong/summit/pull/13164",
+        "mergedAt": "2025-12-17T05:35:09Z",
+        "title": "Resolve merge conflicts via rebase"
+      },
+      {
+        "number": 1284,
+        "url": "https://github.com/BrianCLong/summit/pull/1284",
+        "mergedAt": "2025-09-20T08:06:31Z",
+        "title": "feat(release): enterprise-grade repo consolidation and golden ci pipeline"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -123,7 +123,7 @@ generate_report() {
 echo "Starting GA Gate..."
 
 # 1. Lint and Unit
-record_check "Lint and Test" "make lint test" || { generate_report; exit 1; }
+record_check "Lint and Test" "NODE_ENV=test make lint test" || { generate_report; exit 1; }
 
 # 2. Clean Environment
 record_check "Clean Environment" "make down" || { generate_report; exit 1; }

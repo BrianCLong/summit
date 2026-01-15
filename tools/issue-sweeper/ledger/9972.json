@@ -1,0 +1,21 @@
+{
+  "issue_number": 9972,
+  "title": "[summit-program] sprint-20251015\r",
+  "url": "https://github.com/BrianCLong/summit/issues/9972",
+  "state": "open",
+  "labels": [],
+  "updatedAt": "2025-10-03T21:57:34Z",
+  "createdAt": "2025-10-03T21:57:34Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

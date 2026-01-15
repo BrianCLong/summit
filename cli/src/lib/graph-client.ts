@@ -5,13 +5,13 @@
 
 import neo4j, {
   Driver,
-  Session,
-  Result,
+  QueryResult,
   Record as Neo4jRecord,
   Node,
   Relationship,
   Path,
   Integer,
+  ResultSummary,
 } from 'neo4j-driver';
 import { z } from 'zod';
 import type { Neo4jConfig } from './config.js';
@@ -129,11 +129,11 @@ export class GraphClient {
     });
 
     try {
-      const result = await session.run(queryString, opts.parameters, {
+      const result: QueryResult = await session.run(queryString, opts.parameters, {
         timeout: opts.timeout,
       });
 
-      return this.transformResult(result);
+      return this.transformQueryResult(result);
     } finally {
       await session.close();
     }
@@ -298,7 +298,7 @@ export class GraphClient {
         await this.connect();
       }
 
-      const result = await this.query('RETURN 1 as ping');
+      await this.query('RETURN 1 as ping');
       const latencyMs = Date.now() - start;
 
       const serverInfo = await this.driver!.getServerInfo();
@@ -319,11 +319,11 @@ export class GraphClient {
     }
   }
 
-  private transformResult(result: Result): GraphQueryResult {
+  private transformQueryResult(result: QueryResult): GraphQueryResult {
     const records = result.records;
-    const summary = result.summary;
+    const summary: ResultSummary = result.summary;
 
-    const columns = records.length > 0 ? records[0].keys : [];
+    const columns: string[] = records.length > 0 ? records[0].keys.map(String) : [];
     const rows = records.map((record: Neo4jRecord) =>
       record.keys.map((key) => this.transformValue(record.get(key)))
     );

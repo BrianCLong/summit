@@ -1,0 +1,230 @@
+{
+  "issue_number": 48,
+  "title": "Add DB health endpoints (/api/db/*)",
+  "url": "https://github.com/BrianCLong/summit/issues/48",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    }
+  ],
+  "updatedAt": "2025-08-13T18:12:52Z",
+  "createdAt": "2025-08-12T02:37:50Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13840,
+        "url": "https://github.com/BrianCLong/summit/pull/13840",
+        "mergedAt": "2025-12-20T03:42:29Z",
+        "title": "Expand tranche 41-48 implementation blueprint"
+      },
+      {
+        "number": 13860,
+        "url": "https://github.com/BrianCLong/summit/pull/13860",
+        "mergedAt": "2025-12-20T03:23:53Z",
+        "title": "Add implementation plan for features 41-48"
+      },
+      {
+        "number": 12263,
+        "url": "https://github.com/BrianCLong/summit/pull/12263",
+        "mergedAt": "2025-12-18T03:23:04Z",
+        "title": "Final Polish: Prompts 41-48 Implementation"
+      },
+      {
+        "number": 15125,
+        "url": "https://github.com/BrianCLong/summit/pull/15125",
+        "mergedAt": "2025-12-30T21:20:48Z",
+        "title": "chore(deps): bump mikefarah/yq from 4.30.8 to 4.50.1"
+      },
+      {
+        "number": 12394,
+        "url": "https://github.com/BrianCLong/summit/pull/12394",
+        "mergedAt": "2025-12-04T16:28:20Z",
+        "title": "Add Wave 6 satellite service blueprints"
+      },
+      {
+        "number": 12508,
+        "url": "https://github.com/BrianCLong/summit/pull/12508",
+        "mergedAt": "2025-12-02T18:52:46Z",
+        "title": "Create comprehensive 96-prompt engineering roadmap"
+      },
+      {
+        "number": 15352,
+        "url": "https://github.com/BrianCLong/summit/pull/15352",
+        "mergedAt": "2026-01-01T10:50:33Z",
+        "title": "Add CCR poisoning detection ADR and roadmap update"
+      },
+      {
+        "number": 15333,
+        "url": "https://github.com/BrianCLong/summit/pull/15333",
+        "mergedAt": null,
+        "title": "Innovation Sprint Delivery: 8 Strategic Features"
+      },
+      {
+        "number": 12089,
+        "url": "https://github.com/BrianCLong/summit/pull/12089",
+        "mergedAt": "2025-11-21T06:30:29Z",
+        "title": "Triage and consolidate open pull requests"
+      },
+      {
+        "number": 15313,
+        "url": "https://github.com/BrianCLong/summit/pull/15313",
+        "mergedAt": "2026-01-01T11:39:29Z",
+        "title": "Establish Institutional Continuity Framework"
+      },
+      {
+        "number": 11846,
+        "url": "https://github.com/BrianCLong/summit/pull/11846",
+        "mergedAt": "2025-11-20T09:36:34Z",
+        "title": "fix: rerun neo4j migrations after recovery"
+      },
+      {
+        "number": 15316,
+        "url": "https://github.com/BrianCLong/summit/pull/15316",
+        "mergedAt": "2026-01-01T11:39:03Z",
+        "title": "feat: Economic Innovation Sprint artifacts"
+      },
+      {
+        "number": 13111,
+        "url": "https://github.com/BrianCLong/summit/pull/13111",
+        "mergedAt": "2025-12-17T05:38:55Z",
+        "title": "API Authorization Matrix Generator & Enforcement"
+      },
+      {
+        "number": 10208,
+        "url": "https://github.com/BrianCLong/summit/pull/10208",
+        "mergedAt": "2025-10-15T03:46:45Z",
+        "title": "ci(actions): repo-wide resilience—cron jitter, concurrency, backlog guard, and matrix caps"
+      },
+      {
+        "number": 13047,
+        "url": "https://github.com/BrianCLong/summit/pull/13047",
+        "mergedAt": "2025-12-17T21:27:44Z",
+        "title": "Data Governance Authority Implementation"
+      },
+      {
+        "number": 1322,
+        "url": "https://github.com/BrianCLong/summit/pull/1322",
+        "mergedAt": "2025-09-23T06:10:11Z",
+        "title": "chore(deps): bump @opentelemetry/auto-instrumentations-node from 0.63.0 to 0.64.1"
+      },
+      {
+        "number": 13145,
+        "url": "https://github.com/BrianCLong/summit/pull/13145",
+        "mergedAt": "2025-12-03T03:05:23Z",
+        "title": "Query Replay Engine"
+      },
+      {
+        "number": 1169,
+        "url": "https://github.com/BrianCLong/summit/pull/1169",
+        "mergedAt": null,
+        "title": "chore(deps): bump @opentelemetry/auto-instrumentations-node from 0.39.4 to 0.62.2 in /server"
+      },
+      {
+        "number": 11898,
+        "url": "https://github.com/BrianCLong/summit/pull/11898",
+        "mergedAt": null,
+        "title": "Unify apps with graph timeline map interface"
+      },
+      {
+        "number": 10111,
+        "url": "https://github.com/BrianCLong/summit/pull/10111",
+        "mergedAt": "2025-10-14T10:40:32Z",
+        "title": "Add cash-now product price sheet and SOW templates"
+      },
+      {
+        "number": 10207,
+        "url": "https://github.com/BrianCLong/summit/pull/10207",
+        "mergedAt": null,
+        "title": "chore(ci): add backlog guard to merge-train health workflow"
+      },
+      {
+        "number": 158,
+        "url": "https://github.com/BrianCLong/summit/pull/158",
+        "mergedAt": "2025-08-13T18:12:50Z",
+        "title": "Server health endpoints, client version, CODEOWNERS"
+      },
+      {
+        "number": 10123,
+        "url": "https://github.com/BrianCLong/summit/pull/10123",
+        "mergedAt": "2025-10-14T08:40:19Z",
+        "title": "feat: add narrative simulation engine core"
+      },
+      {
+        "number": 13173,
+        "url": "https://github.com/BrianCLong/summit/pull/13173",
+        "mergedAt": "2025-12-04T15:39:21Z",
+        "title": "Harden triplet runtime with adversarial attestation moats"
+      },
+      {
+        "number": 1352,
+        "url": "https://github.com/BrianCLong/summit/pull/1352",
+        "mergedAt": "2025-09-23T06:56:06Z",
+        "title": "chore(deps): bump parse-url from 6.0.5 to 8.1.0"
+      },
+      {
+        "number": 1355,
+        "url": "https://github.com/BrianCLong/summit/pull/1355",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "chore: add hardened ci guardrails"
+      },
+      {
+        "number": 10114,
+        "url": "https://github.com/BrianCLong/summit/pull/10114",
+        "mergedAt": "2025-10-14T10:40:23Z",
+        "title": "feat: harden intelgraph helm security controls"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 13148,
+        "url": "https://github.com/BrianCLong/summit/pull/13148",
+        "mergedAt": "2025-12-17T05:36:11Z",
+        "title": "C6 — CI Time Budget Enforcer"
+      },
+      {
+        "number": 15339,
+        "url": "https://github.com/BrianCLong/summit/pull/15339",
+        "mergedAt": "2026-01-01T11:37:58Z",
+        "title": "feat: leverage optimization and friction reduction"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

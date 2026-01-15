@@ -1,9 +1,9 @@
-// @ts-nocheck
-import type { Queue, Worker, Job, QueueEvents } from 'bullmq';
+
+import { Queue, Worker, Job, QueueEvents } from 'bullmq';
 import type { Pool } from 'pg';
 import { randomUUID as uuidv4 } from 'node:crypto';
 import pino from 'pino';
-import type IORedis from 'ioredis';
+import IORedis from 'ioredis';
 import { ProcessingStatus } from './MultimodalDataService.js';
 import { ExtractionEngine } from '../ai/ExtractionEngine.js';
 import OCREngine from '../ai/engines/OCREngine.js';
@@ -91,17 +91,17 @@ export interface MethodPerformance {
 
 export class ExtractionJobService {
   private db: Pool;
-  private redis: any;
-  private extractionQueue: any;
-  private extractionWorker: any;
-  private queueEvents: any;
+  private redis: IORedis;
+  private extractionQueue: Queue;
+  private extractionWorker: Worker;
+  private queueEvents: QueueEvents;
   private extractionEngine: ExtractionEngine;
+  private embeddingService: EmbeddingService;
   private ocrEngine: OCREngine;
   private objectDetectionEngine: ObjectDetectionEngine;
   private speechToTextEngine: SpeechToTextEngine;
   private faceDetectionEngine: FaceDetectionEngine;
   private textAnalysisEngine: TextAnalysisEngine;
-  private embeddingService: EmbeddingService;
 
   constructor(db: Pool, redisConfig: any) {
     this.db = db;
@@ -280,7 +280,7 @@ export class ExtractionJobService {
         values.push(filters.offset);
       }
 
-      const result = await this.db.query(query, values);
+      const result = await this.db.query(query, values); // Map results
       return result.rows.map((row: any) => this.mapRowToExtractionJob(row));
     } catch (error: any) {
       logger.error(
@@ -441,7 +441,7 @@ export class ExtractionJobService {
             entitiesFound: result.entities.length,
             averageConfidence:
               result.entities.reduce((sum, e) => sum + e.confidence, 0) /
-                result.entities.length || 0,
+              result.entities.length || 0,
           });
 
           logger.info(
@@ -660,7 +660,7 @@ export class ExtractionJobService {
           entitiesFound: entities.length,
           averageConfidence:
             entities.reduce((sum, e) => sum + e.confidence, 0) /
-              entities.length || 0,
+            entities.length || 0,
         },
       };
     } catch (error: any) {
@@ -806,15 +806,15 @@ export class ExtractionJobService {
       let output = '';
       let errorOutput = '';
 
-      python.stdout.on('data', (data) => {
+      python.stdout.on('data', (data: Buffer | string) => {
         output += data.toString();
       });
 
-      python.stderr.on('data', (data) => {
+      python.stderr.on('data', (data: Buffer | string) => {
         errorOutput += data.toString();
       });
 
-      python.on('close', (code) => {
+      python.on('close', (code: number | null) => {
         if (code === 0) {
           try {
             const result = JSON.parse(output);
@@ -854,7 +854,7 @@ export class ExtractionJobService {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(new Error(`Failed to run speech-to-text: ${error instanceof Error ? error.message : String(error)}`));
       });
     });
@@ -888,15 +888,15 @@ export class ExtractionJobService {
       let output = '';
       let errorOutput = '';
 
-      python.stdout.on('data', (data) => {
+      python.stdout.on('data', (data: Buffer | string) => {
         output += data.toString();
       });
 
-      python.stderr.on('data', (data) => {
+      python.stderr.on('data', (data: Buffer | string) => {
         errorOutput += data.toString();
       });
 
-      python.on('close', (code) => {
+      python.on('close', (code: number | null) => {
         if (code === 0) {
           try {
             const result = JSON.parse(output);
@@ -938,7 +938,7 @@ export class ExtractionJobService {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(new Error(`Failed to run face detection: ${error instanceof Error ? error.message : String(error)}`));
       });
     });
@@ -981,15 +981,15 @@ export class ExtractionJobService {
       let output = '';
       let errorOutput = '';
 
-      python.stdout.on('data', (data) => {
+      python.stdout.on('data', (data: Buffer | string) => {
         output += data.toString();
       });
 
-      python.stderr.on('data', (data) => {
+      python.stderr.on('data', (data: Buffer | string) => {
         errorOutput += data.toString();
       });
 
-      python.on('close', (code) => {
+      python.on('close', (code: number | null) => {
         if (code === 0) {
           try {
             const result = JSON.parse(output);
@@ -1040,7 +1040,7 @@ export class ExtractionJobService {
         }
       });
 
-      python.on('error', (error) => {
+      python.on('error', (error: Error) => {
         reject(new Error(`Failed to run text analysis: ${error instanceof Error ? error.message : String(error)}`));
       });
     });
@@ -1134,43 +1134,45 @@ export class ExtractionJobService {
    */
   private calculateJobPriority(methods: string[]): number {
     // Higher priority for simpler, faster methods
-    const priorities = {
-      ocr: 3,
-      face_detection: 2,
+    const priorities: Record<string, number> = {
+      ocr: 2,
+      face_detection: 1,
       object_detection: 1,
-      speech_to_text: 1,
-      video_analysis: 0,
+      speech_to_text: 3,
+      video_analysis: 4,
     };
 
-    const avgPriority =
-      methods.reduce((sum, method) => {
-        return sum + (priorities[method] || 1);
-      }, 0) / methods.length;
+    let maxPriority = 5;
+    for (const method of methods) {
+      if (priorities[method] < maxPriority) {
+        maxPriority = priorities[method];
+      }
+    }
 
-    return Math.round(avgPriority);
+    return Math.round(maxPriority);
   }
 
   /**
    * Setup event listeners for queue monitoring
    */
   private setupEventListeners(): void {
-    this.queueEvents.on('completed', async ({ jobId }) => {
+    this.queueEvents.on('completed', async ({ jobId }: { jobId: string }) => {
       logger.info(`Extraction job completed: ${jobId}`);
     });
 
-    this.queueEvents.on('failed', async ({ jobId, failedReason }) => {
+    this.queueEvents.on('failed', async ({ jobId, failedReason }: { jobId: string; failedReason: string }) => {
       logger.error(`Extraction job failed: ${jobId}, reason: ${failedReason}`);
     });
 
-    this.queueEvents.on('progress', async ({ jobId, data }) => {
+    this.queueEvents.on('progress', async ({ jobId, data }: { jobId: string; data: number | string }) => {
       logger.debug(`Extraction job progress: ${jobId}, progress: ${data}%`);
     });
 
-    this.extractionWorker.on('completed', (job: any) => {
+    this.extractionWorker.on('completed', (job: Job) => {
       logger.info(`Worker completed job: ${job.id}`);
     });
 
-    this.extractionWorker.on('failed', (job, err) => {
+    this.extractionWorker.on('failed', (job: Job | undefined, err: Error) => {
       logger.error(`Worker failed job: ${job?.id}, error: ${err.message}`);
     });
   }
@@ -1256,7 +1258,7 @@ export class ExtractionJobService {
   /**
    * Map database row to ExtractionJob object
    */
-  private mapRowToExtractionJob(row): ExtractionJob {
+  private mapRowToExtractionJob(row: any): ExtractionJob {
     return {
       id: row.id,
       investigationId: row.investigation_id,

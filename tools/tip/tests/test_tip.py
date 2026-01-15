@@ -32,7 +32,6 @@ def _run_scenario(name: str):
 
 
 class TenantIsolationProverTests(unittest.TestCase):
-
     def test_compliant_configuration_produces_proof(self):
         result = _run_scenario("good")
         self.assertEqual(result.status, "passed")

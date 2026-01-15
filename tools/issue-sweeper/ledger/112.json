@@ -1,0 +1,149 @@
+{
+  "issue_number": 112,
+  "title": "Create Roadmap Document for MVP and Beyond",
+  "url": "https://github.com/BrianCLong/summit/issues/112",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051495,
+      "node_id": "LA_kwDOPaNncM8AAAACHht45w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:docs",
+      "name": "type:docs",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Docs"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    },
+    {
+      "id": 9095068559,
+      "node_id": "LA_kwDOPaNncM8AAAACHhu7jw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:docs",
+      "name": "area:docs",
+      "color": "ededed",
+      "default": false,
+      "description": "Docs area"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:15:15Z",
+  "createdAt": "2025-08-12T04:41:07Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15286,
+        "url": "https://github.com/BrianCLong/summit/pull/15286",
+        "mergedAt": "2026-01-01T05:45:06Z",
+        "title": "Harden usage metering and enforcement"
+      },
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 15332,
+        "url": "https://github.com/BrianCLong/summit/pull/15332",
+        "mergedAt": "2026-01-01T11:38:30Z",
+        "title": "Ontology Engine v2: Execution Runtime & Governance"
+      },
+      {
+        "number": 1359,
+        "url": "https://github.com/BrianCLong/summit/pull/1359",
+        "mergedAt": null,
+        "title": "feat: add nlq engine with sandbox endpoints"
+      },
+      {
+        "number": 10092,
+        "url": "https://github.com/BrianCLong/summit/pull/10092",
+        "mergedAt": "2025-10-14T13:06:07Z",
+        "title": "feat: build intelligent anomaly detection engine"
+      },
+      {
+        "number": 11909,
+        "url": "https://github.com/BrianCLong/summit/pull/11909",
+        "mergedAt": "2025-11-20T10:25:19Z",
+        "title": "Build offline kit with CRDT sync and proofs"
+      },
+      {
+        "number": 1303,
+        "url": "https://github.com/BrianCLong/summit/pull/1303",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "fix: align mcp core test tooling and lock handling"
+      },
+      {
+        "number": 11922,
+        "url": "https://github.com/BrianCLong/summit/pull/11922",
+        "mergedAt": "2025-11-20T10:05:25Z",
+        "title": "Build real-time streaming analytics pipeline"
+      },
+      {
+        "number": 1086,
+        "url": "https://github.com/BrianCLong/summit/pull/1086",
+        "mergedAt": null,
+        "title": "Release 2.5.0: Grafana Release Health dashboard + Playwright smoke pack"
+      },
+      {
+        "number": 1262,
+        "url": "https://github.com/BrianCLong/summit/pull/1262",
+        "mergedAt": "2025-09-19T02:22:35Z",
+        "title": "Release 2.5 dash: merge into merge/all-to-main-20250915-022508 with UI/docs from feature"
+      },
+      {
+        "number": 1085,
+        "url": "https://github.com/BrianCLong/summit/pull/1085",
+        "mergedAt": null,
+        "title": "chore(compat): seed GraphQL N-1 and N-2\nbaselines for CI schema checks"
+      },
+      {
+        "number": 1284,
+        "url": "https://github.com/BrianCLong/summit/pull/1284",
+        "mergedAt": "2025-09-20T08:06:31Z",
+        "title": "feat(release): enterprise-grade repo consolidation and golden ci pipeline"
+      },
+      {
+        "number": 1285,
+        "url": "https://github.com/BrianCLong/summit/pull/1285",
+        "mergedAt": "2025-09-20T08:06:30Z",
+        "title": "feat(release): enterprise ci/cd foundation - clean slate"
+      },
+      {
+        "number": 1259,
+        "url": "https://github.com/BrianCLong/summit/pull/1259",
+        "mergedAt": null,
+        "title": "Merge conflict-free branches and PRs into main"
+      },
+      {
+        "number": 1265,
+        "url": "https://github.com/BrianCLong/summit/pull/1265",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "Chore/husky v9 cleanup"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

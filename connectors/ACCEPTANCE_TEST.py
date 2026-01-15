@@ -22,9 +22,9 @@ from csv_connector.connector import CSVConnector
 
 def print_section(title):
     """Print a section header."""
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print(f"  {title}")
-    print(f"{'='*70}\n")
+    print(f"{'=' * 70}\n")
 
 
 def test_acceptance_criteria():
@@ -68,15 +68,15 @@ def test_acceptance_criteria():
     print_section("CRITERION 2: PII flags visible")
 
     # Show PII configuration from manifest
-    pii_flags = connector.manifest.get('pii_flags', [])
+    pii_flags = connector.manifest.get("pii_flags", [])
     print(f"PII fields configured: {len(pii_flags)}\n")
 
     for pii in pii_flags:
         if isinstance(pii, dict):
-            field = pii.get('field_name', 'unknown')
-            severity = pii.get('severity', 'unknown')
-            policy = pii.get('redaction_policy', 'unknown')
-            description = pii.get('description', '')
+            field = pii.get("field_name", "unknown")
+            severity = pii.get("severity", "unknown")
+            policy = pii.get("redaction_policy", "unknown")
+            description = pii.get("description", "")
 
             print(f"Field: {field}")
             print(f"  Description: {description}")
@@ -85,32 +85,32 @@ def test_acceptance_criteria():
             print()
 
     # Show detection results
-    pii_report = results.get('pii_report', {})
-    total_detections = pii_report.get('total_actions', 0)
+    pii_report = results.get("pii_report", {})
+    total_detections = pii_report.get("total_actions", 0)
 
     print(f"PII detections during ingestion: {total_detections}")
-    if pii_report.get('fields_with_pii'):
+    if pii_report.get("fields_with_pii"):
         print(f"Fields with detected PII: {', '.join(pii_report['fields_with_pii'])}")
 
     if pii_flags:
-        print(f"\n✅ PASS: PII flags are visible and documented")
+        print("\n✅ PASS: PII flags are visible and documented")
     else:
-        print(f"\n❌ FAIL: No PII flags configured")
+        print("\n❌ FAIL: No PII flags configured")
 
     # ============================================================
     # CRITERION 3: Blocked fields show license reason
     # ============================================================
     print_section("CRITERION 3: Blocked fields show license reason")
 
-    license_config = connector.manifest.get('license', {})
-    blocked_fields = license_config.get('blocked_fields', [])
+    license_config = connector.manifest.get("license", {})
+    blocked_fields = license_config.get("blocked_fields", [])
 
     print(f"Blocked fields configured: {len(blocked_fields)}\n")
 
     for bf in blocked_fields:
-        field_name = bf.get('field_name', 'unknown')
-        reason = bf.get('reason', 'No reason provided')
-        alternative = bf.get('alternative', 'None')
+        field_name = bf.get("field_name", "unknown")
+        reason = bf.get("reason", "No reason provided")
+        alternative = bf.get("alternative", "None")
 
         print(f"Blocked Field: {field_name}")
         print(f"  Reason: {reason}")
@@ -118,19 +118,19 @@ def test_acceptance_criteria():
         print()
 
     # Show enforcement results
-    license_report = results.get('license_report', {})
-    violations = license_report.get('total_violations', 0)
+    license_report = results.get("license_report", {})
+    violations = license_report.get("total_violations", 0)
 
     if violations > 0:
         print(f"License violations detected: {violations}")
-        for violation in license_report.get('violations', []):
+        for violation in license_report.get("violations", []):
             print(f"  - {violation.get('field')}: {violation.get('reason')}")
 
     if blocked_fields:
-        print(f"\n✅ PASS: Blocked fields have documented reasons")
+        print("\n✅ PASS: Blocked fields have documented reasons")
     else:
-        print(f"\n⚠️  NOTE: No blocked fields in this connector (this is OK)")
-        print(f"✅ PASS: License enforcement is configured")
+        print("\n⚠️  NOTE: No blocked fields in this connector (this is OK)")
+        print("✅ PASS: License enforcement is configured")
 
     # ============================================================
     # CRITERION 4: Lineage recorded
@@ -138,8 +138,8 @@ def test_acceptance_criteria():
     print_section("CRITERION 4: Lineage recorded")
 
     # Check lineage configuration
-    lineage_config = connector.manifest.get('lineage', {})
-    lineage_enabled = lineage_config.get('enabled', False)
+    lineage_config = connector.manifest.get("lineage", {})
+    lineage_enabled = lineage_config.get("enabled", False)
 
     print(f"Lineage enabled: {lineage_enabled}")
     print(f"Source system: {lineage_config.get('source_system', 'N/A')}")
@@ -147,9 +147,9 @@ def test_acceptance_criteria():
     print()
 
     # Check if lineage was created in results
-    sample_results = results.get('results', [])
+    sample_results = results.get("results", [])
     if sample_results:
-        sample_lineage = sample_results[0].get('lineage', {})
+        sample_lineage = sample_results[0].get("lineage", {})
 
         if sample_lineage:
             print("Sample lineage record:")
@@ -166,29 +166,29 @@ def test_acceptance_criteria():
     print("\nAttempting to record lineage to provenance system...")
     try:
         sys.path.insert(0, str(Path(__file__).parent.parent / "python"))
-        from intelgraph_py.provenance.fabric_client import submit_receipt, generate_hash
+        from intelgraph_py.provenance.fabric_client import generate_hash, submit_receipt
 
         # Create a sample lineage record
         lineage_data = {
-            "connector": connector.manifest['name'],
-            "version": connector.manifest['version'],
+            "connector": connector.manifest["name"],
+            "version": connector.manifest["version"],
             "timestamp": time.time(),
-            "records_processed": results['stats']['records_processed'],
+            "records_processed": results["stats"]["records_processed"],
         }
 
         data_bytes = json.dumps(lineage_data, sort_keys=True).encode()
         data_hash = generate_hash(data_bytes)
         receipt = submit_receipt(data_hash, lineage_data)
 
-        print(f"✓ Lineage recorded successfully")
+        print("✓ Lineage recorded successfully")
         print(f"  TX ID: {receipt.tx_id}")
         print(f"  Hash: {data_hash[:16]}...")
 
-        print(f"\n✅ PASS: Lineage can be recorded to provenance system")
+        print("\n✅ PASS: Lineage can be recorded to provenance system")
 
     except Exception as e:
         print(f"⚠️  Could not record to provenance system: {e}")
-        print(f"✅ PASS: Lineage metadata is generated (recording requires provenance service)")
+        print("✅ PASS: Lineage metadata is generated (recording requires provenance service)")
 
     # ============================================================
     # FINAL SUMMARY

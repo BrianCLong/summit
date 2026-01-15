@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import itertools
-from typing import Iterable, List
+from collections.abc import Iterable
 
 import networkx as nx
 import numpy as np
@@ -36,24 +36,22 @@ class PCAlgorithm:
         # edge removal based on conditional independence up to order 2
         for order in range(0, min(2, len(nodes)) + 1):
             edges_to_remove = []
-            for (u, v) in g.edges():
+            for u, v in g.edges():
                 neighbors = [n for n in g.neighbors(u) if n != v]
                 if len(neighbors) < order:
                     continue
                 for cond_set in itertools.combinations(neighbors, order):
                     z = df[list(cond_set)].values
-                    if self._conditional_independent(
-                        df[u].values, df[v].values, z
-                    ):
+                    if self._conditional_independent(df[u].values, df[v].values, z):
                         edges_to_remove.append((u, v))
                         sep_sets[u][v] = cond_set
                         sep_sets[v][u] = cond_set
                         break
             g.remove_edges_from(edges_to_remove)
 
-        directed_edges: List[Edge] = []
+        directed_edges: list[Edge] = []
         # orient using p-value asymmetry
-        for (u, v) in g.edges():
+        for u, v in g.edges():
             corr_uv, p_uv = stats.pearsonr(df[u].values, df[v].values)
             corr_vu, p_vu = stats.pearsonr(df[v].values, df[u].values)
             if p_uv <= p_vu:

@@ -2,22 +2,20 @@
  * Forensics Logger Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
-import {
+import { describe, it, expect, beforeEach, afterEach, beforeAll, jest } from '@jest/globals';
+import type {
   ForensicsLogger,
   ForensicsEvent,
   ActorInfo,
   TargetInfo,
-  getForensicsLogger,
-  resetForensicsLogger,
 } from '../forensics-logger.js';
 
 // Mock Redis with stream support
-jest.mock('ioredis', () => {
+jest.unstable_mockModule('ioredis', () => {
   const streams = new Map<string, Array<[string, string[]]>>();
   let idCounter = 0;
 
-  return jest.fn<() => any>().mockImplementation(() => ({
+  const MockRedis = jest.fn().mockImplementation(() => ({
     connect: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
     quit: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
     ping: jest.fn<() => Promise<string>>().mockResolvedValue('PONG'),
@@ -54,9 +52,17 @@ jest.mock('ioredis', () => {
     })),
     on: jest.fn<(event: string, listener: (...args: any[]) => void) => void>(),
   }));
+
+  return {
+    __esModule: true,
+    default: MockRedis,
+  };
 });
 
 describe('ForensicsLogger', () => {
+  let ForensicsLogger: typeof import('../forensics-logger.js').ForensicsLogger;
+  let getForensicsLogger: typeof import('../forensics-logger.js').getForensicsLogger;
+  let resetForensicsLogger: typeof import('../forensics-logger.js').resetForensicsLogger;
   let logger: ForensicsLogger;
 
   const testActor: ActorInfo = {
@@ -76,6 +82,13 @@ describe('ForensicsLogger', () => {
     tenantId: 'tenant-1',
     classification: 'secret',
   };
+
+  beforeAll(async () => {
+    const module = await import('../forensics-logger.js');
+    ForensicsLogger = module.ForensicsLogger;
+    getForensicsLogger = module.getForensicsLogger;
+    resetForensicsLogger = module.resetForensicsLogger;
+  });
 
   beforeEach(async () => {
     resetForensicsLogger();
@@ -298,7 +311,6 @@ describe('ForensicsLogger', () => {
   describe('Health Check', () => {
     it('should return healthy status', async () => {
       const health = await logger.healthCheck();
-
       expect(health.status).toBe('healthy');
       expect(health.details.redis).toBe('connected');
     });

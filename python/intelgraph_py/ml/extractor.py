@@ -1,9 +1,11 @@
 import logging
+
+import networkx as nx
 import spacy
 from transformers import pipeline
-import networkx as nx
 
 logger = logging.getLogger(__name__)
+
 
 class ContentExtractor:
     """
@@ -11,6 +13,7 @@ class ContentExtractor:
     Uses Transformers for high-precision NER and spaCy for dependency-based relationship extraction.
     Supports multilingual extraction via language-specific or multilingual models.
     """
+
     def __init__(self, language="en", confidence_threshold=0.85):
         self.language = language
         self.confidence_threshold = confidence_threshold
@@ -40,6 +43,7 @@ class ContentExtractor:
             logger.warning(f"spaCy model {spacy_model_name} not found. Attempting to download...")
             try:
                 from spacy.cli import download
+
                 download(spacy_model_name)
                 self.nlp = spacy.load(spacy_model_name)
             except Exception as e:
@@ -53,7 +57,9 @@ class ContentExtractor:
 
         logger.info(f"Loading Transformer NER model: {transformer_model_name}")
         try:
-            self.ner_pipeline = pipeline("ner", model=transformer_model_name, aggregation_strategy="simple")
+            self.ner_pipeline = pipeline(
+                "ner", model=transformer_model_name, aggregation_strategy="simple"
+            )
         except Exception as e:
             logger.error(f"Failed to load Transformer model {transformer_model_name}: {e}")
             self.ner_pipeline = None
@@ -73,14 +79,16 @@ class ContentExtractor:
                     score = float(r["score"])
                     if score < self.confidence_threshold:
                         continue
-                    entities.append({
-                        "text": r["word"].strip(),
-                        "label": r["entity_group"],
-                        "confidence": score,
-                        "start": r["start"],
-                        "end": r["end"],
-                        "source": "transformer"
-                    })
+                    entities.append(
+                        {
+                            "text": r["word"].strip(),
+                            "label": r["entity_group"],
+                            "confidence": score,
+                            "start": r["start"],
+                            "end": r["end"],
+                            "source": "transformer",
+                        }
+                    )
             except Exception as e:
                 logger.error(f"Error during Transformer NER extraction: {e}")
 
@@ -96,14 +104,16 @@ class ContentExtractor:
                 accepted_types.extend(["PER", "ORG", "LOC"])
 
             if ent.label_ in accepted_types:
-                entities.append({
-                    "text": ent.text,
-                    "label": ent.label_,
-                    "confidence": 0.85, # Heuristic confidence for spaCy
-                    "start": ent.start_char,
-                    "end": ent.end_char,
-                    "source": "spacy"
-                })
+                entities.append(
+                    {
+                        "text": ent.text,
+                        "label": ent.label_,
+                        "confidence": 0.85,  # Heuristic confidence for spaCy
+                        "start": ent.start_char,
+                        "end": ent.end_char,
+                        "source": "spacy",
+                    }
+                )
 
         # 3. Merge and Deduplicate
         unique_entities = []
@@ -133,8 +143,8 @@ class ContentExtractor:
         # Multilingual 'xx' models often lack a parser.
         has_parser = self.nlp.has_pipe("parser")
         if not has_parser:
-             # Fallback: Co-occurrence based extraction for languages without parser
-             return self._extract_relationships_cooccurrence(doc, entities)
+            # Fallback: Co-occurrence based extraction for languages without parser
+            return self._extract_relationships_cooccurrence(doc, entities)
 
         # Map character offsets to tokens for easier alignment
         char_to_token = {}
@@ -147,19 +157,22 @@ class ContentExtractor:
             end = entity["end"]
             span_tokens = []
             for token in doc:
-                if token.idx >= start and token.idx + len(token) <= end:
+                if (token.idx >= start and token.idx + len(token) <= end) or (
+                    token.idx < start and token.idx + len(token) > start
+                ):
                     span_tokens.append(token)
-                elif token.idx < start and token.idx + len(token) > start:
-                     span_tokens.append(token)
 
             if not span_tokens:
                 t = char_to_token.get(start)
-                if t: return t
+                if t:
+                    return t
                 return None
             return span_tokens[-1]
 
         for sent in doc.sents:
-            sent_entities = [e for e in entities if e["start"] >= sent.start_char and e["end"] <= sent.end_char]
+            sent_entities = [
+                e for e in entities if e["start"] >= sent.start_char and e["end"] <= sent.end_char
+            ]
             if len(sent_entities) < 2:
                 continue
 
@@ -174,7 +187,9 @@ class ContentExtractor:
             sentence_dates = [e for e in sent_entities if e["label"] == "DATE"]
             temporal_context = sentence_dates[0]["text"] if sentence_dates else None
 
-            relational_candidates = [e for e in sent_entities if e["label"] not in ["DATE", "TIME", "MONEY"]]
+            relational_candidates = [
+                e for e in sent_entities if e["label"] not in ["DATE", "TIME", "MONEY"]
+            ]
 
             for i in range(len(relational_candidates)):
                 for j in range(i + 1, len(relational_candidates)):
@@ -184,8 +199,10 @@ class ContentExtractor:
                     root1 = get_entity_root(e1)
                     root2 = get_entity_root(e2)
 
-                    if not root1 or not root2: continue
-                    if root1.i not in g or root2.i not in g: continue
+                    if not root1 or not root2:
+                        continue
+                    if root1.i not in g or root2.i not in g:
+                        continue
 
                     try:
                         path = nx.shortest_path(g, source=root1.i, target=root2.i)
@@ -202,7 +219,7 @@ class ContentExtractor:
                                 "confidence": 0.75,
                                 "evidence": sent.text.strip(),
                                 "start_idx": sent.start_char,
-                                "end_idx": sent.end_char
+                                "end_idx": sent.end_char,
                             }
                             if temporal_context:
                                 rel["valid_time"] = temporal_context
@@ -219,7 +236,9 @@ class ContentExtractor:
         """
         relationships = []
         for sent in doc.sents:
-            sent_entities = [e for e in entities if e["start"] >= sent.start_char and e["end"] <= sent.end_char]
+            sent_entities = [
+                e for e in entities if e["start"] >= sent.start_char and e["end"] <= sent.end_char
+            ]
             relational_candidates = [e for e in sent_entities if e["label"] not in ["DATE", "TIME"]]
 
             if len(relational_candidates) < 2:
@@ -237,12 +256,12 @@ class ContentExtractor:
                     rel = {
                         "source": e1["text"],
                         "target": e2["text"],
-                        "type": "RELATED_TO", # Generic type
+                        "type": "RELATED_TO",  # Generic type
                         "predicate_text": "co-occurs with",
-                        "confidence": 0.4, # Low confidence for co-occurrence
+                        "confidence": 0.4,  # Low confidence for co-occurrence
                         "evidence": sent.text.strip(),
-                         "start_idx": sent.start_char,
-                        "end_idx": sent.end_char
+                        "start_idx": sent.start_char,
+                        "end_idx": sent.end_char,
                     }
                     if temporal_context:
                         rel["valid_time"] = temporal_context
@@ -258,6 +277,6 @@ class ContentExtractor:
             "metadata": {
                 "entity_count": len(entities),
                 "relationship_count": len(relationships),
-                "language": self.language
-            }
+                "language": self.language,
+            },
         }

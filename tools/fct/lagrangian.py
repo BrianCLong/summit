@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, Iterable, List, Optional, Tuple
 
 import numpy as np
 
@@ -23,8 +23,8 @@ class FairnessConstraint(str, Enum):
 class TrainingHistory:
     """Stores per-epoch metrics for reproducibility and diagnostics."""
 
-    losses: List[float]
-    reports: List[Dict[str, float]]
+    losses: list[float]
+    reports: list[dict[str, float]]
 
 
 class LagrangianFairClassifier:
@@ -37,7 +37,7 @@ class LagrangianFairClassifier:
         learning_rate: float = 0.1,
         lagrangian_rate: float = 0.1,
         epochs: int = 500,
-        seed: Optional[int] = 42,
+        seed: int | None = 42,
     ) -> None:
         self.constraint = constraint
         self.tolerance = tolerance
@@ -45,11 +45,11 @@ class LagrangianFairClassifier:
         self.lagrangian_rate = lagrangian_rate
         self.epochs = epochs
         self.seed = seed
-        self._weights: Optional[np.ndarray] = None
-        self._history: Optional[TrainingHistory] = None
+        self._weights: np.ndarray | None = None
+        self._history: TrainingHistory | None = None
 
     @property
-    def history(self) -> Optional[TrainingHistory]:
+    def history(self) -> TrainingHistory | None:
         return self._history
 
     def _initialize_weights(self, n_features: int) -> None:
@@ -70,7 +70,7 @@ class LagrangianFairClassifier:
         X: Iterable[Iterable[float]],
         y: Iterable[int],
         sensitive: Iterable[int],
-    ) -> "LagrangianFairClassifier":
+    ) -> LagrangianFairClassifier:
         X_arr = np.asarray(X, dtype=float)
         y_arr = np.asarray(y, dtype=int)
         s_arr = np.asarray(sensitive, dtype=int)
@@ -88,8 +88,8 @@ class LagrangianFairClassifier:
 
         X_aug = self._augment_features(X_arr)
         lagrange = np.zeros(self._lagrange_dim())
-        losses: List[float] = []
-        reports: List[Dict[str, float]] = []
+        losses: list[float] = []
+        reports: list[dict[str, float]] = []
 
         for _ in range(self.epochs):
             logits = X_aug @ weights
@@ -124,7 +124,7 @@ class LagrangianFairClassifier:
             return 2
         return 1
 
-    def _group_masks(self, sensitive: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _group_masks(self, sensitive: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         unique = np.unique(sensitive)
         if unique.size != 2:
             raise ValueError("Only binary sensitive attributes are supported")
@@ -137,13 +137,11 @@ class LagrangianFairClassifier:
         sensitive: np.ndarray,
         preds: np.ndarray,
         lagrange: np.ndarray,
-    ) -> Tuple[float, np.ndarray]:
+    ) -> tuple[float, np.ndarray]:
         n = y.size
         error = preds - y
         grad_loss = X_aug.T @ error / max(n, 1)
-        logistic_loss = -np.mean(
-            y * np.log(preds + EPS) + (1 - y) * np.log(1 - preds + EPS)
-        )
+        logistic_loss = -np.mean(y * np.log(preds + EPS) + (1 - y) * np.log(1 - preds + EPS))
 
         violation = self._constraint_violation(y, preds, sensitive)
         fairness_grad = self._constraint_gradient(X_aug, y, preds, sensitive)
@@ -171,18 +169,10 @@ class LagrangianFairClassifier:
 
         positives = y == 1
         negatives = y == 0
-        tpr_a = (
-            np.mean(preds[group_a & positives]) if np.any(group_a & positives) else 0.0
-        )
-        tpr_b = (
-            np.mean(preds[group_b & positives]) if np.any(group_b & positives) else 0.0
-        )
-        fpr_a = (
-            np.mean(preds[group_a & negatives]) if np.any(group_a & negatives) else 0.0
-        )
-        fpr_b = (
-            np.mean(preds[group_b & negatives]) if np.any(group_b & negatives) else 0.0
-        )
+        tpr_a = np.mean(preds[group_a & positives]) if np.any(group_a & positives) else 0.0
+        tpr_b = np.mean(preds[group_b & positives]) if np.any(group_b & positives) else 0.0
+        fpr_a = np.mean(preds[group_a & negatives]) if np.any(group_a & negatives) else 0.0
+        fpr_b = np.mean(preds[group_b & negatives]) if np.any(group_b & negatives) else 0.0
         tpr_gap = tpr_a - tpr_b
         fpr_gap = fpr_a - fpr_b
         return np.array(

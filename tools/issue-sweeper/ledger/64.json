@@ -1,0 +1,230 @@
+{
+  "issue_number": 64,
+  "title": "Create Roadmap Document for MVP and Beyond",
+  "url": "https://github.com/BrianCLong/summit/issues/64",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051495,
+      "node_id": "LA_kwDOPaNncM8AAAACHht45w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:docs",
+      "name": "type:docs",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Docs"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    },
+    {
+      "id": 9095068559,
+      "node_id": "LA_kwDOPaNncM8AAAACHhu7jw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:docs",
+      "name": "area:docs",
+      "color": "ededed",
+      "default": false,
+      "description": "Docs area"
+    }
+  ],
+  "updatedAt": "2025-08-12T04:39:16Z",
+  "createdAt": "2025-08-12T04:39:16Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12470,
+        "url": "https://github.com/BrianCLong/summit/pull/12470",
+        "mergedAt": "2025-12-18T02:45:55Z",
+        "title": "Add wave eight prompts 57-64"
+      },
+      {
+        "number": 15127,
+        "url": "https://github.com/BrianCLong/summit/pull/15127",
+        "mergedAt": "2025-12-30T21:20:45Z",
+        "title": "chore(deps): bump docker/setup-qemu-action from 2 to 3"
+      },
+      {
+        "number": 1616,
+        "url": "https://github.com/BrianCLong/summit/pull/1616",
+        "mergedAt": "2025-11-20T22:39:48Z",
+        "title": "feat: add zero trust security controls"
+      },
+      {
+        "number": 15126,
+        "url": "https://github.com/BrianCLong/summit/pull/15126",
+        "mergedAt": "2025-12-30T21:31:10Z",
+        "title": "chore(deps): bump the minor-and-patch group with 4 updates"
+      },
+      {
+        "number": 15342,
+        "url": "https://github.com/BrianCLong/summit/pull/15342",
+        "mergedAt": "2026-01-01T08:47:00Z",
+        "title": "Create eight new product requirement documents"
+      },
+      {
+        "number": 1322,
+        "url": "https://github.com/BrianCLong/summit/pull/1322",
+        "mergedAt": "2025-09-23T06:10:11Z",
+        "title": "chore(deps): bump @opentelemetry/auto-instrumentations-node from 0.63.0 to 0.64.1"
+      },
+      {
+        "number": 15349,
+        "url": "https://github.com/BrianCLong/summit/pull/15349",
+        "mergedAt": "2026-01-01T09:42:36Z",
+        "title": "feat: MVP-4 GA Security Tests and ESM Fixes"
+      },
+      {
+        "number": 10108,
+        "url": "https://github.com/BrianCLong/summit/pull/10108",
+        "mergedAt": "2025-10-14T11:52:49Z",
+        "title": "docs: add Summit platform evaluation summary"
+      },
+      {
+        "number": 12007,
+        "url": "https://github.com/BrianCLong/summit/pull/12007",
+        "mergedAt": null,
+        "title": "Build Financial Crime Detection Platform"
+      },
+      {
+        "number": 15326,
+        "url": "https://github.com/BrianCLong/summit/pull/15326",
+        "mergedAt": null,
+        "title": "Add redteam harness module and scenarios"
+      },
+      {
+        "number": 10095,
+        "url": "https://github.com/BrianCLong/summit/pull/10095",
+        "mergedAt": "2025-10-14T13:05:57Z",
+        "title": "feat: add data retention policy engine"
+      },
+      {
+        "number": 13058,
+        "url": "https://github.com/BrianCLong/summit/pull/13058",
+        "mergedAt": "2025-12-04T15:40:49Z",
+        "title": "Add delivery guardrails workflows and release assets"
+      },
+      {
+        "number": 1341,
+        "url": "https://github.com/BrianCLong/summit/pull/1341",
+        "mergedAt": "2025-09-23T11:06:24Z",
+        "title": "Harden policy and SLO gates for Maestro stabilization"
+      },
+      {
+        "number": 10122,
+        "url": "https://github.com/BrianCLong/summit/pull/10122",
+        "mergedAt": "2025-10-14T08:53:50Z",
+        "title": "feat: add influence mining extractor pipeline"
+      },
+      {
+        "number": 1302,
+        "url": "https://github.com/BrianCLong/summit/pull/1302",
+        "mergedAt": "2025-09-23T17:05:47Z",
+        "title": "feat: build maestro conductor milestone shell"
+      },
+      {
+        "number": 11916,
+        "url": "https://github.com/BrianCLong/summit/pull/11916",
+        "mergedAt": "2025-11-20T10:21:11Z",
+        "title": "Wire CompanyOS for internal operations"
+      },
+      {
+        "number": 1204,
+        "url": "https://github.com/BrianCLong/summit/pull/1204",
+        "mergedAt": null,
+        "title": "chore(deps): bump the minor-and-patch group with 70 updates"
+      },
+      {
+        "number": 9795,
+        "url": "https://github.com/BrianCLong/summit/pull/9795",
+        "mergedAt": null,
+        "title": "Fix/bulk import lockfile sync"
+      },
+      {
+        "number": 9800,
+        "url": "https://github.com/BrianCLong/summit/pull/9800",
+        "mergedAt": null,
+        "title": "feat(monitoring): Enable error-budget monitoring and Maestro metrics export (EO-1, EO-2)"
+      },
+      {
+        "number": 9796,
+        "url": "https://github.com/BrianCLong/summit/pull/9796",
+        "mergedAt": "2025-10-03T03:51:08Z",
+        "title": "fix: sync lockfile for CI bulk import"
+      },
+      {
+        "number": 1338,
+        "url": "https://github.com/BrianCLong/summit/pull/1338",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/workflows"
+      },
+      {
+        "number": 1337,
+        "url": "https://github.com/BrianCLong/summit/pull/1337",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/docs"
+      },
+      {
+        "number": 1336,
+        "url": "https://github.com/BrianCLong/summit/pull/1336",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/deps"
+      },
+      {
+        "number": 1335,
+        "url": "https://github.com/BrianCLong/summit/pull/1335",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/hardening"
+      },
+      {
+        "number": 1334,
+        "url": "https://github.com/BrianCLong/summit/pull/1334",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/features"
+      },
+      {
+        "number": 1301,
+        "url": "https://github.com/BrianCLong/summit/pull/1301",
+        "mergedAt": "2025-09-23T06:38:37Z",
+        "title": "IntelGraph salvage: total recapture → promote key artifacts"
+      },
+      {
+        "number": 1279,
+        "url": "https://github.com/BrianCLong/summit/pull/1279",
+        "mergedAt": null,
+        "title": "feat(ga): artifacts pack for v1.0.0"
+      },
+      {
+        "number": 1300,
+        "url": "https://github.com/BrianCLong/summit/pull/1300",
+        "mergedAt": "2025-09-23T06:47:22Z",
+        "title": "Total Recapture: enterprise-ready green merge to main"
+      },
+      {
+        "number": 1283,
+        "url": "https://github.com/BrianCLong/summit/pull/1283",
+        "mergedAt": null,
+        "title": "feat: Maestro vNext - Complete AI-Augmented CI/CD Platform"
+      },
+      {
+        "number": 1309,
+        "url": "https://github.com/BrianCLong/summit/pull/1309",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Fix docling metrics registration and test scaffolding"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

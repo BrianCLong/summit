@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, List
 
 from .base58 import b58decode
 
@@ -21,15 +21,15 @@ class VerificationMethod:
 @dataclass
 class DidDocument:
     id: str
-    assertionMethod: List[str]
-    verificationMethod: List[VerificationMethod] = field(default_factory=list)
+    assertionMethod: list[str]
+    verificationMethod: list[VerificationMethod] = field(default_factory=list)
 
 
 class InMemoryDidResolver:
     """Resolver that holds DID documents in memory."""
 
     def __init__(self, docs: Iterable[DidDocument] | None = None) -> None:
-        self._docs: Dict[str, DidDocument] = {}
+        self._docs: dict[str, DidDocument] = {}
         if docs:
             for doc in docs:
                 self.register(doc)

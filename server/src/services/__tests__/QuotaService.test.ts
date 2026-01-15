@@ -1,15 +1,24 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { UsageKind } from '../../types/usage.js';
-import type { PoolClient, QueryResult } from 'pg';
+import PricingEngine from '../PricingEngine.js';
+type QueryResult<T = unknown> = { rows: T[] };
+type PoolClient = {
+  query: (...args: unknown[]) => Promise<QueryResult<any>>;
+  release: () => Promise<void>;
+};
 
 // 1. Create dependencies
-const mockQuery = jest.fn<() => Promise<QueryResult<any>>>();
-const mockRelease = jest.fn<() => Promise<void>>();
+const mockQuery = jest.fn() as jest.MockedFunction<
+  (...args: any[]) => Promise<QueryResult<any>>
+>;
+const mockRelease = jest.fn() as jest.MockedFunction<() => Promise<void>>;
 const mockClient: PoolClient = {
   query: mockQuery,
   release: mockRelease,
 } as unknown as PoolClient;
-const mockConnect = jest.fn<() => Promise<PoolClient>>(() => Promise.resolve(mockClient));
+const mockConnect = jest.fn(
+  () => Promise.resolve(mockClient),
+) as jest.MockedFunction<() => Promise<PoolClient>>;
 
 // 2. Mock modules
 jest.mock('../../config/database.js', () => ({
@@ -31,31 +40,33 @@ jest.mock('../../utils/metrics.js', () => ({
   }
 }));
 
-const mockGetEffectivePlan = jest.fn<(...args: any[]) => Promise<any>>();
-
-jest.mock('../PricingEngine.js', () => {
-    return {
-        default: {
-            getEffectivePlan: (...args: any[]) => mockGetEffectivePlan(...args)
-        }
-    };
-});
-
 // 3. Import Subject
 import { QuotaService } from '../QuotaService.js';
 
 describe('QuotaService', () => {
   let service: QuotaService;
+  let getEffectivePlanSpy: jest.SpiedFunction<typeof PricingEngine.getEffectivePlan>;
+  const basePlan = {
+    id: 'plan-1',
+    name: 'Test',
+    currency: 'USD',
+    features: {},
+    limits: {},
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     (QuotaService as any).instance = null;
+    mockConnect.mockResolvedValue(mockClient);
+    mockRelease.mockResolvedValue(undefined);
+    mockQuery.mockResolvedValue({ rows: [{ total: '0' }] } as any);
+    getEffectivePlanSpy = jest.spyOn(PricingEngine, 'getEffectivePlan');
     service = QuotaService.getInstance();
   });
 
   it('should allow if no limit is defined', async () => {
-    mockGetEffectivePlan.mockResolvedValue({
-      plan: { limits: {} },
+    getEffectivePlanSpy.mockResolvedValue({
+      plan: basePlan,
       overrides: null
     });
 
@@ -69,11 +80,12 @@ describe('QuotaService', () => {
   });
 
   it('should deny if hard cap exceeded', async () => {
-    mockGetEffectivePlan.mockResolvedValue({
+    getEffectivePlanSpy.mockResolvedValue({
       plan: {
+        ...basePlan,
         limits: {
           'custom': { hardCap: 100 }
-        }
+        },
       },
       overrides: null
     });
@@ -94,11 +106,12 @@ describe('QuotaService', () => {
   });
 
   it('should trigger soft threshold warning', async () => {
-    mockGetEffectivePlan.mockResolvedValue({
+    getEffectivePlanSpy.mockResolvedValue({
       plan: {
+        ...basePlan,
         limits: {
           'custom': { hardCap: 100, softThresholds: [80] }
-        }
+        },
       },
       overrides: null
     });

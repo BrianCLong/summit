@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
 import { getNlGraphQueryService } from '../index.js';
@@ -8,7 +9,10 @@ jest.mock('../index.js', () => ({
   getNlGraphQueryService: jest.fn(),
 }));
 
-describe('nl-graph-query routes', () => {
+const run = process.env.NO_NETWORK_LISTEN !== 'true';
+const describeIf = run ? describe : describe.skip;
+
+describeIf('nl-graph-query routes', () => {
   const app = express();
   app.use(express.json());
   beforeAll(async () => {

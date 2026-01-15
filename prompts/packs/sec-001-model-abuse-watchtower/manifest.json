@@ -1,0 +1,38 @@
+{
+  "id": "sec-001-model-abuse-watchtower",
+  "version": "1.0.0",
+  "description": "Imported from legacy structure: sec-001-model-abuse-watchtower",
+  "model_config": {
+    "model": "gpt-4",
+    "temperature": 0.0
+  },
+  "vars": {
+    "16": {
+      "type": "string",
+      "description": "Auto-detected"
+    },
+    "prUrl": {
+      "type": "string",
+      "description": "Auto-detected"
+    },
+    "3": {
+      "type": "string",
+      "description": "Auto-detected"
+    },
+    "2": {
+      "type": "string",
+      "description": "Auto-detected"
+    },
+    "4": {
+      "type": "string",
+      "description": "Auto-detected"
+    }
+  },
+  "guardrails": {
+    "tags": [
+      "claude",
+      "legacy"
+    ]
+  },
+  "template_path": "template.md"
+}

@@ -529,7 +529,7 @@ def health_check():
 @app.get("/graph")
 def get_graph_data():
     """Fetches a subgraph for visualization."""
-    query = "MATCH (n)-[r]->(m) " "RETURN n, r, m LIMIT 100"
+    query = "MATCH (n)-[r]->(m) RETURN n, r, m LIMIT 100"
     with neo4j_driver.session() as session:
         result = session.run(query)
         nodes = []

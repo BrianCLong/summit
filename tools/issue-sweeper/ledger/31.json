@@ -1,0 +1,239 @@
+{
+  "issue_number": 31,
+  "title": "M1: GitHub Actions CI for client and server (lint, test, build)",
+  "url": "https://github.com/BrianCLong/summit/issues/31",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:11:31Z",
+  "createdAt": "2025-08-12T00:15:32Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13847,
+        "url": "https://github.com/BrianCLong/summit/pull/13847",
+        "mergedAt": "2025-12-20T03:44:50Z",
+        "title": "Add sprint plan for Jul 20–31, 2026"
+      },
+      {
+        "number": 15181,
+        "url": "https://github.com/BrianCLong/summit/pull/15181",
+        "mergedAt": "2025-12-31T14:21:22Z",
+        "title": "chore(deps): bump github/codeql-action from 3 to 4"
+      },
+      {
+        "number": 13849,
+        "url": "https://github.com/BrianCLong/summit/pull/13849",
+        "mergedAt": "2025-12-20T03:45:00Z",
+        "title": "Add Sprint 19 plan for Aug 31–Sep 11 2026"
+      },
+      {
+        "number": 13289,
+        "url": "https://github.com/BrianCLong/summit/pull/13289",
+        "mergedAt": "2025-12-17T06:08:23Z",
+        "title": "Sprint 31: Billing E2E, ER Eval, and API v1.1"
+      },
+      {
+        "number": 15229,
+        "url": "https://github.com/BrianCLong/summit/pull/15229",
+        "mergedAt": null,
+        "title": "docs: add institutional multi-year roadmap artifact"
+      },
+      {
+        "number": 14557,
+        "url": "https://github.com/BrianCLong/summit/pull/14557",
+        "mergedAt": "2025-12-27T04:15:25Z",
+        "title": "chore(deps): Bump requests from 2.31.0 to 2.32.4 in /predictive_threat_suite"
+      },
+      {
+        "number": 13859,
+        "url": "https://github.com/BrianCLong/summit/pull/13859",
+        "mergedAt": "2025-12-20T03:23:59Z",
+        "title": "Add Q1 2027 revenue engine sprint plan"
+      },
+      {
+        "number": 15277,
+        "url": "https://github.com/BrianCLong/summit/pull/15277",
+        "mergedAt": "2026-01-01T05:13:38Z",
+        "title": "docs: refresh SummitThreat roadmap narrative"
+      },
+      {
+        "number": 15227,
+        "url": "https://github.com/BrianCLong/summit/pull/15227",
+        "mergedAt": null,
+        "title": "Document tiered autonomy contracts and policy gates"
+      },
+      {
+        "number": 15211,
+        "url": "https://github.com/BrianCLong/summit/pull/15211",
+        "mergedAt": null,
+        "title": "Add marketing pitch prompt system"
+      },
+      {
+        "number": 12502,
+        "url": "https://github.com/BrianCLong/summit/pull/12502",
+        "mergedAt": "2025-12-18T02:39:41Z",
+        "title": "Deepfake detection and defense mechanisms"
+      },
+      {
+        "number": 13346,
+        "url": "https://github.com/BrianCLong/summit/pull/13346",
+        "mergedAt": "2025-12-05T17:34:11Z",
+        "title": "build(deps): bump jws from 3.2.2 to 3.2.3 in /deepagent-mvp"
+      },
+      {
+        "number": 15300,
+        "url": "https://github.com/BrianCLong/summit/pull/15300",
+        "mergedAt": "2026-01-01T08:02:09Z",
+        "title": "Restore JWT security coverage with ESM-safe mocks"
+      },
+      {
+        "number": 15126,
+        "url": "https://github.com/BrianCLong/summit/pull/15126",
+        "mergedAt": "2025-12-30T21:31:10Z",
+        "title": "chore(deps): bump the minor-and-patch group with 4 updates"
+      },
+      {
+        "number": 1723,
+        "url": "https://github.com/BrianCLong/summit/pull/1723",
+        "mergedAt": null,
+        "title": "chore(deps): bump requests from 2.31.0 to 2.32.4 in /server"
+      },
+      {
+        "number": 15128,
+        "url": "https://github.com/BrianCLong/summit/pull/15128",
+        "mergedAt": "2025-12-30T22:23:16Z",
+        "title": "chore(deps): bump napi-derive from 2.16.13 to 3.4.1"
+      },
+      {
+        "number": 13471,
+        "url": "https://github.com/BrianCLong/summit/pull/13471",
+        "mergedAt": "2025-12-07T02:16:04Z",
+        "title": "deps(npm): bump express from 5.1.0 to 5.2.0"
+      },
+      {
+        "number": 12235,
+        "url": "https://github.com/BrianCLong/summit/pull/12235",
+        "mergedAt": "2025-11-23T01:04:50Z",
+        "title": "Bump next from 14.1.0 to 14.2.32 in /web/retention-dashboard"
+      },
+      {
+        "number": 11795,
+        "url": "https://github.com/BrianCLong/summit/pull/11795",
+        "mergedAt": null,
+        "title": "feat: deliver research integration capabilities"
+      },
+      {
+        "number": 12296,
+        "url": "https://github.com/BrianCLong/summit/pull/12296",
+        "mergedAt": "2025-11-25T20:34:22Z",
+        "title": "Bump body-parser from 2.2.0 to 2.2.1 in /conductor-ui/backend"
+      },
+      {
+        "number": 1151,
+        "url": "https://github.com/BrianCLong/summit/pull/1151",
+        "mergedAt": null,
+        "title": "chore(deps): bump argon2 from 0.31.2 to 0.44.0 in /server"
+      },
+      {
+        "number": 10208,
+        "url": "https://github.com/BrianCLong/summit/pull/10208",
+        "mergedAt": "2025-10-15T03:46:45Z",
+        "title": "ci(actions): repo-wide resilience—cron jitter, concurrency, backlog guard, and matrix caps"
+      },
+      {
+        "number": 13736,
+        "url": "https://github.com/BrianCLong/summit/pull/13736",
+        "mergedAt": "2025-12-20T03:32:42Z",
+        "title": "build(deps-dev): bump vite from 4.5.14 to 5.4.21 in /frontend"
+      },
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 15125,
+        "url": "https://github.com/BrianCLong/summit/pull/15125",
+        "mergedAt": "2025-12-30T21:20:48Z",
+        "title": "chore(deps): bump mikefarah/yq from 4.30.8 to 4.50.1"
+      },
+      {
+        "number": 10243,
+        "url": "https://github.com/BrianCLong/summit/pull/10243",
+        "mergedAt": "2025-10-16T05:43:40Z",
+        "title": "chore(deps): bump next from 13.5.4 to 14.2.32 in /adversarial-misinfo-defense-platform/web"
+      },
+      {
+        "number": 10182,
+        "url": "https://github.com/BrianCLong/summit/pull/10182",
+        "mergedAt": "2025-10-08T17:14:20Z",
+        "title": "chore(deps): bump next from 14.2.3 to 14.2.32 in /intelgraph-mcp/shootout-ui"
+      },
+      {
+        "number": 10142,
+        "url": "https://github.com/BrianCLong/summit/pull/10142",
+        "mergedAt": "2025-10-14T08:36:31Z",
+        "title": "feat: add chaos orchestration framework"
+      },
+      {
+        "number": 9797,
+        "url": "https://github.com/BrianCLong/summit/pull/9797",
+        "mergedAt": "2025-10-03T03:57:04Z",
+        "title": "chore(deps): bump next from 14.2.5 to 14.2.32 in /october2025/companyos-switchboard/apps/web"
+      },
+      {
+        "number": 121,
+        "url": "https://github.com/BrianCLong/summit/pull/121",
+        "mergedAt": null,
+        "title": "Update cytoscape-node-resize requirement from ^1.1.5 to ^3.2.2 in /client"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

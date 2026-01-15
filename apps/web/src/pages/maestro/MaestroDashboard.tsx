@@ -20,7 +20,6 @@ import {
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
 import { CommandPaletteProvider } from '../../contexts/CommandPaletteContext'
-import { TenantProvider } from '../../contexts/TenantContext'
 import { NotificationProvider } from '../../contexts/NotificationContext'
 
 // Import page components (to be created)
@@ -165,51 +164,46 @@ function ContextBar() {
 export default function MaestroDashboard() {
   return (
     <CommandPaletteProvider>
-      <TenantProvider>
-        <NotificationProvider>
-          <div className="min-h-screen bg-gray-50">
-            <MaestroBanner />
+      <NotificationProvider>
+        <div className="min-h-screen bg-gray-50">
+          <MaestroBanner />
 
-            <div className="flex h-[calc(100vh-theme(spacing.12))]">
-              <MaestroNavigation />
+          <div className="flex h-[calc(100vh-theme(spacing.12))]">
+            <MaestroNavigation />
 
-              <div className="flex-1 flex flex-col">
-                <ContextBar />
+            <div className="flex-1 flex flex-col">
+              <ContextBar />
 
-                <main className="flex-1 overflow-y-auto">
-                  <Routes>
-                    <Route
-                      path="/"
-                      element={<Navigate to="/maestro" replace />}
-                    />
-                    <Route path="/maestro" element={<Overview />} />
-                    <Route path="/maestro/runs/*" element={<Runs />} />
-                    <Route path="/maestro/runbooks/*" element={<Runbooks />} />
-                    <Route path="/maestro/approvals" element={<Approvals />} />
-                    <Route
-                      path="/maestro/artifacts/*"
-                      element={<Artifacts />}
-                    />
-                    <Route path="/maestro/policies/*" element={<Policies />} />
-                    <Route path="/maestro/budgets" element={<Budgets />} />
-                    <Route
-                      path="/maestro/observability"
-                      element={<Observability />}
-                    />
-                    <Route path="/maestro/dlq" element={<DLQReplay />} />
-                    <Route
-                      path="/maestro/integrations/*"
-                      element={<Integrations />}
-                    />
-                    <Route path="/maestro/admin/*" element={<Admin />} />
-                    <Route path="/maestro/audit" element={<Audit />} />
-                  </Routes>
-                </main>
-              </div>
+              <main className="flex-1 overflow-y-auto">
+                <Routes>
+                  <Route
+                    path="/"
+                    element={<Navigate to="/maestro" replace />}
+                  />
+                  <Route path="/maestro" element={<Overview />} />
+                  <Route path="/maestro/runs/*" element={<Runs />} />
+                  <Route path="/maestro/runbooks/*" element={<Runbooks />} />
+                  <Route path="/maestro/approvals" element={<Approvals />} />
+                  <Route path="/maestro/artifacts/*" element={<Artifacts />} />
+                  <Route path="/maestro/policies/*" element={<Policies />} />
+                  <Route path="/maestro/budgets" element={<Budgets />} />
+                  <Route
+                    path="/maestro/observability"
+                    element={<Observability />}
+                  />
+                  <Route path="/maestro/dlq" element={<DLQReplay />} />
+                  <Route
+                    path="/maestro/integrations/*"
+                    element={<Integrations />}
+                  />
+                  <Route path="/maestro/admin/*" element={<Admin />} />
+                  <Route path="/maestro/audit" element={<Audit />} />
+                </Routes>
+              </main>
             </div>
           </div>
-        </NotificationProvider>
-      </TenantProvider>
+        </div>
+      </NotificationProvider>
     </CommandPaletteProvider>
   )
 }

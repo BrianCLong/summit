@@ -1,0 +1,95 @@
+{
+  "issue_number": 119,
+  "title": "chore(deps-dev): bump concurrently from 8.2.2 to 9.2.0",
+  "url": "https://github.com/BrianCLong/summit/pull/119",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9102204147,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic8w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/javascript",
+      "name": "javascript",
+      "color": "168700",
+      "default": false,
+      "description": "Pull requests that update javascript code"
+    }
+  ],
+  "updatedAt": "2025-08-14T20:19:49Z",
+  "createdAt": "2025-08-13T05:04:22Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13101,
+        "url": "https://github.com/BrianCLong/summit/pull/13101",
+        "mergedAt": "2025-12-17T05:44:01Z",
+        "title": "Add Multi-Tenant Boundary Stress Test Engine"
+      },
+      {
+        "number": 10106,
+        "url": "https://github.com/BrianCLong/summit/pull/10106",
+        "mergedAt": "2025-10-14T11:52:55Z",
+        "title": "feat: add uvb76 monitoring toolkit"
+      },
+      {
+        "number": 10118,
+        "url": "https://github.com/BrianCLong/summit/pull/10118",
+        "mergedAt": "2025-10-14T10:40:09Z",
+        "title": "feat: Enforce automated test policies in CI/CD"
+      },
+      {
+        "number": 1339,
+        "url": "https://github.com/BrianCLong/summit/pull/1339",
+        "mergedAt": "2025-09-23T11:13:29Z",
+        "title": "Add policy-aware workcell runtime and gateway integration"
+      },
+      {
+        "number": 11922,
+        "url": "https://github.com/BrianCLong/summit/pull/11922",
+        "mergedAt": "2025-11-20T10:05:25Z",
+        "title": "Build real-time streaming analytics pipeline"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 11919,
+        "url": "https://github.com/BrianCLong/summit/pull/11919",
+        "mergedAt": "2025-11-20T10:05:41Z",
+        "title": "Build Advanced Data Integration and ETL Platform"
+      },
+      {
+        "number": 13193,
+        "url": "https://github.com/BrianCLong/summit/pull/13193",
+        "mergedAt": "2025-12-04T15:38:38Z",
+        "title": "Build React Native mobile app with OSINT dashboard"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import re
-from fastapi import HTTPException
 
+from fastapi import HTTPException
 
 DISALLOWED_PATTERNS = [
     r"make (this|it) more convincing",

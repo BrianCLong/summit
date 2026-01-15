@@ -30,7 +30,25 @@ export class ForesightService {
     }
 
     // 2. Persist Scenario
-    const driver = getNeo4jDriver();
+    let driver: ReturnType<typeof getNeo4jDriver> | undefined;
+    try {
+      driver = getNeo4jDriver();
+    } catch {
+      return {
+        scenario: scenarioName,
+        timeline: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        forecast: results,
+      };
+    }
+
+    if (!driver) {
+      return {
+        scenario: scenarioName,
+        timeline: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        forecast: results,
+      };
+    }
+
     const session = driver.session();
     try {
         await session.run(`
@@ -79,7 +97,9 @@ export class ForesightService {
             RETURN c.name as concept
         `, { tenantId });
 
-        const concepts = result.records.map(r => r.get('concept'));
+        const concepts = result.records.map((record: any) =>
+          record.get('concept'),
+        );
 
         for (const concept of concepts) {
             await session.run(`

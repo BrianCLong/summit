@@ -1,0 +1,52 @@
+{
+  "issue_number": 154,
+  "title": "Insight Generation via LLM",
+  "url": "https://github.com/BrianCLong/summit/issues/154",
+  "state": "open",
+  "labels": [],
+  "updatedAt": "2025-08-13T17:08:39Z",
+  "createdAt": "2025-08-13T17:08:39Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15256,
+        "url": "https://github.com/BrianCLong/summit/pull/15256",
+        "mergedAt": "2026-01-01T08:58:50Z",
+        "title": "feat: strengthen webauthn and deduplication flows"
+      },
+      {
+        "number": 1153,
+        "url": "https://github.com/BrianCLong/summit/pull/1153",
+        "mergedAt": null,
+        "title": "chore(deps): bump puppeteer from 22.15.0 to 24.18.0 in /server"
+      },
+      {
+        "number": 10078,
+        "url": "https://github.com/BrianCLong/summit/pull/10078",
+        "mergedAt": "2025-10-04T22:42:55Z",
+        "title": "feat: add analytics threat intelligence layer"
+      },
+      {
+        "number": 1339,
+        "url": "https://github.com/BrianCLong/summit/pull/1339",
+        "mergedAt": "2025-09-23T11:13:29Z",
+        "title": "Add policy-aware workcell runtime and gateway integration"
+      },
+      {
+        "number": 1280,
+        "url": "https://github.com/BrianCLong/summit/pull/1280",
+        "mergedAt": "2025-09-18T05:21:24Z",
+        "title": "feat(ga): CI/ops hardening (conflict-free from ga-core)"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

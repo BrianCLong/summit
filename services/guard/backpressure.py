@@ -11,7 +11,7 @@ import logging
 import time
 from collections import deque
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 # Configure logging
@@ -158,7 +158,7 @@ class BackpressureHook:
                 query_hash=query_hash,
                 is_persisted=is_persisted,
                 priority=self._calculate_priority(tenant_id, is_persisted, estimated_cost),
-                timestamp=datetime.now(timezone.utc),
+                timestamp=datetime.now(UTC),
                 estimated_cost=estimated_cost,
             )
 

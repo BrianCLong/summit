@@ -16,6 +16,7 @@ import { keyRotationService } from '../../security/KeyRotationService.js';
 import { piiDetector } from '../../privacy/PIIDetector.js';
 import { Principal } from '../../types/identity.js';
 import logger from '../../utils/logger.js';
+import { sensitiveContextMiddleware } from '../../middleware/sensitive-context.js';
 
 const router = express.Router();
 const authz = new AuthorizationServiceImpl();
@@ -327,6 +328,7 @@ router.post(
   ensureAuthenticated,
   buildPrincipal,
   requireSecurityAdmin,
+  sensitiveContextMiddleware,
   async (req: Request, res: Response): Promise<void> => {
     try {
       const { data, type = 'object', includeValue = false } = req.body;
@@ -343,7 +345,10 @@ router.post(
         envelope = await piiDetector.scanObject(data, { includeValue });
       }
 
-      res.json(envelope);
+      res.json({
+        ...envelope,
+        accessContext: (req as any).sensitiveAccessContext,
+      });
     } catch (error: any) {
       logger.error('Error scanning for PII:', error);
       res.status(500).json({ error: 'Failed to scan for PII', message: error.message });

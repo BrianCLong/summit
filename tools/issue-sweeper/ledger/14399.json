@@ -1,0 +1,21 @@
+{
+  "issue_number": 14399,
+  "title": "Case-Scoped Release Criteria Engine",
+  "url": "https://github.com/BrianCLong/summit/pull/14399",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-24T03:19:23Z",
+  "createdAt": "2025-12-24T03:04:44Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

@@ -1,0 +1,86 @@
+{
+  "issue_number": 642,
+  "title": "feat: add analytics service bridge",
+  "url": "https://github.com/BrianCLong/summit/pull/642",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-19T13:01:55Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1756,
+        "url": "https://github.com/BrianCLong/summit/pull/1756",
+        "mergedAt": "2025-09-29T21:46:53Z",
+        "title": "chore(deps): bump chalk from 4.1.2 to 5.6.2"
+      },
+      {
+        "number": 13105,
+        "url": "https://github.com/BrianCLong/summit/pull/13105",
+        "mergedAt": "2025-12-04T15:39:29Z",
+        "title": "Build resilient Redis queue with failover support"
+      },
+      {
+        "number": 12296,
+        "url": "https://github.com/BrianCLong/summit/pull/12296",
+        "mergedAt": "2025-11-25T20:34:22Z",
+        "title": "Bump body-parser from 2.2.0 to 2.2.1 in /conductor-ui/backend"
+      },
+      {
+        "number": 13107,
+        "url": "https://github.com/BrianCLong/summit/pull/13107",
+        "mergedAt": "2025-12-03T04:34:58Z",
+        "title": "Build governance orchestration for agent fleets"
+      },
+      {
+        "number": 13148,
+        "url": "https://github.com/BrianCLong/summit/pull/13148",
+        "mergedAt": "2025-12-17T05:36:11Z",
+        "title": "C6 — CI Time Budget Enforcer"
+      },
+      {
+        "number": 613,
+        "url": "https://github.com/BrianCLong/summit/pull/613",
+        "mergedAt": "2025-08-18T14:25:09Z",
+        "title": "chore(deps-dev): bump @testing-library/jest-dom from 5.17.0 to 6.7.0 in /client"
+      },
+      {
+        "number": 13192,
+        "url": "https://github.com/BrianCLong/summit/pull/13192",
+        "mergedAt": "2025-12-04T15:38:41Z",
+        "title": "Add HUMINT source management and debrief workflows"
+      },
+      {
+        "number": 13165,
+        "url": "https://github.com/BrianCLong/summit/pull/13165",
+        "mergedAt": "2025-12-17T05:34:42Z",
+        "title": "Unified prompt governance dashboard 1"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

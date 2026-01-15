@@ -174,7 +174,7 @@ describe('FeatureFlagService', () => {
       await service.initialize();
 
       // Should only log initialization once
-      const initCalls = mockLogger.info.mock.calls.filter((call) =>
+      const initCalls = mockLogger.info.mock.calls.filter((call: any[]) =>
         call[0].includes('Initializing feature flag service')
       );
       expect(initCalls).toHaveLength(1);
@@ -197,7 +197,7 @@ describe('FeatureFlagService', () => {
       ]);
 
       // Should only initialize once
-      const initCalls = mockLogger.info.mock.calls.filter((call) =>
+      const initCalls = mockLogger.info.mock.calls.filter((call: any[]) =>
         call[0].includes('Initializing feature flag service')
       );
       expect(initCalls).toHaveLength(1);

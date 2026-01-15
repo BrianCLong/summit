@@ -4,6 +4,7 @@ Ownership Drift Detection Script
 Checks for files in critical paths that are not covered by CODEOWNERS.
 Also validates that domains in OWNERSHIP_MODEL.md have active DRIs.
 """
+
 import os
 import sys
 
@@ -13,16 +14,17 @@ CRITICAL_PATHS = [
     "server/src/provenance",
     "server/src/security",
     "policy",
-    "opa"
+    "opa",
 ]
 
 CODEOWNERS_FILE = "CODEOWNERS"
+
 
 def load_codeowners():
     owners = []
     if not os.path.exists(CODEOWNERS_FILE):
         return []
-    with open(CODEOWNERS_FILE, "r") as f:
+    with open(CODEOWNERS_FILE) as f:
         for line in f:
             line = line.strip()
             if line and not line.startswith("#"):
@@ -30,6 +32,7 @@ def load_codeowners():
                 if parts:
                     owners.append(parts[0])
     return owners
+
 
 def check_drift():
     owned_paths = load_codeowners()
@@ -69,6 +72,7 @@ def check_drift():
     else:
         print("Ownership Audit Passed: All critical paths have DRIs.")
         sys.exit(0)
+
 
 if __name__ == "__main__":
     check_drift()

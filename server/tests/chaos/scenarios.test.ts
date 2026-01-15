@@ -4,7 +4,7 @@ import { ChaosHarness } from '../../src/lib/chaos/harness.js';
 import { ChaosHttpClient } from '../../src/lib/chaos/ChaosHttpClient.js';
 import { ChaosGraphDriver } from '../../src/lib/chaos/ChaosGraphDriver.js';
 import { ChaosJobMiddleware } from '../../src/lib/chaos/ChaosJobMiddleware.js';
-import type { Driver, Session, QueryResult } from 'neo4j-driver';
+import type { Driver, Session } from 'neo4j-driver';
 
 // Mock Neo4j driver/session
 const mockRun = jest.fn();

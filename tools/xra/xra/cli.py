@@ -4,32 +4,41 @@ from __future__ import annotations
 
 import argparse
 import json
+from collections.abc import Iterable
 from dataclasses import asdict, is_dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable
+from typing import Any
 
 from .explanations import explain_rank_shift
 from .metrics import MetricSummary, compute_bias_metrics
-from .report import generate_markdown_report
 from .replay import load_retrieval_log
+from .report import generate_markdown_report
 
 
-def _serialise_metric_summary(summary: MetricSummary) -> Dict[str, Any]:
+def _serialise_metric_summary(summary: MetricSummary) -> dict[str, Any]:
     return {"average": summary.average, "by_query": summary.by_query}
 
 
-def _serialise_metrics(metrics: dict) -> Dict[str, Any]:
+def _serialise_metrics(metrics: dict) -> dict[str, Any]:
     output = {
         "k_values": metrics["k_values"],
         "baseline": {
             "exposure": metrics["baseline"]["exposure"],
-            "fairness": {k: _serialise_metric_summary(v) for k, v in metrics["baseline"]["fairness"].items()},
-            "coverage": {k: _serialise_metric_summary(v) for k, v in metrics["baseline"]["coverage"].items()},
+            "fairness": {
+                k: _serialise_metric_summary(v) for k, v in metrics["baseline"]["fairness"].items()
+            },
+            "coverage": {
+                k: _serialise_metric_summary(v) for k, v in metrics["baseline"]["coverage"].items()
+            },
         },
         "candidate": {
             "exposure": metrics["candidate"]["exposure"],
-            "fairness": {k: _serialise_metric_summary(v) for k, v in metrics["candidate"]["fairness"].items()},
-            "coverage": {k: _serialise_metric_summary(v) for k, v in metrics["candidate"]["coverage"].items()},
+            "fairness": {
+                k: _serialise_metric_summary(v) for k, v in metrics["candidate"]["fairness"].items()
+            },
+            "coverage": {
+                k: _serialise_metric_summary(v) for k, v in metrics["candidate"]["coverage"].items()
+            },
         },
         "alerts": metrics["alerts"],
     }
@@ -76,7 +85,9 @@ def run_audit(args: argparse.Namespace) -> dict:
             "summary": summary,
             "alerts": metrics["alerts"],
         }
-        Path(args.dashboard_data).write_text(json.dumps(dashboard_payload, indent=2), encoding="utf8")
+        Path(args.dashboard_data).write_text(
+            json.dumps(dashboard_payload, indent=2), encoding="utf8"
+        )
     return summary
 
 

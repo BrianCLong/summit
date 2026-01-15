@@ -7,7 +7,7 @@ import hashlib
 import json
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import structlog
 from fastapi import FastAPI, HTTPException
@@ -85,7 +85,7 @@ class EvidenceService:
     ) -> EvidenceRegisterResponse:
         """Register evidence with transforms"""
         evidence_id = str(uuid.uuid4())
-        timestamp = datetime.now(timezone.utc)
+        timestamp = datetime.now(UTC)
 
         self.logger.info(
             "Registering evidence", evidence_id=evidence_id, checksum=request.checksum[:16] + "..."
@@ -191,7 +191,7 @@ def create_evidence_app():
         """Health check endpoint"""
         return {
             "status": "healthy",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "service": "prov-ledger-evidence-register",
             "version": "1.0.0-beta",
         }

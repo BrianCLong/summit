@@ -1,0 +1,80 @@
+{
+  "issue_number": 208,
+  "title": "GNN LP: Training pipeline (PyTorch Lightning)",
+  "url": "https://github.com/BrianCLong/summit/issues/208",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767070,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX03g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/enhancement",
+      "name": "enhancement",
+      "color": "a2eeef",
+      "default": true,
+      "description": "New feature or request"
+    },
+    {
+      "id": 9103342705,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn8cQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/AI",
+      "name": "AI",
+      "color": "bfdadc",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-14T04:53:33Z",
+  "createdAt": "2025-08-14T04:53:33Z",
+  "classification": "feature",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13181,
+        "url": "https://github.com/BrianCLong/summit/pull/13181",
+        "mergedAt": "2025-12-04T15:39:09Z",
+        "title": "Add quantum-resistant crypto algorithms for Summit"
+      },
+      {
+        "number": 11922,
+        "url": "https://github.com/BrianCLong/summit/pull/11922",
+        "mergedAt": "2025-11-20T10:05:25Z",
+        "title": "Build real-time streaming analytics pipeline"
+      },
+      {
+        "number": 11815,
+        "url": "https://github.com/BrianCLong/summit/pull/11815",
+        "mergedAt": "2025-11-10T13:08:11Z",
+        "title": "chore(deps): bump the js-dependencies group with 34 updates"
+      },
+      {
+        "number": 11892,
+        "url": "https://github.com/BrianCLong/summit/pull/11892",
+        "mergedAt": null,
+        "title": "Build Counterintelligence Operations Platform"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

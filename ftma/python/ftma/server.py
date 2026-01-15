@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from typing import Dict, Tuple
 
 from . import Coordinator
 
@@ -13,7 +12,7 @@ from . import Coordinator
 class FtmaRequestHandler(BaseHTTPRequestHandler):
     coordinator: Coordinator | None = None
 
-    def _json_response(self, status: HTTPStatus, payload: Dict) -> None:
+    def _json_response(self, status: HTTPStatus, payload: dict) -> None:
         body = json.dumps(payload).encode("utf-8")
         self.send_response(status.value)
         self.send_header("Content-Type", "application/json")
@@ -21,7 +20,7 @@ class FtmaRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def do_GET(self) -> None:  # noqa: N802 - required by BaseHTTPRequestHandler
+    def do_GET(self) -> None:
         if self.path != "/status":
             self._json_response(HTTPStatus.NOT_FOUND, {"error": "not found"})
             return
@@ -38,7 +37,7 @@ class FtmaRequestHandler(BaseHTTPRequestHandler):
             },
         )
 
-    def do_POST(self) -> None:  # noqa: N802 - required by BaseHTTPRequestHandler
+    def do_POST(self) -> None:
         length = int(self.headers.get("Content-Length", "0"))
         body = self.rfile.read(length)
         try:
@@ -54,10 +53,12 @@ class FtmaRequestHandler(BaseHTTPRequestHandler):
         else:
             self._json_response(HTTPStatus.NOT_FOUND, {"error": "not found"})
 
-    def _handle_register(self, payload: Dict) -> None:
+    def _handle_register(self, payload: dict) -> None:
         coord = self.__class__.coordinator
         if coord is None:
-            self._json_response(HTTPStatus.SERVICE_UNAVAILABLE, {"error": "coordinator not configured"})
+            self._json_response(
+                HTTPStatus.SERVICE_UNAVAILABLE, {"error": "coordinator not configured"}
+            )
             return
         try:
             client_id = int(payload["client_id"])
@@ -72,10 +73,12 @@ class FtmaRequestHandler(BaseHTTPRequestHandler):
             return
         self._json_response(HTTPStatus.OK, {"masked": masked})
 
-    def _handle_finalize(self, payload: Dict) -> None:
+    def _handle_finalize(self, payload: dict) -> None:
         coord = self.__class__.coordinator
         if coord is None:
-            self._json_response(HTTPStatus.SERVICE_UNAVAILABLE, {"error": "coordinator not configured"})
+            self._json_response(
+                HTTPStatus.SERVICE_UNAVAILABLE, {"error": "coordinator not configured"}
+            )
             return
         try:
             active = [int(v) for v in payload["active_clients"]]
@@ -99,7 +102,15 @@ class FtmaRequestHandler(BaseHTTPRequestHandler):
         )
 
 
-def serve(host: str = "127.0.0.1", port: int = 8080, *, num_clients: int, threshold: int, dimension: int, scale: int = 1_000_000) -> Tuple[str, int]:
+def serve(
+    host: str = "127.0.0.1",
+    port: int = 8080,
+    *,
+    num_clients: int,
+    threshold: int,
+    dimension: int,
+    scale: int = 1_000_000,
+) -> tuple[str, int]:
     """Start the FTMA reference server and return the bound address."""
 
     FtmaRequestHandler.coordinator = Coordinator(num_clients, threshold, dimension, scale)
@@ -113,4 +124,4 @@ def serve(host: str = "127.0.0.1", port: int = 8080, *, num_clients: int, thresh
     return server.server_address
 
 
-__all__ = ["serve", "FtmaRequestHandler"]
+__all__ = ["FtmaRequestHandler", "serve"]

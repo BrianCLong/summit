@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-import re
-import sys
 import os
+import re
 import subprocess
+import sys
 
 PATTERNS = {
     "AWS Access Key": r"AKIA[0-9A-Z]{16}",
@@ -11,41 +11,50 @@ PATTERNS = {
     "Generic Token": r"bearer [a-zA-Z0-9\-\._~\+\/]{30,}",
     "Slack Token": r"xox[baprs]-([0-9a-zA-Z]{10,48})?",
     "Google API Key": r"AIza[0-9A-Za-z\\-_]{35}",
-    "Github Token": r"(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{36}"
+    "Github Token": r"(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{36}",
 }
+
 
 def get_staged_files():
     try:
-        result = subprocess.run(["git", "diff", "--name-only", "--cached"], capture_output=True, text=True)
+        result = subprocess.run(
+            ["git", "diff", "--name-only", "--cached"], capture_output=True, text=True
+        )
         return [f for f in result.stdout.splitlines() if os.path.isfile(f)]
     except Exception:
         return []
 
+
 def scan_file(filepath):
     issues = []
     try:
-        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(filepath, encoding="utf-8", errors="ignore") as f:
             content = f.read()
             for name, pattern in PATTERNS.items():
                 if re.search(pattern, content):
                     # Filter out example files or mock data if needed
-                    if "example" in filepath or "mock" in filepath.lower() or "test" in filepath.lower():
+                    if (
+                        "example" in filepath
+                        or "mock" in filepath.lower()
+                        or "test" in filepath.lower()
+                    ):
                         continue
                     issues.append(f"Found {name}")
     except Exception as e:
         print(f"Error reading {filepath}: {e}")
     return issues
 
+
 def main():
     print("Running Secret Scanner...")
     files = get_staged_files()
     if not files:
         if len(sys.argv) > 1 and sys.argv[1] == "--all":
-             result = subprocess.run(["git", "ls-files"], capture_output=True, text=True)
-             files = result.stdout.splitlines()
+            result = subprocess.run(["git", "ls-files"], capture_output=True, text=True)
+            files = result.stdout.splitlines()
         else:
-             print("No staged files to scan.")
-             return 0
+            print("No staged files to scan.")
+            return 0
 
     found_secrets = False
     for filepath in files:
@@ -63,6 +72,7 @@ def main():
 
     print("✅ No secrets found.")
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,117 @@
+name: Release Ops Digest
+
+# DAILY RELEASE OPS SUMMARY DIGEST
+# Generates a consolidated digest of all active release blockers
+# with strict rate-limiting to avoid spam.
+#
+# DEPRECATION NOTICE:
+# This workflow is now a step in the Release Ops Orchestrator.
+# Primary schedule: release-ops-orchestrator.yml (hourly, with built-in rate limiting)
+# This workflow retains workflow_dispatch for manual runs and debugging.
+#
+# See docs/ci/RELEASE_OPS_DIGEST.md for full documentation.
+# See docs/ci/RELEASE_OPS_ORCHESTRATOR.md for orchestrator details.
+
+on:
+  # Schedule removed - now handled by release-ops-orchestrator.yml
+  # The orchestrator calls this script hourly, but the script has built-in
+  # rate limiting that respects the daily cadence.
+  # schedule:
+  #   - cron: "0 8 * * *"
+
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Force digest generation (bypass rate limit)"
+        type: boolean
+        default: false
+      dry_run:
+        description: "Dry run mode (generate but don't update state)"
+        type: boolean
+        default: false
+
+# Prevent concurrent runs
+concurrency:
+  group: release-ops-digest
+  cancel-in-progress: false
+
+permissions:
+  contents: write # For updating state file
+  issues: read # For reading blocker issues
+  actions: read # For queue status
+
+jobs:
+  generate-digest:
+    name: Generate Digest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Release Ops Digest
+        id: digest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/release/generate_release_ops_digest.sh
+
+          # Build arguments
+          ARGS=""
+          if [[ "${{ inputs.force }}" == "true" ]]; then
+            ARGS="$ARGS --force"
+          fi
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            ARGS="$ARGS --dry-run"
+          fi
+
+          # Run digest generator
+          ./scripts/release/generate_release_ops_digest.sh \
+            --policy docs/ci/RELEASE_OPS_DIGEST_POLICY.yml \
+            --state docs/releases/_state/digest_state.json \
+            --out artifacts/release-train/release_ops_digest.md \
+            $ARGS
+
+      - name: Check for State Changes
+        id: check_changes
+        run: |
+          if git diff --quiet docs/releases/_state/digest_state.json 2>/dev/null; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit State Changes
+        if: steps.check_changes.outputs.changed == 'true' && inputs.dry_run != true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add docs/releases/_state/digest_state.json
+
+          git commit -m "chore(release-ops): update digest state
+
+          Automated update from Release Ops Digest workflow.
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          [skip ci]"
+
+          git push
+
+      - name: Upload Digest Artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: release-ops-digest-${{ github.run_id }}
+          path: artifacts/release-train/release_ops_digest.md
+          retention-days: 30
+
+      - name: Job Summary
+        run: |
+          if [[ -f artifacts/release-train/release_ops_digest.md ]]; then
+            cat artifacts/release-train/release_ops_digest.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### Release Ops Digest" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "No digest generated." >> $GITHUB_STEP_SUMMARY
+          fi

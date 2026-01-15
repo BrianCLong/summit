@@ -1,4 +1,4 @@
-# Summit Experience Alerts
+# Summit Experience & System Health Alerts
 groups:
   - name: summit.experience.rules
     rules:
@@ -44,3 +44,76 @@ groups:
         annotations:
           summary: "High Change Failure Rate"
           description: "Change failure rate is {{ $value | humanizePercentage }}."
+
+  - name: summit.system.rules
+    rules:
+      - alert: HighApiErrorRate
+        expr: |
+          sum(rate(http_requests_total{status_code=~"5.."}[5m]))
+          /
+          sum(rate(http_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "High API Error Rate"
+          description: "API 5xx error rate is {{ $value | humanizePercentage }}, exceeding 5%."
+
+      - alert: HighDatabaseLatency
+        expr: histogram_quantile(0.95, sum(rate(db_query_duration_seconds_bucket[5m])) by (le)) > 2.0
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "High Database Latency"
+          description: "P95 Database query latency is {{ $value }}s, exceeding 2.0s."
+
+      - alert: LowCacheHitRatio
+        expr: |
+          sum(rate(cache_hits_total[5m]))
+          /
+          (sum(rate(cache_hits_total[5m])) + sum(rate(cache_misses_total[5m]))) < 0.5
+        for: 15m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "Low Cache Hit Ratio"
+          description: "Cache hit ratio dropped to {{ $value | humanizePercentage }}."
+
+      - alert: HighMemoryUsage
+        expr: process_memory_rss_bytes / 1024 / 1024 > 1024
+        for: 5m
+        labels:
+          severity: warning
+          team: ops
+        annotations:
+          summary: "High Memory Usage"
+          description: "Server RSS memory usage is {{ $value }} MB, exceeding 1GB."
+
+  - name: summit.maestro.rules
+    rules:
+      - alert: MaestroJobFailures
+        expr: increase(maestro_job_execution_duration_seconds_count{status="failed"}[10m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          team: data-science
+        annotations:
+          summary: "Maestro Job Failures"
+          description: "Maestro jobs have failed in the last 10 minutes."
+
+      - alert: HighAiJobFailureRate
+        expr: |
+          sum(rate(ai_jobs_total{status="failed"}[10m]))
+          /
+          sum(rate(ai_jobs_total[10m])) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          team: data-science
+        annotations:
+          summary: "High AI Job Failure Rate"
+          description: "AI Job failure rate is {{ $value | humanizePercentage }}."

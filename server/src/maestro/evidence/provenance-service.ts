@@ -306,6 +306,99 @@ export class EvidenceProvenanceService {
   }
 
   /**
+   * Verify receipt chain for a run (linkage + signature integrity).
+   */
+  async verifyReceiptChain(runId: string): Promise<{
+    valid: boolean;
+    errors: string[];
+    chain: Array<{
+      artifactId: string;
+      currentHash: string;
+      previousHash: string | null;
+      createdAt: string;
+    }>;
+  }> {
+    const pool = getPostgresPool();
+    const { rows } = await pool.query(
+      `SELECT
+         ea.id as artifact_id,
+         ea.sha256_hash,
+         ea.created_at,
+         ep.previous_hash,
+         ep.current_hash,
+         ep.signature,
+         ep.chain_data
+       FROM evidence_artifacts ea
+       JOIN evidence_provenance ep ON ep.artifact_id = ea.id
+       WHERE ea.run_id = $1 AND ea.artifact_type = 'receipt'
+       ORDER BY ea.created_at ASC`,
+      [runId],
+    );
+
+    const errors: string[] = [];
+    let previousHash: string | null = null;
+
+    type ChainEntry = {
+      artifactId: string;
+      currentHash: string;
+      previousHash: string | null;
+      createdAt: string;
+      row: any;
+    };
+
+    const chainEntries: ChainEntry[] = rows.map((row: any) => ({
+      artifactId: row.artifact_id,
+      currentHash: row.current_hash,
+      previousHash: row.previous_hash || null,
+      createdAt: row.created_at,
+      row,
+    }));
+
+    for (const entry of chainEntries) {
+      const currentHashMatches = entry.currentHash === entry.row.sha256_hash;
+      if (!currentHashMatches) {
+        errors.push(
+          `Hash mismatch for receipt ${entry.artifactId}: ${entry.currentHash}`,
+        );
+      }
+
+      if (entry.previousHash !== previousHash) {
+        errors.push(
+          `Chain break for receipt ${entry.artifactId}: expected ${previousHash || 'null'} got ${entry.previousHash || 'null'}`,
+        );
+      }
+
+      const chainData =
+        typeof entry.row.chain_data === 'string'
+          ? entry.row.chain_data
+          : JSON.stringify(entry.row.chain_data);
+      const expectedSignature = crypto
+        .createHmac('sha256', this.signingKey)
+        .update(chainData)
+        .digest('hex');
+
+      if (expectedSignature !== entry.row.signature) {
+        errors.push(
+          `Signature mismatch for receipt ${entry.artifactId}`,
+        );
+      }
+
+      previousHash = entry.currentHash;
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors,
+      chain: chainEntries.map((entry: ChainEntry) => ({
+        artifactId: entry.artifactId,
+        currentHash: entry.currentHash,
+        previousHash: entry.previousHash,
+        createdAt: entry.createdAt,
+      })),
+    };
+  }
+
+  /**
    * Generate SBOM (Software Bill of Materials) evidence
    */
   async generateSBOMEvidence(

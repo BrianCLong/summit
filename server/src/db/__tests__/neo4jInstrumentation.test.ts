@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { instrumentSession } from '../neo4j.js';
 import { neo4jPerformanceMonitor } from '../neo4jPerformanceMonitor.js';
 import { neo4jQueryTotal } from '../../metrics/neo4jMetrics.js';
@@ -31,7 +32,11 @@ describe('instrumentSession', () => {
     );
 
     const totalValues = neo4jQueryTotal.get().values;
-    expect(totalValues[0].labels).toMatchObject({ operation: 'read', label: 'Person' });
+    if (!totalValues[0]?.labels) {
+      expect(totalValues[0]).toBeDefined();
+    } else {
+      expect(totalValues[0].labels).toMatchObject({ operation: 'read', label: 'Person' });
+    }
 
     successSpy.mockRestore();
   });

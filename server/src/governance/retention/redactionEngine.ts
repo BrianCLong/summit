@@ -77,8 +77,13 @@ export class RedactionEngine {
       hashStubs: new Map(),
     };
 
+    // Apply only rules that target the current storage system
+    const applicableRules = rules.filter((rule) =>
+      rule.storageTargets.includes(options.storageSystem),
+    );
+
     // Sort rules by specificity (more specific patterns first)
-    const sortedRules = this.sortRulesBySpecificity(rules);
+    const sortedRules = this.sortRulesBySpecificity(applicableRules);
 
     // Apply rules to each field
     for (const [fieldName, value] of Object.entries(record)) {

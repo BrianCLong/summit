@@ -376,7 +376,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
 
     try {
       const result = await session.run(view.query, view.parameters);
-      const records = result.records.map((record) => record.toObject());
+      const records = result.records.map((record: any) => record.toObject());
 
       // Cache the materialized view result
       const cacheKey = `${this.MATERIALIZED_VIEW_PREFIX}${name}`;
@@ -704,9 +704,9 @@ export class Neo4jQueryOptimizer extends EventEmitter {
    */
   private serializeResult(result: Result): any {
     return {
-      records: result.records.map((record) => ({
+      records: result.records.map((record: any) => ({
         keys: record.keys,
-        _fields: record._fields.map((field) => this.serializeValue(field)),
+        _fields: record._fields.map((field: any) => this.serializeValue(field)),
       })),
       summary: {
         queryType: result.summary.queryType,

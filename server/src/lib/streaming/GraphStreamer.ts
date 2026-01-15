@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
 import { getRedisClient } from '../../db/redis.js';
 import { getNeo4jDriver } from '../../db/neo4j.js';
-import { PrometheusMetrics } from '../../utils/metrics.js';
+import { Gauge, Counter } from 'prom-client';
 import neo4j from 'neo4j-driver';
 import { CompressionUtils } from '../../utils/compression.js';
 import { logger } from '../../config/logger.js';
@@ -21,14 +21,14 @@ export class GraphStreamer extends EventEmitter {
   private streamTimers: Map<string, NodeJS.Timeout> = new Map();
 
   // Metrics
-  private activeStreamsGauge = PrometheusMetrics.createGauge(
-    'graph_active_streams',
-    'Number of active graph streams',
-  );
-  private streamedRecordsCounter = PrometheusMetrics.createCounter(
-    'graph_streamed_records_total',
-    'Total number of records streamed',
-  );
+  private activeStreamsGauge = new Gauge({
+    name: 'graph_active_streams',
+    help: 'Number of active graph streams',
+  });
+  private streamedRecordsCounter = new Counter({
+    name: 'graph_streamed_records_total',
+    help: 'Total number of records streamed',
+  });
 
   constructor() {
     super();
@@ -242,7 +242,7 @@ export class GraphStreamer extends EventEmitter {
 
     const session = this.streamSessions.get(streamId);
     if (session) {
-      session.close().catch(() => {});
+      session.close().catch(() => { });
       this.streamSessions.delete(streamId);
     }
   }

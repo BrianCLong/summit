@@ -8,11 +8,11 @@ from .dlq import DeadLetterQueue, DLQManager
 from .reliable_consumer import ConsumerConfig, ConsumerState, ReliableKafkaConsumer
 
 __all__ = [
-    "DeadLetterQueue",
-    "DLQManager",
     "BackpressureController",
-    "FlowControl",
-    "ReliableKafkaConsumer",
     "ConsumerConfig",
     "ConsumerState",
+    "DLQManager",
+    "DeadLetterQueue",
+    "FlowControl",
+    "ReliableKafkaConsumer",
 ]

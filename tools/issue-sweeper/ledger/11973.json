@@ -1,0 +1,21 @@
+{
+  "issue_number": 11973,
+  "title": "Build Supply Chain Intelligence System",
+  "url": "https://github.com/BrianCLong/summit/pull/11973",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-11-20T23:01:13Z",
+  "createdAt": "2025-11-20T10:50:23Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

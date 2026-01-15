@@ -1,6 +1,8 @@
 import unittest
+
 from auto_scientist.impl.src.generator import Generator
 from auto_scientist.impl.src.oversight import Oversight
+
 
 class TestLoop(unittest.TestCase):
     def test_oversight_rejection(self):
@@ -19,6 +21,7 @@ class TestLoop(unittest.TestCase):
         refined = gen.refine("Old", "Critique")
         self.assertIn("Refined", refined)
         self.assertIn("Critique", refined)
+
 
 if __name__ == "__main__":
     unittest.main()

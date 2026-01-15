@@ -1,0 +1,46 @@
+{
+  "issue_number": 375,
+  "title": "Feature/analytics pipeline",
+  "url": "https://github.com/BrianCLong/summit/pull/375",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-17T03:07:57Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13180,
+        "url": "https://github.com/BrianCLong/summit/pull/13180",
+        "mergedAt": "2025-12-04T15:39:12Z",
+        "title": "Build AI governance metrics dashboard with analytics"
+      },
+      {
+        "number": 1313,
+        "url": "https://github.com/BrianCLong/summit/pull/1313",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat: add workflow modeling validation suites"
+      },
+      {
+        "number": 11922,
+        "url": "https://github.com/BrianCLong/summit/pull/11922",
+        "mergedAt": "2025-11-20T10:05:25Z",
+        "title": "Build real-time streaming analytics pipeline"
+      },
+      {
+        "number": 1182,
+        "url": "https://github.com/BrianCLong/summit/pull/1182",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group with 2 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

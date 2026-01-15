@@ -3,9 +3,10 @@ Futures Intelligence Service API
 Main API endpoints for emerging threats and futures intelligence
 """
 
-from typing import List, Optional, Dict, Any
 from datetime import datetime
-from fastapi import FastAPI, HTTPException, Query
+from typing import Any
+
+from fastapi import FastAPI, Query
 from pydantic import BaseModel
 
 app = FastAPI(title="Futures Intelligence Service")
@@ -13,9 +14,9 @@ app = FastAPI(title="Futures Intelligence Service")
 
 # Request/Response Models
 class ThreatFilter(BaseModel):
-    category: Optional[str] = None
-    threat_level: Optional[str] = None
-    confidence: Optional[str] = None
+    category: str | None = None
+    threat_level: str | None = None
+    confidence: str | None = None
 
 
 class ScenarioRequest(BaseModel):
@@ -25,20 +26,20 @@ class ScenarioRequest(BaseModel):
 
 
 class RiskAssessmentRequest(BaseModel):
-    categories: List[str]
+    categories: list[str]
 
 
 class ConvergenceRequest(BaseModel):
     type: str
-    technologies: List[str]
+    technologies: list[str]
 
 
 # Threat Monitoring Endpoints
 @app.get("/api/threats")
 async def get_threats(
-    category: Optional[str] = None,
-    threat_level: Optional[str] = None,
-    limit: int = Query(default=100, le=1000)
+    category: str | None = None,
+    threat_level: str | None = None,
+    limit: int = Query(default=100, le=1000),
 ):
     """
     Get emerging threats
@@ -49,11 +50,7 @@ async def get_threats(
     - limit: Maximum results to return
     """
     # TODO: Integrate with @intelgraph/emerging-threats package
-    return {
-        "threats": [],
-        "count": 0,
-        "timestamp": datetime.utcnow().isoformat()
-    }
+    return {"threats": [], "count": 0, "timestamp": datetime.utcnow().isoformat()}
 
 
 @app.get("/api/threats/{threat_id}")
@@ -64,7 +61,7 @@ async def get_threat(threat_id: str):
 
 
 @app.post("/api/threats/assess")
-async def assess_threat(threat_data: Dict[str, Any]):
+async def assess_threat(threat_data: dict[str, Any]):
     """Assess new or updated threat"""
     # TODO: Use ThreatMonitor to assess threat
     return {"status": "assessed", "threat_id": "new-threat-id"}
@@ -78,10 +75,7 @@ async def get_weak_signals():
 
 
 @app.get("/api/technology-trends")
-async def get_technology_trends(
-    domain: Optional[str] = None,
-    limit: int = Query(default=50, le=500)
-):
+async def get_technology_trends(domain: str | None = None, limit: int = Query(default=50, le=500)):
     """Get technology trends"""
     # TODO: Integrate with TechnologyTracker
     return {"trends": [], "count": 0}
@@ -89,10 +83,7 @@ async def get_technology_trends(
 
 # Scenario Planning Endpoints
 @app.get("/api/scenarios")
-async def get_scenarios(
-    time_horizon: Optional[str] = None,
-    scenario_type: Optional[str] = None
-):
+async def get_scenarios(time_horizon: str | None = None, scenario_type: str | None = None):
     """Get all scenarios"""
     # TODO: Integrate with ScenarioPlanner
     return {"scenarios": [], "count": 0}
@@ -102,15 +93,11 @@ async def get_scenarios(
 async def develop_scenarios(request: ScenarioRequest):
     """Develop new scenarios"""
     # TODO: Use ScenarioPlanner to develop scenarios
-    return {
-        "scenarios": [],
-        "request": request.dict(),
-        "status": "developed"
-    }
+    return {"scenarios": [], "request": request.dict(), "status": "developed"}
 
 
 @app.put("/api/scenarios/{scenario_id}")
-async def update_scenario(scenario_id: str, updates: Dict[str, Any]):
+async def update_scenario(scenario_id: str, updates: dict[str, Any]):
     """Update scenario"""
     # TODO: Update scenario in planner
     return {"scenario_id": scenario_id, "status": "updated"}
@@ -132,24 +119,19 @@ async def get_alternative_futures():
 
 # Horizon Scanning Endpoints
 @app.post("/api/horizon-scan")
-async def conduct_horizon_scan(
-    time_horizon: str,
-    domains: List[str]
-):
+async def conduct_horizon_scan(time_horizon: str, domains: list[str]):
     """Conduct horizon scan"""
     # TODO: Use HorizonScanner
     return {
         "scan_id": "scan-id",
         "time_horizon": time_horizon,
         "domains": domains,
-        "status": "completed"
+        "status": "completed",
     }
 
 
 @app.get("/api/emerging-issues")
-async def get_emerging_issues(
-    momentum: Optional[str] = None
-):
+async def get_emerging_issues(momentum: str | None = None):
     """Get emerging issues"""
     # TODO: Retrieve emerging issues
     return {"issues": [], "count": 0}
@@ -157,10 +139,7 @@ async def get_emerging_issues(
 
 # Risk Assessment Endpoints
 @app.get("/api/risks")
-async def get_risks(
-    category: Optional[str] = None,
-    severity: Optional[str] = None
-):
+async def get_risks(category: str | None = None, severity: str | None = None):
     """Get global risks"""
     # TODO: Integrate with RiskForecaster
     return {"risks": [], "count": 0}
@@ -170,26 +149,18 @@ async def get_risks(
 async def assess_risks(request: RiskAssessmentRequest):
     """Assess global risks"""
     # TODO: Use RiskForecaster to assess risks
-    return {
-        "risks": [],
-        "categories": request.categories,
-        "status": "assessed"
-    }
+    return {"risks": [], "categories": request.categories, "status": "assessed"}
 
 
 @app.get("/api/risks/black-swans")
-async def get_black_swans(
-    domain: Optional[str] = None
-):
+async def get_black_swans(domain: str | None = None):
     """Get black swan events"""
     # TODO: Retrieve black swans
     return {"black_swans": [], "count": 0}
 
 
 @app.get("/api/risks/tipping-points")
-async def get_tipping_points(
-    risk_id: Optional[str] = None
-):
+async def get_tipping_points(risk_id: str | None = None):
     """Get tipping points"""
     # TODO: Retrieve tipping points
     return {"tipping_points": [], "count": 0}
@@ -204,9 +175,7 @@ async def analyze_systemic_risk(system: str):
 
 # Convergence Tracking Endpoints
 @app.get("/api/convergence")
-async def get_convergences(
-    convergence_type: Optional[str] = None
-):
+async def get_convergences(convergence_type: str | None = None):
     """Get technology convergences"""
     # TODO: Integrate with ConvergenceTracker
     return {"convergences": [], "count": 0}
@@ -242,17 +211,10 @@ async def assess_convergence_maturity(convergence_id: str):
 
 # Foresight Methods Endpoints
 @app.post("/api/foresight/futures-wheel")
-async def futures_wheel_analysis(
-    central_event: str,
-    levels: int = 3
-):
+async def futures_wheel_analysis(central_event: str, levels: int = 3):
     """Perform futures wheel analysis"""
     # TODO: Use ForesightEngine
-    return {
-        "central_event": central_event,
-        "levels": levels,
-        "analysis": {}
-    }
+    return {"central_event": central_event, "levels": levels, "analysis": {}}
 
 
 @app.post("/api/foresight/causal-layered-analysis")
@@ -263,17 +225,10 @@ async def causal_layered_analysis(issue: str):
 
 
 @app.post("/api/foresight/delphi-study")
-async def create_delphi_study(
-    topic: str,
-    participant_count: int
-):
+async def create_delphi_study(topic: str, participant_count: int):
     """Create Delphi study"""
     # TODO: Use DelphiAnalyzer
-    return {
-        "study_id": "delphi-id",
-        "topic": topic,
-        "status": "created"
-    }
+    return {"study_id": "delphi-id", "topic": topic, "status": "created"}
 
 
 # Health and Status Endpoints
@@ -283,7 +238,7 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "futures-intelligence-service",
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.utcnow().isoformat(),
     }
 
 
@@ -297,12 +252,13 @@ async def get_status():
             "threats_tracked": 0,
             "scenarios_developed": 0,
             "risks_assessed": 0,
-            "convergences_tracked": 0
+            "convergences_tracked": 0,
         },
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.utcnow().isoformat(),
     }
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

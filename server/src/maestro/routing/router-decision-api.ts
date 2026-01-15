@@ -4,6 +4,7 @@ import { getPostgresPool } from '../../db/postgres.js';
 import { ensureAuthenticated } from '../../middleware/auth.js';
 import { requirePermission } from '../../middleware/rbac.js';
 import { otelService } from '../../middleware/observability/otel-tracing.js';
+import { policyActionGate } from '../../middleware/policy-action-gate.js';
 
 const router = express.Router();
 router.use(express.json());
@@ -77,6 +78,15 @@ router.get(
 // POST /api/maestro/v1/runs/:runId/nodes/:nodeId/override-routing
 router.post(
   '/runs/:runId/nodes/:nodeId/override-routing',
+  policyActionGate({
+    action: 'override',
+    resource: 'maestro_run',
+    resolveResourceId: (req) => req.params.runId,
+    buildResourceAttributes: (req) => ({
+      runId: req.params.runId,
+      nodeId: req.params.nodeId,
+    }),
+  }),
   requirePermission('routing:override'),
   async (req, res) => {
     const span = otelService.createSpan('routing.override_decision');
@@ -261,13 +271,13 @@ router.get(
         analysis: {
           mostUsedModel: rows[0]?.selected_model || null,
           overrideRate: rows.length
-            ? (rows.reduce((sum, r) => sum + r.override_count, 0) /
-                rows.reduce((sum, r) => sum + r.total_selections, 0)) *
-              100
+            ? (rows.reduce((sum: number, r: any) => sum + r.override_count, 0) /
+              rows.reduce((sum: number, r: any) => sum + r.total_selections, 0)) *
+            100
             : 0,
           avgScore: rows.length
-            ? rows.reduce((sum, r) => sum + parseFloat(r.avg_score || 0), 0) /
-              rows.length
+            ? rows.reduce((sum: number, r: any) => sum + parseFloat(r.avg_score || 0), 0) /
+            rows.length
             : 0,
         },
       };

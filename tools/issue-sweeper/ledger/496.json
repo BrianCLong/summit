@@ -1,0 +1,80 @@
+{
+  "issue_number": 496,
+  "title": "feat(ingest): STIX/TAXII + CSV/Parquet idempotent pipelines",
+  "url": "https://github.com/BrianCLong/summit/pull/496",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-17T22:34:21Z",
+  "createdAt": "2025-08-17T19:15:24Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11233,
+        "url": "https://github.com/BrianCLong/summit/pull/11233",
+        "mergedAt": "2025-10-16T16:05:19Z",
+        "title": "fix/msw vector adapter typings"
+      },
+      {
+        "number": 13186,
+        "url": "https://github.com/BrianCLong/summit/pull/13186",
+        "mergedAt": "2025-12-04T15:38:58Z",
+        "title": "Implement federated learning for distributed OSINT training"
+      },
+      {
+        "number": 1309,
+        "url": "https://github.com/BrianCLong/summit/pull/1309",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Fix docling metrics registration and test scaffolding"
+      },
+      {
+        "number": 1338,
+        "url": "https://github.com/BrianCLong/summit/pull/1338",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/workflows"
+      },
+      {
+        "number": 1337,
+        "url": "https://github.com/BrianCLong/summit/pull/1337",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/docs"
+      },
+      {
+        "number": 1336,
+        "url": "https://github.com/BrianCLong/summit/pull/1336",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/deps"
+      },
+      {
+        "number": 1335,
+        "url": "https://github.com/BrianCLong/summit/pull/1335",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/hardening"
+      },
+      {
+        "number": 1334,
+        "url": "https://github.com/BrianCLong/summit/pull/1334",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/features"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

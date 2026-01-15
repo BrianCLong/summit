@@ -7,10 +7,9 @@ import argparse
 import json
 import os
 import subprocess
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Sequence
-
 
 DEFAULT_GATE_THRESHOLD = 0.7
 
@@ -22,12 +21,12 @@ class ScenarioResult:
     expected_behaviors: Sequence[str]
     observed_behavior: str
     exit_code: int
-    alerts: List[str]
+    alerts: list[str]
     score: int
     stdout_path: Path
     stderr_path: Path
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "name": self.name,
             "mutation": self.mutation,
@@ -45,7 +44,7 @@ class ScenarioResult:
 class DMCLConfig:
     seed: int
     base_input: Path
-    scenarios: List[Dict[str, object]]
+    scenarios: list[dict[str, object]]
     gate_threshold: float = DEFAULT_GATE_THRESHOLD
     artifacts_dir: Path = Path("reports/dmcl/artifacts")
     report_dir: Path = Path("reports/dmcl")
@@ -60,11 +59,11 @@ class DMCLRunner:
         self.report_dir = (root_dir / config.report_dir).resolve()
         self.mutator_binary = self._ensure_mutator_binary(config.mutator_binary)
 
-    def run(self) -> Dict[str, object]:
+    def run(self) -> dict[str, object]:
         self.artifacts_dir.mkdir(parents=True, exist_ok=True)
         self.report_dir.mkdir(parents=True, exist_ok=True)
 
-        scenario_results: List[ScenarioResult] = []
+        scenario_results: list[ScenarioResult] = []
         for scenario in sorted(self.config.scenarios, key=lambda item: item["name"]):
             scenario_results.append(self._execute_scenario(scenario))
 
@@ -101,7 +100,7 @@ class DMCLRunner:
 
         return scorecard
 
-    def _execute_scenario(self, scenario: Dict[str, object]) -> ScenarioResult:
+    def _execute_scenario(self, scenario: dict[str, object]) -> ScenarioResult:
         name = str(scenario["name"])
         mutation = str(scenario["mutation"])
         seed = int(scenario.get("seed", self.config.seed))
@@ -132,7 +131,9 @@ class DMCLRunner:
             stderr_path=stderr_path.relative_to(self.root_dir),
         )
 
-    def _mutate_dataset(self, base_input: Path, mutated_path: Path, mutation: str, seed: int) -> None:
+    def _mutate_dataset(
+        self, base_input: Path, mutated_path: Path, mutation: str, seed: int
+    ) -> None:
         if not base_input.is_file():
             raise FileNotFoundError(f"base dataset not found: {base_input}")
 
@@ -167,9 +168,10 @@ class DMCLRunner:
         env = os.environ.copy()
         env.setdefault("DMCL_MUTATED_INPUT", str(mutated_path))
 
-        with stdout_path.open("w", encoding="utf-8") as stdout_file, stderr_path.open(
-            "w", encoding="utf-8"
-        ) as stderr_file:
+        with (
+            stdout_path.open("w", encoding="utf-8") as stdout_file,
+            stderr_path.open("w", encoding="utf-8") as stderr_file,
+        ):
             completed = subprocess.run(
                 command,
                 cwd=self.root_dir,
@@ -187,7 +189,7 @@ class DMCLRunner:
         return completed
 
     @staticmethod
-    def _interpret_behavior(completed: subprocess.CompletedProcess) -> tuple[str, List[str]]:
+    def _interpret_behavior(completed: subprocess.CompletedProcess) -> tuple[str, list[str]]:
         stdout = completed.stdout or ""
         stderr = completed.stderr or ""
         alerts = []
@@ -210,14 +212,14 @@ class DMCLRunner:
     def _deterministic_timestamp(seed: int) -> str:
         pseudo_epoch = max(seed, 0)
         base = 1_600_000_000  # Anchor near 2020-09-13 for readability.
-        return _format_timestamp(base + pseudo_epoch%31_536_000)
+        return _format_timestamp(base + pseudo_epoch % 31_536_000)
 
     @staticmethod
-    def _write_json(path: Path, data: Dict[str, object]) -> None:
+    def _write_json(path: Path, data: dict[str, object]) -> None:
         text = json.dumps(data, indent=2, sort_keys=True)
         path.write_text(f"{text}\n", encoding="utf-8")
 
-    def _write_markdown(self, path: Path, scorecard: Dict[str, object]) -> None:
+    def _write_markdown(self, path: Path, scorecard: dict[str, object]) -> None:
         lines = [
             "# DMCL Resilience Scorecard",
             "",
@@ -232,7 +234,9 @@ class DMCLRunner:
 
         for scenario in scorecard["scenarios"]:
             alerts = ", ".join(scenario["alerts"]) if scenario["alerts"] else "-"
-            expected = ", ".join(scenario["expected_behaviors"]) if scenario["expected_behaviors"] else "-"
+            expected = (
+                ", ".join(scenario["expected_behaviors"]) if scenario["expected_behaviors"] else "-"
+            )
             lines.append(
                 f"| {scenario['name']} | {scenario['mutation']} | {scenario['observed_behavior']} | {expected} | {scenario['score']} | {alerts} |"
             )

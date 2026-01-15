@@ -3,10 +3,8 @@ Tests for Maestro subsystem: runs, artifacts, and disclosure packs.
 """
 
 import pytest
-from fastapi.testclient import TestClient
-
 from app.main import app
-from app.models.maestro import ArtifactKind, ArtifactMetadata, RunStatus
+from fastapi.testclient import TestClient
 
 client = TestClient(app)
 
@@ -70,9 +68,7 @@ def test_list_runs():
 def test_get_run():
     """Test getting a specific run."""
     # Create a run
-    create_response = client.post(
-        "/maestro/runs", json={"name": "Test Run", "owner": "test-user"}
-    )
+    create_response = client.post("/maestro/runs", json={"name": "Test Run", "owner": "test-user"})
     run_id = create_response.json()["id"]
 
     # Get the run
@@ -90,9 +86,7 @@ def test_get_run():
 def test_update_run():
     """Test updating a run."""
     # Create a run
-    create_response = client.post(
-        "/maestro/runs", json={"name": "Test Run", "owner": "test-user"}
-    )
+    create_response = client.post("/maestro/runs", json={"name": "Test Run", "owner": "test-user"})
     run_id = create_response.json()["id"]
 
     # Update the run
@@ -112,9 +106,7 @@ def test_update_run():
 def test_create_artifact():
     """Test creating an artifact."""
     # Create a run first
-    run_response = client.post(
-        "/maestro/runs", json={"name": "Test Run", "owner": "test-user"}
-    )
+    run_response = client.post("/maestro/runs", json={"name": "Test Run", "owner": "test-user"})
     run_id = run_response.json()["id"]
 
     # Create an artifact
@@ -158,9 +150,7 @@ def test_create_artifact_invalid_run():
 def test_list_artifacts():
     """Test listing artifacts for a run."""
     # Create a run
-    run_response = client.post(
-        "/maestro/runs", json={"name": "Test Run", "owner": "test-user"}
-    )
+    run_response = client.post("/maestro/runs", json={"name": "Test Run", "owner": "test-user"})
     run_id = run_response.json()["id"]
 
     # Create multiple artifacts
@@ -185,9 +175,7 @@ def test_list_artifacts():
 def test_create_disclosure_pack():
     """Test creating a disclosure pack."""
     # Create a run
-    run_response = client.post(
-        "/maestro/runs", json={"name": "Test Run", "owner": "test-user"}
-    )
+    run_response = client.post("/maestro/runs", json={"name": "Test Run", "owner": "test-user"})
     run_id = run_response.json()["id"]
 
     # Create artifacts
@@ -223,9 +211,7 @@ def test_create_disclosure_pack():
 def test_get_disclosure_pack():
     """Test getting a disclosure pack for a run."""
     # Create a run
-    run_response = client.post(
-        "/maestro/runs", json={"name": "Test Run", "owner": "test-user"}
-    )
+    run_response = client.post("/maestro/runs", json={"name": "Test Run", "owner": "test-user"})
     run_id = run_response.json()["id"]
 
     # Create disclosure pack
@@ -249,9 +235,7 @@ def test_get_disclosure_pack():
 def test_run_manifest_with_release_gate():
     """Test getting run manifest with release gate validation."""
     # Create a run
-    run_response = client.post(
-        "/maestro/runs", json={"name": "Test Run", "owner": "test-user"}
-    )
+    run_response = client.post("/maestro/runs", json={"name": "Test Run", "owner": "test-user"})
     run_id = run_response.json()["id"]
 
     # Create artifacts with all required governance flags
@@ -310,9 +294,7 @@ def test_run_manifest_with_release_gate():
 def test_run_manifest_fails_release_gate():
     """Test that run manifest fails release gate when missing artifacts."""
     # Create a run
-    run_response = client.post(
-        "/maestro/runs", json={"name": "Test Run", "owner": "test-user"}
-    )
+    run_response = client.post("/maestro/runs", json={"name": "Test Run", "owner": "test-user"})
     run_id = run_response.json()["id"]
 
     # Create only SBOM artifact (missing SLSA and risk assessment)
@@ -341,9 +323,7 @@ def test_run_manifest_fails_release_gate():
 def test_run_summary():
     """Test getting run summary with artifact counts."""
     # Create a run
-    run_response = client.post(
-        "/maestro/runs", json={"name": "Test Run", "owner": "test-user"}
-    )
+    run_response = client.post("/maestro/runs", json={"name": "Test Run", "owner": "test-user"})
     run_id = run_response.json()["id"]
 
     # Create various artifacts

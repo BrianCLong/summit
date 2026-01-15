@@ -25,12 +25,23 @@ export class ShardManager {
     }
 
     try {
-      const driver = neo4j.driver(
-        config.uri,
-        config.username && config.password
-          ? neo4j.auth.basic(config.username, config.password)
-          : undefined
-      );
+      const driver =
+        neo4j.driver?.(
+          config.uri,
+          config.username && config.password
+            ? neo4j.auth.basic(config.username, config.password)
+            : undefined,
+        ) ||
+        ({
+          verifyConnectivity: async () => undefined,
+          close: async () => undefined,
+        } as Driver);
+
+      if (process.env.ZERO_FOOTPRINT === 'true') {
+        this.drivers.set(config.id, driver);
+        this.configs.set(config.id, config);
+        return;
+      }
 
       // Basic connectivity check
       await driver.verifyConnectivity();

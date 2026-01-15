@@ -1,5 +1,4 @@
 import pytest
-
 from feed_processor.queue import RedisBatchQueue
 
 try:

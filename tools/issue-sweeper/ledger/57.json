@@ -1,0 +1,230 @@
+{
+  "issue_number": 57,
+  "title": "Add /api/version endpoint",
+  "url": "https://github.com/BrianCLong/summit/issues/57",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    }
+  ],
+  "updatedAt": "2025-08-13T18:12:52Z",
+  "createdAt": "2025-08-12T02:37:58Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12470,
+        "url": "https://github.com/BrianCLong/summit/pull/12470",
+        "mergedAt": "2025-12-18T02:45:55Z",
+        "title": "Add wave eight prompts 57-64"
+      },
+      {
+        "number": 15294,
+        "url": "https://github.com/BrianCLong/summit/pull/15294",
+        "mergedAt": "2026-01-01T05:45:57Z",
+        "title": "Set up autonomous Summit priority system"
+      },
+      {
+        "number": 12689,
+        "url": "https://github.com/BrianCLong/summit/pull/12689",
+        "mergedAt": "2025-12-18T01:39:47Z",
+        "title": "Create copy-paste prompts for Claude Code"
+      },
+      {
+        "number": 15286,
+        "url": "https://github.com/BrianCLong/summit/pull/15286",
+        "mergedAt": "2026-01-01T05:45:06Z",
+        "title": "Harden usage metering and enforcement"
+      },
+      {
+        "number": 12089,
+        "url": "https://github.com/BrianCLong/summit/pull/12089",
+        "mergedAt": "2025-11-21T06:30:29Z",
+        "title": "Triage and consolidate open pull requests"
+      },
+      {
+        "number": 11973,
+        "url": "https://github.com/BrianCLong/summit/pull/11973",
+        "mergedAt": "2025-11-20T11:01:20Z",
+        "title": "Build Supply Chain Intelligence System"
+      },
+      {
+        "number": 1273,
+        "url": "https://github.com/BrianCLong/summit/pull/1273",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump eslint from 8.57.1 to 9.35.0"
+      },
+      {
+        "number": 10210,
+        "url": "https://github.com/BrianCLong/summit/pull/10210",
+        "mergedAt": "2025-10-15T16:04:02Z",
+        "title": "SEV-1: CI Backbone - Guarantee Green Signal on Main"
+      },
+      {
+        "number": 1177,
+        "url": "https://github.com/BrianCLong/summit/pull/1177",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump eslint from 8.57.1 to 9.35.0 in /server"
+      },
+      {
+        "number": 10202,
+        "url": "https://github.com/BrianCLong/summit/pull/10202",
+        "mergedAt": "2025-10-14T21:56:26Z",
+        "title": "ops(merge-train): triage + hotspot + auto-resolve + docs"
+      },
+      {
+        "number": 1169,
+        "url": "https://github.com/BrianCLong/summit/pull/1169",
+        "mergedAt": null,
+        "title": "chore(deps): bump @opentelemetry/auto-instrumentations-node from 0.39.4 to 0.62.2 in /server"
+      },
+      {
+        "number": 158,
+        "url": "https://github.com/BrianCLong/summit/pull/158",
+        "mergedAt": "2025-08-13T18:12:50Z",
+        "title": "Server health endpoints, client version, CODEOWNERS"
+      },
+      {
+        "number": 10129,
+        "url": "https://github.com/BrianCLong/summit/pull/10129",
+        "mergedAt": null,
+        "title": "feat: add cross-database migration rollback engine"
+      },
+      {
+        "number": 271,
+        "url": "https://github.com/BrianCLong/summit/pull/271",
+        "mergedAt": "2025-08-15T21:04:43Z",
+        "title": "chore(deps): bump bullmq from 4.18.3 to 5.57.0 in /server"
+      },
+      {
+        "number": 265,
+        "url": "https://github.com/BrianCLong/summit/pull/265",
+        "mergedAt": "2025-08-15T21:09:50Z",
+        "title": "chore(deps-dev): bump eslint from 8.57.1 to 9.33.0 in /server"
+      },
+      {
+        "number": 10126,
+        "url": "https://github.com/BrianCLong/summit/pull/10126",
+        "mergedAt": "2025-10-14T08:39:46Z",
+        "title": "feat: add PerfTrace Jira automation toolkit"
+      },
+      {
+        "number": 11838,
+        "url": "https://github.com/BrianCLong/summit/pull/11838",
+        "mergedAt": null,
+        "title": "fix: publish kpw-media cli artifacts"
+      },
+      {
+        "number": 10082,
+        "url": "https://github.com/BrianCLong/summit/pull/10082",
+        "mergedAt": "2025-10-14T13:08:04Z",
+        "title": "Add real-time narrative simulation engine"
+      },
+      {
+        "number": 10130,
+        "url": "https://github.com/BrianCLong/summit/pull/10130",
+        "mergedAt": "2025-10-14T08:36:34Z",
+        "title": "feat: introduce synthetic event booster framework"
+      },
+      {
+        "number": 1322,
+        "url": "https://github.com/BrianCLong/summit/pull/1322",
+        "mergedAt": "2025-09-23T06:10:11Z",
+        "title": "chore(deps): bump @opentelemetry/auto-instrumentations-node from 0.63.0 to 0.64.1"
+      },
+      {
+        "number": 1178,
+        "url": "https://github.com/BrianCLong/summit/pull/1178",
+        "mergedAt": "2025-09-17T10:32:40Z",
+        "title": "chore(deps-dev): bump @graphql-codegen/client-preset from 4.8.3 to 5.0.0 in /client"
+      },
+      {
+        "number": 1310,
+        "url": "https://github.com/BrianCLong/summit/pull/1310",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat: orchestrate multi-llm cooperation fabric"
+      },
+      {
+        "number": 10127,
+        "url": "https://github.com/BrianCLong/summit/pull/10127",
+        "mergedAt": "2025-10-17T01:51:15Z",
+        "title": "feat: add Liquid Nano pilot bundle"
+      },
+      {
+        "number": 11891,
+        "url": "https://github.com/BrianCLong/summit/pull/11891",
+        "mergedAt": null,
+        "title": "Build Geopolitical Risk Intelligence Platform"
+      },
+      {
+        "number": 1755,
+        "url": "https://github.com/BrianCLong/summit/pull/1755",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump the eslint group with 3 updates"
+      },
+      {
+        "number": 1221,
+        "url": "https://github.com/BrianCLong/summit/pull/1221",
+        "mergedAt": null,
+        "title": "Sprint v0.5 – Guarded Rail"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      },
+      {
+        "number": 1309,
+        "url": "https://github.com/BrianCLong/summit/pull/1309",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Fix docling metrics registration and test scaffolding"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      },
+      {
+        "number": 11774,
+        "url": "https://github.com/BrianCLong/summit/pull/11774",
+        "mergedAt": "2025-10-20T11:06:07Z",
+        "title": "chore(deps): bump the js-dependencies group with 144 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

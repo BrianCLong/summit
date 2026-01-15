@@ -115,11 +115,18 @@ export class EvidenceIntegrityService {
       }
 
       const passed = checked - mismatches.length;
-      span?.addSpanAttributes({
+      const spanAttributes = {
         'evidence.integrity.checked': checked,
         'evidence.integrity.mismatches': mismatches.length,
         'evidence.integrity.chunks': chunksProcessed,
-      });
+      };
+      if (typeof (span as any)?.addSpanAttributes === 'function') {
+        (span as any).addSpanAttributes(spanAttributes);
+      } else if (typeof (span as any)?.setAttribute === 'function') {
+        Object.entries(spanAttributes).forEach(([key, value]) => {
+          (span as any).setAttribute(key, value);
+        });
+      }
 
       return { checked, passed, mismatches, chunksProcessed };
     } catch (error: any) {

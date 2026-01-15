@@ -1,4 +1,3 @@
-import { Neo4jError } from 'neo4j-driver';
 import { describe, it, beforeAll, afterAll } from '@jest/globals';
 import type { Driver } from 'neo4j-driver';
 

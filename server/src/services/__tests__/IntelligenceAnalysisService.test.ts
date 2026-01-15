@@ -4,10 +4,10 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 // Mock dependencies
 jest.mock('../LLMService', () => {
   return class MockLLMService {
-    constructor(config) {}
-    async summarize(text) { return 'Summary of ' + text; }
-    async extract(text, entities) { return { Person: ['John'] }; }
-    async complete(params) { return 'Positive'; }
+    constructor(config: unknown) {}
+    async summarize(text: string) { return 'Summary of ' + text; }
+    async extract(text: string, entities: unknown) { return { Person: ['John'] }; }
+    async complete(params: unknown) { return 'Positive'; }
   };
 });
 
@@ -17,9 +17,9 @@ const mockComputeGraphMetrics = jest.fn() as any;
 
 jest.mock('../mlAnalysisService', () => ({
   mlAnalysisService: {
-    detectAnomalies: (...args) => mockDetectAnomalies(...args),
-    calculateRiskScore: (...args) => mockCalculateRiskScore(...args),
-    computeGraphMetrics: (...args) => mockComputeGraphMetrics(...args)
+    detectAnomalies: (...args: unknown[]) => mockDetectAnomalies(...args),
+    calculateRiskScore: (...args: unknown[]) => mockCalculateRiskScore(...args),
+    computeGraphMetrics: (...args: unknown[]) => mockComputeGraphMetrics(...args),
   }
 }));
 
@@ -29,17 +29,17 @@ jest.mock('../mlAnalysisService', () => ({
 // The source uses: import { requireFunc } from '../utils/require';
 // Jest resolver will look for it.
 jest.mock('../../utils/require', () => ({
-  requireFunc: (path) => {
+  requireFunc: (path: string) => {
     // console.log('Mock requireFunc called with', path);
     if (path.includes('VisionService')) {
       return class MockVisionService {
-        async analyzeImageObjects(input) { return { objects: [] }; }
-        async analyzeMicroexpressions(input) { return { dominant: 'happy' }; }
+        async analyzeImageObjects(input: unknown) { return { objects: [] }; }
+        async analyzeMicroexpressions(input: unknown) { return { dominant: 'happy' }; }
       };
     }
     if (path.includes('SentimentService')) {
       return class MockSentimentService {
-        async analyze(text) { return { score: 0.8, label: 'positive', magnitude: 0.9 }; }
+        async analyze(text: string) { return { score: 0.8, label: 'positive', magnitude: 0.9 }; }
       };
     }
     if (path.includes('GraphAnalyticsService')) {
@@ -60,7 +60,7 @@ jest.mock('../../utils/logger.js', () => ({
 import { IntelligenceAnalysisService } from '../IntelligenceAnalysisService';
 
 describe('IntelligenceAnalysisService', () => {
-  let service;
+  let service: IntelligenceAnalysisService;
 
   beforeEach(() => {
     jest.clearAllMocks();

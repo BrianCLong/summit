@@ -7,7 +7,7 @@ import pytest
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 
-from dlr import (  # noqa: E402
+from dlr import (
     LineageGraph,
     LineageNode,
     compute_recompute_plan,

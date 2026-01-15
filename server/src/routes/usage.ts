@@ -13,8 +13,8 @@ router.get('/summary', async (req, res) => {
   try {
     const user = (req as any).user;
     if (!user || !user.tenantId) {
-       res.status(401).json({ error: 'Unauthorized' });
-       return;
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
     }
     const tenantId = user.tenantId;
     const { start, end } = req.query;
@@ -27,29 +27,29 @@ router.get('/summary', async (req, res) => {
     const periodEnd = end ? String(end) : new Date().toISOString();
 
     try {
-        const result = await client.query(
-            `SELECT kind, SUM(quantity) as total_quantity, unit
+      const result = await client.query(
+        `SELECT kind, SUM(quantity) as total_quantity, unit
              FROM usage_events
              WHERE tenant_id = $1
              AND occurred_at >= $2
              AND occurred_at <= $3
              GROUP BY kind, unit`,
-             [tenantId, periodStart, periodEnd]
-        );
+        [tenantId, periodStart, periodEnd]
+      );
 
-        res.json({
-            tenantId,
-            periodStart,
-            periodEnd,
-            usage: result.rows.map(r => ({
-                kind: r.kind,
-                total: parseFloat(r.total_quantity),
-                unit: r.unit
-            }))
-        });
+      res.json({
+        tenantId,
+        periodStart,
+        periodEnd,
+        usage: result.rows.map((r: any) => ({
+          kind: r.kind,
+          total: parseFloat(r.total_quantity),
+          unit: r.unit
+        }))
+      });
 
     } finally {
-        client.release();
+      client.release();
     }
 
   } catch (e: any) {
@@ -62,17 +62,17 @@ router.get('/summary', async (req, res) => {
  * Returns the current plan for the tenant.
  */
 router.get('/plan', async (req, res) => {
-    try {
-        const user = (req as any).user;
-        if (!user || !user.tenantId) {
-           res.status(401).json({ error: 'Unauthorized' });
-           return;
-        }
-        const { plan, overrides } = await PricingEngine.getEffectivePlan(user.tenantId);
-        res.json({ plan, overrides });
-    } catch (e: any) {
-        res.status(500).json({ error: e?.message || 'failed' });
+  try {
+    const user = (req as any).user;
+    if (!user || !user.tenantId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
     }
+    const { plan, overrides } = await PricingEngine.getEffectivePlan(user.tenantId);
+    res.json({ plan, overrides });
+  } catch (e: any) {
+    res.status(500).json({ error: e?.message || 'failed' });
+  }
 });
 
 // Legacy export route (kept for backward compatibility if needed, or repurposed)

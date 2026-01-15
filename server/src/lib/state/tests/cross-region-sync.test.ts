@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { CrossRegionSyncService, MockMessageBroker } from '../cross-region-sync.js';
 import { GCounter, CRDTFactory } from '../conflict-resolver.js';
 

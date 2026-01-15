@@ -291,14 +291,14 @@ class FeatureExtractor:
     def _get_entity_name(self, entity: dict[str, Any]) -> str:
         """Extract primary name/identifier from entity"""
         for field in ["name", "title", "label", "identifier", "value"]:
-            if field in entity and entity[field]:
+            if entity.get(field):
                 return str(entity[field])
         return str(entity.get("id", ""))
 
     def _get_entity_description(self, entity: dict[str, Any]) -> str:
         """Extract description/content from entity"""
         for field in ["description", "content", "details", "summary"]:
-            if field in entity and entity[field]:
+            if entity.get(field):
                 return str(entity[field])
         return ""
 

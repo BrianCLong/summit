@@ -1,0 +1,86 @@
+{
+  "issue_number": 324,
+  "title": "Production PyTorch GNN Training Pipeline",
+  "url": "https://github.com/BrianCLong/summit/issues/324",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9121349718,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zAVg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type-feature",
+      "name": "type-feature",
+      "color": "0075ca",
+      "default": false,
+      "description": "Feature development"
+    },
+    {
+      "id": 9121349913,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zBGQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area-AI",
+      "name": "area-AI",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Relates to AI/NLP/ML"
+    },
+    {
+      "id": 9121350669,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zEDQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority-high",
+      "name": "priority-high",
+      "color": "d73a4a",
+      "default": false,
+      "description": "High priority"
+    },
+    {
+      "id": 9122098427,
+      "node_id": "LA_kwDOPaNncM8AAAACH7gs-w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/sprint-8",
+      "name": "sprint-8",
+      "color": "E17055",
+      "default": false,
+      "description": "Sprint 8: Production-Grade AI & Collaborative Intelligence"
+    },
+    {
+      "id": 9122098625,
+      "node_id": "LA_kwDOPaNncM8AAAACH7gtwQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-ml-integration",
+      "name": "epic-ml-integration",
+      "color": "6C5CE7",
+      "default": false,
+      "description": "Advanced ML model integration"
+    }
+  ],
+  "updatedAt": "2025-08-16T22:17:21Z",
+  "createdAt": "2025-08-16T22:17:21Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1277,
+        "url": "https://github.com/BrianCLong/summit/pull/1277",
+        "mergedAt": "2025-09-19T02:20:58Z",
+        "title": "feat: Add Sprint 25 Day-1 deliverables"
+      },
+      {
+        "number": 11872,
+        "url": "https://github.com/BrianCLong/summit/pull/11872",
+        "mergedAt": "2025-11-20T14:34:03Z",
+        "title": "Build autotriage engine for issues and bugs"
+      },
+      {
+        "number": 1278,
+        "url": "https://github.com/BrianCLong/summit/pull/1278",
+        "mergedAt": "2025-09-19T02:28:07Z",
+        "title": "feat: Sprint 25 Day-1 Deliverables"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

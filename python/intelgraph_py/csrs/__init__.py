@@ -4,11 +4,11 @@ This package exposes the RetentionPlanner used to model purpose-specific
 retention schedules and emit deterministic retention plan diffs.
 """
 
-from .planner import RetentionPlanner, ClockShiftScenario
 from .diff import generate_signed_retention_diff
+from .planner import ClockShiftScenario, RetentionPlanner
 
 __all__ = [
-    "RetentionPlanner",
     "ClockShiftScenario",
+    "RetentionPlanner",
     "generate_signed_retention_diff",
 ]

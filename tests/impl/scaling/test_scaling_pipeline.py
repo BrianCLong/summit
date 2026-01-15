@@ -5,7 +5,6 @@ from impl.scaling.ingest import ingest
 from impl.scaling.modeling import fit_linear_response_surface, fit_power_law
 from impl.scaling.planner import plan
 
-
 FIXTURE = Path("impl/scaling/sample_runs.jsonl")
 SCHEMA = Path("impl/scaling/schemas/experiment.schema.json")
 
@@ -34,13 +33,15 @@ def test_scaling_and_planning_flow(capsys):
     assert recommendation.expected_utility > 0
 
     # smoke-test CLI invocation
-    main([
-        "--experiments",
-        str(FIXTURE),
-        "--schema",
-        str(SCHEMA),
-        "--objective",
-        "reasoning_score",
-    ])
+    main(
+        [
+            "--experiments",
+            str(FIXTURE),
+            "--schema",
+            str(SCHEMA),
+            "--objective",
+            "reasoning_score",
+        ]
+    )
     captured = capsys.readouterr()
     assert "Recommended configuration" in captured.out

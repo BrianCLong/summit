@@ -14,7 +14,7 @@ import json
 import time
 import uuid
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -191,7 +191,7 @@ class ZKProvenanceProver:
                 policy_hash=hashlib.sha256(policy_type.encode()).hexdigest()[:16],
                 zk_proof=zk_proof,
                 public_inputs=public_inputs,
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                timestamp=datetime.now(UTC).isoformat(),
                 verifier_version="v0.3.7",
             )
 

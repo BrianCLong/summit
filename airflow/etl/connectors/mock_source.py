@@ -1,8 +1,11 @@
 import random
 import uuid
+from collections.abc import Iterator
 from datetime import datetime
-from typing import Iterator, Dict, Any
+from typing import Any
+
 from .base import BaseConnector
+
 
 class MockSourceConnector(BaseConnector):
     """
@@ -15,7 +18,7 @@ class MockSourceConnector(BaseConnector):
     def get_source_name(self) -> str:
         return self.source_name
 
-    def fetch_data(self, limit: int = 100) -> Iterator[Dict[str, Any]]:
+    def fetch_data(self, limit: int = 100) -> Iterator[dict[str, Any]]:
         """
         Generates synthetic data simulating social media posts or intelligence reports.
         """
@@ -32,7 +35,7 @@ class MockSourceConnector(BaseConnector):
                 "metadata": {
                     "likes": random.randint(0, 1000),
                     "shares": random.randint(0, 500),
-                    "sentiment": random.uniform(-1, 1)
-                }
+                    "sentiment": random.uniform(-1, 1),
+                },
             }
             yield record

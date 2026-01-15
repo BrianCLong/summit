@@ -1,0 +1,104 @@
+# RELEASE_OPS_SLO_POLICY.yml
+# Service Level Objectives for Release Ops publication safety
+#
+# This policy defines SLO windows, metric definitions, and targets
+# for monitoring publication integrity over time.
+#
+# Authority: docs/ci/RELEASE_OPS_SLO.md
+
+version: "1.0"
+
+# --- Reporting Windows ---
+windows:
+  # Weekly window for short-term trends
+  weekly_days: 7
+  # Monthly window for SLO reporting
+  monthly_days: 30
+  # Minimum entries required for meaningful stats
+  min_entries_for_stats: 3
+
+# --- Metric Definitions ---
+# These determine how each cycle is classified
+definitions:
+  # Success: deployed without blocking issues
+  success:
+    conditions:
+      - deployment_status: ["OK", "WARN"]
+      - forbidden_hits: 0
+    description: "Deployed successfully without forbidden patterns"
+
+  # Rollback: had to restore from snapshot
+  rollback:
+    conditions:
+      - deployment_status: "ROLLED_BACK"
+    description: "Deployment rolled back to previous snapshot"
+
+  # Fail: forbidden patterns detected (blocked or triggered rollback)
+  fail:
+    conditions:
+      - health_level: "FAIL"
+    # OR
+    alternate_conditions:
+      - forbidden_hits_gt: 0
+    description: "Forbidden patterns detected in output"
+
+  # Warn: elevated counts but published
+  warn:
+    conditions:
+      - health_level: "WARN"
+      - deployment_status: ["OK", "WARN"]
+    description: "Published with elevated redaction counts"
+
+# --- SLO Targets ---
+# Optional targets for comparison
+targets:
+  # Publication success rate target
+  publish_success_rate_pct: 99.0
+  # Maximum acceptable rollback rate
+  rollback_rate_max_pct: 2.0
+  # Maximum acceptable FAIL rate
+  fail_rate_max_pct: 1.0
+  # Target MTBR (hours) - higher is better
+  mtbr_target_hours: 168  # 1 week
+  # Target OK streak (consecutive successful deploys)
+  ok_streak_target: 20
+
+# --- Output Configuration ---
+output:
+  # Include top N incidents (by date/run_id) in report
+  include_top_n_incidents: 5
+  # Include recovery time analysis
+  include_recovery_analysis: true
+  # Include streak analysis
+  include_streak_analysis: true
+
+# --- Thresholds for Status ---
+# Determines overall SLO status (MEETING / AT_RISK / FAILING)
+status_thresholds:
+  # MEETING: all targets met
+  meeting:
+    success_rate_gte: 99.0
+    rollback_rate_lte: 2.0
+    fail_rate_lte: 1.0
+
+  # AT_RISK: close to failing
+  at_risk:
+    success_rate_gte: 95.0
+    rollback_rate_lte: 5.0
+    fail_rate_lte: 3.0
+
+  # Below AT_RISK thresholds = FAILING
+
+# --- Monthly Issue Configuration ---
+monthly_issue:
+  # Enable monthly SLO issue creation
+  enabled: true
+  # Day of month to create issue (1-28)
+  create_on_day: 1
+  # Labels for the issue
+  labels:
+    - "release-ops"
+    - "slo-report"
+    - "monthly"
+  # Close previous month's issue when new one opens
+  close_previous: true

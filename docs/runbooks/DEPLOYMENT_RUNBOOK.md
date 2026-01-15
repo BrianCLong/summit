@@ -34,6 +34,27 @@ We utilize a progressive delivery strategy ("Canary Release") for all Tier-0 ser
 3.  **Verify Stability**: Check dashboards for error rate recovery.
 4.  **Post-Mortem**: Create incident ticket. Do not re-deploy until root cause is fixed.
 
+## 2.5. Release Channel Policy
+Release channels (`rc`, `ga`) and their allowed source branches are configured in `release-policy.yml`.
+
+Example configuration:
+```yaml
+channels:
+  rc:
+    allowed_from:
+      - default-branch
+    require_evidence: false
+  ga:
+    allowed_from:
+      - default-branch
+      - series-branch # e.g. release/v1.2
+    require_evidence: false
+```
+
+- **rc**: Typically allowed only from `default-branch` (main).
+- **ga**: Can be allowed from `series-branch` for LTS/Patch releases.
+- **require_evidence**: If true, specific evidence artifacts must be present in the bundle.
+
 ## 3. Deployment Verification Tests (DVT)
 Automated checks run after every traffic shift.
 

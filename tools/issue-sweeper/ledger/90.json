@@ -1,0 +1,239 @@
+{
+  "issue_number": 90,
+  "title": "Add PWA Support for Mobile Responsiveness",
+  "url": "https://github.com/BrianCLong/summit/issues/90",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051532,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5DA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:frontend",
+      "name": "area:frontend",
+      "color": "ededed",
+      "default": false,
+      "description": "Frontend work"
+    },
+    {
+      "id": 9095918502,
+      "node_id": "LA_kwDOPaNncM8AAAACHiizpg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:enhancement",
+      "name": "type:enhancement",
+      "color": "FBCA04",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095918587,
+      "node_id": "LA_kwDOPaNncM8AAAACHiiz-w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P3",
+      "name": "priority:P3",
+      "color": "fbca04",
+      "default": false,
+      "description": "Medium"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:13:55Z",
+  "createdAt": "2025-08-12T04:40:31Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14281,
+        "url": "https://github.com/BrianCLong/summit/pull/14281",
+        "mergedAt": "2025-12-22T08:08:55Z",
+        "title": "Add 90-day execution roadmap"
+      },
+      {
+        "number": 14262,
+        "url": "https://github.com/BrianCLong/summit/pull/14262",
+        "mergedAt": "2025-12-22T08:10:08Z",
+        "title": "Add 90-day war-room backlog plan"
+      },
+      {
+        "number": 12862,
+        "url": "https://github.com/BrianCLong/summit/pull/12862",
+        "mergedAt": "2025-12-04T15:48:52Z",
+        "title": "Add 90-day architecture and delivery plan"
+      },
+      {
+        "number": 15315,
+        "url": "https://github.com/BrianCLong/summit/pull/15315",
+        "mergedAt": null,
+        "title": "Initialize Pilot Design Innovation Sprint artifacts"
+      },
+      {
+        "number": 14909,
+        "url": "https://github.com/BrianCLong/summit/pull/14909",
+        "mergedAt": "2025-12-30T22:48:35Z",
+        "title": "Add operational hardening blueprint"
+      },
+      {
+        "number": 14260,
+        "url": "https://github.com/BrianCLong/summit/pull/14260",
+        "mergedAt": "2025-12-22T08:10:14Z",
+        "title": "Add activation and retention execution plan"
+      },
+      {
+        "number": 15348,
+        "url": "https://github.com/BrianCLong/summit/pull/15348",
+        "mergedAt": "2026-01-01T09:53:05Z",
+        "title": "Improve cost and operational efficiency"
+      },
+      {
+        "number": 15204,
+        "url": "https://github.com/BrianCLong/summit/pull/15204",
+        "mergedAt": "2026-01-01T11:46:55Z",
+        "title": "feat: add platform stewardship and long-horizon governance"
+      },
+      {
+        "number": 14246,
+        "url": "https://github.com/BrianCLong/summit/pull/14246",
+        "mergedAt": "2025-12-22T08:10:53Z",
+        "title": "Implement war plan governance engine"
+      },
+      {
+        "number": 13836,
+        "url": "https://github.com/BrianCLong/summit/pull/13836",
+        "mergedAt": "2025-12-20T03:41:03Z",
+        "title": "Expand ADR hardening details and add hardening execution guide"
+      },
+      {
+        "number": 12846,
+        "url": "https://github.com/BrianCLong/summit/pull/12846",
+        "mergedAt": "2025-12-04T15:49:29Z",
+        "title": "Add 90-day gap-closure plan for B2B SaaS and agencies"
+      },
+      {
+        "number": 14448,
+        "url": "https://github.com/BrianCLong/summit/pull/14448",
+        "mergedAt": "2025-12-25T03:17:36Z",
+        "title": "Sprint N+12: Revenue Maturity & Compliance Expansion"
+      },
+      {
+        "number": 12620,
+        "url": "https://github.com/BrianCLong/summit/pull/12620",
+        "mergedAt": "2025-12-18T01:59:06Z",
+        "title": "Add IntelGraph GA core blueprint"
+      },
+      {
+        "number": 15313,
+        "url": "https://github.com/BrianCLong/summit/pull/15313",
+        "mergedAt": "2026-01-01T11:39:29Z",
+        "title": "Establish Institutional Continuity Framework"
+      },
+      {
+        "number": 12366,
+        "url": "https://github.com/BrianCLong/summit/pull/12366",
+        "mergedAt": "2025-12-18T02:59:21Z",
+        "title": "docs: add Summit Merge Acceleration & Architecture Consolidation Plan"
+      },
+      {
+        "number": 12073,
+        "url": "https://github.com/BrianCLong/summit/pull/12073",
+        "mergedAt": null,
+        "title": "Build performance optimization and scaling infrastructure"
+      },
+      {
+        "number": 13628,
+        "url": "https://github.com/BrianCLong/summit/pull/13628",
+        "mergedAt": "2025-12-17T01:39:34Z",
+        "title": "Build control tower feature for CompanyOS"
+      },
+      {
+        "number": 12834,
+        "url": "https://github.com/BrianCLong/summit/pull/12834",
+        "mergedAt": "2025-12-01T10:21:22Z",
+        "title": "Add CompanyOS Data Spine schemas and governance docs"
+      },
+      {
+        "number": 12091,
+        "url": "https://github.com/BrianCLong/summit/pull/12091",
+        "mergedAt": "2025-11-21T06:30:22Z",
+        "title": "Design multi-layer caching strategy for Summit"
+      },
+      {
+        "number": 14353,
+        "url": "https://github.com/BrianCLong/summit/pull/14353",
+        "mergedAt": null,
+        "title": "Strategic Priority Execution: Integrity, CI, and Governance"
+      },
+      {
+        "number": 15142,
+        "url": "https://github.com/BrianCLong/summit/pull/15142",
+        "mergedAt": null,
+        "title": "Review recent changes"
+      },
+      {
+        "number": 11972,
+        "url": "https://github.com/BrianCLong/summit/pull/11972",
+        "mergedAt": "2025-11-20T11:01:26Z",
+        "title": "Triage tech debt backlog for upcoming sprints"
+      },
+      {
+        "number": 13465,
+        "url": "https://github.com/BrianCLong/summit/pull/13465",
+        "mergedAt": "2025-12-06T20:52:07Z",
+        "title": "Build security chaos drill harness"
+      },
+      {
+        "number": 15294,
+        "url": "https://github.com/BrianCLong/summit/pull/15294",
+        "mergedAt": "2026-01-01T05:45:57Z",
+        "title": "Set up autonomous Summit priority system"
+      },
+      {
+        "number": 12099,
+        "url": "https://github.com/BrianCLong/summit/pull/12099",
+        "mergedAt": "2025-11-21T06:30:07Z",
+        "title": "Design comprehensive testing strategy for Summit"
+      },
+      {
+        "number": 12038,
+        "url": "https://github.com/BrianCLong/summit/pull/12038",
+        "mergedAt": "2025-11-21T03:59:50Z",
+        "title": "Optimize GraphQL implementation and resolver performance"
+      },
+      {
+        "number": 11900,
+        "url": "https://github.com/BrianCLong/summit/pull/11900",
+        "mergedAt": "2025-11-20T10:26:00Z",
+        "title": "Add observability and disaster recovery infrastructure"
+      },
+      {
+        "number": 11999,
+        "url": "https://github.com/BrianCLong/summit/pull/11999",
+        "mergedAt": "2025-11-20T15:01:41Z",
+        "title": "Improve test coverage"
+      },
+      {
+        "number": 11967,
+        "url": "https://github.com/BrianCLong/summit/pull/11967",
+        "mergedAt": "2025-11-20T11:01:36Z",
+        "title": "Address competitive gaps in Summit positioning"
+      },
+      {
+        "number": 12074,
+        "url": "https://github.com/BrianCLong/summit/pull/12074",
+        "mergedAt": null,
+        "title": "Build Advanced Threat Detection System"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

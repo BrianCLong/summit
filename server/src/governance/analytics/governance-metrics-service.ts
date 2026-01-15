@@ -120,12 +120,13 @@ export class GovernanceMetricsService {
     const endTimer = governanceDashboardLatency.startTimer({
       endpoint: 'getGovernanceMetrics',
     });
+    const finishTimer = typeof endTimer === 'function' ? endTimer : () => {};
 
     try {
       // Check cache first for sub-2s latency
       const cached = await this.getCachedMetrics(tenantId);
       if (cached) {
-        endTimer({ status: 'cache_hit' });
+        finishTimer({ status: 'cache_hit' });
         return cached;
       }
 
@@ -169,10 +170,10 @@ export class GovernanceMetricsService {
         );
       }
 
-      endTimer({ status: 'success' });
+      finishTimer({ status: 'success' });
       return metrics;
     } catch (error: any) {
-      endTimer({ status: 'error' });
+      finishTimer({ status: 'error' });
       console.error('Error fetching governance metrics:', error);
       throw error;
     }
@@ -188,6 +189,7 @@ export class GovernanceMetricsService {
     const timer = governanceMetricsRefreshLatency.startTimer({
       metric_type: 'validation',
     });
+    const stopTimer = typeof timer === 'function' ? timer : () => {};
 
     try {
       // Query Prometheus for validation metrics
@@ -224,10 +226,10 @@ export class GovernanceMetricsService {
       // Store current rate for trend calculation
       await this.storeValidationRate(tenantId, validationRate);
 
-      timer();
+      stopTimer();
       return metrics;
     } catch (error: any) {
-      timer();
+      stopTimer();
       console.error('Error fetching validation metrics:', error);
       // Return fallback metrics
       return this.getFallbackValidationMetrics();
@@ -244,6 +246,7 @@ export class GovernanceMetricsService {
     const timer = governanceMetricsRefreshLatency.startTimer({
       metric_type: 'incidents',
     });
+    const stopTimer = typeof timer === 'function' ? timer : () => {};
 
     try {
       const [
@@ -290,7 +293,7 @@ export class GovernanceMetricsService {
         previousPeriod?.totalIncidents || 0,
       );
 
-      timer();
+      stopTimer();
       return {
         current,
         previous: previousPeriod || current,
@@ -300,7 +303,7 @@ export class GovernanceMetricsService {
         timeline,
       };
     } catch (error: any) {
-      timer();
+      stopTimer();
       console.error('Error fetching incident trends:', error);
       return this.getFallbackIncidentTrends(timeRange);
     }
@@ -313,6 +316,7 @@ export class GovernanceMetricsService {
     const timer = governanceMetricsRefreshLatency.startTimer({
       metric_type: 'compliance_gaps',
     });
+    const stopTimer = typeof timer === 'function' ? timer : () => {};
 
     try {
       // Fetch from Redis store
@@ -339,10 +343,10 @@ export class GovernanceMetricsService {
       const severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
       gaps.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
 
-      timer();
+      stopTimer();
       return gaps;
     } catch (error: any) {
-      timer();
+      stopTimer();
       console.error('Error fetching compliance gaps:', error);
       return [];
     }
@@ -355,6 +359,7 @@ export class GovernanceMetricsService {
     const timer = governanceMetricsRefreshLatency.startTimer({
       metric_type: 'risk_score',
     });
+    const stopTimer = typeof timer === 'function' ? timer : () => {};
 
     try {
       const [overallResult, componentResult] = await Promise.all([
@@ -374,7 +379,7 @@ export class GovernanceMetricsService {
 
       const trend = this.determineTrend(overall, previousScore);
 
-      timer();
+      stopTimer();
       return {
         overall: Number(overall.toFixed(1)),
         components,
@@ -382,7 +387,7 @@ export class GovernanceMetricsService {
         historicalScores,
       };
     } catch (error: any) {
-      timer();
+      stopTimer();
       console.error('Error fetching risk score:', error);
       return this.getFallbackRiskScore();
     }
@@ -427,6 +432,7 @@ export class GovernanceMetricsService {
     const timer = governanceMetricsRefreshLatency.startTimer({
       metric_type: 'model_governance',
     });
+    const stopTimer = typeof timer === 'function' ? timer : () => {};
 
     try {
       const [totalResult, statusResult, riskTierResult, biasResult] =
@@ -441,7 +447,7 @@ export class GovernanceMetricsService {
       const statusBreakdown = this.parseStatusBreakdown(statusResult);
       const riskTierBreakdown = this.parseRiskTierBreakdown(riskTierResult);
 
-      timer();
+      stopTimer();
       return {
         totalModels: Math.round(totalModels),
         approvedModels: statusBreakdown.approved || 0,
@@ -452,7 +458,7 @@ export class GovernanceMetricsService {
         biasMetrics: await this.getBiasMetrics(tenantId),
       };
     } catch (error: any) {
-      timer();
+      stopTimer();
       console.error('Error fetching model governance metrics:', error);
       return this.getFallbackModelGovernanceMetrics();
     }
@@ -979,4 +985,7 @@ export function createGovernanceMetricsService(
 }
 
 // Export singleton
-export const governanceMetricsService = createGovernanceMetricsService();
+export const governanceMetricsService =
+  process.env.NODE_ENV === 'test'
+    ? createGovernanceMetricsService({ enableRealTime: false })
+    : createGovernanceMetricsService();

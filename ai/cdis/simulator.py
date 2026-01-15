@@ -2,17 +2,24 @@ from __future__ import annotations
 
 import uuid
 from collections import defaultdict
-from typing import Dict, Iterable, List, Tuple
+from collections.abc import Iterable
 
 import networkx as nx
 import numpy as np
 
-from .models import Effect, ExplainResponse, Graph, InterveneRequest, InterveneResponse, Intervention
+from .models import (
+    Effect,
+    ExplainResponse,
+    Graph,
+    InterveneRequest,
+    InterveneResponse,
+    Intervention,
+)
 
 
 class SimulationStore:
     def __init__(self) -> None:
-        self._store: Dict[str, ExplainResponse] = {}
+        self._store: dict[str, ExplainResponse] = {}
 
     def save(self, simulation: ExplainResponse) -> str:
         self._store[simulation.simulation_id] = simulation
@@ -25,15 +32,17 @@ class SimulationStore:
 store = SimulationStore()
 
 
-def _reverse_edges(graph: Graph) -> Dict[str, List[Tuple[str, float]]]:
-    parents: Dict[str, List[Tuple[str, float]]] = defaultdict(list)
+def _reverse_edges(graph: Graph) -> dict[str, list[tuple[str, float]]]:
+    parents: dict[str, list[tuple[str, float]]] = defaultdict(list)
     for edge in graph.edges:
         parents[edge.target].append((edge.source, edge.weight))
     return parents
 
 
-def _top_paths(nx_graph: nx.DiGraph, sources: Iterable[str], target: str, k: int) -> List[List[str]]:
-    ranked: List[Tuple[float, List[str]]] = []
+def _top_paths(
+    nx_graph: nx.DiGraph, sources: Iterable[str], target: str, k: int
+) -> list[list[str]]:
+    ranked: list[tuple[float, list[str]]] = []
     for src in sources:
         if src == target:
             continue
@@ -46,10 +55,16 @@ def _top_paths(nx_graph: nx.DiGraph, sources: Iterable[str], target: str, k: int
     return [p for _, p in ranked[:k]]
 
 
-def _propagate(graph: Graph, interventions: List[Intervention], baseline: Dict[str, float]) -> Dict[str, float]:
+def _propagate(
+    graph: Graph, interventions: list[Intervention], baseline: dict[str, float]
+) -> dict[str, float]:
     parents = _reverse_edges(graph)
-    values: Dict[str, float] = dict(baseline)
-    order = list(nx.topological_sort(_to_networkx(graph))) if nx.is_directed_acyclic_graph(_to_networkx(graph)) else graph.nodes
+    values: dict[str, float] = dict(baseline)
+    order = (
+        list(nx.topological_sort(_to_networkx(graph)))
+        if nx.is_directed_acyclic_graph(_to_networkx(graph))
+        else graph.nodes
+    )
     intervention_map = {i.node: i.value for i in interventions}
     for node in order:
         if node in intervention_map:
@@ -80,7 +95,7 @@ def do_calculus(request: InterveneRequest) -> InterveneResponse:
     nx_graph = _to_networkx(request.graph)
     intervention_sources = [i.node for i in request.interventions]
 
-    effects: List[Effect] = []
+    effects: list[Effect] = []
     weights = [abs(edge.weight) for edge in request.graph.edges]
     mean_confidence = float(np.mean(weights) if weights else 0.0)
     for node in request.graph.nodes:

@@ -8,4 +8,4 @@ from .base import BaseConnector, ConnectorStatus
 from .csv_loader import CSVConnector
 from .kafka_consumer import KafkaConnector
 
-__all__ = ["BaseConnector", "ConnectorStatus", "CSVConnector", "APIConnector", "KafkaConnector"]
+__all__ = ["APIConnector", "BaseConnector", "CSVConnector", "ConnectorStatus", "KafkaConnector"]

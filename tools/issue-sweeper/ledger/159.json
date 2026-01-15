@@ -1,0 +1,104 @@
+{
+  "issue_number": 159,
+  "title": "docs: refresh root README",
+  "url": "https://github.com/BrianCLong/summit/issues/159",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767059,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX00w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/documentation",
+      "name": "documentation",
+      "color": "0075ca",
+      "default": true,
+      "description": "Improvements or additions to documentation"
+    },
+    {
+      "id": 9107968038,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQJg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P0",
+      "name": "P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107981085,
+      "node_id": "LA_kwDOPaNncM8AAAACHuDDHQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-09-15",
+      "name": "due:2025-09-15",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:41:34Z",
+  "createdAt": "2025-08-14T04:04:43Z",
+  "classification": "docs",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 15342,
+        "url": "https://github.com/BrianCLong/summit/pull/15342",
+        "mergedAt": "2026-01-01T08:47:00Z",
+        "title": "Create eight new product requirement documents"
+      },
+      {
+        "number": 11883,
+        "url": "https://github.com/BrianCLong/summit/pull/11883",
+        "mergedAt": "2025-11-20T14:33:14Z",
+        "title": "Add canonical entities with bitemporal provenance"
+      },
+      {
+        "number": 11916,
+        "url": "https://github.com/BrianCLong/summit/pull/11916",
+        "mergedAt": "2025-11-20T10:21:11Z",
+        "title": "Wire CompanyOS for internal operations"
+      },
+      {
+        "number": 1331,
+        "url": "https://github.com/BrianCLong/summit/pull/1331",
+        "mergedAt": "2025-09-23T17:10:18Z",
+        "title": "feat: add crystal orchestration services"
+      },
+      {
+        "number": 13193,
+        "url": "https://github.com/BrianCLong/summit/pull/13193",
+        "mergedAt": "2025-12-04T15:38:38Z",
+        "title": "Build React Native mobile app with OSINT dashboard"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

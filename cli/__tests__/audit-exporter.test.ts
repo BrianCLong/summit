@@ -2,37 +2,51 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import crypto from 'crypto';
-import { AuditExporter, verifyChain, verifySignature } from '../src/lib/audit-exporter.js';
+import { AuditExporter, verifyChain, verifySignature, type AuditRecord } from '../src/lib/audit-exporter.js';
 
 const tmpDir = () => fs.mkdtempSync(path.join(os.tmpdir(), 'audit-export-'));
 
-const sampleRecord = (overrides: Partial<any> = {}) => ({
+const sampleRecord = (overrides: Partial<AuditRecord> = {}): AuditRecord => ({
   sequence: overrides.sequence ?? 1,
   recorded_at: new Date().toISOString(),
-  prev_hash: 'GENESIS',
-  payload_hash: 'hash-payload',
-  hash: 'hash-1',
+  prev_hash: overrides.prev_hash ?? 'GENESIS',
+  payload_hash: overrides.payload_hash ?? 'hash-payload',
+  hash: overrides.hash ?? 'hash-1',
   event: {
     version: 'audit_event_v1',
     actor: { type: 'service', id: 'svc-1', ip_address: '10.0.0.1' },
     action: 'policy_decision',
     resource: { type: 'resource', id: 'res-1', owner: 'owner-1' },
-    classification: 'confidential',
+    classification: 'confidential' as const,
     policy_version: 'v1',
     decision_id: 'dec-1',
     trace_id: 'trace-1',
     timestamp: new Date().toISOString(),
     customer: 'customer-a',
     metadata: { info: 'data' },
+    ...overrides.event,
   },
-  ...overrides,
 });
+
+const computeHash = (record: Pick<AuditRecord, 'sequence' | 'recorded_at' | 'prev_hash' | 'payload_hash'>) =>
+  crypto
+    .createHash('sha256')
+    .update(
+      JSON.stringify({
+        sequence: record.sequence,
+        recorded_at: record.recorded_at,
+        prev_hash: record.prev_hash,
+        payload_hash: record.payload_hash,
+      }),
+    )
+    .digest('hex');
 
 describe('audit exporter', () => {
   it('redacts confidential fields and signs manifest', async () => {
     const dir = tmpDir();
     const storePath = path.join(dir, 'store.jsonl');
     const record = sampleRecord();
+    record.hash = computeHash(record);
     fs.writeFileSync(storePath, `${JSON.stringify(record)}\n`, 'utf8');
 
     const exporter = new AuditExporter();

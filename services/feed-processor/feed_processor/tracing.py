@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 from opentelemetry import trace
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.instrumentation.redis import RedisInstrumentor
@@ -15,7 +13,7 @@ from opentelemetry.semconv.resource import ResourceAttributes
 from .config import Settings
 
 
-def configure_tracing(settings: Settings) -> Optional[TracerProvider]:
+def configure_tracing(settings: Settings) -> TracerProvider | None:
     """Configure OpenTelemetry to export traces to Jaeger."""
 
     if not settings.tracing_enabled:

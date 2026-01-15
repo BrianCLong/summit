@@ -12,6 +12,9 @@ export {
   GovernanceLLMError,
   getGovernanceLLMClient,
   createGovernanceLLMClient,
+} from './GovernanceLLMClient.js';
+
+export type {
   GovernanceLLMRequest,
   GovernanceLLMResponse,
   GovernanceLLMConfig,

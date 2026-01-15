@@ -1,0 +1,21 @@
+{
+  "issue_number": 13151,
+  "title": "I3 — Network Policy Verifier",
+  "url": "https://github.com/BrianCLong/summit/pull/13151",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-17T21:02:53Z",
+  "createdAt": "2025-12-03T03:19:17Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

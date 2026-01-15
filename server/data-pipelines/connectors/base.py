@@ -142,7 +142,7 @@ class BaseConnector(ABC):
 
                 except Exception as e:
                     stats.records_failed += 1
-                    stats.errors.append(f"Record processing error: {str(e)}")
+                    stats.errors.append(f"Record processing error: {e!s}")
                     self.logger.error(f"Failed to process record: {e}")
 
             # Process remaining records
@@ -154,7 +154,7 @@ class BaseConnector(ABC):
 
         except Exception as e:
             self.status = ConnectorStatus.FAILED
-            stats.errors.append(f"Ingestion error: {str(e)}")
+            stats.errors.append(f"Ingestion error: {e!s}")
             self.logger.error(f"Ingestion failed for {self.name}: {e}")
             raise
 

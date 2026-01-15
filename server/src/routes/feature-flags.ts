@@ -3,12 +3,12 @@ import express from 'express';
 import { getFeatureFlagService } from '../feature-flags/setup.js';
 import { getPostgresPool } from '../db/postgres.js';
 import logger from '../utils/logger.js';
-import { authenticateToken, requireRole } from '../middleware/auth.js'; // Assuming these exist
+import { ensureAuthenticated as authenticateToken, ensureRole } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // Middleware to ensure admin role for mutation operations
-const ensureAdmin = [authenticateToken, requireRole(['admin'])];
+const ensureAdmin = [authenticateToken, ensureRole(['admin'])];
 
 // Get all flags (Admin)
 router.get('/', authenticateToken, async (req, res) => {

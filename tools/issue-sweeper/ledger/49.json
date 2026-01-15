@@ -1,0 +1,230 @@
+{
+  "issue_number": 49,
+  "title": "Harden /api/readyz and /api/healthz",
+  "url": "https://github.com/BrianCLong/summit/issues/49",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    }
+  ],
+  "updatedAt": "2025-08-13T18:12:52Z",
+  "createdAt": "2025-08-12T02:37:51Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12301,
+        "url": "https://github.com/BrianCLong/summit/pull/12301",
+        "mergedAt": "2025-12-18T03:12:21Z",
+        "title": "Create comprehensive plan for prompts 17-49"
+      },
+      {
+        "number": 14388,
+        "url": "https://github.com/BrianCLong/summit/pull/14388",
+        "mergedAt": "2025-12-24T00:04:18Z",
+        "title": "SSO Foundation with Tenant Binding"
+      },
+      {
+        "number": 13648,
+        "url": "https://github.com/BrianCLong/summit/pull/13648",
+        "mergedAt": "2025-12-19T01:38:40Z",
+        "title": "fix: resolve all merge conflict markers across codebase"
+      },
+      {
+        "number": 12461,
+        "url": "https://github.com/BrianCLong/summit/pull/12461",
+        "mergedAt": "2025-12-18T02:47:41Z",
+        "title": "Add wave seven architecture notes"
+      },
+      {
+        "number": 12668,
+        "url": "https://github.com/BrianCLong/summit/pull/12668",
+        "mergedAt": "2025-12-04T18:43:58Z",
+        "title": "feat: add motif miner delivery pack"
+      },
+      {
+        "number": 15125,
+        "url": "https://github.com/BrianCLong/summit/pull/15125",
+        "mergedAt": "2025-12-30T21:20:48Z",
+        "title": "chore(deps): bump mikefarah/yq from 4.30.8 to 4.50.1"
+      },
+      {
+        "number": 14023,
+        "url": "https://github.com/BrianCLong/summit/pull/14023",
+        "mergedAt": "2025-12-19T22:46:22Z",
+        "title": "Upgrade deepspeed to version 0.15.1"
+      },
+      {
+        "number": 12508,
+        "url": "https://github.com/BrianCLong/summit/pull/12508",
+        "mergedAt": "2025-12-02T18:52:46Z",
+        "title": "Create comprehensive 96-prompt engineering roadmap"
+      },
+      {
+        "number": 15333,
+        "url": "https://github.com/BrianCLong/summit/pull/15333",
+        "mergedAt": null,
+        "title": "Innovation Sprint Delivery: 8 Strategic Features"
+      },
+      {
+        "number": 15317,
+        "url": "https://github.com/BrianCLong/summit/pull/15317",
+        "mergedAt": "2026-01-01T11:38:59Z",
+        "title": "Ecosystem Entry Innovation Sprint Documentation"
+      },
+      {
+        "number": 15316,
+        "url": "https://github.com/BrianCLong/summit/pull/15316",
+        "mergedAt": "2026-01-01T11:39:03Z",
+        "title": "feat: Economic Innovation Sprint artifacts"
+      },
+      {
+        "number": 15323,
+        "url": "https://github.com/BrianCLong/summit/pull/15323",
+        "mergedAt": null,
+        "title": "feat: add red-team harness to sim-harness"
+      },
+      {
+        "number": 1322,
+        "url": "https://github.com/BrianCLong/summit/pull/1322",
+        "mergedAt": "2025-09-23T06:10:11Z",
+        "title": "chore(deps): bump @opentelemetry/auto-instrumentations-node from 0.63.0 to 0.64.1"
+      },
+      {
+        "number": 11995,
+        "url": "https://github.com/BrianCLong/summit/pull/11995",
+        "mergedAt": null,
+        "title": "Build Federated Learning Privacy Platform"
+      },
+      {
+        "number": 15294,
+        "url": "https://github.com/BrianCLong/summit/pull/15294",
+        "mergedAt": "2026-01-01T05:45:57Z",
+        "title": "Set up autonomous Summit priority system"
+      },
+      {
+        "number": 13056,
+        "url": "https://github.com/BrianCLong/summit/pull/13056",
+        "mergedAt": "2025-12-17T21:19:15Z",
+        "title": "Add streamlined CI lanes and runbook"
+      },
+      {
+        "number": 15339,
+        "url": "https://github.com/BrianCLong/summit/pull/15339",
+        "mergedAt": "2026-01-01T11:37:58Z",
+        "title": "feat: leverage optimization and friction reduction"
+      },
+      {
+        "number": 10104,
+        "url": "https://github.com/BrianCLong/summit/pull/10104",
+        "mergedAt": "2025-10-14T11:53:01Z",
+        "title": "Add decision-ready Link Analysis Canvas PRD and agent prompt"
+      },
+      {
+        "number": 158,
+        "url": "https://github.com/BrianCLong/summit/pull/158",
+        "mergedAt": "2025-08-13T18:12:50Z",
+        "title": "Server health endpoints, client version, CODEOWNERS"
+      },
+      {
+        "number": 10095,
+        "url": "https://github.com/BrianCLong/summit/pull/10095",
+        "mergedAt": "2025-10-14T13:05:57Z",
+        "title": "feat: add data retention policy engine"
+      },
+      {
+        "number": 1169,
+        "url": "https://github.com/BrianCLong/summit/pull/1169",
+        "mergedAt": null,
+        "title": "chore(deps): bump @opentelemetry/auto-instrumentations-node from 0.39.4 to 0.62.2 in /server"
+      },
+      {
+        "number": 10112,
+        "url": "https://github.com/BrianCLong/summit/pull/10112",
+        "mergedAt": "2025-10-14T10:40:29Z",
+        "title": "chore: align intelgraph API package metadata"
+      },
+      {
+        "number": 1717,
+        "url": "https://github.com/BrianCLong/summit/pull/1717",
+        "mergedAt": null,
+        "title": "chore(deps): bump redis from 4.3.4 to 6.4.0"
+      },
+      {
+        "number": 10105,
+        "url": "https://github.com/BrianCLong/summit/pull/10105",
+        "mergedAt": "2025-10-14T11:52:58Z",
+        "title": "feat: add govbrief research brief pipeline"
+      },
+      {
+        "number": 10113,
+        "url": "https://github.com/BrianCLong/summit/pull/10113",
+        "mergedAt": "2025-10-14T10:40:26Z",
+        "title": "docs: add fast-ship sku one-pager and order forms"
+      },
+      {
+        "number": 10106,
+        "url": "https://github.com/BrianCLong/summit/pull/10106",
+        "mergedAt": "2025-10-14T11:52:55Z",
+        "title": "feat: add uvb76 monitoring toolkit"
+      },
+      {
+        "number": 11876,
+        "url": "https://github.com/BrianCLong/summit/pull/11876",
+        "mergedAt": "2025-11-20T14:33:36Z",
+        "title": "Wire end-to-end demo stories for two use cases"
+      },
+      {
+        "number": 11882,
+        "url": "https://github.com/BrianCLong/summit/pull/11882",
+        "mergedAt": null,
+        "title": "Add API documentation and validation layers"
+      },
+      {
+        "number": 1715,
+        "url": "https://github.com/BrianCLong/summit/pull/1715",
+        "mergedAt": null,
+        "title": "chore(deps): bump fastapi from 0.78.0 to 0.117.1"
+      },
+      {
+        "number": 11914,
+        "url": "https://github.com/BrianCLong/summit/pull/11914",
+        "mergedAt": "2025-11-20T10:25:00Z",
+        "title": "Consolidate Summit orchestration layer"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

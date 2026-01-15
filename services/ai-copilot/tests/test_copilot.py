@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 # Add service src to path
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from main import app  # noqa: E402
+from main import app
 
 client = TestClient(app)
 

@@ -1,6 +1,5 @@
-import { describe, test, expect } from '@jest/globals';
+import { describe, test, expect, beforeAll, beforeEach, jest } from '@jest/globals';
 
-// Mock config before any imports to prevent process.exit
 jest.mock('../src/config.js', () => ({
   cfg: {
     NODE_ENV: 'test',
@@ -14,54 +13,74 @@ jest.mock('../src/config.js', () => ({
   },
 }));
 
-// Mock database before imports
-const mockTx = {
-  run: jest.fn().mockResolvedValue({
-    records: [
-      {
-        get: () => ({
-          properties: {
-            id: 'id1',
-            investigationId: 'inv1',
-            fromEntity: { id: 'a' },
-            toEntity: { id: 'b' },
-          },
-        }),
-      },
-    ],
-  }),
-  commit: jest.fn(),
-  rollback: jest.fn(),
-};
-const mockSession = { beginTransaction: () => mockTx, close: jest.fn() };
-const mockPgClient = {
-  query: jest.fn().mockResolvedValue({}),
-  release: jest.fn(),
-};
-const mockRedisClient = {
-  smembers: jest.fn().mockResolvedValue([]),
-  del: jest.fn(),
-  get: jest.fn(),
-  set: jest.fn(),
-  sadd: jest.fn(),
-};
+var tx: any;
+var session: any;
+var pgClient: any;
+var redisClient: any;
+let crudResolvers: typeof import('../src/graphql/resolvers/crudResolvers.js').crudResolvers;
 
-jest.mock('../src/config/database', () => ({
-  getNeo4jDriver: () => ({ session: () => mockSession }),
-  getPostgresPool: () => ({ connect: () => mockPgClient }),
-  getRedisClient: () => mockRedisClient,
+jest.mock('../src/config/database.js', () => ({
+  getNeo4jDriver: () => ({ session: () => session }),
+  getPostgresPool: () => ({ connect: () => pgClient }),
+  getRedisClient: () => redisClient,
 }));
 
-const {
-  crudResolvers: resolvers,
-} = require('../src/graphql/resolvers/crudResolvers');
+jest.mock('../src/graphql/subscriptionEngine.js', () => ({
+  subscriptionEngine: {
+    publish: jest.fn(),
+    createFilteredAsyncIterator: jest.fn(),
+    createBatchedAsyncIterator: jest.fn(),
+  },
+}));
 
 describe('Bulk mutations', () => {
   const user = { id: 'u1', tenantId: 't1' };
 
+  beforeAll(async () => {
+    redisClient = {
+      smembers: jest.fn(),
+      del: jest.fn(),
+      get: jest.fn(),
+      set: jest.fn(),
+      sadd: jest.fn(),
+    };
+    ({ crudResolvers } = await import(
+      '../src/graphql/resolvers/crudResolvers.js'
+    ));
+  });
+
+  beforeEach(() => {
+    const mockRunResult = {
+      records: [
+        {
+          get: () => ({
+            properties: {
+              id: 'id1',
+              investigationId: 'inv1',
+              fromEntity: { id: 'a' },
+              toEntity: { id: 'b' },
+            },
+          }),
+        },
+      ],
+    };
+
+    tx = {
+      run: jest.fn<() => Promise<any>>().mockResolvedValue(mockRunResult),
+      commit: jest.fn(),
+      rollback: jest.fn(),
+    };
+    session = { beginTransaction: () => tx, close: jest.fn() };
+    pgClient = {
+      query: jest.fn<() => Promise<any>>().mockResolvedValue({}),
+      release: jest.fn(),
+    };
+    redisClient.smembers.mockResolvedValue([]);
+  });
+
   test('createEntities returns array', async () => {
     const inputs = [{ type: 'PERSON', label: 'E1', investigationId: 'inv1' }];
-    const res = await resolvers.Mutation.createEntities(
+    const res = await crudResolvers.Mutation.createEntities(
       null,
       { inputs },
       { user },
@@ -79,7 +98,7 @@ describe('Bulk mutations', () => {
         investigationId: 'inv1',
       },
     ];
-    const res = await resolvers.Mutation.createRelationships(
+    const res = await crudResolvers.Mutation.createRelationships(
       null,
       { inputs },
       { user },

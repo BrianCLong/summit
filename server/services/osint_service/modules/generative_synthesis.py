@@ -1,5 +1,6 @@
 from transformers import pipeline
 
+
 def generate_hypotheses(data: dict):
     """
     Generates hypotheses and predictive threat models based on OSINT data.

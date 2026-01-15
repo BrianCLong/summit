@@ -11,8 +11,9 @@
  */
 
 import { z } from 'zod';
-import { Policy, PolicyContext, GovernanceVerdict, PolicyRule } from '../governance/types.js';
-import { createDataEnvelope, DataEnvelope, GovernanceResult } from '../types/data-envelope.js';
+import type { Policy, PolicyContext, GovernanceVerdict, PolicyRule } from '../governance/types.js';
+import { createDataEnvelope, GovernanceResult } from '../types/data-envelope.js';
+import type { DataEnvelope } from '../types/data-envelope.js';
 import logger from '../utils/logger.js';
 
 // ============================================================================

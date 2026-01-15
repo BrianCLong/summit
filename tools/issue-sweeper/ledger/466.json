@@ -1,0 +1,62 @@
+{
+  "issue_number": 466,
+  "title": "docs: add cognitive terrain evaluation framework",
+  "url": "https://github.com/BrianCLong/summit/pull/466",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-18T03:35:41Z",
+  "createdAt": "2025-08-17T19:03:58Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1151,
+        "url": "https://github.com/BrianCLong/summit/pull/1151",
+        "mergedAt": null,
+        "title": "chore(deps): bump argon2 from 0.31.2 to 0.44.0 in /server"
+      },
+      {
+        "number": 1205,
+        "url": "https://github.com/BrianCLong/summit/pull/1205",
+        "mergedAt": null,
+        "title": "chore(deps): bump markupsafe from 2.1.5 to 3.0.2"
+      },
+      {
+        "number": 1289,
+        "url": "https://github.com/BrianCLong/summit/pull/1289",
+        "mergedAt": "2025-09-23T06:48:53Z",
+        "title": "Phase 5: Comprehensive Observability & Monitoring Hardening"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 13042,
+        "url": "https://github.com/BrianCLong/summit/pull/13042",
+        "mergedAt": "2025-12-01T19:17:12Z",
+        "title": "chore: Finalize CI/CD consolidation and cleanup"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

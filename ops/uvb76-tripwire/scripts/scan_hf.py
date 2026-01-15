@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Wideband scanner that sweeps HF spectrum and flags burst activity."""
+
 from __future__ import annotations
 
 import argparse

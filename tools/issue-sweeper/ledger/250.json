@@ -1,0 +1,152 @@
+{
+  "issue_number": 250,
+  "title": "OPA policy integration for GraphQL",
+  "url": "https://github.com/BrianCLong/summit/issues/250",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9108055903,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHnXw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/devops",
+      "name": "devops",
+      "color": "d4c5f9",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:54:37Z",
+  "createdAt": "2025-08-14T04:54:37Z",
+  "classification": "security",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14553,
+        "url": "https://github.com/BrianCLong/summit/pull/14553",
+        "mergedAt": null,
+        "title": "Workflow Rationalization Sprint"
+      },
+      {
+        "number": 14598,
+        "url": "https://github.com/BrianCLong/summit/pull/14598",
+        "mergedAt": "2025-12-27T05:52:11Z",
+        "title": "feat(server): add request profiling middleware and structured slow-query logs"
+      },
+      {
+        "number": 12089,
+        "url": "https://github.com/BrianCLong/summit/pull/12089",
+        "mergedAt": "2025-11-21T06:30:29Z",
+        "title": "Triage and consolidate open pull requests"
+      },
+      {
+        "number": 13099,
+        "url": "https://github.com/BrianCLong/summit/pull/13099",
+        "mergedAt": "2025-12-03T01:50:28Z",
+        "title": "Implement SLSA L3 compliance with cosign and OIDC"
+      },
+      {
+        "number": 11983,
+        "url": "https://github.com/BrianCLong/summit/pull/11983",
+        "mergedAt": "2025-11-20T15:06:02Z",
+        "title": "Implement ABAC governance and audit foundations"
+      },
+      {
+        "number": 11880,
+        "url": "https://github.com/BrianCLong/summit/pull/11880",
+        "mergedAt": "2025-11-20T14:33:22Z",
+        "title": "Set up GitHub Actions CI/CD pipeline"
+      },
+      {
+        "number": 1146,
+        "url": "https://github.com/BrianCLong/summit/pull/1146",
+        "mergedAt": "2025-09-19T04:54:20Z",
+        "title": "chore(deps): bump react-speech-recognition from 3.10.0 to 4.0.1 in /client"
+      },
+      {
+        "number": 1172,
+        "url": "https://github.com/BrianCLong/summit/pull/1172",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps): bump graphql-subscriptions from 2.0.0 to 3.0.0 in /server"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 11915,
+        "url": "https://github.com/BrianCLong/summit/pull/11915",
+        "mergedAt": null,
+        "title": "Implement SLO-driven alerting system for Summit"
+      },
+      {
+        "number": 11902,
+        "url": "https://github.com/BrianCLong/summit/pull/11902",
+        "mergedAt": "2025-11-20T10:25:44Z",
+        "title": "Build Cyber Threat Intelligence Platform"
+      },
+      {
+        "number": 11919,
+        "url": "https://github.com/BrianCLong/summit/pull/11919",
+        "mergedAt": "2025-11-20T10:05:41Z",
+        "title": "Build Advanced Data Integration and ETL Platform"
+      },
+      {
+        "number": 11895,
+        "url": "https://github.com/BrianCLong/summit/pull/11895",
+        "mergedAt": null,
+        "title": "Build Crisis Management and Emergency Response Platform"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 13042,
+        "url": "https://github.com/BrianCLong/summit/pull/13042",
+        "mergedAt": "2025-12-01T19:17:12Z",
+        "title": "chore: Finalize CI/CD consolidation and cleanup"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

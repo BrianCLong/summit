@@ -1,0 +1,149 @@
+{
+  "issue_number": 132,
+  "title": "Design Multimodal Data Schema",
+  "url": "https://github.com/BrianCLong/summit/issues/132",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    },
+    {
+      "id": 9103342866,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9Eg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/data-model",
+      "name": "data-model",
+      "color": "d4c5f9",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103343056,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn90A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/mvp1",
+      "name": "mvp1",
+      "color": "0e8a16",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103343209,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn-aQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/schema",
+      "name": "schema",
+      "color": "d4c5f9",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103361945,
+      "node_id": "LA_kwDOPaNncM8AAAACHppHmQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:core-graph",
+      "name": "area:core-graph",
+      "color": "6f42c1",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-13T09:25:04Z",
+  "createdAt": "2025-08-13T09:20:38Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15279,
+        "url": "https://github.com/BrianCLong/summit/pull/15279",
+        "mergedAt": "2026-01-01T07:43:56Z",
+        "title": "Implement Postgres usage metering persistence"
+      },
+      {
+        "number": 10082,
+        "url": "https://github.com/BrianCLong/summit/pull/10082",
+        "mergedAt": "2025-10-14T13:08:04Z",
+        "title": "Add real-time narrative simulation engine"
+      },
+      {
+        "number": 11795,
+        "url": "https://github.com/BrianCLong/summit/pull/11795",
+        "mergedAt": null,
+        "title": "feat: deliver research integration capabilities"
+      },
+      {
+        "number": 10081,
+        "url": "https://github.com/BrianCLong/summit/pull/10081",
+        "mergedAt": "2025-10-14T13:08:07Z",
+        "title": "feat: add explainable multi-cloud meta orchestrator"
+      },
+      {
+        "number": 11908,
+        "url": "https://github.com/BrianCLong/summit/pull/11908",
+        "mergedAt": "2025-11-20T10:25:29Z",
+        "title": "Establish charts as deployment golden path"
+      },
+      {
+        "number": 1353,
+        "url": "https://github.com/BrianCLong/summit/pull/1353",
+        "mergedAt": "2025-09-23T16:45:14Z",
+        "title": "chore(deps): bump axios from 1.11.0 to 1.12.0 in /conductor-ui"
+      },
+      {
+        "number": 10120,
+        "url": "https://github.com/BrianCLong/summit/pull/10120",
+        "mergedAt": "2025-10-14T08:53:59Z",
+        "title": "feat: Build infrastructure monitoring platform"
+      },
+      {
+        "number": 11871,
+        "url": "https://github.com/BrianCLong/summit/pull/11871",
+        "mergedAt": "2025-11-20T09:49:00Z",
+        "title": "Implement CI/CD release automation and versioning"
+      },
+      {
+        "number": 11884,
+        "url": "https://github.com/BrianCLong/summit/pull/11884",
+        "mergedAt": "2025-11-20T14:33:08Z",
+        "title": "Build connector SDK and sample connectors"
+      },
+      {
+        "number": 11872,
+        "url": "https://github.com/BrianCLong/summit/pull/11872",
+        "mergedAt": "2025-11-20T14:34:03Z",
+        "title": "Build autotriage engine for issues and bugs"
+      },
+      {
+        "number": 13042,
+        "url": "https://github.com/BrianCLong/summit/pull/13042",
+        "mergedAt": "2025-12-01T19:17:12Z",
+        "title": "chore: Finalize CI/CD consolidation and cleanup"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

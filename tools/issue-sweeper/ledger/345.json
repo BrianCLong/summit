@@ -1,0 +1,50 @@
+{
+  "issue_number": 345,
+  "title": "Neuromorphic Computing Integration",
+  "url": "https://github.com/BrianCLong/summit/issues/345",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9122126345,
+      "node_id": "LA_kwDOPaNncM8AAAACH7iaCQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-next-gen-ai",
+      "name": "epic-next-gen-ai",
+      "color": "FF6B6B",
+      "default": false,
+      "description": "Next-generation AI and quantum computing"
+    }
+  ],
+  "updatedAt": "2025-08-16T22:28:20Z",
+  "createdAt": "2025-08-16T22:28:20Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11926,
+        "url": "https://github.com/BrianCLong/summit/pull/11926",
+        "mergedAt": "2025-11-20T10:20:02Z",
+        "title": "Build natural language to graph query translator"
+      },
+      {
+        "number": 11919,
+        "url": "https://github.com/BrianCLong/summit/pull/11919",
+        "mergedAt": "2025-11-20T10:05:41Z",
+        "title": "Build Advanced Data Integration and ETL Platform"
+      },
+      {
+        "number": 13193,
+        "url": "https://github.com/BrianCLong/summit/pull/13193",
+        "mergedAt": "2025-12-04T15:38:38Z",
+        "title": "Build React Native mobile app with OSINT dashboard"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

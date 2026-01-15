@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { Pool } from 'pg';
-import { getPostgresPool } from '../../config/database';
+import { getPostgresPool } from '../config/database.js';
 import {
   FactRun, FactTask, FactSecurity, FactOps,
   KPIDefinition, KPIValue, Forecast, RiskAssessment

@@ -1,9 +1,10 @@
 """Core primitives for interacting with a protected API surface."""
+
 from __future__ import annotations
 
 import random
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, field
-from typing import Callable, Dict, Iterable, List, Optional, Sequence
 
 
 @dataclass
@@ -12,9 +13,15 @@ class AttackSession:
 
     agent_name: str
     seed: int
-    timeline: List[Dict[str, object]] = field(default_factory=list)
+    timeline: list[dict[str, object]] = field(default_factory=list)
 
-    def record(self, prompt: str, response: str, timestamp: float, metadata: Optional[Dict[str, object]] = None) -> None:
+    def record(
+        self,
+        prompt: str,
+        response: str,
+        timestamp: float,
+        metadata: dict[str, object] | None = None,
+    ) -> None:
         entry = {
             "prompt": prompt,
             "response": response,
@@ -33,9 +40,9 @@ class ProtectedAPI:
         knowledge_base: Sequence[str],
         canaries: Sequence[str],
         *,
-        defenses: Optional[Iterable["DefenseAdapter"]] = None,
-        response_selector: Optional[Callable[[str, random.Random], str]] = None,
-        rng: Optional[random.Random] = None,
+        defenses: Iterable[DefenseAdapter] | None = None,
+        response_selector: Callable[[str, random.Random], str] | None = None,
+        rng: random.Random | None = None,
     ) -> None:
         self.knowledge_base = list(knowledge_base)
         self.canaries = list(canaries)
@@ -49,7 +56,7 @@ class ProtectedAPI:
             return rng.choice(self.knowledge_base)
         return "No sensitive information available."
 
-    def query(self, prompt: str, *, metadata: Optional[Dict[str, object]] = None) -> str:
+    def query(self, prompt: str, *, metadata: dict[str, object] | None = None) -> str:
         """Return a response to ``prompt`` after defenses have run."""
 
         response = self._selector(prompt, self._rng)
@@ -63,7 +70,7 @@ class ProtectedAPI:
         return response
 
     @property
-    def defenses(self) -> Sequence["DefenseAdapter"]:
+    def defenses(self) -> Sequence[DefenseAdapter]:
         """Tuple of defense adapters attached to the API."""
 
         return tuple(self._defenses)
@@ -74,5 +81,7 @@ class DefenseAdapter:
 
     name: str = "defense"
 
-    def process(self, response: str, context: Dict[str, object]) -> str:  # pragma: no cover - interface
+    def process(
+        self, response: str, context: dict[str, object]
+    ) -> str:  # pragma: no cover - interface
         raise NotImplementedError

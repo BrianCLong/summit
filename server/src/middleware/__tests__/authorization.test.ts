@@ -1,5 +1,20 @@
-import authorize from '../authorization';
-import { requestFactory, responseFactory, nextFactory } from '../../../../tests/factories/requestFactory';
+import { jest } from '@jest/globals';
+import { authorize } from '../authorization';
+
+const requestFactory = (overrides: Record<string, unknown> = {}) => ({
+  user: undefined,
+  headers: {},
+  ...overrides,
+});
+
+const responseFactory = () => {
+  const res: Record<string, unknown> = {};
+  res.status = jest.fn().mockReturnValue(res);
+  res.json = jest.fn().mockReturnValue(res);
+  return res;
+};
+
+const nextFactory = () => jest.fn();
 
 describe('authorize middleware', () => {
   it('returns 401 when no user is present', () => {

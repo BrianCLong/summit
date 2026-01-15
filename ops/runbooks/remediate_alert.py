@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -35,7 +35,7 @@ def build_incident(alert_name: str, metadata: dict[str, Any]) -> IncidentAlert:
         service=metadata.get("service", "unknown"),
         tenant_id=None,
         metrics={"expr": metadata.get("expr", ""), "source": metadata.get("source", "")},
-        timestamp=datetime.now(timezone.utc).isoformat(),
+        timestamp=datetime.now(UTC).isoformat(),
         description=description,
     )
 
@@ -52,7 +52,7 @@ def write_verification(alert_name: str, proposal_id: str, execution_status: str)
             "Validate Prometheus query recovers for the alert expression.",
             "Ensure service dashboard shows green across burn-rate widgets.",
         ],
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }
     with open(VERIFICATION_DIR / f"{alert_name}.json", "w") as handle:
         json.dump(verification_payload, handle, indent=2)

@@ -1,16 +1,17 @@
 """Deterministic embedding utilities for CSSM."""
+
 from __future__ import annotations
 
 import hashlib
 import math
-from typing import Iterable, List
+from collections.abc import Iterable
 
 
-def _tokenize(text: str) -> List[str]:
+def _tokenize(text: str) -> list[str]:
     return [token for token in text.lower().replace("_", " ").split() if token]
 
 
-def deterministic_embedding(text: str, dimensions: int = 32) -> List[float]:
+def deterministic_embedding(text: str, dimensions: int = 32) -> list[float]:
     """Create a deterministic pseudo-embedding based on hashing tokens."""
     vector = [0.0] * dimensions
     tokens = _tokenize(text)
@@ -20,7 +21,7 @@ def deterministic_embedding(text: str, dimensions: int = 32) -> List[float]:
         digest = hashlib.sha256(token.encode("utf-8")).digest()
         for idx in range(dimensions):
             byte = digest[idx]
-            vector[idx] += ((byte / 255.0) - 0.5)
+            vector[idx] += (byte / 255.0) - 0.5
     # Normalize by token count for stability.
     token_count = float(len(tokens))
     return [value / token_count for value in vector]

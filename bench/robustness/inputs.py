@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List
 
 
 @dataclass
@@ -11,10 +10,10 @@ class RobustnessInput:
     slug: str
     prompt: str
     success_criteria: str
-    metadata: Dict[str, str]
+    metadata: dict[str, str]
 
 
-ROBUSTNESS_INPUTS: List[RobustnessInput] = [
+ROBUSTNESS_INPUTS: list[RobustnessInput] = [
     RobustnessInput(
         slug="financial-scenario",
         prompt=(

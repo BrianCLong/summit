@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 from intelgraph_py.celery_app import celery_app
 from intelgraph_py.database import create_db_tables, get_engine, get_session_local
 from intelgraph_py.models import AlertLog, Schedule, Subscription
-from intelgraph_py.services.mining_service import MiningService
 from intelgraph_py.schemas import (
     AlertLogInDB,
     MiningRequest,
@@ -17,6 +16,7 @@ from intelgraph_py.schemas import (
     SubscriptionInDB,
     SubscriptionUpdate,
 )
+from intelgraph_py.services.mining_service import MiningService
 from intelgraph_py.tasks import analyze_sentiment, enrich_ip_task, run_ai_analytics_task
 
 # from strawberry.fastapi import GraphQLRouter # Temporarily commented out to resolve import error

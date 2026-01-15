@@ -1,60 +1,49 @@
 import { RedTeamSimulator } from '../../src/services/RedTeamSimulator';
 import { EventEmitter } from 'events';
 import { describe, it, expect, jest, afterEach } from '@jest/globals';
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const eventBus = require('../../src/workers/eventBus.js') as EventEmitter;
+import eventBus from '../../src/workers/eventBus';
 
 describe('RedTeamSimulator', () => {
-  // Clear listeners after each test to avoid interference
   afterEach(() => {
     eventBus.removeAllListeners();
   });
 
-  it('should inject a phishing campaign and emit an event', (done) => {
-    const simulator = new RedTeamSimulator();
+  it('should run a phishing campaign and emit an event', (done) => {
+    const simulationEngine = new EventEmitter() as any;
+    simulationEngine.runSimulation = jest.fn().mockResolvedValue({ id: 'sim-1' });
+    const simulator = new RedTeamSimulator(simulationEngine);
 
     eventBus.once('raw-event', (event: any) => {
       try {
         expect(event.source).toBe('red-team');
-        expect(event.data.type).toBe('phishing');
+        expect(event.data.type).toBe('PHISHING_CAMPAIGN');
         expect(event.data.entity).toBe('CorpX');
         done();
       } catch (e) {
-        done(e);
+        done(e as Error);
       }
     });
 
-    simulator.inject('phishing-campaign');
+    simulator.runCampaign('PHISHING_CAMPAIGN', 'CorpX').catch(done);
   });
 
-  it('should run an influence simulation and emit results', (done) => {
-    const simulator = new RedTeamSimulator();
-    const config = {
-      nodes: [
-        { id: 'A', susceptibility: 1.0 },
-        { id: 'B', susceptibility: 1.0 }
-      ],
-      edges: [
-        { source: 'A', target: 'B', weight: 1.0 }
-      ],
-      seeds: ['A'],
-      steps: 2,
-      baseVirality: 1.0
-    };
+  it('should emit a completion update when a simulation finishes', (done) => {
+    const simulationEngine = new EventEmitter() as any;
+    simulationEngine.runSimulation = jest.fn().mockResolvedValue({ id: 'sim-2' });
+    const simulator = new RedTeamSimulator(simulationEngine);
 
-    eventBus.once('raw-event', (event: any) => {
+    eventBus.once('red-team:campaign-update', (event: any) => {
       try {
-        expect(event.source).toBe('red-team');
-        expect(event.type).toBe('simulation_result');
-        expect(event.data.totalSteps).toBeGreaterThan(0);
-        expect(event.data.finalInfectionRate).toBeGreaterThan(0);
+        expect(event.data.status).toBe('COMPLETED');
+        expect(event.data.simulationId).toBe('sim-2');
         done();
       } catch (e) {
-        done(e);
+        done(e as Error);
       }
     });
 
-    simulator.inject('influence-simulation', config);
+    simulator.runCampaign('PHISHING_CAMPAIGN', 'CorpY').then(() => {
+      simulationEngine.emit('simulationCompleted', { id: 'sim-2', results: {} });
+    }).catch(done);
   });
 });

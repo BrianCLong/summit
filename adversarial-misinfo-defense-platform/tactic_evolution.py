@@ -353,7 +353,7 @@ class AutonomousTacticEvolver:
             return mutated_tactic
 
         except Exception as e:
-            self.logger.error(f"Error mutating tactic: {str(e)}")
+            self.logger.error(f"Error mutating tactic: {e!s}")
             return None
 
     def _select_random_tactic(self, exclude_tactic_id: str | None = None) -> Tactic | None:
@@ -414,7 +414,7 @@ class AutonomousTacticEvolver:
             return hybrid_tactic
 
         except Exception as e:
-            self.logger.error(f"Error combining tactics: {str(e)}")
+            self.logger.error(f"Error combining tactics: {e!s}")
             return None
 
     def _estimate_success_probability(self, tactic: Tactic) -> float:
@@ -511,7 +511,7 @@ class AutonomousTacticEvolver:
             return adapted_tactic
 
         except Exception as e:
-            self.logger.error(f"Error creating adapted tactic: {str(e)}")
+            self.logger.error(f"Error creating adapted tactic: {e!s}")
             return None
 
     def update_tactic_effectiveness(self, tactic_id: str, new_effectiveness: float):
@@ -589,7 +589,7 @@ class AutonomousTacticEvolver:
 
             self.logger.info(f"Saved evolution data to {filepath}")
         except Exception as e:
-            self.logger.error(f"Error saving evolution data: {str(e)}")
+            self.logger.error(f"Error saving evolution data: {e!s}")
 
     def load_evolution_data(self, filepath: str):
         """
@@ -614,7 +614,7 @@ class AutonomousTacticEvolver:
 
             self.logger.info(f"Loaded evolution data from {filepath}")
         except Exception as e:
-            self.logger.error(f"Error loading evolution data: {str(e)}")
+            self.logger.error(f"Error loading evolution data: {e!s}")
 
 
 # Convenience function for easy usage

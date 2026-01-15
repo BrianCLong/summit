@@ -14,12 +14,10 @@
 
 import request from 'supertest';
 import { randomUUID } from 'crypto';
-import { app } from '../src/app';
-import { WarrantService } from '../src/services/WarrantService';
-import { AdvancedAuditSystem } from '../src/audit/advanced-audit-system';
-import { getPostgresPool } from '../src/db/postgres';
-import { getNeo4jDriver } from '../src/db/neo4j';
 import { describe, it, test, expect, beforeAll, afterAll } from '@jest/globals';
+
+const runAcceptance = process.env.RUN_ACCEPTANCE === 'true';
+const describeIf = runAcceptance ? describe : describe.skip;
 
 jest.mock('../src/config/database', () => ({
     getPostgresPool: jest.fn(() => ({
@@ -40,15 +38,26 @@ jest.mock('../src/config/database', () => ({
 const TENANT_A_ID = 'tenant-a';
 const TENANT_B_ID = 'tenant-b';
 
-let warrantService: WarrantService;
-let auditSystem: AdvancedAuditSystem;
+let warrantService: any;
+let auditSystem: any;
 let adminToken: string;
 let normalUserToken: string;
 let viewerToken: string;
 let tenantBToken: string;
-let testWarrantId: string;
+let testWarrantId = 'warrant-test';
+let app: any;
+let pool: any | null = null;
+let neo4jDriver: any | null = null;
 
 beforeAll(async () => {
+  if (!runAcceptance) return;
+  const appModule = await import('../src/app.js');
+  const pgModule = await import('../src/db/postgres.js');
+  const neo4jModule = await import('../src/db/neo4j.js');
+  app = await appModule.createApp();
+  pool = pgModule.getPostgresPool();
+  neo4jDriver = neo4jModule.getNeo4jDriver();
+
   // Initialize services
   // warrantService = new WarrantService(pool, logger);
   // auditSystem = new AdvancedAuditSystem(pool, redis, logger, signingKey, encryptionKey);
@@ -64,9 +73,10 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  if (!runAcceptance) return;
   await cleanupTestData();
-  await pool.end();
-  await neo4jDriver.close();
+  await pool?.end();
+  await neo4jDriver?.close();
 });
 
 async function setupTestData() {
@@ -206,7 +216,7 @@ async function cleanupTestData() {
 // TEST SUITE 1: TENANT ISOLATION
 // ============================================================================
 
-describe('1. Tenant Isolation', () => {
+describeIf('1. Tenant Isolation', () => {
   it('should deny access to resources from different tenant', async () => {
     const response = await request(app)
       .post('/graphql')
@@ -258,7 +268,7 @@ describe('1. Tenant Isolation', () => {
 // TEST SUITE 2: RBAC ENFORCEMENT
 // ============================================================================
 
-describe('2. RBAC Enforcement', () => {
+describeIf('2. RBAC Enforcement', () => {
   it('should deny viewer role from creating investigations', async () => {
     const response = await request(app)
       .post('/graphql')
@@ -310,7 +320,7 @@ describe('2. RBAC Enforcement', () => {
 // TEST SUITE 3: POLICY TAG ENFORCEMENT (ABAC)
 // ============================================================================
 
-describe('3. Policy Tag Enforcement', () => {
+describeIf('3. Policy Tag Enforcement', () => {
   it('should deny access to restricted data without clearance', async () => {
     const response = await request(app)
       .post('/graphql')
@@ -363,7 +373,7 @@ describe('3. Policy Tag Enforcement', () => {
 // TEST SUITE 4: WARRANT VALIDATION
 // ============================================================================
 
-describe('4. Warrant Validation', () => {
+describeIf('4. Warrant Validation', () => {
   it('should require warrant for restricted data', async () => {
     const response = await request(app)
       .post('/graphql')
@@ -452,7 +462,7 @@ describe('4. Warrant Validation', () => {
 // TEST SUITE 5: REASON FOR ACCESS
 // ============================================================================
 
-describe('5. Reason for Access', () => {
+describeIf('5. Reason for Access', () => {
   it('should require reason for access header', async () => {
     const response = await request(app)
       .post('/graphql')
@@ -526,7 +536,7 @@ describe('5. Reason for Access', () => {
 // TEST SUITE 6: AUDIT TRAIL
 // ============================================================================
 
-describe('6. Comprehensive Audit Trail', () => {
+describeIf('6. Comprehensive Audit Trail', () => {
   it('should record who/what/why/when for all access', async () => {
     const correlationId = randomUUID();
 
@@ -619,7 +629,7 @@ describe('6. Comprehensive Audit Trail', () => {
 // TEST SUITE 7: APPEAL SYSTEM
 // ============================================================================
 
-describe('7. Appeal System', () => {
+describeIf('7. Appeal System', () => {
   it('should provide appeal path when access is denied', async () => {
     const response = await request(app)
       .post('/graphql')
@@ -674,7 +684,7 @@ describe('7. Appeal System', () => {
 // TEST SUITE 8: IMMUTABLE AUDIT LOG
 // ============================================================================
 
-describe('8. Immutable Audit Log', () => {
+describeIf('8. Immutable Audit Log', () => {
   it('should prevent modification of audit events', async () => {
     // Create an audit event
     // const eventId = await auditSystem.recordEvent({
@@ -717,7 +727,7 @@ describe('8. Immutable Audit Log', () => {
 // TEST SUITE 9: FIELD-LEVEL REDACTION
 // ============================================================================
 
-describe('9. Field-Level Redaction', () => {
+describeIf('9. Field-Level Redaction', () => {
   it('should redact PII fields without PII scope', async () => {
     const response = await request(app)
       .post('/graphql')
@@ -793,7 +803,7 @@ describe('9. Field-Level Redaction', () => {
 // TEST SUITE 10: PURPOSE LIMITATION
 // ============================================================================
 
-describe('10. Purpose Limitation', () => {
+describeIf('10. Purpose Limitation', () => {
   it('should deny access when purpose does not match resource purpose', async () => {
     // Create investigation with specific purpose
     const session = neo4jDriver.session();

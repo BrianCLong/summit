@@ -1,0 +1,104 @@
+{
+  "issue_number": 311,
+  "title": "Feature Attribution Dashboard for AI Predictions",
+  "url": "https://github.com/BrianCLong/summit/issues/311",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9121349718,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zAVg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type-feature",
+      "name": "type-feature",
+      "color": "0075ca",
+      "default": false,
+      "description": "Feature development"
+    },
+    {
+      "id": 9121349913,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zBGQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area-AI",
+      "name": "area-AI",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Relates to AI/NLP/ML"
+    },
+    {
+      "id": 9121485539,
+      "node_id": "LA_kwDOPaNncM8AAAACH67S4w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-explainability",
+      "name": "epic-explainability",
+      "color": "4ECDC4",
+      "default": false,
+      "description": "AI explainability and transparency"
+    },
+    {
+      "id": 9121486304,
+      "node_id": "LA_kwDOPaNncM8AAAACH67V4A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/sprint-7",
+      "name": "sprint-7",
+      "color": "A29BFE",
+      "default": false,
+      "description": "Sprint 7: Insight Experience Polish & Scaling"
+    }
+  ],
+  "updatedAt": "2025-08-16T18:33:37Z",
+  "createdAt": "2025-08-16T18:33:37Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13181,
+        "url": "https://github.com/BrianCLong/summit/pull/13181",
+        "mergedAt": "2025-12-04T15:39:09Z",
+        "title": "Add quantum-resistant crypto algorithms for Summit"
+      },
+      {
+        "number": 11884,
+        "url": "https://github.com/BrianCLong/summit/pull/11884",
+        "mergedAt": "2025-11-20T14:33:08Z",
+        "title": "Build connector SDK and sample connectors"
+      },
+      {
+        "number": 11915,
+        "url": "https://github.com/BrianCLong/summit/pull/11915",
+        "mergedAt": null,
+        "title": "Implement SLO-driven alerting system for Summit"
+      },
+      {
+        "number": 11817,
+        "url": "https://github.com/BrianCLong/summit/pull/11817",
+        "mergedAt": "2025-11-17T10:00:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 41 updates"
+      },
+      {
+        "number": 11895,
+        "url": "https://github.com/BrianCLong/summit/pull/11895",
+        "mergedAt": null,
+        "title": "Build Crisis Management and Emergency Response Platform"
+      },
+      {
+        "number": 1279,
+        "url": "https://github.com/BrianCLong/summit/pull/1279",
+        "mergedAt": null,
+        "title": "feat(ga): artifacts pack for v1.0.0"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

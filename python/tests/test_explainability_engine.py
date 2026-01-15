@@ -106,9 +106,10 @@ async def test_generate_explanation_from_cache():
     }
     set_cached_explanation(cache_key, cached_explanation_data)
 
-    with patch("openai.ChatCompletion.acreate") as mock_openai_create, patch(
-        "langchain_community.chat_models.ollama.ChatOllama.ainvoke"
-    ) as mock_ollama_ainvoke:
+    with (
+        patch("openai.ChatCompletion.acreate") as mock_openai_create,
+        patch("langchain_community.chat_models.ollama.ChatOllama.ainvoke") as mock_ollama_ainvoke,
+    ):
         explanation = await generate_explanation(
             insight_data, llm_model=llm_model, authority="internal"
         )

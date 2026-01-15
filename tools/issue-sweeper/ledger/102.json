@@ -1,0 +1,197 @@
+{
+  "issue_number": 102,
+  "title": "Add Stub for AI/ML Service (Link Prediction)",
+  "url": "https://github.com/BrianCLong/summit/issues/102",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    },
+    {
+      "id": 9095918253,
+      "node_id": "LA_kwDOPaNncM8AAAACHiiyrQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:ai-ml",
+      "name": "area:ai-ml",
+      "color": "5319e7",
+      "default": false,
+      "description": "AI/ML area"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:14:38Z",
+  "createdAt": "2025-08-12T04:40:52Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12718,
+        "url": "https://github.com/BrianCLong/summit/pull/12718",
+        "mergedAt": "2025-12-18T01:31:50Z",
+        "title": "feat(maestro): implement control plane foundation (SM-101, SM-102)"
+      },
+      {
+        "number": 15127,
+        "url": "https://github.com/BrianCLong/summit/pull/15127",
+        "mergedAt": "2025-12-30T21:20:45Z",
+        "title": "chore(deps): bump docker/setup-qemu-action from 2 to 3"
+      },
+      {
+        "number": 15333,
+        "url": "https://github.com/BrianCLong/summit/pull/15333",
+        "mergedAt": null,
+        "title": "Innovation Sprint Delivery: 8 Strategic Features"
+      },
+      {
+        "number": 11924,
+        "url": "https://github.com/BrianCLong/summit/pull/11924",
+        "mergedAt": "2025-11-20T10:20:18Z",
+        "title": "Build Case Spaces with audit logs and access prompts"
+      },
+      {
+        "number": 10085,
+        "url": "https://github.com/BrianCLong/summit/pull/10085",
+        "mergedAt": null,
+        "title": "feat: add policy compliance simulation analytics"
+      },
+      {
+        "number": 322,
+        "url": "https://github.com/BrianCLong/summit/pull/322",
+        "mergedAt": "2025-08-16T22:23:16Z",
+        "title": "feat: add GNN node classifier and close issues"
+      },
+      {
+        "number": 10116,
+        "url": "https://github.com/BrianCLong/summit/pull/10116",
+        "mergedAt": "2025-10-14T10:40:16Z",
+        "title": "chore: harden security compliance pipeline"
+      },
+      {
+        "number": 10115,
+        "url": "https://github.com/BrianCLong/summit/pull/10115",
+        "mergedAt": "2025-10-14T10:40:20Z",
+        "title": "feat: improve websocket connection resilience"
+      },
+      {
+        "number": 10079,
+        "url": "https://github.com/BrianCLong/summit/pull/10079",
+        "mergedAt": null,
+        "title": "[P0][Delta] Fix CI failures - gitleaks, contract-tests, python deps"
+      },
+      {
+        "number": 11908,
+        "url": "https://github.com/BrianCLong/summit/pull/11908",
+        "mergedAt": "2025-11-20T10:25:29Z",
+        "title": "Establish charts as deployment golden path"
+      },
+      {
+        "number": 10094,
+        "url": "https://github.com/BrianCLong/summit/pull/10094",
+        "mergedAt": "2025-10-14T13:06:00Z",
+        "title": "feat: add crypto verification pipeline"
+      },
+      {
+        "number": 13186,
+        "url": "https://github.com/BrianCLong/summit/pull/13186",
+        "mergedAt": "2025-12-04T15:38:58Z",
+        "title": "Implement federated learning for distributed OSINT training"
+      },
+      {
+        "number": 13188,
+        "url": "https://github.com/BrianCLong/summit/pull/13188",
+        "mergedAt": "2025-12-04T15:38:53Z",
+        "title": "Build cross-platform TypeScript CLI for graph queries"
+      },
+      {
+        "number": 1331,
+        "url": "https://github.com/BrianCLong/summit/pull/1331",
+        "mergedAt": "2025-09-23T17:10:18Z",
+        "title": "feat: add crystal orchestration services"
+      },
+      {
+        "number": 11913,
+        "url": "https://github.com/BrianCLong/summit/pull/11913",
+        "mergedAt": "2025-11-20T10:25:05Z",
+        "title": "Improve test coverage and organization"
+      },
+      {
+        "number": 11894,
+        "url": "https://github.com/BrianCLong/summit/pull/11894",
+        "mergedAt": null,
+        "title": "Build Advanced Attribution and Identity Resolution Platform"
+      },
+      {
+        "number": 13193,
+        "url": "https://github.com/BrianCLong/summit/pull/13193",
+        "mergedAt": "2025-12-04T15:38:38Z",
+        "title": "Build React Native mobile app with OSINT dashboard"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      },
+      {
+        "number": 1338,
+        "url": "https://github.com/BrianCLong/summit/pull/1338",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/workflows"
+      },
+      {
+        "number": 1337,
+        "url": "https://github.com/BrianCLong/summit/pull/1337",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/docs"
+      },
+      {
+        "number": 1336,
+        "url": "https://github.com/BrianCLong/summit/pull/1336",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/deps"
+      },
+      {
+        "number": 1335,
+        "url": "https://github.com/BrianCLong/summit/pull/1335",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/hardening"
+      },
+      {
+        "number": 1334,
+        "url": "https://github.com/BrianCLong/summit/pull/1334",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/features"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,5 +1,6 @@
 class ArchitectAgent:
-    def __init__(self, llm): self.llm = llm
+    def __init__(self, llm):
+        self.llm = llm
 
     async def design_system(self, request: str, system_prompt: str) -> dict:
         prompt = f"""

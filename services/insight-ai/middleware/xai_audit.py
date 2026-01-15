@@ -7,7 +7,7 @@ import json
 import time
 import uuid
 from collections.abc import Callable
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -52,7 +52,7 @@ class XAIAuditMiddleware(BaseHTTPMiddleware):
 
         # Generate artifact ID and start audit record
         artifact_id = str(uuid.uuid4())
-        start_time = datetime.now(timezone.utc)
+        start_time = datetime.now(UTC)
 
         audit_record = {
             "artifact_id": artifact_id,
@@ -76,7 +76,6 @@ class XAIAuditMiddleware(BaseHTTPMiddleware):
                 "ai.model": audit_record["model_metadata"].get("name", "unknown"),
             },
         ) as span:
-
             try:
                 # Capture request features if enabled
                 if self.enable_feature_capture:
@@ -88,9 +87,8 @@ class XAIAuditMiddleware(BaseHTTPMiddleware):
                 # Capture response and inference results
                 audit_record.update(
                     {
-                        "end_timestamp": datetime.now(timezone.utc).isoformat(),
-                        "duration_ms": (datetime.now(timezone.utc) - start_time).total_seconds()
-                        * 1000,
+                        "end_timestamp": datetime.now(UTC).isoformat(),
+                        "duration_ms": (datetime.now(UTC) - start_time).total_seconds() * 1000,
                         "status_code": response.status_code,
                         "response_size_bytes": (
                             len(response.body) if hasattr(response, "body") else 0
@@ -156,7 +154,7 @@ class XAIAuditMiddleware(BaseHTTPMiddleware):
                 # Log error and continue
                 audit_record.update(
                     {
-                        "end_timestamp": datetime.now(timezone.utc).isoformat(),
+                        "end_timestamp": datetime.now(UTC).isoformat(),
                         "error": str(e),
                         "status": "failed",
                     }
@@ -231,7 +229,7 @@ class XAIAuditMiddleware(BaseHTTPMiddleware):
                     "data_source": request.headers.get("x-data-source", "unknown"),
                 }
         except Exception as e:
-            return {"error": f"Feature capture failed: {str(e)}"}
+            return {"error": f"Feature capture failed: {e!s}"}
 
         return {}
 

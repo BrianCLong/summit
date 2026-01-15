@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from collections import Counter, defaultdict
-from datetime import datetime, timezone
-from typing import Any, Iterable, Mapping
+from collections import Counter
+from collections.abc import Iterable, Mapping
+from datetime import UTC, datetime
+from typing import Any
 
 import networkx as nx
 
@@ -13,7 +14,9 @@ def _extract_field(record: Mapping[str, Any], field: str, default: Any = None) -
     return default
 
 
-def build_graph(nodes: Iterable[Mapping[str, Any]] | None, edges: Iterable[Mapping[str, Any]]) -> nx.Graph:
+def build_graph(
+    nodes: Iterable[Mapping[str, Any]] | None, edges: Iterable[Mapping[str, Any]]
+) -> nx.Graph:
     graph = nx.Graph()
     if nodes:
         for node in nodes:
@@ -59,7 +62,9 @@ def compute_centrality(graph: nx.Graph) -> dict[str, Mapping[str, float] | list[
     except nx.NetworkXException:
         eigenvector = {}
 
-    top_hubs = [node for node, _ in sorted(degree.items(), key=lambda item: item[1], reverse=True)[:5]]
+    top_hubs = [
+        node for node, _ in sorted(degree.items(), key=lambda item: item[1], reverse=True)[:5]
+    ]
     return {
         "degree": degree,
         "betweenness": betweenness,
@@ -87,7 +92,7 @@ def _parse_timestamp(raw: Any) -> datetime | None:
     if raw is None:
         return None
     if isinstance(raw, (int, float)):
-        return datetime.fromtimestamp(float(raw), tz=timezone.utc)
+        return datetime.fromtimestamp(float(raw), tz=UTC)
     if isinstance(raw, str):
         candidate = raw
         if candidate.endswith("Z"):
@@ -97,7 +102,7 @@ def _parse_timestamp(raw: Any) -> datetime | None:
         except ValueError:
             return None
         if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=timezone.utc)
+            parsed = parsed.replace(tzinfo=UTC)
         return parsed
     return None
 
@@ -154,8 +159,12 @@ def run_custom_algorithms(
             source = parameters.get("source")
             target = parameters.get("target")
             if source in graph and target in graph and nx.has_path(graph, source, target):
-                path = nx.shortest_path(graph, source=source, target=target, weight=parameters.get("weight"))
-                length = nx.shortest_path_length(graph, source=source, target=target, weight=parameters.get("weight"))
+                path = nx.shortest_path(
+                    graph, source=source, target=target, weight=parameters.get("weight")
+                )
+                length = nx.shortest_path_length(
+                    graph, source=source, target=target, weight=parameters.get("weight")
+                )
                 result = {"path": path, "length": float(length)}
             else:
                 result = {"error": "Path not found for requested nodes"}

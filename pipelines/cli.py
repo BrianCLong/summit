@@ -8,13 +8,13 @@ Unified command-line interface for pipeline operations:
 - Visualize pipeline graphs
 - Generate Airflow DAGs
 """
+
 import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Optional
 
-from pipelines.registry.core import create_registry, Pipeline
+from pipelines.registry.core import create_registry
 
 
 def cmd_list(args):
@@ -61,8 +61,16 @@ def cmd_list(args):
         # Rows
         for p in pipelines:
             name = p.name[:38] + ".." if len(p.name) > 40 else p.name
-            owners = ", ".join(p.owners)[:28] + ".." if len(", ".join(p.owners)) > 30 else ", ".join(p.owners)
-            schedule = (p.schedule.get("cron", "")[:13] + "..") if p.schedule and len(p.schedule.get("cron", "")) > 15 else (p.schedule.get("cron", "") if p.schedule else "manual")
+            owners = (
+                ", ".join(p.owners)[:28] + ".."
+                if len(", ".join(p.owners)) > 30
+                else ", ".join(p.owners)
+            )
+            schedule = (
+                (p.schedule.get("cron", "")[:13] + "..")
+                if p.schedule and len(p.schedule.get("cron", "")) > 15
+                else (p.schedule.get("cron", "") if p.schedule else "manual")
+            )
             tasks = str(len(p.tasks))
 
             print(f"{name:<40} {p.runtime:<10} {owners:<30} {schedule:<15} {tasks:<6}")
@@ -163,8 +171,8 @@ def cmd_graph(args):
 
     elif args.format == "dot":
         print("digraph pipeline {")
-        print('    rankdir=LR;')
-        print('    node [shape=box];')
+        print("    rankdir=LR;")
+        print("    node [shape=box];")
 
         # Nodes
         for task in pipeline.tasks:
@@ -312,7 +320,9 @@ def cmd_info(args):
             print(f"Tags: {', '.join(f'{k}:{v}' for k, v in pipeline.tags.items())}")
 
         if pipeline.schedule:
-            print(f"Schedule: {pipeline.schedule.get('cron', 'manual')} ({pipeline.schedule.get('timezone', 'UTC')})")
+            print(
+                f"Schedule: {pipeline.schedule.get('cron', 'manual')} ({pipeline.schedule.get('timezone', 'UTC')})"
+            )
 
         if pipeline.inputs:
             print(f"\nInputs ({len(pipeline.inputs)}):")
@@ -333,7 +343,7 @@ def cmd_info(args):
         # Governance
         governance = pipeline.spec.get("governance", {})
         if governance:
-            print(f"\nGovernance:")
+            print("\nGovernance:")
             if "budget" in governance:
                 budget = governance["budget"]
                 print(f"  Budget: ${budget.get('per_run_usd', 'N/A')} per run")
@@ -356,7 +366,9 @@ def main():
     list_parser.add_argument("--runtime", help="Filter by runtime (airflow, maestro, local)")
     list_parser.add_argument("--owner", help="Filter by owner")
     list_parser.add_argument("--tag", help="Filter by tag (format: key=value)")
-    list_parser.add_argument("--scheduled", action="store_true", help="Show only scheduled pipelines")
+    list_parser.add_argument(
+        "--scheduled", action="store_true", help="Show only scheduled pipelines"
+    )
     list_parser.add_argument("--format", choices=["table", "json", "compact"], default="table")
     list_parser.add_argument("--quiet", action="store_true", help="Suppress summary")
 
@@ -371,7 +383,9 @@ def main():
     # Graph command
     graph_parser = subparsers.add_parser("graph", help="Visualize pipeline graph")
     graph_parser.add_argument("name", help="Pipeline name")
-    graph_parser.add_argument("--format", choices=["ascii", "mermaid", "dot", "json"], default="ascii")
+    graph_parser.add_argument(
+        "--format", choices=["ascii", "mermaid", "dot", "json"], default="ascii"
+    )
 
     # Generate command
     gen_parser = subparsers.add_parser("generate-airflow", help="Generate Airflow DAGs")

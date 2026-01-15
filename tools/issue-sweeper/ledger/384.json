@@ -1,0 +1,92 @@
+{
+  "issue_number": 384,
+  "title": "feat: initialize telemetry service and enhance dashboard responsiveness",
+  "url": "https://github.com/BrianCLong/summit/pull/384",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T16:17:38Z",
+  "createdAt": "2025-08-17T04:21:49Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15130,
+        "url": "https://github.com/BrianCLong/summit/pull/15130",
+        "mergedAt": "2025-12-30T21:30:56Z",
+        "title": "chore(deps): bump thiserror from 1.0.69 to 2.0.17"
+      },
+      {
+        "number": 11897,
+        "url": "https://github.com/BrianCLong/summit/pull/11897",
+        "mergedAt": "2025-11-20T10:26:10Z",
+        "title": "Add XAI overlay service for model metrics"
+      },
+      {
+        "number": 11904,
+        "url": "https://github.com/BrianCLong/summit/pull/11904",
+        "mergedAt": "2025-11-20T10:25:38Z",
+        "title": "Set up Security Autopilot for Summit repoCreate pull request"
+      },
+      {
+        "number": 13185,
+        "url": "https://github.com/BrianCLong/summit/pull/13185",
+        "mergedAt": "2025-12-17T05:27:53Z",
+        "title": "Add STIX 2.1 bundle exporter with secure sharing"
+      },
+      {
+        "number": 15126,
+        "url": "https://github.com/BrianCLong/summit/pull/15126",
+        "mergedAt": "2025-12-30T21:31:10Z",
+        "title": "chore(deps): bump the minor-and-patch group with 4 updates"
+      },
+      {
+        "number": 13181,
+        "url": "https://github.com/BrianCLong/summit/pull/13181",
+        "mergedAt": "2025-12-04T15:39:09Z",
+        "title": "Add quantum-resistant crypto algorithms for Summit"
+      },
+      {
+        "number": 11851,
+        "url": "https://github.com/BrianCLong/summit/pull/11851",
+        "mergedAt": "2025-11-20T09:48:39Z",
+        "title": "Explore LLM guardrails and model security standards"
+      },
+      {
+        "number": 11883,
+        "url": "https://github.com/BrianCLong/summit/pull/11883",
+        "mergedAt": "2025-11-20T14:33:14Z",
+        "title": "Add canonical entities with bitemporal provenance"
+      },
+      {
+        "number": 1331,
+        "url": "https://github.com/BrianCLong/summit/pull/1331",
+        "mergedAt": "2025-09-23T17:10:18Z",
+        "title": "feat: add crystal orchestration services"
+      },
+      {
+        "number": 1300,
+        "url": "https://github.com/BrianCLong/summit/pull/1300",
+        "mergedAt": "2025-09-23T06:47:22Z",
+        "title": "Total Recapture: enterprise-ready green merge to main"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,83 @@
+{
+  "issue_number": 234,
+  "title": "Realtime: Conflict resolution policy",
+  "url": "https://github.com/BrianCLong/summit/issues/234",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767059,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX00w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/documentation",
+      "name": "documentation",
+      "color": "0075ca",
+      "default": true,
+      "description": "Improvements or additions to documentation"
+    },
+    {
+      "id": 9074767070,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX03g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/enhancement",
+      "name": "enhancement",
+      "color": "a2eeef",
+      "default": true,
+      "description": "New feature or request"
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9108055729,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHmsQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/real-time",
+      "name": "real-time",
+      "color": "1d76db",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:54:14Z",
+  "createdAt": "2025-08-14T04:54:14Z",
+  "classification": "feature",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1172,
+        "url": "https://github.com/BrianCLong/summit/pull/1172",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps): bump graphql-subscriptions from 2.0.0 to 3.0.0 in /server"
+      },
+      {
+        "number": 13192,
+        "url": "https://github.com/BrianCLong/summit/pull/13192",
+        "mergedAt": "2025-12-04T15:38:41Z",
+        "title": "Add HUMINT source management and debrief workflows"
+      },
+      {
+        "number": 11891,
+        "url": "https://github.com/BrianCLong/summit/pull/11891",
+        "mergedAt": null,
+        "title": "Build Geopolitical Risk Intelligence Platform"
+      },
+      {
+        "number": 11895,
+        "url": "https://github.com/BrianCLong/summit/pull/11895",
+        "mergedAt": null,
+        "title": "Build Crisis Management and Emergency Response Platform"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

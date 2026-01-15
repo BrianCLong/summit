@@ -10,27 +10,15 @@ import pickle
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any
 
 import flwr as fl
+import numpy as np
 from flwr.common import (
-    Code,
-    EvaluateIns,
-    EvaluateRes,
-    FitIns,
-    FitRes,
-    GetParametersIns,
-    GetParametersRes,
-    GetPropertiesIns,
-    GetPropertiesRes,
-    Parameters,
     Scalar,
-    Status,
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
-
-import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -73,11 +61,13 @@ class ClientConfig:
     max_training_time: float = 300.0  # 5 minutes
 
     # Capabilities
-    capabilities: Dict[str, Any] = field(default_factory=lambda: {
-        "gpu_available": False,
-        "secure_enclave": False,
-        "osint_sources": [],
-    })
+    capabilities: dict[str, Any] = field(
+        default_factory=lambda: {
+            "gpu_available": False,
+            "secure_enclave": False,
+            "osint_sources": [],
+        }
+    )
 
 
 class FederatedClient(fl.client.NumPyClient):
@@ -104,7 +94,7 @@ class FederatedClient(fl.client.NumPyClient):
         self.test_data = test_data
 
         self._current_round = 0
-        self._training_history: List[Dict[str, Any]] = []
+        self._training_history: list[dict[str, Any]] = []
 
         # Initialize paths for air-gap mode
         if config.airgap_mode:
@@ -118,18 +108,17 @@ class FederatedClient(fl.client.NumPyClient):
         )
 
         logger.info(
-            f"Federated client initialized - node_id={config.node_id}, "
-            f"airgap={config.airgap_mode}"
+            f"Federated client initialized - node_id={config.node_id}, airgap={config.airgap_mode}"
         )
 
-    def get_parameters(self, config: Dict[str, Scalar]) -> List[np.ndarray]:
+    def get_parameters(self, config: dict[str, Scalar]) -> list[np.ndarray]:
         """Get current model parameters"""
         if self.model is None:
             return []
 
         return self._get_model_parameters()
 
-    def set_parameters(self, parameters: List[np.ndarray]) -> None:
+    def set_parameters(self, parameters: list[np.ndarray]) -> None:
         """Set model parameters from server"""
         if self.model is None:
             return
@@ -137,15 +126,14 @@ class FederatedClient(fl.client.NumPyClient):
         self._set_model_parameters(parameters)
 
     def fit(
-        self, parameters: List[np.ndarray], config: Dict[str, Scalar]
-    ) -> Tuple[List[np.ndarray], int, Dict[str, Scalar]]:
+        self, parameters: list[np.ndarray], config: dict[str, Scalar]
+    ) -> tuple[list[np.ndarray], int, dict[str, Scalar]]:
         """Train model on local data"""
         start_time = time.time()
         self._current_round = int(config.get("server_round", 0))
 
         logger.info(
-            f"Starting local training - round={self._current_round}, "
-            f"node={self.config.node_id}"
+            f"Starting local training - round={self._current_round}, node={self.config.node_id}"
         )
 
         # Set parameters from server
@@ -166,9 +154,7 @@ class FederatedClient(fl.client.NumPyClient):
         # Apply differential privacy to gradients
         updated_parameters = self._get_model_parameters()
         if self.config.enable_local_dp:
-            updated_parameters = self._apply_local_dp(
-                parameters, updated_parameters
-            )
+            updated_parameters = self._apply_local_dp(parameters, updated_parameters)
 
         # Calculate number of samples
         num_samples = self._get_num_samples()
@@ -205,8 +191,8 @@ class FederatedClient(fl.client.NumPyClient):
         return updated_parameters, num_samples, result_metrics
 
     def evaluate(
-        self, parameters: List[np.ndarray], config: Dict[str, Scalar]
-    ) -> Tuple[float, int, Dict[str, Scalar]]:
+        self, parameters: list[np.ndarray], config: dict[str, Scalar]
+    ) -> tuple[float, int, dict[str, Scalar]]:
         """Evaluate model on local test data"""
         self.set_parameters(parameters)
 
@@ -223,7 +209,7 @@ class FederatedClient(fl.client.NumPyClient):
             },
         )
 
-    def get_properties(self, config: Dict[str, Scalar]) -> Dict[str, Scalar]:
+    def get_properties(self, config: dict[str, Scalar]) -> dict[str, Scalar]:
         """Get client properties"""
         return {
             "node_id": self.config.node_id,
@@ -239,7 +225,7 @@ class FederatedClient(fl.client.NumPyClient):
         epochs: int,
         batch_size: int,
         learning_rate: float,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """
         Perform local training
 
@@ -269,7 +255,7 @@ class FederatedClient(fl.client.NumPyClient):
             "accuracy": total_correct / total_samples,
         }
 
-    def _evaluate_local(self) -> Dict[str, float]:
+    def _evaluate_local(self) -> dict[str, float]:
         """
         Evaluate model on local test data
 
@@ -284,7 +270,7 @@ class FederatedClient(fl.client.NumPyClient):
             "accuracy": min(np.random.uniform(0.7, 0.95), 0.95),
         }
 
-    def _get_model_parameters(self) -> List[np.ndarray]:
+    def _get_model_parameters(self) -> list[np.ndarray]:
         """Extract parameters from model"""
         if self.model is None:
             return []
@@ -295,19 +281,14 @@ class FederatedClient(fl.client.NumPyClient):
             return self.model.get_weights()
         elif hasattr(self.model, "state_dict"):
             # PyTorch
-            return [
-                param.detach().cpu().numpy()
-                for param in self.model.state_dict().values()
-            ]
+            return [param.detach().cpu().numpy() for param in self.model.state_dict().values()]
         elif hasattr(self.model, "parameters"):
             # Generic neural network
-            return [
-                np.array(p) for p in self.model.parameters()
-            ]
+            return [np.array(p) for p in self.model.parameters()]
 
         return []
 
-    def _set_model_parameters(self, parameters: List[np.ndarray]) -> None:
+    def _set_model_parameters(self, parameters: list[np.ndarray]) -> None:
         """Set model parameters"""
         if self.model is None or not parameters:
             return
@@ -325,9 +306,9 @@ class FederatedClient(fl.client.NumPyClient):
 
     def _apply_local_dp(
         self,
-        original_parameters: List[np.ndarray],
-        updated_parameters: List[np.ndarray],
-    ) -> List[np.ndarray]:
+        original_parameters: list[np.ndarray],
+        updated_parameters: list[np.ndarray],
+    ) -> list[np.ndarray]:
         """Apply differential privacy to parameter updates"""
         if not self.config.enable_local_dp:
             return updated_parameters
@@ -345,9 +326,7 @@ class FederatedClient(fl.client.NumPyClient):
 
             # Add Gaussian noise
             noise_scale = (
-                self.config.clip_norm
-                * self.config.noise_multiplier
-                / self._get_num_samples()
+                self.config.clip_norm * self.config.noise_multiplier / self._get_num_samples()
             )
             noise = np.random.normal(0, noise_scale, gradient.shape)
 
@@ -361,9 +340,7 @@ class FederatedClient(fl.client.NumPyClient):
             delta=self.config.local_delta,
         )
 
-        logger.debug(
-            f"Applied local DP - privacy spent: {self._privacy_accountant.get_spent()}"
-        )
+        logger.debug(f"Applied local DP - privacy spent: {self._privacy_accountant.get_spent()}")
 
         return noised_parameters
 
@@ -389,8 +366,8 @@ class FederatedClient(fl.client.NumPyClient):
 
     def _export_update_airgap(
         self,
-        parameters: List[np.ndarray],
-        metrics: Dict[str, float],
+        parameters: list[np.ndarray],
+        metrics: dict[str, float],
         num_samples: int,
     ) -> str:
         """Export update for air-gapped server"""
@@ -423,6 +400,7 @@ class FederatedClient(fl.client.NumPyClient):
         }
 
         import json
+
         with open(manifest_path, "w") as f:
             json.dump(manifest, f)
 
@@ -430,7 +408,7 @@ class FederatedClient(fl.client.NumPyClient):
 
         return str(export_path)
 
-    def import_model_airgap(self) -> Optional[List[np.ndarray]]:
+    def import_model_airgap(self) -> list[np.ndarray] | None:
         """Import model from air-gapped server"""
         import_path = Path(self.config.airgap_import_path)
 
@@ -455,7 +433,8 @@ class FederatedClient(fl.client.NumPyClient):
             manifest_path = latest_model.with_suffix(".manifest")
             if manifest_path.exists():
                 import json
-                with open(manifest_path, "r") as f:
+
+                with open(manifest_path) as f:
                     manifest = json.load(f)
 
                 if manifest.get("checksum") != self._compute_checksum(model_data):
@@ -493,7 +472,7 @@ class FederatedClient(fl.client.NumPyClient):
             client=self,
         )
 
-    def run_airgap_round(self) -> Dict[str, Any]:
+    def run_airgap_round(self) -> dict[str, Any]:
         """Run a single round in air-gap mode"""
         # Import latest model
         parameters = self.import_model_airgap()
@@ -522,11 +501,11 @@ class FederatedClient(fl.client.NumPyClient):
             ),
         }
 
-    def get_training_history(self) -> List[Dict[str, Any]]:
+    def get_training_history(self) -> list[dict[str, Any]]:
         """Get local training history"""
         return self._training_history.copy()
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get client status"""
         return {
             "node_id": self.config.node_id,

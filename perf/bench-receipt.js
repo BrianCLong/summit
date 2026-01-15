@@ -129,7 +129,7 @@ function defaultPayload(seed, overrides = {}) {
 function getGitCommit() {
   try {
     return execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
-  } catch (error) {
+  } catch (_error) {
     return undefined;
   }
 }
@@ -138,7 +138,7 @@ async function getPackageVersion() {
   try {
     const pkg = await import('../package.json', { assert: { type: 'json' } });
     return pkg.default?.version ?? pkg.version;
-  } catch (error) {
+  } catch (_error) {
     return undefined;
   }
 }
@@ -198,11 +198,13 @@ async function main() {
   const smoke = args.has('--smoke');
 
   const report = await runReceiptBenchmark({ iterations, smoke });
+  // eslint-disable-next-line no-console -- CLI output
   console.log(JSON.stringify(report, null, 2));
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch((error) => {
+    // eslint-disable-next-line no-console -- CLI error output
     console.error(error);
     process.exit(1);
   });

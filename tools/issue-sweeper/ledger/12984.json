@@ -1,0 +1,21 @@
+{
+  "issue_number": 12984,
+  "title": "🏗️ Recovery (partial): Add error handling and resilience patterns",
+  "url": "https://github.com/BrianCLong/summit/pull/12984",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-04T15:41:55Z",
+  "createdAt": "2025-12-01T11:30:56Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

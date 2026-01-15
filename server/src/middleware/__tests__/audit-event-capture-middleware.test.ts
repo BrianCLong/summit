@@ -188,7 +188,12 @@ describe('AuditEventCaptureMiddleware', () => {
               {
                 kind: 'Field',
                 name: { value: 'createEntity' },
-                arguments: [],
+                arguments: [
+                  {
+                    name: { value: 'id' },
+                    value: { kind: 'StringValue', value: 'entity-err-1' },
+                  },
+                ],
               },
             ],
           },

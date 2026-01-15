@@ -73,4 +73,4 @@ def explain_decision(feature_importances: dict[str, float]) -> str:
     if not feature_importances:
         return "No features provided."
     feature, importance = max(feature_importances.items(), key=lambda item: abs(item[1]))
-    return f"Decision primarily influenced by {feature} " f"(importance {importance:.2f})."
+    return f"Decision primarily influenced by {feature} (importance {importance:.2f})."

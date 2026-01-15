@@ -57,7 +57,6 @@ class MinHashDeduplicator:
         storage_backend: str = "redis",
         redis_url: str | None = None,
     ):
-
         if not DATASKETCH_AVAILABLE:
             raise ImportError(
                 "datasketch is required for MinHash deduplication. Install with: pip install datasketch"

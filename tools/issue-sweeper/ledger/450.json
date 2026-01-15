@@ -1,0 +1,104 @@
+{
+  "issue_number": 450,
+  "title": "feat: add entity image upload",
+  "url": "https://github.com/BrianCLong/summit/pull/450",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-17T08:06:59Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11934,
+        "url": "https://github.com/BrianCLong/summit/pull/11934",
+        "mergedAt": null,
+        "title": "Align documentation with Summit's actual capabilities"
+      },
+      {
+        "number": 11981,
+        "url": "https://github.com/BrianCLong/summit/pull/11981",
+        "mergedAt": "2025-11-20T15:11:44Z",
+        "title": "Set up Predictive Threat Suite and SLO dashboards"
+      },
+      {
+        "number": 13099,
+        "url": "https://github.com/BrianCLong/summit/pull/13099",
+        "mergedAt": "2025-12-03T01:50:28Z",
+        "title": "Implement SLSA L3 compliance with cosign and OIDC"
+      },
+      {
+        "number": 11983,
+        "url": "https://github.com/BrianCLong/summit/pull/11983",
+        "mergedAt": "2025-11-20T15:06:02Z",
+        "title": "Implement ABAC governance and audit foundations"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 11884,
+        "url": "https://github.com/BrianCLong/summit/pull/11884",
+        "mergedAt": "2025-11-20T14:33:08Z",
+        "title": "Build connector SDK and sample connectors"
+      },
+      {
+        "number": 11883,
+        "url": "https://github.com/BrianCLong/summit/pull/11883",
+        "mergedAt": "2025-11-20T14:33:14Z",
+        "title": "Add canonical entities with bitemporal provenance"
+      },
+      {
+        "number": 1151,
+        "url": "https://github.com/BrianCLong/summit/pull/1151",
+        "mergedAt": null,
+        "title": "chore(deps): bump argon2 from 0.31.2 to 0.44.0 in /server"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 1086,
+        "url": "https://github.com/BrianCLong/summit/pull/1086",
+        "mergedAt": null,
+        "title": "Release 2.5.0: Grafana Release Health dashboard + Playwright smoke pack"
+      },
+      {
+        "number": 1262,
+        "url": "https://github.com/BrianCLong/summit/pull/1262",
+        "mergedAt": "2025-09-19T02:22:35Z",
+        "title": "Release 2.5 dash: merge into merge/all-to-main-20250915-022508 with UI/docs from feature"
+      },
+      {
+        "number": 1085,
+        "url": "https://github.com/BrianCLong/summit/pull/1085",
+        "mergedAt": null,
+        "title": "chore(compat): seed GraphQL N-1 and N-2\nbaselines for CI schema checks"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

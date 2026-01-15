@@ -1,16 +1,16 @@
-
-import sys
 import os
+import sys
 
 # Add the root directory to sys.path to resolve the package
 # We are in auto_scientist/experiments/alignment/
 # We want to add /app (or the repo root)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../")))
 
-from auto_scientist.impl.alignment.schemas import Preference, Candidate, AlignmentConfig
+from auto_scientist.impl.alignment.oversight import OversightOrchestrator
+from auto_scientist.impl.alignment.schemas import AlignmentConfig, Candidate, Preference
 from auto_scientist.impl.alignment.store import PreferenceStore
 from auto_scientist.impl.alignment.trainer import AlignmentTrainer
-from auto_scientist.impl.alignment.oversight import OversightOrchestrator, Candidate as OversightCandidate
+
 
 def run_smoke_test():
     print("=== Running Alignment Smoke Test ===")
@@ -28,7 +28,7 @@ def run_smoke_test():
         chosen_idx=0,
         rejected_idx=1,
         rationale="A is safe command line instruction",
-        safety_tags=["harmless"]
+        safety_tags=["harmless"],
     )
 
     pref_id = store.log_preference(pref)
@@ -55,9 +55,9 @@ def run_smoke_test():
     # 3. Test Trainer (Simulation)
     print("\n3. Testing Trainer (Simulation)...")
     config = AlignmentConfig(
-        model_name="gpt2", # Dummy
+        model_name="gpt2",  # Dummy
         max_steps=5,
-        output_dir="./test_output"
+        output_dir="./test_output",
     )
     trainer = AlignmentTrainer(config)
     # Dummy dataset
@@ -65,6 +65,7 @@ def run_smoke_test():
     trainer.train(dataset)
 
     print("\n=== Smoke Test Passed ===")
+
 
 if __name__ == "__main__":
     run_smoke_test()

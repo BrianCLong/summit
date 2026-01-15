@@ -44,9 +44,12 @@ export interface AnomalyDetectionConfig {
 }
 
 export class CostAnomalyDetectionService {
-  private db = getPostgresPool();
+  private get db() {
+    return getPostgresPool();
+  }
   private budgetThresholds = new Map<string, BudgetThreshold>();
   private recentAlerts = new Map<string, Date>();
+  private initialized = false;
 
   private defaultConfig: AnomalyDetectionConfig = {
     lookbackPeriodDays: 14,
@@ -55,11 +58,24 @@ export class CostAnomalyDetectionService {
     alertCooldownMinutes: 60,
   };
 
-  constructor() {
-    this.initializeDatabase();
-    this.loadBudgetThresholds();
-    this.startPeriodicChecks();
+  constructor() { }
+
+  private async ensureInitialized(): Promise<void> {
+    if (this.initialized) return;
+    try {
+      await this.initializeDatabase();
+      await this.loadBudgetThresholds();
+      // Only start periodic checks once
+      if (!this.checksStarted) {
+        this.startPeriodicChecks();
+        this.checksStarted = true;
+      }
+      this.initialized = true;
+    } catch (error) {
+      logger.warn('Failed to initialize CostAnomaly DB, will retry', error);
+    }
   }
+  private checksStarted = false;
 
   /**
    * Initialize database tables for alerts
@@ -154,6 +170,7 @@ export class CostAnomalyDetectionService {
    * Set budget threshold for a dimension
    */
   async setBudgetThreshold(threshold: BudgetThreshold): Promise<void> {
+    await this.ensureInitialized();
     try {
       await this.db.write(
         `INSERT INTO budget_thresholds
@@ -193,6 +210,7 @@ export class CostAnomalyDetectionService {
     dimension: string,
     dimensionValue: string,
   ): Promise<BudgetAlert[]> {
+    await this.ensureInitialized();
     const key = `${dimension}:${dimensionValue}`;
     const threshold = this.budgetThresholds.get(key);
 
@@ -315,6 +333,7 @@ export class CostAnomalyDetectionService {
     dimensionValue: string,
     config: Partial<AnomalyDetectionConfig> = {},
   ): Promise<BudgetAlert[]> {
+    await this.ensureInitialized();
     const detectionConfig = { ...this.defaultConfig, ...config };
     const alerts: BudgetAlert[] = [];
 
@@ -410,6 +429,7 @@ export class CostAnomalyDetectionService {
    * Detect waste (idle or underutilized resources)
    */
   async detectWaste(): Promise<BudgetAlert[]> {
+    await this.ensureInitialized();
     const alerts: BudgetAlert[] = [];
 
     try {
@@ -610,6 +630,7 @@ export class CostAnomalyDetectionService {
     severity?: string,
     acknowledged?: boolean,
   ): Promise<BudgetAlert[]> {
+    await this.ensureInitialized();
     try {
       let query = `
         SELECT * FROM cost_alerts

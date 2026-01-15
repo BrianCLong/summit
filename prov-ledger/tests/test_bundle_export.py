@@ -53,6 +53,7 @@ def test_bundle_tamper_detection(client, tmp_path):
     target = tmp_path / "extract" / "artifacts" / f"{evid['id']}.json"
     # Modify JSON content to ensure hash mismatch (whitespace is ignored by canonicalizer)
     import json
+
     data = json.loads(target.read_text())
     data["tampered"] = True
     target.write_text(json.dumps(data))

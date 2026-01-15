@@ -9,7 +9,8 @@
  * @module privacy/PIIDetector
  */
 
-import { DataEnvelope, GovernanceVerdict } from '../types/data-envelope.js';
+import { GovernanceResult } from '../types/data-envelope.js';
+import type { DataEnvelope, GovernanceVerdict } from '../types/data-envelope.js';
 import logger from '../utils/logger.js';
 
 // ============================================================================
@@ -228,7 +229,7 @@ export class PIIDetector {
         confidence: 1.0,
       },
       governance: {
-        verdict: result.hasPI ? GovernanceVerdict.FLAG : GovernanceVerdict.ALLOW,
+        verdict: result.hasPI ? GovernanceResult.FLAG : GovernanceResult.ALLOW,
         evaluatedPolicies: [],
         enforcedAt: new Date().toISOString(),
       },
@@ -262,7 +263,7 @@ export class PIIDetector {
         confidence: 1.0,
       },
       governance: {
-        verdict: result.hasPI ? GovernanceVerdict.FLAG : GovernanceVerdict.ALLOW,
+        verdict: result.hasPI ? GovernanceResult.FLAG : GovernanceResult.ALLOW,
         evaluatedPolicies: [],
         enforcedAt: new Date().toISOString(),
       },

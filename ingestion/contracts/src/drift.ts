@@ -15,7 +15,11 @@ export function diffContracts(current: ContractSpec, proposed: ContractSpec): Dr
       continue;
     }
 
-    const existing = currentIndex.get(name)!;
+    const existing = currentIndex.get(name);
+    if (!existing) {
+      // Handle case where existing is undefined
+      continue; // or however the logic should handle it
+    }
     if (
       existing.type !== field.type ||
       existing.nullable !== field.nullable ||

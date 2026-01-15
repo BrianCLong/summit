@@ -1,0 +1,50 @@
+{
+  "issue_number": 481,
+  "title": "feat: add tamper-evident audit trail",
+  "url": "https://github.com/BrianCLong/summit/pull/481",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T16:32:03Z",
+  "createdAt": "2025-08-17T19:07:56Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11899,
+        "url": "https://github.com/BrianCLong/summit/pull/11899",
+        "mergedAt": "2025-11-20T10:26:05Z",
+        "title": "Set up SLO monitoring for API performance"
+      },
+      {
+        "number": 11901,
+        "url": "https://github.com/BrianCLong/summit/pull/11901",
+        "mergedAt": "2025-11-20T10:25:49Z",
+        "title": "Build proof-carrying publishing with disclosure packager"
+      },
+      {
+        "number": 11884,
+        "url": "https://github.com/BrianCLong/summit/pull/11884",
+        "mergedAt": "2025-11-20T14:33:08Z",
+        "title": "Build connector SDK and sample connectors"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

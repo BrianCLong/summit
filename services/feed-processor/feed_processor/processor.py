@@ -9,7 +9,7 @@ import logging
 import signal
 import time
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Optional
+from typing import Any
 
 from opentelemetry import trace
 from opentelemetry.trace import SpanKind
@@ -29,7 +29,7 @@ class FeedProcessor:
         queue: RedisBatchQueue,
         settings: Settings,
         *,
-        loop: Optional[asyncio.AbstractEventLoop] = None,
+        loop: asyncio.AbstractEventLoop | None = None,
     ) -> None:
         self.settings = settings
         self.queue = queue
@@ -87,9 +87,7 @@ class FeedProcessor:
                 continue
 
             started_at = time.perf_counter()
-            with tracer.start_as_current_span(
-                "feed.batch", kind=SpanKind.CONSUMER
-            ) as span:
+            with tracer.start_as_current_span("feed.batch", kind=SpanKind.CONSUMER) as span:
                 span.set_attribute("feed.worker.id", worker_id)
                 span.set_attribute("feed.batch.size", len(batch))
                 results = await self._process_batch(batch, span)
@@ -108,7 +106,11 @@ class FeedProcessor:
         results = await asyncio.gather(
             *[
                 loop.run_in_executor(
-                    self._executor, self._process_record, record, idx, span.get_span_context().trace_id
+                    self._executor,
+                    self._process_record,
+                    record,
+                    idx,
+                    span.get_span_context().trace_id,
                 )
                 for idx, record in enumerate(batch)
             ],

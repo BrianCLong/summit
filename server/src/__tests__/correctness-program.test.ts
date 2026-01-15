@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { correctnessProgram } from '../correctness-program';
 import { buildBooleanStateMachine } from '../correctness-program/invariants';
 import { buildManifest } from '../correctness-program/migrationFactory';

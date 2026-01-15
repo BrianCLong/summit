@@ -2,7 +2,7 @@
 // @ts-nocheck
 import React from 'react'
 
-import { designTokenEntries, tokenVariables } from './tokens'
+import { designTokenEntries } from './tokens'
 import { isFeatureEnabled } from '@/config'
 
 type DesignSystemProviderProps = {
@@ -12,22 +12,28 @@ type DesignSystemProviderProps = {
    * are not wired.
    */
   enableTokens?: boolean
+  tokenOverrides?: Record<string, string | number>
 }
 
 const hasDom = () => typeof document !== 'undefined'
 
 export const applyTokenVariables = (
   root: HTMLElement,
-  entries = designTokenEntries
+  entries = designTokenEntries,
+  overrides: Record<string, string | number> = {}
 ) => {
   entries.forEach(([name, value]) =>
     root.style.setProperty(`--${name}`, String(value))
   )
+  Object.entries(overrides).forEach(([name, value]) => {
+    root.style.setProperty(`--${name}`, String(value))
+  })
 }
 
 export const DesignSystemProvider: React.FC<DesignSystemProviderProps> = ({
   children,
   enableTokens,
+  tokenOverrides,
 }) => {
   const shouldEnable = enableTokens ?? isFeatureEnabled('ui.tokensV1')
 
@@ -40,12 +46,15 @@ export const DesignSystemProvider: React.FC<DesignSystemProviderProps> = ({
     const previousFlag = root.dataset.uiTokens
     const previousValues = new Map<string, string>()
 
-    Object.entries(tokenVariables).forEach(([name]) => {
+    const overrideEntries = Object.entries(tokenOverrides ?? {})
+    const allEntries = [...designTokenEntries, ...overrideEntries]
+
+    allEntries.forEach(([name]) => {
       const cssName = `--${name}`
       previousValues.set(cssName, root.style.getPropertyValue(cssName))
     })
 
-    applyTokenVariables(root)
+    applyTokenVariables(root, designTokenEntries, tokenOverrides)
     root.dataset.uiTokens = 'v1'
 
     return () => {
@@ -63,7 +72,7 @@ export const DesignSystemProvider: React.FC<DesignSystemProviderProps> = ({
         }
       })
     }
-  }, [shouldEnable])
+  }, [shouldEnable, tokenOverrides])
 
   return <>{children}</>
 }

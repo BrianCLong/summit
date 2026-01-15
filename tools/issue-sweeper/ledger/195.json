@@ -1,0 +1,164 @@
+{
+  "issue_number": 195,
+  "title": "API for third-party integrations",
+  "url": "https://github.com/BrianCLong/summit/issues/195",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9107968073,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQSQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P1",
+      "name": "P1",
+      "color": "ff8c00",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108055864,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHnOA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/integration",
+      "name": "integration",
+      "color": "0366d6",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108055870,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHnPg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/API",
+      "name": "API",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108056278,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHo1g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-11-15",
+      "name": "due:2025-11-15",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:42:51Z",
+  "createdAt": "2025-08-14T04:42:51Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15330,
+        "url": "https://github.com/BrianCLong/summit/pull/15330",
+        "mergedAt": null,
+        "title": "docs: add phase4 innovation suite PRDs"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 10086,
+        "url": "https://github.com/BrianCLong/summit/pull/10086",
+        "mergedAt": "2025-10-14T13:07:27Z",
+        "title": "feat: introduce stratified workflow diff engine"
+      },
+      {
+        "number": 10094,
+        "url": "https://github.com/BrianCLong/summit/pull/10094",
+        "mergedAt": "2025-10-14T13:06:00Z",
+        "title": "feat: add crypto verification pipeline"
+      },
+      {
+        "number": 11871,
+        "url": "https://github.com/BrianCLong/summit/pull/11871",
+        "mergedAt": "2025-11-20T09:49:00Z",
+        "title": "Implement CI/CD release automation and versioning"
+      },
+      {
+        "number": 9795,
+        "url": "https://github.com/BrianCLong/summit/pull/9795",
+        "mergedAt": null,
+        "title": "Fix/bulk import lockfile sync"
+      },
+      {
+        "number": 9800,
+        "url": "https://github.com/BrianCLong/summit/pull/9800",
+        "mergedAt": null,
+        "title": "feat(monitoring): Enable error-budget monitoring and Maestro metrics export (EO-1, EO-2)"
+      },
+      {
+        "number": 11893,
+        "url": "https://github.com/BrianCLong/summit/pull/11893",
+        "mergedAt": null,
+        "title": "Build Advanced Metadata Analysis Platform"
+      },
+      {
+        "number": 9796,
+        "url": "https://github.com/BrianCLong/summit/pull/9796",
+        "mergedAt": "2025-10-03T03:51:08Z",
+        "title": "fix: sync lockfile for CI bulk import"
+      },
+      {
+        "number": 1301,
+        "url": "https://github.com/BrianCLong/summit/pull/1301",
+        "mergedAt": "2025-09-23T06:38:37Z",
+        "title": "IntelGraph salvage: total recapture → promote key artifacts"
+      },
+      {
+        "number": 1086,
+        "url": "https://github.com/BrianCLong/summit/pull/1086",
+        "mergedAt": null,
+        "title": "Release 2.5.0: Grafana Release Health dashboard + Playwright smoke pack"
+      },
+      {
+        "number": 13042,
+        "url": "https://github.com/BrianCLong/summit/pull/13042",
+        "mergedAt": "2025-12-01T19:17:12Z",
+        "title": "chore: Finalize CI/CD consolidation and cleanup"
+      },
+      {
+        "number": 1262,
+        "url": "https://github.com/BrianCLong/summit/pull/1262",
+        "mergedAt": "2025-09-19T02:22:35Z",
+        "title": "Release 2.5 dash: merge into merge/all-to-main-20250915-022508 with UI/docs from feature"
+      },
+      {
+        "number": 1300,
+        "url": "https://github.com/BrianCLong/summit/pull/1300",
+        "mergedAt": "2025-09-23T06:47:22Z",
+        "title": "Total Recapture: enterprise-ready green merge to main"
+      },
+      {
+        "number": 1085,
+        "url": "https://github.com/BrianCLong/summit/pull/1085",
+        "mergedAt": null,
+        "title": "chore(compat): seed GraphQL N-1 and N-2\nbaselines for CI schema checks"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

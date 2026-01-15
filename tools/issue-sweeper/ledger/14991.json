@@ -1,0 +1,21 @@
+{
+  "issue_number": 14991,
+  "title": "Release Train Skeleton",
+  "url": "https://github.com/BrianCLong/summit/pull/14991",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-30T22:45:32Z",
+  "createdAt": "2025-12-29T23:20:14Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

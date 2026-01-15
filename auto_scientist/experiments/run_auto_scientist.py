@@ -1,31 +1,32 @@
-import yaml
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any
 
+import yaml
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
 
-from auto_scientist.graph import ExperimentGraph
 from auto_scientist.curriculum import Curriculum, CurriculumStage, StageConstraint
+from auto_scientist.graph import ExperimentGraph
 from auto_scientist.planner import Planner, ProposedExperiment
 from auto_scientist.runner import ExperimentRunner
-from auto_scientist.telemetry import TelemetryLogger
 from auto_scientist.schemas import Node, NodeType
-
+from auto_scientist.telemetry import TelemetryLogger
 
 # --- Mock Implementations ---
 
+
 class MockPlanner(Planner):
     """A mock planner that proposes a simple, predefined experiment."""
+
     def propose_experiments(
         self,
         graph: ExperimentGraph,
         curriculum_stage: str,
         max_proposals: int = 1,
-    ) -> List[ProposedExperiment]:
+    ) -> list[ProposedExperiment]:
         print(f"[{curriculum_stage}] Planner: Proposing a new experiment...")
 
         # Propose different C values based on stage
@@ -45,15 +46,15 @@ class MockPlanner(Planner):
         ]
 
 
-def text_classification_train_fn(config: Dict[str, Any]) -> Dict[str, Any]:
+def text_classification_train_fn(config: dict[str, Any]) -> dict[str, Any]:
     """
     A simple text classification training function using scikit-learn.
     """
     print(f"  Runner: Training with config: {config}")
 
     # 1. Load data (using a subset of 20 Newsgroups for simplicity)
-    categories = ['alt.atheism', 'soc.religion.christian', 'comp.graphics', 'sci.med']
-    data = fetch_20newsgroups(subset='train', categories=categories, shuffle=True, random_state=42)
+    categories = ["alt.atheism", "soc.religion.christian", "comp.graphics", "sci.med"]
+    data = fetch_20newsgroups(subset="train", categories=categories, shuffle=True, random_state=42)
     X_train, X_test, y_train, y_test = train_test_split(
         data.data, data.target, test_size=0.2, random_state=42
     )
@@ -65,9 +66,7 @@ def text_classification_train_fn(config: Dict[str, Any]) -> Dict[str, Any]:
 
     # 3. Train model
     model = LogisticRegression(
-        C=config.get("C", 1.0),
-        solver=config.get("solver", "liblinear"),
-        random_state=42
+        C=config.get("C", 1.0), solver=config.get("solver", "liblinear"), random_state=42
     )
     model.fit(X_train_tfidf, y_train)
 
@@ -78,7 +77,9 @@ def text_classification_train_fn(config: Dict[str, Any]) -> Dict[str, Any]:
     print(f"  Runner: Achieved accuracy: {accuracy:.4f}")
     return {"metrics": {"accuracy": accuracy}}
 
+
 # --- Main Execution Logic ---
+
 
 def main():
     """Main function to run the auto-scientist loop."""
@@ -93,10 +94,11 @@ def main():
 
     curriculum_stages = [
         CurriculumStage(
-            name=stage['stage'],
-            goals=stage['goals'],
-            constraints=StageConstraint(**stage['constraints']),
-        ) for stage in config['curriculum']
+            name=stage["stage"],
+            goals=stage["goals"],
+            constraints=StageConstraint(**stage["constraints"]),
+        )
+        for stage in config["curriculum"]
     ]
     curriculum = Curriculum(stages=curriculum_stages)
 
@@ -104,10 +106,10 @@ def main():
     runner = ExperimentRunner(train_fn=text_classification_train_fn, telemetry=telemetry)
 
     # 3. Run the main loop
-    max_iterations = 5 # Reduced for faster execution
+    max_iterations = 5  # Reduced for faster execution
     print("--- Starting Auto-Scientist Experiment ---")
     for i in range(max_iterations):
-        print(f"\n--- Iteration {i+1}/{max_iterations} | Stage: {curriculum.current.name} ---")
+        print(f"\n--- Iteration {i + 1}/{max_iterations} | Stage: {curriculum.current.name} ---")
 
         # a. Planner proposes experiments
         proposals = planner.propose_experiments(graph, curriculum.current.name)
@@ -121,11 +123,8 @@ def main():
         runner.run_experiment(graph, proposal.config, curriculum.current.name)
 
         # c. Curriculum checks for advancement
-        def select_evals_in_stage(g: ExperimentGraph) -> List[Node]:
-            return [
-                n for n in g.nodes_by_type(NodeType.EVAL)
-                if n.stage == curriculum.current.name
-            ]
+        def select_evals_in_stage(g: ExperimentGraph) -> list[Node]:
+            return [n for n in g.nodes_by_type(NodeType.EVAL) if n.stage == curriculum.current.name]
 
         if curriculum.advance_if_possible(graph, select_evals_in_stage):
             print(f"*** Curriculum advanced to stage: {curriculum.current.name} ***")
@@ -139,6 +138,7 @@ def main():
     # 4. Final Output
     print("\n--- Experiment Complete ---")
     print(f"Final graph has {len(graph.nodes)} nodes.")
+
 
 if __name__ == "__main__":
     main()

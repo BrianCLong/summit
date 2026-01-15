@@ -1,0 +1,28 @@
+{
+  "issue_number": 12064,
+  "title": "Automate Merging of Bot PRs",
+  "url": "https://github.com/BrianCLong/summit/pull/12064",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-11-21T05:53:34Z",
+  "createdAt": "2025-11-21T03:30:03Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12297,
+        "url": "https://github.com/BrianCLong/summit/pull/12297",
+        "mergedAt": "2025-11-25T22:48:45Z",
+        "title": "Fix P1: Add repo context for gh workflow run command"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

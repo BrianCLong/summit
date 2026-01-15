@@ -10,14 +10,13 @@ fakeredis = pytest.importorskip("fakeredis.aioredis")
 
 from ingest.app.ingest import run_job
 from ingest.app.models import IngestJobRequest
-from ingest.app.redis_stream import RedisStream, STREAM_NAME
-
+from ingest.app.redis_stream import STREAM_NAME, RedisStream
 
 BASE = Path(__file__).resolve().parent.parent
 
 
 def load_json(path: str) -> dict[str, Any]:
-    with open(BASE / path, "r", encoding="utf-8") as f:
+    with open(BASE / path, encoding="utf-8") as f:
         return cast(dict[str, Any], json.load(f))
 
 
@@ -87,9 +86,15 @@ def test_postgres_ingest(monkeypatch: pytest.MonkeyPatch) -> None:
             insights = {
                 "timingsMs": {"load_data": 1.0},
                 "featureStats": {},
-                "anomalySummary": {"total": len(rows), "anomalyRate": 0.0, "anomalies": 0},
+                "anomalySummary": {
+                    "total": len(rows),
+                    "anomalyRate": 0.0,
+                    "anomalies": 0,
+                },
             }
-            return SimpleNamespace(dataframe=DummyFrame(rows), quality_insights=insights)
+            return SimpleNamespace(
+                dataframe=DummyFrame(rows), quality_insights=insights
+            )
 
     monkeypatch.setattr(ingest_module, "PostgresPreprocessingPipeline", DummyPipeline)
 
@@ -102,7 +107,11 @@ def test_postgres_ingest(monkeypatch: pytest.MonkeyPatch) -> None:
         source="postgresql://example",
         schemaMap={"tenant": "tenantId", "entity": "entityType", "value_a": "valueA"},
         redactionRules={},
-        postgresOptions={"table": "observations", "indexColumn": "id", "featureColumns": ["value_a"]},
+        postgresOptions={
+            "table": "observations",
+            "indexColumn": "id",
+            "featureColumns": ["value_a"],
+        },
     )
 
     status = asyncio.run(run_job("pg-job", req, stream))

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable, Tuple
 
 import numpy as np
 
@@ -37,7 +37,7 @@ class DatasetSplit:
     def __len__(self) -> int:
         return self.features.shape[0]
 
-    def iter_batches(self, batch_size: int) -> Iterable[Tuple[np.ndarray, np.ndarray]]:
+    def iter_batches(self, batch_size: int) -> Iterable[tuple[np.ndarray, np.ndarray]]:
         """Yield mini-batches from the split.
 
         Parameters

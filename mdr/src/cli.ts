@@ -5,11 +5,12 @@ import { MetricRegistry } from './registry';
 import { Dialect } from './types';
 
 function usage(): never {
-  console.error(`Usage:
+  process.stderr.write(`Usage:
   mdr compile <dialect> [--metric <name>] [--specs <path>] [--out <path>]
   mdr diff <metric> <leftVersion> <rightVersion> [--specs <path>]
   mdr test <dialect> [--metric <name>] [--specs <path>] [--golden <path>]
-  mdr golden <dialect> [--metric <name>] [--specs <path>] [--golden <path>]`);
+  mdr golden <dialect> [--metric <name>] [--specs <path>] [--golden <path>]
+`);
   process.exit(1);
 }
 
@@ -45,7 +46,7 @@ function asDialect(value: string | undefined): Dialect {
   throw new Error(`Unsupported dialect ${value ?? '<missing>'}`);
 }
 
-async function main() {
+function main() {
   const [command, ...rest] = process.argv.slice(2);
   if (!command) {
     usage();
@@ -58,11 +59,11 @@ async function main() {
       const registry = resolveRegistry(flags);
       const written = registry.writeCompiledArtifacts(dialect, flags.metric);
       if (written.length === 0) {
-        console.log('No artifacts changed.');
+        process.stdout.write('No artifacts changed.\n');
       } else {
-        console.log('Wrote artifacts:');
+        process.stdout.write('Wrote artifacts:\n');
         for (const file of written) {
-          console.log(`  ${file}`);
+          process.stdout.write(`  ${file}\n`);
         }
       }
       return;
@@ -76,7 +77,7 @@ async function main() {
       const flags = parseFlags(flagArgs ?? []);
       const registry = resolveRegistry(flags);
       const diff = registry.diff(metricName, Number(left), Number(right));
-      console.log(diff);
+      process.stdout.write(`${diff}\n`);
       return;
     }
 
@@ -86,13 +87,13 @@ async function main() {
       const registry = resolveRegistry(flags);
       const failures = registry.runConformance(dialect, flags.metric);
       if (failures.length > 0) {
-        console.error('Conformance failures detected:');
+        process.stderr.write('Conformance failures detected:\n');
         for (const failure of failures) {
-          console.error(`- ${failure}`);
+          process.stderr.write(`- ${failure}\n`);
         }
         process.exitCode = 1;
       } else {
-        console.log('All compiled SQL artifacts match golden outputs.');
+        process.stdout.write('All compiled SQL artifacts match golden outputs.\n');
       }
       return;
     }
@@ -102,15 +103,15 @@ async function main() {
       const flags = parseFlags(rest.slice(1));
       const registry = resolveRegistry(flags);
       const written = registry.exportGoldenFixtures(dialect, flags.metric);
-      console.log('Exported golden fixtures:');
+      process.stdout.write('Exported golden fixtures:\n');
       for (const file of written) {
-        console.log(`  ${file}`);
+        process.stdout.write(`  ${file}\n`);
       }
       return;
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.error(message);
+    process.stderr.write(`${message}\n`);
     process.exitCode = 1;
     return;
   }

@@ -107,7 +107,6 @@ class CounterStrategyGenerator:
 
 
 class TestCounterPsyOps(unittest.TestCase):
-
     def setUp(self):
         self.nlp_mock = MockNLP()
         self.graph_mock = MockGraph()

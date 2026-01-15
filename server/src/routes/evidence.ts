@@ -8,6 +8,7 @@ import { ProvenanceRepo } from '../repos/ProvenanceRepo.js';
 import { getPostgresPool } from '../config/database.js';
 import { tenantService } from '../services/TenantService.js';
 import { provenanceLedger } from '../provenance/ledger.js';
+import { exportEvidencePayload } from '../provenance/evidenceExport.js';
 import archiver from 'archiver';
 import { createHash, randomUUID } from 'crypto';
 
@@ -19,6 +20,11 @@ const exportRequestSchema = z.object({
     start: z.string().datetime(),
     end: z.string().datetime(),
   }),
+});
+
+const exportStatusSchema = z.object({
+  tenantId: z.string().uuid(),
+  windowHours: z.coerce.number().min(1).max(720).default(168),
 });
 
 interface AuthenticatedRequest extends Request {
@@ -74,15 +80,16 @@ router.post(
 
       // Fetch Audit Events
       const repo = new ProvenanceRepo(getPostgresPool());
-      // ProvenanceRepo.by() doesn't support time range filtering directly in the current signature used in tenants.ts
-      // But we can fetch and filter or update the repo. For now, we fetch recent events as a prototype.
-      // Ideally we should update ProvenanceRepo to support time range.
-      // Using `by` method signature: (purpose, tenantId, entityId, limit, offset, actorTenantId)
-      const events = await repo.by('investigation', tenantId, undefined, 1000, 0, tenantId);
+      const filteredEvents = await repo.byTenant(
+        tenantId,
+        { from: timeRange.start, to: timeRange.end },
+        1000,
+        0,
+      );
 
-      const filteredEvents = events.filter((e: any) => {
-          const t = new Date(e.created_at || e.createdAt).getTime();
-          return t >= new Date(timeRange.start).getTime() && t <= new Date(timeRange.end).getTime();
+      const evidencePayload = await exportEvidencePayload(tenantId, {
+        start: new Date(timeRange.start),
+        end: new Date(timeRange.end),
       });
 
       // Start Stream
@@ -109,12 +116,36 @@ router.post(
         generatedAt: new Date().toISOString(),
         actorId,
         eventCount: filteredEvents.length,
+        accessLogCount: evidencePayload.accessLogs.length,
+        adminChangeReceiptCount: evidencePayload.adminChangeReceipts.length,
+        policyVersionCount: evidencePayload.policyVersions.length,
+        drReceiptCount: evidencePayload.drReceipts.length,
         policyProfile: tenant.settings?.policy_profile || 'unknown',
       };
       archive.append(JSON.stringify(metadata, null, 2), { name: 'metadata.json' });
 
       // Add Events
       archive.append(JSON.stringify(filteredEvents, null, 2), { name: 'audit_events.json' });
+
+      archive.append(
+        JSON.stringify(evidencePayload.accessLogs, null, 2),
+        { name: 'access_logs.json' },
+      );
+
+      archive.append(
+        JSON.stringify(evidencePayload.adminChangeReceipts, null, 2),
+        { name: 'admin_change_receipts.json' },
+      );
+
+      archive.append(
+        JSON.stringify(evidencePayload.policyVersions, null, 2),
+        { name: 'policy_versions.json' },
+      );
+
+      archive.append(
+        JSON.stringify(evidencePayload.drReceipts, null, 2),
+        { name: 'dr_receipts.json' },
+      );
 
       // Add Policy Bundle (Snapshot)
       if (tenant.settings?.policy_bundle) {
@@ -155,6 +186,77 @@ router.post(
         }
     }
   }
+);
+
+/**
+ * @route GET /api/evidence/exports/status
+ * @desc Check evidence export readiness for a tenant
+ * @access Protected (Tenant Admin or Platform Admin)
+ */
+router.get(
+  '/exports/status',
+  ensureAuthenticated,
+  ensurePolicy('read', 'evidence'),
+  async (req: Request, res: Response) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const { tenantId, windowHours } = exportStatusSchema.parse(req.query);
+      const actorId = authReq.user?.id || 'unknown';
+
+      const userTenantId = authReq.user?.tenantId;
+      const isSuperAdmin = authReq.user?.role === 'SUPER_ADMIN';
+      if (!isSuperAdmin && userTenantId !== tenantId) {
+        return res.status(403).json({ success: false, error: 'Forbidden' });
+      }
+
+      const tenant = await tenantService.getTenant(tenantId);
+      if (!tenant) {
+        return res.status(404).json({ success: false, error: 'Tenant not found' });
+      }
+
+      const windowEnd = new Date();
+      const windowStart = new Date(
+        windowEnd.getTime() - windowHours * 60 * 60 * 1000,
+      );
+
+      const repo = new ProvenanceRepo(getPostgresPool());
+      const events = await repo.byTenant(
+        tenantId,
+        { from: windowStart.toISOString(), to: windowEnd.toISOString() },
+        1000,
+        0,
+      );
+
+      const lastEventAt = events.length
+        ? events[0].createdAt || events[0].created_at
+        : null;
+
+      const policyBundleReady = Boolean(tenant.settings?.policy_bundle);
+      const ready = policyBundleReady && events.length > 0;
+
+      return res.json({
+        success: true,
+        data: {
+          tenantId,
+          actorId,
+          windowStart: windowStart.toISOString(),
+          windowEnd: windowEnd.toISOString(),
+          eventCount: events.length,
+          lastEventAt,
+          policyBundleReady,
+          ready,
+        },
+      });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res
+          .status(400)
+          .json({ success: false, error: 'Validation Error', details: error.errors });
+      }
+      logger.error('Error in GET /api/evidence/exports/status:', error);
+      return res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  },
 );
 
 export default router;

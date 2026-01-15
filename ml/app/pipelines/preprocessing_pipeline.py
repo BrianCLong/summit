@@ -9,10 +9,11 @@ wizard from PR #1368) can surface quality insights.
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable, MutableMapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from time import perf_counter
-from typing import Any, Callable, Dict, Iterable, MutableMapping, Sequence
+from typing import Any
 
 import dask.dataframe as dd
 import numpy as np
@@ -30,7 +31,7 @@ class PreprocessingResult:
     """Container for the enriched dataset and derived insights."""
 
     dataframe: dd.DataFrame
-    quality_insights: Dict[str, Any]
+    quality_insights: dict[str, Any]
 
 
 @dataclass
@@ -154,18 +155,21 @@ class PostgresPreprocessingPipeline:
                 augmented["feature_l2_norm"] = np.linalg.norm(numeric_part, axis=1)
                 return augmented
 
-            return frame.map_partitions(_add_features, meta=frame._meta.assign(
-                feature_sum=np.float64(),
-                feature_mean=np.float64(),
-                feature_std=np.float64(),
-                feature_l2_norm=np.float64(),
-            ))
+            return frame.map_partitions(
+                _add_features,
+                meta=frame._meta.assign(
+                    feature_sum=np.float64(),
+                    feature_mean=np.float64(),
+                    feature_std=np.float64(),
+                    feature_l2_norm=np.float64(),
+                ),
+            )
 
     def _detect_anomalies(
         self,
         frame: dd.DataFrame,
         feature_columns: Sequence[str],
-    ) -> tuple[dd.DataFrame, Dict[str, Any]]:
+    ) -> tuple[dd.DataFrame, dict[str, Any]]:
         with self._timed_span("anomaly_detection"):
             row_count = int(frame.index.size.compute())
             if not feature_columns:
@@ -192,7 +196,7 @@ class PostgresPreprocessingPipeline:
             anomaly_rate = float((predictions == -1).sum() / len(predictions))
             return augmented, {
                 "anomalyRate": anomaly_rate,
-                "total": int(len(predictions)),
+                "total": len(predictions),
                 "anomalies": int((predictions == -1).sum()),
             }
 
@@ -216,7 +220,7 @@ class PostgresPreprocessingPipeline:
 
         augmented_frame, anomaly_summary = self._detect_anomalies(feature_frame, feature_columns)
 
-        feature_stats: Dict[str, Dict[str, float]] = {}
+        feature_stats: dict[str, dict[str, float]] = {}
         if not stats.empty:
             for column in stats.columns:
                 feature_stats[column] = {

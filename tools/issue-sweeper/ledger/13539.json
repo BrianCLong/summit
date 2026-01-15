@@ -1,0 +1,31 @@
+{
+  "issue_number": 13539,
+  "title": "Analyze and reduce frontend bundle bloat",
+  "url": "https://github.com/BrianCLong/summit/pull/13539",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9694962502,
+      "node_id": "LA_kwDOPaNncM8AAAACQd1jRg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:%20security",
+      "name": "type: security",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-12-17T02:50:22Z",
+  "createdAt": "2025-12-07T17:55:54Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

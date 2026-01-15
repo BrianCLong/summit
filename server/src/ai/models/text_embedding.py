@@ -94,7 +94,7 @@ class TextEmbeddingGenerator:
             return {
                 "embedding": [],
                 "dimension": 0,
-                "error": f"Embedding generation failed: {str(e)}",
+                "error": f"Embedding generation failed: {e!s}",
             }
 
     def generate_embeddings_batch(
@@ -143,7 +143,7 @@ class TextEmbeddingGenerator:
             return {
                 "embeddings": [],
                 "dimensions": [],
-                "error": f"Batch embedding generation failed: {str(e)}",
+                "error": f"Batch embedding generation failed: {e!s}",
             }
 
     def _generate_sentence_transformer_embedding(
@@ -405,7 +405,7 @@ def main():
         print(json.dumps(result, indent=2, ensure_ascii=False))
 
     except Exception as e:
-        print(json.dumps({"error": f"Embedding generation failed: {str(e)}"}))
+        print(json.dumps({"error": f"Embedding generation failed: {e!s}"}))
         sys.exit(1)
 
 

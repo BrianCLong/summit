@@ -1,46 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- jest mocks require type assertions */
 import React from 'react';
-import { describe, expect, it, jest } from '@jest/globals';
+import { describe, it, jest } from '@jest/globals';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MaestroApp } from '../../maestro/MaestroApp';
 
-jest.mock('react-virtualized', async () => {
-  const actual =
-    await jest.importActual<typeof import('react-virtualized')>(
-      'react-virtualized',
-    );
+jest.mock('react-virtualized', () => {
   return {
-    ...actual,
-    AutoSizer: ({
-      children,
-    }: {
-      children: (size: { width: number; height: number }) => React.ReactNode;
-    }) =>
-      children({
-        width: 900,
-        height: 600,
-      }),
-    List: ({
-      rowCount,
-      rowRenderer,
-    }: {
-      rowCount: number;
-      rowRenderer: ({
-        index,
-      }: {
-        index: number;
-        key: React.Key;
-        style: React.CSSProperties;
-      }) => React.ReactNode;
-    }) => (
+    AutoSizer: ({ children }: any) => children({ width: 900, height: 600 }),
+    List: ({ rowCount, rowRenderer }: any) => (
       <div data-testid="virtualized-list">
         {Array.from({ length: rowCount }).map((_, index) =>
           rowRenderer({ index, key: `row-${index}`, style: { height: 90 } }),
         )}
       </div>
     ),
-  } as typeof import('react-virtualized');
+  };
 });
 
 describe('MaestroApp', () => {

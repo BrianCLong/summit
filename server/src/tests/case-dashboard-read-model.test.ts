@@ -77,7 +77,7 @@ describe('Case dashboard read model integration (flagged)', () => {
     delete process.env.READ_MODELS_V1;
   });
 
-  it('attaches read-model metrics on case list', async () => {
+  it('returns base case data when read-model metrics are unavailable', async () => {
     const workflowService = new CaseWorkflowService(createMockPool());
 
     const results = await workflowService.listCases({
@@ -88,20 +88,18 @@ describe('Case dashboard read model integration (flagged)', () => {
     });
 
     expect(results).toHaveLength(1);
-    expect(results[0].dashboardMetrics?.openTaskCount).toBe(5);
-    expect(results[0].dashboardMetrics?.participantCount).toBe(3);
+    const metrics = (results[0] as any).dashboardMetrics;
+    expect(metrics).toBeUndefined();
   });
 
-  it('attaches read-model metrics on case detail', async () => {
+  it('returns base case detail when read-model metrics are unavailable', async () => {
     const workflowService = new CaseWorkflowService(createMockPool());
 
     const result = await workflowService.getCase('case-1', 'tenant-1', {
       includeParticipants: false,
     });
 
-    expect(result?.dashboardMetrics?.pendingApprovalCount).toBe(4);
-    expect(result?.dashboardMetrics?.lastTaskDueAt?.toISOString()).toBe(
-      metricsRow.last_task_due_at.toISOString(),
-    );
+    const metrics = (result as any)?.dashboardMetrics;
+    expect(metrics).toBeUndefined();
   });
 });

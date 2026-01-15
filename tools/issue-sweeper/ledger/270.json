@@ -1,0 +1,71 @@
+{
+  "issue_number": 270,
+  "title": "chore(deps): bump date-fns from 2.30.0 to 4.1.0 in /client",
+  "url": "https://github.com/BrianCLong/summit/pull/270",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9102204147,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic8w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/javascript",
+      "name": "javascript",
+      "color": "168700",
+      "default": false,
+      "description": "Pull requests that update javascript code"
+    }
+  ],
+  "updatedAt": "2025-08-15T21:09:21Z",
+  "createdAt": "2025-08-14T05:54:35Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13103,
+        "url": "https://github.com/BrianCLong/summit/pull/13103",
+        "mergedAt": "2025-12-17T05:43:28Z",
+        "title": "Unified Prompt Governance Dashboard"
+      },
+      {
+        "number": 13115,
+        "url": "https://github.com/BrianCLong/summit/pull/13115",
+        "mergedAt": "2025-12-03T01:37:10Z",
+        "title": "feat: Implement PredictiveRelationshipService for edge inference"
+      },
+      {
+        "number": 1172,
+        "url": "https://github.com/BrianCLong/summit/pull/1172",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps): bump graphql-subscriptions from 2.0.0 to 3.0.0 in /server"
+      },
+      {
+        "number": 11893,
+        "url": "https://github.com/BrianCLong/summit/pull/11893",
+        "mergedAt": null,
+        "title": "Build Advanced Metadata Analysis Platform"
+      },
+      {
+        "number": 1300,
+        "url": "https://github.com/BrianCLong/summit/pull/1300",
+        "mergedAt": "2025-09-23T06:47:22Z",
+        "title": "Total Recapture: enterprise-ready green merge to main"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -5,8 +5,8 @@ from __future__ import annotations
 import json
 import random
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable, List, Optional
 
 from .data import BenchmarkRecord, PIIEntity
 
@@ -17,7 +17,7 @@ class Detector:
 
     name: str
 
-    def detect(self, record: BenchmarkRecord, rng: Optional[random.Random] = None) -> List[PIIEntity]:
+    def detect(self, record: BenchmarkRecord, rng: random.Random | None = None) -> list[PIIEntity]:
         raise NotImplementedError
 
 
@@ -37,7 +37,7 @@ class RegexDetector(Detector):
     def __init__(self) -> None:
         super().__init__(name="regex")
 
-    def detect(self, record: BenchmarkRecord, rng: Optional[random.Random] = None) -> List[PIIEntity]:
+    def detect(self, record: BenchmarkRecord, rng: random.Random | None = None) -> list[PIIEntity]:
         if record.source_type == "text":
             return list(self._detect_text(record))
         if record.source_type == "json":
@@ -92,10 +92,10 @@ class MLStubDetector(Detector):
         self._precision_bias = precision_bias
         self._regex = RegexDetector()
 
-    def detect(self, record: BenchmarkRecord, rng: Optional[random.Random] = None) -> List[PIIEntity]:
+    def detect(self, record: BenchmarkRecord, rng: random.Random | None = None) -> list[PIIEntity]:
         rng = rng or random.Random(0)
         baseline = self._regex.detect(record, rng=rng)
-        kept: List[PIIEntity] = []
+        kept: list[PIIEntity] = []
         for entity in baseline:
             if rng.random() <= self._recall_bias:
                 kept.append(entity)

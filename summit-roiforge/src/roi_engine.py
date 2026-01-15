@@ -1,5 +1,5 @@
-import time
 import random
+
 
 class ROIEngine:
     def __init__(self):
@@ -7,7 +7,7 @@ class ROIEngine:
             "efficiency_uplift": 0.0,
             "cost_savings": 0.0,
             "cycle_time_reduction": 0.0,
-            "roi_percentage": 0.0
+            "roi_percentage": 0.0,
         }
         self.baseline_cycle_time = 100  # ms
         self.current_cycle_time = 100
@@ -41,19 +41,20 @@ class ROIEngine:
         Exports metrics in Prometheus format.
         """
         lines = []
-        lines.append(f"# HELP roi_efficiency_uplift_percent Efficiency improvement over baseline")
-        lines.append(f"# TYPE roi_efficiency_uplift_percent gauge")
+        lines.append("# HELP roi_efficiency_uplift_percent Efficiency improvement over baseline")
+        lines.append("# TYPE roi_efficiency_uplift_percent gauge")
         lines.append(f"roi_efficiency_uplift_percent {self.metrics['efficiency_uplift']:.2f}")
 
-        lines.append(f"# HELP roi_cost_savings_total Total cost savings accumulated")
-        lines.append(f"# TYPE roi_cost_savings_total counter")
+        lines.append("# HELP roi_cost_savings_total Total cost savings accumulated")
+        lines.append("# TYPE roi_cost_savings_total counter")
         lines.append(f"roi_cost_savings_total {self.metrics['cost_savings']:.2f}")
 
-        lines.append(f"# HELP roi_percentage Calculated ROI percentage")
-        lines.append(f"# TYPE roi_percentage gauge")
+        lines.append("# HELP roi_percentage Calculated ROI percentage")
+        lines.append("# TYPE roi_percentage gauge")
         lines.append(f"roi_percentage {self.metrics['roi_percentage']:.2f}")
 
         return "\n".join(lines)
+
 
 if __name__ == "__main__":
     engine = ROIEngine()

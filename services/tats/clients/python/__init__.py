@@ -12,12 +12,12 @@ from .tats_client import (
 )
 
 __all__ = [
-    'AttenuationRequest',
-    'IssueTokenRequest',
-    'MemoryReplayCache',
-    'ReplayCache',
-    'TatsClient',
-    'TokenClaims',
-    'TokenResponse',
-    'verify_token',
+    "AttenuationRequest",
+    "IssueTokenRequest",
+    "MemoryReplayCache",
+    "ReplayCache",
+    "TatsClient",
+    "TokenClaims",
+    "TokenResponse",
+    "verify_token",
 ]

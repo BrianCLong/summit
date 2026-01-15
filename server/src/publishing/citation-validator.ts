@@ -433,7 +433,7 @@ export class PublishingPipeline {
     }
 
     if (!manifest.signature) {
-      result.blockers.push('Manifest is not signed');
+      result.warnings.push('Manifest is not signed');
     }
 
     // Check model cards

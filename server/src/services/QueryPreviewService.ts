@@ -19,6 +19,7 @@ import { NlToCypherService } from '../ai/nl-to-cypher/nl-to-cypher.service.js';
 import { GlassBoxRunService } from './GlassBoxRunService.js';
 import { QueryResultCache, type QueryResultPayload } from './queryResultCache.js';
 import { wrapCypherWithPagination } from './pagination.js';
+import { enforceTenantScopeForCypher } from './graphTenantScope.js';
 
 export type QueryLanguage = 'cypher' | 'sql';
 
@@ -262,6 +263,7 @@ export class QueryPreviewService {
       naturalLanguageQuery: input.naturalLanguageQuery,
       parameters: {
         ...input.parameters,
+        tenantId: input.tenantId,
         investigationId: input.investigationId,
         focusEntityIds: input.focusEntityIds,
         maxHops: input.maxHops,
@@ -511,6 +513,8 @@ export class QueryPreviewService {
                 {
                   maxRows: input.maxRows || 100,
                   timeout: input.timeout || 30000,
+                  tenantId: preview.tenantId,
+                  actorId: input.userId,
                 }
               );
               return {
@@ -859,6 +863,8 @@ export class QueryPreviewService {
       timeout: number;
       cursor?: number;
       batchSize?: number;
+      tenantId?: string;
+      actorId?: string;
       streamObserver?: (payload: {
         batch: unknown[];
         nextCursor?: number | null;
@@ -878,9 +884,15 @@ export class QueryPreviewService {
     const limit = Math.min(options.batchSize ?? options.maxRows, options.maxRows);
 
     try {
-      const finalQuery = wrapCypherWithPagination(query);
+      const scoped = await enforceTenantScopeForCypher(query, parameters, {
+        tenantId: options.tenantId,
+        actorId: options.actorId,
+        action: 'graph.read',
+        resource: 'graph.query.preview',
+      });
+      const finalQuery = wrapCypherWithPagination(scoped.cypher);
       const result = await session.run(finalQuery, {
-        ...parameters,
+        ...scoped.params,
         skip,
         limitPlusOne: limit + 1,
       }, {

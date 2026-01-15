@@ -1,11 +1,12 @@
 """AutoML-style planner that proposes next experiments."""
+
 from __future__ import annotations
 
 import itertools
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Optional, Sequence
 
-from .core import Config, Experiment, Metrics, Recommendation
+from .core import Config, Metrics, Recommendation
 from .modeling import LinearModel, ScalingFit, _config_features
 
 
@@ -18,8 +19,8 @@ class CandidateScore:
 
 def evaluate_candidate(
     config: Config,
-    scaling_fit: Optional[ScalingFit],
-    response_surface: Optional[LinearModel],
+    scaling_fit: ScalingFit | None,
+    response_surface: LinearModel | None,
     objective: str,
 ) -> CandidateScore:
     """Predict metrics and compute utility for a candidate config."""
@@ -37,7 +38,7 @@ def evaluate_candidate(
     return CandidateScore(config=config, predicted=predicted_metrics, utility=utility)
 
 
-def _within_constraints(config: Config, constraints: Dict[str, float]) -> bool:
+def _within_constraints(config: Config, constraints: dict[str, float]) -> bool:
     max_params = constraints.get("max_params")
     max_context = constraints.get("max_context")
     if max_params is not None and config.parameters > max_params:
@@ -49,15 +50,15 @@ def _within_constraints(config: Config, constraints: Dict[str, float]) -> bool:
 
 def plan(
     base_configs: Sequence[Config],
-    scaling_fit: Optional[ScalingFit],
-    response_surface: Optional[LinearModel],
+    scaling_fit: ScalingFit | None,
+    response_surface: LinearModel | None,
     objective: str,
-    constraints: Optional[Dict[str, float]] = None,
+    constraints: dict[str, float] | None = None,
 ) -> Recommendation:
     """Generate a recommendation from candidate configurations."""
 
     constraints = constraints or {}
-    candidate_pool: List[Config] = []
+    candidate_pool: list[Config] = []
 
     # Expand simple grid over context length and learning rate around provided configs
     context_lengths = [4_096, 8_192, 16_384]
@@ -84,7 +85,9 @@ def plan(
     if not candidate_pool:
         raise ValueError("No candidates satisfy constraints")
 
-    scored = [evaluate_candidate(c, scaling_fit, response_surface, objective) for c in candidate_pool]
+    scored = [
+        evaluate_candidate(c, scaling_fit, response_surface, objective) for c in candidate_pool
+    ]
     scored.sort(key=lambda c: c.utility, reverse=True)
     top = scored[0]
 

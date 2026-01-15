@@ -1,0 +1,44 @@
+{
+  "issue_number": 588,
+  "title": "feat(server): expose metrics and instrument neo4j",
+  "url": "https://github.com/BrianCLong/summit/pull/588",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-18T03:23:18Z",
+  "createdAt": "2025-08-18T02:46:55Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1171,
+        "url": "https://github.com/BrianCLong/summit/pull/1171",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps): bump body-parser from 1.20.3 to 2.2.0 in /server"
+      },
+      {
+        "number": 13186,
+        "url": "https://github.com/BrianCLong/summit/pull/13186",
+        "mergedAt": "2025-12-04T15:38:58Z",
+        "title": "Implement federated learning for distributed OSINT training"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

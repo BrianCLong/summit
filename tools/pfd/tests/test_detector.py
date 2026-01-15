@@ -9,8 +9,8 @@ if str(PACKAGE_ROOT) not in sys.path:
     sys.path.insert(0, str(PACKAGE_ROOT))
 
 from pfd.core import PipelineFlakinessDetector, PipelineStep
-from pfd.report import HTMLReportBuilder
 from pfd.pytest_plugin import PFDSession
+from pfd.report import HTMLReportBuilder
 
 
 def deterministic_step(value: int | None) -> int:

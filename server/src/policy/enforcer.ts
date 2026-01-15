@@ -359,6 +359,16 @@ export class PolicyEnforcer {
       return decision;
     }
 
+    if (
+      context.resource &&
+      context.resource.includes('graph') &&
+      context.tenantId === 'unknown'
+    ) {
+      decision.allow = false;
+      decision.reason = 'Tenant ID required for graph access';
+      return decision;
+    }
+
     // Purpose-based access control
     if (context.action === 'ingest' || context.action === 'write') {
       if (!context.purpose) {

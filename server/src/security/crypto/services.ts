@@ -90,7 +90,7 @@ export class Rfc3161TimestampingService implements TimestampingService {
           ? { [this.options.apiKeyHeader]: this.options.apiKeyValue }
           : {}),
       },
-      body: payload,
+      body: new Uint8Array(payload),
     });
 
     if (!response.ok) {

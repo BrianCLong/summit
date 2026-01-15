@@ -1,0 +1,239 @@
+{
+  "issue_number": 80,
+  "title": "Create Roadmap Document for MVP and Beyond",
+  "url": "https://github.com/BrianCLong/summit/issues/80",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051495,
+      "node_id": "LA_kwDOPaNncM8AAAACHht45w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:docs",
+      "name": "type:docs",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Docs"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    },
+    {
+      "id": 9095068559,
+      "node_id": "LA_kwDOPaNncM8AAAACHhu7jw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:docs",
+      "name": "area:docs",
+      "color": "ededed",
+      "default": false,
+      "description": "Docs area"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:13:17Z",
+  "createdAt": "2025-08-12T04:40:16Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15398,
+        "url": "https://github.com/BrianCLong/summit/pull/15398",
+        "mergedAt": null,
+        "title": "chore: harden coverage and fuzz gates"
+      },
+      {
+        "number": 15392,
+        "url": "https://github.com/BrianCLong/summit/pull/15392",
+        "mergedAt": null,
+        "title": "Harden GA coverage and fuzz gates with deterministic turbo segmentation"
+      },
+      {
+        "number": 14496,
+        "url": "https://github.com/BrianCLong/summit/pull/14496",
+        "mergedAt": "2025-12-27T00:25:28Z",
+        "title": "Add privacy and compliance wave ten prompts"
+      },
+      {
+        "number": 14662,
+        "url": "https://github.com/BrianCLong/summit/pull/14662",
+        "mergedAt": "2025-12-27T15:20:38Z",
+        "title": "feat(testing): comprehensive testing infrastructure setup"
+      },
+      {
+        "number": 14768,
+        "url": "https://github.com/BrianCLong/summit/pull/14768",
+        "mergedAt": "2025-12-29T16:14:28Z",
+        "title": "chore(release): bump packages to v2.0.0 (phase 1)"
+      },
+      {
+        "number": 15186,
+        "url": "https://github.com/BrianCLong/summit/pull/15186",
+        "mergedAt": null,
+        "title": "feat: Comprehensive Testing Suite & CI Pipeline"
+      },
+      {
+        "number": 15261,
+        "url": "https://github.com/BrianCLong/summit/pull/15261",
+        "mergedAt": "2026-01-01T07:29:41Z",
+        "title": "Expand test coverage and fix issues"
+      },
+      {
+        "number": 15251,
+        "url": "https://github.com/BrianCLong/summit/pull/15251",
+        "mergedAt": null,
+        "title": "Refine server test execution and CI dependency locking"
+      },
+      {
+        "number": 13769,
+        "url": "https://github.com/BrianCLong/summit/pull/13769",
+        "mergedAt": "2025-12-20T03:35:05Z",
+        "title": "Establish Comprehensive Testing Suite & CI/CD"
+      },
+      {
+        "number": 12392,
+        "url": "https://github.com/BrianCLong/summit/pull/12392",
+        "mergedAt": "2025-12-18T02:53:47Z",
+        "title": "Refine wave ten plan with hard gates and work packages"
+      },
+      {
+        "number": 11971,
+        "url": "https://github.com/BrianCLong/summit/pull/11971",
+        "mergedAt": null,
+        "title": "Analyze test coverage gaps automatically"
+      },
+      {
+        "number": 12108,
+        "url": "https://github.com/BrianCLong/summit/pull/12108",
+        "mergedAt": "2025-11-21T07:03:50Z",
+        "title": "Improve test coverage and reduce code complexity"
+      },
+      {
+        "number": 12099,
+        "url": "https://github.com/BrianCLong/summit/pull/12099",
+        "mergedAt": "2025-11-21T06:30:07Z",
+        "title": "Design comprehensive testing strategy for Summit"
+      },
+      {
+        "number": 13264,
+        "url": "https://github.com/BrianCLong/summit/pull/13264",
+        "mergedAt": "2025-12-17T06:22:57Z",
+        "title": "Sprint 25 Hardening: GraphQL Gateway, Admin UI, and Safety Controls"
+      },
+      {
+        "number": 13347,
+        "url": "https://github.com/BrianCLong/summit/pull/13347",
+        "mergedAt": "2025-12-06T01:48:20Z",
+        "title": "feat(ci): implement comprehensive security and quality scanning pipeline"
+      },
+      {
+        "number": 12052,
+        "url": "https://github.com/BrianCLong/summit/pull/12052",
+        "mergedAt": "2025-11-21T03:57:15Z",
+        "title": "Implement cost optimization and resource efficiency"
+      },
+      {
+        "number": 11953,
+        "url": "https://github.com/BrianCLong/summit/pull/11953",
+        "mergedAt": "2025-11-20T10:20:52Z",
+        "title": "Review cloud cost optimization opportunities"
+      },
+      {
+        "number": 12049,
+        "url": "https://github.com/BrianCLong/summit/pull/12049",
+        "mergedAt": "2025-11-21T03:59:08Z",
+        "title": "Add comprehensive tests for new modules"
+      },
+      {
+        "number": 12220,
+        "url": "https://github.com/BrianCLong/summit/pull/12220",
+        "mergedAt": "2025-11-21T16:49:56Z",
+        "title": "docs: add monorepo architecture refactoring plan with ADRs"
+      },
+      {
+        "number": 15127,
+        "url": "https://github.com/BrianCLong/summit/pull/15127",
+        "mergedAt": "2025-12-30T21:20:45Z",
+        "title": "chore(deps): bump docker/setup-qemu-action from 2 to 3"
+      },
+      {
+        "number": 12096,
+        "url": "https://github.com/BrianCLong/summit/pull/12096",
+        "mergedAt": "2025-12-20T11:53:10Z",
+        "title": "Optimize Summit deployment and infrastructure"
+      },
+      {
+        "number": 12251,
+        "url": "https://github.com/BrianCLong/summit/pull/12251",
+        "mergedAt": "2025-12-18T03:31:21Z",
+        "title": "test: add comprehensive test coverage for critical areas"
+      },
+      {
+        "number": 15172,
+        "url": "https://github.com/BrianCLong/summit/pull/15172",
+        "mergedAt": "2025-12-31T03:31:39Z",
+        "title": "Prepare Summit MVP for general availability"
+      },
+      {
+        "number": 12241,
+        "url": "https://github.com/BrianCLong/summit/pull/12241",
+        "mergedAt": "2025-12-18T03:33:24Z",
+        "title": "Build entity resolution service with explainability"
+      },
+      {
+        "number": 12146,
+        "url": "https://github.com/BrianCLong/summit/pull/12146",
+        "mergedAt": "2025-11-21T08:02:38Z",
+        "title": "Improve test coverage"
+      },
+      {
+        "number": 11913,
+        "url": "https://github.com/BrianCLong/summit/pull/11913",
+        "mergedAt": "2025-11-20T10:25:05Z",
+        "title": "Improve test coverage and organization"
+      },
+      {
+        "number": 11996,
+        "url": "https://github.com/BrianCLong/summit/pull/11996",
+        "mergedAt": null,
+        "title": "Build Time Series Analytics and Forecasting Platform"
+      },
+      {
+        "number": 12689,
+        "url": "https://github.com/BrianCLong/summit/pull/12689",
+        "mergedAt": "2025-12-18T01:39:47Z",
+        "title": "Create copy-paste prompts for Claude Code"
+      },
+      {
+        "number": 12245,
+        "url": "https://github.com/BrianCLong/summit/pull/12245",
+        "mergedAt": "2025-12-18T03:32:35Z",
+        "title": "feat(ingestion): implement universal data ingestion + ETL assistant"
+      },
+      {
+        "number": 12089,
+        "url": "https://github.com/BrianCLong/summit/pull/12089",
+        "mergedAt": "2025-11-21T06:30:29Z",
+        "title": "Triage and consolidate open pull requests"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

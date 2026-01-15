@@ -130,8 +130,12 @@ interface AuditEvent {
 }
 
 export class MVP1RBACService {
-  private postgresClient = getPostgresPool();
-  private neo4jDriver = getNeo4jDriver();
+  private get postgresClient() {
+    return getPostgresPool();
+  }
+  private get neo4jDriver() {
+    return getNeo4jDriver();
+  }
 
   // Base permissions arrays to avoid circular reference
   private static readonly VIEWER_PERMISSIONS: Permission[] = [

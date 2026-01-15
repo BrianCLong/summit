@@ -1,0 +1,21 @@
+{
+  "issue_number": 15241,
+  "title": "Introduce QOC Templates",
+  "url": "https://github.com/BrianCLong/summit/pull/15241",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2026-01-01T11:44:49Z",
+  "createdAt": "2026-01-01T00:01:03Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

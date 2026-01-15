@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable, List
 
 import numpy as np
 
@@ -27,7 +27,7 @@ class MFUEvaluator:
 
     config: ReproducibilityConfig = DEFAULT_CONFIG
 
-    def _prepare_rngs(self, seeds: Iterable[int]) -> List[np.random.Generator]:
+    def _prepare_rngs(self, seeds: Iterable[int]) -> list[np.random.Generator]:
         return [np.random.default_rng(seed) for seed in seeds]
 
     def evaluate(
@@ -48,19 +48,14 @@ class MFUEvaluator:
         rngs = self._prepare_rngs(seeds)
 
         pre_forget_probs = model.predict_proba(forget_split.features)[:, 1]
-        post_models = [
-            baseline.unlearn(model, forget_split, retain_split)
-            for _ in rngs
-        ]
+        post_models = [baseline.unlearn(model, forget_split, retain_split) for _ in rngs]
 
         post_forget_probs = np.mean(
             [m.predict_proba(forget_split.features)[:, 1] for m in post_models],
             axis=0,
         )
         pre_forget_acc = accuracy(forget_split.labels, (pre_forget_probs >= 0.5).astype(int))
-        post_forget_acc = accuracy(
-            forget_split.labels, (post_forget_probs >= 0.5).astype(int)
-        )
+        post_forget_acc = accuracy(forget_split.labels, (post_forget_probs >= 0.5).astype(int))
         forget_logloss_delta = log_loss(
             forget_split.labels,
             post_forget_probs,

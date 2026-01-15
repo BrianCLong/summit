@@ -1,0 +1,83 @@
+{
+  "issue_number": 350,
+  "title": "Interplanetary Network Protocol for AI Systems",
+  "url": "https://github.com/BrianCLong/summit/issues/350",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9122128940,
+      "node_id": "LA_kwDOPaNncM8AAAACH7ikLA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-interplanetary-ai",
+      "name": "epic-interplanetary-ai",
+      "color": "4ECDC4",
+      "default": false,
+      "description": "Interplanetary AI and space computing"
+    },
+    {
+      "id": 9360062798,
+      "node_id": "LA_kwDOPaNncM8AAAACLec5Tg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/stale",
+      "name": "stale",
+      "color": "e4e669",
+      "default": false,
+      "description": "PR with no activity for 30 days"
+    }
+  ],
+  "updatedAt": "2025-10-02T01:01:52Z",
+  "createdAt": "2025-08-16T22:29:04Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12240,
+        "url": "https://github.com/BrianCLong/summit/pull/12240",
+        "mergedAt": "2025-12-18T03:33:37Z",
+        "title": "Build graph analytics suite with path finding"
+      },
+      {
+        "number": 11983,
+        "url": "https://github.com/BrianCLong/summit/pull/11983",
+        "mergedAt": "2025-11-20T15:06:02Z",
+        "title": "Implement ABAC governance and audit foundations"
+      },
+      {
+        "number": 11976,
+        "url": "https://github.com/BrianCLong/summit/pull/11976",
+        "mergedAt": null,
+        "title": "Document existing and patentable IP in codebase"
+      },
+      {
+        "number": 11902,
+        "url": "https://github.com/BrianCLong/summit/pull/11902",
+        "mergedAt": "2025-11-20T10:25:44Z",
+        "title": "Build Cyber Threat Intelligence Platform"
+      },
+      {
+        "number": 11922,
+        "url": "https://github.com/BrianCLong/summit/pull/11922",
+        "mergedAt": "2025-11-20T10:05:25Z",
+        "title": "Build real-time streaming analytics pipeline"
+      },
+      {
+        "number": 11895,
+        "url": "https://github.com/BrianCLong/summit/pull/11895",
+        "mergedAt": null,
+        "title": "Build Crisis Management and Emergency Response Platform"
+      },
+      {
+        "number": 11893,
+        "url": "https://github.com/BrianCLong/summit/pull/11893",
+        "mergedAt": null,
+        "title": "Build Advanced Metadata Analysis Platform"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

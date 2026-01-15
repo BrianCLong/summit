@@ -6,10 +6,16 @@ import adminResolvers from '../adminPanelResolvers.js';
 import { GraphQLError } from 'graphql';
 
 // Mock dependencies
+const resolved = (value: any) => {
+    const fn: any = jest.fn();
+    fn.mockResolvedValue(value);
+    return fn;
+};
+
 jest.mock('../../../db/neo4j.js', () => ({
     getNeo4jDriver: jest.fn(() => ({
         session: jest.fn(() => ({
-            run: jest.fn().mockResolvedValue({ records: [] }),
+            run: resolved({ records: [] }),
             close: jest.fn(),
         })),
     })),

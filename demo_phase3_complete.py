@@ -568,7 +568,7 @@ def demonstrate_decision_support():
                         return {
                             "sentiment": "positive",
                             "score": 0.95,
-                            "influence_map": {n: 0.8 for n in neighbours or []},
+                            "influence_map": dict.fromkeys(neighbours or [], 0.8),
                         }
 
                 def simulate_counterfactual(node_id: str, remove_edge_type: str) -> Any:

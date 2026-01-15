@@ -1,0 +1,152 @@
+{
+  "issue_number": 92,
+  "title": "Audit and Harden Docker Configurations",
+  "url": "https://github.com/BrianCLong/summit/issues/92",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:14:02Z",
+  "createdAt": "2025-08-12T04:40:34Z",
+  "classification": "security",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13322,
+        "url": "https://github.com/BrianCLong/summit/pull/13322",
+        "mergedAt": "2025-12-04T14:38:56Z",
+        "title": "fix: Resolve Remaining Critical Security Vulnerabilities"
+      },
+      {
+        "number": 15128,
+        "url": "https://github.com/BrianCLong/summit/pull/15128",
+        "mergedAt": "2025-12-30T22:23:16Z",
+        "title": "chore(deps): bump napi-derive from 2.16.13 to 3.4.1"
+      },
+      {
+        "number": 15348,
+        "url": "https://github.com/BrianCLong/summit/pull/15348",
+        "mergedAt": "2026-01-01T09:53:05Z",
+        "title": "Improve cost and operational efficiency"
+      },
+      {
+        "number": 11889,
+        "url": "https://github.com/BrianCLong/summit/pull/11889",
+        "mergedAt": "2025-11-20T11:02:19Z",
+        "title": "Generate master planning docs from markdown files"
+      },
+      {
+        "number": 15159,
+        "url": "https://github.com/BrianCLong/summit/pull/15159",
+        "mergedAt": "2025-12-30T21:37:15Z",
+        "title": "chore(deps): bump napi from 3.3.0 to 3.8.1 in the minor-and-patch group across 1 directory"
+      },
+      {
+        "number": 11773,
+        "url": "https://github.com/BrianCLong/summit/pull/11773",
+        "mergedAt": "2025-11-16T21:51:34Z",
+        "title": "fix: Achieve zero TypeScript and ESLint no-undef errors + build improvements"
+      },
+      {
+        "number": 717,
+        "url": "https://github.com/BrianCLong/summit/pull/717",
+        "mergedAt": null,
+        "title": "🚀 IntelGraph GA Core Release - Production Ready (CONDITIONAL GO)"
+      },
+      {
+        "number": 11908,
+        "url": "https://github.com/BrianCLong/summit/pull/11908",
+        "mergedAt": "2025-11-20T10:25:29Z",
+        "title": "Establish charts as deployment golden path"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 1312,
+        "url": "https://github.com/BrianCLong/summit/pull/1312",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat(conductor): harden build orchestration fabric"
+      },
+      {
+        "number": 1278,
+        "url": "https://github.com/BrianCLong/summit/pull/1278",
+        "mergedAt": "2025-09-19T02:28:07Z",
+        "title": "feat: Sprint 25 Day-1 Deliverables"
+      },
+      {
+        "number": 11923,
+        "url": "https://github.com/BrianCLong/summit/pull/11923",
+        "mergedAt": "2025-11-20T10:04:27Z",
+        "title": "Build Advanced Visualization and Dashboard System"
+      },
+      {
+        "number": 1260,
+        "url": "https://github.com/BrianCLong/summit/pull/1260",
+        "mergedAt": null,
+        "title": "Rebrand: integrate feature/rename-summit into merge/all-to-main-20250915-022508"
+      },
+      {
+        "number": 1258,
+        "url": "https://github.com/BrianCLong/summit/pull/1258",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps): bump paddlepaddle from 2.5.1 to 3.2.0"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

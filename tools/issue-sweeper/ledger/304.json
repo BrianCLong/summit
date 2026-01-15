@@ -1,0 +1,89 @@
+{
+  "issue_number": 304,
+  "title": "Scaffold InsightPanel UI component",
+  "url": "https://github.com/BrianCLong/summit/issues/304",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9121349718,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zAVg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type-feature",
+      "name": "type-feature",
+      "color": "0075ca",
+      "default": false,
+      "description": "Feature development"
+    },
+    {
+      "id": 9121350247,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zCZw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area-UX",
+      "name": "area-UX",
+      "color": "cfd3d7",
+      "default": false,
+      "description": "Frontend insights/UI"
+    }
+  ],
+  "updatedAt": "2025-08-16T17:52:48Z",
+  "createdAt": "2025-08-16T17:52:48Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12231,
+        "url": "https://github.com/BrianCLong/summit/pull/12231",
+        "mergedAt": "2025-11-23T03:24:15Z",
+        "title": "Feature: API Rate Limiting and Caching Strategy"
+      },
+      {
+        "number": 634,
+        "url": "https://github.com/BrianCLong/summit/pull/634",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump globals from 15.15.0 to 16.3.0"
+      },
+      {
+        "number": 13195,
+        "url": "https://github.com/BrianCLong/summit/pull/13195",
+        "mergedAt": "2025-12-04T15:56:11Z",
+        "title": "Deploy Harbor proxy for air-gapped image pulls"
+      },
+      {
+        "number": 11817,
+        "url": "https://github.com/BrianCLong/summit/pull/11817",
+        "mergedAt": "2025-11-17T10:00:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 41 updates"
+      },
+      {
+        "number": 11922,
+        "url": "https://github.com/BrianCLong/summit/pull/11922",
+        "mergedAt": "2025-11-20T10:05:25Z",
+        "title": "Build real-time streaming analytics pipeline"
+      },
+      {
+        "number": 11919,
+        "url": "https://github.com/BrianCLong/summit/pull/11919",
+        "mergedAt": "2025-11-20T10:05:41Z",
+        "title": "Build Advanced Data Integration and ETL Platform"
+      },
+      {
+        "number": 13179,
+        "url": "https://github.com/BrianCLong/summit/pull/13179",
+        "mergedAt": "2025-12-04T15:39:15Z",
+        "title": "Plan evaluation-first platform architecture"
+      },
+      {
+        "number": 13193,
+        "url": "https://github.com/BrianCLong/summit/pull/13193",
+        "mergedAt": "2025-12-04T15:38:38Z",
+        "title": "Build React Native mobile app with OSINT dashboard"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,21 @@
+{
+  "issue_number": 11797,
+  "title": "**CODEX PROMPT**: Implement comprehensive error boundary system for React client with fallback UI",
+  "url": "https://github.com/BrianCLong/summit/issues/11797",
+  "state": "open",
+  "labels": [],
+  "updatedAt": "2025-11-28T04:14:45Z",
+  "createdAt": "2025-11-07T21:00:58Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

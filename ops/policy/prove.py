@@ -14,7 +14,7 @@ import subprocess
 import tempfile
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -232,7 +232,7 @@ class PolicyProofEngine:
         smt_content = [
             "; MC Platform v0.3.6 Policy Proof",
             f"; Property: {property_name}",
-            f"; Generated: {datetime.now(timezone.utc).isoformat()}",
+            f"; Generated: {datetime.now(UTC).isoformat()}",
             "",
             "; Declare sorts",
             "(declare-sort Tenant)",
@@ -429,7 +429,7 @@ class PolicyProofEngine:
         ]
 
         report = PolicyProofReport(
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             commit_hash=commit_hash,
             total_rules=len(rules),
             proven_safe=proven_safe,

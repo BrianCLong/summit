@@ -1,0 +1,56 @@
+{
+  "issue_number": 289,
+  "title": "docs: add velocity plans for sprints v4–v6",
+  "url": "https://github.com/BrianCLong/summit/pull/289",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T16:22:13Z",
+  "createdAt": "2025-08-16T05:27:47Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11924,
+        "url": "https://github.com/BrianCLong/summit/pull/11924",
+        "mergedAt": "2025-11-20T10:20:18Z",
+        "title": "Build Case Spaces with audit logs and access prompts"
+      },
+      {
+        "number": 13183,
+        "url": "https://github.com/BrianCLong/summit/pull/13183",
+        "mergedAt": "2025-12-04T15:39:03Z",
+        "title": "Build graph explorer UI with Tailwind and shadcn"
+      },
+      {
+        "number": 11902,
+        "url": "https://github.com/BrianCLong/summit/pull/11902",
+        "mergedAt": "2025-11-20T10:25:44Z",
+        "title": "Build Cyber Threat Intelligence Platform"
+      },
+      {
+        "number": 11918,
+        "url": "https://github.com/BrianCLong/summit/pull/11918",
+        "mergedAt": "2025-11-20T10:21:01Z",
+        "title": "Build mobile apps for iOS and Android"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

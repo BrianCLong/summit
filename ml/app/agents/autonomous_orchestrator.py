@@ -173,7 +173,7 @@ class AutonomousAgent(AgentLifecycle, ABC):
             return True
 
         except Exception as e:
-            logger.error(f"Agent {self.agent_id} failed task {task.id}: {str(e)}")
+            logger.error(f"Agent {self.agent_id} failed task {task.id}: {e!s}")
 
             task.status = "failed"
             task.result = {"error": str(e)}
@@ -225,9 +225,7 @@ class AutonomousAgent(AgentLifecycle, ABC):
             "capabilities": list(self.capabilities.keys()),
             "relevant_experience": [
                 exp for exp in self.experience_buffer if exp.get("task_type") == task.type
-            ][
-                -5:
-            ],  # Last 5 relevant experiences
+            ][-5:],  # Last 5 relevant experiences
         }
 
         other_agent.knowledge_base[f"collaboration_{collaboration_id}"] = shared_knowledge
@@ -610,7 +608,7 @@ class AutonomousOrchestrator:
                     logger.warning(f"No suitable agent found for task {task.id}")
                     task.status = "unassigned"
 
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 # No tasks in queue, continue
                 continue
             except Exception as e:
@@ -693,7 +691,7 @@ class AutonomousOrchestrator:
                 f"Task {task.id} completed by agent {agent.agent_id} in {completion_time:.2f}s"
             )
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.warning(f"Task {task.id} timed out after {self.task_timeout}s")
             task.status = "timeout"
             agent.current_tasks.remove(task)

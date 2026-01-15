@@ -1,0 +1,40 @@
+{
+  "issue_number": 594,
+  "title": "Merge Train: 27 PRs integrated",
+  "url": "https://github.com/BrianCLong/summit/pull/594",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-18T03:21:21Z",
+  "createdAt": "2025-08-18T03:18:05Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13635,
+        "url": "https://github.com/BrianCLong/summit/pull/13635",
+        "mergedAt": "2025-12-17T04:30:31Z",
+        "title": "build(deps): bump prismjs and react-syntax-highlighter in /client"
+      },
+      {
+        "number": 15260,
+        "url": "https://github.com/BrianCLong/summit/pull/15260",
+        "mergedAt": "2026-01-01T07:29:44Z",
+        "title": "Ecosystem integrations and export transparency"
+      },
+      {
+        "number": 12296,
+        "url": "https://github.com/BrianCLong/summit/pull/12296",
+        "mergedAt": "2025-11-25T20:34:22Z",
+        "title": "Bump body-parser from 2.2.0 to 2.2.1 in /conductor-ui/backend"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

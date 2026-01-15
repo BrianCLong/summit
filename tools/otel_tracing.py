@@ -397,7 +397,6 @@ def main():
             quota_snapshot={"local": 10000, "openai": 5000},
             overrides={"temperature": 0.2},
         ) as span:
-
             # Simulate work
             time.sleep(0.1)
 

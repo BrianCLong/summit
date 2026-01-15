@@ -1,12 +1,10 @@
 import json
-from typing import List
 
 import httpx
-
 from maestro_sdk.mul_ledger import ModelUsageEvent, MulLedgerClient
 
 
-def build_transport(log: List[dict]) -> httpx.MockTransport:
+def build_transport(log: list[dict]) -> httpx.MockTransport:
     def handler(request: httpx.Request) -> httpx.Response:
         if request.method == "POST" and request.url.path == "/events":
             body = json.loads(request.content.decode("utf-8"))
@@ -43,7 +41,7 @@ def build_transport(log: List[dict]) -> httpx.MockTransport:
 
 
 def test_python_sdk_logs_and_queries_quickly() -> None:
-    log: List[dict] = []
+    log: list[dict] = []
     transport = build_transport(log)
     http_client = httpx.Client(transport=transport, base_url="http://ledger.local")
     client = MulLedgerClient("http://ledger.local", client=http_client)
@@ -73,4 +71,3 @@ def test_python_sdk_logs_and_queries_quickly() -> None:
     assert average < 0.005
 
     http_client.close()
-

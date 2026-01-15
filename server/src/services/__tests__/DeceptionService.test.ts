@@ -1,10 +1,11 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { DeceptionService } from '../DeceptionService.js';
 import { neo } from '../../db/neo4j.js';
 
 // Mock neo4j
 jest.mock('../../db/neo4j.js', () => ({
   neo: {
-    run: jest.fn<() => Promise<any>>(),
+    run: jest.fn(),
   },
 }));
 

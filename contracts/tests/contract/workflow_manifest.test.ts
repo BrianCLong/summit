@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
-import path from 'node:path';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 
@@ -8,10 +7,11 @@ const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
 addFormats(ajv);
 const schema = JSON.parse(fs.readFileSync('workflow.schema.json', 'utf8'));
 
+import { parse } from 'yaml';
+
 function loadYaml(file: string) {
   // Minimal YAML loader stub; replace with 'yaml' pkg if desired
-  const { parse } = require('yaml');
-  return parse(fs.readFileSync(file, 'utf8'));
+  return parse(fs.readFileSync(file, 'utf8')) as any;
 }
 
 describe('Workflow manifest schema', () => {
@@ -22,7 +22,7 @@ describe('Workflow manifest schema', () => {
     const validate = ajv.compile(schema);
     const ok = validate(manifest);
     if (!ok) {
-      console.error(validate.errors);
+      // validate.errors
     }
     expect(ok).toBe(true);
   });

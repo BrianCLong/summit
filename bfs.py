@@ -1,10 +1,12 @@
 from collections import deque
-from typing import Dict, Iterable, List, Set, TypeVar
+from collections.abc import Iterable
+from typing import TypeVar
 
 # Define a generic type variable for node identifiers
 Node = TypeVar("Node")
 
-def bfs(adjacency_list: Dict[Node, Iterable[Node]], source: Node) -> List[Node]:
+
+def bfs(adjacency_list: dict[Node, Iterable[Node]], source: Node) -> list[Node]:
     """Perform breadth-first search on a graph represented as an adjacency list.
 
     Args:
@@ -15,9 +17,9 @@ def bfs(adjacency_list: Dict[Node, Iterable[Node]], source: Node) -> List[Node]:
         List of nodes in the order they were visited.
     """
     # Track nodes that have been visited to avoid processing them multiple times.
-    visited: Set[Node] = set()
+    visited: set[Node] = set()
     # Maintain the traversal order to return once the search is complete.
-    order: List[Node] = []
+    order: list[Node] = []
     # Initialize the queue with the source node to start BFS.
     queue: deque[Node] = deque([source])
 

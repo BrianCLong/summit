@@ -1,12 +1,13 @@
-import unittest
-import sys
 import os
+import sys
+import unittest
 
 # Ensure src is in path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 from summit_fara.agent.curriculum import CurriculumAgent
 from summit_fara.agent.executor import ExecutorAgent
+
 
 class TestSummitFara(unittest.TestCase):
     def test_curriculum_instantiation(self):
@@ -21,5 +22,6 @@ class TestSummitFara(unittest.TestCase):
         self.assertIsNotNone(agent.browser)
         self.assertIsNotNone(agent.gh_cli)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

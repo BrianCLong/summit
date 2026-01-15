@@ -20,4 +20,5 @@ export type EventType =
 export interface TelemetryConfig {
   salt: string;
   logDir: string;
+  enabled?: boolean;
 }

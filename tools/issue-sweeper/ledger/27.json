@@ -1,0 +1,248 @@
+{
+  "issue_number": 27,
+  "title": "M0: Normalize filenames and organize repo structure",
+  "url": "https://github.com/BrianCLong/summit/issues/27",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051532,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5DA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:frontend",
+      "name": "area:frontend",
+      "color": "ededed",
+      "default": false,
+      "description": "Frontend work"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:11:17Z",
+  "createdAt": "2025-08-12T00:15:27Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15165,
+        "url": "https://github.com/BrianCLong/summit/pull/15165",
+        "mergedAt": null,
+        "title": "Add governance fabric sprint 27 plan and metadata"
+      },
+      {
+        "number": 14116,
+        "url": "https://github.com/BrianCLong/summit/pull/14116",
+        "mergedAt": "2025-12-20T10:15:24Z",
+        "title": "Epic 27: Real-Time Event Streaming & Data Pipeline Platform"
+      },
+      {
+        "number": 13294,
+        "url": "https://github.com/BrianCLong/summit/pull/13294",
+        "mergedAt": "2025-12-17T05:59:36Z",
+        "title": "Sprint 27: Connectors GA & Per-Tenant Rate Limiting"
+      },
+      {
+        "number": 13779,
+        "url": "https://github.com/BrianCLong/summit/pull/13779",
+        "mergedAt": "2025-12-20T03:35:31Z",
+        "title": "docs: refresh Feb 16–27 2026 sprint plan for enterprise readiness"
+      },
+      {
+        "number": 13252,
+        "url": "https://github.com/BrianCLong/summit/pull/13252",
+        "mergedAt": "2025-12-04T17:11:32Z",
+        "title": "Add Sprint 34 Plan (Apr 27-May 8, 2026)"
+      },
+      {
+        "number": 12814,
+        "url": "https://github.com/BrianCLong/summit/pull/12814",
+        "mergedAt": "2025-12-04T17:41:49Z",
+        "title": "docs: update sprint plan for Feb 16–27 2026"
+      },
+      {
+        "number": 13764,
+        "url": "https://github.com/BrianCLong/summit/pull/13764",
+        "mergedAt": "2025-12-20T03:34:41Z",
+        "title": "docs: add Sprint 7 GA launch plan"
+      },
+      {
+        "number": 14674,
+        "url": "https://github.com/BrianCLong/summit/pull/14674",
+        "mergedAt": null,
+        "title": "chore: capture staged regression drill evidence (EVID-2 disclosure bundle)"
+      },
+      {
+        "number": 12503,
+        "url": "https://github.com/BrianCLong/summit/pull/12503",
+        "mergedAt": "2025-12-18T02:38:25Z",
+        "title": "Extend roadmap with five new defense sprints"
+      },
+      {
+        "number": 14376,
+        "url": "https://github.com/BrianCLong/summit/pull/14376",
+        "mergedAt": "2025-12-23T04:35:24Z",
+        "title": "Bump esbuild and vitest in /apps/gateway"
+      },
+      {
+        "number": 15313,
+        "url": "https://github.com/BrianCLong/summit/pull/15313",
+        "mergedAt": "2026-01-01T11:39:29Z",
+        "title": "Establish Institutional Continuity Framework"
+      },
+      {
+        "number": 13634,
+        "url": "https://github.com/BrianCLong/summit/pull/13634",
+        "mergedAt": "2025-12-17T02:55:59Z",
+        "title": "build(deps): bump esbuild and vitest in /services/nl-cypher"
+      },
+      {
+        "number": 13633,
+        "url": "https://github.com/BrianCLong/summit/pull/13633",
+        "mergedAt": "2025-12-17T02:12:47Z",
+        "title": "build(deps): bump esbuild and vitest in /services/ai-nlq"
+      },
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 594,
+        "url": "https://github.com/BrianCLong/summit/pull/594",
+        "mergedAt": "2025-08-18T03:21:19Z",
+        "title": "Merge Train: 27 PRs integrated"
+      },
+      {
+        "number": 13470,
+        "url": "https://github.com/BrianCLong/summit/pull/13470",
+        "mergedAt": "2025-12-07T02:16:14Z",
+        "title": "deps(npm): bump @babel/runtime from 7.21.0 to 7.28.4"
+      },
+      {
+        "number": 15325,
+        "url": "https://github.com/BrianCLong/summit/pull/15325",
+        "mergedAt": null,
+        "title": "feat: add doctrine spine and enforcement guardrails"
+      },
+      {
+        "number": 13123,
+        "url": "https://github.com/BrianCLong/summit/pull/13123",
+        "mergedAt": "2025-12-17T05:37:30Z",
+        "title": "S5 - Secret Drift Detector"
+      },
+      {
+        "number": 13121,
+        "url": "https://github.com/BrianCLong/summit/pull/13121",
+        "mergedAt": "2025-12-03T01:31:53Z",
+        "title": "Causal Graph Generator"
+      },
+      {
+        "number": 13144,
+        "url": "https://github.com/BrianCLong/summit/pull/13144",
+        "mergedAt": "2025-12-03T03:05:56Z",
+        "title": "C1 — Reproducible Build Verifier"
+      },
+      {
+        "number": 13635,
+        "url": "https://github.com/BrianCLong/summit/pull/13635",
+        "mergedAt": "2025-12-17T04:30:31Z",
+        "title": "build(deps): bump prismjs and react-syntax-highlighter in /client"
+      },
+      {
+        "number": 12074,
+        "url": "https://github.com/BrianCLong/summit/pull/12074",
+        "mergedAt": null,
+        "title": "Build Advanced Threat Detection System"
+      },
+      {
+        "number": 12233,
+        "url": "https://github.com/BrianCLong/summit/pull/12233",
+        "mergedAt": "2025-11-23T00:37:29Z",
+        "title": "Bump nodemailer from 6.10.1 to 7.0.7 in /server"
+      },
+      {
+        "number": 14595,
+        "url": "https://github.com/BrianCLong/summit/pull/14595",
+        "mergedAt": "2025-12-27T05:49:06Z",
+        "title": "chore(deps): Bump urllib3 from 2.5.0 to 2.6.0 in /modules/connector-sdk-s3csv"
+      },
+      {
+        "number": 15339,
+        "url": "https://github.com/BrianCLong/summit/pull/15339",
+        "mergedAt": "2026-01-01T11:37:58Z",
+        "title": "feat: leverage optimization and friction reduction"
+      },
+      {
+        "number": 15126,
+        "url": "https://github.com/BrianCLong/summit/pull/15126",
+        "mergedAt": "2025-12-30T21:31:10Z",
+        "title": "chore(deps): bump the minor-and-patch group with 4 updates"
+      },
+      {
+        "number": 11881,
+        "url": "https://github.com/BrianCLong/summit/pull/11881",
+        "mergedAt": null,
+        "title": "Fix devcontainer setup for F5 start"
+      },
+      {
+        "number": 11840,
+        "url": "https://github.com/BrianCLong/summit/pull/11840",
+        "mergedAt": null,
+        "title": "feat(intelgraph-api): add advanced graph analytics endpoints"
+      },
+      {
+        "number": 11903,
+        "url": "https://github.com/BrianCLong/summit/pull/11903",
+        "mergedAt": "2025-11-20T09:49:20Z",
+        "title": "Add security headers and OWASP compliance"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

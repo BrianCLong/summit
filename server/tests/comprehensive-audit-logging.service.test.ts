@@ -1,4 +1,5 @@
-import { sign } from 'jsonwebtoken';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import * as jwt from 'jsonwebtoken';
 import { ComprehensiveAuditLoggingService } from '../src/services/ComprehensiveAuditLoggingService.js';
 import {
   AuditEvent,
@@ -18,7 +19,7 @@ describe('ComprehensiveAuditLoggingService', () => {
       const timestamp = event.timestamp ?? new Date();
       const hash = `${id}:${event.eventType}:${timestamp.getTime()}`;
       const previousEventHash = this.lastHash;
-      const signature = sign({ id, hash }, signingKey);
+      const signature = jwt.sign({ id, hash }, signingKey);
 
       const stored: AuditEvent = {
         id,

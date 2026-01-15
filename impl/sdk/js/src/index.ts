@@ -26,7 +26,7 @@ export class SummitClient {
     const endpoint = this.endpoint;
     const apiKey = this.apiKey;
     return {
-      chat: async (params: { messages: ChatMessage[]; context?: unknown; policy?: PolicyContext }) => {
+      chat: (params: { messages: ChatMessage[]; context?: unknown; policy?: PolicyContext }) => {
         const payload = {
           model: name,
           ...params,
@@ -45,7 +45,7 @@ export class SummitClient {
 
   rag = {
     knowledgeBase: ({ profile }: { profile: string }) => ({
-      retrieve: async (query: string, opts: { k?: number } = {}) => ({
+      retrieve: (query: string, opts: { k?: number } = {}) => ({
         query,
         profile,
         k: opts.k ?? 5,

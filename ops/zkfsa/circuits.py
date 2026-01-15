@@ -13,7 +13,7 @@ import json
 import logging
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, NamedTuple
 
 logger = logging.getLogger(__name__)
@@ -106,7 +106,7 @@ class ZKFSACircuit:
             "protected_attributes": protected_attributes,
             "threshold": threshold,
             "meets_threshold": fairness_score >= threshold,
-            "evaluation_timestamp": datetime.now(timezone.utc).isoformat(),
+            "evaluation_timestamp": datetime.now(UTC).isoformat(),
         }
 
         # Generate zk-proof (simulation - production would use actual zk-SNARK)
@@ -119,7 +119,7 @@ class ZKFSACircuit:
             public_inputs=public_inputs,
             proof_data=proof_data,
             fairness_score=fairness_score,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
         )
 
         self.proof_count += 1
@@ -127,7 +127,7 @@ class ZKFSACircuit:
 
         logger.info(
             f"Fairness proof generated: {proof.proof_id}, "
-            f"score={fairness_score:.3f}, time={proof_time*1000:.1f}ms"
+            f"score={fairness_score:.3f}, time={proof_time * 1000:.1f}ms"
         )
 
         return proof
@@ -168,7 +168,7 @@ class ZKFSACircuit:
             "safety_policies": safety_policies,
             "threshold": threshold,
             "meets_threshold": safety_score >= threshold,
-            "evaluation_timestamp": datetime.now(timezone.utc).isoformat(),
+            "evaluation_timestamp": datetime.now(UTC).isoformat(),
         }
 
         # Generate zk-proof
@@ -181,7 +181,7 @@ class ZKFSACircuit:
             public_inputs=public_inputs,
             proof_data=proof_data,
             safety_score=safety_score,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
         )
 
         self.proof_count += 1
@@ -189,7 +189,7 @@ class ZKFSACircuit:
 
         logger.info(
             f"Safety proof generated: {proof.proof_id}, "
-            f"score={safety_score:.3f}, time={proof_time*1000:.1f}ms"
+            f"score={safety_score:.3f}, time={proof_time * 1000:.1f}ms"
         )
 
         return proof
@@ -260,7 +260,7 @@ class ZKFSACircuit:
             "proof_type": proof_type,
             "metrics": metrics._asdict() if hasattr(metrics, "_asdict") else str(metrics),
             "circuit_key": self.circuit_key.hex(),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
         # Combine public inputs and witness for proof generation

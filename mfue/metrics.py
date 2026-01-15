@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Iterable
-
 import math
+from collections.abc import Iterable
+from dataclasses import dataclass
+
 import numpy as np
 
 
@@ -33,7 +33,9 @@ def membership_inference_auc(
     member_confidences = np.asarray(list(member_confidences), dtype=float)
     non_member_confidences = np.asarray(list(non_member_confidences), dtype=float)
     scores = np.concatenate([member_confidences, non_member_confidences])
-    labels = np.concatenate([np.ones_like(member_confidences), np.zeros_like(non_member_confidences)])
+    labels = np.concatenate(
+        [np.ones_like(member_confidences), np.zeros_like(non_member_confidences)]
+    )
     if len(scores) == 0:
         return 0.5
     order = np.argsort(scores)

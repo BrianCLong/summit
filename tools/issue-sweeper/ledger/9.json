@@ -1,0 +1,230 @@
+{
+  "issue_number": 9,
+  "title": "M1: GitHub Actions CI for client and server (lint, test, build)",
+  "url": "https://github.com/BrianCLong/summit/issues/9",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T00:09:58Z",
+  "createdAt": "2025-08-12T00:09:58Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14554,
+        "url": "https://github.com/BrianCLong/summit/pull/14554",
+        "mergedAt": "2025-12-27T03:35:08Z",
+        "title": "Sprint N+9: RC Lockdown & Guardrails"
+      },
+      {
+        "number": 15440,
+        "url": "https://github.com/BrianCLong/summit/pull/15440",
+        "mergedAt": null,
+        "title": "Add Summit agent framework mapping and backlog"
+      },
+      {
+        "number": 13793,
+        "url": "https://github.com/BrianCLong/summit/pull/13793",
+        "mergedAt": "2025-12-20T11:36:24Z",
+        "title": "Add Sprint 9 Scale & Efficiency plan"
+      },
+      {
+        "number": 15200,
+        "url": "https://github.com/BrianCLong/summit/pull/15200",
+        "mergedAt": null,
+        "title": "Sprint N+9: Multi-Region, Disaster Recovery, and Resilience"
+      },
+      {
+        "number": 13858,
+        "url": "https://github.com/BrianCLong/summit/pull/13858",
+        "mergedAt": "2025-12-20T03:24:04Z",
+        "title": "Add Sprint 24 plan for Nov 9–20 2026"
+      },
+      {
+        "number": 14009,
+        "url": "https://github.com/BrianCLong/summit/pull/14009",
+        "mergedAt": "2025-12-19T21:17:18Z",
+        "title": "Update nltk version to 3.9 in requirements.txt"
+      },
+      {
+        "number": 13313,
+        "url": "https://github.com/BrianCLong/summit/pull/13313",
+        "mergedAt": null,
+        "title": "deps(npm): bump @deck.gl/react from 9.2.2 to 9.2.3"
+      },
+      {
+        "number": 13318,
+        "url": "https://github.com/BrianCLong/summit/pull/13318",
+        "mergedAt": null,
+        "title": "deps(npm): bump @deck.gl/layers from 9.2.2 to 9.2.3"
+      },
+      {
+        "number": 13854,
+        "url": "https://github.com/BrianCLong/summit/pull/13854",
+        "mergedAt": "2025-12-20T03:24:19Z",
+        "title": "Add sprint 21 plan for Sep 28–Oct 9 2026"
+      },
+      {
+        "number": 13594,
+        "url": "https://github.com/BrianCLong/summit/pull/13594",
+        "mergedAt": "2025-12-17T03:07:55Z",
+        "title": "Implement Epics 7, 8, 9: ER v2, Reporting, Safety"
+      },
+      {
+        "number": 15358,
+        "url": "https://github.com/BrianCLong/summit/pull/15358",
+        "mergedAt": null,
+        "title": "Create patent-grade MCP protocol innovations"
+      },
+      {
+        "number": 12665,
+        "url": "https://github.com/BrianCLong/summit/pull/12665",
+        "mergedAt": "2025-12-18T01:44:28Z",
+        "title": "Add delivery blueprint for council wishbook prompts #9–#16"
+      },
+      {
+        "number": 13602,
+        "url": "https://github.com/BrianCLong/summit/pull/13602",
+        "mergedAt": "2025-12-15T09:44:39Z",
+        "title": "deps(docker): bump python from 3.9-slim to 3.14-slim"
+      },
+      {
+        "number": 15151,
+        "url": "https://github.com/BrianCLong/summit/pull/15151",
+        "mergedAt": "2025-12-30T21:29:24Z",
+        "title": "Identify and catalog critical TODOs"
+      },
+      {
+        "number": 12812,
+        "url": "https://github.com/BrianCLong/summit/pull/12812",
+        "mergedAt": "2025-12-04T17:41:52Z",
+        "title": "Add Sprint 18 plan for Feb 9–20 2026"
+      },
+      {
+        "number": 15184,
+        "url": "https://github.com/BrianCLong/summit/pull/15184",
+        "mergedAt": "2025-12-31T14:21:30Z",
+        "title": "chore(deps): bump docker/setup-buildx-action from 2 to 3"
+      },
+      {
+        "number": 14342,
+        "url": "https://github.com/BrianCLong/summit/pull/14342",
+        "mergedAt": "2025-12-22T08:05:50Z",
+        "title": "Implement Engineering Process Epics (Wishbook, Discovery, QA, Governance)"
+      },
+      {
+        "number": 14320,
+        "url": "https://github.com/BrianCLong/summit/pull/14320",
+        "mergedAt": "2025-12-22T08:06:33Z",
+        "title": "Implement Engineering Process Epics (Wishbook, Discovery, QA, Governance)"
+      },
+      {
+        "number": 14647,
+        "url": "https://github.com/BrianCLong/summit/pull/14647",
+        "mergedAt": "2025-12-27T07:48:57Z",
+        "title": "[PROGRAM] Add coordination artifacts — establish release process"
+      },
+      {
+        "number": 14301,
+        "url": "https://github.com/BrianCLong/summit/pull/14301",
+        "mergedAt": "2025-12-22T08:07:36Z",
+        "title": "Add Legal Transformation Epics"
+      },
+      {
+        "number": 14450,
+        "url": "https://github.com/BrianCLong/summit/pull/14450",
+        "mergedAt": "2025-12-25T03:17:22Z",
+        "title": "Billing Activation V1 Foundation"
+      },
+      {
+        "number": 14276,
+        "url": "https://github.com/BrianCLong/summit/pull/14276",
+        "mergedAt": null,
+        "title": "Add resilience validation engine and audit logging"
+      },
+      {
+        "number": 14351,
+        "url": "https://github.com/BrianCLong/summit/pull/14351",
+        "mergedAt": "2025-12-22T08:05:14Z",
+        "title": "Create Jira-Ready CSV from Project Plan"
+      },
+      {
+        "number": 14364,
+        "url": "https://github.com/BrianCLong/summit/pull/14364",
+        "mergedAt": "2025-12-22T07:56:12Z",
+        "title": "[Epic 1] Golden Path Architecture & Boundaries"
+      },
+      {
+        "number": 14098,
+        "url": "https://github.com/BrianCLong/summit/pull/14098",
+        "mergedAt": "2025-12-20T07:27:00Z",
+        "title": "Improve map clustering ergonomics and deterministic geo ordering"
+      },
+      {
+        "number": 13311,
+        "url": "https://github.com/BrianCLong/summit/pull/13311",
+        "mergedAt": null,
+        "title": "deps(npm): bump @react-native/metro-config from 0.76.9 to 0.82.1"
+      },
+      {
+        "number": 13981,
+        "url": "https://github.com/BrianCLong/summit/pull/13981",
+        "mergedAt": "2025-12-20T01:26:59Z",
+        "title": "feat: add adapter executor runtime"
+      },
+      {
+        "number": 12457,
+        "url": "https://github.com/BrianCLong/summit/pull/12457",
+        "mergedAt": "2025-12-18T02:48:07Z",
+        "title": "docs: outline wave9 capability missions"
+      },
+      {
+        "number": 13729,
+        "url": "https://github.com/BrianCLong/summit/pull/13729",
+        "mergedAt": "2025-12-20T03:32:27Z",
+        "title": "Implement robust database migration system"
+      },
+      {
+        "number": 13326,
+        "url": "https://github.com/BrianCLong/summit/pull/13326",
+        "mergedAt": "2025-12-04T15:03:30Z",
+        "title": "fix: eliminate all moderate-severity vulnerabilities"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

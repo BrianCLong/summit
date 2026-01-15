@@ -1,0 +1,43 @@
+name: release-lint
+
+on:
+  pull_request:
+    paths:
+      - package.json
+      - client/package.json
+      - server/package.json
+      - docs/releases/**
+  push:
+    paths:
+      - package.json
+      - client/package.json
+      - server/package.json
+      - docs/releases/**
+
+jobs:
+  release-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        with:
+          fetch-depth: 0
+      - name: Validate release docs
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          BASE="${BASE_REF:-main}"
+          git fetch origin "$BASE" --depth=1 || true
+          CHANGED=$(git diff --name-only "origin/${BASE}"...HEAD || true)
+          if echo "$CHANGED" | rg -q "package.json|client/package.json|server/package.json"; then
+            VERSION=$(node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));console.log(p.version)")
+            NOTES="docs/releases/MVP-4_RELEASE_NOTES.md"
+            EVIDENCE="docs/releases/MVP-4_EVIDENCE_PACK.md"
+            test -f "$NOTES" || { echo "Missing $NOTES"; exit 1; }
+            test -f "$EVIDENCE" || { echo "Missing $EVIDENCE"; exit 1; }
+            rg -q "v${VERSION}" "$NOTES" || { echo "Version v${VERSION} not found in $NOTES"; exit 1; }
+            rg -q "v${VERSION}" "$EVIDENCE" || { echo "Version v${VERSION} not found in $EVIDENCE"; exit 1; }
+          else
+            echo "No version file changes detected."
+          fi

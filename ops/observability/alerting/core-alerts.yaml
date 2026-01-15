@@ -1,0 +1,21 @@
+groups:
+  - name: SummitCoreAlerts
+    rules:
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: High Error Rate detected
+          description: Error rate is above 1% for the last 5 minutes.
+          runbook_url: https://github.com/BrianCLong/summit/blob/main/ops/observability/runbooks/high-error-rate.md
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High Latency detected
+          description: P95 latency is above 500ms for the last 5 minutes.
+          runbook_url: https://github.com/BrianCLong/summit/blob/main/ops/observability/runbooks/high-latency.md

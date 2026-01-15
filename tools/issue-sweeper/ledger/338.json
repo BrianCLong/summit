@@ -1,0 +1,44 @@
+{
+  "issue_number": 338,
+  "title": "Real-Time OLAP and Data Warehousing",
+  "url": "https://github.com/BrianCLong/summit/issues/338",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9122115570,
+      "node_id": "LA_kwDOPaNncM8AAAACH7hv8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-enterprise-ai",
+      "name": "epic-enterprise-ai",
+      "color": "6C5CE7",
+      "default": false,
+      "description": "Enterprise AI and advanced optimization"
+    }
+  ],
+  "updatedAt": "2025-08-16T22:24:33Z",
+  "createdAt": "2025-08-16T22:24:33Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11888,
+        "url": "https://github.com/BrianCLong/summit/pull/11888",
+        "mergedAt": "2025-11-20T10:26:20Z",
+        "title": "Implement comprehensive API documentation system"
+      },
+      {
+        "number": 13188,
+        "url": "https://github.com/BrianCLong/summit/pull/13188",
+        "mergedAt": "2025-12-04T15:38:53Z",
+        "title": "Build cross-platform TypeScript CLI for graph queries"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

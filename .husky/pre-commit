@@ -18,6 +18,13 @@ else
   log "⚠️ gitleaks not found. Skipping secret scan."
 fi
 
+# Check CJS files don't contain ESM syntax
+log "🔍 Checking CJS files for ESM syntax..."
+node scripts/check-cjs-commonjs.cjs --quiet 2>/dev/null || node scripts/check-cjs-commonjs.cjs || {
+  log "❌ ESM syntax found in .cjs files. Run 'pnpm lint:cjs' for details."
+  exit 1
+}
+
 # Run lint-staged
 # This handles eslint, prettier, and ruff (configured in package.json)
 log "🔍 Running lint-staged..."

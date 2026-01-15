@@ -204,7 +204,7 @@ class OPASimulator:
             return policy_result
 
         except Exception as e:
-            logger.error(f"OPA simulation failed: {str(e)}")
+            logger.error(f"OPA simulation failed: {e!s}")
             return {"allow": False, "error": str(e)}
 
     def _assess_risk_level(self, proposal: EvolutionProposal) -> str:
@@ -317,9 +317,9 @@ class TestHarness:
             return results
 
         except Exception as e:
-            logger.error(f"Test execution failed: {str(e)}")
+            logger.error(f"Test execution failed: {e!s}")
             results.failed_tests = results.total_tests
-            results.test_output = f"Test execution error: {str(e)}"
+            results.test_output = f"Test execution error: {e!s}"
             return results
 
     def _generate_test_output(self, results: TestResults) -> str:
@@ -372,7 +372,7 @@ class CSEValidator:
             return validation
 
         except Exception as e:
-            logger.error(f"CSE validation failed: {str(e)}")
+            logger.error(f"CSE validation failed: {e!s}")
             validation.equivalence_verified = False
             validation.safety_maintained = False
             return validation
@@ -418,7 +418,7 @@ class ZKFairnessProofGenerator:
             return proof
 
         except Exception as e:
-            logger.error(f"ZK proof generation failed: {str(e)}")
+            logger.error(f"ZK proof generation failed: {e!s}")
             proof.proof_generated = False
             proof.verification_passed = False
             return proof
@@ -576,7 +576,7 @@ class EvolutionSandbox:
             )
 
         except Exception as e:
-            logger.error(f"Sandbox validation failed: {str(e)}")
+            logger.error(f"Sandbox validation failed: {e!s}")
             results.status = SandboxStatus.FAILED
             results.error_message = str(e)
 

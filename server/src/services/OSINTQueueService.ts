@@ -3,10 +3,9 @@ import { createRequire } from 'module';
 import logger from '../utils/logger';
 import { VeracityScoringService } from './VeracityScoringService';
 
-const require = createRequire(import.meta.url);
-const config = require('../config/index.js');
-const ExternalAPIServiceCJS = require('./ExternalAPIService');
-const OSINTServiceCJS = require('./OSINTService');
+import config from '../config/index.js';
+import { ExternalAPIService } from './ExternalAPIService';
+import { OSINTService } from './OSINTService';
 
 interface OSINTJobData {
   type: string; // 'comprehensive_scan', 'wikipedia', 'search'
@@ -22,17 +21,17 @@ const connection = {
   db: config.redis?.db || 0,
 };
 
-export const osintQueue = new Queue('osint:ingest', { connection });
+export const osintQueue = new Queue('osint-ingest', { connection });
 
 export function startOSINTWorkers(): Worker {
   const worker = new Worker(
-    'osint:ingest',
+    'osint-ingest',
     async (job: Job<OSINTJobData>) => {
       const { type, targetId, tenantId, params } = job.data;
       logger.info(`Processing OSINT job ${job.id}: ${type} for ${targetId}`);
 
-      const extApi = new ExternalAPIServiceCJS(logger);
-      const osintService = new OSINTServiceCJS();
+      const extApi = new ExternalAPIService(logger as any);
+      const osintService = new OSINTService();
       const veracityService = new VeracityScoringService();
 
       try {

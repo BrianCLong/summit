@@ -7,13 +7,13 @@ import { jest, describe, it, test, expect } from '@jest/globals';
 
 function createMockPool(): Pool {
   return {
-    query: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 }),
+    query: jest.fn(async () => ({ rows: [], rowCount: 0 })) as any,
   } as unknown as Pool;
 }
 
 function createAuditLogger(): RetentionAuditLogger {
   return {
-    log: jest.fn().mockResolvedValue(undefined),
+    log: jest.fn(async () => undefined) as any,
   };
 }
 
@@ -46,7 +46,7 @@ describe('DataRetentionEngine', () => {
     const pool = createMockPool();
     const scheduler = new RetentionScheduler(1000);
     const auditLogger = createAuditLogger();
-    const runCypher = jest.fn().mockResolvedValue([]);
+    const runCypher = jest.fn(async () => []) as any;
     const engine = new DataRetentionEngine({
       pool,
       scheduler,
@@ -59,9 +59,8 @@ describe('DataRetentionEngine', () => {
 
     expect(record.policy.templateId).toBe('pii-365d');
     expect(record.policy.retentionDays).toBe(365);
-    expect((auditLogger.log as jest.Mock).mock.calls[0][0].event).toBe(
-      'policy.applied',
-    );
+    const auditCall = (auditLogger.log as jest.Mock).mock.calls[0]?.[0] as any;
+    expect(auditCall.event).toBe('policy.applied');
 
     scheduler.stop();
   });
@@ -70,7 +69,7 @@ describe('DataRetentionEngine', () => {
     const pool = createMockPool();
     const scheduler = new RetentionScheduler(1000);
     const auditLogger = createAuditLogger();
-    const runCypher = jest.fn().mockResolvedValue([]);
+    const runCypher = jest.fn(async () => []) as any;
     const engine = new DataRetentionEngine({
       pool,
       scheduler,
@@ -103,7 +102,7 @@ describe('DataRetentionEngine', () => {
     const pool = createMockPool();
     const scheduler = new RetentionScheduler(5);
     const auditLogger = createAuditLogger();
-    const runCypher = jest.fn().mockResolvedValue([]);
+    const runCypher = jest.fn(async () => []) as any;
     const engine = new DataRetentionEngine({
       pool,
       scheduler,
@@ -141,7 +140,7 @@ describe('DataRetentionEngine', () => {
     const pool = createMockPool();
     const scheduler = new RetentionScheduler(1000);
     const auditLogger = createAuditLogger();
-    const runCypher = jest.fn().mockResolvedValue([]);
+    const runCypher = jest.fn(async () => []) as any;
     const engine = new DataRetentionEngine({
       pool,
       scheduler,
@@ -176,7 +175,7 @@ describe('DataRetentionEngine', () => {
     const pool = createMockPool();
     const scheduler = new RetentionScheduler(1000);
     const auditLogger = createAuditLogger();
-    const runCypher = jest.fn().mockResolvedValue([]);
+    const runCypher = jest.fn(async () => []) as any;
     const engine = new DataRetentionEngine({
       pool,
       scheduler,

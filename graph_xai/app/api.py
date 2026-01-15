@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 import json
-from typing import List
 
 from fastapi import APIRouter, Depends
 
 from .audit import log_audit
 from .config import get_settings
 from .ethics import check_request
+from .explain import counterfactuals, fairness, robustness, saliency, viz_payload
+from .explain import paths as path_mod
 from .schemas import ExplainRequest, ExplainResponse, Importance, PathExplanation
-from .security import check_api_key, require_role, enforce_limits
+from .security import check_api_key, enforce_limits, require_role
 from .utils.graph_io import to_networkx
-from .explain import saliency, paths as path_mod, counterfactuals, robustness, fairness, viz_payload
 
 router = APIRouter()
 settings = get_settings()
@@ -54,7 +54,7 @@ async def explain(
     fair = fairness.check(g, output)
     viz = viz_payload.build_viz(g, node_imp, edge_imp)
 
-    importances: List[Importance] = [
+    importances: list[Importance] = [
         *[Importance(id=k, type="node", score=v) for k, v in node_imp.items()],
         *[Importance(id=k, type="edge", score=v) for k, v in edge_imp.items()],
     ]

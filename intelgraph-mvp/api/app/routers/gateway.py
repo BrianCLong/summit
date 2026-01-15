@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import List, Optional
-
 from fastapi import APIRouter, Depends, Query, Request
 
 from ..deps import get_tenant_case, require_clearance
@@ -43,7 +41,7 @@ async def neighbors(
     entity_id: str,
     request: Request,
     max_hops: int = Query(1, ge=1, le=3),
-    labels: Optional[List[str]] = Query(None),
+    labels: list[str] | None = Query(None),
     tc=Depends(get_tenant_case),
     user=Depends(require_clearance("analyst")),
 ):

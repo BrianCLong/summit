@@ -12,9 +12,9 @@ from .chaos_runner import (
 )
 
 __all__ = [
-    "ChaosRunner",
     "ChaosExperimentResult",
     "ChaosExperimentSpec",
+    "ChaosRunner",
     "ChaosSuite",
     "run_broker_kill_chaos_test",
     "run_pod_kill_chaos_test",

@@ -11,7 +11,7 @@ import { pipeline } from 'node:stream/promises';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import type { ExportConfig } from './config.js';
-import type { GraphQueryResult, NodeResult, RelationshipResult } from './graph-client.js';
+import type { NodeResult, RelationshipResult } from './graph-client.js';
 import {
   EXPORT_FORMATS,
   type ExportFormat,
@@ -678,7 +678,7 @@ export class ExportManager {
   }
 
   private verifySignature(
-    manifest: ExportManifest,
+    _manifest: ExportManifest,
     signature: string
   ): boolean {
     // For verification, we would need the public key

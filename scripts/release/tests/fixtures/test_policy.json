@@ -1,0 +1,49 @@
+{
+  "version": "1.0.0",
+  "description": "Test policy for unit tests",
+  "always_required": [
+    {
+      "name": "CI Core",
+      "workflow": "ci-core.yml",
+      "rationale": "Primary gate"
+    },
+    {
+      "name": "Unit Tests",
+      "workflow": "unit-tests.yml",
+      "rationale": "Test suite"
+    }
+  ],
+  "conditional_required": [
+    {
+      "name": "Workflow Lint",
+      "workflow": "workflow-lint.yml",
+      "rationale": "Workflow validation",
+      "when_paths_match": ["^\\.github/workflows/", "^\\.github/actions/"]
+    },
+    {
+      "name": "CodeQL",
+      "workflow": "codeql.yml",
+      "rationale": "Security analysis",
+      "when_paths_match": ["^server/", "^packages/", "^cli/"]
+    },
+    {
+      "name": "SBOM Scan",
+      "workflow": "sbom-scan.yml",
+      "rationale": "Supply chain security",
+      "when_paths_match": ["^Dockerfile", "^package\\.json$", "^pnpm-lock\\.yaml$"]
+    },
+    {
+      "name": "Docker Build",
+      "workflow": "docker-build.yml",
+      "rationale": "Docker image build",
+      "when_paths_match": ["^Dockerfile", "^\\.dockerignore$"]
+    }
+  ],
+  "informational": [
+    {
+      "name": "Release Train",
+      "workflow": "release-train.yml",
+      "rationale": "Informational only"
+    }
+  ]
+}

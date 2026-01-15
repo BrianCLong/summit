@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """CLI for managing feature flag targets and kill-switches."""
+
 from __future__ import annotations
 
 import argparse
@@ -9,7 +10,7 @@ import os
 import sys
 import uuid
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -22,29 +23,33 @@ CATALOG = ROOT / "flags" / "catalog.yaml"
 AUDIT_LOG = ROOT / "tools" / "flagctl" / "audit.log"
 
 
-def load_catalog() -> Dict[str, Any]:
+def load_catalog() -> dict[str, Any]:
     if not CATALOG.exists():
         return {}
     data = load_yaml(CATALOG.read_text()) or {}
-    catalog = {item["key"]: item for item in data.get("flags", [])} if isinstance(data.get("flags"), list) else {}
+    catalog = (
+        {item["key"]: item for item in data.get("flags", [])}
+        if isinstance(data.get("flags"), list)
+        else {}
+    )
     return catalog
 
 
-def load_targets(env: str) -> Dict[str, Any]:
+def load_targets(env: str) -> dict[str, Any]:
     path = TARGET_DIR / f"{env}.yaml"
     if not path.exists():
         return {"environment": env, "flags": {}}
     return load_yaml(path.read_text()) or {"environment": env, "flags": {}}
 
 
-def save_targets(env: str, payload: Dict[str, Any]) -> None:
+def save_targets(env: str, payload: dict[str, Any]) -> None:
     path = TARGET_DIR / f"{env}.yaml"
     path.parent.mkdir(parents=True, exist_ok=True)
     # Simple serializer: best-effort JSON for auditability
     path.write_text(json.dumps(payload, indent=2))
 
 
-def write_audit(event: Dict[str, Any]) -> None:
+def write_audit(event: dict[str, Any]) -> None:
     AUDIT_LOG.parent.mkdir(parents=True, exist_ok=True)
     with AUDIT_LOG.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(event) + "\n")
@@ -56,7 +61,9 @@ def get_flag(env: str, key: str) -> None:
     print(json.dumps({"env": env, "key": key, "value": flag}, indent=2))
 
 
-def set_flag(env: str, key: str, value: str, percent: int | None, tenants: list[str] | None) -> None:
+def set_flag(
+    env: str, key: str, value: str, percent: int | None, tenants: list[str] | None
+) -> None:
     payload = load_targets(env)
     payload.setdefault("flags", {})
     entry = payload["flags"].get(key, {})
@@ -110,7 +117,9 @@ def lint_catalog() -> int:
     catalog = load_catalog()
     exit_code = 0
     for key, item in catalog.items():
-        missing = [field for field in ["owner", "expires", "risk", "linked_epic"] if not item.get(field)]
+        missing = [
+            field for field in ["owner", "expires", "risk", "linked_epic"] if not item.get(field)
+        ]
         if missing:
             print(f"catalog entry {key} missing fields: {', '.join(missing)}", file=sys.stderr)
             exit_code = 1

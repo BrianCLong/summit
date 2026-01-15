@@ -1,8 +1,8 @@
+import pathlib
+import shutil
 import subprocess
 import tempfile
-import shutil
-import pathlib
-import os
+
 
 class Sandbox:
     def __init__(self):

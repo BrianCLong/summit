@@ -1,0 +1,143 @@
+{
+  "issue_number": 136,
+  "title": "War Room Creation Flow",
+  "url": "https://github.com/BrianCLong/summit/issues/136",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    },
+    {
+      "id": 9103342828,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn87A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/collaboration",
+      "name": "collaboration",
+      "color": "cfd3d7",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342986,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9ig",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/frontend",
+      "name": "frontend",
+      "color": "A2EEEF",
+      "default": false,
+      "description": "UI/E2E"
+    },
+    {
+      "id": 9103343056,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn90A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/mvp1",
+      "name": "mvp1",
+      "color": "0e8a16",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103361891,
+      "node_id": "LA_kwDOPaNncM8AAAACHppHYw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:collaboration",
+      "name": "area:collaboration",
+      "color": "c5def5",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-12-19T23:10:29Z",
+  "createdAt": "2025-08-13T09:20:44Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14000,
+        "url": "https://github.com/BrianCLong/summit/pull/14000",
+        "mergedAt": "2025-12-19T23:10:27Z",
+        "title": "feat: Add War Room Creation Flow with RBAC"
+      },
+      {
+        "number": 15180,
+        "url": "https://github.com/BrianCLong/summit/pull/15180",
+        "mergedAt": "2025-12-31T14:21:19Z",
+        "title": "chore(deps): bump zaproxy/action-baseline from 0.14.0 to 0.15.0"
+      },
+      {
+        "number": 12313,
+        "url": "https://github.com/BrianCLong/summit/pull/12313",
+        "mergedAt": "2025-11-27T04:48:22Z",
+        "title": "Add Wave 17 codex campaign plan"
+      },
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 924,
+        "url": "https://github.com/BrianCLong/summit/pull/924",
+        "mergedAt": "2025-08-29T18:15:23Z",
+        "title": "🌟 Complete Omniversal Singularity - GA Architecture Integration"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 1260,
+        "url": "https://github.com/BrianCLong/summit/pull/1260",
+        "mergedAt": null,
+        "title": "Rebrand: integrate feature/rename-summit into merge/all-to-main-20250915-022508"
+      },
+      {
+        "number": 11920,
+        "url": "https://github.com/BrianCLong/summit/pull/11920",
+        "mergedAt": "2025-11-20T10:05:36Z",
+        "title": "Build predictive analytics and forecasting platform"
+      },
+      {
+        "number": 1284,
+        "url": "https://github.com/BrianCLong/summit/pull/1284",
+        "mergedAt": "2025-09-20T08:06:31Z",
+        "title": "feat(release): enterprise-grade repo consolidation and golden ci pipeline"
+      },
+      {
+        "number": 1285,
+        "url": "https://github.com/BrianCLong/summit/pull/1285",
+        "mergedAt": "2025-09-20T08:06:30Z",
+        "title": "feat(release): enterprise ci/cd foundation - clean slate"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

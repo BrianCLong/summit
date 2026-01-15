@@ -34,6 +34,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
     "@types/jest": "^30.0.0",
     "@types/node": "20.19.27",
     "@types/pg": "^8.15.6",

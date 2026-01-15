@@ -6,16 +6,17 @@ into a Summit/IntelGraph workflow. It simulates a Summit run, captures the
 trace, converts it to an SRE Episode, and runs an evaluation.
 """
 
-import sys
 import json
-from pathlib import Path
+import sys
 from datetime import datetime
+from pathlib import Path
 
 # Add impl to path to simulate installed package
 sys.path.append(str(Path.cwd() / "impl"))
 
+from sre.metrics import ToolEfficiencyMetric, TraceLengthMetric
 from sre.models import Episode
-from sre.metrics import TraceLengthMetric, ToolEfficiencyMetric
+
 
 # --- Mock Summit Runtime ---
 class SummitRunner:
@@ -32,9 +33,10 @@ class SummitRunner:
             {"type": "tool_call", "tool": "bank_api", "args": {"user": "alice"}},
             {"type": "tool_result", "result": {"balance": 1000}},
             {"type": "llm_thought", "content": "Balance is sufficient. Proceeding."},
-            {"type": "end", "output": "Approved"}
+            {"type": "end", "output": "Approved"},
         ]
         return events
+
 
 # --- Integration Hook ---
 def summit_to_sre(events, run_id="run-123") -> Episode:
@@ -47,7 +49,7 @@ def summit_to_sre(events, run_id="run-123") -> Episode:
 
     for i, evt in enumerate(events):
         node_id = f"node-{i}"
-        node_type = "thought" # default
+        node_type = "thought"  # default
         content = ""
         metadata = {}
 
@@ -65,20 +67,18 @@ def summit_to_sre(events, run_id="run-123") -> Episode:
             node_type = "system"
             content = evt.get("output", "Workflow Signal")
 
-        nodes.append({
-            "id": node_id,
-            "type": node_type,
-            "content": content,
-            "metadata": metadata,
-            "timestamp": evt.get("timestamp")
-        })
+        nodes.append(
+            {
+                "id": node_id,
+                "type": node_type,
+                "content": content,
+                "metadata": metadata,
+                "timestamp": evt.get("timestamp"),
+            }
+        )
 
         if last_node_id:
-            edges.append({
-                "source": last_node_id,
-                "target": node_id,
-                "relation": "follows"
-            })
+            edges.append({"source": last_node_id, "target": node_id, "relation": "follows"})
         last_node_id = node_id
 
     # Extract outcome
@@ -89,8 +89,9 @@ def summit_to_sre(events, run_id="run-123") -> Episode:
         task_id="summit-task-001",
         run_config={"engine": "summit-v1"},
         outcome=outcome,
-        graph={"nodes": nodes, "edges": edges}
+        graph={"nodes": nodes, "edges": edges},
     )
+
 
 # --- Main Execution ---
 def main():
@@ -110,6 +111,7 @@ def main():
     print("\n--- Eval Report ---")
     print(json.dumps(results, indent=2))
     print("-------------------")
+
 
 if __name__ == "__main__":
     main()

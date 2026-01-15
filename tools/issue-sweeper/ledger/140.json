@@ -1,0 +1,230 @@
+{
+  "issue_number": 140,
+  "title": "Epic: Real-Time Threat Simulation & 'What-If' Analysis",
+  "url": "https://github.com/BrianCLong/summit/issues/140",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342919,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9Rw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic",
+      "name": "epic",
+      "color": "8250DF",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103343056,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn90A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/mvp1",
+      "name": "mvp1",
+      "color": "0e8a16",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103361995,
+      "node_id": "LA_kwDOPaNncM8AAAACHppHyw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:simulation",
+      "name": "area:simulation",
+      "color": "fbca04",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-13T09:28:17Z",
+  "createdAt": "2025-08-13T09:20:51Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14375,
+        "url": "https://github.com/BrianCLong/summit/pull/14375",
+        "mergedAt": "2025-12-23T04:35:28Z",
+        "title": "Bump playwright from 1.41.1 to 1.55.1 in /services/reporting"
+      },
+      {
+        "number": 13365,
+        "url": "https://github.com/BrianCLong/summit/pull/13365",
+        "mergedAt": "2025-12-06T09:54:02Z",
+        "title": "build(deps): bump playwright and @playwright/test in /intelgraph-mvp/ui"
+      },
+      {
+        "number": 13099,
+        "url": "https://github.com/BrianCLong/summit/pull/13099",
+        "mergedAt": "2025-12-03T01:50:28Z",
+        "title": "Implement SLSA L3 compliance with cosign and OIDC"
+      },
+      {
+        "number": 13095,
+        "url": "https://github.com/BrianCLong/summit/pull/13095",
+        "mergedAt": "2025-12-03T01:58:35Z",
+        "title": "Add Unsloth Adapter for Long-Context LLMs"
+      },
+      {
+        "number": 15293,
+        "url": "https://github.com/BrianCLong/summit/pull/15293",
+        "mergedAt": "2026-01-01T06:31:07Z",
+        "title": "feat: codify partner operating model guardrails"
+      },
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 11904,
+        "url": "https://github.com/BrianCLong/summit/pull/11904",
+        "mergedAt": "2025-11-20T10:25:38Z",
+        "title": "Set up Security Autopilot for Summit repoCreate pull request"
+      },
+      {
+        "number": 11912,
+        "url": "https://github.com/BrianCLong/summit/pull/11912",
+        "mergedAt": null,
+        "title": "Implement structured logging with correlation IDs"
+      },
+      {
+        "number": 11899,
+        "url": "https://github.com/BrianCLong/summit/pull/11899",
+        "mergedAt": "2025-11-20T10:26:05Z",
+        "title": "Set up SLO monitoring for API performance"
+      },
+      {
+        "number": 11922,
+        "url": "https://github.com/BrianCLong/summit/pull/11922",
+        "mergedAt": "2025-11-20T10:05:25Z",
+        "title": "Build real-time streaming analytics pipeline"
+      },
+      {
+        "number": 11909,
+        "url": "https://github.com/BrianCLong/summit/pull/11909",
+        "mergedAt": "2025-11-20T10:25:19Z",
+        "title": "Build offline kit with CRDT sync and proofs"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 1152,
+        "url": "https://github.com/BrianCLong/summit/pull/1152",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump @playwright/test from 1.54.2 to 1.55.0 in /server"
+      },
+      {
+        "number": 11884,
+        "url": "https://github.com/BrianCLong/summit/pull/11884",
+        "mergedAt": "2025-11-20T14:33:08Z",
+        "title": "Build connector SDK and sample connectors"
+      },
+      {
+        "number": 1357,
+        "url": "https://github.com/BrianCLong/summit/pull/1357",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "chore(deps): bump transformers from 4.34.1 to 4.53.0 in /_salvage_from_refs/RC1/server"
+      },
+      {
+        "number": 1356,
+        "url": "https://github.com/BrianCLong/summit/pull/1356",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "chore(deps): bump transformers from 4.30.2 to 4.53.0 in /apps/ml-engine/src/python"
+      },
+      {
+        "number": 1305,
+        "url": "https://github.com/BrianCLong/summit/pull/1305",
+        "mergedAt": "2025-09-23T06:09:38Z",
+        "title": "chore(deps): bump transformers from 4.37.0 to 4.53.0 in /services/graph-xai"
+      },
+      {
+        "number": 11915,
+        "url": "https://github.com/BrianCLong/summit/pull/11915",
+        "mergedAt": null,
+        "title": "Implement SLO-driven alerting system for Summit"
+      },
+      {
+        "number": 9795,
+        "url": "https://github.com/BrianCLong/summit/pull/9795",
+        "mergedAt": null,
+        "title": "Fix/bulk import lockfile sync"
+      },
+      {
+        "number": 9800,
+        "url": "https://github.com/BrianCLong/summit/pull/9800",
+        "mergedAt": null,
+        "title": "feat(monitoring): Enable error-budget monitoring and Maestro metrics export (EO-1, EO-2)"
+      },
+      {
+        "number": 9796,
+        "url": "https://github.com/BrianCLong/summit/pull/9796",
+        "mergedAt": "2025-10-03T03:51:08Z",
+        "title": "fix: sync lockfile for CI bulk import"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 11920,
+        "url": "https://github.com/BrianCLong/summit/pull/11920",
+        "mergedAt": "2025-11-20T10:05:36Z",
+        "title": "Build predictive analytics and forecasting platform"
+      },
+      {
+        "number": 1301,
+        "url": "https://github.com/BrianCLong/summit/pull/1301",
+        "mergedAt": "2025-09-23T06:38:37Z",
+        "title": "IntelGraph salvage: total recapture → promote key artifacts"
+      },
+      {
+        "number": 1279,
+        "url": "https://github.com/BrianCLong/summit/pull/1279",
+        "mergedAt": null,
+        "title": "feat(ga): artifacts pack for v1.0.0"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      },
+      {
+        "number": 1300,
+        "url": "https://github.com/BrianCLong/summit/pull/1300",
+        "mergedAt": "2025-09-23T06:47:22Z",
+        "title": "Total Recapture: enterprise-ready green merge to main"
+      },
+      {
+        "number": 1284,
+        "url": "https://github.com/BrianCLong/summit/pull/1284",
+        "mergedAt": "2025-09-20T08:06:31Z",
+        "title": "feat(release): enterprise-grade repo consolidation and golden ci pipeline"
+      },
+      {
+        "number": 1285,
+        "url": "https://github.com/BrianCLong/summit/pull/1285",
+        "mergedAt": "2025-09-20T08:06:30Z",
+        "title": "feat(release): enterprise ci/cd foundation - clean slate"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

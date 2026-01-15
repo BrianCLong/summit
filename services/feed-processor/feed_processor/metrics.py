@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections import deque
 from dataclasses import dataclass, field
 from statistics import mean
-from typing import Deque, Dict
 
 
 @dataclass
@@ -28,7 +27,7 @@ class ThroughputTracker:
     """Maintains aggregate throughput statistics."""
 
     window: int = 50
-    _measurements: Deque[BatchMeasurement] = field(default_factory=lambda: deque(maxlen=50))
+    _measurements: deque[BatchMeasurement] = field(default_factory=lambda: deque(maxlen=50))
     total_records: int = 0
     total_batches: int = 0
     total_elapsed: float = 0.0
@@ -42,14 +41,12 @@ class ThroughputTracker:
         self.total_batches += 1
         self.total_elapsed += elapsed
 
-    def snapshot(self) -> Dict[str, float]:
+    def snapshot(self) -> dict[str, float]:
         """Return current throughput metrics."""
 
         window_throughput = [measurement.throughput for measurement in self._measurements]
         average = mean(window_throughput) if window_throughput else 0.0
-        overall = (
-            self.total_records / self.total_elapsed if self.total_elapsed > 0 else 0.0
-        )
+        overall = self.total_records / self.total_elapsed if self.total_elapsed > 0 else 0.0
         peak = max(window_throughput) if window_throughput else 0.0
         return {
             "records_total": float(self.total_records),

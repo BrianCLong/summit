@@ -1,0 +1,25 @@
+# Security Audit Waivers
+# This file tracks approved exceptions for the security audit gate.
+# All waivers must have a rationale and an expiration date.
+
+waivers:
+  - package: "@modelcontextprotocol/sdk"
+    advisory_id: "GHSA-8r9q-7v3j-jr4g"
+    expires: "2026-03-01"
+    rationale: "Vulnerability reported even after override. We are monitoring for a definitive fix in the SDK."
+  - package: "@remix-run/router"
+    advisory_id: "GHSA-2w69-qvjg-hvjx"
+    expires: "2026-03-01"
+    rationale: "Vulnerability reported even after override. Likely a sub-dependency resolution issue in labeling-ui."
+  - package: "react-router"
+    advisory_id: "GHSA-2w69-qvjg-hvjx"
+    expires: "2026-03-01"
+    rationale: "Vulnerability reported even after override. Likely a sub-dependency resolution issue in field-kit."
+  - package: "react-router"
+    advisory_id: "GHSA-8v8x-cx79-35w7"
+    expires: "2026-03-01"
+    rationale: "Vulnerability reported even after override. Likely a sub-dependency resolution issue in field-kit."
+  - package: "preact"
+    advisory_id: "GHSA-36hm-qxxp-pg3m"
+    expires: "2026-06-01"
+    rationale: "Deep dependency in non-production mobile-interface tool. Risk is acceptable for GA."

@@ -1,0 +1,248 @@
+{
+  "issue_number": 37,
+  "title": "M2: Environment config schema validation",
+  "url": "https://github.com/BrianCLong/summit/issues/37",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051648,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5gA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:security",
+      "name": "area:security",
+      "color": "BFD4F2",
+      "default": false,
+      "description": "Security-related documentation/action"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:11:53Z",
+  "createdAt": "2025-08-12T00:15:40Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14525,
+        "url": "https://github.com/BrianCLong/summit/pull/14525",
+        "mergedAt": "2025-12-27T00:20:14Z",
+        "title": "Sprint N+37: Organizational Scaling & Ownership Implementation"
+      },
+      {
+        "number": 15311,
+        "url": "https://github.com/BrianCLong/summit/pull/15311",
+        "mergedAt": "2026-01-01T11:39:37Z",
+        "title": "feat: Establish counter-intelligence framework documentation"
+      },
+      {
+        "number": 15333,
+        "url": "https://github.com/BrianCLong/summit/pull/15333",
+        "mergedAt": null,
+        "title": "Innovation Sprint Delivery: 8 Strategic Features"
+      },
+      {
+        "number": 11971,
+        "url": "https://github.com/BrianCLong/summit/pull/11971",
+        "mergedAt": null,
+        "title": "Analyze test coverage gaps automatically"
+      },
+      {
+        "number": 15322,
+        "url": "https://github.com/BrianCLong/summit/pull/15322",
+        "mergedAt": null,
+        "title": "Add truth operations adversarial defense pack"
+      },
+      {
+        "number": 15324,
+        "url": "https://github.com/BrianCLong/summit/pull/15324",
+        "mergedAt": null,
+        "title": "Add continuity and succession safeguards"
+      },
+      {
+        "number": 12061,
+        "url": "https://github.com/BrianCLong/summit/pull/12061",
+        "mergedAt": "2025-11-21T04:00:35Z",
+        "title": "Build internationalization system for Summit"
+      },
+      {
+        "number": 10168,
+        "url": "https://github.com/BrianCLong/summit/pull/10168",
+        "mergedAt": null,
+        "title": "feat: Docker Compose GA Release Package v2025.10.07"
+      },
+      {
+        "number": 15301,
+        "url": "https://github.com/BrianCLong/summit/pull/15301",
+        "mergedAt": "2026-01-01T07:54:58Z",
+        "title": "Add agent guardrail enforcement and steering controls"
+      },
+      {
+        "number": 11761,
+        "url": "https://github.com/BrianCLong/summit/pull/11761",
+        "mergedAt": "2025-10-17T04:01:09Z",
+        "title": "chore: update pre-commit hooks and fix configuration"
+      },
+      {
+        "number": 13144,
+        "url": "https://github.com/BrianCLong/summit/pull/13144",
+        "mergedAt": "2025-12-03T03:05:56Z",
+        "title": "C1 — Reproducible Build Verifier"
+      },
+      {
+        "number": 1305,
+        "url": "https://github.com/BrianCLong/summit/pull/1305",
+        "mergedAt": "2025-09-23T06:09:38Z",
+        "title": "chore(deps): bump transformers from 4.37.0 to 4.53.0 in /services/graph-xai"
+      },
+      {
+        "number": 1858,
+        "url": "https://github.com/BrianCLong/summit/pull/1858",
+        "mergedAt": null,
+        "title": "test: main-to-green — clean discovery, env split, core mocks, suite f…"
+      },
+      {
+        "number": 1864,
+        "url": "https://github.com/BrianCLong/summit/pull/1864",
+        "mergedAt": "2025-10-04T22:49:31Z",
+        "title": "Add DEPTH operating mode configuration for CompanyOS"
+      },
+      {
+        "number": 1289,
+        "url": "https://github.com/BrianCLong/summit/pull/1289",
+        "mergedAt": "2025-09-23T06:48:53Z",
+        "title": "Phase 5: Comprehensive Observability & Monitoring Hardening"
+      },
+      {
+        "number": 10091,
+        "url": "https://github.com/BrianCLong/summit/pull/10091",
+        "mergedAt": null,
+        "title": "feat: add immutable training capsules for prov-ledger"
+      },
+      {
+        "number": 13173,
+        "url": "https://github.com/BrianCLong/summit/pull/13173",
+        "mergedAt": "2025-12-04T15:39:21Z",
+        "title": "Harden triplet runtime with adversarial attestation moats"
+      },
+      {
+        "number": 11796,
+        "url": "https://github.com/BrianCLong/summit/pull/11796",
+        "mergedAt": null,
+        "title": "fix: harden client env fallbacks"
+      },
+      {
+        "number": 11795,
+        "url": "https://github.com/BrianCLong/summit/pull/11795",
+        "mergedAt": null,
+        "title": "feat: deliver research integration capabilities"
+      },
+      {
+        "number": 11782,
+        "url": "https://github.com/BrianCLong/summit/pull/11782",
+        "mergedAt": "2025-10-24T19:45:25Z",
+        "title": "chore(deps): bump playwright and @playwright/test in /conductor-ui/frontend"
+      },
+      {
+        "number": 11779,
+        "url": "https://github.com/BrianCLong/summit/pull/11779",
+        "mergedAt": "2025-10-22T15:51:49Z",
+        "title": "chore(deps): bump playwright and @playwright/test in /client"
+      },
+      {
+        "number": 10102,
+        "url": "https://github.com/BrianCLong/summit/pull/10102",
+        "mergedAt": "2025-10-14T13:05:00Z",
+        "title": "feat: add multi-cloud arbitrage agent system"
+      },
+      {
+        "number": 11776,
+        "url": "https://github.com/BrianCLong/summit/pull/11776",
+        "mergedAt": "2025-10-20T19:09:45Z",
+        "title": "chore(deps): bump playwright and @playwright/test in /intelgraph"
+      },
+      {
+        "number": 11775,
+        "url": "https://github.com/BrianCLong/summit/pull/11775",
+        "mergedAt": "2025-10-20T18:15:01Z",
+        "title": "chore(deps): bump playwright and @playwright/test in /server"
+      },
+      {
+        "number": 1179,
+        "url": "https://github.com/BrianCLong/summit/pull/1179",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps-dev): bump @typescript-eslint/parser from 6.21.0 to 8.42.0 in /client"
+      },
+      {
+        "number": 11919,
+        "url": "https://github.com/BrianCLong/summit/pull/11919",
+        "mergedAt": "2025-11-20T10:05:41Z",
+        "title": "Build Advanced Data Integration and ETL Platform"
+      },
+      {
+        "number": 1312,
+        "url": "https://github.com/BrianCLong/summit/pull/1312",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat(conductor): harden build orchestration fabric"
+      },
+      {
+        "number": 11774,
+        "url": "https://github.com/BrianCLong/summit/pull/11774",
+        "mergedAt": "2025-10-20T11:06:07Z",
+        "title": "chore(deps): bump the js-dependencies group with 144 updates"
+      },
+      {
+        "number": 11874,
+        "url": "https://github.com/BrianCLong/summit/pull/11874",
+        "mergedAt": null,
+        "title": "Build Resilience Lab with automated chaos drills"
+      },
+      {
+        "number": 11817,
+        "url": "https://github.com/BrianCLong/summit/pull/11817",
+        "mergedAt": "2025-11-17T10:00:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 41 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

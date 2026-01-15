@@ -5,6 +5,7 @@ SERVICE_SRC = Path(__file__).resolve().parents[1] / "src"
 sys.path.append(str(SERVICE_SRC))
 
 from main import QUARANTINE, evaluate_payload, quarantine_retry
+
 from models import EvaluationRequest, Rule
 
 

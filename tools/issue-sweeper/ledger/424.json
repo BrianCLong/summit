@@ -1,0 +1,44 @@
+{
+  "issue_number": 424,
+  "title": "feat(ui): add analyst workbench with drag and AI assist",
+  "url": "https://github.com/BrianCLong/summit/pull/424",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T16:32:05Z",
+  "createdAt": "2025-08-17T08:02:32Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15290,
+        "url": "https://github.com/BrianCLong/summit/pull/15290",
+        "mergedAt": "2026-01-01T05:46:03Z",
+        "title": "Add Claude Code prompt for priority work"
+      },
+      {
+        "number": 11878,
+        "url": "https://github.com/BrianCLong/summit/pull/11878",
+        "mergedAt": null,
+        "title": "Consolidate CLI and assistant tools into Summit CLI"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

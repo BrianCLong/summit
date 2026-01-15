@@ -151,4 +151,4 @@ class StreamingWorker:
         return Path(path)
 
 
-__all__ = ["StreamingWorker", "Event"]
+__all__ = ["Event", "StreamingWorker"]

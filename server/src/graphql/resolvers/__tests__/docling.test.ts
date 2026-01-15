@@ -1,10 +1,7 @@
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { doclingResolvers } from '../docling';
 import { doclingService } from '../../../services/DoclingService';
 import { doclingRepository } from '../../../db/repositories/doclingRepository';
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-
-jest.mock('../../../services/DoclingService');
-jest.mock('../../../db/repositories/doclingRepository');
 
 describe('docling resolvers', () => {
   const ctx = { user: { tenantId: 'tenant-1' } };
@@ -14,7 +11,7 @@ describe('docling resolvers', () => {
   });
 
   it('calls service for summarizeBuildFailure', async () => {
-    (doclingService.summarizeBuildFailure as jest.Mock).mockResolvedValue({
+    (doclingService as any).summarizeBuildFailure.mockResolvedValue({
       summary: {
         id: 's1',
         text: 'ok',
@@ -48,7 +45,7 @@ describe('docling resolvers', () => {
   });
 
   it('fetches stored summary', async () => {
-    (doclingRepository.findSummaryByRequestId as jest.Mock).mockResolvedValue({
+    (doclingRepository as any).findSummaryByRequestId.mockResolvedValue({
       id: 'sum-1',
       tenantId: 'tenant-1',
       requestId: 'req-12345',

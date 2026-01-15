@@ -1,0 +1,119 @@
+{
+  "issue_number": 213,
+  "title": "Anomaly: Node/edge feature engineering",
+  "url": "https://github.com/BrianCLong/summit/issues/213",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767070,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX03g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/enhancement",
+      "name": "enhancement",
+      "color": "a2eeef",
+      "default": true,
+      "description": "New feature or request"
+    },
+    {
+      "id": 9103342705,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn8cQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/AI",
+      "name": "AI",
+      "color": "bfdadc",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9107968276,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRFA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/performance",
+      "name": "performance",
+      "color": "D93F0B",
+      "default": false,
+      "description": "Perf/Load"
+    }
+  ],
+  "updatedAt": "2025-08-14T04:53:41Z",
+  "createdAt": "2025-08-14T04:53:41Z",
+  "classification": "feature",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15184,
+        "url": "https://github.com/BrianCLong/summit/pull/15184",
+        "mergedAt": "2025-12-31T14:21:30Z",
+        "title": "chore(deps): bump docker/setup-buildx-action from 2 to 3"
+      },
+      {
+        "number": 15134,
+        "url": "https://github.com/BrianCLong/summit/pull/15134",
+        "mergedAt": null,
+        "title": "chore(deps): bump actions/github-script from 7 to 8"
+      },
+      {
+        "number": 629,
+        "url": "https://github.com/BrianCLong/summit/pull/629",
+        "mergedAt": null,
+        "title": "chore(deps): bump keybert from 0.8.3 to 0.9.0"
+      },
+      {
+        "number": 10129,
+        "url": "https://github.com/BrianCLong/summit/pull/10129",
+        "mergedAt": null,
+        "title": "feat: add cross-database migration rollback engine"
+      },
+      {
+        "number": 11913,
+        "url": "https://github.com/BrianCLong/summit/pull/11913",
+        "mergedAt": "2025-11-20T10:25:05Z",
+        "title": "Improve test coverage and organization"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 11927,
+        "url": "https://github.com/BrianCLong/summit/pull/11927",
+        "mergedAt": null,
+        "title": "Build workflow orchestration and task scheduling"
+      },
+      {
+        "number": 13193,
+        "url": "https://github.com/BrianCLong/summit/pull/13193",
+        "mergedAt": "2025-12-04T15:38:38Z",
+        "title": "Build React Native mobile app with OSINT dashboard"
+      },
+      {
+        "number": 13042,
+        "url": "https://github.com/BrianCLong/summit/pull/13042",
+        "mergedAt": "2025-12-01T19:17:12Z",
+        "title": "chore: Finalize CI/CD consolidation and cleanup"
+      },
+      {
+        "number": 1283,
+        "url": "https://github.com/BrianCLong/summit/pull/1283",
+        "mergedAt": null,
+        "title": "feat: Maestro vNext - Complete AI-Augmented CI/CD Platform"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

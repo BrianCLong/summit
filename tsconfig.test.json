@@ -3,7 +3,9 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "isolatedModules": true,
     "target": "ES2022",
+    "allowJs": true,
     "strict": false,
     "noImplicitAny": false,
     "esModuleInterop": true,

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { defineTask } from '@intelgraph/maestro-sdk';
 
 type Mapper<T> = (row: any) => T;

@@ -46,7 +46,7 @@ export interface GuardrailResult {
 
 const DEFAULT_FIXTURES_PATH = path.join(
   process.cwd(),
-  'server/tests/fixtures/er/evaluation-fixtures.json'
+  'tests/fixtures/er/evaluation-fixtures.json'
 );
 
 let cachedFixtures: FixtureDataset[] | null = null;

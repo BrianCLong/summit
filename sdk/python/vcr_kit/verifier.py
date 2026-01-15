@@ -5,8 +5,8 @@ from __future__ import annotations
 import base64
 import json
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from datetime import UTC, datetime
+from typing import Any
 
 try:  # pragma: no cover - optional dependency
     from nacl.signing import VerifyKey
@@ -20,7 +20,7 @@ from .revocation import JsonRevocationRegistry
 @dataclass
 class VerificationResult:
     verified: bool
-    reason: Optional[str] = None
+    reason: str | None = None
 
 
 class ConsentVerifier:
@@ -36,7 +36,7 @@ class ConsentVerifier:
 
     async def verify(
         self,
-        credential: Dict[str, Any],
+        credential: dict[str, Any],
         *,
         at_time: datetime | None = None,
     ) -> VerificationResult:
@@ -72,7 +72,7 @@ class ConsentVerifier:
         except Exception:  # pragma: no cover - signature failure
             return VerificationResult(False, "Signature verification failed")
 
-        now = at_time or datetime.now(timezone.utc)
+        now = at_time or datetime.now(UTC)
         expiry = credential.get("expirationDate")
         if expiry:
             exp_raw = str(expiry)
@@ -80,7 +80,7 @@ class ConsentVerifier:
                 exp_raw = exp_raw[:-1] + "+00:00"
             exp_time = datetime.fromisoformat(exp_raw)
             if exp_time.tzinfo is None:
-                exp_time = exp_time.replace(tzinfo=timezone.utc)
+                exp_time = exp_time.replace(tzinfo=UTC)
             if now > exp_time:
                 return VerificationResult(False, "Credential expired")
 
@@ -92,7 +92,7 @@ class ConsentVerifier:
         return VerificationResult(True)
 
 
-def _canonicalize(value: Dict[str, Any]) -> bytes:
+def _canonicalize(value: dict[str, Any]) -> bytes:
     return json.dumps(value, separators=(",", ":"), sort_keys=True).encode("utf-8")
 
 

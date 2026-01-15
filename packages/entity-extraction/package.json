@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/entity-extraction",
-  "version": "2.0.0",
+  "version": "4.1.4",
   "description": "Named Entity Recognition and entity extraction with multi-language support",
   "type": "module",
   "main": "./dist/index.js",

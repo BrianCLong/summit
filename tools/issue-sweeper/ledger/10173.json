@@ -1,0 +1,58 @@
+{
+  "issue_number": 10173,
+  "title": "Complete v0.3.0 Release Hardening",
+  "url": "https://github.com/BrianCLong/summit/pull/10173",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767070,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX03g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/enhancement",
+      "name": "enhancement",
+      "color": "a2eeef",
+      "default": true,
+      "description": "New feature or request"
+    },
+    {
+      "id": 9107968384,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRgA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/release",
+      "name": "release",
+      "color": "C5DEF5",
+      "default": false,
+      "description": "Release Train"
+    },
+    {
+      "id": 9278618923,
+      "node_id": "LA_kwDOPaNncM8AAAACKQx9Kw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/risk:high",
+      "name": "risk:high",
+      "color": "1D76DB",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9456882017,
+      "node_id": "LA_kwDOPaNncM8AAAACM6yRYQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/needs-owner-review",
+      "name": "needs-owner-review",
+      "color": "D93F0B",
+      "default": false,
+      "description": "High-touch PR awaiting owner confirmation"
+    }
+  ],
+  "updatedAt": "2025-11-21T05:54:39Z",
+  "createdAt": "2025-10-08T06:15:43Z",
+  "classification": "feature",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

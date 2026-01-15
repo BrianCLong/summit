@@ -1,0 +1,10 @@
+{
+  "active": false,
+  "set_at": null,
+  "expires_at": null,
+  "justification": null,
+  "ticket_url": null,
+  "approved_via_environment": null,
+  "approved_by": null,
+  "note": "Temporary override for freeze mode. Does not clear freeze - provides bounded exception."
+}

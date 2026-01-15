@@ -1,0 +1,21 @@
+{
+  "issue_number": 10051,
+  "title": "- Add reusable workflow `.github/workflows/policy.check.release-gate.yml`",
+  "url": "https://github.com/BrianCLong/summit/issues/10051",
+  "state": "open",
+  "labels": [],
+  "updatedAt": "2025-10-04T18:13:05Z",
+  "createdAt": "2025-10-04T18:13:05Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

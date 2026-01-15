@@ -50,7 +50,7 @@ export interface Manifest {
   signature?: string;
 }
 
-const hashRecord = (record: Omit<AuditRecord, 'event'> & { event?: AuditRecord['event'] }) =>
+const hashRecord = (record: Pick<AuditRecord, 'sequence' | 'recorded_at' | 'prev_hash' | 'payload_hash'>) =>
   crypto
     .createHash('sha256')
     .update(
@@ -144,9 +144,11 @@ export const verifySignature = (
   manifest: Manifest,
   publicKey?: string,
 ): boolean => {
-  const { signature, ...unsigned } = manifest;
+  const { signature, public_key: manifestPublicKey, ...rest } = manifest;
   if (!signature) return false;
-  const key = publicKey ?? manifest.public_key;
+  const key = publicKey ?? manifestPublicKey;
+  // The original data was signed with public_key: '' so we need to match that
+  const unsigned = { ...rest, public_key: '' };
   return crypto.verify(null, Buffer.from(JSON.stringify(unsigned)), key, Buffer.from(signature, 'base64'));
 };
 

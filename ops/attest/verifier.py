@@ -13,7 +13,7 @@ import json
 import time
 import uuid
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -137,7 +137,7 @@ class ZTAVerifier:
             agent_id=request.agent_id,
             action_type=request.action_type,
             action_payload_hash=payload_hash,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             attestation_token=attestation_token,
             verifier_signature="",  # Will be set below
             chain_hash=chain_hash,
@@ -206,7 +206,7 @@ class ZTAVerifier:
     async def _log_to_ledger(self, receipt: AttestationReceipt):
         """Append receipt to nightly export ledger"""
         ledger_entry = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "receipt": receipt.to_dict(),
         }
 
@@ -245,7 +245,7 @@ async def attest_action(request: AttestationRequest) -> JSONResponse:
         receipt = await verifier.attest_action(request)
         return JSONResponse({"status": "attested", "receipt": receipt.to_dict()})
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Attestation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Attestation failed: {e!s}")
 
 
 @app.post("/verify", response_model=dict[str, Any])
@@ -255,7 +255,7 @@ async def verify_attestation(request: VerificationRequest) -> JSONResponse:
         result = await verifier.verify_attestation(request)
         return JSONResponse({"verification": asdict(result)})
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Verification failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Verification failed: {e!s}")
 
 
 @app.get("/metrics")

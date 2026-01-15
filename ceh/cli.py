@@ -1,9 +1,10 @@
 """Command line interface for the Counterfactual Evaluation Harness."""
+
 from __future__ import annotations
 
 import argparse
 import json
-from typing import Callable, Dict
+from collections.abc import Callable
 
 from sklearn.linear_model import LogisticRegression
 
@@ -16,7 +17,7 @@ except ImportError:  # pragma: no cover
     XGBClassifier = None
 
 
-_DATASETS: Dict[str, Callable] = {
+_DATASETS: dict[str, Callable] = {
     "synthetic": load_synthetic_demo,
     "breast_cancer": load_breast_cancer_demo,
 }

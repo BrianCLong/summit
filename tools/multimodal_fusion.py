@@ -356,7 +356,9 @@ class MultiModalProcessor:
         sentiment_label = (
             "positive"
             if sentiment_score > 0.2
-            else "negative" if sentiment_score < -0.2 else "neutral"
+            else "negative"
+            if sentiment_score < -0.2
+            else "neutral"
         )
 
         return {
@@ -466,7 +468,9 @@ class MultiModalProcessor:
                     "estimated_complexity": (
                         "high"
                         if width * height > 1000000
-                        else "medium" if width * height > 100000 else "low"
+                        else "medium"
+                        if width * height > 100000
+                        else "low"
                     ),
                     "confidence": 0.9,
                 }
@@ -480,7 +484,9 @@ class MultiModalProcessor:
             "estimated_complexity": (
                 "high"
                 if file_size > 5 * 1024 * 1024
-                else "medium" if file_size > 1024 * 1024 else "low"
+                else "medium"
+                if file_size > 1024 * 1024
+                else "low"
             ),
             "processing_method": "file_analysis",
             "confidence": 0.4,
@@ -508,7 +514,9 @@ class MultiModalProcessor:
             "estimated_quality": (
                 "high"
                 if file_size > 10 * 1024 * 1024
-                else "medium" if file_size > 1024 * 1024 else "low"
+                else "medium"
+                if file_size > 1024 * 1024
+                else "low"
             ),
             "processing_method": "file_analysis",
             "confidence": 0.3,
@@ -768,7 +776,7 @@ class MultiModalProcessor:
                 narrative = f"Analysis generation failed: {result.stderr}"
 
         except Exception as e:
-            narrative = f"Failed to generate narrative: {str(e)}"
+            narrative = f"Failed to generate narrative: {e!s}"
 
         processing_time = (time.time() - start_time) * 1000
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import random
+
 import networkx as nx
 
 from ..config import get_settings

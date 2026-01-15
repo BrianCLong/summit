@@ -113,11 +113,15 @@ describe('EntityRepo', () => {
       await entityRepo.create(mockEntityInput, mockUserId);
 
       // Verify outbox event was created
-      const outboxCall = mockPgClient.query.mock.calls.find((call) =>
-        call[0].includes('outbox_events'),
+      const outboxCall = mockPgClient.query.mock.calls.find(
+        (call: any[]) =>
+          typeof call[0] === 'string' &&
+          call[0].includes('outbox_events') &&
+          Array.isArray(call[1]) &&
+          call[1][1] === 'entity.upsert',
       );
       expect(outboxCall).toBeDefined();
-      expect(outboxCall?.[0]).toContain('entity.upsert');
+      expect(outboxCall?.[1]?.[1]).toBe('entity.upsert');
     });
 
     it('should attempt immediate Neo4j write', async () => {
@@ -353,8 +357,12 @@ describe('EntityRepo', () => {
 
       await entityRepo.delete(entityId, tenantId);
 
-      const outboxCall = mockPgClient.query.mock.calls.find((call) =>
-        call[0].includes('entity.delete'),
+      const outboxCall = mockPgClient.query.mock.calls.find(
+        (call: any[]) =>
+          typeof call[0] === 'string' &&
+          call[0].includes('outbox_events') &&
+          Array.isArray(call[1]) &&
+          call[1][1] === 'entity.delete',
       );
       expect(outboxCall).toBeDefined();
     });

@@ -5,14 +5,16 @@ subgraph extracted from Neo4j traversals. It is designed to be executed as a
 standalone CLI (reading JSON from stdin) or imported as a library by the
 Node.js GraphAnomalyService.
 """
+
 from __future__ import annotations
 
 import argparse
 import json
 import sys
+from collections.abc import Iterable
 from dataclasses import dataclass
 from statistics import median
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Any
 
 import numpy as np
 from sklearn.ensemble import IsolationForest
@@ -50,11 +52,11 @@ class GraphAnomalyDetector:
 
     def analyze(
         self,
-        nodes: List[Dict[str, Any]],
-        edges: List[Dict[str, Any]],
+        nodes: list[dict[str, Any]],
+        edges: list[dict[str, Any]],
         *,
         threshold: float | None = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Compute anomaly scores for the provided traversal."""
 
         if not nodes:
@@ -98,7 +100,7 @@ class GraphAnomalyDetector:
         type_median = median(type_values) if type_values else 0.0
         neighbor_median = median(neighbor_values) if neighbor_values else 0.0
 
-        node_results: List[Dict[str, Any]] = []
+        node_results: list[dict[str, Any]] = []
         anomaly_count = 0
 
         for idx, summary in enumerate(summaries):
@@ -148,9 +150,9 @@ class GraphAnomalyDetector:
         return response
 
     def _build_feature_matrix(
-        self, nodes: List[Dict[str, Any]], edges: List[Dict[str, Any]]
-    ) -> Tuple[np.ndarray, List[NodeFeatureSummary]]:
-        adjacency: Dict[str, List[Dict[str, Any]]] = {
+        self, nodes: list[dict[str, Any]], edges: list[dict[str, Any]]
+    ) -> tuple[np.ndarray, list[NodeFeatureSummary]]:
+        adjacency: dict[str, list[dict[str, Any]]] = {
             str(node.get("id")): [] for node in nodes if node.get("id") is not None
         }
 
@@ -165,8 +167,8 @@ class GraphAnomalyDetector:
         degrees = {node_id: len(edges) for node_id, edges in adjacency.items()}
         max_degree = max(degrees.values()) if degrees else 1
 
-        summaries: List[NodeFeatureSummary] = []
-        feature_rows: List[List[float]] = []
+        summaries: list[NodeFeatureSummary] = []
+        feature_rows: list[list[float]] = []
 
         for node in nodes:
             node_id = str(node.get("id"))
@@ -177,7 +179,9 @@ class GraphAnomalyDetector:
 
             neighbor_ids = self._neighbor_ids(node_id, neighbors)
             neighbor_degree_values = [degrees.get(n_id, 0) for n_id in neighbor_ids]
-            neighbor_degree = float(np.mean(neighbor_degree_values)) if neighbor_degree_values else 0.0
+            neighbor_degree = (
+                float(np.mean(neighbor_degree_values)) if neighbor_degree_values else 0.0
+            )
 
             normalized_degree = degree / max_degree if max_degree else 0.0
 
@@ -209,10 +213,10 @@ class GraphAnomalyDetector:
 
     def _heuristic_response(
         self,
-        summaries: List[NodeFeatureSummary],
-        edges: List[Dict[str, Any]],
+        summaries: list[NodeFeatureSummary],
+        edges: list[dict[str, Any]],
         threshold: float | None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if not summaries:
             computed_threshold = threshold if threshold is not None else 0.0
             return {
@@ -228,8 +232,8 @@ class GraphAnomalyDetector:
             }
 
         max_degree = max(summary.degree for summary in summaries) or 1
-        scores: List[float] = []
-        node_results: List[Dict[str, Any]] = []
+        scores: list[float] = []
+        node_results: list[dict[str, Any]] = []
 
         for summary in summaries:
             # Higher score for isolated nodes or very high tag/type variance
@@ -241,7 +245,9 @@ class GraphAnomalyDetector:
             score = float(isolation_bonus + tag_variance + type_variance + (1 - normalized_degree))
             scores.append(score)
 
-        computed_threshold = threshold if threshold is not None else float(np.percentile(scores, 85))
+        computed_threshold = (
+            threshold if threshold is not None else float(np.percentile(scores, 85))
+        )
         anomaly_count = 0
 
         for idx, summary in enumerate(summaries):
@@ -283,9 +289,9 @@ class GraphAnomalyDetector:
     def _neighbor_ids(
         self,
         node_id: str,
-        neighbors: Iterable[Dict[str, Any]],
-    ) -> List[str]:
-        neighbor_ids: List[str] = []
+        neighbors: Iterable[dict[str, Any]],
+    ) -> list[str]:
+        neighbor_ids: list[str] = []
         for edge in neighbors:
             source = str(edge.get("source")) if edge.get("source") is not None else None
             target = str(edge.get("target")) if edge.get("target") is not None else None
@@ -307,7 +313,7 @@ class GraphAnomalyDetector:
         type_median: float,
         neighbor_median: float,
     ) -> str:
-        messages: List[str] = []
+        messages: list[str] = []
 
         if summary.degree <= max(1.0, degree_median / 2):
             messages.append("low degree compared to peers")
@@ -329,7 +335,7 @@ class GraphAnomalyDetector:
         return ", ".join(messages)
 
 
-def run_cli(argv: List[str] | None = None) -> int:
+def run_cli(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Graph traversal anomaly detection")
     parser.add_argument("--threshold", type=float, default=None, help="Score threshold override")
     parser.add_argument(

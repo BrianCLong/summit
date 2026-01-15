@@ -3,10 +3,9 @@ Airflow DAG Generator
 
 Converts unified pipeline manifests into Airflow DAG definitions.
 """
-import textwrap
-from datetime import timedelta
+
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pipelines.registry.core import Pipeline, PipelineRegistry
 
@@ -40,7 +39,7 @@ class AirflowDAGGenerator:
         else:
             return "timedelta(minutes=5)"
 
-    def generate_task_code(self, task: Dict[str, Any], pipeline_name: str) -> str:
+    def generate_task_code(self, task: dict[str, Any], pipeline_name: str) -> str:
         """Generate Airflow task code for a single task."""
         task_id = task["id"]
         task_type = task["type"]
@@ -158,7 +157,9 @@ class AirflowDAGGenerator:
 
         # Schedule
         schedule = pipeline.schedule
-        schedule_interval = f"'{schedule.get('cron')}'" if schedule and schedule.get("cron") else "None"
+        schedule_interval = (
+            f"'{schedule.get('cron')}'" if schedule and schedule.get("cron") else "None"
+        )
         catchup = pipeline.spec.get("execution", {}).get("catchup", False)
 
         # Generate imports
@@ -231,7 +232,7 @@ with dag:
 
         return full_dag
 
-    def generate_all(self, registry: PipelineRegistry) -> Dict[str, Path]:
+    def generate_all(self, registry: PipelineRegistry) -> dict[str, Path]:
         """
         Generate Airflow DAGs for all pipelines in registry.
 
@@ -273,10 +274,13 @@ with dag:
 def main():
     """CLI entry point for DAG generator."""
     import argparse
+
     from pipelines.registry.core import create_registry
 
     parser = argparse.ArgumentParser(description="Generate Airflow DAGs from pipeline manifests")
-    parser.add_argument("--output-dir", default="./airflow/dags", help="Output directory for DAG files")
+    parser.add_argument(
+        "--output-dir", default="./airflow/dags", help="Output directory for DAG files"
+    )
     parser.add_argument("--pipeline", help="Generate DAG for specific pipeline only")
     parser.add_argument("--manifest-dir", help="Pipeline manifest directory")
 

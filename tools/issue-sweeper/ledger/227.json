@@ -1,0 +1,95 @@
+{
+  "issue_number": 227,
+  "title": "NLP: Entity/relation to graph mapping",
+  "url": "https://github.com/BrianCLong/summit/issues/227",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767070,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX03g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/enhancement",
+      "name": "enhancement",
+      "color": "a2eeef",
+      "default": true,
+      "description": "New feature or request"
+    },
+    {
+      "id": 9103342705,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn8cQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/AI",
+      "name": "AI",
+      "color": "bfdadc",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9108055754,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHmyg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/NLP",
+      "name": "NLP",
+      "color": "6f42c1",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:54:01Z",
+  "createdAt": "2025-08-14T04:54:01Z",
+  "classification": "feature",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 10098,
+        "url": "https://github.com/BrianCLong/summit/pull/10098",
+        "mergedAt": "2025-10-14T13:05:14Z",
+        "title": "feat: add legal hold orchestration service"
+      },
+      {
+        "number": 1358,
+        "url": "https://github.com/BrianCLong/summit/pull/1358",
+        "mergedAt": null,
+        "title": "test: expand policy reasoner coverage"
+      },
+      {
+        "number": 1331,
+        "url": "https://github.com/BrianCLong/summit/pull/1331",
+        "mergedAt": "2025-09-23T17:10:18Z",
+        "title": "feat: add crystal orchestration services"
+      },
+      {
+        "number": 10079,
+        "url": "https://github.com/BrianCLong/summit/pull/10079",
+        "mergedAt": null,
+        "title": "[P0][Delta] Fix CI failures - gitleaks, contract-tests, python deps"
+      },
+      {
+        "number": 11919,
+        "url": "https://github.com/BrianCLong/summit/pull/11919",
+        "mergedAt": "2025-11-20T10:05:41Z",
+        "title": "Build Advanced Data Integration and ETL Platform"
+      },
+      {
+        "number": 11894,
+        "url": "https://github.com/BrianCLong/summit/pull/11894",
+        "mergedAt": null,
+        "title": "Build Advanced Attribution and Identity Resolution Platform"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

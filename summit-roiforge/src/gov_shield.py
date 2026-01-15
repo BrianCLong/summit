@@ -1,13 +1,14 @@
 import hashlib
 import time
-from typing import Dict, Any, List
+from typing import Any
+
 
 class GovShield:
     def __init__(self):
         self.audit_log = []
         self.bias_threshold = 0.1
 
-    def scan_for_bias(self, decision_data: Dict[str, Any]) -> Dict[str, Any]:
+    def scan_for_bias(self, decision_data: dict[str, Any]) -> dict[str, Any]:
         """
         Simulates NIST/FICO bias detection.
         """
@@ -24,7 +25,9 @@ class GovShield:
         return {
             "biased": is_biased,
             "bias_score": score,
-            "details": "Potential correlation with protected attribute detected" if is_biased else "Clean"
+            "details": "Potential correlation with protected attribute detected"
+            if is_biased
+            else "Clean",
         }
 
     def encrypt_payload(self, payload: str) -> str:
@@ -41,7 +44,7 @@ class GovShield:
 
         return f"{pqc_tag}:{digest}:{payload}"
 
-    def log_audit_event(self, event_type: str, details: Dict[str, Any]):
+    def log_audit_event(self, event_type: str, details: dict[str, Any]):
         """
         Logs an immutable audit event.
         """
@@ -49,13 +52,14 @@ class GovShield:
             "type": event_type,
             "timestamp": time.time(),
             "details": details,
-            "signature": self.encrypt_payload(str(details)) # Sign with PQC
+            "signature": self.encrypt_payload(str(details)),  # Sign with PQC
         }
         self.audit_log.append(event)
         # In a real system, this would write to WORM storage or a ledger
 
-    def get_audit_trail(self) -> List[Dict[str, Any]]:
+    def get_audit_trail(self) -> list[dict[str, Any]]:
         return self.audit_log
+
 
 if __name__ == "__main__":
     shield = GovShield()

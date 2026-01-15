@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, field
-from typing import Callable, Iterable, List, Optional, Sequence
 
 from .constraints import DenialConstraint
 
@@ -42,12 +42,12 @@ class RESBConfig:
     """
 
     target_column: str
-    minority_class: Optional[object] = None
+    minority_class: object | None = None
     boost_multiplier: float = 1.0
     k_neighbors: int = 5
     epsilon: float = 3.0
     delta: float = 1e-5
-    dp_sensitivity: Optional[dict] = None
+    dp_sensitivity: dict | None = None
     constraints: Sequence[DenialConstraint] = field(default_factory=list)
     precision_target: float = 0.7
     seed: int = 42
@@ -68,4 +68,4 @@ class RESBConfig:
             raise ValueError("max_attempts must be >= 1")
 
 
-ConstraintFactory = Callable[[Iterable[str]], List[DenialConstraint]]
+ConstraintFactory = Callable[[Iterable[str]], list[DenialConstraint]]

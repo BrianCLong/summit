@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { GitOpsSyncValidator, SyncConfig, ResourceState, GitProvider, ClusterProvider } from '../../../lib/deployment/gitops-sync-validator';
 
 describe('GitOpsSyncValidator', () => {

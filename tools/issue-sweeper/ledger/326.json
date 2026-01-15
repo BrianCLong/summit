@@ -1,0 +1,122 @@
+{
+  "issue_number": 326,
+  "title": "Model Drift Detection and Auto-Retraining",
+  "url": "https://github.com/BrianCLong/summit/issues/326",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9121349718,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zAVg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type-feature",
+      "name": "type-feature",
+      "color": "0075ca",
+      "default": false,
+      "description": "Feature development"
+    },
+    {
+      "id": 9121349913,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zBGQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area-AI",
+      "name": "area-AI",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Relates to AI/NLP/ML"
+    },
+    {
+      "id": 9122098427,
+      "node_id": "LA_kwDOPaNncM8AAAACH7gs-w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/sprint-8",
+      "name": "sprint-8",
+      "color": "E17055",
+      "default": false,
+      "description": "Sprint 8: Production-Grade AI & Collaborative Intelligence"
+    },
+    {
+      "id": 9122098625,
+      "node_id": "LA_kwDOPaNncM8AAAACH7gtwQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-ml-integration",
+      "name": "epic-ml-integration",
+      "color": "6C5CE7",
+      "default": false,
+      "description": "Advanced ML model integration"
+    }
+  ],
+  "updatedAt": "2025-08-16T22:17:48Z",
+  "createdAt": "2025-08-16T22:17:48Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1189,
+        "url": "https://github.com/BrianCLong/summit/pull/1189",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump stopword from 2.0.8 to 3.1.4"
+      },
+      {
+        "number": 13184,
+        "url": "https://github.com/BrianCLong/summit/pull/13184",
+        "mergedAt": "2025-12-04T15:39:00Z",
+        "title": "Build promise tracking and production delivery system"
+      },
+      {
+        "number": 11923,
+        "url": "https://github.com/BrianCLong/summit/pull/11923",
+        "mergedAt": "2025-11-20T10:04:27Z",
+        "title": "Build Advanced Visualization and Dashboard System"
+      },
+      {
+        "number": 13192,
+        "url": "https://github.com/BrianCLong/summit/pull/13192",
+        "mergedAt": "2025-12-04T15:38:41Z",
+        "title": "Add HUMINT source management and debrief workflows"
+      },
+      {
+        "number": 1338,
+        "url": "https://github.com/BrianCLong/summit/pull/1338",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/workflows"
+      },
+      {
+        "number": 1337,
+        "url": "https://github.com/BrianCLong/summit/pull/1337",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/docs"
+      },
+      {
+        "number": 1336,
+        "url": "https://github.com/BrianCLong/summit/pull/1336",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/deps"
+      },
+      {
+        "number": 1335,
+        "url": "https://github.com/BrianCLong/summit/pull/1335",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/hardening"
+      },
+      {
+        "number": 1334,
+        "url": "https://github.com/BrianCLong/summit/pull/1334",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/features"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

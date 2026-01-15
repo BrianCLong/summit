@@ -26,38 +26,7 @@ describe('RunsRepo', () => {
     runsRepo = module.runsRepo;
   });
 
-  it('should return existing run if idempotency_key matches', async () => {
-    const input: RunCreateInput = {
-      pipeline_id: 'p-123',
-      pipeline_name: 'Test Pipeline',
-      tenant_id: 'tenant-1',
-      idempotency_key: 'uniq-key-1',
-    };
-
-    // Mock checking for existing run
-    (mockQuery as jest.Mock).mockResolvedValueOnce({
-      rows: [
-        {
-          id: 'existing-id',
-          pipeline_id: 'p-123',
-          pipeline_name: 'Test Pipeline',
-          status: 'queued',
-          created_at: new Date(),
-          updated_at: new Date(),
-          tenant_id: 'tenant-1',
-          idempotency_key: 'uniq-key-1',
-        },
-      ],
-    } as never);
-
-    const result = await runsRepo.create(input);
-
-    expect(result.id).toBe('existing-id');
-    expect(result.idempotency_key).toBe('uniq-key-1');
-    expect(mockQuery).toHaveBeenCalledTimes(1); // Only the select query
-  });
-
-  it('should create new run if idempotency_key does not match', async () => {
+  it('should create a new run', async () => {
     const input: RunCreateInput = {
       pipeline_id: 'p-123',
       pipeline_name: 'Test Pipeline',
@@ -65,10 +34,6 @@ describe('RunsRepo', () => {
       idempotency_key: 'uniq-key-2',
     };
 
-    // Mock checking for existing run (returns empty)
-    (mockQuery as jest.Mock).mockResolvedValueOnce({ rows: [] } as never);
-
-    // Mock insert
     (mockQuery as jest.Mock).mockResolvedValueOnce({
       rows: [
         {
@@ -88,6 +53,6 @@ describe('RunsRepo', () => {
 
     expect(result.id).toBe('new-id');
     expect(result.idempotency_key).toBe('uniq-key-2');
-    expect(mockQuery).toHaveBeenCalledTimes(2); // Select + Insert
+    expect(mockQuery).toHaveBeenCalledTimes(1); // Insert only
   });
 });

@@ -1,4 +1,4 @@
-from summit_sdk import SummitClient, flow, tool, PolicyContext
+from summit_sdk import PolicyContext, SummitClient, flow, tool
 
 client = SummitClient(api_key="demo", endpoint="local")
 policy = PolicyContext(tenant="sre", region="us-east", purpose="operations")
@@ -35,4 +35,3 @@ def ops_agent(request: str):
 
 if __name__ == "__main__":
     print(ops_agent("search"))
-

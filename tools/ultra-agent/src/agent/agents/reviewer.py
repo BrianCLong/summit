@@ -1,5 +1,6 @@
 class ReviewerAgent:
-    def __init__(self, llm): self.llm = llm
+    def __init__(self, llm):
+        self.llm = llm
 
     async def evaluate(self, arch, impl, tests, docs, sys_prompt) -> str:
         prompt = f"""

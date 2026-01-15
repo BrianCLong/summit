@@ -23,10 +23,12 @@ import logger from '../utils/logger.js';
 import { provenanceLedger } from '../provenance/ledger.js';
 import {
   createDataEnvelope,
-  DataEnvelope,
   DataClassification,
-  GovernanceVerdict,
   GovernanceResult,
+} from '../types/data-envelope.js';
+import type {
+  DataEnvelope,
+  GovernanceVerdict,
 } from '../types/data-envelope.js';
 
 // ============================================================================

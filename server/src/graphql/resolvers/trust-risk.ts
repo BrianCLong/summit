@@ -8,8 +8,7 @@ import {
   getTrustScore,
   upsertTrustScore,
   insertRiskSignal,
-} from '../../db/repositories/trustRiskRepo.js';
-import {
+  listRecentSignals,
   listRiskSignalsPaged,
   listTrustScores,
 } from '../../db/repositories/trustRiskRepo.js';
@@ -48,9 +47,7 @@ export const trustRiskResolvers = {
       );
     },
     async riskSignals(_: any, { tenantId, limit, kind, severity }: any) {
-      const rows = await (
-        await import('../../db/repositories/trustRiskRepo.js')
-      ).listRecentSignals(tenantId, undefined, Math.min(limit ?? 50, 100));
+      const rows = await listRecentSignals(tenantId, undefined, Math.min(limit ?? 50, 100));
       return rows
         .filter(
           (r: any) =>

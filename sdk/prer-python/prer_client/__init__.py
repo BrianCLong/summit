@@ -9,13 +9,15 @@ import requests
 @dataclass
 class PrerClient:
     base_url: str
-    default_actor: Optional[str] = None
+    default_actor: str | None = None
     session: requests.Session = requests.Session()
 
     def _url(self, path: str) -> str:
         return f"{self.base_url.rstrip('/')}{path}"
 
-    def create_experiment(self, payload: Dict[str, Any], actor: Optional[str] = None) -> Dict[str, Any]:
+    def create_experiment(
+        self, payload: dict[str, Any], actor: str | None = None
+    ) -> dict[str, Any]:
         resolved_actor = actor or self._require_actor()
         response = self.session.post(
             self._url("/experiments"), json={**payload, "actor": resolved_actor}, timeout=10
@@ -23,7 +25,7 @@ class PrerClient:
         response.raise_for_status()
         return response.json()
 
-    def start_experiment(self, experiment_id: str, actor: Optional[str] = None) -> Dict[str, Any]:
+    def start_experiment(self, experiment_id: str, actor: str | None = None) -> dict[str, Any]:
         resolved_actor = actor or self._require_actor()
         response = self.session.post(
             self._url(f"/experiments/{experiment_id}/start"),
@@ -34,8 +36,8 @@ class PrerClient:
         return response.json()
 
     def ingest_result(
-        self, experiment_id: str, metric: str, variant: str, value: float, actor: Optional[str] = None
-    ) -> Dict[str, Any]:
+        self, experiment_id: str, metric: str, variant: str, value: float, actor: str | None = None
+    ) -> dict[str, Any]:
         resolved_actor = actor or self._require_actor()
         response = self.session.post(
             self._url(f"/experiments/{experiment_id}/results"),
@@ -50,7 +52,9 @@ class PrerClient:
         response.raise_for_status()
         return response.json()
 
-    def export_preregistration(self, experiment_id: str, actor: Optional[str] = None) -> Dict[str, Any]:
+    def export_preregistration(
+        self, experiment_id: str, actor: str | None = None
+    ) -> dict[str, Any]:
         resolved_actor = actor or self._require_actor()
         response = self.session.post(
             self._url(f"/experiments/{experiment_id}/export"),

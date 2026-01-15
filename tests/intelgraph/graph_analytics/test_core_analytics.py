@@ -21,7 +21,6 @@ from core_analytics import (
 
 
 class TestCoreAnalyticsStubs(unittest.TestCase):
-
     def test_shortest_path_implementation(self):
         g = Graph()
         g.add_edge("A", "B")

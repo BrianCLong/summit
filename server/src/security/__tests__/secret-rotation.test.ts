@@ -10,46 +10,13 @@ import {
   resetSecretRotationManager,
 } from '../secret-rotation.js';
 
-// Mock Redis with clearable storage
 const mockRedisStorage = new Map<string, string>();
 const mockRedisSets = new Map<string, Set<string>>();
 
-// Function to clear mock storage between tests
 export function clearMockRedisStorage() {
   mockRedisStorage.clear();
   mockRedisSets.clear();
 }
-
-jest.mock('ioredis', () => {
-  return jest.fn().mockImplementation(() => ({
-    connect: jest.fn().mockResolvedValue(undefined),
-    quit: jest.fn().mockResolvedValue(undefined),
-    ping: jest.fn().mockResolvedValue('PONG'),
-    get: jest.fn((key: string) => Promise.resolve(mockRedisStorage.get(key) || null)),
-    set: jest.fn((key: string, value: string) => {
-      mockRedisStorage.set(key, value);
-      return Promise.resolve('OK');
-    }),
-    del: jest.fn((key: string) => {
-      mockRedisStorage.delete(key);
-      return Promise.resolve(1);
-    }),
-    keys: jest.fn((pattern: string) => {
-      const regex = new RegExp(pattern.replace('*', '.*'));
-      return Promise.resolve(Array.from(mockRedisStorage.keys()).filter(k => regex.test(k)));
-    }),
-    expire: jest.fn().mockResolvedValue(1),
-    sadd: jest.fn((key: string, ...values: string[]) => {
-      if (!mockRedisSets.has(key)) mockRedisSets.set(key, new Set());
-      values.forEach(v => mockRedisSets.get(key)!.add(v));
-      return Promise.resolve(values.length);
-    }),
-    smembers: jest.fn((key: string) => {
-      return Promise.resolve(Array.from(mockRedisSets.get(key) || []));
-    }),
-    on: jest.fn(),
-  }));
-});
 
 describe('SecretRotationManager', () => {
   let manager: SecretRotationManager;
@@ -65,6 +32,42 @@ describe('SecretRotationManager', () => {
       maxVersionsRetained: 3,
       encryptAtRest: true,
     });
+    const resolved = (value: any) => {
+      const fn: any = jest.fn();
+      fn.mockResolvedValue(value);
+      return fn;
+    };
+    const redisMock = {
+      connect: resolved(undefined),
+      quit: resolved(undefined),
+      ping: resolved('PONG'),
+      get: jest.fn((key: string) => Promise.resolve(mockRedisStorage.get(key) || null)),
+      set: jest.fn((key: string, value: string) => {
+        mockRedisStorage.set(key, value);
+        return Promise.resolve('OK');
+      }),
+      del: jest.fn((...keys: string[]) => {
+        let count = 0;
+        keys.forEach((key) => {
+          if (mockRedisStorage.delete(key)) count += 1;
+        });
+        return Promise.resolve(count);
+      }),
+      keys: jest.fn((pattern: string) => {
+        const regex = new RegExp(pattern.replace('*', '.*'));
+        return Promise.resolve(Array.from(mockRedisStorage.keys()).filter(k => regex.test(k)));
+      }),
+      expire: resolved(1),
+      sadd: jest.fn((key: string, ...values: string[]) => {
+        if (!mockRedisSets.has(key)) mockRedisSets.set(key, new Set());
+        values.forEach((v) => mockRedisSets.get(key)!.add(v));
+        return Promise.resolve(values.length);
+      }),
+      smembers: jest.fn((key: string) => {
+        return Promise.resolve(Array.from(mockRedisSets.get(key) || []));
+      }),
+    };
+    (manager as any).redis = redisMock;
     await manager.initialize();
   });
 
@@ -149,7 +152,7 @@ describe('SecretRotationManager', () => {
 
     it('should emit rotation event', async () => {
       const events: any[] = [];
-      manager.on('secret:rotated', (event) => events.push(event));
+      manager.on('secret:rotated', (event: any) => events.push(event));
 
       const original = await manager.registerSecret('api-key', 'event-test', 'value');
       await manager.rotateSecret(original.id, 'scheduled');
@@ -171,7 +174,7 @@ describe('SecretRotationManager', () => {
 
     it('should emit revocation event', async () => {
       const events: any[] = [];
-      manager.on('secret:revoked', (event) => events.push(event));
+      manager.on('secret:revoked', (event: any) => events.push(event));
 
       const secret = await manager.registerSecret('api-key', 'revoke-event', 'value');
       await manager.revokeSecret(secret.id, 'manual');

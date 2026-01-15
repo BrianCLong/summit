@@ -1,0 +1,40 @@
+{
+  "issue_number": 9448,
+  "title": "IG Oct25 | october2025/dirk_ig_q_425_workstream_prompt_sprint_cadence_summit_intel_graph (3).md | `summit-main (1).zip` → `27f925b91197b7354da23bbf09b5c4a9d45803d5d39fca7acd05835",
+  "url": "https://github.com/BrianCLong/summit/issues/9448",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9382634695,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-kxw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/chore",
+      "name": "type/chore",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9382634865,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-lcQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/program/release-train",
+      "name": "program/release-train",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-02T20:52:10Z",
+  "createdAt": "2025-10-02T20:52:10Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

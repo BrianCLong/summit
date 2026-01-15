@@ -1,5 +1,5 @@
-
 from fastapi import APIRouter
+
 from .endpoints import analysis, collectors, entities, reports, scans
 
 api_router = APIRouter()

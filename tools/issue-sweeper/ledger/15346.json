@@ -1,0 +1,38 @@
+{
+  "issue_number": 15346,
+  "title": "Draft patent claims for MCP inventions",
+  "url": "https://github.com/BrianCLong/summit/pull/15346",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9198853862,
+      "node_id": "LA_kwDOPaNncM8AAAACJEte5g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%204/5",
+      "name": "Review effort 4/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2026-01-01T09:53:12Z",
+  "createdAt": "2026-01-01T09:24:27Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15346,
+        "url": "https://github.com/BrianCLong/summit/pull/15346",
+        "mergedAt": "2026-01-01T09:53:10Z",
+        "title": "Draft patent claims for MCP inventions"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

@@ -37,16 +37,16 @@ No later stage may contradict an earlier stage without explicit arbitration.
 
 For each agent stage:
 
-* Define expected inputs
-* Define required outputs
-* Validate completeness
-* Reject partial or vague results
+- Define expected inputs
+- Define required outputs
+- Validate completeness
+- Reject partial or vague results
 
 If an agent output:
 
-* Contains unresolved conflicts
-* Contains non-actionable guidance
-* Leaves gaps in coverage
+- Contains unresolved conflicts
+- Contains non-actionable guidance
+- Leaves gaps in coverage
 
 → You must send it back for correction before proceeding.
 
@@ -56,14 +56,14 @@ If an agent output:
 
 As agents complete, assemble a **single canonical UX package**, including:
 
-* Final UX doctrine (authoritative)
-* Ordered UX backlog (P0–P3)
-* Accepted design patterns
-* Prohibited patterns
-* Accessibility baseline
-* Language & terminology rules
-* Trust and error-handling standards
-* Power-user vs novice contract
+- Final UX doctrine (authoritative)
+- Ordered UX backlog (P0–P3)
+- Accepted design patterns
+- Prohibited patterns
+- Accessibility baseline
+- Language & terminology rules
+- Trust and error-handling standards
+- Power-user vs novice contract
 
 There must be **exactly one source of truth**.
 
@@ -73,16 +73,16 @@ There must be **exactly one source of truth**.
 
 Translate the canonical UX package into:
 
-* Concrete engineering tasks
-* PR-sized work units
-* Ownership assignments
-* Acceptance criteria per task
+- Concrete engineering tasks
+- PR-sized work units
+- Ownership assignments
+- Acceptance criteria per task
 
 Ensure:
 
-* No UX item is unowned
-* No task lacks validation criteria
-* No ambiguity remains for implementers
+- No UX item is unowned
+- No task lacks validation criteria
+- No ambiguity remains for implementers
 
 ---
 
@@ -90,11 +90,11 @@ Ensure:
 
 Before declaring completion, verify:
 
-* All P0 UX issues are addressed
-* CI UX gates are defined
-* Regression prevention exists
-* Reviewers know what to enforce
-* Executives can understand the outcome
+- All P0 UX issues are addressed
+- CI UX gates are defined
+- Regression prevention exists
+- Reviewers know what to enforce
+- Executives can understand the outcome
 
 If validation fails, loop back to the appropriate agent.
 
@@ -121,18 +121,18 @@ Nothing ships without these artifacts.
 
 ## 7. Operating Rules
 
-* No parallel opinions at the end
-* No unresolved conflicts
-* No subjective decisions without rationale
-* No UX work without enforcement
-* No enforcement without ownership
+- No parallel opinions at the end
+- No unresolved conflicts
+- No subjective decisions without rationale
+- No UX work without enforcement
+- No enforcement without ownership
 
 You are accountable for **finishing the system**, not just improving it.
 
 Proceed until UX is:
 
-* Coherent
-* Trustworthy
-* Enforceable
-* Regression-resistant
-* Release-ready
+- Coherent
+- Trustworthy
+- Enforceable
+- Regression-resistant
+- Release-ready

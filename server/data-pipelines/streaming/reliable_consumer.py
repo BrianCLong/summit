@@ -90,7 +90,6 @@ class ReliableKafkaConsumer:
     """
 
     def __init__(self, config: ConsumerConfig, message_processor: Callable[[dict[str, Any]], bool]):
-
         if not KAFKA_AVAILABLE:
             raise ImportError(
                 "aiokafka is required for Kafka consumer. Install with: pip install aiokafka"
@@ -375,7 +374,7 @@ class ReliableKafkaConsumer:
             )
             return result if isinstance(result, bool) else True
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self.logger.warning(
                 f"Message processing timed out after {self.config.processing_timeout_seconds}s"
             )

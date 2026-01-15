@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import json
-from typing import Optional, Tuple
 
 from .models import GoldenCase
 
 
-def classify_failure(case: GoldenCase, response: str) -> Tuple[bool, Optional[str]]:
+def classify_failure(case: GoldenCase, response: str) -> tuple[bool, str | None]:
     """Return whether the response passes and the taxonomy label if it fails."""
 
     expected = case.expected_response.strip()

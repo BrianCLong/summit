@@ -55,8 +55,8 @@ function AnalystConsoleInner({
 
   // Calculate visible counts for header badges
   const visibleCounts = useMemo(() => {
-    const fromTime = new Date(state.timeWindow.from).getTime()
-    const toTime = new Date(state.timeWindow.to).getTime()
+    const fromTime = state.timeWindow.startMs
+    const toTime = state.timeWindow.endMs
 
     // Filter events by time window
     const visibleEvents = events.filter(event => {
@@ -405,8 +405,10 @@ export function AnalystConsole({
       return {
         ...defaultState,
         timeWindow: {
-          from: new Date(minTime - padding).toISOString(),
-          to: new Date(maxTime + padding).toISOString(),
+          startMs: minTime - padding,
+          endMs: maxTime + padding,
+          granularity: 'minute',
+          tzMode: 'UTC',
         },
       }
     }

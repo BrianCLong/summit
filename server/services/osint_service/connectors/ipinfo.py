@@ -1,10 +1,12 @@
 import os
+
 import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
 IPINFO_API_KEY = os.getenv("IPINFO_API_KEY")
+
 
 def get_ip_info(ip_address: str):
     """

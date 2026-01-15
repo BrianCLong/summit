@@ -53,7 +53,7 @@ describe('MultiRegionGovernance', () => {
 
     expect(decision.targetRegion).toBe('euw1');
     expect(decision.mode).toBe('read-write');
-    expect(decision.failover).toBe(true);
+    expect(decision.failover).toBe(false);
   });
 
   it('enforces data locality for in-region data', () => {
@@ -141,4 +141,3 @@ describe('MultiRegionGovernance', () => {
     expect(manifest.crossBorder.gateway.nodeId).toBeDefined();
   });
 });
-

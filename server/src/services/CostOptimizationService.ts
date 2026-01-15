@@ -48,7 +48,7 @@ interface OptimizationResult {
   error?: string;
 }
 
-enum OptimizationType {
+export enum OptimizationType {
   DATABASE_CONNECTION_POOLING = 'db_connection_pooling',
   QUERY_OPTIMIZATION = 'query_optimization',
   DATA_ARCHIVING = 'data_archiving',
@@ -61,13 +61,13 @@ enum OptimizationType {
   RETENTION_POLICY_TUNING = 'retention_policy_tuning',
 }
 
-enum ImplementationEffort {
+export enum ImplementationEffort {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
 }
 
-enum RiskLevel {
+export enum RiskLevel {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',

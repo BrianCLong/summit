@@ -1,7 +1,7 @@
-from typing import Dict, Any
+from typing import Any
 
 
-def explain_merge(features: Dict[str, Any]) -> Dict[str, Any]:
+def explain_merge(features: dict[str, Any]) -> dict[str, Any]:
     """Counterfactual: minimum feature edit to flip decision."""
     # Example: reduce name_distance by 0.12 OR add co-occurrence@t±1d
     return {

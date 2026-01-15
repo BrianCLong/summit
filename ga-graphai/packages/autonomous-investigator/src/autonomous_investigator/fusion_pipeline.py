@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from collections.abc import Iterable as IterableABC
 from collections.abc import Mapping as MappingABC
 from dataclasses import dataclass, field
 from itertools import combinations
 from statistics import mean
-from typing import Any, Callable, Iterable, Literal, Mapping, Sequence
+from typing import Any, Literal
 
 Domain = Literal["osint", "finintel", "cyber"]
 
@@ -97,9 +98,9 @@ class IntelligenceFusionPipeline:
     def _enrich_entities(self) -> list[FusionEntity]:
         enriched: list[FusionEntity] = []
         for entity in self.entities.values():
-            provider = self.enrichment_providers.get(entity.domain) or self.enrichment_providers.get(
-                entity.entity_type
-            )
+            provider = self.enrichment_providers.get(
+                entity.domain
+            ) or self.enrichment_providers.get(entity.entity_type)
             if provider:
                 updates = provider(entity)
                 if updates:
@@ -218,9 +219,7 @@ class IntelligenceFusionPipeline:
             if first_values.get(key, set()) & second_values.get(key, set())
         }
 
-    def _normalized_values(
-        self, entity: FusionEntity, keys: set[str]
-    ) -> dict[str, set[str]]:
+    def _normalized_values(self, entity: FusionEntity, keys: set[str]) -> dict[str, set[str]]:
         normalized: dict[str, set[str]] = {}
         for key in keys:
             raw_value = entity.attributes.get(key)
@@ -249,9 +248,7 @@ class IntelligenceFusionPipeline:
         score = base_confidence * (0.6 + coverage) + chain_bonus
         return round(_clamp(score, 0.0, 1.0), 4)
 
-    def _build_rationale(
-        self, first: FusionEntity, second: FusionEntity, shared: set[str]
-    ) -> str:
+    def _build_rationale(self, first: FusionEntity, second: FusionEntity, shared: set[str]) -> str:
         attributes_text = ", ".join(sorted(shared))
         return (
             f"Correlated {first.entity_type} ({first.domain}) with {second.entity_type} "

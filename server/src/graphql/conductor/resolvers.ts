@@ -1,5 +1,6 @@
 import { getPostgresPool } from '../../db/postgres.js';
 import { approvalProgress } from '../../conductor/approvals.js';
+import { evaluatePolicyAction } from '../../middleware/policy-action-gate.js';
 
 export const conductorResolvers = {
   Mutation: {
@@ -8,6 +9,26 @@ export const conductorResolvers = {
       { runId, stepId, justification }: any,
       ctx: any,
     ) => {
+      const decision = await evaluatePolicyAction({
+        action: 'approve_step',
+        resource: 'maestro_run',
+        tenantId: ctx?.user?.tenantId || ctx?.user?.tenant_id || 'unknown',
+        userId: ctx?.user?.id || ctx?.user?.email,
+        role: ctx?.user?.role || 'user',
+        resourceAttributes: { runId, stepId },
+        subjectAttributes: ctx?.user?.attributes || {},
+        sessionContext: {
+          ipAddress: ctx?.req?.ip,
+          userAgent: ctx?.req?.get?.('User-Agent'),
+          timestamp: Date.now(),
+          sessionId: ctx?.req?.sessionID,
+        },
+      });
+
+      if (!decision.allow) {
+        throw new Error(`Forbidden: ${decision.reason || 'policy_denied'}`);
+      }
+
       const pool = getPostgresPool();
       const userId = ctx?.user?.id || ctx?.user?.email || 'unknown';
       // Record decision in approvals table

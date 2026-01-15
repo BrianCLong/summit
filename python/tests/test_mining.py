@@ -1,9 +1,10 @@
-import pytest
 import logging
+
 from intelgraph_py.services.mining_service import MiningService
 
 # Configure logging to see output
 logging.basicConfig(level=logging.INFO)
+
 
 def test_mining_pipeline_end_to_end():
     """
@@ -43,8 +44,9 @@ def test_mining_pipeline_end_to_end():
     # Check if we found ANY relationship between Elon Musk and SpaceX
     found_rel = False
     for rel in relationships:
-        if ("Elon Musk" in rel["source"] and "SpaceX" in rel["target"]) or \
-           ("SpaceX" in rel["source"] and "Elon Musk" in rel["target"]):
+        if ("Elon Musk" in rel["source"] and "SpaceX" in rel["target"]) or (
+            "SpaceX" in rel["source"] and "Elon Musk" in rel["target"]
+        ):
             found_rel = True
             break
 
@@ -52,9 +54,12 @@ def test_mining_pipeline_end_to_end():
     # unless we are sure the model is deterministic and capable.
     # But for this simple sentence, it should work.
     if not found_rel:
-        logging.warning("No relationship found between Elon Musk and SpaceX. This might be due to model limitations.")
+        logging.warning(
+            "No relationship found between Elon Musk and SpaceX. This might be due to model limitations."
+        )
     else:
         assert found_rel
+
 
 def test_entity_resolution_logic():
     from intelgraph_py.ml.resolution import EntityResolver
@@ -64,7 +69,7 @@ def test_entity_resolution_logic():
     entities = [
         {"text": "Apple Inc.", "label": "ORG", "confidence": 0.99, "start": 0, "end": 10},
         {"text": "Apple", "label": "ORG", "confidence": 0.90, "start": 20, "end": 25},
-        {"text": "Microsoft", "label": "ORG", "confidence": 0.95, "start": 30, "end": 39}
+        {"text": "Microsoft", "label": "ORG", "confidence": 0.95, "start": 30, "end": 39},
     ]
 
     resolved = resolver.cluster_entities(entities)

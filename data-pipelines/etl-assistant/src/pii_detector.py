@@ -14,6 +14,7 @@ from typing import Any
 
 class PIICategory(Enum):
     """PII categories aligned with GDPR and privacy regulations."""
+
     SSN = "ssn"  # Social Security Number
     EMAIL = "email"
     PHONE = "phone"
@@ -33,6 +34,7 @@ class PIICategory(Enum):
 
 class PIISeverity(Enum):
     """Severity levels for PII exposure risk."""
+
     NONE = "none"
     LOW = "low"
     MEDIUM = "medium"
@@ -42,6 +44,7 @@ class PIISeverity(Enum):
 
 class RedactionStrategy(Enum):
     """Recommended redaction strategies."""
+
     NONE = "none"
     MASK = "mask"  # Partial masking (e.g., ***-**-1234)
     HASH = "hash"  # One-way hash for matching
@@ -53,6 +56,7 @@ class RedactionStrategy(Enum):
 @dataclass
 class PIIMatch:
     """A detected PII instance."""
+
     category: PIICategory
     severity: PIISeverity
     field_name: str
@@ -66,6 +70,7 @@ class PIIMatch:
 @dataclass
 class PIIScanResult:
     """Result of PII scan on a dataset."""
+
     pii_matches: list[PIIMatch]
     overall_risk: PIISeverity
     summary: str
@@ -179,14 +184,10 @@ class PIIDetector:
             requires_dpia=requires_dpia,
         )
 
-    def _scan_field(
-        self, field_name: str, rows: list[dict[str, Any]]
-    ) -> PIIMatch | None:
+    def _scan_field(self, field_name: str, rows: list[dict[str, Any]]) -> PIIMatch | None:
         """Scan a single field for PII."""
         values = [row.get(field_name) for row in rows]
-        non_null_values = [
-            str(v) for v in values if v is not None and v != ""
-        ]
+        non_null_values = [str(v) for v in values if v is not None and v != ""]
 
         if not non_null_values:
             return None
@@ -292,9 +293,7 @@ class PIIDetector:
                 return f"{value[:2]}...{value[-2:]}"
             return "****"
 
-    def _calculate_overall_risk(
-        self, pii_matches: list[PIIMatch]
-    ) -> PIISeverity:
+    def _calculate_overall_risk(self, pii_matches: list[PIIMatch]) -> PIISeverity:
         """Calculate overall risk level from PII matches."""
         if not pii_matches:
             return PIISeverity.NONE
@@ -334,9 +333,7 @@ class PIIDetector:
             PIICategory.BIOMETRIC,
         }
 
-        has_critical = any(
-            match.category in critical_categories for match in pii_matches
-        )
+        has_critical = any(match.category in critical_categories for match in pii_matches)
 
         # Count unique PII types
         unique_types = len(set(match.category for match in pii_matches))
@@ -344,9 +341,7 @@ class PIIDetector:
         # DPIA required if critical PII or 3+ types
         return has_critical or unique_types >= 3
 
-    def _generate_summary(
-        self, pii_matches: list[PIIMatch], overall_risk: PIISeverity
-    ) -> str:
+    def _generate_summary(self, pii_matches: list[PIIMatch], overall_risk: PIISeverity) -> str:
         """Generate human-readable summary."""
         if not pii_matches:
             return "No PII detected in sample data"

@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Static agent inventory scanner for Summit."""
+
 from __future__ import annotations
 
 import argparse
 import json
 import re
-from dataclasses import dataclass, field, asdict
+from collections.abc import Iterable, Sequence
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Dict, Iterable, List, Sequence
 
 DEFAULT_SCAN_PATHS: Sequence[str] = (
     "services",
@@ -57,14 +58,14 @@ class AgentFinding:
     name: str
     path: str
     interface: str
-    triggers: List[str] = field(default_factory=list)
-    permissions: List[str] = field(default_factory=list)
-    data_domains: List[str] = field(default_factory=list)
-    secrets: List[str] = field(default_factory=list)
+    triggers: list[str] = field(default_factory=list)
+    permissions: list[str] = field(default_factory=list)
+    data_domains: list[str] = field(default_factory=list)
+    secrets: list[str] = field(default_factory=list)
     risk_score: int = 1
-    notes: List[str] = field(default_factory=list)
+    notes: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         payload = asdict(self)
         payload["risk_score"] = int(self.risk_score)
         return payload
@@ -75,7 +76,7 @@ class AgentScanner:
         self.root = root
         self.paths = self._resolve_paths(extra_paths)
 
-    def _resolve_paths(self, extra_paths: Iterable[Path] | None) -> List[Path]:
+    def _resolve_paths(self, extra_paths: Iterable[Path] | None) -> list[Path]:
         paths = [self.root / path for path in DEFAULT_SCAN_PATHS]
         if extra_paths:
             paths.extend(extra_paths)
@@ -84,8 +85,8 @@ class AgentScanner:
             return [self.root]
         return existing
 
-    def scan(self) -> List[AgentFinding]:
-        findings: List[AgentFinding] = []
+    def scan(self) -> list[AgentFinding]:
+        findings: list[AgentFinding] = []
         for path in self.paths:
             for file_path in path.rglob("*"):
                 if not file_path.is_file():
@@ -106,7 +107,10 @@ class AgentScanner:
         data_domains = self._detect_data_domains(content)
         secrets = self._detect_secrets(content)
 
-        if not any((triggers, permissions, data_domains, secrets)) and "agent" not in content.lower():
+        if (
+            not any((triggers, permissions, data_domains, secrets))
+            and "agent" not in content.lower()
+        ):
             return None
 
         name = self._detect_name(file_path, content)
@@ -146,7 +150,7 @@ class AgentScanner:
             return "service"
         return "unspecified"
 
-    def _detect_triggers(self, content: str) -> List[str]:
+    def _detect_triggers(self, content: str) -> list[str]:
         triggers = []
         lower = content.lower()
         if "pull_request" in lower:
@@ -157,7 +161,7 @@ class AgentScanner:
             triggers.append("schedule")
         return sorted(set(triggers))
 
-    def _detect_permissions(self, content: str) -> List[str]:
+    def _detect_permissions(self, content: str) -> list[str]:
         matches = re.findall(r"permissions?:\s*([\w:-]+)", content, flags=re.IGNORECASE)
         perms = set(matches)
         for hint in WRITE_PRIVILEGE_HINTS:
@@ -165,12 +169,12 @@ class AgentScanner:
                 perms.add(hint)
         return sorted(perms)
 
-    def _detect_data_domains(self, content: str) -> List[str]:
+    def _detect_data_domains(self, content: str) -> list[str]:
         lower = content.lower()
         domains = {label for key, label in DATA_DOMAIN_HINTS.items() if key in lower}
         return sorted(domains)
 
-    def _detect_secrets(self, content: str) -> List[str]:
+    def _detect_secrets(self, content: str) -> list[str]:
         secrets = []
         for pattern in SECRET_PATTERNS:
             if pattern.search(content):
@@ -179,13 +183,13 @@ class AgentScanner:
 
     def _score_risk(
         self,
-        permissions: List[str],
-        secrets: List[str],
-        data_domains: List[str],
-        triggers: List[str],
-    ) -> tuple[int, List[str]]:
+        permissions: list[str],
+        secrets: list[str],
+        data_domains: list[str],
+        triggers: list[str],
+    ) -> tuple[int, list[str]]:
         score = 1
-        notes: List[str] = []
+        notes: list[str] = []
 
         if secrets:
             score += 3
@@ -226,8 +230,13 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def render_markdown(findings: List[AgentFinding]) -> str:
-    lines = ["# Agent Inventory Summary", "", "| Name | Path | Interface | Risk | Notes |", "| --- | --- | --- | --- | --- |"]
+def render_markdown(findings: list[AgentFinding]) -> str:
+    lines = [
+        "# Agent Inventory Summary",
+        "",
+        "| Name | Path | Interface | Risk | Notes |",
+        "| --- | --- | --- | --- | --- |",
+    ]
     for finding in findings:
         notes = "; ".join(finding.notes) or ""
         lines.append(

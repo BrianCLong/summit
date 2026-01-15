@@ -9,6 +9,10 @@ import { Queue, Worker, QueueEvents } from 'bullmq';
 import { logger } from '../utils/logger';
 import { coordinationService } from './coordination/service';
 import * as crypto from 'node:crypto';
+import {
+  TransitionReceiptInput,
+  emitTransitionReceipt,
+} from './evidence/transition-receipts.js';
 
 // Interface for dependencies
 interface MaestroDependencies {
@@ -146,6 +150,26 @@ export class MaestroEngine {
       client.release();
     }
 
+    await this.emitReceiptSafely({
+      runId,
+      tenantId,
+      actor: {
+        id: principalId,
+        principal_type: 'user',
+      },
+      action: 'maestro.run.create',
+      resource: {
+        id: runId,
+        type: 'maestro.run',
+        attributes: {
+          templateId,
+          templateVersion: template.version,
+          status: run.status,
+        },
+      },
+      result: { status: 'success' },
+    });
+
     // 6. Enqueue Ready Tasks
     await this.dispatchReadyTasks(runId);
 
@@ -174,6 +198,22 @@ export class MaestroEngine {
         `UPDATE maestro_tasks SET status = 'queued' WHERE id = $1`,
         [row.id]
       );
+
+      await this.emitReceiptSafely({
+        runId: row.run_id,
+        tenantId: row.tenant_id,
+        actor: { id: 'maestro-engine', principal_type: 'system' },
+        action: 'maestro.task.queued',
+        resource: {
+          id: row.id,
+          type: 'maestro.task',
+          attributes: {
+            kind: row.kind,
+            status: 'queued',
+          },
+        },
+        result: { status: 'success' },
+      });
     }
   }
 
@@ -195,6 +235,22 @@ export class MaestroEngine {
       `UPDATE maestro_tasks SET status = 'running', started_at = NOW(), attempt = attempt + 1 WHERE id = $1`,
       [taskId]
     );
+
+    await this.emitReceiptSafely({
+      runId,
+      tenantId,
+      actor: { id: 'maestro-engine', principal_type: 'system' },
+      action: 'maestro.task.started',
+      resource: {
+        id: taskId,
+        type: 'maestro.task',
+        attributes: {
+          kind: task.kind,
+          status: 'running',
+        },
+      },
+      result: { status: 'success' },
+    });
 
     try {
       // 2.5 Check Coordination Constraints (Budget, Kill-Switch)
@@ -235,6 +291,22 @@ export class MaestroEngine {
         [taskId, result]
       );
 
+      await this.emitReceiptSafely({
+        runId,
+        tenantId,
+        actor: { id: 'maestro-engine', principal_type: 'system' },
+        action: 'maestro.task.succeeded',
+        resource: {
+          id: taskId,
+          type: 'maestro.task',
+          attributes: {
+            kind: task.kind,
+            status: 'succeeded',
+          },
+        },
+        result: { status: 'success' },
+      });
+
       // 5. Trigger Dependents
       await this.evaluateDependents(taskId, runId);
 
@@ -245,6 +317,22 @@ export class MaestroEngine {
         `UPDATE maestro_tasks SET status = 'failed', error = $2, completed_at = NOW() WHERE id = $1`,
         [taskId, err.message]
       );
+
+      await this.emitReceiptSafely({
+        runId,
+        tenantId,
+        actor: { id: 'maestro-engine', principal_type: 'system' },
+        action: 'maestro.task.failed',
+        resource: {
+          id: taskId,
+          type: 'maestro.task',
+          attributes: {
+            kind: task.kind,
+            status: 'failed',
+          },
+        },
+        result: { status: 'failure', details: err.message },
+      });
 
       // Fail run if critical?
       // For now just mark task failed.
@@ -321,6 +409,26 @@ export class MaestroEngine {
         [runId, finalStatus]
       );
 
+      const tenantRes = await this.db.query(
+        `SELECT tenant_id FROM maestro_runs WHERE id = $1`,
+        [runId],
+      );
+
+      await this.emitReceiptSafely({
+        runId,
+        tenantId: tenantRes.rows?.[0]?.tenant_id || 'unknown',
+        actor: { id: 'maestro-engine', principal_type: 'system' },
+        action: 'maestro.run.completed',
+        resource: {
+          id: runId,
+          type: 'maestro.run',
+          attributes: {
+            status: finalStatus,
+          },
+        },
+        result: { status: finalStatus === 'failed' ? 'failure' : 'success' },
+      });
+
       logger.info(`Run ${runId} completed with status ${finalStatus}`);
     }
   }
@@ -333,6 +441,19 @@ export class MaestroEngine {
     this.queueEvents.on('failed', ({ jobId, failedReason }: any) => {
       logger.error(`Job ${jobId} failed: ${failedReason}`);
     });
+  }
+
+  private async emitReceiptSafely(input: TransitionReceiptInput) {
+    try {
+      await emitTransitionReceipt(input);
+    } catch (error: any) {
+      logger.error('Governed Exception: receipt emission failed', {
+        action: input.action,
+        runId: input.runId,
+        resourceId: input.resource.id,
+        error: error.message,
+      });
+    }
   }
 
   async shutdown() {

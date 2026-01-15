@@ -43,14 +43,13 @@ export function GraphPane({
     }
 
     // Filter by time window - only include entities involved in events within the window
-    const fromTime = new Date(timeWindow.from).getTime()
-    const toTime = new Date(timeWindow.to).getTime()
+    const { startMs, endMs } = timeWindow
 
     const entityIdsInTimeWindow = new Set(
       events
         .filter(event => {
           const eventTime = new Date(event.timestamp).getTime()
-          return eventTime >= fromTime && eventTime <= toTime
+          return eventTime >= startMs && eventTime <= endMs
         })
         .flatMap(event => event.entityIds)
     )

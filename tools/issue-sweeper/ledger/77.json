@@ -1,0 +1,179 @@
+{
+  "issue_number": 77,
+  "title": "Bootstrap Basic GraphQL Schema and Resolvers",
+  "url": "https://github.com/BrianCLong/summit/issues/77",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-11-20T11:02:02Z",
+  "createdAt": "2025-08-12T04:40:11Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15249,
+        "url": "https://github.com/BrianCLong/summit/pull/15249",
+        "mergedAt": null,
+        "title": "Add phased roadmap for items 60-95"
+      },
+      {
+        "number": 15310,
+        "url": "https://github.com/BrianCLong/summit/pull/15310",
+        "mergedAt": "2026-01-01T11:39:41Z",
+        "title": "feat: Implement Information Supply Chain Doctrine and Artifacts"
+      },
+      {
+        "number": 11961,
+        "url": "https://github.com/BrianCLong/summit/pull/11961",
+        "mergedAt": "2025-11-20T11:02:01Z",
+        "title": "Build Data Warehouse and Analytics Platform"
+      },
+      {
+        "number": 12048,
+        "url": "https://github.com/BrianCLong/summit/pull/12048",
+        "mergedAt": "2025-11-21T03:59:12Z",
+        "title": "Update and secure project dependencies"
+      },
+      {
+        "number": 13047,
+        "url": "https://github.com/BrianCLong/summit/pull/13047",
+        "mergedAt": "2025-12-17T21:27:44Z",
+        "title": "Data Governance Authority Implementation"
+      },
+      {
+        "number": 15325,
+        "url": "https://github.com/BrianCLong/summit/pull/15325",
+        "mergedAt": null,
+        "title": "feat: add doctrine spine and enforcement guardrails"
+      },
+      {
+        "number": 10090,
+        "url": "https://github.com/BrianCLong/summit/pull/10090",
+        "mergedAt": null,
+        "title": "feat(policy): add governance sandbox framework"
+      },
+      {
+        "number": 15179,
+        "url": "https://github.com/BrianCLong/summit/pull/15179",
+        "mergedAt": "2025-12-31T14:21:16Z",
+        "title": "chore(deps): bump notify from 6.1.1 to 8.2.0"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 10130,
+        "url": "https://github.com/BrianCLong/summit/pull/10130",
+        "mergedAt": "2025-10-14T08:36:34Z",
+        "title": "feat: introduce synthetic event booster framework"
+      },
+      {
+        "number": 10129,
+        "url": "https://github.com/BrianCLong/summit/pull/10129",
+        "mergedAt": null,
+        "title": "feat: add cross-database migration rollback engine"
+      },
+      {
+        "number": 1339,
+        "url": "https://github.com/BrianCLong/summit/pull/1339",
+        "mergedAt": "2025-09-23T11:13:29Z",
+        "title": "Add policy-aware workcell runtime and gateway integration"
+      },
+      {
+        "number": 1332,
+        "url": "https://github.com/BrianCLong/summit/pull/1332",
+        "mergedAt": "2025-09-23T06:25:42Z",
+        "title": "feat: deliver universal ai fabric slice"
+      },
+      {
+        "number": 10127,
+        "url": "https://github.com/BrianCLong/summit/pull/10127",
+        "mergedAt": "2025-10-17T01:51:15Z",
+        "title": "feat: add Liquid Nano pilot bundle"
+      },
+      {
+        "number": 1278,
+        "url": "https://github.com/BrianCLong/summit/pull/1278",
+        "mergedAt": "2025-09-19T02:28:07Z",
+        "title": "feat: Sprint 25 Day-1 Deliverables"
+      },
+      {
+        "number": 11927,
+        "url": "https://github.com/BrianCLong/summit/pull/11927",
+        "mergedAt": null,
+        "title": "Build workflow orchestration and task scheduling"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      },
+      {
+        "number": 1283,
+        "url": "https://github.com/BrianCLong/summit/pull/1283",
+        "mergedAt": null,
+        "title": "feat: Maestro vNext - Complete AI-Augmented CI/CD Platform"
+      },
+      {
+        "number": 1280,
+        "url": "https://github.com/BrianCLong/summit/pull/1280",
+        "mergedAt": "2025-09-18T05:21:24Z",
+        "title": "feat(ga): CI/ops hardening (conflict-free from ga-core)"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

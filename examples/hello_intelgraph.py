@@ -1,5 +1,6 @@
 from intelgraph.sdk import IntelGraphClient
 
+
 def main():
     print("Initializing IntelGraphClient...")
     client = IntelGraphClient()
@@ -14,6 +15,7 @@ def main():
         print("Success!")
     else:
         print("Failed.")
+
 
 if __name__ == "__main__":
     main()

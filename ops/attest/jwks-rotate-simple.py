@@ -102,7 +102,7 @@ class SimpleJWKSManager:
             # Create sample JWS payload
             sample_payload = {
                 "requestId": f"req_{int(datetime.utcnow().timestamp() * 1000)}_{i}",
-                "tenantId": f"TENANT_00{i+1}",
+                "tenantId": f"TENANT_00{i + 1}",
                 "timestamp": datetime.utcnow().isoformat() + "Z",
                 "inputHash": hashlib.sha256(f"sample_input_{i}".encode()).hexdigest()[:16],
                 "outputHash": hashlib.sha256(f"sample_output_{i}".encode()).hexdigest()[:16],
@@ -125,7 +125,7 @@ class SimpleJWKSManager:
             mock_token = f"{header_b64}.{payload_b64}.{mock_signature}"
 
             sample = {
-                "sample_id": f"sample_{i+1}_{key['key_id']}",
+                "sample_id": f"sample_{i + 1}_{key['key_id']}",
                 "kid": key["key_id"],
                 "mock_token": mock_token,
                 "payload_claims": sample_payload,

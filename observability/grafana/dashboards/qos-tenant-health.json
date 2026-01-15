@@ -41,6 +41,61 @@
           ]
         }
       ]
+    },
+    {
+      "title": "Tenant Cost (24h)",
+      "type": "table",
+      "datasource": "DS_PROMETHEUS",
+      "targets": [
+        {
+          "expr": "sum by (tenant) (tenant:cost_usd_24h)",
+          "legendFormat": "{{tenant}}"
+        }
+      ]
+    },
+    {
+      "title": "Quota Breaches (15m)",
+      "type": "table",
+      "datasource": "DS_PROMETHEUS",
+      "targets": [
+        {
+          "expr": "sum by (tenant, quota_type) (increase(tenant_quota_breach_total[15m]))",
+          "legendFormat": "{{tenant}}/{{quota_type}}"
+        }
+      ]
+    },
+    {
+      "title": "Tenant Ramp State",
+      "type": "table",
+      "datasource": "DS_PROMETHEUS",
+      "targets": [
+        {
+          "expr": "max by (tenant, state) (tenant:ramp_state)",
+          "legendFormat": "{{tenant}}/{{state}}"
+        }
+      ]
+    },
+    {
+      "title": "Purge Queue Depth",
+      "type": "table",
+      "datasource": "DS_PROMETHEUS",
+      "targets": [
+        {
+          "expr": "max by (tenant, queue) (tenant:purge_queue_depth)",
+          "legendFormat": "{{tenant}}/{{queue}}"
+        }
+      ]
+    },
+    {
+      "title": "Restore Freshness (hours)",
+      "type": "table",
+      "datasource": "DS_PROMETHEUS",
+      "targets": [
+        {
+          "expr": "max by (tenant) (tenant:restore_freshness_seconds) / 3600",
+          "legendFormat": "{{tenant}}"
+        }
+      ]
     }
   ]
 }

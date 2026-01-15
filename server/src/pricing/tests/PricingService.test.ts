@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { PricingService, PLANS } from '../PricingService';
 import { Quote } from '../types';
 

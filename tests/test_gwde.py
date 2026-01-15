@@ -1,4 +1,3 @@
-import math
 import sys
 from pathlib import Path
 
@@ -83,4 +82,3 @@ def test_roc_generator_reports_auc_above_threshold(rng):
     roc_points = roc.generate_roc(scores, labels, steps=51)
     auc_value = roc.auc(roc_points)
     assert auc_value > 0.88
-

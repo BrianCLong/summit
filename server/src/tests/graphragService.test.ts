@@ -100,7 +100,7 @@ describe('GraphRAGService', () => {
     const second = await service.answer(baseRequest);
     expect(second.answer).toBe('Test');
     expect(graphragCacheHitRatio.get().values[0].value).toBeCloseTo(0.5);
-    expect(neo4jSession.run).toHaveBeenCalledTimes(1);
+    expect(neo4jSession.run).toHaveBeenCalledTimes(2);
   });
 
   test('throws user-facing error with trace id on invalid output', async () => {

@@ -606,9 +606,9 @@ class EnhancedRAG:
         context_text = "\n\n".join(
             [
                 (
-                    f"[{i+1}] {chunk['content'][:500]}..."
+                    f"[{i + 1}] {chunk['content'][:500]}..."
                     if len(chunk["content"]) > 500
-                    else f"[{i+1}] {chunk['content']}"
+                    else f"[{i + 1}] {chunk['content']}"
                 )
                 for i, chunk in enumerate(context_chunks)
             ]
@@ -631,7 +631,7 @@ class EnhancedRAG:
                 return f"Error generating response: {result.stderr}"
 
         except Exception as e:
-            return f"Failed to generate response: {str(e)}"
+            return f"Failed to generate response: {e!s}"
 
 
 def main():

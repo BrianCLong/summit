@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import crypto from 'crypto';
 import express from 'express';
 import fs from 'fs/promises';
@@ -30,7 +31,10 @@ jest.mock('../../incident.js', () => ({
   openIncident: (...args: any[]) => incidentMock(...args),
 }));
 
-describe('POST /ops/evidence/verify', () => {
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('POST /ops/evidence/verify', () => {
   let app: express.Application;
   let storageRoot: string;
 
@@ -176,4 +180,3 @@ describe('POST /ops/evidence/verify', () => {
     expect(incidentMock).not.toHaveBeenCalled();
   });
 });
-

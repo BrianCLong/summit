@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { EntityResolutionV2Service, EntityV2 } from '../../services/er/EntityResolutionV2Service.js';
 import { soundex } from '../../services/er/soundex.js';
 

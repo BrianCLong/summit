@@ -1,0 +1,176 @@
+{
+  "issue_number": 203,
+  "title": "GNN LP: Graph schema & training dataset builder",
+  "url": "https://github.com/BrianCLong/summit/issues/203",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767070,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX03g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/enhancement",
+      "name": "enhancement",
+      "color": "a2eeef",
+      "default": true,
+      "description": "New feature or request"
+    },
+    {
+      "id": 9103342705,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn8cQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/AI",
+      "name": "AI",
+      "color": "bfdadc",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-14T04:53:26Z",
+  "createdAt": "2025-08-14T04:53:26Z",
+  "classification": "feature",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12886,
+        "url": "https://github.com/BrianCLong/summit/pull/12886",
+        "mergedAt": "2025-12-04T15:48:21Z",
+        "title": "Add geospatial visualization and threat analysis"
+      },
+      {
+        "number": 12024,
+        "url": "https://github.com/BrianCLong/summit/pull/12024",
+        "mergedAt": "2025-11-20T15:29:43Z",
+        "title": "Implement quantum-resistant cryptography and algorithms"
+      },
+      {
+        "number": 13123,
+        "url": "https://github.com/BrianCLong/summit/pull/13123",
+        "mergedAt": "2025-12-17T05:37:30Z",
+        "title": "S5 - Secret Drift Detector"
+      },
+      {
+        "number": 1176,
+        "url": "https://github.com/BrianCLong/summit/pull/1176",
+        "mergedAt": null,
+        "title": "chore(deps): bump @opentelemetry/sdk-node from 0.203.0 to 0.204.0 in /server"
+      },
+      {
+        "number": 745,
+        "url": "https://github.com/BrianCLong/summit/pull/745",
+        "mergedAt": "2025-08-29T10:53:36Z",
+        "title": "chore(deps): bump @opentelemetry/sdk-node from 0.45.1 to 0.203.0"
+      },
+      {
+        "number": 743,
+        "url": "https://github.com/BrianCLong/summit/pull/743",
+        "mergedAt": "2025-08-29T10:34:30Z",
+        "title": "chore(deps): bump @opentelemetry/exporter-prometheus from 0.44.0 to 0.203.0"
+      },
+      {
+        "number": 613,
+        "url": "https://github.com/BrianCLong/summit/pull/613",
+        "mergedAt": "2025-08-18T14:25:09Z",
+        "title": "chore(deps-dev): bump @testing-library/jest-dom from 5.17.0 to 6.7.0 in /client"
+      },
+      {
+        "number": 1355,
+        "url": "https://github.com/BrianCLong/summit/pull/1355",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "chore: add hardened ci guardrails"
+      },
+      {
+        "number": 13190,
+        "url": "https://github.com/BrianCLong/summit/pull/13190",
+        "mergedAt": "2025-12-04T15:38:47Z",
+        "title": "Build resilient multi-LLM orchestrator with governance"
+      },
+      {
+        "number": 11875,
+        "url": "https://github.com/BrianCLong/summit/pull/11875",
+        "mergedAt": "2025-11-20T14:33:52Z",
+        "title": "Build Extensions and Ecosystem Framework"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 11893,
+        "url": "https://github.com/BrianCLong/summit/pull/11893",
+        "mergedAt": null,
+        "title": "Build Advanced Metadata Analysis Platform"
+      },
+      {
+        "number": 13042,
+        "url": "https://github.com/BrianCLong/summit/pull/13042",
+        "mergedAt": "2025-12-01T19:17:12Z",
+        "title": "chore: Finalize CI/CD consolidation and cleanup"
+      },
+      {
+        "number": 11774,
+        "url": "https://github.com/BrianCLong/summit/pull/11774",
+        "mergedAt": "2025-10-20T11:06:07Z",
+        "title": "chore(deps): bump the js-dependencies group with 144 updates"
+      },
+      {
+        "number": 1284,
+        "url": "https://github.com/BrianCLong/summit/pull/1284",
+        "mergedAt": "2025-09-20T08:06:31Z",
+        "title": "feat(release): enterprise-grade repo consolidation and golden ci pipeline"
+      },
+      {
+        "number": 1280,
+        "url": "https://github.com/BrianCLong/summit/pull/1280",
+        "mergedAt": "2025-09-18T05:21:24Z",
+        "title": "feat(ga): CI/ops hardening (conflict-free from ga-core)"
+      },
+      {
+        "number": 1338,
+        "url": "https://github.com/BrianCLong/summit/pull/1338",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/workflows"
+      },
+      {
+        "number": 1337,
+        "url": "https://github.com/BrianCLong/summit/pull/1337",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/docs"
+      },
+      {
+        "number": 1336,
+        "url": "https://github.com/BrianCLong/summit/pull/1336",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/deps"
+      },
+      {
+        "number": 1335,
+        "url": "https://github.com/BrianCLong/summit/pull/1335",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/hardening"
+      },
+      {
+        "number": 1334,
+        "url": "https://github.com/BrianCLong/summit/pull/1334",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/features"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

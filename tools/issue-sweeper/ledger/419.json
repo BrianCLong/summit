@@ -1,0 +1,62 @@
+{
+  "issue_number": 419,
+  "title": "feat(ai): similarEntities resolver + entity drawer",
+  "url": "https://github.com/BrianCLong/summit/pull/419",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-17T17:41:55Z",
+  "createdAt": "2025-08-17T08:01:17Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 10142,
+        "url": "https://github.com/BrianCLong/summit/pull/10142",
+        "mergedAt": "2025-10-14T08:36:31Z",
+        "title": "feat: add chaos orchestration framework"
+      },
+      {
+        "number": 1117,
+        "url": "https://github.com/BrianCLong/summit/pull/1117",
+        "mergedAt": "2025-09-03T01:09:14Z",
+        "title": "feat: implement maestro production readiness features and documentation"
+      },
+      {
+        "number": 13179,
+        "url": "https://github.com/BrianCLong/summit/pull/13179",
+        "mergedAt": "2025-12-04T15:39:15Z",
+        "title": "Plan evaluation-first platform architecture"
+      },
+      {
+        "number": 1284,
+        "url": "https://github.com/BrianCLong/summit/pull/1284",
+        "mergedAt": "2025-09-20T08:06:31Z",
+        "title": "feat(release): enterprise-grade repo consolidation and golden ci pipeline"
+      },
+      {
+        "number": 1285,
+        "url": "https://github.com/BrianCLong/summit/pull/1285",
+        "mergedAt": "2025-09-20T08:06:30Z",
+        "title": "feat(release): enterprise ci/cd foundation - clean slate"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

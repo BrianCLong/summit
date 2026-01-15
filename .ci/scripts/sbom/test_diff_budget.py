@@ -3,8 +3,6 @@ import json
 import sys
 from pathlib import Path
 
-import pytest
-
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
@@ -39,7 +37,7 @@ def test_evaluate_blocks_new_critical():
 
 def test_load_exceptions_validates_ticket_and_fields(tmp_path: Path):
     sha = "abc123"
-    expiry = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(days=10)).isoformat()
+    expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(days=10)).isoformat()
     exceptions_dir = tmp_path
     write_exception_file(
         exceptions_dir / f"{sha}.json",
@@ -72,7 +70,7 @@ def test_load_exceptions_validates_ticket_and_fields(tmp_path: Path):
 
 def test_load_exceptions_emits_expiry_alert(tmp_path: Path):
     sha = "abc123"
-    expiry = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(days=1)).isoformat()
+    expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(days=1)).isoformat()
     exceptions_dir = tmp_path
     write_exception_file(
         exceptions_dir / f"{sha}.json",
@@ -98,10 +96,12 @@ def test_load_exceptions_emits_expiry_alert(tmp_path: Path):
 
 def test_count_and_delta_by_severity():
     baseline = count_by_severity([{"severity": "high"}])
-    current = count_by_severity([
-        {"severity": "high"},
-        {"severity": "critical"},
-    ])
+    current = count_by_severity(
+        [
+            {"severity": "high"},
+            {"severity": "critical"},
+        ]
+    )
 
     deltas = delta_counts(current, baseline)
 

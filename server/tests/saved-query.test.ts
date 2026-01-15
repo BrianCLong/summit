@@ -1,56 +1,65 @@
+import { describe, it, expect, jest, beforeAll, beforeEach } from '@jest/globals';
 
-import { SavedQueryService } from '../src/services/SavedQueryService';
-import { getPostgresPool } from '../src/config/database';
+let SavedQueryService: typeof import('../src/services/SavedQueryService.js').SavedQueryService;
 
-// Mock the dependencies
-jest.mock('../src/config/database', () => {
-    const mQuery = jest.fn();
-    const mClient = { query: mQuery, release: jest.fn() };
-    const mPool = {
-        connect: jest.fn().mockResolvedValue(mClient),
-        query: mQuery
-    };
-    return { getPostgresPool: jest.fn(() => mPool) };
+const mockQuery = jest.fn() as jest.Mock;
+const mockRelease = jest.fn();
+const mockConnect = jest.fn() as jest.Mock;
+const mockClient = { query: mockQuery, release: mockRelease };
+const mockPool = {
+  connect: mockConnect,
+  query: mockQuery,
+};
+
+beforeAll(async () => {
+  jest.resetModules();
+  await jest.unstable_mockModule('../src/config/database', () => ({
+    getPostgresPool: jest.fn(() => mockPool),
+  }));
+
+  ({ SavedQueryService } = await import('../src/services/SavedQueryService.js'));
+  await import('../src/config/database');
 });
 
 describe('SavedQueryService', () => {
-    let service: SavedQueryService;
-    let mockPool: any;
+  let service: import('../src/services/SavedQueryService.js').SavedQueryService;
 
-    beforeEach(() => {
-        jest.clearAllMocks();
-        mockPool = getPostgresPool();
-        service = SavedQueryService.getInstance();
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (SavedQueryService as any).instance = undefined;
+    mockConnect.mockImplementation(async () => mockClient as any);
+    service = SavedQueryService.getInstance();
+    (service as any).pool = mockPool;
+  });
 
-    it('should create a saved query', async () => {
-        const input = {
-            name: 'Test Query',
-            cypher: 'MATCH (n) RETURN n',
-            parameters: {},
-            tags: ['test'],
-            scope: 'private' as const,
-        };
-        const userId = 'user-1';
-        const tenantId = 'tenant-1';
+  it('should create a saved query', async () => {
+    const input = {
+      name: 'Test Query',
+      cypher: 'MATCH (n) RETURN n',
+      parameters: {},
+      tags: ['test'],
+      scope: 'private' as const,
+    };
+    const userId = 'user-1';
+    const tenantId = 'tenant-1';
 
-        mockPool.query.mockResolvedValueOnce({ rows: [{ ...input, id: '123' }] });
+    mockQuery.mockImplementationOnce(async () => ({ rows: [{ ...input, id: '123' }] }) as any);
 
-        const result = await service.create(input, userId, tenantId);
+    const result = await service.create(input, userId, tenantId);
 
-        expect(mockPool.query).toHaveBeenCalledWith(
-            expect.stringContaining('INSERT INTO saved_queries'),
-            expect.arrayContaining(['Test Query', 'user-1', 'tenant-1'])
-        );
-        expect(result).toHaveProperty('id', '123');
-    });
+    expect(mockQuery).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT INTO saved_queries'),
+      expect.arrayContaining(['Test Query', 'user-1', 'tenant-1'])
+    );
+    expect(result).toHaveProperty('id', '123');
+  });
 
-    it('should list saved queries', async () => {
-        mockPool.query.mockResolvedValueOnce({ rows: [] });
-        await service.list('user-1', 'tenant-1');
-        expect(mockPool.query).toHaveBeenCalledWith(
-            expect.stringContaining('SELECT * FROM saved_queries'),
-            ['tenant-1', 'user-1']
-        );
-    });
+  it('should list saved queries', async () => {
+    mockQuery.mockImplementationOnce(async () => ({ rows: [] }) as any);
+    await service.list('user-1', 'tenant-1');
+    expect(mockQuery).toHaveBeenCalledWith(
+      expect.stringContaining('SELECT * FROM saved_queries'),
+      ['tenant-1', 'user-1']
+    );
+  });
 });

@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import fs from 'fs/promises';
 import path from 'path';
 import express from 'express';
@@ -10,6 +11,7 @@ describe('CASE_BUNDLE_V1 export/import workflow', () => {
   const createdPaths: string[] = [];
   const service = new CaseBundleService(new FixtureCaseBundleStore());
   const originalFlag = process.env.CASE_BUNDLE_V1;
+  const canListen = process.env.NO_NETWORK_LISTEN !== 'true';
 
   beforeAll(() => {
     process.env.CASE_BUNDLE_V1 = '1';
@@ -75,7 +77,7 @@ describe('CASE_BUNDLE_V1 export/import workflow', () => {
     await expect(service.importBundle(exported.bundlePath)).rejects.toThrow('integrity_mismatch');
   });
 
-  it('exposes export/import endpoints behind the CASE_BUNDLE_V1 flag', async () => {
+  (canListen ? it : it.skip)('exposes export/import endpoints behind the CASE_BUNDLE_V1 flag', async () => {
     const app = express();
     app.use(express.json());
     app.use('/api/case-bundles', caseBundleRouter);

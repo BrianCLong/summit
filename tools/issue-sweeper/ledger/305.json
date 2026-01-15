@@ -1,0 +1,80 @@
+{
+  "issue_number": 305,
+  "title": "Add AI API endpoints in server (ai.ts)",
+  "url": "https://github.com/BrianCLong/summit/issues/305",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9121349718,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zAVg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type-feature",
+      "name": "type-feature",
+      "color": "0075ca",
+      "default": false,
+      "description": "Feature development"
+    },
+    {
+      "id": 9121350669,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zEDQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority-high",
+      "name": "priority-high",
+      "color": "d73a4a",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-16T17:52:57Z",
+  "createdAt": "2025-08-16T17:52:57Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11899,
+        "url": "https://github.com/BrianCLong/summit/pull/11899",
+        "mergedAt": "2025-11-20T10:26:05Z",
+        "title": "Set up SLO monitoring for API performance"
+      },
+      {
+        "number": 11908,
+        "url": "https://github.com/BrianCLong/summit/pull/11908",
+        "mergedAt": "2025-11-20T10:25:29Z",
+        "title": "Establish charts as deployment golden path"
+      },
+      {
+        "number": 13192,
+        "url": "https://github.com/BrianCLong/summit/pull/13192",
+        "mergedAt": "2025-12-04T15:38:41Z",
+        "title": "Add HUMINT source management and debrief workflows"
+      },
+      {
+        "number": 9800,
+        "url": "https://github.com/BrianCLong/summit/pull/9800",
+        "mergedAt": null,
+        "title": "feat(monitoring): Enable error-budget monitoring and Maestro metrics export (EO-1, EO-2)"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

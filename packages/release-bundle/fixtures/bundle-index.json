@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "1.0.0",
+  "entries": {
+    "manifest.json": "sha256:abc",
+    "status.json": "sha256:def"
+  }
+}

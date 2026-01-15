@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
 import fs from 'fs';
@@ -5,12 +6,17 @@ import path from 'path';
 import {
   createGraphqlPersistedAllowlistMiddleware,
   hashPersistedQuery,
-} from '../src/middleware/graphqlPersistedAllowlist.ts';
+} from '../src/middleware/graphqlPersistedAllowlist.js';
 
-describe('GraphqlPersistedAllowlistMiddleware', () => {
-  const manifestPath = path.join(__dirname, 'tmp-manifest.json');
+// Use process.cwd() since tests run from server directory
+const testsDir = path.join(process.cwd(), 'tests');
+const run = process.env.NO_NETWORK_LISTEN !== 'true';
+const describeIf = run ? describe : describe.skip;
+
+describeIf('GraphqlPersistedAllowlistMiddleware', () => {
+  const manifestPath = path.join(testsDir, 'tmp-manifest.json');
   const secondaryManifestPath = path.join(
-    __dirname,
+    testsDir,
     'tmp-secondary-manifest.json',
   );
   const query = 'query Test { __typename }';

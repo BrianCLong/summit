@@ -6,21 +6,20 @@ Demonstrates full GA-level connector with all required integrations.
 """
 
 import asyncio
-import httpx
 import json
-from typing import Dict, Any, AsyncIterator, Optional
-from datetime import datetime, timedelta
 import logging
+from collections.abc import AsyncIterator
+from datetime import datetime
+from typing import Any
 
+import httpx
+from connectors.cisa_kev.schema_mapping import CISA_KEV_URL, map_cisa_kev_to_intelgraph
 from server.data_pipelines.connectors.base import BaseConnector, ConnectorStatus
-from connectors.cisa_kev.schema_mapping import (
-    map_cisa_kev_to_intelgraph,
-    CISA_KEV_URL
-)
 
 # Observability
 try:
     from ops.observability import record_prom_metric
+
     METRICS_AVAILABLE = True
 except ImportError:
     METRICS_AVAILABLE = False
@@ -29,6 +28,7 @@ except ImportError:
 # SLI/SLO
 try:
     from server.data_pipelines.monitoring.sli_slo import SLICollector, SLOManager
+
     SLI_SLO_AVAILABLE = True
 except ImportError:
     SLI_SLO_AVAILABLE = False
@@ -59,7 +59,7 @@ class CISAKEVConnector(BaseConnector):
         filter_ransomware: bool - Only ransomware vulns (default: False)
     """
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         """
         Initialize CISA KEV connector.
 
@@ -78,13 +78,13 @@ class CISAKEVConnector(BaseConnector):
         self.filter_ransomware = self.config.get("filter_ransomware", False)
 
         # State
-        self._client: Optional[httpx.AsyncClient] = None
-        self._cached_data: Optional[Dict[str, Any]] = None
-        self._cache_timestamp: Optional[datetime] = None
+        self._client: httpx.AsyncClient | None = None
+        self._cached_data: dict[str, Any] | None = None
+        self._cache_timestamp: datetime | None = None
 
         # Observability
-        self._sli_collector: Optional[Any] = None
-        self._slo_manager: Optional[Any] = None
+        self._sli_collector: Any | None = None
+        self._slo_manager: Any | None = None
         self._init_observability()
 
     def _init_observability(self):
@@ -100,17 +100,15 @@ class CISAKEVConnector(BaseConnector):
             self._sli_collector.register_sli(
                 f"connector_{self.name}_availability",
                 "Connector availability (success rate)",
-                "percentage"
+                "percentage",
             )
             self._sli_collector.register_sli(
-                f"connector_{self.name}_latency_p95",
-                "95th percentile latency",
-                "seconds"
+                f"connector_{self.name}_latency_p95", "95th percentile latency", "seconds"
             )
             self._sli_collector.register_sli(
                 f"connector_{self.name}_data_freshness",
                 "Data freshness (hours since last update)",
-                "hours"
+                "hours",
             )
 
             # Create SLO manager
@@ -121,7 +119,7 @@ class CISAKEVConnector(BaseConnector):
                 f"connector_{self.name}_availability_slo",
                 f"connector_{self.name}_availability",
                 99.0,  # 99% availability
-                30     # 30-day window
+                30,  # 30-day window
             )
 
             logger.info("Observability initialized")
@@ -140,10 +138,7 @@ class CISAKEVConnector(BaseConnector):
             self._client = httpx.AsyncClient(
                 timeout=30.0,
                 follow_redirects=True,
-                limits=httpx.Limits(
-                    max_keepalive_connections=5,
-                    max_connections=10
-                )
+                limits=httpx.Limits(max_keepalive_connections=5, max_connections=10),
             )
 
             self.status = ConnectorStatus.IDLE
@@ -194,10 +189,7 @@ class CISAKEVConnector(BaseConnector):
             logger.error(f"Connection test failed: {e}")
             return False
 
-    async def extract_data(
-        self,
-        batch_size: int = None
-    ) -> AsyncIterator[Dict[str, Any]]:
+    async def extract_data(self, batch_size: int = None) -> AsyncIterator[dict[str, Any]]:
         """
         Extract vulnerability data in batches.
 
@@ -223,7 +215,7 @@ class CISAKEVConnector(BaseConnector):
 
             # Yield batches
             for i in range(0, total_count, batch_size):
-                batch = vulnerabilities[i:i + batch_size]
+                batch = vulnerabilities[i : i + batch_size]
                 yield {
                     "batch_number": i // batch_size + 1,
                     "batch_size": len(batch),
@@ -232,8 +224,8 @@ class CISAKEVConnector(BaseConnector):
                     "catalog_metadata": {
                         "version": kev_data.get("catalogVersion"),
                         "date_released": kev_data.get("dateReleased"),
-                        "total_count": kev_data.get("count")
-                    }
+                        "total_count": kev_data.get("count"),
+                    },
                 }
 
                 # Small delay between batches
@@ -253,7 +245,7 @@ class CISAKEVConnector(BaseConnector):
             logger.error(f"Failed to extract data: {e}")
             raise
 
-    async def _fetch_kev_data(self) -> Dict[str, Any]:
+    async def _fetch_kev_data(self) -> dict[str, Any]:
         """
         Fetch KEV data from API with caching.
 
@@ -299,7 +291,7 @@ class CISAKEVConnector(BaseConnector):
         age_hours = (datetime.utcnow() - self._cache_timestamp).total_seconds() / 3600
         return age_hours < self.cache_ttl_hours
 
-    async def get_metadata(self) -> Dict[str, Any]:
+    async def get_metadata(self) -> dict[str, Any]:
         """
         Get connector metadata.
 
@@ -317,9 +309,9 @@ class CISAKEVConnector(BaseConnector):
                 "caching",
                 "observability",
                 "pii_detection",
-                "license_enforcement"
+                "license_enforcement",
             ],
-            "status": self.status.name if hasattr(self.status, 'name') else str(self.status),
+            "status": self.status.name if hasattr(self.status, "name") else str(self.status),
             "cache_enabled": self.cache_enabled,
             "cache_valid": self._is_cache_valid(),
         }
@@ -338,12 +330,7 @@ class CISAKEVConnector(BaseConnector):
 
         return metadata
 
-    def _record_metrics(
-        self,
-        records_count: int,
-        duration_seconds: float,
-        success: bool
-    ):
+    def _record_metrics(self, records_count: int, duration_seconds: float, success: bool):
         """
         Record connector metrics.
 
@@ -360,25 +347,19 @@ class CISAKEVConnector(BaseConnector):
             record_prom_metric(
                 "connector_records_processed",
                 records_count,
-                {"connector": self.name, "status": "success" if success else "failure"}
+                {"connector": self.name, "status": "success" if success else "failure"},
             )
 
             record_prom_metric(
-                "connector_duration_seconds",
-                duration_seconds,
-                {"connector": self.name}
+                "connector_duration_seconds", duration_seconds, {"connector": self.name}
             )
 
             # Record SLI measurements
             if self._sli_collector:
                 self._sli_collector.record(
-                    f"connector_{self.name}_availability",
-                    100.0 if success else 0.0
+                    f"connector_{self.name}_availability", 100.0 if success else 0.0
                 )
-                self._sli_collector.record(
-                    f"connector_{self.name}_latency_p95",
-                    duration_seconds
-                )
+                self._sli_collector.record(f"connector_{self.name}_latency_p95", duration_seconds)
 
                 # Record data freshness
                 if self._cache_timestamp:
@@ -386,14 +367,13 @@ class CISAKEVConnector(BaseConnector):
                         datetime.utcnow() - self._cache_timestamp
                     ).total_seconds() / 3600
                     self._sli_collector.record(
-                        f"connector_{self.name}_data_freshness",
-                        freshness_hours
+                        f"connector_{self.name}_data_freshness", freshness_hours
                     )
 
         except Exception as e:
             logger.warning(f"Failed to record metrics: {e}")
 
-    async def ingest(self) -> Dict[str, Any]:
+    async def ingest(self) -> dict[str, Any]:
         """
         Run complete ingestion pipeline.
 
@@ -424,20 +404,23 @@ class CISAKEVConnector(BaseConnector):
 
                 # Write batch to temp file for mapping
                 with open(temp_file, "w") as f:
-                    json.dump({
-                        "catalogVersion": batch["catalog_metadata"]["version"],
-                        "dateReleased": batch["catalog_metadata"]["date_released"],
-                        "count": len(batch_data),
-                        "vulnerabilities": batch_data
-                    }, f)
+                    json.dump(
+                        {
+                            "catalogVersion": batch["catalog_metadata"]["version"],
+                            "dateReleased": batch["catalog_metadata"]["date_released"],
+                            "count": len(batch_data),
+                            "vulnerabilities": batch_data,
+                        },
+                        f,
+                    )
 
                 # Map using schema mapping
                 entities, _ = map_cisa_kev_to_intelgraph(
                     file_path=temp_file,
                     config={
                         "include_metadata": self.include_metadata,
-                        "filter_ransomware": self.filter_ransomware
-                    }
+                        "filter_ransomware": self.filter_ransomware,
+                    },
                 )
 
                 total_entities += len(entities)
@@ -460,7 +443,7 @@ class CISAKEVConnector(BaseConnector):
                 "duration_seconds": duration,
                 "throughput_per_second": total_entities / duration if duration > 0 else 0,
                 "start_time": start_time.isoformat(),
-                "end_time": datetime.utcnow().isoformat()
+                "end_time": datetime.utcnow().isoformat(),
             }
 
             logger.info(f"Ingestion complete: {stats}")
@@ -475,10 +458,7 @@ class CISAKEVConnector(BaseConnector):
 # Example usage
 async def main():
     """Example usage of CISA KEV connector."""
-    connector = CISAKEVConnector(config={
-        "cache_enabled": True,
-        "batch_size": 100
-    })
+    connector = CISAKEVConnector(config={"cache_enabled": True, "batch_size": 100})
 
     try:
         # Run full ingestion

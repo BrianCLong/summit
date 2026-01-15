@@ -4,7 +4,9 @@ import path from 'node:path';
 export async function listRecipes() {
   const dir = path.join(process.cwd(), 'recipes');
   try {
-    return fs.readdirSync(dir).filter((f) => f.endsWith('.yaml'));
+    return fs
+      .readdirSync(dir)
+      .filter((f: string) => f.endsWith('.yaml') || f.endsWith('.yml'));
   } catch {
     return [];
   }

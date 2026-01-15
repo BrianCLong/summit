@@ -30,9 +30,7 @@ def test_irm_penalty_reduces_sensitivity_without_accuracy_collapse():
     irm = report["metrics"]["irm"]
 
     base_conf = next(
-        row["sensitivity"]
-        for row in report["feature_ablation"]
-        if row["feature"] == "confounder"
+        row["sensitivity"] for row in report["feature_ablation"] if row["feature"] == "confounder"
     )
     irm_conf = next(
         row["sensitivity"]

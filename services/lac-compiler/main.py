@@ -1,9 +1,8 @@
-from typing import Dict, Any
+from typing import Any
 
 from fastapi import FastAPI, HTTPException
-
 from lac_compiler.bytecode import BytecodeCompiler
-from lac_compiler.dsl import PolicyDSLParser, DSLParseError
+from lac_compiler.dsl import DSLParseError, PolicyDSLParser
 from lac_compiler.models import (
     CompileRequest,
     CompileResponse,
@@ -78,7 +77,7 @@ async def simulate_policy(body: SimulationRequest):
             )
         )
 
-    summary: Dict[str, Any] = {
+    summary: dict[str, Any] = {
         "total": len(body.historical_logs),
         "changed": changes,
         "unchanged": len(body.historical_logs) - changes,

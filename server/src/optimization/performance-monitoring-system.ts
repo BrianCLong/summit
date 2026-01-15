@@ -951,7 +951,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
       const lines = info.split('\r\n');
       const metrics: any = {};
 
-      lines.forEach((line) => {
+      lines.forEach((line: string) => {
         const [key, value] = line.split(':');
         if (key && value) {
           metrics[key] = value;

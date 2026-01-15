@@ -8,6 +8,9 @@
         "src/**",
         "public/**",
         "package.json",
+        "turbo.json",
+        "pnpm-workspace.yaml",
+        "Makefile",
         "tsconfig.json",
         "tsconfig.base.json",
         "vite.config.ts",
@@ -25,7 +28,9 @@
         "tests/**",
         "__tests__/**",
         "package.json",
+        "turbo.json",
         "jest.config.*",
+        "vitest.config.*",
         "tsconfig.json"
       ],
       "env": ["NODE_ENV", "CI"]
@@ -44,6 +49,9 @@
         "tests/**",
         "__tests__/**",
         ".eslintrc.*",
+        "eslint.config.*",
+        "turbo.json",
+        ".prettierrc*",
         "tsconfig.json",
         "package.json"
       ]
@@ -55,6 +63,8 @@
         "src/**",
         "types/**",
         "package.json",
+        "turbo.json",
+        "pnpm-workspace.yaml",
         "tsconfig.json",
         "tsconfig.base.json"
       ]
@@ -62,7 +72,8 @@
     "smoke": {
       "dependsOn": ["build"],
       "outputs": [],
-      "cache": false
+      "cache": false,
+      "inputs": ["Makefile", "docker-compose*.yml", "scripts/smoke/**", "ops/**", "package.json"]
     },
     "dev": {
       "cache": false,
@@ -75,6 +86,10 @@
     "tsconfig.base.json",
     ".eslintrc.*",
     "jest.config.*",
-    "pnpm-lock.yaml"
+    "pnpm-lock.yaml",
+    "turbo.json",
+    "pnpm-workspace.yaml",
+    "package.json",
+    "Makefile"
   ]
 }

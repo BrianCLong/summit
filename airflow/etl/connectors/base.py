@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Iterator, Dict, Any, List
+from collections.abc import Iterator
+from typing import Any
+
 
 class BaseConnector(ABC):
     """
@@ -7,7 +9,7 @@ class BaseConnector(ABC):
     """
 
     @abstractmethod
-    def fetch_data(self, limit: int = 100) -> Iterator[Dict[str, Any]]:
+    def fetch_data(self, limit: int = 100) -> Iterator[dict[str, Any]]:
         """
         Fetches data from the source.
 

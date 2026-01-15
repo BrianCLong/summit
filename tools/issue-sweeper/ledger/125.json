@@ -1,0 +1,173 @@
+{
+  "issue_number": 125,
+  "title": "Federated Search API",
+  "url": "https://github.com/BrianCLong/summit/issues/125",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342948,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9ZA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/federation",
+      "name": "federation",
+      "color": "c2e0c6",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103343056,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn90A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/mvp1",
+      "name": "mvp1",
+      "color": "0e8a16",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103362047,
+      "node_id": "LA_kwDOPaNncM8AAAACHppH_w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:federation",
+      "name": "area:federation",
+      "color": "0e8a16",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-13T09:25:14Z",
+  "createdAt": "2025-08-13T09:20:26Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 12071,
+        "url": "https://github.com/BrianCLong/summit/pull/12071",
+        "mergedAt": null,
+        "title": "Build Enterprise Compliance and Governance Framework"
+      },
+      {
+        "number": 13114,
+        "url": "https://github.com/BrianCLong/summit/pull/13114",
+        "mergedAt": "2025-12-03T01:38:28Z",
+        "title": "Audit-First API Middleware"
+      },
+      {
+        "number": 11908,
+        "url": "https://github.com/BrianCLong/summit/pull/11908",
+        "mergedAt": "2025-11-20T10:25:29Z",
+        "title": "Establish charts as deployment golden path"
+      },
+      {
+        "number": 1315,
+        "url": "https://github.com/BrianCLong/summit/pull/1315",
+        "mergedAt": "2025-09-23T16:56:14Z",
+        "title": "docs: refresh build platform sprint plan"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 10118,
+        "url": "https://github.com/BrianCLong/summit/pull/10118",
+        "mergedAt": "2025-10-14T10:40:09Z",
+        "title": "feat: Enforce automated test policies in CI/CD"
+      },
+      {
+        "number": 1288,
+        "url": "https://github.com/BrianCLong/summit/pull/1288",
+        "mergedAt": "2025-09-23T06:51:49Z",
+        "title": "feat(phase-4): security & compliance hardening"
+      },
+      {
+        "number": 1310,
+        "url": "https://github.com/BrianCLong/summit/pull/1310",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat: orchestrate multi-llm cooperation fabric"
+      },
+      {
+        "number": 11922,
+        "url": "https://github.com/BrianCLong/summit/pull/11922",
+        "mergedAt": "2025-11-20T10:05:25Z",
+        "title": "Build real-time streaming analytics pipeline"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 1221,
+        "url": "https://github.com/BrianCLong/summit/pull/1221",
+        "mergedAt": null,
+        "title": "Sprint v0.5 – Guarded Rail"
+      },
+      {
+        "number": 13193,
+        "url": "https://github.com/BrianCLong/summit/pull/13193",
+        "mergedAt": "2025-12-04T15:38:38Z",
+        "title": "Build React Native mobile app with OSINT dashboard"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      },
+      {
+        "number": 1280,
+        "url": "https://github.com/BrianCLong/summit/pull/1280",
+        "mergedAt": "2025-09-18T05:21:24Z",
+        "title": "feat(ga): CI/ops hardening (conflict-free from ga-core)"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

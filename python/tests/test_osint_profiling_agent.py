@@ -26,6 +26,7 @@ async def test_gather_combines_sources(monkeypatch):
     assert "virustotal" in data
     assert "abuseipdb" not in data
 
+
 @pytest.mark.asyncio
 async def test_enrich_ip_writes_to_neo4j(monkeypatch):
     mock_store = MagicMock()

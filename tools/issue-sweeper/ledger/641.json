@@ -1,0 +1,56 @@
+{
+  "issue_number": 641,
+  "title": "feat: add redis-backed realtime collaboration",
+  "url": "https://github.com/BrianCLong/summit/pull/641",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T16:19:38Z",
+  "createdAt": "2025-08-19T13:01:55Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12296,
+        "url": "https://github.com/BrianCLong/summit/pull/12296",
+        "mergedAt": "2025-11-25T20:34:22Z",
+        "title": "Bump body-parser from 2.2.0 to 2.2.1 in /conductor-ui/backend"
+      },
+      {
+        "number": 13105,
+        "url": "https://github.com/BrianCLong/summit/pull/13105",
+        "mergedAt": "2025-12-04T15:39:29Z",
+        "title": "Build resilient Redis queue with failover support"
+      },
+      {
+        "number": 13186,
+        "url": "https://github.com/BrianCLong/summit/pull/13186",
+        "mergedAt": "2025-12-04T15:38:58Z",
+        "title": "Implement federated learning for distributed OSINT training"
+      },
+      {
+        "number": 740,
+        "url": "https://github.com/BrianCLong/summit/pull/740",
+        "mergedAt": "2025-08-29T10:30:24Z",
+        "title": "chore(deps): bump graphql-ws from 5.16.2 to 6.0.6"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import List
 
 
 @dataclass
@@ -38,7 +37,7 @@ class SummaryResult:
 
     document: Document
     summary: str
-    iterations: List[SummaryIteration] = field(default_factory=list)
+    iterations: list[SummaryIteration] = field(default_factory=list)
     evaluation: EvaluationResult | None = None
 
 
@@ -55,7 +54,7 @@ class FactCheckReport:
     """Report from running the fact-checker against a summary."""
 
     approved: bool
-    issues: List[FactCheckIssue] = field(default_factory=list)
+    issues: list[FactCheckIssue] = field(default_factory=list)
 
     def raise_for_rejection(self) -> None:
         if not self.approved:

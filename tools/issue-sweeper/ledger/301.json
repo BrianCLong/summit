@@ -1,0 +1,74 @@
+{
+  "issue_number": 301,
+  "title": "docs: add velocity plans v4-v6",
+  "url": "https://github.com/BrianCLong/summit/pull/301",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-16T22:23:31Z",
+  "createdAt": "2025-08-16T17:16:16Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15349,
+        "url": "https://github.com/BrianCLong/summit/pull/15349",
+        "mergedAt": "2026-01-01T09:42:36Z",
+        "title": "feat: MVP-4 GA Security Tests and ESM Fixes"
+      },
+      {
+        "number": 15346,
+        "url": "https://github.com/BrianCLong/summit/pull/15346",
+        "mergedAt": "2026-01-01T09:53:10Z",
+        "title": "Draft patent claims for MCP inventions"
+      },
+      {
+        "number": 11898,
+        "url": "https://github.com/BrianCLong/summit/pull/11898",
+        "mergedAt": null,
+        "title": "Unify apps with graph timeline map interface"
+      },
+      {
+        "number": 1182,
+        "url": "https://github.com/BrianCLong/summit/pull/1182",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group with 2 updates"
+      },
+      {
+        "number": 11902,
+        "url": "https://github.com/BrianCLong/summit/pull/11902",
+        "mergedAt": "2025-11-20T10:25:44Z",
+        "title": "Build Cyber Threat Intelligence Platform"
+      },
+      {
+        "number": 11895,
+        "url": "https://github.com/BrianCLong/summit/pull/11895",
+        "mergedAt": null,
+        "title": "Build Crisis Management and Emergency Response Platform"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

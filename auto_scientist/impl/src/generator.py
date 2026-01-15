@@ -1,5 +1,6 @@
 import random
 
+
 class Generator:
     def __init__(self):
         self.topics = [
@@ -7,7 +8,7 @@ class Generator:
             "Use CRISPR to edit gene X",
             "Synthesize novel compound Y",
             "Deploy nanobots for drug delivery",
-            "Create a pathogen for research" # Intentionally unsafe
+            "Create a pathogen for research",  # Intentionally unsafe
         ]
 
     def generate(self, topic: str) -> str:

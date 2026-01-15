@@ -1,6 +1,5 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { ProvenanceLedgerV2, provenanceLedger } from '../ledger';
-import { witnessRegistry, CryptoWitness } from '../witness';
 import { pool } from '../../db/pg';
 
 // Mock DB connection
@@ -37,6 +36,12 @@ jest.mock('../../db/neo4j', () => ({
   }
 }));
 
+jest.mock('../../audit/index.js', () => ({
+  advancedAuditSystem: {
+    logEvent: jest.fn(),
+  },
+}));
+
 // Create a mock pool client
 const mockClient = {
   query: jest.fn(),
@@ -49,7 +54,9 @@ describe('ProvenanceLedgerV2 Integrity & Witnesses', () => {
     (pool.connect as any).mockResolvedValue(mockClient);
 
     // Mock successful query response for appending
-    mockClient.query.mockImplementation((query, params) => {
+    (mockClient.query as any).mockImplementation((...args: any[]) => {
+        const query = args[0];
+        const params = args[1] as any[];
         if (query === 'BEGIN' || query === 'COMMIT' || query === 'ROLLBACK') {
             return Promise.resolve();
         }
@@ -71,7 +78,7 @@ describe('ProvenanceLedgerV2 Integrity & Witnesses', () => {
                 metadata: params[12],
                 signature: params[13],
                 attestation: params[14],
-                witnesses: params[15]
+                witness: params[15],
             };
             return Promise.resolve({ rows: [inserted] });
         }
@@ -81,7 +88,7 @@ describe('ProvenanceLedgerV2 Integrity & Witnesses', () => {
         return Promise.resolve({ rows: [] });
     });
 
-    (pool.query as any).mockImplementation((query, params) => {
+    (pool.query as any).mockImplementation((query: string, params: unknown[]) => {
         return Promise.resolve({ rows: [] });
     });
   });
@@ -135,13 +142,6 @@ describe('ProvenanceLedgerV2 Integrity & Witnesses', () => {
   });
 
   it('should include witnesses in new entries', async () => {
-    // Register a witness
-    const witness = new CryptoWitness('w1', 'Witness 1');
-    witnessRegistry.register(witness);
-
-    // Spy on sign
-    const signSpy = jest.spyOn(witness, 'sign');
-
     // Act
     const entry = await provenanceLedger.appendEntry({
       tenantId: 't1',
@@ -150,15 +150,25 @@ describe('ProvenanceLedgerV2 Integrity & Witnesses', () => {
       resourceId: '123',
       actorId: 'u1',
       actorType: 'user',
-      payload: { foo: 'bar' },
+      timestamp: new Date(),
+      payload: {
+        mutationType: 'CREATE',
+        entityId: '123',
+        entityType: 'res',
+        newState: {
+          id: '123',
+          type: 'res',
+          version: 1,
+          data: {},
+          metadata: {},
+        },
+      },
       metadata: {}
     });
 
     // Assert
-    expect(signSpy).toHaveBeenCalled();
-    expect(entry.witnesses).toBeDefined();
-    expect(entry.witnesses).toHaveLength(1);
-    expect(entry.witnesses![0].id).toBe('w1');
-    expect(entry.witnesses![0].signature).toBeDefined();
+    expect(entry.witness).toBeDefined();
+    expect(entry.witness?.witnessId).toBeDefined();
+    expect(entry.witness?.signature).toBeDefined();
   });
 });

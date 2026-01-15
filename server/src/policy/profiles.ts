@@ -12,10 +12,35 @@ export const StrictProfile: TenantPolicyBundle = {
       requirePurpose: true,
       requireJustification: true,
     },
+    tenantIsolation: {
+      enabled: true,
+      allowCrossTenant: false,
+      actions: [],
+    },
     crossTenant: {
       mode: 'deny',
       allow: [],
       requireAgreements: true,
+    },
+    quotas: {
+      actions: {
+        export: {
+          limit: 250,
+          period: 'day',
+        },
+      },
+    },
+    ramps: {
+      actions: {
+        delete: {
+          maxPercent: 10,
+        },
+      },
+    },
+    freezeWindows: [],
+    dualControl: {
+      actions: ['delete', 'purge'],
+      minApprovals: 2,
     },
     rules: [
       {
@@ -43,10 +68,35 @@ export const BalancedProfile: TenantPolicyBundle = {
       requirePurpose: false, // Less friction
       requireJustification: false,
     },
+    tenantIsolation: {
+      enabled: true,
+      allowCrossTenant: true,
+      actions: [],
+    },
     crossTenant: {
       mode: 'allowlist',
       allow: [],
       requireAgreements: true,
+    },
+    quotas: {
+      actions: {
+        export: {
+          limit: 500,
+          period: 'day',
+        },
+      },
+    },
+    ramps: {
+      actions: {
+        delete: {
+          maxPercent: 35,
+        },
+      },
+    },
+    freezeWindows: [],
+    dualControl: {
+      actions: ['delete'],
+      minApprovals: 2,
     },
     rules: [
       {
@@ -74,10 +124,35 @@ export const FastOpsProfile: TenantPolicyBundle = {
       requirePurpose: false,
       requireJustification: false,
     },
+    tenantIsolation: {
+      enabled: true,
+      allowCrossTenant: true,
+      actions: [],
+    },
     crossTenant: {
       mode: 'allowlist',
       allow: [], // Dynamic
       requireAgreements: false,
+    },
+    quotas: {
+      actions: {
+        export: {
+          limit: 2000,
+          period: 'day',
+        },
+      },
+    },
+    ramps: {
+      actions: {
+        purge: {
+          maxPercent: 50,
+        },
+      },
+    },
+    freezeWindows: [],
+    dualControl: {
+      actions: ['purge'],
+      minApprovals: 2,
     },
     rules: [
       {

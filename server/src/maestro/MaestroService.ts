@@ -1,7 +1,6 @@
 // @ts-nocheck
 import fs from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { metrics } from '../observability/metrics.js';
 import { runsRepo } from './runs/runs-repo.js';
 import { SubagentCoordinator, agentGovernance } from './subagent-coordinator.js';
@@ -28,9 +27,10 @@ import {
   AuditEvent,
 } from './types.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const DB_PATH = path.resolve(__dirname, '../../data/maestro_db.json');
+const repoRoot = process.cwd().endsWith(`${path.sep}server`)
+  ? path.resolve(process.cwd(), '..')
+  : process.cwd();
+const DB_PATH = path.resolve(repoRoot, 'server', 'data', 'maestro_db.json');
 
 interface MaestroDB {
   loops: AutonomicLoop[];

@@ -275,8 +275,8 @@ export class RevocationRegistry {
    * Import revocation list
    */
   async importRevocationList(inputPath: string): Promise<void> {
-    const content = await fs.readFile(inputPath, 'utf8');
-    const list = JSON.parse(content);
+    const content = await fs.readFile(inputPath, { encoding: 'utf8' });
+    const list = JSON.parse(String(content));
 
     // Verify each revocation signature
     for (const record of list.revocations) {

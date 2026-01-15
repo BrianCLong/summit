@@ -378,7 +378,7 @@ class ChaosEngineer:
         """Calculate performance deltas"""
         deltas = {}
 
-        for key in baseline.keys():
+        for key in baseline:
             if key in final:
                 deltas[f"{key}_delta"] = final[key] - baseline[key]
                 if baseline[key] > 0:

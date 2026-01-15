@@ -6,12 +6,12 @@ import { BackupTarget, BackupPolicy } from '../types.js';
 describe('BackupInventoryService', () => {
   let service: BackupInventoryService;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     service = BackupInventoryService.getInstance();
-    service.clear();
+    await service.clear();
   });
 
-  it('should add and retrieve a backup target', () => {
+  it('should add and retrieve a backup target', async () => {
     const targetData = {
       id: 'target-1',
       name: 'Primary DB Backup',
@@ -22,7 +22,7 @@ describe('BackupInventoryService', () => {
       encrypted: true,
     };
 
-    const created = service.addTarget(targetData);
+    const created = await service.addTarget(targetData);
     expect(created.id).toBe('target-1');
     expect(created.createdAt).toBeDefined();
 
@@ -30,8 +30,8 @@ describe('BackupInventoryService', () => {
     expect(retrieved).toEqual(created);
   });
 
-  it('should update backup status', () => {
-    service.addTarget({
+  it('should update backup status', async () => {
+    await service.addTarget({
       id: 'target-1',
       name: 'Test Backup',
       storeType: 'local',
@@ -42,12 +42,12 @@ describe('BackupInventoryService', () => {
     });
 
     const successTime = new Date();
-    const updated = service.reportStatus('target-1', true, successTime);
+    const updated = await service.reportStatus('target-1', true, successTime);
     expect(updated?.lastSuccessAt).toEqual(successTime);
     expect(updated?.lastFailureAt).toBeUndefined();
 
     const failTime = new Date();
-    const updatedFail = service.reportStatus('target-1', false, failTime);
+    const updatedFail = await service.reportStatus('target-1', false, failTime);
     expect(updatedFail?.lastFailureAt).toEqual(failTime);
     // Should persist last success
     expect(updatedFail?.lastSuccessAt).toEqual(successTime);

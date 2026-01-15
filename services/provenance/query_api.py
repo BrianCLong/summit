@@ -12,7 +12,7 @@ import sqlite3
 import threading
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -213,7 +213,7 @@ class ProvenanceQueryAPI:
     def _generate_demo_traces(self) -> list[ProvenanceTrace]:
         """Generate realistic demo traces"""
         traces = []
-        base_time = datetime.now(timezone.utc) - timedelta(hours=2)
+        base_time = datetime.now(UTC) - timedelta(hours=2)
 
         scenarios = [
             ("analytics_query", "TENANT_001", ["neo4j", "redis"], ["gpt-4", "embedding-model"]),
@@ -229,8 +229,8 @@ class ProvenanceQueryAPI:
         ]
 
         for i, (query_type, tenant_id, data_sources, models) in enumerate(scenarios):
-            trace_id = f"trace_{i+1:03d}"
-            session_id = f"session_{tenant_id}_{i+1}"
+            trace_id = f"trace_{i + 1:03d}"
+            session_id = f"session_{tenant_id}_{i + 1}"
             query_hash = hashlib.sha256(f"{query_type}_{i}".encode()).hexdigest()[:16]
 
             start_time = base_time + timedelta(minutes=i * 10)
@@ -805,7 +805,7 @@ async def main():
     # Generate comprehensive report
     report = {
         "test_metadata": {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "platform_version": "v0.3.4-mc",
             "test_type": "provenance_query_api",
         },

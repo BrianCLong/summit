@@ -32,7 +32,7 @@ describe('memory repositories', () => {
 
     it('creates a session with scoped metadata', async () => {
       const inserted = { id: 's1', tenant_id: 't1', status: 'active' } as any;
-      mockPg.write.mockResolvedValue(inserted);
+      mockPg.write.mockImplementation(async () => inserted);
 
       const session = await createSession({
         tenantId: 't1',
@@ -51,7 +51,7 @@ describe('memory repositories', () => {
 
     it('gets a session scoped by tenant', async () => {
       const row = { id: 's1', tenant_id: 't1' };
-      mockPg.oneOrNone.mockResolvedValue(row);
+      mockPg.oneOrNone.mockImplementation(async () => row);
 
       const result = await getSessionById('s1', 't1');
       expect(result).toEqual(row);
@@ -63,7 +63,7 @@ describe('memory repositories', () => {
     });
 
     it('throws NotFoundError when session missing', async () => {
-      mockPg.oneOrNone.mockResolvedValue(null);
+      mockPg.oneOrNone.mockImplementation(async () => null);
       await expect(getSessionById('missing', 't1')).rejects.toBeInstanceOf(
         NotFoundError,
       );
@@ -79,9 +79,9 @@ describe('memory repositories', () => {
     });
 
     it('creates a page with tenant enforcement', async () => {
-      mockPg.oneOrNone.mockResolvedValueOnce(sessionRow);
+      mockPg.oneOrNone.mockImplementationOnce(async () => sessionRow);
       const inserted = { id: 'p1', session_id: 's1', tenant_id: 't1' };
-      mockPg.write.mockResolvedValue(inserted);
+      mockPg.write.mockImplementation(async () => inserted);
 
       const page = await createPage({
         sessionId: 's1',
@@ -117,8 +117,8 @@ describe('memory repositories', () => {
     });
 
     it('lists pages scoped to session', async () => {
-      mockPg.oneOrNone.mockResolvedValueOnce(sessionRow);
-      mockPg.readMany.mockResolvedValue([{ id: 'p1' }]);
+      mockPg.oneOrNone.mockImplementationOnce(async () => sessionRow);
+      mockPg.readMany.mockImplementation(async () => [{ id: 'p1' }]);
 
       const pages = await listPagesForSession('s1', 't1');
       expect(pages).toEqual([{ id: 'p1' }]);
@@ -136,10 +136,10 @@ describe('memory repositories', () => {
 
     it('creates an event with tenant checks', async () => {
       mockPg.oneOrNone
-        .mockResolvedValueOnce(sessionRow)
-        .mockResolvedValueOnce(pageRow);
+        .mockImplementationOnce(async () => sessionRow)
+        .mockImplementationOnce(async () => pageRow);
       const inserted = { id: 'e1', tenant_id: 't1' };
-      mockPg.write.mockResolvedValue(inserted);
+      mockPg.write.mockImplementation(async () => inserted);
 
       const event = await createEvent({
         pageId: 'p1',
@@ -158,8 +158,8 @@ describe('memory repositories', () => {
     });
 
     it('lists events for a page', async () => {
-      mockPg.oneOrNone.mockResolvedValueOnce(pageRow);
-      mockPg.readMany.mockResolvedValue([{ id: 'e1' }]);
+      mockPg.oneOrNone.mockImplementationOnce(async () => pageRow);
+      mockPg.readMany.mockImplementation(async () => [{ id: 'e1' }]);
 
       const events = await listEventsForPage('p1', 't1', { limit: 10 });
       expect(events).toEqual([{ id: 'e1' }]);

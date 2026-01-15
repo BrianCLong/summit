@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from maestro.models import (
@@ -114,9 +114,7 @@ def list_work_items(status: WorkItemStatus | None = None):
 def get_work_item(work_item_id: str):
     """Get a specific work item by ID."""
     if work_item_id not in WORK_ITEMS:
-        raise HTTPException(
-            status_code=404, detail=f"Work item {work_item_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Work item {work_item_id} not found")
     return WORK_ITEMS[work_item_id]
 
 
@@ -124,9 +122,7 @@ def get_work_item(work_item_id: str):
 def update_work_item(work_item_id: str, request: UpdateWorkItemRequest):
     """Update a work item's status or assignee."""
     if work_item_id not in WORK_ITEMS:
-        raise HTTPException(
-            status_code=404, detail=f"Work item {work_item_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Work item {work_item_id} not found")
     item = WORK_ITEMS[work_item_id]
     if request.status is not None:
         item.status = request.status
@@ -147,9 +143,7 @@ def update_work_item(work_item_id: str, request: UpdateWorkItemRequest):
 def route_work_item(work_item_id: str):
     """Route a pending work item to an appropriate agent (stubbed)."""
     if work_item_id not in WORK_ITEMS:
-        raise HTTPException(
-            status_code=404, detail=f"Work item {work_item_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Work item {work_item_id} not found")
     item = WORK_ITEMS[work_item_id]
     if item.status != WorkItemStatus.PENDING:
         raise HTTPException(
@@ -174,9 +168,7 @@ def route_work_item(work_item_id: str):
             break
 
     if not agent_id:
-        raise HTTPException(
-            status_code=404, detail=f"No agent found with name '{agent_name}'"
-        )
+        raise HTTPException(status_code=404, detail=f"No agent found with name '{agent_name}'")
 
     item.assigned_to_agent_id = agent_id
     item.status = WorkItemStatus.ASSIGNED
@@ -189,9 +181,7 @@ def route_work_item(work_item_id: str):
 def handoff_work_item(work_item_id: str, request: HandoffWorkItemRequest):
     """Handoff a work item to another agent."""
     if work_item_id not in WORK_ITEMS:
-        raise HTTPException(
-            status_code=404, detail=f"Work item {work_item_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Work item {work_item_id} not found")
     if request.target_agent_id not in AGENTS:
         raise HTTPException(
             status_code=404, detail=f"Target agent {request.target_agent_id} not found"
@@ -211,9 +201,7 @@ def handoff_work_item(work_item_id: str, request: HandoffWorkItemRequest):
 def create_review(request: CreateReviewRequest):
     """Submit a review for a work item."""
     if request.work_item_id not in WORK_ITEMS:
-        raise HTTPException(
-            status_code=404, detail=f"Work item {request.work_item_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Work item {request.work_item_id} not found")
     if request.reviewer_agent_id not in AGENTS:
         raise HTTPException(
             status_code=404, detail=f"Reviewer agent {request.reviewer_agent_id} not found"
@@ -240,7 +228,5 @@ def create_review(request: CreateReviewRequest):
 def get_reviews_for_work_item(work_item_id: str):
     """Get all reviews for a specific work item."""
     if work_item_id not in WORK_ITEMS:
-        raise HTTPException(
-            status_code=404, detail=f"Work item {work_item_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Work item {work_item_id} not found")
     return [review for review in REVIEWS.values() if review.work_item_id == work_item_id]

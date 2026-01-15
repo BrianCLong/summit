@@ -1,0 +1,80 @@
+{
+  "issue_number": 261,
+  "title": "Dashboard metrics widgets & saved layouts",
+  "url": "https://github.com/BrianCLong/summit/issues/261",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342986,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9ig",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/frontend",
+      "name": "frontend",
+      "color": "A2EEEF",
+      "default": false,
+      "description": "UI/E2E"
+    },
+    {
+      "id": 9108055842,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHnIg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dashboard",
+      "name": "dashboard",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108138809,
+      "node_id": "LA_kwDOPaNncM8AAAACHuMrOQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/enhancement%7D",
+      "name": "enhancement}",
+      "color": "cfd3d7",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-14T04:54:54Z",
+  "createdAt": "2025-08-14T04:54:54Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1134,
+        "url": "https://github.com/BrianCLong/summit/pull/1134",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump cross-env from 7.0.3 to 10.0.0 in /server"
+      },
+      {
+        "number": 11882,
+        "url": "https://github.com/BrianCLong/summit/pull/11882",
+        "mergedAt": null,
+        "title": "Add API documentation and validation layers"
+      },
+      {
+        "number": 11874,
+        "url": "https://github.com/BrianCLong/summit/pull/11874",
+        "mergedAt": null,
+        "title": "Build Resilience Lab with automated chaos drills"
+      },
+      {
+        "number": 11894,
+        "url": "https://github.com/BrianCLong/summit/pull/11894",
+        "mergedAt": null,
+        "title": "Build Advanced Attribution and Identity Resolution Platform"
+      },
+      {
+        "number": 11774,
+        "url": "https://github.com/BrianCLong/summit/pull/11774",
+        "mergedAt": "2025-10-20T11:06:07Z",
+        "title": "chore(deps): bump the js-dependencies group with 144 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

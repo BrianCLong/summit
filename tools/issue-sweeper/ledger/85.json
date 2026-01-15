@@ -1,0 +1,239 @@
+{
+  "issue_number": 85,
+  "title": "Bootstrap Basic GraphQL Schema and Resolvers",
+  "url": "https://github.com/BrianCLong/summit/issues/85",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:13:36Z",
+  "createdAt": "2025-08-12T04:40:25Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15365,
+        "url": "https://github.com/BrianCLong/summit/pull/15365",
+        "mergedAt": null,
+        "title": "test: enforce coverage gate and add API fuzzing contracts"
+      },
+      {
+        "number": 15397,
+        "url": "https://github.com/BrianCLong/summit/pull/15397",
+        "mergedAt": null,
+        "title": "ci: enforce deterministic coverage and turbo segmentation"
+      },
+      {
+        "number": 15251,
+        "url": "https://github.com/BrianCLong/summit/pull/15251",
+        "mergedAt": null,
+        "title": "Refine server test execution and CI dependency locking"
+      },
+      {
+        "number": 14644,
+        "url": "https://github.com/BrianCLong/summit/pull/14644",
+        "mergedAt": "2025-12-27T07:37:10Z",
+        "title": "feat: Streaming Ingest v1 & Active Learning 1.1"
+      },
+      {
+        "number": 13180,
+        "url": "https://github.com/BrianCLong/summit/pull/13180",
+        "mergedAt": "2025-12-04T15:39:12Z",
+        "title": "Build AI governance metrics dashboard with analytics"
+      },
+      {
+        "number": 12108,
+        "url": "https://github.com/BrianCLong/summit/pull/12108",
+        "mergedAt": "2025-11-21T07:03:50Z",
+        "title": "Improve test coverage and reduce code complexity"
+      },
+      {
+        "number": 12882,
+        "url": "https://github.com/BrianCLong/summit/pull/12882",
+        "mergedAt": "2025-12-01T15:41:59Z",
+        "title": "Add AI governance and edge-first value proposition"
+      },
+      {
+        "number": 11999,
+        "url": "https://github.com/BrianCLong/summit/pull/11999",
+        "mergedAt": "2025-11-20T15:01:41Z",
+        "title": "Improve test coverage"
+      },
+      {
+        "number": 12049,
+        "url": "https://github.com/BrianCLong/summit/pull/12049",
+        "mergedAt": "2025-11-21T03:59:08Z",
+        "title": "Add comprehensive tests for new modules"
+      },
+      {
+        "number": 13104,
+        "url": "https://github.com/BrianCLong/summit/pull/13104",
+        "mergedAt": "2025-12-03T01:45:05Z",
+        "title": "Implement OSINT fusion agentic capability"
+      },
+      {
+        "number": 12257,
+        "url": "https://github.com/BrianCLong/summit/pull/12257",
+        "mergedAt": "2025-12-18T03:24:25Z",
+        "title": "Improve test coverage"
+      },
+      {
+        "number": 12689,
+        "url": "https://github.com/BrianCLong/summit/pull/12689",
+        "mergedAt": "2025-12-18T01:39:47Z",
+        "title": "Create copy-paste prompts for Claude Code"
+      },
+      {
+        "number": 11991,
+        "url": "https://github.com/BrianCLong/summit/pull/11991",
+        "mergedAt": null,
+        "title": "Build Data Integration and ETL Pipeline Platform"
+      },
+      {
+        "number": 15322,
+        "url": "https://github.com/BrianCLong/summit/pull/15322",
+        "mergedAt": null,
+        "title": "Add truth operations adversarial defense pack"
+      },
+      {
+        "number": 12100,
+        "url": "https://github.com/BrianCLong/summit/pull/12100",
+        "mergedAt": "2025-11-21T06:30:04Z",
+        "title": "Build canonical graph and entity resolution pipeline"
+      },
+      {
+        "number": 11913,
+        "url": "https://github.com/BrianCLong/summit/pull/11913",
+        "mergedAt": "2025-11-20T10:25:05Z",
+        "title": "Improve test coverage and organization"
+      },
+      {
+        "number": 12007,
+        "url": "https://github.com/BrianCLong/summit/pull/12007",
+        "mergedAt": null,
+        "title": "Build Financial Crime Detection Platform"
+      },
+      {
+        "number": 15337,
+        "url": "https://github.com/BrianCLong/summit/pull/15337",
+        "mergedAt": "2026-01-01T11:37:44Z",
+        "title": "Security Hardening: Container, CI/CD, and Production Config"
+      },
+      {
+        "number": 12512,
+        "url": "https://github.com/BrianCLong/summit/pull/12512",
+        "mergedAt": "2025-12-04T17:45:29Z",
+        "title": "Modernize Build Pipeline with GitHub Actions"
+      },
+      {
+        "number": 12051,
+        "url": "https://github.com/BrianCLong/summit/pull/12051",
+        "mergedAt": "2025-11-21T03:57:20Z",
+        "title": "Design comprehensive backup and recovery system"
+      },
+      {
+        "number": 12091,
+        "url": "https://github.com/BrianCLong/summit/pull/12091",
+        "mergedAt": "2025-11-21T06:30:22Z",
+        "title": "Design multi-layer caching strategy for Summit"
+      },
+      {
+        "number": 12055,
+        "url": "https://github.com/BrianCLong/summit/pull/12055",
+        "mergedAt": "2025-11-21T03:55:21Z",
+        "title": "Build audit logging and compliance system"
+      },
+      {
+        "number": 11890,
+        "url": "https://github.com/BrianCLong/summit/pull/11890",
+        "mergedAt": "2025-11-20T11:02:14Z",
+        "title": "Fix CI/CD pipeline TypeScript compilation errors"
+      },
+      {
+        "number": 13186,
+        "url": "https://github.com/BrianCLong/summit/pull/13186",
+        "mergedAt": "2025-12-04T15:38:58Z",
+        "title": "Implement federated learning for distributed OSINT training"
+      },
+      {
+        "number": 13190,
+        "url": "https://github.com/BrianCLong/summit/pull/13190",
+        "mergedAt": "2025-12-04T15:38:47Z",
+        "title": "Build resilient multi-LLM orchestrator with governance"
+      },
+      {
+        "number": 1302,
+        "url": "https://github.com/BrianCLong/summit/pull/1302",
+        "mergedAt": "2025-09-23T17:05:47Z",
+        "title": "feat: build maestro conductor milestone shell"
+      },
+      {
+        "number": 10126,
+        "url": "https://github.com/BrianCLong/summit/pull/10126",
+        "mergedAt": "2025-10-14T08:39:46Z",
+        "title": "feat: add PerfTrace Jira automation toolkit"
+      },
+      {
+        "number": 10087,
+        "url": "https://github.com/BrianCLong/summit/pull/10087",
+        "mergedAt": "2025-10-14T13:07:24Z",
+        "title": "feat: introduce maestro conductor meta-agent"
+      },
+      {
+        "number": 709,
+        "url": "https://github.com/BrianCLong/summit/pull/709",
+        "mergedAt": "2025-08-21T00:35:08Z",
+        "title": "feat: IntelGraph GA Foundation - Complete Architecture Implementation"
+      },
+      {
+        "number": 10082,
+        "url": "https://github.com/BrianCLong/summit/pull/10082",
+        "mergedAt": "2025-10-14T13:08:04Z",
+        "title": "Add real-time narrative simulation engine"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

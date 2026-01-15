@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/reference-data",
-  "version": "1.0.0",
+  "version": "4.1.4",
   "description": "Reference data management with code lists, lookups, and versioning",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

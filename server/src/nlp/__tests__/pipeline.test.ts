@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { TextIngestionPipeline } from '../pipeline';
 import { TransformerInferenceService } from '../transformers';
 
@@ -67,6 +68,9 @@ describe('Entity Extraction and KG Construction Pipeline', () => {
         // Check if Python script output was integrated
         const org = result.entities.find((e: any) => e.canonicalName === 'Apple');
         expect(org).toBeDefined();
+        if (!org) {
+            throw new Error('Expected Apple entity to be present');
+        }
         expect(org.type).toBe('ORG');
 
         const rel = result.relationships.find(r => r.subject === 'Tim Cook' && r.object === 'Apple');

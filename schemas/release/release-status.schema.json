@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://intelgraph.com/schemas/release/release-status.schema.json",
+  "title": "Release Status",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "status",
+    "blockedReasons",
+    "checks",
+    "generatedAt"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schemaVersion": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ready",
+        "blocked"
+      ]
+    },
+    "blockedReasons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "checks": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "required": [
+            "ok"
+          ],
+          "additionalProperties": true,
+          "properties": {
+            "ok": {
+              "type": "boolean"
+            },
+            "path": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tag": {
+      "type": "string"
+    },
+    "channel": {
+      "type": "string"
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

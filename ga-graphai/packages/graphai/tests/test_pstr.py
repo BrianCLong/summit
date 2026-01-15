@@ -4,7 +4,7 @@ import sys
 from fastapi.testclient import TestClient
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1] / "src"))
-from main import app  # noqa: E402
+from main import app
 
 client = TestClient(app)
 
@@ -29,7 +29,12 @@ def _base_payload():
 def test_pstr_skips_forbidden_nodes():
     payload = _base_payload()
     payload["nodes"] = [
-        {"id": "allowed", "text": "trusted alpha document", "sensitivity_labels": ["public"], "provenance": {"trust": 0.9}},
+        {
+            "id": "allowed",
+            "text": "trusted alpha document",
+            "sensitivity_labels": ["public"],
+            "provenance": {"trust": 0.9},
+        },
         {"id": "forbidden", "text": "secret alpha", "sensitivity_labels": ["forbidden"]},
     ]
     payload["edges"] = []
@@ -46,7 +51,12 @@ def test_pstr_applies_redaction_for_missing_clearance():
     payload = _base_payload()
     payload["user_ctx"]["clearances"] = ["public"]
     payload["nodes"] = [
-        {"id": "sensitive", "text": "trusted alpha", "sensitivity_labels": ["restricted"], "provenance": {"trust": 0.6}},
+        {
+            "id": "sensitive",
+            "text": "trusted alpha",
+            "sensitivity_labels": ["restricted"],
+            "provenance": {"trust": 0.6},
+        },
     ]
     payload["edges"] = []
 
@@ -59,8 +69,18 @@ def test_pstr_applies_redaction_for_missing_clearance():
 def test_pstr_prefers_higher_trust_paths():
     payload = _base_payload()
     payload["nodes"] = [
-        {"id": "high-trust", "text": "trusted alpha", "sensitivity_labels": ["public"], "provenance": {"trust": 0.95}},
-        {"id": "low-trust", "text": "trusted alpha", "sensitivity_labels": ["public"], "provenance": {"trust": 0.2}},
+        {
+            "id": "high-trust",
+            "text": "trusted alpha",
+            "sensitivity_labels": ["public"],
+            "provenance": {"trust": 0.95},
+        },
+        {
+            "id": "low-trust",
+            "text": "trusted alpha",
+            "sensitivity_labels": ["public"],
+            "provenance": {"trust": 0.2},
+        },
     ]
     payload["edges"] = []
 
@@ -74,14 +94,41 @@ def test_pstr_tracks_cache_hits_for_duplicate_edges():
     payload = _base_payload()
     payload["query"] = "beta"
     payload["nodes"] = [
-        {"id": "seed", "label": "seed node", "sensitivity_labels": ["public"], "provenance": {"trust": 0.4}},
-        {"id": "beta", "text": "beta node", "sensitivity_labels": ["public"], "provenance": {"trust": 0.7}},
+        {
+            "id": "seed",
+            "label": "seed node",
+            "sensitivity_labels": ["public"],
+            "provenance": {"trust": 0.4},
+        },
+        {
+            "id": "beta",
+            "text": "beta node",
+            "sensitivity_labels": ["public"],
+            "provenance": {"trust": 0.7},
+        },
     ]
     payload["edges"] = [
-        {"source": "seed", "target": "beta", "rel_type": "mentions", "sensitivity_labels": ["public"], "provenance": {"trust": 0.6}},
-        {"source": "seed", "target": "beta", "rel_type": "mentions", "sensitivity_labels": ["public"], "provenance": {"trust": 0.6}},
+        {
+            "source": "seed",
+            "target": "beta",
+            "rel_type": "mentions",
+            "sensitivity_labels": ["public"],
+            "provenance": {"trust": 0.6},
+        },
+        {
+            "source": "seed",
+            "target": "beta",
+            "rel_type": "mentions",
+            "sensitivity_labels": ["public"],
+            "provenance": {"trust": 0.6},
+        },
     ]
-    payload["budgets"] = {"max_hops": 2, "max_expansions": 10, "seed_k": 2, "rel_whitelist": ["mentions"]}
+    payload["budgets"] = {
+        "max_hops": 2,
+        "max_expansions": 10,
+        "seed_k": 2,
+        "rel_whitelist": ["mentions"],
+    }
 
     response = client.post("/retrieval/pstr", json=payload)
     assert response.status_code == 200

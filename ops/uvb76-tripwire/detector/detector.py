@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Passive HF station detector for UVB-76 and related networks."""
+
 from __future__ import annotations
 
 import argparse

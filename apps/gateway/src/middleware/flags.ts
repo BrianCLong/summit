@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { FlagClient, FlagContext } from "../../../../libs/flags/node";
+import { FlagClient, FlagContext } from "@intelgraph/flags/index";
 
 const client = new FlagClient({ env: process.env.NODE_ENV ?? "dev" });
 const policyFlag = client.catalogKey("feature.policy-guard");

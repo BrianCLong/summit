@@ -1,7 +1,7 @@
 import logging
 import random
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from confluent_kafka import KafkaException, Producer
 from confluent_kafka.schema_registry import SchemaRegistryClient
@@ -120,7 +120,7 @@ class KafkaLoadTester:
 
         return {
             "source": random.choice(sample_sources),
-            "timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds") + "Z",
+            "timestamp": datetime.now(UTC).isoformat(timespec="seconds") + "Z",
             "author_id": f"user_{random.randint(100000, 999999)}",
             "content": random.choice(sample_contents),
             "language": random.choice(sample_languages),
@@ -152,7 +152,7 @@ class KafkaLoadTester:
                     on_delivery=self._delivery_report,
                 )
                 self.producer.poll(0)  # Poll for callbacks
-                logger.debug(f"Produced message {i+1}/{num_messages}")
+                logger.debug(f"Produced message {i + 1}/{num_messages}")
                 time.sleep(interval_sec)
             except BufferError:
                 logger.warning(

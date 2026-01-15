@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { EntityResolutionService } from '../EntityResolutionService.js';
 import { createHash } from 'node:crypto';
 

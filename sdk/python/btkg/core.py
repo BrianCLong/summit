@@ -1,11 +1,12 @@
 """Core implementation for the Bitemporal Knowledge Graph (BTKG)."""
+
 from __future__ import annotations
 
+import json
+from collections.abc import Iterable, Iterator, Mapping, Sequence
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, Iterable, Iterator, List, Mapping, Optional, Sequence, Tuple
-import json
-from copy import deepcopy
 
 try:  # Optional dependency used for hashing
     import networkx as nx
@@ -25,11 +26,11 @@ class EdgeVersion:
     edge_id: str
     source: str
     target: str
-    properties: Dict[str, object]
+    properties: dict[str, object]
     valid_start: datetime
-    valid_end: Optional[datetime]
+    valid_end: datetime | None
     tx_start: datetime
-    tx_end: Optional[datetime] = None
+    tx_end: datetime | None = None
 
     def is_valid(self, valid_time: datetime, tx_time: datetime) -> bool:
         """Return ``True`` when the version is active for the provided times."""
@@ -42,7 +43,7 @@ class EdgeVersion:
         if self.tx_end is None or tx_time < self.tx_end:
             self.tx_end = tx_time
 
-    def to_snapshot_edge(self) -> "SnapshotEdge":
+    def to_snapshot_edge(self) -> SnapshotEdge:
         return SnapshotEdge(
             edge_id=self.edge_id,
             source=self.source,
@@ -50,7 +51,7 @@ class EdgeVersion:
             properties=tuple(sorted(deepcopy(self.properties).items())),
         )
 
-    def to_record(self) -> Dict[str, object]:
+    def to_record(self) -> dict[str, object]:
         """Serialize the version for persistence."""
         return {
             "edge_id": self.edge_id,
@@ -64,7 +65,7 @@ class EdgeVersion:
         }
 
     @staticmethod
-    def from_record(record: Mapping[str, object]) -> "EdgeVersion":
+    def from_record(record: Mapping[str, object]) -> EdgeVersion:
         """Create a version from serialized state."""
         return EdgeVersion(
             edge_id=str(record["edge_id"]),
@@ -85,9 +86,9 @@ class SnapshotEdge:
     edge_id: str
     source: str
     target: str
-    properties: Tuple[Tuple[str, object], ...]
+    properties: tuple[tuple[str, object], ...]
 
-    def as_dict(self) -> Dict[str, object]:
+    def as_dict(self) -> dict[str, object]:
         return {
             "edge_id": self.edge_id,
             "source": self.source,
@@ -95,7 +96,7 @@ class SnapshotEdge:
             "properties": {k: v for k, v in self.properties},
         }
 
-    def canonical(self) -> Tuple[str, str, Tuple[Tuple[str, object], ...]]:
+    def canonical(self) -> tuple[str, str, tuple[tuple[str, object], ...]]:
         return (self.source, self.target, self.properties)
 
 
@@ -103,27 +104,29 @@ class SnapshotEdge:
 class GraphDiff:
     """Deterministic diff between two graph snapshots."""
 
-    added_edges: Tuple[SnapshotEdge, ...]
-    removed_edges: Tuple[SnapshotEdge, ...]
-    changed_edges: Tuple[Tuple[SnapshotEdge, SnapshotEdge], ...]
+    added_edges: tuple[SnapshotEdge, ...]
+    removed_edges: tuple[SnapshotEdge, ...]
+    changed_edges: tuple[tuple[SnapshotEdge, SnapshotEdge], ...]
 
 
 class GraphSnapshot:
     """Read-only view of a graph at a specific bitemporal point."""
 
     def __init__(self, edges: Sequence[SnapshotEdge]):
-        self._edges: Tuple[SnapshotEdge, ...] = tuple(sorted(edges, key=lambda e: e.edge_id))
-        self._nodes: Tuple[str, ...] = tuple(sorted({n for e in self._edges for n in (e.source, e.target)}))
+        self._edges: tuple[SnapshotEdge, ...] = tuple(sorted(edges, key=lambda e: e.edge_id))
+        self._nodes: tuple[str, ...] = tuple(
+            sorted({n for e in self._edges for n in (e.source, e.target)})
+        )
 
     @property
-    def edges(self) -> Tuple[SnapshotEdge, ...]:
+    def edges(self) -> tuple[SnapshotEdge, ...]:
         return self._edges
 
     @property
-    def nodes(self) -> Tuple[str, ...]:
+    def nodes(self) -> tuple[str, ...]:
         return self._nodes
 
-    def edge_map(self) -> Dict[str, SnapshotEdge]:
+    def edge_map(self) -> dict[str, SnapshotEdge]:
         return {edge.edge_id: edge for edge in self._edges}
 
     def isomorphic_hash(self) -> str:
@@ -150,7 +153,7 @@ class BTKG:
     """In-memory bitemporal property graph store."""
 
     def __init__(self) -> None:
-        self._edge_versions: Dict[str, List[EdgeVersion]] = {}
+        self._edge_versions: dict[str, list[EdgeVersion]] = {}
 
     def assert_edge(
         self,
@@ -159,9 +162,9 @@ class BTKG:
         target: str,
         properties: Mapping[str, object],
         valid_from: datetime,
-        valid_to: Optional[datetime] = None,
+        valid_to: datetime | None = None,
         *,
-        tx_time: Optional[datetime] = None,
+        tx_time: datetime | None = None,
     ) -> None:
         """Assert or correct an edge over a validity interval."""
         tx_time = tx_time or datetime.utcnow()
@@ -183,7 +186,7 @@ class BTKG:
 
     def as_of(self, valid_time: datetime, tx_time: datetime) -> GraphSnapshot:
         """Return the graph snapshot as of the provided valid and transaction times."""
-        edges: List[SnapshotEdge] = []
+        edges: list[SnapshotEdge] = []
         for versions in self._edge_versions.values():
             for version in versions:
                 if version.is_valid(valid_time, tx_time):
@@ -219,7 +222,7 @@ class BTKG:
         pq.write_table(table, path)
 
     @classmethod
-    def from_parquet(cls, path: str) -> "BTKG":
+    def from_parquet(cls, path: str) -> BTKG:
         """Restore a graph from a Parquet file."""
         import pyarrow.parquet as pq
 
@@ -238,11 +241,11 @@ class BTKG:
             yield from versions
 
 
-def _contains(start: datetime, end: Optional[datetime], value: datetime) -> bool:
+def _contains(start: datetime, end: datetime | None, value: datetime) -> bool:
     return start <= value and (end is None or value < end)
 
 
-def _parse_datetime(value: Optional[object]) -> Optional[datetime]:
+def _parse_datetime(value: object | None) -> datetime | None:
     if value in (None, "", "null"):
         return None
     if isinstance(value, datetime):

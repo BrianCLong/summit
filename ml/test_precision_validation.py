@@ -250,8 +250,10 @@ def main():
                     "corp" in str(entity.get("name", "")).lower()
                     or "inc" in str(entity.get("name", "")).lower()
                     or "llc" in str(entity.get("name", "")).lower()
-                    or len(str(entity.get("name", ""))) > 0
-                    and str(entity.get("name", ""))[0].isupper()
+                    or (
+                        len(str(entity.get("name", ""))) > 0
+                        and str(entity.get("name", ""))[0].isupper()
+                    )
                     for entity in [example.get("entity_a", {}), example.get("entity_b", {})]
                 )
             ]

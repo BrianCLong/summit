@@ -9,7 +9,8 @@
  * @module onboarding/types
  */
 
-import { GovernanceVerdict, DataClassification } from '../types/data-envelope.js';
+import { DataClassification } from '../types/data-envelope.js';
+import type { GovernanceVerdict } from '../types/data-envelope.js';
 
 /**
  * User personas for role-based onboarding paths

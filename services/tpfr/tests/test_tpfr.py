@@ -18,8 +18,7 @@ def create_sample_tables():
     ]
     shuffled = list(reversed(base))
     jittered = [
-        {"id": row["id"], "name": row["name"].upper(), "score": row["score"] + 0.02}
-        for row in base
+        {"id": row["id"], "name": row["name"].upper(), "score": row["score"] + 0.02} for row in base
     ]
     unrelated = [
         {"user_id": 11, "city": "Paris", "visits": 10},
@@ -64,4 +63,3 @@ def test_diff_explainer_highlights_schema_changes():
     assert unrelated_diff["schema_changes"]["removed"] == ["id", "name", "score"]
     assert unrelated_diff["schema_changes"]["added"] == ["city", "user_id", "visits"]
     assert unrelated_diff["overall_similarity"] < 0.4
-

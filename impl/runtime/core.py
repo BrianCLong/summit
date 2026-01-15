@@ -1,12 +1,14 @@
-from typing import Any, Dict
+from typing import Any
+
 from .serving import ModelServingLayer
+
 
 class OrchestrationCore:
     def __init__(self):
         self.serving_layer = ModelServingLayer()
         print("OrchestrationCore initialized")
 
-    async def execute_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute_request(self, request: dict[str, Any]) -> dict[str, Any]:
         """
         Executes a request by constructing and running an execution DAG.
         """
@@ -20,17 +22,15 @@ class OrchestrationCore:
             "id": "chatcmpl-123",
             "object": "chat.completion",
             "created": 1677652288,
-            "choices": [{
-                "index": 0,
-                "message": {
-                    "role": "assistant",
-                    "content": generated_text,
-                },
-                "finish_reason": "stop"
-            }],
-            "usage": {
-                "prompt_tokens": 9,
-                "completion_tokens": 12,
-                "total_tokens": 21
-            }
+            "choices": [
+                {
+                    "index": 0,
+                    "message": {
+                        "role": "assistant",
+                        "content": generated_text,
+                    },
+                    "finish_reason": "stop",
+                }
+            ],
+            "usage": {"prompt_tokens": 9, "completion_tokens": 12, "total_tokens": 21},
         }

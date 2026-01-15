@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from automation import (
@@ -221,14 +221,14 @@ class WorkcellOrchestrator:
             raise PolicyViolation(f"unknown agent {agent_name}")
 
         agent = self._agents[agent_name]
-        started_at = datetime.now(timezone.utc)
+        started_at = datetime.now(UTC)
         results: list[TaskResult] = []
 
         for task in tasks:
             result = self._execute_task(task, agent)
             results.append(result)
 
-        finished_at = datetime.now(timezone.utc)
+        finished_at = datetime.now(UTC)
         return ExecutionReport(
             order_id=order_id,
             submitted_by=submitted_by,
@@ -308,7 +308,7 @@ class WorkcellOrchestrator:
             "tool": task.tool,
             "status": status,
             "agent": agent.name,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
         if reason:
             record["reason"] = reason
@@ -436,7 +436,7 @@ class MissionControlOrchestrator:
         tasks: Sequence[MissionTask],
     ) -> ExecutionReport:
         if not tasks:
-            started_at = datetime.now(timezone.utc)
+            started_at = datetime.now(UTC)
             return ExecutionReport(
                 order_id=order_id,
                 submitted_by=submitted_by,
@@ -452,7 +452,7 @@ class MissionControlOrchestrator:
         status_by_id: dict[str, str] = {}
         results: list[TaskResult] = []
         extra_provenance: list[dict[str, Any]] = []
-        started_at = datetime.now(timezone.utc)
+        started_at = datetime.now(UTC)
         baseline = len(self._base.provenance)
 
         while pending:
@@ -501,7 +501,7 @@ class MissionControlOrchestrator:
                         "tool": task.spec.tool,
                         "status": "blocked",
                         "agent": "unassigned",
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "timestamp": datetime.now(UTC).isoformat(),
                         "reason": message,
                     }
                 )
@@ -535,12 +535,12 @@ class MissionControlOrchestrator:
                         "tool": task.spec.tool,
                         "status": "blocked",
                         "agent": "unassigned",
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "timestamp": datetime.now(UTC).isoformat(),
                         "reason": reason,
                     }
                 )
 
-        finished_at = datetime.now(timezone.utc)
+        finished_at = datetime.now(UTC)
         provenance = self._base.provenance[baseline:]
         provenance.extend(extra_provenance)
         return ExecutionReport(

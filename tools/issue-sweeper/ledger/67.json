@@ -1,0 +1,188 @@
+{
+  "issue_number": 67,
+  "title": "Integrate Basic OSINT Connector (e.g., WHOIS API)",
+  "url": "https://github.com/BrianCLong/summit/issues/67",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    },
+    {
+      "id": 9095918371,
+      "node_id": "LA_kwDOPaNncM8AAAACHiizIw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:plugins",
+      "name": "area:plugins",
+      "color": "d93f0b",
+      "default": false,
+      "description": "Plugins area"
+    }
+  ],
+  "updatedAt": "2025-08-12T04:39:21Z",
+  "createdAt": "2025-08-12T04:39:21Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15172,
+        "url": "https://github.com/BrianCLong/summit/pull/15172",
+        "mergedAt": "2025-12-31T03:31:39Z",
+        "title": "Prepare Summit MVP for general availability"
+      },
+      {
+        "number": 12307,
+        "url": "https://github.com/BrianCLong/summit/pull/12307",
+        "mergedAt": "2025-12-18T03:11:14Z",
+        "title": "Revival: GraphQL Security & Performance Overhaul"
+      },
+      {
+        "number": 15314,
+        "url": "https://github.com/BrianCLong/summit/pull/15314",
+        "mergedAt": "2026-01-01T11:39:25Z",
+        "title": "Initialize Adaptive Advantage Innovation Sprint"
+      },
+      {
+        "number": 15255,
+        "url": "https://github.com/BrianCLong/summit/pull/15255",
+        "mergedAt": "2026-01-01T07:29:52Z",
+        "title": "feat: enforce api auth and rbac protections"
+      },
+      {
+        "number": 15127,
+        "url": "https://github.com/BrianCLong/summit/pull/15127",
+        "mergedAt": "2025-12-30T21:20:45Z",
+        "title": "chore(deps): bump docker/setup-qemu-action from 2 to 3"
+      },
+      {
+        "number": 10107,
+        "url": "https://github.com/BrianCLong/summit/pull/10107",
+        "mergedAt": "2025-10-14T11:52:52Z",
+        "title": "docs: refresh chairman wolf committee report"
+      },
+      {
+        "number": 11839,
+        "url": "https://github.com/BrianCLong/summit/pull/11839",
+        "mergedAt": "2025-11-20T09:47:36Z",
+        "title": "Docs: refresh onboarding and runbooks"
+      },
+      {
+        "number": 11873,
+        "url": "https://github.com/BrianCLong/summit/pull/11873",
+        "mergedAt": "2025-11-20T14:33:58Z",
+        "title": "Optimize database performance and caching"
+      },
+      {
+        "number": 631,
+        "url": "https://github.com/BrianCLong/summit/pull/631",
+        "mergedAt": null,
+        "title": "chore(deps): bump tqdm from 4.66.1 to 4.67.1"
+      },
+      {
+        "number": 13173,
+        "url": "https://github.com/BrianCLong/summit/pull/13173",
+        "mergedAt": "2025-12-04T15:39:21Z",
+        "title": "Harden triplet runtime with adversarial attestation moats"
+      },
+      {
+        "number": 10095,
+        "url": "https://github.com/BrianCLong/summit/pull/10095",
+        "mergedAt": "2025-10-14T13:05:57Z",
+        "title": "feat: add data retention policy engine"
+      },
+      {
+        "number": 13058,
+        "url": "https://github.com/BrianCLong/summit/pull/13058",
+        "mergedAt": "2025-12-04T15:40:49Z",
+        "title": "Add delivery guardrails workflows and release assets"
+      },
+      {
+        "number": 1333,
+        "url": "https://github.com/BrianCLong/summit/pull/1333",
+        "mergedAt": "2025-09-23T06:25:39Z",
+        "title": "feat: scaffold ig-rl reinforcement learning service"
+      },
+      {
+        "number": 10123,
+        "url": "https://github.com/BrianCLong/summit/pull/10123",
+        "mergedAt": "2025-10-14T08:40:19Z",
+        "title": "feat: add narrative simulation engine core"
+      },
+      {
+        "number": 11875,
+        "url": "https://github.com/BrianCLong/summit/pull/11875",
+        "mergedAt": "2025-11-20T14:33:52Z",
+        "title": "Build Extensions and Ecosystem Framework"
+      },
+      {
+        "number": 1312,
+        "url": "https://github.com/BrianCLong/summit/pull/1312",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat(conductor): harden build orchestration fabric"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      },
+      {
+        "number": 11920,
+        "url": "https://github.com/BrianCLong/summit/pull/11920",
+        "mergedAt": "2025-11-20T10:05:36Z",
+        "title": "Build predictive analytics and forecasting platform"
+      },
+      {
+        "number": 1204,
+        "url": "https://github.com/BrianCLong/summit/pull/1204",
+        "mergedAt": null,
+        "title": "chore(deps): bump the minor-and-patch group with 70 updates"
+      },
+      {
+        "number": 11918,
+        "url": "https://github.com/BrianCLong/summit/pull/11918",
+        "mergedAt": "2025-11-20T10:21:01Z",
+        "title": "Build mobile apps for iOS and Android"
+      },
+      {
+        "number": 11815,
+        "url": "https://github.com/BrianCLong/summit/pull/11815",
+        "mergedAt": "2025-11-10T13:08:11Z",
+        "title": "chore(deps): bump the js-dependencies group with 34 updates"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

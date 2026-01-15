@@ -1,0 +1,113 @@
+{
+  "issue_number": 267,
+  "title": "chore(deps): bump @bull-board/api from 5.23.0 to 6.12.0 in /server",
+  "url": "https://github.com/BrianCLong/summit/pull/267",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9102204147,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic8w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/javascript",
+      "name": "javascript",
+      "color": "168700",
+      "default": false,
+      "description": "Pull requests that update javascript code"
+    }
+  ],
+  "updatedAt": "2025-08-15T21:09:33Z",
+  "createdAt": "2025-08-14T05:54:25Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15184,
+        "url": "https://github.com/BrianCLong/summit/pull/15184",
+        "mergedAt": "2025-12-31T14:21:30Z",
+        "title": "chore(deps): bump docker/setup-buildx-action from 2 to 3"
+      },
+      {
+        "number": 11901,
+        "url": "https://github.com/BrianCLong/summit/pull/11901",
+        "mergedAt": "2025-11-20T10:25:49Z",
+        "title": "Build proof-carrying publishing with disclosure packager"
+      },
+      {
+        "number": 1297,
+        "url": "https://github.com/BrianCLong/summit/pull/1297",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "feat(phase-3): implement comprehensive test strategy hardening"
+      },
+      {
+        "number": 1286,
+        "url": "https://github.com/BrianCLong/summit/pull/1286",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "feat(phase-3): comprehensive test strategy hardening"
+      },
+      {
+        "number": 13179,
+        "url": "https://github.com/BrianCLong/summit/pull/13179",
+        "mergedAt": "2025-12-04T15:39:15Z",
+        "title": "Plan evaluation-first platform architecture"
+      },
+      {
+        "number": 11872,
+        "url": "https://github.com/BrianCLong/summit/pull/11872",
+        "mergedAt": "2025-11-20T14:34:03Z",
+        "title": "Build autotriage engine for issues and bugs"
+      },
+      {
+        "number": 11918,
+        "url": "https://github.com/BrianCLong/summit/pull/11918",
+        "mergedAt": "2025-11-20T10:21:01Z",
+        "title": "Build mobile apps for iOS and Android"
+      },
+      {
+        "number": 1338,
+        "url": "https://github.com/BrianCLong/summit/pull/1338",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/workflows"
+      },
+      {
+        "number": 1337,
+        "url": "https://github.com/BrianCLong/summit/pull/1337",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/docs"
+      },
+      {
+        "number": 1336,
+        "url": "https://github.com/BrianCLong/summit/pull/1336",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/deps"
+      },
+      {
+        "number": 1335,
+        "url": "https://github.com/BrianCLong/summit/pull/1335",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/hardening"
+      },
+      {
+        "number": 1334,
+        "url": "https://github.com/BrianCLong/summit/pull/1334",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/features"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,6 +1,7 @@
+from difflib import SequenceMatcher
+
 from fastapi import FastAPI
 from pydantic import BaseModel
-from difflib import SequenceMatcher
 
 app = FastAPI(title="er-service")
 

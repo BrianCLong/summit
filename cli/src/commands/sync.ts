@@ -8,8 +8,8 @@ import type { CLIConfig } from '../lib/config.js';
 import { getProfile } from '../lib/config.js';
 import { GraphClient } from '../lib/graph-client.js';
 import { PgVectorSync, type SyncStatus } from '../lib/pgvector-sync.js';
-import { formatOutput, success, error, formatTable, progress } from '../utils/output.js';
-import { handleError, ConnectionError, SyncError } from '../utils/errors.js';
+import { success, error, formatTable } from '../utils/output.js';
+import { handleError, ConnectionError } from '../utils/errors.js';
 
 export function registerSyncCommands(program: Command, config: CLIConfig): void {
   const sync = program

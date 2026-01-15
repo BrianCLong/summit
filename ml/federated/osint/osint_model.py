@@ -6,7 +6,6 @@ and relationship prediction.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -40,7 +39,9 @@ class OSINTClassifier:
             "bias_output": np.zeros(num_classes),
         }
 
-        logger.info(f"OSINTClassifier initialized: {num_classes} classes, {embedding_dim}D embeddings")
+        logger.info(
+            f"OSINTClassifier initialized: {num_classes} classes, {embedding_dim}D embeddings"
+        )
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         """Forward pass"""
@@ -60,14 +61,14 @@ class OSINTClassifier:
 
         return probs
 
-    def predict(self, x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def predict(self, x: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """Predict class and confidence"""
         probs = self.forward(x)
         classes = np.argmax(probs, axis=-1)
         confidences = np.max(probs, axis=-1)
         return classes, confidences
 
-    def get_parameters(self) -> List[np.ndarray]:
+    def get_parameters(self) -> list[np.ndarray]:
         """Get model parameters as list"""
         return [
             self.weights["embedding"],
@@ -77,7 +78,7 @@ class OSINTClassifier:
             self.weights["bias_output"],
         ]
 
-    def set_parameters(self, parameters: List[np.ndarray]) -> None:
+    def set_parameters(self, parameters: list[np.ndarray]) -> None:
         """Set model parameters from list"""
         keys = ["embedding", "hidden", "output", "bias_hidden", "bias_output"]
         for key, param in zip(keys, parameters):
@@ -113,11 +114,11 @@ class OSINTEmbedder:
 
         return normalized
 
-    def get_parameters(self) -> List[np.ndarray]:
+    def get_parameters(self) -> list[np.ndarray]:
         """Get model parameters"""
         return [self.weights["projection"], self.weights["bias"]]
 
-    def set_parameters(self, parameters: List[np.ndarray]) -> None:
+    def set_parameters(self, parameters: list[np.ndarray]) -> None:
         """Set model parameters"""
         self.weights["projection"] = parameters[0]
         self.weights["bias"] = parameters[1]

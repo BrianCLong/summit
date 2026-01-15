@@ -7,8 +7,9 @@ from hypothesis import strategies as st
 SERVICE_SRC = Path(__file__).resolve().parents[1] / "src"
 sys.path.append(str(SERVICE_SRC))
 
-from models import EvaluationRequest, Rule
 from rule_engine import evaluate
+
+from models import EvaluationRequest, Rule
 
 
 def test_required_rule_triggers():

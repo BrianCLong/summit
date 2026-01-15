@@ -1,12 +1,8 @@
 import express, { Router } from 'express';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { readFile, access } from 'fs/promises';
 import yaml from 'js-yaml';
 import { createHash } from 'crypto';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const swaggerUiHtml = (specUrl: string) => `<!doctype html>
 <html>
@@ -59,17 +55,18 @@ const computeEtag = (contents: string) =>
 
 const loadSpec = async (specPath: string) => {
   await access(specPath);
-  const yamlContents = await readFile(specPath, 'utf-8');
-  const specDocument = yaml.load(yamlContents) as Record<string, unknown>;
+  const yamlContents = await readFile(specPath, { encoding: 'utf-8' });
+  const yamlText = String(yamlContents);
+  const specDocument = yaml.load(yamlText) as Record<string, unknown>;
 
   if (!specDocument || typeof specDocument !== 'object' || !('openapi' in specDocument)) {
     throw new Error(`Invalid OpenAPI document at ${specPath}`);
   }
 
   return {
-    yamlContents,
+    yamlContents: yamlText,
     specDocument,
-    etag: computeEtag(yamlContents),
+    etag: computeEtag(yamlText),
   };
 };
 
@@ -78,7 +75,7 @@ export const createApiDocsRouter = async (
 ): Promise<Router> => {
   const router = express.Router();
   const specPath =
-    options.specPath ?? path.resolve(__dirname, '../../..', 'openapi/spec.yaml');
+    options.specPath ?? path.resolve(process.cwd(), 'openapi', 'spec.yaml');
   const specPublicPath = options.specPublicPath ?? '/api/docs/openapi.json';
 
   const { yamlContents, specDocument, etag } = await loadSpec(specPath);

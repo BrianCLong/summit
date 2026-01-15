@@ -1,0 +1,131 @@
+{
+  "issue_number": 313,
+  "title": "AI Metrics Dashboard in Grafana",
+  "url": "https://github.com/BrianCLong/summit/issues/313",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9121349718,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zAVg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type-feature",
+      "name": "type-feature",
+      "color": "0075ca",
+      "default": false,
+      "description": "Feature development"
+    },
+    {
+      "id": 9121485634,
+      "node_id": "LA_kwDOPaNncM8AAAACH67TQg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-performance",
+      "name": "epic-performance",
+      "color": "45B7D1",
+      "default": false,
+      "description": "Performance and monitoring"
+    },
+    {
+      "id": 9121486304,
+      "node_id": "LA_kwDOPaNncM8AAAACH67V4A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/sprint-7",
+      "name": "sprint-7",
+      "color": "A29BFE",
+      "default": false,
+      "description": "Sprint 7: Insight Experience Polish & Scaling"
+    }
+  ],
+  "updatedAt": "2025-08-16T18:34:08Z",
+  "createdAt": "2025-08-16T18:34:08Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12247,
+        "url": "https://github.com/BrianCLong/summit/pull/12247",
+        "mergedAt": "2025-12-18T03:32:11Z",
+        "title": "Fix a small todo"
+      },
+      {
+        "number": 11841,
+        "url": "https://github.com/BrianCLong/summit/pull/11841",
+        "mergedAt": "2025-11-20T09:48:29Z",
+        "title": "feat: implement IntelGraph ML benchmarking and auto-tuning stack"
+      },
+      {
+        "number": 13148,
+        "url": "https://github.com/BrianCLong/summit/pull/13148",
+        "mergedAt": "2025-12-17T05:36:11Z",
+        "title": "C6 — CI Time Budget Enforcer"
+      },
+      {
+        "number": 13106,
+        "url": "https://github.com/BrianCLong/summit/pull/13106",
+        "mergedAt": "2025-12-03T04:36:27Z",
+        "title": "Add spectrum analysis and sensor fusion integration"
+      },
+      {
+        "number": 13165,
+        "url": "https://github.com/BrianCLong/summit/pull/13165",
+        "mergedAt": "2025-12-17T05:34:42Z",
+        "title": "Unified prompt governance dashboard 1"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      },
+      {
+        "number": 1338,
+        "url": "https://github.com/BrianCLong/summit/pull/1338",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/workflows"
+      },
+      {
+        "number": 1337,
+        "url": "https://github.com/BrianCLong/summit/pull/1337",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/docs"
+      },
+      {
+        "number": 1336,
+        "url": "https://github.com/BrianCLong/summit/pull/1336",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/deps"
+      },
+      {
+        "number": 1335,
+        "url": "https://github.com/BrianCLong/summit/pull/1335",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/hardening"
+      },
+      {
+        "number": 1334,
+        "url": "https://github.com/BrianCLong/summit/pull/1334",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/features"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

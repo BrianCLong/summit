@@ -90,7 +90,7 @@ async def export_audit(investigation_id: str, format: str = "JSON"):
         <h1>IntelGraph Audit Report</h1>
         <p>Investigation: {investigation_id}</p>
         <table border='1'>
-            <tr>{''.join(f'<th>{k}</th>' for k in entries[0].keys())}</tr>
+            <tr>{"".join(f"<th>{k}</th>" for k in entries[0].keys())}</tr>
             {rows}
         </table>
         """

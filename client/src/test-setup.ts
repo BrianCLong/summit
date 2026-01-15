@@ -116,7 +116,7 @@ Object.defineProperty(URL, 'revokeObjectURL', {
 });
 
 // Mock WebSocket
-global.WebSocket = jest.fn().mockImplementation(() => ({
+const MockWebSocket = jest.fn().mockImplementation(() => ({
   send: jest.fn(),
   close: jest.fn(),
   addEventListener: jest.fn(),
@@ -127,6 +127,13 @@ global.WebSocket = jest.fn().mockImplementation(() => ({
   CLOSING: 2,
   CLOSED: 3,
 }));
+/* eslint-disable @typescript-eslint/no-explicit-any */
+(MockWebSocket as any).CONNECTING = 0;
+(MockWebSocket as any).OPEN = 1;
+(MockWebSocket as any).CLOSING = 2;
+(MockWebSocket as any).CLOSED = 3;
+global.WebSocket = MockWebSocket as any;
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 // Mock fetch
 global.fetch = jest.fn(() =>

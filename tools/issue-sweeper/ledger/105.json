@@ -1,0 +1,197 @@
+{
+  "issue_number": 105,
+  "title": "Set Up Basic Testing Framework (Jest/Cypress)",
+  "url": "https://github.com/BrianCLong/summit/issues/105",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:14:49Z",
+  "createdAt": "2025-08-12T04:40:56Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14415,
+        "url": "https://github.com/BrianCLong/summit/pull/14415",
+        "mergedAt": "2025-12-24T19:54:35Z",
+        "title": "Codex 105: Bulk Operations Framework"
+      },
+      {
+        "number": 13603,
+        "url": "https://github.com/BrianCLong/summit/pull/13603",
+        "mergedAt": "2025-12-15T10:48:20Z",
+        "title": "deps(docker): bump anchore/syft from v0.105.1 to v1.38.2"
+      },
+      {
+        "number": 15327,
+        "url": "https://github.com/BrianCLong/summit/pull/15327",
+        "mergedAt": null,
+        "title": "feat: enforce agent attestations and diff risk gates"
+      },
+      {
+        "number": 15276,
+        "url": "https://github.com/BrianCLong/summit/pull/15276",
+        "mergedAt": "2026-01-01T07:47:29Z",
+        "title": "GA Gate: Accessibility lint + keyboard smoke tests (CI-required)"
+      },
+      {
+        "number": 1720,
+        "url": "https://github.com/BrianCLong/summit/pull/1720",
+        "mergedAt": null,
+        "title": "chore(deps): bump anchore/syft from v0.105.1 to v1.33.0"
+      },
+      {
+        "number": 13057,
+        "url": "https://github.com/BrianCLong/summit/pull/13057",
+        "mergedAt": "2025-12-04T15:40:52Z",
+        "title": "ci: add golden path gate workflow"
+      },
+      {
+        "number": 322,
+        "url": "https://github.com/BrianCLong/summit/pull/322",
+        "mergedAt": "2025-08-16T22:23:16Z",
+        "title": "feat: add GNN node classifier and close issues"
+      },
+      {
+        "number": 10126,
+        "url": "https://github.com/BrianCLong/summit/pull/10126",
+        "mergedAt": "2025-10-14T08:39:46Z",
+        "title": "feat: add PerfTrace Jira automation toolkit"
+      },
+      {
+        "number": 11782,
+        "url": "https://github.com/BrianCLong/summit/pull/11782",
+        "mergedAt": "2025-10-24T19:45:25Z",
+        "title": "chore(deps): bump playwright and @playwright/test in /conductor-ui/frontend"
+      },
+      {
+        "number": 11779,
+        "url": "https://github.com/BrianCLong/summit/pull/11779",
+        "mergedAt": "2025-10-22T15:51:49Z",
+        "title": "chore(deps): bump playwright and @playwright/test in /client"
+      },
+      {
+        "number": 11776,
+        "url": "https://github.com/BrianCLong/summit/pull/11776",
+        "mergedAt": "2025-10-20T19:09:45Z",
+        "title": "chore(deps): bump playwright and @playwright/test in /intelgraph"
+      },
+      {
+        "number": 11775,
+        "url": "https://github.com/BrianCLong/summit/pull/11775",
+        "mergedAt": "2025-10-20T18:15:01Z",
+        "title": "chore(deps): bump playwright and @playwright/test in /server"
+      },
+      {
+        "number": 11908,
+        "url": "https://github.com/BrianCLong/summit/pull/11908",
+        "mergedAt": "2025-11-20T10:25:29Z",
+        "title": "Establish charts as deployment golden path"
+      },
+      {
+        "number": 10105,
+        "url": "https://github.com/BrianCLong/summit/pull/10105",
+        "mergedAt": "2025-10-14T11:52:58Z",
+        "title": "feat: add govbrief research brief pipeline"
+      },
+      {
+        "number": 1289,
+        "url": "https://github.com/BrianCLong/summit/pull/1289",
+        "mergedAt": "2025-09-23T06:48:53Z",
+        "title": "Phase 5: Comprehensive Observability & Monitoring Hardening"
+      },
+      {
+        "number": 10130,
+        "url": "https://github.com/BrianCLong/summit/pull/10130",
+        "mergedAt": "2025-10-14T08:36:34Z",
+        "title": "feat: introduce synthetic event booster framework"
+      },
+      {
+        "number": 10129,
+        "url": "https://github.com/BrianCLong/summit/pull/10129",
+        "mergedAt": null,
+        "title": "feat: add cross-database migration rollback engine"
+      },
+      {
+        "number": 1117,
+        "url": "https://github.com/BrianCLong/summit/pull/1117",
+        "mergedAt": "2025-09-03T01:09:14Z",
+        "title": "feat: implement maestro production readiness features and documentation"
+      },
+      {
+        "number": 11893,
+        "url": "https://github.com/BrianCLong/summit/pull/11893",
+        "mergedAt": null,
+        "title": "Build Advanced Metadata Analysis Platform"
+      },
+      {
+        "number": 1284,
+        "url": "https://github.com/BrianCLong/summit/pull/1284",
+        "mergedAt": "2025-09-20T08:06:31Z",
+        "title": "feat(release): enterprise-grade repo consolidation and golden ci pipeline"
+      },
+      {
+        "number": 1285,
+        "url": "https://github.com/BrianCLong/summit/pull/1285",
+        "mergedAt": "2025-09-20T08:06:30Z",
+        "title": "feat(release): enterprise ci/cd foundation - clean slate"
+      },
+      {
+        "number": 1259,
+        "url": "https://github.com/BrianCLong/summit/pull/1259",
+        "mergedAt": null,
+        "title": "Merge conflict-free branches and PRs into main"
+      },
+      {
+        "number": 1265,
+        "url": "https://github.com/BrianCLong/summit/pull/1265",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "Chore/husky v9 cleanup"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

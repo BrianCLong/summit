@@ -1,5 +1,5 @@
 """Pipeline Runners Module"""
 
-from .local_runner import LocalRunner, PipelineRun, TaskResult, RunStatus, TaskStatus
+from .local_runner import LocalRunner, PipelineRun, RunStatus, TaskResult, TaskStatus
 
-__all__ = ["LocalRunner", "PipelineRun", "TaskResult", "RunStatus", "TaskStatus"]
+__all__ = ["LocalRunner", "PipelineRun", "RunStatus", "TaskResult", "TaskStatus"]

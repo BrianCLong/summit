@@ -4,7 +4,7 @@ import sys
 import pytest
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1] / "src"))
-from autonomous_investigator.fusion_pipeline import (  # type: ignore  # noqa: E402
+from autonomous_investigator.fusion_pipeline import (  # type: ignore
     FusionEntity,
     IntelligenceFusionPipeline,
 )

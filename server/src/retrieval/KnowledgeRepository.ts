@@ -120,6 +120,18 @@ export class KnowledgeRepository {
       params.push(query.queryText);
       const qIdx = pIdx;
 
+      const parsedTopK =
+        typeof query.topK === 'number'
+          ? query.topK
+          : typeof query.topK === 'string'
+            ? Number(query.topK)
+            : NaN;
+      const limit = Number.isFinite(parsedTopK)
+        ? Math.min(parsedTopK, 100)
+        : 10;
+      params.push(limit);
+      const limitIdx = qIdx + 1;
+
       const sql = `
         SELECT
           ko.*,
@@ -128,7 +140,7 @@ export class KnowledgeRepository {
         WHERE ${whereConditions.join(' AND ')}
           AND to_tsvector('english', coalesce(ko.title, '') || ' ' || coalesce(ko.body, '')) @@ plainto_tsquery('english', $${qIdx})
         ORDER BY rank DESC
-        LIMIT ${query.topK || 10}
+        LIMIT $${limitIdx}
       `;
 
       const res = await client.query(sql, params);
@@ -178,6 +190,11 @@ export class KnowledgeRepository {
       params.push(vectorStr);
       const vecParamIdx = pIdx;
 
+      // Ensure limit is a safe integer
+      const limit = typeof query.topK === 'number' ? Math.min(query.topK, 100) : 10;
+      params.push(limit);
+      const limitIdx = vecParamIdx + 1;
+
       // Note: We select from knowledge_objects joined with embedding_records
       const sql = `
         SELECT
@@ -187,7 +204,7 @@ export class KnowledgeRepository {
         JOIN embedding_records er ON ko.id = er.object_id
         WHERE ${whereConditions.join(' AND ')}
         ORDER BY similarity DESC
-        LIMIT ${query.topK || 10}
+        LIMIT $${limitIdx}
       `;
 
       const res = await client.query(sql, params);

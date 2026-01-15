@@ -54,9 +54,7 @@ class InferenceRequest(BaseModel):
     node_features: list[list[float]] = Field(..., description="Node feature matrix")
     edge_index: list[list[int]] = Field(..., description="Edge connectivity")
     batch_indices: list[int] | None = Field(None, description="Batch assignment for nodes")
-    batch_size: int | None = Field(
-        None, description="Optional micro-batch size for large graphs"
-    )
+    batch_size: int | None = Field(None, description="Optional micro-batch size for large graphs")
 
 
 class OptimizationRequest(BaseModel):
@@ -245,9 +243,7 @@ async def create_model(config: ModelConfig):
             "status": "ready",
         }
 
-        await ml_state.inference_pipeline.refresh_model(
-            model_id, ml_state.models[model_id]
-        )
+        await ml_state.inference_pipeline.refresh_model(model_id, ml_state.models[model_id])
 
         # Get memory usage
         memory_usage = model.get_memory_usage() if hasattr(model, "get_memory_usage") else None
@@ -264,8 +260,8 @@ async def create_model(config: ModelConfig):
         )
 
     except Exception as e:
-        logger.error(f"Failed to create model: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Model creation failed: {str(e)}")
+        logger.error(f"Failed to create model: {e!s}")
+        raise HTTPException(status_code=500, detail=f"Model creation failed: {e!s}")
 
 
 @app.get("/models")
@@ -412,7 +408,7 @@ async def _train_model_background(
         logger.info(f"Training completed for model {model_id}")
 
     except Exception as e:
-        logger.error(f"Training failed for model {model_id}: {str(e)}")
+        logger.error(f"Training failed for model {model_id}: {e!s}")
         ml_state.models[model_id]["status"] = "error"
 
 
@@ -457,8 +453,8 @@ async def predict(model_id: str, request: InferenceRequest):
         )
 
     except Exception as e:
-        logger.error(f"Inference failed for model {model_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Inference failed: {str(e)}")
+        logger.error(f"Inference failed for model {model_id}: {e!s}")
+        raise HTTPException(status_code=500, detail=f"Inference failed: {e!s}")
 
 
 # Optimization endpoints
@@ -520,8 +516,8 @@ async def optimize_model(model_id: str, request: OptimizationRequest):
         }
 
     except Exception as e:
-        logger.error(f"Optimization failed for model {model_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Optimization failed: {str(e)}")
+        logger.error(f"Optimization failed for model {model_id}: {e!s}")
+        raise HTTPException(status_code=500, detail=f"Optimization failed: {e!s}")
 
 
 # Quantum computing endpoints
@@ -562,8 +558,8 @@ async def quantum_optimize(request: QuantumOptimizationRequest):
         }
 
     except Exception as e:
-        logger.error(f"Quantum optimization failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Quantum optimization failed: {str(e)}")
+        logger.error(f"Quantum optimization failed: {e!s}")
+        raise HTTPException(status_code=500, detail=f"Quantum optimization failed: {e!s}")
 
 
 @app.post("/quantum/feature_map")
@@ -587,8 +583,8 @@ async def quantum_feature_mapping(data: dict[str, list[list[float]]]):
         }
 
     except Exception as e:
-        logger.error(f"Quantum feature mapping failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Quantum feature mapping failed: {str(e)}")
+        logger.error(f"Quantum feature mapping failed: {e!s}")
+        raise HTTPException(status_code=500, detail=f"Quantum feature mapping failed: {e!s}")
 
 
 # Metrics and monitoring endpoints

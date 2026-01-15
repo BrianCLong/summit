@@ -330,7 +330,7 @@ class SymphonyMLOptimizer:
         if optimal_score - current_score > 15:
             recommendation = "defer"
             reasoning = (
-                f"Performance {optimal_score-current_score:.1f}% better at {optimal_hour:02d}:00"
+                f"Performance {optimal_score - current_score:.1f}% better at {optimal_hour:02d}:00"
             )
         elif optimal_score - current_score > 5:
             recommendation = "consider_defer"

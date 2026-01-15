@@ -2,6 +2,7 @@
  * Digital Twin Service Tests
  */
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { DigitalTwinService } from '../services/DigitalTwinService';
 import { AssetType, TwinSyncState, HealthStatus, CreateAssetInput } from '../types/digitalTwin';
 

@@ -1,0 +1,77 @@
+name: Pre-triaged issue
+about: Capture priority, area, and GA posture upfront so automation has clean signals.
+labels: ["triage:needed"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Briefly describe the symptom, request, or experiment.
+      placeholder: e.g., "Graph RAG query returns stale data for entity X."
+    validations: { required: true }
+  - type: textarea
+    id: context
+    attributes:
+      label: Context & impact
+      description: Who is affected and why does this matter?
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority label (automation maps this to a real label)
+      options:
+        - priority:P0
+        - priority:P1
+        - priority:P2
+        - priority:P3
+      description: Choose the priority that best matches the operational impact.
+    validations: { required: true }
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area label (aligns with automation)
+      options:
+        - area:server
+        - area:client
+        - area:web
+        - area:packages
+        - area:cli
+        - area:ci
+        - area:docs
+        - area:governance
+        - area:security
+        - area:release
+      description: Pick the subsystem this depends on.
+    validations: { required: true }
+  - type: dropdown
+    id: type
+    attributes:
+      label: Work type
+      options:
+        - type:bug
+        - type:feature
+        - type:chore
+        - type:security
+        - type:docs
+        - type:ci
+      description: Helps the automation triage the issue guided by taxonomy.
+    validations: { required: true }
+  - type: dropdown
+    id: ga_posture
+    attributes:
+      label: GA posture (if applicable)
+      options:
+        - none
+        - ga:blocker
+        - ga:hard-gate
+        - ga:polish
+        - post-ga
+      description: Choose the closest GA/release posture so automation keeps GA issues out of stale runs.
+  - type: checkboxes
+    id: triage_state
+    attributes:
+      label: Triage flags (optional)
+      options:
+        - triage:blocked
+        - triage:needs-info
+        - triage:duplicate
+        - triage:ready

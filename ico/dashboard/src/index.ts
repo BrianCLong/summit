@@ -78,7 +78,7 @@ export function buildDashboardState(plan: PlanDocument): DashboardState {
 
   const endpoints = plan.plans.map<DashboardEndpoint>((endpointPlan) => {
     const id = `${endpointPlan.model}:${endpointPlan.endpoint}`
-    const baselineCapacity = endpointPlan.baseline.replicas * endpointPlan.baseline.qps_capacity
+    const _baselineCapacity = endpointPlan.baseline.replicas * endpointPlan.baseline.qps_capacity
     const plannedCapacity = endpointPlan.autoscaling.target_replicas * endpointPlan.quantization.qps_capacity
     const capacityMargin = plannedCapacity > 0
       ? (plannedCapacity - endpointPlan.autoscaling.target_replicas * endpointPlan.quantization.qps_capacity * endpointPlan.autoscaling.target_utilization) / plannedCapacity

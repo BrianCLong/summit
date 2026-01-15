@@ -1,0 +1,239 @@
+{
+  "issue_number": 12,
+  "title": "M2: GraphQL schema for User, Investigation, Entity, Relationship",
+  "url": "https://github.com/BrianCLong/summit/issues/12",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051573,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5NQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:graphql",
+      "name": "area:graphql",
+      "color": "ededed",
+      "default": false,
+      "description": "GraphQL"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T00:10:03Z",
+  "createdAt": "2025-08-12T00:10:03Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14448,
+        "url": "https://github.com/BrianCLong/summit/pull/14448",
+        "mergedAt": "2025-12-25T03:17:36Z",
+        "title": "Sprint N+12: Revenue Maturity & Compliance Expansion"
+      },
+      {
+        "number": 15358,
+        "url": "https://github.com/BrianCLong/summit/pull/15358",
+        "mergedAt": null,
+        "title": "Create patent-grade MCP protocol innovations"
+      },
+      {
+        "number": 13756,
+        "url": "https://github.com/BrianCLong/summit/pull/13756",
+        "mergedAt": "2025-12-20T03:34:07Z",
+        "title": "docs: refresh Sprint 12 maturity & moat plan"
+      },
+      {
+        "number": 14767,
+        "url": "https://github.com/BrianCLong/summit/pull/14767",
+        "mergedAt": null,
+        "title": "Sprint 12: Ask IntelGraph v1.1, Storybuilder, and Admin Ops"
+      },
+      {
+        "number": 14750,
+        "url": "https://github.com/BrianCLong/summit/pull/14750",
+        "mergedAt": null,
+        "title": "docs: add 12–18 month investment thesis and capital plan"
+      },
+      {
+        "number": 13317,
+        "url": "https://github.com/BrianCLong/summit/pull/13317",
+        "mergedAt": null,
+        "title": "deps(npm): bump msw from 2.12.2 to 2.12.4"
+      },
+      {
+        "number": 12360,
+        "url": "https://github.com/BrianCLong/summit/pull/12360",
+        "mergedAt": "2025-12-18T03:00:29Z",
+        "title": "Sprint 12: Cognitive Security Toolkit"
+      },
+      {
+        "number": 13339,
+        "url": "https://github.com/BrianCLong/summit/pull/13339",
+        "mergedAt": "2025-12-05T16:57:08Z",
+        "title": "Gap 12: Competitive Narrative & Patent Strategy"
+      },
+      {
+        "number": 12514,
+        "url": "https://github.com/BrianCLong/summit/pull/12514",
+        "mergedAt": "2025-12-18T02:36:16Z",
+        "title": "Sprint 12: IntelGraph Decision Core & Governance Gates"
+      },
+      {
+        "number": 14463,
+        "url": "https://github.com/BrianCLong/summit/pull/14463",
+        "mergedAt": "2025-12-25T04:27:10Z",
+        "title": "docs: Add Definition of Production and Repo Map (Sprint Lock 2025-12-29)"
+      },
+      {
+        "number": 15411,
+        "url": "https://github.com/BrianCLong/summit/pull/15411",
+        "mergedAt": null,
+        "title": "Harden graph analytics query bounds"
+      },
+      {
+        "number": 14573,
+        "url": "https://github.com/BrianCLong/summit/pull/14573",
+        "mergedAt": "2025-12-27T05:27:34Z",
+        "title": "chore(deps): Bump black from 23.12.0 to 24.3.0 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 12810,
+        "url": "https://github.com/BrianCLong/summit/pull/12810",
+        "mergedAt": "2025-12-04T17:41:57Z",
+        "title": "Update sprint plan for Dec 1–12 2025 golden path"
+      },
+      {
+        "number": 15248,
+        "url": "https://github.com/BrianCLong/summit/pull/15248",
+        "mergedAt": null,
+        "title": "docs: align war-room backlog tracking with roadmap"
+      },
+      {
+        "number": 11951,
+        "url": "https://github.com/BrianCLong/summit/pull/11951",
+        "mergedAt": "2025-11-20T10:20:57Z",
+        "title": "Create 12-month roadmap with technical debt strategy"
+      },
+      {
+        "number": 15229,
+        "url": "https://github.com/BrianCLong/summit/pull/15229",
+        "mergedAt": null,
+        "title": "docs: add institutional multi-year roadmap artifact"
+      },
+      {
+        "number": 15129,
+        "url": "https://github.com/BrianCLong/summit/pull/15129",
+        "mergedAt": "2025-12-30T21:37:18Z",
+        "title": "chore(deps): bump config from 0.13.4 to 0.15.19"
+      },
+      {
+        "number": 14532,
+        "url": "https://github.com/BrianCLong/summit/pull/14532",
+        "mergedAt": "2025-12-27T00:21:07Z",
+        "title": "Sprint N+51: Long-Horizon Strategy & Platform Evolution"
+      },
+      {
+        "number": 13855,
+        "url": "https://github.com/BrianCLong/summit/pull/13855",
+        "mergedAt": "2025-12-20T03:24:16Z",
+        "title": "Add Sprint 22 trust verification sprint plan"
+      },
+      {
+        "number": 14215,
+        "url": "https://github.com/BrianCLong/summit/pull/14215",
+        "mergedAt": null,
+        "title": "Epic 1: API Charter and Cleanup"
+      },
+      {
+        "number": 14222,
+        "url": "https://github.com/BrianCLong/summit/pull/14222",
+        "mergedAt": "2025-12-22T08:12:20Z",
+        "title": "Implement forward defense orchestration module"
+      },
+      {
+        "number": 14826,
+        "url": "https://github.com/BrianCLong/summit/pull/14826",
+        "mergedAt": "2025-12-29T16:13:58Z",
+        "title": "Infrastructure: Redis Caching + Data Partitioning + Cold Storage"
+      },
+      {
+        "number": 14484,
+        "url": "https://github.com/BrianCLong/summit/pull/14484",
+        "mergedAt": null,
+        "title": "docs: platform governance and long-horizon roadmap"
+      },
+      {
+        "number": 13676,
+        "url": "https://github.com/BrianCLong/summit/pull/13676",
+        "mergedAt": "2025-12-20T11:49:30Z",
+        "title": "Production Deployment Overhaul (Helm + AWS EKS)"
+      },
+      {
+        "number": 14474,
+        "url": "https://github.com/BrianCLong/summit/pull/14474",
+        "mergedAt": null,
+        "title": "feat: add demo walkthrough page with demo-only gating"
+      },
+      {
+        "number": 14098,
+        "url": "https://github.com/BrianCLong/summit/pull/14098",
+        "mergedAt": "2025-12-20T07:27:00Z",
+        "title": "Improve map clustering ergonomics and deterministic geo ordering"
+      },
+      {
+        "number": 14563,
+        "url": "https://github.com/BrianCLong/summit/pull/14563",
+        "mergedAt": "2025-12-27T04:48:01Z",
+        "title": "chore(deps): Bump scikit-learn from 1.3.2 to 1.5.0 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 13250,
+        "url": "https://github.com/BrianCLong/summit/pull/13250",
+        "mergedAt": "2025-12-04T17:11:35Z",
+        "title": "feat: Complete Summit Enhancement Project & Transition to Enterprise Scale"
+      },
+      {
+        "number": 13322,
+        "url": "https://github.com/BrianCLong/summit/pull/13322",
+        "mergedAt": "2025-12-04T14:38:56Z",
+        "title": "fix: Resolve Remaining Critical Security Vulnerabilities"
+      },
+      {
+        "number": 14616,
+        "url": "https://github.com/BrianCLong/summit/pull/14616",
+        "mergedAt": null,
+        "title": "docs: add CI runner isolation blueprint"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

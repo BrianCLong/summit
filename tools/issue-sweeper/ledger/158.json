@@ -1,0 +1,106 @@
+{
+  "issue_number": 158,
+  "title": "Server health endpoints, client version, CODEOWNERS",
+  "url": "https://github.com/BrianCLong/summit/pull/158",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-13T18:12:53Z",
+  "createdAt": "2025-08-13T17:18:06Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14561,
+        "url": "https://github.com/BrianCLong/summit/pull/14561",
+        "mergedAt": "2025-12-27T04:48:07Z",
+        "title": "chore(deps): Bump torch from 2.1.1 to 2.8.0 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 15256,
+        "url": "https://github.com/BrianCLong/summit/pull/15256",
+        "mergedAt": "2026-01-01T08:58:50Z",
+        "title": "feat: strengthen webauthn and deduplication flows"
+      },
+      {
+        "number": 1725,
+        "url": "https://github.com/BrianCLong/summit/pull/1725",
+        "mergedAt": null,
+        "title": "chore(deps): bump torch from 2.1.0 to 2.8.0 in /server"
+      },
+      {
+        "number": 1345,
+        "url": "https://github.com/BrianCLong/summit/pull/1345",
+        "mergedAt": "2025-09-23T06:24:08Z",
+        "title": "chore(deps): bump torch from 2.1.1 to 2.8.0 in /services/insight-ai"
+      },
+      {
+        "number": 1306,
+        "url": "https://github.com/BrianCLong/summit/pull/1306",
+        "mergedAt": "2025-09-23T06:07:20Z",
+        "title": "chore(deps): bump torch from 2.1.2 to 2.8.0 in /services/graph-xai"
+      },
+      {
+        "number": 13098,
+        "url": "https://github.com/BrianCLong/summit/pull/13098",
+        "mergedAt": "2025-12-03T01:54:50Z",
+        "title": "Harden Summit security with RBAC and audit trails"
+      },
+      {
+        "number": 11908,
+        "url": "https://github.com/BrianCLong/summit/pull/11908",
+        "mergedAt": "2025-11-20T10:25:29Z",
+        "title": "Establish charts as deployment golden path"
+      },
+      {
+        "number": 1292,
+        "url": "https://github.com/BrianCLong/summit/pull/1292",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "fix: workflow pnpm order and cache setup"
+      },
+      {
+        "number": 1291,
+        "url": "https://github.com/BrianCLong/summit/pull/1291",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "fix: workflow pnpm compatibility and topicality.co domains"
+      },
+      {
+        "number": 11883,
+        "url": "https://github.com/BrianCLong/summit/pull/11883",
+        "mergedAt": "2025-11-20T14:33:14Z",
+        "title": "Add canonical entities with bitemporal provenance"
+      },
+      {
+        "number": 11915,
+        "url": "https://github.com/BrianCLong/summit/pull/11915",
+        "mergedAt": null,
+        "title": "Implement SLO-driven alerting system for Summit"
+      },
+      {
+        "number": 11919,
+        "url": "https://github.com/BrianCLong/summit/pull/11919",
+        "mergedAt": "2025-11-20T10:05:41Z",
+        "title": "Build Advanced Data Integration and ETL Platform"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

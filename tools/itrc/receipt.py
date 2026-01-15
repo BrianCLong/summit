@@ -6,11 +6,10 @@ import json
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from .signing import Signature, Signer, Verifier, signature_from_dict
 from .utils import canonical_json, sha256_bytes, sha256_file, write_bytes_if_changed
-
 
 SCHEMA = "itrc.receipt/1"
 
@@ -21,7 +20,7 @@ class ReceiptArtifact:
     expected_sha256: str
     actual_sha256: str
 
-    def as_dict(self) -> Dict[str, str]:
+    def as_dict(self) -> dict[str, str]:
         return {
             "path": self.path,
             "expected_sha256": self.expected_sha256,
@@ -32,7 +31,7 @@ class ReceiptArtifact:
 
 @dataclass
 class Receipt:
-    manifest: Dict[str, Any]
+    manifest: dict[str, Any]
     signature: Signature
 
     def to_json(self) -> str:
@@ -56,7 +55,7 @@ def build_receipt(
     *,
     capsule_digest: str,
     capsule_signature: Signature,
-    artifacts: List[ReceiptArtifact],
+    artifacts: list[ReceiptArtifact],
     stdout: str,
     stderr: str,
     return_code: int,
@@ -90,8 +89,8 @@ def load_receipt(path: Path, verifier: Verifier | None = None) -> Receipt:
     return receipt
 
 
-def verify_receipt_artifacts(receipt: Receipt, base_dir: Path) -> List[ReceiptArtifact]:
-    verified: List[ReceiptArtifact] = []
+def verify_receipt_artifacts(receipt: Receipt, base_dir: Path) -> list[ReceiptArtifact]:
+    verified: list[ReceiptArtifact] = []
     for artifact in receipt.manifest.get("artifacts", []):
         path = artifact["path"]
         expected = artifact["expected_sha256"]

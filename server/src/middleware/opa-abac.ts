@@ -432,6 +432,118 @@ export function opaAuthzMiddleware(opaClient: OPAClient) {
   };
 }
 
+export class ABACContext {
+  static fromRequest(req: Request) {
+    const forwardedFor = req.headers['x-forwarded-for'];
+    const forwardedIp = Array.isArray(forwardedFor)
+      ? forwardedFor[0]
+      : forwardedFor?.split(',')[0]?.trim();
+
+    return {
+      ip: forwardedIp || req.ip,
+      userAgent: req.get('User-Agent'),
+      time: Date.now(),
+    };
+  }
+}
+
+export function createABACMiddleware(opaClient: OPAClient) {
+  return {
+    enforce(resourceType: string, action: string) {
+      return async (req: Request, res: Response, next: NextFunction) => {
+        const user = (req as any).user;
+        if (!user) {
+          res.status(401).json({ error: 'Unauthorized' });
+          return;
+        }
+
+        const context = ABACContext.fromRequest(req);
+        const resourceId =
+          req.params?.investigationId ||
+          req.params?.id ||
+          (req.body && req.body.id);
+
+        const policyInput: OPAPolicyInput = {
+          subject: {
+            id: user.id,
+            tenantId: user.tenantId || user.tenant || 'default',
+            roles: user.roles || (user.role ? [user.role] : []),
+            residency: user.residency || 'US',
+            clearance: user.clearance || 'public',
+            entitlements: user.entitlements || [],
+          },
+          resource: {
+            type: resourceType,
+            id: resourceId,
+            tenantId:
+              (req.headers['x-tenant-id'] as string) ||
+              user.tenantId ||
+              user.tenant ||
+              'default',
+          },
+          action,
+          context,
+        };
+
+        try {
+          const result = await opaClient.evaluate(
+            'summit.abac.allow',
+            policyInput,
+          );
+          if (typeof result === 'boolean') {
+            if (result) {
+              return next();
+            }
+            res.status(403).json({ error: 'Forbidden', reason: 'Denied' });
+            return;
+          }
+
+          if (result.allow) {
+            return next();
+          }
+
+          if (result.reason === 'opa_unavailable') {
+            res.status(503).json({
+              error: 'ServiceUnavailable',
+              message: 'Authorization service temporarily unavailable',
+            });
+            return;
+          }
+
+          const obligation = result.obligations?.[0];
+          if (obligation?.type === 'step_up_auth') {
+            res.status(403).json({
+              error: 'StepUpRequired',
+              reason: result.reason,
+              obligation,
+            });
+            return;
+          }
+
+          if (obligation?.type === 'dual_control') {
+            res.status(403).json({
+              error: 'DualControlRequired',
+              reason: result.reason,
+              obligation,
+            });
+            return;
+          }
+
+          res.status(403).json({
+            error: 'Forbidden',
+            reason: result.reason,
+          });
+        } catch (error) {
+          res.status(503).json({
+            error: 'ServiceUnavailable',
+            message: 'Authorization service temporarily unavailable',
+          });
+        }
+      };
+    },
+  };
+}
+
 function mapMethodToAction(method: string): string {
     switch(method.toUpperCase()) {
         case 'GET': return 'read';

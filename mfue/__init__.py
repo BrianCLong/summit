@@ -3,26 +3,26 @@
 This package provides utilities to benchmark machine unlearning methods.
 """
 
-from .config import ReproducibilityConfig
-from .datasets import DatasetSplit
-from .evaluator import MFUEvaluator
-from .metrics import EvaluationResult
-from .report import EvaluationReport
 from .baselines import (
     BaseUnlearningBaseline,
     FineTuneUnlearningBaseline,
     MaskBasedUnlearningBaseline,
 )
+from .config import ReproducibilityConfig
+from .datasets import DatasetSplit
+from .evaluator import MFUEvaluator
+from .metrics import EvaluationResult
 from .models import LogisticRegressionModel
+from .report import EvaluationReport
 
 __all__ = [
-    "ReproducibilityConfig",
-    "DatasetSplit",
-    "MFUEvaluator",
-    "EvaluationResult",
-    "EvaluationReport",
     "BaseUnlearningBaseline",
+    "DatasetSplit",
+    "EvaluationReport",
+    "EvaluationResult",
     "FineTuneUnlearningBaseline",
-    "MaskBasedUnlearningBaseline",
     "LogisticRegressionModel",
+    "MFUEvaluator",
+    "MaskBasedUnlearningBaseline",
+    "ReproducibilityConfig",
 ]

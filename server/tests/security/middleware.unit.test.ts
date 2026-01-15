@@ -1,6 +1,7 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { securityHardening } from '../../src/middleware/security-hardening.js';
-import { globalErrorHandler } from '../../src/middleware/global-error-handler.js';
+import { errorHandler } from '../../src/middleware/errorHandler.js';
 
 describe('Security Middleware Units', () => {
   let req: any;
@@ -57,7 +58,7 @@ describe('Security Middleware Units', () => {
     });
   });
 
-  describe('globalErrorHandler', () => {
+  describe('errorHandler', () => {
     it('should sanitize errors in production', () => {
       // Mock NODE_ENV via simple reassignment if possible, but it's hard to change global process.env dynamically in ESM cleanly for one test.
       // We can check if it respects the logic assuming default env (which is test or dev usually).
@@ -66,7 +67,7 @@ describe('Security Middleware Units', () => {
       (err as any).status = 500;
 
       // If we assume non-prod by default:
-      globalErrorHandler(err, req, res, next);
+      errorHandler(err, req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
       // In dev, stack is present

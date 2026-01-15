@@ -1,0 +1,38 @@
+{
+  "task_id": "MAESTRO_RECEIPT_V1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "maestro-provenance-receipts",
+    "version": "v1",
+    "sha256": "3c4637161ddf1eaa797aea60875d9dea184ef1f4368ce76f3c6890212cdced8c",
+    "path": "prompts/engineering/maestro-provenance-receipts.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "server/src/maestro/",
+      "server/src/redaction/",
+      "server/tests/maestro/",
+      "PROVENANCE_SCHEMA.md",
+      "provenance/",
+      "docs/roadmap/STATUS.json",
+      "prompts/engineering/",
+      "agents/examples/"
+    ],
+    "domains": ["provenance", "governance", "maestro", "evidence"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["server/tests/maestro/receipt-chain.test.ts"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Maestro transitions emit signed provenance receipts with run linkage",
+    "Evidence bundle export includes receipts, hashes, policy bundle version, and SBOM references",
+    "Receipt chain verification passes for valid signatures"
+  ],
+  "stop_conditions": ["CI failure in main", "Detection of PII in output", "Sandbox violation alert"]
+}

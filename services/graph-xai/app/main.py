@@ -242,7 +242,7 @@ async def explain_entity(
         logger.error(
             "Failed to generate entity explanation", entity_id=request.entityId, error=str(e)
         )
-        raise HTTPException(status_code=500, detail=f"XAI generation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"XAI generation failed: {e!s}")
 
 
 @app.post("/explain/edge", response_model=Explanation)
@@ -286,7 +286,7 @@ async def explain_edge(
 
     except Exception as e:
         logger.error("Failed to generate edge explanation", error=str(e))
-        raise HTTPException(status_code=500, detail=f"XAI generation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"XAI generation failed: {e!s}")
 
 
 @app.post("/counterfactuals")
@@ -318,7 +318,7 @@ async def generate_counterfactuals(
 
     except Exception as e:
         logger.error("Failed to generate counterfactuals", error=str(e))
-        raise HTTPException(status_code=500, detail=f"Counterfactual generation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Counterfactual generation failed: {e!s}")
 
 
 @app.get("/fairness/{model}/{version}")

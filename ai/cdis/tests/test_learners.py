@@ -3,11 +3,10 @@ from pathlib import Path
 
 import networkx as nx
 import pandas as pd
-
 from ai.cdis.learners import GrangerLearner, NotearsLearner, PCLearner
 
-
 FIXTURE = Path(__file__).parent.parent / "fixtures" / "gold_dag.json"
+
 
 def load_fixture():
     with FIXTURE.open() as f:

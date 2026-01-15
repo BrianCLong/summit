@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.agent_audit import AgentFinding, AgentScanner, render_markdown
+from tools.agent_audit import AgentScanner, render_markdown
 
 
 @pytest.fixture

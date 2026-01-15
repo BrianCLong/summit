@@ -1,4 +1,4 @@
-from summit_sdk import SummitClient, flow, tool, rag, PolicyContext
+from summit_sdk import PolicyContext, SummitClient, flow, rag, tool
 
 client = SummitClient(api_key="demo", endpoint="local")
 policy = PolicyContext(tenant="demo-tenant", region="us-west")
@@ -25,4 +25,3 @@ def hello(question: str):
 
 if __name__ == "__main__":
     print(hello("What is the latest build?"))
-

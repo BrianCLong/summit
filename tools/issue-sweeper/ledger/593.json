@@ -1,0 +1,56 @@
+{
+  "issue_number": 593,
+  "title": "chore: add linting and ci configuration",
+  "url": "https://github.com/BrianCLong/summit/pull/593",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-18T03:21:22Z",
+  "createdAt": "2025-08-18T03:10:47Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11909,
+        "url": "https://github.com/BrianCLong/summit/pull/11909",
+        "mergedAt": "2025-11-20T10:25:19Z",
+        "title": "Build offline kit with CRDT sync and proofs"
+      },
+      {
+        "number": 12296,
+        "url": "https://github.com/BrianCLong/summit/pull/12296",
+        "mergedAt": "2025-11-25T20:34:22Z",
+        "title": "Bump body-parser from 2.2.0 to 2.2.1 in /conductor-ui/backend"
+      },
+      {
+        "number": 10081,
+        "url": "https://github.com/BrianCLong/summit/pull/10081",
+        "mergedAt": "2025-10-14T13:08:07Z",
+        "title": "feat: add explainable multi-cloud meta orchestrator"
+      },
+      {
+        "number": 13190,
+        "url": "https://github.com/BrianCLong/summit/pull/13190",
+        "mergedAt": "2025-12-04T15:38:47Z",
+        "title": "Build resilient multi-LLM orchestrator with governance"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

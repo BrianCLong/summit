@@ -5,12 +5,11 @@ import sys
 from pathlib import Path
 
 # Add src to path
-sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from streaming_pipeline import (
-    StreamingETLPipeline,
     PipelineConfig,
-    PipelineMetrics,
+    StreamingETLPipeline,
 )
 
 
@@ -20,9 +19,9 @@ class TestStreamingPipeline:
     def test_pipeline_initialization(self):
         """Test pipeline initializes correctly."""
         config = PipelineConfig(
-            tenant_id='tenant_123',
-            source_name='test_source',
-            source_type='csv',
+            tenant_id="tenant_123",
+            source_name="test_source",
+            source_type="csv",
         )
 
         pipeline = StreamingETLPipeline(config)
@@ -33,9 +32,9 @@ class TestStreamingPipeline:
     def test_pipeline_with_enrichers_disabled(self):
         """Test pipeline with enrichers disabled."""
         config = PipelineConfig(
-            tenant_id='tenant_123',
-            source_name='test_source',
-            source_type='csv',
+            tenant_id="tenant_123",
+            source_name="test_source",
+            source_type="csv",
             enable_enrichers=False,
         )
 
@@ -46,9 +45,9 @@ class TestStreamingPipeline:
     async def test_process_stream_basic(self):
         """Test basic stream processing."""
         config = PipelineConfig(
-            tenant_id='tenant_123',
-            source_name='test_source',
-            source_type='csv',
+            tenant_id="tenant_123",
+            source_name="test_source",
+            source_type="csv",
             batch_size=10,
         )
 
@@ -57,12 +56,14 @@ class TestStreamingPipeline:
         # Create input queue with test data
         input_queue = asyncio.Queue()
         for i in range(5):
-            await input_queue.put({
-                'id': str(i),
-                'name': f'Record {i}',
-                'ip': f'8.8.8.{i}',
-                'text': 'This is a test message.',
-            })
+            await input_queue.put(
+                {
+                    "id": str(i),
+                    "name": f"Record {i}",
+                    "ip": f"8.8.8.{i}",
+                    "text": "This is a test message.",
+                }
+            )
         await input_queue.put(None)  # Sentinel
 
         # Process stream
@@ -81,14 +82,14 @@ class TestStreamingPipeline:
     async def test_enrichment_applied(self):
         """Test enrichments are applied to records."""
         config = PipelineConfig(
-            tenant_id='tenant_123',
-            source_name='test_source',
-            source_type='csv',
+            tenant_id="tenant_123",
+            source_name="test_source",
+            source_type="csv",
             enable_enrichers=True,
             enricher_config={
-                'geoip': {'enabled': True},
-                'language': {'enabled': True},
-                'hashing': {'enabled': True},
+                "geoip": {"enabled": True},
+                "language": {"enabled": True},
+                "hashing": {"enabled": True},
             },
         )
 
@@ -96,12 +97,14 @@ class TestStreamingPipeline:
 
         # Create input queue
         input_queue = asyncio.Queue()
-        await input_queue.put({
-            'id': '1',
-            'name': 'Test Record',
-            'ip': '8.8.8.8',
-            'text': 'This is a test message with enough text.',
-        })
+        await input_queue.put(
+            {
+                "id": "1",
+                "name": "Test Record",
+                "ip": "8.8.8.8",
+                "text": "This is a test message with enough text.",
+            }
+        )
         await input_queue.put(None)
 
         # Process stream
@@ -112,17 +115,17 @@ class TestStreamingPipeline:
         enriched_record = await output_queue.get()
 
         # Verify enrichments were applied
-        assert 'geo' in enriched_record
-        assert 'language' in enriched_record
-        assert 'hashes' in enriched_record
-        assert '_enrichment_metadata' in enriched_record
+        assert "geo" in enriched_record
+        assert "language" in enriched_record
+        assert "hashes" in enriched_record
+        assert "_enrichment_metadata" in enriched_record
 
     async def test_batch_processing(self):
         """Test batch processing."""
         config = PipelineConfig(
-            tenant_id='tenant_123',
-            source_name='test_source',
-            source_type='csv',
+            tenant_id="tenant_123",
+            source_name="test_source",
+            source_type="csv",
             batch_size=3,
             max_workers=2,
         )
@@ -132,7 +135,7 @@ class TestStreamingPipeline:
         # Create input queue with more records than batch size
         input_queue = asyncio.Queue()
         for i in range(10):
-            await input_queue.put({'id': str(i), 'name': f'Record {i}'})
+            await input_queue.put({"id": str(i), "name": f"Record {i}"})
         await input_queue.put(None)
 
         # Process stream
@@ -145,9 +148,9 @@ class TestStreamingPipeline:
     async def test_error_handling(self):
         """Test error handling in pipeline."""
         config = PipelineConfig(
-            tenant_id='tenant_123',
-            source_name='test_source',
-            source_type='csv',
+            tenant_id="tenant_123",
+            source_name="test_source",
+            source_type="csv",
         )
 
         pipeline = StreamingETLPipeline(config)
@@ -161,7 +164,7 @@ class TestStreamingPipeline:
 
         # Create input queue with invalid data
         input_queue = asyncio.Queue()
-        await input_queue.put({'id': '1', 'name': 'Valid'})
+        await input_queue.put({"id": "1", "name": "Valid"})
         # This would cause an error if enrichers tried to process it incorrectly
         await input_queue.put(None)  # But we'll just use valid data for this test
 
@@ -174,9 +177,9 @@ class TestStreamingPipeline:
     async def test_provenance_emission(self):
         """Test provenance events are emitted."""
         config = PipelineConfig(
-            tenant_id='tenant_123',
-            source_name='test_source',
-            source_type='csv',
+            tenant_id="tenant_123",
+            source_name="test_source",
+            source_type="csv",
             emit_provenance=True,
         )
 
@@ -191,7 +194,7 @@ class TestStreamingPipeline:
 
         # Create input queue
         input_queue = asyncio.Queue()
-        await input_queue.put({'id': '1', 'name': 'Test'})
+        await input_queue.put({"id": "1", "name": "Test"})
         await input_queue.put(None)
 
         output_queue = asyncio.Queue()
@@ -199,15 +202,15 @@ class TestStreamingPipeline:
 
         # Verify provenance events were emitted
         assert len(provenance_events) == 1
-        assert provenance_events[0]['event_type'] == 'etl_enrichment'
-        assert provenance_events[0]['tenant_id'] == 'tenant_123'
+        assert provenance_events[0]["event_type"] == "etl_enrichment"
+        assert provenance_events[0]["tenant_id"] == "tenant_123"
 
     def test_enricher_metrics(self):
         """Test enricher metrics are collected."""
         config = PipelineConfig(
-            tenant_id='tenant_123',
-            source_name='test_source',
-            source_type='csv',
+            tenant_id="tenant_123",
+            source_name="test_source",
+            source_type="csv",
             enable_enrichers=True,
         )
 
@@ -221,19 +224,19 @@ class TestStreamingPipeline:
 
         # Each metric should have expected fields
         for enricher_name, metrics in enricher_metrics.items():
-            assert 'total_enrichments' in metrics
-            assert 'successful_enrichments' in metrics
-            assert 'failed_enrichments' in metrics
-            assert 'average_duration_ms' in metrics
+            assert "total_enrichments" in metrics
+            assert "successful_enrichments" in metrics
+            assert "failed_enrichments" in metrics
+            assert "average_duration_ms" in metrics
 
 
 def run_async_tests():
     """Run async tests."""
     import pytest
 
-    pytest.main([__file__, '-v', '-s'])
+    pytest.main([__file__, "-v", "-s"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Run tests using pytest
     run_async_tests()

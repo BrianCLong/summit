@@ -10,6 +10,7 @@
     <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="./utils/formatting.js"></script>
     <style>
       .glass-card {
         background: rgba(255, 255, 255, 0.85);
@@ -42,6 +43,31 @@
     <script type="text/babel">
       const { useState, useEffect, useMemo, useRef } = React;
 
+      const formatting = window.SymphonyFormatting || {
+        formatAbsoluteTime: (value) =>
+          new Date(value).toISOString().replace('T', ' ').replace('Z', ' UTC'),
+        formatRelativeTime: () => '',
+        formatNumber: (value) =>
+          new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(
+            Number(value) || 0,
+          ),
+        formatCurrency: (value) => `$${Number(value || 0).toFixed(2)}`,
+        formatPercent: (numerator, denominator) => {
+          const safeDenominator = Number(denominator);
+          const safeNumerator = Number(numerator);
+          if (!safeDenominator || Number.isNaN(safeDenominator) || Number.isNaN(safeNumerator)) return '0%';
+          return `${Math.round((safeNumerator / safeDenominator) * 100)}%`;
+        },
+      };
+
+      const {
+        formatAbsoluteTime,
+        formatRelativeTime,
+        formatNumber,
+        formatCurrency,
+        formatPercent,
+      } = formatting;
+
       // Initialize Mermaid
       mermaid.initialize({
         startOnLoad: true,
@@ -66,11 +92,6 @@
           new URLSearchParams(window.location.search).get('ollama') ||
           'http://127.0.0.1:11434',
       });
-
-      // Utility functions
-      const formatTime = (date) => new Date(date).toLocaleTimeString();
-      const formatPercent = (val, total) =>
-        total > 0 ? Math.round((val / total) * 100) : 0;
 
       // Custom hooks
       const useInterval = (fn, delay) => {
@@ -201,6 +222,13 @@
           { id: 'docs', name: 'Docs & Runbooks', icon: '📚' },
         ];
 
+        const updateLabel = formatAbsoluteTime
+          ? formatAbsoluteTime(lastUpdate, { includeDate: false })
+          : new Date(lastUpdate).toLocaleTimeString();
+        const relativeUpdate = formatRelativeTime
+          ? formatRelativeTime(lastUpdate)
+          : '';
+
         // Auto-refresh system status
         useInterval(async () => {
           try {
@@ -234,7 +262,9 @@
                     <span>ENV: dev</span>
                     <span>LOA: 1</span>
                     <span>Kill: OFF</span>
-                    <span>{formatTime(lastUpdate)}</span>
+                    <span title={`Last update ${updateLabel}`} aria-label={`Last update ${updateLabel}`}>
+                      Updated {relativeUpdate || updateLabel}
+                    </span>
                   </div>
                 </div>
 
@@ -948,7 +978,7 @@
               {/* Minute Window (matches wireframe) */}
               <div className="mb-6">
                 <h4 className="font-medium text-gray-900 mb-3">
-                  Minute Window (reset {formatTime(nextMinute)})
+                  Minute Window (resets {formatAbsoluteTime(nextMinute, { includeDate: false })})
                 </h4>
                 <div className="space-y-3">
                   <div className="flex items-center space-x-4">
@@ -958,11 +988,13 @@
                     <div className="flex-1 bg-gray-200 rounded-full h-4">
                       <div
                         className="bg-blue-600 h-4 rounded-full"
-                        style={{ width: '23%' }}
+                        style={{ width: formatPercent(14, 60) }}
                       ></div>
                     </div>
                     <span className="text-sm text-gray-500">
-                      14/60 rpm p50 90ms
+                      {formatNumber(14, { maximumFractionDigits: 0 })}/
+                      {formatNumber(60, { maximumFractionDigits: 0 })} rpm •
+                      {formatPercent(14, 60)} used • p50 {formatNumber(90, { maximumFractionDigits: 0 })}ms
                     </span>
                   </div>
 
@@ -973,11 +1005,13 @@
                     <div className="flex-1 bg-gray-200 rounded-full h-4">
                       <div
                         className="bg-green-600 h-4 rounded-full"
-                        style={{ width: '17%' }}
+                        style={{ width: formatPercent(10, 60) }}
                       ></div>
                     </div>
                     <span className="text-sm text-gray-500">
-                      10/60 rpm p50 180ms
+                      {formatNumber(10, { maximumFractionDigits: 0 })}/
+                      {formatNumber(60, { maximumFractionDigits: 0 })} rpm •
+                      {formatPercent(10, 60)} used • p50 {formatNumber(180, { maximumFractionDigits: 0 })}ms
                     </span>
                   </div>
                 </div>
@@ -986,7 +1020,7 @@
               {/* Daily Budgets (matches wireframe) */}
               <div>
                 <h4 className="font-medium text-gray-900 mb-3">
-                  Daily Budgets (reset 00:00Z)
+                  Daily Budgets (resets 00:00 UTC)
                 </h4>
                 <div className="space-y-3">
                   <div className="flex items-center space-x-4">
@@ -994,10 +1028,12 @@
                     <div className="flex-1 bg-gray-200 rounded-full h-4">
                       <div
                         className="bg-purple-600 h-4 rounded-full"
-                        style={{ width: '0%' }}
+                        style={{ width: formatPercent(0, 10) }}
                       ></div>
                     </div>
-                    <span className="text-sm text-gray-500">$0 / $10 (0%)</span>
+                    <span className="text-sm text-gray-500">
+                      {formatCurrency(0)} / {formatCurrency(10)} ({formatPercent(0, 10)})
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1165,31 +1201,44 @@ budgets:
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card title="RPS">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600">1.2</div>
+                  <div className="text-3xl font-bold text-blue-600">
+                    {formatNumber(1.2, {
+                      minimumFractionDigits: 1,
+                      maximumFractionDigits: 1,
+                    })}
+                  </div>
                   <div className="text-sm text-gray-500">requests/sec</div>
                 </div>
               </Card>
               <Card title="Latency">
                 <div className="text-center space-y-1">
                   <div>
-                    <span className="text-lg font-bold">120ms</span>{' '}
+                    <span className="text-lg font-bold">
+                      {formatNumber(120, { maximumFractionDigits: 0 })}ms
+                    </span>{' '}
                     <span className="text-sm text-gray-500">p50</span>
                   </div>
                   <div>
-                    <span className="text-lg font-bold">480ms</span>{' '}
+                    <span className="text-lg font-bold">
+                      {formatNumber(480, { maximumFractionDigits: 0 })}ms
+                    </span>{' '}
                     <span className="text-sm text-gray-500">p95</span>
                   </div>
                 </div>
               </Card>
               <Card title="Queue Depth">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-yellow-600">12</div>
+                  <div className="text-3xl font-bold text-yellow-600">
+                    {formatNumber(12, { maximumFractionDigits: 0 })}
+                  </div>
                   <div className="text-sm text-gray-500">pending</div>
                 </div>
               </Card>
               <Card title="Error Rate (15m)">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600">0</div>
+                  <div className="text-3xl font-bold text-green-600">
+                    {formatNumber(0, { maximumFractionDigits: 0 })}
+                  </div>
                   <div className="text-sm text-gray-500">errors</div>
                 </div>
               </Card>
@@ -1222,7 +1271,13 @@ budgets:
               <div className="bg-black text-green-400 font-mono text-sm p-4 rounded-lg h-96 overflow-auto">
                 {logs.map((log, index) => (
                   <div key={index} className="mb-1">
-                    <span className="text-gray-500">{formatTime(log.ts)}</span>
+                    <span
+                      className="text-gray-500"
+                      title={formatAbsoluteTime(log.ts, { includeSeconds: true })}
+                    >
+                      {formatAbsoluteTime(log.ts, { includeDate: false })}
+                      {formatRelativeTime ? ` (${formatRelativeTime(log.ts)})` : ''}
+                    </span>
                     <span
                       className={`ml-2 ${
                         log.level === 'error'

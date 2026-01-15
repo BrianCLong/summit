@@ -240,6 +240,15 @@ describe('MaestroConductor meta-agent', () => {
     expect(
       plan.primary.reasoning.some((reason) => reason.includes('policy')),
     ).toBe(true);
+    expect(plan.primary.policyDecisions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          hookId: 'sensitivity',
+          allowed: true,
+          reason: 'policy:approved',
+        }),
+      ]),
+    );
     expect(plan.fallbacks.length).toBeLessThanOrEqual(1);
   });
 

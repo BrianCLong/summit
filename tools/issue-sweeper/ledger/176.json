@@ -1,0 +1,107 @@
+{
+  "issue_number": 176,
+  "title": "ux: graph analytics ui",
+  "url": "https://github.com/BrianCLong/summit/issues/176",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342747,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn8mw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/UX",
+      "name": "UX",
+      "color": "c5def5",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9107968112,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQcA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P2",
+      "name": "P2",
+      "color": "fbca04",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107968311,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRNw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/feature",
+      "name": "feature",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107981145,
+      "node_id": "LA_kwDOPaNncM8AAAACHuDDWQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-10-30",
+      "name": "due:2025-10-30",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:43:21Z",
+  "createdAt": "2025-08-14T04:06:41Z",
+  "classification": "feature",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13120,
+        "url": "https://github.com/BrianCLong/summit/pull/13120",
+        "mergedAt": "2025-12-03T01:33:12Z",
+        "title": "Agent-based Trend Forecaster for Narrative Simulation"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 13184,
+        "url": "https://github.com/BrianCLong/summit/pull/13184",
+        "mergedAt": "2025-12-04T15:39:00Z",
+        "title": "Build promise tracking and production delivery system"
+      },
+      {
+        "number": 1358,
+        "url": "https://github.com/BrianCLong/summit/pull/1358",
+        "mergedAt": null,
+        "title": "test: expand policy reasoner coverage"
+      },
+      {
+        "number": 11923,
+        "url": "https://github.com/BrianCLong/summit/pull/11923",
+        "mergedAt": "2025-11-20T10:04:27Z",
+        "title": "Build Advanced Visualization and Dashboard System"
+      },
+      {
+        "number": 11878,
+        "url": "https://github.com/BrianCLong/summit/pull/11878",
+        "mergedAt": null,
+        "title": "Consolidate CLI and assistant tools into Summit CLI"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

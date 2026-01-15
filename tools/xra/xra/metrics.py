@@ -5,10 +5,10 @@ from __future__ import annotations
 import math
 import random
 from collections import Counter, defaultdict
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Sequence
 
-from .models import QueryResult, RetrievalLog
+from .models import RetrievalLog
 
 
 @dataclass
@@ -16,7 +16,7 @@ class MetricSummary:
     """Container for a metric value with per-query detail."""
 
     average: float
-    by_query: Dict[str, float]
+    by_query: dict[str, float]
 
 
 def _exposure(rank: int) -> float:
@@ -24,10 +24,10 @@ def _exposure(rank: int) -> float:
     return 1.0 / math.log2(rank + 1.5)
 
 
-def exposure_disparity(log: RetrievalLog, k: int | None = None) -> Dict[str, float]:
+def exposure_disparity(log: RetrievalLog, k: int | None = None) -> dict[str, float]:
     """Compute average discounted exposure for each group."""
 
-    exposures: Dict[str, float] = defaultdict(float)
+    exposures: dict[str, float] = defaultdict(float)
     total_queries = max(len(log.queries), 1)
     for query in log.queries:
         for doc in query.results:
@@ -59,8 +59,8 @@ def fairness_at_k(log: RetrievalLog, k: int) -> MetricSummary:
     expected = {group: count / total_global for group, count in global_counter.items()}
 
     random.seed(42 + k)
-    by_query: Dict[str, float] = {}
-    scores: List[float] = []
+    by_query: dict[str, float] = {}
+    scores: list[float] = []
     for query in log.queries:
         top_k = [doc for doc in query.results if doc.rank <= k]
         if not top_k:
@@ -87,8 +87,8 @@ def coverage_at_k(log: RetrievalLog, k: int) -> MetricSummary:
     """Compute the fraction of groups represented within top-k results."""
 
     groups = set(log.all_groups())
-    by_query: Dict[str, float] = {}
-    coverage_scores: List[float] = []
+    by_query: dict[str, float] = {}
+    coverage_scores: list[float] = []
     for query in log.queries:
         present = {doc.group for doc in query.results if doc.rank <= k}
         if not groups:
@@ -105,7 +105,7 @@ def compute_bias_metrics(
     baseline: RetrievalLog,
     candidate: RetrievalLog,
     k_values: Sequence[int] = (3, 5, 10),
-) -> Dict[str, object]:
+) -> dict[str, object]:
     """Compute coverage and fairness metrics for two retrieval logs."""
 
     random.seed(42)
@@ -122,7 +122,7 @@ def compute_bias_metrics(
         "coverage": {k: coverage_at_k(candidate, k) for k in k_values},
     }
 
-    alerts: List[Dict[str, object]] = []
+    alerts: list[dict[str, object]] = []
 
     base_ratio = base_metrics["exposure"]["ratio"] if base_metrics["exposure"] else 1.0
     cand_ratio = cand_metrics["exposure"]["ratio"] if cand_metrics["exposure"] else 1.0

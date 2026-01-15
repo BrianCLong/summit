@@ -1,0 +1,239 @@
+{
+  "issue_number": 19,
+  "title": "M4: CSV upload → graph import (upsert)",
+  "url": "https://github.com/BrianCLong/summit/issues/19",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051669,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5lQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:ingest",
+      "name": "area:ingest",
+      "color": "ededed",
+      "default": false,
+      "description": "Data ingestion"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T00:10:11Z",
+  "createdAt": "2025-08-12T00:10:11Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15399,
+        "url": "https://github.com/BrianCLong/summit/pull/15399",
+        "mergedAt": null,
+        "title": "Sweep 1: navigation label coherence (Project #19 #121)"
+      },
+      {
+        "number": 15405,
+        "url": "https://github.com/BrianCLong/summit/pull/15405",
+        "mergedAt": null,
+        "title": "chore: pin pnpm runtime in CI and document project 19 queue"
+      },
+      {
+        "number": 15390,
+        "url": "https://github.com/BrianCLong/summit/pull/15390",
+        "mergedAt": null,
+        "title": "Harden github_inventory.sh fallback for restricted access"
+      },
+      {
+        "number": 15459,
+        "url": "https://github.com/BrianCLong/summit/pull/15459",
+        "mergedAt": null,
+        "title": "Improve approvals table UX and document list/table contract"
+      },
+      {
+        "number": 14786,
+        "url": "https://github.com/BrianCLong/summit/pull/14786",
+        "mergedAt": "2025-12-29T05:02:04Z",
+        "title": "Sprint 19: Switchboard Enterprise Integrations v1"
+      },
+      {
+        "number": 15411,
+        "url": "https://github.com/BrianCLong/summit/pull/15411",
+        "mergedAt": null,
+        "title": "Harden graph analytics query bounds"
+      },
+      {
+        "number": 13876,
+        "url": "https://github.com/BrianCLong/summit/pull/13876",
+        "mergedAt": "2025-12-20T03:21:56Z",
+        "title": "Epic 19: Search / Typesense Integration"
+      },
+      {
+        "number": 13873,
+        "url": "https://github.com/BrianCLong/summit/pull/13873",
+        "mergedAt": "2025-12-20T03:22:08Z",
+        "title": "Epic 19: Search / Typesense Integration"
+      },
+      {
+        "number": 14366,
+        "url": "https://github.com/BrianCLong/summit/pull/14366",
+        "mergedAt": "2025-12-22T07:56:12Z",
+        "title": "Epic 19: Billing Foundations - Plans & Entitlements"
+      },
+      {
+        "number": 13578,
+        "url": "https://github.com/BrianCLong/summit/pull/13578",
+        "mergedAt": "2025-12-17T04:06:16Z",
+        "title": "Epic #19: Differential Privacy Implementation"
+      },
+      {
+        "number": 15414,
+        "url": "https://github.com/BrianCLong/summit/pull/15414",
+        "mergedAt": null,
+        "title": "feat: establish environment contracts and config validation"
+      },
+      {
+        "number": 15413,
+        "url": "https://github.com/BrianCLong/summit/pull/15413",
+        "mergedAt": null,
+        "title": "feat(web): polish GlobalSearch UX and add tests"
+      },
+      {
+        "number": 15129,
+        "url": "https://github.com/BrianCLong/summit/pull/15129",
+        "mergedAt": "2025-12-30T21:37:18Z",
+        "title": "chore(deps): bump config from 0.13.4 to 0.15.19"
+      },
+      {
+        "number": 13849,
+        "url": "https://github.com/BrianCLong/summit/pull/13849",
+        "mergedAt": "2025-12-20T03:45:00Z",
+        "title": "Add Sprint 19 plan for Aug 31–Sep 11 2026"
+      },
+      {
+        "number": 15410,
+        "url": "https://github.com/BrianCLong/summit/pull/15410",
+        "mergedAt": null,
+        "title": "chore: enforce secret scanning gate"
+      },
+      {
+        "number": 12864,
+        "url": "https://github.com/BrianCLong/summit/pull/12864",
+        "mergedAt": "2025-12-04T15:48:49Z",
+        "title": "Add sprint plan for Jun 8-19 2026"
+      },
+      {
+        "number": 12811,
+        "url": "https://github.com/BrianCLong/summit/pull/12811",
+        "mergedAt": "2025-12-04T17:41:54Z",
+        "title": "Add Sprint 19 plan and execution Q&A"
+      },
+      {
+        "number": 15412,
+        "url": "https://github.com/BrianCLong/summit/pull/15412",
+        "mergedAt": null,
+        "title": "Codify release doctrine and add version policy check"
+      },
+      {
+        "number": 13617,
+        "url": "https://github.com/BrianCLong/summit/pull/13617",
+        "mergedAt": "2025-12-17T00:27:38Z",
+        "title": "build(deps): bump filelock from 3.19.1 to 3.20.1 in /cognitive_insights_engine"
+      },
+      {
+        "number": 13312,
+        "url": "https://github.com/BrianCLong/summit/pull/13312",
+        "mergedAt": null,
+        "title": "deps(npm): bump @opentelemetry/resources from 1.19.0 to 2.2.0"
+      },
+      {
+        "number": 13757,
+        "url": "https://github.com/BrianCLong/summit/pull/13757",
+        "mergedAt": "2025-12-20T03:34:12Z",
+        "title": "docs: refresh sprint 13 privacy-safe plan"
+      },
+      {
+        "number": 13805,
+        "url": "https://github.com/BrianCLong/summit/pull/13805",
+        "mergedAt": "2025-12-20T11:33:44Z",
+        "title": "Add switchboard approvals queue view"
+      },
+      {
+        "number": 12804,
+        "url": "https://github.com/BrianCLong/summit/pull/12804",
+        "mergedAt": "2025-12-04T17:42:13Z",
+        "title": "Add design partner onboarding sprint plan"
+      },
+      {
+        "number": 13316,
+        "url": "https://github.com/BrianCLong/summit/pull/13316",
+        "mergedAt": "2025-12-04T08:52:38Z",
+        "title": "deps(npm): bump react and @types/react"
+      },
+      {
+        "number": 13736,
+        "url": "https://github.com/BrianCLong/summit/pull/13736",
+        "mergedAt": "2025-12-20T03:32:42Z",
+        "title": "build(deps-dev): bump vite from 4.5.14 to 5.4.21 in /frontend"
+      },
+      {
+        "number": 13390,
+        "url": "https://github.com/BrianCLong/summit/pull/13390",
+        "mergedAt": "2025-12-17T04:37:03Z",
+        "title": "sec: Security chaos drills harness (initial drills)"
+      },
+      {
+        "number": 13053,
+        "url": "https://github.com/BrianCLong/summit/pull/13053",
+        "mergedAt": "2025-12-17T21:22:02Z",
+        "title": "Security: Fix dependency vulnerabilities and document findings"
+      },
+      {
+        "number": 11971,
+        "url": "https://github.com/BrianCLong/summit/pull/11971",
+        "mergedAt": null,
+        "title": "Analyze test coverage gaps automatically"
+      },
+      {
+        "number": 14385,
+        "url": "https://github.com/BrianCLong/summit/pull/14385",
+        "mergedAt": null,
+        "title": "chore(deps): bump marshmallow from 3.26.1 to 3.26.2"
+      },
+      {
+        "number": 1290,
+        "url": "https://github.com/BrianCLong/summit/pull/1290",
+        "mergedAt": "2025-09-20T16:30:04Z",
+        "title": "Phase 7: Canary Deployment & GA Release v2025.09.19"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

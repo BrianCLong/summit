@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable, List
 
 
 @dataclass
@@ -14,7 +14,7 @@ class ScenarioGenerator:
     """Produces curated simulation scenarios for orchestrators."""
 
     def __init__(self) -> None:
-        self.catalog: List[Scenario] = [
+        self.catalog: list[Scenario] = [
             Scenario("Jules executes next", depth=2),
             Scenario("Codex proposes refactor", depth=2),
             Scenario("Architecture migration initiated", depth=3),

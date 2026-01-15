@@ -1,0 +1,94 @@
+{
+  "issue_number": 12073,
+  "title": "Build performance optimization and scaling infrastructure",
+  "url": "https://github.com/BrianCLong/summit/pull/12073",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-11-22T06:03:43Z",
+  "createdAt": "2025-11-21T06:05:33Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13138,
+        "url": "https://github.com/BrianCLong/summit/pull/13138",
+        "mergedAt": "2025-12-03T02:27:21Z",
+        "title": "🏗️ Recovery: Build performance optimization and scaling infrastructure"
+      },
+      {
+        "number": 13096,
+        "url": "https://github.com/BrianCLong/summit/pull/13096",
+        "mergedAt": "2025-12-02T22:32:56Z",
+        "title": "🏗️ Recovery: Build performance optimization and scaling infrastructure"
+      },
+      {
+        "number": 12942,
+        "url": "https://github.com/BrianCLong/summit/pull/12942",
+        "mergedAt": "2025-12-02T21:46:46Z",
+        "title": "🏗️ Recovery: Build performance optimization and scaling infrastructure"
+      },
+      {
+        "number": 12940,
+        "url": "https://github.com/BrianCLong/summit/pull/12940",
+        "mergedAt": "2025-11-30T22:50:01Z",
+        "title": "🏗️ Recovery: Build performance optimization and scaling infrastructure"
+      },
+      {
+        "number": 12939,
+        "url": "https://github.com/BrianCLong/summit/pull/12939",
+        "mergedAt": "2025-11-30T22:04:57Z",
+        "title": "🏗️ Recovery: Build performance optimization and scaling infrastructure"
+      },
+      {
+        "number": 12937,
+        "url": "https://github.com/BrianCLong/summit/pull/12937",
+        "mergedAt": "2025-11-30T20:51:00Z",
+        "title": "🏗️ Recovery: Build performance optimization and scaling infrastructure"
+      },
+      {
+        "number": 12935,
+        "url": "https://github.com/BrianCLong/summit/pull/12935",
+        "mergedAt": "2025-11-30T19:49:18Z",
+        "title": "🏗️ Recovery: Build performance optimization and scaling infrastructure"
+      },
+      {
+        "number": 12933,
+        "url": "https://github.com/BrianCLong/summit/pull/12933",
+        "mergedAt": "2025-11-30T18:38:17Z",
+        "title": "🏗️ Recovery: Build performance optimization and scaling infrastructure"
+      },
+      {
+        "number": 12931,
+        "url": "https://github.com/BrianCLong/summit/pull/12931",
+        "mergedAt": "2025-11-30T17:41:16Z",
+        "title": "🏗️ Recovery: Build performance optimization and scaling infrastructure"
+      },
+      {
+        "number": 12929,
+        "url": "https://github.com/BrianCLong/summit/pull/12929",
+        "mergedAt": "2025-11-30T16:33:35Z",
+        "title": "🏗️ Recovery: Build performance optimization and scaling infrastructure"
+      },
+      {
+        "number": 12927,
+        "url": "https://github.com/BrianCLong/summit/pull/12927",
+        "mergedAt": "2025-11-30T15:31:21Z",
+        "title": "🏗️ Recovery: Build performance optimization and scaling infrastructure"
+      },
+      {
+        "number": 12925,
+        "url": "https://github.com/BrianCLong/summit/pull/12925",
+        "mergedAt": "2025-11-30T14:33:03Z",
+        "title": "🏗️ Recovery: Build performance optimization and scaling infrastructure"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

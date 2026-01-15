@@ -1,0 +1,155 @@
+{
+  "issue_number": 173,
+  "title": "sec: audit events",
+  "url": "https://github.com/BrianCLong/summit/issues/173",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9107968112,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQcA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P2",
+      "name": "P2",
+      "color": "fbca04",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107968375,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRdw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/audit",
+      "name": "audit",
+      "color": "e4e669",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107981145,
+      "node_id": "LA_kwDOPaNncM8AAAACHuDDWQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-10-30",
+      "name": "due:2025-10-30",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:43:13Z",
+  "createdAt": "2025-08-14T04:06:35Z",
+  "classification": "security",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 13111,
+        "url": "https://github.com/BrianCLong/summit/pull/13111",
+        "mergedAt": "2025-12-17T05:38:55Z",
+        "title": "API Authorization Matrix Generator & Enforcement"
+      },
+      {
+        "number": 13119,
+        "url": "https://github.com/BrianCLong/summit/pull/13119",
+        "mergedAt": "2025-12-17T05:37:58Z",
+        "title": "Implement Time-Series Intelligence Model for Entity Forecasting"
+      },
+      {
+        "number": 13120,
+        "url": "https://github.com/BrianCLong/summit/pull/13120",
+        "mergedAt": "2025-12-03T01:33:12Z",
+        "title": "Agent-based Trend Forecaster for Narrative Simulation"
+      },
+      {
+        "number": 13117,
+        "url": "https://github.com/BrianCLong/summit/pull/13117",
+        "mergedAt": "2025-12-03T01:35:51Z",
+        "title": "PsyOps Narrative Simulator: Propagation & Suppression"
+      },
+      {
+        "number": 13109,
+        "url": "https://github.com/BrianCLong/summit/pull/13109",
+        "mergedAt": "2025-12-03T00:15:40Z",
+        "title": "Harden Summit inputs against security threats"
+      },
+      {
+        "number": 13115,
+        "url": "https://github.com/BrianCLong/summit/pull/13115",
+        "mergedAt": "2025-12-03T01:37:10Z",
+        "title": "feat: Implement PredictiveRelationshipService for edge inference"
+      },
+      {
+        "number": 11852,
+        "url": "https://github.com/BrianCLong/summit/pull/11852",
+        "mergedAt": "2025-11-20T09:48:03Z",
+        "title": "Improve developer experience in summit monorepo"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 1289,
+        "url": "https://github.com/BrianCLong/summit/pull/1289",
+        "mergedAt": "2025-09-23T06:48:53Z",
+        "title": "Phase 5: Comprehensive Observability & Monitoring Hardening"
+      },
+      {
+        "number": 11922,
+        "url": "https://github.com/BrianCLong/summit/pull/11922",
+        "mergedAt": "2025-11-20T10:05:25Z",
+        "title": "Build real-time streaming analytics pipeline"
+      },
+      {
+        "number": 11902,
+        "url": "https://github.com/BrianCLong/summit/pull/11902",
+        "mergedAt": "2025-11-20T10:25:44Z",
+        "title": "Build Cyber Threat Intelligence Platform"
+      },
+      {
+        "number": 11919,
+        "url": "https://github.com/BrianCLong/summit/pull/11919",
+        "mergedAt": "2025-11-20T10:05:41Z",
+        "title": "Build Advanced Data Integration and ETL Platform"
+      },
+      {
+        "number": 11927,
+        "url": "https://github.com/BrianCLong/summit/pull/11927",
+        "mergedAt": null,
+        "title": "Build workflow orchestration and task scheduling"
+      },
+      {
+        "number": 1221,
+        "url": "https://github.com/BrianCLong/summit/pull/1221",
+        "mergedAt": null,
+        "title": "Sprint v0.5 – Guarded Rail"
+      },
+      {
+        "number": 13193,
+        "url": "https://github.com/BrianCLong/summit/pull/13193",
+        "mergedAt": "2025-12-04T15:38:38Z",
+        "title": "Build React Native mobile app with OSINT dashboard"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

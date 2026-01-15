@@ -1,0 +1,230 @@
+{
+  "issue_number": 65,
+  "title": "Set Up Basic Testing Framework (Jest/Cypress)",
+  "url": "https://github.com/BrianCLong/summit/issues/65",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T04:39:18Z",
+  "createdAt": "2025-08-12T04:39:18Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15288,
+        "url": "https://github.com/BrianCLong/summit/pull/15288",
+        "mergedAt": "2026-01-01T11:42:56Z",
+        "title": "Sprint N+65: Platform Narrative & Positioning"
+      },
+      {
+        "number": 15392,
+        "url": "https://github.com/BrianCLong/summit/pull/15392",
+        "mergedAt": null,
+        "title": "Harden GA coverage and fuzz gates with deterministic turbo segmentation"
+      },
+      {
+        "number": 12670,
+        "url": "https://github.com/BrianCLong/summit/pull/12670",
+        "mergedAt": "2025-12-18T01:43:59Z",
+        "title": "Add execution guides for prompts #65–#72"
+      },
+      {
+        "number": 12457,
+        "url": "https://github.com/BrianCLong/summit/pull/12457",
+        "mergedAt": "2025-12-18T02:48:07Z",
+        "title": "docs: outline wave9 capability missions"
+      },
+      {
+        "number": 12097,
+        "url": "https://github.com/BrianCLong/summit/pull/12097",
+        "mergedAt": "2025-11-21T06:30:12Z",
+        "title": "Enhance CI/CD pipeline with quality gates"
+      },
+      {
+        "number": 15317,
+        "url": "https://github.com/BrianCLong/summit/pull/15317",
+        "mergedAt": "2026-01-01T11:38:59Z",
+        "title": "Ecosystem Entry Innovation Sprint Documentation"
+      },
+      {
+        "number": 11841,
+        "url": "https://github.com/BrianCLong/summit/pull/11841",
+        "mergedAt": "2025-11-20T09:48:29Z",
+        "title": "feat: implement IntelGraph ML benchmarking and auto-tuning stack"
+      },
+      {
+        "number": 13148,
+        "url": "https://github.com/BrianCLong/summit/pull/13148",
+        "mergedAt": "2025-12-17T05:36:11Z",
+        "title": "C6 — CI Time Budget Enforcer"
+      },
+      {
+        "number": 10202,
+        "url": "https://github.com/BrianCLong/summit/pull/10202",
+        "mergedAt": "2025-10-14T21:56:26Z",
+        "title": "ops(merge-train): triage + hotspot + auto-resolve + docs"
+      },
+      {
+        "number": 10037,
+        "url": "https://github.com/BrianCLong/summit/pull/10037",
+        "mergedAt": "2025-10-04T22:44:15Z",
+        "title": "feat: launch autonomous investigator overlay"
+      },
+      {
+        "number": 10089,
+        "url": "https://github.com/BrianCLong/summit/pull/10089",
+        "mergedAt": "2025-10-14T13:07:17Z",
+        "title": "feat: add semantic pii mapping engine"
+      },
+      {
+        "number": 10102,
+        "url": "https://github.com/BrianCLong/summit/pull/10102",
+        "mergedAt": "2025-10-14T13:05:00Z",
+        "title": "feat: add multi-cloud arbitrage agent system"
+      },
+      {
+        "number": 11906,
+        "url": "https://github.com/BrianCLong/summit/pull/11906",
+        "mergedAt": null,
+        "title": "feat: implement data catalog & governance spine"
+      },
+      {
+        "number": 1358,
+        "url": "https://github.com/BrianCLong/summit/pull/1358",
+        "mergedAt": null,
+        "title": "test: expand policy reasoner coverage"
+      },
+      {
+        "number": 10118,
+        "url": "https://github.com/BrianCLong/summit/pull/10118",
+        "mergedAt": "2025-10-14T10:40:09Z",
+        "title": "feat: Enforce automated test policies in CI/CD"
+      },
+      {
+        "number": 15339,
+        "url": "https://github.com/BrianCLong/summit/pull/15339",
+        "mergedAt": "2026-01-01T11:37:58Z",
+        "title": "feat: leverage optimization and friction reduction"
+      },
+      {
+        "number": 13106,
+        "url": "https://github.com/BrianCLong/summit/pull/13106",
+        "mergedAt": "2025-12-03T04:36:27Z",
+        "title": "Add spectrum analysis and sensor fusion integration"
+      },
+      {
+        "number": 11882,
+        "url": "https://github.com/BrianCLong/summit/pull/11882",
+        "mergedAt": null,
+        "title": "Add API documentation and validation layers"
+      },
+      {
+        "number": 11784,
+        "url": "https://github.com/BrianCLong/summit/pull/11784",
+        "mergedAt": "2025-10-27T10:54:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 21 updates"
+      },
+      {
+        "number": 13166,
+        "url": "https://github.com/BrianCLong/summit/pull/13166",
+        "mergedAt": "2025-12-04T15:39:25Z",
+        "title": "Fix Jest ESM config, update CI, and resolve conflicts"
+      },
+      {
+        "number": 13076,
+        "url": "https://github.com/BrianCLong/summit/pull/13076",
+        "mergedAt": "2025-12-03T05:15:02Z",
+        "title": "Fix Jest ESM Configuration and Test Execution"
+      },
+      {
+        "number": 11927,
+        "url": "https://github.com/BrianCLong/summit/pull/11927",
+        "mergedAt": null,
+        "title": "Build workflow orchestration and task scheduling"
+      },
+      {
+        "number": 1277,
+        "url": "https://github.com/BrianCLong/summit/pull/1277",
+        "mergedAt": "2025-09-19T02:20:58Z",
+        "title": "feat: Add Sprint 25 Day-1 deliverables"
+      },
+      {
+        "number": 1260,
+        "url": "https://github.com/BrianCLong/summit/pull/1260",
+        "mergedAt": null,
+        "title": "Rebrand: integrate feature/rename-summit into merge/all-to-main-20250915-022508"
+      },
+      {
+        "number": 13164,
+        "url": "https://github.com/BrianCLong/summit/pull/13164",
+        "mergedAt": "2025-12-17T05:35:09Z",
+        "title": "Resolve merge conflicts via rebase"
+      },
+      {
+        "number": 1338,
+        "url": "https://github.com/BrianCLong/summit/pull/1338",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/workflows"
+      },
+      {
+        "number": 1337,
+        "url": "https://github.com/BrianCLong/summit/pull/1337",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/docs"
+      },
+      {
+        "number": 1336,
+        "url": "https://github.com/BrianCLong/summit/pull/1336",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/deps"
+      },
+      {
+        "number": 1335,
+        "url": "https://github.com/BrianCLong/summit/pull/1335",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/hardening"
+      },
+      {
+        "number": 1334,
+        "url": "https://github.com/BrianCLong/summit/pull/1334",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/features"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

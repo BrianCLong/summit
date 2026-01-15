@@ -1,12 +1,14 @@
 import argparse
-import time
 import asyncio
 import logging
+import time
+
 from server.src.ai.batchProcessor import BatchProcessor
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("Benchmark")
+
 
 async def run_benchmark(batch_sizes):
     logger.info(f"Starting benchmark with batch sizes: {batch_sizes}")
@@ -20,7 +22,7 @@ async def run_benchmark(batch_sizes):
     async def measured_process(model, batch):
         start = time.time()
         # Mock inference direct call
-        await processor.mock_inference(model, [b['input'] for b in batch])
+        await processor.mock_inference(model, [b["input"] for b in batch])
         duration = time.time() - start
         return duration
 
@@ -35,7 +37,7 @@ async def run_benchmark(batch_sizes):
         start_total = time.time()
         # Process 10 batches
         for _ in range(10):
-            await processor.mock_inference("yolo", [b['input'] for b in batch])
+            await processor.mock_inference("yolo", [b["input"] for b in batch])
 
         total_time = time.time() - start_total
         throughput = (size * 10) / total_time
@@ -47,6 +49,7 @@ async def run_benchmark(batch_sizes):
     print("-----------|-------------------")
     for size, tput in results.items():
         print(f"{size:<10} | {tput:.2f}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

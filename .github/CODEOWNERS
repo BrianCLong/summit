@@ -51,3 +51,9 @@
 # CI/CD & Deploy (Overrides)
 /.github/workflows/ @team-ops
 /deploy/ @team-ops
+
+# Release Evidence Governance
+/release-evidence/  @BrianCLong
+/docs/releases/     @BrianCLong
+/.github/workflows/release*  @BrianCLong
+/scripts/release/   @BrianCLong

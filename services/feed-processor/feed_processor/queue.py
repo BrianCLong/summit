@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any, Iterable, List, Optional
+from typing import Any
 
 from redis import asyncio as redis_async
 
@@ -25,7 +26,7 @@ class RedisBatchQueue:
         redis_url: str,
         queue_name: str,
         *,
-        redis_client: Optional[redis_async.Redis] = None,
+        redis_client: redis_async.Redis | None = None,
     ) -> None:
         self._queue = queue_name
         self._redis = redis_client or redis_async.from_url(

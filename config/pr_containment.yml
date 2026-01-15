@@ -1,0 +1,43 @@
+# Mega-PR Containment Configuration
+
+# Thresholds for triggering the containment protocol
+thresholds:
+  filesChanged: 20
+  linesChanged: 1000  # Additions + Deletions
+  criticalSize: 5     # If touching critical paths, this lower threshold applies
+
+# Critical paths that require isolation and elevated scrutiny
+# These should be merged first or with special care.
+criticalPaths:
+  - ".github/workflows/**"
+  - "scripts/**"
+  - "Makefile*"
+  - "package.json"
+  - "pnpm-lock.yaml"
+  - "turbo.json"
+  - "tsconfig*.json"
+  - "invariants/**"
+  - "policies/**"
+  - "docs/compliance/**"
+  - "infra/**"
+  - "docker/**"
+  - "k8s/**"
+  - "policy/**"
+  - "security/**"
+
+# Known safe slice anchors (can be grouped together)
+safeAnchors:
+  docs:
+    - "docs/**"
+    - "**/*.md"
+    - "LICENSE"
+  tests:
+    - "**/*.test.ts"
+    - "**/*.spec.ts"
+    - "test/**"
+    - "tests/**"
+    - "e2e/**"
+  ui:
+    - "apps/web/**"
+    - "client/**"
+    - "frontend/**"

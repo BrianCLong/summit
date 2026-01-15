@@ -116,13 +116,11 @@ def health_check():
 def readiness_check():
     try:
         redis_client.ping()
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise HTTPException(status_code=503, detail=f"Redis unavailable: {exc}")
 
     if producer is None or consumer is None:
-        raise HTTPException(
-            status_code=503, detail="Kafka clients not initialized yet"
-        )
+        raise HTTPException(status_code=503, detail="Kafka clients not initialized yet")
 
     return {"status": "ready"}
 

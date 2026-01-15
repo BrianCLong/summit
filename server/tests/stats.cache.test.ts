@@ -1,5 +1,16 @@
-import { statsResolvers } from '../src/graphql/resolvers/stats';
 import { jest, describe, test, expect } from '@jest/globals';
+
+jest.mock('../src/metrics/cacheMetrics.js', () => ({
+  recHit: jest.fn(),
+  recMiss: jest.fn(),
+  recSet: jest.fn(),
+  recInvalidation: jest.fn(),
+  recEviction: jest.fn(),
+  setHitRatio: jest.fn(),
+  cacheLocalSize: {
+    labels: jest.fn(() => ({ set: jest.fn() })),
+  },
+}));
 
 jest.mock('../src/config/database.js', () => {
   const query = jest.fn(async (sql: string, _params: any[]) => {
@@ -26,6 +37,8 @@ jest.mock('../src/config/database.js', () => {
 
 describe('stats caching', () => {
   test('caseCounts and summaryStats are cached via local/redis cache', async () => {
+    jest.resetModules();
+    const { statsResolvers } = await import('../src/graphql/resolvers/stats');
     const ctx: any = { user: { tenant: 't-test' } };
     // First pass -> populates cache
     await statsResolvers.Query.caseCounts(null as any, {}, ctx);

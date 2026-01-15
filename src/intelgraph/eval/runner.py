@@ -1,15 +1,18 @@
 import json
 import time
+from collections.abc import Callable
 from pathlib import Path
-from typing import List, Dict, Callable, Any, Optional
+from typing import Any
+
 from .registry import registry
+
 
 def run_eval(
     name: str,
-    cases: List[Dict[str, Any]],
-    predict_fn: Callable[[Dict[str, Any]], Any],
-    metrics: List[str],
-    out_path: Path
+    cases: list[dict[str, Any]],
+    predict_fn: Callable[[dict[str, Any]], Any],
+    metrics: list[str],
+    out_path: Path,
 ) -> None:
     """
     Run evaluation on a set of cases and write results to JSONL.
@@ -27,7 +30,7 @@ def run_eval(
             # Predict
             try:
                 y_pred = predict_fn(inputs)
-            except Exception as e:
+            except Exception:
                 y_pred = None
                 # Maybe log error?
 
@@ -40,7 +43,7 @@ def run_eval(
                         score = metric.compute(y_true, y_pred)
                         metric_results[m_name] = score
                     except Exception:
-                        pass # Ignore metric failures
+                        pass  # Ignore metric failures
 
             record = {
                 "case_id": case_id,
@@ -49,7 +52,7 @@ def run_eval(
                 "y_pred": y_pred,
                 "metric_results": metric_results,
                 "timestamp": time.time(),
-                "eval_name": name
+                "eval_name": name,
             }
 
             f.write(json.dumps(record, sort_keys=True) + "\n")

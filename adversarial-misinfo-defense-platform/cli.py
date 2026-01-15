@@ -58,7 +58,7 @@ def validate(args: argparse.Namespace) -> int:
         return 0
 
     except Exception as e:
-        print(f"Error during validation: {str(e)}")
+        print(f"Error during validation: {e!s}")
         if args.verbose:
             import traceback
 
@@ -89,7 +89,7 @@ def train(args: argparse.Namespace) -> int:
         return 0
 
     except Exception as e:
-        print(f"Error during training: {str(e)}")
+        print(f"Error during training: {e!s}")
         if args.verbose:
             import traceback
 
@@ -129,7 +129,7 @@ def exercise(args: argparse.Namespace) -> int:
         return 0
 
     except Exception as e:
-        print(f"Error during exercise management: {str(e)}")
+        print(f"Error during exercise management: {e!s}")
         if args.verbose:
             import traceback
 

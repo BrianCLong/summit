@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { NextFunction, Request, Response } from 'express';
 import { createOsintRateLimiter } from '../../src/middleware/osintRateLimiter';
 

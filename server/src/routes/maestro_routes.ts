@@ -5,6 +5,7 @@ import { MaestroQueries } from '../maestro/queries.js';
 import { opaClient } from '../services/opa-client';
 import { getCorrelationContext } from '../middleware/correlation-id';
 import { logger } from '../utils/logger';
+import { policyActionGate } from '../middleware/policy-action-gate.js';
 
 type OpaEvaluator = {
   evaluateQuery: (policyPath: string, input: any) => Promise<any>;
@@ -158,7 +159,15 @@ export function buildMaestroRouter(
   opa: OpaEvaluator = opaClient,
 ): Router {
   const router = Router();
-  const enforceRunPolicy = createMaestroOPAEnforcer(opa);
+  const enforceStartRunPolicy = policyActionGate({
+    action: 'start_run',
+    resource: 'maestro_run',
+    resolveResourceId: (req) => req.body?.pipeline_id,
+    buildResourceAttributes: (req) => ({
+      pipelineId: req.body?.pipeline_id,
+      requestText: req.body?.requestText,
+    }),
+  });
   const enforceRunReadPolicy = createMaestroOPAEnforcer(opa, DEFAULT_POLICY_PATH, {
     action: 'maestro.run.read',
     resourceType: 'maestro/run',
@@ -175,7 +184,7 @@ export function buildMaestroRouter(
   });
 
   // POST /api/maestro/runs – fire-and-return (current v0.1)
-  router.post('/runs', enforceRunPolicy, async (req, res, next) => {
+  router.post('/runs', enforceStartRunPolicy, async (req, res, next) => {
     try {
       const { userId, requestText } = req.body ?? {};
       if (!userId || !requestText) {

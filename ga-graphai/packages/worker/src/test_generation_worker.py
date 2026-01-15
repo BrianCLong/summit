@@ -7,7 +7,6 @@ from typing import Protocol
 
 from prompt_engineering import PromptEngineer, PromptTuning
 
-
 _DEFAULT_TEST_TUNING = PromptTuning(
     system_instruction=(
         "You are a senior code-focused LLM tasked with producing only unit test diffs. "
@@ -32,7 +31,9 @@ _DEFAULT_TEST_TUNING = PromptTuning(
 class CodeLLMClient(Protocol):
     """Minimal client contract for completing a prompt with a code LLM."""
 
-    def complete(self, prompt: str, *, temperature: float, max_tokens: int) -> str:  # pragma: no cover - Protocol
+    def complete(
+        self, prompt: str, *, temperature: float, max_tokens: int
+    ) -> str:  # pragma: no cover - Protocol
         ...
 
 
@@ -226,7 +227,9 @@ class DiffOnlyTestGenerationWorker:
             "cargo test": ("fn test_", "#[test]"),
         }
         indicators = test_indicators.get(framework, ("test",))
-        detected_cases = [line for line in added_lines if any(token in line for token in indicators)]
+        detected_cases = [
+            line for line in added_lines if any(token in line for token in indicators)
+        ]
         if not detected_cases:
             return 0.0
         return min(len(detected_cases) * 0.75, 10.0)
@@ -234,7 +237,7 @@ class DiffOnlyTestGenerationWorker:
 
 def build_unit_test_generation_tool(
     client: CodeLLMClient,
-) -> "ToolCapability":  # pragma: no cover - returned callable is exercised in integration tests
+) -> ToolCapability:  # pragma: no cover - returned callable is exercised in integration tests
     from main import ToolCapability
 
     worker = DiffOnlyTestGenerationWorker(client)
@@ -254,4 +257,3 @@ def build_unit_test_generation_tool(
         }
 
     return ToolCapability(name="unit-test-generator", handler=handler, minimum_authority=2)
-

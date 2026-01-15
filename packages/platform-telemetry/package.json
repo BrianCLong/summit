@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/platform-telemetry",
-  "version": "1.0.0",
+  "version": "4.1.4",
   "description": "Unified telemetry SDK for metrics, tracing, and logging (P31-32)",
   "type": "module",
   "main": "dist/index.js",

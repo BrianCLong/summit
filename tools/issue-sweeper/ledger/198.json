@@ -1,0 +1,83 @@
+{
+  "issue_number": 198,
+  "title": "CI/CD pipeline with GitHub Actions",
+  "url": "https://github.com/BrianCLong/summit/issues/198",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9107968073,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQSQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P1",
+      "name": "P1",
+      "color": "ff8c00",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107981145,
+      "node_id": "LA_kwDOPaNncM8AAAACHuDDWQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-10-30",
+      "name": "due:2025-10-30",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108055903,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHnXw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/devops",
+      "name": "devops",
+      "color": "d4c5f9",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108056042,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHn6g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/CI/CD",
+      "name": "CI/CD",
+      "color": "84b6eb",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:42:59Z",
+  "createdAt": "2025-08-14T04:42:59Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 10089,
+        "url": "https://github.com/BrianCLong/summit/pull/10089",
+        "mergedAt": "2025-10-14T13:07:17Z",
+        "title": "feat: add semantic pii mapping engine"
+      },
+      {
+        "number": 11875,
+        "url": "https://github.com/BrianCLong/summit/pull/11875",
+        "mergedAt": "2025-11-20T14:33:52Z",
+        "title": "Build Extensions and Ecosystem Framework"
+      },
+      {
+        "number": 1204,
+        "url": "https://github.com/BrianCLong/summit/pull/1204",
+        "mergedAt": null,
+        "title": "chore(deps): bump the minor-and-patch group with 70 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

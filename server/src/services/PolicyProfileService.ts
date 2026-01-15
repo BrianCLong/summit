@@ -4,6 +4,7 @@ import { tenantService } from './TenantService.js';
 import { randomUUID, createHash } from 'crypto';
 import logger from '../utils/logger.js';
 import type { TenantPolicyBundle } from '../policy/tenantBundle.js';
+import { buildSettingsWithHistory } from './TenantService.js';
 
 // Hardcoded Profiles (Prototypes)
 const BASELINE_PROFILE: TenantPolicyBundle['baseProfile'] = {
@@ -169,11 +170,15 @@ export class PolicyProfileService {
       // storing the selection in settings.policy_profile
       // storing the resolved bundle in settings.policy_bundle (since config column doesn't exist yet per plan discussion)
 
-      const newSettings = {
-        ...(tenant.settings || {}),
-        policy_profile: profileId,
-        policy_bundle: newBundle,
-      };
+      const { settings: newSettings } = buildSettingsWithHistory(
+        tenant.settings || {},
+        {
+          policy_profile: profileId,
+          policy_bundle: newBundle,
+        },
+        actorId,
+        'policy_profile_applied',
+      );
 
       await client.query(
         'UPDATE tenants SET settings = $1, updated_at = NOW() WHERE id = $2',

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict
 
 from .metrics import EvaluationResult
 
@@ -14,7 +13,7 @@ class EvaluationReport:
 
     result: EvaluationResult
 
-    def certification(self) -> Dict[str, str | float]:
+    def certification(self) -> dict[str, str | float]:
         """Return a dictionary certifying residual risk bands."""
 
         return {

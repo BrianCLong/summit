@@ -1,0 +1,230 @@
+{
+  "issue_number": 56,
+  "title": "Docs: one-command local bootstrap (README + .env.example)",
+  "url": "https://github.com/BrianCLong/summit/issues/56",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051495,
+      "node_id": "LA_kwDOPaNncM8AAAACHht45w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:docs",
+      "name": "type:docs",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Docs"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    },
+    {
+      "id": 9095068559,
+      "node_id": "LA_kwDOPaNncM8AAAACHhu7jw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:docs",
+      "name": "area:docs",
+      "color": "ededed",
+      "default": false,
+      "description": "Docs area"
+    }
+  ],
+  "updatedAt": "2025-08-12T02:39:45Z",
+  "createdAt": "2025-08-12T02:37:58Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14537,
+        "url": "https://github.com/BrianCLong/summit/pull/14537",
+        "mergedAt": "2025-12-27T00:22:48Z",
+        "title": "Platform Economics Optimization"
+      },
+      {
+        "number": 12461,
+        "url": "https://github.com/BrianCLong/summit/pull/12461",
+        "mergedAt": "2025-12-18T02:47:41Z",
+        "title": "Add wave seven architecture notes"
+      },
+      {
+        "number": 12668,
+        "url": "https://github.com/BrianCLong/summit/pull/12668",
+        "mergedAt": "2025-12-04T18:43:58Z",
+        "title": "feat: add motif miner delivery pack"
+      },
+      {
+        "number": 15294,
+        "url": "https://github.com/BrianCLong/summit/pull/15294",
+        "mergedAt": "2026-01-01T05:45:57Z",
+        "title": "Set up autonomous Summit priority system"
+      },
+      {
+        "number": 15315,
+        "url": "https://github.com/BrianCLong/summit/pull/15315",
+        "mergedAt": null,
+        "title": "Initialize Pilot Design Innovation Sprint artifacts"
+      },
+      {
+        "number": 15319,
+        "url": "https://github.com/BrianCLong/summit/pull/15319",
+        "mergedAt": "2026-01-01T11:38:50Z",
+        "title": "Add Summit Decision Governance Pilot Documentation"
+      },
+      {
+        "number": 15324,
+        "url": "https://github.com/BrianCLong/summit/pull/15324",
+        "mergedAt": null,
+        "title": "Add continuity and succession safeguards"
+      },
+      {
+        "number": 11782,
+        "url": "https://github.com/BrianCLong/summit/pull/11782",
+        "mergedAt": "2025-10-24T19:45:25Z",
+        "title": "chore(deps): bump playwright and @playwright/test in /conductor-ui/frontend"
+      },
+      {
+        "number": 15293,
+        "url": "https://github.com/BrianCLong/summit/pull/15293",
+        "mergedAt": "2026-01-01T06:31:07Z",
+        "title": "feat: codify partner operating model guardrails"
+      },
+      {
+        "number": 11779,
+        "url": "https://github.com/BrianCLong/summit/pull/11779",
+        "mergedAt": "2025-10-22T15:51:49Z",
+        "title": "chore(deps): bump playwright and @playwright/test in /client"
+      },
+      {
+        "number": 15338,
+        "url": "https://github.com/BrianCLong/summit/pull/15338",
+        "mergedAt": "2026-01-01T11:38:05Z",
+        "title": "Control the Arena: Governance Definitions and Debt Automation"
+      },
+      {
+        "number": 11776,
+        "url": "https://github.com/BrianCLong/summit/pull/11776",
+        "mergedAt": "2025-10-20T19:09:45Z",
+        "title": "chore(deps): bump playwright and @playwright/test in /intelgraph"
+      },
+      {
+        "number": 11775,
+        "url": "https://github.com/BrianCLong/summit/pull/11775",
+        "mergedAt": "2025-10-20T18:15:01Z",
+        "title": "chore(deps): bump playwright and @playwright/test in /server"
+      },
+      {
+        "number": 15316,
+        "url": "https://github.com/BrianCLong/summit/pull/15316",
+        "mergedAt": "2026-01-01T11:39:03Z",
+        "title": "feat: Economic Innovation Sprint artifacts"
+      },
+      {
+        "number": 13111,
+        "url": "https://github.com/BrianCLong/summit/pull/13111",
+        "mergedAt": "2025-12-17T05:38:55Z",
+        "title": "API Authorization Matrix Generator & Enforcement"
+      },
+      {
+        "number": 15301,
+        "url": "https://github.com/BrianCLong/summit/pull/15301",
+        "mergedAt": "2026-01-01T07:54:58Z",
+        "title": "Add agent guardrail enforcement and steering controls"
+      },
+      {
+        "number": 13119,
+        "url": "https://github.com/BrianCLong/summit/pull/13119",
+        "mergedAt": "2025-12-17T05:37:58Z",
+        "title": "Implement Time-Series Intelligence Model for Entity Forecasting"
+      },
+      {
+        "number": 15290,
+        "url": "https://github.com/BrianCLong/summit/pull/15290",
+        "mergedAt": "2026-01-01T05:46:03Z",
+        "title": "Add Claude Code prompt for priority work"
+      },
+      {
+        "number": 13120,
+        "url": "https://github.com/BrianCLong/summit/pull/13120",
+        "mergedAt": "2025-12-03T01:33:12Z",
+        "title": "Agent-based Trend Forecaster for Narrative Simulation"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      },
+      {
+        "number": 13117,
+        "url": "https://github.com/BrianCLong/summit/pull/13117",
+        "mergedAt": "2025-12-03T01:35:51Z",
+        "title": "PsyOps Narrative Simulator: Propagation & Suppression"
+      },
+      {
+        "number": 13109,
+        "url": "https://github.com/BrianCLong/summit/pull/13109",
+        "mergedAt": "2025-12-03T00:15:40Z",
+        "title": "Harden Summit inputs against security threats"
+      },
+      {
+        "number": 11967,
+        "url": "https://github.com/BrianCLong/summit/pull/11967",
+        "mergedAt": "2025-11-20T11:01:36Z",
+        "title": "Address competitive gaps in Summit positioning"
+      },
+      {
+        "number": 11819,
+        "url": "https://github.com/BrianCLong/summit/pull/11819",
+        "mergedAt": "2025-11-20T21:12:45Z",
+        "title": "feat: add bias mitigation evaluation via cognitive NLP engine"
+      },
+      {
+        "number": 1169,
+        "url": "https://github.com/BrianCLong/summit/pull/1169",
+        "mergedAt": null,
+        "title": "chore(deps): bump @opentelemetry/auto-instrumentations-node from 0.39.4 to 0.62.2 in /server"
+      },
+      {
+        "number": 13115,
+        "url": "https://github.com/BrianCLong/summit/pull/13115",
+        "mergedAt": "2025-12-03T01:37:10Z",
+        "title": "feat: Implement PredictiveRelationshipService for edge inference"
+      },
+      {
+        "number": 271,
+        "url": "https://github.com/BrianCLong/summit/pull/271",
+        "mergedAt": "2025-08-15T21:04:43Z",
+        "title": "chore(deps): bump bullmq from 4.18.3 to 5.57.0 in /server"
+      },
+      {
+        "number": 11898,
+        "url": "https://github.com/BrianCLong/summit/pull/11898",
+        "mergedAt": null,
+        "title": "Unify apps with graph timeline map interface"
+      },
+      {
+        "number": 15339,
+        "url": "https://github.com/BrianCLong/summit/pull/15339",
+        "mergedAt": "2026-01-01T11:37:58Z",
+        "title": "feat: leverage optimization and friction reduction"
+      },
+      {
+        "number": 10041,
+        "url": "https://github.com/BrianCLong/summit/pull/10041",
+        "mergedAt": null,
+        "title": "feat: launch global provenance graph"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

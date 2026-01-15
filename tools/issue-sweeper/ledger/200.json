@@ -1,0 +1,257 @@
+{
+  "issue_number": 200,
+  "title": "Anomaly alerting",
+  "url": "https://github.com/BrianCLong/summit/issues/200",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342705,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn8cQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/AI",
+      "name": "AI",
+      "color": "bfdadc",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342986,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9ig",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/frontend",
+      "name": "frontend",
+      "color": "A2EEEF",
+      "default": false,
+      "description": "UI/E2E"
+    },
+    {
+      "id": 9107968112,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQcA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P2",
+      "name": "P2",
+      "color": "fbca04",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108056065,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHoAQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/monitoring",
+      "name": "monitoring",
+      "color": "1d76db",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108056381,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHpPQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-11-30",
+      "name": "due:2025-11-30",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:43:04Z",
+  "createdAt": "2025-08-14T04:43:04Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15397,
+        "url": "https://github.com/BrianCLong/summit/pull/15397",
+        "mergedAt": null,
+        "title": "ci: enforce deterministic coverage and turbo segmentation"
+      },
+      {
+        "number": 14970,
+        "url": "https://github.com/BrianCLong/summit/pull/14970",
+        "mergedAt": null,
+        "title": "feat: add standard health and status endpoints"
+      },
+      {
+        "number": 13377,
+        "url": "https://github.com/BrianCLong/summit/pull/13377",
+        "mergedAt": "2025-12-17T05:04:14Z",
+        "title": "docs: Service dependency map & failure-mode taxonomy (phase 1)"
+      },
+      {
+        "number": 15343,
+        "url": "https://github.com/BrianCLong/summit/pull/15343",
+        "mergedAt": "2026-01-01T11:37:28Z",
+        "title": "Migrate to Vitest and Enforce CI Gates"
+      },
+      {
+        "number": 13462,
+        "url": "https://github.com/BrianCLong/summit/pull/13462",
+        "mergedAt": "2025-12-06T22:22:57Z",
+        "title": "Analyze and reduce frontend bundle size"
+      },
+      {
+        "number": 15184,
+        "url": "https://github.com/BrianCLong/summit/pull/15184",
+        "mergedAt": "2025-12-31T14:21:30Z",
+        "title": "chore(deps): bump docker/setup-buildx-action from 2 to 3"
+      },
+      {
+        "number": 12089,
+        "url": "https://github.com/BrianCLong/summit/pull/12089",
+        "mergedAt": "2025-11-21T06:30:29Z",
+        "title": "Triage and consolidate open pull requests"
+      },
+      {
+        "number": 11953,
+        "url": "https://github.com/BrianCLong/summit/pull/11953",
+        "mergedAt": "2025-11-20T10:20:52Z",
+        "title": "Review cloud cost optimization opportunities"
+      },
+      {
+        "number": 12240,
+        "url": "https://github.com/BrianCLong/summit/pull/12240",
+        "mergedAt": "2025-12-18T03:33:37Z",
+        "title": "Build graph analytics suite with path finding"
+      },
+      {
+        "number": 12093,
+        "url": "https://github.com/BrianCLong/summit/pull/12093",
+        "mergedAt": "2025-11-21T06:30:17Z",
+        "title": "Design database migration and schema strategy"
+      },
+      {
+        "number": 13110,
+        "url": "https://github.com/BrianCLong/summit/pull/13110",
+        "mergedAt": "2025-12-17T05:42:57Z",
+        "title": "S8 - Security Regression Replay Harness"
+      },
+      {
+        "number": 11899,
+        "url": "https://github.com/BrianCLong/summit/pull/11899",
+        "mergedAt": "2025-11-20T10:26:05Z",
+        "title": "Set up SLO monitoring for API performance"
+      },
+      {
+        "number": 15342,
+        "url": "https://github.com/BrianCLong/summit/pull/15342",
+        "mergedAt": "2026-01-01T08:47:00Z",
+        "title": "Create eight new product requirement documents"
+      },
+      {
+        "number": 13120,
+        "url": "https://github.com/BrianCLong/summit/pull/13120",
+        "mergedAt": "2025-12-03T01:33:12Z",
+        "title": "Agent-based Trend Forecaster for Narrative Simulation"
+      },
+      {
+        "number": 10210,
+        "url": "https://github.com/BrianCLong/summit/pull/10210",
+        "mergedAt": "2025-10-15T16:04:02Z",
+        "title": "SEV-1: CI Backbone - Guarantee Green Signal on Main"
+      },
+      {
+        "number": 12074,
+        "url": "https://github.com/BrianCLong/summit/pull/12074",
+        "mergedAt": null,
+        "title": "Build Advanced Threat Detection System"
+      },
+      {
+        "number": 13115,
+        "url": "https://github.com/BrianCLong/summit/pull/13115",
+        "mergedAt": "2025-12-03T01:37:10Z",
+        "title": "feat: Implement PredictiveRelationshipService for edge inference"
+      },
+      {
+        "number": 10202,
+        "url": "https://github.com/BrianCLong/summit/pull/10202",
+        "mergedAt": "2025-10-14T21:56:26Z",
+        "title": "ops(merge-train): triage + hotspot + auto-resolve + docs"
+      },
+      {
+        "number": 15340,
+        "url": "https://github.com/BrianCLong/summit/pull/15340",
+        "mergedAt": "2026-01-01T08:47:05Z",
+        "title": "Counter-intelligence information dominance sprint"
+      },
+      {
+        "number": 11842,
+        "url": "https://github.com/BrianCLong/summit/pull/11842",
+        "mergedAt": "2025-11-20T09:48:18Z",
+        "title": "feat: add collaborative investigation realtime workflows"
+      },
+      {
+        "number": 1257,
+        "url": "https://github.com/BrianCLong/summit/pull/1257",
+        "mergedAt": null,
+        "title": "chore(deps): bump pytest-asyncio from 0.21.1 to 1.2.0"
+      },
+      {
+        "number": 1318,
+        "url": "https://github.com/BrianCLong/summit/pull/1318",
+        "mergedAt": "2025-09-23T06:36:05Z",
+        "title": "chore(deps): bump @opentelemetry/sdk-metrics from 1.30.1 to 2.1.0"
+      },
+      {
+        "number": 741,
+        "url": "https://github.com/BrianCLong/summit/pull/741",
+        "mergedAt": "2025-08-29T10:29:33Z",
+        "title": "chore(deps): bump @opentelemetry/exporter-jaeger from 1.30.1 to 2.0.1"
+      },
+      {
+        "number": 1175,
+        "url": "https://github.com/BrianCLong/summit/pull/1175",
+        "mergedAt": null,
+        "title": "chore(deps): bump @opentelemetry/sdk-trace-base from 1.17.1 to 2.1.0 in /server"
+      },
+      {
+        "number": 11882,
+        "url": "https://github.com/BrianCLong/summit/pull/11882",
+        "mergedAt": null,
+        "title": "Add API documentation and validation layers"
+      },
+      {
+        "number": 11874,
+        "url": "https://github.com/BrianCLong/summit/pull/11874",
+        "mergedAt": null,
+        "title": "Build Resilience Lab with automated chaos drills"
+      },
+      {
+        "number": 10079,
+        "url": "https://github.com/BrianCLong/summit/pull/10079",
+        "mergedAt": null,
+        "title": "[P0][Delta] Fix CI failures - gitleaks, contract-tests, python deps"
+      },
+      {
+        "number": 13192,
+        "url": "https://github.com/BrianCLong/summit/pull/13192",
+        "mergedAt": "2025-12-04T15:38:41Z",
+        "title": "Add HUMINT source management and debrief workflows"
+      },
+      {
+        "number": 11892,
+        "url": "https://github.com/BrianCLong/summit/pull/11892",
+        "mergedAt": null,
+        "title": "Build Counterintelligence Operations Platform"
+      },
+      {
+        "number": 263,
+        "url": "https://github.com/BrianCLong/summit/pull/263",
+        "mergedAt": "2025-08-15T21:10:46Z",
+        "title": "chore(deps): bump @apollo/server from 4.12.2 to 5.0.0 in /server"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

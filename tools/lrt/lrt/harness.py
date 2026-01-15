@@ -1,9 +1,10 @@
 """Leakage Red-Team Tournament harness and scoring."""
+
 from __future__ import annotations
 
 import random
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Sequence
 
 from .api import AttackSession, ProtectedAPI
 from .canary import CanaryCatalog
@@ -12,7 +13,7 @@ from .canary import CanaryCatalog
 @dataclass(frozen=True)
 class LRTConfig:
     seed: int = 1337
-    agents: Sequence["AttackAgent"] = ()
+    agents: Sequence[AttackAgent] = ()
 
 
 @dataclass
@@ -21,8 +22,8 @@ class HarnessResult:
 
     precision: float
     recall: float
-    time_to_first_leak: Optional[float]
-    leak_events: List[Dict[str, object]]
+    time_to_first_leak: float | None
+    leak_events: list[dict[str, object]]
 
 
 class LRTHarness:
@@ -32,19 +33,19 @@ class LRTHarness:
         self,
         api: ProtectedAPI,
         canaries: CanaryCatalog,
-        config: Optional[LRTConfig] = None,
+        config: LRTConfig | None = None,
     ) -> None:
         self.api = api
         self.canaries = canaries
         self.config = config or LRTConfig()
         self._rng = random.Random(self.config.seed)
 
-    def run(self, agents: Optional[Sequence["AttackAgent"]] = None) -> HarnessResult:
+    def run(self, agents: Sequence[AttackAgent] | None = None) -> HarnessResult:
         agents = agents or self.config.agents
-        leak_events: List[Dict[str, object]] = []
-        discovered: Dict[str, Dict[str, object]] = {}
+        leak_events: list[dict[str, object]] = []
+        discovered: dict[str, dict[str, object]] = {}
         false_positive_count = 0
-        first_leak_time: Optional[float] = None
+        first_leak_time: float | None = None
 
         for agent in agents:
             session = AttackSession(agent_name=agent.name, seed=agent.seed)
@@ -78,7 +79,7 @@ class LRTHarness:
             leak_events=leak_events,
         )
 
-    def _extract_canaries(self, response: str) -> List[str]:
+    def _extract_canaries(self, response: str) -> list[str]:
         leaks = [canary for canary in self.canaries.canaries if canary in response]
         return leaks
 

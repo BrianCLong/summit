@@ -1,0 +1,128 @@
+{
+  "issue_number": 137,
+  "title": "Epic: Unified Multimodal Intelligence Graph",
+  "url": "https://github.com/BrianCLong/summit/issues/137",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342919,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9Rw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic",
+      "name": "epic",
+      "color": "8250DF",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103343056,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn90A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/mvp1",
+      "name": "mvp1",
+      "color": "0e8a16",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103361945,
+      "node_id": "LA_kwDOPaNncM8AAAACHppHmQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:core-graph",
+      "name": "area:core-graph",
+      "color": "6f42c1",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-13T09:28:33Z",
+  "createdAt": "2025-08-13T09:20:46Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15180,
+        "url": "https://github.com/BrianCLong/summit/pull/15180",
+        "mergedAt": "2025-12-31T14:21:19Z",
+        "title": "chore(deps): bump zaproxy/action-baseline from 0.14.0 to 0.15.0"
+      },
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 11880,
+        "url": "https://github.com/BrianCLong/summit/pull/11880",
+        "mergedAt": "2025-11-20T14:33:22Z",
+        "title": "Set up GitHub Actions CI/CD pipeline"
+      },
+      {
+        "number": 10115,
+        "url": "https://github.com/BrianCLong/summit/pull/10115",
+        "mergedAt": "2025-10-14T10:40:20Z",
+        "title": "feat: improve websocket connection resilience"
+      },
+      {
+        "number": 1308,
+        "url": "https://github.com/BrianCLong/summit/pull/1308",
+        "mergedAt": "2025-09-23T06:26:26Z",
+        "title": "feat: orchestrate web llm automation workflows"
+      },
+      {
+        "number": 13179,
+        "url": "https://github.com/BrianCLong/summit/pull/13179",
+        "mergedAt": "2025-12-04T15:39:15Z",
+        "title": "Plan evaluation-first platform architecture"
+      },
+      {
+        "number": 11872,
+        "url": "https://github.com/BrianCLong/summit/pull/11872",
+        "mergedAt": "2025-11-20T14:34:03Z",
+        "title": "Build autotriage engine for issues and bugs"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      },
+      {
+        "number": 1300,
+        "url": "https://github.com/BrianCLong/summit/pull/1300",
+        "mergedAt": "2025-09-23T06:47:22Z",
+        "title": "Total Recapture: enterprise-ready green merge to main"
+      },
+      {
+        "number": 1284,
+        "url": "https://github.com/BrianCLong/summit/pull/1284",
+        "mergedAt": "2025-09-20T08:06:31Z",
+        "title": "feat(release): enterprise-grade repo consolidation and golden ci pipeline"
+      },
+      {
+        "number": 1285,
+        "url": "https://github.com/BrianCLong/summit/pull/1285",
+        "mergedAt": "2025-09-20T08:06:30Z",
+        "title": "feat(release): enterprise ci/cd foundation - clean slate"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

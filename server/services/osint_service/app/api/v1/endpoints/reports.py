@@ -1,8 +1,8 @@
-
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
 router = APIRouter()
+
 
 @router.get("/{scan_id}")
 def generate_report(scan_id: str):

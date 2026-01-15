@@ -1,0 +1,230 @@
+{
+  "issue_number": 8,
+  "title": "M0: Add .editorconfig, Prettier, ESLint, and pre-commit hooks",
+  "url": "https://github.com/BrianCLong/summit/issues/8",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-11-20T10:20:48Z",
+  "createdAt": "2025-08-12T00:09:57Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15334,
+        "url": "https://github.com/BrianCLong/summit/pull/15334",
+        "mergedAt": "2026-01-01T11:38:19Z",
+        "title": "Delivery of 8 Strategic Innovations"
+      },
+      {
+        "number": 15333,
+        "url": "https://github.com/BrianCLong/summit/pull/15333",
+        "mergedAt": null,
+        "title": "Innovation Sprint Delivery: 8 Strategic Features"
+      },
+      {
+        "number": 14370,
+        "url": "https://github.com/BrianCLong/summit/pull/14370",
+        "mergedAt": "2025-12-22T07:56:12Z",
+        "title": "Implement 8 Parallel Codex Workstreams"
+      },
+      {
+        "number": 15210,
+        "url": "https://github.com/BrianCLong/summit/pull/15210",
+        "mergedAt": "2026-01-01T11:46:41Z",
+        "title": "Scale, Performance, and Cost Controls (Sprint N+8)"
+      },
+      {
+        "number": 14403,
+        "url": "https://github.com/BrianCLong/summit/pull/14403",
+        "mergedAt": null,
+        "title": "feat: Implement 8 core reliability and compliance modules"
+      },
+      {
+        "number": 13765,
+        "url": "https://github.com/BrianCLong/summit/pull/13765",
+        "mergedAt": "2025-12-20T03:34:50Z",
+        "title": "Update Sprint 8 growth and expansion plan"
+      },
+      {
+        "number": 14550,
+        "url": "https://github.com/BrianCLong/summit/pull/14550",
+        "mergedAt": "2025-12-27T01:48:13Z",
+        "title": "Add Hardening Roadmap Sprints N+4 to N+8"
+      },
+      {
+        "number": 15134,
+        "url": "https://github.com/BrianCLong/summit/pull/15134",
+        "mergedAt": null,
+        "title": "chore(deps): bump actions/github-script from 7 to 8"
+      },
+      {
+        "number": 15179,
+        "url": "https://github.com/BrianCLong/summit/pull/15179",
+        "mergedAt": "2025-12-31T14:21:16Z",
+        "title": "chore(deps): bump notify from 6.1.1 to 8.2.0"
+      },
+      {
+        "number": 13334,
+        "url": "https://github.com/BrianCLong/summit/pull/13334",
+        "mergedAt": "2025-12-05T16:57:12Z",
+        "title": "Gap 8: Security Hardening & Secret Management"
+      },
+      {
+        "number": 15125,
+        "url": "https://github.com/BrianCLong/summit/pull/15125",
+        "mergedAt": "2025-12-30T21:20:48Z",
+        "title": "chore(deps): bump mikefarah/yq from 4.30.8 to 4.50.1"
+      },
+      {
+        "number": 13594,
+        "url": "https://github.com/BrianCLong/summit/pull/13594",
+        "mergedAt": "2025-12-17T03:07:55Z",
+        "title": "Implement Epics 7, 8, 9: ER v2, Reporting, Safety"
+      },
+      {
+        "number": 14411,
+        "url": "https://github.com/BrianCLong/summit/pull/14411",
+        "mergedAt": "2025-12-25T03:16:04Z",
+        "title": "feat: Batch 21 - Analytics Readiness"
+      },
+      {
+        "number": 12864,
+        "url": "https://github.com/BrianCLong/summit/pull/12864",
+        "mergedAt": "2025-12-04T15:48:49Z",
+        "title": "Add sprint plan for Jun 8-19 2026"
+      },
+      {
+        "number": 13252,
+        "url": "https://github.com/BrianCLong/summit/pull/13252",
+        "mergedAt": "2025-12-04T17:11:32Z",
+        "title": "Add Sprint 34 Plan (Apr 27-May 8, 2026)"
+      },
+      {
+        "number": 13261,
+        "url": "https://github.com/BrianCLong/summit/pull/13261",
+        "mergedAt": "2025-12-04T16:29:29Z",
+        "title": "feat: orchestration layer setup and role registry (Prompt 8)"
+      },
+      {
+        "number": 15178,
+        "url": "https://github.com/BrianCLong/summit/pull/15178",
+        "mergedAt": null,
+        "title": "Enterprise Readiness: Strict Tenant Isolation & Admin Controls"
+      },
+      {
+        "number": 12259,
+        "url": "https://github.com/BrianCLong/summit/pull/12259",
+        "mergedAt": "2025-12-18T03:23:59Z",
+        "title": "feat: implement Summit Phase 1 Rust streams (Streams 1-8)"
+      },
+      {
+        "number": 14561,
+        "url": "https://github.com/BrianCLong/summit/pull/14561",
+        "mergedAt": "2025-12-27T04:48:07Z",
+        "title": "chore(deps): Bump torch from 2.1.1 to 2.8.0 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 15342,
+        "url": "https://github.com/BrianCLong/summit/pull/15342",
+        "mergedAt": "2026-01-01T08:47:00Z",
+        "title": "Create eight new product requirement documents"
+      },
+      {
+        "number": 14407,
+        "url": "https://github.com/BrianCLong/summit/pull/14407",
+        "mergedAt": "2025-12-24T12:52:45Z",
+        "title": "feat: Implement Batch 2 Parallel Prompts"
+      },
+      {
+        "number": 14371,
+        "url": "https://github.com/BrianCLong/summit/pull/14371",
+        "mergedAt": "2025-12-22T07:56:12Z",
+        "title": "IntelGraph Core: Engineering Baseline and Foundations"
+      },
+      {
+        "number": 15271,
+        "url": "https://github.com/BrianCLong/summit/pull/15271",
+        "mergedAt": null,
+        "title": "Senior engineer embedded repository work"
+      },
+      {
+        "number": 15159,
+        "url": "https://github.com/BrianCLong/summit/pull/15159",
+        "mergedAt": "2025-12-30T21:37:15Z",
+        "title": "chore(deps): bump napi from 3.3.0 to 3.8.1 in the minor-and-patch group across 1 directory"
+      },
+      {
+        "number": 15181,
+        "url": "https://github.com/BrianCLong/summit/pull/15181",
+        "mergedAt": "2025-12-31T14:21:22Z",
+        "title": "chore(deps): bump github/codeql-action from 3 to 4"
+      },
+      {
+        "number": 14009,
+        "url": "https://github.com/BrianCLong/summit/pull/14009",
+        "mergedAt": "2025-12-19T21:17:18Z",
+        "title": "Update nltk version to 3.9 in requirements.txt"
+      },
+      {
+        "number": 14634,
+        "url": "https://github.com/BrianCLong/summit/pull/14634",
+        "mergedAt": null,
+        "title": "Prompt 22: Cross-Domain Guard (CDS) - APPROVED"
+      },
+      {
+        "number": 15050,
+        "url": "https://github.com/BrianCLong/summit/pull/15050",
+        "mergedAt": null,
+        "title": "Codex-63: Schema generation & drift check"
+      },
+      {
+        "number": 14397,
+        "url": "https://github.com/BrianCLong/summit/pull/14397",
+        "mergedAt": "2025-12-24T03:19:04Z",
+        "title": "feat: Implement SBOM Gate and Repro Builds Harness"
+      },
+      {
+        "number": 13757,
+        "url": "https://github.com/BrianCLong/summit/pull/13757",
+        "mergedAt": "2025-12-20T03:34:12Z",
+        "title": "docs: refresh sprint 13 privacy-safe plan"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

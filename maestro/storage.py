@@ -23,9 +23,7 @@ class MaestroStore:
         """Get a run by ID."""
         return self.runs.get(run_id)
 
-    def list_runs(
-        self, owner: str | None = None, status: str | None = None
-    ) -> list[Run]:
+    def list_runs(self, owner: str | None = None, status: str | None = None) -> list[Run]:
         """List all runs, optionally filtered by owner or status."""
         runs = list(self.runs.values())
         if owner:
@@ -82,6 +80,4 @@ class MaestroStore:
 
     def list_disclosure_packs(self) -> list[DisclosurePack]:
         """List all disclosure packs."""
-        return sorted(
-            self.disclosure_packs.values(), key=lambda p: p.created_at, reverse=True
-        )
+        return sorted(self.disclosure_packs.values(), key=lambda p: p.created_at, reverse=True)

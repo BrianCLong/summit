@@ -126,3 +126,8 @@ venv/
 # Development
 uploads/
 downloads/
+
+# CI/Supply chain artifacts (generated during CI, not needed in container)
+sboms/
+vulnerability-reports/
+release-evidence/

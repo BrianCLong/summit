@@ -10,10 +10,10 @@
  */
 
 import { Pool as PostgresPool } from 'pg';
-import { Driver as Neo4jDriver } from 'neo4j-driver';
-import Redis from 'ioredis';
+import { Driver as _Neo4jDriver } from 'neo4j-driver';
+import _Redis from 'ioredis';
 import pino from 'pino';
-import { register, Counter, Histogram, Gauge } from 'prom-client';
+import { Counter, Histogram, Gauge } from 'prom-client';
 
 const logger = pino();
 
@@ -384,7 +384,11 @@ export class CachePerformanceMonitor {
       this.stats.set(cacheType, { hits: 0, misses: 0 });
     }
 
-    const stats = this.stats.get(cacheType)!;
+    const stats = this.stats.get(cacheType);
+    if (!stats) {
+      // This should not happen if the initialization worked correctly
+      throw new Error(`Stats not initialized for cache type: ${cacheType}`);
+    }
     if (result === 'hit') {
       stats.hits++;
     } else {
@@ -513,7 +517,7 @@ export function createQueryTrackingMiddleware() {
 /**
  * Health check endpoint handler
  */
-export async function handleHealthCheck(req: any, res: any): Promise<void> {
+export function handleHealthCheck(req: any, res: any): void {
   try {
     const report = databaseHealthMonitor.getHealthReport();
     res.status(200).json({

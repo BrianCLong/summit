@@ -1,6 +1,6 @@
 // @ts-nocheck
 import pino from 'pino';
-import { correlationEngine } from '../lib/telemetry/correlation-engine';
+import { correlationEngine } from '../lib/telemetry/correlation-engine.js';
 
 // Custom stream that intercepts logs for the Correlation Engine and passes them to stdout
 const stream = {
@@ -18,7 +18,7 @@ const stream = {
     process.stdout.write(msg);
   },
 };
-import { cfg } from '../config';
+import { cfg } from '../config.js';
 import { AsyncLocalStorage } from 'async_hooks';
 
 // AsyncLocalStorage for correlation ID propagation - enables distributed tracing correlation in logs

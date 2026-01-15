@@ -1,0 +1,80 @@
+{
+  "issue_number": 318,
+  "title": "ML Model Versioning and A/B Testing Framework",
+  "url": "https://github.com/BrianCLong/summit/issues/318",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9121349718,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zAVg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type-feature",
+      "name": "type-feature",
+      "color": "0075ca",
+      "default": false,
+      "description": "Feature development"
+    },
+    {
+      "id": 9121349913,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zBGQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area-AI",
+      "name": "area-AI",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Relates to AI/NLP/ML"
+    },
+    {
+      "id": 9121486118,
+      "node_id": "LA_kwDOPaNncM8AAAACH67VJg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-devtools",
+      "name": "epic-devtools",
+      "color": "FFEAA7",
+      "default": false,
+      "description": "Developer tooling and experience"
+    },
+    {
+      "id": 9121486304,
+      "node_id": "LA_kwDOPaNncM8AAAACH67V4A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/sprint-7",
+      "name": "sprint-7",
+      "color": "A29BFE",
+      "default": false,
+      "description": "Sprint 7: Insight Experience Polish & Scaling"
+    }
+  ],
+  "updatedAt": "2025-08-16T18:35:25Z",
+  "createdAt": "2025-08-16T18:35:25Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11923,
+        "url": "https://github.com/BrianCLong/summit/pull/11923",
+        "mergedAt": "2025-11-20T10:04:27Z",
+        "title": "Build Advanced Visualization and Dashboard System"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

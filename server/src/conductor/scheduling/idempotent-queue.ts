@@ -66,9 +66,9 @@ export class IdempotentQueue {
         const dupCheck = await this.checkDuplicate(item.idempotencyKey);
         if (dupCheck) {
           prometheusConductorMetrics.recordOperationalEvent(
-      'queue_duplicate_ignored',
-      { success: true },
-    );
+            'queue_duplicate_ignored',
+            { success: true },
+          );
           return { success: true, duplicate: true, id: dupCheck };
         }
       }
@@ -76,11 +76,11 @@ export class IdempotentQueue {
       // Run poison pill checks
       const poisonCheck = await this.checkPoisonPill(queueItem);
       if (poisonCheck.quarantine) {
-        await this.quarantineItem(queueItem, poisonCheck.reason);
+        await this.quarantineItem(queueItem, poisonCheck.reason || 'unknown_poison_pill');
         prometheusConductorMetrics.recordOperationalEvent(
-      'queue_item_quarantined',
-      { success: false },
-    );
+          'queue_item_quarantined',
+          { success: false },
+        );
         return { success: false, quarantined: true, id: queueItem.id };
       }
 
@@ -106,9 +106,9 @@ export class IdempotentQueue {
         await this.getDepth(),
       );
       prometheusConductorMetrics.recordOperationalEvent(
-      'queue_item_enqueued',
-      { success: true },
-    );
+        'queue_item_enqueued',
+        { success: true },
+      );
 
       logger.debug('Item enqueued successfully', {
         queueName: this.queueName,
@@ -123,9 +123,9 @@ export class IdempotentQueue {
         queueName: this.queueName,
       });
       prometheusConductorMetrics.recordOperationalEvent(
-      'queue_enqueue_error',
-      { success: false },
-    );
+        'queue_enqueue_error',
+        { success: false },
+      );
       return { success: false };
     }
   }
@@ -155,9 +155,9 @@ export class IdempotentQueue {
 
       // Track processing start
       prometheusConductorMetrics.recordOperationalEvent(
-      'queue_item_dequeued',
-      { success: true },
-    );
+        'queue_item_dequeued',
+        { success: true },
+      );
       prometheusConductorMetrics.recordOperationalMetric(
         'queue_depth',
         await this.getDepth(),
@@ -176,9 +176,9 @@ export class IdempotentQueue {
         queueName: this.queueName,
       });
       prometheusConductorMetrics.recordOperationalEvent(
-      'queue_dequeue_error',
-      { success: false },
-    );
+        'queue_dequeue_error',
+        { success: false },
+      );
       return null;
     }
   }
@@ -202,9 +202,9 @@ export class IdempotentQueue {
 
       await this.redis.del(leaseKey);
       prometheusConductorMetrics.recordOperationalEvent(
-      'queue_item_completed',
-      { success: true },
-    );
+        'queue_item_completed',
+        { success: true },
+      );
 
       logger.debug('Item completed', {
         queueName: this.queueName,
@@ -240,9 +240,9 @@ export class IdempotentQueue {
       });
 
       prometheusConductorMetrics.recordOperationalEvent(
-      'queue_item_requeued',
-      { success: true },
-    );
+        'queue_item_requeued',
+        { success: true },
+      );
       logger.info('Item requeued with backoff', {
         itemId: item.id,
         retryCount: item.retryCount,
@@ -281,7 +281,7 @@ export class IdempotentQueue {
         this.redis.lLen(`quarantine:${this.queueName}`),
         this.redis
           .keys(`lease:${this.queueName}:*`)
-          .then((keys) => keys.length),
+          .then((keys: string[]) => keys.length),
       ]);
 
       // Get oldest item age
@@ -331,9 +331,9 @@ export class IdempotentQueue {
               rule: rule.name,
             });
             prometheusConductorMetrics.recordOperationalEvent(
-      'queue_item_dropped',
-      { success: false },
-    );
+              'queue_item_dropped',
+              { success: false },
+            );
             return { quarantine: false };
           }
           // retry_later would need additional logic

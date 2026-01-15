@@ -1,10 +1,16 @@
 import logging
 import random
+
 from .mock_data import mock_pulses
 
 # Set up basic logging
-logging.basicConfig(level=logging.INFO, filename='feed_updater.log', filemode='a',
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    filename="feed_updater.log",
+    filemode="a",
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
+
 
 # --- GenAI Engine Placeholder ---
 def analyze_iocs(iocs):
@@ -17,16 +23,19 @@ def analyze_iocs(iocs):
         if ioc["threat_score"] > 75:
             ioc["prediction"] = "High probability of being malicious. Immediate action recommended."
         elif ioc["threat_score"] > 50:
-            ioc["prediction"] = "Medium probability of being malicious. Further investigation is advised."
+            ioc["prediction"] = (
+                "Medium probability of being malicious. Further investigation is advised."
+            )
         else:
             ioc["prediction"] = "Low probability of being malicious. Monitor for any changes."
     return iocs
+
+
 # --- End of GenAI Engine Placeholder ---
 
 # In-memory storage for the MVP
-DB = {
-    "iocs": []
-}
+DB = {"iocs": []}
+
 
 def update_feeds():
     """

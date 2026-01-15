@@ -10,9 +10,6 @@
 | `radar.md` | 1 |
 | `scripts/dev/radar.ts` | 1 |
 | `${input:duckdb_db_path}` | 1 |
-| `--docker-password=` | 1 |
-| `--docker-server=ghcr.io` | 1 |
-| `--docker-username=brianclong` | 1 |
 | `.agentic-prompts/README.md` | 1 |
 | `.agentic-prompts/THIRD_ORDER_PERFECTION_MODE.md` | 1 |
 | `.agentic-prompts/archived/.gitkeep` | 1 |
@@ -30,9 +27,6 @@
 - **Unowned Files**: 18423 / 25445
 - **Top Unowned Files**:
   - `${input:duckdb_db_path}`
-  - `--docker-password=`
-  - `--docker-server=ghcr.io`
-  - `--docker-username=brianclong`
   - `.agentic-prompts/README.md`
   - `.agentic-prompts/THIRD_ORDER_PERFECTION_MODE.md`
   - `.agentic-prompts/archived/.gitkeep`

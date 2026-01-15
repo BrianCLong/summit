@@ -3,7 +3,7 @@
  */
 
 import { HandoverProtocol } from '../handover-protocol.js';
-import { PartnerRegistry } from '../partner-registry.js';
+import { PartnerRegistry, getPartnerRegistry } from '../partner-registry.js';
 import type { HandoverRequest, SessionContext } from '../types.js';
 import { jest, describe, it, test, expect, beforeAll, afterAll, beforeEach, afterEach } from '@jest/globals';
 
@@ -15,7 +15,7 @@ describe('HandoverProtocol', () => {
   let registry: PartnerRegistry;
 
   beforeAll(async () => {
-    registry = new PartnerRegistry(60000);
+    registry = getPartnerRegistry();
     await registry.initialize();
   });
 
@@ -57,40 +57,44 @@ describe('HandoverProtocol', () => {
     it('should create session with valid request', async () => {
       const request: HandoverRequest = {
         sessionId: 'session-001',
-        sourceNation: 'US',
-        targetNation: 'EE',
+        sourceNation: 'EE',
+        targetNation: 'FI',
         context: createMockContext(),
         priority: 'normal',
         timeoutMs: 5000,
       };
 
       // Mock successful handover response
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () =>
+      const fetchMock = jest.fn(
+        () =>
           Promise.resolve({
-            sessionId: request.sessionId,
-            accepted: true,
-            targetSessionId: 'remote-session-001',
-            estimatedWaitMs: 0,
-          }),
-      });
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                sessionId: request.sessionId,
+                accepted: true,
+                targetSessionId: 'remote-session-001',
+                estimatedWaitMs: 0,
+              }),
+          }) as Promise<any>,
+      ) as jest.MockedFunction<(...args: any[]) => Promise<any>>;
+      global.fetch = fetchMock as unknown as typeof fetch;
 
       const response = await protocol.initiateHandover(request);
 
       expect(response.accepted).toBe(true);
       expect(response.sessionId).toBe(request.sessionId);
 
-      const session = protocol.getSession(request.sessionId);
+      const [session] = protocol.getActiveSessions();
       expect(session).toBeDefined();
-      expect(session?.originNation).toBe('US');
-      expect(session?.targetNation).toBe('EE');
+      expect(session?.originNation).toBe('EE');
+      expect(session?.targetNation).toBe('FI');
     });
 
     it('should reject handover for unknown target nation', async () => {
       const request: HandoverRequest = {
         sessionId: 'session-002',
-        sourceNation: 'US',
+        sourceNation: 'EE',
         targetNation: 'XX',
         context: createMockContext(),
         priority: 'normal',
@@ -108,7 +112,7 @@ describe('HandoverProtocol', () => {
 
       const request: HandoverRequest = {
         sessionId: 'session-003',
-        sourceNation: 'US',
+        sourceNation: 'EE',
         targetNation: 'LV',
         context: createMockContext(),
         priority: 'normal',
@@ -126,8 +130,8 @@ describe('HandoverProtocol', () => {
 
       const request: HandoverRequest = {
         sessionId: 'session-004',
-        sourceNation: 'US',
-        targetNation: 'EE',
+        sourceNation: 'EE',
+        targetNation: 'FI',
         context,
         priority: 'normal',
         timeoutMs: 5000,
@@ -160,7 +164,7 @@ describe('HandoverProtocol', () => {
       const request: HandoverRequest = {
         sessionId: 'incoming-001',
         sourceNation: 'EE',
-        targetNation: 'US',
+        targetNation: 'FI',
         context: createMockContext(),
         priority: 'normal',
         timeoutMs: 5000,
@@ -177,7 +181,7 @@ describe('HandoverProtocol', () => {
       const request: HandoverRequest = {
         sessionId: 'incoming-002',
         sourceNation: 'XX',
-        targetNation: 'US',
+        targetNation: 'FI',
         context: createMockContext(),
         priority: 'normal',
         timeoutMs: 5000,
@@ -194,7 +198,7 @@ describe('HandoverProtocol', () => {
       const request: HandoverRequest = {
         sessionId: 'lifecycle-001',
         sourceNation: 'EE',
-        targetNation: 'US',
+        targetNation: 'FI',
         context: {
           conversationId: 'conv-lifecycle',
           language: 'en',
@@ -224,7 +228,7 @@ describe('HandoverProtocol', () => {
       const request: HandoverRequest = {
         sessionId: 'lifecycle-002',
         sourceNation: 'EE',
-        targetNation: 'US',
+        targetNation: 'FI',
         context: {
           conversationId: 'conv-complete',
           language: 'en',
@@ -257,20 +261,24 @@ describe('HandoverProtocol', () => {
 
   describe('context sanitization', () => {
     it('should redact sensitive entity types', async () => {
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () =>
+      const fetchMock = jest.fn(
+        () =>
           Promise.resolve({
-            sessionId: 'sanitize-001',
-            accepted: true,
-            targetSessionId: 'remote-sanitize-001',
-          }),
-      });
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                sessionId: 'sanitize-001',
+                accepted: true,
+                targetSessionId: 'remote-sanitize-001',
+              }),
+          }) as Promise<any>,
+      ) as jest.MockedFunction<(...args: any[]) => Promise<any>>;
+      global.fetch = fetchMock as unknown as typeof fetch;
 
       const request: HandoverRequest = {
         sessionId: 'sanitize-001',
-        sourceNation: 'US',
-        targetNation: 'EE',
+        sourceNation: 'EE',
+        targetNation: 'FI',
         context: {
           conversationId: 'conv-sanitize',
           language: 'en',
@@ -296,9 +304,9 @@ describe('HandoverProtocol', () => {
       await protocol.initiateHandover(request);
 
       // Verify fetch was called with sanitized data
-      expect(global.fetch).toHaveBeenCalled();
-      const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
-      const body = JSON.parse(fetchCall[1].body);
+      expect(fetchMock).toHaveBeenCalled();
+      const fetchCall = fetchMock.mock.calls[0];
+      const body = JSON.parse(fetchCall[1]?.body as string);
 
       // SSN should be redacted
       const ssnEntity = body.context.entities.find(

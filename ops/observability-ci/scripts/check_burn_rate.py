@@ -7,7 +7,7 @@ import argparse
 import sys
 import textwrap
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import yaml
 
@@ -17,7 +17,7 @@ SERVICE_TO_SLO = {
 }
 
 
-def load_slo(config_path: Path, slo_name: str) -> Dict[str, Any]:
+def load_slo(config_path: Path, slo_name: str) -> dict[str, Any]:
     raw = yaml.safe_load(config_path.read_text())
     slo_blob = raw.get("data", {}).get("slos.yaml")
     if slo_blob is None:
@@ -33,10 +33,17 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--slo-config", type=Path, required=True)
     parser.add_argument("--service", choices=sorted(SERVICE_TO_SLO), required=True)
-    parser.add_argument("--warning-threshold", type=float, default=0.8,
-                        help="Fail if burn ratio exceeds this value (default: 0.8)")
-    parser.add_argument("--observed-sli", type=float,
-                        help="Override observed SLI ratio (0-1). If omitted, assumes slightly above objective")
+    parser.add_argument(
+        "--warning-threshold",
+        type=float,
+        default=0.8,
+        help="Fail if burn ratio exceeds this value (default: 0.8)",
+    )
+    parser.add_argument(
+        "--observed-sli",
+        type=float,
+        help="Override observed SLI ratio (0-1). If omitted, assumes slightly above objective",
+    )
     return parser.parse_args()
 
 
@@ -56,13 +63,15 @@ def main() -> int:
     error_rate = max(0.0, 1.0 - observed_sli)
     burn_ratio = error_rate / error_budget
 
-    print(textwrap.dedent(f"""
+    print(
+        textwrap.dedent(f"""
         ✅ SLO check for {args.service}
         • objective: {objective:.4f}
         • observed SLI: {observed_sli:.4f}
         • error budget burn: {burn_ratio:.4f}
         • threshold: {args.warning_threshold:.2f}
-    """).strip())
+    """).strip()
+    )
 
     if burn_ratio >= args.warning_threshold:
         print("::error::Error budget burn rate exceeded threshold", file=sys.stderr)

@@ -1,24 +1,23 @@
 #!/usr/bin/env python3
 import argparse
-import os
-import sys
 import logging
-import time
-from typing import List, Dict, Optional
+import os
+
 import requests
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 from duckduckgo_search import DDGS
 from openai import OpenAI
-from termcolor import colored
-from dotenv import load_dotenv
 from tenacity import retry, stop_after_attempt, wait_exponential
+from termcolor import colored
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
+
 
 class SummitSummarizer:
     def __init__(self, model: str = "gpt-4o", max_iterations: int = 3, mock: bool = False):
@@ -35,7 +34,7 @@ class SummitSummarizer:
                 self.client = OpenAI(api_key=api_key)
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
-    def search_documents(self, query: str, limit: int = 5) -> List[str]:
+    def search_documents(self, query: str, limit: int = 5) -> list[str]:
         """Retrieve relevant URLs for the query."""
         logger.info(colored(f"Searching for: {query}", "cyan"))
 
@@ -44,7 +43,7 @@ class SummitSummarizer:
             return [
                 "https://example.com/article1",
                 "https://example.com/article2",
-                "https://example.com/article3"
+                "https://example.com/article3",
             ]
 
         urls = []
@@ -52,10 +51,10 @@ class SummitSummarizer:
             with DDGS() as ddgs:
                 results = list(ddgs.text(query, max_results=limit))
                 for r in results:
-                    urls.append(r['href'])
+                    urls.append(r["href"])
         except Exception as e:
             logger.error(f"Search failed: {e}")
-            raise # Let tenacity retry
+            raise  # Let tenacity retry
 
         return urls
 
@@ -68,33 +67,32 @@ class SummitSummarizer:
             return f"This is the mock content for {url}. It contains information relevant to the user's query about {url}."
 
         try:
-            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            }
             response = requests.get(url, headers=headers, timeout=10)
             response.raise_for_status()
-            soup = BeautifulSoup(response.text, 'html.parser')
+            soup = BeautifulSoup(response.text, "html.parser")
 
             # Simple extraction heuristic: fetch all paragraphs
-            paragraphs = soup.find_all('p')
-            text = ' '.join([p.get_text() for p in paragraphs])
+            paragraphs = soup.find_all("p")
+            text = " ".join([p.get_text() for p in paragraphs])
 
             # Basic cleaning
-            text = ' '.join(text.split())
+            text = " ".join(text.split())
             return text
         except Exception as e:
             logger.error(f"Failed to extract content from {url}: {e}")
             raise
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
-    def _call_llm(self, messages: List[Dict[str, str]]) -> str:
+    def _call_llm(self, messages: list[dict[str, str]]) -> str:
         """Helper to call LLM or return mock response."""
         if self.mock:
             return "Mock LLM Response: This is a simulated output summarizing the content."
 
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages
-            )
+            response = self.client.chat.completions.create(model=self.model, messages=messages)
             return response.choices[0].message.content
         except Exception as e:
             logger.error(f"LLM call failed: {e}")
@@ -115,7 +113,7 @@ class SummitSummarizer:
         current_summary = self._call_llm([{"role": "user", "content": draft_prompt}])
 
         for i in range(self.max_iterations):
-            logger.info(f"Iteration {i+1}/{self.max_iterations}")
+            logger.info(f"Iteration {i + 1}/{self.max_iterations}")
 
             # Step 2: Evaluation (Critique)
             critique_prompt = f"""
@@ -151,13 +149,13 @@ class SummitSummarizer:
 
         return current_summary
 
-    def merge_summaries(self, summaries: List[str], query: str) -> str:
+    def merge_summaries(self, summaries: list[str], query: str) -> str:
         """Synthesize multiple summaries into a final report."""
         logger.info(colored("Merging summaries...", "blue"))
         if not summaries:
             return "No summaries to merge."
 
-        combined_text = "\n\n".join([f"Source {i+1}:\n{s}" for i, s in enumerate(summaries)])
+        combined_text = "\n\n".join([f"Source {i + 1}:\n{s}" for i, s in enumerate(summaries)])
 
         merge_prompt = f"""
         Synthesize the following summaries into a single, coherent report that answers the query: '{query}'.
@@ -168,7 +166,7 @@ class SummitSummarizer:
         """
         return self._call_llm([{"role": "user", "content": merge_prompt}])
 
-    def fact_check(self, final_report: str, original_texts: List[str]) -> str:
+    def fact_check(self, final_report: str, original_texts: list[str]) -> str:
         """Verify facts in the report against original texts."""
         logger.info(colored("Running fact check...", "red"))
 
@@ -191,7 +189,11 @@ class SummitSummarizer:
 
     def run(self, query: str):
         """Main execution pipeline."""
-        print(colored(f"Summit Auto-Summarizer initialized for query: {query}", "green", attrs=['bold']))
+        print(
+            colored(
+                f"Summit Auto-Summarizer initialized for query: {query}", "green", attrs=["bold"]
+            )
+        )
 
         # 1. Search
         try:
@@ -235,32 +237,38 @@ class SummitSummarizer:
             logger.error(f"Fact check failed: {e}")
             verification_result = "Fact check unavailable."
 
-        print("\n" + "="*50)
-        print(colored("FINAL REPORT", "magenta", attrs=['bold']))
-        print("="*50)
+        print("\n" + "=" * 50)
+        print(colored("FINAL REPORT", "magenta", attrs=["bold"]))
+        print("=" * 50)
 
         # If the output indicates verification, we print the original report as verified.
         # Otherwise, we print the output which presumably contains corrections.
         if "VERIFIED" in verification_result.upper():
-             print(colored("Status: Verified", "green"))
-             print(final_report)
+            print(colored("Status: Verified", "green"))
+            print(final_report)
         else:
-             print(colored("Status: Issues Found / Corrected", "yellow"))
-             print(verification_result)
+            print(colored("Status: Issues Found / Corrected", "yellow"))
+            print(verification_result)
 
-        print("="*50)
+        print("=" * 50)
+
 
 def main():
-    parser = argparse.ArgumentParser(description="Summit: Automated Iterative Multi-Document Summarization")
+    parser = argparse.ArgumentParser(
+        description="Summit: Automated Iterative Multi-Document Summarization"
+    )
     parser.add_argument("query", help="The query/topic to summarize")
     parser.add_argument("--model", default="gpt-4o", help="LLM model to use (default: gpt-4o)")
-    parser.add_argument("--iterations", type=int, default=3, help="Max iterations for refinement (default: 3)")
+    parser.add_argument(
+        "--iterations", type=int, default=3, help="Max iterations for refinement (default: 3)"
+    )
     parser.add_argument("--mock", action="store_true", help="Run in mock mode (no API calls)")
 
     args = parser.parse_args()
 
     summarizer = SummitSummarizer(model=args.model, max_iterations=args.iterations, mock=args.mock)
     summarizer.run(args.query)
+
 
 if __name__ == "__main__":
     main()

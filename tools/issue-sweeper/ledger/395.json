@@ -1,0 +1,92 @@
+{
+  "issue_number": 395,
+  "title": "chore(deps): update dependencies and automate weekly checks",
+  "url": "https://github.com/BrianCLong/summit/pull/395",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-17T17:44:50Z",
+  "createdAt": "2025-08-17T07:15:13Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15346,
+        "url": "https://github.com/BrianCLong/summit/pull/15346",
+        "mergedAt": "2026-01-01T09:53:10Z",
+        "title": "Draft patent claims for MCP inventions"
+      },
+      {
+        "number": 1329,
+        "url": "https://github.com/BrianCLong/summit/pull/1329",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat: harden blowback risk controller"
+      },
+      {
+        "number": 13148,
+        "url": "https://github.com/BrianCLong/summit/pull/13148",
+        "mergedAt": "2025-12-17T05:36:11Z",
+        "title": "C6 — CI Time Budget Enforcer"
+      },
+      {
+        "number": 10103,
+        "url": "https://github.com/BrianCLong/summit/pull/10103",
+        "mergedAt": "2025-10-14T11:53:04Z",
+        "title": "feat: add zero-touch compliance enforcement system"
+      },
+      {
+        "number": 13106,
+        "url": "https://github.com/BrianCLong/summit/pull/13106",
+        "mergedAt": "2025-12-03T04:36:27Z",
+        "title": "Add spectrum analysis and sensor fusion integration"
+      },
+      {
+        "number": 13165,
+        "url": "https://github.com/BrianCLong/summit/pull/13165",
+        "mergedAt": "2025-12-17T05:34:42Z",
+        "title": "Unified prompt governance dashboard 1"
+      },
+      {
+        "number": 13179,
+        "url": "https://github.com/BrianCLong/summit/pull/13179",
+        "mergedAt": "2025-12-04T15:39:15Z",
+        "title": "Plan evaluation-first platform architecture"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 13193,
+        "url": "https://github.com/BrianCLong/summit/pull/13193",
+        "mergedAt": "2025-12-04T15:38:38Z",
+        "title": "Build React Native mobile app with OSINT dashboard"
+      },
+      {
+        "number": 13164,
+        "url": "https://github.com/BrianCLong/summit/pull/13164",
+        "mergedAt": "2025-12-17T05:35:09Z",
+        "title": "Resolve merge conflicts via rebase"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,40 @@
+{
+  "issue_number": 12225,
+  "title": "Add Batch 01: CI/CD Fix & Hardening prompts",
+  "url": "https://github.com/BrianCLong/summit/pull/12225",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9694889694,
+      "node_id": "LA_kwDOPaNncM8AAAACQdxG3g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/batch",
+      "name": "batch",
+      "color": "D4E2CF",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9696587455,
+      "node_id": "LA_kwDOPaNncM8AAAACQfYuvw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/size:%20S",
+      "name": "size: S",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-11-22T14:48:01Z",
+  "createdAt": "2025-11-22T08:00:36Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

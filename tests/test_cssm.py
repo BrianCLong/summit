@@ -8,7 +8,6 @@ if str(ROOT) not in sys.path:
 
 from tools.cssm import map_sources
 
-
 SAMPLE_PATH = Path("tools/cssm/samples/seeded_corpora.json")
 
 
@@ -52,8 +51,7 @@ def test_compatibility_matrix_flags_incompatible_pairs():
     mismatches = [
         row
         for row in matrix
-        if not row["compatible"]
-        and row["left"]["canonical"] != row["right"]["canonical"]
+        if not row["compatible"] and row["left"]["canonical"] != row["right"]["canonical"]
     ]
     assert mismatches, "Expected canonical mismatches to be surfaced"
 

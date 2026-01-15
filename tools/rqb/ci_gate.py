@@ -4,20 +4,20 @@ from __future__ import annotations
 
 import argparse
 import json
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Dict, Iterable
 
-MetricDict = Dict[str, float]
+MetricDict = dict[str, float]
 
 
-def _load_scorecard(path: Path) -> Dict[str, object]:
+def _load_scorecard(path: Path) -> dict[str, object]:
     with path.open("r", encoding="utf-8") as handle:
         return json.load(handle)
 
 
 def _assert_thresholds(
-    baseline: Dict[str, object],
-    candidate: Dict[str, object],
+    baseline: dict[str, object],
+    candidate: dict[str, object],
     metrics: Iterable[str],
     max_drop: float,
 ) -> None:

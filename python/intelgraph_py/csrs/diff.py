@@ -1,11 +1,13 @@
 """Utilities for producing deterministic retention plan diffs."""
+
 from __future__ import annotations
 
 import difflib
-import hmac
 import hashlib
+import hmac
 import json
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 _CANONICAL_SEPARATORS = (",", ":")
 

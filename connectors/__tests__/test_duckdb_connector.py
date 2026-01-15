@@ -9,7 +9,6 @@ from schema_mapping import map_duckdb_to_intelgraph
 
 
 class TestDuckDBConnector(unittest.TestCase):
-
     def setUp(self):
         # No actual DuckDB connection, just passing a dummy path for the function signature
         self.sample_sql_path = "dummy_path.sql"

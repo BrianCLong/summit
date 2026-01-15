@@ -1,0 +1,92 @@
+{
+  "issue_number": 429,
+  "title": "feat: add analyst dashboard mvp",
+  "url": "https://github.com/BrianCLong/summit/pull/429",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T16:31:03Z",
+  "createdAt": "2025-08-17T08:03:30Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13707,
+        "url": "https://github.com/BrianCLong/summit/pull/13707",
+        "mergedAt": "2025-12-20T03:31:21Z",
+        "title": "Add OSINT Redis sliding-window rate limiting"
+      },
+      {
+        "number": 13775,
+        "url": "https://github.com/BrianCLong/summit/pull/13775",
+        "mergedAt": "2025-12-20T11:38:27Z",
+        "title": "feat: add quotas v1 control plane"
+      },
+      {
+        "number": 14515,
+        "url": "https://github.com/BrianCLong/summit/pull/14515",
+        "mergedAt": "2025-12-27T00:19:16Z",
+        "title": "Sprint N+23: Agent Workload SLOs & Scale Testing"
+      },
+      {
+        "number": 14641,
+        "url": "https://github.com/BrianCLong/summit/pull/14641",
+        "mergedAt": "2025-12-27T07:02:15Z",
+        "title": "Sprint 6: Hard Quota Enforcement & Operator Overrides"
+      },
+      {
+        "number": 15036,
+        "url": "https://github.com/BrianCLong/summit/pull/15036",
+        "mergedAt": "2025-12-30T22:42:29Z",
+        "title": "Add deterministic retry/backoff utilities for connectors"
+      },
+      {
+        "number": 15130,
+        "url": "https://github.com/BrianCLong/summit/pull/15130",
+        "mergedAt": "2025-12-30T21:30:56Z",
+        "title": "chore(deps): bump thiserror from 1.0.69 to 2.0.17"
+      },
+      {
+        "number": 12063,
+        "url": "https://github.com/BrianCLong/summit/pull/12063",
+        "mergedAt": "2025-11-21T04:00:31Z",
+        "title": "Implement API rate limiting and throttling system"
+      },
+      {
+        "number": 10095,
+        "url": "https://github.com/BrianCLong/summit/pull/10095",
+        "mergedAt": "2025-10-14T13:05:57Z",
+        "title": "feat: add data retention policy engine"
+      },
+      {
+        "number": 10092,
+        "url": "https://github.com/BrianCLong/summit/pull/10092",
+        "mergedAt": "2025-10-14T13:06:07Z",
+        "title": "feat: build intelligent anomaly detection engine"
+      },
+      {
+        "number": 1151,
+        "url": "https://github.com/BrianCLong/summit/pull/1151",
+        "mergedAt": null,
+        "title": "chore(deps): bump argon2 from 0.31.2 to 0.44.0 in /server"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

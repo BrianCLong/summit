@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Iterable, List, Optional
+from collections.abc import Iterable
 
 import pandas as pd
 
@@ -14,13 +14,13 @@ from .models import (
 
 
 class DoCalculusSimulator:
-    def __init__(self, graph: GraphEstimate, baseline: Dict[str, float]) -> None:
+    def __init__(self, graph: GraphEstimate, baseline: dict[str, float]) -> None:
         self.graph = graph
         self.baseline = baseline
         self._weights = graph.adjacency()
 
-    def _propagate(self, interventions: Dict[str, float]) -> Dict[str, float]:
-        projected: Dict[str, float] = {**self.baseline}
+    def _propagate(self, interventions: dict[str, float]) -> dict[str, float]:
+        projected: dict[str, float] = {**self.baseline}
         order = topological_sort(self.graph)
         for node in order:
             if node in interventions:
@@ -36,14 +36,14 @@ class DoCalculusSimulator:
     def intervene(
         self,
         sim_id: str,
-        interventions: Dict[str, float],
-        target: Optional[str],
+        interventions: dict[str, float],
+        target: str | None,
         confidence: float,
         top_k_paths: int,
     ) -> InterventionResult:
         projected = self._propagate(interventions)
         delta = {node: projected[node] - self.baseline.get(node, 0.0) for node in projected}
-        contribution_paths: List[PathContribution] = []
+        contribution_paths: list[PathContribution] = []
         if target:
             contribution_paths = enumerate_paths(
                 self.graph, sources=interventions.keys(), target=target, limit=top_k_paths
@@ -59,7 +59,7 @@ class DoCalculusSimulator:
         )
 
 
-def compute_baseline(df: pd.DataFrame) -> Dict[str, float]:
+def compute_baseline(df: pd.DataFrame) -> dict[str, float]:
     return {col: float(df[col].mean()) for col in df.columns}
 
 

@@ -5,28 +5,28 @@ constraints, sampling synthetic datasets under those constraints, and verifying
 synthetic data fidelity and privacy risk.
 """
 
-from .schema import TabularSchema, SchemaLearner
 from .constraints import (
+    ConstraintCompiler,
     ConstraintSet,
     ConstraintSpecification,
-    ConstraintCompiler,
-    MarginalConstraint,
     CorrelationConstraint,
     DenialConstraint,
+    MarginalConstraint,
 )
 from .sampler import ConstraintDrivenSampler
+from .schema import SchemaLearner, TabularSchema
 from .verifier import ConstraintVerifier, VerificationReport
 
 __all__ = [
-    "TabularSchema",
-    "SchemaLearner",
+    "ConstraintCompiler",
+    "ConstraintDrivenSampler",
     "ConstraintSet",
     "ConstraintSpecification",
-    "ConstraintCompiler",
-    "MarginalConstraint",
+    "ConstraintVerifier",
     "CorrelationConstraint",
     "DenialConstraint",
-    "ConstraintDrivenSampler",
-    "ConstraintVerifier",
+    "MarginalConstraint",
+    "SchemaLearner",
+    "TabularSchema",
     "VerificationReport",
 ]

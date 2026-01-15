@@ -10,6 +10,11 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.1
     hooks: [{ id: ruff, args: ['--fix'] }, { id: ruff-format }]
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v5.1.0
+    hooks:
+      - id: prettier
+        files: '\\.(js|jsx|ts|tsx|json|yaml|yml|md|css|scss|html)$'
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.18.2
     hooks: [{ id: mypy, additional_dependencies: ['types-requests'] }]
@@ -17,6 +22,7 @@ repos:
     rev: v9.37.0
     hooks:
       - id: eslint
+        args: [--fix]
         additional_dependencies: [eslint, prettier, eslint-config-prettier]
         files: .(js|jsx|ts|tsx)$
   - repo: https://github.com/gitleaks/gitleaks

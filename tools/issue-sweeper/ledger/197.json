@@ -1,0 +1,122 @@
+{
+  "issue_number": 197,
+  "title": "Terraform scripts for cloud deployment",
+  "url": "https://github.com/BrianCLong/summit/issues/197",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9107968112,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQcA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P2",
+      "name": "P2",
+      "color": "fbca04",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108055903,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHnXw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/devops",
+      "name": "devops",
+      "color": "d4c5f9",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108055998,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHnvg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/terraform",
+      "name": "terraform",
+      "color": "84b6eb",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108056021,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHn1Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/cloud",
+      "name": "cloud",
+      "color": "84b6eb",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108056411,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHpWw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-12-15",
+      "name": "due:2025-12-15",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:42:57Z",
+  "createdAt": "2025-08-14T04:42:56Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15276,
+        "url": "https://github.com/BrianCLong/summit/pull/15276",
+        "mergedAt": "2026-01-01T07:47:29Z",
+        "title": "GA Gate: Accessibility lint + keyboard smoke tests (CI-required)"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 10128,
+        "url": "https://github.com/BrianCLong/summit/pull/10128",
+        "mergedAt": "2025-10-14T08:39:43Z",
+        "title": "feat: add community engagement toolkit"
+      },
+      {
+        "number": 13190,
+        "url": "https://github.com/BrianCLong/summit/pull/13190",
+        "mergedAt": "2025-12-04T15:38:47Z",
+        "title": "Build resilient multi-LLM orchestrator with governance"
+      },
+      {
+        "number": 11927,
+        "url": "https://github.com/BrianCLong/summit/pull/11927",
+        "mergedAt": null,
+        "title": "Build workflow orchestration and task scheduling"
+      },
+      {
+        "number": 11918,
+        "url": "https://github.com/BrianCLong/summit/pull/11918",
+        "mergedAt": "2025-11-20T10:21:01Z",
+        "title": "Build mobile apps for iOS and Android"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

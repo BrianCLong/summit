@@ -1,0 +1,21 @@
+{
+  "issue_number": 13063,
+  "title": "🏗️ Recovery: feat: add provenance-preserving etl generator",
+  "url": "https://github.com/BrianCLong/summit/pull/13063",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-04T15:40:45Z",
+  "createdAt": "2025-12-01T23:28:41Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
 import { Pool } from 'pg';
@@ -7,6 +8,9 @@ const ACTOR_TWO = 'support-comment-other';
 
 let getPostgresPool: () => Pool;
 let supportRouter: express.Router;
+
+const describeIf =
+  process.env.RUN_ACCEPTANCE === 'true' ? describe : describe.skip;
 
 async function ensureSoftDeleteColumns(pg: Pool) {
   await pg.query(`
@@ -43,7 +47,7 @@ async function cleanupTicket(pg: Pool, ticketId: string) {
   await pg.query('DELETE FROM support_tickets WHERE id = $1', [ticketId]);
 }
 
-describe('Support ticket comment safe delete lifecycle', () => {
+describeIf('Support ticket comment safe delete lifecycle', () => {
   let app: express.Express;
   let pg: Pool;
   let ticketId: string;

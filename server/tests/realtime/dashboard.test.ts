@@ -1,11 +1,17 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { io as Client } from 'socket.io-client';
 import { registerDashboardHandlers } from '../../src/realtime/dashboard.js';
 import { dashboardSimulation } from '../../src/services/DashboardSimulationService.js';
 
-describe('Dashboard WebSocket', () => {
-  let io, server, clientSocket;
+const NO_NETWORK_LISTEN = process.env.NO_NETWORK_LISTEN === 'true';
+const describeIf = NO_NETWORK_LISTEN ? describe.skip : describe;
+
+describeIf('Dashboard WebSocket', () => {
+  let io: any;
+  let server: any;
+  let clientSocket: any;
   const PORT = 4321;
 
   beforeAll((done) => {
@@ -14,8 +20,8 @@ describe('Dashboard WebSocket', () => {
 
     // Setup dashboard namespace
     const ns = io.of('/realtime');
-    ns.on('connection', (socket) => {
-      registerDashboardHandlers(ns, socket);
+    ns.on('connection', (socket: any) => {
+      registerDashboardHandlers(ns as any, socket);
 
       // Manually trigger simulation for test
       dashboardSimulation['io'] = io;
@@ -47,7 +53,7 @@ describe('Dashboard WebSocket', () => {
   test('should allow joining dashboard room', (done) => {
     clientSocket.emit('dashboard:join');
 
-    clientSocket.on('dashboard:state', (data) => {
+    clientSocket.on('dashboard:state', (data: any) => {
       expect(data.connected).toBe(true);
       expect(data.message).toBe('Joined dashboard stream');
       done();
@@ -69,7 +75,7 @@ describe('Dashboard WebSocket', () => {
     // We can't easily mock setInterval inside the module without jest.mock or similar.
     // However, we can just call the method and expect it to emit.
 
-    clientSocket.on('dashboard:metrics', (data) => {
+    clientSocket.on('dashboard:metrics', (data: any) => {
       expect(data).toHaveProperty('network');
       expect(data).toHaveProperty('investigations');
       expect(data.network).toHaveProperty('totalNodes');

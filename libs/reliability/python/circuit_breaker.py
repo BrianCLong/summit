@@ -1,7 +1,8 @@
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Callable, Generic, Optional, TypeVar
+from typing import Generic, TypeVar
 
 from prometheus_client import Counter, Gauge, Histogram
 
@@ -24,7 +25,9 @@ class CircuitBreakerConfig:
 
 
 state_gauge = Gauge(
-    "db_cb_state", "Circuit breaker state (0=closed,1=open,2=half-open)", ["service", "store"],
+    "db_cb_state",
+    "Circuit breaker state (0=closed,1=open,2=half-open)",
+    ["service", "store"],
 )
 latency_hist = Histogram(
     "db_query_latency_seconds",
@@ -40,11 +43,13 @@ class CircuitBreaker(Generic[T]):
         self.config = config
         self.failures = 0
         self.state = State.CLOSED
-        self._next_probe_at: Optional[float] = None
+        self._next_probe_at: float | None = None
         self._update_gauge()
 
     def execute(self, op: str, func: Callable[[], T]) -> T:
-        if self.state == State.OPEN and (self._next_probe_at is None or time.time() < self._next_probe_at):
+        if self.state == State.OPEN and (
+            self._next_probe_at is None or time.time() < self._next_probe_at
+        ):
             error_counter.labels(store=self.config.store, code="circuit_open").inc()
             raise RuntimeError("Circuit breaker open")
         start = time.perf_counter()
@@ -53,7 +58,7 @@ class CircuitBreaker(Generic[T]):
             self._record_latency(op, start)
             self._reset()
             return result
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             self.failures += 1
             error_counter.labels(store=self.config.store, code="operation_failed").inc()
             self._record_latency(op, start)

@@ -13,10 +13,7 @@ def health_detailed(request: Request, response: Response) -> dict:
     graph = getattr(request.app.state, "graph", None)
     prov = getattr(request.app.state, "provenance_store", None)
 
-    services = {
-        "neo4j": "unknown",
-        "postgres": "unknown"
-    }
+    services = {"neo4j": "unknown", "postgres": "unknown"}
 
     # Check Graph
     if graph:
@@ -45,7 +42,4 @@ def health_detailed(request: Request, response: Response) -> dict:
         overall_status = "unhealthy"
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
 
-    return {
-        "status": overall_status,
-        "services": services
-    }
+    return {"status": overall_status, "services": services}

@@ -1,9 +1,5 @@
 
-import { describe, it } from 'node:test';
-import assert from 'node:assert';
-import express from 'express';
-import request from 'supertest';
-import { createApp } from '../../src/app.js';
+import { describe, it, expect, jest } from '@jest/globals';
 
 // NOTE: This test reproduces the logic of the `authenticateToken` middleware found in `server/src/app.ts`.
 // Ideally, we would import `createApp` and test the middleware in context. However, `createApp` has
@@ -27,7 +23,7 @@ describe('SEC-2025-001: Authentication Fail Closed (Logic Verification)', () => 
         delete process.env.ENABLE_INSECURE_DEV_AUTH;
 
         // Recreate the middleware logic exactly as in app.ts
-        const authenticateToken = (req, res, next) => {
+        const authenticateToken = (req: any, res: any, next: any) => {
              // Development mode - relaxed auth for easier testing
             const authHeader = req.headers['authorization'];
             const token = authHeader && authHeader.split(' ')[1];
@@ -46,14 +42,18 @@ describe('SEC-2025-001: Authentication Fail Closed (Logic Verification)', () => 
             res.status(401).json({ error: 'Unauthorized', message: 'No token provided' });
         };
 
-        const testApp = express();
-        testApp.use(authenticateToken);
-        testApp.get('/protected', (req, res) => res.json({ success: true }));
+        const req: any = { headers: {} };
+        const res: any = {
+          status: jest.fn().mockReturnThis(),
+          json: jest.fn(),
+        };
+        const next = jest.fn();
 
-        const response = await request(testApp).get('/protected');
+        await authenticateToken(req, res, next);
 
         // Assert
-        assert.strictEqual(response.status, 401, 'Should return 401 Unauthorized');
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(next).not.toHaveBeenCalled();
 
         // Cleanup
         process.env.NODE_ENV = originalNodeEnv;
@@ -67,7 +67,7 @@ describe('SEC-2025-001: Authentication Fail Closed (Logic Verification)', () => 
         process.env.ENABLE_INSECURE_DEV_AUTH = 'true';
 
         // Recreate the middleware logic exactly as in app.ts
-        const authenticateToken = (req, res, next) => {
+        const authenticateToken = (req: any, res: any, next: any) => {
             const authHeader = req.headers['authorization'];
             const token = authHeader && authHeader.split(' ')[1];
 
@@ -81,14 +81,17 @@ describe('SEC-2025-001: Authentication Fail Closed (Logic Verification)', () => 
             res.status(401).json({ error: 'Unauthorized' });
         };
 
-        const testApp = express();
-        testApp.use(authenticateToken);
-        testApp.get('/protected', (req, res) => res.json({ success: true }));
+        const req: any = { headers: {} };
+        const res: any = {
+          status: jest.fn().mockReturnThis(),
+          json: jest.fn(),
+        };
+        const next = jest.fn();
 
-        const response = await request(testApp).get('/protected');
+        await authenticateToken(req, res, next);
 
         // Assert
-        assert.strictEqual(response.status, 200, 'Should allow access');
+        expect(next).toHaveBeenCalled();
 
         // Cleanup
         process.env.NODE_ENV = originalNodeEnv;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/Button';
 import {
   Card,
@@ -27,6 +27,14 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   showHomeButton = true,
 }) => {
   const navigate = useNavigate();
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    // Focus the heading for accessibility when the error boundary mounts
+    if (headingRef.current) {
+      headingRef.current.focus();
+    }
+  }, []);
 
   const handleHome = () => {
     navigate('/');
@@ -37,12 +45,22 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   };
 
   return (
-    <div className="flex min-h-[400px] w-full items-center justify-center p-4">
-      <Card className="max-w-md w-full shadow-lg">
+    <div
+      className="flex min-h-[400px] w-full items-center justify-center p-4"
+      role="alert"
+      aria-live="assertive"
+    >
+      <Card className="max-w-md w-full shadow-lg border-destructive/20">
         <CardHeader>
           <div className="flex items-center gap-3 text-destructive mb-2">
-            <AlertTriangle className="h-6 w-6" />
-            <CardTitle className="text-xl">{title}</CardTitle>
+            <AlertTriangle className="h-6 w-6" aria-hidden="true" />
+            <CardTitle
+              className="text-xl outline-none"
+              tabIndex={-1}
+              ref={headingRef}
+            >
+              {title}
+            </CardTitle>
           </div>
           <CardDescription className="text-base">{description}</CardDescription>
         </CardHeader>
@@ -62,6 +80,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
               Our team has been notified of this issue.
             </p>
           )}
+          {/* Operator safe details - Correlation ID could go here if available */}
         </CardContent>
         <CardFooter className="flex gap-3 justify-end">
           {showHomeButton && (

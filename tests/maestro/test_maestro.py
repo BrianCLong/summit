@@ -2,14 +2,11 @@
 
 from datetime import datetime
 
-import pytest
-
 from maestro.checks import check_release_gate, generate_compliance_report
 from maestro.models import (
     Artifact,
     ArtifactKind,
     ArtifactMetadata,
-    DisclosurePack,
     Run,
     RunStatus,
 )
@@ -46,9 +43,7 @@ class TestRunOperations:
         """Test listing all runs."""
         # Create multiple runs
         client.post("/maestro/runs", json=sample_run_data)
-        client.post(
-            "/maestro/runs", json={**sample_run_data, "owner": "other@example.com"}
-        )
+        client.post("/maestro/runs", json={**sample_run_data, "owner": "other@example.com"})
 
         # List all runs
         response = client.get("/maestro/runs")
@@ -152,9 +147,7 @@ class TestArtifactOperations:
 class TestDisclosurePackOperations:
     """Test disclosure pack creation and retrieval."""
 
-    def test_create_disclosure_pack(
-        self, client, sample_run_data, sample_artifact_metadata
-    ):
+    def test_create_disclosure_pack(self, client, sample_run_data, sample_artifact_metadata):
         """Test creating a disclosure pack for a run."""
         # Create run
         run_response = client.post("/maestro/runs", json=sample_run_data)
@@ -238,9 +231,7 @@ class TestDisclosurePackOperations:
 class TestReleaseGate:
     """Test release gate validation logic."""
 
-    def test_release_gate_passes(
-        self, maestro_store, sample_run_data, sample_artifact_metadata
-    ):
+    def test_release_gate_passes(self, maestro_store, sample_run_data, sample_artifact_metadata):
         """Test release gate passes with compliant artifacts."""
         # Create run
         run = Run(**sample_run_data, status=RunStatus.SUCCEEDED)
@@ -271,9 +262,7 @@ class TestReleaseGate:
         assert result.passed is False
         assert "no artifacts" in result.message.lower()
 
-    def test_release_gate_fails_incomplete_metadata(
-        self, maestro_store, sample_run_data
-    ):
+    def test_release_gate_fails_incomplete_metadata(self, maestro_store, sample_run_data):
         """Test release gate fails with incomplete metadata."""
         # Create run
         run = Run(**sample_run_data, status=RunStatus.SUCCEEDED)
@@ -359,9 +348,7 @@ class TestReleaseGate:
         assert report["summary"]["compliant_artifacts"] == 1
         assert len(report["artifacts"]) == 2
 
-    def test_release_gate_via_api(
-        self, client, sample_run_data, sample_artifact_metadata
-    ):
+    def test_release_gate_via_api(self, client, sample_run_data, sample_artifact_metadata):
         """Test release gate check via API endpoint."""
         # Create run
         run_response = client.post("/maestro/runs", json=sample_run_data)

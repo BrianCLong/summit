@@ -7,14 +7,14 @@ import hashlib
 import json
 import os
 import re
+from collections.abc import Awaitable, Callable, Mapping, MutableMapping
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from typing import Any, Awaitable, Callable, Dict, Mapping, MutableMapping, Optional
+from datetime import UTC, datetime
+from typing import Any
 
 import httpx
 
 from .logger import ProvenanceRecord
-
 
 EMAIL_PATTERN = re.compile(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", re.IGNORECASE)
 SSN_PATTERN = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
@@ -70,7 +70,7 @@ class PublishResult:
     evidence_id: str
     release_id: str
     ok: bool
-    details: Dict[str, Any]
+    details: dict[str, Any]
 
 
 class EvidencePublishError(RuntimeError):
@@ -83,22 +83,24 @@ class KubernetesReleaseInspector:
     def __init__(
         self,
         *,
-        pod_labels: Optional[Mapping[str, str] | str] = None,
-        rollout_labels: Optional[Mapping[str, str] | str] = None,
-        env: Optional[Mapping[str, str]] = None,
+        pod_labels: Mapping[str, str] | str | None = None,
+        rollout_labels: Mapping[str, str] | str | None = None,
+        env: Mapping[str, str] | None = None,
         label_keys: tuple[str, ...] = DEFAULT_RELEASE_LABEL_KEYS,
     ) -> None:
         self._env = env or os.environ
         self._label_keys = label_keys
-        self._pod_labels_raw = pod_labels if pod_labels is not None else self._read_env_labels(
-            "K8S_POD_LABELS", "POD_LABELS", "MC_POD_LABELS"
+        self._pod_labels_raw = (
+            pod_labels
+            if pod_labels is not None
+            else self._read_env_labels("K8S_POD_LABELS", "POD_LABELS", "MC_POD_LABELS")
         )
         self._rollout_labels_raw = (
             rollout_labels
             if rollout_labels is not None
             else self._read_env_labels("K8S_ROLLOUT_LABELS", "ROLLOUT_LABELS", "MC_ROLLOUT_LABELS")
         )
-        self._release_id: Optional[str] = None
+        self._release_id: str | None = None
 
     def _read_env_labels(self, *keys: str) -> str:
         for key in keys:
@@ -108,12 +110,12 @@ class KubernetesReleaseInspector:
         return ""
 
     @staticmethod
-    def _parse(labels: Mapping[str, str] | str | None) -> Dict[str, str]:
+    def _parse(labels: Mapping[str, str] | str | None) -> dict[str, str]:
         if labels is None:
             return {}
         if isinstance(labels, Mapping):
             return dict(labels)
-        parsed: Dict[str, str] = {}
+        parsed: dict[str, str] = {}
         for pair in labels.split(","):
             if not pair:
                 continue
@@ -129,11 +131,11 @@ class KubernetesReleaseInspector:
         pod_labels = self._parse(self._pod_labels_raw)
         rollout_labels = self._parse(self._rollout_labels_raw)
         for key in self._label_keys:
-            if key in pod_labels and pod_labels[key]:
+            if pod_labels.get(key):
                 self._release_id = pod_labels[key]
                 return self._release_id
         for key in self._label_keys:
-            if key in rollout_labels and rollout_labels[key]:
+            if rollout_labels.get(key):
                 self._release_id = rollout_labels[key]
                 return self._release_id
         raise EvidencePublishError("Unable to determine releaseId from Kubernetes labels")
@@ -142,7 +144,7 @@ class KubernetesReleaseInspector:
 class EnvironmentMetricsSource:
     """Reads latency, error rate, and unit cost metrics from environment variables."""
 
-    def __init__(self, env: Optional[Mapping[str, str]] = None) -> None:
+    def __init__(self, env: Mapping[str, str] | None = None) -> None:
         self._env = env or os.environ
 
     async def __call__(self, release_id: str) -> SLOMetrics:  # pragma: no cover - simple env reader
@@ -157,10 +159,12 @@ class EnvironmentMetricsSource:
 class EnvironmentArtifactSource:
     """Reads artifact digests (SBOM + test reports) from environment variables."""
 
-    def __init__(self, env: Optional[Mapping[str, str]] = None) -> None:
+    def __init__(self, env: Mapping[str, str] | None = None) -> None:
         self._env = env or os.environ
 
-    async def __call__(self, release_id: str) -> ArtifactDigests:  # pragma: no cover - simple env reader
+    async def __call__(
+        self, release_id: str
+    ) -> ArtifactDigests:  # pragma: no cover - simple env reader
         return ArtifactDigests(
             sbom_sha256=self._env.get("MC_SBOM_SHA256", ""),
             test_results_sha256=self._env.get("MC_TEST_RESULTS_SHA256", ""),
@@ -174,11 +178,11 @@ class MCEvidencePublisher:
         self,
         endpoint: str,
         *,
-        token: Optional[str] = None,
-        metrics_provider: Optional[Callable[[str], Awaitable[SLOMetrics]]] = None,
-        artifact_provider: Optional[Callable[[str], Awaitable[ArtifactDigests]]] = None,
-        release_inspector: Optional[KubernetesReleaseInspector] = None,
-        transport: Optional[httpx.BaseTransport] = None,
+        token: str | None = None,
+        metrics_provider: Callable[[str], Awaitable[SLOMetrics]] | None = None,
+        artifact_provider: Callable[[str], Awaitable[ArtifactDigests]] | None = None,
+        release_inspector: KubernetesReleaseInspector | None = None,
+        transport: httpx.BaseTransport | None = None,
         timeout: float = 30.0,
         max_retries: int = 3,
         retry_backoff_seconds: float = 0.5,
@@ -218,7 +222,7 @@ class MCEvidencePublisher:
             raise EvidencePublishError("Malformed response from publishEvidence mutation") from exc
 
         ok = False
-        details: Dict[str, Any] = {}
+        details: dict[str, Any] = {}
         if self._verify_after_publish:
             ok, details = await self.evidence_ok(release_id)
 
@@ -229,7 +233,7 @@ class MCEvidencePublisher:
             details=details,
         )
 
-    async def evidence_ok(self, release_id: str) -> tuple[bool, Dict[str, Any]]:
+    async def evidence_ok(self, release_id: str) -> tuple[bool, dict[str, Any]]:
         response_data = await self._execute_with_retries(
             {
                 "query": EVIDENCE_OK_QUERY,
@@ -243,8 +247,8 @@ class MCEvidencePublisher:
         self,
         payload: MutableMapping[str, Any],
         *,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
         headers = {"Content-Type": "application/json"}
         if self._token:
             headers["Authorization"] = f"Bearer {self._token}"
@@ -252,10 +256,12 @@ class MCEvidencePublisher:
             headers["Idempotency-Key"] = idempotency_key
 
         attempt = 0
-        last_error: Optional[Exception] = None
+        last_error: Exception | None = None
         while attempt < self._max_retries:
             try:
-                async with httpx.AsyncClient(timeout=self._timeout, transport=self._transport) as client:
+                async with httpx.AsyncClient(
+                    timeout=self._timeout, transport=self._transport
+                ) as client:
                     response = await client.post(self._endpoint, json=payload, headers=headers)
                 response.raise_for_status()
                 body = response.json()
@@ -274,7 +280,7 @@ class MCEvidencePublisher:
         raise EvidencePublishError("Failed to publish evidence") from last_error
 
     @staticmethod
-    def _sanitize(payload: Dict[str, Any]) -> Dict[str, Any]:
+    def _sanitize(payload: dict[str, Any]) -> dict[str, Any]:
         def scrub(value: Any) -> Any:
             if isinstance(value, str):
                 if EMAIL_PATTERN.search(value) or SSN_PATTERN.search(value):
@@ -295,10 +301,10 @@ class MCEvidencePublisher:
         release_id: str,
         metrics: SLOMetrics,
         artifacts: ArtifactDigests,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return {
             "releaseId": release_id,
-            "recordedAt": datetime.now(tz=timezone.utc).isoformat(),
+            "recordedAt": datetime.now(tz=UTC).isoformat(),
             "artifacts": [
                 {"type": "sbom", "hash": artifacts.sbom_sha256},
                 {"type": "test", "hash": artifacts.test_results_sha256},

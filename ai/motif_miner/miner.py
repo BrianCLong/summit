@@ -2,19 +2,20 @@
 Deterministic motif miner (triangle and path motifs) for snapshot graphs.
 Read-only: consumes in-memory graphs and emits reusable motif definitions.
 """
+
 from __future__ import annotations
 
 import random
 from collections import defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import DefaultDict, Dict, Iterable, List, Set, Tuple
 
 
 class SimpleGraph:
     """Minimal undirected graph helper to avoid external dependencies."""
 
     def __init__(self) -> None:
-        self._adj: DefaultDict[int, Set[int]] = defaultdict(set)
+        self._adj: defaultdict[int, set[int]] = defaultdict(set)
 
     def add_edge(self, a: int, b: int) -> None:
         if a == b:
@@ -22,14 +23,14 @@ class SimpleGraph:
         self._adj[a].add(b)
         self._adj[b].add(a)
 
-    def add_edges_from(self, edges: Iterable[Tuple[int, int]]) -> None:
+    def add_edges_from(self, edges: Iterable[tuple[int, int]]) -> None:
         for a, b in edges:
             self.add_edge(a, b)
 
-    def nodes(self) -> List[int]:
+    def nodes(self) -> list[int]:
         return list(self._adj.keys())
 
-    def neighbors(self, node: int) -> Set[int]:
+    def neighbors(self, node: int) -> set[int]:
         return set(self._adj.get(node, set()))
 
     def has_edge(self, a: int, b: int) -> bool:
@@ -48,9 +49,9 @@ class MotifMiner:
         self.config = config or MiningConfig()
         random.seed(self.config.seed)
 
-    def mine(self, graph: SimpleGraph) -> Dict[str, List[Tuple[int, ...]]]:
+    def mine(self, graph: SimpleGraph) -> dict[str, list[tuple[int, ...]]]:
         """Return discovered motifs keyed by motif type with node tuples."""
-        motifs: Dict[str, List[Tuple[int, ...]]] = {
+        motifs: dict[str, list[tuple[int, ...]]] = {
             "triangle": [],
             "path3": [],
         }
@@ -82,24 +83,30 @@ class MotifMiner:
 
         # Deduplicate and enforce min_support deterministically
         for key, vals in motifs.items():
-            counts: Dict[Tuple[int, ...], int] = {}
+            counts: dict[tuple[int, ...], int] = {}
             for v in vals:
                 counts[v] = counts.get(v, 0) + 1
-            motifs[key] = [motif for motif, count in counts.items() if count >= self.config.min_support]
+            motifs[key] = [
+                motif for motif, count in counts.items() if count >= self.config.min_support
+            ]
         return motifs
 
-    def explain(self, graph: SimpleGraph, motifs: Dict[str, List[Tuple[int, ...]]]) -> Dict[str, List[str]]:
+    def explain(
+        self, graph: SimpleGraph, motifs: dict[str, list[tuple[int, ...]]]
+    ) -> dict[str, list[str]]:
         """Provide simple explanations per motif instance (paths + strength)."""
-        explanations: Dict[str, List[str]] = {}
+        explanations: dict[str, list[str]] = {}
         for motif_type, instances in motifs.items():
             explanations[motif_type] = []
             for inst in instances:
                 strength = self._strength(graph, inst)
                 path_repr = " -> ".join(map(str, inst))
-                explanations[motif_type].append(f"{motif_type}:{path_repr} (strength={strength:.2f})")
+                explanations[motif_type].append(
+                    f"{motif_type}:{path_repr} (strength={strength:.2f})"
+                )
         return explanations
 
-    def _strength(self, graph: SimpleGraph, nodes: Tuple[int, ...]) -> float:
+    def _strength(self, graph: SimpleGraph, nodes: tuple[int, ...]) -> float:
         edges = 0
         node_list = list(nodes)
         for i, a in enumerate(node_list):

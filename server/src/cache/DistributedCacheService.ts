@@ -11,8 +11,7 @@
 
 import { Redis } from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
-// @ts-ignore - LRU cache may have different export structure
-import LRUCache from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 import {
   DataEnvelope,
   GovernanceVerdict,

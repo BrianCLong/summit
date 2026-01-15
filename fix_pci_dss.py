@@ -1,12 +1,8 @@
-
-import os
-import re
-
 # File paths
-pci_dss_path = 'server/src/compliance/frameworks/PCIDSSControls.ts'
+pci_dss_path = "server/src/compliance/frameworks/PCIDSSControls.ts"
 
 # Read file
-with open(pci_dss_path, 'r') as f:
+with open(pci_dss_path) as f:
     content = f.read()
 
 # Pattern to find createDataEnvelope(data, createVerdict(...))
@@ -67,11 +63,11 @@ with open(pci_dss_path, 'r') as f:
 # Then we look for `createVerdict`.
 
 modified_content = ""
-lines = content.split('\n')
+lines = content.split("\n")
 i = 0
 while i < len(lines):
     line = lines[i]
-    if 'return createDataEnvelope(' in line:
+    if "return createDataEnvelope(" in line:
         # found start.
         modified_content += line + "\n"
         i += 1
@@ -105,9 +101,9 @@ while i < len(lines):
         buffer = ""
         # We are inside createDataEnvelope.
         # consume lines until we find `createVerdict`
-        while i < len(lines) and 'createVerdict(' not in lines[i]:
-             modified_content += lines[i] + "\n"
-             i += 1
+        while i < len(lines) and "createVerdict(" not in lines[i]:
+            modified_content += lines[i] + "\n"
+            i += 1
 
         if i < len(lines):
             # We found the line with `createVerdict(`.
@@ -122,7 +118,10 @@ while i < len(lines):
 
             curr_line = lines[i]
             # Replace `createVerdict` with `{ source: 'PCIDSSControlsService', governanceVerdict: createVerdict`
-            new_line = curr_line.replace('createVerdict', '{ source: \'PCIDSSControlsService\', governanceVerdict: createVerdict')
+            new_line = curr_line.replace(
+                "createVerdict",
+                "{ source: 'PCIDSSControlsService', governanceVerdict: createVerdict",
+            )
             modified_content += new_line + "\n"
             i += 1
 
@@ -170,30 +169,30 @@ while i < len(lines):
             # We only care about parens belonging to `createVerdict` args.
             # `createVerdict(` is open.
 
-            start_index = new_line.find('createVerdict(')
+            start_index = new_line.find("createVerdict(")
             # count parens from there
             sub_str = new_line[start_index:]
-            current_balance = sub_str.count('(') - sub_str.count(')')
+            current_balance = sub_str.count("(") - sub_str.count(")")
 
             # If balance is 0, it closed on the same line.
             if current_balance == 0:
-                 # It closed on the same line.
-                 # We need to insert `}` after the closing paren.
-                 # But wait, there might be a trailing comma or `);`?
-                 # If `createDataEnvelope(..., createVerdict(...));`
-                 # Then `new_line` ends with `));` or `),`.
+                # It closed on the same line.
+                # We need to insert `}` after the closing paren.
+                # But wait, there might be a trailing comma or `);`?
+                # If `createDataEnvelope(..., createVerdict(...));`
+                # Then `new_line` ends with `));` or `),`.
 
-                 # We need to be careful.
-                 # Let's just assume we append `}` after the matching paren.
-                 pass
+                # We need to be careful.
+                # Let's just assume we append `}` after the matching paren.
+                pass
 
             while current_balance > 0 and i < len(lines):
                 line_content = lines[i]
 
                 # Check for parens
-                open_p = line_content.count('(')
-                close_p = line_content.count(')')
-                current_balance += (open_p - close_p)
+                open_p = line_content.count("(")
+                close_p = line_content.count(")")
+                current_balance += open_p - close_p
 
                 if current_balance <= 0:
                     # It closed on this line.
@@ -219,26 +218,28 @@ while i < len(lines):
                     # )
 
                     # The closing paren is on its own line usually.
-                    if line_content.strip() == ')':
-                         modified_content += line_content.replace(')', '})') + "\n"
-                    elif line_content.strip().startswith(')') and (',' in line_content or ';' in line_content):
-                         # e.g. `),` or `);`
-                         # Replace first `)` with `})`
-                         modified_content += line_content.replace(')', '})', 1) + "\n"
+                    if line_content.strip() == ")":
+                        modified_content += line_content.replace(")", "})") + "\n"
+                    elif line_content.strip().startswith(")") and (
+                        "," in line_content or ";" in line_content
+                    ):
+                        # e.g. `),` or `);`
+                        # Replace first `)` with `})`
+                        modified_content += line_content.replace(")", "})", 1) + "\n"
                     else:
-                         # It might be `0.7)` -> `0.7})`
-                         # Just replace the last `)` with `})`?
-                         # Only if balance hits 0 exactly at the end?
-                         # Safer: replace the `)` that brings balance to 0.
-                         # Since we process line by line, if balance hits <= 0, we know the closing paren is in this line.
-                         # We should find the N-th closing paren that closes the balance.
+                        # It might be `0.7)` -> `0.7})`
+                        # Just replace the last `)` with `})`?
+                        # Only if balance hits 0 exactly at the end?
+                        # Safer: replace the `)` that brings balance to 0.
+                        # Since we process line by line, if balance hits <= 0, we know the closing paren is in this line.
+                        # We should find the N-th closing paren that closes the balance.
 
-                         # Simplified assumption: append `}` after the closing paren.
-                         # If `line_content` contains the closing paren, we append `}` after it.
-                         # Since we are wrapping `createVerdict(...)` -> `{ ..., val: createVerdict(...) }`
+                        # Simplified assumption: append `}` after the closing paren.
+                        # If `line_content` contains the closing paren, we append `}` after it.
+                        # Since we are wrapping `createVerdict(...)` -> `{ ..., val: createVerdict(...) }`
 
-                         # If the line has `... ) ...`, we want `... }) ...`.
-                         modified_content += line_content.replace(')', '})', 1) + "\n"
+                        # If the line has `... ) ...`, we want `... }) ...`.
+                        modified_content += line_content.replace(")", "})", 1) + "\n"
                 else:
                     modified_content += line_content + "\n"
 
@@ -249,7 +250,7 @@ while i < len(lines):
         i += 1
 
 # Write back
-with open(pci_dss_path, 'w') as f:
+with open(pci_dss_path, "w") as f:
     f.write(modified_content)
 
 print("Fixed PCIDSSControls.ts")
@@ -272,22 +273,26 @@ print("Fixed PCIDSSControls.ts")
 # We need to fix access patterns: `result.metadata?.governanceVerdict` -> `result.governanceVerdict`.
 
 middleware_files = [
-    'server/src/middleware/adaptiveThrottlingMiddleware.ts',
-    'server/src/middleware/bulkheadMiddleware.ts'
+    "server/src/middleware/adaptiveThrottlingMiddleware.ts",
+    "server/src/middleware/bulkheadMiddleware.ts",
 ]
 
 for path in middleware_files:
-    with open(path, 'r') as f:
+    with open(path) as f:
         mw_content = f.read()
 
     # Replace `result.metadata?.governanceVerdict` with `result.governanceVerdict`
     # Also `result.metadata.governanceVerdict` just in case.
-    mw_content = mw_content.replace('result.metadata?.governanceVerdict', 'result.governanceVerdict')
-    mw_content = mw_content.replace('result.metadata.governanceVerdict', 'result.governanceVerdict')
+    mw_content = mw_content.replace(
+        "result.metadata?.governanceVerdict", "result.governanceVerdict"
+    )
+    mw_content = mw_content.replace("result.metadata.governanceVerdict", "result.governanceVerdict")
 
     # Also check `acquired.metadata?.governanceVerdict` in `withBulkhead`
-    mw_content = mw_content.replace('acquired.metadata?.governanceVerdict', 'acquired.governanceVerdict')
+    mw_content = mw_content.replace(
+        "acquired.metadata?.governanceVerdict", "acquired.governanceVerdict"
+    )
 
-    with open(path, 'w') as f:
+    with open(path, "w") as f:
         f.write(mw_content)
     print(f"Fixed {path}")

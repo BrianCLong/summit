@@ -3,7 +3,10 @@ import request from 'supertest';
 import narrativeSimulationRouter from '../../routes/narrative-sim.js';
 import { describe, it, expect } from '@jest/globals';
 
-describe('Narrative simulation routes', () => {
+const NO_NETWORK_LISTEN = process.env.NO_NETWORK_LISTEN === 'true';
+const describeIf = NO_NETWORK_LISTEN ? describe.skip : describe;
+
+describeIf('Narrative simulation routes', () => {
   const app = express()
     .use(express.json())
     .use('/api', narrativeSimulationRouter);

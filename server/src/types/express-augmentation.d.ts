@@ -11,6 +11,7 @@ declare global {
             userId?: string;
             user?: any;
             envelope?: DataEnvelope;
+            intelGraphService?: any;
         }
 
         export interface Response {

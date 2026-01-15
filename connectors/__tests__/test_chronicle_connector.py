@@ -12,7 +12,6 @@ from schema_mapping import map_chronicle_to_intelgraph
 
 
 class TestChronicleConnector(unittest.TestCase):
-
     def setUp(self):
         self.sample_json_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "../chronicle_connector/sample.json")

@@ -1,6 +1,8 @@
-import os
 import json
+import os
+
 import requests
+
 
 def get_ready_to_merge_prs():
     """
@@ -18,15 +20,12 @@ def get_ready_to_merge_prs():
     repo_slug = os.environ.get("GITHUB_REPOSITORY")
     if not repo_slug:
         raise ValueError("GITHUB_REPOSITORY environment variable not set")
-    owner, repo = repo_slug.split('/')
+    owner, repo = repo_slug.split("/")
 
     bot_authors_str = os.environ.get("BOT_AUTHORS", "dependabot[bot],renovate[bot]")
-    bot_authors = [author.strip() for author in bot_authors_str.split(',')]
+    bot_authors = [author.strip() for author in bot_authors_str.split(",")]
 
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
     query = """
     query($owner: String!, $repo: String!, $cursor: String) {
@@ -64,16 +63,12 @@ def get_ready_to_merge_prs():
     cursor = None
 
     while has_next_page:
-        variables = {
-            "owner": owner,
-            "repo": repo,
-            "cursor": cursor
-        }
+        variables = {"owner": owner, "repo": repo, "cursor": cursor}
 
         response = requests.post(
             "https://api.github.com/graphql",
             headers=headers,
-            json={"query": query, "variables": variables}
+            json={"query": query, "variables": variables},
         )
         response.raise_for_status()
         data = response.json()

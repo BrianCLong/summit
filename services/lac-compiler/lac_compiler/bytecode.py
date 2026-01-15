@@ -1,11 +1,9 @@
-from typing import List
-
-from .models import PolicyIR, BytecodeInstruction, Rule
+from .models import BytecodeInstruction, PolicyIR, Rule
 
 
 class BytecodeCompiler:
-    def compile(self, policy: PolicyIR) -> List[BytecodeInstruction]:
-        bytecode: List[BytecodeInstruction] = []
+    def compile(self, policy: PolicyIR) -> list[BytecodeInstruction]:
+        bytecode: list[BytecodeInstruction] = []
 
         if policy.license:
             bytecode.append(
@@ -46,11 +44,13 @@ class BytecodeCompiler:
         for rule in policy.rules:
             bytecode.extend(self._compile_rule(rule))
 
-        bytecode.append(BytecodeInstruction(op="DEFAULT_DENY", args=[], description="Implicit deny"))
+        bytecode.append(
+            BytecodeInstruction(op="DEFAULT_DENY", args=[], description="Implicit deny")
+        )
         return bytecode
 
-    def _compile_rule(self, rule: Rule) -> List[BytecodeInstruction]:
-        instructions: List[BytecodeInstruction] = [
+    def _compile_rule(self, rule: Rule) -> list[BytecodeInstruction]:
+        instructions: list[BytecodeInstruction] = [
             BytecodeInstruction(
                 op="RULE_START",
                 args=[rule.effect, rule.subject, rule.action, rule.resource],

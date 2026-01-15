@@ -1,0 +1,125 @@
+{
+  "issue_number": 312,
+  "title": "AI Services Load Testing Suite",
+  "url": "https://github.com/BrianCLong/summit/issues/312",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9121349718,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zAVg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type-feature",
+      "name": "type-feature",
+      "color": "0075ca",
+      "default": false,
+      "description": "Feature development"
+    },
+    {
+      "id": 9121485634,
+      "node_id": "LA_kwDOPaNncM8AAAACH67TQg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-performance",
+      "name": "epic-performance",
+      "color": "45B7D1",
+      "default": false,
+      "description": "Performance and monitoring"
+    },
+    {
+      "id": 9121486304,
+      "node_id": "LA_kwDOPaNncM8AAAACH67V4A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/sprint-7",
+      "name": "sprint-7",
+      "color": "A29BFE",
+      "default": false,
+      "description": "Sprint 7: Insight Experience Polish & Scaling"
+    }
+  ],
+  "updatedAt": "2025-08-16T18:33:55Z",
+  "createdAt": "2025-08-16T18:33:55Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12055,
+        "url": "https://github.com/BrianCLong/summit/pull/12055",
+        "mergedAt": "2025-11-21T03:55:21Z",
+        "title": "Build audit logging and compliance system"
+      },
+      {
+        "number": 12007,
+        "url": "https://github.com/BrianCLong/summit/pull/12007",
+        "mergedAt": null,
+        "title": "Build Financial Crime Detection Platform"
+      },
+      {
+        "number": 15258,
+        "url": "https://github.com/BrianCLong/summit/pull/15258",
+        "mergedAt": "2026-01-01T07:29:50Z",
+        "title": "Predictive Analytics and Multi-Agent Negotiation"
+      },
+      {
+        "number": 11899,
+        "url": "https://github.com/BrianCLong/summit/pull/11899",
+        "mergedAt": "2025-11-20T10:26:05Z",
+        "title": "Set up SLO monitoring for API performance"
+      },
+      {
+        "number": 11877,
+        "url": "https://github.com/BrianCLong/summit/pull/11877",
+        "mergedAt": "2025-11-20T14:33:29Z",
+        "title": "Build GraphQL schema governance and validation"
+      },
+      {
+        "number": 1182,
+        "url": "https://github.com/BrianCLong/summit/pull/1182",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group with 2 updates"
+      },
+      {
+        "number": 10079,
+        "url": "https://github.com/BrianCLong/summit/pull/10079",
+        "mergedAt": null,
+        "title": "[P0][Delta] Fix CI failures - gitleaks, contract-tests, python deps"
+      },
+      {
+        "number": 13165,
+        "url": "https://github.com/BrianCLong/summit/pull/13165",
+        "mergedAt": "2025-12-17T05:34:42Z",
+        "title": "Unified prompt governance dashboard 1"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 13164,
+        "url": "https://github.com/BrianCLong/summit/pull/13164",
+        "mergedAt": "2025-12-17T05:35:09Z",
+        "title": "Resolve merge conflicts via rebase"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

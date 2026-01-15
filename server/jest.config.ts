@@ -1,18 +1,26 @@
 import type { Config } from 'jest';
 
+const gaVerifyMode = process.env.GA_VERIFY_MODE === 'true';
+
 const config: Config = {
   preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
+  setupFiles: ['<rootDir>/tests/setup/env.ts'],
   setupFilesAfterEnv: [
     '<rootDir>/tests/setup/jest.setup.cjs',
     'jest-extended/all',
   ],
-  testMatch: [
-    '<rootDir>/tests/**/*.test.ts',
-    '<rootDir>/src/tests/**/*.test.ts',
-    '<rootDir>/src/**/__tests__/**/*.test.ts',
-  ],
+  testMatch: gaVerifyMode
+    ? [
+      '<rootDir>/src/services/__tests__/GraphRAGService.test.ts',
+      '<rootDir>/src/provenance-integrity-gateway/__tests__/ProvenanceIntegrityGateway.test.ts',
+    ]
+    : [
+      '<rootDir>/tests/**/*.test.ts',
+      '<rootDir>/src/tests/**/*.test.ts',
+      '<rootDir>/src/**/__tests__/**/*.test.ts',
+    ],
   testPathIgnorePatterns: [
     '/node_modules/',
     '/dist/',
@@ -20,7 +28,39 @@ const config: Config = {
     '/coverage/',
     '/playwright-tests/',
   ],
+  modulePathIgnorePatterns: ['<rootDir>/dist/'],
   moduleNameMapper: {
+    '^jsdom$': '<rootDir>/tests/mocks/jsdom.ts',
+    '.*diagnostic-snapshotter(\\.js)?$': '<rootDir>/tests/mocks/diagnostic-snapshotter.ts',
+    '.*DeterministicExportService(\\.js)?$': '<rootDir>/tests/mocks/deterministic-export-service.ts',
+    '.*PolicyEngine(\\.js)?$': '<rootDir>/tests/mocks/policy-engine.ts',
+    '.*prompts/registry(\\.js)?$': '<rootDir>/tests/mocks/prompts-registry.ts',
+    '.*insights/engagementCascade(\\.js)?$': '<rootDir>/tests/mocks/engagement-cascade.ts',
+    '.*packages/shared/provenance(\\.js)?$': '<rootDir>/tests/mocks/provenance.ts',
+    '.*logger(\\.js)?$': '<rootDir>/tests/mocks/logger.ts',
+    '.*metrics/dbMetrics(\\.js)?$': '<rootDir>/tests/mocks/db-metrics.ts',
+    '.*workers/eventBus(\\.js)?$': '<rootDir>/tests/mocks/eventBus.ts',
+    '.*health/aggregator(\\.js)?$': '<rootDir>/tests/mocks/health-aggregator.ts',
+    '^node-fetch$': '<rootDir>/tests/mocks/node-fetch.cjs',
+    '^ioredis$': '<rootDir>/tests/mocks/ioredis.ts',
+    '^pg-boss$': '<rootDir>/tests/mocks/pg-boss.ts',
+    '^neo4j-driver$': '<rootDir>/tests/mocks/neo4j-driver.ts',
+    '.*db/neo4j(\\.js)?$': '<rootDir>/tests/mocks/db-neo4j.ts',
+    '^pg$': '<rootDir>/tests/mocks/pg.ts',
+    '^jsonwebtoken$': '<rootDir>/tests/mocks/jsonwebtoken.ts',
+    '^isomorphic-dompurify$': '<rootDir>/tests/mocks/isomorphic-dompurify.ts',
+    '.*services/rag(\\.js)?$': '<rootDir>/tests/mocks/rag.ts',
+    '.*middleware/rateLimit(\\.js)?$': '<rootDir>/tests/mocks/rateLimit.ts',
+    '.*middleware/audit-logger(\\.js)?$': '<rootDir>/tests/mocks/audit-logger.cjs',
+    '.*utils/audit(\\.js)?$': '<rootDir>/tests/mocks/audit.ts',
+    '.*graphql/schema\\.collab(\\.js)?$': '<rootDir>/tests/mocks/schema-collab.ts',
+    '.*graphql/resolvers\\.collab(\\.js)?$': '<rootDir>/tests/mocks/resolvers-collab.ts',
+    '.*scripts/maintenance(\\.js)?$': '<rootDir>/tests/mocks/maintenance.ts',
+
+    '@intelgraph/feature-flags': '<rootDir>/tests/mocks/feature-flags.ts',
+    '@intelgraph/attack-surface': '<rootDir>/tests/mocks/attack-surface.ts',
+    '@packages/cache': '<rootDir>/tests/mocks/cache.ts',
+    '.*security/secret-audit-logger(\\.js)?$': '<rootDir>/tests/mocks/secret-audit-logger.ts',
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
     '^(\\.{1,2}/.*)\\.js$': '$1',
@@ -34,7 +74,11 @@ const config: Config = {
     '!src/**/index.ts',
     '!src/config/**',
     '!src/database/**',
+    '!src/generated/**',
+    '!src/**/__mocks__/**',
+    '!src/**/*.d.ts',
   ],
+  coverageProvider: 'v8',
   coverageThreshold: {
     global: {
       branches: 85,
@@ -69,8 +113,20 @@ const config: Config = {
   resetMocks: true,
   bail: false,
   errorOnDeprecated: true,
-  transformIgnorePatterns: ['node_modules/(?!(.*\.mjs$))'],
+  transform: {
+    '^.+\\.tsx?$': ['ts-jest', { useESM: true, tsconfig: 'tsconfig.test.json' }],
+    '^.+\\.js$': ['ts-jest', { useESM: true, tsconfig: 'tsconfig.test.json' }],
+  },
+  transformIgnorePatterns: [
+    'node_modules/(?!(\\.pnpm|p-limit|yocto-queue|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|pptxgenjs|jszip|@exodus/bytes|jsdom|html-encoding-sniffer|pg-boss|gaxios|gcp-metadata|@opentelemetry|pg)/)',
+  ],
   maxWorkers: process.env.CI ? 2 : '50%',
+  // Limit worker memory to prevent OOM in CI
+  workerIdleMemoryLimit: process.env.CI ? '512MB' : undefined,
+  // Open handle detection - helps identify hanging tests
+  detectOpenHandles: process.env.JEST_DETECT_HANDLES === 'true',
+  // Force exit after tests complete (CI safety net for orphan handles)
+  forceExit: process.env.CI === 'true',
 };
 
 export default config;

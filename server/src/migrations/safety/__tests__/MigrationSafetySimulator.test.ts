@@ -1,20 +1,34 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { jest } from '@jest/globals';
 
-import { MigrationSafetySimulator } from '../MigrationSafetySimulator.js';
+import type { MigrationSafetySimulator as MigrationSafetySimulatorType } from '../MigrationSafetySimulator.js';
 
-const connectMock = jest.fn();
-const queryMock = jest.fn();
-const endMock = jest.fn();
+const connectMock: jest.MockedFunction<() => Promise<void>> = jest.fn();
+const queryMock: jest.MockedFunction<(sql: string) => Promise<{ rowCount: number }>> =
+  jest.fn();
+const endMock: jest.MockedFunction<() => Promise<void>> = jest.fn();
 
-jest.mock('pg', () => ({
-  Client: jest.fn(() => ({
-    connect: connectMock,
-    query: queryMock,
-    end: endMock,
-  })),
-}));
+let MigrationSafetySimulator: typeof MigrationSafetySimulatorType;
+
+beforeAll(async () => {
+  jest.unstable_mockModule('pg', () => ({
+    Client: jest.fn(() => ({
+      connect: connectMock,
+      query: queryMock,
+      end: endMock,
+    })),
+  }));
+
+  ({ MigrationSafetySimulator } = await import('../MigrationSafetySimulator.js'));
+  const pgModule = (await import('pg')) as any;
+  if (pgModule?.Client?.prototype) {
+    pgModule.Client.prototype.connect = connectMock;
+    pgModule.Client.prototype.query = queryMock;
+    pgModule.Client.prototype.end = endMock;
+  }
+});
 
 describe('MigrationSafetySimulator.detectUnsafePatterns', () => {
   it('flags destructive operations and missing predicates', () => {

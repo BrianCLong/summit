@@ -1,0 +1,80 @@
+{
+  "issue_number": 251,
+  "title": "Neo4j: Causal Cluster setup",
+  "url": "https://github.com/BrianCLong/summit/issues/251",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9107968276,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRFA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/performance",
+      "name": "performance",
+      "color": "D93F0B",
+      "default": false,
+      "description": "Perf/Load"
+    },
+    {
+      "id": 9108055903,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHnXw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/devops",
+      "name": "devops",
+      "color": "d4c5f9",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108056154,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHoWg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/scalability",
+      "name": "scalability",
+      "color": "bfd4f2",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:54:39Z",
+  "createdAt": "2025-08-14T04:54:39Z",
+  "classification": "perf",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11880,
+        "url": "https://github.com/BrianCLong/summit/pull/11880",
+        "mergedAt": "2025-11-20T14:33:22Z",
+        "title": "Set up GitHub Actions CI/CD pipeline"
+      },
+      {
+        "number": 11795,
+        "url": "https://github.com/BrianCLong/summit/pull/11795",
+        "mergedAt": null,
+        "title": "feat: deliver research integration capabilities"
+      },
+      {
+        "number": 13186,
+        "url": "https://github.com/BrianCLong/summit/pull/13186",
+        "mergedAt": "2025-12-04T15:38:58Z",
+        "title": "Implement federated learning for distributed OSINT training"
+      },
+      {
+        "number": 11872,
+        "url": "https://github.com/BrianCLong/summit/pull/11872",
+        "mergedAt": "2025-11-20T14:34:03Z",
+        "title": "Build autotriage engine for issues and bugs"
+      },
+      {
+        "number": 13193,
+        "url": "https://github.com/BrianCLong/summit/pull/13193",
+        "mergedAt": "2025-12-04T15:38:38Z",
+        "title": "Build React Native mobile app with OSINT dashboard"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

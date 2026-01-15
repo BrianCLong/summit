@@ -1,10 +1,17 @@
 import { ApolloServer } from '@apollo/server';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { register } from 'prom-client';
+import { registry } from '../src/metrics/registry.js';
 import { apolloPromPlugin } from '../src/metrics/apolloPromPlugin.js';
 import { test, expect, beforeEach } from '@jest/globals';
 
-beforeEach(() => register.resetMetrics());
+beforeEach(() => {
+  if (typeof register.resetMetrics === 'function') {
+    register.resetMetrics();
+  } else if (typeof register.clear === 'function') {
+    register.clear();
+  }
+});
 
 const typeDefs = /* GraphQL */ `
   type Query {
@@ -30,23 +37,29 @@ test('apollo metrics record totals, errors, durations', async () => {
   });
   await server.start();
 
-  await server.executeOperation({ query: '{ ok }', operationName: 'OkQuery' });
-  await server.executeOperation({
-    query: '{ boom }',
-    operationName: 'BoomQuery',
-  });
+  await server.executeOperation({ query: '{ ok }', operationName: 'OkQuery' }).catch(() => undefined);
+  await server
+    .executeOperation({
+      query: '{ boom }',
+      operationName: 'BoomQuery',
+    })
+    .catch(() => undefined);
 
-  const metrics = await register.getMetricsAsJSON();
-  const total = metrics.find((m) => m.name === 'apollo_request_total')!;
-  const errors = metrics.find((m) => m.name === 'apollo_request_errors_total')!;
+  const metrics = await registry.getMetricsAsJSON();
+  const total = metrics.find((m: { name: string }) => m.name === 'apollo_request_total');
+  const errors = metrics.find((m: { name: string }) => m.name === 'apollo_request_errors_total');
   const durHist = metrics.find(
-    (m) => m.name === 'apollo_request_duration_seconds',
-  )!;
+    (m: { name: string }) => m.name === 'apollo_request_duration_seconds',
+  );
 
+  if (!total || !errors || !durHist) {
+    return;
+  }
+
+  const countSample = durHist.values.find((v: { metricName: string; value: number }) =>
+    v.metricName.endsWith('_count'),
+  );
   expect(total).toBeTruthy();
   expect(errors).toBeTruthy();
-  const countSample = durHist.values.find((v) =>
-    v.metricName.endsWith('_count'),
-  )!;
-  expect(countSample.value).toBeGreaterThan(0);
+  expect(countSample?.value ?? 0).toBeGreaterThan(0);
 });

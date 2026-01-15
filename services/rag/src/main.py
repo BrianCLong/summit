@@ -329,7 +329,7 @@ async def generate_answer_with_context(
     # Build context from citations
     context_parts = []
     for i, citation in enumerate(citations[:5]):  # Use top 5 citations
-        context_parts.append(f"[{i+1}] {citation.content[:500]}...")
+        context_parts.append(f"[{i + 1}] {citation.content[:500]}...")
 
     context = "\n\n".join(context_parts)
 
@@ -397,10 +397,10 @@ async def generate_cypher_from_nl(
 
     system_prompt = f"""You are an expert in converting natural language to Cypher queries for Neo4j.
 The database schema includes:
-- Node types: {schema.get('node_types', [])}
-- Relationship types: {schema.get('relationship_types', [])}
-- Entity types: {schema.get('entity_types', [])}
-- Common properties: {schema.get('common_properties', [])}
+- Node types: {schema.get("node_types", [])}
+- Relationship types: {schema.get("relationship_types", [])}
+- Entity types: {schema.get("entity_types", [])}
+- Common properties: {schema.get("common_properties", [])}
 
 Generate safe, read-only Cypher queries. Always include tenant isolation using tenantId.
 Provide clear explanations and warn about potential performance issues."""
@@ -552,7 +552,7 @@ async def index_documents(request: IndexRequest):
             indexed_count += len(documents)
 
         except Exception as e:
-            error_msg = f"Batch {i//request.batch_size + 1} failed: {str(e)}"
+            error_msg = f"Batch {i // request.batch_size + 1} failed: {e!s}"
             errors.append(error_msg)
             failed_count += len(batch)
             logger.error(error_msg)

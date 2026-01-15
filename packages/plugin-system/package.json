@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/plugin-system",
-  "version": "2.0.0",
+  "version": "4.1.4",
   "description": "Core plugin system architecture for Summit platform extensibility",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

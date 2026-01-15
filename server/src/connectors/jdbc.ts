@@ -28,8 +28,8 @@ const tracer = {
 };
 
 // Fix PostgreSQL parsing for large integers
-types.setTypeParser(20, (val) => parseInt(val, 10)); // BIGINT
-types.setTypeParser(1700, (val) => parseFloat(val)); // NUMERIC
+types.setTypeParser(20, (val: string) => parseInt(val, 10)); // BIGINT
+types.setTypeParser(1700, (val: string) => parseFloat(val)); // NUMERIC
 
 // Metrics
 const jdbcOperations = new Counter({
@@ -426,7 +426,7 @@ export class JDBCConnector extends EventEmitter {
       return {
         rows: pgResult.rows,
         rowCount: pgResult.rowCount || pgResult.rows.length,
-        fields: pgResult.fields.map((field) => ({
+        fields: pgResult.fields.map((field: any) => ({
           name: field.name,
           type: this.mapPostgreSQLType(field.dataTypeID),
           nullable: true, // PostgreSQL doesn't provide this info easily

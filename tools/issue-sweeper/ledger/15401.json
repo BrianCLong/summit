@@ -1,0 +1,21 @@
+{
+  "issue_number": 15401,
+  "title": "Fix supply chain and security workflow gates",
+  "url": "https://github.com/BrianCLong/summit/pull/15401",
+  "state": "open",
+  "labels": [],
+  "updatedAt": "2026-01-02T22:56:43Z",
+  "createdAt": "2026-01-02T22:55:06Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { endpointOwnership } from '../endpoint-ownership.js';
 
 describe('endpoint ownership map', () => {

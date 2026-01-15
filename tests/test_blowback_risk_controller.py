@@ -5,7 +5,7 @@ import pytest
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from blowback_risk_controller import (  # noqa: E402
+from blowback_risk_controller import (
     BlowbackPath,
     BlowbackRiskController,
     CoolingPlay,

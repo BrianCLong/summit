@@ -46,9 +46,9 @@ class SecurityHeadersManager {
       // Content Security Policy
       contentSecurityPolicy: this.config.contentSecurityPolicy.enabled
         ? {
-            directives: this.buildCSPDirectives(),
-            reportOnly: this.config.contentSecurityPolicy.reportOnly,
-          }
+          directives: this.buildCSPDirectives(),
+          reportOnly: this.config.contentSecurityPolicy.reportOnly,
+        }
         : false,
 
       // Cross-Origin Embedder Policy
@@ -85,11 +85,11 @@ class SecurityHeadersManager {
       // HTTP Strict Transport Security
       hsts: this.config.strictTransportSecurity.enabled
         ? {
-            maxAge: this.config.strictTransportSecurity.maxAge,
-            includeSubDomains:
-              this.config.strictTransportSecurity.includeSubDomains,
-            preload: this.config.strictTransportSecurity.preload,
-          }
+          maxAge: this.config.strictTransportSecurity.maxAge,
+          includeSubDomains:
+            this.config.strictTransportSecurity.includeSubDomains,
+          preload: this.config.strictTransportSecurity.preload,
+        }
         : false,
 
       // IE No Open
@@ -121,7 +121,7 @@ class SecurityHeadersManager {
     const isProduction = this.config.environment === 'production';
     const domain = this.config.domain;
 
-    const baseDirectives = {
+    const baseDirectives: Record<string, string[]> = {
       'default-src': ["'self'"],
       'base-uri': ["'self'"],
       'font-src': ["'self'", 'https:', 'data:'],
@@ -184,7 +184,7 @@ class SecurityHeadersManager {
       res.setHeader('X-API-Version', process.env.API_VERSION || '1.0');
 
       // Permissions Policy (restricts browser features)
-      const permissionsPolicy = [
+      const permissionsPolicy: string = [
         'accelerometer=()',
         'autoplay=()',
         'camera=()',
@@ -212,9 +212,9 @@ class SecurityHeadersManager {
       // Request ID for tracing
       // SECURITY: Use cryptographically secure random for request IDs
       const crypto = require('crypto');
-      const requestId =
-        req.headers['x-request-id'] ||
-        req.headers['x-correlation-id'] ||
+      const requestId: string =
+        req.headers['x-request-id']?.toString() ||
+        req.headers['x-correlation-id']?.toString() ||
         `req_${Date.now()}_${crypto.randomBytes(8).toString('base64url')}`;
       res.setHeader('X-Request-ID', requestId);
 
@@ -227,7 +227,7 @@ class SecurityHeadersManager {
 
       // Security reporting endpoints
       if (this.config.enableReporting && this.config.reportingEndpoint) {
-        const reportTo = JSON.stringify({
+        const reportTo: string = JSON.stringify({
           group: 'csp-endpoint',
           max_age: 31536000,
           endpoints: [{ url: this.config.reportingEndpoint }],
@@ -237,7 +237,7 @@ class SecurityHeadersManager {
 
       // Network Error Logging (NEL)
       if (this.config.environment === 'production') {
-        const nel = JSON.stringify({
+        const nel: string = JSON.stringify({
           report_to: 'csp-endpoint',
           max_age: 31536000,
           include_subdomains: true,
@@ -350,4 +350,5 @@ export function createSecurityMiddleware(
   ];
 }
 
-export { SecurityHeadersManager, SecurityHeadersConfig };
+export { SecurityHeadersManager };
+export type { SecurityHeadersConfig };

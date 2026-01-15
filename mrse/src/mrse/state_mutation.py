@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Dict, Iterable, List
-
 from .agent_models import BaseAgentModel
 from .constraint_engine import ConstraintEngine
 from .world_state import WorldState
@@ -12,14 +10,14 @@ class StateMutationEngine:
 
     def __init__(
         self,
-        agent_models: Dict[str, BaseAgentModel],
+        agent_models: dict[str, BaseAgentModel],
         constraint_engine: ConstraintEngine,
     ):
         self.agent_models = agent_models
         self.constraint_engine = constraint_engine
 
-    def expand(self, state: WorldState) -> List[WorldState]:
-        next_worlds: List[WorldState] = []
+    def expand(self, state: WorldState) -> list[WorldState]:
+        next_worlds: list[WorldState] = []
         for model in self.agent_models.values():
             for action in model.predict_actions(state):
                 candidate = state.clone()

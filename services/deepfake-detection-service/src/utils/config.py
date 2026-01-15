@@ -1,6 +1,7 @@
 """Configuration helpers for the deepfake detection service."""
 
 from functools import lru_cache
+
 from pydantic_settings import BaseSettings
 
 
@@ -19,6 +20,6 @@ class Settings(BaseSettings):
         env_prefix = "DEEPFAKE_"
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> Settings:
     return Settings()

@@ -45,6 +45,15 @@ describe('Swarm Intelligence Layer', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    (getRedisClient as jest.Mock).mockReturnValue({
+      duplicate: mockDuplicate,
+    });
+    mockDuplicate.mockImplementation(() => ({
+      publish: mockPublish,
+      subscribe: mockSubscribe,
+      on: mockOn,
+      quit: mockQuit,
+    }));
 
     gossip = new GossipProtocol('test-node-1');
     consensus = new ConsensusEngine('test-node-1', gossip);

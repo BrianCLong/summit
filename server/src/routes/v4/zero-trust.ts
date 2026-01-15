@@ -28,7 +28,7 @@ import {
   IntegrityVerification,
   MerkleProof,
 } from '../../security/zero-trust/types.js';
-import { GovernanceVerdict } from '../../governance/types.js';
+import type { GovernanceVerdict } from '../../governance/types.js';
 
 // =============================================================================
 // Types

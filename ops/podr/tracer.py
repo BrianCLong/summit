@@ -14,7 +14,7 @@ import json
 import logging
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
@@ -127,7 +127,7 @@ class PoDRTracer:
             drill_id=drill_id,
             drill_type=drill_type,
             tenant_id=self.tenant_id,
-            start_time=datetime.now(timezone.utc).isoformat(),
+            start_time=datetime.now(UTC).isoformat(),
             end_time=None,
             total_duration_s=None,
             steps=[],
@@ -180,7 +180,7 @@ class PoDRTracer:
             proof.compliance_score = self._calculate_compliance_score(proof)
 
             # Finalize proof
-            proof.end_time = datetime.now(timezone.utc).isoformat()
+            proof.end_time = datetime.now(UTC).isoformat()
             proof.total_duration_s = int(time.time() - start_time)
 
             # Generate cryptographic evidence
@@ -212,7 +212,7 @@ class PoDRTracer:
 
             # Mark as failed
             proof.overall_success = False
-            proof.end_time = datetime.now(timezone.utc).isoformat()
+            proof.end_time = datetime.now(UTC).isoformat()
             proof.total_duration_s = int(time.time() - start_time)
 
             # Still generate proof for audit trail
@@ -293,7 +293,7 @@ class PoDRTracer:
     async def _execute_drill_step(self, step: DrillStep, proof: PoDRProof) -> bool:
         """Execute individual drill step"""
         step.status = DrillStatus.RUNNING
-        step.timestamp = datetime.now(timezone.utc).isoformat()
+        step.timestamp = datetime.now(UTC).isoformat()
         step_start = time.time()
 
         logger.info(f"Executing step: {step.step_id} - {step.description}")
@@ -337,7 +337,7 @@ class PoDRTracer:
         # Simulate evidence collection with step-specific data
         evidence = {
             "step_id": step.step_id,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "success": True,  # Simulate mostly successful steps
             "metrics": {},
         }

@@ -96,6 +96,51 @@ Violations are treated as build-blocking defects, not stylistic issues.
 **Summit/IntelGraph** is a next-generation intelligence analysis platform with AI-augmented graph
 analytics designed for the intelligence community.
 
+## Agent Quality Charter (Summit Stack)
+
+The following principles translate the CLAUDE.md guidance into Summit's TypeScript-first stack.
+They are **enforceable** and apply to all code under this repository.
+
+1. **Core Principles**
+   - Optimize for asymptotic performance and memory: avoid redundant allocations, duplicated work,
+     and unnecessary abstractions; prefer linear-time operations and short hot paths.
+   - Eliminate technical debt: remove dead/debug code, keep interfaces minimal, and refactor
+     repetitive logic before merging.
+   - If a change is not demonstrably efficient, perform another optimization pass before request for
+     review.
+
+2. **Error Handling Rules**
+   - TypeScript/Node: do not silently catch errors or use untyped `any` without justification;
+     surface contextual errors with actionable messages; use typed error boundaries or Result-like
+     helpers where available.
+   - Rust (Cargo workspaces present): never rely on `.unwrap()`/`.expect()` in production paths;
+     return `Result` with `anyhow`/`thiserror` patterns and propagate meaningful context.
+   - Python utilities: avoid bare `except`; raise typed exceptions with explicit remediation notes;
+     never swallow errors via `pass`.
+
+3. **Code Style & Formatting**
+   - Use meaningful, consistent names; keep line lengths reasonable for readability; avoid emoji and
+     commented-out code or debug prints.
+   - Adhere to Prettier/Biome-style formatting and eslint rules; prefer typed interfaces over
+     structural `any`.
+
+4. **Testing Expectations**
+   - Add unit tests for new logic and mock external dependencies; follow Arrange-Act-Assert and do
+     not skip/comment out tests.
+   - Keep golden-path smoke tests (`make smoke`) green; include regression tests when fixing bugs.
+
+5. **Security Basics**
+   - Never commit secrets; keep `.env` files git-ignored; avoid logging tokens/PII; favor
+     environment variables for configuration.
+   - Validate inputs and prefer least-privilege defaults in new services or scripts.
+
+6. **Before Merging Checklist**
+   - Run: `pnpm lint` (treat warnings as blockers; prefer `--max-warnings=0` for touched files),
+     `pnpm format:check`, `pnpm typecheck`, `pnpm test` (or scoped equivalents), and `make smoke`
+     when touching golden-path surfaces.
+   - Rust crates: `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test`.
+   - Python utilities: `ruff check .` and targeted unit tests where present.
+
 ### Core Philosophy
 
 - Install: `pnpm install`.

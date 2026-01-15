@@ -2,6 +2,7 @@ import request from 'supertest';
 import crypto from 'crypto';
 import { createApp } from '../app'; // assumes your express app export
 import { describe, it, test, expect, beforeAll } from '@jest/globals';
+import type { Express } from 'express';
 
 const SECRET = process.env.ML_WEBHOOK_SECRET || 'test-secret';
 
@@ -11,8 +12,11 @@ function sign(body: any) {
   return { raw, sig: h };
 }
 
-describe('AI webhook', () => {
-  let app;
+const run = process.env.NO_NETWORK_LISTEN !== 'true';
+const describeIf = run ? describe : describe.skip;
+
+describeIf('AI webhook', () => {
+  let app: Express;
 
   beforeAll(async () => {
     app = await createApp();

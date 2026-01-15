@@ -1,0 +1,40 @@
+{
+  "issue_number": 15128,
+  "title": "chore(deps): bump napi-derive from 2.16.13 to 3.4.1",
+  "url": "https://github.com/BrianCLong/summit/pull/15128",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9908528129,
+      "node_id": "LA_kwDOPaNncM8AAAACTpgkAQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/rust",
+      "name": "rust",
+      "color": "000000",
+      "default": false,
+      "description": "Pull requests that update rust code"
+    }
+  ],
+  "updatedAt": "2025-12-30T22:23:18Z",
+  "createdAt": "2025-12-30T06:25:32Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

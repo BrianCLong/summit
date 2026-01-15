@@ -1,0 +1,56 @@
+{
+  "issue_number": 453,
+  "title": "feat: add sentiment analysis for text nodes",
+  "url": "https://github.com/BrianCLong/summit/pull/453",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-17T14:47:02Z",
+  "createdAt": "2025-08-17T08:07:21Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13617,
+        "url": "https://github.com/BrianCLong/summit/pull/13617",
+        "mergedAt": "2025-12-17T00:27:38Z",
+        "title": "build(deps): bump filelock from 3.19.1 to 3.20.1 in /cognitive_insights_engine"
+      },
+      {
+        "number": 1358,
+        "url": "https://github.com/BrianCLong/summit/pull/1358",
+        "mergedAt": null,
+        "title": "test: expand policy reasoner coverage"
+      },
+      {
+        "number": 1151,
+        "url": "https://github.com/BrianCLong/summit/pull/1151",
+        "mergedAt": null,
+        "title": "chore(deps): bump argon2 from 0.31.2 to 0.44.0 in /server"
+      },
+      {
+        "number": 13186,
+        "url": "https://github.com/BrianCLong/summit/pull/13186",
+        "mergedAt": "2025-12-04T15:38:58Z",
+        "title": "Implement federated learning for distributed OSINT training"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

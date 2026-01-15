@@ -1,4 +1,5 @@
 import pathlib
+
 import yaml
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -7,8 +8,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 def load_config(path: str | None = None) -> dict:
     cfg_path = ROOT / "config" / "agent-config.yaml" if path is None else pathlib.Path(path)
     if not cfg_path.exists():
-         # Fallback to look relative to cwd if running from outside
-         cfg_path = pathlib.Path("config/agent-config.yaml")
+        # Fallback to look relative to cwd if running from outside
+        cfg_path = pathlib.Path("config/agent-config.yaml")
 
     with cfg_path.open("r", encoding="utf-8") as f:
         return yaml.safe_load(f)
@@ -19,9 +20,9 @@ def load_prompt_from_config(cfg: dict) -> str:
     if prompt_file:
         p_path = ROOT / prompt_file
         if not p_path.exists():
-             p_path = pathlib.Path(prompt_file)
+            p_path = pathlib.Path(prompt_file)
         if p_path.exists():
-             return p_path.read_text(encoding="utf-8")
+            return p_path.read_text(encoding="utf-8")
 
     # Fallback to inline prompt or error
     prompt = cfg.get("prompt", "").strip()

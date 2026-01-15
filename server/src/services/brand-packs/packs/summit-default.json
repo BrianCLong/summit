@@ -1,0 +1,52 @@
+{
+  "id": "summit-default",
+  "name": "Summit",
+  "websiteUrl": "https://summit.example.com",
+  "logos": {
+    "primary": "https://cdn.summit.example.com/brand/summit-primary.svg",
+    "mark": "https://cdn.summit.example.com/brand/summit-mark.svg",
+    "inverted": "https://cdn.summit.example.com/brand/summit-inverted.svg"
+  },
+  "navLabels": {
+    "home": "Home",
+    "investigations": "Investigations",
+    "cases": "Cases",
+    "dashboards": "Dashboards",
+    "settings": "Settings",
+    "support": "Support"
+  },
+  "tokens": {
+    "palette": {
+      "mode": "dark",
+      "primary": "#0f766e",
+      "secondary": "#1d4ed8",
+      "accent": "#f59e0b",
+      "background": "#0b1120",
+      "surface": "#111827",
+      "text": {
+        "primary": "#f9fafb",
+        "secondary": "#cbd5f5"
+      }
+    },
+    "typography": {
+      "fontFamily": "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif",
+      "baseSize": 16
+    },
+    "radii": {
+      "sm": 4,
+      "md": 8,
+      "lg": 16,
+      "pill": 9999
+    },
+    "spacing": {
+      "sm": 12,
+      "md": 16,
+      "lg": 24
+    },
+    "shadows": {
+      "sm": "0 1px 2px rgba(0, 0, 0, 0.08)",
+      "md": "0 6px 16px rgba(0, 0, 0, 0.12)"
+    }
+  },
+  "updatedAt": "2026-01-05T02:02:27Z"
+}

@@ -1,5 +1,6 @@
 from playwright.sync_api import sync_playwright
 
+
 def verify_debug():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -42,6 +43,7 @@ def verify_debug():
             print(f"Script Error: {e}")
         finally:
             browser.close()
+
 
 if __name__ == "__main__":
     verify_debug()

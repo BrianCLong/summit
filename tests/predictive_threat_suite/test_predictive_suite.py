@@ -18,7 +18,6 @@ from predictive_threat_suite.timeline_forecast import (
 
 
 class TestPredictiveSuiteStubs(unittest.TestCase):
-
     def test_get_timeline_forecast_enhanced(self):
         entity_id = "threat_actor_X"
         start_date = "2025-01-01"

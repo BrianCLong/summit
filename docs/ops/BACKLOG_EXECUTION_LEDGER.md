@@ -1,0 +1,41 @@
+# Backlog Execution Ledger
+
+| Title | Source | Status | Owner | Verified By | Notes |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| Harden agent guardrails in CI (TB-01) | TASK_BACKLOG.md | Done | Jules | scripts/ga/check-pr-metadata.mjs, scripts/ga/scan-pii.mjs | Ship guardrail workflow + contract updates. Updated agent-contract.json and .github/workflows/agent-guardrails.yml |
+| Stand up agent activity ledger (TB-02) | TASK_BACKLOG.md | In Progress | Codex | | Keep `AGENT_ACTIVITY.md` synced with new tasks. |
+| Refresh human steering guide (TB-03) | TASK_BACKLOG.md | Ready | Codex | | Add examples for toggling exploration/exploitation. |
+| Restricted-path coverage audit (TB-04) | TASK_BACKLOG.md | Done | Jules | Manual Audit | Verified that `agent-contract.json` restricted areas cover `secrets/`, `sealed-secrets/`, `security/`, `trust/`, and `security-hardening/`. Found `deploy/helm/intelgraph/secrets`, `k8s/secrets` etc are NOT explicitly covered by current prefix match `secrets/` (which matches root folder). Updated contract to be more inclusive. |
+| Prime Brain prompt alignment sweep (TB-05) | TASK_BACKLOG.md | Queued | Jules | | Normalize `.agentic-prompts/` scopes to backlog priorities. |
+| Case spaces with immutable audit + SLA timers | backlog.yaml | Done | Jules | testing/ga-verification/case-audit-sla.ga.test.ts | Implemented CaseSLAService and defined types. Verified with Tier B node test. **Note: Batched with TB-01/TB-04 for initialization efficiency.** |
+| Comment threads bound to graph nodes | backlog.yaml | Done | Jules | testing/ga-verification/comments.ga.test.ts | Implemented UniversalCommentService.ts and types.ts. Verified with Tier B node test. **Note: Batched with TB-01/TB-04 for initialization efficiency.** |
+| Live co-editing of link charts | backlog.yaml | Queued | Jules | | Epic: Collaboration (E), P1 - Love, Sprint 2 |
+| @Mentions with inline entity previews | backlog.yaml | Queued | Jules | | Epic: Collaboration (E), P1 - Love, Sprint 2 |
+| STIX/TAXII + MISP bi-directional connectors | backlog.yaml | Queued | Jules | | Epic: Integrations (G), P0 - Must, Sprint 1 |
+| Slack/Teams + Jira/ServiceNow integration | backlog.yaml | Queued | Jules | | Epic: Integrations (G), P0 - Must, Sprint 1 |
+| Push graph updates into chat with visual snippets | backlog.yaml | Queued | Jules | | Epic: Integrations (G), P1 - Love, Sprint 2 |
+| Magic paste (auto-entity creation from raw text/CSV/URL) | backlog.yaml | Queued | Jules | | Epic: Integrations (G), P2 - Delight, Sprint 3 |
+| Metrics/Prometheus + DR/BCP baseline | backlog.yaml | Queued | Jules | | Epic: Ops & Reliability (H), P0 - Must, Sprint 1 |
+| Smart query budgeter with optimization hints | backlog.yaml | Queued | Jules | | Epic: Ops & Reliability (H), P1 - Love, Sprint 2 |
+| Predictive latency heatmaps | backlog.yaml | Queued | Jules | | Epic: Ops & Reliability (H), P2 - Fearsome Delight, Sprint 3 |
+| Tri-pane Timeline + Map + Graph view | backlog.yaml | Queued | Jules | | Epic: Frontend Experience (I), P0 - Must, Sprint 1 |
+| Undo/Redo + Explain-this-view panel | backlog.yaml | Queued | Jules | | Epic: Frontend Experience (I), P0 - Must, Sprint 1 |
+| Drag-and-drop narrative builder | backlog.yaml | Queued | Jules | | Epic: Frontend Experience (I), P1 - Love, Sprint 2 |
+| Beautiful graph expansion animations | backlog.yaml | Queued | Jules | | Epic: Frontend Experience (I), P2 - Delight, Sprint 3 |
+| UI clutter dimming for focus (cognitive load guardrails) | backlog.yaml | Queued | Jules | | Epic: Frontend Experience (I), P2 - Fearsome Delight, Sprint 3 |
+| Paved-Road Service Template v0.1 | backlog.yaml | Queued | Jules | | Epic: Platform Governance (K), P0 - Must |
+| Local Dev Stack for Paved-Road Services | backlog.yaml | Queued | Jules | | Epic: Platform Governance (K), P1 - Should |
+| Observability Baseline for Reference Service | backlog.yaml | Queued | Jules | | Epic: Platform Governance (K), P0 - Must |
+| Post-Deploy Validation & Runbook v0.1 | backlog.yaml | Queued | Jules | | Epic: Platform Governance (K), P2 - Stretch |
+| SBOM Generation in CI | backlog.yaml | Queued | Jules | | Epic: Platform Governance (K), P0 - Must |
+| Container Signing & Verification | backlog.yaml | Queued | Jules | | Epic: Platform Governance (K), P1 - Should |
+| OPA Policy Gate on PR & Release | backlog.yaml | Queued | Jules | | Epic: Platform Governance (K), P0 - Must |
+| Evidence Pack v0.1 | backlog.yaml | Queued | Jules | | Epic: Platform Governance (K), P2 - Stretch |
+| Agentic Prompt Library | backlog.yaml | Queued | Jules | | Epic: Agentic Capabilities (L), P0 - Must |
+| Adaptive Agent Orchestration | backlog.yaml | Queued | Jules | | Epic: Agentic Capabilities (L), P0 - Must |
+| Agent Feedback Loop | backlog.yaml | Queued | Jules | | Epic: Agentic Capabilities (L), P1 - Love |
+| Multi-Agent Collaboration Workflows | backlog.yaml | Queued | Jules | | Epic: Agentic Capabilities (L), P1 - Love |
+| Agent Security & Compliance Audits | backlog.yaml | Queued | Jules | | Epic: Agentic Capabilities (L), P0 - Must |
+| Cost: Ship weekly cost leaderboard; enable automated idle env shutdown | 90_DAY_WAR_ROOM_BACKLOG.md | Queued | Jules | | Week 1, Task 60 |
+| Change: Add progressive delivery templates (canary->ramp) with automated rollback | 90_DAY_WAR_ROOM_BACKLOG.md | Queued | Jules | | Week 1, Task 61 |
+| Simplification: Inventory top 50 modules and publish Kill List v1 (10 candidates) | 90_DAY_WAR_ROOM_BACKLOG.md | Queued | Jules | | Week 1, Task 62 |

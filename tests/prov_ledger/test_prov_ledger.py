@@ -17,7 +17,6 @@ from prov_ledger.export_manifest import generate_export_manifest, verify_export_
 
 
 class TestProvLedgerStubs(unittest.TestCase):
-
     def setUp(self):
         # Clear the in-memory store before each test
         _EVIDENCE_STORE.clear()

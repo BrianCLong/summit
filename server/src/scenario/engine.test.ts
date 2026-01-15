@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import { ScenarioEngine } from './engine';

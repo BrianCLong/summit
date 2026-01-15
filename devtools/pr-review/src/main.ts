@@ -42,12 +42,12 @@ function generateMarkdown(findings: ReviewFinding[]): string {
   return md;
 }
 
-async function main() {
+function main() {
   const args = process.argv.slice(2);
   const diffFile = args[0];
 
   if (!diffFile) {
-    console.error('Usage: scan <diff-file>');
+    process.stderr.write('Usage: scan <diff-file>\n');
     process.exit(1);
   }
 
@@ -86,15 +86,15 @@ async function main() {
     // Output Markdown
     fs.writeFileSync('review_findings.md', output.summary);
 
-    console.log(output.summary);
+    process.stdout.write(`${output.summary}\n`);
 
     if (!output.passed) {
-      console.error('CRITICAL ISSUES FOUND');
+      process.stderr.write('CRITICAL ISSUES FOUND\n');
       process.exit(1);
     }
 
   } catch (error) {
-    console.error('Error processing diff:', error);
+    process.stderr.write(`Error processing diff: ${error}\n`);
     process.exit(1);
   }
 }

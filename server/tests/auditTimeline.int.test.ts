@@ -1,8 +1,12 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import fs from 'fs';
 import path from 'path';
 import { Pool } from 'pg';
 import { AuditTimelineRollupService } from '../src/audit/AuditTimelineRollupService.js';
+
+// Use process.cwd() since tests run from server directory
+const testsDir = process.cwd();
 
 let GenericContainer: any;
 try {
@@ -11,7 +15,13 @@ try {
   // testcontainers not available; tests will be skipped
 }
 
-const maybe = GenericContainer ? describe : describe.skip;
+const supportsEnv =
+  GenericContainer &&
+  (typeof GenericContainer.prototype?.withEnv === 'function' ||
+    typeof GenericContainer.prototype?.withEnvironment === 'function') &&
+  typeof GenericContainer.prototype?.withExposedPorts === 'function';
+const runIntegration = process.env.RUN_AUDIT_TIMELINE === 'true';
+const maybe = supportsEnv && runIntegration ? describe : describe.skip;
 
 interface PlanNode {
   'Node Type': string;
@@ -24,10 +34,7 @@ maybe('Audit timeline BRIN + rollups', () => {
   let pool: Pool;
   let rollups: AuditTimelineRollupService;
   const migrationSql = fs.readFileSync(
-    path.resolve(
-      __dirname,
-      '../db/migrations/postgres/2026-11-05_timeline_rollups_brin.sql',
-    ),
+    path.join(testsDir, 'db/migrations/postgres/2026-11-05_timeline_rollups_brin.sql'),
     'utf8',
   );
 
@@ -64,11 +71,18 @@ maybe('Audit timeline BRIN + rollups', () => {
   };
 
   beforeAll(async () => {
-    container = await new GenericContainer('postgres:15-alpine')
-      .withEnv('POSTGRES_PASSWORD', 'postgres')
-      .withEnv('POSTGRES_DB', 'auditdb')
-      .withExposedPorts(5432)
-      .start();
+    const containerBuilder = new GenericContainer('postgres:15-alpine');
+    if (typeof containerBuilder.withEnv === 'function') {
+      containerBuilder
+        .withEnv('POSTGRES_PASSWORD', 'postgres')
+        .withEnv('POSTGRES_DB', 'auditdb');
+    } else if (typeof containerBuilder.withEnvironment === 'function') {
+      containerBuilder
+        .withEnvironment('POSTGRES_PASSWORD', 'postgres')
+        .withEnvironment('POSTGRES_DB', 'auditdb');
+    }
+
+    container = await containerBuilder.withExposedPorts(5432).start();
 
     const port = container.getMappedPort(5432);
     const host = container.getHost();
@@ -120,9 +134,7 @@ maybe('Audit timeline BRIN + rollups', () => {
     await seedEvents('tenant-b', 240, now);
 
     await pool.query('SET enable_seqscan = off;');
-    const planResult = await pool.query<{
-      'QUERY PLAN': Array<{ Plan: PlanNode }>;
-    }>(
+    const planResult = (await pool.query(
       `
       EXPLAIN (FORMAT JSON)
       SELECT *
@@ -133,7 +145,7 @@ maybe('Audit timeline BRIN + rollups', () => {
       ORDER BY "timestamp" DESC
     `,
       [ 'tenant-a', new Date(now.getTime() - 3600 * 1000), now ],
-    );
+    )) as { rows: Array<{ 'QUERY PLAN': Array<{ Plan: PlanNode }> }> };
 
     const rootPlan = planResult.rows[0]['QUERY PLAN'][0].Plan;
     const indexNode = findPlanNode(

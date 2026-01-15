@@ -47,12 +47,12 @@ describe('QuotaEnforcer', () => {
   });
 
   it('should enforce API quota', async () => {
-    (rateLimiter.checkLimit as jest.Mock).mockResolvedValue({
+    (rateLimiter.checkLimit as jest.Mock).mockImplementation(async () => ({
       allowed: true,
       total: 100,
       remaining: 99,
       reset: 12345,
-    });
+    }));
 
     const result = await enforcer.checkApiQuota('demo-tenant');
     expect(result.allowed).toBe(true);
@@ -60,17 +60,16 @@ describe('QuotaEnforcer', () => {
       'quota:demo-tenant:api_rpm',
       100, // Starter plan limit
       60000,
-      undefined // Default amount
     );
   });
 
   it('should enforce Ingest quota with custom amount', async () => {
-    (rateLimiter.checkLimit as jest.Mock).mockResolvedValue({
+    (rateLimiter.checkLimit as jest.Mock).mockImplementation(async () => ({
       allowed: false,
       total: 10,
       remaining: 0,
       reset: 12345,
-    });
+    }));
 
     const result = await enforcer.checkIngestQuota('demo-tenant', 5);
     expect(result.allowed).toBe(false);
@@ -87,19 +86,18 @@ describe('QuotaEnforcer', () => {
      (quotaConfigService.getTenantPlan as jest.Mock).mockReturnValue('standard');
      (quotaConfigService.getTenantOverrides as jest.Mock).mockReturnValue({ api_rpm: 8000 });
 
-     (rateLimiter.checkLimit as jest.Mock).mockResolvedValue({
+     (rateLimiter.checkLimit as jest.Mock).mockImplementation(async () => ({
       allowed: true,
       total: 8000,
       remaining: 7999,
       reset: 12345,
-    });
+    }));
 
     await enforcer.checkApiQuota('acme-corp');
     expect(rateLimiter.checkLimit).toHaveBeenCalledWith(
       'quota:acme-corp:api_rpm',
       8000, // Overridden limit
       60000,
-      undefined
     );
   });
 

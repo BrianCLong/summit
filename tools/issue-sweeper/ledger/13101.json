@@ -1,0 +1,65 @@
+{
+  "issue_number": 13101,
+  "title": "Add Multi-Tenant Boundary Stress Test Engine",
+  "url": "https://github.com/BrianCLong/summit/pull/13101",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9215499745,
+      "node_id": "LA_kwDOPaNncM8AAAACJUld4Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%203/5",
+      "name": "Review effort 3/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9694715744,
+      "node_id": "LA_kwDOPaNncM8AAAACQdmfYA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/has-tests",
+      "name": "has-tests",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9694960151,
+      "node_id": "LA_kwDOPaNncM8AAAACQd1aFw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/size:%20XL",
+      "name": "size: XL",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9694962502,
+      "node_id": "LA_kwDOPaNncM8AAAACQd1jRg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:%20security",
+      "name": "type: security",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-12-17T05:44:04Z",
+  "createdAt": "2025-12-02T23:35:47Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13101,
+        "url": "https://github.com/BrianCLong/summit/pull/13101",
+        "mergedAt": "2025-12-17T05:44:01Z",
+        "title": "Add Multi-Tenant Boundary Stress Test Engine"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

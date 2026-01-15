@@ -1,0 +1,155 @@
+{
+  "issue_number": 104,
+  "title": "Create Roadmap Document for MVP and Beyond",
+  "url": "https://github.com/BrianCLong/summit/issues/104",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051495,
+      "node_id": "LA_kwDOPaNncM8AAAACHht45w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:docs",
+      "name": "type:docs",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Docs"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    },
+    {
+      "id": 9095068559,
+      "node_id": "LA_kwDOPaNncM8AAAACHhu7jw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:docs",
+      "name": "area:docs",
+      "color": "ededed",
+      "default": false,
+      "description": "Docs area"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:14:45Z",
+  "createdAt": "2025-08-12T04:40:55Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15388,
+        "url": "https://github.com/BrianCLong/summit/pull/15388",
+        "mergedAt": null,
+        "title": "fix(ci): pin supply-chain tools and apply security fix"
+      },
+      {
+        "number": 12696,
+        "url": "https://github.com/BrianCLong/summit/pull/12696",
+        "mergedAt": "2025-12-18T01:34:35Z",
+        "title": "Add prompts 97-104 issue carving plan"
+      },
+      {
+        "number": 12449,
+        "url": "https://github.com/BrianCLong/summit/pull/12449",
+        "mergedAt": "2025-12-18T02:49:37Z",
+        "title": "Add ultra-prime wave 13 prompt expansion"
+      },
+      {
+        "number": 12451,
+        "url": "https://github.com/BrianCLong/summit/pull/12451",
+        "mergedAt": "2025-12-18T02:49:11Z",
+        "title": "docs: capture wave 13 mission scopes"
+      },
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 1330,
+        "url": "https://github.com/BrianCLong/summit/pull/1330",
+        "mergedAt": null,
+        "title": "feat: enrich counter-response agent orchestration"
+      },
+      {
+        "number": 322,
+        "url": "https://github.com/BrianCLong/summit/pull/322",
+        "mergedAt": "2025-08-16T22:23:16Z",
+        "title": "feat: add GNN node classifier and close issues"
+      },
+      {
+        "number": 15339,
+        "url": "https://github.com/BrianCLong/summit/pull/15339",
+        "mergedAt": "2026-01-01T11:37:58Z",
+        "title": "feat: leverage optimization and friction reduction"
+      },
+      {
+        "number": 1311,
+        "url": "https://github.com/BrianCLong/summit/pull/1311",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat: orchestrate zero spend routing"
+      },
+      {
+        "number": 1333,
+        "url": "https://github.com/BrianCLong/summit/pull/1333",
+        "mergedAt": "2025-09-23T06:25:39Z",
+        "title": "feat: scaffold ig-rl reinforcement learning service"
+      },
+      {
+        "number": 13166,
+        "url": "https://github.com/BrianCLong/summit/pull/13166",
+        "mergedAt": "2025-12-04T15:39:25Z",
+        "title": "Fix Jest ESM config, update CI, and resolve conflicts"
+      },
+      {
+        "number": 13076,
+        "url": "https://github.com/BrianCLong/summit/pull/13076",
+        "mergedAt": "2025-12-03T05:15:02Z",
+        "title": "Fix Jest ESM Configuration and Test Execution"
+      },
+      {
+        "number": 11893,
+        "url": "https://github.com/BrianCLong/summit/pull/11893",
+        "mergedAt": null,
+        "title": "Build Advanced Metadata Analysis Platform"
+      },
+      {
+        "number": 1260,
+        "url": "https://github.com/BrianCLong/summit/pull/1260",
+        "mergedAt": null,
+        "title": "Rebrand: integrate feature/rename-summit into merge/all-to-main-20250915-022508"
+      },
+      {
+        "number": 13193,
+        "url": "https://github.com/BrianCLong/summit/pull/13193",
+        "mergedAt": "2025-12-04T15:38:38Z",
+        "title": "Build React Native mobile app with OSINT dashboard"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

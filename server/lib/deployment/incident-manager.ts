@@ -1,6 +1,6 @@
 
 // Mock external services for demonstration
-const mockAlertingSystem = {
+const defaultAlertingSystem = {
   getAlerts: async (): Promise<Array<{ severity: 'critical' | 'warning'; message: string }>> => {
     // Simulate a critical alert 5% of the time
     if (Math.random() < 0.05) {
@@ -10,13 +10,13 @@ const mockAlertingSystem = {
   },
 };
 
-const mockPagerDutyClient = {
+const defaultPagerDutyClient = {
   triggerIncident: async (details: string): Promise<void> => {
     console.log(`[MockPagerDuty] Incident triggered: ${details}`);
   },
 };
 
-const mockSlackClient = {
+const defaultSlackClient = {
   sendMessage: async (channel: string, message: string): Promise<void> => {
     console.log(`[MockSlack] Posting to #${channel}: ${message}`);
   },
@@ -27,6 +27,12 @@ interface IncidentManagerConfig {
     critical: { notify: string[]; runbook: string };
   };
   slackChannel: string;
+  alertingSystem?: typeof defaultAlertingSystem;
+  pagerDutyClient?: typeof defaultPagerDutyClient;
+  slackClient?: typeof defaultSlackClient;
+  runbookDelayMs?: number;
+  enablePolling?: boolean;
+  pollingIntervalMs?: number;
 }
 
 interface Incident {
@@ -40,15 +46,28 @@ interface Incident {
 export class IncidentManager {
   private config: IncidentManagerConfig;
   private openIncidents: Incident[] = [];
+  private poller: NodeJS.Timeout | null = null;
+  private alertingSystem: typeof defaultAlertingSystem;
+  private pagerDutyClient: typeof defaultPagerDutyClient;
+  private slackClient: typeof defaultSlackClient;
+  private runbookDelayMs: number;
 
   constructor(config: IncidentManagerConfig) {
     this.config = config;
-    setInterval(() => this.checkForIncidents(), 60000); // Check every minute
+    this.alertingSystem = config.alertingSystem ?? defaultAlertingSystem;
+    this.pagerDutyClient = config.pagerDutyClient ?? defaultPagerDutyClient;
+    this.slackClient = config.slackClient ?? defaultSlackClient;
+    this.runbookDelayMs = config.runbookDelayMs ?? 5000;
+    const enablePolling = config.enablePolling ?? true;
+    if (enablePolling) {
+      const intervalMs = config.pollingIntervalMs ?? 60000;
+      this.poller = setInterval(() => this.checkForIncidents(), intervalMs);
+    }
   }
 
   public async checkForIncidents(): Promise<void> {
     console.log('Checking for new incidents...');
-    const alerts = await mockAlertingSystem.getAlerts();
+    const alerts = await this.alertingSystem.getAlerts();
     for (const alert of alerts) {
       if (alert.severity === 'critical' && !this.isOpenIncident(alert.message)) {
         await this.handleIncident(alert.message);
@@ -78,7 +97,7 @@ export class IncidentManager {
     console.log(`Enforcing escalation policy: notifying ${policy.notify.join(', ')}`);
     for (const target of policy.notify) {
       if (target === 'pagerduty') {
-        await mockPagerDutyClient.triggerIncident(incident.details);
+        await this.pagerDutyClient.triggerIncident(incident.details);
       }
     }
     await this.executeRunbook(incident, policy.runbook);
@@ -87,7 +106,7 @@ export class IncidentManager {
   private async executeRunbook(incident: Incident, runbookName: string): Promise<void> {
     console.log(`Executing runbook: ${runbookName}`);
     // In a real system, this would trigger an automated script or workflow.
-    await new Promise(resolve => setTimeout(resolve, 5000)); // Simulate runbook execution time
+    await new Promise(resolve => setTimeout(resolve, this.runbookDelayMs));
     incident.runbookExecuted = true;
     console.log(`Runbook ${runbookName} executed successfully.`);
     await this.notify(`✅ Runbook '${runbookName}' executed for incident ${incident.id}.`);
@@ -107,7 +126,7 @@ export class IncidentManager {
   }
 
   private async notify(message: string): Promise<void> {
-    await mockSlackClient.sendMessage(this.config.slackChannel, message);
+    await this.slackClient.sendMessage(this.config.slackChannel, message);
   }
 
   private isOpenIncident(details: string): boolean {

@@ -9,7 +9,8 @@
  * @module analytics/adoption/types
  */
 
-import { GovernanceVerdict, DataClassification } from '../../types/data-envelope.js';
+import { DataClassification } from '../../types/data-envelope.js';
+import type { GovernanceVerdict } from '../../types/data-envelope.js';
 
 /**
  * Consent status for analytics collection

@@ -1,7 +1,24 @@
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { createReasonForAccessMiddleware } from '../reason-for-access';
-import { requestFactory, responseFactory, nextFactory } from '../../../tests/factories/requestFactory';
 import { ForbiddenError } from 'apollo-server-express';
+
+const requestFactory = (overrides: Record<string, any> = {}) => {
+  const headers = overrides.headers ?? {};
+  return {
+    headers,
+    path: '/',
+    get: (name: string) => headers[name.toLowerCase()],
+    ...overrides,
+  };
+};
+
+const responseFactory = () => ({
+  status: jest.fn().mockReturnThis(),
+  json: jest.fn().mockReturnThis(),
+  set: jest.fn().mockReturnThis(),
+});
+
+const nextFactory = () => jest.fn();
 
 describe('reason-for-access middleware', () => {
   const baseConfig = {

@@ -7,8 +7,8 @@ import type { DataLoaderContext } from '../index';
 import { jest, describe, it, test, expect, beforeEach } from '@jest/globals';
 
 interface MockNeo4jSession {
-  run: jest.Mock;
-  close: jest.Mock;
+  run: jest.MockedFunction<(...args: any[]) => Promise<{ records: any[] }>>;
+  close: jest.MockedFunction<() => void>;
 }
 
 interface MockNeo4jDriver {
@@ -38,6 +38,7 @@ describe('EntityLoader', () => {
     };
 
     jest.clearAllMocks();
+    mockNeo4jDriver.session.mockReturnValue(mockNeo4jSession as any);
   });
 
   describe('batch loading', () => {
@@ -139,28 +140,30 @@ describe('EntityLoader', () => {
         records: [], // No entities found
       });
 
-      const result = await loader.load('non-existent');
-
-      expect(result).toBeInstanceOf(Error);
-      expect((result as Error).message).toContain('Entity not found');
+      await expect(loader.load('non-existent')).rejects.toThrow(
+        'Entity not found',
+      );
     });
 
     it('should respect maxBatchSize limit', async () => {
       const loader = createEntityLoader(context);
 
       // Mock response for multiple batches
-      mockNeo4jSession.run.mockResolvedValue({
-        records: Array.from({ length: 50 }, (_, i) => ({
-          get: () => ({
-            properties: {
-              id: `entity-${i}`,
-              tenantId: 'test-tenant',
-              createdAt: '2024-01-01',
-              updatedAt: '2024-01-01',
-            },
-            labels: ['Entity'],
-          }),
-        })),
+      mockNeo4jSession.run.mockImplementation((_query: string, params: any) => {
+        const ids = params?.ids || [];
+        return Promise.resolve({
+          records: ids.map((id: string) => ({
+            get: () => ({
+              properties: {
+                id,
+                tenantId: 'test-tenant',
+                createdAt: '2024-01-01',
+                updatedAt: '2024-01-01',
+              },
+              labels: ['Entity'],
+            }),
+          })),
+        });
       });
 
       // Request 150 entities (should be split into 2 batches of 100 and 1 batch of 50)
@@ -181,10 +184,7 @@ describe('EntityLoader', () => {
 
       mockNeo4jSession.run.mockRejectedValueOnce(new Error('Neo4j error'));
 
-      const result = await loader.load('entity-1');
-
-      expect(result).toBeInstanceOf(Error);
-      expect((result as Error).message).toContain('Neo4j error');
+      await expect(loader.load('entity-1')).rejects.toThrow('Neo4j error');
       expect(mockNeo4jSession.close).toHaveBeenCalled();
     });
   });

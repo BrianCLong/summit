@@ -97,7 +97,7 @@ def mutate_policy(policy_definition):
             rules.remove(random.choice(rules))
     elif mutation_type == "modify_condition":
         rule_to_mutate = random.choice(rules)
-        if "condition" in rule_to_mutate and rule_to_mutate["condition"]:
+        if rule_to_mutate.get("condition"):
             # Simplified: just replace a random simple condition
             if isinstance(rule_to_mutate["condition"], dict):
                 key_to_modify = random.choice(list(rule_to_mutate["condition"].keys()))

@@ -100,6 +100,8 @@ function createMockRedisClient() {
     quit: async () => { },
     on: () => { },
     connect: async () => { },
+    options: { keyPrefix: 'summit:' },
+    duplicate: () => createMockRedisClient(),
   };
 }
 

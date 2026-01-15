@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/esg-reporting",
-  "version": "1.0.0",
+  "version": "4.1.4",
   "description": "Shared ESG reporting types, validators, and calculation utilities",
   "type": "module",
   "main": "dist/index.js",

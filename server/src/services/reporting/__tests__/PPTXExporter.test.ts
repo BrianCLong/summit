@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { promises as fs } from 'fs';
 import path from 'path';
 import type PptxGenJS from 'pptxgenjs';

@@ -1,0 +1,21 @@
+{
+  "issue_number": 15194,
+  "title": "Implement GA Canary, Rollback, and Drift Detection",
+  "url": "https://github.com/BrianCLong/summit/pull/15194",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2026-01-01T11:48:01Z",
+  "createdAt": "2025-12-31T21:59:09Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

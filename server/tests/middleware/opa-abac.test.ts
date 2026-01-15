@@ -4,7 +4,9 @@ import { Request, Response } from 'express';
 import { AuthenticationError } from 'apollo-server-express';
 
 // Mock dependencies
-const mockEvaluate = jest.fn();
+const mockEvaluate = jest.fn() as jest.MockedFunction<
+  (policy: string, input: any) => Promise<any>
+>;
 
 jest.mock('axios');
 jest.mock('@opentelemetry/api', () => ({
@@ -20,7 +22,7 @@ jest.mock('@opentelemetry/api', () => ({
   },
 }));
 
-jest.mock('../src/utils/logger.js', () => ({
+jest.mock('../../src/utils/logger.js', () => ({
   logger: {
     child: () => ({
       debug: jest.fn(),
@@ -31,7 +33,7 @@ jest.mock('../src/utils/logger.js', () => ({
 }));
 
 // Import the module under test
-import { opaAuthzMiddleware, OPAClient } from '../src/middleware/opa-abac.js';
+import { opaAuthzMiddleware, OPAClient } from '../../src/middleware/opa-abac.js';
 
 describe('opaAuthzMiddleware', () => {
   let mockReq: Partial<Request>;
@@ -74,11 +76,13 @@ describe('opaAuthzMiddleware', () => {
   });
 
   it('should call next() when policy allows', async () => {
-    mockEvaluate.mockResolvedValue({
-      allow: true,
-      reason: 'allow',
-      obligations: [],
-    });
+    mockEvaluate.mockImplementation(() =>
+      Promise.resolve({
+        allow: true,
+        reason: 'allow',
+        obligations: [],
+      }),
+    );
 
     const middleware = opaAuthzMiddleware(opaClient);
     await middleware(mockReq as Request, mockRes as Response, next);
@@ -97,11 +101,13 @@ describe('opaAuthzMiddleware', () => {
   });
 
   it('should return 403 when policy denies', async () => {
-    mockEvaluate.mockResolvedValue({
-      allow: false,
-      reason: 'insufficient_clearance',
-      obligations: [],
-    });
+    mockEvaluate.mockImplementation(() =>
+      Promise.resolve({
+        allow: false,
+        reason: 'insufficient_clearance',
+        obligations: [],
+      }),
+    );
 
     const middleware = opaAuthzMiddleware(opaClient);
     await middleware(mockReq as Request, mockRes as Response, next);
@@ -116,11 +122,13 @@ describe('opaAuthzMiddleware', () => {
 
   it('should return 401 when step-up is required but missing', async () => {
     // Policy allows but returns step_up obligation because currentAcr is low
-    mockEvaluate.mockResolvedValue({
-      allow: true,
-      reason: 'allow',
-      obligations: [{ type: 'step_up', mechanism: 'webauthn' }],
-    });
+    mockEvaluate.mockImplementation(() =>
+      Promise.resolve({
+        allow: true,
+        reason: 'allow',
+        obligations: [{ type: 'step_up', mechanism: 'webauthn' }],
+      }),
+    );
 
     const middleware = opaAuthzMiddleware(opaClient);
     await middleware(mockReq as Request, mockRes as Response, next);
@@ -142,11 +150,13 @@ describe('opaAuthzMiddleware', () => {
     // If we provide the header, and mock OPA to return NO obligation (simulating logic worked), it should pass.
 
     // Simulate OPA happy path (since we can't run Rego logic here)
-    mockEvaluate.mockResolvedValue({
-      allow: true,
-      reason: 'allow',
-      obligations: [], // No obligation because we sent high ACR
-    });
+    mockEvaluate.mockImplementation(() =>
+      Promise.resolve({
+        allow: true,
+        reason: 'allow',
+        obligations: [], // No obligation because we sent high ACR
+      }),
+    );
 
     mockReq.headers = { 'x-step-up-auth': 'valid-token' };
 

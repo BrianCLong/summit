@@ -110,7 +110,12 @@ export class FeatureFlagService {
     injectedLogger?: any
   ) {
     this.provider = config.provider;
-    this.logger = injectedLogger || logger.child({ service: 'FeatureFlagService' });
+    const baseLogger =
+      injectedLogger ||
+      (logger && typeof (logger as any).child === 'function'
+        ? logger.child({ service: 'FeatureFlagService' })
+        : console);
+    this.logger = baseLogger;
   }
 
   /**

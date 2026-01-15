@@ -12,9 +12,7 @@ import pickle
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-
-import numpy as np
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -26,15 +24,15 @@ class ModelVersion:
     version_id: str
     round_number: int
     parameters_hash: str
-    metrics: Dict[str, float]
+    metrics: dict[str, float]
     created_at: float
-    node_contributions: List[str]
+    node_contributions: list[str]
     privacy_budget_used: float
-    parent_version: Optional[str] = None
-    tags: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    parent_version: str | None = None
+    tags: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         return {
             "version_id": self.version_id,
@@ -50,7 +48,7 @@ class ModelVersion:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ModelVersion":
+    def from_dict(cls, data: dict[str, Any]) -> "ModelVersion":
         """Create from dictionary"""
         return cls(**data)
 
@@ -69,14 +67,14 @@ class ModelRegistry:
     def __init__(
         self,
         storage_path: str = "./model_registry",
-        neo4j_config: Optional[Dict[str, str]] = None,
+        neo4j_config: dict[str, str] | None = None,
     ):
         self.storage_path = Path(storage_path)
         self.storage_path.mkdir(parents=True, exist_ok=True)
 
         self.neo4j_config = neo4j_config
-        self._versions: Dict[str, ModelVersion] = {}
-        self._parameters_cache: Dict[str, Any] = {}
+        self._versions: dict[str, ModelVersion] = {}
+        self._parameters_cache: dict[str, Any] = {}
 
         # Load existing registry
         self._load_registry()
@@ -87,12 +85,12 @@ class ModelRegistry:
         self,
         parameters: Any,
         round_number: int,
-        metrics: Dict[str, float],
-        node_contributions: List[str],
+        metrics: dict[str, float],
+        node_contributions: list[str],
         privacy_budget_used: float,
-        parent_version: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        parent_version: str | None = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> ModelVersion:
         """Register a new model version"""
         # Compute parameters hash
@@ -132,11 +130,11 @@ class ModelRegistry:
 
         return version
 
-    def get_version(self, version_id: str) -> Optional[ModelVersion]:
+    def get_version(self, version_id: str) -> ModelVersion | None:
         """Get model version by ID"""
         return self._versions.get(version_id)
 
-    def get_parameters(self, version_id: str) -> Optional[Any]:
+    def get_parameters(self, version_id: str) -> Any | None:
         """Get model parameters for version"""
         # Check cache first
         if version_id in self._parameters_cache:
@@ -152,7 +150,7 @@ class ModelRegistry:
 
         return None
 
-    def get_latest_version(self) -> Optional[ModelVersion]:
+    def get_latest_version(self) -> ModelVersion | None:
         """Get the latest registered version"""
         if not self._versions:
             return None
@@ -164,15 +162,12 @@ class ModelRegistry:
 
     def get_best_version(
         self, metric: str = "accuracy", higher_is_better: bool = True
-    ) -> Optional[ModelVersion]:
+    ) -> ModelVersion | None:
         """Get the best version by metric"""
         if not self._versions:
             return None
 
-        versions_with_metric = [
-            v for v in self._versions.values()
-            if metric in v.metrics
-        ]
+        versions_with_metric = [v for v in self._versions.values() if metric in v.metrics]
 
         if not versions_with_metric:
             return None
@@ -182,21 +177,15 @@ class ModelRegistry:
             key=lambda v: v.metrics[metric],
         )
 
-    def get_versions_by_round(self, round_number: int) -> List[ModelVersion]:
+    def get_versions_by_round(self, round_number: int) -> list[ModelVersion]:
         """Get all versions from a specific round"""
-        return [
-            v for v in self._versions.values()
-            if v.round_number == round_number
-        ]
+        return [v for v in self._versions.values() if v.round_number == round_number]
 
-    def get_versions_by_tag(self, tag: str) -> List[ModelVersion]:
+    def get_versions_by_tag(self, tag: str) -> list[ModelVersion]:
         """Get all versions with a specific tag"""
-        return [
-            v for v in self._versions.values()
-            if tag in v.tags
-        ]
+        return [v for v in self._versions.values() if tag in v.tags]
 
-    def get_lineage(self, version_id: str) -> List[ModelVersion]:
+    def get_lineage(self, version_id: str) -> list[ModelVersion]:
         """Get the lineage (ancestors) of a version"""
         lineage = []
         current_id = version_id
@@ -301,7 +290,7 @@ class ModelRegistry:
 
         return version
 
-    def get_training_summary(self) -> Dict[str, Any]:
+    def get_training_summary(self) -> dict[str, Any]:
         """Get summary of all registered models"""
         if not self._versions:
             return {
@@ -316,10 +305,7 @@ class ModelRegistry:
         for v in self._versions.values():
             all_nodes.update(v.node_contributions)
 
-        accuracies = [
-            v.metrics.get("accuracy", 0)
-            for v in self._versions.values()
-        ]
+        accuracies = [v.metrics.get("accuracy", 0) for v in self._versions.values()]
 
         return {
             "total_versions": len(self._versions),
@@ -330,9 +316,7 @@ class ModelRegistry:
                 if self.get_latest_version()
                 else 0
             ),
-            "total_privacy_budget": sum(
-                v.privacy_budget_used for v in self._versions.values()
-            ),
+            "total_privacy_budget": sum(v.privacy_budget_used for v in self._versions.values()),
             "unique_nodes": list(all_nodes),
             "versions_by_round": {
                 r: len(self.get_versions_by_round(r))
@@ -365,7 +349,7 @@ class ModelRegistry:
         """Load existing versions from storage"""
         for meta_file in self.storage_path.glob("*_meta.json"):
             try:
-                with open(meta_file, "r") as f:
+                with open(meta_file) as f:
                     data = json.load(f)
                 version = ModelVersion.from_dict(data)
                 self._versions[version.version_id] = version
@@ -446,7 +430,7 @@ class ModelRegistry:
         except Exception as e:
             logger.error(f"Failed to store version in Neo4j: {e}")
 
-    def query_neo4j(self, cypher_query: str, **params) -> List[Dict[str, Any]]:
+    def query_neo4j(self, cypher_query: str, **params) -> list[dict[str, Any]]:
         """Execute a Cypher query on the model registry graph"""
         if not self.neo4j_config:
             raise ValueError("Neo4j not configured")
@@ -469,41 +453,49 @@ class ModelRegistry:
         driver.close()
         return results
 
-    def get_node_contribution_graph(self) -> Dict[str, Any]:
+    def get_node_contribution_graph(self) -> dict[str, Any]:
         """Get contribution graph for visualization"""
         nodes = []
         edges = []
 
         # Add model version nodes
         for version in self._versions.values():
-            nodes.append({
-                "id": version.version_id,
-                "type": "model_version",
-                "round": version.round_number,
-                "accuracy": version.metrics.get("accuracy", 0),
-            })
+            nodes.append(
+                {
+                    "id": version.version_id,
+                    "type": "model_version",
+                    "round": version.round_number,
+                    "accuracy": version.metrics.get("accuracy", 0),
+                }
+            )
 
             # Add edges to parent
             if version.parent_version:
-                edges.append({
-                    "source": version.version_id,
-                    "target": version.parent_version,
-                    "type": "derived_from",
-                })
+                edges.append(
+                    {
+                        "source": version.version_id,
+                        "target": version.parent_version,
+                        "type": "derived_from",
+                    }
+                )
 
             # Add contributing node edges
             for node_id in version.node_contributions:
                 # Add node if not exists
                 if not any(n["id"] == node_id for n in nodes):
-                    nodes.append({
-                        "id": node_id,
-                        "type": "federated_node",
-                    })
+                    nodes.append(
+                        {
+                            "id": node_id,
+                            "type": "federated_node",
+                        }
+                    )
 
-                edges.append({
-                    "source": node_id,
-                    "target": version.version_id,
-                    "type": "contributed_to",
-                })
+                edges.append(
+                    {
+                        "source": node_id,
+                        "target": version.version_id,
+                        "type": "contributed_to",
+                    }
+                )
 
         return {"nodes": nodes, "edges": edges}

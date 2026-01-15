@@ -2,7 +2,6 @@
 
 import asyncio
 import logging
-from typing import Dict, Optional
 
 import torch
 
@@ -27,22 +26,21 @@ class ModelLoader:
 
     def __init__(self, model_storage_path: str):
         self.model_storage_path = model_storage_path
-        self._models: Dict[str, torch.nn.Module] = {}
+        self._models: dict[str, torch.nn.Module] = {}
         logger.info("ModelLoader initialized with storage path %s", model_storage_path)
 
-    async def load_model(self, model_name: str, version: Optional[str] = None) -> torch.nn.Module:
+    async def load_model(self, model_name: str, version: str | None = None) -> torch.nn.Module:
         # Simulate asynchronous model loading to keep the API non-blocking
         await asyncio.sleep(0)
         if model_name not in self._models:
             self._models[model_name] = _DummyDetectorModel()
-            logger.info("Loaded placeholder model for %s (version=%s)", model_name, version or "default")
+            logger.info(
+                "Loaded placeholder model for %s (version=%s)", model_name, version or "default"
+            )
         return self._models[model_name]
 
     async def list_models(self):
-        return [
-            {"name": name, "version": "placeholder"}
-            for name in self._models
-        ]
+        return [{"name": name, "version": "placeholder"} for name in self._models]
 
     async def get_model_info(self, model_name: str):
         if model_name in self._models:

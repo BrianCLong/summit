@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { IngestionService, IngestionWorker } from '../../src/lib/data-platform/ingest/service';
 import { RetrievalService } from '../../src/lib/data-platform/retrieval/service';
 import { RagService } from '../../src/lib/data-platform/rag/service';

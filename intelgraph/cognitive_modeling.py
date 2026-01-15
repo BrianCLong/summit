@@ -836,7 +836,9 @@ class BehavioralSimulationEngine:
                 "response_trend": (
                     "increasing"
                     if mean_responses[-1] > mean_responses[0]
-                    else "decreasing" if mean_responses[-1] < mean_responses[0] else "stable"
+                    else "decreasing"
+                    if mean_responses[-1] < mean_responses[0]
+                    else "stable"
                 ),
                 "consensus_stability": (
                     "stable" if statistics.stdev(consensus_levels) < 0.1 else "volatile"
@@ -1301,7 +1303,7 @@ async def demonstrate_advanced_cognitive_modeling():
             print(f"     {action}: {count}")
 
     # Show collective trends if available
-    if "collective_trends" in pattern_analysis and pattern_analysis["collective_trends"]:
+    if pattern_analysis.get("collective_trends"):
         trends = pattern_analysis["collective_trends"]
         print("   Collective trends:")
         print(f"     Overall mean response: {trends['overall_mean_response']:.3f}")
@@ -1320,7 +1322,9 @@ async def demonstrate_advanced_cognitive_modeling():
 
     # Show anomaly details
     for i, anomaly_dict in enumerate(behavioral_anomalies[:3]):  # Show first 3 anomalies
-        print(f"     {i+1}. {anomaly_dict['anomaly_type']}: {anomaly_dict['description'][:50]}...")
+        print(
+            f"     {i + 1}. {anomaly_dict['anomaly_type']}: {anomaly_dict['description'][:50]}..."
+        )
         print(f"        Confidence: {anomaly_dict['confidence_score']:.1%}")
         print(f"        Affected behaviors: {len(anomaly_dict['affected_behaviors'])}")
         print(

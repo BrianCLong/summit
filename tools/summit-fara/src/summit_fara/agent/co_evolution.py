@@ -1,9 +1,10 @@
 import logging
-import time
+
 from .curriculum import CurriculumAgent
 from .executor import ExecutorAgent
 
 log = logging.getLogger("summit-fara")
+
 
 class CoEvolutionLoop:
     def __init__(self, endpoint_config: str, max_rounds: int, use_intelgraph: bool):
@@ -29,8 +30,10 @@ class CoEvolutionLoop:
 
             # 1. Curriculum Evolution
             log.info("Step 1: Curriculum Generation (πθ)")
-            tasks = self.curriculum_agent.generate_tasks(count=10) # Reduced from 100 for dev
-            log.info(f"Generated {len(tasks)} tasks (e.g., '{tasks[0].description if tasks else 'None'}')")
+            tasks = self.curriculum_agent.generate_tasks(count=10)  # Reduced from 100 for dev
+            log.info(
+                f"Generated {len(tasks)} tasks (e.g., '{tasks[0].description if tasks else 'None'}')"
+            )
 
             # 2. Executor Evolution
             log.info("Step 2: Executor Rollouts (πϕ)")
@@ -38,7 +41,9 @@ class CoEvolutionLoop:
                 log.info(f"Executing task: {task.description}")
 
                 # Run visual trajectories (simulated count)
-                trajectories = self.executor_agent.run_trajectories(task, count=3) # Reduced from 10
+                trajectories = self.executor_agent.run_trajectories(
+                    task, count=3
+                )  # Reduced from 10
 
                 # Calculate Reward
                 # Reward = Fara's (Uncertainty + Tool) + Summit Boost (YAML, PR velocity, Leak-free)
@@ -56,6 +61,7 @@ class CoEvolutionLoop:
         """
         log.info(f"Executing single task: {task_description}")
         from .types import Task
+
         task = Task(id="manual-1", description=task_description, type="manual")
         result = self.executor_agent.execute(task)
         if result.success:

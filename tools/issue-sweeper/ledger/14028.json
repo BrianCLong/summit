@@ -1,0 +1,28 @@
+{
+  "issue_number": 14028,
+  "title": "feat(ui): add loading state to Button component",
+  "url": "https://github.com/BrianCLong/summit/pull/14028",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-20T03:13:48Z",
+  "createdAt": "2025-12-20T03:09:17Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12024,
+        "url": "https://github.com/BrianCLong/summit/pull/12024",
+        "mergedAt": "2025-11-20T15:29:43Z",
+        "title": "Implement quantum-resistant cryptography and algorithms"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

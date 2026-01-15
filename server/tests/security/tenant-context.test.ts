@@ -1,45 +1,94 @@
-import express from 'express';
-import request from 'supertest';
-import tenant from '../../src/middleware/tenant.js';
+import { jest, describe, it, expect, beforeAll } from '@jest/globals';
+
+let tenantMiddleware: typeof import('../../src/middleware/tenant.js').default;
+
+beforeAll(async () => {
+  jest.unstable_mockModule('../../src/services/RateLimiter.js', () => ({
+    rateLimiter: {
+      checkLimit: async () => ({
+        allowed: true,
+        total: 1,
+        remaining: 1,
+        reset: Date.now(),
+      }),
+    },
+  }));
+  const tenantIsolationGuardMock = {
+    assertTenantContext: jest.fn(),
+    evaluatePolicy: jest.fn(() => ({ allowed: true })),
+  };
+  jest.unstable_mockModule('../../src/tenancy/TenantIsolationGuard.js', () => ({
+    tenantIsolationGuard: tenantIsolationGuardMock,
+  }));
+  jest.unstable_mockModule('../../src/tenancy/TenantIsolationGuard', () => ({
+    tenantIsolationGuard: tenantIsolationGuardMock,
+  }));
+  jest.unstable_mockModule('../../src/monitoring/metrics.js', () => ({
+    register: {
+      registerMetric: () => undefined,
+    },
+  }));
+
+  const tenantModule = await import('../../src/middleware/tenant.js');
+  tenantMiddleware = tenantModule.default;
+});
+
+const buildRes = () => {
+  const res: any = {};
+  res.status = jest.fn((code: number) => {
+    res.statusCode = code;
+    return res;
+  });
+  res.json = jest.fn((payload: unknown) => {
+    res.body = payload;
+    return res;
+  });
+  res.setHeader = jest.fn();
+  return res;
+};
 
 describe('tenant middleware', () => {
   it('rejects requests without tenant context when strict', async () => {
-    const app = express();
+    const req: any = {
+      headers: {},
+      method: 'GET',
+      baseUrl: '',
+      path: '/protected',
+    };
+    const res = buildRes();
+    const next = jest.fn();
 
-    app.get('/protected', tenant(), (_req, res) => {
-      res.json({ ok: true });
-    });
+    tenantMiddleware()(req, res, next);
 
-    const response = await request(app).get('/protected');
-
-    expect(response.status).toBe(400);
-    expect(response.body.error).toBe('tenant_required');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.error).toBe('tenant_required');
   });
 
   it('attaches tenant context when header and auth are present', async () => {
-    const app = express();
-
-    app.use((req, _res, next) => {
-      (req as any).user = {
+    const req: any = {
+      headers: {
+        'x-tenant-id': 'tenant-abc',
+      },
+      method: 'GET',
+      baseUrl: '',
+      path: '/protected',
+      user: {
         id: 'user-123',
         roles: ['analyst'],
-      };
-      next();
-    });
+      },
+    };
+    const res = buildRes();
+    const next = jest.fn();
 
-    app.get('/protected', tenant(), (req, res) => {
-      res.json({ tenant: req.tenant });
-    });
+    tenantMiddleware()(req, res, next);
 
-    const response = await request(app)
-      .get('/protected')
-      .set('x-tenant-id', 'tenant-abc');
-
-    expect(response.status).toBe(200);
-    expect(response.body.tenant).toEqual({
-      tenantId: 'tenant-abc',
-      roles: ['analyst'],
-      subject: 'user-123',
-    });
+    expect(next).toHaveBeenCalled();
+    expect(req.tenant).toEqual(
+      expect.objectContaining({
+        tenantId: 'tenant-abc',
+        roles: ['analyst'],
+        subject: 'user-123',
+      }),
+    );
   });
 });

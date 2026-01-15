@@ -1,0 +1,248 @@
+{
+  "issue_number": 4,
+  "title": "M0: Remove sensitive files from history and add proper .gitignore",
+  "url": "https://github.com/BrianCLong/summit/issues/4",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051648,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5gA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:security",
+      "name": "area:security",
+      "color": "BFD4F2",
+      "default": false,
+      "description": "Security-related documentation/action"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:11:06Z",
+  "createdAt": "2025-08-12T00:09:52Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15384,
+        "url": "https://github.com/BrianCLong/summit/pull/15384",
+        "mergedAt": null,
+        "title": "Prepare MVP-4 release for general availability"
+      },
+      {
+        "number": 15377,
+        "url": "https://github.com/BrianCLong/summit/pull/15377",
+        "mergedAt": null,
+        "title": "Prepare MVP-4 release for general availability"
+      },
+      {
+        "number": 15414,
+        "url": "https://github.com/BrianCLong/summit/pull/15414",
+        "mergedAt": null,
+        "title": "feat: establish environment contracts and config validation"
+      },
+      {
+        "number": 15381,
+        "url": "https://github.com/BrianCLong/summit/pull/15381",
+        "mergedAt": null,
+        "title": "Enhance Storage, Caching and DR Infrastructure"
+      },
+      {
+        "number": 15380,
+        "url": "https://github.com/BrianCLong/summit/pull/15380",
+        "mergedAt": null,
+        "title": "Sprint 2026.02: Hard Gates and Safer Defaults"
+      },
+      {
+        "number": 15092,
+        "url": "https://github.com/BrianCLong/summit/pull/15092",
+        "mergedAt": null,
+        "title": "Docs: MVP-4 GA readiness"
+      },
+      {
+        "number": 15097,
+        "url": "https://github.com/BrianCLong/summit/pull/15097",
+        "mergedAt": "2025-12-30T13:13:25Z",
+        "title": "MVP-4 GA Readiness Hardening"
+      },
+      {
+        "number": 15394,
+        "url": "https://github.com/BrianCLong/summit/pull/15394",
+        "mergedAt": null,
+        "title": "Sprint 2026.02: Hard Gates and Safer Defaults (Decomposed)"
+      },
+      {
+        "number": 15125,
+        "url": "https://github.com/BrianCLong/summit/pull/15125",
+        "mergedAt": "2025-12-30T21:20:48Z",
+        "title": "chore(deps): bump mikefarah/yq from 4.30.8 to 4.50.1"
+      },
+      {
+        "number": 15387,
+        "url": "https://github.com/BrianCLong/summit/pull/15387",
+        "mergedAt": null,
+        "title": "feat: Backlog Orchestrator Init & Phase 1 Delivery"
+      },
+      {
+        "number": 15375,
+        "url": "https://github.com/BrianCLong/summit/pull/15375",
+        "mergedAt": null,
+        "title": "feat: Release Automation & Evidence Bundle"
+      },
+      {
+        "number": 15093,
+        "url": "https://github.com/BrianCLong/summit/pull/15093",
+        "mergedAt": "2025-12-30T22:39:08Z",
+        "title": "Generate MVP-4 GA Readiness Pack"
+      },
+      {
+        "number": 15409,
+        "url": "https://github.com/BrianCLong/summit/pull/15409",
+        "mergedAt": null,
+        "title": "perf: add bounded k6 baseline and reporting workflow"
+      },
+      {
+        "number": 15461,
+        "url": "https://github.com/BrianCLong/summit/pull/15461",
+        "mergedAt": null,
+        "title": "docs: establish PR stack plan and ownership boundaries"
+      },
+      {
+        "number": 15247,
+        "url": "https://github.com/BrianCLong/summit/pull/15247",
+        "mergedAt": "2026-01-01T07:29:59Z",
+        "title": "Expand MVP-4 capability and operations blueprint"
+      },
+      {
+        "number": 15013,
+        "url": "https://github.com/BrianCLong/summit/pull/15013",
+        "mergedAt": null,
+        "title": "feat: add MVP-4 GA evaluation harness"
+      },
+      {
+        "number": 15010,
+        "url": "https://github.com/BrianCLong/summit/pull/15010",
+        "mergedAt": "2025-12-30T22:44:33Z",
+        "title": "Analyze repository for MVP-4-GA release"
+      },
+      {
+        "number": 15329,
+        "url": "https://github.com/BrianCLong/summit/pull/15329",
+        "mergedAt": null,
+        "title": "Add phase 4 innovation PRDs and governance prompt"
+      },
+      {
+        "number": 15091,
+        "url": "https://github.com/BrianCLong/summit/pull/15091",
+        "mergedAt": null,
+        "title": "Add MVP-4 GA Jules prompt advisory doc"
+      },
+      {
+        "number": 14282,
+        "url": "https://github.com/BrianCLong/summit/pull/14282",
+        "mergedAt": "2025-12-22T08:08:52Z",
+        "title": "Add Sprint N+4 delivery blueprint"
+      },
+      {
+        "number": 15090,
+        "url": "https://github.com/BrianCLong/summit/pull/15090",
+        "mergedAt": "2025-12-30T22:39:12Z",
+        "title": "Add MVP-4-GA Readiness Package (DoD-V)"
+      },
+      {
+        "number": 15358,
+        "url": "https://github.com/BrianCLong/summit/pull/15358",
+        "mergedAt": null,
+        "title": "Create patent-grade MCP protocol innovations"
+      },
+      {
+        "number": 15349,
+        "url": "https://github.com/BrianCLong/summit/pull/15349",
+        "mergedAt": "2026-01-01T09:42:36Z",
+        "title": "feat: MVP-4 GA Security Tests and ESM Fixes"
+      },
+      {
+        "number": 13736,
+        "url": "https://github.com/BrianCLong/summit/pull/13736",
+        "mergedAt": "2025-12-20T03:32:42Z",
+        "title": "build(deps-dev): bump vite from 4.5.14 to 5.4.21 in /frontend"
+      },
+      {
+        "number": 14599,
+        "url": "https://github.com/BrianCLong/summit/pull/14599",
+        "mergedAt": null,
+        "title": "docs: add CompanyOS Sprint 4 \"Scale & Sell\" plan"
+      },
+      {
+        "number": 15170,
+        "url": "https://github.com/BrianCLong/summit/pull/15170",
+        "mergedAt": "2025-12-30T22:35:35Z",
+        "title": "fix(server): stabilize environment and release 4.0.1"
+      },
+      {
+        "number": 14362,
+        "url": "https://github.com/BrianCLong/summit/pull/14362",
+        "mergedAt": "2025-12-22T07:15:17Z",
+        "title": "docs: add GLM-4.6 to catalog"
+      },
+      {
+        "number": 15005,
+        "url": "https://github.com/BrianCLong/summit/pull/15005",
+        "mergedAt": "2025-12-30T22:44:52Z",
+        "title": "docs: MVP-4-GA Architecture Decision Records and Roadmap"
+      },
+      {
+        "number": 15098,
+        "url": "https://github.com/BrianCLong/summit/pull/15098",
+        "mergedAt": "2025-12-30T13:12:23Z",
+        "title": "Wire Jules Copilot MVP-4 Prompt into GraphRAG Runner"
+      },
+      {
+        "number": 14988,
+        "url": "https://github.com/BrianCLong/summit/pull/14988",
+        "mergedAt": "2025-12-30T22:45:31Z",
+        "title": "Add MVP-4-GA backlog GitHub issue import script"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

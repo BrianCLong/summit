@@ -1,0 +1,20 @@
+{
+    "items": [
+        {
+            "number": 101,
+            "title": "Fix: login button",
+            "html_url": "https://github.com/BrianCLong/summit/pull/101",
+            "pull_request": {
+                "merged_at": null
+            }
+        },
+        {
+            "number": 102,
+            "title": "Feat: Dark mode implementation",
+            "html_url": "https://github.com/BrianCLong/summit/pull/102",
+            "pull_request": {
+                "merged_at": "2026-01-01T12:00:00Z"
+            }
+        }
+    ]
+}

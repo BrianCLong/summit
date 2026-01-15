@@ -112,7 +112,7 @@ async def parse_query(request: ParseQueryRequest):
 
     except Exception as e:
         logger.error("Error parsing query: %s", str(e))
-        raise HTTPException(status_code=500, detail=f"Error parsing query: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error parsing query: {e!s}")
 
 
 @app.get("/dialogue/{conversation_id}", response_model=DialogueHistoryResponse)
@@ -145,7 +145,7 @@ async def get_dialogue_history(conversation_id: str):
         raise
     except Exception as e:
         logger.error("Error retrieving dialogue history: %s", str(e))
-        raise HTTPException(status_code=500, detail=f"Error retrieving dialogue history: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error retrieving dialogue history: {e!s}")
 
 
 @app.post("/graph/query", response_model=GraphQueryResponse)
@@ -173,7 +173,7 @@ async def query_knowledge_graph(request: GraphQueryRequest):
         )
     except Exception as e:
         logger.error("Error executing graph query: %s", str(e))
-        raise HTTPException(status_code=500, detail=f"Error executing graph query: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error executing graph query: {e!s}")
 
 
 @app.get("/dialogue/list/{user_id}")
@@ -184,7 +184,7 @@ async def list_user_conversations(user_id: str):
         return {"conversations": conversations}
     except Exception as e:
         logger.error("Error listing conversations: %s", str(e))
-        raise HTTPException(status_code=500, detail=f"Error listing conversations: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error listing conversations: {e!s}")
 
 
 @app.delete("/dialogue/{conversation_id}")
@@ -203,7 +203,7 @@ async def end_conversation(conversation_id: str):
         raise
     except Exception as e:
         logger.error("Error ending conversation: %s", str(e))
-        raise HTTPException(status_code=500, detail=f"Error ending conversation: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error ending conversation: {e!s}")
 
 
 def generate_system_response(intent: str, entities: dict[str, list[str]]) -> str:

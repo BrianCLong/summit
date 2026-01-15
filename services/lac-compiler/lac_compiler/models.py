@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict, Any
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -14,51 +14,51 @@ class Rule(BaseModel):
     subject: str
     action: str
     resource: str
-    conditions: List[Condition] = Field(default_factory=list)
-    description: Optional[str] = None
+    conditions: list[Condition] = Field(default_factory=list)
+    description: str | None = None
 
 
 class PolicyIR(BaseModel):
-    name: Optional[str] = None
-    license: Optional[str] = None
-    legal_basis: Optional[str] = None
-    purposes: List[str] = Field(default_factory=list)
-    retention: Optional[str] = None
-    rules: List[Rule] = Field(default_factory=list)
+    name: str | None = None
+    license: str | None = None
+    legal_basis: str | None = None
+    purposes: list[str] = Field(default_factory=list)
+    retention: str | None = None
+    rules: list[Rule] = Field(default_factory=list)
 
 
 class BytecodeInstruction(BaseModel):
     op: str
-    args: List[Any] = Field(default_factory=list)
-    description: Optional[str] = None
+    args: list[Any] = Field(default_factory=list)
+    description: str | None = None
 
 
 class CompileResponse(BaseModel):
     ir: PolicyIR
-    bytecode: List[BytecodeInstruction]
-    reason_panel: Dict[str, Any]
+    bytecode: list[BytecodeInstruction]
+    reason_panel: dict[str, Any]
 
 
 class SimulationLogEntry(BaseModel):
     subject: str
     action: str
     resource: str
-    purpose: Optional[str] = None
-    retention: Optional[str] = None
-    legal_basis: Optional[str] = None
-    expected: Optional[str] = None
+    purpose: str | None = None
+    retention: str | None = None
+    legal_basis: str | None = None
+    expected: str | None = None
 
 
 class SimulationResult(BaseModel):
     context: SimulationLogEntry
     decision: str
     changed: bool
-    reason_panel: Dict[str, Any]
+    reason_panel: dict[str, Any]
 
 
 class SimulationResponse(BaseModel):
-    summary: Dict[str, Any]
-    results: List[SimulationResult]
+    summary: dict[str, Any]
+    results: list[SimulationResult]
 
 
 class EnforceRequest(BaseModel):
@@ -66,15 +66,15 @@ class EnforceRequest(BaseModel):
     subject: str
     action: str
     resource: str
-    purpose: Optional[str] = None
-    retention: Optional[str] = None
-    legal_basis: Optional[str] = None
+    purpose: str | None = None
+    retention: str | None = None
+    legal_basis: str | None = None
 
 
 class EnforceResponse(BaseModel):
     decision: str
-    reason_panel: Dict[str, Any]
-    bytecode: List[BytecodeInstruction]
+    reason_panel: dict[str, Any]
+    bytecode: list[BytecodeInstruction]
 
 
 class CompileRequest(BaseModel):
@@ -83,4 +83,4 @@ class CompileRequest(BaseModel):
 
 class SimulationRequest(BaseModel):
     policy: str
-    historical_logs: List[SimulationLogEntry]
+    historical_logs: list[SimulationLogEntry]

@@ -172,7 +172,7 @@ class DataValidator:
                 ValidationIssue(
                     field="__completeness__",
                     severity=ValidationSeverity.WARNING,
-                    message=f'Record completeness {completeness_score:.2%} below threshold {self.quality_metrics["completeness_threshold"]:.2%}',
+                    message=f"Record completeness {completeness_score:.2%} below threshold {self.quality_metrics['completeness_threshold']:.2%}",
                     rule="completeness_check",
                 )
             )
@@ -459,11 +459,11 @@ class DataValidator:
 Data Quality Report
 ==================
 
-Total Records: {batch_stats['total_records']}
-Total Issues: {batch_stats['total_issues']}
+Total Records: {batch_stats["total_records"]}
+Total Issues: {batch_stats["total_issues"]}
 
 Issue Breakdown:
-{'-' * 20}
+{"-" * 20}
 """
 
         for severity, count in batch_stats["issue_counts"].items():
@@ -472,14 +472,14 @@ Issue Breakdown:
 
         report += f"""
 Rule Violations:
-{'-' * 20}
+{"-" * 20}
 """
 
         for rule, count in batch_stats["rule_counts"].items():
             report += f"  {rule}: {count}\n"
 
         report += f"""
-Generated: {batch_stats['validation_timestamp']}
+Generated: {batch_stats["validation_timestamp"]}
 """
 
         return report

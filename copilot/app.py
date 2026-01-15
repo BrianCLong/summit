@@ -238,11 +238,11 @@ class CopilotNERService:
         org_indicators = ["inc", "corp", "ltd", "company", "organization"]
         location_indicators = ["city", "country", "state", "street", "avenue"]
 
-        if ent.label_ == "PERSON" and any(ind in context_tokens for ind in person_indicators):
-            base_confidence += 0.15
-        elif ent.label_ == "ORG" and any(ind in context_tokens for ind in org_indicators):
-            base_confidence += 0.15
-        elif ent.label_ == "GPE" and any(ind in context_tokens for ind in location_indicators):
+        if (
+            (ent.label_ == "PERSON" and any(ind in context_tokens for ind in person_indicators))
+            or (ent.label_ == "ORG" and any(ind in context_tokens for ind in org_indicators))
+            or (ent.label_ == "GPE" and any(ind in context_tokens for ind in location_indicators))
+        ):
             base_confidence += 0.15
 
         return min(base_confidence, 1.0)
@@ -482,7 +482,7 @@ async def extract_entities(request: NERRequest):
             span.record_exception(e)
             span.set_status(trace.Status(trace.StatusCode.ERROR, str(e)))
             logger.error(f"NER extraction failed: {e}")
-            raise HTTPException(status_code=500, detail=f"NER extraction failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"NER extraction failed: {e!s}")
 
 
 @app.post("/links/suggest", response_model=LinkSuggestionResponse)
@@ -527,7 +527,7 @@ async def suggest_links(request: LinkSuggestionRequest):
             span.record_exception(e)
             span.set_status(trace.Status(trace.StatusCode.ERROR, str(e)))
             logger.error(f"Link suggestion failed: {e}")
-            raise HTTPException(status_code=500, detail=f"Link suggestion failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Link suggestion failed: {e!s}")
 
 
 def _infer_relationship(

@@ -10,7 +10,6 @@ from server.src.ai.rag.graph_rag import block_publish_if_citations_missing, quer
 
 
 class TestGraphRagStubs(unittest.TestCase):
-
     def test_query_graph_with_rag_alice(self):
         subgraph = {"nodes": ["Alice", "Tech Solutions", "Project Alpha"], "edges": []}
         result = query_graph_with_rag("Who is Alice?", subgraph)

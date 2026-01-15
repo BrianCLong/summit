@@ -271,7 +271,7 @@ def validate_phase3_components():
 
     # Calculate overall validation status
     passed_components = sum(1 for result in validation_results.values() if result)
-    total_components = len([k for k in validation_results.keys() if k != "overall"])
+    total_components = len([k for k in validation_results if k != "overall"])
     validation_results["overall"] = passed_components == total_components
 
     # Print validation summary

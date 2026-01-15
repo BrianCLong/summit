@@ -10,20 +10,20 @@ Pluggable enrichers for streaming ETL pipelines:
 """
 
 from .base import BaseEnricher, EnricherResult, EnrichmentContext
-from .geoip import GeoIPEnricher
-from .language import LanguageEnricher
-from .hashing import HashingEnricher
 from .exif_scrub import ExifScrubEnricher
+from .geoip import GeoIPEnricher
+from .hashing import HashingEnricher
+from .language import LanguageEnricher
 from .ocr_stt import OCREnricher, STTEnricher
 
 __all__ = [
-    'BaseEnricher',
-    'EnricherResult',
-    'EnrichmentContext',
-    'GeoIPEnricher',
-    'LanguageEnricher',
-    'HashingEnricher',
-    'ExifScrubEnricher',
-    'OCREnricher',
-    'STTEnricher',
+    "BaseEnricher",
+    "EnricherResult",
+    "EnrichmentContext",
+    "ExifScrubEnricher",
+    "GeoIPEnricher",
+    "HashingEnricher",
+    "LanguageEnricher",
+    "OCREnricher",
+    "STTEnricher",
 ]

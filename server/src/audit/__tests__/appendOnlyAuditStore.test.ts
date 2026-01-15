@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -17,7 +18,7 @@ describe('AppendOnlyAuditStore', () => {
       resource: { type: 'resource', id: 'res-1' },
       classification: 'internal',
       policy_version: 'v1',
-      decision_id: 'dec-1',
+      decision_id: 'decision-1',
       trace_id: 'trace-1',
       timestamp: new Date().toISOString(),
       customer: 'customer-a',
@@ -30,7 +31,7 @@ describe('AppendOnlyAuditStore', () => {
       resource: { type: 'resource', id: 'res-2' },
       classification: 'restricted',
       policy_version: 'v1',
-      decision_id: 'dec-2',
+      decision_id: 'decision-2',
       trace_id: 'trace-2',
       timestamp: new Date().toISOString(),
       customer: 'customer-a',

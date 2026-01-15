@@ -1,11 +1,11 @@
 import pandas as pd
 
 from vsdf import (
-    SchemaLearner,
-    ConstraintSpecification,
     ConstraintCompiler,
     ConstraintDrivenSampler,
+    ConstraintSpecification,
     ConstraintVerifier,
+    SchemaLearner,
 )
 
 

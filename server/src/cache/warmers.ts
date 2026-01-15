@@ -29,6 +29,17 @@ let lastRun: number | null = null;
 let lastResults: WarmResult[] = [];
 let warmInterval: NodeJS.Timeout | null = null;
 
+const defaultCacheConfig = {
+  warmersEnabled: true,
+  warmerIntervalSeconds: 60,
+  staleWhileRevalidateSeconds: 30,
+  defaultTtlSeconds: 60,
+};
+
+function getCacheConfig() {
+  return (config as { cache?: typeof defaultCacheConfig }).cache ?? defaultCacheConfig;
+}
+
 function shouldRunWarmer(warmer: CacheWarmer, patterns: string[]): boolean {
   if (!patterns.length) return true;
   if (!warmer.patterns || !warmer.patterns.length) return true;
@@ -89,7 +100,8 @@ export async function runWarmers(
   const redis = process.env.REDIS_DISABLE === '1' ? null : (getRedisClient() as RedisClient | null);
   const lockKey = 'cache:warm:lock';
   const lockId = crypto.randomUUID();
-  const lockTtlMs = config.cache.warmerIntervalSeconds * 1000;
+  const cacheConfig = getCacheConfig();
+  const lockTtlMs = cacheConfig.warmerIntervalSeconds * 1000;
 
   const lockAcquired = await acquireLock(redis, lockTtlMs, lockKey, lockId);
   if (!lockAcquired) return [];
@@ -105,7 +117,7 @@ export async function runWarmers(
             ttlSec: warmer.ttlSec,
             tags: warmer.tags,
             op: `${reason}:${warmer.name}`,
-            swrSec: config.cache.staleWhileRevalidateSeconds,
+            swrSec: cacheConfig.staleWhileRevalidateSeconds,
           },
           warmer.fetcher,
         );
@@ -135,20 +147,22 @@ export async function runWarmers(
 }
 
 export function scheduleWarmersAfterInvalidation(patterns: string[]) {
-  if (!config.cache.warmersEnabled) return;
+  const cacheConfig = getCacheConfig();
+  if (!cacheConfig.warmersEnabled) return;
   setTimeout(() => {
     runWarmers('invalidation', patterns).catch(() => {});
   }, 200);
 }
 
 export async function initializeCacheWarmers(): Promise<void> {
-  if (initialized || !config.cache.warmersEnabled) return;
+  const cacheConfig = getCacheConfig();
+  if (initialized || !cacheConfig.warmersEnabled) return;
   initialized = true;
 
   registerCacheWarmer({
     name: 'counts-default-tenant',
     keyParts: ['counts', 'anon'],
-    ttlSec: config.cache.defaultTtlSeconds,
+    ttlSec: cacheConfig.defaultTtlSeconds,
     tags: ['counts'],
     patterns: ['counts:*'],
     fetcher: async () => {
@@ -171,7 +185,7 @@ export async function initializeCacheWarmers(): Promise<void> {
   registerCacheWarmer({
     name: 'summary-default-tenant',
     keyParts: ['summary', 'anon'],
-    ttlSec: config.cache.defaultTtlSeconds,
+    ttlSec: cacheConfig.defaultTtlSeconds,
     tags: ['summary'],
     patterns: ['summary:*'],
     fetcher: async () => {
@@ -200,5 +214,5 @@ export async function initializeCacheWarmers(): Promise<void> {
 
   warmInterval = setInterval(() => {
     runWarmers('schedule').catch(() => {});
-  }, config.cache.warmerIntervalSeconds * 1000);
+  }, cacheConfig.warmerIntervalSeconds * 1000);
 }

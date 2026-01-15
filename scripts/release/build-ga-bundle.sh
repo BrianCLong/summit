@@ -1,0 +1,533 @@
+#!/usr/bin/env bash
+#
+# build-ga-bundle.sh - Build GA release bundle
+#
+# Creates a comprehensive GA release bundle containing all artifacts,
+# evidence, checksums, and metadata required for GA release.
+#
+# Usage:
+#   ./build-ga-bundle.sh --tag v4.1.2 --sha abc123 [--output DIR]
+#
+# Options:
+#   --tag TAG           GA tag (e.g., v4.1.2)
+#   --sha SHA           Commit SHA
+#   --output DIR        Output directory (default: artifacts/ga-bundles/<tag>)
+#   --rc-tag TAG        Source RC tag (auto-detected if not specified)
+#   --workflow-run ID   GitHub workflow run ID (optional)
+#   --verbose           Enable verbose output
+#   --help              Show this help message
+#
+
+set -euo pipefail
+
+SCRIPT_VERSION="1.0.0"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Configuration
+GA_TAG=""
+GA_SHA=""
+OUTPUT_DIR=""
+RC_TAG=""
+WORKFLOW_RUN=""
+VERBOSE=false
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+log_info() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+log_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+log_warn() {
+    echo -e "${YELLOW}[WARN]${NC} $1"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $1" >&2
+}
+
+log_verbose() {
+    if [[ "$VERBOSE" == "true" ]]; then
+        echo -e "${BLUE}[VERBOSE]${NC} $1"
+    fi
+}
+
+show_help() {
+    cat << EOF
+build-ga-bundle.sh v${SCRIPT_VERSION}
+
+Build GA release bundle with all required artifacts.
+
+Usage:
+  $(basename "$0") --tag TAG --sha SHA [options]
+
+Options:
+  --tag TAG           GA tag (e.g., v4.1.2)
+  --sha SHA           Commit SHA
+  --output DIR        Output directory (default: artifacts/ga-bundles/<tag>)
+  --rc-tag TAG        Source RC tag (auto-detected if not specified)
+  --workflow-run ID   GitHub workflow run ID
+  --verbose           Enable verbose output
+  --help              Show this help message
+
+Examples:
+  # Build GA bundle
+  $(basename "$0") --tag v4.1.2 --sha abc123
+
+  # With custom output directory
+  $(basename "$0") --tag v4.1.2 --sha abc123 --output ./my-bundle
+EOF
+}
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --tag)
+            GA_TAG="$2"
+            shift 2
+            ;;
+        --sha)
+            GA_SHA="$2"
+            shift 2
+            ;;
+        --output)
+            OUTPUT_DIR="$2"
+            shift 2
+            ;;
+        --rc-tag)
+            RC_TAG="$2"
+            shift 2
+            ;;
+        --workflow-run)
+            WORKFLOW_RUN="$2"
+            shift 2
+            ;;
+        --verbose)
+            VERBOSE=true
+            shift
+            ;;
+        --help)
+            show_help
+            exit 0
+            ;;
+        *)
+            log_error "Unknown option: $1"
+            show_help
+            exit 2
+            ;;
+    esac
+done
+
+# Validate required arguments
+if [[ -z "$GA_TAG" ]]; then
+    log_error "Missing required argument: --tag"
+    exit 2
+fi
+
+if [[ -z "$GA_SHA" ]]; then
+    log_error "Missing required argument: --sha"
+    exit 2
+fi
+
+# Validate GA tag format
+if [[ ! "$GA_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    log_error "Invalid GA tag format: ${GA_TAG}. Expected vX.Y.Z"
+    exit 1
+fi
+
+# Set default output directory
+if [[ -z "$OUTPUT_DIR" ]]; then
+    OUTPUT_DIR="artifacts/ga-bundles/${GA_TAG}"
+fi
+
+# Extract base version
+BASE_VERSION="${GA_TAG#v}"
+
+log_info "Building GA bundle for ${GA_TAG}"
+log_info "Commit: ${GA_SHA}"
+log_info "Output: ${OUTPUT_DIR}"
+
+# Create output directory
+mkdir -p "${OUTPUT_DIR}"
+
+# Auto-detect RC tag if not specified
+if [[ -z "$RC_TAG" ]]; then
+    RC_PATTERN="v${BASE_VERSION}-rc.*"
+    RC_TAG=$(git tag -l "${RC_PATTERN}" --sort=-v:refname 2>/dev/null | head -n1 || echo "")
+    if [[ -n "$RC_TAG" ]]; then
+        log_info "Auto-detected RC tag: ${RC_TAG}"
+    else
+        log_warn "No RC tag found for version ${BASE_VERSION}"
+    fi
+fi
+
+# Generate github_release.md
+log_info "Generating github_release.md..."
+cat > "${OUTPUT_DIR}/github_release.md" << RELEASEEOF
+# ${GA_TAG} - GA Release
+
+## Summary
+
+General Availability release of version ${BASE_VERSION}.
+
+## Lineage
+
+- **GA Tag:** \`${GA_TAG}\`
+- **Commit:** \`${GA_SHA}\`
+- **Source RC:** \`${RC_TAG:-N/A}\`
+
+## Verification
+
+All GA releases include:
+- Verification against RC lineage
+- Two-person approval via \`ga-release\` environment
+- SHA256 checksums for all artifacts
+- Governance lockfile snapshot
+- SBOM (Software Bill of Materials)
+
+### Verify Checksums
+
+\`\`\`bash
+# Verify all bundle artifacts
+sha256sum -c SHA256SUMS
+
+# Verify governance lockfile
+cd governance && sha256sum -c governance_SHA256SUMS && cd ..
+\`\`\`
+
+## Changes
+
+See CHANGELOG.md for detailed changes since last release.
+
+---
+*Released via GA Pipeline*
+RELEASEEOF
+
+# Generate publish_to_ga.sh (operator script)
+log_info "Generating publish_to_ga.sh..."
+cat > "${OUTPUT_DIR}/publish_to_ga.sh" << 'PUBLISHEOF'
+#!/usr/bin/env bash
+#
+# publish_to_ga.sh - Publish GA release
+#
+# This script is generated by build-ga-bundle.sh and contains
+# the commands to publish the GA release.
+#
+
+set -euo pipefail
+
+DRY_RUN=false
+FORCE=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --dry-run)
+            DRY_RUN=true
+            shift
+            ;;
+        --force)
+            FORCE=true
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
+
+PUBLISHEOF
+
+# Add the actual commands with proper variable substitution
+cat >> "${OUTPUT_DIR}/publish_to_ga.sh" << EOF
+
+GA_TAG="${GA_TAG}"
+GA_SHA="${GA_SHA}"
+
+echo "Publishing GA Release: \${GA_TAG}"
+echo "Commit: \${GA_SHA}"
+echo ""
+
+if [[ "\$DRY_RUN" == "true" ]]; then
+    echo "[DRY-RUN] Would execute:"
+    echo ""
+    echo "  # Verify tag exists locally"
+    echo "  git tag -l \${GA_TAG}"
+    echo ""
+    echo "  # Create GitHub Release"
+    echo "  gh release create \${GA_TAG} \\\\"
+    echo "    --title \"\${GA_TAG} - GA Release\" \\\\"
+    echo "    --notes-file github_release.md"
+    echo ""
+    echo "No changes made."
+    exit 0
+fi
+
+# Verify we're on the correct commit
+CURRENT_SHA=\$(git rev-parse HEAD)
+if [[ "\$CURRENT_SHA" != "\$GA_SHA" && "\$FORCE" != "true" ]]; then
+    echo "ERROR: Current HEAD (\$CURRENT_SHA) does not match GA SHA (\$GA_SHA)"
+    echo "Use --force to override"
+    exit 1
+fi
+
+# Create GitHub Release
+echo "Creating GitHub Release..."
+gh release create "\${GA_TAG}" \\
+    --title "\${GA_TAG} - GA Release" \\
+    --notes-file github_release.md
+
+echo ""
+echo "GA Release \${GA_TAG} published successfully!"
+EOF
+
+chmod +x "${OUTPUT_DIR}/publish_to_ga.sh"
+
+# Generate GA_RELEASE_CHECKLIST.md
+log_info "Generating GA_RELEASE_CHECKLIST.md..."
+cat > "${OUTPUT_DIR}/GA_RELEASE_CHECKLIST.md" << EOF
+# GA Release Checklist: ${GA_TAG}
+
+## Pre-Release Verification
+
+- [ ] RC lineage verified (GA SHA matches RC SHA)
+- [ ] All required CI checks passed
+- [ ] Publish guard completed successfully
+- [ ] Two-person approval granted
+
+## Bundle Contents
+
+- [ ] \`github_release.md\` - Release notes
+- [ ] \`publish_to_ga.sh\` - Operator script
+- [ ] \`ga_metadata.json\` - Bundle metadata
+- [ ] \`SHA256SUMS\` - Artifact checksums
+- [ ] \`governance/governance_lockfile.json\` - Policy snapshot
+- [ ] \`governance/governance_SHA256SUMS\` - Policy checksums
+
+## Publish Steps
+
+1. Download this bundle artifact
+2. Extract to local directory
+3. Review all verification outputs
+4. Run: \`./publish_to_ga.sh --dry-run\`
+5. If satisfied: \`./publish_to_ga.sh\`
+
+## Post-Release
+
+- [ ] Verify GitHub Release created
+- [ ] Tag pushed successfully
+- [ ] Notify stakeholders
+
+---
+**GA Tag:** ${GA_TAG}
+**Commit:** ${GA_SHA}
+**Source RC:** ${RC_TAG:-N/A}
+**Generated:** $(date -u +%Y-%m-%dT%H:%M:%SZ)
+EOF
+
+# Generate ga_metadata.json
+log_info "Generating ga_metadata.json..."
+
+# Build governance lockfile reference if available
+GOVERNANCE_JSON="null"
+if [[ -f "${OUTPUT_DIR}/governance/governance_lockfile.json" ]]; then
+    GOVERNANCE_LOCKFILE_HASH=$(sha256sum "${OUTPUT_DIR}/governance/governance_lockfile.json" | cut -d' ' -f1)
+    GOVERNANCE_JSON="{
+      \"path\": \"governance/governance_lockfile.json\",
+      \"sha256\": \"${GOVERNANCE_LOCKFILE_HASH}\",
+      \"sums_path\": \"governance/governance_SHA256SUMS\"
+    }"
+fi
+
+cat > "${OUTPUT_DIR}/ga_metadata.json" << EOF
+{
+  "version": "1.2.0",
+  "bundle_type": "ga-release",
+  "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "generated_by": "build-ga-bundle.sh v${SCRIPT_VERSION}",
+  "release": {
+    "ga_tag": "${GA_TAG}",
+    "base_version": "${BASE_VERSION}",
+    "commit_sha": "${GA_SHA}",
+    "source_rc": "${RC_TAG:-null}"
+  },
+  "workflow": {
+    "run_id": "${WORKFLOW_RUN:-null}"
+  },
+  "artifacts": {
+    "release_notes": "github_release.md",
+    "publish_script": "publish_to_ga.sh",
+    "checklist": "GA_RELEASE_CHECKLIST.md",
+    "checksums": "SHA256SUMS",
+    "provenance": "provenance.json"
+  },
+  "governance_hash": "${GOVERNANCE_LOCKFILE_HASH:-null}",
+  "governance_lockfile": ${GOVERNANCE_JSON},
+  "verification": {
+    "lineage_required": true,
+    "two_person_approval": true,
+    "publish_guard": true,
+    "governance_lockfile_required": true
+  }
+}
+EOF
+
+# Copy verification script if exists
+if [[ -f "${SCRIPT_DIR}/verify-green-for-tag.sh" ]]; then
+    log_verbose "Copying verify-green-for-tag.sh..."
+    cp "${SCRIPT_DIR}/verify-green-for-tag.sh" "${OUTPUT_DIR}/"
+fi
+
+# Copy lineage script if exists
+if [[ -f "${SCRIPT_DIR}/verify-rc-lineage.sh" ]]; then
+    log_verbose "Copying verify-rc-lineage.sh..."
+    cp "${SCRIPT_DIR}/verify-rc-lineage.sh" "${OUTPUT_DIR}/"
+fi
+
+# Generate governance lockfile
+log_info "Generating governance lockfile..."
+if [[ -f "${SCRIPT_DIR}/generate_governance_lockfile.sh" ]]; then
+    GOVERNANCE_OUTPUT=$("${SCRIPT_DIR}/generate_governance_lockfile.sh" \
+        --sha "${GA_SHA}" \
+        --tag "${GA_TAG}" \
+        --out-dir "${OUTPUT_DIR}/governance" \
+        ${VERBOSE:+--verbose} 2>&1) || {
+        log_warn "Governance lockfile generation failed, continuing..."
+    }
+
+    # Extract governance lockfile hash for provenance
+    if [[ -f "${OUTPUT_DIR}/governance/governance_lockfile.json" ]]; then
+        GOVERNANCE_LOCKFILE_HASH=$(sha256sum "${OUTPUT_DIR}/governance/governance_lockfile.json" | cut -d' ' -f1)
+        log_verbose "Governance lockfile hash: ${GOVERNANCE_LOCKFILE_HASH}"
+    fi
+else
+    log_warn "Governance lockfile generator not found"
+fi
+
+# Sign governance lockfile (if signing script exists and governance_SHA256SUMS exists)
+GOVERNANCE_SIGNATURE_METHOD="unsigned"
+GOVERNANCE_SIGNATURE_REASON="not_attempted"
+if [[ -f "${SCRIPT_DIR}/sign_governance_lockfile.sh" && -f "${OUTPUT_DIR}/governance/governance_SHA256SUMS" ]]; then
+    log_info "Signing governance lockfile..."
+    if "${SCRIPT_DIR}/sign_governance_lockfile.sh" \
+        --mode sign \
+        --subject "${OUTPUT_DIR}/governance/governance_SHA256SUMS" \
+        --out-dir "${OUTPUT_DIR}/governance/signatures" \
+        --tag "${GA_TAG}" \
+        --sha "${GA_SHA}" \
+        ${VERBOSE:+--verbose} 2>&1; then
+
+        # Check if signature was created or marked unsigned
+        if [[ -f "${OUTPUT_DIR}/governance/signatures/metadata.json" ]]; then
+            GOVERNANCE_SIGNATURE_METHOD=$(jq -r '.method // "unknown"' "${OUTPUT_DIR}/governance/signatures/metadata.json" 2>/dev/null || echo "unknown")
+            if [[ "$GOVERNANCE_SIGNATURE_METHOD" == "sigstore-cosign-oidc" ]]; then
+                log_success "Governance lockfile signed with Sigstore OIDC"
+                GOVERNANCE_SIGNATURE_REASON="ok"
+            else
+                GOVERNANCE_SIGNATURE_REASON=$(jq -r '.reason // "unknown"' "${OUTPUT_DIR}/governance/signatures/metadata.json" 2>/dev/null || echo "unknown")
+                log_warn "Governance lockfile unsigned: ${GOVERNANCE_SIGNATURE_REASON}"
+            fi
+        fi
+    else
+        log_warn "Governance signing failed, continuing with unsigned bundle"
+        GOVERNANCE_SIGNATURE_REASON="signing_failed"
+    fi
+else
+    if [[ ! -f "${SCRIPT_DIR}/sign_governance_lockfile.sh" ]]; then
+        log_verbose "Signing script not found, skipping"
+        GOVERNANCE_SIGNATURE_REASON="script_not_found"
+    elif [[ ! -f "${OUTPUT_DIR}/governance/governance_SHA256SUMS" ]]; then
+        log_verbose "No governance_SHA256SUMS to sign"
+        GOVERNANCE_SIGNATURE_REASON="no_subject"
+    fi
+fi
+
+# Generate provenance.json with governance hash and signature
+log_info "Generating provenance.json..."
+cat > "${OUTPUT_DIR}/provenance.json" << EOF
+{
+  "version": "1.1.0",
+  "type": "ga-release-provenance",
+  "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "release": {
+    "tag": "${GA_TAG}",
+    "sha": "${GA_SHA}",
+    "type": "ga"
+  },
+  "governance": {
+    "governance_hash": "${GOVERNANCE_LOCKFILE_HASH:-null}",
+    "lockfile_path": "governance/governance_lockfile.json",
+    "sums_path": "governance/governance_SHA256SUMS",
+    "verification_command": "sha256sum governance/governance_lockfile.json"
+  },
+  "governance_signature": {
+    "method": "${GOVERNANCE_SIGNATURE_METHOD}",
+    "status": "${GOVERNANCE_SIGNATURE_REASON}",
+    "subject": "governance/governance_SHA256SUMS",
+    "sig_path": "governance/signatures/governance_SHA256SUMS.sig",
+    "cert_path": "governance/signatures/governance_SHA256SUMS.cert",
+    "metadata_path": "governance/signatures/metadata.json",
+    "identity_policy": "security/sigstore-identity-policy.yml"
+  },
+  "workflow": {
+    "run_id": "${WORKFLOW_RUN:-null}",
+    "generator": "build-ga-bundle.sh v${SCRIPT_VERSION}"
+  },
+  "verification": {
+    "offline_verification": "sha256sum -c SHA256SUMS",
+    "governance_verification": "Compare governance_hash with sha256sum of governance_lockfile.json",
+    "signature_verification": "cosign verify-blob --signature governance/signatures/governance_SHA256SUMS.sig --certificate governance/signatures/governance_SHA256SUMS.cert --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity-regexp 'https://github.com/.*/summit/.github/workflows/.*' governance/governance_SHA256SUMS"
+  }
+}
+EOF
+
+# Append governance identity block to release notes
+if [[ -f "${SCRIPT_DIR}/emit_governance_identity_block.sh" ]]; then
+    log_info "Appending governance identity to release notes..."
+    IDENTITY_BLOCK=$("${SCRIPT_DIR}/emit_governance_identity_block.sh" \
+        --bundle-dir "${OUTPUT_DIR}" \
+        --mode ga \
+        ${VERBOSE:+--verify} 2>/dev/null) || IDENTITY_BLOCK=""
+
+    if [[ -n "$IDENTITY_BLOCK" && -f "${OUTPUT_DIR}/github_release.md" ]]; then
+        echo "" >> "${OUTPUT_DIR}/github_release.md"
+        echo "$IDENTITY_BLOCK" >> "${OUTPUT_DIR}/github_release.md"
+        log_verbose "Governance identity block appended"
+    fi
+fi
+
+# Generate SHA256SUMS
+log_info "Generating SHA256SUMS..."
+cd "${OUTPUT_DIR}"
+find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
+cd - > /dev/null
+
+log_success "GA bundle created: ${OUTPUT_DIR}"
+log_info ""
+log_info "Bundle contents:"
+ls -la "${OUTPUT_DIR}/"
+
+# Output summary
+echo ""
+echo "=============================================="
+echo "  GA Bundle Ready: ${GA_TAG}"
+echo "=============================================="
+echo ""
+echo "  Tag:      ${GA_TAG}"
+echo "  Commit:   ${GA_SHA}"
+echo "  RC:       ${RC_TAG:-N/A}"
+echo "  Output:   ${OUTPUT_DIR}"
+echo ""
+echo "Next steps:"
+echo "  1. Review GA_RELEASE_CHECKLIST.md"
+echo "  2. Dry run: ./publish_to_ga.sh --dry-run"
+echo "  3. Publish: ./publish_to_ga.sh"
+echo ""

@@ -9,7 +9,6 @@ from schema_mapping import map_splunk_to_intelgraph
 
 
 class TestSplunkConnector(unittest.TestCase):
-
     def setUp(self):
         self.sample_json_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "../splunk_connector/sample.json")

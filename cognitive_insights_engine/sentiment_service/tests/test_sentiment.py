@@ -14,7 +14,7 @@ async def test_analyze_endpoint(monkeypatch):
         return {
             "sentiment": "positive",
             "score": 0.9,
-            "influence_map": {n: 0.45 for n in neighbours},
+            "influence_map": dict.fromkeys(neighbours, 0.45),
         }
 
     monkeypatch.setattr(router, "fetch_neighbour_entities", fake_fetch)

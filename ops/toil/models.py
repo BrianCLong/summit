@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Callable, List, Optional, Set
 
 
 @dataclass
@@ -15,10 +15,10 @@ class ToilEntry:
     severity: int
     timestamp: datetime
     after_hours: bool
-    alert_source: Optional[str] = None
-    mtta_minutes: Optional[int] = None
-    mttr_minutes: Optional[int] = None
-    notes: Optional[str] = None
+    alert_source: str | None = None
+    mtta_minutes: int | None = None
+    mttr_minutes: int | None = None
+    notes: str | None = None
 
     def cost_score(self) -> int:
         return self.minutes * max(self.severity, 1)
@@ -43,15 +43,15 @@ class AlertMetadata:
     owner: str
     runbook: str
     taxonomy: str
-    description: Optional[str] = None
-    replace_alert_id: Optional[str] = None
+    description: str | None = None
+    replace_alert_id: str | None = None
     multi_signal: bool = False
-    suppression_until: Optional[datetime] = None
-    suppression_reason: Optional[str] = None
+    suppression_until: datetime | None = None
+    suppression_reason: str | None = None
     last_false_positive_events: int = 0
     total_pages: int = 0
     total_page_minutes: int = 0
-    sources: Set[str] = field(default_factory=set)
+    sources: set[str] = field(default_factory=set)
 
     def register_page(self, duration_minutes: int, false_positive: bool = False) -> None:
         self.total_pages += 1
@@ -74,7 +74,7 @@ class ExceptionEntry:
     expires_at: datetime
     created_at: datetime = field(default_factory=datetime.utcnow)
 
-    def is_expired(self, now: Optional[datetime] = None) -> bool:
+    def is_expired(self, now: datetime | None = None) -> bool:
         now = now or datetime.utcnow()
         return now >= self.expires_at
 
@@ -98,7 +98,7 @@ class RemediationActionDefinition:
     name: str
     description: str
     handler: Callable[[str, bool], RemediationResult]
-    verification_steps: List[str]
+    verification_steps: list[str]
 
     def execute(self, target: str, dry_run: bool) -> RemediationResult:
         return self.handler(target, dry_run)
@@ -108,7 +108,7 @@ class RemediationActionDefinition:
 class ChatOpsCommand:
     name: str
     description: str
-    allowed_roles: Set[str]
+    allowed_roles: set[str]
     remediation_action: str
 
 
@@ -120,5 +120,4 @@ class ReleaseEnvelope:
     canary_percentage: int
     ramp_steps: int
     rollback_plan: str
-    verification_tests: List[str]
-
+    verification_tests: list[str]

@@ -5,4 +5,4 @@ from .ingestors import (
     TwitterIngestor,
 )
 
-__all__ = ["Ingestor", "RSSIngestor", "TwitterIngestor", "PastebinIngestor"]
+__all__ = ["Ingestor", "PastebinIngestor", "RSSIngestor", "TwitterIngestor"]

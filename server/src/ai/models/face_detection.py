@@ -90,7 +90,7 @@ class FaceDetector:
             }
 
         except Exception as e:
-            return {"error": f"Face detection failed: {str(e)}"}
+            return {"error": f"Face detection failed: {e!s}"}
 
     def _format_landmarks(self, landmarks: np.ndarray) -> dict[str, list[float]]:
         """Format facial landmarks"""

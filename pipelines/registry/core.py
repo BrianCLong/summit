@@ -4,14 +4,14 @@ Pipeline Registry Core
 Unified registry for all orchestrated pipelines across Summit.
 Loads, validates, and queries pipeline manifests.
 """
+
 import json
-import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 import yaml
-from jsonschema import Draft7Validator, ValidationError
+from jsonschema import Draft7Validator
 
 
 @dataclass
@@ -22,29 +22,29 @@ class Pipeline:
     kind: str
     name: str
     description: str
-    owners: List[str]
-    tags: Dict[str, str]
-    annotations: Dict[str, str]
-    spec: Dict[str, Any]
-    source_file: Optional[Path] = None
+    owners: list[str]
+    tags: dict[str, str]
+    annotations: dict[str, str]
+    spec: dict[str, Any]
+    source_file: Path | None = None
 
     @property
-    def tasks(self) -> List[Dict[str, Any]]:
+    def tasks(self) -> list[dict[str, Any]]:
         """Get pipeline tasks."""
         return self.spec.get("tasks", [])
 
     @property
-    def schedule(self) -> Optional[Dict[str, Any]]:
+    def schedule(self) -> dict[str, Any] | None:
         """Get pipeline schedule."""
         return self.spec.get("schedule")
 
     @property
-    def inputs(self) -> List[Dict[str, str]]:
+    def inputs(self) -> list[dict[str, str]]:
         """Get input datasets."""
         return self.spec.get("inputs", [])
 
     @property
-    def outputs(self) -> List[Dict[str, str]]:
+    def outputs(self) -> list[dict[str, str]]:
         """Get output datasets."""
         return self.spec.get("outputs", [])
 
@@ -54,7 +54,7 @@ class Pipeline:
         return self.spec.get("execution", {}).get("runtime", "maestro")
 
     @property
-    def task_graph(self) -> Dict[str, List[str]]:
+    def task_graph(self) -> dict[str, list[str]]:
         """
         Build task dependency graph.
         Returns dict mapping task_id -> [dependent_task_ids]
@@ -66,13 +66,13 @@ class Pipeline:
             graph[task_id] = depends_on
         return graph
 
-    def topological_sort(self) -> List[str]:
+    def topological_sort(self) -> list[str]:
         """
         Return tasks in topological order (execution order).
         Raises ValueError if cycle detected.
         """
         graph = self.task_graph
-        in_degree = {task_id: 0 for task_id in graph}
+        in_degree = dict.fromkeys(graph, 0)
 
         # Calculate in-degrees
         for task_id, deps in graph.items():
@@ -109,10 +109,10 @@ class PipelineRegistry:
     Discovers, loads, validates, and queries pipelines.
     """
 
-    manifest_dirs: List[Path]
-    schema_path: Optional[Path] = None
-    _pipelines: Dict[str, Pipeline] = field(default_factory=dict)
-    _validator: Optional[Draft7Validator] = None
+    manifest_dirs: list[Path]
+    schema_path: Path | None = None
+    _pipelines: dict[str, Pipeline] = field(default_factory=dict)
+    _validator: Draft7Validator | None = None
 
     def __post_init__(self):
         """Initialize registry and load schema."""
@@ -121,7 +121,7 @@ class PipelineRegistry:
                 schema = json.load(f)
                 self._validator = Draft7Validator(schema)
 
-    def discover_manifests(self) -> List[Path]:
+    def discover_manifests(self) -> list[Path]:
         """
         Discover all pipeline manifests in manifest directories.
         Supports .yaml and .json files.
@@ -136,7 +136,7 @@ class PipelineRegistry:
 
         return sorted(manifests)
 
-    def load_manifest(self, path: Path) -> Dict[str, Any]:
+    def load_manifest(self, path: Path) -> dict[str, Any]:
         """Load a manifest file (YAML or JSON)."""
         with open(path) as f:
             if path.suffix in [".yaml", ".yml"]:
@@ -146,7 +146,7 @@ class PipelineRegistry:
             else:
                 raise ValueError(f"Unsupported manifest format: {path.suffix}")
 
-    def validate_manifest(self, manifest: Dict[str, Any]) -> List[str]:
+    def validate_manifest(self, manifest: dict[str, Any]) -> list[str]:
         """
         Validate manifest against schema.
         Returns list of validation errors (empty if valid).
@@ -160,7 +160,7 @@ class PipelineRegistry:
 
         return errors
 
-    def parse_pipeline(self, manifest: Dict[str, Any], source_file: Optional[Path] = None) -> Pipeline:
+    def parse_pipeline(self, manifest: dict[str, Any], source_file: Path | None = None) -> Pipeline:
         """Parse manifest dict into Pipeline object."""
         metadata = manifest.get("metadata", {})
         spec = manifest.get("spec", {})
@@ -212,52 +212,42 @@ class PipelineRegistry:
 
         return len(self._pipelines)
 
-    def get(self, name: str) -> Optional[Pipeline]:
+    def get(self, name: str) -> Pipeline | None:
         """Get pipeline by name."""
         return self._pipelines.get(name)
 
-    def list_all(self) -> List[Pipeline]:
+    def list_all(self) -> list[Pipeline]:
         """List all registered pipelines."""
         return sorted(self._pipelines.values(), key=lambda p: p.name)
 
-    def filter_by_tags(self, **tags) -> List[Pipeline]:
+    def filter_by_tags(self, **tags) -> list[Pipeline]:
         """
         Filter pipelines by tags.
         Example: filter_by_tags(domain="security", criticality="high")
         """
         results = []
         for pipeline in self._pipelines.values():
-            match = all(
-                pipeline.tags.get(key) == value
-                for key, value in tags.items()
-            )
+            match = all(pipeline.tags.get(key) == value for key, value in tags.items())
             if match:
                 results.append(pipeline)
 
         return sorted(results, key=lambda p: p.name)
 
-    def filter_by_owner(self, owner: str) -> List[Pipeline]:
+    def filter_by_owner(self, owner: str) -> list[Pipeline]:
         """Filter pipelines by owner."""
-        return [
-            p for p in self._pipelines.values()
-            if owner in p.owners
-        ]
+        return [p for p in self._pipelines.values() if owner in p.owners]
 
-    def filter_by_runtime(self, runtime: str) -> List[Pipeline]:
+    def filter_by_runtime(self, runtime: str) -> list[Pipeline]:
         """Filter pipelines by execution runtime."""
-        return [
-            p for p in self._pipelines.values()
-            if p.runtime == runtime
-        ]
+        return [p for p in self._pipelines.values() if p.runtime == runtime]
 
-    def get_scheduled_pipelines(self) -> List[Pipeline]:
+    def get_scheduled_pipelines(self) -> list[Pipeline]:
         """Get all pipelines with schedules enabled."""
         return [
-            p for p in self._pipelines.values()
-            if p.schedule and p.schedule.get("enabled", True)
+            p for p in self._pipelines.values() if p.schedule and p.schedule.get("enabled", True)
         ]
 
-    def analyze_dependencies(self) -> Dict[str, Any]:
+    def analyze_dependencies(self) -> dict[str, Any]:
         """
         Analyze cross-pipeline dependencies based on input/output datasets.
         Returns dict with dataset producers and consumers.
@@ -285,7 +275,7 @@ class PipelineRegistry:
             "consumers": consumers,
         }
 
-    def find_downstream_pipelines(self, pipeline_name: str) -> Set[str]:
+    def find_downstream_pipelines(self, pipeline_name: str) -> set[str]:
         """
         Find all pipelines that depend on outputs from the given pipeline.
         """
@@ -308,7 +298,7 @@ class PipelineRegistry:
 
         return downstream
 
-    def export_summary(self) -> Dict[str, Any]:
+    def export_summary(self) -> dict[str, Any]:
         """Export registry summary as dict."""
         return {
             "total_pipelines": len(self._pipelines),
@@ -321,7 +311,7 @@ class PipelineRegistry:
             "owners": self._collect_owners(),
         }
 
-    def _collect_tags(self) -> Dict[str, Set[str]]:
+    def _collect_tags(self) -> dict[str, set[str]]:
         """Collect all unique tag keys and values."""
         tag_values = {}
         for pipeline in self._pipelines.values():
@@ -332,7 +322,7 @@ class PipelineRegistry:
 
         return {k: sorted(v) for k, v in tag_values.items()}
 
-    def _collect_owners(self) -> List[str]:
+    def _collect_owners(self) -> list[str]:
         """Collect all unique owners."""
         owners = set()
         for pipeline in self._pipelines.values():
@@ -342,8 +332,8 @@ class PipelineRegistry:
 
 
 def create_registry(
-    manifest_dirs: Optional[List[str]] = None,
-    schema_path: Optional[str] = None,
+    manifest_dirs: list[str] | None = None,
+    schema_path: str | None = None,
 ) -> PipelineRegistry:
     """
     Create and initialize a pipeline registry.

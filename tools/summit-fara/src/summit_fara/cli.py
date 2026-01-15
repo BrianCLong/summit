@@ -1,25 +1,25 @@
-import click
 import logging
+
+import click
 from rich.console import Console
 from rich.logging import RichHandler
+
 from .agent.co_evolution import CoEvolutionLoop
 from .env.intelgraph import IntelGraphConnector
 
 # Configure logging
 logging.basicConfig(
-    level="INFO",
-    format="%(message)s",
-    datefmt="[%X]",
-    handlers=[RichHandler(rich_tracebacks=True)]
+    level="INFO", format="%(message)s", datefmt="[%X]", handlers=[RichHandler(rich_tracebacks=True)]
 )
 log = logging.getLogger("summit-fara")
 console = Console()
 
+
 @click.command()
-@click.option('--task', required=True, help='The task description or "Evolve ..." command.')
-@click.option('--endpoint', default='summit_llm.json', help='Path to LLM endpoint config.')
-@click.option('--max_rounds', default=50, type=int, help='Maximum co-evolution rounds.')
-@click.option('--intelgraph', is_flag=True, help='Enable IntelGraph integration.')
+@click.option("--task", required=True, help='The task description or "Evolve ..." command.')
+@click.option("--endpoint", default="summit_llm.json", help="Path to LLM endpoint config.")
+@click.option("--max_rounds", default=50, type=int, help="Maximum co-evolution rounds.")
+@click.option("--intelgraph", is_flag=True, help="Enable IntelGraph integration.")
 def main(task, endpoint, max_rounds, intelgraph):
     """
     SummitFara CLI: Autonomous Computer-Use Agent for Summit.
@@ -41,9 +41,7 @@ def main(task, endpoint, max_rounds, intelgraph):
 
     # Initialize Co-Evolution Loop
     loop = CoEvolutionLoop(
-        endpoint_config=endpoint,
-        max_rounds=max_rounds,
-        use_intelgraph=intelgraph
+        endpoint_config=endpoint, max_rounds=max_rounds, use_intelgraph=intelgraph
     )
 
     if "Evolve" in task:
@@ -53,5 +51,6 @@ def main(task, endpoint, max_rounds, intelgraph):
         console.print(f"[bold green]Executing single task: {task}[/]")
         loop.execute_task(task)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

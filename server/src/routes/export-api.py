@@ -462,7 +462,7 @@ async def export_data(request: ExportRequest, background_tasks: BackgroundTasks)
         return response
 
     except Exception as e:
-        logger.error(f"Export request {request_id} failed: {str(e)}")
+        logger.error(f"Export request {request_id} failed: {e!s}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {request_id}")
 
 
@@ -544,7 +544,7 @@ async def simulate_export(request: SimulateRequest):
         return response
 
     except Exception as e:
-        logger.error(f"Export simulation {request_id} failed: {str(e)}")
+        logger.error(f"Export simulation {request_id} failed: {e!s}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {request_id}")
 
 

@@ -8,7 +8,8 @@ jest.mock('../../db/postgres', () => ({
 }));
 
 // Mock logger
-jest.mock('../../utils/logger', () => ({
+jest.mock('../../utils/logger.js', () => ({
+  __esModule: true,
   default: {
     info: jest.fn(),
     error: jest.fn(),
@@ -18,19 +19,23 @@ jest.mock('../../utils/logger', () => ({
 
 // Mock Redis
 jest.mock('ioredis', () => {
-  return jest.fn().mockImplementation(() => ({
-    subscribe: jest.fn(),
-    on: jest.fn(),
-    publish: jest.fn(),
-    quit: jest.fn(),
-  }));
+  return {
+    __esModule: true,
+    default: jest.fn().mockImplementation(() => ({
+      subscribe: jest.fn(),
+      on: jest.fn(),
+      publish: jest.fn(),
+      quit: jest.fn(),
+    })),
+  };
 });
 
 describe('PostgresProvider', () => {
   let provider: PostgresProvider;
-  let mockQuery: jest.Mock;
+  let mockQuery: any;
 
   beforeEach(() => {
+    delete process.env.REDIS_URL;
     mockQuery = jest.fn();
     (getPostgresPool as jest.Mock).mockReturnValue({
       query: mockQuery,

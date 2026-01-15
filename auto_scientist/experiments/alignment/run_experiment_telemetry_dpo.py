@@ -1,31 +1,29 @@
-
-import sys
-import os
 import json
+import os
 import random
+import sys
 from datetime import datetime
 
 # Add root to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../")))
 
-from auto_scientist.impl.alignment.schemas import AlignmentConfig, Preference
+from auto_scientist.impl.alignment.schemas import AlignmentConfig
 from auto_scientist.impl.alignment.trainer import AlignmentTrainer
+
 
 def run_experiment():
     print("=== Experiment: Telemetry-Aware DPO ===")
 
     # 1. Setup
     config = AlignmentConfig(
-        model_name="frontier-1.3b-v0",
-        max_steps=100,
-        output_dir="./results/telemetry_aware_dpo"
+        model_name="frontier-1.3b-v0", max_steps=100, output_dir="./results/telemetry_aware_dpo"
     )
 
     # 2. Simulate Telemetry Loading
     print("Loading telemetry context...")
     telemetry_hotspots = {
-        "tool_use": 0.8, # High error rate
-        "safety_jailbreak": 0.2
+        "tool_use": 0.8,  # High error rate
+        "safety_jailbreak": 0.2,
     }
     print(f"Telemetry hotspots identified: {telemetry_hotspots}")
 
@@ -45,8 +43,8 @@ def run_experiment():
 
         # In a real scenario, this would duplicate the sample or set a weight column
         # Here we just log the distribution shift
-        if random.random() < (weight / 2.0): # Probabilistic inclusion for simulation
-             weighted_dataset.append({"domain": domain, "id": i})
+        if random.random() < (weight / 2.0):  # Probabilistic inclusion for simulation
+            weighted_dataset.append({"domain": domain, "id": i})
 
     print(f"Original size: {dataset_size}, Weighted size: {len(weighted_dataset)}")
 
@@ -59,11 +57,7 @@ def run_experiment():
     results = {
         "experiment": "telemetry_aware_dpo",
         "timestamp": datetime.now().isoformat(),
-        "metrics": {
-            "win_rate_vs_baseline": 0.58,
-            "safety_score": 0.94,
-            "tool_success_rate": 0.82
-        }
+        "metrics": {"win_rate_vs_baseline": 0.58, "safety_score": 0.94, "tool_success_rate": 0.82},
     }
 
     # Output results
@@ -71,7 +65,8 @@ def run_experiment():
     with open("./results/telemetry_dpo_results.json", "w") as f:
         json.dump(results, f, indent=2)
 
-    print(f"Results saved to ./results/telemetry_dpo_results.json")
+    print("Results saved to ./results/telemetry_dpo_results.json")
+
 
 if __name__ == "__main__":
     run_experiment()

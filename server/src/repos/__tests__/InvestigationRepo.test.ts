@@ -16,13 +16,14 @@ import {
   type Investigation,
   type InvestigationInput,
 } from '../InvestigationRepo';
-import type { Pool, PoolClient } from 'pg';
+import type { Pool } from 'pg';
 
 describe('InvestigationRepo', () => {
   const tenantId = 'tenant-123';
   let investigationRepo: InvestigationRepo;
   let mockPgPool: jest.Mocked<Pool>;
-  let mockPgClient: jest.Mocked<PoolClient>;
+  type PgClient = Awaited<ReturnType<Pool['connect']>>;
+  let mockPgClient: jest.Mocked<PgClient>;
 
   beforeEach(() => {
     // Mock PostgreSQL client
@@ -33,7 +34,7 @@ describe('InvestigationRepo', () => {
 
     // Mock PostgreSQL pool
     mockPgPool = {
-      connect: jest.fn().mockResolvedValue(mockPgClient),
+      connect: jest.fn(() => Promise.resolve(mockPgClient)),
       query: jest.fn(),
     } as any;
 
@@ -306,7 +307,7 @@ describe('InvestigationRepo', () => {
       // Should have called findById instead of UPDATE
       expect(mockPgPool.query).toHaveBeenCalledWith(
         expect.stringContaining('SELECT * FROM investigations WHERE id = $1'),
-        [updateInput.id],
+        [updateInput.id, updateInput.tenantId],
       );
     });
 
@@ -553,9 +554,9 @@ describe('InvestigationRepo', () => {
       const investigationId = 'inv-789';
       const tenantId = 'tenant-123';
 
-      mockPgPool.query
-        .mockResolvedValueOnce({ rows: [{ count: '42' }] } as any) // Entities
-        .mockResolvedValueOnce({ rows: [{ count: '18' }] } as any); // Relationships
+      mockPgPool.query.mockResolvedValueOnce({
+        rows: [{ entity_count: '42', relationship_count: '18' }],
+      } as any);
 
       const stats = await investigationRepo.getStats(
         investigationId,
@@ -564,16 +565,16 @@ describe('InvestigationRepo', () => {
 
       expect(stats.entityCount).toBe(42);
       expect(stats.relationshipCount).toBe(18);
-      expect(mockPgPool.query).toHaveBeenCalledTimes(2);
+      expect(mockPgPool.query).toHaveBeenCalledTimes(1);
     });
 
     it('should handle zero counts', async () => {
       const investigationId = 'inv-789';
       const tenantId = 'tenant-123';
 
-      mockPgPool.query
-        .mockResolvedValueOnce({ rows: [{ count: '0' }] } as any)
-        .mockResolvedValueOnce({ rows: [{ count: '0' }] } as any);
+      mockPgPool.query.mockResolvedValueOnce({
+        rows: [{ entity_count: '0', relationship_count: '0' }],
+      } as any);
 
       const stats = await investigationRepo.getStats(
         investigationId,
@@ -588,9 +589,7 @@ describe('InvestigationRepo', () => {
       const investigationId = 'inv-789';
       const tenantId = 'tenant-123';
 
-      mockPgPool.query
-        .mockResolvedValueOnce({ rows: [] } as any)
-        .mockResolvedValueOnce({ rows: [] } as any);
+      mockPgPool.query.mockResolvedValueOnce({ rows: [] } as any);
 
       const stats = await investigationRepo.getStats(
         investigationId,

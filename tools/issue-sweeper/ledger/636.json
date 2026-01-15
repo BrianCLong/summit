@@ -1,0 +1,40 @@
+{
+  "issue_number": 636,
+  "title": "Feature runbook",
+  "url": "https://github.com/BrianCLong/summit/pull/636",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-19T19:14:10Z",
+  "createdAt": "2025-08-19T09:30:36Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12296,
+        "url": "https://github.com/BrianCLong/summit/pull/12296",
+        "mergedAt": "2025-11-25T20:34:22Z",
+        "title": "Bump body-parser from 2.2.0 to 2.2.1 in /conductor-ui/backend"
+      },
+      {
+        "number": 11233,
+        "url": "https://github.com/BrianCLong/summit/pull/11233",
+        "mergedAt": "2025-10-16T16:05:19Z",
+        "title": "fix/msw vector adapter typings"
+      },
+      {
+        "number": 613,
+        "url": "https://github.com/BrianCLong/summit/pull/613",
+        "mergedAt": "2025-08-18T14:25:09Z",
+        "title": "chore(deps-dev): bump @testing-library/jest-dom from 5.17.0 to 6.7.0 in /client"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

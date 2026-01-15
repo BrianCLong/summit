@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import argparse
+from collections.abc import Callable, Iterable
 from pathlib import Path
-from typing import Callable, Iterable
 
 from .codegen import PipelineGenerator
 from .diff_inspector import diff_provenance, render_diff_report
@@ -50,7 +50,7 @@ def _cmd_diff(args: argparse.Namespace) -> int:
 def main(argv: Iterable[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(list(argv) if argv is not None else None)
-    func: Callable[[argparse.Namespace], int] = getattr(args, "func")
+    func: Callable[[argparse.Namespace], int] = args.func
     return func(args)
 
 

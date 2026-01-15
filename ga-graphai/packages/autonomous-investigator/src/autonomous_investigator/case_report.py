@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -34,7 +35,7 @@ class CaseStep:
         return trimmed
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> "CaseStep":
+    def from_dict(cls, data: Mapping[str, Any]) -> CaseStep:
         if not isinstance(data, Mapping):
             raise ValueError("Each step entry must be a mapping")
         return cls(

@@ -1,4 +1,5 @@
 """SafeJoin Python SDK for interacting with the SafeJoin PSI engine."""
+
 from __future__ import annotations
 
 import base64
@@ -8,7 +9,7 @@ import hmac
 import math
 import secrets
 import time
-from typing import Dict, Iterable, List, Optional, Tuple
+from collections.abc import Iterable
 
 import requests
 from cryptography.hazmat.primitives.asymmetric import x25519
@@ -44,7 +45,7 @@ class SimpleBloom:
             idx = int.from_bytes(digest[:8], "big") % self.m
             self.bits[idx // 8] |= 1 << (idx % 8)
 
-    def encode(self) -> Dict[str, object]:
+    def encode(self) -> dict[str, object]:
         return {
             "m": self.m,
             "k": self.k,
@@ -67,8 +68,8 @@ class SafeJoinParticipant:
         return shared
 
     @staticmethod
-    def hash_tokens(shared_secret: bytes, keys: Iterable[str]) -> List[str]:
-        tokens: List[str] = []
+    def hash_tokens(shared_secret: bytes, keys: Iterable[str]) -> list[str]:
+        tokens: list[str] = []
         for key in keys:
             mac = hmac.new(shared_secret, key.encode("utf-8"), hashlib.sha256)
             tokens.append(base64.b64encode(mac.digest()).decode("utf-8"))
@@ -80,9 +81,9 @@ class SafeJoinParticipant:
         values: Iterable[float],
         epsilon: float,
         shared_secret: bytes,
-    ) -> Dict[str, NoisyAggregate]:
+    ) -> dict[str, NoisyAggregate]:
         scale = 1.0 / max(epsilon, 1e-6)
-        aggregates: Dict[str, NoisyAggregate] = {}
+        aggregates: dict[str, NoisyAggregate] = {}
         for token, value in zip(hashed_tokens, values):
             entry = aggregates.setdefault(token, NoisyAggregate(0.0, 0.0))
             entry.noisy_sum += value + _laplace_noise(scale)
@@ -93,7 +94,7 @@ class SafeJoinParticipant:
 class SafeJoinClient:
     """HTTP client for orchestrating SafeJoin sessions."""
 
-    def __init__(self, base_url: str, session: Optional[requests.Session] = None):
+    def __init__(self, base_url: str, session: requests.Session | None = None):
         self.base_url = base_url.rstrip("/")
         self.session = session or requests.Session()
 
@@ -101,10 +102,10 @@ class SafeJoinClient:
         self,
         mode: str,
         expected_participants: int = 2,
-        epsilon: Optional[float] = None,
-        fault_probability: Optional[float] = None,
+        epsilon: float | None = None,
+        fault_probability: float | None = None,
     ) -> str:
-        payload: Dict[str, object] = {"mode": mode, "expected_participants": expected_participants}
+        payload: dict[str, object] = {"mode": mode, "expected_participants": expected_participants}
         if epsilon is not None:
             payload.setdefault("mode_config", {})
         if mode == "aggregate":
@@ -123,7 +124,9 @@ class SafeJoinClient:
         resp.raise_for_status()
         return resp.json()["session_id"]
 
-    def register(self, session_id: str, participant: SafeJoinParticipant, participant_id: str) -> Optional[str]:
+    def register(
+        self, session_id: str, participant: SafeJoinParticipant, participant_id: str
+    ) -> str | None:
         resp = self.session.post(
             f"{self.base_url}/sessions/{session_id}/register",
             json={"participant_id": participant_id, "public_key": participant.public_key_b64},
@@ -152,11 +155,11 @@ class SafeJoinClient:
         self,
         session_id: str,
         participant_id: str,
-        hashed_tokens: List[str],
+        hashed_tokens: list[str],
         bloom: SimpleBloom,
-        aggregates: Optional[Dict[str, NoisyAggregate]] = None,
+        aggregates: dict[str, NoisyAggregate] | None = None,
     ) -> None:
-        payload: Dict[str, object] = {
+        payload: dict[str, object] = {
             "participant_id": participant_id,
             "hashed_tokens": hashed_tokens,
             "bloom_filter": bloom.encode(),
@@ -168,7 +171,7 @@ class SafeJoinClient:
         resp = self.session.post(f"{self.base_url}/sessions/{session_id}/upload", json=payload)
         resp.raise_for_status()
 
-    def fetch_result(self, session_id: str) -> Dict[str, object]:
+    def fetch_result(self, session_id: str) -> dict[str, object]:
         resp = self.session.get(f"{self.base_url}/sessions/{session_id}/result")
         resp.raise_for_status()
         return resp.json()
@@ -177,17 +180,19 @@ class SafeJoinClient:
 def prepare_payload(
     participant: SafeJoinParticipant,
     peer_public_key: str,
-    records: Iterable[Tuple[str, float]],
-    epsilon: Optional[float] = None,
-) -> Tuple[List[str], SimpleBloom, Optional[Dict[str, NoisyAggregate]]]:
+    records: Iterable[tuple[str, float]],
+    epsilon: float | None = None,
+) -> tuple[list[str], SimpleBloom, dict[str, NoisyAggregate] | None]:
     shared_secret = participant.derive_shared_secret(peer_public_key)
     keys = [k for k, _ in records]
     hashed_tokens = participant.hash_tokens(shared_secret, keys)
     bloom = SimpleBloom()
     for token in hashed_tokens:
         bloom.insert(base64.b64decode(token))
-    aggregates: Optional[Dict[str, NoisyAggregate]] = None
+    aggregates: dict[str, NoisyAggregate] | None = None
     if epsilon is not None:
         values = [v for _, v in records]
-        aggregates = participant.aggregates_with_noise(hashed_tokens, values, epsilon, shared_secret)
+        aggregates = participant.aggregates_with_noise(
+            hashed_tokens, values, epsilon, shared_secret
+        )
     return hashed_tokens, bloom, aggregates

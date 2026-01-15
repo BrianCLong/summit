@@ -1,13 +1,17 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { tenantContextMiddleware } from '../../src/middleware/tenantContext';
 import { JWT_SECRET } from '../../src/lib/auth';
 
-describe('tenantContextMiddleware', () => {
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('tenantContextMiddleware', () => {
   const buildApp = () => {
     const app = express();
-    app.use(tenantContextMiddleware);
+    app.use(tenantContextMiddleware());
     app.get('/test', (req, res) => {
       res.json({ tenantId: (req as any).tenantId });
     });

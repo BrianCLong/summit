@@ -1,0 +1,49 @@
+{
+  "issue_number": 12894,
+  "title": "Batch 3: Security & Compliance Upgrades (Audit, APQ, Caching, Rate Limiting)",
+  "url": "https://github.com/BrianCLong/summit/pull/12894",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9694962502,
+      "node_id": "LA_kwDOPaNncM8AAAACQd1jRg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:%20security",
+      "name": "type: security",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9695444019,
+      "node_id": "LA_kwDOPaNncM8AAAACQeS8Mw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/needs-tests",
+      "name": "needs-tests",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9696311256,
+      "node_id": "LA_kwDOPaNncM8AAAACQfH32A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/size:%20M",
+      "name": "size: M",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-12-04T16:57:52Z",
+  "createdAt": "2025-11-30T02:59:11Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

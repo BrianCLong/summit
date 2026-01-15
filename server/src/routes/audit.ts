@@ -5,7 +5,8 @@ import archiver from 'archiver';
 import { getPostgresPool } from '../db/postgres.js';
 import { ProvenanceRepo } from '../repos/ProvenanceRepo.js';
 import { ensureAuthenticated, requirePermission } from '../middleware/auth.js';
-import { advancedAuditSystem, ComplianceFramework } from '../audit/advanced-audit-system.js';
+import { advancedAuditSystem } from '../audit/index.js';
+import { ComplianceFramework } from '../audit/advanced-audit-system.js';
 import logger from '../utils/logger.js';
 import { BundleVerifier } from '../audit/BundleVerifier.js';
 import rateLimit from 'express-rate-limit';
@@ -47,8 +48,8 @@ auditRouter.post('/verify-bundle', verificationLimiter, async (req: any, res: Re
 auditRouter.get('/incidents/:id/audit-bundle.zip', async (req: AuthenticatedRequest, res: Response) => {
   const tenant = String(
     (req.headers['x-tenant-id'] as any) ||
-      (req.headers['x-tenant'] as any) ||
-      '',
+    (req.headers['x-tenant'] as any) ||
+    '',
   );
   if (!tenant) return res.status(400).json({ error: 'tenant_required' });
   const { id } = req.params as { id: string };
@@ -112,8 +113,8 @@ auditRouter.get('/incidents/:id/audit-bundle.zip', async (req: AuthenticatedRequ
 auditRouter.get('/investigations/:id/audit-bundle.zip', async (req: AuthenticatedRequest, res: Response) => {
   const tenant = String(
     (req.headers['x-tenant-id'] as any) ||
-      (req.headers['x-tenant'] as any) ||
-      '',
+    (req.headers['x-tenant'] as any) ||
+    '',
   );
   if (!tenant) return res.status(400).json({ error: 'tenant_required' });
   const { id } = req.params as { id: string };
@@ -258,14 +259,14 @@ auditRouter.get(
   requirePermission('audit:verify'),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-       const { startTime, endTime } = req.query;
+      const { startTime, endTime } = req.query;
 
-       const result = await advancedAuditSystem.verifyIntegrity(
-         startTime ? new Date(startTime as string) : undefined,
-         endTime ? new Date(endTime as string) : undefined
-       );
+      const result = await advancedAuditSystem.verifyIntegrity(
+        startTime ? new Date(startTime as string) : undefined,
+        endTime ? new Date(endTime as string) : undefined
+      );
 
-       res.json({ data: result });
+      res.json({ data: result });
     } catch (error: any) {
       logger.error('Failed to verify integrity', error);
       res.status(500).json({ error: 'Internal Server Error' });

@@ -551,7 +551,7 @@ class RedBlueTeamExerciseManager:
                     json.dump(asdict(scenario), f, indent=2, default=str)
                 self.logger.info(f"Exported scenario {scenario_id} to {filepath}")
             except Exception as e:
-                self.logger.error(f"Error exporting scenario: {str(e)}")
+                self.logger.error(f"Error exporting scenario: {e!s}")
         else:
             self.logger.warning(f"Scenario ID not found: {scenario_id}")
 
@@ -579,7 +579,7 @@ class RedBlueTeamExerciseManager:
                 self.logger.error(f"Invalid scenario in file: {filepath}")
                 return None
         except Exception as e:
-            self.logger.error(f"Error importing scenario: {str(e)}")
+            self.logger.error(f"Error importing scenario: {e!s}")
             return None
 
     def generate_custom_scenario(
@@ -703,7 +703,7 @@ class ScenarioBuilderCLI:
             print(f"Name: {scenario.name}")
 
         except Exception as e:
-            print(f"Error creating scenario: {str(e)}")
+            print(f"Error creating scenario: {e!s}")
 
 
 # Convenience functions for easy usage

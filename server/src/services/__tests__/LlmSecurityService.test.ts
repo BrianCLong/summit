@@ -1,8 +1,19 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
-const mockPolicyEvaluate = jest.fn();
-const mockDlpScanContent = jest.fn();
-const mockDlpApplyActions = jest.fn();
+type LlmSecurityContext = {
+  tenantId: string;
+  principal: {
+    id: string;
+    name: string;
+    role: string;
+  };
+  purpose: 'rag' | 'analysis' | 'enrichment' | 'automation' | 'other';
+  dataSensitivity: 'public' | 'internal' | 'confidential' | 'restricted';
+};
+
+const mockPolicyEvaluate = jest.fn() as jest.Mock<any>;
+const mockDlpScanContent = jest.fn() as jest.Mock<any>;
+const mockDlpApplyActions = jest.fn() as jest.Mock<any>;
 
 jest.mock('../PolicyService.js', () => ({
   policyService: {
@@ -18,6 +29,7 @@ jest.mock('../DLPService.js', () => ({
 }));
 
 jest.mock('../../utils/logger.js', () => ({
+  __esModule: true,
   default: {
     info: jest.fn(),
     warn: jest.fn(),
@@ -26,10 +38,10 @@ jest.mock('../../utils/logger.js', () => ({
   },
 }));
 
-import { LlmSecurityService, LlmSecurityContext } from '../LlmSecurityService.js';
+import { LlmSecurityService } from '../LlmSecurityService.js';
 
 describe('LlmSecurityService', () => {
-  let service: LlmSecurityService;
+  let service: ReturnType<typeof LlmSecurityService.getInstance>;
 
   const defaultContext: LlmSecurityContext = {
     tenantId: 'tenant-123',
@@ -64,7 +76,7 @@ describe('LlmSecurityService', () => {
       const result = await service.validatePrompt(
         'Analyze this data',
         defaultContext,
-        'gpt-4'
+        'gpt-4',
       );
 
       expect(result.allowed).toBe(true);
@@ -80,7 +92,7 @@ describe('LlmSecurityService', () => {
       const result = await service.validatePrompt(
         'Analyze this data',
         defaultContext,
-        'gpt-4'
+        'gpt-4',
       );
 
       expect(result.allowed).toBe(false);
@@ -100,7 +112,7 @@ describe('LlmSecurityService', () => {
       const result = await service.validatePrompt(
         'Patient SSN is 123-45-6789',
         defaultContext,
-        'gpt-4'
+        'gpt-4',
       );
 
       expect(result.allowed).toBe(false);
@@ -123,7 +135,7 @@ describe('LlmSecurityService', () => {
       const result = await service.validatePrompt(
         'Contact john@example.com for info',
         defaultContext,
-        'gpt-4'
+        'gpt-4',
       );
 
       expect(result.allowed).toBe(true);
@@ -137,7 +149,7 @@ describe('LlmSecurityService', () => {
       const result = await service.validatePrompt(
         'Test prompt',
         defaultContext,
-        'gpt-4'
+        'gpt-4',
       );
 
       expect(result.allowed).toBe(false);

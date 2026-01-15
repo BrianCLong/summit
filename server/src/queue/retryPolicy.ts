@@ -53,6 +53,7 @@ export function classifyError(error: any): RetryClassification {
   if (
     message.includes('network') ||
     message.includes('timeout') ||
+    message.includes('timed out') ||
     message.includes('deadlock')
   ) {
     return RetryClassification.Retryable;

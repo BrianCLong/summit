@@ -679,7 +679,7 @@ export class PolicyLeakSimulator {
     nodeId: string,
   ): Promise<CRDTOperation[]> {
     const operationsData = await this.redis.zrange(`crdt_log:${nodeId}`, 0, 99);
-    return operationsData.map((data) => JSON.parse(data));
+    return operationsData.map((data: string) => JSON.parse(data));
   }
 
   /**

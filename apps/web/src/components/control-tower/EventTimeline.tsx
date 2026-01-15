@@ -2,7 +2,7 @@
  * Event Timeline - Chronological stream of operational events
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Box,
   Paper,
@@ -103,7 +103,9 @@ export const EventTimeline: React.FC<EventTimelineProps> = ({
     });
   };
 
-  const groupEventsByDate = (events: OperationalEvent[]) => {
+  const groupedEvents = useMemo(() => {
+    if (!events) return {};
+
     const groups: { [key: string]: OperationalEvent[] } = {};
 
     events.forEach((event) => {
@@ -132,7 +134,7 @@ export const EventTimeline: React.FC<EventTimelineProps> = ({
     });
 
     return groups;
-  };
+  }, [events]);
 
   if (isLoading) {
     return (
@@ -144,8 +146,6 @@ export const EventTimeline: React.FC<EventTimelineProps> = ({
       </Paper>
     );
   }
-
-  const groupedEvents = groupEventsByDate(events);
 
   return (
     <Paper

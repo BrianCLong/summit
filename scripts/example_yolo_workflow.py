@@ -22,6 +22,7 @@ from datetime import datetime
 # Configuration
 YOLO_SCRIPT = "server/src/ai/models/yolo_detection.py"
 
+
 def run_detection(image_path):
     """
     Executes the existing YOLO detection script.
@@ -37,9 +38,12 @@ def run_detection(image_path):
     cmd = [
         sys.executable,
         YOLO_SCRIPT,
-        "--image", image_path,
-        "--model", "yolov8n.pt", # Defaulting to nano model
-        "--confidence", "0.5"
+        "--image",
+        image_path,
+        "--model",
+        "yolov8n.pt",  # Defaulting to nano model
+        "--confidence",
+        "0.5",
     ]
 
     try:
@@ -51,6 +55,7 @@ def run_detection(image_path):
     except json.JSONDecodeError:
         print(f"Failed to parse detection output: {result.stdout}")
         return None
+
 
 def generate_graph_nodes(image_path, detection_result, investigation_id="inv-123"):
     """
@@ -75,7 +80,7 @@ def generate_graph_nodes(image_path, detection_result, investigation_id="inv-123
     for det in detection_result["detections"]:
         class_name = det["class_name"]
         confidence = det["confidence"]
-        bbox = det["bbox"] # [x, y, w, h]
+        bbox = det["bbox"]  # [x, y, w, h]
 
         # Create a unique ID for the detected object instance
         object_id = str(uuid.uuid4())
@@ -88,13 +93,14 @@ def generate_graph_nodes(image_path, detection_result, investigation_id="inv-123
             class: '{class_name}',
             confidence: {confidence},
             bbox: {json.dumps(bbox)},
-            source_model: '{detection_result.get('model', 'unknown')}'
+            source_model: '{detection_result.get("model", "unknown")}'
         }})
         CREATE (i)-[:DEPICTS {{confidence: {confidence}}}]->(o)
         """
         queries.append(query.strip())
 
     return queries
+
 
 def main():
     parser = argparse.ArgumentParser(description="Simulate Image-to-Graph Workflow")
@@ -104,7 +110,7 @@ def main():
     print(f"[*] Starting workflow for: {args.image}")
 
     # Step 1: Object Detection
-    print(f"[*] Running YOLOv8 detection...")
+    print("[*] Running YOLOv8 detection...")
     result = run_detection(args.image)
 
     if result:
@@ -112,7 +118,7 @@ def main():
         print(f"[*] Detection complete. Found {det_count} objects.")
 
         # Step 2: Graph Node Generation
-        print(f"[*] Generating Graph Nodes...")
+        print("[*] Generating Graph Nodes...")
         cypher_queries = generate_graph_nodes(args.image, result)
 
         print("\n--- Generated Cypher Queries ---")
@@ -123,6 +129,7 @@ def main():
         print(f"[*] Workflow complete. {len(cypher_queries)} queries generated.")
     else:
         print("[!] Workflow failed during detection.")
+
 
 if __name__ == "__main__":
     main()

@@ -26,10 +26,17 @@ interface UsageForecast {
 
 export class RenewalService {
     private static instance: RenewalService;
-    private pool: Pool;
+    private _pool?: Pool;
 
     private constructor() {
-        this.pool = getPostgresPool();
+        // Lazy initialization
+    }
+
+    private get pool(): Pool {
+        if (!this._pool) {
+            this._pool = getPostgresPool();
+        }
+        return this._pool;
     }
 
     public static getInstance(): RenewalService {
@@ -55,8 +62,8 @@ export class RenewalService {
 
                 // Query for contracts ending on targetDate (approximate for daily run)
                 // We use a range for the day
-                const startOfDay = new Date(targetDate.setHours(0,0,0,0));
-                const endOfDay = new Date(targetDate.setHours(23,59,59,999));
+                const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
+                const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
 
                 const res = await client.query(
                     `SELECT * FROM contract_terms

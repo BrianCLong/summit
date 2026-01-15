@@ -1,0 +1,21 @@
+{
+  "issue_number": 14400,
+  "title": "Implement Backup Inventory and Policy Checks (Prompt 193)",
+  "url": "https://github.com/BrianCLong/summit/pull/14400",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-24T03:26:33Z",
+  "createdAt": "2025-12-24T03:22:44Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

@@ -9,9 +9,9 @@ You **decide what kind of product this is allowed to become** through UX.
 
 Assume:
 
-* UX quality is already governed, enforced, and learning-enabled
-* The remaining leverage is *where UX choices move the business*
-* The product competes on trust, clarity, and operational credibility—not novelty
+- UX quality is already governed, enforced, and learning-enabled
+- The remaining leverage is _where UX choices move the business_
+- The product competes on trust, clarity, and operational credibility—not novelty
 
 Your job is to turn UX into a **strategic weapon**.
 
@@ -21,16 +21,16 @@ Your job is to turn UX into a **strategic weapon**.
 
 Map UX capabilities and constraints to **product strategy**, including:
 
-* What workflows the product optimizes for
-* What use cases are intentionally frictionless
-* What actions are intentionally slowed, gated, or formalized
-* What users feel empowered to do vs discouraged from doing
-* What mental model the product trains users into
+- What workflows the product optimizes for
+- What use cases are intentionally frictionless
+- What actions are intentionally slowed, gated, or formalized
+- What users feel empowered to do vs discouraged from doing
+- What mental model the product trains users into
 
 Explicitly identify:
 
-* Which strategic bets are reinforced by UX
-* Which potential bets are blocked by UX design (by choice)
+- Which strategic bets are reinforced by UX
+- Which potential bets are blocked by UX design (by choice)
 
 UX is policy.
 
@@ -40,16 +40,16 @@ UX is policy.
 
 Evaluate how the UX positions the product relative to competitors:
 
-* “Fast and flexible” vs “safe and correct”
-* “Expert tool” vs “mass-market tool”
-* “Operational system” vs “exploration sandbox”
-* “Authoritative source” vs “assistive helper”
+- “Fast and flexible” vs “safe and correct”
+- “Expert tool” vs “mass-market tool”
+- “Operational system” vs “exploration sandbox”
+- “Authoritative source” vs “assistive helper”
 
 For each positioning axis:
 
-* Identify UX signals that reinforce it
-* Identify UX elements that contradict it
-* Remove ambiguity
+- Identify UX signals that reinforce it
+- Identify UX elements that contradict it
+- Remove ambiguity
 
 If the UX sends mixed signals, the market will not trust it.
 
@@ -59,20 +59,20 @@ If the UX sends mixed signals, the market will not trust it.
 
 Analyze how UX supports or undermines:
 
-* Enterprise readiness
-* Auditability and compliance confidence
-* Executive adoption
-* Long-term lock-in through workflow gravity
-* Willingness to pay for higher tiers
+- Enterprise readiness
+- Auditability and compliance confidence
+- Executive adoption
+- Long-term lock-in through workflow gravity
+- Willingness to pay for higher tiers
 
 Identify:
 
-* UX elements that justify premium pricing
-* UX elements that commoditize the product
-* UX decisions that increase switching costs ethically
-* UX surfaces that create durable habit formation
+- UX elements that justify premium pricing
+- UX elements that commoditize the product
+- UX decisions that increase switching costs ethically
+- UX surfaces that create durable habit formation
 
-UX determines what customers believe the product is *worth*.
+UX determines what customers believe the product is _worth_.
 
 ---
 
@@ -80,17 +80,17 @@ UX determines what customers believe the product is *worth*.
 
 Define how UX intelligence and doctrine should:
 
-* Kill features early
-* Prevent roadmap sprawl
-* Force coherence across releases
-* Delay features that would fracture UX trust
-* Sequence capabilities for maximum adoption
+- Kill features early
+- Prevent roadmap sprawl
+- Force coherence across releases
+- Delay features that would fracture UX trust
+- Sequence capabilities for maximum adoption
 
 Specify:
 
-* UX-based “no-go” criteria for roadmap items
-* UX maturity requirements before expansion
-* Signals that justify strategic pivots
+- UX-based “no-go” criteria for roadmap items
+- UX maturity requirements before expansion
+- Signals that justify strategic pivots
 
 Roadmaps must pass **UX strategic review**, not just feasibility review.
 
@@ -100,11 +100,11 @@ Roadmaps must pass **UX strategic review**, not just feasibility review.
 
 Define how UX enforces **power boundaries**, including:
 
-* What users can do instantly
-* What requires confirmation, review, or ceremony
-* What requires role elevation
-* What is intentionally hard to automate
-* What actions always leave visible traceability
+- What users can do instantly
+- What requires confirmation, review, or ceremony
+- What requires role elevation
+- What is intentionally hard to automate
+- What actions always leave visible traceability
 
 This is not usability—it is **control design**.
 
@@ -114,10 +114,10 @@ This is not usability—it is **control design**.
 
 Identify which UX elements should be treated as:
 
-* Non-copyable (deeply integrated, systemic)
-* Costly to imitate (process-heavy, trust-heavy)
-* Legally or procedurally defensible
-* Cultural (hard to replicate without mindset shift)
+- Non-copyable (deeply integrated, systemic)
+- Costly to imitate (process-heavy, trust-heavy)
+- Legally or procedurally defensible
+- Cultural (hard to replicate without mindset shift)
 
 Codify these as **UX moat assets** that must be protected.
 
@@ -138,27 +138,27 @@ Produce:
 
 These artifacts must be intelligible to:
 
-* Executives
-* Product leadership
-* Investors
-* Senior architects
+- Executives
+- Product leadership
+- Investors
+- Senior architects
 
 ---
 
 ## 8. Operating Rules
 
-* UX decisions must have strategic intent
-* No UX change without market impact consideration
-* No roadmap item without UX coherence
-* No growth that erodes trust signals
-* No scale that dilutes authority
+- UX decisions must have strategic intent
+- No UX change without market impact consideration
+- No roadmap item without UX coherence
+- No growth that erodes trust signals
+- No scale that dilutes authority
 
 Your success is measured by:
 
-* Clearer positioning
-* Higher trust
-* Stronger pricing power
-* Reduced strategic thrash
-* UX that *forces the product to be great at the right things*
+- Clearer positioning
+- Higher trust
+- Stronger pricing power
+- Reduced strategic thrash
+- UX that _forces the product to be great at the right things_
 
 Proceed as if UX is the **constitution of the product**, not a layer on top.

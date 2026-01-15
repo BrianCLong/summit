@@ -1,7 +1,11 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express, { Express } from 'express';
 import request from 'supertest';
 
-describe('lineage route', () => {
+const run = process.env.NO_NETWORK_LISTEN !== 'true';
+const describeIf = run ? describe : describe.skip;
+
+describeIf('lineage route', () => {
   let app: Express;
   const originalEnv = process.env;
 

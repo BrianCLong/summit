@@ -23,34 +23,37 @@ Last Updated: 2025-11-20
 """
 
 import json
-import sys
 import logging
+import sys
 import time
-from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple
-from datetime import datetime
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
+from pathlib import Path
+from typing import Any
 
 # Configure structured logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler(Path(__file__).parent.parent / 'output' / 'pipeline.log')
-    ]
+        logging.FileHandler(Path(__file__).parent.parent / "output" / "pipeline.log"),
+    ],
 )
 logger = logging.getLogger(__name__)
 
 # Add parent directories to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "adversarial-misinfo-defense-platform"))
+sys.path.insert(
+    0, str(Path(__file__).parent.parent.parent.parent / "adversarial-misinfo-defense-platform")
+)
 
 # Try importing production modules with explicit error handling
 try:
     from adversarial_misinfo_defense_platform.deepfake_detector import DeepfakeDetector
     from adversarial_misinfo_defense_platform.meme_analyzer import MemeManipulationDetector
     from adversarial_misinfo_defense_platform.text_analyzer import TextMisinfoDetector
+
     PRODUCTION_MODULES_AVAILABLE = True
     logger.info("Production detection modules loaded successfully")
 except ImportError as e:
@@ -65,6 +68,7 @@ except ImportError as e:
 
 class AnalysisMode(Enum):
     """Analysis execution mode."""
+
     PRODUCTION = "production"  # Use real ML models
     MOCK = "mock"  # Use ground truth data (for demos)
     HYBRID = "hybrid"  # Mix of both
@@ -73,15 +77,16 @@ class AnalysisMode(Enum):
 @dataclass
 class PipelineMetrics:
     """Track pipeline execution metrics for observability."""
+
     posts_processed: int = 0
     posts_failed: int = 0
     misinfo_detected: int = 0
     legitimate_detected: int = 0
     total_processing_time_ms: float = 0.0
     avg_confidence: float = 0.0
-    errors: List[Dict[str, Any]] = field(default_factory=list)
+    errors: list[dict[str, Any]] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert metrics to dictionary for JSON serialization."""
         return {
             "posts_processed": self.posts_processed,
@@ -91,24 +96,28 @@ class PipelineMetrics:
             "total_processing_time_ms": self.total_processing_time_ms,
             "avg_processing_time_ms": (
                 self.total_processing_time_ms / self.posts_processed
-                if self.posts_processed > 0 else 0
+                if self.posts_processed > 0
+                else 0
             ),
             "avg_confidence": self.avg_confidence,
             "error_count": len(self.errors),
             "success_rate": (
                 self.posts_processed / (self.posts_processed + self.posts_failed)
-                if (self.posts_processed + self.posts_failed) > 0 else 0
-            )
+                if (self.posts_processed + self.posts_failed) > 0
+                else 0
+            ),
         }
 
 
 class ValidationError(Exception):
     """Raised when input data fails validation."""
+
     pass
 
 
 class AnalysisError(Exception):
     """Raised when analysis fails."""
+
     pass
 
 
@@ -132,11 +141,7 @@ class DemoDataLoader:
     """
 
     def __init__(
-        self,
-        data_path: Path,
-        output_path: Path,
-        mode: AnalysisMode = None,
-        max_retries: int = 3
+        self, data_path: Path, output_path: Path, mode: AnalysisMode = None, max_retries: int = 3
     ):
         """
         Initialize the demo data loader.
@@ -165,7 +170,9 @@ class DemoDataLoader:
 
         # Auto-detect mode if not specified
         if mode is None:
-            self.mode = AnalysisMode.PRODUCTION if PRODUCTION_MODULES_AVAILABLE else AnalysisMode.MOCK
+            self.mode = (
+                AnalysisMode.PRODUCTION if PRODUCTION_MODULES_AVAILABLE else AnalysisMode.MOCK
+            )
         else:
             self.mode = mode
 
@@ -201,7 +208,7 @@ class DemoDataLoader:
             self.text_detector = None
             logger.info("Using mock analysis (no detectors initialized)")
 
-    def validate_post(self, post: Dict[str, Any], line_num: int) -> Tuple[bool, Optional[str]]:
+    def validate_post(self, post: dict[str, Any], line_num: int) -> tuple[bool, str | None]:
         """
         Validate a single post's data structure.
 
@@ -214,7 +221,7 @@ class DemoDataLoader:
         Returns:
             Tuple of (is_valid, error_message)
         """
-        required_fields = ['id', 'platform', 'text', 'timestamp']
+        required_fields = ["id", "platform", "text", "timestamp"]
 
         # Check required fields
         for field in required_fields:
@@ -222,26 +229,26 @@ class DemoDataLoader:
                 return False, f"Line {line_num}: Missing required field '{field}'"
 
         # Validate field types
-        if not isinstance(post['id'], str) or not post['id']:
+        if not isinstance(post["id"], str) or not post["id"]:
             return False, f"Line {line_num}: 'id' must be non-empty string"
 
-        if not isinstance(post['text'], str):
+        if not isinstance(post["text"], str):
             return False, f"Line {line_num}: 'text' must be string"
 
         # Validate media if present
-        if 'media' in post:
-            if not isinstance(post['media'], list):
+        if "media" in post:
+            if not isinstance(post["media"], list):
                 return False, f"Line {line_num}: 'media' must be list"
 
-            for i, media_item in enumerate(post['media']):
-                if 'type' not in media_item:
+            for i, media_item in enumerate(post["media"]):
+                if "type" not in media_item:
                     return False, f"Line {line_num}: media[{i}] missing 'type'"
-                if media_item['type'] not in ['image', 'video', 'audio']:
+                if media_item["type"] not in ["image", "video", "audio"]:
                     return False, f"Line {line_num}: media[{i}] invalid type"
 
         return True, None
 
-    def load_posts(self) -> List[Dict[str, Any]]:
+    def load_posts(self) -> list[dict[str, Any]]:
         """
         Load demo posts from JSONL file with validation.
 
@@ -268,7 +275,7 @@ class DemoDataLoader:
         posts = []
         errors = []
 
-        with open(posts_file, 'r', encoding='utf-8') as f:
+        with open(posts_file, encoding="utf-8") as f:
             for line_num, line in enumerate(f, 1):
                 # Skip empty lines
                 if not line.strip():
@@ -312,11 +319,7 @@ class DemoDataLoader:
 
         return posts
 
-    def analyze_post_with_retry(
-        self,
-        post: Dict[str, Any],
-        attempt: int = 1
-    ) -> Dict[str, Any]:
+    def analyze_post_with_retry(self, post: dict[str, Any], attempt: int = 1) -> dict[str, Any]:
         """
         Analyze post with exponential backoff retry logic.
 
@@ -345,7 +348,7 @@ class DemoDataLoader:
                 raise AnalysisError(f"Max retries exceeded: {e}")
 
             # Exponential backoff: 2^attempt seconds
-            delay = 2 ** attempt
+            delay = 2**attempt
             logger.warning(
                 f"Analysis attempt {attempt} failed for post {post['id']}: {e}. "
                 f"Retrying in {delay}s..."
@@ -355,7 +358,7 @@ class DemoDataLoader:
             # Recursive retry
             return self.analyze_post_with_retry(post, attempt + 1)
 
-    def analyze_post(self, post: Dict[str, Any]) -> Dict[str, Any]:
+    def analyze_post(self, post: dict[str, Any]) -> dict[str, Any]:
         """
         Analyze a single post for misinformation.
 
@@ -389,8 +392,8 @@ class DemoDataLoader:
                 "is_misinfo": False,
                 "confidence": 0.0,
                 "evidence": [],
-                "processing_time_ms": 0.0
-            }
+                "processing_time_ms": 0.0,
+            },
         }
 
         try:
@@ -409,7 +412,7 @@ class DemoDataLoader:
                     "confidence": gt.get("confidence", 0.5),
                     "category": gt.get("category", "unknown"),
                     "red_flags": gt.get("red_flags", []),
-                    "manipulation_type": gt.get("manipulation_type")
+                    "manipulation_type": gt.get("manipulation_type"),
                 }
 
             # === MEDIA ANALYSIS ===
@@ -430,7 +433,7 @@ class DemoDataLoader:
                         result["analysis"]["detection_results"]["video"] = {
                             "is_deepfake": gt.get("manipulation_type") == "deepfake_video",
                             "confidence": gt.get("confidence", 0.5),
-                            "manipulation_markers": gt.get("manipulation_markers", [])
+                            "manipulation_markers": gt.get("manipulation_markers", []),
                         }
 
                 # Image analysis (manipulation detection)
@@ -445,7 +448,7 @@ class DemoDataLoader:
                         result["analysis"]["detection_results"]["image"] = {
                             "is_manipulated": gt.get("is_misinfo", False),
                             "confidence": gt.get("confidence", 0.5),
-                            "manipulation_type": gt.get("manipulation_type")
+                            "manipulation_type": gt.get("manipulation_type"),
                         }
 
             # === AGGREGATE RESULTS ===
@@ -492,14 +495,14 @@ class DemoDataLoader:
 
         except Exception as e:
             # Unexpected error during analysis
-            logger.error(f"Analysis failed for post {post.get('id', 'unknown')}: {e}", exc_info=True)
+            logger.error(
+                f"Analysis failed for post {post.get('id', 'unknown')}: {e}", exc_info=True
+            )
             raise AnalysisError(f"Analysis failed: {e}")
 
     def _generate_evidence(
-        self,
-        post: Dict[str, Any],
-        analysis: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        self, post: dict[str, Any], analysis: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """
         Generate evidence items for UI display and transparency.
 
@@ -524,18 +527,22 @@ class DemoDataLoader:
 
         if red_flags:
             # Determine severity based on number of red flags
-            severity = "critical" if len(red_flags) >= 4 else "high" if len(red_flags) >= 3 else "medium"
+            severity = (
+                "critical" if len(red_flags) >= 4 else "high" if len(red_flags) >= 3 else "medium"
+            )
 
-            evidence.append({
-                "type": "text_analysis",
-                "title": "Suspicious Language Patterns Detected",
-                "description": (
-                    f"Found {len(red_flags)} red flags: {', '.join(red_flags)}. "
-                    f"These patterns are commonly associated with {text_result.get('category', 'misinformation')}."
-                ),
-                "severity": severity,
-                "indicators": red_flags
-            })
+            evidence.append(
+                {
+                    "type": "text_analysis",
+                    "title": "Suspicious Language Patterns Detected",
+                    "description": (
+                        f"Found {len(red_flags)} red flags: {', '.join(red_flags)}. "
+                        f"These patterns are commonly associated with {text_result.get('category', 'misinformation')}."
+                    ),
+                    "severity": severity,
+                    "indicators": red_flags,
+                }
+            )
 
         # === VIDEO EVIDENCE (DEEPFAKE) ===
         video_result = analysis["detection_results"].get("video", {})
@@ -543,16 +550,18 @@ class DemoDataLoader:
         if video_result.get("is_deepfake"):
             markers = video_result.get("manipulation_markers", [])
 
-            evidence.append({
-                "type": "deepfake_detection",
-                "title": "Deepfake Video Detected",
-                "description": (
-                    f"Found {len(markers)} manipulation markers: {', '.join(markers)}. "
-                    f"These forensic indicators suggest synthetic or manipulated video content."
-                ),
-                "severity": "critical",
-                "indicators": markers
-            })
+            evidence.append(
+                {
+                    "type": "deepfake_detection",
+                    "title": "Deepfake Video Detected",
+                    "description": (
+                        f"Found {len(markers)} manipulation markers: {', '.join(markers)}. "
+                        f"These forensic indicators suggest synthetic or manipulated video content."
+                    ),
+                    "severity": "critical",
+                    "indicators": markers,
+                }
+            )
 
         # === IMAGE EVIDENCE ===
         image_result = analysis["detection_results"].get("image", {})
@@ -560,23 +569,27 @@ class DemoDataLoader:
         if image_result.get("is_manipulated"):
             manipulation_type = image_result.get("manipulation_type", "unknown")
 
-            evidence.append({
-                "type": "image_manipulation",
-                "title": "Image Manipulation Detected",
-                "description": (
-                    f"Manipulation type: {manipulation_type}. "
-                    f"The image has been altered in a way that could mislead viewers."
-                ),
-                "severity": "high",
-                "indicators": [manipulation_type]
-            })
+            evidence.append(
+                {
+                    "type": "image_manipulation",
+                    "title": "Image Manipulation Detected",
+                    "description": (
+                        f"Manipulation type: {manipulation_type}. "
+                        f"The image has been altered in a way that could mislead viewers."
+                    ),
+                    "severity": "high",
+                    "indicators": [manipulation_type],
+                }
+            )
 
         # Log evidence generation
-        logger.debug(f"Generated {len(evidence)} evidence items for post {post.get('id', 'unknown')}")
+        logger.debug(
+            f"Generated {len(evidence)} evidence items for post {post.get('id', 'unknown')}"
+        )
 
         return evidence
 
-    def process_all(self) -> Dict[str, Any]:
+    def process_all(self) -> dict[str, Any]:
         """
         Process all demo posts and save results.
 
@@ -615,7 +628,7 @@ class DemoDataLoader:
 
         # === PROCESS EACH POST ===
         for i, post in enumerate(posts, 1):
-            post_id = post.get('id', f'unknown_{i}')
+            post_id = post.get("id", f"unknown_{i}")
             print(f"\nAnalyzing post {i}/{len(posts)}: {post_id}")
             logger.info(f"Processing post {i}/{len(posts)}: {post_id}")
 
@@ -631,39 +644,46 @@ class DemoDataLoader:
                 # Track detection outcomes
                 if result["analysis"]["is_misinfo"]:
                     self.metrics.misinfo_detected += 1
-                    print(f"  ⚠️  MISINFO DETECTED - Confidence: {result['analysis']['confidence']:.2%}")
-                    logger.info(f"Post {post_id}: MISINFO (confidence={result['analysis']['confidence']:.2%})")
+                    print(
+                        f"  ⚠️  MISINFO DETECTED - Confidence: {result['analysis']['confidence']:.2%}"
+                    )
+                    logger.info(
+                        f"Post {post_id}: MISINFO (confidence={result['analysis']['confidence']:.2%})"
+                    )
                 else:
                     self.metrics.legitimate_detected += 1
-                    print(f"  ✓ Legitimate content - Confidence: {result['analysis']['confidence']:.2%}")
-                    logger.info(f"Post {post_id}: LEGITIMATE (confidence={result['analysis']['confidence']:.2%})")
+                    print(
+                        f"  ✓ Legitimate content - Confidence: {result['analysis']['confidence']:.2%}"
+                    )
+                    logger.info(
+                        f"Post {post_id}: LEGITIMATE (confidence={result['analysis']['confidence']:.2%})"
+                    )
 
             except AnalysisError as e:
                 # Analysis failed after retries
                 self.metrics.posts_failed += 1
-                self.metrics.errors.append({
-                    "post_id": post_id,
-                    "error": str(e),
-                    "timestamp": datetime.utcnow().isoformat()
-                })
+                self.metrics.errors.append(
+                    {
+                        "post_id": post_id,
+                        "error": str(e),
+                        "timestamp": datetime.utcnow().isoformat(),
+                    }
+                )
                 logger.error(f"Failed to analyze post {post_id}: {e}")
                 print(f"  ✗ Analysis failed: {e}")
 
                 # Add failed result placeholder
-                results.append({
-                    "post": post,
-                    "analysis": {
-                        "error": str(e),
-                        "timestamp": datetime.utcnow().isoformat()
+                results.append(
+                    {
+                        "post": post,
+                        "analysis": {"error": str(e), "timestamp": datetime.utcnow().isoformat()},
                     }
-                })
+                )
 
         # Calculate average confidence
         if self.metrics.posts_processed > 0:
             total_confidence = sum(
-                r["analysis"].get("confidence", 0)
-                for r in results
-                if "error" not in r["analysis"]
+                r["analysis"].get("confidence", 0) for r in results if "error" not in r["analysis"]
             )
             self.metrics.avg_confidence = total_confidence / self.metrics.posts_processed
 
@@ -681,16 +701,17 @@ class DemoDataLoader:
             "legitimate_content": self.metrics.legitimate_detected,
             "detection_rate": (
                 self.metrics.misinfo_detected / self.metrics.posts_processed
-                if self.metrics.posts_processed > 0 else 0
+                if self.metrics.posts_processed > 0
+                else 0
             ),
             "results": results,
             "metrics": self.metrics.to_dict(),
-            "pipeline_duration_seconds": time.time() - pipeline_start
+            "pipeline_duration_seconds": time.time() - pipeline_start,
         }
 
         try:
             # Atomic write: write to temp file first, then rename
-            with open(temp_file, 'w', encoding='utf-8') as f:
+            with open(temp_file, "w", encoding="utf-8") as f:
                 json.dump(summary, f, indent=2, ensure_ascii=False)
 
             # Atomic rename (POSIX compliant)
@@ -703,7 +724,7 @@ class DemoDataLoader:
 
         # === PRINT SUMMARY ===
         print(f"\n{'=' * 60}")
-        print(f"✓ Analysis complete!")
+        print("✓ Analysis complete!")
         print(f"  Total posts: {len(posts)}")
         print(f"  Successfully processed: {self.metrics.posts_processed}")
         print(f"  Failed: {self.metrics.posts_failed}")

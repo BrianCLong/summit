@@ -10,7 +10,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 print("Validating Maestro modules...")
 
 try:
-    from maestro.models import Run, Artifact, DisclosurePack, RunStatus, ArtifactKind
+    from maestro.models import Artifact, ArtifactKind, Run, RunStatus
+
     print("✓ maestro.models imports successfully")
 except Exception as e:
     print(f"✗ maestro.models failed: {e}")
@@ -18,6 +19,7 @@ except Exception as e:
 
 try:
     from maestro.storage import MaestroStore
+
     print("✓ maestro.storage imports successfully")
 except Exception as e:
     print(f"✗ maestro.storage failed: {e}")
@@ -25,6 +27,7 @@ except Exception as e:
 
 try:
     from maestro.checks import check_release_gate, generate_compliance_report
+
     print("✓ maestro.checks imports successfully")
 except Exception as e:
     print(f"✗ maestro.checks failed: {e}")

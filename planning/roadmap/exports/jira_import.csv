@@ -1,0 +1,2721 @@
+Summary,Description,Priority,Issue Type,Labels
+"Multi-pane IDE shell","hotkeys, command palette, undo/redo, explain overlay",P1,Task,"IDE & Developer Experience"
+"Docker sandbox runner","artifact hashing, SBOM",P1,Task,"IDE & Developer Experience"
+"ACI command set","constrained ops, linter/formatter gates",P1,Task,"IDE & Developer Experience"
+"AST search + multi-file edit","transactional patches, reliability",P1,Task,"IDE & Developer Experience"
+"Fault localization","uses test traces, patch proposals",P2,Task,"IDE & Developer Experience"
+"NL→code authoring","repo+ticket context, citations",P1,Task,"AI Coding Assistance"
+"Completion engine","tests/docs/types/logging by default",P1,Task,"AI Coding Assistance"
+"Implement X macro","DoD injection",P2,Task,"AI Coding Assistance"
+"CI/CD Actions kit","build, lint, test, SBOM, SAST/DAST, deploy",P1,Task,"CI/CD & Infrastructure"
+"E2E harness","Playwright; visual diffs",P1,Task,"CI/CD & Infrastructure"
+"IaC blueprints","Terraform+Helm envs",P1,Task,"CI/CD & Infrastructure"
+"Canary+rollback","health checks, freeze",P2,Task,"CI/CD & Infrastructure"
+"OTEL+Prom instrumenters","Grafana boards",P1,Task,"Observability & Monitoring"
+"Anomaly detectors","latency/error/cost spikes",P2,Task,"Observability & Monitoring"
+"SLOs & burn alerts","budget burn",P2,Task,"Observability & Monitoring"
+"Engineering-intel ingest","DORA/WIP/cycle time",P2,Task,"Engineering Intelligence"
+"Delivery risk model","velocity forecasts",P3,Task,"Engineering Intelligence"
+"NL→Cypher Copilot","cost/row estimates, sandbox execute",P1,Task,"Graph Intelligence & RAG"
+"GraphRAG with citations","path rationales, redaction aware",P1,Task,"Graph Intelligence & RAG"
+"Provenance/Claim ledger","export manifest",P2,Task,"Graph Intelligence & RAG"
+"Runbook engine","DAG + replay log, legal basis",P2,Task,"Graph Intelligence & RAG"
+"Tri-pane UX","graph/timeline/map sync",P2,Task,"Graph Intelligence & RAG"
+"ABAC/OPA governance","step-up auth, reason-for-access",P1,Task,"Governance & Policy"
+"License/TOS engine","export blockers, appeal",P1,Task,"Governance & Policy"
+"Policy simulation","historical replays",P3,Task,"Governance & Policy"
+"Offline kit","CRDT merges, signed resync",P3,Task,"Administration & Operations"
+"Admin Studio","feature flags, cost/rate caps",P1,Task,"Administration & Operations"
+"Issue-to-System automation","scaffold code/tests/CI/IaC/docs",P1,Task,"Automation & Scaffolding"
+"DoD enforcer bot","validate ACs & provenance",P2,Task,"Automation & Scaffolding"
+"Address TODO in arborist.yml","Found in `.archive/workflows/arborist.yml:18`
+
+> implement query for merged + age; log only in dry-run",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ci-reusable-build.yml","Found in `.archive/workflows/ci-reusable-build.yml:32`
+
+> replace with your build command",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in server.ts","Found in `.disabled/intelgraph-mcp.disabled/src/server.ts:10`
+
+> wire to graph backend and apply tenant-scoped filtering",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in canary-deployment.yml","Found in `.github/workflows/.archive/canary-deployment.yml:283`
+
+> Implement real SLO check using Prometheus or similar.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in canary-deployment.yml","Found in `.github/workflows/.archive/canary-deployment.yml:392`
+
+> Implement real burn rate check.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ci-platform.yml","Found in `.github/workflows/.archive/ci-platform.yml:204`
+
+> Add Playwright/API integration tests",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ci-platform.yml","Found in `.github/workflows/.archive/ci-platform.yml:232`
+
+> Add OPA policies and run conftest",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in ci-sharded-example.yml","Found in `.github/workflows/.archive/ci-sharded-example.yml:35`
+
+> Actual sharding depends on the test runner support.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in conftest.yml","Found in `.github/workflows/.archive/conftest.yml:6`
+
+> Remove once Helm template helpers are fixed",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ingest-ci.yml","Found in `.github/workflows/.archive/ingest-ci.yml:72`
+
+> Use a proper schema diff tool",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ingest-ci.yml","Found in `.github/workflows/.archive/ingest-ci.yml:218`
+
+> Implement smoke test",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in lambda-deploy-example.yml","Found in `.github/workflows/.archive/lambda-deploy-example.yml:69`
+
+> In a real scenario, you'd construct an AppSpec or just trigger a deployment",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in lambda-deploy-example.yml","Found in `.github/workflows/.archive/lambda-deploy-example.yml:102`
+
+> During a Blue/Green deployment, traffic might still be split.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in lane-fast.yml","Found in `.github/workflows/.archive/lane-fast.yml:45`
+
+> Remove once lint warnings are fixed across codebase",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in platform-health.yml","Found in `.github/workflows/.archive/platform-health.yml:24`
+
+> In a production environment, this workflow would depend on test/build workflows",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in copilot-golden-path.yml","Found in `.github/workflows/copilot-golden-path.yml:4`
+
+> Move _golden-path-pipeline.yml to top-level workflows directory",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in ga-ready.yml","Found in `.github/workflows/ga-ready.yml:57`
+
+> We allow failure here so ga-check can report it,",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in _golden-path-pipeline.yml","Found in `.github/workflows/golden-path/_golden-path-pipeline.yml:411`
+
+> Actual deployment steps would go here",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in golden-path-supply-chain.yml","Found in `.github/workflows/golden-path-supply-chain.yml:4`
+
+> Move reusable/supply-chain-policy.yml to top-level workflows",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in golden-path-supply-chain.yml","Found in `.github/workflows/golden-path-supply-chain.yml:28`
+
+> Fix and re-enable when the reusable workflow infrastructure is ready",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in isolation_stress.js","Found in `.maestro/tests/k6/isolation_stress.js:383`
+
+> In a real scenario, you might want to clean up test data",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in ARCHITECTURE_MAP.generated.yaml","Found in `ARCHITECTURE_MAP.generated.yaml:766`
+
+> S & CLARIFICATIONS",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in PROJECT_MANAGEMENT_SATURATION.md","Found in `PROJECT_MANAGEMENT_SATURATION.md:737`
+
+> wire to graph backend and apply tenant-scoped filtering",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in PROJECT_MANAGEMENT_SATURATION.md","Found in `PROJECT_MANAGEMENT_SATURATION.md:771`
+
+> Replace with actual JWT verification using your auth library",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in PROJECT_MANAGEMENT_SATURATION.md","Found in `PROJECT_MANAGEMENT_SATURATION.md:806`
+
+> Replace jQuery with React state management",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in MultiLLMOrchestrator.ts","Found in `agents/orchestrator/src/MultiLLMOrchestrator.ts:157`
+
+> 'request' here overrides the session history typically.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in MultiLLMOrchestrator.ts","Found in `agents/orchestrator/src/MultiLLMOrchestrator.ts:206`
+
+> Request messages might contain full history or just last turn.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in InvariantValidator.ts","Found in `agents/orchestrator/src/context/capsules/InvariantValidator.ts:269`
+
+> Integrate with Rego or CEL policy engine",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in linear_issues_bulk_import.yaml","Found in `analysis/linear_issues_bulk_import.yaml:599`
+
+> HARVEST ISSUES (Sample - 47 Infrastructure)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in search.js","Found in `api/search.js:6`
+
+> call Typesense search; for now, return empty",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in Database.ts","Found in `apps/.mobile-native-disabled/src/services/Database.ts:15`
+
+> Generate secure key",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in EnhancedOfflineSync.ts","Found in `apps/.mobile-native-disabled/src/services/EnhancedOfflineSync.ts:280`
+
+> Implement location sync mutation",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in NotificationService.ts","Found in `apps/.mobile-native-disabled/src/services/NotificationService.ts:118`
+
+> Send token to server",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in NotificationService.ts","Found in `apps/.mobile-native-disabled/src/services/NotificationService.ts:215`
+
+> Navigate to appropriate screen based on notification data",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in OfflineSync.ts","Found in `apps/.mobile-native-disabled/src/services/OfflineSync.ts:96`
+
+> Replace with actual mutation",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in server.ts","Found in `apps/analytics-engine/src/server.ts:462`
+
+> Implement PDF export",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in security.ts","Found in `apps/field-kit/src/lib/security.ts:68`
+
+> In a real app we would iterate all stores and clear them",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in scim.ts","Found in `apps/gateway/src/rbac/scim.ts:2`
+
+> Implement SCIM sync using your IdP API.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in search.ts","Found in `apps/gateway/src/routes/search.ts:82`
+
+> Add proper RBAC here",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in AttachmentUpload.tsx","Found in `apps/mobile/src/components/AttachmentUpload.tsx:140`
+
+> In production, would also remove from sync queue",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in offlineCache.ts","Found in `apps/mobile/src/lib/offlineCache.ts:360`
+
+> operations (locally created, sync-tracked)",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in securityMeasures.ts","Found in `apps/mobile/src/lib/securityMeasures.ts:53`
+
+> Can't actually prevent, but can log attempt",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in next-env.d.ts","Found in `apps/mobile-interface/next-env.d.ts:5`
+
+> This file should not be edited",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in EnhancedOfflineSync.ts","Found in `apps/mobile-native/src/services/EnhancedOfflineSync.ts:281`
+
+> Implement location sync mutation",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in NotificationService.ts","Found in `apps/mobile-native/src/services/NotificationService.ts:118`
+
+> Send token to server",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in NotificationService.ts","Found in `apps/mobile-native/src/services/NotificationService.ts:215`
+
+> Navigate to appropriate screen based on notification data",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in OfflineSync.ts","Found in `apps/mobile-native/src/services/OfflineSync.ts:96`
+
+> Replace with actual mutation",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in IndexingService.ts","Found in `apps/search-engine/src/services/IndexingService.ts:496`
+
+> ElasticsearchService needs a deleteDocument method",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in FlowStudio.tsx","Found in `apps/web/src/components/FlowStudio.tsx:15`
+
+> Replace jQuery with React state management",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in ScenarioSimulator.tsx","Found in `apps/web/src/components/narrative/ScenarioSimulator.tsx:93`
+
+> The API prefix might need to be adjusted based on setup.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in index.ts","Found in `apps/web/src/components/ui/index.ts:55`
+
+> Recharts components were previously re-exported here for convenience,",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in explainSlice.ts","Found in `apps/web/src/features/explain/explainSlice.ts:3`
+
+> viewSync feature was removed - restore if needed",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in explainSlice.ts","Found in `apps/web/src/features/explain/explainSlice.ts:36`
+
+> Re-enable when viewSync feature is restored",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TriPaneShell.tsx","Found in `apps/web/src/features/triPane/TriPaneShell.tsx:154`
+
+> Make dynamic based on workspace/investigation ID",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in useCollaboration.ts","Found in `apps/web/src/hooks/useCollaboration.ts:31`
+
+> Consumers should prefer emitting relative coordinates (0-1)",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in useGraphSync.ts","Found in `apps/web/src/lib/yjs/useGraphSync.ts:41`
+
+> This can cause issues if multiple clients init at once.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in AdminDashboard.tsx","Found in `apps/web/src/pages/AdminDashboard.tsx:33`
+
+> Implement missing admin components",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in AdminPage.tsx","Found in `apps/web/src/pages/AdminPage.tsx:14`
+
+> Add toast notification when component is implemented",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in PartnerConsole.tsx","Found in `apps/web/src/pages/PartnerConsole.tsx:33`
+
+> In a real app, this should probably be paginated",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in history-explain-bridge.ts","Found in `apps/web/src/sync/history-explain-bridge.ts:1`
+
+> Remove jQuery dependency - migrate to React event system",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in history-explain-bridge.ts","Found in `apps/web/src/sync/history-explain-bridge.ts:10`
+
+> Replace with React-based event system",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in engine.ts","Found in `bootstrap/src/engine.ts:47`
+
+> rootDir is 'bootstrap/', so repo root is 'bootstrap/../'",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in redis-backup-cron.yaml","Found in `charts/backup/redis-backup-cron.yaml:131`
+
+> In production, this would require access to Redis data directory",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in InteractiveGraphExplorer.js","Found in `client/_stashed_archive/client/src/components/graph/InteractiveGraphExplorer.js:564`
+
+> Highlight cluster nodes in graph",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in IntelGraphWorkbench.tsx","Found in `client/src/components/IntelGraphWorkbench.tsx:382`
+
+> Implement layout logic here (dagre, radial)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in IntelGraphWorkbench.tsx","Found in `client/src/components/IntelGraphWorkbench.tsx:732`
+
+> Show tooltip on hover",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in IntelGraphWorkbench.tsx","Found in `client/src/components/IntelGraphWorkbench.tsx:795`
+
+> Show tooltip on hover",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in DemoIndicator.test.jsx","Found in `client/src/components/common/DemoIndicator.test.jsx:13`
+
+> This test assumes DEMO_MODE is set in test environment",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in LiveActivityFeed.tsx","Found in `client/src/components/dashboard/LiveActivityFeed.tsx:24`
+
+> Re-enable GraphQL subscription when schema is available",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in LiveActivityFeed.tsx","Found in `client/src/components/dashboard/LiveActivityFeed.tsx:108`
+
+> Re-enable GraphQL subscription when schema is available",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in LiveActivityFeed.tsx","Found in `client/src/components/dashboard/LiveActivityFeed.tsx:119`
+
+> Re-enable when GraphQL subscription is available",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in StatsOverview.tsx","Found in `client/src/components/dashboard/StatsOverview.tsx:5`
+
+> Re-enable GraphQL query when schema is available",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in InteractiveGraphExplorer.jsx","Found in `client/src/components/graph/InteractiveGraphExplorer.jsx:568`
+
+> Highlight cluster nodes in graph",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ReportTemplateSelector.tsx","Found in `client/src/components/reports/ReportTemplateSelector.tsx:170`
+
+> replace with real mutation once backend wiring exists",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in OperationsDashboard.tsx","Found in `client/src/features/companyos/pages/OperationsDashboard.tsx:8`
+
+> TrendingUp was renamed to ArrowUpRight in newer versions of lucide-react",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in featureFlags.ts","Found in `client/src/flags/featureFlags.ts:24`
+
+> This might cause SyntaxError in CJS environments (like Jest) if not transformed.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in usePrefetch.ts","Found in `client/src/hooks/usePrefetch.ts:3`
+
+> Re-enable when GraphQL schema is available",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in usePrefetch.ts","Found in `client/src/hooks/usePrefetch.ts:16`
+
+> Re-enable when GraphQL schema is available",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in usePrefetch.ts","Found in `client/src/hooks/usePrefetch.ts:29`
+
+> Re-enable when GraphQL schema is available",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in usePrefetch.ts","Found in `client/src/hooks/usePrefetch.ts:43`
+
+> Re-enable when GraphQL schema is available",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in transport.ts","Found in `client/src/lib/assistant/transport.ts:111`
+
+> Authorization header isn’t supported by native EventSource; use a token query param or cookie.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in HuntList.tsx","Found in `client/src/pages/Hunting/HuntList.tsx:461`
+
+> Navigate to hunt detail page",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in HuntList.tsx","Found in `client/src/pages/Hunting/HuntList.tsx:536`
+
+> Create hunt logic here",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in IOCList.tsx","Found in `client/src/pages/IOC/IOCList.tsx:543`
+
+> Navigate to IOC detail page",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in IOCList.tsx","Found in `client/src/pages/IOC/IOCList.tsx:619`
+
+> Add IOC logic here",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in IOCList.tsx","Found in `client/src/pages/IOC/IOCList.tsx:678`
+
+> Import IOCs logic here",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in data-envelope-validator.ts","Found in `client/src/utils/data-envelope-validator.ts:204`
+
+> In browser, we'd use SubtleCrypto API instead",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ADR-2025-12-07-authorization-model-v0.md","Found in `companyos/adr/ADR-2025-12-07-authorization-model-v0.md:105`
+
+> Replace with OPA policy decision point",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in authContext.ts","Found in `companyos/services/tenant-api/src/middleware/authContext.ts:179`
+
+> Validate JWT token and extract user",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in metrics.ts","Found in `companyos/services/tenant-api/src/middleware/metrics.ts:10`
+
+> Replace with proper Prometheus client (prom-client) in production",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in sources.ts","Found in `companyos/src/evidence/sources.ts:14`
+
+> replace with metrics scrape; stubbed",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in sources.ts","Found in `companyos/src/evidence/sources.ts:19`
+
+> compute from usage + billing; stubbed",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in server.js","Found in `conductor-ui/backend/server.js:26`
+
+> In production, remove unsafe-inline and unsafe-eval",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in no-pii.e2e.ts","Found in `conductor-ui/frontend/privacy/tests/no-pii.e2e.ts:42`
+
+> db.statement.parameters should be scrubbed",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in util.ts","Found in `conductor-ui/frontend/privacy/tests/util.ts:60`
+
+> email should be scrubbed from actual logs",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in util.ts","Found in `conductor-ui/frontend/privacy/tests/util.ts:71`
+
+> parameters should be scrubbed",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in util.ts","Found in `conductor-ui/frontend/privacy/tests/util.ts:80`
+
+> no sensitive token data should appear",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in main-maestro.js","Found in `conductor-ui/frontend/src/maestro/main-maestro.js:7`
+
+> Add proper OpenTelemetry configuration when exporter packages are available",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in main-maestro.tsx","Found in `conductor-ui/frontend/src/maestro/main-maestro.tsx:7`
+
+> Add proper OpenTelemetry configuration when exporter packages are available",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in neo4j.test.ts","Found in `config/__tests__/neo4j.test.ts:332`
+
+> In real tests, you'd mock the driver to verify config",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in registry.json","Found in `debt/registry.json:36310`
+
+> Implement proper OIDC validation with issuer verification`."",",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in maestro-secrets.yaml","Found in `deploy/external-secrets/maestro-secrets.yaml:9`
+
+> set your SecretStore name",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in council_v_1_1_pager_roadmap_acceptance_test_checklist_ga_core.md","Found in `docs/ChatOps/council_v_1_1_pager_roadmap_acceptance_test_checklist_ga_core.md:194`
+
+> s & Next Steps",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in intel_graph_ai_symphony_orchestration_pack_mac_m_2_16_gb (1).md","Found in `docs/ChatOps/intel_graph_ai_symphony_orchestration_pack_mac_m_2_16_gb (1).md:132`
+
+> Avoid setting a provider-wide cap for ""openai_compatible"" to prevent impacting locals.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in intel_graph_ai_symphony_orchestration_pack_mac_m_2_16_gb (2).md","Found in `docs/ChatOps/intel_graph_ai_symphony_orchestration_pack_mac_m_2_16_gb (2).md:132`
+
+> Avoid setting a provider-wide cap for ""openai_compatible"" to prevent impacting locals.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in intel_graph_integrated_sprints_3_6_all_party_plan_draft_prs_jira_csv.md","Found in `docs/ChatOps/intel_graph_integrated_sprints_3_6_all_party_plan_draft_prs_jira_csv.md:333`
+
+> s on Compliance & Data Sensitivity",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_mvp_0_implementation_plan_repo_layout_code_stubs_keycloak_cisa_taxii_mapbox_copilot_preview.md","Found in `docs/ChatOps/intel_graph_mvp_0_implementation_plan_repo_layout_code_stubs_keycloak_cisa_taxii_mapbox_copilot_preview.md:401`
+
+> parse JWT (Keycloak). For dev, stub user",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_release_candidate_stabilization_pack_post_merge_orchestrator (1).md","Found in `docs/ChatOps/intel_graph_release_candidate_stabilization_pack_post_merge_orchestrator (1).md:217`
+
+> add GraphQL introspection ping & a trivial query",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_release_candidate_stabilization_pack_post_merge_orchestrator.md","Found in `docs/ChatOps/intel_graph_release_candidate_stabilization_pack_post_merge_orchestrator.md:217`
+
+> add GraphQL introspection ping & a trivial query",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_velocity_plan_v_1_guy.md","Found in `docs/ChatOps/intel_graph_velocity_plan_v_1_guy.md:318`
+
+> call embedding model provider",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in maestro_reference_tasks_runbooks_catalog_v_1.md","Found in `docs/ChatOps/maestro_reference_tasks_runbooks_catalog_v_1.md:210`
+
+> mapper is a JS function body in a sandboxed new Function (trusted catalogs only)",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in pr_patch_intel_graph_ai_ml_microservice_webhooks_approvals_audit_feedback (1).md","Found in `docs/ChatOps/pr_patch_intel_graph_ai_ml_microservice_webhooks_approvals_audit_feedback (1).md:781`
+
+> s on Hybrid Delivery (Webhook + Polling)",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in pr_patch_intel_graph_ai_ml_microservice_webhooks_approvals_audit_feedback.md","Found in `docs/ChatOps/pr_patch_intel_graph_ai_ml_microservice_webhooks_approvals_audit_feedback.md:788`
+
+> s on Hybrid Delivery (Webhook + Polling)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in sprint_14_implementation_scaffolding_code.md","Found in `docs/ChatOps/sprint_14_implementation_scaffolding_code.md:842`
+
+> Day-1: create case C-1, insert evidence rows, add two contradictory claims",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ISSUE_RESOLUTION_LEDGER.md","Found in `docs/ISSUE_RESOLUTION_LEDGER.md:55`
+
+> get tenant from context`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ISSUE_RESOLUTION_LEDGER.md","Found in `docs/ISSUE_RESOLUTION_LEDGER.md:205`
+
+> Get from auth context`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ISSUE_RESOLUTION_LEDGER.md","Found in `docs/ISSUE_RESOLUTION_LEDGER.md:261`
+
+> Add permission check (schema.admin)`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in PILOT_DEPLOYMENT_GUIDE.md","Found in `docs/PILOT_DEPLOYMENT_GUIDE.md:657`
+
+> Integrate with email service (SendGrid, Mailgun, etc.)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in 00-IMPLEMENTATION-STATUS.md","Found in `docs/agentic-mesh/00-IMPLEMENTATION-STATUS.md:65`
+
+> for Auth Gateway",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in claude-code-superprompt.md","Found in `docs/agents/variants/claude-code-superprompt.md:128`
+
+> ` comments are forbidden |",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in AGENTIC_EXECUTION_GUIDE.md","Found in `docs/archive/root-history/AGENTIC_EXECUTION_GUIDE.md:163`
+
+> any existing errors",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in AGENTIC_EXECUTION_GUIDE.md","Found in `docs/archive/root-history/AGENTIC_EXECUTION_GUIDE.md:164`
+
+> any existing warnings",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in CODEBASE_AUDIT_REPORT.md","Found in `docs/archive/root-history/CODEBASE_AUDIT_REPORT.md:131`
+
+> Implement admin-only check",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in CODEBASE_AUDIT_REPORT.md","Found in `docs/archive/root-history/CODEBASE_AUDIT_REPORT.md:136`
+
+> Implement actual export logic",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in Closed-PR-Merge.md","Found in `docs/archive/root-history/Closed-PR-Merge.md:1680`
+
+> s for Reviewers",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in DEPENDENCY_HEALTH_CHECK.md","Found in `docs/archive/root-history/DEPENDENCY_HEALTH_CHECK.md:506`
+
+> s & Recommendations",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in DEVELOPMENT_ROADMAP_12_WEEKS.md","Found in `docs/archive/root-history/DEVELOPMENT_ROADMAP_12_WEEKS.md:1101`
+
+> S FOR IMPORTATION",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in JULES_PRIORITY_QUEUE.md","Found in `docs/archive/root-history/JULES_PRIORITY_QUEUE.md:9`
+
+> Implement proper OIDC validation with issuer verification`.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in JULES_PRIORITY_QUEUE.md","Found in `docs/archive/root-history/JULES_PRIORITY_QUEUE.md:18`
+
+> Detect mutation vs query`.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in JULES_PRIORITY_QUEUE.md","Found in `docs/archive/root-history/JULES_PRIORITY_QUEUE.md:27`
+
+> Log audit entry to hash chain`.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in JULES_PRIORITY_QUEUE.md","Found in `docs/archive/root-history/JULES_PRIORITY_QUEUE.md:35`
+
+> Verify signature against provider's registered key (PKI/cosign)`.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in JULES_PRIORITY_QUEUE.md","Found in `docs/archive/root-history/JULES_PRIORITY_QUEUE.md:43`
+
+> Monitor system metrics (CPU, memory, query latency)`.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in JULES_PRIORITY_QUEUE.md","Found in `docs/archive/root-history/JULES_PRIORITY_QUEUE.md:51`
+
+> Track error rate in metrics`.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in JULES_PRIORITY_QUEUE.md","Found in `docs/archive/root-history/JULES_PRIORITY_QUEUE.md:59`
+
+> Track cache hits/misses`.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in JULES_PRIORITY_QUEUE.md","Found in `docs/archive/root-history/JULES_PRIORITY_QUEUE.md:67`
+
+> Integrate with actual Neo4j sandbox connection`.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in JULES_PRIORITY_QUEUE.md","Found in `docs/archive/root-history/JULES_PRIORITY_QUEUE.md:125`
+
+> Implement layout logic here (dagre, radial)`.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in JULES_PRIORITY_QUEUE.md","Found in `docs/archive/root-history/JULES_PRIORITY_QUEUE.md:134`
+
+> Navigate to IOC detail page`.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in JULES_PRIORITY_QUEUE.md","Found in `docs/archive/root-history/JULES_PRIORITY_QUEUE.md:142`
+
+> call Python/HTTP embedding generator; placeholder`.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in JULES_PRIORITY_QUEUE.md","Found in `docs/archive/root-history/JULES_PRIORITY_QUEUE.md:150`
+
+> Show tooltip on hover`.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in JULES_PRIORITY_QUEUE.md","Found in `docs/archive/root-history/JULES_PRIORITY_QUEUE.md:165`
+
+> Implement usage tracking per user/tenant`.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in MAINTAINABILITY.md","Found in `docs/archive/root-history/MAINTAINABILITY.md:436`
+
+> fix this",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in MAINTAINABILITY.md","Found in `docs/archive/root-history/MAINTAINABILITY.md:439`
+
+> Implement proper error handling for network failures",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in PROMPTS_65-72_PLAN.md","Found in `docs/archive/root-history/PROMPTS_65-72_PLAN.md:117`
+
+> s on isolation and compliance",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in SPRINT_FRAUD_SCAM_INTEL.md","Found in `docs/archive/root-history/SPRINT_FRAUD_SCAM_INTEL.md:187`
+
+> call GraphQL mutation server.mutations.upsertAlert(alerts)",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in SPRINT_MAESTRO_COMPOSER_BACKEND_S2.md","Found in `docs/archive/root-history/SPRINT_MAESTRO_COMPOSER_BACKEND_S2.md:216`
+
+> s from Repo Scan (grounding)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECHNICAL_DEBT.md","Found in `docs/archive/root-history/TECHNICAL_DEBT.md:29`
+
+> Re-enable GraphQL subscription when schema is available",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECHNICAL_DEBT.md","Found in `docs/archive/root-history/TECHNICAL_DEBT.md:30`
+
+> Re-enable GraphQL query when schema is available",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECHNICAL_DEBT.md","Found in `docs/archive/root-history/TECHNICAL_DEBT.md:66`
+
+> Track hit rate""",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECHNICAL_DEBT.md","Found in `docs/archive/root-history/TECHNICAL_DEBT.md:67`
+
+> Track cache hits/misses""",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECHNICAL_DEBT.md","Found in `docs/archive/root-history/TECHNICAL_DEBT.md:68`
+
+> Track error rate in metrics""",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECHNICAL_DEBT.md","Found in `docs/archive/root-history/TECHNICAL_DEBT.md:159`
+
+> "" comments",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECHNICAL_DEBT.md","Found in `docs/archive/root-history/TECHNICAL_DEBT.md:160`
+
+> wire to your telemetry""",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECHNICAL_DEBT.md","Found in `docs/archive/root-history/TECHNICAL_DEBT.md:161`
+
+> ping DB/queue""",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:8`
+
+> implement query for merged + age; log only in dry-run`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:11`
+
+> call GraphQL mutation server.mutations.upsertAlert(alerts)`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:12`
+
+> call Typesense search; for now, return empty`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:13`
+
+> Implement PDF export`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:14`
+
+> Implement SCIM sync using your IdP API.`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:15`
+
+> wire to your telemetry`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:16`
+
+> Implement layout logic here (dagre, radial)`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:17`
+
+> Re-enable GraphQL subscription when schema is available`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:18`
+
+> Re-enable when GraphQL schema is available`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:19`
+
+> Navigate to hunt detail page`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:20`
+
+> Navigate to IOC detail page`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:22`
+
+> implement simulation of 50 clients editing the same document`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:23`
+
+> Add proper OpenTelemetry configuration when exporter packages are available`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:25`
+
+> set your SecretStore name`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:26`
+
+> Implement admin-only check`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:27`
+
+> Replace with your OIDC issuer URL`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:28`
+
+> replace with actual processing logic`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:29`
+
+> implement actual fine-tuning logic`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:30`
+
+> Implement actual data export logic`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:32`
+
+> ping DB/queue`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:33`
+
+> reuse MerkleLog to recompute root; placeholder returns true`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TECH_DEBT_TRACKER.md","Found in `docs/archive/root-history/TECH_DEBT_TRACKER.md:34`
+
+> Track per-expert request counts if needed`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ci_cd_hardening_ready_to_commit_bundle_maestro_aware.md","Found in `docs/archive/root-history/ci_cd_hardening_ready_to_commit_bundle_maestro_aware.md:149`
+
+> replace with your build command",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ci_cd_hardening_ready_to_commit_bundle_maestro_aware.md","Found in `docs/archive/root-history/ci_cd_hardening_ready_to_commit_bundle_maestro_aware.md:470`
+
+> set cluster context via KUBE_CONFIG",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ci_cd_hardening_ready_to_commit_bundle_maestro_aware.md","Found in `docs/archive/root-history/ci_cd_hardening_ready_to_commit_bundle_maestro_aware.md:516`
+
+> implement checks against your metrics endpoint / health dashboard",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in ci_cd_hardening_ready_to_commit_bundle_maestro_aware.md","Found in `docs/archive/root-history/ci_cd_hardening_ready_to_commit_bundle_maestro_aware.md:646`
+
+> s for Maestro Conductor Integration",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in company_os_next_pack_eight_parallel_pr_slices.md","Found in `docs/archive/root-history/company_os_next_pack_eight_parallel_pr_slices.md:133`
+
+> replace with metrics scrape; stubbed",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in company_os_next_pack_eight_parallel_pr_slices.md","Found in `docs/archive/root-history/company_os_next_pack_eight_parallel_pr_slices.md:137`
+
+> compute from usage + billing; stubbed",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in company_os_next_pack_eight_parallel_pr_slices.md","Found in `docs/archive/root-history/company_os_next_pack_eight_parallel_pr_slices.md:457`
+
+> fetchAndVerify expects a real tar; here we just assert headers via Pact",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in docs_phase_37_38_enterprise_search_sso_audit_trust_center_data_governance.md","Found in `docs/archive/root-history/docs_phase_37_38_enterprise_search_sso_audit_trust_center_data_governance.md:181`
+
+> call Typesense search; for now, return empty",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (1).md","Found in `docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (1).md:289`
+
+> snapshot/restore per toolClass for p95 cold-start ≤300ms.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (1).md","Found in `docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (1).md:344`
+
+> enforce purpose tags and caps intersection.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (1).md","Found in `docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (1).md:465`
+
+> enforce causal ordering + side-effect stubs per ADR 0004.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (2).md","Found in `docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (2).md:289`
+
+> snapshot/restore per toolClass for p95 cold-start ≤300ms.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (2).md","Found in `docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (2).md:344`
+
+> enforce purpose tags and caps intersection.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (2).md","Found in `docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (2).md:465`
+
+> enforce causal ordering + side-effect stubs per ADR 0004.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (2).md","Found in `docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (2).md:1037`
+
+> resume from `last` using in‑memory ring buffer / redis stream",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (2).md","Found in `docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (2).md:1546`
+
+> batch + sign",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets.md","Found in `docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets.md:289`
+
+> snapshot/restore per toolClass for p95 cold-start ≤300ms.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets.md","Found in `docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets.md:344`
+
+> enforce purpose tags and caps intersection.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets.md","Found in `docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets.md:465`
+
+> enforce causal ordering + side-effect stubs per ADR 0004.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_pr_6_opa_abac_policy_simulation_api.md","Found in `docs/archive/root-history/intel_graph_pr_6_opa_abac_policy_simulation_api.md:202`
+
+> JWT; for now honor a simple header: ""role <role>""",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_repo_bootstrap_first_3_prs_patches_commands.md","Found in `docs/archive/root-history/intel_graph_repo_bootstrap_first_3_prs_patches_commands.md:420`
+
+> implement AST visitor; for now return small constant",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_summit_pr_pack_001_workflows_policies_rollouts_dr.md","Found in `docs/archive/root-history/intel_graph_summit_pr_pack_001_workflows_policies_rollouts_dr.md:508`
+
+> replace with actual backup store + restore commands",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_summit_pr_pack_003_testing_flake_mgmt_data_policy_incidents_fin_ops.md","Found in `docs/archive/root-history/intel_graph_summit_pr_pack_003_testing_flake_mgmt_data_policy_incidents_fin_ops.md:623`
+
+> implement query for merged + age; log only in dry-run",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_summit_pr_pack_007_service_mesh_m_tls_multi_cluster_dora_notes_sbom_secretless.md","Found in `docs/archive/root-history/intel_graph_summit_pr_pack_007_service_mesh_m_tls_multi_cluster_dora_notes_sbom_secretless.md:214`
+
+> compute from releases, deployments, incidents issues",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_workstream_starter_pack_v_0.md","Found in `docs/archive/root-history/intel_graph_workstream_starter_pack_v_0.md:347`
+
+> implement",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in mc↔cos_starter_additions_ci_sign_verify_cos_fetch_client_contract_test (2).md","Found in `docs/archive/root-history/mc↔cos_starter_additions_ci_sign_verify_cos_fetch_client_contract_test (2).md:1281`
+
+> pull latest Evidence bundle for (service, releaseId)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in mc↔cos_starter_additions_ci_sign_verify_cos_fetch_client_contract_test (3).md","Found in `docs/archive/root-history/mc↔cos_starter_additions_ci_sign_verify_cos_fetch_client_contract_test (3).md:1281`
+
+> pull latest Evidence bundle for (service, releaseId)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in release_train_migration_gate_defaults_wired_to_maestro.md","Found in `docs/archive/root-history/release_train_migration_gate_defaults_wired_to_maestro.md:265`
+
+> Replace with real metrics queries. Placeholder loop to indicate stepwise promotion.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in release_train_migration_gate_defaults_wired_to_maestro.md","Found in `docs/archive/root-history/release_train_migration_gate_defaults_wired_to_maestro.md:270`
+
+> query metrics; exit 1 on breach to trigger rollback",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in release_train_migration_gate_defaults_wired_to_maestro.md","Found in `docs/archive/root-history/release_train_migration_gate_defaults_wired_to_maestro.md:280`
+
+> implement check against your metrics provider using .ci/config/slo.yml thresholds",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in summit_main_tailored_ci_cd_bundle_pnpm_python_helm_terraform.md","Found in `docs/archive/root-history/summit_main_tailored_ci_cd_bundle_pnpm_python_helm_terraform.md:437`
+
+> call metrics endpoint(s) and enforce thresholds from .ci/config/slo.yml",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in team-prompts-clarifications.md","Found in `docs/archive/root-history/team-prompts-clarifications.md:11`
+
+> s for coordination",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in tenant-churn-analysis-workspace.yaml","Found in `docs/blueprints/examples/tenant-churn-analysis-workspace.yaml:175`
+
+> book environment",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in maestro_reference_tasks_runbooks_catalog_v_1.md","Found in `docs/maestro_reference_tasks_runbooks_catalog_v_1.md:210`
+
+> mapper is a JS function body in a sandboxed new Function (trusted catalogs only)",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in ON_CALL_GUIDE.md","Found in `docs/operations/ON_CALL_GUIDE.md:194`
+
+> anything to mention in tomorrow's handoff",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in proof-first-core-ga-sprint-kit.md","Found in `docs/project_management/proof-first-core-ga-sprint-kit.md:1029`
+
+> verify checksums across referenced files",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in docs_phase_37_38_enterprise_search_sso_audit_trust_center_data_governance.md","Found in `docs/releases/docs_phase_37_38_enterprise_search_sso_audit_trust_center_data_governance.md:181`
+
+> call Typesense search; for now, return empty",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in repo-bootstrap.md","Found in `docs/repo-bootstrap.md:435`
+
+> implement AST visitor; for now return small constant",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_summit_pr_pack_001_workflows_policies_rollouts_dr.md","Found in `docs/reports/intel_graph_summit_pr_pack_001_workflows_policies_rollouts_dr.md:508`
+
+> replace with actual backup store + restore commands",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_summit_pr_pack_003_testing_flake_mgmt_data_policy_incidents_fin_ops.md","Found in `docs/reports/intel_graph_summit_pr_pack_003_testing_flake_mgmt_data_policy_incidents_fin_ops.md:623`
+
+> implement query for merged + age; log only in dry-run",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intel_graph_summit_pr_pack_007_service_mesh_m_tls_multi_cluster_dora_notes_sbom_secretless.md","Found in `docs/reports/intel_graph_summit_pr_pack_007_service_mesh_m_tls_multi_cluster_dora_notes_sbom_secretless.md:214`
+
+> compute from releases, deployments, incidents issues",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in summit-platform-execution-master.md","Found in `docs/roadmaps/summit-platform-execution-master.md:49`
+
+> Catalog",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in CRITICAL_TODOS_CATALOG.md","Found in `docs/security/CRITICAL_TODOS_CATALOG.md:43`
+
+> Add proper RBAC here",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in CRITICAL_TODOS_CATALOG.md","Found in `docs/security/CRITICAL_TODOS_CATALOG.md:77`
+
+> Implement SCIM sync using your IdP API.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in CRITICAL_TODOS_CATALOG.md","Found in `docs/security/CRITICAL_TODOS_CATALOG.md:444`
+
+> implement checks against your metrics endpoint / health dashboard",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in CRITICAL_TODOS_CATALOG.md","Found in `docs/security/CRITICAL_TODOS_CATALOG.md:480`
+
+> call metrics endpoint(s) and enforce thresholds from .ci/config/slo.yml",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in CRITICAL_TODOS_CATALOG.md","Found in `docs/security/CRITICAL_TODOS_CATALOG.md:515`
+
+> Generate secure key`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in CRITICAL_TODOS_CATALOG.md","Found in `docs/security/CRITICAL_TODOS_CATALOG.md:521`
+
+> Generate secure key",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in CRITICAL_TODOS_CATALOG.md","Found in `docs/security/CRITICAL_TODOS_CATALOG.md:571`
+
+> call Typesense search; for now, return empty",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in CRITICAL_TODOS_CATALOG.md","Found in `docs/security/CRITICAL_TODOS_CATALOG.md:602`
+
+> Track failures`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in CRITICAL_TODOS_CATALOG.md","Found in `docs/security/CRITICAL_TODOS_CATALOG.md:608`
+
+> Track failures",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in CRITICAL_TODOS_CATALOG.md","Found in `docs/security/CRITICAL_TODOS_CATALOG.md:609`
+
+> Track bytes",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in CRITICAL_TODOS_CATALOG.md","Found in `docs/security/CRITICAL_TODOS_CATALOG.md:651`
+
+> Track bytes`",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in SECURITY_INTEGRATION_GUIDE.md","Found in `docs/security/SECURITY_INTEGRATION_GUIDE.md:248`
+
+> Add query complexity analysis",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in SECURITY_TODOS_ANALYSIS.md","Found in `docs/security/SECURITY_TODOS_ANALYSIS.md:205`
+
+> Add proper RBAC here",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TODO_REMEDIATION_PLAN.md","Found in `docs/security/TODO_REMEDIATION_PLAN.md:1`
+
+> REMEDIATION PLAN — SUMMIT GA READINESS",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in critical-todos-ledger.json","Found in `docs/security/critical-todos-ledger.json:28`
+
+> Add proper RBAC here\n    res.json({ status: 'triggered', job_id: 'job-' + Date.now() });\n});"",",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in critical-todos-ledger.json","Found in `docs/security/critical-todos-ledger.json:47`
+
+> Implement SCIM sync using your IdP API.\n  return { ok: true } as const;\n}"",",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in critical-todos-ledger.json","Found in `docs/security/critical-todos-ledger.json:256`
+
+> implement checks against your metrics endpoint / health dashboard\nexit 0"",",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in critical-todos-ledger.json","Found in `docs/security/critical-todos-ledger.json:275`
+
+> call metrics endpoint(s) and enforce thresholds from .ci/config/slo.yml\nexit 0"",",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in critical-todos-ledger.json","Found in `docs/security/critical-todos-ledger.json:285`
+
+> Generate secure key"",",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in critical-todos-ledger.json","Found in `docs/security/critical-todos-ledger.json:294`
+
+> Generate secure key\n});"",",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in critical-todos-ledger.json","Found in `docs/security/critical-todos-ledger.json:313`
+
+> call Typesense search; for now, return empty\n  return res.status(200).json([]);\n};"",",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in critical-todos-ledger.json","Found in `docs/security/critical-todos-ledger.json:323`
+
+> Track failures"",",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in critical-todos-ledger.json","Found in `docs/security/critical-todos-ledger.json:332`
+
+> Track failures\n  bytes_processed: 0, // TODO: Track bytes\n  processing_duration_ms: Date.now() - startTime,\n};"",",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in critical-todos-ledger.json","Found in `docs/security/critical-todos-ledger.json:342`
+
+> Track bytes"",",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in critical-todos-ledger.json","Found in `docs/security/critical-todos-ledger.json:351`
+
+> Track failures\n  bytes_processed: 0, // TODO: Track bytes\n  processing_duration_ms: Date.now() - startTime,\n};"",",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in SPRINT_FRAUD_SCAM_INTEL.md","Found in `docs/sprints/SPRINT_FRAUD_SCAM_INTEL.md:187`
+
+> call GraphQL mutation server.mutations.upsertAlert(alerts)",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in SPRINT_MAESTRO_COMPOSER_BACKEND_S2.md","Found in `docs/sprints/SPRINT_MAESTRO_COMPOSER_BACKEND_S2.md:216`
+
+> s from Repo Scan (grounding)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in exporter.ts","Found in `dora/exporter.ts:5`
+
+> compute from releases, deployments, incidents issues",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in collab-delta-sync.spec.ts","Found in `e2e/client/collab-delta-sync.spec.ts:5`
+
+> implement simulation of 50 clients editing the same document",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in golden-path-ci-gate.spec.ts","Found in `e2e/client/golden-path-ci-gate.spec.ts:356`
+
+> Actual rate limiting verification would need higher load",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in webauthn.spec.ts","Found in `e2e/client/webauthn.spec.ts:8`
+
+> This is a simplified test. A real implementation would involve:",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in golden-path.spec.ts","Found in `e2e/golden-path.spec.ts:54`
+
+> Can't easily assert contents of canvas, but presence is good.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in maestro-run-console.spec.ts","Found in `e2e/maestro-run-console.spec.ts:3`
+
+> Enable this test once the apps/web environment is stable and can be served locally.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in performance-monitor.ts","Found in `graphql/performance-monitor.ts:338`
+
+> This is a simple implementation. In production, use the actual DataLoader library",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in oidc-auth.yaml","Found in `infra/k8s/auth/oidc-auth.yaml:16`
+
+> Replace with your OIDC issuer URL",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in oidc-auth.yaml","Found in `infra/k8s/auth/oidc-auth.yaml:17`
+
+> Replace with your OIDC client ID for production",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in oidc-auth.yaml","Found in `infra/k8s/auth/oidc-auth.yaml:20`
+
+> Replace with your production redirect URI",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in oidc-auth.yaml","Found in `infra/k8s/auth/oidc-auth.yaml:21`
+
+> Replace with your production post-logout redirect URI",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in oidc-auth.yaml","Found in `infra/k8s/auth/oidc-auth.yaml:85`
+
+> Replace with your base64 encoded OIDC client secret (prod)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in oidc-auth.yaml","Found in `infra/k8s/auth/oidc-auth.yaml:87`
+
+> Replace with your base64 encoded JWT signing secret (prod)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in oidc-auth.yaml","Found in `infra/k8s/auth/oidc-auth.yaml:89`
+
+> Replace with your base64 encoded session encryption key (prod)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in oidc-auth.yaml","Found in `infra/k8s/auth/oidc-auth.yaml:140`
+
+> Replace with your OIDC issuer URL",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in oidc-auth.yaml","Found in `infra/k8s/auth/oidc-auth.yaml:142`
+
+> Replace with your OIDC client ID for production",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in oidc-auth.yaml","Found in `infra/k8s/auth/oidc-auth.yaml:154`
+
+> Replace with your production domain",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in oidc-auth.yaml","Found in `infra/k8s/auth/oidc-auth.yaml:156`
+
+> Replace with your production redirect URI",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in oidc-auth.yaml","Found in `infra/k8s/auth/oidc-auth.yaml:253`
+
+> Replace with your production domain",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in 20-control-plane.yaml","Found in `infra/k8s/zero-trust/network-policies/20-control-plane.yaml:322`
+
+> In production, use egress gateway with domain filtering",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in server.js","Found in `intelgraph/server/server.js:163`
+
+> Extract user from token",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in replayer.ts","Found in `intelgraph-mcp/services/replay-engine/src/replayer.ts:5`
+
+> enforce causal ordering + side-effect stubs per ADR 0004.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in firecracker.ts","Found in `intelgraph-mcp/services/runtime-pooler/src/firecracker.ts:114`
+
+> tie into deterministic sandbox runner communicating with VM guest agent.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in next-env.d.ts","Found in `intelgraph-mcp/shootout-ui/next-env.d.ts:4`
+
+> This file should not be edited",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in next-env.d.ts","Found in `intelgraph-mvp/ui/next-env.d.ts:4`
+
+> This file should not be edited",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in auth.ts","Found in `intelgraph-quickstart/api/src/auth.ts:8`
+
+> extend with OIDC validation if Authorization: Bearer is present",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in agent-scale-test.js","Found in `k6/agent-scale-test.js:147`
+
+> If auth fails with 401/403, it counts as failure for the test setup but maybe not for the system availability if credentials are bad.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in agent-slo-gate.js","Found in `k6/agent-slo-gate.js:16`
+
+> In a real CI, we might run the full scale test. Here we run a lighter version.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in golden-path-benchmark.js","Found in `k6/golden-path-benchmark.js:9`
+
+> This path is relative to the script file execution location (usually repo root if run via npm script)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in purge-processor.yaml","Found in `k8s/cron/purge-processor.yaml:19`
+
+> replace with actual processing logic",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in dr-restore.yaml","Found in `k8s/cronjobs/dr-restore.yaml:18`
+
+> replace with actual backup store + restore commands",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in rate-limiter.ts","Found in `libs/ingest-worker/node/src/rate-limiter.ts:165`
+
+> This is a simplification; in production you might want to handle this differently",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in mc_v_0_3.jsx","Found in `mc_v_0_3.jsx:20`
+
+> Wire API_BASE to your MC Gateway; all writes must be persisted-only + audit-logged.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in DocumentsScreen.tsx","Found in `mobile/src/screens/DocumentsScreen.tsx:33`
+
+> Date.now() in event handlers is safe, unlike in render logic.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in slo-burn-rules.yaml","Found in `observability/alerts/prometheus/slo-burn-rules.yaml:2`
+
+> Replace metric names/labels to match your exporters.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in Switchboard.md","Found in `october2025/Switchboard.md:4328`
+
+> s: start with vision, then timeline",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in Switchboard.md","Found in `october2025/Switchboard.md:4338`
+
+> s: ask for owners and dates",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in Switchboard.md","Found in `october2025/Switchboard.md:4348`
+
+> s: propose mitigations",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in Switchboard.md","Found in `october2025/Switchboard.md:4412`
+
+> s: ...",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in Switchboard.md","Found in `october2025/Switchboard.md:4670`
+
+> s: ... --> text.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in Switchboard.md","Found in `october2025/Switchboard.md:5081`
+
+> call OPA/engine; demo logic:",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in Switchboard.md","Found in `october2025/Switchboard.md:5764`
+
+> call OPA sidecar / wasmtime policy / local rules",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in Switchboard.md","Found in `october2025/Switchboard.md:5773`
+
+> fan-out to native signaling / window/event bus",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in Switchboard.md","Found in `october2025/Switchboard.md:5779`
+
+> store via keyring or encrypted file",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in Switchboard.md","Found in `october2025/Switchboard.md:12436`
+
+> look up from CRM or DB; stubbed for now",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in Switchboard.md","Found in `october2025/Switchboard.md:12453`
+
+> persist to decisions table & append audit trail",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in app_team_2025_10_20_switchboard_approvals_rationale_v_2_022.md","Found in `october2025/app_team_2025_10_20_switchboard_approvals_rationale_v_2_022.md:140`
+
+> wire to api-client, OPA preflight, receipts",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in co_ceo_governance_workstream_2026_02_09_08.md","Found in `october2025/co_ceo_governance_workstream_2026_02_09_08.md:130`
+
+> implement cosign verify",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in next-env.d.ts","Found in `october2025/companyos-switchboard/apps/web/next-env.d.ts:3`
+
+> This file should not be edited",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in route.ts","Found in `october2025/companyos-switchboard/apps/web/src/app/api/switchboard/[[...path]]/route.ts:31`
+
+> Replace with actual JWT verification using your auth library",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in router.ts","Found in `october2025/companyos-switchboard/apps/web/src/switchboard/router.ts:41`
+
+> Integrate with the application's real logger (e.g. Pino, Winston)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in router.ts","Found in `october2025/companyos-switchboard/apps/web/src/switchboard/router.ts:44`
+
+> Integrate with real metrics (e.g. Prometheus, StatsD)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in docs_phase_37_38_enterprise_search_sso_audit_trust_center_data_governance.md","Found in `october2025/docs_phase_37_38_enterprise_search_sso_audit_trust_center_data_governance.md:181`
+
+> call Typesense search; for now, return empty",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in gc_legal_governance_q_4_2025_10_20_to_2025_10_31_sprint_02.md","Found in `october2025/gc_legal_governance_q_4_2025_10_20_to_2025_10_31_sprint_02.md:238`
+
+> POST to registry when available",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in groves_security_governance_provenance_2025_10_01_10_14_sprint_01.md","Found in `october2025/groves_security_governance_provenance_2025_10_01_10_14_sprint_01.md:272`
+
+> verify Merkle root + signatures",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in guy_intelgraph_platform_auditable_core_2025_10_06_sprint_01.md","Found in `october2025/guy_intelgraph_platform_auditable_core_2025_10_06_sprint_01.md:237`
+
+> call model; sanitize schema-aware generation",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in guy_intelgraph_platform_explainable_analyst_assist_2025_11_03_sprint_03.md","Found in `october2025/guy_intelgraph_platform_explainable_analyst_assist_2025_11_03_sprint_03.md:233`
+
+> call OPA for join permission using abac() logic or explicit policy fn",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in guy_intelgraph_platform_mobile_attachments_mdm_er_rules_2026_02_02_sprint_09.md","Found in `october2025/guy_intelgraph_platform_mobile_attachments_mdm_er_rules_2026_02_02_sprint_09.md:188`
+
+> OCR hook (WebAssembly) for basic text scan",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in guy_intelgraph_platform_mobile_attachments_mdm_er_rules_2026_02_02_sprint_09.md","Found in `october2025/guy_intelgraph_platform_mobile_attachments_mdm_er_rules_2026_02_02_sprint_09.md:209`
+
+> OCR then regex scan for emails/PII",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in guy_intelgraph_platform_mobile_write_mtls_2026_01_19_sprint_08 (1).md","Found in `october2025/guy_intelgraph_platform_mobile_write_mtls_2026_01_19_sprint_08 (1).md:213`
+
+> OPA posture gate checked earlier in middleware",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in guy_intelgraph_platform_mobile_write_mtls_2026_01_19_sprint_08.md","Found in `october2025/guy_intelgraph_platform_mobile_write_mtls_2026_01_19_sprint_08.md:213`
+
+> OPA posture gate checked earlier in middleware",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in integration_diffs_fold_into_existing_services_opa_bundle.md","Found in `october2025/integration_diffs_fold_into_existing_services_opa_bundle.md:238`
+
+> replace with real OPA check",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in investigate1.md","Found in `october2025/investigate1.md:294`
+
+> integrate retriever + coverage + generator\n\n\n---\n\n## /benchmark/results.md\n- Latency: 72 ms p95 (N=10k queries, Android NPU)\n- Memory: 1.6 GB (RTD+PQ compressed corpus)\n- Coverage@0.9: 0.985\n- Uncited Claim Rate: 0.4%\n- Proof size: 2.1 KB avg\n- Verification time: 0.7 ms\n\n---\n\n## /ip/claims.md\n1. Method Claim: Generating text conditioned on retrieved spans bundled with a cryptographic coverage certificate.\n2. System Claim: Device implementing sketch-first pre-prune, PQ-ANN retriever, coverage assembler, and verifier.\n3. Dependent Claims:\n - Co-trained sketch encoder.\n - Span-credit learner.\n - Dual-channel RTD+PQ.\n - Adaptive τ policies.\n - Verifier-gated decoding.\n - Attested runtime integration.\n - Proof branch deduplication.\n - Risk-aware fallback policies.\n\n---\n\n## /compliance/data_governance.md\n- All data synthetic or public QA.\n- No PII stored in RTD.\n- DP noise applied during online learner updates.\n- SPDX SBOM generated automatically.\n\n---\n\n## /next_steps.md\n- [ ] Finalize Rust PQ kernel.\n- [ ] Integrate verifier with Summit decoder.\n- [ ] Expand evaluation harness with entailment checks.\n- [ ] Draft provisional patent with full claims set.\n- [ ] Reach out to OEM partners (Samsung, Qualcomm).\n- [ ] Run enterprise pilot (finance/legal).\n- [ ] Prepare compliance packet for audits.\n- [ ] File PCT application within 12 months.""}}",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in investigate1.md","Found in `october2025/investigate1.md:309`
+
+> s for Prosecution\n- Distinguish from classic RAG (Lewis 2020): no cryptographic proof layer, no verifier-gated decoding.\n- Distinguish from PCC (Necula 1997): applied to code safety, not ML retrieval context.\n- Distinguish from transparency logs (RFC6962): log commitments, not span-level coverage proofs.\n\n---\n\n## Next Steps\n- Expand dependent claims for multi-lingual verifier, federated retriever updates, and GPU/NPU acceleration.\n- Generate formal claim language for filing (US provisional → PCT).\n- Align claim chart with Summit | IntelGraph | MC integration modules for industrial applicability.""}}",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in investigate1.md","Found in `october2025/investigate1.md:314`
+
+> s\n- Figures designed to map directly to claim chart.\n- Use for /ip/draft_spec.md filing package.\n- Mermaid source ensures reproducibility + easy redrawing.\n\n---""}}",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in pager_duty_statuspage_wiring_helm_consumer_docs_final_gap_sweep.md","Found in `october2025/pager_duty_statuspage_wiring_helm_consumer_docs_final_gap_sweep.md:65`
+
+> if using Helm, patch via values instead of editing manifest",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in sprint_2025_09_29_artifacts_and_scaffolds.md","Found in `october2025/sprint_2025_09_29_artifacts_and_scaffolds.md:256`
+
+> parse results to normalized event model",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in sprint_2025_10_27_intelgraph_v_0.md","Found in `october2025/sprint_2025_10_27_intelgraph_v_0.md:182`
+
+> load graph, compute/update embeddings",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in summit_git_hub_projects_scaffolding_opa_ci_policy_gates.md","Found in `october2025/summit_git_hub_projects_scaffolding_opa_ci_policy_gates.md:82`
+
+> gh project field create requires gh >= 2.60",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in docker-compose.yml","Found in `ops/compose/docker-compose.yml:25`
+
+> different host port than your single container",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in judge.ts","Found in `packages/agent-lab/src/judge.ts:38`
+
+> s',",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in WellbeingPredictor.test.ts","Found in `packages/ai-wellbeing-predictors/src/__tests__/WellbeingPredictor.test.ts:428`
+
+> After normalization, the actual percentages may differ",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `packages/api-analytics/src/index.ts:12`
+
+> Add these modules when implemented",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `packages/api-management/src/index.ts:10`
+
+> Add these modules when implemented",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ConsensusEngine.ts","Found in `packages/blockchain/src/consensus/ConsensusEngine.ts:261`
+
+> Implement signature verification",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in Blockchain.ts","Found in `packages/blockchain/src/core/Blockchain.ts:425`
+
+> Implement signature verification",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `packages/business-rules/src/index.ts:793`
+
+> Implement conflict detection for UNIQUE policy",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in azure-storage.ts","Found in `packages/cloud-abstraction/src/storage/azure-storage.ts:225`
+
+> Azure SAS tokens require different permissions",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ConvergenceTracker.ts","Found in `packages/convergence-tracking/src/ConvergenceTracker.ts:231`
+
+> Analyze historical convergence patterns",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ConvergenceTracker.ts","Found in `packages/convergence-tracking/src/ConvergenceTracker.ts:236`
+
+> Identify recurring patterns",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ConvergenceTracker.ts","Found in `packages/convergence-tracking/src/ConvergenceTracker.ts:241`
+
+> Assess pattern predictive value",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ConvergenceTracker.ts","Found in `packages/convergence-tracking/src/ConvergenceTracker.ts:256`
+
+> Assess technology synergy",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ConvergenceTracker.ts","Found in `packages/convergence-tracking/src/ConvergenceTracker.ts:268`
+
+> Calculate application maturity",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ConvergenceTracker.ts","Found in `packages/convergence-tracking/src/ConvergenceTracker.ts:273`
+
+> Calculate market maturity",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ConvergenceTracker.ts","Found in `packages/convergence-tracking/src/ConvergenceTracker.ts:278`
+
+> Analyze cross-domain integration",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in store.ts","Found in `packages/dashboard-framework/src/store.ts:487`
+
+> Implement proper undo/redo with history stack",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in store.ts","Found in `packages/dashboard-framework/src/store.ts:492`
+
+> Implement proper undo/redo with history stack",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ThreatMonitor.ts","Found in `packages/emerging-threats/src/ThreatMonitor.ts:212`
+
+> Integrate with research databases (arXiv, PubMed, Defense Technical Information Center)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ThreatMonitor.ts","Found in `packages/emerging-threats/src/ThreatMonitor.ts:217`
+
+> Integrate with patent databases (USPTO, WIPO, EPO)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ThreatMonitor.ts","Found in `packages/emerging-threats/src/ThreatMonitor.ts:222`
+
+> Monitor SBIR/STTR, DARPA programs, venture capital",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ThreatMonitor.ts","Found in `packages/emerging-threats/src/ThreatMonitor.ts:227`
+
+> Implement breakthrough detection algorithm",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ThreatMonitor.ts","Found in `packages/emerging-threats/src/ThreatMonitor.ts:232`
+
+> Analyze growth rates and trends",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ThreatMonitor.ts","Found in `packages/emerging-threats/src/ThreatMonitor.ts:237`
+
+> Map to Technology Readiness Level (TRL) scale",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ThreatMonitor.ts","Found in `packages/emerging-threats/src/ThreatMonitor.ts:242`
+
+> Analyze deployment and adoption metrics",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ThreatMonitor.ts","Found in `packages/emerging-threats/src/ThreatMonitor.ts:247`
+
+> Categorize investment levels",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ThreatMonitor.ts","Found in `packages/emerging-threats/src/ThreatMonitor.ts:252`
+
+> Extract organizations and entities",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ThreatMonitor.ts","Found in `packages/emerging-threats/src/ThreatMonitor.ts:257`
+
+> Identify technology convergence opportunities",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ThreatMonitor.ts","Found in `packages/emerging-threats/src/ThreatMonitor.ts:262`
+
+> Monitor for novel attack methodologies",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ThreatMonitor.ts","Found in `packages/emerging-threats/src/ThreatMonitor.ts:267`
+
+> Track unconventional warfare developments",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ThreatMonitor.ts","Found in `packages/emerging-threats/src/ThreatMonitor.ts:272`
+
+> Identify gray zone activities",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ThreatMonitor.ts","Found in `packages/emerging-threats/src/ThreatMonitor.ts:277`
+
+> Monitor information warfare evolution",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ThreatMonitor.ts","Found in `packages/emerging-threats/src/ThreatMonitor.ts:313`
+
+> Monitor edge and fringe sources",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ThreatMonitor.ts","Found in `packages/emerging-threats/src/ThreatMonitor.ts:318`
+
+> Detect anomalous patterns",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ThreatMonitor.ts","Found in `packages/emerging-threats/src/ThreatMonitor.ts:323`
+
+> Track fringe technology developments",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ThreatMonitor.ts","Found in `packages/emerging-threats/src/ThreatMonitor.ts:328`
+
+> Assess potential implications",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ThreatMonitor.ts","Found in `packages/emerging-threats/src/ThreatMonitor.ts:333`
+
+> Correlate with existing trends",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in README.md","Found in `packages/extensions/templates/basic/README.md:3`
+
+> Add extension description",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in README.md","Found in `packages/extensions/templates/basic/README.md:7`
+
+> List extension features",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in README.md","Found in `packages/extensions/templates/basic/README.md:36`
+
+> Add usage examples",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in README.md","Found in `packages/extensions/templates/basic/README.md:61`
+
+> List required permissions",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `packages/extensions/templates/basic/src/index.ts:24`
+
+> Initialize your extension here",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `packages/extensions/templates/basic/src/index.ts:32`
+
+> Clean up resources (close connections, stop timers, etc.)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `packages/extensions/templates/basic/src/index.ts:37`
+
+> Export functions/objects that other extensions can use",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in BackcastingEngine.ts","Found in `packages/futures-analysis/src/BackcastingEngine.ts:49`
+
+> Identify transition pathways",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in BackcastingEngine.ts","Found in `packages/futures-analysis/src/BackcastingEngine.ts:54`
+
+> Define critical milestones",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in BackcastingEngine.ts","Found in `packages/futures-analysis/src/BackcastingEngine.ts:59`
+
+> Identify necessary changes",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in DelphiAnalyzer.ts","Found in `packages/futures-analysis/src/DelphiAnalyzer.ts:67`
+
+> Calculate IQR, median, outliers",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in HorizonScanner.ts","Found in `packages/futures-analysis/src/HorizonScanner.ts:95`
+
+> Analyze trajectory of mentions, attention, development",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in HorizonScanner.ts","Found in `packages/futures-analysis/src/HorizonScanner.ts:187`
+
+> Monitor R&D developments",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in HorizonScanner.ts","Found in `packages/futures-analysis/src/HorizonScanner.ts:192`
+
+> Track policy and regulatory changes",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in HorizonScanner.ts","Found in `packages/futures-analysis/src/HorizonScanner.ts:197`
+
+> Monitor market trends",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in HorizonScanner.ts","Found in `packages/futures-analysis/src/HorizonScanner.ts:202`
+
+> Scan social and cultural shifts",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in HorizonScanner.ts","Found in `packages/futures-analysis/src/HorizonScanner.ts:207`
+
+> Cluster findings into emerging issues",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in HorizonScanner.ts","Found in `packages/futures-analysis/src/HorizonScanner.ts:212`
+
+> Identify weak signals",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in HorizonScanner.ts","Found in `packages/futures-analysis/src/HorizonScanner.ts:217`
+
+> Identify potential wild card events",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ScenarioPlanner.ts","Found in `packages/futures-analysis/src/ScenarioPlanner.ts:203`
+
+> Implement STEEP/PESTLE analysis",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ScenarioPlanner.ts","Found in `packages/futures-analysis/src/ScenarioPlanner.ts:210`
+
+> Identify high-impact, high-uncertainty factors",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ScenarioPlanner.ts","Found in `packages/futures-analysis/src/ScenarioPlanner.ts:215`
+
+> Generate 2x2 or 3x3 scenario matrix",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ScenarioPlanner.ts","Found in `packages/futures-analysis/src/ScenarioPlanner.ts:253`
+
+> Determine scenario type based on forces and uncertainties",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ScenarioPlanner.ts","Found in `packages/futures-analysis/src/ScenarioPlanner.ts:262`
+
+> Generate scenario narrative",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ScenarioPlanner.ts","Found in `packages/futures-analysis/src/ScenarioPlanner.ts:270`
+
+> Extract key assumptions",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ScenarioPlanner.ts","Found in `packages/futures-analysis/src/ScenarioPlanner.ts:275`
+
+> Identify transition pathways between scenarios",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ScenarioPlanner.ts","Found in `packages/futures-analysis/src/ScenarioPlanner.ts:280`
+
+> Identify critical decision points",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ScenarioPlanner.ts","Found in `packages/futures-analysis/src/ScenarioPlanner.ts:285`
+
+> Find where pathways converge",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ScenarioPlanner.ts","Found in `packages/futures-analysis/src/ScenarioPlanner.ts:296`
+
+> Check for logical consistency",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ScenarioPlanner.ts","Found in `packages/futures-analysis/src/ScenarioPlanner.ts:301`
+
+> Compare against historical trends",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ScenarioPlanner.ts","Found in `packages/futures-analysis/src/ScenarioPlanner.ts:306`
+
+> Validate assumptions",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ScenarioPlanner.ts","Found in `packages/futures-analysis/src/ScenarioPlanner.ts:311`
+
+> Check driving force alignment",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in TrendAnalyzer.ts","Found in `packages/futures-analysis/src/TrendAnalyzer.ts:36`
+
+> Implement trend projection algorithms",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in compliance.ts","Found in `packages/geopolitical-analysis/src/safeguards/compliance.ts:242`
+
+> Integrate with actual audit logging system",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in airgapped-cache.ts","Found in `packages/geospatial/src/processing/airgapped-cache.ts:454`
+
+> Actual raster data would need to be fetched from source",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in GraphEmbeddings.ts","Found in `packages/knowledge-graph/src/embeddings/GraphEmbeddings.ts:42`
+
+> This requires Neo4j Graph Data Science library",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in GraphEmbeddings.ts","Found in `packages/knowledge-graph/src/embeddings/GraphEmbeddings.ts:192`
+
+> This is a simplified version. In production, use vector indexes",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in dsar.ts","Found in `packages/maestro-cli/src/commands/dsar.ts:18`
+
+> Implement actual data export logic",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in dsar.ts","Found in `packages/maestro-cli/src/commands/dsar.ts:35`
+
+> Implement actual data deletion/anonymization logic",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in cosign-plugin.ts","Found in `packages/maestro-core/src/plugins/cosign-plugin.ts:145`
+
+> Signatures and attestations in transparency logs cannot be ""undone""",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in s3-artifact-store.ts","Found in `packages/maestro-core/src/stores/s3-artifact-store.ts:226`
+
+> This implementation doesn't handle content-addressable cleanup",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `packages/predictive-graph-intelligence/src/index.ts:2`
+
+> Implement predictive signal generation",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in primitives.ts","Found in `packages/prov-ledger/src/primitives.ts:72`
+
+> Implement real signature verification",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in primitives.ts","Found in `packages/prov-ledger/src/primitives.ts:80`
+
+> Implement real manifest chain verification",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in DependencyAuditValidator.ts","Found in `packages/pve/src/evaluator/validators/DependencyAuditValidator.ts:248`
+
+> Full license checking requires fetching package metadata",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `packages/query-language/src/index.ts:91`
+
+> Implement CST to AST visitor",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RiskForecaster.ts","Found in `packages/risk-forecasting/src/RiskForecaster.ts:169`
+
+> Implement category-specific risk assessment",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RiskForecaster.ts","Found in `packages/risk-forecasting/src/RiskForecaster.ts:174`
+
+> Identify risk interconnections",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RiskForecaster.ts","Found in `packages/risk-forecasting/src/RiskForecaster.ts:178`
+
+> Model cascading failure scenarios",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RiskForecaster.ts","Found in `packages/risk-forecasting/src/RiskForecaster.ts:183`
+
+> Analyze historical black swan events",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RiskForecaster.ts","Found in `packages/risk-forecasting/src/RiskForecaster.ts:188`
+
+> Identify potential future black swans",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RiskForecaster.ts","Found in `packages/risk-forecasting/src/RiskForecaster.ts:193`
+
+> Identify system vulnerabilities",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RiskForecaster.ts","Found in `packages/risk-forecasting/src/RiskForecaster.ts:198`
+
+> Map feedback loops",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RiskForecaster.ts","Found in `packages/risk-forecasting/src/RiskForecaster.ts:203`
+
+> Identify system breaking points",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RiskForecaster.ts","Found in `packages/risk-forecasting/src/RiskForecaster.ts:208`
+
+> Analyze proximity to critical thresholds",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RiskForecaster.ts","Found in `packages/risk-forecasting/src/RiskForecaster.ts:213`
+
+> Project probability over time",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RiskForecaster.ts","Found in `packages/risk-forecasting/src/RiskForecaster.ts:218`
+
+> Project impact over time",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RiskForecaster.ts","Found in `packages/risk-forecasting/src/RiskForecaster.ts:223`
+
+> Identify critical decision points",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in ScenarioGenerator.test.ts","Found in `packages/sim-harness/src/__tests__/ScenarioGenerator.test.ts:101`
+
+> nodeCount is a hint, actual count depends on template structure",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ForesightEngine.ts","Found in `packages/strategic-foresight/src/ForesightEngine.ts:60`
+
+> Implement futures wheel exploration",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ForesightEngine.ts","Found in `packages/strategic-foresight/src/ForesightEngine.ts:85`
+
+> Generate all possible configurations",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ForesightEngine.ts","Found in `packages/strategic-foresight/src/ForesightEngine.ts:90`
+
+> Build consistency matrix",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in transform.map.ts","Found in `packages/tasks-core/src/tasks/transform.map.ts:9`
+
+> mapper is a JS function body in a sandboxed new Function (trusted catalogs only)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in meta-sprint-backlog-machine.md","Found in `project_management/backlog/meta-sprint-backlog-machine.md:81`
+
+> [#1234]`).",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in implement.graph-xai-explainer@v1.yaml","Found in `prompts/implement.graph-xai-explainer@v1.yaml:547`
+
+> books ({{notebook_format}})",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in server.ts","Found in `prov-ledger-service/src/server.ts:32`
+
+> In production, this would import from the actual OPA client service",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in server.ts","Found in `prov-ledger-service/src/server.ts:392`
+
+> Get actual classification",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-evidence-bundle.js","Found in `scripts/generate-evidence-bundle.js:62`
+
+> Get from actual CI",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:81`
+
+> Add more specific tests for methods and properties",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:90`
+
+> Add test with valid input",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:96`
+
+> Add test with invalid input",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:101`
+
+> Add edge case tests",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:110`
+
+> Add assertions for properties",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:127`
+
+> Add specific tests for this module",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:176`
+
+> Add create operation test",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:180`
+
+> Add read operation test",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:184`
+
+> Add update operation test",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:188`
+
+> Add delete operation test",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:200`
+
+> Add authentication test",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:204`
+
+> Add authorization test",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:207`
+
+> Add endpoint-specific tests",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:217`
+
+> Add malformed data test",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:221`
+
+> Add database error handling test",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:278`
+
+> Add page-specific assertions",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:282`
+
+> Add interaction tests",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:288`
+
+> Add form submission test",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:295`
+
+> Add error handling test",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:301`
+
+> Add accessibility tests",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:309`
+
+> Add mobile-specific tests",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-test-suite.ts","Found in `scripts/generate-test-suite.ts:316`
+
+> Add offline handling test",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in launch_day_simulation.ts","Found in `scripts/launch_day_simulation.ts:72`
+
+> Since we are running against a potentially non-running server in this sandbox,",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in generate-load.ts","Found in `scripts/load/generate-load.ts:101`
+
+> In a real test, this path should exist or be mocked to return slowly",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in compute-health-score.ts","Found in `scripts/ops/compute-health-score.ts:188`
+
+> metrics.reliability.passed excludes skipped.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in create-future-history-entry.ts","Found in `scripts/ops/create-future-history-entry.ts:289`
+
+> Add 1-2 paragraphs describing the change in detail",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in create-future-history-entry.ts","Found in `scripts/ops/create-future-history-entry.ts:295`
+
+> Fill in rationale",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in generate.ts","Found in `scripts/sbom/generate.ts:15`
+
+> cdxgen might try to fetch data.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in scan_todos.ts","Found in `scripts/scan_todos.ts:41`
+
+> and <!-- TODO --> styles",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in schema-diff.ts","Found in `scripts/schema-diff.ts:322`
+
+> Add schema comparison for request/response bodies",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in scan-tenant-isolation.ts","Found in `scripts/security/scan-tenant-isolation.ts:117`
+
+> More advanced AST parsing to check individual resolvers",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in README.md","Found in `sdk/python/maestro_sdk/README.md:111`
+
+> that base_url needs to be re-set, as would any shared cookies, headers, etc.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in generate-clients.ts","Found in `server/scripts/generate-clients.ts:24`
+
+> This requires java to be installed in the environment",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in verify_policy_lifecycle.ts","Found in `server/scripts/verify_policy_lifecycle.ts:59`
+
+> Logic continues in next calls for transaction",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in server.ts","Found in `server/server.ts:14`
+
+> ping DB/queue",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in strategic-planning.e2e.test.ts","Found in `server/src/__tests__/strategic-planning.e2e.test.ts:10`
+
+> These tests require a running database and should be run in an integration environment",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in graphrag-provenance.service.ts","Found in `server/src/ai/copilot/graphrag-provenance.service.ts:374`
+
+> In production, this would query the prov-ledger service",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in graphrag-provenance.service.ts","Found in `server/src/ai/copilot/graphrag-provenance.service.ts:424`
+
+> In production, this would query the prov-ledger service",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in redaction.service.ts","Found in `server/src/ai/copilot/redaction.service.ts:381`
+
+> We already did pattern-based redaction, don't redact entire text",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in nl-to-cypher.service.ts","Found in `server/src/ai/nl-to-cypher/nl-to-cypher.service.ts:176`
+
+> Integrate with actual Neo4j sandbox connection",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in index.ts","Found in `server/src/analytics/index.ts:30`
+
+> RiskFactor is already exported from policy/index.js, so we exclude it from compliance",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in PolicyImpactAnalyzer.ts","Found in `server/src/analytics/policy/PolicyImpactAnalyzer.ts:561`
+
+> In a real implementation, we'd track this in MetricsAggregator",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in featureFlags.ts","Found in `server/src/api/featureFlags.ts:83`
+
+> Add authentication and authorization check here",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in featureFlags.ts","Found in `server/src/api/featureFlags.ts:105`
+
+> Actually implement the createFlag method in the service",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in featureFlags.ts","Found in `server/src/api/featureFlags.ts:125`
+
+> Add authentication and authorization check here",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in featureFlags.ts","Found in `server/src/api/featureFlags.ts:147`
+
+> Add authentication and authorization check here",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in app.ts","Found in `server/src/app.ts:347`
+
+> /graphql has its own rate limiting chain above",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in index.ts","Found in `server/src/audit/index.ts:19`
+
+> This creates a separate connection pool for audit logging isolation.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in InventionService.ts","Found in `server/src/aurelius/services/InventionService.ts:59`
+
+> LLMService interface might vary, adapting to a generic 'complete' or similar method",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in PriorArtService.ts","Found in `server/src/aurelius/services/PriorArtService.ts:27`
+
+> Assuming 'patent_embedding_index' exists as defined in schema.ts",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in PredictiveOpsService.ts","Found in `server/src/autonomous/PredictiveOpsService.ts:44`
+
+> Implement queue backlog check once ApprovalService is ready",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in BillingService.ts","Found in `server/src/billing/BillingService.ts:54`
+
+> In a real implementation, we would fetch raw counters from 'meters' table for accuracy.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in handlers.ts","Found in `server/src/bulk/handlers.ts:79`
+
+> Annotations table doesn't strictly exist in our migrations grep,",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in responseCache.ts","Found in `server/src/cache/responseCache.ts:188`
+
+> We can't easily invalidate specific keys in L1 across all instances",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in sign.ts","Found in `server/src/claims/sign.ts:24`
+
+> reuse MerkleLog to recompute root; placeholder returns true",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in DataLineageSystem.ts","Found in `server/src/compliance/DataLineageSystem.ts:31`
+
+> Ideally should be deterministic based on name/type or lookup first.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in budget-control.ts","Found in `server/src/conductor/admission/budget-control.ts:282`
+
+> Track per-expert request counts if needed",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in conductor-routes.ts","Found in `server/src/conductor/api/conductor-routes.ts:198`
+
+> wire real metrics aggregations here",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in trust.ts","Found in `server/src/conductor/contracts/trust.ts:16`
+
+> Verify signature against provider's registered key (PKI/cosign)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in engine.ts","Found in `server/src/conductor/events/engine.ts:99`
+
+> enqueue a run with payload",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in bandit.ts","Found in `server/src/conductor/learn/bandit.ts:689`
+
+> Implement time-windowed metrics",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in bandit.ts","Found in `server/src/conductor/learn/bandit.ts:841`
+
+> Implement based on recent decisions",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in client.ts","Found in `server/src/conductor/mcp/client.ts:76`
+
+> Implement certificate pinning here",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in models.ts","Found in `server/src/conductor/models.ts:6`
+
+> implement cosign verification of OCI/S3 reference",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in router-v2.ts","Found in `server/src/conductor/router/router-v2.ts:810`
+
+> Implement based on routing history analysis",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in router-v2.ts","Found in `server/src/conductor/router/router-v2.ts:815`
+
+> Implement cost efficiency calculation",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in router-v2.ts","Found in `server/src/conductor/router/router-v2.ts:820`
+
+> Implement latency prediction accuracy",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in selectGpuPool.ts","Found in `server/src/conductor/scheduler/selectGpuPool.ts:18`
+
+> load dynamic pools; placeholder",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in cleanroomAggregate.ts","Found in `server/src/conductor/steps/cleanroomAggregate.ts:4`
+
+> apply per-metric DP noise if requested",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in embedUpsert.ts","Found in `server/src/conductor/steps/embedUpsert.ts:26`
+
+> call Python/HTTP embedding generator; placeholder",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in config.test.ts","Found in `server/src/config/__tests__/config.test.ts:35`
+
+> loadConfig returns raw strings from env usually, but AJV might coerce?",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in featureFlags.ts","Found in `server/src/config/featureFlags.ts:213`
+
+> 'features' in constructor already contains merged defaults+overrides if loaded via getInstance()",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in production-security.ts","Found in `server/src/config/production-security.ts:54`
+
+> helmet() in app.ts enables HSTS in production.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in README.md","Found in `server/src/connectors/README.md:51`
+
+> You must handle stream consumption and cleanup.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in gcs-ingest.test.ts","Found in `server/src/connectors/__tests__/gcs-ingest.test.ts:29`
+
+> These tests have TypeScript inference issues with jest.fn() mocking",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in orchestrator.enhanced.js","Found in `server/src/copilot/orchestrator.enhanced.js:273`
+
+> Call actual Neo4j service",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in orchestrator.enhanced.js","Found in `server/src/copilot/orchestrator.enhanced.js:280`
+
+> Call actual graph analytics service",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in orchestrator.enhanced.js","Found in `server/src/copilot/orchestrator.enhanced.js:288`
+
+> Call actual summarization service",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in orchestrator.enhanced.js","Found in `server/src/copilot/orchestrator.enhanced.js:295`
+
+> Call actual enrichment service",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in orchestrator.js","Found in `server/src/copilot/orchestrator.js:21`
+
+> call existing service/repo; here we simulate",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in DataQualityService.ts","Found in `server/src/data-governance/quality/DataQualityService.ts:138`
+
+> This assumes the asset name corresponds to a real table in the SAME database.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in postgres-performance-optimizer.ts","Found in `server/src/db/optimization/postgres-performance-optimizer.ts:68`
+
+> UNION ALL may return duplicates if same relationship appears in both",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in postgres.ts","Found in `server/src/db/postgres.ts:413`
+
+> Add read replica support from config if needed",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in postgres.ts","Found in `server/src/db/postgres.ts:710`
+
+> It's better to set this per session or query if possible,",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in RiskRepository.ts","Found in `server/src/db/repositories/RiskRepository.ts:61`
+
+> signals are not part of RiskScore interface but usually returned in a full object",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in tenantHelpers.ts","Found in `server/src/db/tenantHelpers.ts:42`
+
+> We don't magically inject tenant_id into raw SQL strings because",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in TemplateRenderer.ts","Found in `server/src/email-service/TemplateRenderer.ts:106`
+
+> This is a basic implementation",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in FuzzyMatcher.test.ts","Found in `server/src/entity-resolution/__tests__/FuzzyMatcher.test.ts:10`
+
+> normalized strings. 'abc' and 'xyz' have distance 3. max length 3. 1 - 3/3 = 0.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in pipeline.ts","Found in `server/src/etl/pipeline.ts:72`
+
+> In real system, this might be batched.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in EventService.ts","Found in `server/src/events/EventService.ts:29`
+
+> The current WebhookService fetches subscriptions itself.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in EventService.ts","Found in `server/src/events/EventService.ts:39`
+
+> Handle other sink types (QUEUE)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in EventService.ts","Found in `server/src/events/EventService.ts:167`
+
+> generic sink storage",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in attestation.test.ts","Found in `server/src/evidence/attestation/__tests__/attestation.test.ts:84`
+
+> the above might be invalid PEM structure for node crypto,",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in experiment.test.ts","Found in `server/src/experimentation/experiment.test.ts:76`
+
+> This test requires a running experiment to be meaningful",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ExplainabilityExplorerService.ts","Found in `server/src/explainability/ExplainabilityExplorerService.ts:506`
+
+> Call provenanceService.getProvenanceChain() or similar",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ExplainabilityExplorerService.ts","Found in `server/src/explainability/ExplainabilityExplorerService.ts:516`
+
+> Verify SBOM hashes",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ExplainabilityExplorerService.ts","Found in `server/src/explainability/ExplainabilityExplorerService.ts:522`
+
+> Verify Merkle proof",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intents.ts","Found in `server/src/federation/intents.ts:144`
+
+> derive from intent or actor",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in intents.ts","Found in `server/src/federation/intents.ts:173`
+
+> Add more sophisticated logic",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in governance-metrics-service.test.ts","Found in `server/src/governance/analytics/__tests__/governance-metrics-service.test.ts:126`
+
+> In real implementation, this would check Redis cache",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in demo.ts","Found in `server/src/governance/demo.ts:77`
+
+> violation is auto-logged by governance.check",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in IndexAdvisor.ts","Found in `server/src/graph/optimizer/IndexAdvisor.ts:12`
+
+> GraphIndexAdvisorService is a singleton service that tracks runtime query patterns.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in attachments.ts","Found in `server/src/graphql/attachments.ts:2`
+
+> Fix graphql-upload-ts import",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in resolvers.ts","Found in `server/src/graphql/intelgraph/resolvers.ts:441`
+
+> Calculate actual clustering coefficient",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in resolvers.ts","Found in `server/src/graphql/intelgraph/resolvers.ts:480`
+
+> Implement OPA health check",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in multimodalResolvers.ts","Found in `server/src/graphql/multimodalResolvers.ts:273`
+
+> Implement generateMultimodalTimeline method in MultimodalDataService",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in SafeMutations.ts","Found in `server/src/graphql/mutations/SafeMutations.ts:339`
+
+> Implement cache invalidation",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in SafeMutations.ts","Found in `server/src/graphql/mutations/SafeMutations.ts:506`
+
+> Implement custom schema setting",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in core.ts","Found in `server/src/graphql/resolvers/core.ts:523`
+
+> graphNeighborhood and searchEntities are temporarily disabled",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in crudResolvers.ts","Found in `server/src/graphql/resolvers/crudResolvers.ts:6`
+
+> .js extension for ESM",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in crudResolvers.ts","Found in `server/src/graphql/resolvers/crudResolvers.ts:7`
+
+> .js extension for ESM",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in cti.ts","Found in `server/src/graphql/resolvers/cti.ts:9`
+
+> In a real app, we might use dependency injection or context",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in entity.ts","Found in `server/src/graphql/resolvers/entity.ts:86`
+
+> 'entity_fulltext_idx' must be created via migration",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in graphragQueryResolvers.ts","Found in `server/src/graphql/resolvers/graphragQueryResolvers.ts:102`
+
+> This is a placeholder for the quota service",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in graphragQueryResolvers.ts","Found in `server/src/graphql/resolvers/graphragQueryResolvers.ts:124`
+
+> This is a placeholder for the usage metering service",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in graphragResolvers.ts","Found in `server/src/graphql/resolvers/graphragResolvers.ts:170`
+
+> Fetch full entity objects from Neo4j using the entity IDs",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in graphragResolvers.ts","Found in `server/src/graphql/resolvers/graphragResolvers.ts:224`
+
+> Implement cache clearing logic",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in mvp1-copilot.ts","Found in `server/src/graphql/resolvers/mvp1-copilot.ts:151`
+
+> Integrate with entity creation service",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in safe-mutations.ts","Found in `server/src/graphql/resolvers/safe-mutations.ts:41`
+
+> enforce idempotency via audit/outbox store; validate DAG/policies",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in safe-mutations.ts","Found in `server/src/graphql/resolvers/safe-mutations.ts:83`
+
+> enqueue via outbox; start saga orchestrator",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in sprint28.ts","Found in `server/src/graphql/resolvers/sprint28.ts:12`
+
+> ""period"" parsing (e.g. ""7d"") is simplified here.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in strategicPlanningResolvers.ts","Found in `server/src/graphql/resolvers/strategicPlanningResolvers.ts:197`
+
+> Risk by ID would need to be added to repo",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in resolvers.copilot-mvp.ts","Found in `server/src/graphql/resolvers.copilot-mvp.ts:405`
+
+> Persist to database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in resolvers.copilot-mvp.ts","Found in `server/src/graphql/resolvers.copilot-mvp.ts:424`
+
+> Persist to database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in resolvers.copilot.js","Found in `server/src/graphql/resolvers.copilot.js:24`
+
+> Add proper filtering to store",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in resolvers.er.ts","Found in `server/src/graphql/resolvers.er.ts:447`
+
+> Implement merge logic",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in watchlists.ts","Found in `server/src/graphql/watchlists.ts:1`
+
+> Create proper shared schema package",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in stream.ts","Found in `server/src/ingest/stream.ts:203`
+
+> We need a table. Let's assume one exists or we just log for the scaffold if no DB migration yet.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in ChunkingService.ts","Found in `server/src/ingestion/ChunkingService.ts:63`
+
+> The start offset for the *next* chunk is confusing here.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in MigrationOrchestrator.ts","Found in `server/src/ingestion/migration/MigrationOrchestrator.ts:106`
+
+> Batching writes would be more efficient in production",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in selectorMinimizationJobs.ts","Found in `server/src/jobs/selectorMinimizationJobs.ts:330`
+
+> node-cron doesn't provide a global stop method",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in multi-tier-cache.ts","Found in `server/src/lib/cache/multi-tier-cache.ts:2`
+
+> The 'lru-cache' package could not be installed due to a pre-existing",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in autoscaling.ts","Found in `server/src/lib/deployment/autoscaling.ts:231`
+
+> This is a static generation based on a snapshot.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in index.ts","Found in `server/src/lib/dlq/index.ts:72`
+
+> This does not ""lock"" the message, so multiple workers could see it.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in state-sync.ts","Found in `server/src/lib/state/state-sync.ts:6`
+
+> This is a simplified simulation for demonstration purposes and is not a production-ready implementation.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in runner.ts","Found in `server/src/llm/agents/runner.ts:41`
+
+> We need to define this metric in observability/metrics.ts first or cast to any if we are lazy,",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in coordination.test.ts","Found in `server/src/maestro/coordination/__tests__/coordination.test.ts:79`
+
+> consumeBudget in service checks AFTER consumption",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in core.ts","Found in `server/src/maestro/core.ts:159`
+
+> shell tools, etc.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in dsl.ts","Found in `server/src/maestro/dsl.ts:94`
+
+> This simplistic compilation creates ALL tasks upfront.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in engine.ts","Found in `server/src/maestro/engine.ts:73`
+
+> This assumes the caller handles the 'succeeded' status correctly",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in engine.ts","Found in `server/src/maestro/engine.ts:98`
+
+> Map snake_case to camelCase",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in engine.ts","Found in `server/src/maestro/engine.ts:101`
+
+> Validate input against template.inputSchema",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in engine.ts","Found in `server/src/maestro/engine.ts:243`
+
+> Retry logic based on backoffStrategy",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in handlers.ts","Found in `server/src/maestro/handlers.ts:73`
+
+> In a real distributed system, we might need to handle the sub-run async",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in runs-api.ts","Found in `server/src/maestro/runs/runs-api.ts:137`
+
+> This is a placeholder for the quota service",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in runs-api.ts","Found in `server/src/maestro/runs/runs-api.ts:200`
+
+> This is a placeholder for the usage metering service",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in MasteryService.ts","Found in `server/src/mastery/MasteryService.ts:97`
+
+> getEntries returns promises",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in MasteryService.ts","Found in `server/src/mastery/MasteryService.ts:133`
+
+> Implement deep verification of citations against Hypothesis service",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in quotas.ts","Found in `server/src/metering/quotas.ts:82`
+
+> This checks DAILY usage against MONTHLY limits for simplicity in MVP.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in security.test.ts","Found in `server/src/middleware/__tests__/security.test.ts:396`
+
+> This simple pattern may not catch all SQL injection",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in security.test.ts","Found in `server/src/middleware/__tests__/security.test.ts:658`
+
+> validateRequest catches UNION SELECT pattern",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in audit-first.ts","Found in `server/src/middleware/audit-first.ts:123`
+
+> We don't block the response here as it's already finished,",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in governance.ts","Found in `server/src/middleware/governance.ts:197`
+
+> Check if user has required role for this purpose",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in idempotency.ts","Found in `server/src/middleware/idempotency.ts:404`
+
+> Track error rate in metrics",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in llm-preflight.ts","Found in `server/src/middleware/llm-preflight.ts:220`
+
+> Implement usage tracking per user/tenant",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in provenance-enforcement.ts","Found in `server/src/middleware/provenance-enforcement.ts:535`
+
+> Send to audit ledger service",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in registry.ts","Found in `server/src/mlops/registry.ts:100`
+
+> metadata.modelId usually stores the ID, but for this simplified lookup we assume we can match or payload has info",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in pipeline.test.ts","Found in `server/src/nlp/__tests__/pipeline.test.ts:128`
+
+> The simple ContextDisambiguator implements a very basic ""previous token"" strategy",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in graph_updater.ts","Found in `server/src/nlp/graph_updater.ts:56`
+
+> Relationship resolution is harder because we need the globalIds of subject/object.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in NotificationHub.ts","Found in `server/src/notifications-hub/NotificationHub.ts:363`
+
+> Implement Redis-based deduplication",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in NotificationHub.ts","Found in `server/src/notifications-hub/NotificationHub.ts:498`
+
+> 'sms' and 'push' support in routing rules would be added here",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in cost-guards.ts","Found in `server/src/observability/cost-guards.ts:370`
+
+> Send notification to monitoring system (PagerDuty, Slack, etc.)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in competency.test.js","Found in `server/src/ontology/tests/competency.test.js:9`
+
+> Implement actual test",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in competency.test.js","Found in `server/src/ontology/tests/competency.test.js:16`
+
+> Implement actual test",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in competency.test.js","Found in `server/src/ontology/tests/competency.test.js:23`
+
+> Implement actual test",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in redactionMiddleware.ts","Found in `server/src/pii/redactionMiddleware.ts:537`
+
+> Log audit entry to hash chain",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in runtime.ts","Found in `server/src/plugins/runtime.ts:60`
+
+> This only checks pre-execution. strict memory isolation requires child processes or isolated-vm.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in PredictiveService.ts","Found in `server/src/predictive/PredictiveService.ts:28`
+
+> Connect to real time-series DB or Provenance Ledger",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in FusionService.ts","Found in `server/src/products/fusion/FusionService.ts:70`
+
+> Use VisionService or SignalAnalyzer to get description.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in invariants.ts","Found in `server/src/provenance/invariants.ts:37`
+
+> metadata object itself must exist, and contain correlationId",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in ledger.ts","Found in `server/src/provenance/ledger.ts:239`
+
+> entry.payload is now strongly typed as MutationPayload",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in ledger.ts","Found in `server/src/provenance/ledger.ts:257`
+
+> We need to handle the new columns 'witness' if we decide to store it separately",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in threat-model.test.ts","Found in `server/src/quality-evaluation/autonomous/__tests__/abuse-tests/threat-model.test.ts:14`
+
+> In a real implementation this would check types or provenance,",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in service.ts","Found in `server/src/reporting/service.ts:54`
+
+> extract from access context if available",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in service.ts","Found in `server/src/reporting/service.ts:78`
+
+> extract from access context if available",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in InvestigationRepo.ts","Found in `server/src/repos/InvestigationRepo.ts:193`
+
+> In a full implementation, you might want to soft-delete",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in KnowledgeRepository.ts","Found in `server/src/retrieval/KnowledgeRepository.ts:181`
+
+> We select from knowledge_objects joined with embedding_records",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in RetrievalService.ts","Found in `server/src/retrieval/RetrievalService.ts:31`
+
+> For production, we'd want RRF (Reciprocal Rank Fusion) or weighted sum.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in FeatureStore.ts","Found in `server/src/risk/FeatureStore.ts:9`
+
+> Implement real aggregation logic",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in compliance.test.ts","Found in `server/src/routes/__tests__/compliance.test.ts:114`
+
+> A test for the authorization middleware would go here.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in partners.test.ts","Found in `server/src/routes/__tests__/partners.test.ts:116`
+
+> Testing /api/partners/exchange/cases requires headers modification which supertest handles,",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ai.ts","Found in `server/src/routes/ai.ts:432`
+
+> Replace with actual LLM integration",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ai.ts","Found in `server/src/routes/ai.ts:484`
+
+> Replace with actual model health checks",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in cds.ts","Found in `server/src/routes/cds.ts:10`
+
+> In a real app, use dependency injection",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in connectorRoutes.js","Found in `server/src/routes/connectorRoutes.js:7`
+
+> requirePermission middleware not yet implemented - planned for fine-grained authorization",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in federationRoutes.js","Found in `server/src/routes/federationRoutes.js:7`
+
+> requirePermission middleware not yet implemented - planned for fine-grained authorization",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in maestro.ts","Found in `server/src/routes/maestro.ts:9`
+
+> These routers define their own paths (e.g. /pipelines, /runs),",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in maestro.ts","Found in `server/src/routes/maestro.ts:36`
+
+> This assumes `req.user` is populated by auth middleware",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in maestro.ts","Found in `server/src/routes/maestro.ts:135`
+
+> Validate Spec via MaestroDSL.validate(template.spec)",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in narrative-sim.ts","Found in `server/src/routes/narrative-sim.ts:214`
+
+> The schema is 'createSimulationSchema', we need to adapt it",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in queues-dashboard.ts","Found in `server/src/routes/queues-dashboard.ts:48`
+
+> Dynamic addition requires Bull Board 4.x+",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in recipes.ts","Found in `server/src/routes/recipes.ts:95`
+
+> Enqueue job with your actual job queue (BullMQ, etc.)",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in sso.ts","Found in `server/src/routes/sso.ts:127`
+
+> Some IdPs might not preserve RelayState perfectly in all flows (e.g. IdP initiated),",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in tracingRoutes.js","Found in `server/src/routes/tracingRoutes.js:7`
+
+> requirePermission middleware not yet implemented - planned for fine-grained authorization",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in twilio.ts","Found in `server/src/routes/twilio.ts:14`
+
+> For production, verify X-Twilio-Signature using your Twilio auth token",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in learning-gate.ts","Found in `server/src/runtime/learning-gate.ts:62`
+
+> Integrate with Outcome Ledger to check for duplicates or conflicts",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in learning-gate.ts","Found in `server/src/runtime/learning-gate.ts:63`
+
+> Integrate with Constitutional Constraints",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in engine.ts","Found in `server/src/scenario/engine.ts:116`
+
+> totalCost in state is cumulative or period? In model it's cumulative.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in maestro-cli.ts","Found in `server/src/scripts/maestro-cli.ts:111`
+
+> Job output is not currently exposed via getTaskStatus.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in maestro-cli.ts","Found in `server/src/scripts/maestro-cli.ts:185`
+
+> In a real scenario, this might trigger a review task.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in StatisticalDetector.ts","Found in `server/src/securiteyes/services/StatisticalDetector.ts:27`
+
+> This relies on having historical data. For a new system, it will be volatile.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in KubeBenchmarkValidator.ts","Found in `server/src/security/KubeBenchmarkValidator.ts:41`
+
+> In a real env, this might need to run as a Job or DaemonSet.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in llm-guardrails.test.ts","Found in `server/src/security/__tests__/llm-guardrails.test.ts:379`
+
+> retention policy is internal, would need to verify via database",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in llm-guardrails.test.ts","Found in `server/src/security/__tests__/llm-guardrails.test.ts:484`
+
+> redacted_prompt is only defined if noise actually modified the prompt.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in security-headers.ts","Found in `server/src/security/security-headers.ts:74`
+
+> Expect-CT has been deprecated and removed from helmet",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in AuthorizationService.ts","Found in `server/src/services/AuthorizationService.ts:143`
+
+> The RBAC manager expects permission strings like 'investigation:read'.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in CacheWarmingService.ts","Found in `server/src/services/CacheWarmingService.ts:273`
+
+> Actual GraphRAG query would be called here",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in CognitiveMapperService.ts","Found in `server/src/services/CognitiveMapperService.ts:94`
+
+> This relies on APOC. If APOC is not present, we need a standard Cypher fallback.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in CognitiveMapperService.ts","Found in `server/src/services/CognitiveMapperService.ts:112`
+
+> The power operator in Cypher is ^",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in CostAnomalyDetectionService.ts","Found in `server/src/services/CostAnomalyDetectionService.ts:537`
+
+> Send notifications (email, Slack, PagerDuty, etc.)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in CostAnomalyDetectionService.ts","Found in `server/src/services/CostAnomalyDetectionService.ts:576`
+
+> Implement notification channels (email, Slack, webhooks, etc.)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in CrossPlatformAttributionService.ts","Found in `server/src/services/CrossPlatformAttributionService.ts:45`
+
+> Implement fuzzy matching (Levenshtein distance)",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in DatabaseService.ts","Found in `server/src/services/DatabaseService.ts:24`
+
+> This is a stub and will return an empty array.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ExplainabilityService.ts","Found in `server/src/services/ExplainabilityService.ts:67`
+
+> Add path analysis (shortest path to key entities)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ExtractionJobService.ts","Found in `server/src/services/ExtractionJobService.ts:589`
+
+> Implement embedding generation",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in FederatedPrivacyService.ts","Found in `server/src/services/FederatedPrivacyService.ts:21`
+
+> Initialize secure aggregation protocol",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in FederatedPrivacyService.ts","Found in `server/src/services/FederatedPrivacyService.ts:33`
+
+> Implement federated averaging with noise addition",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in FraudService.ts","Found in `server/src/services/FraudService.ts:30`
+
+> Trigger investigation workflow if severity is high",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in GDPRComplianceService.ts","Found in `server/src/services/GDPRComplianceService.ts:493`
+
+> Actual anonymization logic would be implemented based on your data models",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in GDPRComplianceService.ts","Found in `server/src/services/GDPRComplianceService.ts:519`
+
+> Actual erasure logic would identify and delete/anonymize all data",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in GraphAnalyticsService.ts","Found in `server/src/services/GraphAnalyticsService.ts:274`
+
+> This returns pairs, not full communities.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in GraphIndexAdvisorService.ts","Found in `server/src/services/GraphIndexAdvisorService.ts:85`
+
+> We don't rely on `WHERE` keyword prefixing immediately because of `AND`/`OR`.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in GraphRAGQueryServiceEnhanced.ts","Found in `server/src/services/GraphRAGQueryServiceEnhanced.ts:729`
+
+> evidenceIds are stored in metadata, so we access them there",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in MasintService.ts","Found in `server/src/services/MasintService.ts:145`
+
+> precise geospatial query requires PostGIS. This is a rough approximation using simple lat/lon matching in JSON.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in NarrativeAnalysisService.ts","Found in `server/src/services/NarrativeAnalysisService.ts:126`
+
+> edgeCount is double counted in undirected sense if we don't handle direction carefully,",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in NarrativePrioritizationService.ts","Found in `server/src/services/NarrativePrioritizationService.ts:152`
+
+> Connect to Postgres 'sources' table to retrieve actual credibility score and history.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in PasswordResetService.ts","Found in `server/src/services/PasswordResetService.ts:376`
+
+> Never log the actual token in production",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in PasswordResetService.ts","Found in `server/src/services/PasswordResetService.ts:380`
+
+> Implement actual email sending",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in PolicyService.ts","Found in `server/src/services/PolicyService.ts:57`
+
+> Call OPA here",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in PredictiveTalentService.ts","Found in `server/src/services/PredictiveTalentService.ts:19`
+
+> Connect to ML model for forecasting",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in PredictiveTalentService.ts","Found in `server/src/services/PredictiveTalentService.ts:35`
+
+> Integrate with LinkedIn API or similar",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in PricingEngine.ts","Found in `server/src/services/PricingEngine.ts:96`
+
+> Merge logic for overrides",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in PrivacyService.ts","Found in `server/src/services/PrivacyService.ts:105`
+
+> In production, this should be a migration",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in PrivacyService.ts","Found in `server/src/services/PrivacyService.ts:285`
+
+> Integrate with Identity Provider for strong verification",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RenewalService.ts","Found in `server/src/services/RenewalService.ts:96`
+
+> Trigger Notification (Email/Webhook)",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in SecureFusionService.ts","Found in `server/src/services/SecureFusionService.ts:97`
+
+> Actual Vector Search syntax depends on Neo4j version and index config.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in ThreatModelingService.ts","Found in `server/src/services/ThreatModelingService.ts:57`
+
+> promptRegistry.initialize() is async.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in VRCollaborationService.ts","Found in `server/src/services/VRCollaborationService.ts:34`
+
+> Send notifications",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in VectorStoreService.ts","Found in `server/src/services/VectorStoreService.ts:132`
+
+> cosine similarity is 1 - cosine distance.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in VerificationSwarmService.ts","Found in `server/src/services/VerificationSwarmService.ts:60`
+
+> For testing purposes, we might want to await this if we can't sleep long enough",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ZeroTrustService.ts","Found in `server/src/services/ZeroTrustService.ts:20`
+
+> Integrate with security scanning tools (e.g., Trivy, OWASP ZAP)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ZeroTrustService.ts","Found in `server/src/services/ZeroTrustService.ts:32`
+
+> Implement risk scoring logic based on device fingerprint, impossible travel, etc.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in EntityResolutionService.test.ts","Found in `server/src/services/__tests__/EntityResolutionService.test.ts:30`
+
+> Implement URL normalization in EntityResolutionService",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in EntityResolutionService.test.ts","Found in `server/src/services/__tests__/EntityResolutionService.test.ts:44`
+
+> Implement privacy mode email hashing in EntityResolutionService",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in FeatureFlagService.test.ts","Found in `server/src/services/__tests__/FeatureFlagService.test.ts:329`
+
+> actual distribution depends on hash function implementation",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in auth.integration.test.ts","Found in `server/src/services/__tests__/auth.integration.test.ts:54`
+
+> This test is skipped because it requires ESM mode (import.meta.url in app.ts)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in solver.ts","Found in `server/src/services/contraband/solver.ts:47`
+
+> Convert Rego conditions to SMT-LIB",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in solver.ts","Found in `server/src/services/contraband/solver.ts:48`
+
+> Invoke Z3 solver",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in solver.ts","Found in `server/src/services/contraband/solver.ts:49`
+
+> If SAT, extract counter-example",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in solver.ts","Found in `server/src/services/contraband/solver.ts:70`
+
+> Implement proper condition overlap detection via SMT",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in solver.ts","Found in `server/src/services/contraband/solver.ts:84`
+
+> Convert invariant to SMT formula",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in solver.ts","Found in `server/src/services/contraband/solver.ts:85`
+
+> Check if rules satisfy invariant",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in AdvancedCorrelationEngine.ts","Found in `server/src/services/correlation/AdvancedCorrelationEngine.ts:120`
+
+> In a real system, we'd cache these or fetch from DB",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in OpenAIProvider.ts","Found in `server/src/services/llm/providers/OpenAIProvider.ts:34`
+
+> Add more options like temperature, max_tokens based on config or request",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ConsensusManager.ts","Found in `server/src/services/orchestration/ConsensusManager.ts:56`
+
+> implement result storage",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ReportServiceV2.ts","Found in `server/src/services/reporting/ReportServiceV2.ts:82`
+
+> Integrate with PostgreSQL 'reports' and 'provenance_manifests' tables",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ModelAbuseWatch.ts","Found in `server/src/services/safety/ModelAbuseWatch.ts:40`
+
+> Update user status in real DB",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in ScimService.ts","Found in `server/src/services/scim/ScimService.ts:484`
+
+> Simple sequential processing. A real implementation should handle dependencies (bulkId).",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in secretManager.ts","Found in `server/src/services/secretManager.ts:1`
+
+> This is a mock implementation for development purposes.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in detector.ts","Found in `server/src/services/sentinel/detector.ts:58`
+
+> Implement Isolation Forest on entity embeddings",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in detector.ts","Found in `server/src/services/sentinel/detector.ts:63`
+
+> Check graph structure for unusual patterns",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in detector.ts","Found in `server/src/services/sentinel/detector.ts:68`
+
+> Validate temporal coherence of events",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in detector.ts","Found in `server/src/services/sentinel/detector.ts:73`
+
+> Scan metadata for steganographic patterns",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in serviceRegistry.ts","Found in `server/src/services/serviceRegistry.ts:1`
+
+> This is a mock implementation for development purposes.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in optimizer.ts","Found in `server/src/services/velocity/optimizer.ts:68`
+
+> Parse execution plan for SCAN operations",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in optimizer.ts","Found in `server/src/services/velocity/optimizer.ts:73`
+
+> Extract property access patterns and generate CREATE INDEX",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in optimizer.ts","Found in `server/src/services/velocity/optimizer.ts:78`
+
+> Apply AST transformation rules",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in optimizer.ts","Found in `server/src/services/velocity/optimizer.ts:83`
+
+> Generate stable cache key from query structure",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in SIEMPlatform.ts","Found in `server/src/siem/SIEMPlatform.ts:88`
+
+> eventBuffer includes newEvent.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in SummitsightDataService.ts","Found in `server/src/summitsight/SummitsightDataService.ts:109`
+
+> Conflict handling might need to be smarter (update) in prod, but keeping simple for MVP",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in billingSink.test.ts","Found in `server/src/tests/billingSink.test.ts:56`
+
+> signature is the last part, but payload might contain commas if escaped.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in entityResolution.guards.test.ts","Found in `server/src/tests/entityResolution.guards.test.ts:12`
+
+> Implement evaluateWithSampling method in EntityResolutionService",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in entityResolution.normalization.test.ts","Found in `server/src/tests/entityResolution.normalization.test.ts:4`
+
+> These tests describe advanced normalization features not yet implemented",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in EntityResolutionV2Service.test.ts","Found in `server/src/tests/er/EntityResolutionV2Service.test.ts:98`
+
+> These merge tests require proper DLQ and Neo4j session mocking",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in CopilotOrchestrationService.test.ts","Found in `server/src/tests/services/CopilotOrchestrationService.test.ts:1`
+
+> the .js extension",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in summit-metrics.ts","Found in `server/src/utils/summit-metrics.ts:74`
+
+> OTel Counters are monotonic. For active requests (gauge), we need UpDownCounter.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in core.ts","Found in `server/src/websocket/core.ts:174`
+
+> core logic prefixes tenantId, so clients send raw topic.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in EntityResolution.test.ts","Found in `server/tests/EntityResolution.test.ts:39`
+
+> Re-enable once resolveWithML method is implemented",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in activity.test.ts","Found in `server/tests/activity.test.ts:18`
+
+> input structure depends on your schema.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in aurora.service.spec.ts","Found in `server/tests/aurora.service.spec.ts:44`
+
+> Do not call handshake, so implant is considered offline",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in connectors.test.ts","Found in `server/tests/connectors/connectors.test.ts:66`
+
+> These tests require complex mocking of dynamic require'd modules.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in db_layer_smoke.test.ts","Found in `server/tests/db/db_layer_smoke.test.ts:9`
+
+> These tests might need a real DB to pass if we don't mock pg.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in auth.integration.test.ts","Found in `server/tests/integration/auth.integration.test.ts:64`
+
+> Test requires full database mock chain and audit system fixes",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in opa-abac.test.ts","Found in `server/tests/middleware/opa-abac.test.ts:137`
+
+> The middleware logic now checks the header BEFORE calling OPA to determine ACR,",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in auth_fail_closed.test.ts","Found in `server/tests/security/auth_fail_closed.test.ts:8`
+
+> This test reproduces the logic of the `authenticateToken` middleware found in `server/src/app.ts`.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in multi_tenant_stress_engine.test.ts","Found in `server/tests/security/multi_tenant_stress_engine.test.ts:107`
+
+> In `entity.ts`, `entity` resolver calls `requireTenant(context)`.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in StreamProcessor.test.ts","Found in `server/tests/streaming/StreamProcessor.test.ts:48`
+
+> mockImplementation runs when start() calls run().",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in resolvers.ts","Found in `services/admin-api/src/resolvers.ts:271`
+
+> Calculate percentiles from actual query data",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in resolvers.ts","Found in `services/admin-api/src/resolvers.ts:281`
+
+> Implement actual health checks",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in neo4j.ts","Found in `services/api/src/db/neo4j.ts:237`
+
+> This requires APOC procedures for advanced graph algorithms",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in rateLimit.new.ts","Found in `services/api/src/middleware/rateLimit.new.ts:60`
+
+> Send alerts to monitoring system (e.g., PagerDuty, Slack)",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in socket.ts","Found in `services/api/src/realtime/socket.ts:545`
+
+> In production, consider using Redis SCAN instead of KEYS for better performance",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in resolvers.ts","Found in `services/api-gateway/src/resolvers.ts:39`
+
+> Delegate to graph service",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in resolvers.ts","Found in `services/api-gateway/src/resolvers.ts:44`
+
+> Delegate to graph service",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in verifier.ts","Found in `services/attest/src/verifier.ts:10`
+
+> call AMD/Intel verification service; parse claims → measurement digest",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in event-buffer.ts","Found in `services/audit-blackbox-service/src/core/event-buffer.ts:226`
+
+> In production, you might want more sophisticated retry logic",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in immutable-store.ts","Found in `services/audit-blackbox-service/src/store/immutable-store.ts:592`
+
+> Verify against checkpoints",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in audit.test.ts","Found in `services/audit_svc/__tests__/audit.test.ts:266`
+
+> This test validates the concept - actual tamper detection",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in audit.test.ts","Found in `services/audit_svc/__tests__/audit.test.ts:465`
+
+> This test demonstrates the concept - actual implementation",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in slack-adapter.ts","Found in `services/chatops/src/adapters/slack/slack-adapter.ts:309`
+
+> Implement trace lookup",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in slack-adapter.ts","Found in `services/chatops/src/adapters/slack/slack-adapter.ts:372`
+
+> Implement entity expansion",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in slack-adapter.ts","Found in `services/chatops/src/adapters/slack/slack-adapter.ts:379`
+
+> Implement trace expansion",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in slack-adapter.ts","Found in `services/chatops/src/adapters/slack/slack-adapter.ts:441`
+
+> Map Slack user to IntelGraph user and fetch clearance/roles",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in hierarchical-memory.ts","Found in `services/chatops/src/memory/hierarchical-memory.ts:356`
+
+> Use LLM to generate compressed summary",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in hierarchical-memory.ts","Found in `services/chatops/src/memory/hierarchical-memory.ts:411`
+
+> Use LLM to extract structured facts",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in hierarchical-memory.ts","Found in `services/chatops/src/memory/hierarchical-memory.ts:453`
+
+> Implement semantic similarity search",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in hierarchical-memory.ts","Found in `services/chatops/src/memory/hierarchical-memory.ts:485`
+
+> Query Neo4j for relevant facts using semantic search",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in health.ts","Found in `services/citizen-service/src/middleware/health.ts:104`
+
+> Add Neo4j, Redis, etc. checks when integrated",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in LlmAdapter.ts","Found in `services/copilot/src/LlmAdapter.ts:443`
+
+> Implement real LLM adapters",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in repositories.ts","Found in `services/copilot/src/repositories.ts:255`
+
+> Implement PostgreSQL INSERT/UPSERT",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in repositories.ts","Found in `services/copilot/src/repositories.ts:260`
+
+> Implement PostgreSQL SELECT",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in repositories.ts","Found in `services/copilot/src/repositories.ts:265`
+
+> Implement PostgreSQL DELETE",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in repositories.ts","Found in `services/copilot/src/repositories.ts:270`
+
+> Implement PostgreSQL SELECT with user filter",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in repositories.ts","Found in `services/copilot/src/repositories.ts:275`
+
+> Implement PostgreSQL DELETE WHERE expires_at < NOW()",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in repositories.ts","Found in `services/copilot/src/repositories.ts:291`
+
+> Implement PostgreSQL INSERT",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in repositories.ts","Found in `services/copilot/src/repositories.ts:296`
+
+> Implement PostgreSQL SELECT",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in repositories.ts","Found in `services/copilot/src/repositories.ts:301`
+
+> Implement PostgreSQL SELECT",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RecoveryOrchestrator.ts","Found in `services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts:262`
+
+> Implement recovery history",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RecoveryOrchestrator.ts","Found in `services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts:282`
+
+> Implement infrastructure checks",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RecoveryOrchestrator.ts","Found in `services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts:293`
+
+> Implement infrastructure recovery",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RecoveryOrchestrator.ts","Found in `services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts:330`
+
+> Implement golden path tests",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RecoveryOrchestrator.ts","Found in `services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts:331`
+
+> Implement data integrity checks",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RecoveryOrchestrator.ts","Found in `services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts:348`
+
+> Implement actual drill",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RecoveryOrchestrator.ts","Found in `services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts:364`
+
+> Implement actual drill",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RecoveryOrchestrator.ts","Found in `services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts:380`
+
+> Implement actual drill",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RecoveryOrchestrator.ts","Found in `services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts:389`
+
+> Verify backup integrity",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RecoveryOrchestrator.ts","Found in `services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts:390`
+
+> Test restore in isolated environment",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `services/enrichment/src/index.ts:149`
+
+> emit to enrichment.results.v1",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in routes.ts","Found in `services/entity-resolution/src/api/routes.ts:85`
+
+> Extract user ID from auth context",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in routes.ts","Found in `services/entity-resolution/src/api/routes.ts:119`
+
+> Extract user ID from auth context",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agents.ts","Found in `services/espionage-service/src/routes/agents.ts:30`
+
+> Query from database with filters",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agents.ts","Found in `services/espionage-service/src/routes/agents.ts:51`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agents.ts","Found in `services/espionage-service/src/routes/agents.ts:78`
+
+> Save to database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agents.ts","Found in `services/espionage-service/src/routes/agents.ts:97`
+
+> Fetch existing officer from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agents.ts","Found in `services/espionage-service/src/routes/agents.ts:110`
+
+> Update in database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agents.ts","Found in `services/espionage-service/src/routes/agents.ts:138`
+
+> Fetch officer from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agents.ts","Found in `services/espionage-service/src/routes/agents.ts:147`
+
+> Save analysis to database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agents.ts","Found in `services/espionage-service/src/routes/agents.ts:174`
+
+> Fetch officer from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agents.ts","Found in `services/espionage-service/src/routes/agents.ts:186`
+
+> Save analysis to database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agents.ts","Found in `services/espionage-service/src/routes/agents.ts:206`
+
+> Fetch officer from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agents.ts","Found in `services/espionage-service/src/routes/agents.ts:237`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agents.ts","Found in `services/espionage-service/src/routes/agents.ts:264`
+
+> Fetch officers from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agents.ts","Found in `services/espionage-service/src/routes/agents.ts:273`
+
+> Save network to database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agents.ts","Found in `services/espionage-service/src/routes/agents.ts:289`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agents.ts","Found in `services/espionage-service/src/routes/agents.ts:314`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agents.ts","Found in `services/espionage-service/src/routes/agents.ts:333`
+
+> Validate and save surveillance report",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in analytics.ts","Found in `services/espionage-service/src/routes/analytics.ts:30`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in analytics.ts","Found in `services/espionage-service/src/routes/analytics.ts:51`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in analytics.ts","Found in `services/espionage-service/src/routes/analytics.ts:78`
+
+> Save to database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in analytics.ts","Found in `services/espionage-service/src/routes/analytics.ts:97`
+
+> Fetch existing product",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in analytics.ts","Found in `services/espionage-service/src/routes/analytics.ts:110`
+
+> Update in database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in analytics.ts","Found in `services/espionage-service/src/routes/analytics.ts:133`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in analytics.ts","Found in `services/espionage-service/src/routes/analytics.ts:154`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in analytics.ts","Found in `services/espionage-service/src/routes/analytics.ts:181`
+
+> Save to database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in analytics.ts","Found in `services/espionage-service/src/routes/analytics.ts:205`
+
+> Update indicator status in database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in analytics.ts","Found in `services/espionage-service/src/routes/analytics.ts:235`
+
+> Aggregate data from multiple sources",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in analytics.ts","Found in `services/espionage-service/src/routes/analytics.ts:280`
+
+> Perform pattern analysis",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in analytics.ts","Found in `services/espionage-service/src/routes/analytics.ts:382`
+
+> Use ML/AI models for prediction",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in counterintel.ts","Found in `services/espionage-service/src/routes/counterintel.ts:26`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in counterintel.ts","Found in `services/espionage-service/src/routes/counterintel.ts:50`
+
+> Save to database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in counterintel.ts","Found in `services/espionage-service/src/routes/counterintel.ts:82`
+
+> Update indicator in database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in counterintel.ts","Found in `services/espionage-service/src/routes/counterintel.ts:106`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in counterintel.ts","Found in `services/espionage-service/src/routes/counterintel.ts:127`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in counterintel.ts","Found in `services/espionage-service/src/routes/counterintel.ts:151`
+
+> Save to database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in counterintel.ts","Found in `services/espionage-service/src/routes/counterintel.ts:175`
+
+> Update agent status in database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in counterintel.ts","Found in `services/espionage-service/src/routes/counterintel.ts:199`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in counterintel.ts","Found in `services/espionage-service/src/routes/counterintel.ts:223`
+
+> Save to database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in counterintel.ts","Found in `services/espionage-service/src/routes/counterintel.ts:243`
+
+> Update operation in database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in counterintel.ts","Found in `services/espionage-service/src/routes/counterintel.ts:270`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in counterintel.ts","Found in `services/espionage-service/src/routes/counterintel.ts:294`
+
+> Save to database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in counterintel.ts","Found in `services/espionage-service/src/routes/counterintel.ts:314`
+
+> Update profile in database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in counterintel.ts","Found in `services/espionage-service/src/routes/counterintel.ts:341`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in counterintel.ts","Found in `services/espionage-service/src/routes/counterintel.ts:365`
+
+> Save to database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in counterintel.ts","Found in `services/espionage-service/src/routes/counterintel.ts:385`
+
+> Update vetting in database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in counterintel.ts","Found in `services/espionage-service/src/routes/counterintel.ts:409`
+
+> Aggregate data from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in operations.ts","Found in `services/espionage-service/src/routes/operations.ts:35`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in operations.ts","Found in `services/espionage-service/src/routes/operations.ts:56`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in operations.ts","Found in `services/espionage-service/src/routes/operations.ts:83`
+
+> Save to database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in operations.ts","Found in `services/espionage-service/src/routes/operations.ts:102`
+
+> Fetch existing operation from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in operations.ts","Found in `services/espionage-service/src/routes/operations.ts:115`
+
+> Update in database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in operations.ts","Found in `services/espionage-service/src/routes/operations.ts:138`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in operations.ts","Found in `services/espionage-service/src/routes/operations.ts:162`
+
+> Save to database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in operations.ts","Found in `services/espionage-service/src/routes/operations.ts:185`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in operations.ts","Found in `services/espionage-service/src/routes/operations.ts:209`
+
+> Save to database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in operations.ts","Found in `services/espionage-service/src/routes/operations.ts:232`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in operations.ts","Found in `services/espionage-service/src/routes/operations.ts:256`
+
+> Save to database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in operations.ts","Found in `services/espionage-service/src/routes/operations.ts:279`
+
+> Fetch operation from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in federation-manager.ts","Found in `services/federation-service/src/services/federation-manager.ts:304`
+
+> Get from context",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in federation-manager.ts","Found in `services/federation-service/src/services/federation-manager.ts:305`
+
+> Get from agreement",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agencies.ts","Found in `services/foreign-intel-service/src/routes/agencies.ts:20`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agencies.ts","Found in `services/foreign-intel-service/src/routes/agencies.ts:30`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agencies.ts","Found in `services/foreign-intel-service/src/routes/agencies.ts:53`
+
+> Fetch agency from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agencies.ts","Found in `services/foreign-intel-service/src/routes/agencies.ts:67`
+
+> Query organizational units",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agencies.ts","Found in `services/foreign-intel-service/src/routes/agencies.ts:87`
+
+> Query leadership profiles",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in agencies.ts","Found in `services/foreign-intel-service/src/routes/agencies.ts:113`
+
+> Query operational priorities",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in capabilities.ts","Found in `services/foreign-intel-service/src/routes/capabilities.ts:12`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in capabilities.ts","Found in `services/foreign-intel-service/src/routes/capabilities.ts:38`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in capabilities.ts","Found in `services/foreign-intel-service/src/routes/capabilities.ts:49`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in cooperation.ts","Found in `services/foreign-intel-service/src/routes/cooperation.ts:15`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in cooperation.ts","Found in `services/foreign-intel-service/src/routes/cooperation.ts:38`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in cooperation.ts","Found in `services/foreign-intel-service/src/routes/cooperation.ts:49`
+
+> Query from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in analytics-worker.ts","Found in `services/graph-compute/src/workers/analytics-worker.ts:85`
+
+> temporal analysis requires different graph format",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in i18n-adapter.ts","Found in `services/i18n-service/src/integrations/copilot/i18n-adapter.ts:188`
+
+> Integrate with i18n message catalog",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `services/ingest-adapters/src/index.ts:223`
+
+> Implement Prometheus metrics export",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in index.ts","Found in `services/ingest-runner/src/index.ts:138`
+
+> We do NOT throw here to allow the service to start if NATS is temporarily down,",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `services/knowledge-service/src/index.ts:24`
+
+> Query vector store with the embedding of the query",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `services/knowledge-service/src/index.ts:43`
+
+> Query graph store (e.g., Neo4j) for code relationships",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `services/lsc-service/src/index.ts:25`
+
+> Add logic to build the GSN graph based on events",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in email-delivery.ts","Found in `services/notification-router/src/delivery-channels/email-delivery.ts:249`
+
+> Fetch from database",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in FutureFabric.ts","Found in `services/predictive-analytics/collective-intelligence-weaving/src/models/FutureFabric.ts:106`
+
+> Would need signal lookup for source IDs",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in index.ts","Found in `services/predictive-analytics/recursive-outcome-amplifier/src/index.ts:67`
+
+> In a real deployment, you'd use express or similar to handle HTTP",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `services/predictive-analytics/temporal-fracture-forecasting/src/index.ts:90`
+
+> Implement actual readiness checks",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in WorkerManager.ts","Found in `services/queue-manager/src/scaling/WorkerManager.ts:236`
+
+> Would need processor reference to actually scale",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in WorkerManager.ts","Found in `services/queue-manager/src/scaling/WorkerManager.ts:250`
+
+> Would need processor reference to actually scale",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in index.ts","Found in `services/receipt-signer/src/index.ts:13`
+
+> The following exports were removed because they don't exist in signer.ts:",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `services/runbooks/src/index.ts:76`
+
+> Use PostgreSQL in production",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in governance.ts","Found in `services/safe-analytics-workbench/src/models/governance.ts:232`
+
+> book operations",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in types.ts","Found in `services/safe-analytics-workbench/src/models/types.ts:534`
+
+> book Types",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in server.ts","Found in `services/streaming-ingest/src/server.ts:136`
+
+> Implement Prometheus metrics",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in sprint-26-release-integrity-audit-readiness.md","Found in `sprint/sprint-26-release-integrity-audit-readiness.md:149`
+
+> s for Sprint Creation",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in time_to_path.cy.ts","Found in `sprint-kits/proof-first-core-ga/tests/cypress/time_to_path.cy.ts:8`
+
+> assert timer budget once baseline is recorded",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in BaseAgentArchetype.ts","Found in `src/agents/archetypes/base/BaseAgentArchetype.ts:190`
+
+> Integrate with actual OPA service",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in BaseAgentArchetype.ts","Found in `src/agents/archetypes/base/BaseAgentArchetype.ts:222`
+
+> Integrate with actual audit log service",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in BaseAgentArchetype.ts","Found in `src/agents/archetypes/base/BaseAgentArchetype.ts:263`
+
+> Actual health check",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ChiefOfStaffAgent.ts","Found in `src/agents/archetypes/chief-of-staff/ChiefOfStaffAgent.ts:209`
+
+> Implement actual action execution",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ChiefOfStaffAgent.ts","Found in `src/agents/archetypes/chief-of-staff/ChiefOfStaffAgent.ts:347`
+
+> Implement meeting prep analysis",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ChiefOfStaffAgent.ts","Found in `src/agents/archetypes/chief-of-staff/ChiefOfStaffAgent.ts:381`
+
+> Integrate with actual inbox/email API",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ChiefOfStaffAgent.ts","Found in `src/agents/archetypes/chief-of-staff/ChiefOfStaffAgent.ts:415`
+
+> Integrate with actual calendar API",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ChiefOfStaffAgent.ts","Found in `src/agents/archetypes/chief-of-staff/ChiefOfStaffAgent.ts:441`
+
+> Integrate with actual task management system",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in ChiefOfStaffAgent.ts","Found in `src/agents/archetypes/chief-of-staff/ChiefOfStaffAgent.ts:472`
+
+> Integrate with actual action item tracking",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in COOAgent.ts","Found in `src/agents/archetypes/coo/COOAgent.ts:536`
+
+> Integrate with actual SLA monitoring system",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in COOAgent.ts","Found in `src/agents/archetypes/coo/COOAgent.ts:569`
+
+> Integrate with actual incident management system",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in COOAgent.ts","Found in `src/agents/archetypes/coo/COOAgent.ts:597`
+
+> Integrate with actual approval engine",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in COOAgent.ts","Found in `src/agents/archetypes/coo/COOAgent.ts:638`
+
+> Integrate with actual workflow engine",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in COOAgent.ts","Found in `src/agents/archetypes/coo/COOAgent.ts:683`
+
+> Integrate with actual incident management system",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in COOAgent.ts","Found in `src/agents/archetypes/coo/COOAgent.ts:699`
+
+> Integrate with actual incident management and notification system",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in COOAgent.ts","Found in `src/agents/archetypes/coo/COOAgent.ts:709`
+
+> Integrate with actual notification system",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RevOpsAgent.ts","Found in `src/agents/archetypes/revops/RevOpsAgent.ts:530`
+
+> Integrate with actual CRM (Salesforce, HubSpot, etc.)",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RevOpsAgent.ts","Found in `src/agents/archetypes/revops/RevOpsAgent.ts:577`
+
+> Integrate with actual forecasting system",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RevOpsAgent.ts","Found in `src/agents/archetypes/revops/RevOpsAgent.ts:590`
+
+> Calculate actual waterfall from opportunity changes",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RevOpsAgent.ts","Found in `src/agents/archetypes/revops/RevOpsAgent.ts:601`
+
+> Integrate with actual CRM and usage tracking",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RevOpsAgent.ts","Found in `src/agents/archetypes/revops/RevOpsAgent.ts:639`
+
+> Integrate with actual lead management system",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RevOpsAgent.ts","Found in `src/agents/archetypes/revops/RevOpsAgent.ts:658`
+
+> Implement actual attribution calculation",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RevOpsAgent.ts","Found in `src/agents/archetypes/revops/RevOpsAgent.ts:673`
+
+> Integrate with actual task management system",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RevOpsAgent.ts","Found in `src/agents/archetypes/revops/RevOpsAgent.ts:688`
+
+> Integrate with actual customer success system",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in RevOpsAgent.ts","Found in `src/agents/archetypes/revops/RevOpsAgent.ts:698`
+
+> Generate actual variance report",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in CacheManager.ts","Found in `src/build-cache/CacheManager.ts:224`
+
+> Track hit rate",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in entangledInfluence.ts","Found in `src/insights/entangledInfluence.ts:5`
+
+> sympy and qutip are Python libraries and cannot be directly imported into TypeScript.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in globalSynergyVortex.ts","Found in `src/insights/globalSynergyVortex.ts:5`
+
+> networkx and qutip are Python libraries and cannot be directly imported into TypeScript.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in quantumEcosystemBastion.ts","Found in `src/insights/quantumEcosystemBastion.ts:4`
+
+> qutip is a Python library and cannot be directly imported into TypeScript.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in telemetryAmplifier.ts","Found in `src/insights/telemetryAmplifier.ts:6`
+
+> sympy, mpmath, and scapy are Python libraries and cannot be directly imported into TypeScript.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in MaestroIntegrationOrchestrator.ts","Found in `src/maestro/MaestroIntegrationOrchestrator.ts:444`
+
+> In real implementation, proper dependencies would be injected",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in database.ts","Found in `test/infra/database.ts:63`
+
+> This assumes migrations are idempotent or schema-aware",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in server.ts","Found in `test/infra/server.ts:54`
+
+> This is a placeholder - adjust to your actual server entry point",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in lease_drop.test.ts","Found in `tests/chaos/lease_drop.test.ts:41`
+
+> Implement actual API calls to verify task state transition after lease drop",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in golden-path.e2e.test.ts","Found in `tests/e2e/golden-path.e2e.test.ts:1008`
+
+> WebSocket subscription testing would require a WebSocket client",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in maestro-api-ui-flow.spec.ts","Found in `tests/e2e/maestro-api-ui-flow.spec.ts:51`
+
+> Add more robust checks for run status updates on the page.",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in maestro-api-ui-flow.spec.ts","Found in `tests/e2e/maestro-api-ui-flow.spec.ts:61`
+
+> Add more robust checks for the presence and content of run listings.",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in jest-setup.ts","Found in `tests/utils/jest-setup.ts:13`
+
+> `jest` is a global injected by Jest - no import needed",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in cli.ts","Found in `tools/dlqtriage/src/cli.ts:372`
+
+> Implement actual redrive - publish to ingest topic",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in generate-soc-tests.js","Found in `tools/generate-soc-tests.js:111`
+
+> Implement specific test logic",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in github.ts","Found in `tools/issue-sweeper/src/github.ts:28`
+
+> Implement retry logic with exponential backoff",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `tools/legal/ltdim/index.ts:159`
+
+> Load from a secure location",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in README.md","Found in `tools/promise-tracker/README.md:279`
+
+> Implement caching layer",P3,Task,"Technical Debt Auto-Discovery"
+"Address FIXME in README.md","Found in `tools/promise-tracker/README.md:280`
+
+> Race condition in connection pool",P2,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `tools/prompt-system/src/cli/index.ts:55`
+
+> Implement clipboard copy",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `tools/prompt-system/src/cli/index.ts:89`
+
+> Write to file",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `tools/prompt-system/src/cli/index.ts:214`
+
+> Implement template file validation",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in index.ts","Found in `tools/prompt-system/src/cli/index.ts:270`
+
+> Format metrics output",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in cli.ts","Found in `tools/replayctl/src/cli.ts:171`
+
+> Implement legal hold check",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in cli.ts","Found in `tools/replayctl/src/cli.ts:514`
+
+> Implement actual replay logic",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in cli.ts","Found in `tools/replayctl/src/cli.ts:563`
+
+> Implement actual checkpoint retrieval",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in create.ts","Found in `tools/scaffold-cli/src/commands/create.ts:450`
+
+> Add your routes here",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in create.ts","Found in `tools/scaffold-cli/src/commands/create.ts:592`
+
+> Add dependency checks (database, redis, etc.)",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in next-env.d.ts","Found in `web/retention-dashboard/next-env.d.ts:4`
+
+> This file should not be edited",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in next-env.d.ts","Found in `website/next-env.d.ts:4`
+
+> This file should not be edited",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in IngestOrchestrator.ts","Found in `workers/ingest/src/IngestOrchestrator.ts:165`
+
+> Track failures",P3,Task,"Technical Debt Auto-Discovery"
+"Address TODO in IngestOrchestrator.ts","Found in `workers/ingest/src/IngestOrchestrator.ts:166`
+
+> Track bytes",P3,Task,"Technical Debt Auto-Discovery"
+"Address NOTE in connectivity.test.ts","Found in `zero-trust/tests/e2e/connectivity.test.ts:273`
+
+> This might allow in simplified test due to source/dest match",P3,Task,"Technical Debt Auto-Discovery"

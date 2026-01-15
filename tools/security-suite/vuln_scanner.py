@@ -4,13 +4,12 @@ Vulnerability Scanner Wrapper
 Wraps Trivy/Snyk or falls back to npm audit.
 """
 
-import os
 import shutil
 import subprocess
-import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
+
 
 def run_npm_audit():
     print("Running npm audit...")
@@ -30,6 +29,7 @@ def run_npm_audit():
     except Exception as e:
         print(f"Error running npm audit: {e}")
 
+
 def run_trivy():
     if not shutil.which("trivy"):
         print("Trivy not found. Skipping container scan.")
@@ -38,6 +38,7 @@ def run_trivy():
     print("Running Trivy filesystem scan...")
     subprocess.run(["trivy", "fs", ".", "--severity", "HIGH,CRITICAL"])
     return True
+
 
 def main():
     print("Starting Vulnerability Scan...")
@@ -49,6 +50,7 @@ def main():
     run_npm_audit()
 
     print("Scan complete.")
+
 
 if __name__ == "__main__":
     main()

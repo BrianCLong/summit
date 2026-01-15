@@ -18,21 +18,37 @@ const maxUses = toInt(process.env.PG_POOL_MAX_USES, 5000);
 const statementTimeoutMs = toInt(process.env.PG_STATEMENT_TIMEOUT_MS, 0);
 
 // Region-aware database metrics
+function createCounter(config: any) {
+    try {
+        return new Counter(config);
+    } catch (e) {
+        return { inc: () => {}, labels: () => ({ inc: () => {} }) } as any;
+    }
+}
+
+function createHistogram(config: any) {
+    try {
+        return new Histogram(config);
+    } catch (e) {
+        return { observe: () => {}, labels: () => ({ observe: () => {} }) } as any;
+    }
+}
+
 const dbConnectionsActive =
-  (register.getSingleMetric(
+  (register?.getSingleMetric(
     'db_connections_active_total',
   ) as Counter<string>) ||
-  new Counter({
+  createCounter({
     name: 'db_connections_active_total',
     help: 'Total active database connections',
     labelNames: ['region', 'pool_type', 'tenant_id'],
   });
 
 const dbQueryDuration =
-  (register.getSingleMetric(
+  (register?.getSingleMetric(
     'db_query_duration_seconds',
   ) as Histogram<string>) ||
-  new Histogram({
+  createHistogram({
     name: 'db_query_duration_seconds',
     help: 'Database query duration',
     labelNames: ['region', 'pool_type', 'operation', 'tenant_id'],
@@ -40,10 +56,10 @@ const dbQueryDuration =
   });
 
 const dbReplicationLag =
-  (register.getSingleMetric(
+  (register?.getSingleMetric(
     'db_replication_lag_seconds',
   ) as Histogram<string>) ||
-  new Histogram({
+  createHistogram({
     name: 'db_replication_lag_seconds',
     help: 'Database replication lag in seconds',
     labelNames: ['region', 'primary_region'],

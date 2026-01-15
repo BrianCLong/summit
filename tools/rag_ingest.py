@@ -226,7 +226,7 @@ class RAGIngestor:
             # Generate embedding
             embedding = self._embed_text(chunk)
             if embedding is None:
-                print(f"  Skipping chunk {i+1}: embedding failed")
+                print(f"  Skipping chunk {i + 1}: embedding failed")
                 skipped += 1
                 continue
 
@@ -245,7 +245,7 @@ class RAGIngestor:
                     print(f"  Processed {i + 1}/{len(chunks)} chunks")
 
             except Exception as e:
-                print(f"  Error inserting chunk {i+1}: {e}")
+                print(f"  Error inserting chunk {i + 1}: {e}")
                 skipped += 1
 
         return added, skipped

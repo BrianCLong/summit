@@ -1,0 +1,49 @@
+{
+  "issue_number": 10018,
+  "title": "IntelGraph Policy: OPA ABAC",
+  "url": "https://github.com/BrianCLong/summit/issues/10018",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9399486444,
+      "node_id": "LA_kwDOPaNncM8AAAACMEDH7A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/track:E",
+      "name": "track:E",
+      "color": "0366d6",
+      "default": false,
+      "description": "Track E"
+    },
+    {
+      "id": 9399486935,
+      "node_id": "LA_kwDOPaNncM8AAAACMEDJ1w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:governance",
+      "name": "area:governance",
+      "color": "fbca04",
+      "default": false,
+      "description": "Governance and policy"
+    },
+    {
+      "id": 9399487325,
+      "node_id": "LA_kwDOPaNncM8AAAACMEDLXQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/prio:P0",
+      "name": "prio:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Critical priority"
+    }
+  ],
+  "updatedAt": "2025-10-04T03:22:32Z",
+  "createdAt": "2025-10-04T03:22:32Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

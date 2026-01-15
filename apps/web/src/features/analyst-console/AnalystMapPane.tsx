@@ -33,8 +33,7 @@ export function AnalystMapPane({
   const [hoveredLocationId, setHoveredLocationId] = useState<string | null>(null)
 
   // Parse time window
-  const fromTime = new Date(timeWindow.from).getTime()
-  const toTime = new Date(timeWindow.to).getTime()
+  const { startMs: fromTime, endMs: toTime } = timeWindow
 
   // Filter locations within time window
   const filteredLocations = useMemo(() => {

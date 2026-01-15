@@ -1,0 +1,86 @@
+{
+  "issue_number": 277,
+  "title": "fix: correct audit logging on entity view",
+  "url": "https://github.com/BrianCLong/summit/pull/277",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T16:31:37Z",
+  "createdAt": "2025-08-15T20:05:27Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11925,
+        "url": "https://github.com/BrianCLong/summit/pull/11925",
+        "mergedAt": "2025-11-20T10:20:13Z",
+        "title": "Build Ingest Wizard and ETL Assistant backend"
+      },
+      {
+        "number": 15326,
+        "url": "https://github.com/BrianCLong/summit/pull/15326",
+        "mergedAt": null,
+        "title": "Add redteam harness module and scenarios"
+      },
+      {
+        "number": 11912,
+        "url": "https://github.com/BrianCLong/summit/pull/11912",
+        "mergedAt": null,
+        "title": "Implement structured logging with correlation IDs"
+      },
+      {
+        "number": 1172,
+        "url": "https://github.com/BrianCLong/summit/pull/1172",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps): bump graphql-subscriptions from 2.0.0 to 3.0.0 in /server"
+      },
+      {
+        "number": 1302,
+        "url": "https://github.com/BrianCLong/summit/pull/1302",
+        "mergedAt": "2025-09-23T17:05:47Z",
+        "title": "feat: build maestro conductor milestone shell"
+      },
+      {
+        "number": 13190,
+        "url": "https://github.com/BrianCLong/summit/pull/13190",
+        "mergedAt": "2025-12-04T15:38:47Z",
+        "title": "Build resilient multi-LLM orchestrator with governance"
+      },
+      {
+        "number": 1182,
+        "url": "https://github.com/BrianCLong/summit/pull/1182",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group with 2 updates"
+      },
+      {
+        "number": 1279,
+        "url": "https://github.com/BrianCLong/summit/pull/1279",
+        "mergedAt": null,
+        "title": "feat(ga): artifacts pack for v1.0.0"
+      },
+      {
+        "number": 11872,
+        "url": "https://github.com/BrianCLong/summit/pull/11872",
+        "mergedAt": "2025-11-20T14:34:03Z",
+        "title": "Build autotriage engine for issues and bugs"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

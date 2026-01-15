@@ -1,0 +1,224 @@
+{
+  "issue_number": 66,
+  "title": "Add PWA Support for Mobile Responsiveness",
+  "url": "https://github.com/BrianCLong/summit/issues/66",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051532,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5DA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:frontend",
+      "name": "area:frontend",
+      "color": "ededed",
+      "default": false,
+      "description": "Frontend work"
+    },
+    {
+      "id": 9095918502,
+      "node_id": "LA_kwDOPaNncM8AAAACHiizpg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:enhancement",
+      "name": "type:enhancement",
+      "color": "FBCA04",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095918587,
+      "node_id": "LA_kwDOPaNncM8AAAACHiiz-w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P3",
+      "name": "priority:P3",
+      "color": "fbca04",
+      "default": false,
+      "description": "Medium"
+    }
+  ],
+  "updatedAt": "2025-08-12T04:39:19Z",
+  "createdAt": "2025-08-12T04:39:19Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14257,
+        "url": "https://github.com/BrianCLong/summit/pull/14257",
+        "mergedAt": "2025-12-22T08:10:18Z",
+        "title": "Add pilot stage hardening pipeline"
+      },
+      {
+        "number": 1722,
+        "url": "https://github.com/BrianCLong/summit/pull/1722",
+        "mergedAt": null,
+        "title": "chore(deps): bump tqdm from 4.66.1 to 4.66.3 in /server"
+      },
+      {
+        "number": 1719,
+        "url": "https://github.com/BrianCLong/summit/pull/1719",
+        "mergedAt": null,
+        "title": "chore(deps): bump aquasec/trivy from 0.51.1 to 0.66.0"
+      },
+      {
+        "number": 631,
+        "url": "https://github.com/BrianCLong/summit/pull/631",
+        "mergedAt": null,
+        "title": "chore(deps): bump tqdm from 4.66.1 to 4.67.1"
+      },
+      {
+        "number": 1362,
+        "url": "https://github.com/BrianCLong/summit/pull/1362",
+        "mergedAt": null,
+        "title": "Add coverage tests for prov-ledger service"
+      },
+      {
+        "number": 10044,
+        "url": "https://github.com/BrianCLong/summit/pull/10044",
+        "mergedAt": "2025-10-04T22:43:32Z",
+        "title": "feat: add mission control conflict arbitration"
+      },
+      {
+        "number": 11784,
+        "url": "https://github.com/BrianCLong/summit/pull/11784",
+        "mergedAt": "2025-10-27T10:54:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 21 updates"
+      },
+      {
+        "number": 10208,
+        "url": "https://github.com/BrianCLong/summit/pull/10208",
+        "mergedAt": "2025-10-15T03:46:45Z",
+        "title": "ci(actions): repo-wide resilience—cron jitter, concurrency, backlog guard, and matrix caps"
+      },
+      {
+        "number": 10123,
+        "url": "https://github.com/BrianCLong/summit/pull/10123",
+        "mergedAt": "2025-10-14T08:40:19Z",
+        "title": "feat: add narrative simulation engine core"
+      },
+      {
+        "number": 1328,
+        "url": "https://github.com/BrianCLong/summit/pull/1328",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat(cli): add ig-detect rule validation CLI"
+      },
+      {
+        "number": 1311,
+        "url": "https://github.com/BrianCLong/summit/pull/1311",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat: orchestrate zero spend routing"
+      },
+      {
+        "number": 1303,
+        "url": "https://github.com/BrianCLong/summit/pull/1303",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "fix: align mcp core test tooling and lock handling"
+      },
+      {
+        "number": 13166,
+        "url": "https://github.com/BrianCLong/summit/pull/13166",
+        "mergedAt": "2025-12-04T15:39:25Z",
+        "title": "Fix Jest ESM config, update CI, and resolve conflicts"
+      },
+      {
+        "number": 13076,
+        "url": "https://github.com/BrianCLong/summit/pull/13076",
+        "mergedAt": "2025-12-03T05:15:02Z",
+        "title": "Fix Jest ESM Configuration and Test Execution"
+      },
+      {
+        "number": 13042,
+        "url": "https://github.com/BrianCLong/summit/pull/13042",
+        "mergedAt": "2025-12-01T19:17:12Z",
+        "title": "chore: Finalize CI/CD consolidation and cleanup"
+      },
+      {
+        "number": 13179,
+        "url": "https://github.com/BrianCLong/summit/pull/13179",
+        "mergedAt": "2025-12-04T15:39:15Z",
+        "title": "Plan evaluation-first platform architecture"
+      },
+      {
+        "number": 1279,
+        "url": "https://github.com/BrianCLong/summit/pull/1279",
+        "mergedAt": null,
+        "title": "feat(ga): artifacts pack for v1.0.0"
+      },
+      {
+        "number": 1259,
+        "url": "https://github.com/BrianCLong/summit/pull/1259",
+        "mergedAt": null,
+        "title": "Merge conflict-free branches and PRs into main"
+      },
+      {
+        "number": 11815,
+        "url": "https://github.com/BrianCLong/summit/pull/11815",
+        "mergedAt": "2025-11-10T13:08:11Z",
+        "title": "chore(deps): bump the js-dependencies group with 34 updates"
+      },
+      {
+        "number": 1309,
+        "url": "https://github.com/BrianCLong/summit/pull/1309",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Fix docling metrics registration and test scaffolding"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      },
+      {
+        "number": 1338,
+        "url": "https://github.com/BrianCLong/summit/pull/1338",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/workflows"
+      },
+      {
+        "number": 1337,
+        "url": "https://github.com/BrianCLong/summit/pull/1337",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/docs"
+      },
+      {
+        "number": 1336,
+        "url": "https://github.com/BrianCLong/summit/pull/1336",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/deps"
+      },
+      {
+        "number": 1335,
+        "url": "https://github.com/BrianCLong/summit/pull/1335",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/hardening"
+      },
+      {
+        "number": 1334,
+        "url": "https://github.com/BrianCLong/summit/pull/1334",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/features"
+      },
+      {
+        "number": 1265,
+        "url": "https://github.com/BrianCLong/summit/pull/1265",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "Chore/husky v9 cleanup"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      },
+      {
+        "number": 1204,
+        "url": "https://github.com/BrianCLong/summit/pull/1204",
+        "mergedAt": null,
+        "title": "chore(deps): bump the minor-and-patch group with 70 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

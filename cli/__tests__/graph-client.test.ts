@@ -2,62 +2,71 @@
  * Graph Client Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 
-// Mock neo4j-driver
-jest.mock('neo4j-driver', () => ({
-  default: {
-    driver: jest.fn(() => ({
-      verifyConnectivity: jest.fn().mockResolvedValue(undefined),
-      close: jest.fn().mockResolvedValue(undefined),
-      session: jest.fn(() => ({
-        run: jest.fn().mockResolvedValue({
-          records: [
-            {
-              keys: ['n'],
-              get: jest.fn((key) => ({
-                elementId: '4:test:123',
-                labels: ['Person'],
-                properties: { name: 'Test' },
-              })),
-            },
-          ],
-          summary: {
-            resultAvailableAfter: { toNumber: () => 10 },
-            resultConsumedAfter: { toNumber: () => 15 },
-            counters: {
-              updates: () => ({
-                nodesCreated: 0,
-                nodesDeleted: 0,
-                relationshipsCreated: 0,
-                relationshipsDeleted: 0,
-                propertiesSet: 0,
-                labelsAdded: 0,
-                labelsRemoved: 0,
-              }),
-            },
-            queryType: 'r',
-          },
-        }),
-        close: jest.fn().mockResolvedValue(undefined),
-      })),
-      getServerInfo: jest.fn().mockResolvedValue({
-        protocolVersion: 5.0,
+// Use jest.unstable_mockModule for ESM
+const mockQueryResult = {
+  records: [
+    {
+      keys: ['n'],
+      get: () => ({
+        elementId: '4:test:123',
+        labels: ['Person'],
+        properties: { name: 'Test' },
       }),
-    })),
-    auth: {
-      basic: jest.fn((user, pass) => ({ scheme: 'basic', principal: user })),
     },
-    session: {
-      READ: 'READ',
-      WRITE: 'WRITE',
+  ],
+  summary: {
+    resultAvailableAfter: { toNumber: () => 10 },
+    resultConsumedAfter: { toNumber: () => 15 },
+    counters: {
+      updates: () => ({
+        nodesCreated: 0,
+        nodesDeleted: 0,
+        relationshipsCreated: 0,
+        relationshipsDeleted: 0,
+        propertiesSet: 0,
+        labelsAdded: 0,
+        labelsRemoved: 0,
+      }),
     },
-    int: jest.fn((n) => ({ toNumber: () => n })),
-    isInt: jest.fn(() => false),
-    isNode: jest.fn((val) => val && 'labels' in val),
-    isRelationship: jest.fn((val) => val && 'type' in val && 'startNodeElementId' in val),
-    isPath: jest.fn(() => false),
+    queryType: 'r',
   },
+};
+
+const mockSession = {
+  run: async () => mockQueryResult,
+  close: async () => undefined,
+};
+
+const mockDriverInstance = {
+  verifyConnectivity: async () => undefined,
+  close: async () => undefined,
+  session: () => mockSession,
+  getServerInfo: async () => ({ protocolVersion: 5.0 }),
+};
+
+const mockNeo4j = {
+  driver: () => mockDriverInstance,
+  auth: {
+    basic: (user: string) => ({ scheme: 'basic', principal: user }),
+  },
+  session: {
+    READ: 'READ',
+    WRITE: 'WRITE',
+  },
+  int: (n: number) => ({ toNumber: () => n }),
+  isInt: () => false,
+  isNode: (val: unknown) => val && typeof val === 'object' && val !== null && 'labels' in val,
+  isRelationship: (val: unknown) => val && typeof val === 'object' && val !== null && 'type' in val && 'startNodeElementId' in val,
+  isPath: () => false,
+};
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+jest.mock('neo4j-driver', () => ({
+  __esModule: true,
+  default: mockNeo4j,
+  ...mockNeo4j,
 }));
 
 import { GraphClient } from '../src/lib/graph-client.js';

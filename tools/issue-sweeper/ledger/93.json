@@ -1,0 +1,149 @@
+{
+  "issue_number": 93,
+  "title": "Bootstrap Basic GraphQL Schema and Resolvers",
+  "url": "https://github.com/BrianCLong/summit/issues/93",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:14:05Z",
+  "createdAt": "2025-08-12T04:40:38Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11844,
+        "url": "https://github.com/BrianCLong/summit/pull/11844",
+        "mergedAt": "2025-11-20T09:42:22Z",
+        "title": "fix(authz-gateway): harden opa decision parsing"
+      },
+      {
+        "number": 12071,
+        "url": "https://github.com/BrianCLong/summit/pull/12071",
+        "mergedAt": null,
+        "title": "Build Enterprise Compliance and Governance Framework"
+      },
+      {
+        "number": 12091,
+        "url": "https://github.com/BrianCLong/summit/pull/12091",
+        "mergedAt": "2025-11-21T06:30:22Z",
+        "title": "Design multi-layer caching strategy for Summit"
+      },
+      {
+        "number": 11792,
+        "url": "https://github.com/BrianCLong/summit/pull/11792",
+        "mergedAt": null,
+        "title": "fix: resolve GraphQL service regressions"
+      },
+      {
+        "number": 11879,
+        "url": "https://github.com/BrianCLong/summit/pull/11879",
+        "mergedAt": null,
+        "title": "Create monorepo remediation and dev workflow plan"
+      },
+      {
+        "number": 10119,
+        "url": "https://github.com/BrianCLong/summit/pull/10119",
+        "mergedAt": "2025-10-14T10:40:06Z",
+        "title": "feat: Optimize data processing pipelines"
+      },
+      {
+        "number": 10114,
+        "url": "https://github.com/BrianCLong/summit/pull/10114",
+        "mergedAt": "2025-10-14T10:40:23Z",
+        "title": "feat: harden intelgraph helm security controls"
+      },
+      {
+        "number": 10130,
+        "url": "https://github.com/BrianCLong/summit/pull/10130",
+        "mergedAt": "2025-10-14T08:36:34Z",
+        "title": "feat: introduce synthetic event booster framework"
+      },
+      {
+        "number": 10122,
+        "url": "https://github.com/BrianCLong/summit/pull/10122",
+        "mergedAt": "2025-10-14T08:53:50Z",
+        "title": "feat: add influence mining extractor pipeline"
+      },
+      {
+        "number": 10127,
+        "url": "https://github.com/BrianCLong/summit/pull/10127",
+        "mergedAt": "2025-10-17T01:51:15Z",
+        "title": "feat: add Liquid Nano pilot bundle"
+      },
+      {
+        "number": 11918,
+        "url": "https://github.com/BrianCLong/summit/pull/11918",
+        "mergedAt": "2025-11-20T10:21:01Z",
+        "title": "Build mobile apps for iOS and Android"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      },
+      {
+        "number": 1284,
+        "url": "https://github.com/BrianCLong/summit/pull/1284",
+        "mergedAt": "2025-09-20T08:06:31Z",
+        "title": "feat(release): enterprise-grade repo consolidation and golden ci pipeline"
+      },
+      {
+        "number": 1285,
+        "url": "https://github.com/BrianCLong/summit/pull/1285",
+        "mergedAt": "2025-09-20T08:06:30Z",
+        "title": "feat(release): enterprise ci/cd foundation - clean slate"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,62 @@
+{
+  "issue_number": 574,
+  "title": "feat: add deepfake detection stubs",
+  "url": "https://github.com/BrianCLong/summit/pull/574",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-18T03:24:02Z",
+  "createdAt": "2025-08-18T01:53:30Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11889,
+        "url": "https://github.com/BrianCLong/summit/pull/11889",
+        "mergedAt": "2025-11-20T11:02:19Z",
+        "title": "Generate master planning docs from markdown files"
+      },
+      {
+        "number": 15341,
+        "url": "https://github.com/BrianCLong/summit/pull/15341",
+        "mergedAt": "2026-01-01T08:47:02Z",
+        "title": "Implement adversarial resistance and truth defense"
+      },
+      {
+        "number": 11815,
+        "url": "https://github.com/BrianCLong/summit/pull/11815",
+        "mergedAt": "2025-11-10T13:08:11Z",
+        "title": "chore(deps): bump the js-dependencies group with 34 updates"
+      },
+      {
+        "number": 1284,
+        "url": "https://github.com/BrianCLong/summit/pull/1284",
+        "mergedAt": "2025-09-20T08:06:31Z",
+        "title": "feat(release): enterprise-grade repo consolidation and golden ci pipeline"
+      },
+      {
+        "number": 1285,
+        "url": "https://github.com/BrianCLong/summit/pull/1285",
+        "mergedAt": "2025-09-20T08:06:30Z",
+        "title": "feat(release): enterprise ci/cd foundation - clean slate"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

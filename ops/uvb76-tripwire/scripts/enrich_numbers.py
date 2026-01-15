@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Enrich events with candidate numbers-station metadata."""
+
 from __future__ import annotations
 
 import argparse

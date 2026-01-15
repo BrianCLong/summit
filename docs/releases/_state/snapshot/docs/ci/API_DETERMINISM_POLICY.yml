@@ -1,0 +1,134 @@
+# API Determinism Policy
+# Configures API response consistency verification
+#
+# This policy file is read by scripts/release/api_determinism_check.sh
+# See docs/ci/API_DETERMINISM.md for full documentation.
+
+version: "1.0.0"
+
+# Check configuration
+check:
+  # Number of times to call each endpoint
+  iterations: 3
+
+  # Delay between iterations (ms)
+  iteration_delay: 100
+
+  # Timeout per request (ms)
+  request_timeout: 5000
+
+  # Server start timeout (ms)
+  server_start_timeout: 30000
+
+# Endpoints to verify
+endpoints:
+  # Health and status endpoints (should be deterministic)
+  - path: "/health"
+    method: GET
+    deterministic: true
+    ignore_fields:
+      - "timestamp"
+      - "uptime"
+
+  - path: "/api/v1/status"
+    method: GET
+    deterministic: true
+    ignore_fields:
+      - "timestamp"
+      - "serverTime"
+      - "requestId"
+
+  # GraphQL introspection (should be fully deterministic)
+  - path: "/graphql"
+    method: POST
+    body: '{"query":"{ __schema { types { name } } }"}'
+    deterministic: true
+    content_type: "application/json"
+
+  # API version endpoint
+  - path: "/api/version"
+    method: GET
+    deterministic: true
+
+# Fields that are expected to vary
+allowed_variance_fields:
+  # Timestamps
+  - "timestamp"
+  - "created_at"
+  - "updated_at"
+  - "serverTime"
+  - "requestTime"
+
+  # Request-specific
+  - "requestId"
+  - "traceId"
+  - "correlationId"
+
+  # Runtime metrics
+  - "uptime"
+  - "memory"
+  - "cpu"
+
+  # Random/generated
+  - "nonce"
+  - "sessionId"
+
+# Comparison options
+comparison:
+  # Ignore order of array elements
+  ignore_array_order: true
+
+  # Ignore whitespace differences
+  ignore_whitespace: true
+
+  # Deep comparison for nested objects
+  deep_compare: true
+
+  # Normalize numbers (ignore floating point precision)
+  normalize_numbers: true
+
+# Gates
+gates:
+  # Fail if any deterministic endpoint varies
+  fail_on_variance: true
+
+  # Maximum allowed variation percentage (for non-deterministic endpoints)
+  max_variance_percent: 5
+
+# Reporting
+reporting:
+  # Generate detailed report
+  generate_report: true
+
+  # Report format: markdown, json
+  format: markdown
+
+  # Upload as artifact
+  upload_artifact: true
+
+  # Include diff in report
+  include_diff: true
+
+# Schedule
+schedule:
+  # Regular scheduled checks
+  enabled: true
+  cron: "0 8 * * *"  # Daily at 8 AM UTC
+
+  # Check on PRs (requires test server)
+  on_pull_request: false
+
+  # Check after deployment
+  on_deployment: true
+
+# Integration
+integration:
+  # Block releases if check fails
+  block_release: true
+
+  # Add to release checklist
+  include_in_checklist: true
+
+# State tracking
+state:
+  path: "docs/releases/_state/determinism_state.json"

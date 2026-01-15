@@ -1,0 +1,137 @@
+{
+  "issue_number": 113,
+  "title": "Set Up Basic Testing Framework (Jest/Cypress)",
+  "url": "https://github.com/BrianCLong/summit/issues/113",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:15:19Z",
+  "createdAt": "2025-08-12T04:41:09Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14389,
+        "url": "https://github.com/BrianCLong/summit/pull/14389",
+        "mergedAt": "2025-12-24T02:15:37Z",
+        "title": "feat: SSO Scaffold (Prompt 113)"
+      },
+      {
+        "number": 12722,
+        "url": "https://github.com/BrianCLong/summit/pull/12722",
+        "mergedAt": "2025-12-05T17:14:35Z",
+        "title": "Add issue specs for prompts 113-120"
+      },
+      {
+        "number": 12446,
+        "url": "https://github.com/BrianCLong/summit/pull/12446",
+        "mergedAt": "2025-12-04T17:46:00Z",
+        "title": "Add ultra-prime expansion for wave 15 missions"
+      },
+      {
+        "number": 15331,
+        "url": "https://github.com/BrianCLong/summit/pull/15331",
+        "mergedAt": "2026-01-01T11:38:35Z",
+        "title": "feat: initialize Ontology Engine architecture and artifacts"
+      },
+      {
+        "number": 15131,
+        "url": "https://github.com/BrianCLong/summit/pull/15131",
+        "mergedAt": "2025-12-30T21:30:53Z",
+        "title": "chore(deps): bump napi from 2.16.17 to 3.3.0"
+      },
+      {
+        "number": 10123,
+        "url": "https://github.com/BrianCLong/summit/pull/10123",
+        "mergedAt": "2025-10-14T08:40:19Z",
+        "title": "feat: add narrative simulation engine core"
+      },
+      {
+        "number": 11882,
+        "url": "https://github.com/BrianCLong/summit/pull/11882",
+        "mergedAt": null,
+        "title": "Add API documentation and validation layers"
+      },
+      {
+        "number": 1310,
+        "url": "https://github.com/BrianCLong/summit/pull/1310",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat: orchestrate multi-llm cooperation fabric"
+      },
+      {
+        "number": 11922,
+        "url": "https://github.com/BrianCLong/summit/pull/11922",
+        "mergedAt": "2025-11-20T10:05:25Z",
+        "title": "Build real-time streaming analytics pipeline"
+      },
+      {
+        "number": 11919,
+        "url": "https://github.com/BrianCLong/summit/pull/11919",
+        "mergedAt": "2025-11-20T10:05:41Z",
+        "title": "Build Advanced Data Integration and ETL Platform"
+      },
+      {
+        "number": 11893,
+        "url": "https://github.com/BrianCLong/summit/pull/11893",
+        "mergedAt": null,
+        "title": "Build Advanced Metadata Analysis Platform"
+      },
+      {
+        "number": 11918,
+        "url": "https://github.com/BrianCLong/summit/pull/11918",
+        "mergedAt": "2025-11-20T10:21:01Z",
+        "title": "Build mobile apps for iOS and Android"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,4 +1,3 @@
-
 def process_with_human_in_the_loop(data: dict):
     """
     Processes data with a human-in-the-loop workflow.

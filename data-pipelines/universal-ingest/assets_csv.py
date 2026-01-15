@@ -5,6 +5,7 @@ Reads an asset inventory CSV and emits graph-ready JSON containing
 `Asset` nodes linked to an `Org` node. The CSV is expected to contain
 `asset_id`, `hostname`, `ip_address` and `cpe` columns.
 """
+
 from __future__ import annotations
 
 import argparse

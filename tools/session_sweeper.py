@@ -26,13 +26,14 @@ Example input structure:
 
 Statuses supported: pr-ready, pr-created, needs-more-work, blocked.
 """
+
 from __future__ import annotations
 
 import argparse
 import json
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Optional
 
 PRIORITY_CATEGORIES = [
     "Security",
@@ -53,10 +54,10 @@ class Session:
     category: str
     remaining_steps: int = 1
     blocked: bool = False
-    blocker: Optional[str] = None
+    blocker: str | None = None
 
     @classmethod
-    def from_dict(cls, payload: dict) -> "Session":
+    def from_dict(cls, payload: dict) -> Session:
         return cls(
             name=str(payload.get("name", "unknown")),
             status=str(payload.get("status", "needs-more-work")).lower(),
@@ -76,12 +77,12 @@ class Session:
 @dataclass
 class Plan:
     free_slots_needed: int
-    to_close_first: List[Session]
-    cold_categories: List[str]
+    to_close_first: list[Session]
+    cold_categories: list[str]
     summary: str
 
 
-def load_sessions(source: Path) -> List[Session]:
+def load_sessions(source: Path) -> list[Session]:
     with source.open("r", encoding="utf-8") as handle:
         data = json.load(handle)
     if not isinstance(data, list):
@@ -89,7 +90,7 @@ def load_sessions(source: Path) -> List[Session]:
     return [Session.from_dict(item) for item in data]
 
 
-def _recommend_closures(sessions: Iterable[Session]) -> List[Session]:
+def _recommend_closures(sessions: Iterable[Session]) -> list[Session]:
     # Order: PR-ready, PR already open, blocked, needs-work; within each, fewer remaining steps first.
     def sort_key(session: Session):
         status_order = {
@@ -108,12 +109,12 @@ def _recommend_closures(sessions: Iterable[Session]) -> List[Session]:
     return sorted(sessions, key=sort_key)
 
 
-def _detect_cold_categories(sessions: Iterable[Session]) -> List[str]:
+def _detect_cold_categories(sessions: Iterable[Session]) -> list[str]:
     observed = {s.category for s in sessions}
     return [cat for cat in PRIORITY_CATEGORIES if cat not in observed]
 
 
-def build_plan(sessions: List[Session], capacity: int, reserve_slot: int) -> Plan:
+def build_plan(sessions: list[Session], capacity: int, reserve_slot: int) -> Plan:
     free_slots_needed = max(0, len(sessions) - (capacity - reserve_slot))
     suggestion_count = free_slots_needed or min(2, len(sessions)) or 1
     to_close_first = _recommend_closures(sessions)[:suggestion_count]
@@ -129,9 +130,7 @@ def build_plan(sessions: List[Session], capacity: int, reserve_slot: int) -> Pla
             + ", ".join(f"{s.name} ({s.status})" for s in to_close_first)
         )
     if cold_categories:
-        summary_lines.append(
-            "Backfill cold categories: " + ", ".join(cold_categories)
-        )
+        summary_lines.append("Backfill cold categories: " + ", ".join(cold_categories))
     return Plan(free_slots_needed, to_close_first, cold_categories, "\n".join(summary_lines))
 
 
@@ -157,7 +156,9 @@ def format_plan(plan: Plan) -> str:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Prioritize session closures and backfill prompts.")
+    parser = argparse.ArgumentParser(
+        description="Prioritize session closures and backfill prompts."
+    )
     parser.add_argument("input", type=Path, help="Path to JSON file describing sessions")
     parser.add_argument("--capacity", type=int, default=15, help="Maximum concurrent sessions")
     parser.add_argument(

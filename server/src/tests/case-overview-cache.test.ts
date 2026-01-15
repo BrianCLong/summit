@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
-import { Pool, QueryResult } from 'pg';
+import type { Pool } from 'pg';
 import { getPostgresPool } from '../db/postgres.js';
 import { CaseOverviewService } from '../cases/overview/CaseOverviewService.js';
 import { CaseOverviewCacheRepo } from '../repos/CaseOverviewCacheRepo.js';
@@ -13,7 +13,7 @@ async function seedCase(pg: Pool): Promise<string> {
      VALUES (gen_random_uuid(), $1, 'Overview Case', 'open', $2)
      RETURNING id`,
     [TENANT_ID, USER_ID],
-  )) as QueryResult<{ id: string }>;
+  )) as { rows: { id: string }[] };
 
   const caseId = rows[0].id;
 
@@ -63,7 +63,10 @@ async function cleanupCase(pg: Pool, caseId: string) {
   await pg.query('DELETE FROM maestro.cases WHERE id = $1', [caseId]);
 }
 
-describe('CaseOverviewService cache', () => {
+const describeDatabase =
+  process.env.ZERO_FOOTPRINT === 'true' ? describe.skip : describe;
+
+describeDatabase('CaseOverviewService cache', () => {
   let pg: Pool;
   let service: CaseOverviewService;
   let repo: CaseOverviewCacheRepo;

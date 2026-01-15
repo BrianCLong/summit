@@ -1,10 +1,14 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
 import Joi from 'joi';
 import { z } from 'zod';
 import { buildRequestValidator, createSqlInjectionGuard } from '../request-schema-validator.js';
 
-describe('request schema validator middleware', () => {
+const NO_NETWORK_LISTEN = process.env.NO_NETWORK_LISTEN === 'true';
+const describeIf = NO_NETWORK_LISTEN ? describe.skip : describe;
+
+describeIf('request schema validator middleware', () => {
   const zodSchema = z.object({
     name: z.string().min(1),
     count: z.coerce.number().int().min(1).max(5).default(1),

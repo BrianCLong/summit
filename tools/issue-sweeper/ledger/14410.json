@@ -1,0 +1,21 @@
+{
+  "issue_number": 14410,
+  "title": "Enhance Storage Infrastructure: Redis, Partitioning, and DR",
+  "url": "https://github.com/BrianCLong/summit/pull/14410",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-24T20:36:38Z",
+  "createdAt": "2025-12-24T17:44:04Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

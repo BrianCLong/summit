@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { randomBytes, generateKeyPairSync } from 'crypto';
+import { randomUUID, generateKeyPairSync } from 'crypto';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
@@ -30,7 +30,7 @@ describe('Proof-Carrying Publishing', () => {
 
   beforeEach(async () => {
     // Create temp directory for tests
-    tempDir = join(tmpdir(), `pcp-test-${randomBytes(8).toString('hex')}`);
+    tempDir = join(tmpdir(), `pcp-test-${randomUUID()}`);
     await fs.mkdir(tempDir, { recursive: true });
 
     // Generate key pair for testing
@@ -200,6 +200,7 @@ describe('Proof-Carrying Publishing', () => {
         type: 'data',
         required: true,
         title: 'Test Dataset',
+        organization: 'IntelGraph',
         license: StandardLicenses['MIT'],
         verified: true,
         verifiedAt: new Date().toISOString(),
@@ -222,6 +223,7 @@ describe('Proof-Carrying Publishing', () => {
         type: 'data',
         required: true,
         title: 'Test Dataset',
+        organization: 'IntelGraph',
         license: StandardLicenses['MIT'],
         verified: false, // Not verified
       };
@@ -289,6 +291,7 @@ describe('Proof-Carrying Publishing', () => {
           version: '1.0',
           createdAt: new Date().toISOString(),
           createdBy: 'test-user',
+          securityClassification: 'public',
         },
         verification: {
           offlineVerifiable: true,
@@ -338,6 +341,7 @@ describe('Proof-Carrying Publishing', () => {
           version: '1.0',
           createdAt: new Date().toISOString(),
           createdBy: 'test-user',
+          securityClassification: 'public',
         },
         verification: {
           offlineVerifiable: true,
@@ -448,6 +452,7 @@ describe('Proof-Carrying Publishing', () => {
         type: 'data',
         required: true,
         title: 'Test Data',
+        organization: 'IntelGraph',
         license: StandardLicenses['MIT'],
         verified: true,
         verifiedAt: new Date().toISOString(),
@@ -461,6 +466,7 @@ describe('Proof-Carrying Publishing', () => {
         artifacts: [file1],
         citations: [citation],
         licenses: [StandardLicenses['MIT']],
+        securityClassification: 'public',
       });
 
       expect(result.validation.canPublish).toBe(true);
@@ -525,6 +531,7 @@ describe('Proof-Carrying Publishing', () => {
         type: 'data',
         required: true,
         title: 'Test Data',
+        organization: 'IntelGraph',
         license: StandardLicenses['MIT'],
         verified: true,
         verifiedAt: new Date().toISOString(),
@@ -538,6 +545,7 @@ describe('Proof-Carrying Publishing', () => {
         artifacts: [file1],
         citations: [citation],
         licenses: [StandardLicenses['MIT']],
+        securityClassification: 'public',
       });
 
       // Revoke the bundle
@@ -634,6 +642,7 @@ describe('Proof-Carrying Publishing', () => {
           type: 'data',
           required: true,
           title: 'Test Dataset',
+          organization: 'IntelGraph',
           license: StandardLicenses['MIT'],
           verified: false, // Not verified!
         },
@@ -662,6 +671,7 @@ describe('Proof-Carrying Publishing', () => {
         type: 'data',
         required: true,
         title: 'Test Data',
+        organization: 'IntelGraph',
         license: StandardLicenses['MIT'],
         verified: true,
         verifiedAt: new Date().toISOString(),
@@ -675,6 +685,7 @@ describe('Proof-Carrying Publishing', () => {
         artifacts: [file1],
         citations: [citation],
         licenses: [StandardLicenses['MIT']],
+        securityClassification: 'public',
       });
 
       // Create wallets for different audiences
@@ -712,6 +723,7 @@ describe('Proof-Carrying Publishing', () => {
         type: 'data',
         required: true,
         title: 'Test Data',
+        organization: 'IntelGraph',
         license: StandardLicenses['MIT'],
         verified: true,
         verifiedAt: new Date().toISOString(),
@@ -725,6 +737,7 @@ describe('Proof-Carrying Publishing', () => {
         artifacts: [file1],
         citations: [citation],
         licenses: [StandardLicenses['MIT']],
+        securityClassification: 'public',
       });
 
       // Create multiple wallets

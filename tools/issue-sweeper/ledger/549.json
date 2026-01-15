@@ -1,0 +1,74 @@
+{
+  "issue_number": 549,
+  "title": "feat: enforce OPA authz with persisted queries and audit trail",
+  "url": "https://github.com/BrianCLong/summit/pull/549",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-18T00:41:17Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15340,
+        "url": "https://github.com/BrianCLong/summit/pull/15340",
+        "mergedAt": "2026-01-01T08:47:05Z",
+        "title": "Counter-intelligence information dominance sprint"
+      },
+      {
+        "number": 11901,
+        "url": "https://github.com/BrianCLong/summit/pull/11901",
+        "mergedAt": "2025-11-20T10:25:49Z",
+        "title": "Build proof-carrying publishing with disclosure packager"
+      },
+      {
+        "number": 119,
+        "url": "https://github.com/BrianCLong/summit/pull/119",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump concurrently from 8.2.2 to 9.2.0"
+      },
+      {
+        "number": 11873,
+        "url": "https://github.com/BrianCLong/summit/pull/11873",
+        "mergedAt": "2025-11-20T14:33:58Z",
+        "title": "Optimize database performance and caching"
+      },
+      {
+        "number": 1190,
+        "url": "https://github.com/BrianCLong/summit/pull/1190",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump tailwind-merge from 2.6.0 to 3.3.1"
+      },
+      {
+        "number": 11874,
+        "url": "https://github.com/BrianCLong/summit/pull/11874",
+        "mergedAt": null,
+        "title": "Build Resilience Lab with automated chaos drills"
+      },
+      {
+        "number": 1171,
+        "url": "https://github.com/BrianCLong/summit/pull/1171",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps): bump body-parser from 1.20.3 to 2.2.0 in /server"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

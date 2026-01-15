@@ -1,0 +1,94 @@
+# Release Ops Digest Policy
+# Configures the daily digest generator for release operations visibility
+#
+# This policy file is read by scripts/release/generate_release_ops_digest.sh
+# Cadence gating by scripts/release/should_run_task.sh
+# See docs/ci/RELEASE_OPS_DIGEST.md for full documentation.
+
+version: "1.1.0"
+
+# Run window (UTC) - digest only runs within this daily window
+# The orchestrator runs hourly; this gates when digest actually executes
+run_window_utc:
+  start: "08:00"              # Start of daily window (08:00 UTC = business hours start)
+  end: "09:00"                # End of daily window (1 hour window)
+
+# Cadence hours - minimum time between digest executions
+# Combined with run_window_utc ensures once-per-day execution
+cadence_hours: 24
+
+# Rate limiting to prevent spam (legacy format, preserved for compatibility)
+cadence:
+  hours: 24                    # Minimum hours between digest posts
+  force_on_escalation: true    # Force digest if new P0 escalation detected
+
+# Content configuration
+content:
+  max_blockers: 50             # Maximum blockers to include
+  max_items_per_section: 10    # Limit items in each section
+
+  # Sections to include
+  include_sections:
+    - overview               # Summary counts and metrics
+    - promotable_candidates  # "Promote Now" items
+    - blocked_items          # P0/Blocked issues
+    - queued_or_pending      # P1/Queued issues
+    - aging_summary          # Age distribution buckets
+
+  # Labels to query for blockers
+  labels_to_include:
+    - release-blocker
+    - escalation:P0
+    - escalation:P1
+
+  # Severity label priority order
+  severity_order:
+    - severity:P0
+    - blocked
+    - severity:P1
+    - escalation:P0
+    - escalation:P1
+
+  # Include release line status
+  include_release_lines: true
+
+  # Include queue/runner snapshot
+  include_queue_snapshot: true
+
+  # Include "Promote Now" candidates
+  include_promote_now: true
+
+# Output targets
+output:
+  # Always generate artifact
+  artifact: true
+  artifact_path: "artifacts/release-train/release_ops_digest.md"
+
+  # Optional: post as comment to a tracking issue
+  issue_comment:
+    enabled: false
+    # Uncomment and set to enable issue posting:
+    # target_issue_number: 123
+
+  # Optional: update a pinned digest file
+  pinned_file:
+    enabled: false
+    # Uncomment to enable:
+    # path: "docs/releases/RELEASE_OPS_DAILY_DIGEST.md"
+
+# State file for rate limiting
+state:
+  path: "docs/releases/_state/digest_state.json"
+
+# Aging buckets for summary
+aging_buckets:
+  - label: "< 1 hour"
+    max_minutes: 60
+  - label: "1-4 hours"
+    max_minutes: 240
+  - label: "4-12 hours"
+    max_minutes: 720
+  - label: "12-24 hours"
+    max_minutes: 1440
+  - label: "> 24 hours"
+    max_minutes: null  # No upper limit

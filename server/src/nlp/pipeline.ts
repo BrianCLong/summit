@@ -93,9 +93,9 @@ export class TextIngestionPipeline {
     const content = fs.readFileSync(filePath, 'utf-8');
     const rows = content
       .split('\n')
-      .map((line) => line.trim())
+      .map((line: string) => line.trim())
       .filter(Boolean);
-    return rows.map((line) => ({
+    return rows.map((line: string) => ({
       id: uuid(),
       source: 'file',
       payload: { text: line },

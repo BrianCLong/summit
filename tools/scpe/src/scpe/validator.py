@@ -56,7 +56,7 @@ class Validator:
         if not artifacts_spec:
             raise ConfigError("Configuration must provide at least one artifact entry")
 
-        coverage = {key: False for key in REQUIRED_TYPES}
+        coverage = dict.fromkeys(REQUIRED_TYPES, False)
         results: list[dict[str, Any]] = []
         checks: list[dict[str, Any]] = []
 

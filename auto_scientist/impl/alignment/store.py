@@ -1,7 +1,7 @@
-import json
 import os
-from typing import List, Optional
+
 from .schemas import Preference
+
 
 class PreferenceStore:
     def __init__(self, storage_path: str = "preference_data.jsonl"):
@@ -14,12 +14,12 @@ class PreferenceStore:
             f.write(preference.json() + "\n")
         return preference.id
 
-    def load_preferences(self, limit: Optional[int] = None) -> List[Preference]:
+    def load_preferences(self, limit: int | None = None) -> list[Preference]:
         prefs = []
         if not os.path.exists(self.storage_path):
             return prefs
 
-        with open(self.storage_path, "r") as f:
+        with open(self.storage_path) as f:
             for i, line in enumerate(f):
                 if limit and i >= limit:
                     break
@@ -32,5 +32,5 @@ class PreferenceStore:
     def count(self) -> int:
         if not os.path.exists(self.storage_path):
             return 0
-        with open(self.storage_path, "r") as f:
+        with open(self.storage_path) as f:
             return sum(1 for _ in f)

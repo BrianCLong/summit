@@ -1,0 +1,83 @@
+{
+  "issue_number": 262,
+  "title": "chore(deps): bump @mui/material from 5.18.0 to 7.3.1 in /client",
+  "url": "https://github.com/BrianCLong/summit/pull/262",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9102204147,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic8w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/javascript",
+      "name": "javascript",
+      "color": "168700",
+      "default": false,
+      "description": "Pull requests that update javascript code"
+    }
+  ],
+  "updatedAt": "2025-08-15T21:10:03Z",
+  "createdAt": "2025-08-14T05:54:05Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15328,
+        "url": "https://github.com/BrianCLong/summit/pull/15328",
+        "mergedAt": null,
+        "title": "feat: add counter-intel osint playbook and tooling"
+      },
+      {
+        "number": 15342,
+        "url": "https://github.com/BrianCLong/summit/pull/15342",
+        "mergedAt": "2026-01-01T08:47:00Z",
+        "title": "Create eight new product requirement documents"
+      },
+      {
+        "number": 13119,
+        "url": "https://github.com/BrianCLong/summit/pull/13119",
+        "mergedAt": "2025-12-17T05:37:58Z",
+        "title": "Implement Time-Series Intelligence Model for Entity Forecasting"
+      },
+      {
+        "number": 11926,
+        "url": "https://github.com/BrianCLong/summit/pull/11926",
+        "mergedAt": "2025-11-20T10:20:02Z",
+        "title": "Build natural language to graph query translator"
+      },
+      {
+        "number": 13183,
+        "url": "https://github.com/BrianCLong/summit/pull/13183",
+        "mergedAt": "2025-12-04T15:39:03Z",
+        "title": "Build graph explorer UI with Tailwind and shadcn"
+      },
+      {
+        "number": 13193,
+        "url": "https://github.com/BrianCLong/summit/pull/13193",
+        "mergedAt": "2025-12-04T15:38:38Z",
+        "title": "Build React Native mobile app with OSINT dashboard"
+      },
+      {
+        "number": 13164,
+        "url": "https://github.com/BrianCLong/summit/pull/13164",
+        "mergedAt": "2025-12-17T05:35:09Z",
+        "title": "Resolve merge conflicts via rebase"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

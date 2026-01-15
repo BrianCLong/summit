@@ -1,0 +1,31 @@
+{
+  "issue_number": 11828,
+  "title": "Wire metrics into WebSocket service",
+  "url": "https://github.com/BrianCLong/summit/issues/11828",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9107968269,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRDQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/observability",
+      "name": "observability",
+      "color": "5319E7",
+      "default": false,
+      "description": "OTel/Grafana/Alerts"
+    }
+  ],
+  "updatedAt": "2025-11-20T03:54:45Z",
+  "createdAt": "2025-11-20T03:30:27Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

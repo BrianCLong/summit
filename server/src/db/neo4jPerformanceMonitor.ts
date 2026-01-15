@@ -8,6 +8,7 @@ import {
 type QueryLabels = {
   operation: string;
   label: string;
+  tenant_id?: string;
 };
 
 type QueryOutcome = {
@@ -109,6 +110,7 @@ export class Neo4jPerformanceMonitor {
     return {
       operation: labels?.operation || 'unknown',
       label: labels?.label || 'unlabeled',
+      tenant_id: labels?.tenant_id || 'unknown',
     };
   }
 }

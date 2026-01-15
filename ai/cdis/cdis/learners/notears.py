@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Iterable, List
+from collections.abc import Iterable
 
 import numpy as np
 import pandas as pd
@@ -23,7 +23,7 @@ class NoteaRSRegression:
 
     def fit(self, df: pd.DataFrame) -> GraphEstimate:
         nodes = list(df.columns)
-        edges: List[Edge] = []
+        edges: list[Edge] = []
         for target in nodes:
             predictors = [c for c in nodes if c != target]
             model = LassoLars(alpha=self.alpha, normalize=False)

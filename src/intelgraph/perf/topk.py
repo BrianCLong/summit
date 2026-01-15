@@ -1,14 +1,16 @@
-from typing import Sequence, List, Tuple
 import heapq
+from collections.abc import Sequence
 
 try:
     # Attempt to import hypothetical native module
     from intelgraph.perf._native import topk_indices as _native_topk_indices  # type: ignore
+
     _HAS_NATIVE = True
 except ImportError:
     _HAS_NATIVE = False
 
-def _python_topk_indices(scores: Sequence[float], k: int) -> List[int]:
+
+def _python_topk_indices(scores: Sequence[float], k: int) -> list[int]:
     """
     Pure Python implementation of top-k indices.
     Deterministic tie-breaking: lower index wins.
@@ -36,7 +38,7 @@ def _python_topk_indices(scores: Sequence[float], k: int) -> List[int]:
     return [-idx for score, idx in top_k_items]
 
 
-def topk_indices(scores: Sequence[float], k: int) -> List[int]:
+def topk_indices(scores: Sequence[float], k: int) -> list[int]:
     """
     Return indices of the k largest elements in scores.
     Tie-breaking: lower index wins.

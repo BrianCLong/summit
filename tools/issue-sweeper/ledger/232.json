@@ -1,0 +1,83 @@
+{
+  "issue_number": 232,
+  "title": "Realtime: CRDT model for graph edits (Y.js)",
+  "url": "https://github.com/BrianCLong/summit/issues/232",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767070,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX03g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/enhancement",
+      "name": "enhancement",
+      "color": "a2eeef",
+      "default": true,
+      "description": "New feature or request"
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342986,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9ig",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/frontend",
+      "name": "frontend",
+      "color": "A2EEEF",
+      "default": false,
+      "description": "UI/E2E"
+    },
+    {
+      "id": 9108055729,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHmsQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/real-time",
+      "name": "real-time",
+      "color": "1d76db",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:54:11Z",
+  "createdAt": "2025-08-14T04:54:11Z",
+  "classification": "feature",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12305,
+        "url": "https://github.com/BrianCLong/summit/pull/12305",
+        "mergedAt": "2025-11-27T00:19:42Z",
+        "title": "Bump node-forge from 1.3.1 to 1.3.2 in /conductor-ui"
+      },
+      {
+        "number": 1172,
+        "url": "https://github.com/BrianCLong/summit/pull/1172",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps): bump graphql-subscriptions from 2.0.0 to 3.0.0 in /server"
+      },
+      {
+        "number": 11880,
+        "url": "https://github.com/BrianCLong/summit/pull/11880",
+        "mergedAt": "2025-11-20T14:33:22Z",
+        "title": "Set up GitHub Actions CI/CD pipeline"
+      },
+      {
+        "number": 11884,
+        "url": "https://github.com/BrianCLong/summit/pull/11884",
+        "mergedAt": "2025-11-20T14:33:08Z",
+        "title": "Build connector SDK and sample connectors"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

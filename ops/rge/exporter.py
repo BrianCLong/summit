@@ -15,7 +15,7 @@ import logging
 import time
 import zipfile
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from enum import Enum
 from typing import Any
 
@@ -149,7 +149,7 @@ class RGEExporter:
 
         try:
             # Calculate reporting period
-            end_date = datetime.now(timezone.utc)
+            end_date = datetime.now(UTC)
             start_date = end_date - timedelta(days=reporting_period_days)
 
             # Collect compliance controls for each framework
@@ -182,7 +182,7 @@ class RGEExporter:
                 export_id=export_id,
                 tenant_id=self.tenant_id,
                 frameworks=frameworks,
-                export_date=datetime.now(timezone.utc).isoformat(),
+                export_date=datetime.now(UTC).isoformat(),
                 reporting_period_start=start_date.isoformat(),
                 reporting_period_end=end_date.isoformat(),
                 controls=all_controls,
@@ -252,7 +252,7 @@ class RGEExporter:
                 description="Maintain records of processing activities",
                 status=ComplianceStatus.COMPLIANT,
                 evidence_refs=["gdpr_processing_log_2024", "data_flow_diagram"],
-                assessment_date=datetime.now(timezone.utc).isoformat(),
+                assessment_date=datetime.now(UTC).isoformat(),
                 assessor="MC-Platform-Auditor",
                 notes="All processing activities logged with legal basis",
                 risk_level="LOW",
@@ -264,7 +264,7 @@ class RGEExporter:
                 description="Implement data protection by design and default",
                 status=ComplianceStatus.COMPLIANT,
                 evidence_refs=["privacy_impact_assessment", "encryption_standards"],
-                assessment_date=datetime.now(timezone.utc).isoformat(),
+                assessment_date=datetime.now(UTC).isoformat(),
                 assessor="MC-Platform-Auditor",
                 notes="Privacy controls integrated into system design",
                 risk_level="MEDIUM",
@@ -276,7 +276,7 @@ class RGEExporter:
                 description="Implement appropriate technical and organizational measures",
                 status=ComplianceStatus.COMPLIANT,
                 evidence_refs=["security_controls_matrix", "encryption_audit"],
-                assessment_date=datetime.now(timezone.utc).isoformat(),
+                assessment_date=datetime.now(UTC).isoformat(),
                 assessor="MC-Platform-Auditor",
                 notes="AES-256 encryption, access controls, audit logging",
                 risk_level="HIGH",
@@ -295,7 +295,7 @@ class RGEExporter:
                 description="Implement logical access security measures",
                 status=ComplianceStatus.COMPLIANT,
                 evidence_refs=["access_review_log", "rbac_configuration"],
-                assessment_date=datetime.now(timezone.utc).isoformat(),
+                assessment_date=datetime.now(UTC).isoformat(),
                 assessor="MC-Platform-Auditor",
                 notes="Role-based access controls with quarterly reviews",
                 risk_level="HIGH",
@@ -307,7 +307,7 @@ class RGEExporter:
                 description="Detect and respond to system security breaches",
                 status=ComplianceStatus.COMPLIANT,
                 evidence_refs=["incident_response_log", "security_monitoring"],
-                assessment_date=datetime.now(timezone.utc).isoformat(),
+                assessment_date=datetime.now(UTC).isoformat(),
                 assessor="MC-Platform-Auditor",
                 notes="24/7 security monitoring with automated response",
                 risk_level="HIGH",
@@ -326,7 +326,7 @@ class RGEExporter:
                 description="Access control policy shall be established",
                 status=ComplianceStatus.COMPLIANT,
                 evidence_refs=["access_control_policy", "policy_review_log"],
-                assessment_date=datetime.now(timezone.utc).isoformat(),
+                assessment_date=datetime.now(UTC).isoformat(),
                 assessor="MC-Platform-Auditor",
                 notes="Comprehensive access control policy reviewed annually",
                 risk_level="MEDIUM",
@@ -345,7 +345,7 @@ class RGEExporter:
                 description="Establish and maintain internal controls",
                 status=ComplianceStatus.COMPLIANT,
                 evidence_refs=["financial_controls_testing", "executive_certification"],
-                assessment_date=datetime.now(timezone.utc).isoformat(),
+                assessment_date=datetime.now(UTC).isoformat(),
                 assessor="MC-Platform-Auditor",
                 notes="Quarterly testing of internal controls",
                 risk_level="HIGH",
@@ -364,7 +364,7 @@ class RGEExporter:
                 description="Manage information system accounts",
                 status=ComplianceStatus.COMPLIANT,
                 evidence_refs=["account_management_procedures", "access_review_log"],
-                assessment_date=datetime.now(timezone.utc).isoformat(),
+                assessment_date=datetime.now(UTC).isoformat(),
                 assessor="MC-Platform-Auditor",
                 notes="Automated account provisioning and deprovisioning",
                 risk_level="HIGH",
@@ -389,7 +389,9 @@ class RGEExporter:
     def _create_evidence_artifact(self, evidence_ref: str) -> AuditEvidence:
         """Create evidence artifact with cryptographic integrity"""
         # Simulate evidence artifact creation
-        file_content = f"Evidence artifact: {evidence_ref}\nGenerated: {datetime.now(timezone.utc).isoformat()}"
+        file_content = (
+            f"Evidence artifact: {evidence_ref}\nGenerated: {datetime.now(UTC).isoformat()}"
+        )
         file_hash = hashlib.sha256(file_content.encode()).hexdigest()
 
         # Generate digital signature for evidence
@@ -403,14 +405,12 @@ class RGEExporter:
             evidence_type="document",
             title=evidence_ref.replace("_", " ").title(),
             description=f"Supporting documentation for {evidence_ref}",
-            creation_date=datetime.now(timezone.utc).isoformat(),
+            creation_date=datetime.now(UTC).isoformat(),
             file_path=f"/evidence/{evidence_ref}.pdf",
             file_hash=file_hash,
             file_size_bytes=len(file_content),
             digital_signature=digital_signature,
-            retention_date=(
-                datetime.now(timezone.utc) + timedelta(days=2555)
-            ).isoformat(),  # 7 years
+            retention_date=(datetime.now(UTC) + timedelta(days=2555)).isoformat(),  # 7 years
             classification="CONFIDENTIAL",
         )
 
@@ -502,7 +502,7 @@ class RGEExporter:
     def _create_attestation_statement(self, compliance_posture: dict[str, Any]) -> dict[str, Any]:
         """Create executive attestation statement"""
         return {
-            "attestation_date": datetime.now(timezone.utc).isoformat(),
+            "attestation_date": datetime.now(UTC).isoformat(),
             "attesting_party": "MC Platform Chief Compliance Officer",
             "statement": (
                 "I hereby attest that the compliance controls and evidence "

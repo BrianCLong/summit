@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import hmac
 import json
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict, is_dataclass
 from hashlib import sha256
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 
 def _serialize(obj: Any) -> Any:
@@ -37,4 +38,3 @@ def verify_report(report_bytes: bytes, secret: str) -> bool:
     canonical = _canonical_json(payload)
     expected = hmac.new(secret.encode("utf-8"), canonical, sha256).hexdigest()
     return hmac.compare_digest(signature, expected)
-

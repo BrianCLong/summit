@@ -1,23 +1,26 @@
-from dataclasses import dataclass
-from typing import List, Optional
 import json
+from dataclasses import dataclass
+
 import requests
+
 
 @dataclass
 class JobManifest:
     job_id: str
     payload: bytes
-    attestation_quotes: List[bytes]
+    attestation_quotes: list[bytes]
     model_pack: str
+
 
 @dataclass
 class RunJobRequest:
     manifest: JobManifest
-    sealed_key: Optional[bytes] = None
-    expected_hash: Optional[bytes] = None
+    sealed_key: bytes | None = None
+    expected_hash: bytes | None = None
     client_region: str = "us-east-1"
     allow_egress: bool = False
-    kms_wrap_material: Optional[bytes] = None
+    kms_wrap_material: bytes | None = None
+
 
 @dataclass
 class RunJobResponse:
@@ -25,6 +28,7 @@ class RunJobResponse:
     result_hash: bytes
     sealed_result: bytes
     audit_token: str
+
 
 class CCEClient:
     def __init__(self, host: str):
@@ -44,7 +48,11 @@ class CCEClient:
             "allowEgress": req.allow_egress,
             "kmsWrapMaterial": list(req.kms_wrap_material) if req.kms_wrap_material else None,
         }
-        resp = requests.post(f"http://{self.host}/runJob", data=json.dumps(body), headers={"content-type": "application/json"})
+        resp = requests.post(
+            f"http://{self.host}/runJob",
+            data=json.dumps(body),
+            headers={"content-type": "application/json"},
+        )
         resp.raise_for_status()
         data = resp.json()
         return RunJobResponse(

@@ -40,6 +40,11 @@ module.exports = async () => {
     process.env.JWT_REFRESH_SECRET =
       process.env.JWT_REFRESH_SECRET || 'test-jwt-refresh-secret-for-testing-only';
     process.env.CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000';
+    process.env.DISABLE_SWAGGER = process.env.DISABLE_SWAGGER || 'true';
+    process.env.DISABLE_TELEMETRY = process.env.DISABLE_TELEMETRY || 'true';
+    if (process.env.CI && !process.env.NO_NETWORK_LISTEN) {
+      process.env.NO_NETWORK_LISTEN = 'true';
+    }
 
     const testDirs = [
       path.join(__dirname, '../../tmp'),
@@ -56,6 +61,23 @@ module.exports = async () => {
     if (process.env.CI) {
       console.log('⏳ Waiting for test services (CI)...');
       await new Promise((r) => setTimeout(r, 500));
+    }
+
+    try {
+      await new Promise((resolve) => {
+        const server = require('http').createServer();
+        server.once('error', (err) => {
+          if (err && err.code === 'EPERM') {
+            process.env.NO_NETWORK_LISTEN = 'true';
+          }
+          resolve();
+        });
+        server.listen(0, '0.0.0.0', () => {
+          server.close(() => resolve());
+        });
+      });
+    } catch (err) {
+      process.env.NO_NETWORK_LISTEN = 'true';
     }
 
     console.log('✅ Jest Global Setup completed successfully');

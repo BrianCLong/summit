@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from fastapi import FastAPI, HTTPException
-from models import EvaluationRequest, Finding, QuarantineItem, Rule
 from rule_engine import evaluate
+
+from models import EvaluationRequest, Finding, QuarantineItem, Rule
 
 app = FastAPI(title="Data Quality Service", version="0.1.0")
 

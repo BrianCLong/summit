@@ -1,7 +1,4 @@
-declare module 'validator';
-declare module 'html-escaper';
-declare module 'isomorphic-dompurify';
-
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 jest.mock(
   'validator',
   () => ({

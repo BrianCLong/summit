@@ -14,8 +14,8 @@ import json
 import os
 import subprocess
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Dict, Iterable, List, Set, Tuple
 from urllib.parse import urlparse
 
 SEVERITY_ORDER = ["critical", "high", "medium", "low", "unknown"]
@@ -87,7 +87,7 @@ def _read_git_file(path: str) -> dict:
     return json.loads(output.decode("utf-8"))
 
 
-def load_report(path: Path, fallback_git: bool = True, prefer_git: bool = False) -> List[dict]:
+def load_report(path: Path, fallback_git: bool = True, prefer_git: bool = False) -> list[dict]:
     data = None
     if prefer_git:
         try:
@@ -103,9 +103,9 @@ def load_report(path: Path, fallback_git: bool = True, prefer_git: bool = False)
     return extract_vulnerabilities(data)
 
 
-def extract_vulnerabilities(data: object) -> List[dict]:
+def extract_vulnerabilities(data: object) -> list[dict]:
     """Normalize vulnerabilities from various scanners."""
-    vulns: List[dict] = []
+    vulns: list[dict] = []
 
     def _append(vuln_obj: dict):
         vid = vuln_obj.get("id") or vuln_obj.get("VulnerabilityID")
@@ -136,8 +136,8 @@ def extract_vulnerabilities(data: object) -> List[dict]:
     return vulns
 
 
-def count_by_severity(vulns: Iterable[dict]) -> Dict[str, int]:
-    counts = {sev: 0 for sev in SEVERITY_ORDER}
+def count_by_severity(vulns: Iterable[dict]) -> dict[str, int]:
+    counts = dict.fromkeys(SEVERITY_ORDER, 0)
     for vuln in vulns:
         sev = str(vuln.get("severity", "unknown")).lower()
         sev = sev if sev in counts else "unknown"
@@ -145,7 +145,7 @@ def count_by_severity(vulns: Iterable[dict]) -> Dict[str, int]:
     return counts
 
 
-def load_budgets(path: Path) -> Dict[str, int]:
+def load_budgets(path: Path) -> dict[str, int]:
     data = load_json(path)
     budgets = data.get("security", {}).get("sbomSeverityBudget", {})
     merged = {**DEFAULT_BUDGET, **{k.lower(): v for k, v in budgets.items()}}
@@ -154,8 +154,8 @@ def load_budgets(path: Path) -> Dict[str, int]:
 
 def load_exceptions(
     exceptions_dir: Path, sha: str, alert_window_days: int
-) -> Tuple[Set[str], List[str]]:
-    alerts: List[str] = []
+) -> tuple[set[str], list[str]]:
+    alerts: list[str] = []
     if not sha:
         sha = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
     path = exceptions_dir / f"{sha}.json"
@@ -166,8 +166,8 @@ def load_exceptions(
         alerts.append(f"Exception file {path} is not signed; ignoring.")
         return set(), alerts
 
-    accepted: Set[str] = set()
-    now = dt.datetime.now(dt.timezone.utc)
+    accepted: set[str] = set()
+    now = dt.datetime.now(dt.UTC)
     window = dt.timedelta(days=alert_window_days)
     for entry in data.get("exceptions", []):
         vuln_id = entry.get("vulnId") or entry.get("id")
@@ -195,15 +195,13 @@ def load_exceptions(
 
         parsed_ticket = urlparse(str(ticket))
         if parsed_ticket.scheme not in {"http", "https"} or not parsed_ticket.netloc:
-            alerts.append(
-                f"Invalid ticket URL for {vuln_id}: {ticket!r}; expected http(s) URL."
-            )
+            alerts.append(f"Invalid ticket URL for {vuln_id}: {ticket!r}; expected http(s) URL.")
             continue
 
         try:
             expiry = dt.datetime.fromisoformat(str(expiry_raw).replace("Z", "+00:00"))
             if expiry.tzinfo is None:
-                expiry = expiry.replace(tzinfo=dt.timezone.utc)
+                expiry = expiry.replace(tzinfo=dt.UTC)
         except Exception:
             alerts.append(f"Invalid expiry '{expiry_raw}' for {vuln_id}; skipping.")
             continue
@@ -219,36 +217,34 @@ def load_exceptions(
     return accepted, alerts
 
 
-def filter_exceptions(vulns: List[dict], accepted_ids: Set[str]) -> List[dict]:
+def filter_exceptions(vulns: list[dict], accepted_ids: set[str]) -> list[dict]:
     if not accepted_ids:
         return vulns
     return [v for v in vulns if str(v.get("id")) not in accepted_ids]
 
 
-def delta_counts(current: Dict[str, int], baseline: Dict[str, int]) -> Dict[str, int]:
+def delta_counts(current: dict[str, int], baseline: dict[str, int]) -> dict[str, int]:
     return {sev: current.get(sev, 0) - baseline.get(sev, 0) for sev in SEVERITY_ORDER}
 
 
-def evaluate(deltas: Dict[str, int], budget: Dict[str, int]) -> Tuple[bool, List[str]]:
-    errors: List[str] = []
+def evaluate(deltas: dict[str, int], budget: dict[str, int]) -> tuple[bool, list[str]]:
+    errors: list[str] = []
     if deltas.get("critical", 0) > 0:
         errors.append(f"Blocking: {deltas['critical']} new critical vulnerabilities detected.")
     for sev, delta in deltas.items():
         allowed = budget.get(sev, DEFAULT_BUDGET.get(sev, 0))
         if delta > allowed:
-            errors.append(
-                f"Budget exceeded for {sev}: delta {delta} > allowed {allowed}."
-            )
+            errors.append(f"Budget exceeded for {sev}: delta {delta} > allowed {allowed}.")
     return not errors, errors
 
 
 def format_summary(
-    baseline: Dict[str, int], current: Dict[str, int], deltas: Dict[str, int], alerts: List[str]
+    baseline: dict[str, int], current: dict[str, int], deltas: dict[str, int], alerts: list[str]
 ) -> str:
     lines = ["Severity summary (baseline -> current, delta):"]
     for sev in SEVERITY_ORDER:
         lines.append(
-            f"- {sev.title()}: {baseline.get(sev,0)} -> {current.get(sev,0)} (Δ {deltas.get(sev,0)})"
+            f"- {sev.title()}: {baseline.get(sev, 0)} -> {current.get(sev, 0)} (Δ {deltas.get(sev, 0)})"
         )
     if alerts:
         lines.append("Alerts:")
@@ -258,12 +254,12 @@ def format_summary(
 
 def write_json_summary(
     path: Path,
-    baseline: Dict[str, int],
-    current: Dict[str, int],
-    deltas: Dict[str, int],
+    baseline: dict[str, int],
+    current: dict[str, int],
+    deltas: dict[str, int],
     ok: bool,
-    alerts: List[str],
-    errors: List[str],
+    alerts: list[str],
+    errors: list[str],
 ) -> None:
     payload = {
         "ok": ok,
@@ -303,7 +299,9 @@ def main():
         )
         baseline_vulns = []
 
-    accepted_ids, alerts = load_exceptions(Path(args.exceptions_dir), args.sha, args.alert_window_days)
+    accepted_ids, alerts = load_exceptions(
+        Path(args.exceptions_dir), args.sha, args.alert_window_days
+    )
     filtered_current = filter_exceptions(current_vulns, accepted_ids)
 
     baseline_counts = count_by_severity(baseline_vulns)

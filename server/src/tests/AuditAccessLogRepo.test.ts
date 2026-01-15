@@ -16,6 +16,7 @@ describe('AuditAccessLogRepo', () => {
       query: jest.fn(),
     } as any;
     repo = new AuditAccessLogRepo(mockPool);
+    mockPool.query.mockClear();
   });
 
   describe('logAccess', () => {

@@ -4,7 +4,6 @@ import { ScoringEngine } from './scoring.js';
 import { provenanceLedger } from '../../provenance/ledger.js';
 import { getDriver } from '../../graph/neo4j.js';
 import { getTracer } from '../../observability/tracer.js';
-import pLimit from 'p-limit';
 
 export class EntityResolutionService {
   private scoringEngine: ScoringEngine;
@@ -32,6 +31,7 @@ export class EntityResolutionService {
   async resolveBatch(entities: EntityInput[]): Promise<ResolutionDecision[]> {
     return getTracer().withSpan('EntityResolutionService.resolveBatch', async (span: any) => {
         span.setAttribute('er.batch_size', entities.length);
+        const { default: pLimit } = await import('p-limit');
         const limit = pLimit(10); // Concurrency limit
         const decisions: ResolutionDecision[] = [];
 

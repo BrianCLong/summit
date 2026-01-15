@@ -1,0 +1,62 @@
+{
+  "issue_number": 457,
+  "title": "feat: add encrypted PDF export",
+  "url": "https://github.com/BrianCLong/summit/pull/457",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-17T14:37:08Z",
+  "createdAt": "2025-08-17T08:07:50Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13617,
+        "url": "https://github.com/BrianCLong/summit/pull/13617",
+        "mergedAt": "2025-12-17T00:27:38Z",
+        "title": "build(deps): bump filelock from 3.19.1 to 3.20.1 in /cognitive_insights_engine"
+      },
+      {
+        "number": 736,
+        "url": "https://github.com/BrianCLong/summit/pull/736",
+        "mergedAt": null,
+        "title": "chore(deps): bump soundfile from 0.12.1 to 0.13.1"
+      },
+      {
+        "number": 1277,
+        "url": "https://github.com/BrianCLong/summit/pull/1277",
+        "mergedAt": "2025-09-19T02:20:58Z",
+        "title": "feat: Add Sprint 25 Day-1 deliverables"
+      },
+      {
+        "number": 1278,
+        "url": "https://github.com/BrianCLong/summit/pull/1278",
+        "mergedAt": "2025-09-19T02:28:07Z",
+        "title": "feat: Sprint 25 Day-1 Deliverables"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,9 @@
+{
+  "freeze_mode": false,
+  "set_at": null,
+  "reason": null,
+  "set_by": null,
+  "tier": null,
+  "expires_at": null,
+  "note": "Initial state. Set to true automatically when error budget triggers freeze. Manual PR required to reset."
+}

@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { EventEmitter } from 'events';
-import { logger } from '../config/logger.js';
-import { correlationStorage } from '../config/logger.js';
-import { summitMetrics } from './summit-metrics.js';
+import { logger } from '../../config/logger.js';
+import { correlationStorage } from '../../config/logger.js';
+import { summitMetrics } from '../../utils/summit-metrics.js';
 
 export interface SummitEvent<T = unknown> {
   name: string;

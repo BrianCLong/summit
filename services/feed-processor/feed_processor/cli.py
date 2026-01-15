@@ -5,14 +5,13 @@ from __future__ import annotations
 import argparse
 import asyncio
 import logging
-from typing import Optional
 
 from .config import Settings, get_settings
 from .processor import run_from_cli
 from .tracing import configure_tracing
 
 
-def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the feed processor workers")
     parser.add_argument(
         "--log-level",
@@ -32,13 +31,11 @@ async def async_main(settings: Settings) -> None:
             provider.shutdown()
 
 
-def main(argv: Optional[list[str]] = None) -> None:
+def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
     settings = get_settings()
     if args.log_level:
-        settings = settings.model_copy(
-            update={"log_level": args.log_level.upper()}
-        )
+        settings = settings.model_copy(update={"log_level": args.log_level.upper()})
     asyncio.run(async_main(settings))
 
 

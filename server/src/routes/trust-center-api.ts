@@ -49,32 +49,32 @@ router.get('/status', async (req: Request, res: Response, next: NextFunction) =>
     };
 
     try {
-        // Try to fetch real metrics if available in this environment
-        const sloRes = await axios.get('http://localhost:9092/metrics.json', { timeout: 1000 }).catch(() => null);
-        if (sloRes?.data) {
-            const smokeUptime = sloRes.data.find((m: any) => m.name === 'smoke_uptime_pct');
-            if (smokeUptime?.values?.[0]?.value) {
-                const currentUptime = parseFloat(smokeUptime.values[0].value);
-                uptime.last24h = currentUptime; // Use current probe uptime as a proxy for now
-            }
+      // Try to fetch real metrics if available in this environment
+      const sloRes = await axios.get('http://localhost:9092/metrics.json', { timeout: 1000 }).catch(() => null);
+      if (sloRes?.data) {
+        const smokeUptime = sloRes.data.find((m: any) => m.name === 'smoke_uptime_pct');
+        if (smokeUptime?.values?.[0]?.value) {
+          const currentUptime = parseFloat(smokeUptime.values[0].value);
+          uptime.last24h = currentUptime; // Use current probe uptime as a proxy for now
         }
+      }
     } catch (e: any) {
-        // Ignore errors and use fallback
+      // Ignore errors and use fallback
     }
 
     // Get incident count (last 30 days)
     // Use mock incident count if table doesn't exist or query fails (common in this env)
     let incidentCount = 0;
     try {
-        const { rows: incidentRows } = await pool.query(`
+      const { rows: incidentRows } = await pool.query(`
           SELECT COUNT(*) as count
           FROM incidents
           WHERE created_at > now() - interval '30 days'
         `);
-        incidentCount = parseInt(incidentRows[0]?.count || '0', 10);
+      incidentCount = parseInt(incidentRows[0]?.count || '0', 10);
     } catch (e: any) {
-        // Table might not exist yet
-        incidentCount = 0;
+      // Table might not exist yet
+      incidentCount = 0;
     }
 
     const status = {
@@ -478,7 +478,7 @@ router.get('/evidence/packages/:packageId', async (req: Request, res: Response, 
       id: row.id,
       tenantId: row.tenant_id,
       controlIds: row.control_ids,
-      snapshots: snapshotRows.map((sr) => ({
+      snapshots: snapshotRows.map((sr: any) => ({
         id: sr.id,
         controlId: sr.control_id,
         sourceId: sr.source_id,

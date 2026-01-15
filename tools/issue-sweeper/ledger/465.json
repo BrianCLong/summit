@@ -1,0 +1,50 @@
+{
+  "issue_number": 465,
+  "title": "refactor(graphql): modularize schema with federation",
+  "url": "https://github.com/BrianCLong/summit/pull/465",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T16:19:37Z",
+  "createdAt": "2025-08-17T19:03:49Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1267,
+        "url": "https://github.com/BrianCLong/summit/pull/1267",
+        "mergedAt": "2025-09-17T10:32:37Z",
+        "title": "feat: Apply Codepacks IV-X"
+      },
+      {
+        "number": 1259,
+        "url": "https://github.com/BrianCLong/summit/pull/1259",
+        "mergedAt": null,
+        "title": "Merge conflict-free branches and PRs into main"
+      },
+      {
+        "number": 1265,
+        "url": "https://github.com/BrianCLong/summit/pull/1265",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "Chore/husky v9 cleanup"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

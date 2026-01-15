@@ -1,0 +1,22 @@
+{
+  "id": "fin-001-cost-guard-unit-economics",
+  "version": "1.0.0",
+  "description": "Imported from legacy structure: fin-001-cost-guard-unit-economics",
+  "model_config": {
+    "model": "gpt-4",
+    "temperature": 0.0
+  },
+  "vars": {
+    "applyOptimization": {
+      "type": "string",
+      "description": "Auto-detected"
+    }
+  },
+  "guardrails": {
+    "tags": [
+      "claude",
+      "legacy"
+    ]
+  },
+  "template_path": "template.md"
+}

@@ -4,7 +4,6 @@ import time
 from collections import deque
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 
 class BackoffStrategy(Enum):
@@ -26,7 +25,7 @@ class RateLimitConfig:
     """Rate limit configuration."""
 
     requests_per_hour: int
-    requests_per_minute: Optional[int] = None
+    requests_per_minute: int | None = None
     burst_limit: int = 10
     backoff_strategy: BackoffStrategy = BackoffStrategy.EXPONENTIAL
     max_retries: int = 3

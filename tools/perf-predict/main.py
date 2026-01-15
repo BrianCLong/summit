@@ -2,7 +2,6 @@ import argparse
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
 
 DEFAULT_LATENCY_BUDGET_MS = 200
 DEFAULT_CPU_BUDGET = 0.7
@@ -16,7 +15,7 @@ class MetricsSnapshot:
     replicas: int
 
     @classmethod
-    def from_dict(cls, data: Dict[str, float]) -> "MetricsSnapshot":
+    def from_dict(cls, data: dict[str, float]) -> "MetricsSnapshot":
         return cls(
             rps=float(data.get("rps", 0)),
             p95_ms=float(data.get("p95_ms", 0)),
@@ -25,7 +24,7 @@ class MetricsSnapshot:
         )
 
 
-def load_metrics(path: Optional[str]) -> MetricsSnapshot:
+def load_metrics(path: str | None) -> MetricsSnapshot:
     if not path:
         return MetricsSnapshot(rps=50, p95_ms=150, cpu_util=0.55, replicas=3)
 
@@ -56,7 +55,7 @@ def burn_rate(snapshot: MetricsSnapshot, slo_budget: float = 0.995) -> float:
     return observed_error / error_budget
 
 
-def predict_capacity(args: argparse.Namespace) -> Dict[str, float]:
+def predict_capacity(args: argparse.Namespace) -> dict[str, float]:
     snapshot = load_metrics(args.metrics)
     budget = args.budget_ms or DEFAULT_LATENCY_BUDGET_MS
     target = args.target_rps
@@ -71,7 +70,7 @@ def predict_capacity(args: argparse.Namespace) -> Dict[str, float]:
     }
 
 
-def predict_headroom(args: argparse.Namespace) -> Dict[str, float]:
+def predict_headroom(args: argparse.Namespace) -> dict[str, float]:
     snapshot = load_metrics(args.metrics)
     budget = args.budget_ms or DEFAULT_LATENCY_BUDGET_MS
     capacity = rps_at_budget(snapshot, budget)
@@ -84,7 +83,7 @@ def predict_headroom(args: argparse.Namespace) -> Dict[str, float]:
     }
 
 
-def predict_burn(args: argparse.Namespace) -> Dict[str, float]:
+def predict_burn(args: argparse.Namespace) -> dict[str, float]:
     snapshot = load_metrics(args.metrics)
     burn = burn_rate(snapshot)
     return {
@@ -94,7 +93,7 @@ def predict_burn(args: argparse.Namespace) -> Dict[str, float]:
     }
 
 
-def emit_json(payload: Dict[str, float]) -> None:
+def emit_json(payload: dict[str, float]) -> None:
     print(json.dumps(payload, indent=2))
 
 

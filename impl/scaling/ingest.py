@@ -1,9 +1,10 @@
 """Telemetry ingestion and validation utilities for scaling orchestrator."""
+
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable, Iterator
 from pathlib import Path
-from typing import Iterable, Iterator, List
 
 from .core import Config, Experiment, Metrics
 from .validation import ValidationError, validate_record
@@ -66,23 +67,25 @@ def parse_experiment(record: dict) -> Experiment:
     )
 
 
-def ingest(path: Path, schema_path: Path) -> List[Experiment]:
+def ingest(path: Path, schema_path: Path) -> list[Experiment]:
     """Load, validate, and parse experiments from a JSONL file."""
 
-    records: List[Experiment] = []
+    records: list[Experiment] = []
     for record in load_jsonl(path):
         try:
             validate_record(record, schema_path)
         except ValidationError as exc:
-            raise IngestionError(f"Validation failed for experiment {record.get('id')}: {exc}") from exc
+            raise IngestionError(
+                f"Validation failed for experiment {record.get('id')}: {exc}"
+            ) from exc
         records.append(parse_experiment(record))
     return records
 
 
-def load_many(paths: Iterable[Path], schema_path: Path) -> List[Experiment]:
+def load_many(paths: Iterable[Path], schema_path: Path) -> list[Experiment]:
     """Load multiple JSONL files of experiments."""
 
-    experiments: List[Experiment] = []
+    experiments: list[Experiment] = []
     for path in paths:
         experiments.extend(ingest(path, schema_path))
     return experiments

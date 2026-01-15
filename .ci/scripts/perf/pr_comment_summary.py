@@ -2,21 +2,21 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 GITHUB_OUTPUT = os.environ.get("GITHUB_STEP_SUMMARY")
 SUMMARY_FILE = Path(os.environ.get("PERF_SUMMARY_FILE", "perf/results/k6-baseline-summary.json"))
 COMMENT_PATH = Path("perf/results/pr_comment.md")
 
 
-def load_summary(path: Path) -> Dict[str, Any]:
+def load_summary(path: Path) -> dict[str, Any]:
     if not path.exists():
         raise FileNotFoundError(f"Summary file not found: {path}")
     with path.open() as handle:
         return json.load(handle)
 
 
-def format_thresholds(thresholds: Dict[str, Any]) -> str:
+def format_thresholds(thresholds: dict[str, Any]) -> str:
     lines = []
     for name, result in thresholds.items():
         status = "✅" if result.get("ok") else "❌"
@@ -57,7 +57,7 @@ def write_outputs(body: str) -> None:
 def main() -> None:
     try:
         body = summarize()
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(f"Failed to summarize: {exc}", file=sys.stderr)
         sys.exit(1)
 

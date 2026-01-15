@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
+
 from .. import tools
 
 
@@ -11,7 +13,9 @@ class PRResult:
 
 
 class PRManager:
-    def prepare_and_optionally_merge(self, title: str, body: str, branch: str, auto_merge: bool) -> PRResult:
+    def prepare_and_optionally_merge(
+        self, title: str, body: str, branch: str, auto_merge: bool
+    ) -> PRResult:
         notes: list[str] = []
         tools.create_pr(branch=branch, title=title, body=body, meta={})
         notes.append(f"PR stub created on branch {branch}.")

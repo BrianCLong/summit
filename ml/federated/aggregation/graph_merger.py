@@ -8,7 +8,7 @@ multiple federated nodes with conflict resolution.
 import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -31,9 +31,9 @@ class GraphNode:
 
     node_id: str
     node_type: str
-    properties: Dict[str, Any]
+    properties: dict[str, Any]
     confidence: float
-    sources: Set[str]
+    sources: set[str]
     timestamp: float
 
 
@@ -44,9 +44,9 @@ class GraphEdge:
     source_id: str
     target_id: str
     edge_type: str
-    properties: Dict[str, Any]
+    properties: dict[str, Any]
     confidence: float
-    sources: Set[str]
+    sources: set[str]
     timestamp: float
 
 
@@ -71,14 +71,14 @@ class GraphMerger:
         self.min_confidence = min_confidence
         self.consensus_threshold = consensus_threshold
 
-        self._merged_nodes: Dict[str, GraphNode] = {}
-        self._merged_edges: Dict[str, GraphEdge] = {}
+        self._merged_nodes: dict[str, GraphNode] = {}
+        self._merged_edges: dict[str, GraphEdge] = {}
 
     def merge_graphs(
         self,
-        graphs: List[Dict[str, Any]],
-        source_ids: List[str],
-    ) -> Dict[str, Any]:
+        graphs: list[dict[str, Any]],
+        source_ids: list[str],
+    ) -> dict[str, Any]:
         """
         Merge multiple graphs from federated nodes
 
@@ -121,7 +121,7 @@ class GraphMerger:
 
         return merged
 
-    def _process_graph(self, graph: Dict[str, Any], source_id: str) -> None:
+    def _process_graph(self, graph: dict[str, Any], source_id: str) -> None:
         """Process a single graph from a federated node"""
         import time
 
@@ -191,7 +191,7 @@ class GraphMerger:
                     timestamp=edge_data.get("timestamp", time.time()),
                 )
 
-    def _merge_union(self) -> Dict[str, Any]:
+    def _merge_union(self) -> dict[str, Any]:
         """Union merge - keep all elements above confidence threshold"""
         nodes = [
             self._node_to_dict(n)
@@ -207,7 +207,7 @@ class GraphMerger:
 
         return {"nodes": nodes, "edges": edges}
 
-    def _merge_intersection(self, num_sources: int) -> Dict[str, Any]:
+    def _merge_intersection(self, num_sources: int) -> dict[str, Any]:
         """Intersection merge - only keep elements from all sources"""
         nodes = [
             self._node_to_dict(n)
@@ -223,7 +223,7 @@ class GraphMerger:
 
         return {"nodes": nodes, "edges": edges}
 
-    def _merge_weighted(self) -> Dict[str, Any]:
+    def _merge_weighted(self) -> dict[str, Any]:
         """Weighted merge - boost confidence by source count"""
         nodes = []
         for node in self._merged_nodes.values():
@@ -250,7 +250,7 @@ class GraphMerger:
 
         return {"nodes": nodes, "edges": edges}
 
-    def _merge_latest(self) -> Dict[str, Any]:
+    def _merge_latest(self) -> dict[str, Any]:
         """Latest merge - most recent update wins"""
         nodes = [
             self._node_to_dict(n)
@@ -266,25 +266,23 @@ class GraphMerger:
 
         return {"nodes": nodes, "edges": edges}
 
-    def _merge_consensus(self) -> Dict[str, Any]:
+    def _merge_consensus(self) -> dict[str, Any]:
         """Consensus merge - require minimum source agreement"""
         nodes = [
             self._node_to_dict(n)
             for n in self._merged_nodes.values()
-            if len(n.sources) >= self.consensus_threshold
-            and n.confidence >= self.min_confidence
+            if len(n.sources) >= self.consensus_threshold and n.confidence >= self.min_confidence
         ]
 
         edges = [
             self._edge_to_dict(e)
             for e in self._merged_edges.values()
-            if len(e.sources) >= self.consensus_threshold
-            and e.confidence >= self.min_confidence
+            if len(e.sources) >= self.consensus_threshold and e.confidence >= self.min_confidence
         ]
 
         return {"nodes": nodes, "edges": edges}
 
-    def _node_to_dict(self, node: GraphNode) -> Dict[str, Any]:
+    def _node_to_dict(self, node: GraphNode) -> dict[str, Any]:
         """Convert GraphNode to dictionary"""
         return {
             "id": node.node_id,
@@ -295,7 +293,7 @@ class GraphMerger:
             "timestamp": node.timestamp,
         }
 
-    def _edge_to_dict(self, edge: GraphEdge) -> Dict[str, Any]:
+    def _edge_to_dict(self, edge: GraphEdge) -> dict[str, Any]:
         """Convert GraphEdge to dictionary"""
         return {
             "source": edge.source_id,
@@ -307,7 +305,7 @@ class GraphMerger:
             "timestamp": edge.timestamp,
         }
 
-    def get_merge_statistics(self) -> Dict[str, Any]:
+    def get_merge_statistics(self) -> dict[str, Any]:
         """Get statistics about the merge operation"""
         source_distribution = {}
         for node in self._merged_nodes.values():
@@ -318,10 +316,10 @@ class GraphMerger:
             "total_nodes": len(self._merged_nodes),
             "total_edges": len(self._merged_edges),
             "source_distribution": source_distribution,
-            "avg_node_confidence": np.mean([
-                n.confidence for n in self._merged_nodes.values()
-            ]) if self._merged_nodes else 0,
-            "avg_edge_confidence": np.mean([
-                e.confidence for e in self._merged_edges.values()
-            ]) if self._merged_edges else 0,
+            "avg_node_confidence": np.mean([n.confidence for n in self._merged_nodes.values()])
+            if self._merged_nodes
+            else 0,
+            "avg_edge_confidence": np.mean([e.confidence for e in self._merged_edges.values()])
+            if self._merged_edges
+            else 0,
         }

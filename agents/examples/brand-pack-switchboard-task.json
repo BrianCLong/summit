@@ -1,0 +1,51 @@
+{
+  "task_id": "BRAND_PACK_SWITCHBOARD_20260105",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "brand-pack-runtime-theming",
+    "version": "v1",
+    "sha256": "212b1403926eee702edc4d83b7befe3a68f3c87aa9c7cee15d4d3ac8055877c1",
+    "path": "prompts/tasks/brand-pack-runtime-theming.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "server/src/app.ts",
+      "server/src/services/brand-packs/",
+      "server/src/provenance/",
+      "server/src/audit/",
+      "apps/web/",
+      "docs/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/",
+      "prompts/"
+    ],
+    "domains": ["theming", "provenance", "audit", "web", "server", "docs"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "artifacts/agent-runs/BRAND_PACK_SWITCHBOARD_20260105.json",
+      "check-boundaries.log",
+      "make-smoke.log"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Brand pack schema, loader, and service exist under server/src/services/brand-packs/.",
+    "Tenant/partner brand pack endpoint returns packs and applies packs with cache invalidation.",
+    "Brand pack application emits provenance receipt and audit log entry with receipt query path.",
+    "Switchboard runtime theming loads pack by tenant context without rebuild.",
+    "Documentation updates cover brand pack contract and receipt format.",
+    "docs/roadmap/STATUS.json updated with current revision note."
+  ],
+  "stop_conditions": [
+    "Policy violation detected",
+    "PII exposure detected",
+    "CI verification failure in main",
+    "Sandbox violation alert"
+  ]
+}

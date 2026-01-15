@@ -27,6 +27,7 @@ export interface OPAInput {
     approvals?: string[];
     step_up_verified?: boolean;
     pii_export_approved?: boolean;
+    compliance_mode?: boolean;
   };
 }
 
@@ -50,6 +51,7 @@ export interface OPARiskAssessment {
 export interface OPADecision {
   action: 'allow' | 'deny' | 'review';
   allow: boolean;
+  decision_id?: string;
   violations: OPAViolation[];
   risk_assessment: OPARiskAssessment;
   required_approvals: string[];
@@ -58,6 +60,7 @@ export interface OPADecision {
 }
 
 export interface OPAResponse {
+  decision_id?: string;
   result: {
     decision: OPADecision;
     deny: OPAViolation[];
@@ -148,7 +151,13 @@ export class OPAClient {
         { input },
       );
 
-      const decision = response.data.result.decision;
+      const decisionId =
+        response.data.decision_id ||
+        (response.headers['x-opa-decision-id'] as string | undefined);
+      const decision = {
+        ...response.data.result.decision,
+        decision_id: decisionId,
+      };
 
       // Cache the decision
       this.decisionCache.set(cacheKey, {

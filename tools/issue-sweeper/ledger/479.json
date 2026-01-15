@@ -1,0 +1,38 @@
+{
+  "issue_number": 479,
+  "title": "test(server): add data redaction coverage and CI updates",
+  "url": "https://github.com/BrianCLong/summit/pull/479",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-18T03:33:12Z",
+  "createdAt": "2025-08-17T19:07:28Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11904,
+        "url": "https://github.com/BrianCLong/summit/pull/11904",
+        "mergedAt": "2025-11-20T10:25:38Z",
+        "title": "Set up Security Autopilot for Summit repoCreate pull request"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

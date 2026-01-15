@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Iterable, List
+from collections.abc import Iterable
 
 import numpy as np
 import pandas as pd
@@ -16,7 +16,7 @@ class GrangerCausality:
 
     def fit(self, df: pd.DataFrame) -> GraphEstimate:
         nodes = list(df.columns)
-        edges: List[Edge] = []
+        edges: list[Edge] = []
         for target in nodes:
             for source in nodes:
                 if source == target:

@@ -1,0 +1,21 @@
+{
+  "issue_number": 14641,
+  "title": "Sprint 6: Hard Quota Enforcement & Operator Overrides",
+  "url": "https://github.com/BrianCLong/summit/pull/14641",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-27T07:02:18Z",
+  "createdAt": "2025-12-27T06:51:13Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import type { Driver } from 'neo4j-driver';
 
 export interface ThreadMessage {
@@ -36,11 +35,9 @@ export default class InvestigativeThreadQualityAgent {
     redundancy: number;
   } {
     try {
-      const __filename = fileURLToPath(import.meta.url);
-      const __dirname = path.dirname(__filename);
       const refPath = path.resolve(
-        __dirname,
-        '../../../AUTOMATE_SCORING_OF_RESPONSE_QUALITY_COMPLETED.md',
+        process.cwd(),
+        'AUTOMATE_SCORING_OF_RESPONSE_QUALITY_COMPLETED.md',
       );
       // Read reference file from previous scoring pipeline
       fs.readFileSync(refPath, 'utf-8');

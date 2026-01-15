@@ -1,8 +1,9 @@
 """Query chaining attacker."""
+
 from __future__ import annotations
 
-from .base import AttackAgent
 from ..api import AttackSession, ProtectedAPI
+from .base import AttackAgent
 
 
 class QueryChainingAgent(AttackAgent):

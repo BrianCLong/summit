@@ -48,7 +48,7 @@ scored = [(p, c, cosine_sim(e, emb)) for (p, c, e) in rows]
 scored.sort(key=lambda t: t[2], reverse=True)
 top = scored[:5]
 
-context = "\n---\n".join(f"[{i+1}] {r[1][:800]}" for i, r in enumerate(top))
+context = "\n---\n".join(f"[{i + 1}] {r[1][:800]}" for i, r in enumerate(top))
 messages = [
     {"role": "system", "content": "Answer concisely and cite [1], [2]."},
     {"role": "user", "content": f"Question: {q}\n\nContext:\n{context}"},

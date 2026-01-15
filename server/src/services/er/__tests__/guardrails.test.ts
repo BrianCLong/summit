@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { EntityResolutionV2Service } from '../EntityResolutionV2Service';
 import { provenanceLedger } from '../../../provenance/ledger.js';
 
@@ -33,7 +34,7 @@ describe('EntityResolutionV2Service guardrails', () => {
     process.env.ER_GUARDRAIL_MATCH_THRESHOLD = '0.6';
     process.env.ER_GUARDRAIL_DATASET_ID = 'baseline';
 
-    const service = new EntityResolutionV2Service();
+    const service = new EntityResolutionV2Service({ dlq: mockDlq });
     const result = service.evaluateGuardrails();
 
     expect(result.datasetId).toBe('baseline');
@@ -47,7 +48,7 @@ describe('EntityResolutionV2Service guardrails', () => {
     process.env.ER_GUARDRAIL_MIN_RECALL = '0.99';
     process.env.ER_GUARDRAIL_MATCH_THRESHOLD = '0.8';
 
-    const service = new EntityResolutionV2Service();
+    const service = new EntityResolutionV2Service({ dlq: mockDlq });
     const session = {
       run: jest.fn().mockResolvedValue({
         records: [
@@ -83,7 +84,7 @@ describe('EntityResolutionV2Service guardrails', () => {
     process.env.ER_GUARDRAIL_MIN_RECALL = '0.99';
     process.env.ER_GUARDRAIL_MATCH_THRESHOLD = '0.8';
 
-    const service = new EntityResolutionV2Service();
+    const service = new EntityResolutionV2Service({ dlq: mockDlq });
     const tx = {
       run: jest.fn(async (query: string) => {
         if (query.includes('MERGE (d:ERDecision {idempotencyKey')) {

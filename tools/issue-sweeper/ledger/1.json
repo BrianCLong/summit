@@ -1,0 +1,239 @@
+{
+  "issue_number": 1,
+  "title": "M0: Remove sensitive files from history and add proper .gitignore",
+  "url": "https://github.com/BrianCLong/summit/issues/1",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051648,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5gA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:security",
+      "name": "area:security",
+      "color": "BFD4F2",
+      "default": false,
+      "description": "Security-related documentation/action"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    }
+  ],
+  "updatedAt": "2025-08-11T23:56:59Z",
+  "createdAt": "2025-08-11T23:56:59Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15387,
+        "url": "https://github.com/BrianCLong/summit/pull/15387",
+        "mergedAt": null,
+        "title": "feat: Backlog Orchestrator Init & Phase 1 Delivery"
+      },
+      {
+        "number": 15462,
+        "url": "https://github.com/BrianCLong/summit/pull/15462",
+        "mergedAt": null,
+        "title": "Implement ChatOps Phase 1: Intent Routing & Bounded Autonomy"
+      },
+      {
+        "number": 15399,
+        "url": "https://github.com/BrianCLong/summit/pull/15399",
+        "mergedAt": null,
+        "title": "Sweep 1: navigation label coherence (Project #19 #121)"
+      },
+      {
+        "number": 14375,
+        "url": "https://github.com/BrianCLong/summit/pull/14375",
+        "mergedAt": "2025-12-23T04:35:28Z",
+        "title": "Bump playwright from 1.41.1 to 1.55.1 in /services/reporting"
+      },
+      {
+        "number": 14644,
+        "url": "https://github.com/BrianCLong/summit/pull/14644",
+        "mergedAt": "2025-12-27T07:37:10Z",
+        "title": "feat: Streaming Ingest v1 & Active Learning 1.1"
+      },
+      {
+        "number": 14143,
+        "url": "https://github.com/BrianCLong/summit/pull/14143",
+        "mergedAt": "2025-12-20T10:58:07Z",
+        "title": "Release v0.1.1: Observability foundation"
+      },
+      {
+        "number": 15396,
+        "url": "https://github.com/BrianCLong/summit/pull/15396",
+        "mergedAt": null,
+        "title": "feat(ui): accessibility hardening and backlog hygiene"
+      },
+      {
+        "number": 15051,
+        "url": "https://github.com/BrianCLong/summit/pull/15051",
+        "mergedAt": null,
+        "title": "Connector Contract v0.1"
+      },
+      {
+        "number": 15391,
+        "url": "https://github.com/BrianCLong/summit/pull/15391",
+        "mergedAt": null,
+        "title": "Include missing server sources in tsconfig"
+      },
+      {
+        "number": 15409,
+        "url": "https://github.com/BrianCLong/summit/pull/15409",
+        "mergedAt": null,
+        "title": "perf: add bounded k6 baseline and reporting workflow"
+      },
+      {
+        "number": 15370,
+        "url": "https://github.com/BrianCLong/summit/pull/15370",
+        "mergedAt": null,
+        "title": "Organize workspaces with Turborepo segmentation"
+      },
+      {
+        "number": 15425,
+        "url": "https://github.com/BrianCLong/summit/pull/15425",
+        "mergedAt": null,
+        "title": "ModelOps: RLVR PEFT adapter policy (DoRA/AdaLoRA/MiSS defaults + guardrails)"
+      },
+      {
+        "number": 15179,
+        "url": "https://github.com/BrianCLong/summit/pull/15179",
+        "mergedAt": "2025-12-31T14:21:16Z",
+        "title": "chore(deps): bump notify from 6.1.1 to 8.2.0"
+      },
+      {
+        "number": 15366,
+        "url": "https://github.com/BrianCLong/summit/pull/15366",
+        "mergedAt": null,
+        "title": "Harden Express input validation and GraphQL guard"
+      },
+      {
+        "number": 15039,
+        "url": "https://github.com/BrianCLong/summit/pull/15039",
+        "mergedAt": "2025-12-30T22:42:21Z",
+        "title": "docs: Threat Model v0.1"
+      },
+      {
+        "number": 15365,
+        "url": "https://github.com/BrianCLong/summit/pull/15365",
+        "mergedAt": null,
+        "title": "test: enforce coverage gate and add API fuzzing contracts"
+      },
+      {
+        "number": 14805,
+        "url": "https://github.com/BrianCLong/summit/pull/14805",
+        "mergedAt": "2025-12-29T05:00:10Z",
+        "title": "Rules & Alerts v1.1 Implementation"
+      },
+      {
+        "number": 15289,
+        "url": "https://github.com/BrianCLong/summit/pull/15289",
+        "mergedAt": "2026-01-01T11:42:53Z",
+        "title": "Implement Jules Sprint Day 1 Artifacts"
+      },
+      {
+        "number": 15381,
+        "url": "https://github.com/BrianCLong/summit/pull/15381",
+        "mergedAt": null,
+        "title": "Enhance Storage, Caching and DR Infrastructure"
+      },
+      {
+        "number": 15411,
+        "url": "https://github.com/BrianCLong/summit/pull/15411",
+        "mergedAt": null,
+        "title": "Harden graph analytics query bounds"
+      },
+      {
+        "number": 14387,
+        "url": "https://github.com/BrianCLong/summit/pull/14387",
+        "mergedAt": "2025-12-24T00:04:01Z",
+        "title": "chore(deps): bump langchain-core from 1.0.7 to 1.2.5"
+      },
+      {
+        "number": 15380,
+        "url": "https://github.com/BrianCLong/summit/pull/15380",
+        "mergedAt": null,
+        "title": "Sprint 2026.02: Hard Gates and Safer Defaults"
+      },
+      {
+        "number": 14643,
+        "url": "https://github.com/BrianCLong/summit/pull/14643",
+        "mergedAt": "2025-12-27T07:02:11Z",
+        "title": "Day-0 Onboarding Wizard (Epic 1)"
+      },
+      {
+        "number": 14344,
+        "url": "https://github.com/BrianCLong/summit/pull/14344",
+        "mergedAt": "2025-12-22T08:05:42Z",
+        "title": "Epic 1: Golden Paths Implementation"
+      },
+      {
+        "number": 15394,
+        "url": "https://github.com/BrianCLong/summit/pull/15394",
+        "mergedAt": null,
+        "title": "Sprint 2026.02: Hard Gates and Safer Defaults (Decomposed)"
+      },
+      {
+        "number": 15388,
+        "url": "https://github.com/BrianCLong/summit/pull/15388",
+        "mergedAt": null,
+        "title": "fix(ci): pin supply-chain tools and apply security fix"
+      },
+      {
+        "number": 15373,
+        "url": "https://github.com/BrianCLong/summit/pull/15373",
+        "mergedAt": null,
+        "title": "🛡️ Sentinel: [CRITICAL] Fix Path Traversal in Recipe Execution"
+      },
+      {
+        "number": 14455,
+        "url": "https://github.com/BrianCLong/summit/pull/14455",
+        "mergedAt": "2025-12-25T03:17:01Z",
+        "title": "Sprint +1 Plan & Migration Gate Enforcement"
+      },
+      {
+        "number": 14318,
+        "url": "https://github.com/BrianCLong/summit/pull/14318",
+        "mergedAt": null,
+        "title": "Epic 1: Implement Beta Program Infrastructure"
+      },
+      {
+        "number": 14364,
+        "url": "https://github.com/BrianCLong/summit/pull/14364",
+        "mergedAt": "2025-12-22T07:56:12Z",
+        "title": "[Epic 1] Golden Path Architecture & Boundaries"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

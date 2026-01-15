@@ -1,5 +1,6 @@
-import streamlit as st
 import time
+
+import streamlit as st
 
 st.set_page_config(page_title="Collaborative Analyst Swarm", layout="wide")
 
@@ -42,7 +43,7 @@ if st.button("Assign Task"):
             - **Recovery:** Restore affected systems from backups.
             - **Lessons Learned:** Update security policies and user training.
             """,
-            language="markdown"
+            language="markdown",
         )
     else:
         st.warning("Please enter a task description.")

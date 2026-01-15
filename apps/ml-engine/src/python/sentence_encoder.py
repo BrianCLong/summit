@@ -297,7 +297,7 @@ def batch_entity_similarity(
         all_embeddings.append(batch_embeddings)
 
         logger.info(
-            f"Processed batch {i//batch_size + 1}/{(len(entity_texts) + batch_size - 1)//batch_size}"
+            f"Processed batch {i // batch_size + 1}/{(len(entity_texts) + batch_size - 1) // batch_size}"
         )
 
     return np.vstack(all_embeddings)

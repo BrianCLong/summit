@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { ChunkingService } from '../ChunkingService';
 import { Document } from '../../data-model/types';
 
@@ -9,12 +10,16 @@ describe('ChunkingService', () => {
   });
 
   it('should chunk simple text', () => {
+    const now = new Date().toISOString();
     const doc: Document = {
       id: 'doc1',
       tenantId: 'tenant1',
+      source: { system: 'unit-test', id: 'doc1' },
       text: 'Hello world. This is a test.',
       metadata: {},
-      entityIds: []
+      entityIds: [],
+      createdAt: now,
+      updatedAt: now,
     };
 
     const chunks = chunkingService.chunkDocument(doc, 10, 2);
@@ -23,13 +28,17 @@ describe('ChunkingService', () => {
   });
 
   it('should respect semantic boundaries (paragraphs)', () => {
+    const now = new Date().toISOString();
     const text = 'Para 1.\n\nPara 2 is longer.\n\nPara 3.';
     const doc: Document = {
       id: 'doc2',
       tenantId: 'tenant1',
+      source: { system: 'unit-test', id: 'doc2' },
       text: text,
       metadata: {},
-      entityIds: []
+      entityIds: [],
+      createdAt: now,
+      updatedAt: now,
     };
 
     // Small chunk size to force split, but large enough for one para
@@ -45,13 +54,17 @@ describe('ChunkingService', () => {
   });
 
   it('should split huge paragraphs', () => {
+      const now = new Date().toISOString();
       const hugeText = 'A'.repeat(100);
       const doc: Document = {
         id: 'doc3',
         tenantId: 'tenant1',
+        source: { system: 'unit-test', id: 'doc3' },
         text: hugeText,
         metadata: {},
-        entityIds: []
+        entityIds: [],
+        createdAt: now,
+        updatedAt: now,
       };
 
       const chunks = chunkingService.chunkDocument(doc, 20, 5);

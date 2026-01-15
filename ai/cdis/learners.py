@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Tuple
 
 import networkx as nx
 import numpy as np
@@ -15,7 +14,7 @@ from sklearn.linear_model import LinearRegression
 class LearnedGraph:
     graph: nx.DiGraph
     confidence: float
-    paths: List[List[str]]
+    paths: list[list[str]]
 
 
 class StructureLearner:
@@ -34,7 +33,7 @@ class NotearsLearner(StructureLearner):
         nodes = list(corr.columns)
         g = nx.DiGraph()
         g.add_nodes_from(nodes)
-        weights: List[float] = []
+        weights: list[float] = []
         for i, src in enumerate(nodes):
             for j, tgt in enumerate(nodes):
                 if i >= j:
@@ -59,7 +58,7 @@ class PCLearner(StructureLearner):
         g = nx.DiGraph()
         g.add_nodes_from(nodes)
         corr = data.corr().fillna(0)
-        weights: List[float] = []
+        weights: list[float] = []
         for src in nodes:
             for tgt in nodes:
                 if src == tgt:
@@ -79,7 +78,11 @@ class PCLearner(StructureLearner):
                     weight = float(r_cond)
                     g.add_edge(src, tgt, weight=weight)
                     weights.append(abs(weight))
-        g = nx.DiGraph(nx.algorithms.dag.transitive_reduction(g)) if nx.is_directed_acyclic_graph(g) else g
+        g = (
+            nx.DiGraph(nx.algorithms.dag.transitive_reduction(g))
+            if nx.is_directed_acyclic_graph(g)
+            else g
+        )
         confidence = float(np.mean(weights) if weights else 0.0)
         paths = _enumerate_paths(g, limit=3)
         return LearnedGraph(graph=g, confidence=confidence, paths=paths)
@@ -98,7 +101,7 @@ class GrangerLearner(StructureLearner):
         aligned = data.loc[lagged.index]
         g = nx.DiGraph()
         g.add_nodes_from(data.columns)
-        weights: List[float] = []
+        weights: list[float] = []
         for target in data.columns:
             y = aligned[target].to_numpy()
             for source in data.columns:
@@ -115,8 +118,8 @@ class GrangerLearner(StructureLearner):
         return LearnedGraph(graph=g, confidence=confidence, paths=paths)
 
 
-def _enumerate_paths(graph: nx.DiGraph, limit: int = 3) -> List[List[str]]:
-    paths: List[List[str]] = []
+def _enumerate_paths(graph: nx.DiGraph, limit: int = 3) -> list[list[str]]:
+    paths: list[list[str]] = []
     for src in graph.nodes:
         for tgt in graph.nodes:
             if src == tgt:

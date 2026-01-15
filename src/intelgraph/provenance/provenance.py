@@ -1,11 +1,10 @@
 import time
-from typing import Dict, Any, Optional
+from typing import Any
+
 
 def build_provenance_record(
-    run_id: str,
-    params: Dict[str, Any],
-    git_commit: Optional[str] = None
-) -> Dict[str, Any]:
+    run_id: str, params: dict[str, Any], git_commit: str | None = None
+) -> dict[str, Any]:
     """
     Build a JSON-serializable provenance record.
     """
@@ -14,5 +13,5 @@ def build_provenance_record(
         "timestamp": time.time(),
         "params": params,
         "git_commit": git_commit,
-        "schema_version": "1.0.0"
+        "schema_version": "1.0.0",
     }

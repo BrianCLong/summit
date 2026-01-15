@@ -1,0 +1,50 @@
+{
+  "issue_number": 422,
+  "title": "docs: add time-bound anomaly forecasts",
+  "url": "https://github.com/BrianCLong/summit/pull/422",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-17T17:41:40Z",
+  "createdAt": "2025-08-17T08:02:05Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13801,
+        "url": "https://github.com/BrianCLong/summit/pull/13801",
+        "mergedAt": "2025-12-20T11:34:31Z",
+        "title": "feat: add citation gate enforcement"
+      },
+      {
+        "number": 15340,
+        "url": "https://github.com/BrianCLong/summit/pull/15340",
+        "mergedAt": "2026-01-01T08:47:05Z",
+        "title": "Counter-intelligence information dominance sprint"
+      },
+      {
+        "number": 11851,
+        "url": "https://github.com/BrianCLong/summit/pull/11851",
+        "mergedAt": "2025-11-20T09:48:39Z",
+        "title": "Explore LLM guardrails and model security standards"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

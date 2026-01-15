@@ -1,0 +1,5384 @@
+[
+  {
+    "file": ".archive/workflows/arborist.yml",
+    "line": 18,
+    "text": "implement query for merged + age; log only in dry-run",
+    "type": "TODO"
+  },
+  {
+    "file": ".archive/workflows/ci-reusable-build.yml",
+    "line": 32,
+    "text": "replace with your build command",
+    "type": "TODO"
+  },
+  {
+    "file": ".disabled/intelgraph-mcp.disabled/src/server.ts",
+    "line": 10,
+    "text": "wire to graph backend and apply tenant-scoped filtering",
+    "type": "TODO"
+  },
+  {
+    "file": ".github/workflows/.archive/canary-deployment.yml",
+    "line": 283,
+    "text": "Implement real SLO check using Prometheus or similar.",
+    "type": "TODO"
+  },
+  {
+    "file": ".github/workflows/.archive/canary-deployment.yml",
+    "line": 392,
+    "text": "Implement real burn rate check.",
+    "type": "TODO"
+  },
+  {
+    "file": ".github/workflows/.archive/ci-platform.yml",
+    "line": 204,
+    "text": "Add Playwright/API integration tests",
+    "type": "TODO"
+  },
+  {
+    "file": ".github/workflows/.archive/ci-platform.yml",
+    "line": 232,
+    "text": "Add OPA policies and run conftest",
+    "type": "TODO"
+  },
+  {
+    "file": ".github/workflows/.archive/ci-sharded-example.yml",
+    "line": 35,
+    "text": "Actual sharding depends on the test runner support.",
+    "type": "NOTE"
+  },
+  {
+    "file": ".github/workflows/.archive/conftest.yml",
+    "line": 6,
+    "text": "Remove once Helm template helpers are fixed",
+    "type": "TODO"
+  },
+  {
+    "file": ".github/workflows/.archive/ingest-ci.yml",
+    "line": 72,
+    "text": "Use a proper schema diff tool",
+    "type": "TODO"
+  },
+  {
+    "file": ".github/workflows/.archive/ingest-ci.yml",
+    "line": 218,
+    "text": "Implement smoke test",
+    "type": "TODO"
+  },
+  {
+    "file": ".github/workflows/.archive/lambda-deploy-example.yml",
+    "line": 69,
+    "text": "In a real scenario, you'd construct an AppSpec or just trigger a deployment",
+    "type": "NOTE"
+  },
+  {
+    "file": ".github/workflows/.archive/lambda-deploy-example.yml",
+    "line": 102,
+    "text": "During a Blue/Green deployment, traffic might still be split.",
+    "type": "NOTE"
+  },
+  {
+    "file": ".github/workflows/.archive/lane-fast.yml",
+    "line": 45,
+    "text": "Remove once lint warnings are fixed across codebase",
+    "type": "TODO"
+  },
+  {
+    "file": ".github/workflows/.archive/platform-health.yml",
+    "line": 24,
+    "text": "In a production environment, this workflow would depend on test/build workflows",
+    "type": "NOTE"
+  },
+  {
+    "file": ".github/workflows/copilot-golden-path.yml",
+    "line": 4,
+    "text": "Move _golden-path-pipeline.yml to top-level workflows directory",
+    "type": "TODO"
+  },
+  {
+    "file": ".github/workflows/ga-ready.yml",
+    "line": 57,
+    "text": "We allow failure here so ga-check can report it,",
+    "type": "NOTE"
+  },
+  {
+    "file": ".github/workflows/golden-path/_golden-path-pipeline.yml",
+    "line": 411,
+    "text": "Actual deployment steps would go here",
+    "type": "NOTE"
+  },
+  {
+    "file": ".github/workflows/golden-path-supply-chain.yml",
+    "line": 4,
+    "text": "Move reusable/supply-chain-policy.yml to top-level workflows",
+    "type": "TODO"
+  },
+  {
+    "file": ".github/workflows/golden-path-supply-chain.yml",
+    "line": 28,
+    "text": "Fix and re-enable when the reusable workflow infrastructure is ready",
+    "type": "TODO"
+  },
+  {
+    "file": ".maestro/tests/k6/isolation_stress.js",
+    "line": 383,
+    "text": "In a real scenario, you might want to clean up test data",
+    "type": "NOTE"
+  },
+  {
+    "file": "ARCHITECTURE_MAP.generated.yaml",
+    "line": 766,
+    "text": "S & CLARIFICATIONS",
+    "type": "NOTE"
+  },
+  {
+    "file": "PROJECT_MANAGEMENT_SATURATION.md",
+    "line": 737,
+    "text": "wire to graph backend and apply tenant-scoped filtering",
+    "type": "TODO"
+  },
+  {
+    "file": "PROJECT_MANAGEMENT_SATURATION.md",
+    "line": 771,
+    "text": "Replace with actual JWT verification using your auth library",
+    "type": "TODO"
+  },
+  {
+    "file": "PROJECT_MANAGEMENT_SATURATION.md",
+    "line": 806,
+    "text": "Replace jQuery with React state management",
+    "type": "TODO"
+  },
+  {
+    "file": "agents/orchestrator/src/MultiLLMOrchestrator.ts",
+    "line": 157,
+    "text": "'request' here overrides the session history typically.",
+    "type": "NOTE"
+  },
+  {
+    "file": "agents/orchestrator/src/MultiLLMOrchestrator.ts",
+    "line": 206,
+    "text": "Request messages might contain full history or just last turn.",
+    "type": "NOTE"
+  },
+  {
+    "file": "agents/orchestrator/src/context/capsules/InvariantValidator.ts",
+    "line": 269,
+    "text": "Integrate with Rego or CEL policy engine",
+    "type": "TODO"
+  },
+  {
+    "file": "analysis/linear_issues_bulk_import.yaml",
+    "line": 599,
+    "text": "HARVEST ISSUES (Sample - 47 Infrastructure)",
+    "type": "TODO"
+  },
+  {
+    "file": "api/search.js",
+    "line": 6,
+    "text": "call Typesense search; for now, return empty",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/.mobile-native-disabled/src/services/Database.ts",
+    "line": 15,
+    "text": "Generate secure key",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/.mobile-native-disabled/src/services/EnhancedOfflineSync.ts",
+    "line": 280,
+    "text": "Implement location sync mutation",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/.mobile-native-disabled/src/services/NotificationService.ts",
+    "line": 118,
+    "text": "Send token to server",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/.mobile-native-disabled/src/services/NotificationService.ts",
+    "line": 215,
+    "text": "Navigate to appropriate screen based on notification data",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/.mobile-native-disabled/src/services/OfflineSync.ts",
+    "line": 96,
+    "text": "Replace with actual mutation",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/analytics-engine/src/server.ts",
+    "line": 462,
+    "text": "Implement PDF export",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/field-kit/src/lib/security.ts",
+    "line": 68,
+    "text": "In a real app we would iterate all stores and clear them",
+    "type": "NOTE"
+  },
+  {
+    "file": "apps/gateway/src/rbac/scim.ts",
+    "line": 2,
+    "text": "Implement SCIM sync using your IdP API.",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/gateway/src/routes/search.ts",
+    "line": 82,
+    "text": "Add proper RBAC here",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/mobile/src/components/AttachmentUpload.tsx",
+    "line": 140,
+    "text": "In production, would also remove from sync queue",
+    "type": "NOTE"
+  },
+  {
+    "file": "apps/mobile/src/lib/offlineCache.ts",
+    "line": 360,
+    "text": "operations (locally created, sync-tracked)",
+    "type": "NOTE"
+  },
+  {
+    "file": "apps/mobile/src/lib/securityMeasures.ts",
+    "line": 53,
+    "text": "Can't actually prevent, but can log attempt",
+    "type": "NOTE"
+  },
+  {
+    "file": "apps/mobile-interface/next-env.d.ts",
+    "line": 5,
+    "text": "This file should not be edited",
+    "type": "NOTE"
+  },
+  {
+    "file": "apps/mobile-native/src/services/EnhancedOfflineSync.ts",
+    "line": 281,
+    "text": "Implement location sync mutation",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/mobile-native/src/services/NotificationService.ts",
+    "line": 118,
+    "text": "Send token to server",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/mobile-native/src/services/NotificationService.ts",
+    "line": 215,
+    "text": "Navigate to appropriate screen based on notification data",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/mobile-native/src/services/OfflineSync.ts",
+    "line": 96,
+    "text": "Replace with actual mutation",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/search-engine/src/services/IndexingService.ts",
+    "line": 496,
+    "text": "ElasticsearchService needs a deleteDocument method",
+    "type": "NOTE"
+  },
+  {
+    "file": "apps/web/src/components/FlowStudio.tsx",
+    "line": 15,
+    "text": "Replace jQuery with React state management",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/web/src/components/narrative/ScenarioSimulator.tsx",
+    "line": 93,
+    "text": "The API prefix might need to be adjusted based on setup.",
+    "type": "NOTE"
+  },
+  {
+    "file": "apps/web/src/components/ui/index.ts",
+    "line": 55,
+    "text": "Recharts components were previously re-exported here for convenience,",
+    "type": "NOTE"
+  },
+  {
+    "file": "apps/web/src/features/explain/explainSlice.ts",
+    "line": 3,
+    "text": "viewSync feature was removed - restore if needed",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/web/src/features/explain/explainSlice.ts",
+    "line": 36,
+    "text": "Re-enable when viewSync feature is restored",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/web/src/features/triPane/TriPaneShell.tsx",
+    "line": 154,
+    "text": "Make dynamic based on workspace/investigation ID",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/web/src/hooks/useCollaboration.ts",
+    "line": 31,
+    "text": "Consumers should prefer emitting relative coordinates (0-1)",
+    "type": "NOTE"
+  },
+  {
+    "file": "apps/web/src/lib/yjs/useGraphSync.ts",
+    "line": 41,
+    "text": "This can cause issues if multiple clients init at once.",
+    "type": "NOTE"
+  },
+  {
+    "file": "apps/web/src/pages/AdminDashboard.tsx",
+    "line": 33,
+    "text": "Implement missing admin components",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/web/src/pages/AdminPage.tsx",
+    "line": 14,
+    "text": "Add toast notification when component is implemented",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/web/src/pages/PartnerConsole.tsx",
+    "line": 33,
+    "text": "In a real app, this should probably be paginated",
+    "type": "NOTE"
+  },
+  {
+    "file": "apps/web/src/sync/history-explain-bridge.ts",
+    "line": 1,
+    "text": "Remove jQuery dependency - migrate to React event system",
+    "type": "TODO"
+  },
+  {
+    "file": "apps/web/src/sync/history-explain-bridge.ts",
+    "line": 10,
+    "text": "Replace with React-based event system",
+    "type": "TODO"
+  },
+  {
+    "file": "bootstrap/src/engine.ts",
+    "line": 47,
+    "text": "rootDir is 'bootstrap/', so repo root is 'bootstrap/../'",
+    "type": "NOTE"
+  },
+  {
+    "file": "charts/backup/redis-backup-cron.yaml",
+    "line": 131,
+    "text": "In production, this would require access to Redis data directory",
+    "type": "NOTE"
+  },
+  {
+    "file": "client/_stashed_archive/client/src/components/graph/InteractiveGraphExplorer.js",
+    "line": 564,
+    "text": "Highlight cluster nodes in graph",
+    "type": "TODO"
+  },
+  {
+    "file": "client/src/components/IntelGraphWorkbench.tsx",
+    "line": 382,
+    "text": "Implement layout logic here (dagre, radial)",
+    "type": "TODO"
+  },
+  {
+    "file": "client/src/components/IntelGraphWorkbench.tsx",
+    "line": 732,
+    "text": "Show tooltip on hover",
+    "type": "TODO"
+  },
+  {
+    "file": "client/src/components/IntelGraphWorkbench.tsx",
+    "line": 795,
+    "text": "Show tooltip on hover",
+    "type": "TODO"
+  },
+  {
+    "file": "client/src/components/common/DemoIndicator.test.jsx",
+    "line": 13,
+    "text": "This test assumes DEMO_MODE is set in test environment",
+    "type": "NOTE"
+  },
+  {
+    "file": "client/src/components/dashboard/LiveActivityFeed.tsx",
+    "line": 24,
+    "text": "Re-enable GraphQL subscription when schema is available",
+    "type": "TODO"
+  },
+  {
+    "file": "client/src/components/dashboard/LiveActivityFeed.tsx",
+    "line": 108,
+    "text": "Re-enable GraphQL subscription when schema is available",
+    "type": "TODO"
+  },
+  {
+    "file": "client/src/components/dashboard/LiveActivityFeed.tsx",
+    "line": 119,
+    "text": "Re-enable when GraphQL subscription is available",
+    "type": "TODO"
+  },
+  {
+    "file": "client/src/components/dashboard/StatsOverview.tsx",
+    "line": 5,
+    "text": "Re-enable GraphQL query when schema is available",
+    "type": "TODO"
+  },
+  {
+    "file": "client/src/components/graph/InteractiveGraphExplorer.jsx",
+    "line": 568,
+    "text": "Highlight cluster nodes in graph",
+    "type": "TODO"
+  },
+  {
+    "file": "client/src/components/reports/ReportTemplateSelector.tsx",
+    "line": 170,
+    "text": "replace with real mutation once backend wiring exists",
+    "type": "TODO"
+  },
+  {
+    "file": "client/src/features/companyos/pages/OperationsDashboard.tsx",
+    "line": 8,
+    "text": "TrendingUp was renamed to ArrowUpRight in newer versions of lucide-react",
+    "type": "NOTE"
+  },
+  {
+    "file": "client/src/flags/featureFlags.ts",
+    "line": 24,
+    "text": "This might cause SyntaxError in CJS environments (like Jest) if not transformed.",
+    "type": "NOTE"
+  },
+  {
+    "file": "client/src/hooks/usePrefetch.ts",
+    "line": 3,
+    "text": "Re-enable when GraphQL schema is available",
+    "type": "TODO"
+  },
+  {
+    "file": "client/src/hooks/usePrefetch.ts",
+    "line": 16,
+    "text": "Re-enable when GraphQL schema is available",
+    "type": "TODO"
+  },
+  {
+    "file": "client/src/hooks/usePrefetch.ts",
+    "line": 29,
+    "text": "Re-enable when GraphQL schema is available",
+    "type": "TODO"
+  },
+  {
+    "file": "client/src/hooks/usePrefetch.ts",
+    "line": 43,
+    "text": "Re-enable when GraphQL schema is available",
+    "type": "TODO"
+  },
+  {
+    "file": "client/src/lib/assistant/transport.ts",
+    "line": 111,
+    "text": "Authorization header isn’t supported by native EventSource; use a token query param or cookie.",
+    "type": "NOTE"
+  },
+  {
+    "file": "client/src/pages/Hunting/HuntList.tsx",
+    "line": 461,
+    "text": "Navigate to hunt detail page",
+    "type": "TODO"
+  },
+  {
+    "file": "client/src/pages/Hunting/HuntList.tsx",
+    "line": 536,
+    "text": "Create hunt logic here",
+    "type": "TODO"
+  },
+  {
+    "file": "client/src/pages/IOC/IOCList.tsx",
+    "line": 543,
+    "text": "Navigate to IOC detail page",
+    "type": "TODO"
+  },
+  {
+    "file": "client/src/pages/IOC/IOCList.tsx",
+    "line": 619,
+    "text": "Add IOC logic here",
+    "type": "TODO"
+  },
+  {
+    "file": "client/src/pages/IOC/IOCList.tsx",
+    "line": 678,
+    "text": "Import IOCs logic here",
+    "type": "TODO"
+  },
+  {
+    "file": "client/src/utils/data-envelope-validator.ts",
+    "line": 204,
+    "text": "In browser, we'd use SubtleCrypto API instead",
+    "type": "NOTE"
+  },
+  {
+    "file": "companyos/adr/ADR-2025-12-07-authorization-model-v0.md",
+    "line": 105,
+    "text": "Replace with OPA policy decision point",
+    "type": "TODO"
+  },
+  {
+    "file": "companyos/services/tenant-api/src/middleware/authContext.ts",
+    "line": 179,
+    "text": "Validate JWT token and extract user",
+    "type": "TODO"
+  },
+  {
+    "file": "companyos/services/tenant-api/src/middleware/metrics.ts",
+    "line": 10,
+    "text": "Replace with proper Prometheus client (prom-client) in production",
+    "type": "TODO"
+  },
+  {
+    "file": "companyos/src/evidence/sources.ts",
+    "line": 14,
+    "text": "replace with metrics scrape; stubbed",
+    "type": "TODO"
+  },
+  {
+    "file": "companyos/src/evidence/sources.ts",
+    "line": 19,
+    "text": "compute from usage + billing; stubbed",
+    "type": "TODO"
+  },
+  {
+    "file": "conductor-ui/backend/server.js",
+    "line": 26,
+    "text": "In production, remove unsafe-inline and unsafe-eval",
+    "type": "NOTE"
+  },
+  {
+    "file": "conductor-ui/frontend/privacy/tests/no-pii.e2e.ts",
+    "line": 42,
+    "text": "db.statement.parameters should be scrubbed",
+    "type": "NOTE"
+  },
+  {
+    "file": "conductor-ui/frontend/privacy/tests/util.ts",
+    "line": 60,
+    "text": "email should be scrubbed from actual logs",
+    "type": "NOTE"
+  },
+  {
+    "file": "conductor-ui/frontend/privacy/tests/util.ts",
+    "line": 71,
+    "text": "parameters should be scrubbed",
+    "type": "NOTE"
+  },
+  {
+    "file": "conductor-ui/frontend/privacy/tests/util.ts",
+    "line": 80,
+    "text": "no sensitive token data should appear",
+    "type": "NOTE"
+  },
+  {
+    "file": "conductor-ui/frontend/src/maestro/main-maestro.js",
+    "line": 7,
+    "text": "Add proper OpenTelemetry configuration when exporter packages are available",
+    "type": "TODO"
+  },
+  {
+    "file": "conductor-ui/frontend/src/maestro/main-maestro.tsx",
+    "line": 7,
+    "text": "Add proper OpenTelemetry configuration when exporter packages are available",
+    "type": "TODO"
+  },
+  {
+    "file": "config/__tests__/neo4j.test.ts",
+    "line": 332,
+    "text": "In real tests, you'd mock the driver to verify config",
+    "type": "NOTE"
+  },
+  {
+    "file": "debt/registry.json",
+    "line": 36310,
+    "text": "Implement proper OIDC validation with issuer verification`.\",",
+    "type": "TODO"
+  },
+  {
+    "file": "deploy/external-secrets/maestro-secrets.yaml",
+    "line": 9,
+    "text": "set your SecretStore name",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/ChatOps/council_v_1_1_pager_roadmap_acceptance_test_checklist_ga_core.md",
+    "line": 194,
+    "text": "s & Next Steps",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/ChatOps/intel_graph_ai_symphony_orchestration_pack_mac_m_2_16_gb (1).md",
+    "line": 132,
+    "text": "Avoid setting a provider-wide cap for \"openai_compatible\" to prevent impacting locals.",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/ChatOps/intel_graph_ai_symphony_orchestration_pack_mac_m_2_16_gb (2).md",
+    "line": 132,
+    "text": "Avoid setting a provider-wide cap for \"openai_compatible\" to prevent impacting locals.",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/ChatOps/intel_graph_integrated_sprints_3_6_all_party_plan_draft_prs_jira_csv.md",
+    "line": 333,
+    "text": "s on Compliance & Data Sensitivity",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/ChatOps/intel_graph_mvp_0_implementation_plan_repo_layout_code_stubs_keycloak_cisa_taxii_mapbox_copilot_preview.md",
+    "line": 401,
+    "text": "parse JWT (Keycloak). For dev, stub user",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/ChatOps/intel_graph_release_candidate_stabilization_pack_post_merge_orchestrator (1).md",
+    "line": 217,
+    "text": "add GraphQL introspection ping & a trivial query",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/ChatOps/intel_graph_release_candidate_stabilization_pack_post_merge_orchestrator.md",
+    "line": 217,
+    "text": "add GraphQL introspection ping & a trivial query",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/ChatOps/intel_graph_velocity_plan_v_1_guy.md",
+    "line": 318,
+    "text": "call embedding model provider",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/ChatOps/maestro_reference_tasks_runbooks_catalog_v_1.md",
+    "line": 210,
+    "text": "mapper is a JS function body in a sandboxed new Function (trusted catalogs only)",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/ChatOps/pr_patch_intel_graph_ai_ml_microservice_webhooks_approvals_audit_feedback (1).md",
+    "line": 781,
+    "text": "s on Hybrid Delivery (Webhook + Polling)",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/ChatOps/pr_patch_intel_graph_ai_ml_microservice_webhooks_approvals_audit_feedback.md",
+    "line": 788,
+    "text": "s on Hybrid Delivery (Webhook + Polling)",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/ChatOps/sprint_14_implementation_scaffolding_code.md",
+    "line": 842,
+    "text": "Day-1: create case C-1, insert evidence rows, add two contradictory claims",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/ISSUE_RESOLUTION_LEDGER.md",
+    "line": 55,
+    "text": "get tenant from context`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/ISSUE_RESOLUTION_LEDGER.md",
+    "line": 205,
+    "text": "Get from auth context`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/ISSUE_RESOLUTION_LEDGER.md",
+    "line": 261,
+    "text": "Add permission check (schema.admin)`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/PILOT_DEPLOYMENT_GUIDE.md",
+    "line": 657,
+    "text": "Integrate with email service (SendGrid, Mailgun, etc.)",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/agentic-mesh/00-IMPLEMENTATION-STATUS.md",
+    "line": 65,
+    "text": "for Auth Gateway",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/agents/variants/claude-code-superprompt.md",
+    "line": 128,
+    "text": "` comments are forbidden |",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/AGENTIC_EXECUTION_GUIDE.md",
+    "line": 163,
+    "text": "any existing errors",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/archive/root-history/AGENTIC_EXECUTION_GUIDE.md",
+    "line": 164,
+    "text": "any existing warnings",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/archive/root-history/CODEBASE_AUDIT_REPORT.md",
+    "line": 131,
+    "text": "Implement admin-only check",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/CODEBASE_AUDIT_REPORT.md",
+    "line": 136,
+    "text": "Implement actual export logic",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/Closed-PR-Merge.md",
+    "line": 1680,
+    "text": "s for Reviewers",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/archive/root-history/DEPENDENCY_HEALTH_CHECK.md",
+    "line": 506,
+    "text": "s & Recommendations",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/archive/root-history/DEVELOPMENT_ROADMAP_12_WEEKS.md",
+    "line": 1101,
+    "text": "S FOR IMPORTATION",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/archive/root-history/JULES_PRIORITY_QUEUE.md",
+    "line": 9,
+    "text": "Implement proper OIDC validation with issuer verification`.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/JULES_PRIORITY_QUEUE.md",
+    "line": 18,
+    "text": "Detect mutation vs query`.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/JULES_PRIORITY_QUEUE.md",
+    "line": 27,
+    "text": "Log audit entry to hash chain`.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/JULES_PRIORITY_QUEUE.md",
+    "line": 35,
+    "text": "Verify signature against provider's registered key (PKI/cosign)`.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/JULES_PRIORITY_QUEUE.md",
+    "line": 43,
+    "text": "Monitor system metrics (CPU, memory, query latency)`.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/JULES_PRIORITY_QUEUE.md",
+    "line": 51,
+    "text": "Track error rate in metrics`.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/JULES_PRIORITY_QUEUE.md",
+    "line": 59,
+    "text": "Track cache hits/misses`.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/JULES_PRIORITY_QUEUE.md",
+    "line": 67,
+    "text": "Integrate with actual Neo4j sandbox connection`.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/JULES_PRIORITY_QUEUE.md",
+    "line": 125,
+    "text": "Implement layout logic here (dagre, radial)`.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/JULES_PRIORITY_QUEUE.md",
+    "line": 134,
+    "text": "Navigate to IOC detail page`.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/JULES_PRIORITY_QUEUE.md",
+    "line": 142,
+    "text": "call Python/HTTP embedding generator; placeholder`.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/JULES_PRIORITY_QUEUE.md",
+    "line": 150,
+    "text": "Show tooltip on hover`.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/JULES_PRIORITY_QUEUE.md",
+    "line": 165,
+    "text": "Implement usage tracking per user/tenant`.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/MAINTAINABILITY.md",
+    "line": 436,
+    "text": "fix this",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/MAINTAINABILITY.md",
+    "line": 439,
+    "text": "Implement proper error handling for network failures",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/PROMPTS_65-72_PLAN.md",
+    "line": 117,
+    "text": "s on isolation and compliance",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/archive/root-history/SPRINT_FRAUD_SCAM_INTEL.md",
+    "line": 187,
+    "text": "call GraphQL mutation server.mutations.upsertAlert(alerts)",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/SPRINT_MAESTRO_COMPOSER_BACKEND_S2.md",
+    "line": 216,
+    "text": "s from Repo Scan (grounding)",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/archive/root-history/TECHNICAL_DEBT.md",
+    "line": 29,
+    "text": "Re-enable GraphQL subscription when schema is available",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECHNICAL_DEBT.md",
+    "line": 30,
+    "text": "Re-enable GraphQL query when schema is available",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECHNICAL_DEBT.md",
+    "line": 66,
+    "text": "Track hit rate\"",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECHNICAL_DEBT.md",
+    "line": 67,
+    "text": "Track cache hits/misses\"",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECHNICAL_DEBT.md",
+    "line": 68,
+    "text": "Track error rate in metrics\"",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECHNICAL_DEBT.md",
+    "line": 159,
+    "text": "\" comments",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECHNICAL_DEBT.md",
+    "line": 160,
+    "text": "wire to your telemetry\"",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECHNICAL_DEBT.md",
+    "line": 161,
+    "text": "ping DB/queue\"",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 8,
+    "text": "implement query for merged + age; log only in dry-run`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 11,
+    "text": "call GraphQL mutation server.mutations.upsertAlert(alerts)`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 12,
+    "text": "call Typesense search; for now, return empty`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 13,
+    "text": "Implement PDF export`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 14,
+    "text": "Implement SCIM sync using your IdP API.`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 15,
+    "text": "wire to your telemetry`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 16,
+    "text": "Implement layout logic here (dagre, radial)`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 17,
+    "text": "Re-enable GraphQL subscription when schema is available`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 18,
+    "text": "Re-enable when GraphQL schema is available`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 19,
+    "text": "Navigate to hunt detail page`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 20,
+    "text": "Navigate to IOC detail page`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 22,
+    "text": "implement simulation of 50 clients editing the same document`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 23,
+    "text": "Add proper OpenTelemetry configuration when exporter packages are available`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 25,
+    "text": "set your SecretStore name`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 26,
+    "text": "Implement admin-only check`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 27,
+    "text": "Replace with your OIDC issuer URL`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 28,
+    "text": "replace with actual processing logic`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 29,
+    "text": "implement actual fine-tuning logic`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 30,
+    "text": "Implement actual data export logic`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 32,
+    "text": "ping DB/queue`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 33,
+    "text": "reuse MerkleLog to recompute root; placeholder returns true`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/TECH_DEBT_TRACKER.md",
+    "line": 34,
+    "text": "Track per-expert request counts if needed`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/ci_cd_hardening_ready_to_commit_bundle_maestro_aware.md",
+    "line": 149,
+    "text": "replace with your build command",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/ci_cd_hardening_ready_to_commit_bundle_maestro_aware.md",
+    "line": 470,
+    "text": "set cluster context via KUBE_CONFIG",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/ci_cd_hardening_ready_to_commit_bundle_maestro_aware.md",
+    "line": 516,
+    "text": "implement checks against your metrics endpoint / health dashboard",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/ci_cd_hardening_ready_to_commit_bundle_maestro_aware.md",
+    "line": 646,
+    "text": "s for Maestro Conductor Integration",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/archive/root-history/company_os_next_pack_eight_parallel_pr_slices.md",
+    "line": 133,
+    "text": "replace with metrics scrape; stubbed",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/company_os_next_pack_eight_parallel_pr_slices.md",
+    "line": 137,
+    "text": "compute from usage + billing; stubbed",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/company_os_next_pack_eight_parallel_pr_slices.md",
+    "line": 457,
+    "text": "fetchAndVerify expects a real tar; here we just assert headers via Pact",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/archive/root-history/docs_phase_37_38_enterprise_search_sso_audit_trust_center_data_governance.md",
+    "line": 181,
+    "text": "call Typesense search; for now, return empty",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (1).md",
+    "line": 289,
+    "text": "snapshot/restore per toolClass for p95 cold-start ≤300ms.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (1).md",
+    "line": 344,
+    "text": "enforce purpose tags and caps intersection.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (1).md",
+    "line": 465,
+    "text": "enforce causal ordering + side-effect stubs per ADR 0004.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (2).md",
+    "line": 289,
+    "text": "snapshot/restore per toolClass for p95 cold-start ≤300ms.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (2).md",
+    "line": 344,
+    "text": "enforce purpose tags and caps intersection.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (2).md",
+    "line": 465,
+    "text": "enforce causal ordering + side-effect stubs per ADR 0004.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (2).md",
+    "line": 1037,
+    "text": "resume from `last` using in‑memory ring buffer / redis stream",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets (2).md",
+    "line": 1546,
+    "text": "batch + sign",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets.md",
+    "line": 289,
+    "text": "snapshot/restore per toolClass for p95 cold-start ≤300ms.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets.md",
+    "line": 344,
+    "text": "enforce purpose tags and caps intersection.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/intel_graph_mcp_exceedance_implementation_kickstart_scaffolds_tickets.md",
+    "line": 465,
+    "text": "enforce causal ordering + side-effect stubs per ADR 0004.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/intel_graph_pr_6_opa_abac_policy_simulation_api.md",
+    "line": 202,
+    "text": "JWT; for now honor a simple header: \"role <role>\"",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/intel_graph_repo_bootstrap_first_3_prs_patches_commands.md",
+    "line": 420,
+    "text": "implement AST visitor; for now return small constant",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/intel_graph_summit_pr_pack_001_workflows_policies_rollouts_dr.md",
+    "line": 508,
+    "text": "replace with actual backup store + restore commands",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/intel_graph_summit_pr_pack_003_testing_flake_mgmt_data_policy_incidents_fin_ops.md",
+    "line": 623,
+    "text": "implement query for merged + age; log only in dry-run",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/intel_graph_summit_pr_pack_007_service_mesh_m_tls_multi_cluster_dora_notes_sbom_secretless.md",
+    "line": 214,
+    "text": "compute from releases, deployments, incidents issues",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/intel_graph_workstream_starter_pack_v_0.md",
+    "line": 347,
+    "text": "implement",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/mc↔cos_starter_additions_ci_sign_verify_cos_fetch_client_contract_test (2).md",
+    "line": 1281,
+    "text": "pull latest Evidence bundle for (service, releaseId)",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/mc↔cos_starter_additions_ci_sign_verify_cos_fetch_client_contract_test (3).md",
+    "line": 1281,
+    "text": "pull latest Evidence bundle for (service, releaseId)",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/release_train_migration_gate_defaults_wired_to_maestro.md",
+    "line": 265,
+    "text": "Replace with real metrics queries. Placeholder loop to indicate stepwise promotion.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/release_train_migration_gate_defaults_wired_to_maestro.md",
+    "line": 270,
+    "text": "query metrics; exit 1 on breach to trigger rollback",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/release_train_migration_gate_defaults_wired_to_maestro.md",
+    "line": 280,
+    "text": "implement check against your metrics provider using .ci/config/slo.yml thresholds",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/summit_main_tailored_ci_cd_bundle_pnpm_python_helm_terraform.md",
+    "line": 437,
+    "text": "call metrics endpoint(s) and enforce thresholds from .ci/config/slo.yml",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/archive/root-history/team-prompts-clarifications.md",
+    "line": 11,
+    "text": "s for coordination",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/blueprints/examples/tenant-churn-analysis-workspace.yaml",
+    "line": 175,
+    "text": "book environment",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/maestro_reference_tasks_runbooks_catalog_v_1.md",
+    "line": 210,
+    "text": "mapper is a JS function body in a sandboxed new Function (trusted catalogs only)",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/operations/ON_CALL_GUIDE.md",
+    "line": 194,
+    "text": "anything to mention in tomorrow's handoff",
+    "type": "NOTE"
+  },
+  {
+    "file": "docs/project_management/proof-first-core-ga-sprint-kit.md",
+    "line": 1029,
+    "text": "verify checksums across referenced files",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/releases/docs_phase_37_38_enterprise_search_sso_audit_trust_center_data_governance.md",
+    "line": 181,
+    "text": "call Typesense search; for now, return empty",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/repo-bootstrap.md",
+    "line": 435,
+    "text": "implement AST visitor; for now return small constant",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/reports/intel_graph_summit_pr_pack_001_workflows_policies_rollouts_dr.md",
+    "line": 508,
+    "text": "replace with actual backup store + restore commands",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/reports/intel_graph_summit_pr_pack_003_testing_flake_mgmt_data_policy_incidents_fin_ops.md",
+    "line": 623,
+    "text": "implement query for merged + age; log only in dry-run",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/reports/intel_graph_summit_pr_pack_007_service_mesh_m_tls_multi_cluster_dora_notes_sbom_secretless.md",
+    "line": 214,
+    "text": "compute from releases, deployments, incidents issues",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/roadmaps/summit-platform-execution-master.md",
+    "line": 49,
+    "text": "Catalog",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/CRITICAL_TODOS_CATALOG.md",
+    "line": 43,
+    "text": "Add proper RBAC here",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/CRITICAL_TODOS_CATALOG.md",
+    "line": 77,
+    "text": "Implement SCIM sync using your IdP API.",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/CRITICAL_TODOS_CATALOG.md",
+    "line": 444,
+    "text": "implement checks against your metrics endpoint / health dashboard",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/CRITICAL_TODOS_CATALOG.md",
+    "line": 480,
+    "text": "call metrics endpoint(s) and enforce thresholds from .ci/config/slo.yml",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/CRITICAL_TODOS_CATALOG.md",
+    "line": 515,
+    "text": "Generate secure key`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/CRITICAL_TODOS_CATALOG.md",
+    "line": 521,
+    "text": "Generate secure key",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/CRITICAL_TODOS_CATALOG.md",
+    "line": 571,
+    "text": "call Typesense search; for now, return empty",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/CRITICAL_TODOS_CATALOG.md",
+    "line": 602,
+    "text": "Track failures`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/CRITICAL_TODOS_CATALOG.md",
+    "line": 608,
+    "text": "Track failures",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/CRITICAL_TODOS_CATALOG.md",
+    "line": 609,
+    "text": "Track bytes",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/CRITICAL_TODOS_CATALOG.md",
+    "line": 651,
+    "text": "Track bytes`",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/SECURITY_INTEGRATION_GUIDE.md",
+    "line": 248,
+    "text": "Add query complexity analysis",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/SECURITY_TODOS_ANALYSIS.md",
+    "line": 205,
+    "text": "Add proper RBAC here",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/TODO_REMEDIATION_PLAN.md",
+    "line": 1,
+    "text": "REMEDIATION PLAN — SUMMIT GA READINESS",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/critical-todos-ledger.json",
+    "line": 28,
+    "text": "Add proper RBAC here\\n    res.json({ status: 'triggered', job_id: 'job-' + Date.now() });\\n});\",",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/critical-todos-ledger.json",
+    "line": 47,
+    "text": "Implement SCIM sync using your IdP API.\\n  return { ok: true } as const;\\n}\",",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/critical-todos-ledger.json",
+    "line": 256,
+    "text": "implement checks against your metrics endpoint / health dashboard\\nexit 0\",",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/critical-todos-ledger.json",
+    "line": 275,
+    "text": "call metrics endpoint(s) and enforce thresholds from .ci/config/slo.yml\\nexit 0\",",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/critical-todos-ledger.json",
+    "line": 285,
+    "text": "Generate secure key\",",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/critical-todos-ledger.json",
+    "line": 294,
+    "text": "Generate secure key\\n});\",",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/critical-todos-ledger.json",
+    "line": 313,
+    "text": "call Typesense search; for now, return empty\\n  return res.status(200).json([]);\\n};\",",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/critical-todos-ledger.json",
+    "line": 323,
+    "text": "Track failures\",",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/critical-todos-ledger.json",
+    "line": 332,
+    "text": "Track failures\\n  bytes_processed: 0, // TODO: Track bytes\\n  processing_duration_ms: Date.now() - startTime,\\n};\",",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/critical-todos-ledger.json",
+    "line": 342,
+    "text": "Track bytes\",",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/security/critical-todos-ledger.json",
+    "line": 351,
+    "text": "Track failures\\n  bytes_processed: 0, // TODO: Track bytes\\n  processing_duration_ms: Date.now() - startTime,\\n};\",",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/sprints/SPRINT_FRAUD_SCAM_INTEL.md",
+    "line": 187,
+    "text": "call GraphQL mutation server.mutations.upsertAlert(alerts)",
+    "type": "TODO"
+  },
+  {
+    "file": "docs/sprints/SPRINT_MAESTRO_COMPOSER_BACKEND_S2.md",
+    "line": 216,
+    "text": "s from Repo Scan (grounding)",
+    "type": "NOTE"
+  },
+  {
+    "file": "dora/exporter.ts",
+    "line": 5,
+    "text": "compute from releases, deployments, incidents issues",
+    "type": "TODO"
+  },
+  {
+    "file": "e2e/client/collab-delta-sync.spec.ts",
+    "line": 5,
+    "text": "implement simulation of 50 clients editing the same document",
+    "type": "TODO"
+  },
+  {
+    "file": "e2e/client/golden-path-ci-gate.spec.ts",
+    "line": 356,
+    "text": "Actual rate limiting verification would need higher load",
+    "type": "NOTE"
+  },
+  {
+    "file": "e2e/client/webauthn.spec.ts",
+    "line": 8,
+    "text": "This is a simplified test. A real implementation would involve:",
+    "type": "NOTE"
+  },
+  {
+    "file": "e2e/golden-path.spec.ts",
+    "line": 54,
+    "text": "Can't easily assert contents of canvas, but presence is good.",
+    "type": "NOTE"
+  },
+  {
+    "file": "e2e/maestro-run-console.spec.ts",
+    "line": 3,
+    "text": "Enable this test once the apps/web environment is stable and can be served locally.",
+    "type": "TODO"
+  },
+  {
+    "file": "graphql/performance-monitor.ts",
+    "line": 338,
+    "text": "This is a simple implementation. In production, use the actual DataLoader library",
+    "type": "NOTE"
+  },
+  {
+    "file": "infra/k8s/auth/oidc-auth.yaml",
+    "line": 16,
+    "text": "Replace with your OIDC issuer URL",
+    "type": "TODO"
+  },
+  {
+    "file": "infra/k8s/auth/oidc-auth.yaml",
+    "line": 17,
+    "text": "Replace with your OIDC client ID for production",
+    "type": "TODO"
+  },
+  {
+    "file": "infra/k8s/auth/oidc-auth.yaml",
+    "line": 20,
+    "text": "Replace with your production redirect URI",
+    "type": "TODO"
+  },
+  {
+    "file": "infra/k8s/auth/oidc-auth.yaml",
+    "line": 21,
+    "text": "Replace with your production post-logout redirect URI",
+    "type": "TODO"
+  },
+  {
+    "file": "infra/k8s/auth/oidc-auth.yaml",
+    "line": 85,
+    "text": "Replace with your base64 encoded OIDC client secret (prod)",
+    "type": "TODO"
+  },
+  {
+    "file": "infra/k8s/auth/oidc-auth.yaml",
+    "line": 87,
+    "text": "Replace with your base64 encoded JWT signing secret (prod)",
+    "type": "TODO"
+  },
+  {
+    "file": "infra/k8s/auth/oidc-auth.yaml",
+    "line": 89,
+    "text": "Replace with your base64 encoded session encryption key (prod)",
+    "type": "TODO"
+  },
+  {
+    "file": "infra/k8s/auth/oidc-auth.yaml",
+    "line": 140,
+    "text": "Replace with your OIDC issuer URL",
+    "type": "TODO"
+  },
+  {
+    "file": "infra/k8s/auth/oidc-auth.yaml",
+    "line": 142,
+    "text": "Replace with your OIDC client ID for production",
+    "type": "TODO"
+  },
+  {
+    "file": "infra/k8s/auth/oidc-auth.yaml",
+    "line": 154,
+    "text": "Replace with your production domain",
+    "type": "TODO"
+  },
+  {
+    "file": "infra/k8s/auth/oidc-auth.yaml",
+    "line": 156,
+    "text": "Replace with your production redirect URI",
+    "type": "TODO"
+  },
+  {
+    "file": "infra/k8s/auth/oidc-auth.yaml",
+    "line": 253,
+    "text": "Replace with your production domain",
+    "type": "TODO"
+  },
+  {
+    "file": "infra/k8s/zero-trust/network-policies/20-control-plane.yaml",
+    "line": 322,
+    "text": "In production, use egress gateway with domain filtering",
+    "type": "NOTE"
+  },
+  {
+    "file": "intelgraph/server/server.js",
+    "line": 163,
+    "text": "Extract user from token",
+    "type": "TODO"
+  },
+  {
+    "file": "intelgraph-mcp/services/replay-engine/src/replayer.ts",
+    "line": 5,
+    "text": "enforce causal ordering + side-effect stubs per ADR 0004.",
+    "type": "TODO"
+  },
+  {
+    "file": "intelgraph-mcp/services/runtime-pooler/src/firecracker.ts",
+    "line": 114,
+    "text": "tie into deterministic sandbox runner communicating with VM guest agent.",
+    "type": "TODO"
+  },
+  {
+    "file": "intelgraph-mcp/shootout-ui/next-env.d.ts",
+    "line": 4,
+    "text": "This file should not be edited",
+    "type": "NOTE"
+  },
+  {
+    "file": "intelgraph-mvp/ui/next-env.d.ts",
+    "line": 4,
+    "text": "This file should not be edited",
+    "type": "NOTE"
+  },
+  {
+    "file": "intelgraph-quickstart/api/src/auth.ts",
+    "line": 8,
+    "text": "extend with OIDC validation if Authorization: Bearer is present",
+    "type": "NOTE"
+  },
+  {
+    "file": "k6/agent-scale-test.js",
+    "line": 147,
+    "text": "If auth fails with 401/403, it counts as failure for the test setup but maybe not for the system availability if credentials are bad.",
+    "type": "NOTE"
+  },
+  {
+    "file": "k6/agent-slo-gate.js",
+    "line": 16,
+    "text": "In a real CI, we might run the full scale test. Here we run a lighter version.",
+    "type": "NOTE"
+  },
+  {
+    "file": "k6/golden-path-benchmark.js",
+    "line": 9,
+    "text": "This path is relative to the script file execution location (usually repo root if run via npm script)",
+    "type": "NOTE"
+  },
+  {
+    "file": "k8s/cron/purge-processor.yaml",
+    "line": 19,
+    "text": "replace with actual processing logic",
+    "type": "TODO"
+  },
+  {
+    "file": "k8s/cronjobs/dr-restore.yaml",
+    "line": 18,
+    "text": "replace with actual backup store + restore commands",
+    "type": "TODO"
+  },
+  {
+    "file": "libs/ingest-worker/node/src/rate-limiter.ts",
+    "line": 165,
+    "text": "This is a simplification; in production you might want to handle this differently",
+    "type": "NOTE"
+  },
+  {
+    "file": "mc_v_0_3.jsx",
+    "line": 20,
+    "text": "Wire API_BASE to your MC Gateway; all writes must be persisted-only + audit-logged.",
+    "type": "NOTE"
+  },
+  {
+    "file": "mobile/src/screens/DocumentsScreen.tsx",
+    "line": 33,
+    "text": "Date.now() in event handlers is safe, unlike in render logic.",
+    "type": "NOTE"
+  },
+  {
+    "file": "observability/alerts/prometheus/slo-burn-rules.yaml",
+    "line": 2,
+    "text": "Replace metric names/labels to match your exporters.",
+    "type": "NOTE"
+  },
+  {
+    "file": "october2025/Switchboard.md",
+    "line": 4328,
+    "text": "s: start with vision, then timeline",
+    "type": "NOTE"
+  },
+  {
+    "file": "october2025/Switchboard.md",
+    "line": 4338,
+    "text": "s: ask for owners and dates",
+    "type": "NOTE"
+  },
+  {
+    "file": "october2025/Switchboard.md",
+    "line": 4348,
+    "text": "s: propose mitigations",
+    "type": "NOTE"
+  },
+  {
+    "file": "october2025/Switchboard.md",
+    "line": 4412,
+    "text": "s: ...",
+    "type": "NOTE"
+  },
+  {
+    "file": "october2025/Switchboard.md",
+    "line": 4670,
+    "text": "s: ... --> text.",
+    "type": "NOTE"
+  },
+  {
+    "file": "october2025/Switchboard.md",
+    "line": 5081,
+    "text": "call OPA/engine; demo logic:",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/Switchboard.md",
+    "line": 5764,
+    "text": "call OPA sidecar / wasmtime policy / local rules",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/Switchboard.md",
+    "line": 5773,
+    "text": "fan-out to native signaling / window/event bus",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/Switchboard.md",
+    "line": 5779,
+    "text": "store via keyring or encrypted file",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/Switchboard.md",
+    "line": 12436,
+    "text": "look up from CRM or DB; stubbed for now",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/Switchboard.md",
+    "line": 12453,
+    "text": "persist to decisions table & append audit trail",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/app_team_2025_10_20_switchboard_approvals_rationale_v_2_022.md",
+    "line": 140,
+    "text": "wire to api-client, OPA preflight, receipts",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/co_ceo_governance_workstream_2026_02_09_08.md",
+    "line": 130,
+    "text": "implement cosign verify",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/companyos-switchboard/apps/web/next-env.d.ts",
+    "line": 3,
+    "text": "This file should not be edited",
+    "type": "NOTE"
+  },
+  {
+    "file": "october2025/companyos-switchboard/apps/web/src/app/api/switchboard/[[...path]]/route.ts",
+    "line": 31,
+    "text": "Replace with actual JWT verification using your auth library",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/companyos-switchboard/apps/web/src/switchboard/router.ts",
+    "line": 41,
+    "text": "Integrate with the application's real logger (e.g. Pino, Winston)",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/companyos-switchboard/apps/web/src/switchboard/router.ts",
+    "line": 44,
+    "text": "Integrate with real metrics (e.g. Prometheus, StatsD)",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/docs_phase_37_38_enterprise_search_sso_audit_trust_center_data_governance.md",
+    "line": 181,
+    "text": "call Typesense search; for now, return empty",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/gc_legal_governance_q_4_2025_10_20_to_2025_10_31_sprint_02.md",
+    "line": 238,
+    "text": "POST to registry when available",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/groves_security_governance_provenance_2025_10_01_10_14_sprint_01.md",
+    "line": 272,
+    "text": "verify Merkle root + signatures",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/guy_intelgraph_platform_auditable_core_2025_10_06_sprint_01.md",
+    "line": 237,
+    "text": "call model; sanitize schema-aware generation",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/guy_intelgraph_platform_explainable_analyst_assist_2025_11_03_sprint_03.md",
+    "line": 233,
+    "text": "call OPA for join permission using abac() logic or explicit policy fn",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/guy_intelgraph_platform_mobile_attachments_mdm_er_rules_2026_02_02_sprint_09.md",
+    "line": 188,
+    "text": "OCR hook (WebAssembly) for basic text scan",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/guy_intelgraph_platform_mobile_attachments_mdm_er_rules_2026_02_02_sprint_09.md",
+    "line": 209,
+    "text": "OCR then regex scan for emails/PII",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/guy_intelgraph_platform_mobile_write_mtls_2026_01_19_sprint_08 (1).md",
+    "line": 213,
+    "text": "OPA posture gate checked earlier in middleware",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/guy_intelgraph_platform_mobile_write_mtls_2026_01_19_sprint_08.md",
+    "line": 213,
+    "text": "OPA posture gate checked earlier in middleware",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/integration_diffs_fold_into_existing_services_opa_bundle.md",
+    "line": 238,
+    "text": "replace with real OPA check",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/investigate1.md",
+    "line": 294,
+    "text": "integrate retriever + coverage + generator\\n\\n\\n---\\n\\n## /benchmark/results.md\\n- Latency: 72 ms p95 (N=10k queries, Android NPU)\\n- Memory: 1.6 GB (RTD+PQ compressed corpus)\\n- Coverage@0.9: 0.985\\n- Uncited Claim Rate: 0.4%\\n- Proof size: 2.1 KB avg\\n- Verification time: 0.7 ms\\n\\n---\\n\\n## /ip/claims.md\\n1. Method Claim: Generating text conditioned on retrieved spans bundled with a cryptographic coverage certificate.\\n2. System Claim: Device implementing sketch-first pre-prune, PQ-ANN retriever, coverage assembler, and verifier.\\n3. Dependent Claims:\\n - Co-trained sketch encoder.\\n - Span-credit learner.\\n - Dual-channel RTD+PQ.\\n - Adaptive τ policies.\\n - Verifier-gated decoding.\\n - Attested runtime integration.\\n - Proof branch deduplication.\\n - Risk-aware fallback policies.\\n\\n---\\n\\n## /compliance/data_governance.md\\n- All data synthetic or public QA.\\n- No PII stored in RTD.\\n- DP noise applied during online learner updates.\\n- SPDX SBOM generated automatically.\\n\\n---\\n\\n## /next_steps.md\\n- [ ] Finalize Rust PQ kernel.\\n- [ ] Integrate verifier with Summit decoder.\\n- [ ] Expand evaluation harness with entailment checks.\\n- [ ] Draft provisional patent with full claims set.\\n- [ ] Reach out to OEM partners (Samsung, Qualcomm).\\n- [ ] Run enterprise pilot (finance/legal).\\n- [ ] Prepare compliance packet for audits.\\n- [ ] File PCT application within 12 months.\"}}",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/investigate1.md",
+    "line": 309,
+    "text": "s for Prosecution\\n- Distinguish from classic RAG (Lewis 2020): no cryptographic proof layer, no verifier-gated decoding.\\n- Distinguish from PCC (Necula 1997): applied to code safety, not ML retrieval context.\\n- Distinguish from transparency logs (RFC6962): log commitments, not span-level coverage proofs.\\n\\n---\\n\\n## Next Steps\\n- Expand dependent claims for multi-lingual verifier, federated retriever updates, and GPU/NPU acceleration.\\n- Generate formal claim language for filing (US provisional → PCT).\\n- Align claim chart with Summit | IntelGraph | MC integration modules for industrial applicability.\"}}",
+    "type": "NOTE"
+  },
+  {
+    "file": "october2025/investigate1.md",
+    "line": 314,
+    "text": "s\\n- Figures designed to map directly to claim chart.\\n- Use for /ip/draft_spec.md filing package.\\n- Mermaid source ensures reproducibility + easy redrawing.\\n\\n---\"}}",
+    "type": "NOTE"
+  },
+  {
+    "file": "october2025/pager_duty_statuspage_wiring_helm_consumer_docs_final_gap_sweep.md",
+    "line": 65,
+    "text": "if using Helm, patch via values instead of editing manifest",
+    "type": "NOTE"
+  },
+  {
+    "file": "october2025/sprint_2025_09_29_artifacts_and_scaffolds.md",
+    "line": 256,
+    "text": "parse results to normalized event model",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/sprint_2025_10_27_intelgraph_v_0.md",
+    "line": 182,
+    "text": "load graph, compute/update embeddings",
+    "type": "TODO"
+  },
+  {
+    "file": "october2025/summit_git_hub_projects_scaffolding_opa_ci_policy_gates.md",
+    "line": 82,
+    "text": "gh project field create requires gh >= 2.60",
+    "type": "NOTE"
+  },
+  {
+    "file": "ops/compose/docker-compose.yml",
+    "line": 25,
+    "text": "different host port than your single container",
+    "type": "NOTE"
+  },
+  {
+    "file": "packages/agent-lab/src/judge.ts",
+    "line": 38,
+    "text": "s',",
+    "type": "NOTE"
+  },
+  {
+    "file": "packages/ai-wellbeing-predictors/src/__tests__/WellbeingPredictor.test.ts",
+    "line": 428,
+    "text": "After normalization, the actual percentages may differ",
+    "type": "NOTE"
+  },
+  {
+    "file": "packages/api-analytics/src/index.ts",
+    "line": 12,
+    "text": "Add these modules when implemented",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/api-management/src/index.ts",
+    "line": 10,
+    "text": "Add these modules when implemented",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/blockchain/src/consensus/ConsensusEngine.ts",
+    "line": 261,
+    "text": "Implement signature verification",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/blockchain/src/core/Blockchain.ts",
+    "line": 425,
+    "text": "Implement signature verification",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/business-rules/src/index.ts",
+    "line": 793,
+    "text": "Implement conflict detection for UNIQUE policy",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/cloud-abstraction/src/storage/azure-storage.ts",
+    "line": 225,
+    "text": "Azure SAS tokens require different permissions",
+    "type": "NOTE"
+  },
+  {
+    "file": "packages/convergence-tracking/src/ConvergenceTracker.ts",
+    "line": 231,
+    "text": "Analyze historical convergence patterns",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/convergence-tracking/src/ConvergenceTracker.ts",
+    "line": 236,
+    "text": "Identify recurring patterns",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/convergence-tracking/src/ConvergenceTracker.ts",
+    "line": 241,
+    "text": "Assess pattern predictive value",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/convergence-tracking/src/ConvergenceTracker.ts",
+    "line": 256,
+    "text": "Assess technology synergy",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/convergence-tracking/src/ConvergenceTracker.ts",
+    "line": 268,
+    "text": "Calculate application maturity",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/convergence-tracking/src/ConvergenceTracker.ts",
+    "line": 273,
+    "text": "Calculate market maturity",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/convergence-tracking/src/ConvergenceTracker.ts",
+    "line": 278,
+    "text": "Analyze cross-domain integration",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/dashboard-framework/src/store.ts",
+    "line": 487,
+    "text": "Implement proper undo/redo with history stack",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/dashboard-framework/src/store.ts",
+    "line": 492,
+    "text": "Implement proper undo/redo with history stack",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/emerging-threats/src/ThreatMonitor.ts",
+    "line": 212,
+    "text": "Integrate with research databases (arXiv, PubMed, Defense Technical Information Center)",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/emerging-threats/src/ThreatMonitor.ts",
+    "line": 217,
+    "text": "Integrate with patent databases (USPTO, WIPO, EPO)",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/emerging-threats/src/ThreatMonitor.ts",
+    "line": 222,
+    "text": "Monitor SBIR/STTR, DARPA programs, venture capital",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/emerging-threats/src/ThreatMonitor.ts",
+    "line": 227,
+    "text": "Implement breakthrough detection algorithm",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/emerging-threats/src/ThreatMonitor.ts",
+    "line": 232,
+    "text": "Analyze growth rates and trends",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/emerging-threats/src/ThreatMonitor.ts",
+    "line": 237,
+    "text": "Map to Technology Readiness Level (TRL) scale",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/emerging-threats/src/ThreatMonitor.ts",
+    "line": 242,
+    "text": "Analyze deployment and adoption metrics",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/emerging-threats/src/ThreatMonitor.ts",
+    "line": 247,
+    "text": "Categorize investment levels",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/emerging-threats/src/ThreatMonitor.ts",
+    "line": 252,
+    "text": "Extract organizations and entities",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/emerging-threats/src/ThreatMonitor.ts",
+    "line": 257,
+    "text": "Identify technology convergence opportunities",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/emerging-threats/src/ThreatMonitor.ts",
+    "line": 262,
+    "text": "Monitor for novel attack methodologies",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/emerging-threats/src/ThreatMonitor.ts",
+    "line": 267,
+    "text": "Track unconventional warfare developments",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/emerging-threats/src/ThreatMonitor.ts",
+    "line": 272,
+    "text": "Identify gray zone activities",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/emerging-threats/src/ThreatMonitor.ts",
+    "line": 277,
+    "text": "Monitor information warfare evolution",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/emerging-threats/src/ThreatMonitor.ts",
+    "line": 313,
+    "text": "Monitor edge and fringe sources",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/emerging-threats/src/ThreatMonitor.ts",
+    "line": 318,
+    "text": "Detect anomalous patterns",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/emerging-threats/src/ThreatMonitor.ts",
+    "line": 323,
+    "text": "Track fringe technology developments",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/emerging-threats/src/ThreatMonitor.ts",
+    "line": 328,
+    "text": "Assess potential implications",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/emerging-threats/src/ThreatMonitor.ts",
+    "line": 333,
+    "text": "Correlate with existing trends",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/extensions/templates/basic/README.md",
+    "line": 3,
+    "text": "Add extension description",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/extensions/templates/basic/README.md",
+    "line": 7,
+    "text": "List extension features",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/extensions/templates/basic/README.md",
+    "line": 36,
+    "text": "Add usage examples",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/extensions/templates/basic/README.md",
+    "line": 61,
+    "text": "List required permissions",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/extensions/templates/basic/src/index.ts",
+    "line": 24,
+    "text": "Initialize your extension here",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/extensions/templates/basic/src/index.ts",
+    "line": 32,
+    "text": "Clean up resources (close connections, stop timers, etc.)",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/extensions/templates/basic/src/index.ts",
+    "line": 37,
+    "text": "Export functions/objects that other extensions can use",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/BackcastingEngine.ts",
+    "line": 49,
+    "text": "Identify transition pathways",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/BackcastingEngine.ts",
+    "line": 54,
+    "text": "Define critical milestones",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/BackcastingEngine.ts",
+    "line": 59,
+    "text": "Identify necessary changes",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/DelphiAnalyzer.ts",
+    "line": 67,
+    "text": "Calculate IQR, median, outliers",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/HorizonScanner.ts",
+    "line": 95,
+    "text": "Analyze trajectory of mentions, attention, development",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/HorizonScanner.ts",
+    "line": 187,
+    "text": "Monitor R&D developments",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/HorizonScanner.ts",
+    "line": 192,
+    "text": "Track policy and regulatory changes",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/HorizonScanner.ts",
+    "line": 197,
+    "text": "Monitor market trends",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/HorizonScanner.ts",
+    "line": 202,
+    "text": "Scan social and cultural shifts",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/HorizonScanner.ts",
+    "line": 207,
+    "text": "Cluster findings into emerging issues",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/HorizonScanner.ts",
+    "line": 212,
+    "text": "Identify weak signals",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/HorizonScanner.ts",
+    "line": 217,
+    "text": "Identify potential wild card events",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/ScenarioPlanner.ts",
+    "line": 203,
+    "text": "Implement STEEP/PESTLE analysis",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/ScenarioPlanner.ts",
+    "line": 210,
+    "text": "Identify high-impact, high-uncertainty factors",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/ScenarioPlanner.ts",
+    "line": 215,
+    "text": "Generate 2x2 or 3x3 scenario matrix",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/ScenarioPlanner.ts",
+    "line": 253,
+    "text": "Determine scenario type based on forces and uncertainties",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/ScenarioPlanner.ts",
+    "line": 262,
+    "text": "Generate scenario narrative",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/ScenarioPlanner.ts",
+    "line": 270,
+    "text": "Extract key assumptions",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/ScenarioPlanner.ts",
+    "line": 275,
+    "text": "Identify transition pathways between scenarios",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/ScenarioPlanner.ts",
+    "line": 280,
+    "text": "Identify critical decision points",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/ScenarioPlanner.ts",
+    "line": 285,
+    "text": "Find where pathways converge",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/ScenarioPlanner.ts",
+    "line": 296,
+    "text": "Check for logical consistency",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/ScenarioPlanner.ts",
+    "line": 301,
+    "text": "Compare against historical trends",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/ScenarioPlanner.ts",
+    "line": 306,
+    "text": "Validate assumptions",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/ScenarioPlanner.ts",
+    "line": 311,
+    "text": "Check driving force alignment",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/futures-analysis/src/TrendAnalyzer.ts",
+    "line": 36,
+    "text": "Implement trend projection algorithms",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/geopolitical-analysis/src/safeguards/compliance.ts",
+    "line": 242,
+    "text": "Integrate with actual audit logging system",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/geospatial/src/processing/airgapped-cache.ts",
+    "line": 454,
+    "text": "Actual raster data would need to be fetched from source",
+    "type": "NOTE"
+  },
+  {
+    "file": "packages/knowledge-graph/src/embeddings/GraphEmbeddings.ts",
+    "line": 42,
+    "text": "This requires Neo4j Graph Data Science library",
+    "type": "NOTE"
+  },
+  {
+    "file": "packages/knowledge-graph/src/embeddings/GraphEmbeddings.ts",
+    "line": 192,
+    "text": "This is a simplified version. In production, use vector indexes",
+    "type": "NOTE"
+  },
+  {
+    "file": "packages/maestro-cli/src/commands/dsar.ts",
+    "line": 18,
+    "text": "Implement actual data export logic",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/maestro-cli/src/commands/dsar.ts",
+    "line": 35,
+    "text": "Implement actual data deletion/anonymization logic",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/maestro-core/src/plugins/cosign-plugin.ts",
+    "line": 145,
+    "text": "Signatures and attestations in transparency logs cannot be \"undone\"",
+    "type": "NOTE"
+  },
+  {
+    "file": "packages/maestro-core/src/stores/s3-artifact-store.ts",
+    "line": 226,
+    "text": "This implementation doesn't handle content-addressable cleanup",
+    "type": "NOTE"
+  },
+  {
+    "file": "packages/predictive-graph-intelligence/src/index.ts",
+    "line": 2,
+    "text": "Implement predictive signal generation",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/prov-ledger/src/primitives.ts",
+    "line": 72,
+    "text": "Implement real signature verification",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/prov-ledger/src/primitives.ts",
+    "line": 80,
+    "text": "Implement real manifest chain verification",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/pve/src/evaluator/validators/DependencyAuditValidator.ts",
+    "line": 248,
+    "text": "Full license checking requires fetching package metadata",
+    "type": "NOTE"
+  },
+  {
+    "file": "packages/query-language/src/index.ts",
+    "line": 91,
+    "text": "Implement CST to AST visitor",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/risk-forecasting/src/RiskForecaster.ts",
+    "line": 169,
+    "text": "Implement category-specific risk assessment",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/risk-forecasting/src/RiskForecaster.ts",
+    "line": 174,
+    "text": "Identify risk interconnections",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/risk-forecasting/src/RiskForecaster.ts",
+    "line": 178,
+    "text": "Model cascading failure scenarios",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/risk-forecasting/src/RiskForecaster.ts",
+    "line": 183,
+    "text": "Analyze historical black swan events",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/risk-forecasting/src/RiskForecaster.ts",
+    "line": 188,
+    "text": "Identify potential future black swans",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/risk-forecasting/src/RiskForecaster.ts",
+    "line": 193,
+    "text": "Identify system vulnerabilities",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/risk-forecasting/src/RiskForecaster.ts",
+    "line": 198,
+    "text": "Map feedback loops",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/risk-forecasting/src/RiskForecaster.ts",
+    "line": 203,
+    "text": "Identify system breaking points",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/risk-forecasting/src/RiskForecaster.ts",
+    "line": 208,
+    "text": "Analyze proximity to critical thresholds",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/risk-forecasting/src/RiskForecaster.ts",
+    "line": 213,
+    "text": "Project probability over time",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/risk-forecasting/src/RiskForecaster.ts",
+    "line": 218,
+    "text": "Project impact over time",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/risk-forecasting/src/RiskForecaster.ts",
+    "line": 223,
+    "text": "Identify critical decision points",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/sim-harness/src/__tests__/ScenarioGenerator.test.ts",
+    "line": 101,
+    "text": "nodeCount is a hint, actual count depends on template structure",
+    "type": "NOTE"
+  },
+  {
+    "file": "packages/strategic-foresight/src/ForesightEngine.ts",
+    "line": 60,
+    "text": "Implement futures wheel exploration",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/strategic-foresight/src/ForesightEngine.ts",
+    "line": 85,
+    "text": "Generate all possible configurations",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/strategic-foresight/src/ForesightEngine.ts",
+    "line": 90,
+    "text": "Build consistency matrix",
+    "type": "TODO"
+  },
+  {
+    "file": "packages/tasks-core/src/tasks/transform.map.ts",
+    "line": 9,
+    "text": "mapper is a JS function body in a sandboxed new Function (trusted catalogs only)",
+    "type": "NOTE"
+  },
+  {
+    "file": "project_management/backlog/meta-sprint-backlog-machine.md",
+    "line": 81,
+    "text": "[#1234]`).",
+    "type": "TODO"
+  },
+  {
+    "file": "prompts/implement.graph-xai-explainer@v1.yaml",
+    "line": 547,
+    "text": "books ({{notebook_format}})",
+    "type": "NOTE"
+  },
+  {
+    "file": "prov-ledger-service/src/server.ts",
+    "line": 32,
+    "text": "In production, this would import from the actual OPA client service",
+    "type": "NOTE"
+  },
+  {
+    "file": "prov-ledger-service/src/server.ts",
+    "line": 392,
+    "text": "Get actual classification",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-evidence-bundle.js",
+    "line": 62,
+    "text": "Get from actual CI",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 81,
+    "text": "Add more specific tests for methods and properties",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 90,
+    "text": "Add test with valid input",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 96,
+    "text": "Add test with invalid input",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 101,
+    "text": "Add edge case tests",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 110,
+    "text": "Add assertions for properties",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 127,
+    "text": "Add specific tests for this module",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 176,
+    "text": "Add create operation test",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 180,
+    "text": "Add read operation test",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 184,
+    "text": "Add update operation test",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 188,
+    "text": "Add delete operation test",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 200,
+    "text": "Add authentication test",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 204,
+    "text": "Add authorization test",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 207,
+    "text": "Add endpoint-specific tests",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 217,
+    "text": "Add malformed data test",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 221,
+    "text": "Add database error handling test",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 278,
+    "text": "Add page-specific assertions",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 282,
+    "text": "Add interaction tests",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 288,
+    "text": "Add form submission test",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 295,
+    "text": "Add error handling test",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 301,
+    "text": "Add accessibility tests",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 309,
+    "text": "Add mobile-specific tests",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/generate-test-suite.ts",
+    "line": 316,
+    "text": "Add offline handling test",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/launch_day_simulation.ts",
+    "line": 72,
+    "text": "Since we are running against a potentially non-running server in this sandbox,",
+    "type": "NOTE"
+  },
+  {
+    "file": "scripts/load/generate-load.ts",
+    "line": 101,
+    "text": "In a real test, this path should exist or be mocked to return slowly",
+    "type": "NOTE"
+  },
+  {
+    "file": "scripts/ops/compute-health-score.ts",
+    "line": 188,
+    "text": "metrics.reliability.passed excludes skipped.",
+    "type": "NOTE"
+  },
+  {
+    "file": "scripts/ops/create-future-history-entry.ts",
+    "line": 289,
+    "text": "Add 1-2 paragraphs describing the change in detail",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/ops/create-future-history-entry.ts",
+    "line": 295,
+    "text": "Fill in rationale",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/sbom/generate.ts",
+    "line": 15,
+    "text": "cdxgen might try to fetch data.",
+    "type": "NOTE"
+  },
+  {
+    "file": "scripts/scan_todos.ts",
+    "line": 41,
+    "text": "and <!-- TODO --> styles",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/schema-diff.ts",
+    "line": 322,
+    "text": "Add schema comparison for request/response bodies",
+    "type": "TODO"
+  },
+  {
+    "file": "scripts/security/scan-tenant-isolation.ts",
+    "line": 117,
+    "text": "More advanced AST parsing to check individual resolvers",
+    "type": "TODO"
+  },
+  {
+    "file": "sdk/python/maestro_sdk/README.md",
+    "line": 111,
+    "text": "that base_url needs to be re-set, as would any shared cookies, headers, etc.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/scripts/generate-clients.ts",
+    "line": 24,
+    "text": "This requires java to be installed in the environment",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/scripts/verify_policy_lifecycle.ts",
+    "line": 59,
+    "text": "Logic continues in next calls for transaction",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/server.ts",
+    "line": 14,
+    "text": "ping DB/queue",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/__tests__/strategic-planning.e2e.test.ts",
+    "line": 10,
+    "text": "These tests require a running database and should be run in an integration environment",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/ai/copilot/graphrag-provenance.service.ts",
+    "line": 374,
+    "text": "In production, this would query the prov-ledger service",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/ai/copilot/graphrag-provenance.service.ts",
+    "line": 424,
+    "text": "In production, this would query the prov-ledger service",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/ai/copilot/redaction.service.ts",
+    "line": 381,
+    "text": "We already did pattern-based redaction, don't redact entire text",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/ai/nl-to-cypher/nl-to-cypher.service.ts",
+    "line": 176,
+    "text": "Integrate with actual Neo4j sandbox connection",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/analytics/index.ts",
+    "line": 30,
+    "text": "RiskFactor is already exported from policy/index.js, so we exclude it from compliance",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/analytics/policy/PolicyImpactAnalyzer.ts",
+    "line": 561,
+    "text": "In a real implementation, we'd track this in MetricsAggregator",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/api/featureFlags.ts",
+    "line": 83,
+    "text": "Add authentication and authorization check here",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/api/featureFlags.ts",
+    "line": 105,
+    "text": "Actually implement the createFlag method in the service",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/api/featureFlags.ts",
+    "line": 125,
+    "text": "Add authentication and authorization check here",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/api/featureFlags.ts",
+    "line": 147,
+    "text": "Add authentication and authorization check here",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/app.ts",
+    "line": 347,
+    "text": "/graphql has its own rate limiting chain above",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/audit/index.ts",
+    "line": 19,
+    "text": "This creates a separate connection pool for audit logging isolation.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/aurelius/services/InventionService.ts",
+    "line": 59,
+    "text": "LLMService interface might vary, adapting to a generic 'complete' or similar method",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/aurelius/services/PriorArtService.ts",
+    "line": 27,
+    "text": "Assuming 'patent_embedding_index' exists as defined in schema.ts",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/autonomous/PredictiveOpsService.ts",
+    "line": 44,
+    "text": "Implement queue backlog check once ApprovalService is ready",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/billing/BillingService.ts",
+    "line": 54,
+    "text": "In a real implementation, we would fetch raw counters from 'meters' table for accuracy.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/bulk/handlers.ts",
+    "line": 79,
+    "text": "Annotations table doesn't strictly exist in our migrations grep,",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/cache/responseCache.ts",
+    "line": 188,
+    "text": "We can't easily invalidate specific keys in L1 across all instances",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/claims/sign.ts",
+    "line": 24,
+    "text": "reuse MerkleLog to recompute root; placeholder returns true",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/compliance/DataLineageSystem.ts",
+    "line": 31,
+    "text": "Ideally should be deterministic based on name/type or lookup first.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/conductor/admission/budget-control.ts",
+    "line": 282,
+    "text": "Track per-expert request counts if needed",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/conductor/api/conductor-routes.ts",
+    "line": 198,
+    "text": "wire real metrics aggregations here",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/conductor/contracts/trust.ts",
+    "line": 16,
+    "text": "Verify signature against provider's registered key (PKI/cosign)",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/conductor/events/engine.ts",
+    "line": 99,
+    "text": "enqueue a run with payload",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/conductor/learn/bandit.ts",
+    "line": 689,
+    "text": "Implement time-windowed metrics",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/conductor/learn/bandit.ts",
+    "line": 841,
+    "text": "Implement based on recent decisions",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/conductor/mcp/client.ts",
+    "line": 76,
+    "text": "Implement certificate pinning here",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/conductor/models.ts",
+    "line": 6,
+    "text": "implement cosign verification of OCI/S3 reference",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/conductor/router/router-v2.ts",
+    "line": 810,
+    "text": "Implement based on routing history analysis",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/conductor/router/router-v2.ts",
+    "line": 815,
+    "text": "Implement cost efficiency calculation",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/conductor/router/router-v2.ts",
+    "line": 820,
+    "text": "Implement latency prediction accuracy",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/conductor/scheduler/selectGpuPool.ts",
+    "line": 18,
+    "text": "load dynamic pools; placeholder",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/conductor/steps/cleanroomAggregate.ts",
+    "line": 4,
+    "text": "apply per-metric DP noise if requested",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/conductor/steps/embedUpsert.ts",
+    "line": 26,
+    "text": "call Python/HTTP embedding generator; placeholder",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/config/__tests__/config.test.ts",
+    "line": 35,
+    "text": "loadConfig returns raw strings from env usually, but AJV might coerce?",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/config/featureFlags.ts",
+    "line": 213,
+    "text": "'features' in constructor already contains merged defaults+overrides if loaded via getInstance()",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/config/production-security.ts",
+    "line": 54,
+    "text": "helmet() in app.ts enables HSTS in production.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/connectors/README.md",
+    "line": 51,
+    "text": "You must handle stream consumption and cleanup.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/connectors/__tests__/gcs-ingest.test.ts",
+    "line": 29,
+    "text": "These tests have TypeScript inference issues with jest.fn() mocking",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/copilot/orchestrator.enhanced.js",
+    "line": 273,
+    "text": "Call actual Neo4j service",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/copilot/orchestrator.enhanced.js",
+    "line": 280,
+    "text": "Call actual graph analytics service",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/copilot/orchestrator.enhanced.js",
+    "line": 288,
+    "text": "Call actual summarization service",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/copilot/orchestrator.enhanced.js",
+    "line": 295,
+    "text": "Call actual enrichment service",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/copilot/orchestrator.js",
+    "line": 21,
+    "text": "call existing service/repo; here we simulate",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/data-governance/quality/DataQualityService.ts",
+    "line": 138,
+    "text": "This assumes the asset name corresponds to a real table in the SAME database.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/db/optimization/postgres-performance-optimizer.ts",
+    "line": 68,
+    "text": "UNION ALL may return duplicates if same relationship appears in both",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/db/postgres.ts",
+    "line": 413,
+    "text": "Add read replica support from config if needed",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/db/postgres.ts",
+    "line": 710,
+    "text": "It's better to set this per session or query if possible,",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/db/repositories/RiskRepository.ts",
+    "line": 61,
+    "text": "signals are not part of RiskScore interface but usually returned in a full object",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/db/tenantHelpers.ts",
+    "line": 42,
+    "text": "We don't magically inject tenant_id into raw SQL strings because",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/email-service/TemplateRenderer.ts",
+    "line": 106,
+    "text": "This is a basic implementation",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/entity-resolution/__tests__/FuzzyMatcher.test.ts",
+    "line": 10,
+    "text": "normalized strings. 'abc' and 'xyz' have distance 3. max length 3. 1 - 3/3 = 0.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/etl/pipeline.ts",
+    "line": 72,
+    "text": "In real system, this might be batched.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/events/EventService.ts",
+    "line": 29,
+    "text": "The current WebhookService fetches subscriptions itself.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/events/EventService.ts",
+    "line": 39,
+    "text": "Handle other sink types (QUEUE)",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/events/EventService.ts",
+    "line": 167,
+    "text": "generic sink storage",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/evidence/attestation/__tests__/attestation.test.ts",
+    "line": 84,
+    "text": "the above might be invalid PEM structure for node crypto,",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/experimentation/experiment.test.ts",
+    "line": 76,
+    "text": "This test requires a running experiment to be meaningful",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/explainability/ExplainabilityExplorerService.ts",
+    "line": 506,
+    "text": "Call provenanceService.getProvenanceChain() or similar",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/explainability/ExplainabilityExplorerService.ts",
+    "line": 516,
+    "text": "Verify SBOM hashes",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/explainability/ExplainabilityExplorerService.ts",
+    "line": 522,
+    "text": "Verify Merkle proof",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/federation/intents.ts",
+    "line": 144,
+    "text": "derive from intent or actor",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/federation/intents.ts",
+    "line": 173,
+    "text": "Add more sophisticated logic",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/governance/analytics/__tests__/governance-metrics-service.test.ts",
+    "line": 126,
+    "text": "In real implementation, this would check Redis cache",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/governance/demo.ts",
+    "line": 77,
+    "text": "violation is auto-logged by governance.check",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/graph/optimizer/IndexAdvisor.ts",
+    "line": 12,
+    "text": "GraphIndexAdvisorService is a singleton service that tracks runtime query patterns.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/graphql/attachments.ts",
+    "line": 2,
+    "text": "Fix graphql-upload-ts import",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/graphql/intelgraph/resolvers.ts",
+    "line": 441,
+    "text": "Calculate actual clustering coefficient",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/graphql/intelgraph/resolvers.ts",
+    "line": 480,
+    "text": "Implement OPA health check",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/graphql/multimodalResolvers.ts",
+    "line": 273,
+    "text": "Implement generateMultimodalTimeline method in MultimodalDataService",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/graphql/mutations/SafeMutations.ts",
+    "line": 339,
+    "text": "Implement cache invalidation",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/graphql/mutations/SafeMutations.ts",
+    "line": 506,
+    "text": "Implement custom schema setting",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/graphql/resolvers/core.ts",
+    "line": 523,
+    "text": "graphNeighborhood and searchEntities are temporarily disabled",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/graphql/resolvers/crudResolvers.ts",
+    "line": 6,
+    "text": ".js extension for ESM",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/graphql/resolvers/crudResolvers.ts",
+    "line": 7,
+    "text": ".js extension for ESM",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/graphql/resolvers/cti.ts",
+    "line": 9,
+    "text": "In a real app, we might use dependency injection or context",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/graphql/resolvers/entity.ts",
+    "line": 86,
+    "text": "'entity_fulltext_idx' must be created via migration",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/graphql/resolvers/graphragQueryResolvers.ts",
+    "line": 102,
+    "text": "This is a placeholder for the quota service",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/graphql/resolvers/graphragQueryResolvers.ts",
+    "line": 124,
+    "text": "This is a placeholder for the usage metering service",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/graphql/resolvers/graphragResolvers.ts",
+    "line": 170,
+    "text": "Fetch full entity objects from Neo4j using the entity IDs",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/graphql/resolvers/graphragResolvers.ts",
+    "line": 224,
+    "text": "Implement cache clearing logic",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/graphql/resolvers/mvp1-copilot.ts",
+    "line": 151,
+    "text": "Integrate with entity creation service",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/graphql/resolvers/safe-mutations.ts",
+    "line": 41,
+    "text": "enforce idempotency via audit/outbox store; validate DAG/policies",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/graphql/resolvers/safe-mutations.ts",
+    "line": 83,
+    "text": "enqueue via outbox; start saga orchestrator",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/graphql/resolvers/sprint28.ts",
+    "line": 12,
+    "text": "\"period\" parsing (e.g. \"7d\") is simplified here.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/graphql/resolvers/strategicPlanningResolvers.ts",
+    "line": 197,
+    "text": "Risk by ID would need to be added to repo",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/graphql/resolvers.copilot-mvp.ts",
+    "line": 405,
+    "text": "Persist to database",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/graphql/resolvers.copilot-mvp.ts",
+    "line": 424,
+    "text": "Persist to database",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/graphql/resolvers.copilot.js",
+    "line": 24,
+    "text": "Add proper filtering to store",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/graphql/resolvers.er.ts",
+    "line": 447,
+    "text": "Implement merge logic",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/graphql/watchlists.ts",
+    "line": 1,
+    "text": "Create proper shared schema package",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/ingest/stream.ts",
+    "line": 203,
+    "text": "We need a table. Let's assume one exists or we just log for the scaffold if no DB migration yet.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/ingestion/ChunkingService.ts",
+    "line": 63,
+    "text": "The start offset for the *next* chunk is confusing here.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/ingestion/migration/MigrationOrchestrator.ts",
+    "line": 106,
+    "text": "Batching writes would be more efficient in production",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/jobs/selectorMinimizationJobs.ts",
+    "line": 330,
+    "text": "node-cron doesn't provide a global stop method",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/lib/cache/multi-tier-cache.ts",
+    "line": 2,
+    "text": "The 'lru-cache' package could not be installed due to a pre-existing",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/lib/deployment/autoscaling.ts",
+    "line": 231,
+    "text": "This is a static generation based on a snapshot.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/lib/dlq/index.ts",
+    "line": 72,
+    "text": "This does not \"lock\" the message, so multiple workers could see it.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/lib/state/state-sync.ts",
+    "line": 6,
+    "text": "This is a simplified simulation for demonstration purposes and is not a production-ready implementation.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/llm/agents/runner.ts",
+    "line": 41,
+    "text": "We need to define this metric in observability/metrics.ts first or cast to any if we are lazy,",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/maestro/coordination/__tests__/coordination.test.ts",
+    "line": 79,
+    "text": "consumeBudget in service checks AFTER consumption",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/maestro/core.ts",
+    "line": 159,
+    "text": "shell tools, etc.",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/maestro/dsl.ts",
+    "line": 94,
+    "text": "This simplistic compilation creates ALL tasks upfront.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/maestro/engine.ts",
+    "line": 73,
+    "text": "This assumes the caller handles the 'succeeded' status correctly",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/maestro/engine.ts",
+    "line": 98,
+    "text": "Map snake_case to camelCase",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/maestro/engine.ts",
+    "line": 101,
+    "text": "Validate input against template.inputSchema",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/maestro/engine.ts",
+    "line": 243,
+    "text": "Retry logic based on backoffStrategy",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/maestro/handlers.ts",
+    "line": 73,
+    "text": "In a real distributed system, we might need to handle the sub-run async",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/maestro/runs/runs-api.ts",
+    "line": 137,
+    "text": "This is a placeholder for the quota service",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/maestro/runs/runs-api.ts",
+    "line": 200,
+    "text": "This is a placeholder for the usage metering service",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/mastery/MasteryService.ts",
+    "line": 97,
+    "text": "getEntries returns promises",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/mastery/MasteryService.ts",
+    "line": 133,
+    "text": "Implement deep verification of citations against Hypothesis service",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/metering/quotas.ts",
+    "line": 82,
+    "text": "This checks DAILY usage against MONTHLY limits for simplicity in MVP.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/middleware/__tests__/security.test.ts",
+    "line": 396,
+    "text": "This simple pattern may not catch all SQL injection",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/middleware/__tests__/security.test.ts",
+    "line": 658,
+    "text": "validateRequest catches UNION SELECT pattern",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/middleware/audit-first.ts",
+    "line": 123,
+    "text": "We don't block the response here as it's already finished,",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/middleware/governance.ts",
+    "line": 197,
+    "text": "Check if user has required role for this purpose",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/middleware/idempotency.ts",
+    "line": 404,
+    "text": "Track error rate in metrics",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/middleware/llm-preflight.ts",
+    "line": 220,
+    "text": "Implement usage tracking per user/tenant",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/middleware/provenance-enforcement.ts",
+    "line": 535,
+    "text": "Send to audit ledger service",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/mlops/registry.ts",
+    "line": 100,
+    "text": "metadata.modelId usually stores the ID, but for this simplified lookup we assume we can match or payload has info",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/nlp/__tests__/pipeline.test.ts",
+    "line": 128,
+    "text": "The simple ContextDisambiguator implements a very basic \"previous token\" strategy",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/nlp/graph_updater.ts",
+    "line": 56,
+    "text": "Relationship resolution is harder because we need the globalIds of subject/object.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/notifications-hub/NotificationHub.ts",
+    "line": 363,
+    "text": "Implement Redis-based deduplication",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/notifications-hub/NotificationHub.ts",
+    "line": 498,
+    "text": "'sms' and 'push' support in routing rules would be added here",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/observability/cost-guards.ts",
+    "line": 370,
+    "text": "Send notification to monitoring system (PagerDuty, Slack, etc.)",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/ontology/tests/competency.test.js",
+    "line": 9,
+    "text": "Implement actual test",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/ontology/tests/competency.test.js",
+    "line": 16,
+    "text": "Implement actual test",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/ontology/tests/competency.test.js",
+    "line": 23,
+    "text": "Implement actual test",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/pii/redactionMiddleware.ts",
+    "line": 537,
+    "text": "Log audit entry to hash chain",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/plugins/runtime.ts",
+    "line": 60,
+    "text": "This only checks pre-execution. strict memory isolation requires child processes or isolated-vm.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/predictive/PredictiveService.ts",
+    "line": 28,
+    "text": "Connect to real time-series DB or Provenance Ledger",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/products/fusion/FusionService.ts",
+    "line": 70,
+    "text": "Use VisionService or SignalAnalyzer to get description.",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/provenance/invariants.ts",
+    "line": 37,
+    "text": "metadata object itself must exist, and contain correlationId",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/provenance/ledger.ts",
+    "line": 239,
+    "text": "entry.payload is now strongly typed as MutationPayload",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/provenance/ledger.ts",
+    "line": 257,
+    "text": "We need to handle the new columns 'witness' if we decide to store it separately",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/quality-evaluation/autonomous/__tests__/abuse-tests/threat-model.test.ts",
+    "line": 14,
+    "text": "In a real implementation this would check types or provenance,",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/reporting/service.ts",
+    "line": 54,
+    "text": "extract from access context if available",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/reporting/service.ts",
+    "line": 78,
+    "text": "extract from access context if available",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/repos/InvestigationRepo.ts",
+    "line": 193,
+    "text": "In a full implementation, you might want to soft-delete",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/retrieval/KnowledgeRepository.ts",
+    "line": 181,
+    "text": "We select from knowledge_objects joined with embedding_records",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/retrieval/RetrievalService.ts",
+    "line": 31,
+    "text": "For production, we'd want RRF (Reciprocal Rank Fusion) or weighted sum.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/risk/FeatureStore.ts",
+    "line": 9,
+    "text": "Implement real aggregation logic",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/routes/__tests__/compliance.test.ts",
+    "line": 114,
+    "text": "A test for the authorization middleware would go here.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/routes/__tests__/partners.test.ts",
+    "line": 116,
+    "text": "Testing /api/partners/exchange/cases requires headers modification which supertest handles,",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/routes/ai.ts",
+    "line": 432,
+    "text": "Replace with actual LLM integration",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/routes/ai.ts",
+    "line": 484,
+    "text": "Replace with actual model health checks",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/routes/cds.ts",
+    "line": 10,
+    "text": "In a real app, use dependency injection",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/routes/connectorRoutes.js",
+    "line": 7,
+    "text": "requirePermission middleware not yet implemented - planned for fine-grained authorization",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/routes/federationRoutes.js",
+    "line": 7,
+    "text": "requirePermission middleware not yet implemented - planned for fine-grained authorization",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/routes/maestro.ts",
+    "line": 9,
+    "text": "These routers define their own paths (e.g. /pipelines, /runs),",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/routes/maestro.ts",
+    "line": 36,
+    "text": "This assumes `req.user` is populated by auth middleware",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/routes/maestro.ts",
+    "line": 135,
+    "text": "Validate Spec via MaestroDSL.validate(template.spec)",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/routes/narrative-sim.ts",
+    "line": 214,
+    "text": "The schema is 'createSimulationSchema', we need to adapt it",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/routes/queues-dashboard.ts",
+    "line": 48,
+    "text": "Dynamic addition requires Bull Board 4.x+",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/routes/recipes.ts",
+    "line": 95,
+    "text": "Enqueue job with your actual job queue (BullMQ, etc.)",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/routes/sso.ts",
+    "line": 127,
+    "text": "Some IdPs might not preserve RelayState perfectly in all flows (e.g. IdP initiated),",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/routes/tracingRoutes.js",
+    "line": 7,
+    "text": "requirePermission middleware not yet implemented - planned for fine-grained authorization",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/routes/twilio.ts",
+    "line": 14,
+    "text": "For production, verify X-Twilio-Signature using your Twilio auth token",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/runtime/learning-gate.ts",
+    "line": 62,
+    "text": "Integrate with Outcome Ledger to check for duplicates or conflicts",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/runtime/learning-gate.ts",
+    "line": 63,
+    "text": "Integrate with Constitutional Constraints",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/scenario/engine.ts",
+    "line": 116,
+    "text": "totalCost in state is cumulative or period? In model it's cumulative.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/scripts/maestro-cli.ts",
+    "line": 111,
+    "text": "Job output is not currently exposed via getTaskStatus.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/scripts/maestro-cli.ts",
+    "line": 185,
+    "text": "In a real scenario, this might trigger a review task.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/securiteyes/services/StatisticalDetector.ts",
+    "line": 27,
+    "text": "This relies on having historical data. For a new system, it will be volatile.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/security/KubeBenchmarkValidator.ts",
+    "line": 41,
+    "text": "In a real env, this might need to run as a Job or DaemonSet.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/security/__tests__/llm-guardrails.test.ts",
+    "line": 379,
+    "text": "retention policy is internal, would need to verify via database",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/security/__tests__/llm-guardrails.test.ts",
+    "line": 484,
+    "text": "redacted_prompt is only defined if noise actually modified the prompt.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/security/security-headers.ts",
+    "line": 74,
+    "text": "Expect-CT has been deprecated and removed from helmet",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/AuthorizationService.ts",
+    "line": 143,
+    "text": "The RBAC manager expects permission strings like 'investigation:read'.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/CacheWarmingService.ts",
+    "line": 273,
+    "text": "Actual GraphRAG query would be called here",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/CognitiveMapperService.ts",
+    "line": 94,
+    "text": "This relies on APOC. If APOC is not present, we need a standard Cypher fallback.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/CognitiveMapperService.ts",
+    "line": 112,
+    "text": "The power operator in Cypher is ^",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/CostAnomalyDetectionService.ts",
+    "line": 537,
+    "text": "Send notifications (email, Slack, PagerDuty, etc.)",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/CostAnomalyDetectionService.ts",
+    "line": 576,
+    "text": "Implement notification channels (email, Slack, webhooks, etc.)",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/CrossPlatformAttributionService.ts",
+    "line": 45,
+    "text": "Implement fuzzy matching (Levenshtein distance)",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/DatabaseService.ts",
+    "line": 24,
+    "text": "This is a stub and will return an empty array.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/ExplainabilityService.ts",
+    "line": 67,
+    "text": "Add path analysis (shortest path to key entities)",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/ExtractionJobService.ts",
+    "line": 589,
+    "text": "Implement embedding generation",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/FederatedPrivacyService.ts",
+    "line": 21,
+    "text": "Initialize secure aggregation protocol",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/FederatedPrivacyService.ts",
+    "line": 33,
+    "text": "Implement federated averaging with noise addition",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/FraudService.ts",
+    "line": 30,
+    "text": "Trigger investigation workflow if severity is high",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/GDPRComplianceService.ts",
+    "line": 493,
+    "text": "Actual anonymization logic would be implemented based on your data models",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/GDPRComplianceService.ts",
+    "line": 519,
+    "text": "Actual erasure logic would identify and delete/anonymize all data",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/GraphAnalyticsService.ts",
+    "line": 274,
+    "text": "This returns pairs, not full communities.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/GraphIndexAdvisorService.ts",
+    "line": 85,
+    "text": "We don't rely on `WHERE` keyword prefixing immediately because of `AND`/`OR`.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/GraphRAGQueryServiceEnhanced.ts",
+    "line": 729,
+    "text": "evidenceIds are stored in metadata, so we access them there",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/MasintService.ts",
+    "line": 145,
+    "text": "precise geospatial query requires PostGIS. This is a rough approximation using simple lat/lon matching in JSON.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/NarrativeAnalysisService.ts",
+    "line": 126,
+    "text": "edgeCount is double counted in undirected sense if we don't handle direction carefully,",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/NarrativePrioritizationService.ts",
+    "line": 152,
+    "text": "Connect to Postgres 'sources' table to retrieve actual credibility score and history.",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/PasswordResetService.ts",
+    "line": 376,
+    "text": "Never log the actual token in production",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/PasswordResetService.ts",
+    "line": 380,
+    "text": "Implement actual email sending",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/PolicyService.ts",
+    "line": 57,
+    "text": "Call OPA here",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/PredictiveTalentService.ts",
+    "line": 19,
+    "text": "Connect to ML model for forecasting",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/PredictiveTalentService.ts",
+    "line": 35,
+    "text": "Integrate with LinkedIn API or similar",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/PricingEngine.ts",
+    "line": 96,
+    "text": "Merge logic for overrides",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/PrivacyService.ts",
+    "line": 105,
+    "text": "In production, this should be a migration",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/PrivacyService.ts",
+    "line": 285,
+    "text": "Integrate with Identity Provider for strong verification",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/RenewalService.ts",
+    "line": 96,
+    "text": "Trigger Notification (Email/Webhook)",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/SecureFusionService.ts",
+    "line": 97,
+    "text": "Actual Vector Search syntax depends on Neo4j version and index config.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/ThreatModelingService.ts",
+    "line": 57,
+    "text": "promptRegistry.initialize() is async.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/VRCollaborationService.ts",
+    "line": 34,
+    "text": "Send notifications",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/VectorStoreService.ts",
+    "line": 132,
+    "text": "cosine similarity is 1 - cosine distance.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/VerificationSwarmService.ts",
+    "line": 60,
+    "text": "For testing purposes, we might want to await this if we can't sleep long enough",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/ZeroTrustService.ts",
+    "line": 20,
+    "text": "Integrate with security scanning tools (e.g., Trivy, OWASP ZAP)",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/ZeroTrustService.ts",
+    "line": 32,
+    "text": "Implement risk scoring logic based on device fingerprint, impossible travel, etc.",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/__tests__/EntityResolutionService.test.ts",
+    "line": 30,
+    "text": "Implement URL normalization in EntityResolutionService",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/__tests__/EntityResolutionService.test.ts",
+    "line": 44,
+    "text": "Implement privacy mode email hashing in EntityResolutionService",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/__tests__/FeatureFlagService.test.ts",
+    "line": 329,
+    "text": "actual distribution depends on hash function implementation",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/__tests__/auth.integration.test.ts",
+    "line": 54,
+    "text": "This test is skipped because it requires ESM mode (import.meta.url in app.ts)",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/contraband/solver.ts",
+    "line": 47,
+    "text": "Convert Rego conditions to SMT-LIB",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/contraband/solver.ts",
+    "line": 48,
+    "text": "Invoke Z3 solver",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/contraband/solver.ts",
+    "line": 49,
+    "text": "If SAT, extract counter-example",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/contraband/solver.ts",
+    "line": 70,
+    "text": "Implement proper condition overlap detection via SMT",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/contraband/solver.ts",
+    "line": 84,
+    "text": "Convert invariant to SMT formula",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/contraband/solver.ts",
+    "line": 85,
+    "text": "Check if rules satisfy invariant",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/correlation/AdvancedCorrelationEngine.ts",
+    "line": 120,
+    "text": "In a real system, we'd cache these or fetch from DB",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/llm/providers/OpenAIProvider.ts",
+    "line": 34,
+    "text": "Add more options like temperature, max_tokens based on config or request",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/orchestration/ConsensusManager.ts",
+    "line": 56,
+    "text": "implement result storage",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/reporting/ReportServiceV2.ts",
+    "line": 82,
+    "text": "Integrate with PostgreSQL 'reports' and 'provenance_manifests' tables",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/safety/ModelAbuseWatch.ts",
+    "line": 40,
+    "text": "Update user status in real DB",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/scim/ScimService.ts",
+    "line": 484,
+    "text": "Simple sequential processing. A real implementation should handle dependencies (bulkId).",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/secretManager.ts",
+    "line": 1,
+    "text": "This is a mock implementation for development purposes.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/sentinel/detector.ts",
+    "line": 58,
+    "text": "Implement Isolation Forest on entity embeddings",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/sentinel/detector.ts",
+    "line": 63,
+    "text": "Check graph structure for unusual patterns",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/sentinel/detector.ts",
+    "line": 68,
+    "text": "Validate temporal coherence of events",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/sentinel/detector.ts",
+    "line": 73,
+    "text": "Scan metadata for steganographic patterns",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/serviceRegistry.ts",
+    "line": 1,
+    "text": "This is a mock implementation for development purposes.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/services/velocity/optimizer.ts",
+    "line": 68,
+    "text": "Parse execution plan for SCAN operations",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/velocity/optimizer.ts",
+    "line": 73,
+    "text": "Extract property access patterns and generate CREATE INDEX",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/velocity/optimizer.ts",
+    "line": 78,
+    "text": "Apply AST transformation rules",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/services/velocity/optimizer.ts",
+    "line": 83,
+    "text": "Generate stable cache key from query structure",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/siem/SIEMPlatform.ts",
+    "line": 88,
+    "text": "eventBuffer includes newEvent.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/summitsight/SummitsightDataService.ts",
+    "line": 109,
+    "text": "Conflict handling might need to be smarter (update) in prod, but keeping simple for MVP",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/tests/billingSink.test.ts",
+    "line": 56,
+    "text": "signature is the last part, but payload might contain commas if escaped.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/tests/entityResolution.guards.test.ts",
+    "line": 12,
+    "text": "Implement evaluateWithSampling method in EntityResolutionService",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/tests/entityResolution.normalization.test.ts",
+    "line": 4,
+    "text": "These tests describe advanced normalization features not yet implemented",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/tests/er/EntityResolutionV2Service.test.ts",
+    "line": 98,
+    "text": "These merge tests require proper DLQ and Neo4j session mocking",
+    "type": "TODO"
+  },
+  {
+    "file": "server/src/tests/services/CopilotOrchestrationService.test.ts",
+    "line": 1,
+    "text": "the .js extension",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/utils/summit-metrics.ts",
+    "line": 74,
+    "text": "OTel Counters are monotonic. For active requests (gauge), we need UpDownCounter.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/src/websocket/core.ts",
+    "line": 174,
+    "text": "core logic prefixes tenantId, so clients send raw topic.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/tests/EntityResolution.test.ts",
+    "line": 39,
+    "text": "Re-enable once resolveWithML method is implemented",
+    "type": "TODO"
+  },
+  {
+    "file": "server/tests/activity.test.ts",
+    "line": 18,
+    "text": "input structure depends on your schema.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/tests/aurora.service.spec.ts",
+    "line": 44,
+    "text": "Do not call handshake, so implant is considered offline",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/tests/connectors/connectors.test.ts",
+    "line": 66,
+    "text": "These tests require complex mocking of dynamic require'd modules.",
+    "type": "TODO"
+  },
+  {
+    "file": "server/tests/db/db_layer_smoke.test.ts",
+    "line": 9,
+    "text": "These tests might need a real DB to pass if we don't mock pg.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/tests/integration/auth.integration.test.ts",
+    "line": 64,
+    "text": "Test requires full database mock chain and audit system fixes",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/tests/middleware/opa-abac.test.ts",
+    "line": 137,
+    "text": "The middleware logic now checks the header BEFORE calling OPA to determine ACR,",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/tests/security/auth_fail_closed.test.ts",
+    "line": 8,
+    "text": "This test reproduces the logic of the `authenticateToken` middleware found in `server/src/app.ts`.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/tests/security/multi_tenant_stress_engine.test.ts",
+    "line": 107,
+    "text": "In `entity.ts`, `entity` resolver calls `requireTenant(context)`.",
+    "type": "NOTE"
+  },
+  {
+    "file": "server/tests/streaming/StreamProcessor.test.ts",
+    "line": 48,
+    "text": "mockImplementation runs when start() calls run().",
+    "type": "NOTE"
+  },
+  {
+    "file": "services/admin-api/src/resolvers.ts",
+    "line": 271,
+    "text": "Calculate percentiles from actual query data",
+    "type": "TODO"
+  },
+  {
+    "file": "services/admin-api/src/resolvers.ts",
+    "line": 281,
+    "text": "Implement actual health checks",
+    "type": "TODO"
+  },
+  {
+    "file": "services/api/src/db/neo4j.ts",
+    "line": 237,
+    "text": "This requires APOC procedures for advanced graph algorithms",
+    "type": "NOTE"
+  },
+  {
+    "file": "services/api/src/middleware/rateLimit.new.ts",
+    "line": 60,
+    "text": "Send alerts to monitoring system (e.g., PagerDuty, Slack)",
+    "type": "TODO"
+  },
+  {
+    "file": "services/api/src/realtime/socket.ts",
+    "line": 545,
+    "text": "In production, consider using Redis SCAN instead of KEYS for better performance",
+    "type": "NOTE"
+  },
+  {
+    "file": "services/api-gateway/src/resolvers.ts",
+    "line": 39,
+    "text": "Delegate to graph service",
+    "type": "TODO"
+  },
+  {
+    "file": "services/api-gateway/src/resolvers.ts",
+    "line": 44,
+    "text": "Delegate to graph service",
+    "type": "TODO"
+  },
+  {
+    "file": "services/attest/src/verifier.ts",
+    "line": 10,
+    "text": "call AMD/Intel verification service; parse claims → measurement digest",
+    "type": "TODO"
+  },
+  {
+    "file": "services/audit-blackbox-service/src/core/event-buffer.ts",
+    "line": 226,
+    "text": "In production, you might want more sophisticated retry logic",
+    "type": "NOTE"
+  },
+  {
+    "file": "services/audit-blackbox-service/src/store/immutable-store.ts",
+    "line": 592,
+    "text": "Verify against checkpoints",
+    "type": "TODO"
+  },
+  {
+    "file": "services/audit_svc/__tests__/audit.test.ts",
+    "line": 266,
+    "text": "This test validates the concept - actual tamper detection",
+    "type": "NOTE"
+  },
+  {
+    "file": "services/audit_svc/__tests__/audit.test.ts",
+    "line": 465,
+    "text": "This test demonstrates the concept - actual implementation",
+    "type": "NOTE"
+  },
+  {
+    "file": "services/chatops/src/adapters/slack/slack-adapter.ts",
+    "line": 309,
+    "text": "Implement trace lookup",
+    "type": "TODO"
+  },
+  {
+    "file": "services/chatops/src/adapters/slack/slack-adapter.ts",
+    "line": 372,
+    "text": "Implement entity expansion",
+    "type": "TODO"
+  },
+  {
+    "file": "services/chatops/src/adapters/slack/slack-adapter.ts",
+    "line": 379,
+    "text": "Implement trace expansion",
+    "type": "TODO"
+  },
+  {
+    "file": "services/chatops/src/adapters/slack/slack-adapter.ts",
+    "line": 441,
+    "text": "Map Slack user to IntelGraph user and fetch clearance/roles",
+    "type": "TODO"
+  },
+  {
+    "file": "services/chatops/src/memory/hierarchical-memory.ts",
+    "line": 356,
+    "text": "Use LLM to generate compressed summary",
+    "type": "TODO"
+  },
+  {
+    "file": "services/chatops/src/memory/hierarchical-memory.ts",
+    "line": 411,
+    "text": "Use LLM to extract structured facts",
+    "type": "TODO"
+  },
+  {
+    "file": "services/chatops/src/memory/hierarchical-memory.ts",
+    "line": 453,
+    "text": "Implement semantic similarity search",
+    "type": "TODO"
+  },
+  {
+    "file": "services/chatops/src/memory/hierarchical-memory.ts",
+    "line": 485,
+    "text": "Query Neo4j for relevant facts using semantic search",
+    "type": "TODO"
+  },
+  {
+    "file": "services/citizen-service/src/middleware/health.ts",
+    "line": 104,
+    "text": "Add Neo4j, Redis, etc. checks when integrated",
+    "type": "TODO"
+  },
+  {
+    "file": "services/copilot/src/LlmAdapter.ts",
+    "line": 443,
+    "text": "Implement real LLM adapters",
+    "type": "TODO"
+  },
+  {
+    "file": "services/copilot/src/repositories.ts",
+    "line": 255,
+    "text": "Implement PostgreSQL INSERT/UPSERT",
+    "type": "TODO"
+  },
+  {
+    "file": "services/copilot/src/repositories.ts",
+    "line": 260,
+    "text": "Implement PostgreSQL SELECT",
+    "type": "TODO"
+  },
+  {
+    "file": "services/copilot/src/repositories.ts",
+    "line": 265,
+    "text": "Implement PostgreSQL DELETE",
+    "type": "TODO"
+  },
+  {
+    "file": "services/copilot/src/repositories.ts",
+    "line": 270,
+    "text": "Implement PostgreSQL SELECT with user filter",
+    "type": "TODO"
+  },
+  {
+    "file": "services/copilot/src/repositories.ts",
+    "line": 275,
+    "text": "Implement PostgreSQL DELETE WHERE expires_at < NOW()",
+    "type": "TODO"
+  },
+  {
+    "file": "services/copilot/src/repositories.ts",
+    "line": 291,
+    "text": "Implement PostgreSQL INSERT",
+    "type": "TODO"
+  },
+  {
+    "file": "services/copilot/src/repositories.ts",
+    "line": 296,
+    "text": "Implement PostgreSQL SELECT",
+    "type": "TODO"
+  },
+  {
+    "file": "services/copilot/src/repositories.ts",
+    "line": 301,
+    "text": "Implement PostgreSQL SELECT",
+    "type": "TODO"
+  },
+  {
+    "file": "services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts",
+    "line": 262,
+    "text": "Implement recovery history",
+    "type": "TODO"
+  },
+  {
+    "file": "services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts",
+    "line": 282,
+    "text": "Implement infrastructure checks",
+    "type": "TODO"
+  },
+  {
+    "file": "services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts",
+    "line": 293,
+    "text": "Implement infrastructure recovery",
+    "type": "TODO"
+  },
+  {
+    "file": "services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts",
+    "line": 330,
+    "text": "Implement golden path tests",
+    "type": "TODO"
+  },
+  {
+    "file": "services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts",
+    "line": 331,
+    "text": "Implement data integrity checks",
+    "type": "TODO"
+  },
+  {
+    "file": "services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts",
+    "line": 348,
+    "text": "Implement actual drill",
+    "type": "TODO"
+  },
+  {
+    "file": "services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts",
+    "line": 364,
+    "text": "Implement actual drill",
+    "type": "TODO"
+  },
+  {
+    "file": "services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts",
+    "line": 380,
+    "text": "Implement actual drill",
+    "type": "TODO"
+  },
+  {
+    "file": "services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts",
+    "line": 389,
+    "text": "Verify backup integrity",
+    "type": "TODO"
+  },
+  {
+    "file": "services/disaster-recovery/src/orchestrator/RecoveryOrchestrator.ts",
+    "line": 390,
+    "text": "Test restore in isolated environment",
+    "type": "TODO"
+  },
+  {
+    "file": "services/enrichment/src/index.ts",
+    "line": 149,
+    "text": "emit to enrichment.results.v1",
+    "type": "TODO"
+  },
+  {
+    "file": "services/entity-resolution/src/api/routes.ts",
+    "line": 85,
+    "text": "Extract user ID from auth context",
+    "type": "TODO"
+  },
+  {
+    "file": "services/entity-resolution/src/api/routes.ts",
+    "line": 119,
+    "text": "Extract user ID from auth context",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/agents.ts",
+    "line": 30,
+    "text": "Query from database with filters",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/agents.ts",
+    "line": 51,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/agents.ts",
+    "line": 78,
+    "text": "Save to database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/agents.ts",
+    "line": 97,
+    "text": "Fetch existing officer from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/agents.ts",
+    "line": 110,
+    "text": "Update in database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/agents.ts",
+    "line": 138,
+    "text": "Fetch officer from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/agents.ts",
+    "line": 147,
+    "text": "Save analysis to database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/agents.ts",
+    "line": 174,
+    "text": "Fetch officer from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/agents.ts",
+    "line": 186,
+    "text": "Save analysis to database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/agents.ts",
+    "line": 206,
+    "text": "Fetch officer from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/agents.ts",
+    "line": 237,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/agents.ts",
+    "line": 264,
+    "text": "Fetch officers from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/agents.ts",
+    "line": 273,
+    "text": "Save network to database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/agents.ts",
+    "line": 289,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/agents.ts",
+    "line": 314,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/agents.ts",
+    "line": 333,
+    "text": "Validate and save surveillance report",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/analytics.ts",
+    "line": 30,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/analytics.ts",
+    "line": 51,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/analytics.ts",
+    "line": 78,
+    "text": "Save to database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/analytics.ts",
+    "line": 97,
+    "text": "Fetch existing product",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/analytics.ts",
+    "line": 110,
+    "text": "Update in database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/analytics.ts",
+    "line": 133,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/analytics.ts",
+    "line": 154,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/analytics.ts",
+    "line": 181,
+    "text": "Save to database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/analytics.ts",
+    "line": 205,
+    "text": "Update indicator status in database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/analytics.ts",
+    "line": 235,
+    "text": "Aggregate data from multiple sources",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/analytics.ts",
+    "line": 280,
+    "text": "Perform pattern analysis",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/analytics.ts",
+    "line": 382,
+    "text": "Use ML/AI models for prediction",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/counterintel.ts",
+    "line": 26,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/counterintel.ts",
+    "line": 50,
+    "text": "Save to database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/counterintel.ts",
+    "line": 82,
+    "text": "Update indicator in database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/counterintel.ts",
+    "line": 106,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/counterintel.ts",
+    "line": 127,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/counterintel.ts",
+    "line": 151,
+    "text": "Save to database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/counterintel.ts",
+    "line": 175,
+    "text": "Update agent status in database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/counterintel.ts",
+    "line": 199,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/counterintel.ts",
+    "line": 223,
+    "text": "Save to database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/counterintel.ts",
+    "line": 243,
+    "text": "Update operation in database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/counterintel.ts",
+    "line": 270,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/counterintel.ts",
+    "line": 294,
+    "text": "Save to database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/counterintel.ts",
+    "line": 314,
+    "text": "Update profile in database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/counterintel.ts",
+    "line": 341,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/counterintel.ts",
+    "line": 365,
+    "text": "Save to database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/counterintel.ts",
+    "line": 385,
+    "text": "Update vetting in database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/counterintel.ts",
+    "line": 409,
+    "text": "Aggregate data from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/operations.ts",
+    "line": 35,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/operations.ts",
+    "line": 56,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/operations.ts",
+    "line": 83,
+    "text": "Save to database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/operations.ts",
+    "line": 102,
+    "text": "Fetch existing operation from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/operations.ts",
+    "line": 115,
+    "text": "Update in database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/operations.ts",
+    "line": 138,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/operations.ts",
+    "line": 162,
+    "text": "Save to database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/operations.ts",
+    "line": 185,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/operations.ts",
+    "line": 209,
+    "text": "Save to database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/operations.ts",
+    "line": 232,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/operations.ts",
+    "line": 256,
+    "text": "Save to database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/espionage-service/src/routes/operations.ts",
+    "line": 279,
+    "text": "Fetch operation from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/federation-service/src/services/federation-manager.ts",
+    "line": 304,
+    "text": "Get from context",
+    "type": "TODO"
+  },
+  {
+    "file": "services/federation-service/src/services/federation-manager.ts",
+    "line": 305,
+    "text": "Get from agreement",
+    "type": "TODO"
+  },
+  {
+    "file": "services/foreign-intel-service/src/routes/agencies.ts",
+    "line": 20,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/foreign-intel-service/src/routes/agencies.ts",
+    "line": 30,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/foreign-intel-service/src/routes/agencies.ts",
+    "line": 53,
+    "text": "Fetch agency from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/foreign-intel-service/src/routes/agencies.ts",
+    "line": 67,
+    "text": "Query organizational units",
+    "type": "TODO"
+  },
+  {
+    "file": "services/foreign-intel-service/src/routes/agencies.ts",
+    "line": 87,
+    "text": "Query leadership profiles",
+    "type": "TODO"
+  },
+  {
+    "file": "services/foreign-intel-service/src/routes/agencies.ts",
+    "line": 113,
+    "text": "Query operational priorities",
+    "type": "TODO"
+  },
+  {
+    "file": "services/foreign-intel-service/src/routes/capabilities.ts",
+    "line": 12,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/foreign-intel-service/src/routes/capabilities.ts",
+    "line": 38,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/foreign-intel-service/src/routes/capabilities.ts",
+    "line": 49,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/foreign-intel-service/src/routes/cooperation.ts",
+    "line": 15,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/foreign-intel-service/src/routes/cooperation.ts",
+    "line": 38,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/foreign-intel-service/src/routes/cooperation.ts",
+    "line": 49,
+    "text": "Query from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/graph-compute/src/workers/analytics-worker.ts",
+    "line": 85,
+    "text": "temporal analysis requires different graph format",
+    "type": "NOTE"
+  },
+  {
+    "file": "services/i18n-service/src/integrations/copilot/i18n-adapter.ts",
+    "line": 188,
+    "text": "Integrate with i18n message catalog",
+    "type": "TODO"
+  },
+  {
+    "file": "services/ingest-adapters/src/index.ts",
+    "line": 223,
+    "text": "Implement Prometheus metrics export",
+    "type": "TODO"
+  },
+  {
+    "file": "services/ingest-runner/src/index.ts",
+    "line": 138,
+    "text": "We do NOT throw here to allow the service to start if NATS is temporarily down,",
+    "type": "NOTE"
+  },
+  {
+    "file": "services/knowledge-service/src/index.ts",
+    "line": 24,
+    "text": "Query vector store with the embedding of the query",
+    "type": "TODO"
+  },
+  {
+    "file": "services/knowledge-service/src/index.ts",
+    "line": 43,
+    "text": "Query graph store (e.g., Neo4j) for code relationships",
+    "type": "TODO"
+  },
+  {
+    "file": "services/lsc-service/src/index.ts",
+    "line": 25,
+    "text": "Add logic to build the GSN graph based on events",
+    "type": "TODO"
+  },
+  {
+    "file": "services/notification-router/src/delivery-channels/email-delivery.ts",
+    "line": 249,
+    "text": "Fetch from database",
+    "type": "TODO"
+  },
+  {
+    "file": "services/predictive-analytics/collective-intelligence-weaving/src/models/FutureFabric.ts",
+    "line": 106,
+    "text": "Would need signal lookup for source IDs",
+    "type": "NOTE"
+  },
+  {
+    "file": "services/predictive-analytics/recursive-outcome-amplifier/src/index.ts",
+    "line": 67,
+    "text": "In a real deployment, you'd use express or similar to handle HTTP",
+    "type": "NOTE"
+  },
+  {
+    "file": "services/predictive-analytics/temporal-fracture-forecasting/src/index.ts",
+    "line": 90,
+    "text": "Implement actual readiness checks",
+    "type": "TODO"
+  },
+  {
+    "file": "services/queue-manager/src/scaling/WorkerManager.ts",
+    "line": 236,
+    "text": "Would need processor reference to actually scale",
+    "type": "NOTE"
+  },
+  {
+    "file": "services/queue-manager/src/scaling/WorkerManager.ts",
+    "line": 250,
+    "text": "Would need processor reference to actually scale",
+    "type": "NOTE"
+  },
+  {
+    "file": "services/receipt-signer/src/index.ts",
+    "line": 13,
+    "text": "The following exports were removed because they don't exist in signer.ts:",
+    "type": "NOTE"
+  },
+  {
+    "file": "services/runbooks/src/index.ts",
+    "line": 76,
+    "text": "Use PostgreSQL in production",
+    "type": "TODO"
+  },
+  {
+    "file": "services/safe-analytics-workbench/src/models/governance.ts",
+    "line": 232,
+    "text": "book operations",
+    "type": "NOTE"
+  },
+  {
+    "file": "services/safe-analytics-workbench/src/models/types.ts",
+    "line": 534,
+    "text": "book Types",
+    "type": "NOTE"
+  },
+  {
+    "file": "services/streaming-ingest/src/server.ts",
+    "line": 136,
+    "text": "Implement Prometheus metrics",
+    "type": "TODO"
+  },
+  {
+    "file": "sprint/sprint-26-release-integrity-audit-readiness.md",
+    "line": 149,
+    "text": "s for Sprint Creation",
+    "type": "NOTE"
+  },
+  {
+    "file": "sprint-kits/proof-first-core-ga/tests/cypress/time_to_path.cy.ts",
+    "line": 8,
+    "text": "assert timer budget once baseline is recorded",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/base/BaseAgentArchetype.ts",
+    "line": 190,
+    "text": "Integrate with actual OPA service",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/base/BaseAgentArchetype.ts",
+    "line": 222,
+    "text": "Integrate with actual audit log service",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/base/BaseAgentArchetype.ts",
+    "line": 263,
+    "text": "Actual health check",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/chief-of-staff/ChiefOfStaffAgent.ts",
+    "line": 209,
+    "text": "Implement actual action execution",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/chief-of-staff/ChiefOfStaffAgent.ts",
+    "line": 347,
+    "text": "Implement meeting prep analysis",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/chief-of-staff/ChiefOfStaffAgent.ts",
+    "line": 381,
+    "text": "Integrate with actual inbox/email API",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/chief-of-staff/ChiefOfStaffAgent.ts",
+    "line": 415,
+    "text": "Integrate with actual calendar API",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/chief-of-staff/ChiefOfStaffAgent.ts",
+    "line": 441,
+    "text": "Integrate with actual task management system",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/chief-of-staff/ChiefOfStaffAgent.ts",
+    "line": 472,
+    "text": "Integrate with actual action item tracking",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/coo/COOAgent.ts",
+    "line": 536,
+    "text": "Integrate with actual SLA monitoring system",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/coo/COOAgent.ts",
+    "line": 569,
+    "text": "Integrate with actual incident management system",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/coo/COOAgent.ts",
+    "line": 597,
+    "text": "Integrate with actual approval engine",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/coo/COOAgent.ts",
+    "line": 638,
+    "text": "Integrate with actual workflow engine",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/coo/COOAgent.ts",
+    "line": 683,
+    "text": "Integrate with actual incident management system",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/coo/COOAgent.ts",
+    "line": 699,
+    "text": "Integrate with actual incident management and notification system",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/coo/COOAgent.ts",
+    "line": 709,
+    "text": "Integrate with actual notification system",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/revops/RevOpsAgent.ts",
+    "line": 530,
+    "text": "Integrate with actual CRM (Salesforce, HubSpot, etc.)",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/revops/RevOpsAgent.ts",
+    "line": 577,
+    "text": "Integrate with actual forecasting system",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/revops/RevOpsAgent.ts",
+    "line": 590,
+    "text": "Calculate actual waterfall from opportunity changes",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/revops/RevOpsAgent.ts",
+    "line": 601,
+    "text": "Integrate with actual CRM and usage tracking",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/revops/RevOpsAgent.ts",
+    "line": 639,
+    "text": "Integrate with actual lead management system",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/revops/RevOpsAgent.ts",
+    "line": 658,
+    "text": "Implement actual attribution calculation",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/revops/RevOpsAgent.ts",
+    "line": 673,
+    "text": "Integrate with actual task management system",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/revops/RevOpsAgent.ts",
+    "line": 688,
+    "text": "Integrate with actual customer success system",
+    "type": "TODO"
+  },
+  {
+    "file": "src/agents/archetypes/revops/RevOpsAgent.ts",
+    "line": 698,
+    "text": "Generate actual variance report",
+    "type": "TODO"
+  },
+  {
+    "file": "src/build-cache/CacheManager.ts",
+    "line": 224,
+    "text": "Track hit rate",
+    "type": "TODO"
+  },
+  {
+    "file": "src/insights/entangledInfluence.ts",
+    "line": 5,
+    "text": "sympy and qutip are Python libraries and cannot be directly imported into TypeScript.",
+    "type": "NOTE"
+  },
+  {
+    "file": "src/insights/globalSynergyVortex.ts",
+    "line": 5,
+    "text": "networkx and qutip are Python libraries and cannot be directly imported into TypeScript.",
+    "type": "NOTE"
+  },
+  {
+    "file": "src/insights/quantumEcosystemBastion.ts",
+    "line": 4,
+    "text": "qutip is a Python library and cannot be directly imported into TypeScript.",
+    "type": "NOTE"
+  },
+  {
+    "file": "src/insights/telemetryAmplifier.ts",
+    "line": 6,
+    "text": "sympy, mpmath, and scapy are Python libraries and cannot be directly imported into TypeScript.",
+    "type": "NOTE"
+  },
+  {
+    "file": "src/maestro/MaestroIntegrationOrchestrator.ts",
+    "line": 444,
+    "text": "In real implementation, proper dependencies would be injected",
+    "type": "NOTE"
+  },
+  {
+    "file": "test/infra/database.ts",
+    "line": 63,
+    "text": "This assumes migrations are idempotent or schema-aware",
+    "type": "NOTE"
+  },
+  {
+    "file": "test/infra/server.ts",
+    "line": 54,
+    "text": "This is a placeholder - adjust to your actual server entry point",
+    "type": "NOTE"
+  },
+  {
+    "file": "tests/chaos/lease_drop.test.ts",
+    "line": 41,
+    "text": "Implement actual API calls to verify task state transition after lease drop",
+    "type": "TODO"
+  },
+  {
+    "file": "tests/e2e/golden-path.e2e.test.ts",
+    "line": 1008,
+    "text": "WebSocket subscription testing would require a WebSocket client",
+    "type": "NOTE"
+  },
+  {
+    "file": "tests/e2e/maestro-api-ui-flow.spec.ts",
+    "line": 51,
+    "text": "Add more robust checks for run status updates on the page.",
+    "type": "TODO"
+  },
+  {
+    "file": "tests/e2e/maestro-api-ui-flow.spec.ts",
+    "line": 61,
+    "text": "Add more robust checks for the presence and content of run listings.",
+    "type": "TODO"
+  },
+  {
+    "file": "tests/utils/jest-setup.ts",
+    "line": 13,
+    "text": "`jest` is a global injected by Jest - no import needed",
+    "type": "NOTE"
+  },
+  {
+    "file": "tools/dlqtriage/src/cli.ts",
+    "line": 372,
+    "text": "Implement actual redrive - publish to ingest topic",
+    "type": "TODO"
+  },
+  {
+    "file": "tools/generate-soc-tests.js",
+    "line": 111,
+    "text": "Implement specific test logic",
+    "type": "TODO"
+  },
+  {
+    "file": "tools/issue-sweeper/src/github.ts",
+    "line": 28,
+    "text": "Implement retry logic with exponential backoff",
+    "type": "TODO"
+  },
+  {
+    "file": "tools/legal/ltdim/index.ts",
+    "line": 159,
+    "text": "Load from a secure location",
+    "type": "TODO"
+  },
+  {
+    "file": "tools/promise-tracker/README.md",
+    "line": 279,
+    "text": "Implement caching layer",
+    "type": "TODO"
+  },
+  {
+    "file": "tools/promise-tracker/README.md",
+    "line": 280,
+    "text": "Race condition in connection pool",
+    "type": "FIXME"
+  },
+  {
+    "file": "tools/prompt-system/src/cli/index.ts",
+    "line": 55,
+    "text": "Implement clipboard copy",
+    "type": "TODO"
+  },
+  {
+    "file": "tools/prompt-system/src/cli/index.ts",
+    "line": 89,
+    "text": "Write to file",
+    "type": "TODO"
+  },
+  {
+    "file": "tools/prompt-system/src/cli/index.ts",
+    "line": 214,
+    "text": "Implement template file validation",
+    "type": "TODO"
+  },
+  {
+    "file": "tools/prompt-system/src/cli/index.ts",
+    "line": 270,
+    "text": "Format metrics output",
+    "type": "TODO"
+  },
+  {
+    "file": "tools/replayctl/src/cli.ts",
+    "line": 171,
+    "text": "Implement legal hold check",
+    "type": "TODO"
+  },
+  {
+    "file": "tools/replayctl/src/cli.ts",
+    "line": 514,
+    "text": "Implement actual replay logic",
+    "type": "TODO"
+  },
+  {
+    "file": "tools/replayctl/src/cli.ts",
+    "line": 563,
+    "text": "Implement actual checkpoint retrieval",
+    "type": "TODO"
+  },
+  {
+    "file": "tools/scaffold-cli/src/commands/create.ts",
+    "line": 450,
+    "text": "Add your routes here",
+    "type": "TODO"
+  },
+  {
+    "file": "tools/scaffold-cli/src/commands/create.ts",
+    "line": 592,
+    "text": "Add dependency checks (database, redis, etc.)",
+    "type": "TODO"
+  },
+  {
+    "file": "web/retention-dashboard/next-env.d.ts",
+    "line": 4,
+    "text": "This file should not be edited",
+    "type": "NOTE"
+  },
+  {
+    "file": "website/next-env.d.ts",
+    "line": 4,
+    "text": "This file should not be edited",
+    "type": "NOTE"
+  },
+  {
+    "file": "workers/ingest/src/IngestOrchestrator.ts",
+    "line": 165,
+    "text": "Track failures",
+    "type": "TODO"
+  },
+  {
+    "file": "workers/ingest/src/IngestOrchestrator.ts",
+    "line": 166,
+    "text": "Track bytes",
+    "type": "TODO"
+  },
+  {
+    "file": "zero-trust/tests/e2e/connectivity.test.ts",
+    "line": 273,
+    "text": "This might allow in simplified test due to source/dest match",
+    "type": "NOTE"
+  }
+]

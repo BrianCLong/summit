@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "1.0.0",
+  "name": "test-bundle",
+  "version": "1.2.3",
+  "majorVersion": 1,
+  "artifacts": ["artifact1.bin"]
+}

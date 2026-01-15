@@ -28,6 +28,7 @@ if "psutil" not in sys.modules:
     )
 
 if "neo4j" not in sys.modules:
+
     class _FakeDriver:
         def close(self):
             return None
@@ -40,6 +41,7 @@ if "neo4j" not in sys.modules:
     sys.modules["neo4j"] = types.SimpleNamespace(GraphDatabase=_FakeGraphDatabase)
 
 if "prometheus_client" not in sys.modules:
+
     class _Counter:
         def __init__(self, *_, **__):
             self._value = 0
@@ -47,7 +49,7 @@ if "prometheus_client" not in sys.modules:
         def inc(self, value: float = 1.0):
             self._value += value
 
-        def labels(self, **kwargs):  # noqa: ARG002
+        def labels(self, **kwargs):
             return self
 
     class _Histogram(_Counter):
@@ -60,7 +62,7 @@ if "prometheus_client" not in sys.modules:
     class _CollectorRegistry:
         pass
 
-    def _generate_latest(_registry=None):  # noqa: ARG001
+    def _generate_latest(_registry=None):
         return b""
 
     sys.modules["prometheus_client"] = types.SimpleNamespace(
@@ -104,9 +106,7 @@ async def test_model_cache_and_quantization():
     assert second.cache_hit is True
 
     cached_model = pipeline._model_cache["model-a"].model
-    assert any(
-        isinstance(mod, torch.nn.quantized.dynamic.Linear) for mod in cached_model.modules()
-    )
+    assert any(isinstance(mod, torch.nn.quantized.dynamic.Linear) for mod in cached_model.modules())
 
 
 @pytest.mark.asyncio

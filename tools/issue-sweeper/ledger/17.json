@@ -1,0 +1,230 @@
+{
+  "issue_number": 17,
+  "title": "M3: Investigations list/create/detail views",
+  "url": "https://github.com/BrianCLong/summit/issues/17",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051532,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5DA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:frontend",
+      "name": "area:frontend",
+      "color": "ededed",
+      "default": false,
+      "description": "Frontend work"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T00:10:09Z",
+  "createdAt": "2025-08-12T00:10:09Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14727,
+        "url": "https://github.com/BrianCLong/summit/pull/14727",
+        "mergedAt": "2025-12-29T18:12:30Z",
+        "title": "Sprint 17: Switchboard Compliance Suite"
+      },
+      {
+        "number": 14485,
+        "url": "https://github.com/BrianCLong/summit/pull/14485",
+        "mergedAt": null,
+        "title": "Sprint 17: Audit Readiness & Evidence Packaging"
+      },
+      {
+        "number": 13875,
+        "url": "https://github.com/BrianCLong/summit/pull/13875",
+        "mergedAt": "2025-12-20T11:25:45Z",
+        "title": "Epic 17: Graph Subscriptions & Realtime Path"
+      },
+      {
+        "number": 13850,
+        "url": "https://github.com/BrianCLong/summit/pull/13850",
+        "mergedAt": "2025-12-20T03:45:05Z",
+        "title": "Add sprint plan for Aug 17–28 2026"
+      },
+      {
+        "number": 15131,
+        "url": "https://github.com/BrianCLong/summit/pull/15131",
+        "mergedAt": "2025-12-30T21:30:53Z",
+        "title": "chore(deps): bump napi from 2.16.17 to 3.3.0"
+      },
+      {
+        "number": 15130,
+        "url": "https://github.com/BrianCLong/summit/pull/15130",
+        "mergedAt": "2025-12-30T21:30:56Z",
+        "title": "chore(deps): bump thiserror from 1.0.69 to 2.0.17"
+      },
+      {
+        "number": 13759,
+        "url": "https://github.com/BrianCLong/summit/pull/13759",
+        "mergedAt": "2025-12-20T03:34:19Z",
+        "title": "Add sprint plan for Jul 6–17 2026 (Sprint 15)"
+      },
+      {
+        "number": 12822,
+        "url": "https://github.com/BrianCLong/summit/pull/12822",
+        "mergedAt": "2025-12-04T15:49:57Z",
+        "title": "Add Sprint 17 Federation & Findability plan"
+      },
+      {
+        "number": 12301,
+        "url": "https://github.com/BrianCLong/summit/pull/12301",
+        "mergedAt": "2025-12-18T03:12:21Z",
+        "title": "Create comprehensive plan for prompts 17-49"
+      },
+      {
+        "number": 12313,
+        "url": "https://github.com/BrianCLong/summit/pull/12313",
+        "mergedAt": "2025-11-27T04:48:22Z",
+        "title": "Add Wave 17 codex campaign plan"
+      },
+      {
+        "number": 12666,
+        "url": "https://github.com/BrianCLong/summit/pull/12666",
+        "mergedAt": "2025-12-04T18:41:51Z",
+        "title": "Add implementation blueprint for prompts 17-24"
+      },
+      {
+        "number": 15358,
+        "url": "https://github.com/BrianCLong/summit/pull/15358",
+        "mergedAt": null,
+        "title": "Create patent-grade MCP protocol innovations"
+      },
+      {
+        "number": 14829,
+        "url": "https://github.com/BrianCLong/summit/pull/14829",
+        "mergedAt": "2025-12-29T16:13:49Z",
+        "title": "feat(security): Scaffold SCIM Service and Secret Rotation API"
+      },
+      {
+        "number": 13848,
+        "url": "https://github.com/BrianCLong/summit/pull/13848",
+        "mergedAt": "2025-12-20T03:44:57Z",
+        "title": "Add sprint plan for Aug 3–14, 2026 (America/Denver)"
+      },
+      {
+        "number": 13615,
+        "url": "https://github.com/BrianCLong/summit/pull/13615",
+        "mergedAt": "2025-12-16T21:15:36Z",
+        "title": "build(deps): bump golang.org/x/crypto from 0.17.0 to 0.45.0 in /services/retentiond"
+      },
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 14758,
+        "url": "https://github.com/BrianCLong/summit/pull/14758",
+        "mergedAt": null,
+        "title": "docs: add MVP-3-GA red-team sprint report and update roadmap timestamp"
+      },
+      {
+        "number": 14755,
+        "url": "https://github.com/BrianCLong/summit/pull/14755",
+        "mergedAt": null,
+        "title": "docs: add MVP-3-GA org design governance model"
+      },
+      {
+        "number": 14596,
+        "url": "https://github.com/BrianCLong/summit/pull/14596",
+        "mergedAt": "2025-12-27T05:49:17Z",
+        "title": "docs: add CompanyOS “Fortify” Sprint 3 plan and update sprint index/status"
+      },
+      {
+        "number": 14604,
+        "url": "https://github.com/BrianCLong/summit/pull/14604",
+        "mergedAt": "2025-12-27T05:50:24Z",
+        "title": "docs: add onboarding known-issues and link from onboarding quickstart & release"
+      },
+      {
+        "number": 14741,
+        "url": "https://github.com/BrianCLong/summit/pull/14741",
+        "mergedAt": null,
+        "title": "feat(web): enforce exposure modes for demos"
+      },
+      {
+        "number": 14757,
+        "url": "https://github.com/BrianCLong/summit/pull/14757",
+        "mergedAt": null,
+        "title": "docs: harden public documentation into contract-grade registry, matrix, and policy"
+      },
+      {
+        "number": 14689,
+        "url": "https://github.com/BrianCLong/summit/pull/14689",
+        "mergedAt": "2025-12-27T18:15:47Z",
+        "title": "feat(playbooks): add playbook DSL, executor, and BullMQ worker with idempotent runs"
+      },
+      {
+        "number": 12673,
+        "url": "https://github.com/BrianCLong/summit/pull/12673",
+        "mergedAt": "2025-12-04T16:26:50Z",
+        "title": "docs: expand companyos wave3 delivery plan"
+      },
+      {
+        "number": 12802,
+        "url": "https://github.com/BrianCLong/summit/pull/12802",
+        "mergedAt": "2025-12-04T17:42:26Z",
+        "title": "Add Sprint 22 Hardening & Scale plan"
+      },
+      {
+        "number": 12302,
+        "url": "https://github.com/BrianCLong/summit/pull/12302",
+        "mergedAt": "2025-12-18T03:12:08Z",
+        "title": "Add geopolitical analysis master prompts"
+      },
+      {
+        "number": 12268,
+        "url": "https://github.com/BrianCLong/summit/pull/12268",
+        "mergedAt": "2025-12-18T03:20:41Z",
+        "title": "Cross-Subsystem Performance Benchmark Suite"
+      },
+      {
+        "number": 14742,
+        "url": "https://github.com/BrianCLong/summit/pull/14742",
+        "mergedAt": null,
+        "title": "feat(frontend): add executable frontend user-journey contracts and truth disclosures"
+      },
+      {
+        "number": 14675,
+        "url": "https://github.com/BrianCLong/summit/pull/14675",
+        "mergedAt": null,
+        "title": "feat(connectors): OAuth2 PKCE + encrypted token vault, consent lineage, PII mapping UI"
+      },
+      {
+        "number": 13551,
+        "url": "https://github.com/BrianCLong/summit/pull/13551",
+        "mergedAt": "2025-12-17T03:05:11Z",
+        "title": "chore: update server dependencies for security patches"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

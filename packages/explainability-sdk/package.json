@@ -1,6 +1,6 @@
 {
   "name": "@summit/explainability-sdk",
-  "version": "0.1.0",
+  "version": "4.1.4",
   "description": "SDK for instrumenting Summit AI operations with inference chain capture",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,6 +23,11 @@
     "url": "https://github.com/BrianCLong/summit",
     "directory": "packages/explainability-sdk"
   },
-  "keywords": ["explainability", "ai-trust", "provenance", "audit"],
+  "keywords": [
+    "explainability",
+    "ai-trust",
+    "provenance",
+    "audit"
+  ],
   "license": "MIT"
 }

@@ -111,27 +111,27 @@ class AdversarialMisinfoDetector:
         results = {}
 
         # Process text content
-        if "text" in content_dict and content_dict["text"]:
+        if content_dict.get("text"):
             results["text_results"] = self.detect_text_misinfo(content_dict["text"])
 
         # Process image content
-        if "images" in content_dict and content_dict["images"]:
+        if content_dict.get("images"):
             results["image_results"] = self.detect_image_misinfo(content_dict["images"])
 
         # Process audio content
-        if "audio" in content_dict and content_dict["audio"]:
+        if content_dict.get("audio"):
             results["audio_results"] = self.detect_audio_misinfo(content_dict["audio"])
 
         # Process video content
-        if "videos" in content_dict and content_dict["videos"]:
+        if content_dict.get("videos"):
             results["video_results"] = self.detect_video_misinfo(content_dict["videos"])
 
         # Process meme content
-        if "memes" in content_dict and content_dict["memes"]:
+        if content_dict.get("memes"):
             results["meme_results"] = self.detect_meme_misinfo(content_dict["memes"])
 
         # Process deepfake content
-        if "deepfake_media" in content_dict and content_dict["deepfake_media"]:
+        if content_dict.get("deepfake_media"):
             media_paths = content_dict["deepfake_media"]["paths"]
             media_types = content_dict["deepfake_media"]["types"]
             results["deepfake_results"] = self.detect_deepfake_misinfo(media_paths, media_types)
@@ -340,34 +340,34 @@ class AdversarialMisinfoDetector:
         adversarial_samples = {}
 
         # Generate adversarial text samples
-        if "text" in content_dict and content_dict["text"]:
+        if content_dict.get("text"):
             adversarial_samples["text"] = self.text_detector.generate_adversarial_samples(
                 content_dict["text"], num_samples
             )
 
         # Generate adversarial image samples (placeholder - would need actual images)
         # In practice, you would pass actual image objects to the detector
-        if "images" in content_dict and content_dict["images"]:
+        if content_dict.get("images"):
             # This is a placeholder since we don't have actual image objects here
             adversarial_samples["images"] = ["adversarial_image_placeholder"] * num_samples
 
         # Generate adversarial audio samples (placeholder)
-        if "audio" in content_dict and content_dict["audio"]:
+        if content_dict.get("audio"):
             # This is a placeholder since we don't have actual audio data here
             adversarial_samples["audio"] = ["adversarial_audio_placeholder"] * num_samples
 
         # Generate adversarial video samples (placeholder)
-        if "videos" in content_dict and content_dict["videos"]:
+        if content_dict.get("videos"):
             # This is a placeholder since we don't have actual video data here
             adversarial_samples["videos"] = ["adversarial_video_placeholder"] * num_samples
 
         # Generate adversarial meme samples (placeholder)
-        if "memes" in content_dict and content_dict["memes"]:
+        if content_dict.get("memes"):
             # This is a placeholder since we don't have actual meme data here
             adversarial_samples["memes"] = ["adversarial_meme_placeholder"] * num_samples
 
         # Generate adversarial deepfake samples (placeholder)
-        if "deepfake_media" in content_dict and content_dict["deepfake_media"]:
+        if content_dict.get("deepfake_media"):
             # This is a placeholder since we don't have actual media here
             adversarial_samples["deepfake"] = ["adversarial_deepfake_placeholder"] * num_samples
 
@@ -380,7 +380,7 @@ class AdversarialMisinfoDetector:
         Update detection libraries with new training data
         """
         # Update text detector
-        if "text" in training_data and training_data["text"]:
+        if training_data.get("text"):
             self.text_detector.fine_tune_model(training_data["text"], labels["text"])
 
         # Update image detector (would need actual images)
@@ -426,7 +426,7 @@ class AdversarialMisinfoDetector:
                 json.dump(results, f, indent=2, default=str)
             self.logger.info(f"Saved results to {output_path}")
         except Exception as e:
-            self.logger.error(f"Failed to save results: {str(e)}")
+            self.logger.error(f"Failed to save results: {e!s}")
 
     def load_results(self, input_path: str | Path) -> dict[str, Any]:
         """
@@ -438,7 +438,7 @@ class AdversarialMisinfoDetector:
             self.logger.info(f"Loaded results from {input_path}")
             return results
         except Exception as e:
-            self.logger.error(f"Failed to load results: {str(e)}")
+            self.logger.error(f"Failed to load results: {e!s}")
             return {}
 
 

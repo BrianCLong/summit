@@ -1,0 +1,9 @@
+{
+  "CI Core": "success",
+  "Unit Tests": "success",
+  "Workflow Lint": "success",
+  "CodeQL": "success",
+  "SBOM Scan": "success",
+  "Docker Build": "success",
+  "Release Train": "success"
+}

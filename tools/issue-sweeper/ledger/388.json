@@ -1,0 +1,44 @@
+{
+  "issue_number": 388,
+  "title": "feat: integrate real ai extraction pipelines",
+  "url": "https://github.com/BrianCLong/summit/pull/388",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T18:13:25Z",
+  "createdAt": "2025-08-17T06:22:00Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11924,
+        "url": "https://github.com/BrianCLong/summit/pull/11924",
+        "mergedAt": "2025-11-20T10:20:18Z",
+        "title": "Build Case Spaces with audit logs and access prompts"
+      },
+      {
+        "number": 11873,
+        "url": "https://github.com/BrianCLong/summit/pull/11873",
+        "mergedAt": "2025-11-20T14:33:58Z",
+        "title": "Optimize database performance and caching"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

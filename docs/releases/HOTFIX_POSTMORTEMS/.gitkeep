@@ -1,0 +1,17 @@
+# Hotfix Post-Mortems Directory
+
+This directory contains post-mortem documentation for hotfix releases.
+
+## Naming Convention
+
+Each post-mortem file must be named after the hotfix tag:
+- `v4.1.2-hotfix.1.md`
+- `v4.1.3-hotfix.1.md`
+
+## Template
+
+See [HOTFIX_OVERRIDE.md](../HOTFIX_OVERRIDE.md) for the required template.
+
+## Enforcement
+
+The `hotfix-postmortem-enforcer.yml` workflow runs daily to check for missing post-mortems.

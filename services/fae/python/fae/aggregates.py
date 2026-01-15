@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping, MutableMapping
 from dataclasses import dataclass, field
-from typing import Any, Dict, Iterable, List, Mapping, MutableMapping, Optional, Tuple
+from typing import Any
 
-CohortKey = Tuple[Tuple[str, str], ...]
-Path = Tuple[str, ...]
+CohortKey = tuple[tuple[str, str], ...]
+Path = tuple[str, ...]
 
 
-def _normalize_cohort(cohort: Optional[Mapping[str, str]]) -> CohortKey:
+def _normalize_cohort(cohort: Mapping[str, str] | None) -> CohortKey:
     if not cohort:
         return ()
     return tuple(sorted((str(k), str(v)) for k, v in cohort.items()))
@@ -34,7 +35,7 @@ class CupedAggregate:
         self.sum_x2 += x * x
         self.sum_xy += x * y
 
-    def merge(self, other: "CupedAggregate") -> None:
+    def merge(self, other: CupedAggregate) -> None:
         self.n += other.n
         self.sum_y += other.sum_y
         self.sum_y2 += other.sum_y2
@@ -61,7 +62,7 @@ class SecureAggregatedMetrics:
     path_conversions: MutableMapping[Path, float] = field(default_factory=dict)
     metadata: MutableMapping[str, Any] = field(default_factory=dict)
 
-    def copy(self) -> "SecureAggregatedMetrics":
+    def copy(self) -> SecureAggregatedMetrics:
         clone = SecureAggregatedMetrics(cohort=self.cohort)
         clone.control = CupedAggregate(
             self.control.n,
@@ -98,10 +99,10 @@ class SecureAggregator:
     def from_events(
         cls,
         events: Iterable[Mapping[str, Any]],
-        cohort_keys: Optional[Iterable[str]] = None,
-    ) -> "SecureAggregator":
-        metrics: Dict[CohortKey, SecureAggregatedMetrics] = {}
-        keys: Optional[List[str]] = list(cohort_keys) if cohort_keys else None
+        cohort_keys: Iterable[str] | None = None,
+    ) -> SecureAggregator:
+        metrics: dict[CohortKey, SecureAggregatedMetrics] = {}
+        keys: list[str] | None = list(cohort_keys) if cohort_keys else None
 
         for event in events:
             cohort_data = event.get("cohort", {})
@@ -128,8 +129,8 @@ class SecureAggregator:
 
         return cls(metrics)
 
-    def combine(self, other: "SecureAggregator") -> "SecureAggregator":
-        merged: Dict[CohortKey, SecureAggregatedMetrics] = {
+    def combine(self, other: SecureAggregator) -> SecureAggregator:
+        merged: dict[CohortKey, SecureAggregatedMetrics] = {
             key: metric.copy() for key, metric in self._metrics.items()
         }
         for cohort, metric in other.metrics.items():
@@ -140,4 +141,3 @@ class SecureAggregator:
                 target.path_conversions[path] = target.path_conversions.get(path, 0.0) + value
             merged[cohort] = target
         return SecureAggregator(merged)
-

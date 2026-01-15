@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Protocol
+from typing import Any, Protocol
 
 from .world_state import WorldState
 
@@ -11,13 +12,12 @@ class Action(Protocol):
 
     kind: str
 
-    def apply(self, state: WorldState) -> None:
-        ...
+    def apply(self, state: WorldState) -> None: ...
 
 
 @dataclass
 class CodeMutationAction:
-    diff: Dict[str, Any]
+    diff: dict[str, Any]
     kind: str = "code_mutation"
 
     def apply(self, state: WorldState) -> None:
@@ -63,5 +63,5 @@ class CodexModel(BaseAgentModel):
             yield TaskCreationAction({"title": "Bootstrap test harness", "owner": self.name})
 
 
-def default_agent_models() -> Dict[str, BaseAgentModel]:
+def default_agent_models() -> dict[str, BaseAgentModel]:
     return {model.name: model for model in (JulesModel(), CodexModel())}

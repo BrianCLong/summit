@@ -178,7 +178,7 @@ class ModelTrainer:
                 "trueNegatives": int(tn),
                 "falseNegatives": int(fn),
             },
-            "totalExamples": int(len(y_test)),
+            "totalExamples": len(y_test),
             "predictions": (
                 y_pred.tolist() if len(y_pred) < 1000 else None
             ),  # Only include for small datasets

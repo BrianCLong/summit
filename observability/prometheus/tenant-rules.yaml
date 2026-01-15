@@ -3,3 +3,15 @@ groups:
     rules:
       - record: tenant:http_error_rate:ratio5m
         expr: sum by (tenant) (rate(http_requests_total{code=~"5.."}[5m])) / sum by (tenant) (rate(http_requests_total[5m]))
+      - record: tenant:cost_usd_rate_5m
+        expr: sum by (tenant) (rate(cost_cents_total[5m])) / 100
+      - record: tenant:cost_usd_24h
+        expr: sum by (tenant) (increase(cost_cents_total[24h])) / 100
+      - record: tenant:quota_breach_rate_5m
+        expr: sum by (tenant, quota_type) (rate(tenant_quota_breach_total[5m]))
+      - record: tenant:ramp_state
+        expr: max by (tenant, state) (tenant_ramp_state)
+      - record: tenant:purge_queue_depth
+        expr: max by (tenant, queue) (purge_queue_depth)
+      - record: tenant:restore_freshness_seconds
+        expr: time() - max by (tenant, datastore) (restore_last_success_timestamp_seconds)

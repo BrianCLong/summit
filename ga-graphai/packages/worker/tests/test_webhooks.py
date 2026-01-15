@@ -21,7 +21,9 @@ class SequencedClient:
         self.calls: list[dict[str, str]] = []
 
     def post(self, url: str, headers: dict[str, str], body: bytes) -> HttpResponse:
-        self.calls.append({"url": url, "body": body.decode(), "signature": headers.get("X-Webhook-Signature", "")})
+        self.calls.append(
+            {"url": url, "body": body.decode(), "signature": headers.get("X-Webhook-Signature", "")}
+        )
         index = min(len(self.calls) - 1, len(self._responses) - 1)
         return HttpResponse(status_code=self._responses[index], body="test")
 
@@ -61,9 +63,13 @@ def test_retry_sets_backoff_and_records_attempt() -> None:
     store = DeliveryStore()
     sub = store.add_subscription(_subscription("export.ready"))
     client = SequencedClient([500, 200])
-    worker = WebhookWorker(store, http_client=client, backoff_policy=BackoffPolicy(base_seconds=1, factor=2))
+    worker = WebhookWorker(
+        store, http_client=client, backoff_policy=BackoffPolicy(base_seconds=1, factor=2)
+    )
 
-    worker.enqueue_event(sub.tenant_id, "export.ready", {"export_id": "ex-1"}, idempotency_key="evt-1")
+    worker.enqueue_event(
+        sub.tenant_id, "export.ready", {"export_id": "ex-1"}, idempotency_key="evt-1"
+    )
 
     first = worker.process_due()[0]
     assert first.status == DeliveryStatus.RETRYING
@@ -96,7 +102,9 @@ def test_poison_messages_stop_retrying_after_max_attempts() -> None:
         max_attempts=3,
     )
 
-    worker.enqueue_event(sub.tenant_id, "ingest.completed", {"ingest_id": "ing-1"}, idempotency_key="ing-evt")
+    worker.enqueue_event(
+        sub.tenant_id, "ingest.completed", {"ingest_id": "ing-1"}, idempotency_key="ing-evt"
+    )
 
     latest = None
     for _ in range(3):

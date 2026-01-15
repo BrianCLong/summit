@@ -66,7 +66,8 @@ describe('AgentClient', () => {
         { async: true }
       );
 
-      expect(status.status).toBe('pending');
+      // Async mode starts the agent immediately, so status may be 'pending' or 'running'
+      expect(['pending', 'running']).toContain(status.status);
     });
   });
 

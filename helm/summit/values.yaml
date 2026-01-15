@@ -175,6 +175,17 @@ externalSecrets:
             key: summit/ai-service
             property: api-key
 
+metering:
+  sinks:
+    - name: s3
+      type: s3
+      bucket: intelgraph-billing
+      prefix: parquet/
+  partitions:
+    tenantKey: tenant_id_p
+    dateKey: ingest_date
+  storagePrefix: parquet/
+
 # Service inventory
 server:
   enabled: true

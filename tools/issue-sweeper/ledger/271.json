@@ -1,0 +1,65 @@
+{
+  "issue_number": 271,
+  "title": "chore(deps): bump bullmq from 4.18.3 to 5.57.0 in /server",
+  "url": "https://github.com/BrianCLong/summit/pull/271",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9102204147,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic8w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/javascript",
+      "name": "javascript",
+      "color": "168700",
+      "default": false,
+      "description": "Pull requests that update javascript code"
+    }
+  ],
+  "updatedAt": "2025-08-15T21:04:51Z",
+  "createdAt": "2025-08-14T05:54:38Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15346,
+        "url": "https://github.com/BrianCLong/summit/pull/15346",
+        "mergedAt": "2026-01-01T09:53:10Z",
+        "title": "Draft patent claims for MCP inventions"
+      },
+      {
+        "number": 15341,
+        "url": "https://github.com/BrianCLong/summit/pull/15341",
+        "mergedAt": "2026-01-01T08:47:02Z",
+        "title": "Implement adversarial resistance and truth defense"
+      },
+      {
+        "number": 13193,
+        "url": "https://github.com/BrianCLong/summit/pull/13193",
+        "mergedAt": "2025-12-04T15:38:38Z",
+        "title": "Build React Native mobile app with OSINT dashboard"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

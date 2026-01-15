@@ -2,6 +2,7 @@ import { EventEmitter } from 'events';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import yaml from 'js-yaml';
+import { getAuditSystem } from '../audit/index.js';
 import { AdvancedAuditSystem } from '../audit/advanced-audit-system.js';
 import { AppError } from '../lib/errors.js';
 import { fileURLToPath } from 'url';
@@ -39,7 +40,7 @@ export interface PolicyDecision {
 export class PolicyEngine extends EventEmitter {
   private static instance: PolicyEngine;
   private config: any;
-  private auditSystem!: AdvancedAuditSystem;
+  private auditSystem: AdvancedAuditSystem | null = null;
   private initialized: boolean = false;
   private opaUrl: string = 'http://localhost:8181/v1/data/governance/allow';
 
@@ -48,7 +49,7 @@ export class PolicyEngine extends EventEmitter {
     // Use getInstance without params, assuming it's already initialized by the main app
     // or fallback to lazy initialization if possible
     try {
-      this.auditSystem = AdvancedAuditSystem.getInstance();
+      this.auditSystem = getAuditSystem();
     } catch (e: any) {
       // If not initialized, we can't really log audits effectively yet.
       // We'll let it fail or log to console.
@@ -72,7 +73,7 @@ export class PolicyEngine extends EventEmitter {
 
       try {
         const fileContents = await readFile(configPath, 'utf8');
-        this.config = yaml.load(fileContents);
+        this.config = yaml.load(fileContents as unknown as string);
         console.log('PolicyEngine loaded configuration from', configPath);
       } catch (e: any) {
         console.warn('PolicyEngine could not load config file from', configPath, e);

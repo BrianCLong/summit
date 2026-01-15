@@ -1,9 +1,7 @@
 import json
-from typing import Dict
 
 import httpx
 import pytest
-
 from ig_rl.provenance import (
     ArtifactDigests,
     EvidencePublishError,
@@ -53,7 +51,9 @@ async def test_publish_sends_sanitized_payload_and_metrics():
                     }
                 },
             )
-        return httpx.Response(200, json={"data": {"evidenceOk": {"ok": True, "details": {"budget": 0.5}}}})
+        return httpx.Response(
+            200, json={"data": {"evidenceOk": {"ok": True, "details": {"budget": 0.5}}}}
+        )
 
     transport = httpx.MockTransport(handler)
     publisher = MCEvidencePublisher(
@@ -89,7 +89,7 @@ async def test_publish_sends_sanitized_payload_and_metrics():
 
 @pytest.mark.asyncio
 async def test_publish_retries_with_same_idempotency_key():
-    attempts: Dict[str, int] = {"count": 0}
+    attempts: dict[str, int] = {"count": 0}
     captured_keys: list[str] = []
 
     async def metrics_provider(_: str) -> SLOMetrics:

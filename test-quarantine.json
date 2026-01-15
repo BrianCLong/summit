@@ -1,0 +1,6 @@
+{
+  "$schema": "./test-quarantine.schema.json",
+  "version": "1.0.0",
+  "description": "Tests in this file are temporarily skipped due to flakiness",
+  "quarantined": []
+}

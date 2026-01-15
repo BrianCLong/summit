@@ -1,0 +1,68 @@
+{
+  "issue_number": 331,
+  "title": "API Gateway for Cross-Platform Access",
+  "url": "https://github.com/BrianCLong/summit/issues/331",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9122099213,
+      "node_id": "LA_kwDOPaNncM8AAAACH7gwDQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-ai-analytics",
+      "name": "epic-ai-analytics",
+      "color": "A29BFE",
+      "default": false,
+      "description": "AI analytics and business intelligence"
+    }
+  ],
+  "updatedAt": "2025-08-16T22:20:44Z",
+  "createdAt": "2025-08-16T22:20:44Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 10090,
+        "url": "https://github.com/BrianCLong/summit/pull/10090",
+        "mergedAt": null,
+        "title": "feat(policy): add governance sandbox framework"
+      },
+      {
+        "number": 10079,
+        "url": "https://github.com/BrianCLong/summit/pull/10079",
+        "mergedAt": null,
+        "title": "[P0][Delta] Fix CI failures - gitleaks, contract-tests, python deps"
+      },
+      {
+        "number": 1285,
+        "url": "https://github.com/BrianCLong/summit/pull/1285",
+        "mergedAt": "2025-09-20T08:06:30Z",
+        "title": "feat(release): enterprise ci/cd foundation - clean slate"
+      },
+      {
+        "number": 11894,
+        "url": "https://github.com/BrianCLong/summit/pull/11894",
+        "mergedAt": null,
+        "title": "Build Advanced Attribution and Identity Resolution Platform"
+      },
+      {
+        "number": 1284,
+        "url": "https://github.com/BrianCLong/summit/pull/1284",
+        "mergedAt": "2025-09-20T08:06:31Z",
+        "title": "feat(release): enterprise-grade repo consolidation and golden ci pipeline"
+      },
+      {
+        "number": 11920,
+        "url": "https://github.com/BrianCLong/summit/pull/11920",
+        "mergedAt": "2025-11-20T10:05:36Z",
+        "title": "Build predictive analytics and forecasting platform"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

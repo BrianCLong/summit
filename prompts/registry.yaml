@@ -13,18 +13,119 @@ prompts:
         - docs/ga/
         - artifacts/
         - metrics/
+        - observability/
         - .github/
       domains:
         - governance
         - ci
         - provenance
         - quality
+        - observability
     verification:
       tiers_required:
         - A
       debt_budget:
         permitted: 0
         retirement_target: 1
+    allowed_operations:
+      - create
+      - edit
+  - id: runbooks-docs-update
+    version: v1
+    path: prompts/docs/runbooks-update@v1.md
+    sha256: d8fa2fa89f5bb30b954a8fc1735794033cd55be52bc8aedce76dcb57948fac11
+    description: Add or update operational runbooks with policy and receipt evidence steps.
+    scope:
+      paths:
+        - docs/runbooks/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/docs/runbooks-update@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - operations
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: companyos-sprint-04
+    version: v1
+    path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
+    sha256: 434a88382afaa83775ef9055171b2095acb3595b82566da8c0e2a21d1625dac2
+    description: Plan and record the CompanyOS Sprint 04 execution brief and roadmap status update.
+    scope:
+      paths:
+        - sprint/
+        - docs/roadmap/STATUS.json
+        - prompts/companyos/
+        - agents/examples/
+      domains:
+        - companyos
+        - sprint-planning
+        - roadmap
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: adr-pr-template-cleanup
+    version: v1
+    path: prompts/docs/adr-pr-template-cleanup@v1.md
+    sha256: 429dc47c69fb43ee25eff48a54868fc88e2faf48f8de6a213d702794d2cb3d07
+    description: Update PR and ADR templates for current workflow guidance and formatting.
+    scope:
+      paths:
+        - .github/
+        - docs/ADR/
+        - agents/examples/
+        - prompts/docs/adr-pr-template-cleanup@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - quality
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: adr-pr-template-cleanup
+    version: v1
+    path: prompts/docs/adr-pr-template-cleanup@v1.md
+    sha256: 429dc47c69fb43ee25eff48a54868fc88e2faf48f8de6a213d702794d2cb3d07
+    description: Update PR and ADR templates for current workflow guidance and formatting.
+    scope:
+      paths:
+        - .github/
+        - docs/ADR/
+        - agents/examples/
+        - prompts/docs/adr-pr-template-cleanup@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - quality
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
     allowed_operations:
       - create
       - edit

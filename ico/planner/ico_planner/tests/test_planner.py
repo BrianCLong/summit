@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from ico_planner import Planner, PlannerConfig
 
 FIXTURES = Path(__file__).resolve().parents[2] / "fixtures"
@@ -53,7 +52,9 @@ def test_apply_plan_matches_benchmark(planning_request):
     }
     for key, expected in benchmark["endpoints"].items():
         assert key in actual_map
-        assert actual_map[key]["baseline_cost"] == pytest.approx(expected["baseline_cost"], abs=1e-6)
+        assert actual_map[key]["baseline_cost"] == pytest.approx(
+            expected["baseline_cost"], abs=1e-6
+        )
         assert actual_map[key]["planned_cost"] == pytest.approx(expected["planned_cost"], abs=1e-6)
 
 
@@ -68,5 +69,3 @@ def test_simulation_load_curves_are_monotonic(planning_request):
 
         latency_values = [point["latency_ms"] for point in series]
         assert latency_values[0] <= latency_values[-1]
-
-

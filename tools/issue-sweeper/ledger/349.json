@@ -1,0 +1,71 @@
+{
+  "issue_number": 349,
+  "title": "Brain-Computer Interface for AI Control",
+  "url": "https://github.com/BrianCLong/summit/issues/349",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9122126345,
+      "node_id": "LA_kwDOPaNncM8AAAACH7iaCQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-next-gen-ai",
+      "name": "epic-next-gen-ai",
+      "color": "FF6B6B",
+      "default": false,
+      "description": "Next-generation AI and quantum computing"
+    },
+    {
+      "id": 9360062798,
+      "node_id": "LA_kwDOPaNncM8AAAACLec5Tg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/stale",
+      "name": "stale",
+      "color": "e4e669",
+      "default": false,
+      "description": "PR with no activity for 30 days"
+    }
+  ],
+  "updatedAt": "2025-10-02T01:01:52Z",
+  "createdAt": "2025-08-16T22:28:38Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1299,
+        "url": "https://github.com/BrianCLong/summit/pull/1299",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat: add cursor governance gateway scaffolding"
+      },
+      {
+        "number": 11915,
+        "url": "https://github.com/BrianCLong/summit/pull/11915",
+        "mergedAt": null,
+        "title": "Implement SLO-driven alerting system for Summit"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 11917,
+        "url": "https://github.com/BrianCLong/summit/pull/11917",
+        "mergedAt": "2025-11-20T10:21:06Z",
+        "title": "Build collaborative intelligence platform with workspaces"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

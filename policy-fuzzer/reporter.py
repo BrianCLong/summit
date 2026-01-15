@@ -152,7 +152,7 @@ def generate_reports(failing_cases, coverage_data):
     if failing_cases:
         with open(os.path.join(REPORTS_DIR, "failing_cases.txt"), "w") as f:
             for i, case in enumerate(failing_cases):
-                f.write(f"Failing Case {i+1}:\n")
+                f.write(f"Failing Case {i + 1}:\n")
                 f.write(f"  Severity: {case.get('severity', 'N/A')}\n")
                 f.write(f"  Impact: {case.get('impact', 'N/A')}\n")
                 f.write(f"  Policy: {case['policy']}\n")
@@ -167,7 +167,7 @@ def generate_reports(failing_cases, coverage_data):
         # Generate reproducer files
         for i, case in enumerate(failing_cases):
             with open(os.path.join(REPORTS_DIR, f"reproducer_{i}.py"), "w") as f:
-                f.write(f"# Reproducer for failing case {i+1}\n")
+                f.write(f"# Reproducer for failing case {i + 1}\n")
                 f.write("from datetime import datetime\n")
                 f.write(
                     "from governance_layers import check_consent, check_licenses, check_geo, check_retention, check_time_window\n"

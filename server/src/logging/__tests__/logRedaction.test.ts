@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { redactLogLine, sanitizeLogArguments } from '../logRedaction.js';
 
 describe('redactLogLine', () => {

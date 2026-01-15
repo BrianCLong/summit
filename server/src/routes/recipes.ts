@@ -12,7 +12,7 @@ router.get('/recipes', (_req, res) => {
   try {
     const files = fs.existsSync(recipesDir) ? fs.readdirSync(recipesDir) : [];
     const items = files.filter(
-      (f) => f.endsWith('.yaml') || f.endsWith('.yml'),
+      (f: string) => f.endsWith('.yaml') || f.endsWith('.yml'),
     );
     res.json({ items });
   } catch (e: any) {
@@ -34,8 +34,20 @@ router.post('/recipes/run', express.json(), async (req, res) => {
     ].filter(Boolean);
 
     let validRecipeFile = null;
+    const recipesRoot = path.resolve(process.cwd(), 'recipes');
+
     for (const file of recipeFiles) {
-      const fullPath = path.join(process.cwd(), 'recipes', file);
+      // SECURITY: Prevent path traversal
+      const fullPath = path.resolve(recipesRoot, file);
+
+      // Ensure the resolved path is still inside the recipes directory
+      // Using path.relative checks for sibling directory attacks better than startsWith
+      const rel = path.relative(recipesRoot, fullPath);
+      if (rel.startsWith('..') || path.isAbsolute(rel)) {
+        console.warn(`[SECURITY] Blocked path traversal attempt: ${file}`);
+        continue;
+      }
+
       if (fs.existsSync(fullPath)) {
         validRecipeFile = file;
         break;
@@ -45,7 +57,7 @@ router.post('/recipes/run', express.json(), async (req, res) => {
     if (!validRecipeFile) {
       const availableRecipes = fs
         .readdirSync(path.join(process.cwd(), 'recipes'))
-        .filter((f) => f.endsWith('.yaml') || f.endsWith('.yml'))
+        .filter((f: string) => f.endsWith('.yaml') || f.endsWith('.yml'))
         .join(', ');
       return res.status(404).json({
         error: `Recipe '${name}' not found. Available recipes: ${availableRecipes}`,

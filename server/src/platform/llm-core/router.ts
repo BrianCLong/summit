@@ -66,7 +66,7 @@ export class RouterService {
         1000,
         1000 // Generic estimation
       );
-      await this.collector.record(estimatedCost).catch(console.error);
+      await Promise.resolve(this.collector.record(estimatedCost)).catch(console.error);
     }
 
     return selectedProfile;

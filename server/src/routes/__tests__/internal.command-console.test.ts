@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
 import commandConsoleRouter from '../internal/command-console';
@@ -31,7 +32,10 @@ const app = express();
 app.use(express.json());
 app.use('/api/internal/command-console', commandConsoleRouter);
 
-describe('Internal Command Console routes', () => {
+const NO_NETWORK_LISTEN = process.env.NO_NETWORK_LISTEN === 'true';
+const describeIf = NO_NETWORK_LISTEN ? describe.skip : describe;
+
+describeIf('Internal Command Console routes', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {

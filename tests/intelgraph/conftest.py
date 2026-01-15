@@ -2,19 +2,19 @@
 
 import os
 import sys
-from typing import Generator
+from collections.abc import Generator
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, create_engine
-from sqlmodel.pool import StaticPool
+from sqlmodel import Session
 
 # Add intelgraph to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "intelgraph"))
 
-from api import app  # noqa: E402
-from core.database import Database, reset_database  # noqa: E402
-from core.models import Claim, Decision, Entity, Source  # noqa: E402
+from core.database import Database, reset_database
+from core.models import Claim, Decision, Entity, Source
+
+from api import app
 
 
 @pytest.fixture(name="test_db")

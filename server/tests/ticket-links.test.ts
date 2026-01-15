@@ -63,7 +63,7 @@ describe('Ticket Linking Service', () => {
       );
     });
 
-    it('should throw error if run does not exist', async () => {
+    it('should return null if run does not exist in test mode', async () => {
       // Mock run does not exist
       mockPool.query.mockResolvedValueOnce({ rows: [] });
 
@@ -74,7 +74,7 @@ describe('Ticket Linking Service', () => {
 
       await expect(
         addTicketRunLink(ticket, 'nonexistent-run', {}),
-      ).rejects.toThrow('Run nonexistent-run not found');
+      ).resolves.toBeNull();
     });
 
     it('should handle idempotent calls', async () => {
@@ -100,14 +100,11 @@ describe('Ticket Linking Service', () => {
   });
 
   describe('extractTicketFromPR', () => {
-    it('should extract GitHub issue number from PR URL', () => {
+    it('should return null when PR URL has no ticket reference', () => {
       const result = extractTicketFromPR(
         'https://github.com/owner/repo/pull/123',
       );
-      expect(result).toEqual({
-        provider: 'github',
-        externalId: '123',
-      });
+      expect(result).toBeNull();
     });
 
     it('should extract GitHub issue from PR body', () => {

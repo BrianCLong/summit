@@ -18,6 +18,7 @@
  * - Full session context (IP, user agent, correlation ID)
  *
  * @module cases/domain/CaseAuditLog
+ * @note This module is essential for the "Case spaces with immutable audit" feature.
  */
 
 import { createHash, randomUUID } from 'crypto';

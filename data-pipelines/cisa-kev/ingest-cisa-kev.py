@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Fetch CISA Known Exploited Vulnerabilities and emit graph-ready JSON."""
+
 import csv
 import hashlib
 import io

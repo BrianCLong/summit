@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { cacheService } from './CacheService.js';
-import { advancedAuditSystem } from '../audit/advanced-audit-system.js';
+import { advancedAuditSystem } from '../audit/index.js';
 
 export interface Investigation {
   id: string;

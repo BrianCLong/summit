@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import List
-
 from .reality_graph import RealityGraph
 from .state_mutation import StateMutationEngine
 from .world_state import WorldState
@@ -17,9 +15,9 @@ class HorizonManager:
         graph = RealityGraph()
         graph.add_state(start_state)
 
-        frontier: List[WorldState] = [start_state]
+        frontier: list[WorldState] = [start_state]
         for _ in range(depth):
-            next_frontier: List[WorldState] = []
+            next_frontier: list[WorldState] = []
             for state in frontier:
                 children = self.mutation_engine.expand(state)
                 for child in children:

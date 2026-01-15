@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "description": "Canonical policy for MVP-4 Stabilization release gate requirements",
+  "last_updated": "2026-01-07",
+  "owner": "Platform Engineering",
+
+  "always_required": [
+    {
+      "name": "Release Readiness Gate",
+      "workflow": "release-readiness.yml",
+      "rationale": "Comprehensive release readiness verification - runs on every change"
+    },
+    {
+      "name": "GA Gate",
+      "workflow": "ga-gate.yml",
+      "rationale": "Official GA verification entrypoint with make ga"
+    },
+    {
+      "name": "Unit Tests & Coverage",
+      "workflow": "unit-test-coverage.yml",
+      "rationale": "Test suite and coverage gates must pass for all code changes"
+    },
+    {
+      "name": "CI Core (Primary Gate)",
+      "workflow": "ci-core.yml",
+      "rationale": "Primary blocking gate - lint, typecheck, tests, build"
+    }
+  ],
+
+  "conditional_required": [
+    {
+      "name": "Workflow Lint",
+      "workflow": "workflow-lint.yml",
+      "rationale": "Validates GitHub Actions workflow syntax and safety",
+      "required_when_paths_match": ["^\\.github/workflows/.*", "^\\.github/actions/.*"]
+    },
+    {
+      "name": "CodeQL",
+      "workflow": "codeql.yml",
+      "rationale": "Security analysis for server and package code",
+      "required_when_paths_match": ["^server/", "^packages/", "^cli/"]
+    },
+    {
+      "name": "SBOM & Vulnerability Scanning",
+      "workflow": "sbom-vuln-scan.yml",
+      "rationale": "Supply chain security for Docker and dependencies",
+      "required_when_paths_match": [
+        "^Dockerfile",
+        "^docker-compose",
+        "^package\\.json$",
+        "^pnpm-lock\\.yaml$",
+        "^server/package\\.json$",
+        "^\\.github/workflows/supply-chain",
+        "^scripts/security/"
+      ]
+    },
+    {
+      "name": "Docker Build & Security Scan",
+      "workflow": "docker-build-scan.yml",
+      "rationale": "Docker image build and security validation",
+      "required_when_paths_match": ["^Dockerfile", "^docker-compose", "^\\.dockerignore$"]
+    }
+  ],
+
+  "informational": [
+    {
+      "name": "Release Train",
+      "workflow": "release-train.yml",
+      "rationale": "Automated release orchestration - informational only"
+    },
+    {
+      "name": "Post-Release Canary",
+      "workflow": "post-release-canary.yml",
+      "rationale": "Post-deployment smoke tests - informational only"
+    },
+    {
+      "name": "PR Quality Gate",
+      "workflow": "pr-quality-gate.yml",
+      "rationale": "Additional PR metrics - not blocking"
+    },
+    {
+      "name": "Release Reliability",
+      "workflow": "release-reliability.yml",
+      "rationale": "Release success metrics - observability only"
+    },
+    {
+      "name": "AI Copilot Canary",
+      "workflow": "ai-copilot-canary.yml",
+      "rationale": "AI feature monitoring - informational only"
+    },
+    {
+      "name": "Performance Baseline (k6)",
+      "workflow": "perf-baseline.yml",
+      "rationale": "Performance benchmarks - informational only"
+    },
+    {
+      "name": "CI Legacy (Non-Blocking)",
+      "workflow": "ci-legacy.yml",
+      "rationale": "Legacy compatibility checks - non-blocking"
+    }
+  ],
+
+  "evaluation_rules": {
+    "description": "Rules for computing required workflow set for a given commit",
+    "base_ref_default": "origin/main~1",
+    "algorithm": [
+      "1. Always include all 'always_required' workflows",
+      "2. For each 'conditional_required' workflow:",
+      "   a. Get changed files: git diff --name-only <base>..<commit>",
+      "   b. For each changed file, check if it matches any regex in 'required_when_paths_match'",
+      "   c. If any file matches, include the workflow in required set",
+      "3. 'informational' workflows are never required for promotion"
+    ],
+    "status_interpretation": {
+      "success": "Workflow passed - counts as green",
+      "failure": "Workflow failed - blocks promotion if required",
+      "cancelled": "Workflow was cancelled - blocks promotion if required",
+      "timed_out": "Workflow timed out - blocks promotion if required",
+      "queued": "Workflow queued - blocks promotion (not completed)",
+      "in_progress": "Workflow running - blocks promotion (not completed)",
+      "pending": "Workflow pending - blocks promotion (not completed)",
+      "skipped": "Workflow skipped by GitHub - treated as success if not required",
+      "missing": "Workflow did not run - blocks if required, OK if not required"
+    }
+  }
+}

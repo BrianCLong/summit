@@ -1,13 +1,11 @@
-import { jest, describe, it, expect, beforeAll } from '@jest/globals';
+import { jest, describe, it, expect, beforeAll, beforeEach } from '@jest/globals';
 
-const queryMock = jest.fn().mockImplementation((query: string) => {
+const queryMock = jest.fn().mockImplementation((query: unknown) => {
   const queryText = String(query);
-  // Simple mock for query execution
   if (queryText.includes('INSERT INTO lineage_nodes')) {
     return { rowCount: 1 };
   }
   if (queryText.includes('SELECT id FROM lineage_nodes')) {
-    // Simulate not found for first call, then found
     return { rows: [] };
   }
   if (queryText.includes('SELECT * FROM retention_policies')) {
@@ -65,8 +63,14 @@ beforeAll(async () => {
   ({ SchemaDriftDetector } = await import('../SchemaDriftDetector'));
 });
 
-describe('Governance Authority', () => {
+beforeEach(() => {
+  (DataLineageSystem.getInstance() as any).pool = poolMock;
+  (RetentionPolicyEngine.getInstance() as any).pool = poolMock;
+  (SchemaDriftDetector.getInstance() as any).pool = poolMock;
+  queryMock.mockClear();
+});
 
+describe('Governance Authority', () => {
   describe('DataLineageSystem', () => {
     it('should upsert a node', async () => {
       const system = DataLineageSystem.getInstance();
@@ -78,7 +82,6 @@ describe('Governance Authority', () => {
   describe('RetentionPolicyEngine', () => {
     it('should enforce policies', async () => {
       const engine = RetentionPolicyEngine.getInstance();
-      // We are mocking the pool, so we just expect it not to crash and call the delete query
       await expect(engine.enforcePolicies()).resolves.not.toThrow();
       expect(queryMock).toHaveBeenCalledWith(
         expect.stringContaining('DELETE FROM audit_events'),
@@ -90,8 +93,10 @@ describe('Governance Authority', () => {
   describe('SchemaDriftDetector', () => {
     it('should detect drift', async () => {
       const detector = SchemaDriftDetector.getInstance();
-      const drift = await detector.checkDrift('test_node', { field1: 'string', field2: 'number' });
-      // Based on mock returning { field1: 'string' }, field2 should be added
+      const drift = await detector.checkDrift('test_node', {
+        field1: 'string',
+        field2: 'number',
+      });
       expect(drift).toBeDefined();
       expect(drift?.added).toContain('field2');
     });

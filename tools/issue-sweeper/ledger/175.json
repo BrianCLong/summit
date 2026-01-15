@@ -1,0 +1,155 @@
+{
+  "issue_number": 175,
+  "title": "docs: security",
+  "url": "https://github.com/BrianCLong/summit/issues/175",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767059,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX00w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/documentation",
+      "name": "documentation",
+      "color": "0075ca",
+      "default": true,
+      "description": "Improvements or additions to documentation"
+    },
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9107968112,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQcA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P2",
+      "name": "P2",
+      "color": "fbca04",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107981145,
+      "node_id": "LA_kwDOPaNncM8AAAACHuDDWQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-10-30",
+      "name": "due:2025-10-30",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:43:18Z",
+  "createdAt": "2025-08-14T04:06:39Z",
+  "classification": "docs",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 15349,
+        "url": "https://github.com/BrianCLong/summit/pull/15349",
+        "mergedAt": "2026-01-01T09:42:36Z",
+        "title": "feat: MVP-4 GA Security Tests and ESM Fixes"
+      },
+      {
+        "number": 11898,
+        "url": "https://github.com/BrianCLong/summit/pull/11898",
+        "mergedAt": null,
+        "title": "Unify apps with graph timeline map interface"
+      },
+      {
+        "number": 10097,
+        "url": "https://github.com/BrianCLong/summit/pull/10097",
+        "mergedAt": "2025-10-14T13:05:17Z",
+        "title": "feat: add federated attribution engine"
+      },
+      {
+        "number": 15263,
+        "url": "https://github.com/BrianCLong/summit/pull/15263",
+        "mergedAt": "2026-01-01T07:29:38Z",
+        "title": "Build user-facing explainability and provenance explorer"
+      },
+      {
+        "number": 1358,
+        "url": "https://github.com/BrianCLong/summit/pull/1358",
+        "mergedAt": null,
+        "title": "test: expand policy reasoner coverage"
+      },
+      {
+        "number": 10103,
+        "url": "https://github.com/BrianCLong/summit/pull/10103",
+        "mergedAt": "2025-10-14T11:53:04Z",
+        "title": "feat: add zero-touch compliance enforcement system"
+      },
+      {
+        "number": 13188,
+        "url": "https://github.com/BrianCLong/summit/pull/13188",
+        "mergedAt": "2025-12-04T15:38:53Z",
+        "title": "Build cross-platform TypeScript CLI for graph queries"
+      },
+      {
+        "number": 13165,
+        "url": "https://github.com/BrianCLong/summit/pull/13165",
+        "mergedAt": "2025-12-17T05:34:42Z",
+        "title": "Unified prompt governance dashboard 1"
+      },
+      {
+        "number": 11917,
+        "url": "https://github.com/BrianCLong/summit/pull/11917",
+        "mergedAt": "2025-11-20T10:21:06Z",
+        "title": "Build collaborative intelligence platform with workspaces"
+      },
+      {
+        "number": 11919,
+        "url": "https://github.com/BrianCLong/summit/pull/11919",
+        "mergedAt": "2025-11-20T10:05:41Z",
+        "title": "Build Advanced Data Integration and ETL Platform"
+      },
+      {
+        "number": 11895,
+        "url": "https://github.com/BrianCLong/summit/pull/11895",
+        "mergedAt": null,
+        "title": "Build Crisis Management and Emergency Response Platform"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 11920,
+        "url": "https://github.com/BrianCLong/summit/pull/11920",
+        "mergedAt": "2025-11-20T10:05:36Z",
+        "title": "Build predictive analytics and forecasting platform"
+      },
+      {
+        "number": 13164,
+        "url": "https://github.com/BrianCLong/summit/pull/13164",
+        "mergedAt": "2025-12-17T05:35:09Z",
+        "title": "Resolve merge conflicts via rebase"
+      },
+      {
+        "number": 11815,
+        "url": "https://github.com/BrianCLong/summit/pull/11815",
+        "mergedAt": "2025-11-10T13:08:11Z",
+        "title": "chore(deps): bump the js-dependencies group with 34 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

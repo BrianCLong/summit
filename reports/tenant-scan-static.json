@@ -1,122 +1,570 @@
 [
   {
+    "file": "ai/copilot/graphrag-provenance.service.ts",
+    "line": 381,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "           MATCH (e:Entity)-[:HAS_EVIDENCE]->(ev:Evidence)           WHERE e.id IN $entityIds       "
+  },
+  {
+    "file": "ai/copilot/graphrag-provenance.service.ts",
+    "line": 430,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "           MATCH (e:Entity)-[:SUPPORTS]->(c:Claim)           WHERE e.id IN $entityIds             AN"
+  },
+  {
+    "file": "analytics/adoption/AdoptionAnalyticsService.ts",
+    "line": 540,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT         feature_id,         COUNT(DISTINCT user_hash) as users       FROM adoption_events    "
+  },
+  {
+    "file": "auth-sso/SSOService.ts",
+    "line": 163,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT * FROM users WHERE email = $1"
+  },
+  {
     "file": "autonomous/orchestrator.enhanced.ts",
-    "line": 603,
+    "line": 601,
     "type": "SQL",
     "message": "Query accessing 'runs' likely missing 'tenant_id' filter",
     "snippet": "SELECT * FROM runs WHERE id = $1"
   },
   {
     "file": "autonomous/orchestrator.enhanced.ts",
-    "line": 610,
+    "line": 608,
     "type": "SQL",
     "message": "Query accessing 'runs' likely missing 'tenant_id' filter",
     "snippet": "UPDATE runs SET status = $2, started_at = COALESCE(started_at, NOW()) WHERE id = $1"
   },
   {
+    "file": "backup/BackupService.ts",
+    "line": 172,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (n) RETURN n"
+  },
+  {
+    "file": "backup/BackupService.ts",
+    "line": 179,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH ()-[r]->() RETURN r"
+  },
+  {
+    "file": "cases/workflow/StateMachine.ts",
+    "line": 395,
+    "type": "SQL",
+    "message": "Query accessing 'cases' likely missing 'tenant_id' filter",
+    "snippet": "UPDATE maestro.cases          SET current_stage = $1,              updated_at = NOW()          WHERE"
+  },
+  {
+    "file": "cases/workflow/StateMachine.ts",
+    "line": 410,
+    "type": "SQL",
+    "message": "Query accessing 'cases' likely missing 'tenant_id' filter",
+    "snippet": "UPDATE maestro.cases            SET status = "
+  },
+  {
+    "file": "cognitive-security/campaign-detection.service.ts",
+    "line": 104,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (c:CogSecClaim)         WHERE c.firstObservedAt >= datetime() - duration({millisecond"
+  },
+  {
+    "file": "cognitive-security/campaign-detection.service.ts",
+    "line": 180,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (c1:CogSecClaim), (c2:CogSecClaim)         WHERE c1.id < c2.id           AND c1.actor"
+  },
+  {
+    "file": "cognitive-security/campaign-detection.service.ts",
+    "line": 308,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (a:CogSecActor)-[:MADE_CLAIM]->(c:CogSecClaim)-[:APPEARED_IN]->(ch:CogSecChannel)    "
+  },
+  {
+    "file": "cognitive-security/campaign-detection.service.ts",
+    "line": 439,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (c:CogSecClaim)         WITH c, size(c.actorIds) AS shares         WHERE c.firstObser"
+  },
+  {
+    "file": "cognitive-security/campaign-detection.service.ts",
+    "line": 499,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         UNWIND $channelIds AS channelId         MATCH (ch:CogSecChannel {id: channelId})         SE"
+  },
+  {
+    "file": "cognitive-security/campaign-detection.service.ts",
+    "line": 735,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         UNWIND $claimIds AS claimId         MATCH (c:CogSecClaim {id: claimId})         OPTIONAL MA"
+  },
+  {
+    "file": "cognitive-security/campaign-detection.service.ts",
+    "line": 778,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (camp:CogSecCampaign {id: $campaignId}) RETURN camp"
+  },
+  {
+    "file": "cognitive-security/campaign-detection.service.ts",
+    "line": 800,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (camp:CogSecCampaign {id: $campaignId})         SET camp.status = $status,           "
+  },
+  {
+    "file": "cognitive-security/campaign-detection.service.ts",
+    "line": 826,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (camp:CogSecCampaign)         WHERE camp.status IN ["
+  },
+  {
+    "file": "cognitive-security/campaign-detection.service.ts",
+    "line": 851,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (s:CogSecCoordinationSignal {campaignId: $campaignId})         RETURN s         ORDER"
+  },
+  {
+    "file": "cognitive-security/campaign-detection.service.ts",
+    "line": 945,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (s:CogSecCoordinationSignal {id: $signalId})         SET s.campaignId = $campaignId  "
+  },
+  {
+    "file": "cognitive-security/claims.service.ts",
+    "line": 141,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (c:CogSecClaim)         WHERE c.id <> $claimId         WITH c, gds.similarity.cosine("
+  },
+  {
+    "file": "cognitive-security/claims.service.ts",
+    "line": 177,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (c:CogSecClaim)         WITH c,              1.0 - (toFloat(apoc.text.levenshteinDist"
+  },
+  {
+    "file": "cognitive-security/claims.service.ts",
+    "line": 212,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (c:CogSecClaim {id: $claimId})         SET c.verdict = $verdict,             c.verdic"
+  },
+  {
+    "file": "cognitive-security/claims.service.ts",
+    "line": 255,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (c1:CogSecClaim {id: $claimId1})         MATCH (c2:CogSecClaim {id: $claimId2})      "
+  },
+  {
+    "file": "cognitive-security/claims.service.ts",
+    "line": 278,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (c:CogSecClaim {id: $claimId}) RETURN c"
+  },
+  {
+    "file": "cognitive-security/claims.service.ts",
+    "line": 398,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (e:CogSecEvidence {id: $evidenceId})         UNWIND $claimIds AS claimId         MATC"
+  },
+  {
+    "file": "cognitive-security/claims.service.ts",
+    "line": 423,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (e:CogSecEvidence {id: $evidenceId})         SET e.verified = true,             e.ver"
+  },
+  {
+    "file": "cognitive-security/claims.service.ts",
+    "line": 483,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (n:CogSecNarrative {id: $narrativeId})         UNWIND $claimIds AS claimId         MA"
+  },
+  {
+    "file": "cognitive-security/claims.service.ts",
+    "line": 508,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (n:CogSecNarrative {id: $narrativeId})         SET n.status = $status,             n."
+  },
+  {
+    "file": "cognitive-security/claims.service.ts",
+    "line": 535,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (n:CogSecNarrative {id: $narrativeId})<-[:PART_OF]-(c:CogSecClaim)         WITH n, co"
+  },
+  {
+    "file": "cognitive-security/claims.service.ts",
+    "line": 637,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (a:CogSecActor {id: $actorId})         MATCH (c:CogSecClaim {id: $claimId})         M"
+  },
+  {
+    "file": "cognitive-security/claims.service.ts",
+    "line": 704,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (ch:CogSecChannel {id: $channelId})         MATCH (c:CogSecClaim {id: $claimId})     "
+  },
+  {
+    "file": "cognitive-security/claims.service.ts",
+    "line": 735,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (n:CogSecNarrative {id: $narrativeId})         OPTIONAL MATCH (c:CogSecClaim)-[:PART_"
+  },
+  {
+    "file": "cognitive-security/claims.service.ts",
+    "line": 784,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (c:CogSecClaim {id: $claimId})-[r:APPEARED_IN]->(ch:CogSecChannel)         RETURN ch,"
+  },
+  {
+    "file": "cognitive-security/evaluation.service.ts",
+    "line": 109,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (camp:CogSecCampaign)         WHERE camp.firstDetectedAt >= datetime($startDate)     "
+  },
+  {
+    "file": "cognitive-security/evaluation.service.ts",
+    "line": 138,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (s:CogSecCoordinationSignal)         WHERE s.detectedAt >= datetime($startDate)      "
+  },
+  {
+    "file": "cognitive-security/evaluation.service.ts",
+    "line": 214,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (c:CogSecClaim)         WHERE c.updatedAt >= datetime($startDate)           AND c.upd"
+  },
+  {
+    "file": "cognitive-security/evaluation.service.ts",
+    "line": 301,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (c:CogSecClaim)         WHERE c.updatedAt >= datetime($startDate)           AND c.upd"
+  },
+  {
+    "file": "cognitive-security/evaluation.service.ts",
+    "line": 364,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (n:CogSecNarrative)         WHERE n.createdAt >= datetime($startDate)           AND n"
+  },
+  {
+    "file": "cognitive-security/evaluation.service.ts",
+    "line": 385,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (p:CogSecPlaybook)         WHERE p.createdAt >= datetime($startDate)           AND p."
+  },
+  {
+    "file": "cognitive-security/evaluation.service.ts",
+    "line": 398,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (a:CogSecArtifact {type: "
+  },
+  {
+    "file": "cognitive-security/evaluation.service.ts",
+    "line": 485,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (i:CogSecIncident)         WHERE i.createdAt >= datetime($startDate)           AND i."
+  },
+  {
+    "file": "cognitive-security/evaluation.service.ts",
+    "line": 501,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (a:CogSecAuditLog)         WHERE a.action = "
+  },
+  {
+    "file": "cognitive-security/evaluation.service.ts",
+    "line": 517,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (i:CogSecIncident)         WHERE i.createdAt >= datetime($startDate)           AND i."
+  },
+  {
+    "file": "cognitive-security/evaluation.service.ts",
+    "line": 745,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (m:CogSecMetricsSnapshot)         WHERE m.generatedAt >= datetime($startDate)        "
+  },
+  {
+    "file": "cognitive-security/governance.service.ts",
+    "line": 515,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (a:CogSecAppeal {id: $appealId})         SET a.status = $status,             a.review"
+  },
+  {
+    "file": "cognitive-security/governance.service.ts",
+    "line": 567,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (c:CogSecClaim {id: $claimId})         SET c.verdict = $requestedVerdict,            "
+  },
+  {
+    "file": "cognitive-security/governance.service.ts",
+    "line": 602,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (a:CogSecAppeal {status: "
+  },
+  {
+    "file": "cognitive-security/governance.service.ts",
+    "line": 624,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (a:CogSecAppeal {id: $appealId}) RETURN a"
+  },
+  {
+    "file": "cognitive-security/governance.service.ts",
+    "line": 642,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (a:CogSecAppeal {appellantId: $userId})         RETURN a         ORDER BY a.createdAt"
+  },
+  {
+    "file": "cognitive-security/governance.service.ts",
+    "line": 942,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (c:CogSecClaim)         WHERE c.createdAt >= datetime($startDate) AND c.createdAt <= "
+  },
+  {
+    "file": "cognitive-security/governance.service.ts",
+    "line": 957,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (a:CogSecAppeal)         WHERE a.createdAt >= datetime($startDate) AND a.createdAt <="
+  },
+  {
+    "file": "cognitive-security/governance.service.ts",
+    "line": 971,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (art:CogSecArtifact)         WHERE art.generatedAt >= datetime($startDate) AND art.ge"
+  },
+  {
+    "file": "cognitive-security/governance.service.ts",
+    "line": 1026,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         CREATE (a:CogSecAppeal {           id: $id,           claimId: $claimId,           currentV"
+  },
+  {
+    "file": "cognitive-security/response-ops.service.ts",
+    "line": 705,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (i:CogSecIncident {id: $incidentId})         SET i.timeline = i.timeline + [$event], "
+  },
+  {
+    "file": "cognitive-security/response-ops.service.ts",
+    "line": 730,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (i:CogSecIncident {id: $incidentId})         SET i.status = $status,             i.up"
+  },
+  {
+    "file": "cognitive-security/response-ops.service.ts",
+    "line": 774,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (p:CogSecPlaybook {id: $playbookId}) RETURN p"
+  },
+  {
+    "file": "cognitive-security/response-ops.service.ts",
+    "line": 837,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (p:CogSecPlaybook {id: $playbookId})         SET p.status = $status,             p.up"
+  },
+  {
+    "file": "cognitive-security/response-ops.service.ts",
+    "line": 864,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (c:CogSecCampaign {id: $campaignId}) RETURN c"
+  },
+  {
+    "file": "cognitive-security/response-ops.service.ts",
+    "line": 889,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (camp:CogSecCampaign {id: $campaignId})         OPTIONAL MATCH (c:CogSecClaim) WHERE "
+  },
+  {
+    "file": "cognitive-security/response-ops.service.ts",
+    "line": 1242,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (p:CogSecPlaybook {id: $playbookId})         SET p.actions = $actions,             p."
+  },
+  {
+    "file": "cognitive-security/response-ops.service.ts",
+    "line": 1261,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (p:CogSecPlaybook {id: $playbookId})         MATCH (c:CogSecCampaign {id: $campaignId"
+  },
+  {
+    "file": "cognitive-security/response-ops.service.ts",
+    "line": 1281,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         CREATE (a:CogSecArtifact {           id: $id,           type: $type,           title: $titl"
+  },
+  {
+    "file": "cognitive-security/response-ops.service.ts",
+    "line": 1346,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (c:CogSecCampaign {id: $campaignId})         MATCH (i:CogSecIncident {id: $incidentId"
+  },
+  {
     "file": "coherence/intelligence/activityFingerprintIndex.ts",
-    "line": 665,
+    "line": 666,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "               MATCH (af:ActivityFingerprint {fingerprint_id: $fingerprintId})               MERGE ("
   },
   {
     "file": "coherence/intelligence/missionVault.ts",
-    "line": 292,
+    "line": 293,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "             MATCH (m:Mission {mission_id: $missionId})             SET m.current_phase = $phase, m."
   },
   {
     "file": "coherence/intelligence/missionVault.ts",
-    "line": 304,
+    "line": 305,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "               MATCH (m:Mission {mission_id: $missionId})-[:HAS_OBJECTIVE]->(obj:Objective {objectiv"
   },
   {
     "file": "coherence/intelligence/missionVault.ts",
-    "line": 321,
+    "line": 322,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "               MATCH (m:Mission {mission_id: $missionId})-[:HAS_MILESTONE]->(ms:Milestone {milestone"
   },
   {
     "file": "coherence/intelligence/missionVault.ts",
-    "line": 338,
+    "line": 339,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "               MATCH (m:Mission {mission_id: $missionId})-[:HAS_RISK]->(rf:RiskFactor {risk_id: $ris"
   },
   {
     "file": "coherence/intelligence/missionVault.ts",
-    "line": 354,
+    "line": 355,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "             MATCH (m:Mission {mission_id: $missionId})             SET m.metadata = $metadata, m.la"
   },
   {
     "file": "coherence/intelligence/missionVault.ts",
-    "line": 517,
+    "line": 518,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "           MATCH (m:Mission {mission_id: $missionId})           MERGE (m)-[:INFORMED_BY]->(ci:Cohere"
   },
   {
     "file": "coherence/intelligence/missionVault.ts",
-    "line": 591,
+    "line": 592,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "             MATCH (m:Mission {mission_id: $missionId})             MERGE (obj:Objective {objective_"
   },
   {
     "file": "coherence/intelligence/missionVault.ts",
-    "line": 608,
+    "line": 609,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "             MATCH (m:Mission {mission_id: $missionId})             MERGE (sh:Stakeholder {stakehold"
   },
   {
     "file": "coherence/intelligence/missionVault.ts",
-    "line": 625,
+    "line": 626,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "             MATCH (m:Mission {mission_id: $missionId})             MERGE (res:Resource {resource_id"
   },
   {
     "file": "coherence/intelligence/missionVault.ts",
-    "line": 642,
+    "line": 643,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "             MATCH (m:Mission {mission_id: $missionId})             MERGE (ms:Milestone {milestone_i"
   },
   {
     "file": "coherence/intelligence/missionVault.ts",
-    "line": 659,
+    "line": 660,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "             MATCH (m:Mission {mission_id: $missionId})             MERGE (rf:RiskFactor {risk_id: $"
   },
   {
     "file": "coherence/intelligence/missionVault.ts",
-    "line": 676,
+    "line": 677,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "             MATCH (m:Mission {mission_id: $missionId})             MERGE (sc:SuccessCriteria {crite"
   },
   {
     "file": "coherence/intelligence/narrativeImpactModel.ts",
-    "line": 672,
+    "line": 673,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "               MATCH (ni:NarrativeImpact {impact_id: $impactId})               MERGE (e:Entity {enti"
   },
   {
-    "file": "config/database.ts",
-    "line": 230,
+    "file": "data/UserRepository.ts",
+    "line": 15,
     "type": "SQL",
     "message": "Query accessing 'users' likely missing 'tenant_id' filter",
-    "snippet": "       CREATE TABLE IF NOT EXISTS user_sessions (         id UUID PRIMARY KEY DEFAULT gen_random_uui"
+    "snippet": "SELECT COUNT(*) FROM users WHERE is_active = TRUE"
+  },
+  {
+    "file": "data/UserRepository.ts",
+    "line": 23,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT COUNT(*) FROM users WHERE is_active = TRUE AND mfa_enabled = TRUE"
   },
   {
     "file": "db/compensationLog.ts",
@@ -189,274 +637,316 @@
     "snippet": "       MATCH (e:Entity)       REMOVE e.canonicalId     "
   },
   {
+    "file": "db/online-migrations/exampleUserDisplayNameMigration.ts",
+    "line": 21,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "UPDATE users SET display_name = $1 WHERE id = $2"
+  },
+  {
+    "file": "db/online-migrations/exampleUserDisplayNameMigration.ts",
+    "line": 27,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "UPDATE users SET display_name_canonical = $1 WHERE id = $2"
+  },
+  {
+    "file": "db/online-migrations/exampleUserDisplayNameMigration.ts",
+    "line": 45,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT id, display_name FROM users ORDER BY created_at, id LIMIT $1 OFFSET $2"
+  },
+  {
+    "file": "db/online-migrations/exampleUserDisplayNameMigration.ts",
+    "line": 50,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT count(*)::int AS count FROM users"
+  },
+  {
+    "file": "db/online-migrations/exampleUserDisplayNameMigration.ts",
+    "line": 64,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "UPDATE users SET display_name_canonical = $1 WHERE id = $2"
+  },
+  {
+    "file": "entities/comments/EntityCommentService.ts",
+    "line": 347,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "         SELECT id, username         FROM users         WHERE username = ANY($1)       "
+  },
+  {
     "file": "graphql/intelgraph/resolvers.ts",
-    "line": 112,
+    "line": 114,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "               MATCH (e:Entity {id: $id})               OPTIONAL MATCH (e)-[:FROM_SOURCE]->(s:Source"
   },
   {
     "file": "graphql/intelgraph/resolvers.ts",
-    "line": 807,
+    "line": 819,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (d:Decision {id: $decisionId})                  UNWIND $evidenceIds as evidenceId             "
   },
   {
     "file": "graphql/intelgraph/resolvers.ts",
-    "line": 817,
+    "line": 829,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (d:Decision {id: $decisionId})                  UNWIND $claimIds as claimId                  M"
   },
   {
     "file": "graphql/intelgraph/resolvers.ts",
-    "line": 864,
+    "line": 876,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (c:Claim {id: $id})              SET c.claimType = $claimType,                  c.statement = "
   },
   {
     "file": "graphql/intelgraph/resolvers.ts",
-    "line": 917,
+    "line": 929,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Evidence {id: $id})              SET e.title = $title,                  e.description = $de"
   },
   {
     "file": "graphql/intelgraph/resolvers.ts",
-    "line": 975,
+    "line": 987,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (d:Decision {id: $id})              SET d.title = $title,                  d.description = $de"
   },
   {
     "file": "graphql/intelgraph/resolvers.ts",
-    "line": 1026,
+    "line": 1038,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (d:Decision {id: $decisionId})                UNWIND $evidenceIds as evidenceId               "
   },
   {
     "file": "graphql/intelgraph/resolvers.ts",
-    "line": 1036,
+    "line": 1048,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (d:Decision {id: $decisionId})                UNWIND $claimIds as claimId                MATCH"
   },
   {
     "file": "graphql/intelgraph/resolvers.ts",
-    "line": 1079,
+    "line": 1091,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (c:Claim {id: $id}) WHERE c.tenant = $tenant RETURN c"
   },
   {
     "file": "graphql/intelgraph/resolvers.ts",
-    "line": 1117,
+    "line": 1129,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Evidence {id: $id}) WHERE e.tenant = $tenant RETURN e"
   },
   {
     "file": "graphql/intelgraph/resolvers.ts",
-    "line": 1169,
+    "line": 1181,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (d:Decision {id: $id}) WHERE d.tenant = $tenant          OPTIONAL MATCH (d)-[:SUPPORTED_BY]->("
   },
   {
     "file": "graphql/intelgraph/resolvers.ts",
-    "line": 1214,
+    "line": 1226,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (c:Claim)          WHERE c.tenant = $tenant          AND (toLower(c.statement) CONTAINS toLowe"
   },
   {
     "file": "graphql/intelgraph/resolvers.ts",
-    "line": 1257,
+    "line": 1269,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Evidence)          WHERE e.tenant = $tenant          AND (toLower(e.title) CONTAINS toLower"
   },
   {
     "file": "graphql/intelgraph/resolvers.ts",
-    "line": 1304,
+    "line": 1316,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (d:Decision)          WHERE d.tenant = $tenant          AND (toLower(d.title) CONTAINS toLower"
   },
   {
     "file": "graphql/loaders.ts",
-    "line": 34,
+    "line": 35,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "             MATCH (n) WHERE elementId(n) IN $ids OR n.id IN $ids             RETURN n             "
   },
   {
     "file": "graphql/multimodalResolvers.ts",
-    "line": 920,
+    "line": 921,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "           MATCH (e:MultimodalEntity {id: $entityId})-[:EXTRACTED_FROM]->(m:MediaSource)           R"
   },
   {
     "file": "graphql/multimodalResolvers.ts",
-    "line": 939,
+    "line": 940,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "           MATCH (e:MultimodalEntity {id: $entityId})-[:HAS_CROSS_MODAL_MATCH]->(c:CrossModalMatch) "
   },
   {
     "file": "graphql/multimodalResolvers.ts",
-    "line": 958,
+    "line": 959,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "           MATCH (e:MultimodalEntity {id: $entityId})-[r:MultimodalRelationship]-(other:MultimodalEn"
   },
   {
     "file": "graphql/multimodalResolvers.ts",
-    "line": 985,
+    "line": 986,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "           MATCH (j:ExtractionJob {id: $jobId})-[:EXTRACTED]->(e:MultimodalEntity)           OPTIONA"
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 107,
+    "line": 165,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Entity {id: $id})${permClause}            MATCH (creator:User {id: e.createdBy})           "
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 247,
+    "line": 305,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (from:Entity)-[r:RELATIONSHIP {id: $id}]->(to:Entity)${permClause}            RETURN r, from, "
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 382,
+    "line": 440,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (i:Investigation {id: $id})            MATCH (creator:User {id: i.createdBy})            OPTIO"
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 520,
+    "line": 578,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Entity {investigationId: $investigationId}) RETURN e"
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 525,
+    "line": 583,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (from:Entity {investigationId: $investigationId})-[r:RELATIONSHIP]->(to:Entity {investigationI"
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 604,
+    "line": 662,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Entity {id: $entityId})-[r]->(related:Entity)            RETURN related, type(r) as relatio"
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 849,
+    "line": 915,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Entity {id: $id}) RETURN e.investigationId as invId"
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 890,
+    "line": 956,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Entity {id: $id})            SET ${updateFields.join("
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 923,
+    "line": 993,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Entity {id: $id})            OPTIONAL MATCH (e)-[r:RELATIONSHIP]-()            DELETE r, e "
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 979,
+    "line": 1053,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (from:Entity {id: $fromEntityId})            MATCH (to:Entity {id: $toEntityId})            CR"
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 1074,
+    "line": 1152,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (from:Entity {id: $fromEntityId})              MATCH (to:Entity {id: $toEntityId})            "
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 1194,
+    "line": 1276,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (:Entity)-[r:RELATIONSHIP {id: $id}]->(:Entity) RETURN r.investigationId as invId"
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 1239,
+    "line": 1321,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (from:Entity)-[r:RELATIONSHIP {id: $id}]->(to:Entity)            SET ${updateFields.join("
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 1285,
+    "line": 1371,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (a:Entity)-[r:RELATIONSHIP {id: $id}]-(b:Entity)            WITH a, b, r            DELETE r  "
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 1418,
+    "line": 1508,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (i:Investigation {id: $id})            SET ${updateFields.join("
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 1562,
+    "line": 1717,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Entity {id: $entityId})-[r:RELATIONSHIP]-(other:Entity)            RETURN r, other"
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 1585,
+    "line": 1740,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (other:Entity)-[r:RELATIONSHIP]->(e:Entity {id: $entityId})            RETURN r, other"
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 1608,
+    "line": 1763,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Entity {id: $entityId})-[r:RELATIONSHIP]->(other:Entity)            RETURN r, other"
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 1642,
+    "line": 1797,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Entity {investigationId: $investigationId}) RETURN e"
   },
   {
     "file": "graphql/resolvers/crudResolvers.ts",
-    "line": 1660,
+    "line": 1815,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (from:Entity {investigationId: $investigationId})-[r:RELATIONSHIP]->(to:Entity {investigationI"
@@ -467,6 +957,55 @@
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Entity {id: $id}) SET e.embedding = $embedding, e.embeddingModel = $model, e.embeddingGener"
+  },
+  {
+    "file": "graphql/resolvers/user.ts",
+    "line": 98,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT id, email, username, first_name, last_name, role, is_active,                   last_login, pr"
+  },
+  {
+    "file": "graphql/resolvers/user.ts",
+    "line": 145,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT id, email, username, first_name, last_name, role, is_active,                   last_login, pr"
+  },
+  {
+    "file": "graphql/resolvers/user.ts",
+    "line": 192,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT id FROM users WHERE email = $1 OR username = $2"
+  },
+  {
+    "file": "graphql/resolvers/user.ts",
+    "line": 267,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT id FROM users WHERE id = $1"
+  },
+  {
+    "file": "graphql/resolvers/user.ts",
+    "line": 294,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "UPDATE users            SET ${updates.join("
+  },
+  {
+    "file": "graphql/resolvers/user.ts",
+    "line": 343,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "UPDATE users            SET is_active = false, updated_at = NOW()            WHERE id = $1          "
+  },
+  {
+    "file": "graphql/resolvers/user.ts",
+    "line": 405,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "UPDATE users            SET preferences = COALESCE(preferences, "
   },
   {
     "file": "graphql/resolvers.ai.js",
@@ -504,6 +1043,27 @@
     "snippet": "MATCH (e:Entity {id: $entityId})            CREATE (a:Annotation {              id: randomUUID(),   "
   },
   {
+    "file": "graphql/resolvers.canonical.ts",
+    "line": 41,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (n {id: $id}) RETURN n"
+  },
+  {
+    "file": "graphql/resolvers.canonical.ts",
+    "line": 79,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (n:Person {id: $id}) RETURN n"
+  },
+  {
+    "file": "graphql/resolvers.canonical.ts",
+    "line": 114,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "                        MATCH (n)                        WHERE n.id CONTAINS $query OR n.name CONTAI"
+  },
+  {
     "file": "graphql/resolvers.document.js",
     "line": 7,
     "type": "Cypher",
@@ -519,17 +1079,143 @@
   },
   {
     "file": "graphql/resolvers.er.ts",
-    "line": 324,
+    "line": 369,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
-    "snippet": "           MATCH (a:Entity) WHERE a.id = $entityA OR a.uuid = $entityA           MATCH (b:Entity) WH"
+    "snippet": "             MATCH (a:Entity) WHERE a.id = $entityA OR a.uuid = $entityA             MATCH (b:Entity"
+  },
+  {
+    "file": "graphql/resolvers.threat-actor.js",
+    "line": 13,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (a:ThreatActor) RETURN a LIMIT 25"
+  },
+  {
+    "file": "graphql/resolvers.threat-actor.js",
+    "line": 57,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (a:ThreatActor {id: $id})-[:USES_TTP]->(t:TTP) RETURN t"
+  },
+  {
+    "file": "graphql/resolvers.threat-actor.js",
+    "line": 71,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (a:ThreatActor {id: $id})-[:USES_INFRA]->(i:Infrastructure) RETURN i"
+  },
+  {
+    "file": "graphql/resolvers.threat-actor.js",
+    "line": 85,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (a:ThreatActor {id: $id})-[r:ATTRIBUTED_TO]->(c:Campaign) RETURN c, r.confidence"
+  },
+  {
+    "file": "graphql/resolvers.threat-actor.js",
+    "line": 102,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (a:ThreatActor {id: $id})-[:RELATED_TO]->(p:ThreatActor) RETURN p"
+  },
+  {
+    "file": "graphql/resolvers.threat-actor.js",
+    "line": 116,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (a:ThreatActor {id: $id})-[:EXHIBITS]->(b:Behavior) RETURN b"
+  },
+  {
+    "file": "intel/cti/bundle-serializer.ts",
+    "line": 182,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "           MATCH (source:Entity)-[r]->(target:Entity)           WHERE source.id IN $entityIds AND ta"
+  },
+  {
+    "file": "intelgraph/client-impl.ts",
+    "line": 41,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (r:MaestroRun {id: $runId})         SET r += $props         "
+  },
+  {
+    "file": "intelgraph/client-impl.ts",
+    "line": 57,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (r:MaestroRun {id: $props.runId})         MERGE (t:MaestroTask {id: $props.id})      "
+  },
+  {
+    "file": "intelgraph/client-impl.ts",
+    "line": 81,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (t:MaestroTask {id: $taskId})         SET t += $props         "
+  },
+  {
+    "file": "intelgraph/client-impl.ts",
+    "line": 96,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (t:MaestroTask {id: $artifact.taskId})         MERGE (a:MaestroArtifact {id: $artifac"
+  },
+  {
+    "file": "intelgraph/client-impl.ts",
+    "line": 115,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (r:MaestroRun {id: $sample.runId})         CREATE (c:MaestroCostSample)         SET c"
+  },
+  {
+    "file": "intelgraph/client-impl.ts",
+    "line": 132,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (r:MaestroRun {id: $runId})-[:HAS_COST]->(c:MaestroCostSample)         RETURN        "
+  },
+  {
+    "file": "intelgraph/client-impl.ts",
+    "line": 182,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (r:MaestroRun {id: $runId})         RETURN r         "
+  },
+  {
+    "file": "intelgraph/client-impl.ts",
+    "line": 203,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (r:MaestroRun {id: $runId})-[:HAS_TASK]->(t:MaestroTask)         RETURN t         ORD"
+  },
+  {
+    "file": "intelgraph/client-impl.ts",
+    "line": 226,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (t:MaestroTask {id: $taskId})         RETURN t         "
+  },
+  {
+    "file": "intelgraph/client-impl.ts",
+    "line": 247,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (r:MaestroRun {id: $runId})-[:HAS_ARTIFACT]->(a:MaestroArtifact)         RETURN a    "
+  },
+  {
+    "file": "intelgraph/client-impl.ts",
+    "line": 264,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (t:MaestroTask {id: $taskId})-[:HAS_ARTIFACT]->(a:MaestroArtifact)         RETURN a  "
   },
   {
     "file": "lib/auth.ts",
-    "line": 77,
+    "line": 113,
     "type": "SQL",
     "message": "Query accessing 'users' likely missing 'tenant_id' filter",
-    "snippet": "SELECT id, email, username, role FROM users WHERE id = $1"
+    "snippet": "SELECT id, email, username, role, token_version FROM users WHERE id = $1"
   },
   {
     "file": "maestro/mcp/audit-api.ts",
@@ -610,49 +1296,70 @@
   },
   {
     "file": "pii/examples/fullIntegration.ts",
-    "line": 160,
+    "line": 161,
     "type": "SQL",
     "message": "Query accessing 'users' likely missing 'tenant_id' filter",
     "snippet": "SELECT * FROM users WHERE id = $1"
   },
   {
     "file": "pii/examples/fullIntegration.ts",
-    "line": 167,
+    "line": 168,
     "type": "SQL",
     "message": "Query accessing 'users' likely missing 'tenant_id' filter",
     "snippet": "SELECT * FROM users"
   },
   {
     "file": "pii/examples/fullIntegration.ts",
-    "line": 208,
+    "line": 209,
     "type": "SQL",
     "message": "Query accessing 'users' likely missing 'tenant_id' filter",
     "snippet": "SELECT * FROM users WHERE id = $1"
   },
   {
+    "file": "predictive/PredictiveService.ts",
+    "line": 144,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "             MATCH (n)             WHERE n.investigation_id = $invId             OPTIONAL MATCH (n)-"
+  },
+  {
+    "file": "products/fusion/FusionService.ts",
+    "line": 147,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (a:Entity {id: $idA}), (b:Entity {id: $idB})                  MERGE (a)-[r:RELATED_TO {type: $"
+  },
+  {
+    "file": "provenance/CanonicalGraphService.ts",
+    "line": 85,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (n:CanonicalNode {id: $id}) RETURN n.nodeType as type"
+  },
+  {
     "file": "repos/CaseRepo.ts",
-    "line": 167,
+    "line": 176,
     "type": "SQL",
     "message": "Query accessing 'cases' likely missing 'tenant_id' filter",
     "snippet": "UPDATE maestro.cases SET ${updateFields.join("
   },
   {
     "file": "repos/CaseRepo.ts",
-    "line": 208,
+    "line": 217,
     "type": "SQL",
     "message": "Query accessing 'cases' likely missing 'tenant_id' filter",
     "snippet": "DELETE FROM maestro.cases WHERE id = $1"
   },
   {
     "file": "repos/EntityRepo.ts",
-    "line": 368,
+    "line": 403,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Entity {id: $id})            DETACH DELETE e"
   },
   {
     "file": "repos/RelationshipRepo.ts",
-    "line": 380,
+    "line": 383,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH ()-[r:REL {id: $id}]-()            DELETE r"
@@ -679,6 +1386,20 @@
     "snippet": "MATCH (a)-[r]->(b) WHERE r.snapshotId = $snapshotId RETURN a.id as u, b.id as v"
   },
   {
+    "file": "resolvers/entities.ts",
+    "line": 34,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (n {id: $id, tenant_id: $tenant}) RETURN n"
+  },
+  {
+    "file": "resolvers/entities.ts",
+    "line": 76,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (startNode {id: $id, tenant_id: $tenant})-[*1..${maxHops}]-(neighbor)            WHERE neighbo"
+  },
+  {
     "file": "routes/admin.js",
     "line": 17,
     "type": "SQL",
@@ -693,22 +1414,29 @@
     "snippet": "UPDATE users SET role = $1 WHERE id = $2"
   },
   {
+    "file": "routes/admin.ts",
+    "line": 103,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT COUNT(*) FROM users"
+  },
+  {
     "file": "routes/entities.js",
-    "line": 74,
+    "line": 141,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Entity {uuid: $id}) RETURN e LIMIT 1"
   },
   {
     "file": "routes/entities.js",
-    "line": 136,
+    "line": 203,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Entity {uuid: $id})        SET e.label = coalesce($label, e.label),            e.descriptio"
   },
   {
     "file": "routes/entities.js",
-    "line": 164,
+    "line": 231,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Entity {uuid: $id}) DETACH DELETE e RETURN count(*) AS c"
@@ -721,78 +1449,78 @@
     "snippet": "MATCH (e:Entity {id: $id}) SET e.embedding = $embedding, e.embeddingModel = $model, e.embeddingGener"
   },
   {
-    "file": "routes/usage.ts",
-    "line": 12,
+    "file": "scripts/generate_retention_report.ts",
+    "line": 17,
     "type": "SQL",
-    "message": "Query accessing 'runs' likely missing 'tenant_id' filter",
-    "snippet": "SELECT tenant, month, cpu_sec, gb_sec, egress_gb, runs FROM usage_counters WHERE month=$1 ORDER BY t"
+    "message": "Query accessing 'audit_logs' likely missing 'tenant_id' filter",
+    "snippet": "SELECT * FROM audit_logs        WHERE action LIKE "
   },
   {
     "file": "search/search.ts",
-    "line": 107,
+    "line": 127,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (c:Case) WHERE c.id IN $ids         OPTIONAL MATCH (c)-[:MENTIONS]->(i:IOC)         RETURN c.i"
   },
   {
     "file": "services/AdminPanelService.ts",
-    "line": 331,
+    "line": 342,
     "type": "SQL",
     "message": "Query accessing 'users' likely missing 'tenant_id' filter",
     "snippet": "SELECT COUNT(*) as total FROM users WHERE ${whereClause}"
   },
   {
     "file": "services/AdminPanelService.ts",
-    "line": 339,
+    "line": 350,
     "type": "SQL",
     "message": "Query accessing 'users' likely missing 'tenant_id' filter",
     "snippet": "SELECT * FROM users WHERE ${whereClause} ORDER BY created_at DESC LIMIT $${paramCount + 1} OFFSET $$"
   },
   {
     "file": "services/AdminPanelService.ts",
-    "line": 353,
+    "line": 364,
     "type": "SQL",
     "message": "Query accessing 'users' likely missing 'tenant_id' filter",
     "snippet": "SELECT * FROM users WHERE id = $1"
   },
   {
     "file": "services/AdminPanelService.ts",
-    "line": 474,
+    "line": 485,
     "type": "SQL",
     "message": "Query accessing 'users' likely missing 'tenant_id' filter",
     "snippet": "UPDATE users SET ${updates.join("
   },
   {
     "file": "services/AdminPanelService.ts",
-    "line": 556,
+    "line": 567,
     "type": "SQL",
     "message": "Query accessing 'users' likely missing 'tenant_id' filter",
     "snippet": "UPDATE users SET is_active = false, updated_at = NOW() WHERE id = $1"
   },
   {
     "file": "services/AdminPanelService.ts",
-    "line": 581,
+    "line": 592,
     "type": "SQL",
     "message": "Query accessing 'users' likely missing 'tenant_id' filter",
     "snippet": "UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2"
   },
   {
     "file": "services/AdminPanelService.ts",
-    "line": 716,
+    "line": 727,
     "type": "SQL",
     "message": "Query accessing 'audit_logs' likely missing 'tenant_id' filter",
     "snippet": "SELECT COUNT(*) as total FROM audit_logs WHERE ${whereClause}"
   },
   {
     "file": "services/AdminPanelService.ts",
-    "line": 724,
+    "line": 735,
     "type": "SQL",
     "message": "Query accessing 'audit_logs' likely missing 'tenant_id' filter",
     "snippet": "SELECT * FROM audit_logs WHERE ${whereClause} ORDER BY timestamp DESC LIMIT $${paramCount + 1} OFFSE"
   },
   {
     "file": "services/AdminPanelService.ts",
-    "line": 1079,
+    "line": 1090,
     "type": "SQL",
     "message": "Query accessing 'audit_logs' likely missing 'tenant_id' filter",
     "snippet": "       SELECT action, COUNT(*) as count       FROM audit_logs       WHERE timestamp > NOW() - INTERV"
@@ -806,45 +1534,80 @@
   },
   {
     "file": "services/AuthService.ts",
-    "line": 269,
+    "line": 322,
     "type": "SQL",
     "message": "Query accessing 'users' likely missing 'tenant_id' filter",
     "snippet": "SELECT id FROM users WHERE email = $1 OR username = $2"
   },
   {
     "file": "services/AuthService.ts",
-    "line": 351,
+    "line": 398,
     "type": "SQL",
     "message": "Query accessing 'users' likely missing 'tenant_id' filter",
     "snippet": "SELECT * FROM users WHERE email = $1 AND is_active = true"
   },
   {
     "file": "services/AuthService.ts",
-    "line": 367,
+    "line": 410,
     "type": "SQL",
     "message": "Query accessing 'users' likely missing 'tenant_id' filter",
     "snippet": "UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1"
   },
   {
     "file": "services/AuthService.ts",
-    "line": 466,
+    "line": 468,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT * FROM users WHERE email = $1 AND is_active = true"
+  },
+  {
+    "file": "services/AuthService.ts",
+    "line": 485,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1"
+  },
+  {
+    "file": "services/AuthService.ts",
+    "line": 588,
     "type": "SQL",
     "message": "Query accessing 'users' likely missing 'tenant_id' filter",
     "snippet": "SELECT * FROM users WHERE id = $1 AND is_active = true"
   },
   {
     "file": "services/AuthService.ts",
-    "line": 525,
+    "line": 654,
     "type": "SQL",
     "message": "Query accessing 'users' likely missing 'tenant_id' filter",
     "snippet": "SELECT * FROM users WHERE id = $1 AND is_active = true"
   },
   {
+    "file": "services/BackupService.ts",
+    "line": 198,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (n) RETURN n"
+  },
+  {
+    "file": "services/BackupService.ts",
+    "line": 214,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH ()-[r]->() RETURN r"
+  },
+  {
     "file": "services/CacheWarmingService.ts",
-    "line": 283,
+    "line": 430,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "         MATCH (i:Investigation)         WHERE i.lastAccessedAt > datetime() - duration("
+  },
+  {
+    "file": "services/DatabaseService.ts",
+    "line": 25,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT * FROM users"
   },
   {
     "file": "services/EnterpriseSecurityService.js",
@@ -917,41 +1680,6 @@
     "snippet": "         // Check for orphaned relationships         OPTIONAL MATCH ()-[r:RELATIONSHIP]-()         W"
   },
   {
-    "file": "services/EntityResolutionService.ts",
-    "line": 72,
-    "type": "Cypher",
-    "message": "Cypher query likely missing 'tenantId' filter",
-    "snippet": "       MATCH (e:Entity)       WHERE e.name IS NOT NULL OR e.email IS NOT NULL OR e.url IS NOT NULL  "
-  },
-  {
-    "file": "services/EntityResolutionService.ts",
-    "line": 129,
-    "type": "Cypher",
-    "message": "Cypher query likely missing 'tenantId' filter",
-    "snippet": "       MATCH (e:Entity)       WHERE e.id IN $allEntityIds       SET e.canonicalId = $masterEntityId "
-  },
-  {
-    "file": "services/EntityResolutionService.ts",
-    "line": 139,
-    "type": "Cypher",
-    "message": "Cypher query likely missing 'tenantId' filter",
-    "snippet": "       MATCH (n)-[r]->(d:Entity)       WHERE d.id IN $duplicateEntityIds       MATCH (m:Entity {id: "
-  },
-  {
-    "file": "services/EntityResolutionService.ts",
-    "line": 152,
-    "type": "Cypher",
-    "message": "Cypher query likely missing 'tenantId' filter",
-    "snippet": "       MATCH (d:Entity)-[r]->(n)       WHERE d.id IN $duplicateEntityIds       MATCH (m:Entity {id: "
-  },
-  {
-    "file": "services/EntityResolutionService.ts",
-    "line": 165,
-    "type": "Cypher",
-    "message": "Cypher query likely missing 'tenantId' filter",
-    "snippet": "       MATCH (d:Entity)       WHERE d.id IN $duplicateEntityIds       DETACH DELETE d     "
-  },
-  {
     "file": "services/GACoremetricsService.ts",
     "line": 337,
     "type": "Cypher",
@@ -959,39 +1687,74 @@
     "snippet": "         MATCH (e:Entity)         WITH COUNT(e) as total,              COUNT(CASE WHEN e.name IS NOT"
   },
   {
+    "file": "services/GAEnrollmentService.ts",
+    "line": 166,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT COUNT(*) as count FROM users"
+  },
+  {
+    "file": "services/GraphConsistencyService.ts",
+    "line": 44,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (n) WHERE NOT (n)--() RETURN n LIMIT 1000"
+  },
+  {
     "file": "services/GraphStore.ts",
-    "line": 68,
+    "line": 75,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Entity) WHERE $type IS NULL OR e.type = $type RETURN e LIMIT $limit"
   },
   {
     "file": "services/GraphStore.ts",
-    "line": 81,
+    "line": 88,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (:Entity {id: $id})-[r:RELATIONSHIP]-(:Entity) RETURN r"
   },
   {
     "file": "services/GraphStore.ts",
-    "line": 113,
+    "line": 173,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (a:Entity {id: $fromId}), (b:Entity {id: $toId})              MERGE (a)-[rel:RELATIONSHIP {id:"
   },
   {
     "file": "services/GraphStore.ts",
-    "line": 132,
+    "line": 192,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (n:Entity {id: $id}) DETACH DELETE n"
   },
   {
     "file": "services/GraphStore.ts",
-    "line": 143,
+    "line": 203,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH ()-[r:RELATIONSHIP {id: $id}]-() DELETE r"
+  },
+  {
+    "file": "services/GraphXAIService.ts",
+    "line": 31,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (n {id: $nodeId})-[r*1..2]-(m)         RETURN n.id as source, m.id as target, labels("
+  },
+  {
+    "file": "services/GraphXAIService.ts",
+    "line": 47,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (n {id: $nodeId})         OPTIONAL MATCH (n)-[]-(m)         RETURN n.id as u, m.id as"
+  },
+  {
+    "file": "services/GraphXAIService.ts",
+    "line": 95,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "              MATCH (n {id: $nodeId})-->(m)              RETURN n.id as nid, labels(n) as nlabels, m"
   },
   {
     "file": "services/MultimodalDataService.js",
@@ -1085,22 +1848,57 @@
     "snippet": "UPDATE users SET is_active = false, updated_at = NOW() WHERE email = $1"
   },
   {
+    "file": "services/PasswordResetService.ts",
+    "line": 73,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT id, email, first_name FROM users WHERE email = $1 AND is_active = true"
+  },
+  {
+    "file": "services/PasswordResetService.ts",
+    "line": 159,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT prt.id, prt.user_id, prt.expires_at, prt.used_at, u.email          FROM password_reset_tokens"
+  },
+  {
+    "file": "services/PasswordResetService.ts",
+    "line": 187,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "UPDATE users          SET password_hash = $1, updated_at = NOW(), failed_login_attempts = 0, locked_"
+  },
+  {
+    "file": "services/PasswordResetService.ts",
+    "line": 251,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT id, email, password_hash FROM users WHERE id = $1 AND is_active = true"
+  },
+  {
+    "file": "services/PasswordResetService.ts",
+    "line": 279,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2"
+  },
+  {
     "file": "services/PredictiveRelationshipService.ts",
-    "line": 66,
+    "line": 65,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Entity {id: $id}) RETURN e"
   },
   {
     "file": "services/PredictiveRelationshipService.ts",
-    "line": 198,
+    "line": 197,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Entity {id: $id}) SET e.embedding = $embedding"
   },
   {
     "file": "services/QueryPreviewService.ts",
-    "line": 584,
+    "line": 695,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "         MATCH (e:Entity {investigationId: $investigationId})         WITH DISTINCT labels(e) as ent"
@@ -1120,8 +1918,15 @@
     "snippet": "MATCH ()-[r]-() RETURN r LIMIT 1"
   },
   {
+    "file": "services/SSOService.ts",
+    "line": 71,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT * FROM users WHERE email = $1"
+  },
+  {
     "file": "services/SemanticSearchService.ts",
-    "line": 77,
+    "line": 140,
     "type": "SQL",
     "message": "Query accessing 'cases' likely missing 'tenant_id' filter",
     "snippet": "UPDATE cases SET embedding = $1::vector WHERE id = $2"
@@ -1139,6 +1944,202 @@
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "         MATCH (a:Entity)-[r]->(b:Entity)         WHERE (a.investigation_id = $investigationId OR $i"
+  },
+  {
+    "file": "services/SupernodeQueryOptimizer.ts",
+    "line": 137,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (e:Entity {id: $entityId})         OPTIONAL MATCH (e)-[r_out]->()         WITH e, cou"
+  },
+  {
+    "file": "services/SupernodeQueryOptimizer.ts",
+    "line": 540,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (e:Entity)         WITH e, size((e)--()) AS connectionCount         WHERE connectionC"
+  },
+  {
+    "file": "services/ThreatActorProfileService.js",
+    "line": 278,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (a:ThreatActor) RETURN a LIMIT $limit"
+  },
+  {
+    "file": "services/ThreatIntelligenceFusionService.ts",
+    "line": 66,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (a {id: $sourceId}), (b {id: $targetId})         MERGE (a)-[r:${type}]->(b)         S"
+  },
+  {
+    "file": "services/UserManagementService.ts",
+    "line": 204,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT COUNT(*) FROM users WHERE ${whereClause}"
+  },
+  {
+    "file": "services/UserManagementService.ts",
+    "line": 211,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT * FROM users WHERE ${whereClause}          ORDER BY ${sortColumn} ${sortOrder.toUpperCase()} "
+  },
+  {
+    "file": "services/UserManagementService.ts",
+    "line": 371,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "SELECT id FROM users WHERE email = $1"
+  },
+  {
+    "file": "services/UserManagementService.ts",
+    "line": 562,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "UPDATE users SET ${updates.join("
+  },
+  {
+    "file": "services/UserManagementService.ts",
+    "line": 696,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "DELETE FROM users WHERE id = $1"
+  },
+  {
+    "file": "services/UserManagementService.ts",
+    "line": 699,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "UPDATE users SET is_active = false, updated_at = NOW() WHERE id = $1"
+  },
+  {
+    "file": "services/VeracityScoringService.ts",
+    "line": 83,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (n:Entity {id: $id})         SET n.veracityScore = $score,             n.veracityConf"
+  },
+  {
+    "file": "services/consistency/GraphConsistencyService.ts",
+    "line": 62,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (n:Entity)          WHERE n.investigationId = $investigationId          RETURN n.id as id"
+  },
+  {
+    "file": "services/consistency/GraphConsistencyService.ts",
+    "line": 72,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH ()-[r:RELATIONSHIP]->()          WHERE r.investigationId = $investigationId          RETURN r."
+  },
+  {
+    "file": "services/consistency/GraphConsistencyService.ts",
+    "line": 232,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "                 MATCH (e:Entity)                 WHERE e.id IN $ids                 DETACH DELETE e"
+  },
+  {
+    "file": "services/consistency/GraphConsistencyService.ts",
+    "line": 243,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "                 MATCH ()-[r:RELATIONSHIP]->()                 WHERE r.id IN $ids                 DE"
+  },
+  {
+    "file": "services/er/EntityResolutionV2Service.ts",
+    "line": 531,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "MATCH (n) WHERE n.id IN $ids RETURN n"
+  },
+  {
+    "file": "services/er/EntityResolutionV2Service.ts",
+    "line": 652,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "          MATCH (source)-[r]->(target)          WHERE (source.id IN $mergeIds OR target.id IN $merge"
+  },
+  {
+    "file": "services/er/EntityResolutionV2Service.ts",
+    "line": 685,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "           MATCH (d:ERDecision {id: $decisionId})           MATCH (m {id: $masterId})           MERG"
+  },
+  {
+    "file": "services/er/EntityResolutionV2Service.ts",
+    "line": 710,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "               MATCH (m {id: $masterId})               MATCH (t {id: $targetId})               // Us"
+  },
+  {
+    "file": "services/er/EntityResolutionV2Service.ts",
+    "line": 731,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "               MATCH (s {id: $sourceId})               MATCH (m {id: $masterId})               MERGE"
+  },
+  {
+    "file": "services/er/EntityResolutionV2Service.ts",
+    "line": 766,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (d:ERDecision {id: $decisionId})         SET d.archivedRelationships = $blob       "
+  },
+  {
+    "file": "services/er/EntityResolutionV2Service.ts",
+    "line": 771,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "         MATCH (n)-[r]-()         WHERE n.id IN $mergeIds AND NOT n:ERDecision         SET r.merged "
+  },
+  {
+    "file": "services/er/EntityResolutionV2Service.ts",
+    "line": 780,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "             MATCH (n {id: $id})             SET n:MergedEntity             SET n.mergedInto = $mast"
+  },
+  {
+    "file": "services/er/EntityResolutionV2Service.ts",
+    "line": 810,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "        MATCH (d:ERDecision {id: $decisionId})        RETURN d      "
+  },
+  {
+    "file": "services/er/EntityResolutionV2Service.ts",
+    "line": 827,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "            MATCH (n {id: $id})            SET n:Entity            REMOVE n:MergedEntity            "
+  },
+  {
+    "file": "services/er/EntityResolutionV2Service.ts",
+    "line": 836,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "          MATCH ()-[r {mergedByDecision: $decisionId}]-()          REMOVE r.merged          REMOVE r"
+  },
+  {
+    "file": "services/er/EntityResolutionV2Service.ts",
+    "line": 850,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "          MATCH (d:ERDecision {id: $decisionId})          SET d:RevertedDecision          SET d.reve"
+  },
+  {
+    "file": "services/safety/ModelAbuseWatch.ts",
+    "line": 42,
+    "type": "SQL",
+    "message": "Query accessing 'users' likely missing 'tenant_id' filter",
+    "snippet": "UPDATE users SET status = "
   },
   {
     "file": "services/semantic-rag/GraphTraversalAlgorithms.ts",
@@ -1247,70 +2248,70 @@
   },
   {
     "file": "services/semantic-rag/HybridSemanticRetriever.ts",
-    "line": 489,
+    "line": 490,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "         MATCH (n:Entity)         WHERE n.id IN $nodeIds         OPTIONAL MATCH (n)-[r]-(m)         "
   },
   {
     "file": "services/semantic-rag/STIXTAXIIFusionService.ts",
-    "line": 417,
+    "line": 418,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "       MATCH (a:Entity {stixId: $sourceRef}), (b:Entity {stixId: $targetRef})       MERGE (a)-[r:${r"
   },
   {
     "file": "services/semantic-rag/STIXTAXIIFusionService.ts",
-    "line": 458,
+    "line": 459,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "       MATCH (e:Entity)       WHERE e.stixId IS NULL         ${investigationId ? "
   },
   {
     "file": "services/semantic-rag/STIXTAXIIFusionService.ts",
-    "line": 516,
+    "line": 517,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "           MATCH (stix:Entity {stixId: $stixId}), (target:Entity {id: $nodeId})           MERGE (sti"
   },
   {
     "file": "services/semantic-rag/STIXTAXIIFusionService.ts",
-    "line": 549,
+    "line": 550,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "         MATCH (start:Entity {id: $nodeId})         CALL apoc.path.subgraphNodes(start, {           "
   },
   {
     "file": "services/semantic-rag/STIXTAXIIFusionService.ts",
-    "line": 639,
+    "line": 640,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "         MATCH (e:Entity)         ${whereClause}         MATCH (e)<-[:IOC_CORRELATES]-(ioc:Entity:In"
   },
   {
     "file": "services/semantic-rag/STIXTAXIIFusionService.ts",
-    "line": 651,
+    "line": 652,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "         MATCH (e:Entity)         ${whereClause}         MATCH (e)<-[:IOC_CORRELATES]-()-[:ATTRIBUTE"
   },
   {
     "file": "services/semantic-rag/STIXTAXIIFusionService.ts",
-    "line": 664,
+    "line": 665,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "         MATCH (e:Entity)         ${whereClause}         MATCH (e)<-[:IOC_CORRELATES]-()-[:ATTRIBUTE"
   },
   {
     "file": "services/semantic-rag/STIXTAXIIFusionService.ts",
-    "line": 677,
+    "line": 678,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "         MATCH (e:Entity)         ${whereClause}         WITH COALESCE(e.threatScore, 0) + COALESCE("
   },
   {
     "file": "services/semantic-rag/STIXTAXIIFusionService.ts",
-    "line": 704,
+    "line": 705,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "         MATCH (e:Entity {investigationId: $investigationId})         WHERE e.killChainPhases IS NOT"
@@ -1321,6 +2322,13 @@
     "type": "SQL",
     "message": "Query accessing 'runs' likely missing 'tenant_id' filter",
     "snippet": "SELECT id FROM runs WHERE id = $1"
+  },
+  {
+    "file": "sigint/persistence/SigIntRepository.ts",
+    "line": 168,
+    "type": "Cypher",
+    "message": "Cypher query likely missing 'tenantId' filter",
+    "snippet": "          MATCH (e:Emitter {id: $emitterId})          CREATE (s:Signal {            id: $id,        "
   },
   {
     "file": "tests/entityModel.test.js",
@@ -1359,28 +2367,28 @@
   },
   {
     "file": "utils/sampleData.ts",
-    "line": 108,
+    "line": 134,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Entity) RETURN e LIMIT 5"
   },
   {
     "file": "utils/sampleData.ts",
-    "line": 138,
+    "line": 164,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "           MATCH (from:Entity {id: $from}), (to:Entity {id: $to})           MERGE (from)-[r:${rel.ty"
   },
   {
     "file": "workers/OutboxNeo4jSync.ts",
-    "line": 245,
+    "line": 246,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH (e:Entity {id: $id})            DETACH DELETE e"
   },
   {
     "file": "workers/OutboxNeo4jSync.ts",
-    "line": 321,
+    "line": 322,
     "type": "Cypher",
     "message": "Cypher query likely missing 'tenantId' filter",
     "snippet": "MATCH ()-[r:REL {id: $id}]-()            DELETE r"

@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 
 import pandas as pd
-import networkx as nx
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -24,7 +23,9 @@ class FeatureGuard:
     def __call__(self) -> None:
         enabled = os.getenv("CAUSAL_LAB_ENABLED", "false").lower() == "true"
         if not enabled:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Causal Lab is disabled")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Causal Lab is disabled"
+            )
 
 
 def _to_graph(nx_graph) -> Graph:
@@ -49,7 +50,11 @@ def intervene(request: InterveneRequest):
     return do_calculus(request)
 
 
-@app.get("/explain/{simulation_id}", response_model=ExplainResponse, dependencies=[Depends(FeatureGuard())])
+@app.get(
+    "/explain/{simulation_id}",
+    response_model=ExplainResponse,
+    dependencies=[Depends(FeatureGuard())],
+)
 def explain(simulation_id: str):
     result = store.get(simulation_id)
     if not result:

@@ -1,9 +1,10 @@
 from __future__ import annotations
+
 from dataclasses import dataclass, field
-from enum import Enum
-from typing import Dict, List, Optional, Any
-from uuid import uuid4
 from datetime import datetime
+from enum import Enum
+from typing import Any
+from uuid import uuid4
 
 
 class NodeType(str, Enum):
@@ -26,14 +27,18 @@ class EdgeType(str, Enum):
 class Node:
     id: str
     type: NodeType
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
     created_at: datetime = field(default_factory=datetime.utcnow)
-    stage: Optional[str] = None  # curriculum stage label
-    tags: List[str] = field(default_factory=list)
+    stage: str | None = None  # curriculum stage label
+    tags: list[str] = field(default_factory=list)
 
     @staticmethod
-    def new(type_: NodeType, payload: Dict[str, Any], stage: Optional[str] = None,
-            tags: Optional[List[str]] = None) -> "Node":
+    def new(
+        type_: NodeType,
+        payload: dict[str, Any],
+        stage: str | None = None,
+        tags: list[str] | None = None,
+    ) -> Node:
         return Node(
             id=str(uuid4()),
             type=type_,
@@ -48,4 +53,4 @@ class Edge:
     source: str
     target: str
     type: EdgeType
-    payload: Dict[str, Any] = field(default_factory=dict)
+    payload: dict[str, Any] = field(default_factory=dict)

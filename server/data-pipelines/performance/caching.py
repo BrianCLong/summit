@@ -249,7 +249,6 @@ class MemoryCache:
             len(self.cache) >= self.config.memory_max_size
             or self.current_size_bytes + new_item_size > max_size_bytes
         ):
-
             if not self.cache:
                 break
 

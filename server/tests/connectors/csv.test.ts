@@ -1,4 +1,5 @@
 // Mock config before any imports to prevent process.exit
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 jest.mock('../../src/config.js', () => ({
   cfg: {
     NODE_ENV: 'test',

@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { buildSchema, parse, validate } from 'graphql';
 import { createGraphQLHardening } from '../graphql-hardening.js';
 

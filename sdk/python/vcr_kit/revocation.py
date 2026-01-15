@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, Set
 
 
 class JsonRevocationRegistry:
@@ -12,7 +12,7 @@ class JsonRevocationRegistry:
 
     def __init__(self, path: str | Path, initial: Iterable[str] | None = None) -> None:
         self.path = Path(path)
-        self._revoked: Set[str] = set(initial or [])
+        self._revoked: set[str] = set(initial or [])
         if self.path.exists():
             self._load()
 

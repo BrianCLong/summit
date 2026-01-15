@@ -264,13 +264,13 @@ const crudResolvers = {
 
         const totalCount = countResult.records[0].get('total').toNumber();
         const entities = entitiesResult.records.map(
-          (record) => record.get('e').properties,
+          (record: any) => record.get('e').properties,
         );
 
         const hasNextPage = entities.length > first;
         if (hasNextPage) entities.pop(); // Remove the extra entity
 
-        const edges = entities.map((entity) => ({
+        const edges = entities.map((entity: any) => ({
           node: entity,
           cursor: entity.createdAt,
         }));
@@ -396,7 +396,7 @@ const crudResolvers = {
         ]);
 
         const totalCount = countResult.records[0].get('total').toNumber();
-        const relationships = relationshipsResult.records.map((record) => ({
+        const relationships = relationshipsResult.records.map((record: any) => ({
           ...record.get('r').properties,
           fromEntity: record.get('from').properties,
           toEntity: record.get('to').properties,
@@ -405,7 +405,7 @@ const crudResolvers = {
         const hasNextPage = relationships.length > first;
         if (hasNextPage) relationships.pop();
 
-        const edges = relationships.map((relationship) => ({
+        const edges = relationships.map((relationship: any) => ({
           node: relationship,
           cursor: relationship.createdAt,
         }));
@@ -535,13 +535,13 @@ const crudResolvers = {
 
         const totalCount = countResult.records[0].get('total').toNumber();
         const investigations = investigationsResult.records.map(
-          (record) => record.get('i').properties,
+          (record: any) => record.get('i').properties,
         );
 
         const hasNextPage = investigations.length > first;
         if (hasNextPage) investigations.pop();
 
-        const edges = investigations.map((investigation) => ({
+        const edges = investigations.map((investigation: any) => ({
           node: investigation,
           cursor: investigation.createdAt,
         }));
@@ -586,9 +586,9 @@ const crudResolvers = {
         );
 
         let nodes = entitiesResult.records.map(
-          (record) => record.get('e').properties,
+          (record: any) => record.get('e').properties,
         );
-        let edges = relationshipsResult.records.map((record) => ({
+        let edges = relationshipsResult.records.map((record: any) => ({
           ...record.get('r').properties,
           fromEntity: record.get('from').properties,
           toEntity: record.get('to').properties,
@@ -623,12 +623,12 @@ const crudResolvers = {
         };
 
         nodes = nodes.filter(
-          (n) => matchesConfidence(n) && matchesTags(n) && matchesTime(n),
+          (n: any) => matchesConfidence(n) && matchesTags(n) && matchesTime(n),
         );
-        const validNodeIds = new Set(nodes.map((n) => n.id));
+        const validNodeIds = new Set(nodes.map((n: any) => n.id));
 
         edges = edges.filter(
-          (e) =>
+          (e: any) =>
             validNodeIds.has(e.fromEntity.id) &&
             validNodeIds.has(e.toEntity.id) &&
             matchesConfidence(e) &&
@@ -667,7 +667,7 @@ const crudResolvers = {
           { entityId },
         );
 
-        return result.records.map((record) => ({
+        return result.records.map((record: any) => ({
           entity: record.get('related').properties,
           strength: record.get('strength').toNumber(),
           relationshipType: record.get('relationshipType'),
@@ -769,7 +769,13 @@ const crudResolvers = {
         );
 
         logger.info(`Entity created: ${id} by user ${user.id}`);
-        await nbhdCache.invalidate(user.tenantId, input.investigationId, [id]);
+        if (input.investigationId) {
+          await nbhdCache.invalidate(
+            user.tenantId ?? 'unknown-tenant',
+            input.investigationId,
+            [id],
+          );
+        }
         return entity;
       } finally {
         await session.close();
@@ -876,9 +882,11 @@ const crudResolvers = {
           },
           buildMetadata(user, entity.investigationId, 'ENTITY_CREATED'),
         );
-        await nbhdCache.invalidate(user.tenantId, entity.investigationId, [
-          entity.id,
-        ]);
+        await nbhdCache.invalidate(
+          user.tenantId ?? 'unknown-tenant',
+          entity.investigationId,
+          [entity.id],
+        );
         logger.info(`Entity created: ${entity.id} by user ${user.id}`);
       }
 
@@ -918,7 +926,9 @@ const crudResolvers = {
             );
             invId = invRes.records[0].get('invId');
           }
-          await validateCustomMetadata(invId, customMetadata);
+          if (invId) {
+            await validateCustomMetadata(invId, customMetadata);
+          }
           updateFields.push('e.customMetadata = $customMetadata');
           params.customMetadata = JSON.stringify(customMetadata);
         }
@@ -976,7 +986,11 @@ const crudResolvers = {
         );
 
         logger.info(`Entity updated: ${id} by user ${user.id}`);
-        await nbhdCache.invalidate(user.tenantId, entity.investigationId, [id]);
+        await nbhdCache.invalidate(
+          user.tenantId ?? 'unknown-tenant',
+          entity.investigationId,
+          [id],
+        );
         return entity;
       } finally {
         await session.close();
@@ -1014,7 +1028,11 @@ const crudResolvers = {
         );
 
         logger.info(`Entity deleted: ${id} by user ${user.id}`);
-        await nbhdCache.invalidate(user.tenantId, investigationId, [id]);
+        await nbhdCache.invalidate(
+          user.tenantId ?? 'unknown-tenant',
+          investigationId,
+          [id],
+        );
         return true;
       } finally {
         await session.close();
@@ -1110,10 +1128,13 @@ const crudResolvers = {
         );
 
         logger.info(`Relationship created: ${id} by user ${user.id}`);
-        await nbhdCache.invalidate(user.tenantId, input.investigationId, [
-          input.fromEntityId,
-          input.toEntityId,
-        ]);
+        if (input.investigationId) {
+          await nbhdCache.invalidate(
+            user.tenantId ?? 'unknown-tenant',
+            input.investigationId,
+            [input.fromEntityId, input.toEntityId],
+          );
+        }
         return relationship;
       } finally {
         await session.close();
@@ -1235,10 +1256,11 @@ const crudResolvers = {
           },
           buildMetadata(user, rel.investigationId, 'RELATIONSHIP_CREATED'),
         );
-        await nbhdCache.invalidate(user.tenantId, rel.investigationId, [
-          rel.fromEntity.id,
-          rel.toEntity.id,
-        ]);
+        await nbhdCache.invalidate(
+          user.tenantId ?? 'unknown-tenant',
+          rel.investigationId,
+          [rel.fromEntity.id, rel.toEntity.id],
+        );
         logger.info(`Relationship created: ${rel.id} by user ${user.id}`);
       }
 
@@ -1279,7 +1301,9 @@ const crudResolvers = {
             );
             invId = invRes.records[0].get('invId');
           }
-          await validateCustomMetadata(invId, customMetadata);
+          if (invId) {
+            await validateCustomMetadata(invId, customMetadata);
+          }
           updateFields.push('r.customMetadata = $customMetadata');
           params.customMetadata = JSON.stringify(customMetadata);
         }
@@ -1347,7 +1371,7 @@ const crudResolvers = {
 
         logger.info(`Relationship updated: ${id} by user ${user.id}`);
         await nbhdCache.invalidate(
-          user.tenantId,
+          user.tenantId ?? 'unknown-tenant',
           relationship.investigationId,
           [relationship.fromEntity.id, relationship.toEntity.id],
         );
@@ -1395,10 +1419,11 @@ const crudResolvers = {
         );
 
         logger.info(`Relationship deleted: ${id} by user ${user.id}`);
-        await nbhdCache.invalidate(user.tenantId, investigationId, [
-          fromId,
-          toId,
-        ]);
+        await nbhdCache.invalidate(
+          user.tenantId ?? 'unknown-tenant',
+          investigationId,
+          [fromId, toId],
+        );
         return true;
       } finally {
         await session.close();
@@ -1680,7 +1705,7 @@ const crudResolvers = {
               batchSize?: number;
               flushIntervalMs?: number;
             }
-          | undefined,
+          | undefined = {},
         { user }: Context,
       ) => {
         if (!user) throw new Error('Not authenticated');

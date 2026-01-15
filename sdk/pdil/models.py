@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, Optional
 
 
 @dataclass
@@ -11,12 +11,12 @@ class GoldenCase:
     """Represents a single evaluation scenario in the golden set."""
 
     case_id: str
-    prompts: Dict[str, str]
+    prompts: dict[str, str]
     expected_response: str
     business_impact: float = 1.0
-    coverage_tags: List[str] = field(default_factory=list)
-    failure_severity: Dict[str, float] = field(default_factory=dict)
-    metadata: Dict[str, str] = field(default_factory=dict)
+    coverage_tags: list[str] = field(default_factory=list)
+    failure_severity: dict[str, float] = field(default_factory=dict)
+    metadata: dict[str, str] = field(default_factory=dict)
 
     def severity_for(self, taxonomy: str) -> float:
         return self.failure_severity.get(taxonomy, self.failure_severity.get("default", 1.0))
@@ -30,7 +30,7 @@ class PromptRun:
     model_name: str
     response: str
     passed: bool
-    taxonomy: Optional[str]
+    taxonomy: str | None
     severity: float
 
 
@@ -55,17 +55,17 @@ class PromptDiffOutcome:
 class GoldenSet:
     """Collection of golden cases with helper lookups."""
 
-    cases: List[GoldenCase]
+    cases: list[GoldenCase]
 
-    def by_tag(self) -> Dict[str, List[GoldenCase]]:
-        tags: Dict[str, List[GoldenCase]] = {}
+    def by_tag(self) -> dict[str, list[GoldenCase]]:
+        tags: dict[str, list[GoldenCase]] = {}
         for case in self.cases:
             for tag in case.coverage_tags or ["__untagged__"]:
                 tags.setdefault(tag, []).append(case)
         return tags
 
     @classmethod
-    def from_iterable(cls, cases: Iterable[GoldenCase]) -> "GoldenSet":
+    def from_iterable(cls, cases: Iterable[GoldenCase]) -> GoldenSet:
         return cls(list(cases))
 
 
@@ -75,8 +75,8 @@ class RiskAssessment:
 
     total_risk: float
     coverage_delta: float
-    taxonomy_counts: Dict[str, int]
-    regressions: List[PromptDiffOutcome]
+    taxonomy_counts: dict[str, int]
+    regressions: list[PromptDiffOutcome]
 
 
 @dataclass
@@ -84,13 +84,13 @@ class ReplayReport:
     """Complete report produced by a PDIL replay run."""
 
     seed: int
-    outcomes: List[PromptDiffOutcome]
+    outcomes: list[PromptDiffOutcome]
     assessment: RiskAssessment
 
-    def regression_cases(self) -> List[str]:
+    def regression_cases(self) -> list[str]:
         return [outcome.case.case_id for outcome in self.outcomes if outcome.regression_detected]
 
-    def coverage_by_tag(self) -> Dict[str, float]:
+    def coverage_by_tag(self) -> dict[str, float]:
         tagged = {}
         for tag, cases in GoldenSet(self.cases_from_outcomes()).by_tag().items():
             total = len(cases)
@@ -104,5 +104,5 @@ class ReplayReport:
                 return outcome.candidate.passed
         return False
 
-    def cases_from_outcomes(self) -> List[GoldenCase]:
+    def cases_from_outcomes(self) -> list[GoldenCase]:
         return [outcome.case for outcome in self.outcomes]

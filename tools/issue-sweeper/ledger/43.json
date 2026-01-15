@@ -1,0 +1,248 @@
+{
+  "issue_number": 43,
+  "title": "M5: Louvain community detection (experimental)",
+  "url": "https://github.com/BrianCLong/summit/issues/43",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051714,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5wg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:graph-analytics",
+      "name": "area:graph-analytics",
+      "color": "ededed",
+      "default": false,
+      "description": "Graph analytics"
+    },
+    {
+      "id": 9095051767,
+      "node_id": "LA_kwDOPaNncM8AAAACHht59w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/experimental",
+      "name": "experimental",
+      "color": "ededed",
+      "default": false,
+      "description": "Experimental"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:12:15Z",
+  "createdAt": "2025-08-12T00:15:48Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14528,
+        "url": "https://github.com/BrianCLong/summit/pull/14528",
+        "mergedAt": "2025-12-27T00:20:59Z",
+        "title": "Sprint N+43: Go-To-Market Readiness & Launch Hardening"
+      },
+      {
+        "number": 12950,
+        "url": "https://github.com/BrianCLong/summit/pull/12950",
+        "mergedAt": "2025-12-17T21:41:50Z",
+        "title": "fix(security): update next.js to 14.2.33 to resolve critical CVEs #43 #38"
+      },
+      {
+        "number": 12890,
+        "url": "https://github.com/BrianCLong/summit/pull/12890",
+        "mergedAt": "2025-12-04T16:52:42Z",
+        "title": "fix(security): update next.js to 14.2.33 to resolve critical CVEs #43 #38"
+      },
+      {
+        "number": 15293,
+        "url": "https://github.com/BrianCLong/summit/pull/15293",
+        "mergedAt": "2026-01-01T06:31:07Z",
+        "title": "feat: codify partner operating model guardrails"
+      },
+      {
+        "number": 12263,
+        "url": "https://github.com/BrianCLong/summit/pull/12263",
+        "mergedAt": "2025-12-18T03:23:04Z",
+        "title": "Final Polish: Prompts 41-48 Implementation"
+      },
+      {
+        "number": 15299,
+        "url": "https://github.com/BrianCLong/summit/pull/15299",
+        "mergedAt": "2026-01-01T08:08:11Z",
+        "title": "Document next roadmap priorities and agent task spec"
+      },
+      {
+        "number": 11948,
+        "url": "https://github.com/BrianCLong/summit/pull/11948",
+        "mergedAt": "2025-11-20T10:22:37Z",
+        "title": "Build Production Monitoring and Incident Response"
+      },
+      {
+        "number": 13113,
+        "url": "https://github.com/BrianCLong/summit/pull/13113",
+        "mergedAt": "2025-12-17T05:38:26Z",
+        "title": "S9 - Threat Modeling Assistant"
+      },
+      {
+        "number": 1274,
+        "url": "https://github.com/BrianCLong/summit/pull/1274",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump @typescript-eslint/parser from 8.43.0 to 8.44.0"
+      },
+      {
+        "number": 10208,
+        "url": "https://github.com/BrianCLong/summit/pull/10208",
+        "mergedAt": "2025-10-15T03:46:45Z",
+        "title": "ci(actions): repo-wide resilience—cron jitter, concurrency, backlog guard, and matrix caps"
+      },
+      {
+        "number": 11792,
+        "url": "https://github.com/BrianCLong/summit/pull/11792",
+        "mergedAt": null,
+        "title": "fix: resolve GraphQL service regressions"
+      },
+      {
+        "number": 15326,
+        "url": "https://github.com/BrianCLong/summit/pull/15326",
+        "mergedAt": null,
+        "title": "Add redteam harness module and scenarios"
+      },
+      {
+        "number": 1151,
+        "url": "https://github.com/BrianCLong/summit/pull/1151",
+        "mergedAt": null,
+        "title": "chore(deps): bump argon2 from 0.31.2 to 0.44.0 in /server"
+      },
+      {
+        "number": 1147,
+        "url": "https://github.com/BrianCLong/summit/pull/1147",
+        "mergedAt": "2025-09-17T10:32:40Z",
+        "title": "chore(deps): bump cytoscape-navigator from 1.3.3 to 2.0.2 in /client"
+      },
+      {
+        "number": 10127,
+        "url": "https://github.com/BrianCLong/summit/pull/10127",
+        "mergedAt": "2025-10-17T01:51:15Z",
+        "title": "feat: add Liquid Nano pilot bundle"
+      },
+      {
+        "number": 1272,
+        "url": "https://github.com/BrianCLong/summit/pull/1272",
+        "mergedAt": "2025-09-19T02:20:40Z",
+        "title": "chore(deps-dev): bump @typescript-eslint/eslint-plugin from 6.21.0 to 8.44.0 in /client"
+      },
+      {
+        "number": 10126,
+        "url": "https://github.com/BrianCLong/summit/pull/10126",
+        "mergedAt": "2025-10-14T08:39:46Z",
+        "title": "feat: add PerfTrace Jira automation toolkit"
+      },
+      {
+        "number": 1755,
+        "url": "https://github.com/BrianCLong/summit/pull/1755",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump the eslint group with 3 updates"
+      },
+      {
+        "number": 10105,
+        "url": "https://github.com/BrianCLong/summit/pull/10105",
+        "mergedAt": "2025-10-14T11:52:58Z",
+        "title": "feat: add govbrief research brief pipeline"
+      },
+      {
+        "number": 1269,
+        "url": "https://github.com/BrianCLong/summit/pull/1269",
+        "mergedAt": "2025-09-19T02:20:34Z",
+        "title": "chore(deps-dev): bump ts-jest from 29.4.1 to 29.4.2"
+      },
+      {
+        "number": 10130,
+        "url": "https://github.com/BrianCLong/summit/pull/10130",
+        "mergedAt": "2025-10-14T08:36:34Z",
+        "title": "feat: introduce synthetic event booster framework"
+      },
+      {
+        "number": 10094,
+        "url": "https://github.com/BrianCLong/summit/pull/10094",
+        "mergedAt": "2025-10-14T13:06:00Z",
+        "title": "feat: add crypto verification pipeline"
+      },
+      {
+        "number": 13124,
+        "url": "https://github.com/BrianCLong/summit/pull/13124",
+        "mergedAt": "2025-12-17T05:37:05Z",
+        "title": "feat: Playwright Setup Progress"
+      },
+      {
+        "number": 10103,
+        "url": "https://github.com/BrianCLong/summit/pull/10103",
+        "mergedAt": "2025-10-14T11:53:04Z",
+        "title": "feat: add zero-touch compliance enforcement system"
+      },
+      {
+        "number": 11876,
+        "url": "https://github.com/BrianCLong/summit/pull/11876",
+        "mergedAt": "2025-11-20T14:33:36Z",
+        "title": "Wire end-to-end demo stories for two use cases"
+      },
+      {
+        "number": 1303,
+        "url": "https://github.com/BrianCLong/summit/pull/1303",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "fix: align mcp core test tooling and lock handling"
+      },
+      {
+        "number": 1086,
+        "url": "https://github.com/BrianCLong/summit/pull/1086",
+        "mergedAt": null,
+        "title": "Release 2.5.0: Grafana Release Health dashboard + Playwright smoke pack"
+      },
+      {
+        "number": 1283,
+        "url": "https://github.com/BrianCLong/summit/pull/1283",
+        "mergedAt": null,
+        "title": "feat: Maestro vNext - Complete AI-Augmented CI/CD Platform"
+      },
+      {
+        "number": 9795,
+        "url": "https://github.com/BrianCLong/summit/pull/9795",
+        "mergedAt": null,
+        "title": "Fix/bulk import lockfile sync"
+      },
+      {
+        "number": 1279,
+        "url": "https://github.com/BrianCLong/summit/pull/1279",
+        "mergedAt": null,
+        "title": "feat(ga): artifacts pack for v1.0.0"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

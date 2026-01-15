@@ -10,9 +10,9 @@ __all__ = [
     "Experiment",
     "Metrics",
     "Recommendation",
-    "ingest",
-    "load_many",
     "fit_linear_response_surface",
     "fit_power_law",
+    "ingest",
+    "load_many",
     "plan",
 ]

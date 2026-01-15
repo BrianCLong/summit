@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { PatternOfLifeService } from '../PatternOfLifeService.js';
 import { ProvenanceEntry } from '../../provenance/ledger.js';
 
@@ -24,7 +25,11 @@ describe('PatternOfLifeService', () => {
     resourceId: 'res-1',
     actorId: 'user-1',
     actorType: 'user',
-    payload: {},
+    payload: {
+      mutationType: 'CREATE',
+      entityId: id,
+      entityType: 'resource',
+    },
     metadata: {},
   });
 
@@ -120,8 +125,9 @@ describe('PatternOfLifeService', () => {
          }
 
          const patterns = service.detectTimeDistribution(events);
+         const expectedHour = new Date('2023-01-01T10:00:00Z').getHours();
          expect(patterns).toHaveLength(1);
-         expect(patterns[0].metadata.activeHours).toContain(10);
+         expect(patterns[0].metadata.activeHours).toContain(expectedHour);
       });
   });
 });

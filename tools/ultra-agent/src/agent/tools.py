@@ -1,8 +1,10 @@
 from __future__ import annotations
+
+import os
 import pathlib
 import subprocess
-import os
 from typing import Any
+
 
 def write_file(path: str, content: str) -> None:
     p = pathlib.Path(path)
@@ -37,12 +39,15 @@ def run_linter() -> bool:
     print("[tools] (stub) Linter would run here.")
     return True
 
+
 # GitHub Integration Stubs - requires PyGithub
 try:
     from github import Github
+
     HAS_GITHUB = True
 except ImportError:
     HAS_GITHUB = False
+
 
 def get_github_client():
     token = os.environ.get("GITHUB_TOKEN")
@@ -50,14 +55,19 @@ def get_github_client():
         return None
     return Github(token)
 
+
 def create_pr(branch: str, title: str, body: str, meta: dict[str, Any] | None = None) -> None:
     if not HAS_GITHUB:
-        print(f"[tools] (stub - no PyGithub) Would create PR on branch '{branch}' with title '{title}'.")
+        print(
+            f"[tools] (stub - no PyGithub) Would create PR on branch '{branch}' with title '{title}'."
+        )
         return
 
     client = get_github_client()
     if not client:
-        print(f"[tools] (stub - no token) Would create PR on branch '{branch}' with title '{title}'.")
+        print(
+            f"[tools] (stub - no token) Would create PR on branch '{branch}' with title '{title}'."
+        )
         return
 
     # This assumes we know the repo we are working on.

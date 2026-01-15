@@ -1,4 +1,5 @@
 import { ProvenanceLedgerV2 } from '../provenance/ledger.js';
+import type { ReceiptEvidence } from '../provenance/types.js';
 import { SigningService } from './SigningService.js';
 import { createHash } from 'crypto';
 
@@ -15,14 +16,25 @@ export interface Receipt {
 }
 
 export class ReceiptService {
-  private ledger: ProvenanceLedgerV2;
-  private signer: SigningService;
+  private _ledger?: ProvenanceLedgerV2;
+  private _signer?: SigningService;
   private static instance: ReceiptService;
 
   private constructor() {
-    this.ledger = ProvenanceLedgerV2.getInstance();
-    // Critical: Fail if signing service cannot be initialized (missing keys)
-    this.signer = new SigningService();
+  }
+
+  private get ledger(): ProvenanceLedgerV2 {
+    if (!this._ledger) {
+      this._ledger = ProvenanceLedgerV2.getInstance();
+    }
+    return this._ledger;
+  }
+
+  private get signer(): SigningService {
+    if (!this._signer) {
+      this._signer = new SigningService();
+    }
+    return this._signer;
   }
 
   public static getInstance(): ReceiptService {
@@ -75,8 +87,7 @@ export class ReceiptService {
 
     // 4. Sign it
     const signature = this.signer.sign(receiptCanonical);
-
-    return {
+    const receipt: Receipt = {
       id: entryId,
       timestamp,
       action,
@@ -87,6 +98,24 @@ export class ReceiptService {
       signature,
       signerKeyId: this.signer.getPublicKey().slice(0, 32) + '...' // simplified ID
     };
+
+    const receiptEvidence: ReceiptEvidence = {
+      receiptId: receipt.id,
+      entryId,
+      action,
+      actorId: actor.id,
+      tenantId: actor.tenantId,
+      resourceId: resource,
+      inputHash,
+      policyDecisionId,
+      signature,
+      signerKeyId: receipt.signerKeyId,
+      issuedAt: timestamp
+    };
+
+    await this.ledger.recordReceiptEvidence(receiptEvidence);
+
+    return receipt;
   }
 
   public async getReceipt(id: string): Promise<Receipt | null> {

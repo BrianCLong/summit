@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
 export type MigrationRiskSeverity = 'error' | 'warning';
 
@@ -35,10 +34,13 @@ export interface MigrationRiskOptions {
   overridden: boolean;
 }
 
-const DEFAULT_MANAGED_MIGRATIONS_DIR = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  '../../../../db/managed-migrations',
-);
+const DEFAULT_MANAGED_MIGRATIONS_DIR = (() => {
+  const candidates = [
+    path.resolve(process.cwd(), 'db/managed-migrations'),
+    path.resolve(process.cwd(), 'server/db/managed-migrations'),
+  ];
+  return candidates.find((candidate) => fs.existsSync(candidate)) || candidates[0];
+})();
 
 const rules = [
   {

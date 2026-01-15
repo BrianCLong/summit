@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import json
 import random
+from collections.abc import Iterable
 from dataclasses import dataclass
 from itertools import product
 from pathlib import Path
 from statistics import quantiles
-from typing import Dict, Iterable, List
 
 import yaml
 
@@ -18,9 +18,9 @@ from .plotting import export_pareto_frontier
 @dataclass
 class AblationSetting:
     name: str
-    component: Dict[str, str]
-    data: Dict[str, str]
-    compute: Dict[str, str]
+    component: dict[str, str]
+    data: dict[str, str]
+    compute: dict[str, str]
 
 
 @dataclass
@@ -35,7 +35,7 @@ class CaseResult:
 @dataclass
 class RobustnessRun:
     ablation: AblationSetting
-    results: List[CaseResult]
+    results: list[CaseResult]
 
     @property
     def quality_mean(self) -> float:
@@ -50,7 +50,7 @@ class RobustnessRun:
     def cost_total_usd(self) -> float:
         return sum(case.cost_usd for case in self.results)
 
-    def to_summary(self) -> Dict[str, object]:
+    def to_summary(self) -> dict[str, object]:
         return {
             "ablation": self.ablation.name,
             "quality_mean": round(self.quality_mean, 4),
@@ -59,7 +59,7 @@ class RobustnessRun:
         }
 
 
-def _load_yaml_options(path: Path, key: str) -> List[Dict[str, str]]:
+def _load_yaml_options(path: Path, key: str) -> list[dict[str, str]]:
     raw = yaml.safe_load(path.read_text()) or {}
     entries = raw.get(key, [])
     if not isinstance(entries, list):
@@ -67,14 +67,16 @@ def _load_yaml_options(path: Path, key: str) -> List[Dict[str, str]]:
     return entries
 
 
-def load_ablation_grid(config_root: Path) -> List[AblationSetting]:
+def load_ablation_grid(config_root: Path) -> list[AblationSetting]:
     components = _load_yaml_options(config_root / "components.yaml", "components")
     data = _load_yaml_options(config_root / "data.yaml", "data")
     compute = _load_yaml_options(config_root / "compute.yaml", "compute")
 
-    grid: List[AblationSetting] = []
+    grid: list[AblationSetting] = []
     for comp, datum, compu in product(components, data, compute):
-        name = "|".join([comp.get("name", "comp"), datum.get("name", "data"), compu.get("name", "compute")])
+        name = "|".join(
+            [comp.get("name", "comp"), datum.get("name", "data"), compu.get("name", "compute")]
+        )
         grid.append(
             AblationSetting(
                 name=name,
@@ -148,20 +150,26 @@ def _materialize_cases(ablation: AblationSetting) -> Iterable[CaseResult]:
             yield _evaluate_case(rng, robustness_input, perturbation, ablation)
 
 
-def evaluate_suite(output_dir: Path | str | None = None, config_dir: Path | str | None = None) -> List[RobustnessRun]:
+def evaluate_suite(
+    output_dir: Path | str | None = None, config_dir: Path | str | None = None
+) -> list[RobustnessRun]:
     config_root = Path(config_dir) if config_dir else Path("bench/configs/ablations")
     ablations = load_ablation_grid(config_root)
-    runs: List[RobustnessRun] = []
+    runs: list[RobustnessRun] = []
     output_base = Path(output_dir) if output_dir else Path("bench/robustness/output")
     output_base.mkdir(parents=True, exist_ok=True)
 
-    summaries: List[Dict[str, object]] = []
+    summaries: list[dict[str, object]] = []
     for ablation in ablations:
         results = list(_materialize_cases(ablation))
         run = RobustnessRun(ablation=ablation, results=results)
         runs.append(run)
         run_path = output_base / f"run_{ablation.name.replace('|', '_')}.json"
-        run_path.write_text(json.dumps({"ablation": ablation.name, "cases": [case.__dict__ for case in results]}, indent=2))
+        run_path.write_text(
+            json.dumps(
+                {"ablation": ablation.name, "cases": [case.__dict__ for case in results]}, indent=2
+            )
+        )
         summaries.append(run.to_summary())
 
     summary_path = output_base / "summary.json"

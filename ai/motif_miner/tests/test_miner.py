@@ -1,4 +1,4 @@
-from ai.motif_miner import MotifMiner, MiningConfig, is_enabled
+from ai.motif_miner import MiningConfig, MotifMiner, is_enabled
 from ai.motif_miner.miner import SimpleGraph
 
 

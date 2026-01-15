@@ -63,7 +63,7 @@ class EntityResolver:
 
         # Combine text fields
         for field in ["name", "label", "description", "alias"]:
-            if field in entity and entity[field]:
+            if entity.get(field):
                 text_fields.append(str(entity[field]))
 
         # Add attribute values

@@ -15,6 +15,10 @@ import { maestroAuthzMiddleware } from '../../middleware/maestro-authz.js';
 import { recordEndpointResult } from '../../observability/reliability-metrics.js';
 import { flagService } from '../../services/FlagService.js';
 import { MaestroEvents } from '../../realtime/maestro.js';
+import {
+  policyActionGate,
+  evaluatePolicyAction,
+} from '../../middleware/policy-action-gate.js';
 
 const router = express.Router();
 router.use(express.json());
@@ -87,7 +91,18 @@ router.get('/runs', authorize('run_maestro'), async (req, res) => {
 });
 
 // POST /runs - Create a new run
-router.post('/runs', authorize('run_maestro'), async (req, res) => {
+router.post(
+  '/runs',
+  policyActionGate({
+    action: 'start_run',
+    resource: 'maestro_run',
+    resolveResourceId: (req) => req.body?.pipeline_id,
+    buildResourceAttributes: (req) => ({
+      pipelineId: req.body?.pipeline_id,
+    }),
+  }),
+  authorize('run_maestro'),
+  async (req, res) => {
   // Kill Switch Check
   if (flagService.getFlag('DISABLE_MAESTRO_RUNS')) {
       return res.status(503).json({ error: 'Maestro run creation is currently disabled due to maintenance or high load.' });
@@ -235,6 +250,35 @@ router.put('/runs/:id', authorize('run_maestro'), async (req, res) => {
 
     const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
 
+    if (validation.data.status === 'cancelled') {
+      const decision = await evaluatePolicyAction({
+        action: 'cancel_run',
+        resource: 'maestro_run',
+        tenantId,
+        userId: (req as any).user?.id,
+        role: (req as any).user?.role,
+        resourceAttributes: {
+          runId: req.params.id,
+          status: validation.data.status,
+        },
+        subjectAttributes: (req as any).user?.attributes || {},
+        sessionContext: {
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent'),
+          timestamp: Date.now(),
+          sessionId: (req as any).sessionID,
+        },
+      });
+
+      if (!decision.allow) {
+        return res.status(403).json({
+          error: 'Forbidden',
+          reason: decision.reason,
+          decision,
+        });
+      }
+    }
+
     // Calculate duration if both start and end times provided
     if (validation.data.started_at && validation.data.completed_at) {
       validation.data.duration_ms =
@@ -259,7 +303,18 @@ router.put('/runs/:id', authorize('run_maestro'), async (req, res) => {
 });
 
 // DELETE /runs/:id - Delete a run
-router.delete('/runs/:id', authorize('run_maestro'), async (req, res) => {
+router.delete(
+  '/runs/:id',
+  policyActionGate({
+    action: 'delete_run',
+    resource: 'maestro_run',
+    resolveResourceId: (req) => req.params.id,
+    buildResourceAttributes: (req) => ({
+      runId: req.params.id,
+    }),
+  }),
+  authorize('run_maestro'),
+  async (req, res) => {
     try {
       const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
       const deleted = await runsRepo.delete(req.params.id, tenantId); // Pass tenantId

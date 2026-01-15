@@ -5,8 +5,8 @@ import pytest
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 
-import main  # noqa: E402  pylint: disable=wrong-import-position
-from automation import (  # noqa: E402
+import main
+from automation import (
     AutomationOrchestrator,
     LLMWebPrompter,
     NavigationRequest,
@@ -16,9 +16,9 @@ from automation import (  # noqa: E402
     WorkProduct,
     WorkProductCapture,
 )
-from main import execute_ticket, plan_tickets  # noqa: E402
-from prompt_engineering import PromptEngineer, PromptTuning  # noqa: E402
-from routing import ManualControlPlan, Ticket, WorkerProfile, WorkParcel  # noqa: E402
+from main import execute_ticket, plan_tickets
+from prompt_engineering import PromptEngineer, PromptTuning
+from routing import ManualControlPlan, Ticket, WorkerProfile, WorkParcel
 
 
 class FakeHttpClient:
@@ -35,9 +35,7 @@ class RecordingController:
     def __init__(self) -> None:
         self.stages: list[str] = []
 
-    def await_confirmation(
-        self, stage: str, parcel: WorkParcel
-    ) -> None:  # noqa: ARG002 - interface requirement
+    def await_confirmation(self, stage: str, parcel: WorkParcel) -> None:
         self.stages.append(stage)
 
 
@@ -109,9 +107,7 @@ def test_execute_ticket_uses_overrides(monkeypatch: pytest.MonkeyPatch):
     stub_results: list[WorkProduct] = []
 
     class StubOrchestrator:
-        def execute(
-            self, parcel: WorkParcel, engineer: PromptEngineer
-        ) -> WorkProduct:  # noqa: ARG002 - interface requirement
+        def execute(self, parcel: WorkParcel, engineer: PromptEngineer) -> WorkProduct:
             result = WorkProduct(
                 ticket_id=parcel.ticket.identifier,
                 worker_id=parcel.worker.identifier,

@@ -97,7 +97,9 @@ def test_coverage_estimator_tracks_framework_specific_signals():
 
 def test_validator_rejects_missing_additions():
     validator = PatchValidator()
-    invalid_patch = "diff --git a/tests/test_empty.py b/tests/test_empty.py\n+++ b/tests/test_empty.py"
+    invalid_patch = (
+        "diff --git a/tests/test_empty.py b/tests/test_empty.py\n+++ b/tests/test_empty.py"
+    )
 
     with pytest.raises(ValueError):
         validator.validate(invalid_patch, expected_framework="pytest")
@@ -142,9 +144,7 @@ def test_workcell_tool_executes_generation_flow():
     tool = build_unit_test_generation_tool(client)
     orchestrator = WorkcellOrchestrator()
     orchestrator.register_tool(tool)
-    orchestrator.register_agent(
-        AgentProfile(name="qa-bot", authority=3, allowed_tools=[tool.name])
-    )
+    orchestrator.register_agent(AgentProfile(name="qa-bot", authority=3, allowed_tools=[tool.name]))
 
     report = orchestrator.submit(
         order_id="order-1091",
@@ -162,6 +162,5 @@ def test_workcell_tool_executes_generation_flow():
     assert report.results[0].status == "success"
     output = report.results[0].output
     assert output["framework"] == "pytest"
-    assert "patch" in output and output["patch"]
+    assert output.get("patch")
     assert output["coverage_delta_estimate"] >= 0.5
-

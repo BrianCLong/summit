@@ -6,12 +6,11 @@ Analyzes the codebase to generate a preliminary threat model based on STRIDE.
 
 import os
 import re
-import sys
 from pathlib import Path
-import json
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 SERVER_SRC = ROOT / "server" / "src"
+
 
 def analyze_routes():
     """Finds API endpoints and identifies potential trust boundaries."""
@@ -25,22 +24,28 @@ def analyze_routes():
         for file in files:
             if file.endswith(".ts") or file.endswith(".js"):
                 try:
-                    with open(os.path.join(root, file), 'r', encoding='utf-8') as f:
+                    with open(os.path.join(root, file), encoding="utf-8") as f:
                         content = f.read()
                         matches = route_pattern.findall(content)
                         for match in matches:
                             method = match[1].upper()
                             path = match[2]
-                            routes.append({
-                                "file": file,
-                                "method": method,
-                                "path": path,
-                                "auth_check": "ensureAuthenticated" in content or "passport" in content,
-                                "input_validation": "zod" in content or "joi" in content or "body(" in content
-                            })
-                except Exception as e:
+                            routes.append(
+                                {
+                                    "file": file,
+                                    "method": method,
+                                    "path": path,
+                                    "auth_check": "ensureAuthenticated" in content
+                                    or "passport" in content,
+                                    "input_validation": "zod" in content
+                                    or "joi" in content
+                                    or "body(" in content,
+                                }
+                            )
+                except Exception:
                     pass
     return routes
+
 
 def analyze_data_stores():
     """Identifies potential data stores based on file names and imports."""
@@ -52,8 +57,13 @@ def analyze_data_stores():
         for file in files:
             if file.endswith(".ts") or file.endswith(".js"):
                 lower_file = file.lower()
-                if "repo" in lower_file or "dao" in lower_file or "store" in lower_file or "db" in lower_file:
-                     with open(os.path.join(root, file), 'r', encoding='utf-8') as f:
+                if (
+                    "repo" in lower_file
+                    or "dao" in lower_file
+                    or "store" in lower_file
+                    or "db" in lower_file
+                ):
+                    with open(os.path.join(root, file), encoding="utf-8") as f:
                         content = f.read()
                         store_type = "Unknown"
                         if "postgres" in content.lower() or "pg" in content.lower():
@@ -63,12 +73,15 @@ def analyze_data_stores():
                         elif "redis" in content.lower():
                             store_type = "Redis"
 
-                        stores.append({
-                            "name": file,
-                            "type": store_type,
-                            "path": os.path.relpath(os.path.join(root, file), ROOT)
-                        })
+                        stores.append(
+                            {
+                                "name": file,
+                                "type": store_type,
+                                "path": os.path.relpath(os.path.join(root, file), ROOT),
+                            }
+                        )
     return stores
+
 
 def generate_threats(routes, stores):
     threats = []
@@ -77,41 +90,50 @@ def generate_threats(routes, stores):
     for route in routes:
         # Spoofing
         if not route["auth_check"]:
-            threats.append({
-                "category": "Spoofing",
-                "component": f"{route['method']} {route['path']}",
-                "description": "Endpoint appears to lack authentication middleware.",
-                "mitigation": "Ensure `ensureAuthenticated` or similar middleware is applied."
-            })
+            threats.append(
+                {
+                    "category": "Spoofing",
+                    "component": f"{route['method']} {route['path']}",
+                    "description": "Endpoint appears to lack authentication middleware.",
+                    "mitigation": "Ensure `ensureAuthenticated` or similar middleware is applied.",
+                }
+            )
 
         # Tampering
         if not route["input_validation"]:
-            threats.append({
-                "category": "Tampering",
-                "component": f"{route['method']} {route['path']}",
-                "description": "Endpoint appears to lack explicit input validation (Zod/Joi).",
-                "mitigation": "Implement strict input validation using Zod schemas."
-            })
+            threats.append(
+                {
+                    "category": "Tampering",
+                    "component": f"{route['method']} {route['path']}",
+                    "description": "Endpoint appears to lack explicit input validation (Zod/Joi).",
+                    "mitigation": "Implement strict input validation using Zod schemas.",
+                }
+            )
 
     # Analyze Stores
     for store in stores:
         # Information Disclosure
-        threats.append({
-            "category": "Information Disclosure",
-            "component": f"Data Store: {store['name']} ({store['type']})",
-            "description": f"Potential for unauthorized access to {store['type']} data.",
-            "mitigation": "Verify encryption at rest and transit. Audit access controls."
-        })
+        threats.append(
+            {
+                "category": "Information Disclosure",
+                "component": f"Data Store: {store['name']} ({store['type']})",
+                "description": f"Potential for unauthorized access to {store['type']} data.",
+                "mitigation": "Verify encryption at rest and transit. Audit access controls.",
+            }
+        )
 
         # Denial of Service
-        threats.append({
-            "category": "Denial of Service",
-            "component": f"Data Store: {store['name']} ({store['type']})",
-            "description": "Resource exhaustion if queries are not optimized or rate-limited.",
-            "mitigation": "Implement connection pooling, timeouts, and query cost limits."
-        })
+        threats.append(
+            {
+                "category": "Denial of Service",
+                "component": f"Data Store: {store['name']} ({store['type']})",
+                "description": "Resource exhaustion if queries are not optimized or rate-limited.",
+                "mitigation": "Implement connection pooling, timeouts, and query cost limits.",
+            }
+        )
 
     return threats
+
 
 def main():
     print("Analyzing codebase for STRIDE threat modeling...")
@@ -153,6 +175,7 @@ def main():
             f.write("\n")
 
     print(f"Report generated at {report_path}")
+
 
 if __name__ == "__main__":
     main()

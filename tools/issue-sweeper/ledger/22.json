@@ -1,0 +1,230 @@
+{
+  "issue_number": 22,
+  "title": "M6: Request logging and /metrics endpoint",
+  "url": "https://github.com/BrianCLong/summit/issues/22",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T00:10:15Z",
+  "createdAt": "2025-08-12T00:10:15Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14634,
+        "url": "https://github.com/BrianCLong/summit/pull/14634",
+        "mergedAt": null,
+        "title": "Prompt 22: Cross-Domain Guard (CDS) - APPROVED"
+      },
+      {
+        "number": 13855,
+        "url": "https://github.com/BrianCLong/summit/pull/13855",
+        "mergedAt": "2025-12-20T03:24:16Z",
+        "title": "Add Sprint 22 trust verification sprint plan"
+      },
+      {
+        "number": 13766,
+        "url": "https://github.com/BrianCLong/summit/pull/13766",
+        "mergedAt": "2025-12-20T03:34:54Z",
+        "title": "docs: add sprint plan for May 11–22, 2026"
+      },
+      {
+        "number": 13256,
+        "url": "https://github.com/BrianCLong/summit/pull/13256",
+        "mergedAt": "2025-12-17T06:24:37Z",
+        "title": "Prompt 22: Cross-Domain Guard & ABAC System"
+      },
+      {
+        "number": 12802,
+        "url": "https://github.com/BrianCLong/summit/pull/12802",
+        "mergedAt": "2025-12-04T17:42:26Z",
+        "title": "Add Sprint 22 Hardening & Scale plan"
+      },
+      {
+        "number": 15358,
+        "url": "https://github.com/BrianCLong/summit/pull/15358",
+        "mergedAt": null,
+        "title": "Create patent-grade MCP protocol innovations"
+      },
+      {
+        "number": 15050,
+        "url": "https://github.com/BrianCLong/summit/pull/15050",
+        "mergedAt": null,
+        "title": "Codex-63: Schema generation & drift check"
+      },
+      {
+        "number": 13758,
+        "url": "https://github.com/BrianCLong/summit/pull/13758",
+        "mergedAt": "2025-12-20T03:34:16Z",
+        "title": "Add Sprint 14 autonomy and workflow plan"
+      },
+      {
+        "number": 13950,
+        "url": "https://github.com/BrianCLong/summit/pull/13950",
+        "mergedAt": "2025-12-20T11:15:32Z",
+        "title": "Add receipt worker retries and Prometheus metrics"
+      },
+      {
+        "number": 14833,
+        "url": "https://github.com/BrianCLong/summit/pull/14833",
+        "mergedAt": "2025-12-29T16:12:19Z",
+        "title": "feat: enforce schema compatibility guard"
+      },
+      {
+        "number": 13061,
+        "url": "https://github.com/BrianCLong/summit/pull/13061",
+        "mergedAt": "2025-12-01T23:28:53Z",
+        "title": "chore(deps): bump express from 4.21.2 to 4.22.1 in /services/admin-automation"
+      },
+      {
+        "number": 14098,
+        "url": "https://github.com/BrianCLong/summit/pull/14098",
+        "mergedAt": "2025-12-20T07:27:00Z",
+        "title": "Improve map clustering ergonomics and deterministic geo ordering"
+      },
+      {
+        "number": 12329,
+        "url": "https://github.com/BrianCLong/summit/pull/12329",
+        "mergedAt": "2025-12-18T03:07:43Z",
+        "title": "Add governance and response prompt playbook"
+      },
+      {
+        "number": 13094,
+        "url": "https://github.com/BrianCLong/summit/pull/13094",
+        "mergedAt": "2025-12-02T21:21:46Z",
+        "title": "chore(deps): bump validator from 13.15.20 to 13.15.23 in /sdk/typescript"
+      },
+      {
+        "number": 13552,
+        "url": "https://github.com/BrianCLong/summit/pull/13552",
+        "mergedAt": "2025-12-17T03:18:04Z",
+        "title": "Fix Technical Debt: Implement MultimodalDataService and Fix Tests"
+      },
+      {
+        "number": 13592,
+        "url": "https://github.com/BrianCLong/summit/pull/13592",
+        "mergedAt": "2025-12-17T02:26:45Z",
+        "title": "Monorepo & Dependency Stabilization"
+      },
+      {
+        "number": 12251,
+        "url": "https://github.com/BrianCLong/summit/pull/12251",
+        "mergedAt": "2025-12-18T03:31:21Z",
+        "title": "test: add comprehensive test coverage for critical areas"
+      },
+      {
+        "number": 15311,
+        "url": "https://github.com/BrianCLong/summit/pull/15311",
+        "mergedAt": "2026-01-01T11:39:37Z",
+        "title": "feat: Establish counter-intelligence framework documentation"
+      },
+      {
+        "number": 15352,
+        "url": "https://github.com/BrianCLong/summit/pull/15352",
+        "mergedAt": "2026-01-01T10:50:33Z",
+        "title": "Add CCR poisoning detection ADR and roadmap update"
+      },
+      {
+        "number": 15180,
+        "url": "https://github.com/BrianCLong/summit/pull/15180",
+        "mergedAt": "2025-12-31T14:21:19Z",
+        "title": "chore(deps): bump zaproxy/action-baseline from 0.14.0 to 0.15.0"
+      },
+      {
+        "number": 15351,
+        "url": "https://github.com/BrianCLong/summit/pull/15351",
+        "mergedAt": null,
+        "title": "Add SH-MCP provisional patent draft and prompt registration"
+      },
+      {
+        "number": 15320,
+        "url": "https://github.com/BrianCLong/summit/pull/15320",
+        "mergedAt": "2026-01-01T11:38:44Z",
+        "title": "Market Entry Innovation Sprint Artifacts"
+      },
+      {
+        "number": 15293,
+        "url": "https://github.com/BrianCLong/summit/pull/15293",
+        "mergedAt": "2026-01-01T06:31:07Z",
+        "title": "feat: codify partner operating model guardrails"
+      },
+      {
+        "number": 13110,
+        "url": "https://github.com/BrianCLong/summit/pull/13110",
+        "mergedAt": "2025-12-17T05:42:57Z",
+        "title": "S8 - Security Regression Replay Harness"
+      },
+      {
+        "number": 13075,
+        "url": "https://github.com/BrianCLong/summit/pull/13075",
+        "mergedAt": "2025-12-03T02:05:47Z",
+        "title": "Security and Compliance Pass"
+      },
+      {
+        "number": 15325,
+        "url": "https://github.com/BrianCLong/summit/pull/15325",
+        "mergedAt": null,
+        "title": "feat: add doctrine spine and enforcement guardrails"
+      },
+      {
+        "number": 1314,
+        "url": "https://github.com/BrianCLong/summit/pull/1314",
+        "mergedAt": null,
+        "title": "docs: refresh sprint 24 plan"
+      },
+      {
+        "number": 12055,
+        "url": "https://github.com/BrianCLong/summit/pull/12055",
+        "mergedAt": "2025-11-21T03:55:21Z",
+        "title": "Build audit logging and compliance system"
+      },
+      {
+        "number": 1315,
+        "url": "https://github.com/BrianCLong/summit/pull/1315",
+        "mergedAt": "2025-09-23T16:56:14Z",
+        "title": "docs: refresh build platform sprint plan"
+      },
+      {
+        "number": 1316,
+        "url": "https://github.com/BrianCLong/summit/pull/1316",
+        "mergedAt": "2025-09-23T06:11:25Z",
+        "title": "docs: update IG squad sprint plan"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

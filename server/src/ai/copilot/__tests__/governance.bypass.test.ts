@@ -12,6 +12,7 @@ import {
   CopilotGovernanceService,
   createCopilotGovernanceService,
 } from '../governance.service.js';
+import { CopilotAnswerSchema } from '../types.js';
 import type {
   CopilotAnswer,
   CopilotRefusal,
@@ -75,9 +76,7 @@ describe('Copilot Governance Bypass Prevention', () => {
     });
 
     it('should NOT allow CopilotAnswer without governanceVerdict (TypeScript check)', () => {
-      // This is enforced at compile time by the GovernanceVerdictSchema
-      // @ts-expect-error - Missing governanceVerdict should cause compile error
-      const invalidAnswer: CopilotAnswer = {
+      const invalidAnswer = {
         answerId: 'answer-123',
         answer: 'Test answer',
         confidence: 0.95,
@@ -107,7 +106,7 @@ describe('Copilot Governance Bypass Prevention', () => {
         // Missing governanceVerdict
       };
 
-      expect(true).toBe(true); // Placeholder
+      expect(() => CopilotAnswerSchema.parse(invalidAnswer)).toThrow();
     });
   });
 
@@ -412,7 +411,7 @@ describe('Copilot Governance Bypass Prevention', () => {
 
       expect(verdict.metadata?.remediationSuggestions).toBeDefined();
       expect(
-        verdict.metadata?.remediationSuggestions?.some((s) =>
+        verdict.metadata?.remediationSuggestions?.some((s: string) =>
           s.toLowerCase().includes('security')
         )
       ).toBe(true);
@@ -420,7 +419,7 @@ describe('Copilot Governance Bypass Prevention', () => {
   });
 
   describe('Edge Cases and Bypass Attempts', () => {
-    it('should handle null/undefined inputs gracefully', () => {
+    it('should reject null/undefined guardrails inputs', () => {
       const mockAnswer = {
         answerId: 'test',
         answer: 'test',
@@ -449,11 +448,11 @@ describe('Copilot Governance Bypass Prevention', () => {
 
       expect(() => {
         governanceService.generateApprovedVerdict(mockAnswer, null as any);
-      }).not.toThrow();
+      }).toThrow();
 
       expect(() => {
         governanceService.generateApprovedVerdict(mockAnswer, undefined as any);
-      }).not.toThrow();
+      }).toThrow();
     });
 
     it('should prevent bypass via response manipulation', () => {

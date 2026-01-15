@@ -20,6 +20,9 @@ from .intelcraft import (
 
 __all__ = [
     "Graph",
+    "IntelCraftElement",
+    "IntelCraftRelationship",
+    "build_intelcraft_graph",
     "calculate_betweenness_centrality",
     "calculate_eigenvector_centrality",
     "detect_communities_leiden",
@@ -27,9 +30,6 @@ __all__ = [
     "detect_roles_and_brokers",
     "find_k_shortest_paths",
     "find_shortest_path",
-    "IntelCraftElement",
-    "IntelCraftRelationship",
-    "build_intelcraft_graph",
     "integrate_intelcraft_elements",
     "normalize_intelcraft_elements",
 ]

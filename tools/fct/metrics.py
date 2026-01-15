@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Dict, Iterable, Tuple
 
 import numpy as np
-
 
 EPS = 1e-9
 
@@ -49,7 +48,9 @@ class GroupMetrics:
         return predicted_positive / max(total, EPS)
 
 
-def _validate_inputs(y_true: Iterable[int], y_prob: Iterable[float], sensitive: Iterable[int]) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def _validate_inputs(
+    y_true: Iterable[int], y_prob: Iterable[float], sensitive: Iterable[int]
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     y_true_arr = np.asarray(y_true)
     y_prob_arr = np.asarray(y_prob)
     sensitive_arr = np.asarray(sensitive)
@@ -68,13 +69,13 @@ def confusion_by_group(
     y_prob: Iterable[float],
     sensitive: Iterable[int],
     threshold: float = 0.5,
-) -> Dict[int, GroupMetrics]:
+) -> dict[int, GroupMetrics]:
     """Compute confusion-matrix counts for each sensitive group."""
 
     y_true_arr, y_prob_arr, sensitive_arr = _validate_inputs(y_true, y_prob, sensitive)
     y_pred = (y_prob_arr >= threshold).astype(int)
 
-    metrics: Dict[int, GroupMetrics] = {}
+    metrics: dict[int, GroupMetrics] = {}
     for group in np.unique(sensitive_arr):
         mask = sensitive_arr == group
         y_true_group = y_true_arr[mask]
@@ -164,12 +165,14 @@ def fairness_report(
     y_prob: Iterable[float],
     sensitive: Iterable[int],
     threshold: float = 0.5,
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """Generate a summary of fairness and utility metrics."""
 
     report = {
         "accuracy": accuracy(y_true, y_prob, threshold),
-        "demographic_parity_diff": demographic_parity_difference(y_true, y_prob, sensitive, threshold),
+        "demographic_parity_diff": demographic_parity_difference(
+            y_true, y_prob, sensitive, threshold
+        ),
         "tpr_gap": true_positive_rate_gap(y_true, y_prob, sensitive, threshold),
         "fpr_gap": false_positive_rate_gap(y_true, y_prob, sensitive, threshold),
     }

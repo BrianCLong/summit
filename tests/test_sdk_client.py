@@ -1,12 +1,12 @@
-import pytest
 from intelgraph.sdk import IntelGraphClient
-from types import SimpleNamespace
+
 
 def test_basic_allow():
     client = IntelGraphClient()
     result = client.process("hello")
     assert result["ok"]
     assert result["redacted_text"] == "hello"
+
 
 def test_with_redactor():
     class StubRedactor:
@@ -17,6 +17,7 @@ def test_with_redactor():
     result = client.process("this is secret")
     assert result["ok"]
     assert result["redacted_text"] == "this is [REDACTED]"
+
 
 def test_with_policy_deny():
     class DenyEngine:

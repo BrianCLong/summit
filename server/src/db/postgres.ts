@@ -587,7 +587,11 @@ function createManagedPool(
     withTransaction,
     connect,
     end,
-    on,
+    on: (event: any, listener: any) => {
+      writePool.pool.on(event, listener);
+      readPools.forEach((wrapper) => wrapper.pool.on(event, listener));
+      return managedPool as unknown as ManagedPostgresPool;
+    },
     healthCheck,
     slowQueryInsights,
     queryCaptureSnapshot: snapshotQueryCapture,

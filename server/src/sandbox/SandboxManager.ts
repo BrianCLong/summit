@@ -9,7 +9,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { createDataEnvelope, GovernanceResult, type GovernanceVerdict, type DataEnvelope } from '../types/data-envelope.js';
+import { createDataEnvelope, GovernanceResult } from '../types/data-envelope.js';
+import type { GovernanceVerdict, DataEnvelope } from '../types/data-envelope.js';
 import type {
   SandboxConfig,
   SandboxPolicy,

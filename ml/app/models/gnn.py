@@ -540,7 +540,7 @@ class GNNModelManager:
 
         except Exception as e:
             track_error("gnn_manager", "ModelLoadError")
-            raise Exception(f"Failed to load model {model_name}: {str(e)}")
+            raise Exception(f"Failed to load model {model_name}: {e!s}")
 
     def save_model(self, model_name: str, model_path: str = None, metrics: dict = None):
         """Save a trained model"""

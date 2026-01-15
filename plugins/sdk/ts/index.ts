@@ -29,6 +29,7 @@ export function createGraphClient(apiUrl: string): GraphClient {
 
 export function registerPanel(panel: PanelDefinition): void {
   // In the real runtime this would register the panel with the host application.
+  // eslint-disable-next-line no-console -- SDK debug logging is intentional
   console.debug(`registering panel ${panel.id}`);
 }
 
@@ -36,5 +37,6 @@ export function emitTelemetry(
   event: string,
   data: Record<string, unknown>,
 ): void {
+  // eslint-disable-next-line no-console -- SDK telemetry logging is intentional
   console.debug(`telemetry:${event}`, data);
 }

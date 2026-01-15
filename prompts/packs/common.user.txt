@@ -1,4 +1,0 @@
-{{QUESTION}}
-
-{{CONTEXT}}
-{{RULES}}

@@ -30,6 +30,7 @@ async function batchLoadEntities(
   const { redis, tenantId, neo4jDriver } = context;
   const entityMap = new Map<string, Entity>();
   const missingIds: string[] = [];
+  let loadError: Error | null = null;
 
   // 1. Try to load from Redis cache first
   if (redis) {
@@ -120,6 +121,10 @@ async function batchLoadEntities(
       );
     } catch (error: any) {
       logger.error({ error, ids: missingIds }, 'Error in entity batch loader');
+      loadError =
+        error instanceof Error
+          ? error
+          : new Error('Entity batch load failed');
       // If DB fails, we can only return errors for missingIds
       // Existing ones from cache are fine
       missingIds.forEach(id => {
@@ -138,6 +143,9 @@ async function batchLoadEntities(
   return ids.map((id) => {
     const entity = entityMap.get(id);
     if (!entity) {
+      if (loadError) {
+        return new Error(loadError.message);
+      }
       return new Error(`Entity not found: ${id}`);
     }
     return entity;

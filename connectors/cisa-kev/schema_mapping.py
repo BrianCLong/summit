@@ -7,14 +7,16 @@ Reference: https://www.cisa.gov/known-exploited-vulnerabilities-catalog
 """
 
 import json
-import httpx
-from typing import List, Dict, Any, Tuple, Optional
-from datetime import datetime
 import logging
+from datetime import datetime
+from typing import Any
+
+import httpx
 
 # PII detection integration
 try:
     from services.ingest.ingest.app.pii import detect_pii
+
     PII_DETECTION_AVAILABLE = True
 except ImportError:
     PII_DETECTION_AVAILABLE = False
@@ -29,9 +31,8 @@ CISA_KEV_URL = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_v
 
 
 def map_cisa_kev_to_intelgraph(
-    file_path: Optional[str] = None,
-    config: Optional[Dict[str, Any]] = None
-) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    file_path: str | None = None, config: dict[str, Any] | None = None
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """
     Maps CISA KEV data to IntelGraph Vulnerability entities.
 
@@ -85,8 +86,7 @@ def map_cisa_kev_to_intelgraph(
     catalog_count = kev_data.get("count", 0)
 
     logger.info(
-        f"Processing CISA KEV catalog version {catalog_version} "
-        f"({catalog_count} vulnerabilities)"
+        f"Processing CISA KEV catalog version {catalog_version} ({catalog_count} vulnerabilities)"
     )
 
     # Map vulnerabilities to entities
@@ -95,7 +95,10 @@ def map_cisa_kev_to_intelgraph(
 
     for vuln in vulnerabilities:
         # Apply filters
-        if filter_ransomware and not vuln.get("knownRansomwareCampaignUse", "Unknown").lower() == "known":
+        if (
+            filter_ransomware
+            and not vuln.get("knownRansomwareCampaignUse", "Unknown").lower() == "known"
+        ):
             continue
 
         if min_date:
@@ -104,11 +107,7 @@ def map_cisa_kev_to_intelgraph(
                 continue
 
         # Map to entity
-        entity = _map_vulnerability_to_entity(
-            vuln,
-            catalog_version,
-            include_metadata
-        )
+        entity = _map_vulnerability_to_entity(vuln, catalog_version, include_metadata)
 
         # PII detection (should find none, but validate)
         if PII_DETECTION_AVAILABLE:
@@ -124,7 +123,7 @@ def map_cisa_kev_to_intelgraph(
     return entities, relationships
 
 
-def _load_kev_data(file_path: Optional[str] = None) -> Dict[str, Any]:
+def _load_kev_data(file_path: str | None = None) -> dict[str, Any]:
     """
     Load KEV data from file or API.
 
@@ -142,7 +141,7 @@ def _load_kev_data(file_path: Optional[str] = None) -> Dict[str, Any]:
     if file_path:
         logger.info(f"Loading KEV data from file: {file_path}")
         try:
-            with open(file_path, "r") as f:
+            with open(file_path) as f:
                 return json.load(f)
         except FileNotFoundError:
             logger.error(f"File not found: {file_path}")
@@ -164,7 +163,7 @@ def _load_kev_data(file_path: Optional[str] = None) -> Dict[str, Any]:
             raise ValueError(f"Invalid JSON from API: {e}")
 
 
-def _validate_kev_schema(kev_data: Dict[str, Any]) -> None:
+def _validate_kev_schema(kev_data: dict[str, Any]) -> None:
     """
     Validate KEV data schema.
 
@@ -187,10 +186,8 @@ def _validate_kev_schema(kev_data: Dict[str, Any]) -> None:
 
 
 def _map_vulnerability_to_entity(
-    vuln: Dict[str, Any],
-    catalog_version: str,
-    include_metadata: bool = False
-) -> Dict[str, Any]:
+    vuln: dict[str, Any], catalog_version: str, include_metadata: bool = False
+) -> dict[str, Any]:
     """
     Map a single vulnerability to an IntelGraph Vulnerability entity.
 
@@ -224,35 +221,28 @@ def _map_vulnerability_to_entity(
             "id": cve_id,
             "cve_id": cve_id,
             "name": vuln_name,
-
             # Vendor/product info
             "vendor_project": vuln.get("vendorProject", ""),
             "product": vuln.get("product", ""),
-
             # Vulnerability details
             "vulnerability_name": vuln_name,
             "short_description": vuln.get("shortDescription", ""),
             "description": vuln.get("shortDescription", ""),  # Alias for compatibility
-
             # Timeline
             "date_added": vuln.get("dateAdded", ""),
             "discovered_date": vuln.get("dateAdded", ""),  # Alias
             "due_date": vuln.get("dueDate", ""),
-
             # Remediation
             "required_action": vuln.get("requiredAction", ""),
             "remediation": vuln.get("requiredAction", ""),  # Alias
-
             # Threat indicators
             "known_ransomware_use": _parse_ransomware_flag(
                 vuln.get("knownRansomwareCampaignUse", "Unknown")
             ),
-
             # Source info
             "source": "cisa-kev",
             "confidence": 1.0,  # Authoritative source
             "data_classification": "public",
-
             # Catalog metadata
             "catalog_version": catalog_version,
         },
@@ -262,7 +252,7 @@ def _map_vulnerability_to_entity(
             "connector_name": "cisa-kev",
             "connector_version": "1.0.0",
             "source_url": CISA_KEV_URL,
-        }
+        },
     }
 
     # Optionally include raw record
@@ -285,7 +275,7 @@ def _parse_ransomware_flag(value: str) -> bool:
     return value.lower() == "known"
 
 
-def _detect_and_mark_pii(entity: Dict[str, Any]) -> Dict[str, Any]:
+def _detect_and_mark_pii(entity: dict[str, Any]) -> dict[str, Any]:
     """
     Detect and mark PII fields in entity.
 
@@ -307,13 +297,8 @@ def _detect_and_mark_pii(entity: Dict[str, Any]) -> Dict[str, Any]:
         if isinstance(value, str) and value:
             detected_types = detect_pii(value)
             if detected_types:
-                pii_fields.append({
-                    "field": field,
-                    "pii_types": detected_types
-                })
-                logger.warning(
-                    f"Unexpected PII detected in field '{field}': {detected_types}"
-                )
+                pii_fields.append({"field": field, "pii_types": detected_types})
+                logger.warning(f"Unexpected PII detected in field '{field}': {detected_types}")
 
     if pii_fields:
         entity["_metadata"]["_pii_fields"] = pii_fields
@@ -321,9 +306,7 @@ def _detect_and_mark_pii(entity: Dict[str, Any]) -> Dict[str, Any]:
     return entity
 
 
-def get_ransomware_vulnerabilities(
-    file_path: Optional[str] = None
-) -> List[Dict[str, Any]]:
+def get_ransomware_vulnerabilities(file_path: str | None = None) -> list[dict[str, Any]]:
     """
     Convenience function to get only ransomware-associated vulnerabilities.
 
@@ -334,16 +317,14 @@ def get_ransomware_vulnerabilities(
         List of Vulnerability entities with known ransomware use
     """
     entities, _ = map_cisa_kev_to_intelgraph(
-        file_path=file_path,
-        config={"filter_ransomware": True}
+        file_path=file_path, config={"filter_ransomware": True}
     )
     return entities
 
 
 def get_recent_vulnerabilities(
-    days: int = 30,
-    file_path: Optional[str] = None
-) -> List[Dict[str, Any]]:
+    days: int = 30, file_path: str | None = None
+) -> list[dict[str, Any]]:
     """
     Get vulnerabilities added in the last N days.
 
@@ -357,10 +338,7 @@ def get_recent_vulnerabilities(
     from datetime import timedelta
 
     min_date = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
-    entities, _ = map_cisa_kev_to_intelgraph(
-        file_path=file_path,
-        config={"min_date": min_date}
-    )
+    entities, _ = map_cisa_kev_to_intelgraph(file_path=file_path, config={"min_date": min_date})
     return entities
 
 

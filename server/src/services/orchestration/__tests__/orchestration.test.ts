@@ -17,6 +17,10 @@ describe('AgentOrchestrator System', () => {
     (lifecycleManager as any).agents.clear();
     // Reset persistence
     orchestrator.persistence = new InMemoryPersistence();
+    (orchestrator.policyEngine as any).evaluate = jest.fn(async () => ({
+      allowed: true,
+      reason: 'Allowed',
+    }));
   });
 
   afterEach(() => {

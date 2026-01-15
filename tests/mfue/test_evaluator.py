@@ -2,11 +2,10 @@ import numpy as np
 
 from mfue import (
     DatasetSplit,
-    EvaluationReport,
-    MFUEvaluator,
-    MaskBasedUnlearningBaseline,
     FineTuneUnlearningBaseline,
     LogisticRegressionModel,
+    MaskBasedUnlearningBaseline,
+    MFUEvaluator,
     ReproducibilityConfig,
 )
 

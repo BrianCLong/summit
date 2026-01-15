@@ -1,0 +1,38 @@
+{
+  "issue_number": 11847,
+  "title": "Fix Jest test suite ESM configuration",
+  "url": "https://github.com/BrianCLong/summit/issues/11847",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9095051430,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4pg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:bug",
+      "name": "type:bug",
+      "color": "E11D21",
+      "default": false,
+      "description": "Auto-generated label"
+    }
+  ],
+  "updatedAt": "2025-12-19T17:50:43Z",
+  "createdAt": "2025-11-20T04:23:11Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13296,
+        "url": "https://github.com/BrianCLong/summit/pull/13296",
+        "mergedAt": "2025-12-17T05:55:45Z",
+        "title": "fix: Jest ESM configuration and test suite updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

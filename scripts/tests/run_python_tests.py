@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Environment-aware synthetic data checks for Python services."""
+
 from __future__ import annotations
 
 import json
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
 from typing import NoReturn
 
 ENVIRONMENT = os.getenv("TEST_ENVIRONMENT", "dev")
@@ -28,7 +29,7 @@ def fail(message: str) -> NoReturn:
 def load_data(path: Path) -> dict:
     try:
         return json.loads(path.read_text())
-    except Exception as exc:  # noqa: BLE001 - surfacing failure context
+    except Exception as exc:
         fail(f"Unable to load synthetic data from {path}: {exc}")
 
 
@@ -72,12 +73,12 @@ def main() -> None:
         fail("Synthetic events must be a positive integer.")
 
     if ENVIRONMENT == "prod" and synthetic_events < 10:
-        fail("Production synthetic dataset should contain at least 10 events for regression coverage.")
+        fail(
+            "Production synthetic dataset should contain at least 10 events for regression coverage."
+        )
 
     print(
-        "Python service synthetic validation succeeded for {}. Confidence={:.2f}, anomalies={}, events={}.".format(
-            ENVIRONMENT, confidence, anomalies, synthetic_events
-        )
+        f"Python service synthetic validation succeeded for {ENVIRONMENT}. Confidence={confidence:.2f}, anomalies={anomalies}, events={synthetic_events}."
     )
 
 

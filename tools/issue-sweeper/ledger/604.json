@@ -1,0 +1,74 @@
+{
+  "issue_number": 604,
+  "title": "feat: add dark mode and accessibility toggles",
+  "url": "https://github.com/BrianCLong/summit/pull/604",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-18T04:31:38Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13635,
+        "url": "https://github.com/BrianCLong/summit/pull/13635",
+        "mergedAt": "2025-12-17T04:30:31Z",
+        "title": "build(deps): bump prismjs and react-syntax-highlighter in /client"
+      },
+      {
+        "number": 11233,
+        "url": "https://github.com/BrianCLong/summit/pull/11233",
+        "mergedAt": "2025-10-16T16:05:19Z",
+        "title": "fix/msw vector adapter typings"
+      },
+      {
+        "number": 11896,
+        "url": "https://github.com/BrianCLong/summit/pull/11896",
+        "mergedAt": "2025-11-20T10:26:15Z",
+        "title": "Add GraphRAG with query preview feature"
+      },
+      {
+        "number": 11907,
+        "url": "https://github.com/BrianCLong/summit/pull/11907",
+        "mergedAt": "2025-11-20T10:25:33Z",
+        "title": "Convert runbooks to DAGs with gates and logs"
+      },
+      {
+        "number": 1086,
+        "url": "https://github.com/BrianCLong/summit/pull/1086",
+        "mergedAt": null,
+        "title": "Release 2.5.0: Grafana Release Health dashboard + Playwright smoke pack"
+      },
+      {
+        "number": 1262,
+        "url": "https://github.com/BrianCLong/summit/pull/1262",
+        "mergedAt": "2025-09-19T02:22:35Z",
+        "title": "Release 2.5 dash: merge into merge/all-to-main-20250915-022508 with UI/docs from feature"
+      },
+      {
+        "number": 1085,
+        "url": "https://github.com/BrianCLong/summit/pull/1085",
+        "mergedAt": null,
+        "title": "chore(compat): seed GraphQL N-1 and N-2\nbaselines for CI schema checks"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

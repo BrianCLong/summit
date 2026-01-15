@@ -246,10 +246,10 @@ class DAGBuilder:
                 self.create_node(
                     "source_access",
                     "research_engine",
-                    f"research_step_{step+1}",
+                    f"research_step_{step + 1}",
                     [input_hash],
                     [step_output],
-                    {"sources_queried": 5 + step * 2, "findings": f"research_findings_{step+1}"},
+                    {"sources_queried": 5 + step * 2, "findings": f"research_findings_{step + 1}"},
                 )
             )
             input_hash = step_output

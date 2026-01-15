@@ -2,8 +2,10 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { IntelGraphService } from '../services/IntelGraphService.js';
 
 // Define shared mocks
-const mockRun = jest.fn();
-const mockClose = jest.fn().mockResolvedValue(undefined);
+const mockRun = jest.fn() as jest.MockedFunction<
+  (...args: any[]) => Promise<any>
+>;
+const mockClose = jest.fn() as jest.MockedFunction<() => Promise<void>>;
 const mockSession = { run: mockRun, close: mockClose };
 const mockDriver = { session: jest.fn(() => mockSession) };
 
@@ -38,6 +40,12 @@ describe('IntelGraphService', () => {
     // Re-initialize to ensure fresh mocks
     // @ts-ignore
     IntelGraphService.instance = null;
+    mockClose.mockResolvedValue(undefined);
+    const dbModule = jest.requireMock('../config/database.js') as {
+      getNeo4jDriver: jest.Mock;
+    };
+    dbModule.getNeo4jDriver.mockReturnValue(mockDriver);
+    (mockDriver.session as jest.Mock).mockReturnValue(mockSession);
     service = IntelGraphService.getInstance();
   });
 
@@ -68,7 +76,11 @@ describe('IntelGraphService', () => {
     it('should create a claim linked to an entity', async () => {
       const owner = 'user-1';
       const tenantId = 't1';
-      const claimData = { statement: 'AI is great', confidence: 0.9, entityId: 'e-1' };
+      const claimData = {
+        statement: 'AI is great',
+        confidence: 0.9,
+        entityId: '11111111-1111-1111-1111-111111111111',
+      };
 
       const mockRecord = {
         get: jest.fn().mockReturnValue({ properties: { id: 'c-1', ...claimData } })

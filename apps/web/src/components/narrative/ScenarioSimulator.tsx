@@ -136,8 +136,9 @@ export const ScenarioSimulator: React.FC = () => {
             <h2 className="text-xl font-semibold mb-4">Configuration</h2>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-700 mb-2">Scenario Entities (JSON)</label>
+              <label htmlFor="scenario-entities" className="block text-sm font-medium text-slate-700 mb-2">Scenario Entities (JSON)</label>
               <textarea
+                id="scenario-entities"
                 className="w-full h-64 p-3 border rounded font-mono text-xs bg-slate-50"
                 value={JSON.stringify(entities, null, 2)}
                 onChange={(e) => {
@@ -145,25 +146,28 @@ export const ScenarioSimulator: React.FC = () => {
                     setEntities(JSON.parse(e.target.value));
                   } catch (e) {}
                 }}
+                aria-label="Edit scenario entities JSON"
               />
             </div>
 
             <div className="border-t pt-4 mt-4">
               <div className="flex items-center justify-between mb-4">
-                <span className="font-medium">Adversarial Shock</span>
+                <span className="font-medium" id="shock-label">Adversarial Shock</span>
                 <input
                   type="checkbox"
                   checked={shockEnabled}
                   onChange={(e) => setShockEnabled(e.target.checked)}
                   className="h-5 w-5"
+                  aria-labelledby="shock-label"
                 />
               </div>
 
               {shockEnabled && (
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs font-medium text-slate-500">Description</label>
+                    <label htmlFor="shock-description" className="block text-xs font-medium text-slate-500">Description</label>
                     <input
+                      id="shock-description"
                       type="text"
                       value={shockDescription}
                       onChange={(e) => setShockDescription(e.target.value)}
@@ -183,6 +187,7 @@ export const ScenarioSimulator: React.FC = () => {
               onClick={runSimulation}
               disabled={loading}
               className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded disabled:opacity-50"
+              aria-label={loading ? 'Simulation in progress' : 'Run Monte Carlo Batch Simulation (20 iterations)'}
             >
               {loading ? 'Simulating...' : 'Run Monte Carlo Batch (20x)'}
             </button>
@@ -192,7 +197,7 @@ export const ScenarioSimulator: React.FC = () => {
         {/* Results Panel */}
         <div className="lg:col-span-2">
           {result ? (
-            <div className="space-y-6">
+            <div className="space-y-6" role="region" aria-label="Simulation Results">
               <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
                 <h2 className="text-xl font-semibold mb-4">Outcome Clustering</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -206,6 +211,8 @@ export const ScenarioSimulator: React.FC = () => {
                           ? 'border-green-500 bg-green-50'
                           : 'border-blue-500 bg-blue-50'
                       }`}
+                      role="article"
+                      aria-label={`${cluster.label} Outcome Cluster`}
                     >
                       <h3 className="font-bold text-lg">{cluster.label}</h3>
                       <div className="text-3xl font-black my-2">

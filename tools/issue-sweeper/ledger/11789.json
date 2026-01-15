@@ -1,0 +1,44 @@
+{
+  "issue_number": 11789,
+  "title": "docs: capture deepagent mvp deliverable",
+  "url": "https://github.com/BrianCLong/summit/pull/11789",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-11-20T21:13:10Z",
+  "createdAt": "2025-11-03T05:02:03Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12089,
+        "url": "https://github.com/BrianCLong/summit/pull/12089",
+        "mergedAt": "2025-11-21T06:30:29Z",
+        "title": "Triage and consolidate open pull requests"
+      },
+      {
+        "number": 11789,
+        "url": "https://github.com/BrianCLong/summit/pull/11789",
+        "mergedAt": "2025-11-20T21:13:08Z",
+        "title": "docs: capture deepagent mvp deliverable"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

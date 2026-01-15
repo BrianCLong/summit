@@ -35,7 +35,6 @@ import monitoringRouter from './routes/monitoring.js';
 import billingRouter from './routes/billing.js';
 import entityResolutionRouter from './routes/entity-resolution.js';
 import workspaceRouter from './routes/workspaces.js';
-import aiRouter from './routes/ai.js';
 import gaCoreMetricsRouter from './routes/ga-core-metrics.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
@@ -43,11 +42,10 @@ import narrativeSimulationRouter from './routes/narrative-sim.js';
 import receiptsRouter from './routes/receipts.js';
 import predictiveRouter from './routes/predictive.js';
 import { policyRouter } from './routes/policy.js';
+import policyManagementRouter from './routes/policies/policy-management.js';
 import { metricsRoute } from './http/metricsRoute.js';
 import monitoringBackpressureRouter from './routes/monitoring-backpressure.js';
-const rbacRouter = require('./routes/rbacRoutes.js');
-import { typeDefs } from './graphql/schema.js';
-import resolvers from './graphql/resolvers/index.js';
+import rbacRouter from './routes/rbacRoutes.js';
 // import { licenseRuleValidationMiddleware } from './graphql/middleware/licenseRuleValidationMiddleware.js';
 import { getContext } from './lib/auth.js';
 import { getNeo4jDriver } from './db/neo4j.js';
@@ -56,8 +54,6 @@ import { Request, Response, NextFunction } from 'express'; // Import types for m
 import { startTrustWorker } from './workers/trustScoreWorker.js';
 import { startRetentionWorker } from './workers/retentionWorker.js';
 import { cfg } from './config.js';
-import webhookRouter from './routes/webhooks.js';
-import { webhookWorker } from './webhooks/webhook.worker.js';
 import supportTicketsRouter from './routes/support-tickets.js';
 import ticketLinksRouter from './routes/ticket-links.js';
 import tenantContextMiddleware from './middleware/tenantContext.js';
@@ -83,7 +79,7 @@ import { SummitInvestigate } from './services/SummitInvestigate.js';
 import { streamIngest } from './ingest/stream.js';
 import osintRouter from './routes/osint.js';
 import palettesRouter from './routes/palettes.js';
-import edgeOpsRouter from './routes/edge-ops.js';
+
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger.js';
 import metaOrchestratorRouter from './routes/meta-orchestrator.js';
@@ -91,7 +87,7 @@ import adminSmokeRouter from './routes/admin-smoke.js';
 import lineageRouter from './routes/lineage.js';
 import scenarioRouter from './routes/scenarios.js';
 import resourceCostsRouter from './routes/resource-costs.js';
-import queryReplayRouter from './routes/query-replay.js';
+
 import streamRouter from './routes/stream.js'; // Added import
 import queryPreviewStreamRouter from './routes/query-preview-stream.js';
 import correctnessProgramRouter from './routes/correctness-program.js';
@@ -101,6 +97,7 @@ import ontologyRouter from './routes/ontology.js';
 import searchIndexRouter from './routes/search-index.js'; // New search-index route
 import dataGovernanceRouter from './routes/data-governance-routes.js';
 import tenantBillingRouter from './routes/tenants/billing.js';
+import tenantUsageRouter from './routes/tenants/usage.js';
 import { gtmRouter } from './routes/gtm-messaging.js';
 import { airgapRouter } from './routes/airgap.js';
 import analyticsRouter from './routes/analytics.js';
@@ -113,6 +110,7 @@ import retentionRouter from './routes/retention.js';
 import drRouter from './routes/dr.js';
 import reportingRouter from './routes/reporting.js';
 import policyProfilesRouter from './routes/policy-profiles.js';
+import policyProposalsRouter from './routes/policy-proposals.js';
 import evidenceRouter from './routes/evidence.js';
 import masteryRouter from './routes/mastery.js';
 import cryptoIntelligenceRouter from './routes/crypto-intelligence.js';
@@ -123,12 +121,14 @@ import featureFlagsRouter from './routes/feature-flags.js';
 import mlReviewRouter from './routes/ml_review.js';
 import adminFlagsRouter from './routes/admin-flags.js';
 import auditEventsRouter from './routes/audit-events.js';
+import brandPackRouter from './services/brand-packs/brand-pack.routes.js';
 import { centralizedErrorHandler } from './middleware/error-handling-middleware.js';
 import pluginAdminRouter from './routes/plugins/plugin-admin.js';
 import integrationAdminRouter from './routes/integrations/integration-admin.js';
 import securityAdminRouter from './routes/security/security-admin.js';
 import complianceAdminRouter from './routes/compliance/compliance-admin.js';
 import sandboxAdminRouter from './routes/sandbox/sandbox-admin.js';
+import adminTenantsRouter from './routes/admin/tenants.js';
 import onboardingRouter from './routes/onboarding.js';
 import supportCenterRouter from './routes/support-center.js';
 import i18nRouter from './routes/i18n.js';
@@ -199,8 +199,9 @@ export const createApp = async () => {
   app.use(publicRateLimit);
 
   // Enhanced Pino HTTP logger with correlation and trace context
+  const pinoHttpInstance = typeof pinoHttp === 'function' ? pinoHttp : (pinoHttp as any).pinoHttp;
   app.use(
-    pinoHttp({
+    pinoHttpInstance({
       logger: appLogger,
       // Redaction is handled by the logger config itself, but we keep this consistent if needed
       // logger config already has redact paths, so we can omit here or merge.
@@ -212,7 +213,7 @@ export const createApp = async () => {
         traceId: req.traceId,
         spanId: req.spanId,
         userId: req.user?.sub || req.user?.id,
-        tenantId: req.user?.tenant_id,
+        tenantId: req.user?.tenant_id || req.user?.tenantId,
       }),
     }),
   );
@@ -374,11 +375,17 @@ export const createApp = async () => {
 
   // Other routes
   // app.use('/api/policy', policyRouter);
+  app.use('/api/policies', policyManagementRouter);
+  app.use('/policies', policyManagementRouter);
   app.use('/api/receipts', receiptsRouter);
+  app.use('/api/brand-packs', brandPackRouter);
   app.use(['/monitoring', '/api/monitoring'], monitoringRouter);
   app.use('/api', monitoringBackpressureRouter);
   app.use('/api/ga-core-metrics', gaCoreMetricsRouter);
-  app.use('/api/ai', aiRouter);
+  if (process.env.SKIP_AI_ROUTES !== 'true') {
+    const { default: aiRouter } = await import('./routes/ai.js');
+    app.use('/api/ai', aiRouter);
+  }
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
   app.use('/api/predictive', predictiveRouter);
@@ -388,7 +395,10 @@ export const createApp = async () => {
   app.use('/api/billing', billingRouter);
   app.use('/api/er', entityResolutionRouter);
   app.use('/api/workspaces', workspaceRouter);
-  app.use('/api/webhooks', webhookRouter);
+  if (process.env.SKIP_WEBHOOKS !== 'true') {
+    const { default: webhookRouter } = await import('./routes/webhooks.js');
+    app.use('/api/webhooks', webhookRouter);
+  }
   app.use('/api/support', supportTicketsRouter);
   app.use('/api', ticketLinksRouter);
   app.use('/api/cases', caseRouter);
@@ -407,14 +417,15 @@ export const createApp = async () => {
   app.use('/api/tenants', tenantsRouter);
   app.use('/api/actions', actionsRouter);
   app.use('/api/osint', osintRouter);
-  app.use('/api/edge', edgeOpsRouter);
+
   app.use('/api/meta-orchestrator', metaOrchestratorRouter);
   app.use('/api', adminSmokeRouter);
   app.use('/api/scenarios', scenarioRouter);
   app.use('/api/costs', resourceCostsRouter);
   app.use('/api/tenants/:tenantId/billing', tenantBillingRouter);
+  app.use('/api/tenants/:tenantId/usage', tenantUsageRouter);
   app.use('/api/internal/command-console', commandConsoleRouter);
-  app.use('/api/query-replay', queryReplayRouter);
+
   app.use('/api/correctness', correctnessProgramRouter);
   app.use('/api', queryPreviewStreamRouter);
   app.use('/api/stream', streamRouter); // Register stream route
@@ -433,6 +444,7 @@ export const createApp = async () => {
   app.use('/api', exportsRouter);
   app.use('/api', retentionRouter);
   app.use('/api/policy-profiles', policyProfilesRouter);
+  app.use('/api/policy-proposals', authenticateToken, policyProposalsRouter);
   app.use('/api/evidence', evidenceRouter);
   app.use('/dr', drRouter);
   app.use('/', opsRouter);
@@ -445,6 +457,7 @@ export const createApp = async () => {
   app.use('/api/ml-reviews', mlReviewRouter);
   app.use('/api/admin/flags', adminFlagsRouter);
   app.use('/api', auditEventsRouter);
+  app.use('/api/admin', adminTenantsRouter);
   app.use('/api/plugins', pluginAdminRouter);
   app.use('/api/integrations', integrationAdminRouter);
   app.use('/api/security', securityAdminRouter);
@@ -554,85 +567,92 @@ export const createApp = async () => {
     }
   });
 
-  const executableSchema = makeExecutableSchema({
-    typeDefs: typeDefs as any,
-    resolvers: resolvers as any,
-  });
+  if (process.env.SKIP_GRAPHQL !== 'true') {
+    const { typeDefs } = await import('./graphql/schema.js');
+    const { default: resolvers } = await import('./graphql/resolvers/index.js');
 
-  const schema = executableSchema; // applyMiddleware(executableSchema, licenseRuleValidationMiddleware);
+    const executableSchema = makeExecutableSchema({
+      typeDefs: typeDefs as any,
+      resolvers: resolvers as any,
+    });
 
-  // GraphQL over HTTP
-  const { persistedQueriesPlugin } = await import(
-    './graphql/plugins/persistedQueries.js'
-  );
-  const { default: pbacPlugin } = await import('./graphql/plugins/pbac.js');
-  const { default: resolverMetricsPlugin } = await import(
-    './graphql/plugins/resolverMetrics.js'
-  );
-  const { default: auditLoggerPlugin } = await import(
-    './graphql/plugins/auditLogger.js'
-  );
-  const { depthLimit } = await import('./graphql/validation/depthLimit.js');
-  const { rateLimitAndCachePlugin } = await import('./graphql/plugins/rateLimitAndCache.js');
+    const schema = executableSchema; // applyMiddleware(executableSchema, licenseRuleValidationMiddleware);
 
-  const apollo = new ApolloServer({
-    schema,
-    // Security plugins - Order matters for execution lifecycle
-    plugins: [
-      persistedQueriesPlugin as any,
-      resolverMetricsPlugin as any,
-      auditLoggerPlugin as any,
-      rateLimitAndCachePlugin(schema) as any,
-      // Enable PBAC in production
-      ...(cfg.NODE_ENV === 'production' ? [pbacPlugin() as any] : []),
-    ],
-    // Security configuration based on environment
-    introspection: cfg.NODE_ENV !== 'production',
-    // Enhanced query validation rules
-    validationRules: [
-      depthLimit(cfg.NODE_ENV === 'production' ? 6 : 8), // Stricter in prod
-    ],
-    // Security context
-    formatError: (formattedError, error) => {
-      // Always allow introspection errors (dev) or client-side validation errors
-      if (
-        formattedError.extensions?.code === 'GRAPHQL_VALIDATION_FAILED' ||
-        formattedError.extensions?.code === 'BAD_USER_INPUT' ||
-        formattedError.extensions?.code === 'UNAUTHENTICATED' ||
-        formattedError.extensions?.code === 'FORBIDDEN'
-      ) {
+    // GraphQL over HTTP
+    const { persistedQueriesPlugin } = await import(
+      './graphql/plugins/persistedQueries.js'
+    );
+    const { default: pbacPlugin } = await import('./graphql/plugins/pbac.js');
+    const { default: resolverMetricsPlugin } = await import(
+      './graphql/plugins/resolverMetrics.js'
+    );
+    const { default: auditLoggerPlugin } = await import(
+      './graphql/plugins/auditLogger.js'
+    );
+    const { depthLimit } = await import('./graphql/validation/depthLimit.js');
+    const { rateLimitAndCachePlugin } = await import('./graphql/plugins/rateLimitAndCache.js');
+
+    const apollo = new ApolloServer({
+      schema,
+      // Security plugins - Order matters for execution lifecycle
+      plugins: [
+        persistedQueriesPlugin as any,
+        resolverMetricsPlugin as any,
+        auditLoggerPlugin as any,
+        rateLimitAndCachePlugin(schema) as any,
+        // Enable PBAC in production
+        ...(cfg.NODE_ENV === 'production' ? [pbacPlugin() as any] : []),
+      ],
+      // Security configuration based on environment
+      introspection: cfg.NODE_ENV !== 'production',
+      // Enhanced query validation rules
+      validationRules: [
+        depthLimit(cfg.NODE_ENV === 'production' ? 6 : 8), // Stricter in prod
+      ],
+      // Security context
+      formatError: (formattedError, error) => {
+        // Always allow introspection errors (dev) or client-side validation errors
+        if (
+          formattedError.extensions?.code === 'GRAPHQL_VALIDATION_FAILED' ||
+          formattedError.extensions?.code === 'BAD_USER_INPUT' ||
+          formattedError.extensions?.code === 'UNAUTHENTICATED' ||
+          formattedError.extensions?.code === 'FORBIDDEN'
+        ) {
+          return formattedError;
+        }
+
+        // In production, mask everything else as Internal Server Error
+        if (cfg.NODE_ENV === 'production') {
+          appLogger.error(
+            { err: error, stack: (error as any)?.stack },
+            `GraphQL Error: ${formattedError.message}`,
+          );
+          return new GraphQLError('Internal server error', {
+            extensions: {
+              code: 'INTERNAL_SERVER_ERROR',
+              http: { status: 500 }
+            }
+          });
+        }
+
+        // In development, return the full error
         return formattedError;
-      }
+      },
+    });
+    await apollo.start();
 
-      // In production, mask everything else as Internal Server Error
-      if (cfg.NODE_ENV === 'production') {
-        appLogger.error(
-          { err: error, stack: (error as any)?.stack },
-          `GraphQL Error: ${formattedError.message}`,
-        );
-        return new GraphQLError('Internal server error', {
-          extensions: {
-            code: 'INTERNAL_SERVER_ERROR',
-            http: { status: 500 }
-          }
-        });
-      }
-
-      // In development, return the full error
-      return formattedError;
-    },
-  });
-  await apollo.start();
-
-  app.use(
-    '/graphql',
-    express.json(),
-    authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
-    advancedRateLimiter.middleware(), // Applied AFTER authentication to enable per-user limits
-    expressMiddleware(apollo, {
-      context: async ({ req }) => getContext({ req: req as any })
-    }),
-  );
+    app.use(
+      '/graphql',
+      express.json(),
+      authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
+      advancedRateLimiter.middleware(), // Applied AFTER authentication to enable per-user limits
+      expressMiddleware(apollo, {
+        context: async ({ req }) => getContext({ req: req as any })
+      }),
+    );
+  } else {
+    appLogger.warn('GraphQL disabled via SKIP_GRAPHQL');
+  }
 
   if (!safetyState.killSwitch && !safetyState.safeMode) {
     // Start background trust worker if enabled
@@ -650,12 +670,15 @@ export const createApp = async () => {
     );
   }
 
-  // Ensure webhook worker is running (it's an auto-starting worker, but importing it ensures it's registered)
-  // In a real production setup, this might be in a separate process/container.
-  // For MVP/Monolith, we keep it here.
-  if (webhookWorker) {
-    // Just referencing it to prevent tree-shaking/unused variable lint errors if any,
-    // though import side-effects usually suffice.
+  if (process.env.SKIP_WEBHOOKS !== 'true') {
+    // Ensure webhook worker is running (it's an auto-starting worker, but importing it ensures it's registered)
+    // In a real production setup, this might be in a separate process/container.
+    // For MVP/Monolith, we keep it here.
+    const { webhookWorker } = await import('./webhooks/webhook.worker.js');
+    if (webhookWorker) {
+      // Just referencing it to prevent tree-shaking/unused variable lint errors if any,
+      // though import side-effects usually suffice.
+    }
   }
 
   appLogger.info('Anomaly detector activated.');

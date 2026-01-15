@@ -2,8 +2,9 @@
 
 import csv
 import sys
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any, Dict, Iterator, List
+from typing import Any
 
 # Add SDK to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -24,9 +25,8 @@ class CSVConnector(BaseConnector):
 
     def __init__(self, manifest_path: str, csv_file_path: str = None):
         super().__init__(manifest_path)
-        self.csv_file_path = (
-            csv_file_path
-            or self.connector_dir / self.manifest.get("sample_data_file", "sample.csv")
+        self.csv_file_path = csv_file_path or self.connector_dir / self.manifest.get(
+            "sample_data_file", "sample.csv"
         )
 
         # Get CSV config from manifest
@@ -36,7 +36,7 @@ class CSVConnector(BaseConnector):
         self.skip_header = self.config.get("skip_header", True)
         self.batch_size = self.config.get("batch_size", 1000)
 
-    def fetch_raw_data(self) -> Iterator[Dict[str, Any]]:
+    def fetch_raw_data(self) -> Iterator[dict[str, Any]]:
         """
         Fetch rows from CSV file.
 
@@ -53,7 +53,7 @@ class CSVConnector(BaseConnector):
 
                 yield row
 
-    def map_to_entities(self, raw_data: Dict[str, Any]) -> tuple[List[Dict], List[Dict]]:
+    def map_to_entities(self, raw_data: dict[str, Any]) -> tuple[list[dict], list[dict]]:
         """
         Map CSV row to IntelGraph entities.
 
@@ -127,7 +127,7 @@ def main():
     # Print first few results
     print("\n=== Sample Results ===")
     for i, result in enumerate(results["results"][:3]):
-        print(f"\nResult {i+1}:")
+        print(f"\nResult {i + 1}:")
         print(json.dumps(result, indent=2))
 
 

@@ -1,0 +1,167 @@
+{
+  "issue_number": 164,
+  "title": "db: Neo4j constraints/indexes",
+  "url": "https://github.com/BrianCLong/summit/issues/164",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9107968038,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQJg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P0",
+      "name": "P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107968280,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRGA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/database",
+      "name": "database",
+      "color": "0366d6",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107968281,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRGQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/neo4j",
+      "name": "neo4j",
+      "color": "6f42c1",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107981085,
+      "node_id": "LA_kwDOPaNncM8AAAACHuDDHQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-09-15",
+      "name": "due:2025-09-15",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:41:47Z",
+  "createdAt": "2025-08-14T04:04:55Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15358,
+        "url": "https://github.com/BrianCLong/summit/pull/15358",
+        "mergedAt": null,
+        "title": "Create patent-grade MCP protocol innovations"
+      },
+      {
+        "number": 12055,
+        "url": "https://github.com/BrianCLong/summit/pull/12055",
+        "mergedAt": "2025-11-21T03:55:21Z",
+        "title": "Build audit logging and compliance system"
+      },
+      {
+        "number": 15126,
+        "url": "https://github.com/BrianCLong/summit/pull/15126",
+        "mergedAt": "2025-12-30T21:31:10Z",
+        "title": "chore(deps): bump the minor-and-patch group with 4 updates"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 13121,
+        "url": "https://github.com/BrianCLong/summit/pull/13121",
+        "mergedAt": "2025-12-03T01:31:53Z",
+        "title": "Causal Graph Generator"
+      },
+      {
+        "number": 15344,
+        "url": "https://github.com/BrianCLong/summit/pull/15344",
+        "mergedAt": "2026-01-01T08:46:52Z",
+        "title": "Create execution plan for Summit to GA"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 10130,
+        "url": "https://github.com/BrianCLong/summit/pull/10130",
+        "mergedAt": "2025-10-14T08:36:34Z",
+        "title": "feat: introduce synthetic event booster framework"
+      },
+      {
+        "number": 717,
+        "url": "https://github.com/BrianCLong/summit/pull/717",
+        "mergedAt": null,
+        "title": "🚀 IntelGraph GA Core Release - Production Ready (CONDITIONAL GO)"
+      },
+      {
+        "number": 13190,
+        "url": "https://github.com/BrianCLong/summit/pull/13190",
+        "mergedAt": "2025-12-04T15:38:47Z",
+        "title": "Build resilient multi-LLM orchestrator with governance"
+      },
+      {
+        "number": 13188,
+        "url": "https://github.com/BrianCLong/summit/pull/13188",
+        "mergedAt": "2025-12-04T15:38:53Z",
+        "title": "Build cross-platform TypeScript CLI for graph queries"
+      },
+      {
+        "number": 1311,
+        "url": "https://github.com/BrianCLong/summit/pull/1311",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat: orchestrate zero spend routing"
+      },
+      {
+        "number": 9795,
+        "url": "https://github.com/BrianCLong/summit/pull/9795",
+        "mergedAt": null,
+        "title": "Fix/bulk import lockfile sync"
+      },
+      {
+        "number": 9796,
+        "url": "https://github.com/BrianCLong/summit/pull/9796",
+        "mergedAt": "2025-10-03T03:51:08Z",
+        "title": "fix: sync lockfile for CI bulk import"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      },
+      {
+        "number": 13042,
+        "url": "https://github.com/BrianCLong/summit/pull/13042",
+        "mergedAt": "2025-12-01T19:17:12Z",
+        "title": "chore: Finalize CI/CD consolidation and cleanup"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

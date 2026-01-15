@@ -1,5 +1,5 @@
 import logging
-import os
+
 try:
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -9,6 +9,7 @@ except ImportError:
     AutoTokenizer = None
 
 log = logging.getLogger("summit-fara")
+
 
 class FaraModel:
     def __init__(self, model_path: str = "microsoft/Fara-7B", load_in_8bit: bool = True):
@@ -28,7 +29,7 @@ class FaraModel:
                 model_path,
                 trust_remote_code=True,
                 device_map="auto" if self.device == "cuda" else None,
-                torch_dtype=torch.float16 if self.device == "cuda" else torch.float32
+                torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
             )
             log.info("Model loaded successfully.")
         except Exception as e:

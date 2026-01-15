@@ -1,0 +1,22 @@
+{
+  "id": "xai-001-xai-integrity-overlays",
+  "version": "1.0.0",
+  "description": "Imported from legacy structure: xai-001-xai-integrity-overlays",
+  "model_config": {
+    "model": "gpt-4",
+    "temperature": 0.0
+  },
+  "vars": {
+    "confidenceBand": {
+      "type": "string",
+      "description": "Auto-detected"
+    }
+  },
+  "guardrails": {
+    "tags": [
+      "claude",
+      "legacy"
+    ]
+  },
+  "template_path": "template.md"
+}

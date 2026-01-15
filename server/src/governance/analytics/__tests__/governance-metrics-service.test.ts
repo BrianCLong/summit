@@ -1,49 +1,37 @@
 // Unit Tests for Governance Metrics Service
 // Tests Prometheus integration, ODNI validation tracking, and p95 < 2s latency
 
-import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import {
-  GovernanceMetricsService,
-  createGovernanceMetricsService,
-  governanceDashboardLatency,
-  governanceValidationRateGauge,
-} from '../governance-metrics-service';
-import {
-  AIGovernanceMetrics,
-  ValidationMetrics,
-  IncidentTrendData,
-  ComplianceGap,
-  TimeRange,
-} from '../types';
-
-// Mock Redis
-jest.mock('ioredis', () => {
-  return jest.fn().mockImplementation(() => ({
-    get: (jest.fn() as any),
-    set: (jest.fn() as any),
-    setex: (jest.fn() as any),
-    zadd: (jest.fn() as any),
-    zrange: (jest.fn() as any).mockResolvedValue([]),
-    zrevrange: (jest.fn() as any).mockResolvedValue([]),
-    zremrangebyrank: (jest.fn() as any),
-    smembers: (jest.fn() as any).mockResolvedValue([]),
-    exists: (jest.fn() as any).mockResolvedValue(0),
-    quit: (jest.fn() as any),
-  } as any));
-});
+  jest,
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  beforeAll,
+} from '@jest/globals';
 
 // Mock fetch for Prometheus queries
 const mockFetch: any = jest.fn();
 global.fetch = mockFetch as any;
 
 describe('GovernanceMetricsService', () => {
-  let service: GovernanceMetricsService;
+  type GovernanceMetricsServiceType =
+    import('../governance-metrics-service').GovernanceMetricsService;
+  type TimeRange = import('../types').TimeRange;
+  let createGovernanceMetricsService: typeof import('../governance-metrics-service').createGovernanceMetricsService;
+  let service: GovernanceMetricsServiceType;
   const testTenantId = 'test-tenant';
   const testTimeRange: TimeRange = {
     start: Date.now() - 86400000,
     end: Date.now(),
     label: 'Last 24 hours',
   };
+
+  beforeAll(async () => {
+    const module = await import('../governance-metrics-service');
+    createGovernanceMetricsService = module.createGovernanceMetricsService;
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import re
-from typing import List, Tuple
 
 from .backends.transformers_backend import TransformersBackend
 
@@ -24,10 +23,10 @@ def _basic_rewrite(text: str) -> str:
     return " ".join(words).strip().capitalize()
 
 
-def rewrite_text(text: str) -> Tuple[str, List[str]]:
+def rewrite_text(text: str) -> tuple[str, list[str]]:
     rewritten = _basic_rewrite(text)
     _ = backend.generate(rewritten)
-    flags: List[str] = []
+    flags: list[str] = []
     orig_nums = re.findall(r"\d+", text)
     new_nums = re.findall(r"\d+", rewritten)
     if orig_nums != new_nums:

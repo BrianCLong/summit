@@ -14,24 +14,17 @@ Run with:
     python -m unittest test_load_demo_data.py
 """
 
-import unittest
 import json
-import tempfile
 import shutil
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime
 
 # Import the module to test
 import sys
+import tempfile
+import unittest
+from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent))
-from load_demo_data import (
-    DemoDataLoader,
-    AnalysisMode,
-    PipelineMetrics,
-    ValidationError,
-    AnalysisError
-)
+from load_demo_data import AnalysisError, AnalysisMode, DemoDataLoader, PipelineMetrics
 
 
 class TestPipelineMetrics(unittest.TestCase):
@@ -57,28 +50,28 @@ class TestPipelineMetrics(unittest.TestCase):
             misinfo_detected=6,
             legitimate_detected=4,
             total_processing_time_ms=1000.0,
-            avg_confidence=0.85
+            avg_confidence=0.85,
         )
 
         result = metrics.to_dict()
 
-        self.assertEqual(result['posts_processed'], 10)
-        self.assertEqual(result['posts_failed'], 2)
-        self.assertEqual(result['avg_processing_time_ms'], 100.0)  # 1000/10
-        self.assertEqual(result['success_rate'], 10 / 12)  # 10/(10+2)
-        self.assertEqual(result['error_count'], 0)
+        self.assertEqual(result["posts_processed"], 10)
+        self.assertEqual(result["posts_failed"], 2)
+        self.assertEqual(result["avg_processing_time_ms"], 100.0)  # 1000/10
+        self.assertEqual(result["success_rate"], 10 / 12)  # 10/(10+2)
+        self.assertEqual(result["error_count"], 0)
 
     def test_metrics_success_rate_edge_cases(self):
         """Test success rate calculation handles edge cases."""
         # Zero posts
         metrics = PipelineMetrics()
         result = metrics.to_dict()
-        self.assertEqual(result['success_rate'], 0)
+        self.assertEqual(result["success_rate"], 0)
 
         # Only failures
         metrics = PipelineMetrics(posts_failed=5)
         result = metrics.to_dict()
-        self.assertEqual(result['success_rate'], 0)
+        self.assertEqual(result["success_rate"], 0)
 
 
 class TestDemoDataLoader(unittest.TestCase):
@@ -104,25 +97,21 @@ class TestDemoDataLoader(unittest.TestCase):
                     "is_misinfo": True,
                     "confidence": 0.9,
                     "category": "test_category",
-                    "red_flags": ["flag1", "flag2"]
-                }
+                    "red_flags": ["flag1", "flag2"],
+                },
             },
             {
                 "id": "test_002",
                 "platform": "facebook",
                 "text": "Test post 2",
                 "timestamp": "2025-11-20T10:05:00Z",
-                "ground_truth": {
-                    "is_misinfo": False,
-                    "confidence": 0.95,
-                    "category": "legitimate"
-                }
-            }
+                "ground_truth": {"is_misinfo": False, "confidence": 0.95, "category": "legitimate"},
+            },
         ]
 
-        with open(self.posts_file, 'w') as f:
+        with open(self.posts_file, "w") as f:
             for post in self.sample_posts:
-                f.write(json.dumps(post) + '\n')
+                f.write(json.dumps(post) + "\n")
 
     def tearDown(self):
         """Clean up test fixtures."""
@@ -159,7 +148,7 @@ class TestDemoDataLoader(unittest.TestCase):
             "id": "test_001",
             "platform": "twitter",
             "text": "Test content",
-            "timestamp": "2025-11-20T10:00:00Z"
+            "timestamp": "2025-11-20T10:00:00Z",
         }
 
         is_valid, error = loader.validate_post(valid_post, 1)
@@ -173,7 +162,7 @@ class TestDemoDataLoader(unittest.TestCase):
 
         invalid_post = {
             "id": "test_001",
-            "platform": "twitter"
+            "platform": "twitter",
             # Missing 'text' and 'timestamp'
         }
 
@@ -190,7 +179,7 @@ class TestDemoDataLoader(unittest.TestCase):
             "id": 123,  # Should be string
             "platform": "twitter",
             "text": "Test",
-            "timestamp": "2025-11-20T10:00:00Z"
+            "timestamp": "2025-11-20T10:00:00Z",
         }
 
         is_valid, error = loader.validate_post(invalid_post, 1)
@@ -209,8 +198,8 @@ class TestDemoDataLoader(unittest.TestCase):
             "timestamp": "2025-11-20T10:00:00Z",
             "media": [
                 {"type": "image", "url": "http://example.com/img.jpg"},
-                {"type": "video", "url": "http://example.com/vid.mp4"}
-            ]
+                {"type": "video", "url": "http://example.com/vid.mp4"},
+            ],
         }
 
         is_valid, error = loader.validate_post(post_with_media, 1)
@@ -229,7 +218,7 @@ class TestDemoDataLoader(unittest.TestCase):
             "timestamp": "2025-11-20T10:00:00Z",
             "media": [
                 {"url": "http://example.com/img.jpg"}  # Missing 'type'
-            ]
+            ],
         }
 
         is_valid, error = loader.validate_post(post_invalid_media, 1)
@@ -244,15 +233,17 @@ class TestDemoDataLoader(unittest.TestCase):
         posts = loader.load_posts()
 
         self.assertEqual(len(posts), 2)
-        self.assertEqual(posts[0]['id'], 'test_001')
-        self.assertEqual(posts[1]['id'], 'test_002')
+        self.assertEqual(posts[0]["id"], "test_001")
+        self.assertEqual(posts[1]["id"], "test_002")
 
     def test_load_posts_skip_invalid_lines(self):
         """Test posts loading skips invalid lines."""
         # Add invalid JSON line
-        with open(self.posts_file, 'a') as f:
+        with open(self.posts_file, "a") as f:
             f.write("invalid json line\n")
-            f.write('{"id": "test_003", "platform": "reddit", "text": "Valid", "timestamp": "2025-11-20T10:10:00Z"}\n')
+            f.write(
+                '{"id": "test_003", "platform": "reddit", "text": "Valid", "timestamp": "2025-11-20T10:10:00Z"}\n'
+            )
 
         loader = DemoDataLoader(self.data_path, self.output_path)
         posts = loader.load_posts()
@@ -277,11 +268,11 @@ class TestDemoDataLoader(unittest.TestCase):
         post = self.sample_posts[0]
         result = loader.analyze_post(post)
 
-        self.assertIn('analysis', result)
-        self.assertEqual(result['analysis']['mode'], 'mock')
-        self.assertTrue(result['analysis']['is_misinfo'])
-        self.assertEqual(result['analysis']['confidence'], 0.9)
-        self.assertGreater(len(result['analysis']['evidence']), 0)
+        self.assertIn("analysis", result)
+        self.assertEqual(result["analysis"]["mode"], "mock")
+        self.assertTrue(result["analysis"]["is_misinfo"])
+        self.assertEqual(result["analysis"]["confidence"], 0.9)
+        self.assertGreater(len(result["analysis"]["evidence"]), 0)
 
     def test_analyze_post_generates_evidence(self):
         """Test post analysis generates evidence correctly."""
@@ -290,15 +281,15 @@ class TestDemoDataLoader(unittest.TestCase):
         post = self.sample_posts[0]
         result = loader.analyze_post(post)
 
-        evidence = result['analysis']['evidence']
+        evidence = result["analysis"]["evidence"]
         self.assertGreater(len(evidence), 0)
 
         # Check evidence structure
         for item in evidence:
-            self.assertIn('type', item)
-            self.assertIn('title', item)
-            self.assertIn('description', item)
-            self.assertIn('severity', item)
+            self.assertIn("type", item)
+            self.assertIn("title", item)
+            self.assertIn("description", item)
+            self.assertIn("severity", item)
 
     def test_analyze_post_with_retry_success(self):
         """Test retry logic succeeds after transient failure."""
@@ -321,7 +312,7 @@ class TestDemoDataLoader(unittest.TestCase):
         result = loader.analyze_post_with_retry(post)
 
         # Should succeed after retry
-        self.assertIn('analysis', result)
+        self.assertIn("analysis", result)
         self.assertEqual(call_count[0], 2)  # Called twice
 
     def test_analyze_post_with_retry_max_exceeded(self):
@@ -346,16 +337,16 @@ class TestDemoDataLoader(unittest.TestCase):
         summary = loader.process_all()
 
         # Check summary structure
-        self.assertEqual(summary['total_posts'], 2)
-        self.assertEqual(summary['misinfo_detected'], 1)
-        self.assertEqual(summary['legitimate_content'], 1)
-        self.assertEqual(len(summary['results']), 2)
+        self.assertEqual(summary["total_posts"], 2)
+        self.assertEqual(summary["misinfo_detected"], 1)
+        self.assertEqual(summary["legitimate_content"], 1)
+        self.assertEqual(len(summary["results"]), 2)
 
         # Check metrics
-        metrics = summary['metrics']
-        self.assertEqual(metrics['posts_processed'], 2)
-        self.assertEqual(metrics['posts_failed'], 0)
-        self.assertEqual(metrics['success_rate'], 1.0)
+        metrics = summary["metrics"]
+        self.assertEqual(metrics["posts_processed"], 2)
+        self.assertEqual(metrics["posts_failed"], 0)
+        self.assertEqual(metrics["success_rate"], 1.0)
 
         # Check output file exists
         output_file = self.output_path / "analysis_results.json"
@@ -364,7 +355,7 @@ class TestDemoDataLoader(unittest.TestCase):
         # Verify output file contents
         with open(output_file) as f:
             saved_data = json.load(f)
-            self.assertEqual(saved_data['total_posts'], 2)
+            self.assertEqual(saved_data["total_posts"], 2)
 
     def test_process_all_atomic_write(self):
         """Test results are written atomically."""
@@ -407,17 +398,17 @@ class TestDemoDataLoader(unittest.TestCase):
             "ground_truth": {
                 "is_misinfo": True,
                 "confidence": 0.95,
-                "red_flags": ["flag1", "flag2", "flag3", "flag4"]
-            }
+                "red_flags": ["flag1", "flag2", "flag3", "flag4"],
+            },
         }
 
         result = loader.analyze_post(post_high_severity)
-        evidence = result['analysis']['evidence']
+        evidence = result["analysis"]["evidence"]
 
         # Should have critical severity with 4+ red flags
-        text_evidence = [e for e in evidence if e['type'] == 'text_analysis']
+        text_evidence = [e for e in evidence if e["type"] == "text_analysis"]
         self.assertEqual(len(text_evidence), 1)
-        self.assertEqual(text_evidence[0]['severity'], 'critical')
+        self.assertEqual(text_evidence[0]["severity"], "critical")
 
 
 class TestEdgeCases(unittest.TestCase):
@@ -447,11 +438,15 @@ class TestEdgeCases(unittest.TestCase):
 
     def test_posts_with_empty_lines(self):
         """Test posts file with empty lines."""
-        with open(self.posts_file, 'w') as f:
-            f.write('{"id": "test_001", "platform": "twitter", "text": "Test", "timestamp": "2025-11-20T10:00:00Z"}\n')
-            f.write('\n')  # Empty line
-            f.write('  \n')  # Whitespace line
-            f.write('{"id": "test_002", "platform": "facebook", "text": "Test2", "timestamp": "2025-11-20T10:05:00Z"}\n')
+        with open(self.posts_file, "w") as f:
+            f.write(
+                '{"id": "test_001", "platform": "twitter", "text": "Test", "timestamp": "2025-11-20T10:00:00Z"}\n'
+            )
+            f.write("\n")  # Empty line
+            f.write("  \n")  # Whitespace line
+            f.write(
+                '{"id": "test_002", "platform": "facebook", "text": "Test2", "timestamp": "2025-11-20T10:05:00Z"}\n'
+            )
 
         loader = DemoDataLoader(self.data_path, self.output_path)
         posts = loader.load_posts()
@@ -464,19 +459,19 @@ class TestEdgeCases(unittest.TestCase):
             "id": "unicode_test",
             "platform": "twitter",
             "text": "Test with emoji 🚀 and Chinese 中文",
-            "timestamp": "2025-11-20T10:00:00Z"
+            "timestamp": "2025-11-20T10:00:00Z",
         }
 
-        with open(self.posts_file, 'w', encoding='utf-8') as f:
-            f.write(json.dumps(unicode_post, ensure_ascii=False) + '\n')
+        with open(self.posts_file, "w", encoding="utf-8") as f:
+            f.write(json.dumps(unicode_post, ensure_ascii=False) + "\n")
 
         loader = DemoDataLoader(self.data_path, self.output_path)
         posts = loader.load_posts()
 
         self.assertEqual(len(posts), 1)
-        self.assertIn('🚀', posts[0]['text'])
-        self.assertIn('中文', posts[0]['text'])
+        self.assertIn("🚀", posts[0]["text"])
+        self.assertIn("中文", posts[0]["text"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

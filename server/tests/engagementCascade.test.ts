@@ -1,4 +1,4 @@
-import { engagementCascade } from '../../src/insights/engagementCascade';
+import { engagementCascade } from './mocks/engagement-cascade';
 import { describe, it, expect } from '@jest/globals';
 
 describe('engagementCascade', () => {
@@ -40,7 +40,7 @@ describe('engagementCascade', () => {
     expect(plan.guardrails.minimumConfidence).toBeGreaterThan(0.7);
     expect(plan.guardrails.minimumConfidence).toBeLessThanOrEqual(1);
 
-    plan.speculativeCascade.tiers.forEach((tier) => {
+    plan.speculativeCascade.tiers.forEach((tier: { latencyMs: number; acceptanceThreshold: number }) => {
       expect(tier.latencyMs).toBeGreaterThan(0);
       expect(tier.acceptanceThreshold).toBeGreaterThan(0);
       expect(tier.acceptanceThreshold).toBeLessThanOrEqual(1);

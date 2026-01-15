@@ -72,7 +72,7 @@ class PrometheusMetricsService implements Metrics {
 
   private initializeMetrics() {
     for (const [name, config] of Object.entries(METRIC_DEFINITIONS)) {
-      if (registry.getSingleMetric(name)) {
+      if (typeof registry.getSingleMetric === 'function' && registry.getSingleMetric(name)) {
         // Already registered, grab it
         this.metrics.set(name, registry.getSingleMetric(name) as Metric<string>);
         continue;

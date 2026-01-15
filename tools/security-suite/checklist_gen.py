@@ -4,8 +4,6 @@ Security Review Checklist Generator
 Generates a checklist for PRs based on modified files.
 """
 
-import sys
-import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
@@ -35,6 +33,7 @@ FRONTEND_CHECKLIST = """
 - [ ] **State**: Ensure sensitive data is not stored in LocalStorage.
 """
 
+
 def generate_checklist():
     # In a real CI env, we would get the diff.
     # Here we just output the template to a file that can be used.
@@ -54,6 +53,7 @@ def generate_checklist():
         f.write(checklist)
 
     print(f"Checklist template generated at {output_path}")
+
 
 if __name__ == "__main__":
     generate_checklist()

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Any, Dict
+from typing import Any
 
 
 def parse_value(raw: str) -> Any:
@@ -19,19 +19,19 @@ def parse_value(raw: str) -> Any:
         if not inner:
             return []
         return [parse_value(part.strip()) for part in inner.split(",")]
-    if raw.startswith("\"") and raw.endswith("\""):
+    if raw.startswith('"') and raw.endswith('"'):
         return raw[1:-1]
     return raw
 
 
-def load(text: str) -> Dict[str, Any]:
+def load(text: str) -> dict[str, Any]:
     try:
         parsed = json.loads(text)
         if isinstance(parsed, dict):
             return parsed
     except Exception:
         pass
-    root: Dict[str, Any] = {}
+    root: dict[str, Any] = {}
     stack = [(0, root)]
     for line in text.splitlines():
         if not line.strip() or line.strip().startswith("#"):
@@ -42,7 +42,7 @@ def load(text: str) -> Dict[str, Any]:
         key, _, remainder = line.strip().partition(":")
         current = stack[-1][1]
         if remainder.strip() == "":
-            new_node: Dict[str, Any] = {}
+            new_node: dict[str, Any] = {}
             current[key] = new_node
             stack.append((indent + 2, new_node))
         else:

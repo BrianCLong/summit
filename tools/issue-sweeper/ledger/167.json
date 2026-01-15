@@ -1,0 +1,86 @@
+{
+  "issue_number": 167,
+  "title": "obs: RED metrics",
+  "url": "https://github.com/BrianCLong/summit/issues/167",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9107968073,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQSQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P1",
+      "name": "P1",
+      "color": "ff8c00",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107968269,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRDQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/observability",
+      "name": "observability",
+      "color": "5319E7",
+      "default": false,
+      "description": "OTel/Grafana/Alerts"
+    },
+    {
+      "id": 9107981108,
+      "node_id": "LA_kwDOPaNncM8AAAACHuDDNA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-09-30",
+      "name": "due:2025-09-30",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:41:54Z",
+  "createdAt": "2025-08-14T04:05:02Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 15342,
+        "url": "https://github.com/BrianCLong/summit/pull/15342",
+        "mergedAt": "2026-01-01T08:47:00Z",
+        "title": "Create eight new product requirement documents"
+      },
+      {
+        "number": 11908,
+        "url": "https://github.com/BrianCLong/summit/pull/11908",
+        "mergedAt": "2025-11-20T10:25:29Z",
+        "title": "Establish charts as deployment golden path"
+      },
+      {
+        "number": 10094,
+        "url": "https://github.com/BrianCLong/summit/pull/10094",
+        "mergedAt": "2025-10-14T13:06:00Z",
+        "title": "feat: add crypto verification pipeline"
+      },
+      {
+        "number": 9800,
+        "url": "https://github.com/BrianCLong/summit/pull/9800",
+        "mergedAt": null,
+        "title": "feat(monitoring): Enable error-budget monitoring and Maestro metrics export (EO-1, EO-2)"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

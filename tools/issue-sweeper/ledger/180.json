@@ -1,0 +1,161 @@
+{
+  "issue_number": 180,
+  "title": "Natural Language Processing for entity extraction",
+  "url": "https://github.com/BrianCLong/summit/issues/180",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767070,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX03g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/enhancement",
+      "name": "enhancement",
+      "color": "a2eeef",
+      "default": true,
+      "description": "New feature or request"
+    },
+    {
+      "id": 9103342705,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn8cQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/AI",
+      "name": "AI",
+      "color": "bfdadc",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9107968073,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQSQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P1",
+      "name": "P1",
+      "color": "ff8c00",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107981145,
+      "node_id": "LA_kwDOPaNncM8AAAACHuDDWQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-10-30",
+      "name": "due:2025-10-30",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108055754,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHmyg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/NLP",
+      "name": "NLP",
+      "color": "6f42c1",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:42:13Z",
+  "createdAt": "2025-08-14T04:28:32Z",
+  "classification": "feature",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15204,
+        "url": "https://github.com/BrianCLong/summit/pull/15204",
+        "mergedAt": "2026-01-01T11:46:55Z",
+        "title": "feat: add platform stewardship and long-horizon governance"
+      },
+      {
+        "number": 12834,
+        "url": "https://github.com/BrianCLong/summit/pull/12834",
+        "mergedAt": "2025-12-01T10:21:22Z",
+        "title": "Add CompanyOS Data Spine schemas and governance docs"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 11762,
+        "url": "https://github.com/BrianCLong/summit/pull/11762",
+        "mergedAt": null,
+        "title": "feat: Anthropic Claude Skills pack with CI integration"
+      },
+      {
+        "number": 15340,
+        "url": "https://github.com/BrianCLong/summit/pull/15340",
+        "mergedAt": "2026-01-01T08:47:05Z",
+        "title": "Counter-intelligence information dominance sprint"
+      },
+      {
+        "number": 15258,
+        "url": "https://github.com/BrianCLong/summit/pull/15258",
+        "mergedAt": "2026-01-01T07:29:50Z",
+        "title": "Predictive Analytics and Multi-Agent Negotiation"
+      },
+      {
+        "number": 11900,
+        "url": "https://github.com/BrianCLong/summit/pull/11900",
+        "mergedAt": "2025-11-20T10:26:00Z",
+        "title": "Add observability and disaster recovery infrastructure"
+      },
+      {
+        "number": 1142,
+        "url": "https://github.com/BrianCLong/summit/pull/1142",
+        "mergedAt": null,
+        "title": "chore(deps): bump helmet from 7.2.0 to 8.1.0 in /server"
+      },
+      {
+        "number": 1331,
+        "url": "https://github.com/BrianCLong/summit/pull/1331",
+        "mergedAt": "2025-09-23T17:10:18Z",
+        "title": "feat: add crystal orchestration services"
+      },
+      {
+        "number": 11913,
+        "url": "https://github.com/BrianCLong/summit/pull/11913",
+        "mergedAt": "2025-11-20T10:25:05Z",
+        "title": "Improve test coverage and organization"
+      },
+      {
+        "number": 11878,
+        "url": "https://github.com/BrianCLong/summit/pull/11878",
+        "mergedAt": null,
+        "title": "Consolidate CLI and assistant tools into Summit CLI"
+      },
+      {
+        "number": 13166,
+        "url": "https://github.com/BrianCLong/summit/pull/13166",
+        "mergedAt": "2025-12-04T15:39:25Z",
+        "title": "Fix Jest ESM config, update CI, and resolve conflicts"
+      },
+      {
+        "number": 13076,
+        "url": "https://github.com/BrianCLong/summit/pull/13076",
+        "mergedAt": "2025-12-03T05:15:02Z",
+        "title": "Fix Jest ESM Configuration and Test Execution"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

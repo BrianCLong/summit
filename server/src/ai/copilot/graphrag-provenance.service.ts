@@ -389,7 +389,7 @@ export class GraphRAGProvenanceService {
           { entityIds, investigationId },
         );
 
-        return result.records.map((record) => {
+        return result.records.map((record: any) => {
           const ev = record.get('ev');
           return {
             id: ev.properties.id,
@@ -438,7 +438,7 @@ export class GraphRAGProvenanceService {
           { entityIds, investigationId },
         );
 
-        return result.records.map((record) => {
+        return result.records.map((record: any) => {
           const c = record.get('c');
           return {
             id: c.properties.id,

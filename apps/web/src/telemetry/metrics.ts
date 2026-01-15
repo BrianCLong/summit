@@ -124,3 +124,34 @@ export const getTelemetryContext = () => ({
     sessionId: getSessionId(),
     deviceId: getDeviceId(),
 });
+
+
+// Tri-pane Telemetry
+export const trackTimeWindowChange = async (
+    startMs: number,
+    endMs: number,
+    granularity: string,
+    tzMode: string,
+    source: string
+) => {
+    // Implementation for sending triPane.timeWindow.change
+    // console.log('triPane.timeWindow.change', { startMs, endMs, granularity, tzMode, source });
+};
+
+export const trackSyncDivergence = async (
+    deltaStartMs: number,
+    deltaEndMs: number,
+    pane: string,
+    granularity: string
+) => {
+    // Implementation for sending triPane.sync.divergence_detected
+    // console.log('triPane.sync.divergence_detected', { deltaStartMs, deltaEndMs, pane, granularity });
+};
+
+export const trackQueryLatency = async (
+    pane: string,
+    durationMs: number
+) => {
+    // Implementation for sending triPane.query.latency_ms
+    // console.log('triPane.query.latency_ms', { pane, durationMs });
+};

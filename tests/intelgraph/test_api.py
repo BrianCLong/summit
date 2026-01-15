@@ -2,10 +2,8 @@
 
 import json
 
-import pytest
-from fastapi.testclient import TestClient
-
 from core.models import Claim, Decision, Entity, Source
+from fastapi.testclient import TestClient
 
 
 def test_root_endpoint(client: TestClient):

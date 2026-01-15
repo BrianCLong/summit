@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional
 
 from .models import MappingReport, MappingResult
 
@@ -11,8 +10,8 @@ from .models import MappingReport, MappingResult
 @dataclass
 class DiffEntry:
     field: str
-    from_tag: Optional[str]
-    to_tag: Optional[str]
+    from_tag: str | None
+    to_tag: str | None
     from_confidence: float
     to_confidence: float
     explanation: str
@@ -21,9 +20,9 @@ class DiffEntry:
 @dataclass
 class DiffReport:
     dataset: str
-    changes: List[DiffEntry]
+    changes: list[DiffEntry]
 
-    def as_dict(self) -> Dict[str, Dict[str, object]]:
+    def as_dict(self) -> dict[str, dict[str, object]]:
         return {
             entry.field: {
                 "from": entry.from_tag,
@@ -42,7 +41,7 @@ def diff_reports(before: MappingReport, after: MappingReport) -> DiffReport:
     before_index = before.as_index()
     after_index = after.as_index()
     fields = set(before_index) | set(after_index)
-    changes: List[DiffEntry] = []
+    changes: list[DiffEntry] = []
 
     for field_name in sorted(fields):
         previous: MappingResult | None = before_index.get(field_name)
@@ -69,15 +68,9 @@ def diff_reports(before: MappingReport, after: MappingReport) -> DiffReport:
     return DiffReport(dataset=after.dataset or before.dataset, changes=changes)
 
 
-def _build_diff_explanation(
-    previous: MappingResult | None, current: MappingResult | None
-) -> str:
+def _build_diff_explanation(previous: MappingResult | None, current: MappingResult | None) -> str:
     if previous and current:
-        return (
-            "Tag changed from "
-            f"{previous.tag.summary()}"
-            f" to {current.tag.summary()}"
-        )
+        return f"Tag changed from {previous.tag.summary()} to {current.tag.summary()}"
     if previous and not current:
         return "Field removed from dataset"
     if current and not previous:

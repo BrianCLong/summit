@@ -3,8 +3,8 @@ import json
 import sys
 import tempfile
 import textwrap
-from pathlib import Path
 import unittest
+from pathlib import Path
 
 import yaml
 

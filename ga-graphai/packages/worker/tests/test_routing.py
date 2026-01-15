@@ -3,8 +3,8 @@ import sys
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 
-from prompt_engineering import PromptTuning  # noqa: E402
-from routing import Ticket, TicketRouter, WorkerProfile  # noqa: E402
+from prompt_engineering import PromptTuning
+from routing import Ticket, TicketRouter, WorkerProfile
 
 
 def _tuning() -> PromptTuning:

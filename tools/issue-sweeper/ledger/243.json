@@ -1,0 +1,101 @@
+{
+  "issue_number": 243,
+  "title": "Access Control: ABAC extension",
+  "url": "https://github.com/BrianCLong/summit/issues/243",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767070,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX03g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/enhancement",
+      "name": "enhancement",
+      "color": "a2eeef",
+      "default": true,
+      "description": "New feature or request"
+    },
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342986,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9ig",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/frontend",
+      "name": "frontend",
+      "color": "A2EEEF",
+      "default": false,
+      "description": "UI/E2E"
+    }
+  ],
+  "updatedAt": "2025-08-14T04:54:27Z",
+  "createdAt": "2025-08-14T04:54:27Z",
+  "classification": "feature",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11843,
+        "url": "https://github.com/BrianCLong/summit/pull/11843",
+        "mergedAt": "2025-11-20T09:47:53Z",
+        "title": "feat: extend multimodal fusion intelligence"
+      },
+      {
+        "number": 10084,
+        "url": "https://github.com/BrianCLong/summit/pull/10084",
+        "mergedAt": null,
+        "title": "feat: add federated attribution engine"
+      },
+      {
+        "number": 10089,
+        "url": "https://github.com/BrianCLong/summit/pull/10089",
+        "mergedAt": "2025-10-14T13:07:17Z",
+        "title": "feat: add semantic pii mapping engine"
+      },
+      {
+        "number": 13183,
+        "url": "https://github.com/BrianCLong/summit/pull/13183",
+        "mergedAt": "2025-12-04T15:39:03Z",
+        "title": "Build graph explorer UI with Tailwind and shadcn"
+      },
+      {
+        "number": 709,
+        "url": "https://github.com/BrianCLong/summit/pull/709",
+        "mergedAt": "2025-08-21T00:35:08Z",
+        "title": "feat: IntelGraph GA Foundation - Complete Architecture Implementation"
+      },
+      {
+        "number": 1311,
+        "url": "https://github.com/BrianCLong/summit/pull/1311",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat: orchestrate zero spend routing"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

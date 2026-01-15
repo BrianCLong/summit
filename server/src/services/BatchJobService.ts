@@ -1,6 +1,6 @@
 // @ts-nocheck
-import PgBoss from 'pg-boss';
-import { cfg } from '../config/index.js';
+import { PgBoss } from 'pg-boss';
+import cfg from '../config/index.js';
 import { createReportingService } from '../reporting/service.js';
 import { AccessControlService } from '../reporting/access-control.js';
 import { AccessRule, AccessContext } from '../reporting/types.js';
@@ -8,9 +8,9 @@ import { registerRevenueJobs } from '../jobs/revenue/RevenueJobs.js';
 
 // Define system-level access rules for background jobs
 const systemRules: AccessRule[] = [
-    { resource: 'report', action: 'view', roles: ['system'] },
-    { resource: 'report', action: 'create', roles: ['system'] },
-    { resource: 'report', action: 'deliver', roles: ['system'] },
+  { resource: 'report', action: 'view', roles: ['system'] },
+  { resource: 'report', action: 'create', roles: ['system'] },
+  { resource: 'report', action: 'deliver', roles: ['system'] },
 ];
 const reportingService = createReportingService(new AccessControlService(systemRules));
 
@@ -42,11 +42,19 @@ export const JOB_QUEUE_GENERATE_REPORT = 'generate-report';
  */
 class BatchJobService {
   private static instance: BatchJobService;
-  public boss: PgBoss;
+  private _boss?: PgBoss;
 
   private constructor() {
-    this.boss = new PgBoss(cfg.DATABASE_URL);
-    this.boss.on('error', error => console.error(`[PG-BOSS] Error: ${error.message}`));
+    // Lazy initialization
+  }
+
+  public get boss(): PgBoss {
+    if (!this._boss) {
+      // @ts-ignore
+      this._boss = new PgBoss(cfg.DATABASE_URL);
+      this._boss.on('error', error => console.error(`[PG-BOSS] Error: ${error.message}`));
+    }
+    return this._boss;
   }
 
   /**
@@ -83,29 +91,29 @@ class BatchJobService {
    * Each worker is associated with a specific job queue name.
    */
   private async registerWorkers() {
-      // Register revenue jobs
-      await registerRevenueJobs(this.boss);
+    // Register revenue jobs
+    await registerRevenueJobs(this.boss);
 
-      // Register worker for report generation
-      await this.boss.work(JOB_QUEUE_GENERATE_REPORT, async (job: any) => {
-          console.log(`[PG-BOSS] Processing report job ${job.id} (${job.name})`);
-          try {
-              const { request, userId, reportName } = job.data;
-              console.log(`[PG-BOSS] Generating report: ${reportName || 'unnamed'}`);
+    // Register worker for report generation
+    await this.boss.work(JOB_QUEUE_GENERATE_REPORT, async (job: any) => {
+      console.log(`[PG-BOSS] Processing report job ${job.id} (${job.name})`);
+      try {
+        const { request, userId, reportName } = job.data;
+        console.log(`[PG-BOSS] Generating report: ${reportName || 'unnamed'}`);
 
-              // Construct a system access context, impersonating the user who scheduled it or using system user
-              const access: AccessContext = {
-                  userId: userId || 'system-scheduler',
-                  roles: ['system', 'admin', 'user'], // Grant sufficient roles for background execution
-              };
+        // Construct a system access context, impersonating the user who scheduled it or using system user
+        const access: AccessContext = {
+          userId: userId || 'system-scheduler',
+          roles: ['system', 'admin', 'user'], // Grant sufficient roles for background execution
+        };
 
-              await reportingService.generate(request, access);
-              console.log(`[PG-BOSS] Report generated successfully for job ${job.id}`);
-          } catch (error: any) {
-              console.error(`[PG-BOSS] Report generation failed for job ${job.id}:`, error);
-              throw error;
-          }
-      });
+        await reportingService.generate(request, access);
+        console.log(`[PG-BOSS] Report generated successfully for job ${job.id}`);
+      } catch (error: any) {
+        console.error(`[PG-BOSS] Report generation failed for job ${job.id}:`, error);
+        throw error;
+      }
+    });
   }
 
   /**
@@ -134,10 +142,10 @@ class BatchJobService {
    * @returns {Promise<string | null>} The ID of the scheduled job.
    */
   public async scheduleReport(reportName: string, cron: string, data: any) {
-      const jobData = { ...data, reportName };
-      const jobId = await this.boss.send(JOB_QUEUE_GENERATE_REPORT, jobData, { tz: 'UTC', ... (cron ? { cron } : {}) });
-      console.log(`[PG-BOSS] Scheduled report '${reportName}' on queue '${JOB_QUEUE_GENERATE_REPORT}' with cron: ${cron}`);
-      return jobId;
+    const jobData = { ...data, reportName };
+    const jobId = await this.boss.send(JOB_QUEUE_GENERATE_REPORT, jobData, { tz: 'UTC', ... (cron ? { cron } : {}) });
+    console.log(`[PG-BOSS] Scheduled report '${reportName}' on queue '${JOB_QUEUE_GENERATE_REPORT}' with cron: ${cron}`);
+    return jobId;
   }
 
   /**
@@ -148,10 +156,10 @@ class BatchJobService {
    * @returns {Promise<string | null>} The ID of the queued job.
    */
   public async queueReport(reportName: string, data: any) {
-      const jobData = { ...data, reportName };
-      const jobId = await this.boss.send(JOB_QUEUE_GENERATE_REPORT, jobData);
-      console.log(`[PG-BOSS] Queued report '${reportName}' on queue '${JOB_QUEUE_GENERATE_REPORT}' with id: ${jobId}`);
-      return jobId;
+    const jobData = { ...data, reportName };
+    const jobId = await this.boss.send(JOB_QUEUE_GENERATE_REPORT, jobData);
+    console.log(`[PG-BOSS] Queued report '${reportName}' on queue '${JOB_QUEUE_GENERATE_REPORT}' with id: ${jobId}`);
+    return jobId;
   }
 
   /**

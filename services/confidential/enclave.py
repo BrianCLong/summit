@@ -14,7 +14,7 @@ import json
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -95,7 +95,7 @@ class KMSSimulator:
         seal_metadata = {
             "key_id": key_id,
             "enclave_measurement": enclave_measurement,
-            "sealed_at": datetime.now(timezone.utc).isoformat(),
+            "sealed_at": datetime.now(UTC).isoformat(),
             "key_length": len(key_data),
         }
 
@@ -136,7 +136,7 @@ class KMSSimulator:
         # In production: integrate with CloudTrail/audit system
         return [
             {
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "operation": "unseal_key",
                 "key_id": "sealed-demo",
                 "enclave_id": "enclave-123",
@@ -256,7 +256,7 @@ class TEEEnclave:
             "version": "0.3.6",
             "enclave_type": "mc-confidential",
             "measurement": self.measurement,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "security_level": "confidential",
             "integrity_verified": True,
         }
@@ -264,7 +264,7 @@ class TEEEnclave:
         return EnclaveAttestation(
             enclave_id=self.enclave_id,
             measurement_hash=self.measurement,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             attestation_report=base64.b64encode(json.dumps(attestation_report).encode()).decode(),
             kms_sealed_key_id=self.sealed_key_id,
             residency_zone="us-east-1",  # Current deployment region
@@ -306,7 +306,7 @@ class TEEEnclave:
                 "audit_log_id": audit_log_id,
                 "request_id": request.request_id,
                 "tenant_id": request.tenant_id,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "enclave_id": self.enclave_id,
                 "model_name": request.model_name,
                 "processing_time_ms": processing_time,
@@ -334,7 +334,7 @@ class TEEEnclave:
             error_audit = {
                 "audit_log_id": audit_log_id,
                 "request_id": request.request_id,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "error": str(e),
                 "processing_time_ms": (time.time() - start_time) * 1000,
             }

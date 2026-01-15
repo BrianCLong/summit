@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { CitationGate, ExportPayload } from '../../src/gates/CitationGate';
 import { FeatureFlagService, getFeatureFlagService, resetFeatureFlagService } from '../../src/services/FeatureFlagService';
 

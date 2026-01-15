@@ -44,18 +44,22 @@ def test_replays_are_deterministic() -> None:
 
 
 def test_risk_score_correlates_with_severity() -> None:
-    high_severity = build_case("high", "{\"selected\":\"ok\"}", impact=2.0, severity=3.0)
-    low_severity = build_case("low", "{\"selected\":\"ok\"}", impact=2.0, severity=1.0)
+    high_severity = build_case("high", '{"selected":"ok"}', impact=2.0, severity=3.0)
+    low_severity = build_case("low", '{"selected":"ok"}', impact=2.0, severity=1.0)
 
     golden = GoldenSet.from_iterable([high_severity, low_severity])
-    adapter = TemplateAdapter({
-        high_severity.expected_response: "wrong",
-        low_severity.expected_response: "wrong",
-    })
+    adapter = TemplateAdapter(
+        {
+            high_severity.expected_response: "wrong",
+            low_severity.expected_response: "wrong",
+        }
+    )
     runner = PromptDiffRunner(golden, {"v1": adapter, "v2": adapter}, risk_assessor=RiskAssessor())
     report = runner.run("v1", "v2", seed=77)
 
-    contributions = {outcome.case.case_id: outcome.candidate.severity for outcome in report.outcomes}
+    contributions = {
+        outcome.case.case_id: outcome.candidate.severity for outcome in report.outcomes
+    }
     assert contributions["high"] > contributions["low"]
     assert report.assessment.total_risk > 0
 

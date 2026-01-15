@@ -7,7 +7,7 @@ execution runs, their artifacts, and disclosure packs for governance and complia
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -55,10 +55,10 @@ class Run(BaseModel):
     name: str
     owner: str
     started_at: datetime
-    finished_at: Optional[datetime] = None
+    finished_at: datetime | None = None
     status: RunStatus = RunStatus.PENDING
-    cost_estimate: Optional[float] = None
-    cost_actual: Optional[float] = None
+    cost_estimate: float | None = None
+    cost_actual: float | None = None
     related_entity_ids: list[str] = Field(default_factory=list)
     related_decision_ids: list[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -102,7 +102,7 @@ class CreateRunRequest(BaseModel):
 
     name: str
     owner: str
-    cost_estimate: Optional[float] = None
+    cost_estimate: float | None = None
     related_entity_ids: list[str] = Field(default_factory=list)
     related_decision_ids: list[str] = Field(default_factory=list)
 
@@ -110,9 +110,9 @@ class CreateRunRequest(BaseModel):
 class UpdateRunRequest(BaseModel):
     """Request to update a run's status or completion."""
 
-    status: Optional[RunStatus] = None
-    finished_at: Optional[datetime] = None
-    cost_actual: Optional[float] = None
+    status: RunStatus | None = None
+    finished_at: datetime | None = None
+    cost_actual: float | None = None
 
 
 class CreateArtifactRequest(BaseModel):
@@ -122,7 +122,7 @@ class CreateArtifactRequest(BaseModel):
     kind: ArtifactKind
     path_or_uri: str
     content_hash: str
-    metadata_json: Optional[ArtifactMetadata] = None
+    metadata_json: ArtifactMetadata | None = None
 
 
 class CreateDisclosurePackRequest(BaseModel):
@@ -138,5 +138,5 @@ class RunManifest(BaseModel):
 
     run: Run
     artifacts: list[Artifact] = Field(default_factory=list)
-    disclosure_pack: Optional[DisclosurePack] = None
+    disclosure_pack: DisclosurePack | None = None
     release_gate_passed: bool = False

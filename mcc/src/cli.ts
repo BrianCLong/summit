@@ -25,11 +25,11 @@ export function buildCli(): Command {
         const raw = readFileSync(modelCardPath, 'utf8');
         const parsed = parse(raw);
         validateModelCard(parsed);
-        console.log('Model card is valid.');
+        process.stdout.write('Model card is valid.\n');
       } catch (error) {
         if (error instanceof ModelCardValidationError) {
-          console.error('Model card validation failed:');
-          error.issues.forEach((issue) => console.error(` - ${issue}`));
+          process.stderr.write('Model card validation failed:\n');
+          error.issues.forEach((issue) => process.stderr.write(` - ${issue}\n`));
           process.exitCode = 1;
           return;
         }
@@ -50,14 +50,14 @@ export function buildCli(): Command {
           privateKeyPath: resolve(options.privateKey),
           publicKeyPath: options.publicKey ? resolve(options.publicKey) : undefined,
         });
-        console.log(`Model card compiled for ${result.card.metadata.modelId}#${result.card.metadata.version}.`);
+        process.stdout.write(`Model card compiled for ${result.card.metadata.modelId}#${result.card.metadata.version}.\n`);
         if (options.output) {
-          console.log(`Signed card written to ${resolve(options.output)}.`);
+          process.stdout.write(`Signed card written to ${resolve(options.output)}.\n`);
         }
       } catch (error) {
         if (error instanceof ModelCardValidationError) {
-          console.error('Model card validation failed:');
-          error.issues.forEach((issue) => console.error(` - ${issue}`));
+          process.stderr.write('Model card validation failed:\n');
+          error.issues.forEach((issue) => process.stderr.write(` - ${issue}\n`));
           process.exitCode = 1;
           return;
         }
@@ -82,11 +82,11 @@ export function buildCli(): Command {
       });
       const isValid = verifySignature(canonical, card.signature);
       if (!isValid) {
-        console.error('Signature verification failed.');
+        process.stderr.write('Signature verification failed.\n');
         process.exitCode = 1;
         return;
       }
-      console.log('Signature verification succeeded.');
+      process.stdout.write('Signature verification succeeded.\n');
     });
 
   program
@@ -96,13 +96,13 @@ export function buildCli(): Command {
     .option('-o, --output <path>', 'Path to write a TypeScript module (defaults to stdout)')
     .action((compiledCardPath: string, options: { output?: string }) => {
       const card = JSON.parse(readFileSync(compiledCardPath, 'utf8')) as CompiledModelCard;
-      const hooks = createEnforcementHooks(card);
+      const _hooks = createEnforcementHooks(card);
       const moduleBody = `import card from './${compiledCardPath}';\n\nexport function denyIfOutOfScope(purpose: string) {\n  const hooks = (${createEnforcementHooks.toString()})(card);\n  hooks.denyIfOutOfScope({ purpose });\n}\n`;
       if (options.output) {
         writeFileSync(resolve(options.output), moduleBody, 'utf8');
-        console.log(`Hook module written to ${resolve(options.output)}.`);
+        process.stdout.write(`Hook module written to ${resolve(options.output)}.\n`);
       } else {
-        console.log(moduleBody);
+        process.stdout.write(`${moduleBody}\n`);
       }
     });
 
@@ -116,7 +116,7 @@ export function buildCli(): Command {
         JSON.parse(readFileSync(cardPath, 'utf8')) as CompiledModelCard
       );
       writeGalleryDataset(resolve(output), cards);
-      console.log(`Gallery dataset written to ${resolve(output)} with ${cards.length} card(s).`);
+      process.stdout.write(`Gallery dataset written to ${resolve(output)} with ${cards.length} card(s).\n`);
     });
 
   return program;

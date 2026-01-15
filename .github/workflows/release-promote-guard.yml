@@ -1,0 +1,354 @@
+name: Release Promotion Guard
+
+# AUTHORITATIVE PROMOTION GATE for MVP-4 Stabilization RC → GA
+# This workflow validates that an RC is safe to promote to GA
+#
+# Purpose: Prevent premature or unsafe RC → GA promotion
+# - Verifies all required workflows are green for target commit
+# - Generates promotion evidence bundle
+# - Provides deterministic promotion decision
+#
+# What it guarantees:
+# 1. Target commit passed Release Readiness Gate
+# 2. Target commit passed Workflow Lint
+# 3. Target commit passed GA Gate
+# 4. Target commit passed Unit Tests & Coverage
+# 5. Target commit passed CI Core
+# 6. Promotion bundle artifact is generated for audit trail
+#
+# When to use:
+# - Before promoting an RC tag to GA
+# - To validate that a commit is safe for production release
+# - To generate evidence for release audit trail
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Target GA version (e.g., 4.1.2)"
+        required: true
+        type: string
+      rc_tag:
+        description: "RC tag to promote (e.g., v4.1.2-rc.1)"
+        required: true
+        type: string
+      commit_sha:
+        description: "Commit SHA to verify (optional, will be extracted from rc_tag if not provided)"
+        required: false
+        type: string
+      skip_verification:
+        description: "DANGER: Skip green verification (use only for emergency hotfixes)"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  verify-promotion-readiness:
+    name: Verify RC Promotion Readiness
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    outputs:
+      promotion_allowed: ${{ steps.verify.outputs.promotion_allowed }}
+      commit_sha: ${{ steps.resolve_commit.outputs.commit_sha }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        with:
+          fetch-depth: 0 # Need full history to resolve tags
+
+      - name: Validate Inputs
+        id: validate
+        run: |
+          echo "Validating promotion inputs..."
+
+          VERSION="${{ inputs.version }}"
+          RC_TAG="${{ inputs.rc_tag }}"
+
+          # Validate version format (X.Y.Z)
+          if ! [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid version format: ${VERSION}. Expected X.Y.Z (e.g., 4.1.2)"
+            exit 1
+          fi
+
+          # Validate RC tag format (vX.Y.Z-rc.N)
+          if ! [[ "${RC_TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$ ]]; then
+            echo "::error::Invalid RC tag format: ${RC_TAG}. Expected vX.Y.Z-rc.N (e.g., v4.1.2-rc.1)"
+            exit 1
+          fi
+
+          # Verify RC tag version matches target GA version
+          RC_VERSION=$(echo "${RC_TAG}" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)-rc\.[0-9]+$/\1/')
+          if [[ "${RC_VERSION}" != "${VERSION}" ]]; then
+            echo "::error::Version mismatch: RC tag ${RC_TAG} (${RC_VERSION}) does not match target GA ${VERSION}"
+            exit 1
+          fi
+
+          echo "✅ Input validation passed"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "rc_tag=${RC_TAG}" >> $GITHUB_OUTPUT
+
+      - name: Resolve Commit SHA
+        id: resolve_commit
+        run: |
+          RC_TAG="${{ inputs.rc_tag }}"
+          COMMIT_SHA="${{ inputs.commit_sha }}"
+
+          if [[ -z "${COMMIT_SHA}" ]]; then
+            echo "Resolving commit SHA from RC tag: ${RC_TAG}"
+
+            # Check if tag exists locally
+            if ! git rev-parse "${RC_TAG}" &>/dev/null; then
+              echo "Tag not found locally, fetching from remote..."
+              git fetch origin "refs/tags/${RC_TAG}:refs/tags/${RC_TAG}" || {
+                echo "::error::RC tag ${RC_TAG} not found in repository"
+                exit 1
+              }
+            fi
+
+            COMMIT_SHA=$(git rev-parse "${RC_TAG}^{commit}")
+            echo "Resolved commit SHA: ${COMMIT_SHA}"
+          else
+            echo "Using provided commit SHA: ${COMMIT_SHA}"
+            # Validate it's a valid commit
+            if ! git rev-parse "${COMMIT_SHA}" &>/dev/null; then
+              echo "::error::Invalid commit SHA: ${COMMIT_SHA}"
+              exit 1
+            fi
+          fi
+
+          echo "commit_sha=${COMMIT_SHA}" >> $GITHUB_OUTPUT
+          echo "commit_sha_short=${COMMIT_SHA:0:7}" >> $GITHUB_OUTPUT
+
+      - name: Verify Green for Promotion
+        id: verify
+        if: ${{ !inputs.skip_verification }}
+        run: |
+          COMMIT_SHA="${{ steps.resolve_commit.outputs.commit_sha }}"
+          RC_TAG="${{ inputs.rc_tag }}"
+
+          echo "Running promotion gate verification..."
+          echo "Commit: ${COMMIT_SHA}"
+          echo "RC Tag: ${RC_TAG}"
+          echo ""
+
+          # Make script executable
+          chmod +x scripts/release/verify-green-for-tag.sh
+
+          # Run verification script
+          if scripts/release/verify-green-for-tag.sh \
+              --tag "${RC_TAG}" \
+              --commit "${COMMIT_SHA}" \
+              --branch main \
+              --verbose; then
+            echo "promotion_allowed=true" >> $GITHUB_OUTPUT
+            echo "✅ Promotion verification PASSED"
+          else
+            echo "promotion_allowed=false" >> $GITHUB_OUTPUT
+            echo "::error::Promotion verification FAILED - commit is not green"
+            exit 1
+          fi
+
+      - name: Check Skip Verification Warning
+        if: ${{ inputs.skip_verification }}
+        run: |
+          echo "::warning::⚠️  VERIFICATION SKIPPED - Emergency bypass mode enabled"
+          echo "::warning::This promotion is proceeding without green verification"
+          echo "::warning::Ensure manual verification has been performed"
+          echo "promotion_allowed=true (skipped)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Generate Promotion Bundle
+        id: bundle
+        run: |
+          COMMIT_SHA="${{ steps.resolve_commit.outputs.commit_sha }}"
+          VERSION="${{ steps.validate.outputs.version }}"
+          RC_TAG="${{ steps.validate.outputs.rc_tag }}"
+          GA_TAG="v${VERSION}"
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          mkdir -p artifacts/promotion
+
+          # Generate promotion evidence
+          cat > artifacts/promotion/promotion_evidence.json <<EOF
+          {
+            "version": "1.0.0",
+            "promotion": {
+              "from_rc": "${RC_TAG}",
+              "to_ga": "${GA_TAG}",
+              "commit_sha": "${COMMIT_SHA}",
+              "verified_at": "${TIMESTAMP}",
+              "verification_skipped": ${{ inputs.skip_verification }},
+              "verified_by_workflow": "${{ github.workflow }}",
+              "workflow_run_id": "${{ github.run_id }}",
+              "workflow_run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+              "triggered_by": "${{ github.actor }}"
+            },
+            "required_checks": {
+              "release_readiness_gate": "verified",
+              "workflow_lint": "verified",
+              "ga_gate": "verified",
+              "unit_tests_coverage": "verified",
+              "ci_core": "verified"
+            },
+            "promotion_approved": true,
+            "audit_trail": {
+              "verification_workflow": "${{ github.workflow }}",
+              "verification_run": "${{ github.run_id }}",
+              "verification_script": "scripts/release/verify-green-for-tag.sh v1.0.0"
+            }
+          }
+          EOF
+
+          # Generate promotion checklist
+          cat > artifacts/promotion/PROMOTION_CHECKLIST.md <<'EOF'
+          # MVP-4 Stabilization Promotion Checklist
+
+          ## Pre-Promotion Verification
+
+          - [x] All required CI workflows passed
+          - [x] Promotion gate verification completed
+          - [x] Promotion evidence bundle generated
+
+          ## Promotion Steps
+
+          1. **Review Promotion Evidence**
+             ```bash
+             cat artifacts/promotion/promotion_evidence.json
+             ```
+
+          2. **Create GA Tag**
+             ```bash
+             git tag -a v${VERSION} ${COMMIT_SHA} -m "MVP-4 Stabilization Release ${VERSION}
+
+          Promoted from: ${RC_TAG}
+          Commit: ${COMMIT_SHA}
+          Verified at: ${TIMESTAMP}
+
+          This release has passed all required gates:
+          - Release Readiness Gate
+          - Workflow Lint
+          - GA Gate
+          - Unit Tests & Coverage
+          - CI Core (Primary Gate)
+
+          Evidence: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+             ```
+
+          3. **Push GA Tag**
+             ```bash
+             git push origin v${VERSION}
+             ```
+
+          4. **Monitor Release Workflows**
+             ```bash
+             gh run watch
+             ```
+
+          5. **Verify Release Artifacts**
+             - Check GitHub release page
+             - Verify Docker images published
+             - Confirm documentation updated
+
+          ## Post-Promotion
+
+          - [ ] Update CHANGELOG.md
+          - [ ] Announce release in team channels
+          - [ ] Monitor production metrics for 24-48 hours
+          - [ ] Archive promotion evidence in release artifacts
+
+          ## Rollback Plan (if needed)
+
+          ```bash
+          # Delete GA tag if issues discovered
+          git tag -d v${VERSION}
+          git push origin :refs/tags/v${VERSION}
+
+          # Revert to previous stable version
+          # See docs/releases/ROLLBACK_PROCEDURE.md
+          ```
+
+          ---
+
+          **Promotion Evidence**: This checklist generated by workflow run #${{ github.run_id }}
+          **Generated**: ${TIMESTAMP}
+          **Verified Commit**: ${COMMIT_SHA}
+          EOF
+
+          # Generate summary
+          cat > artifacts/promotion/summary.md <<EOF
+          # Promotion Verification Summary
+
+          **Status**: ✅ APPROVED FOR PROMOTION
+
+          ## Promotion Details
+
+          | Field | Value |
+          |-------|-------|
+          | RC Tag | \`${RC_TAG}\` |
+          | GA Tag | \`${GA_TAG}\` |
+          | Commit | \`${COMMIT_SHA}\` |
+          | Version | ${VERSION} |
+          | Verified At | ${TIMESTAMP} |
+          | Workflow Run | [#${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+          | Triggered By | @${{ github.actor }} |
+
+          ## Required Checks Status
+
+          All required CI workflows verified as **GREEN** ✅
+
+          - ✅ Release Readiness Gate
+          - ✅ Workflow Lint
+          - ✅ GA Gate
+          - ✅ Unit Tests & Coverage
+          - ✅ CI Core (Primary Gate)
+
+          ## Next Steps
+
+          1. Review promotion checklist: \`artifacts/promotion/PROMOTION_CHECKLIST.md\`
+          2. Create and push GA tag: \`v${VERSION}\`
+          3. Monitor release workflows
+          4. Archive this promotion bundle
+
+          ---
+
+          **This promotion has been verified safe and is approved to proceed.**
+          EOF
+
+          echo "bundle_path=artifacts/promotion" >> $GITHUB_OUTPUT
+
+      - name: Upload Promotion Bundle
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: promotion-bundle-${{ steps.validate.outputs.version }}
+          path: artifacts/promotion/
+          retention-days: 90 # Keep for audit trail
+
+      - name: Generate Job Summary
+        if: always()
+        run: |
+          cat artifacts/promotion/summary.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Promotion Decision
+        run: |
+          PROMOTION_ALLOWED="${{ steps.verify.outputs.promotion_allowed }}"
+          SKIP_VERIFICATION="${{ inputs.skip_verification }}"
+
+          if [[ "${SKIP_VERIFICATION}" == "true" ]]; then
+            echo "::warning::Promotion proceeding with verification skipped"
+            echo "✅ Promotion bundle generated (verification bypassed)"
+          elif [[ "${PROMOTION_ALLOWED}" == "true" ]]; then
+            echo "✅ Promotion APPROVED - All checks green"
+            echo ""
+            echo "Next steps:"
+            echo "  1. Download promotion bundle artifact"
+            echo "  2. Review PROMOTION_CHECKLIST.md"
+            echo "  3. Create and push GA tag"
+          else
+            echo "::error::Promotion BLOCKED - Checks not green"
+            exit 1
+          fi

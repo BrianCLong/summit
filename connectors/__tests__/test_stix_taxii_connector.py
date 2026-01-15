@@ -11,7 +11,6 @@ from schema_mapping import map_stix_to_intelgraph
 
 
 class TestStixTaxiiConnector(unittest.TestCase):
-
     def setUp(self):
         self.sample_json_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "../stix_taxii_connector/sample.json")

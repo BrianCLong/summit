@@ -1,0 +1,56 @@
+{
+  "issue_number": 497,
+  "title": "feat(er): canonical_id, merges/splits + audit log",
+  "url": "https://github.com/BrianCLong/summit/pull/497",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-17T19:15:30Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15134,
+        "url": "https://github.com/BrianCLong/summit/pull/15134",
+        "mergedAt": null,
+        "title": "chore(deps): bump actions/github-script from 7 to 8"
+      },
+      {
+        "number": 615,
+        "url": "https://github.com/BrianCLong/summit/pull/615",
+        "mergedAt": "2025-08-18T14:31:47Z",
+        "title": "chore(deps): bump web-vitals from 3.5.2 to 5.1.0 in /client"
+      },
+      {
+        "number": 613,
+        "url": "https://github.com/BrianCLong/summit/pull/613",
+        "mergedAt": "2025-08-18T14:25:09Z",
+        "title": "chore(deps-dev): bump @testing-library/jest-dom from 5.17.0 to 6.7.0 in /client"
+      },
+      {
+        "number": 13195,
+        "url": "https://github.com/BrianCLong/summit/pull/13195",
+        "mergedAt": "2025-12-04T15:56:11Z",
+        "title": "Deploy Harbor proxy for air-gapped image pulls"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

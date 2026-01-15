@@ -1,9 +1,11 @@
 """Lightweight schema-driven validation aligned to the JSON Schemas."""
+
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable, Mapping
 from pathlib import Path
-from typing import Any, Dict, Iterable, Mapping
+from typing import Any
 
 TYPE_MAP = {
     "string": str,
@@ -23,9 +25,9 @@ class SchemaLoader:
     """Utility to load and cache JSON Schemas."""
 
     def __init__(self) -> None:
-        self._cache: Dict[Path, Dict[str, Any]] = {}
+        self._cache: dict[Path, dict[str, Any]] = {}
 
-    def load(self, path: Path) -> Dict[str, Any]:
+    def load(self, path: Path) -> dict[str, Any]:
         if path not in self._cache:
             with path.open("r", encoding="utf-8") as handle:
                 self._cache[path] = json.load(handle)
@@ -47,7 +49,7 @@ def _validate_type(value: Any, expected_type: str, path: str) -> None:
         raise ValidationError(f"{path} expected {expected_type}, received {type(value).__name__}")
 
 
-def _validate_object(record: Mapping[str, Any], schema: Dict[str, Any], path: str = "root") -> None:
+def _validate_object(record: Mapping[str, Any], schema: dict[str, Any], path: str = "root") -> None:
     required = schema.get("required", [])
     properties = schema.get("properties", {})
 

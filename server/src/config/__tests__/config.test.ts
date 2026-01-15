@@ -1,12 +1,9 @@
 import { jest } from '@jest/globals';
 import { loadConfig } from '../load.js';
 
-// Mocks
-const mockExit = jest.spyOn(process, 'exit').mockImplementation((code) => {
-  throw new Error(`Process exited with code ${code}`);
-});
-const mockConsoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
-const mockConsoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+let mockExit: jest.SpiedFunction<typeof process.exit>;
+let mockConsoleError: jest.SpiedFunction<typeof console.error>;
+let mockConsoleWarn: jest.SpiedFunction<typeof console.warn>;
 
 describe('Config Loader', () => {
   const originalEnv = process.env;
@@ -14,9 +11,9 @@ describe('Config Loader', () => {
   beforeEach(() => {
     jest.resetModules();
     process.env = { ...originalEnv };
-    mockExit.mockClear();
-    mockConsoleError.mockClear();
-    mockConsoleWarn.mockClear();
+    mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    mockConsoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockConsoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   afterAll(() => {
@@ -32,11 +29,6 @@ describe('Config Loader', () => {
     const config = loadConfig();
 
     expect(config).toBeDefined();
-    expect(config.port).toBe('4000'); // Note: loadConfig returns raw strings from env usually, but AJV might coerce?
-    // Wait, AJV with coerceTypes: true modifies the object.
-    // But loadConfig constructs rawConfig from process.env strings.
-    // AJV validates and coerces properties inside rawConfig.
-    // So config.port should be a number after loadConfig returns.
     expect(config.port).toBe(4000);
   });
 
@@ -44,10 +36,8 @@ describe('Config Loader', () => {
     process.env.CONFIG_VALIDATE_ON_START = 'true';
     process.env.PORT = 'invalid-port';
 
-    expect(() => {
-      loadConfig();
-    }).toThrow('Process exited with code 1');
-
+    loadConfig();
+    expect(mockExit).toHaveBeenCalledWith(1);
     expect(mockConsoleError).toHaveBeenCalled();
     // Check error message contains info
     expect(mockConsoleError.mock.calls[0][0]).toContain('Invalid Configuration');

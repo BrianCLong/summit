@@ -1,21 +1,24 @@
 import logging
-from fuzzywuzzy import fuzz
+from typing import Any
+
 import networkx as nx
-from typing import List, Dict, Any
+from fuzzywuzzy import fuzz
 
 logger = logging.getLogger(__name__)
+
 
 class EntityResolver:
     """
     Handles Entity Resolution, Disambiguation, and Clustering.
     """
+
     def __init__(self, similarity_threshold=85):
         self.similarity_threshold = similarity_threshold
 
     def compute_similarity(self, text1, text2):
         return fuzz.token_set_ratio(text1, text2)
 
-    def cluster_entities(self, entities: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def cluster_entities(self, entities: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """
         Clusters entities based on name similarity.
         Returns a list of entities with a 'canonical_id' or 'cluster_id'.
@@ -55,7 +58,9 @@ class EntityResolver:
             # Here: longest name as it usually contains more info, or highest confidence.
             # Let's use highest total confidence sum or max confidence.
 
-            best_entity = max(cluster_members, key=lambda x: (x.get("confidence", 0), len(x["text"])))
+            best_entity = max(
+                cluster_members, key=lambda x: (x.get("confidence", 0), len(x["text"]))
+            )
             canonical_name = best_entity["text"]
             canonical_type = best_entity.get("label")
 

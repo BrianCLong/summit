@@ -9,7 +9,7 @@ import sys
 from collections import Counter, defaultdict
 from collections.abc import Iterable
 from dataclasses import asdict, dataclass
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import yaml
@@ -114,8 +114,8 @@ def parse_datetime(raw: str) -> datetime:
         raw = raw[:-1] + "+00:00"
     dt = datetime.fromisoformat(raw)
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone(timezone.utc)
+        dt = dt.replace(tzinfo=UTC)
+    return dt.astimezone(UTC)
 
 
 def load_config(path: Path) -> tuple[dict[str, dict[str, object]], list[Waiver]]:
@@ -136,11 +136,9 @@ def load_config(path: Path) -> tuple[dict[str, dict[str, object]], list[Waiver]]
     for raw in config.get("waivers", []):
         expires_raw = raw["expires_on"]
         if isinstance(expires_raw, str):
-            expires_on = datetime.strptime(expires_raw, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            expires_on = datetime.strptime(expires_raw, "%Y-%m-%d").replace(tzinfo=UTC)
         elif isinstance(expires_raw, date):
-            expires_on = datetime.combine(expires_raw, datetime.min.time()).replace(
-                tzinfo=timezone.utc
-            )
+            expires_on = datetime.combine(expires_raw, datetime.min.time()).replace(tzinfo=UTC)
         else:
             raise TypeError(f"Unsupported expiry type for waiver {raw}")
         waivers.append(
@@ -195,7 +193,7 @@ def evaluate(
     vuln_report: dict[str, object],
 ) -> tuple[list[ServiceReport], dict[str, object], int]:
     now = parse_datetime(
-        vuln_report.get("generated_at", datetime.utcnow().replace(tzinfo=timezone.utc).isoformat())
+        vuln_report.get("generated_at", datetime.utcnow().replace(tzinfo=UTC).isoformat())
     )
     waiver_index = index_waivers(waivers)
     reports: list[ServiceReport] = []
@@ -209,7 +207,7 @@ def evaluate(
     global_attestation_failures: list[str] = []
 
     services_in_report = {svc.get("name") for svc in vuln_report.get("services", [])}
-    missing_services = [s for s in services_cfg.keys() if s not in services_in_report]
+    missing_services = [s for s in services_cfg if s not in services_in_report]
 
     for missing in missing_services:
         global_violations.append(
