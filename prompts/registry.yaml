@@ -104,6 +104,129 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: skill-triage-to-spec
+    version: v1
+    path: prompts/skills/skill-triage-to-spec.md
+    sha256: 308147bf7cf7e9a61e53c0adfdeae2c6d83e884e47c00395f9b274af2510e34d
+    description: Convert issues into deterministic specs, task breakdowns, and acceptance tests.
+    scope:
+      paths:
+        - prompts/skills/skill-triage-to-spec.md
+        - prompts/registry.yaml
+        - docs/agentic/
+        - scripts/agentic/
+        - scripts/ci/
+        - .github/workflows/
+      domains:
+        - governance
+        - triage
+        - planning
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: skill-tests-first
+    version: v1
+    path: prompts/skills/skill-tests-first.md
+    sha256: 7d38073a70c4f967238614d0ad598b0dd67f2b4dffcfa83fae1ac18a448cb662
+    description: Generate tests first and implement changes until passing.
+    scope:
+      paths:
+        - prompts/skills/skill-tests-first.md
+        - prompts/registry.yaml
+        - docs/agentic/
+        - scripts/agentic/
+        - scripts/ci/
+      domains:
+        - quality
+        - testing
+        - engineering
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: skill-docs-and-governance
+    version: v1
+    path: prompts/skills/skill-docs-and-governance.md
+    sha256: 4cf39c52f0ab004d12f68415fd95b0c8d87e7cdbddda3dee7dfc48ae78be774d
+    description: Update governance docs and evidence indices with deterministic ordering.
+    scope:
+      paths:
+        - prompts/skills/skill-docs-and-governance.md
+        - prompts/registry.yaml
+        - docs/agentic/
+        - docs/
+      domains:
+        - documentation
+        - governance
+        - evidence
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: skill-security-ledger
+    version: v1
+    path: prompts/skills/skill-security-ledger.md
+    sha256: c1da724819ee85ca5e6295d0bb4e8abfa6236402686e16515692fc051a8ef4b5
+    description: Update security ledgers, SBOM pointers, and threat models with evidence.
+    scope:
+      paths:
+        - prompts/skills/skill-security-ledger.md
+        - prompts/registry.yaml
+        - docs/agentic/
+        - security/
+      domains:
+        - security
+        - governance
+        - evidence
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: skill-release-candidate
+    version: v1
+    path: prompts/skills/skill-release-candidate.md
+    sha256: af7e9981423e6e1cf1ef944d1a90906b9743315d482b85768b7ce0890e6559e5
+    description: Prepare release-candidate checklist, version plan, and GA evidence deltas.
+    scope:
+      paths:
+        - prompts/skills/skill-release-candidate.md
+        - prompts/registry.yaml
+        - docs/agentic/
+        - release/
+      domains:
+        - release
+        - governance
+        - evidence
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
