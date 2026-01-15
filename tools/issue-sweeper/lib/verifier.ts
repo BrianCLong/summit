@@ -270,15 +270,15 @@ export async function getCIStatus(branchName: string): Promise<'success' | 'fail
       return 'unknown';
     }
 
-    const data = await response.json();
+    const data = await response.json() as { check_runs?: Array<{ conclusion: string; status: string }> };
     const checkRuns = data.check_runs || [];
 
     if (checkRuns.length === 0) {
       return 'pending';
     }
 
-    const hasFailure = checkRuns.some((run: any) => run.conclusion === 'failure');
-    const allComplete = checkRuns.every((run: any) => run.status === 'completed');
+    const hasFailure = checkRuns.some((run) => run.conclusion === 'failure');
+    const allComplete = checkRuns.every((run) => run.status === 'completed');
 
     if (hasFailure) {
       return 'failure';

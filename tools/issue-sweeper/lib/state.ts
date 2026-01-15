@@ -2,12 +2,18 @@
  * State persistence and management
  */
 
-import { readFileSync, writeFileSync, appendFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, writeFileSync, appendFileSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { State, LedgerEntry } from './types.js';
 
-const STATE_FILE = join(process.cwd(), 'tools/issue-sweeper/STATE.json');
-const LEDGER_FILE = join(process.cwd(), 'tools/issue-sweeper/LEDGER.ndjson');
+// Determine the base directory (either running from repo root or from issue-sweeper dir)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const issueSweeperDir = join(__dirname, '..');
+
+const STATE_FILE = join(issueSweeperDir, 'STATE.json');
+const LEDGER_FILE = join(issueSweeperDir, 'LEDGER.ndjson');
 
 /**
  * Load state from STATE.json

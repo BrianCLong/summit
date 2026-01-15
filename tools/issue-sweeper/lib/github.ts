@@ -24,10 +24,10 @@ export class GitHubClient {
 
   private async fetch(endpoint: string, options: RequestInit = {}): Promise<any> {
     const url = `${GITHUB_API}${endpoint}`;
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       Accept: 'application/vnd.github.v3+json',
       ...(this.token && { Authorization: `token ${this.token}` }),
-      ...options.headers,
+      ...(options.headers as Record<string, string> || {}),
     };
 
     const response = await fetch(url, { ...options, headers });

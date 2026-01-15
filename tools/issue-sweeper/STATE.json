@@ -1,17 +1,17 @@
 {
   "cursor": 1,
-  "last_issue_number": 0,
+  "last_issue_number": 5,
   "batch_size": 50,
   "run_started_at": null,
-  "run_updated_at": null,
+  "run_updated_at": "2026-01-15T17:48:54.859Z",
   "open_prs": [],
   "failures": [],
-  "total_processed": 0,
+  "total_processed": 10,
   "stats": {
     "already_solved": 0,
     "solved_in_this_run": 0,
-    "not_solved": 0,
-    "blocked": 0,
+    "not_solved": 6,
+    "blocked": 4,
     "duplicate": 0,
     "invalid": 0
   }

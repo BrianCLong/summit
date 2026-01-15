@@ -61,7 +61,7 @@ export async function createPullRequest(options: CreatePROptions): Promise<strin
     throw new Error(`Failed to create PR: ${response.status} ${error}`);
   }
 
-  const pr = await response.json();
+  const pr = await response.json() as { html_url: string; number: number };
   console.log(`   ✅ Pull request created: ${pr.html_url}`);
 
   // Add labels to PR
@@ -156,7 +156,7 @@ export async function findExistingPR(issueNumber: number): Promise<string | null
       return null;
     }
 
-    const data = await response.json();
+    const data = await response.json() as { items?: Array<{ html_url: string }> };
     if (data.items && data.items.length > 0) {
       return data.items[0].html_url;
     }

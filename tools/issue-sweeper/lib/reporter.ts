@@ -3,11 +3,17 @@
  */
 
 import { writeFileSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { State, LedgerEntry } from './types.js';
 import { readLedger } from './state.js';
 
-const REPORT_FILE = join(process.cwd(), 'tools/issue-sweeper/REPORT.md');
+// Determine the base directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const issueSweeperDir = join(__dirname, '..');
+
+const REPORT_FILE = join(issueSweeperDir, 'REPORT.md');
 
 /**
  * Generate and save the report

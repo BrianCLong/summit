@@ -175,7 +175,7 @@ export class MultiRepoManager {
         // Process each issue
         for (const issue of issues) {
           try {
-            const result = await processIssue(this.githubClient, issue, config.options || {});
+            const result = await processIssue(issue, this.githubClient, config.options || {});
 
             // Update repo state
             repoState.totalProcessed++;

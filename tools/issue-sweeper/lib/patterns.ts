@@ -24,48 +24,6 @@ interface FixResult {
   error?: string;
 }
 
-/**
- * Pattern Library - Register all known patterns here
- */
-export const ISSUE_PATTERNS: IssuePattern[] = [
-  // TypeScript Patterns
-  MISSING_TYPE_IMPORTS,
-  WRONG_MODULE_EXTENSION,
-  IMPLICIT_ANY_PARAMETER,
-  MISSING_RETURN_TYPE,
-
-  // Linting Patterns
-  ESLINT_ERRORS,
-  PRETTIER_FORMATTING,
-
-  // Dependency Patterns
-  MISSING_DEPENDENCY,
-  OUTDATED_DEPENDENCY,
-  PEER_DEPENDENCY_CONFLICT,
-
-  // Testing Patterns
-  FAILING_SNAPSHOT_TEST,
-  MISSING_TEST_COVERAGE,
-
-  // Documentation Patterns
-  MISSING_README,
-  OUTDATED_API_DOCS,
-  BROKEN_MARKDOWN_LINK,
-
-  // CI/CD Patterns
-  FAILING_WORKFLOW,
-  MISSING_WORKFLOW_PERMISSIONS,
-  DEPRECATED_GITHUB_ACTION,
-
-  // Security Patterns
-  VULNERABLE_DEPENDENCY,
-  EXPOSED_SECRET,
-
-  // Performance Patterns
-  LARGE_BUNDLE_SIZE,
-  SLOW_TEST_SUITE,
-];
-
 // ============================================================================
 // TypeScript Patterns
 // ============================================================================
@@ -893,6 +851,49 @@ const MISSING_TEST_COVERAGE: IssuePattern = {
     return false;
   },
 };
+
+// ============================================================================
+// Pattern Library - Register all known patterns here
+// ============================================================================
+
+export const ISSUE_PATTERNS: IssuePattern[] = [
+  // TypeScript Patterns
+  MISSING_TYPE_IMPORTS,
+  WRONG_MODULE_EXTENSION,
+  IMPLICIT_ANY_PARAMETER,
+  MISSING_RETURN_TYPE,
+
+  // Linting Patterns
+  ESLINT_ERRORS,
+  PRETTIER_FORMATTING,
+
+  // Dependency Patterns
+  MISSING_DEPENDENCY,
+  OUTDATED_DEPENDENCY,
+  PEER_DEPENDENCY_CONFLICT,
+
+  // Testing Patterns
+  FAILING_SNAPSHOT_TEST,
+  MISSING_TEST_COVERAGE,
+
+  // Documentation Patterns
+  MISSING_README,
+  OUTDATED_API_DOCS,
+  BROKEN_MARKDOWN_LINK,
+
+  // CI/CD Patterns
+  FAILING_WORKFLOW,
+  MISSING_WORKFLOW_PERMISSIONS,
+  DEPRECATED_GITHUB_ACTION,
+
+  // Security Patterns
+  VULNERABLE_DEPENDENCY,
+  EXPOSED_SECRET,
+
+  // Performance Patterns
+  LARGE_BUNDLE_SIZE,
+  SLOW_TEST_SUITE,
+];
 
 // ============================================================================
 // Helper Functions

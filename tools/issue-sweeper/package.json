@@ -1,0 +1,16 @@
+{
+  "name": "@summit/issue-sweeper",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Automated GitHub issue processing and fixing system",
+  "scripts": {
+    "start": "tsx run.ts",
+    "test": "tsx test-local.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
