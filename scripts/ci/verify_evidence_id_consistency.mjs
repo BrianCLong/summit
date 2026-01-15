@@ -674,8 +674,53 @@ async function main() {
     await writeReports(report, outputDir);
     const writeReportsDuration = Date.now() - writeReportsStartTime;
 
-    // Log summary with performance metrics
+    // Generate metrics for monitoring and quality assessment
     const totalTime = Date.now() - startTime;
+    const metrics = {
+      timestamp: new Date().toISOString(),
+      sha: report.sha,
+      generator: report.generator,
+      gate_version: '1.3.0',
+      performance: {
+        total_time_ms: totalTime,
+        evidence_map_load_ms: evidenceMapDuration,
+        document_discovery_ms: findDocsDuration,
+        document_processing_ms: processDuration,
+        report_building_ms: buildReportDuration,
+        report_writing_ms: writeReportsDuration,
+        average_doc_processing_ms: documents.length > 0 ? Math.round(processDuration / documents.length) : 0
+      },
+      totals: {
+        documents_checked: report.totals.documents_checked,
+        evidence_ids_found: report.totals.evidence_ids_found,
+        evidence_ids_referenced: report.totals.evidence_ids_referenced,
+        evidence_ids_registered: report.totals.evidence_ids_registered,
+        evidence_ids_orphaned: report.totals.evidence_ids_orphaned,
+        violations: report.totals.violations,
+        errors: report.totals.errors,
+        warnings: report.totals.warnings,
+        info_messages: report.totals.infos
+      },
+      accuracy: {
+        document_processing_success_rate: documents.length > 0
+          ? (documents.length - results.filter(r =>
+              r.violations.some(v => v.type === 'processing_error')
+            ).length) / documents.length
+          : 1
+      },
+      configuration: {
+        ai_analysis_enabled: process.env.ENABLE_QWEN_ANALYSIS === 'true',
+        ai_patches_enabled: process.env.ENABLE_QWEN_PATCHES === 'true',
+        replay_only_mode: process.env.QWEN_REPLAY_ONLY === 'true',
+        record_mode_allowed: process.env.ALLOW_QWEN_RECORD_IN_CI === 'true',
+        debug_enabled: DEBUG
+      }
+    };
+
+    // Write metrics for monitoring/observability
+    const metricsPath = join(outputDir, 'metrics.json');
+    await fs.writeFile(metricsPath, JSON.stringify(metrics, null, 2), 'utf8');
+
     console.log(`\nEvidence ID Consistency Report:`);
     console.log(`- Status: ${report.status.toUpperCase()}`);
     console.log(`- Documents: ${report.totals.documents_checked}`);
@@ -688,11 +733,30 @@ async function main() {
     console.log(`- Document processing: ${processDuration}ms`);
     console.log(`- Report building: ${buildReportDuration}ms`);
     console.log(`- Report writing: ${writeReportsDuration}ms`);
+    console.log(`- Average per document: ${Math.round(processDuration / documents.length)}ms`);
+
+    // Log metrics summary for operators
+    if (report.totals.errors > 0 || report.totals.warnings > 0) {
+      console.log(`\nQuality Metrics:`);
+      console.log(`- Errors: ${report.totals.errors}`);
+      console.log(`- Warnings: ${report.totals.warnings}`);
+      console.log(`- Orphaned IDs: ${report.totals.evidence_ids_orphaned}`);
+      console.log(`- Processing success rate: ${(metrics.accuracy.document_processing_success_rate * 100).toFixed(1)}%`);
+    }
 
     // Exit with appropriate code
     const hasErrors = report.totals.errors > 0;
     if (hasErrors) {
       console.log('\n❌ Evidence ID consistency check FAILED');
+      const shouldFailOnHighPatches = (
+        process.env.QWEN_PATCHES_FAIL_ON_HIGH === 'true' &&
+        report.metadata?.high_severity_patches > 0 &&
+        report.metadata.high_severity_patches > parseInt(process.env.QWEN_PATCHES_MAX_HIGH || '0', 10)
+      );
+      if (shouldFailOnHighPatches) {
+        console.log(`🚫 High severity patches threshold exceeded (${report.metadata?.high_severity_patches} > ${process.env.QWEN_PATCHES_MAX_HIGH}), exiting with error`);
+        process.exit(1);
+      }
       process.exit(1);
     } else {
       const hasWarnings = report.totals.warnings > 0;
