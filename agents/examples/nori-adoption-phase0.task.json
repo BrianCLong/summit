@@ -1,0 +1,42 @@
+{
+  "task_id": "NORI_ADOPTION_PHASE0",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "nori-adoption-phase0",
+    "version": "v1",
+    "sha256": "8a63e76e22862d7307b1003b1f3f5c6d28201bcef8ae0500074d76f18efe793b",
+    "path": "prompts/docs/nori-adoption-phase0.md"
+  },
+  "declared_scope": {
+    "paths": [
+      ".summit/skillsets/",
+      "docs/onboarding/",
+      "docs/roadmap/STATUS.json",
+      "scripts/onboarding/",
+      "package.json",
+      "agents/examples/",
+      "prompts/docs/nori-adoption-phase0.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["documentation", "onboarding", "tooling", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs-update", "script-update"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Developer docs reference Nori and the summit:agent:install bootstrap command.",
+    "Summit skillsets are present under .summit/skillsets.",
+    "Roadmap status reflects the documentation update."
+  ],
+  "stop_conditions": [
+    "Any request to bypass official provider CLI authentication.",
+    "Scope changes outside declared paths.",
+    "Governance policy conflict detected."
+  ]
+}

@@ -104,6 +104,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: nori-adoption-phase0
+    version: v1
+    path: prompts/docs/nori-adoption-phase0.md
+    sha256: 8a63e76e22862d7307b1003b1f3f5c6d28201bcef8ae0500074d76f18efe793b
+    description: Adopt Nori as the local agent console and add Summit bootstrap support.
+    scope:
+      paths:
+        - .summit/skillsets/
+        - docs/onboarding/
+        - docs/roadmap/STATUS.json
+        - scripts/onboarding/
+        - package.json
+        - agents/examples/
+        - prompts/docs/nori-adoption-phase0.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - onboarding
+        - tooling
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md

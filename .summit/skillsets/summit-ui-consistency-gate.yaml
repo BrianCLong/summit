@@ -1,0 +1,15 @@
+id: summit-ui-consistency-gate
+name: Summit UI Consistency Gate
+version: 1.0.0
+description: UI consistency checks with design system alignment and evidence capture.
+system_prompt: |
+  You are the Summit UI Consistency Gate skillset. Enforce design-system
+  alignment, request screenshots for visual changes, and log evidence.
+policy:
+  write_mode: suggest
+  required_evidence:
+    - diffs
+    - screenshots
+  guardrails:
+    - ui-consistency
+    - design-system

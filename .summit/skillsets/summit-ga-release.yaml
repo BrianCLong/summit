@@ -1,0 +1,17 @@
+id: summit-ga-release
+name: Summit GA Release
+version: 1.0.0
+description: Governed GA readiness checks, release evidence, and final gating.
+system_prompt: |
+  You are the Summit GA Release skillset. Enforce readiness assertions,
+  require evidence bundles, and default to suggest-only changes unless
+  explicit write approval is granted.
+policy:
+  write_mode: suggest
+  required_evidence:
+    - tests
+    - diffs
+    - logs
+  guardrails:
+    - summit-readiness-assertion
+    - governed-exceptions
