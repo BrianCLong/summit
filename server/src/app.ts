@@ -507,6 +507,7 @@ export const createApp = async () => {
 
   // Initialize SummitInvestigate Platform Routes
   SummitInvestigate.initialize(app);
+  process.stdout.write('[DEBUG] SummitInvestigate initialized\n');
   // Maestro
   const { buildMaestroRouter } = await import('./routes/maestro_routes.js');
   const { Maestro } = await import('./maestro/core.js');
@@ -533,6 +534,7 @@ export const createApp = async () => {
   const maestroQueries = new MaestroQueries(igClient);
 
   app.use('/api/maestro', buildMaestroRouter(maestro, maestroQueries));
+  process.stdout.write('[DEBUG] Maestro router built\n');
 
   app.get('/search/evidence', async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
@@ -596,6 +598,7 @@ export const createApp = async () => {
   if (process.env.SKIP_GRAPHQL !== 'true') {
     const { typeDefs } = await import('./graphql/schema.js');
     const { default: resolvers } = await import('./graphql/resolvers/index.js');
+    process.stdout.write('[DEBUG] GraphQL resolvers imported\n');
 
     const executableSchema = makeExecutableSchema({
       typeDefs: typeDefs as any,
@@ -667,7 +670,9 @@ export const createApp = async () => {
         return formattedError;
       },
     });
+    process.stdout.write('[DEBUG] Apollo Server created, starting...\n');
     await apollo.start();
+    process.stdout.write('[DEBUG] Apollo Server started\n');
 
     app.use(
       '/graphql',

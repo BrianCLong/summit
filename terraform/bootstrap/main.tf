@@ -47,7 +47,7 @@ module "eks_cluster" {
 module "monitoring" {
   source = "../../modules/monitoring"
 
-  cluster_name = module.eks_cluster.cluster_name
+  cluster_name      = module.eks_cluster.cluster_name
   enable_prometheus = true
   enable_grafana    = true
   enable_loki       = true

@@ -24,12 +24,17 @@ jest.unstable_mockModule('../src/services/CIBDetectionService.js', () => {
   return { CIBDetectionService: MockCIBDetectionService };
 });
 
-jest.unstable_mockModule('../src/services/GraphAnalyticsService.js', () => ({
-  __esModule: true,
-  default: {
-    getInstance: jest.fn(() => mockGraphService),
-  },
-}));
+jest.unstable_mockModule('../src/services/GraphAnalyticsService.js', () => {
+  class MockGraphAnalyticsService {
+    centrality = mockCentrality;
+    communities = mockCommunities;
+    static getInstance = jest.fn(() => mockGraphService);
+  }
+  return {
+    __esModule: true,
+    default: MockGraphAnalyticsService,
+  };
+});
 
 jest.unstable_mockModule('../src/services/CrossPlatformAttributionService.js', () => ({
   CrossPlatformAttributionService: jest.fn(),
@@ -38,9 +43,13 @@ jest.unstable_mockModule('../src/services/CrossPlatformAttributionService.js', (
 describe('InfluenceOperationsService', () => {
   let InfluenceOperationsService: typeof import('../src/services/InfluenceOperationsService.js').InfluenceOperationsService;
   let service: InstanceType<typeof InfluenceOperationsService>;
+  let NarrativeAnalysisService: jest.Mock;
+  let GraphAnalyticsService: { getInstance: jest.Mock };
 
   beforeAll(async () => {
     ({ InfluenceOperationsService } = await import('../src/services/InfluenceOperationsService.js'));
+    ({ NarrativeAnalysisService } = await import('../src/services/NarrativeAnalysisService.js'));
+    ({ default: GraphAnalyticsService } = await import('../src/services/GraphAnalyticsService.js'));
   });
 
   beforeEach(() => {
@@ -48,7 +57,18 @@ describe('InfluenceOperationsService', () => {
 
     // Clear the instance so a new one is created
     (InfluenceOperationsService as any).instance = null;
+    NarrativeAnalysisService.mockImplementation(() => ({
+      takeSnapshot: mockTakeSnapshot,
+      getNarrativeEvolution: mockGetNarrativeEvolution,
+    }));
+    GraphAnalyticsService.getInstance.mockReturnValue(mockGraphService);
     service = InfluenceOperationsService.getInstance();
+    (service as any).cibService = { detectCIB: mockDetectCIB };
+    (service as any).narrativeService = {
+      takeSnapshot: mockTakeSnapshot,
+      getNarrativeEvolution: mockGetNarrativeEvolution,
+    };
+    (service as any).graphService = mockGraphService;
   });
 
   it('should detect influence operations correctly', async () => {

@@ -208,12 +208,12 @@ locals {
               route53 = {
                 region = var.region
               }
-            } : (
+              } : (
               var.provider == "gcp" ? {
                 cloudDNS = {
                   project = var.gcp_project_id
                 }
-              } : {
+                } : {
                 azureDNS = {
                   subscriptionID    = var.azure_subscription_id
                   resourceGroupName = var.resource_group_name

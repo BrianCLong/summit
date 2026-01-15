@@ -185,6 +185,95 @@ jest.unstable_mockModule('../../src/db/postgres.js', () => ({
   query: jest.fn(),
 }));
 
+// Mock utils/logger.js explicitly to ensure child method exists
+jest.unstable_mockModule('../../src/utils/logger.js', () => {
+  const mockLogger = {
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+    child: jest.fn().mockReturnThis(),
+    level: 'info',
+  };
+  return {
+    logger: mockLogger,
+    default: mockLogger,
+  };
+});
+
+// Mock background workers to prevent hanging
+jest.unstable_mockModule('../../src/workers/trustScoreWorker.js', () => ({
+  startTrustWorker: jest.fn(),
+  stopTrustWorker: jest.fn(),
+}));
+
+jest.unstable_mockModule('../../src/workers/retentionWorker.js', () => ({
+  startRetentionWorker: jest.fn(),
+  stopRetentionWorker: jest.fn(),
+}));
+
+jest.unstable_mockModule('../../src/ingest/stream.js', () => ({
+  streamIngest: {
+    start: jest.fn().mockResolvedValue(undefined),
+    stop: jest.fn().mockResolvedValue(undefined),
+  },
+}));
+
+jest.unstable_mockModule('../../src/webhooks/webhook.worker.js', () => ({
+  webhookWorker: {
+    start: jest.fn(),
+    stop: jest.fn(),
+  },
+  startWebhookWorker: jest.fn(),
+}));
+
+// Mock provenance ledger
+jest.unstable_mockModule('../../src/provenance/ledger.js', () => ({
+  provenanceLedger: {
+    appendEntry: jest.fn().mockResolvedValue(undefined),
+  },
+  ProvenanceLedgerV2: class {
+    static getInstance() {
+      return {
+        appendEntry: jest.fn().mockResolvedValue(undefined),
+      };
+    }
+  },
+}));
+
+// Mock GraphQL plugins to avoid complex initialization
+jest.unstable_mockModule('../../src/graphql/plugins/auditLogger.js', () => ({
+  default: {},
+}));
+
+jest.unstable_mockModule('../../src/graphql/plugins/rateLimitAndCache.js', () => ({
+  rateLimitAndCachePlugin: jest.fn(() => ({})),
+}));
+
+jest.unstable_mockModule('../../src/graphql/plugins/pbac.js', () => ({
+  default: jest.fn(() => ({})),
+}));
+
+jest.unstable_mockModule('../../src/graphql/plugins/resolverMetrics.js', () => ({
+  default: {},
+}));
+
+jest.unstable_mockModule('../../src/graphql/plugins/persistedQueries.js', () => ({
+  persistedQueriesPlugin: {},
+  default: {},
+}));
+
+
+jest.unstable_mockModule('../../src/audit/index.js', () => ({
+  getAuditSystem: jest.fn(() => ({
+    recordEvent: jest.fn(),
+  })),
+  advancedAuditSystem: {
+    logEvent: jest.fn(),
+    recordEvent: jest.fn(),
+  },
+}));
+
 // Mocks must be before imports
 console.log('LOADING HARNESS...');
 const { createTestHarness } = await import('../harness.js');
@@ -207,6 +296,7 @@ describe('Golden Path Integration', () => {
     try {
       // Skip AI routes to avoid pino CJS/ESM interop issues during tests
       process.env.SKIP_AI_ROUTES = 'true';
+      process.env.SKIP_WEBHOOKS = 'true';
 
       // Override db connections
       jest.spyOn(db, 'getRedisClient').mockImplementation(() => ({
@@ -235,8 +325,10 @@ describe('Golden Path Integration', () => {
         }),
       } as any));
 
+      process.stdout.write('[DEBUG] Creating TestHarness\n');
       harness = await createTestHarness();
-      server = harness.server;
+      process.stdout.write('[DEBUG] TestHarness created\n');
+      server = harness.app; // TestHarness exposes app, not server
       app = harness.app;
     } catch (error) {
       console.error('FAILED TO START HARNESS:', error);

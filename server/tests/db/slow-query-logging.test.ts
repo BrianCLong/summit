@@ -31,14 +31,13 @@ describe('slow query logging', () => {
       ['traceId', 'trace-123'],
       ['tenantId', 'tenant-abc'],
     ]);
-    correlationStorage.run(store, () => {
-      __private.recordSlowQuery(
-        'stmt_test',
-        312,
-        'write',
-        'SELECT * FROM users',
-      );
-    });
+    correlationStorage.getStore.mockReturnValue(store);
+    __private.recordSlowQuery(
+      'stmt_test',
+      312,
+      'write',
+      'SELECT * FROM users',
+    );
 
     expect(mockLogger.warn).toHaveBeenCalledWith(
       expect.objectContaining({

@@ -1,17 +1,17 @@
 export const logger = {
-  info: () => {},
-  error: () => {},
-  warn: () => {},
-  debug: () => {},
+  info: () => { },
+  error: () => { },
+  warn: () => { },
+  debug: () => { },
   child: function () {
     return this;
   },
-  trace: () => {},
-  fatal: () => {},
-  silent: () => {},
+  trace: () => { },
+  fatal: () => { },
+  silent: () => { },
   level: 'info',
   bindings: () => ({}),
-  flush: () => {},
+  flush: () => { },
 };
 
 export default logger;

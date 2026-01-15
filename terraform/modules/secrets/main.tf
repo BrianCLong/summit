@@ -251,15 +251,15 @@ locals {
           }
         }
       }
-    } : (
+      } : (
       var.provider == "gcp" ? {
         provider = {
           gcpsm = {
             projectID = var.gcp_project_id
             auth = {
               workloadIdentity = {
-                clusterLocation    = var.region
-                clusterName        = var.cluster_name
+                clusterLocation = var.region
+                clusterName     = var.cluster_name
                 serviceAccountRef = {
                   name = "external-secrets-sa"
                 }
@@ -267,12 +267,12 @@ locals {
             }
           }
         }
-      } : {
+        } : {
         provider = {
           azurekv = {
-            authType  = "ServicePrincipal"
-            vaultUrl  = azurerm_key_vault.main[0].vault_uri
-            tenantId  = var.azure_tenant_id
+            authType = "ServicePrincipal"
+            vaultUrl = azurerm_key_vault.main[0].vault_uri
+            tenantId = var.azure_tenant_id
             authSecretRef = {
               clientId = {
                 name = "azure-credentials"
