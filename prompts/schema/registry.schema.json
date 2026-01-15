@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://topicality.co/schemas/prompt_registry.schema.json",
+  "title": "Prompt Registry",
+  "type": "object",
+  "required": ["registry_version", "prompts"],
+  "properties": {
+    "registry_version": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)"
+    },
+    "prompts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "version", "path", "status", "owner"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^prompt\\.[a-z0-9_\\.\\-]+$" },
+          "version": {
+            "type": "string",
+            "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z\\-\\.]+)?(?:\\+[0-9A-Za-z\\-\\.]+)?$"
+          },
+          "path": { "type": "string", "minLength": 3 },
+          "status": { "type": "string", "enum": ["active", "deprecated", "experimental"] },
+          "owner": { "type": "string", "minLength": 2 },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "meta_fingerprint": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "compiled_fingerprint": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
