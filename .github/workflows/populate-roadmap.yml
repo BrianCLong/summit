@@ -1,0 +1,39 @@
+name: Populate Summit Roadmap
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run with first 1 item only"
+        required: false
+        default: "true"
+
+jobs:
+  populate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      projects: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Limit items on dry run
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        run: |
+          jq '.[0:1]' roadmap-items.json > /tmp/items.json
+          mv /tmp/items.json roadmap-items.json
+
+      - name: Run populate script
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run populate:roadmap
