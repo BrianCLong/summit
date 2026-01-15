@@ -104,6 +104,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: grounded-claim-contract-docs
+    version: v1
+    path: prompts/docs/grounded-claim-contract@v1.md
+    sha256: 49120252b379b4daa6a3850b43bc4cca670da8081472fd959b36dfd03ceaa157
+    description: Document the grounded claim contract for MMFormalizer-inspired reasoning and update roadmap status.
+    scope:
+      paths:
+        - docs/grounded-claim-contract.md
+        - docs/roadmap/STATUS.json
+        - prompts/docs/grounded-claim-contract@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - roadmap
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
