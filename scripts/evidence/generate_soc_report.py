@@ -389,12 +389,16 @@ def build_report(evidence_dir: Path, baseline_dir: Path | None, baseline_sha: st
     if not run_url and run_id and repo and env.get("GITHUB_SERVER_URL"):
         run_url = f"{env.get('GITHUB_SERVER_URL')}/{repo}/actions/runs/{run_id}"
 
+    timestamp = datetime.now(timezone.utc)
+    if "SOURCE_DATE_EPOCH" in env:
+        timestamp = datetime.fromtimestamp(int(env["SOURCE_DATE_EPOCH"]), timezone.utc)
+
     report = {
         "meta": {
             "repo": repo,
             "branch": env.get("GITHUB_REF_NAME", "unknown"),
             "sha": meta.get("sha") or env.get("GITHUB_SHA") or "unknown",
-            "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "generated_at": timestamp.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "ci_run_url": run_url,
             "bundle_id": evidence_dir.name,
         },

@@ -36,6 +36,8 @@ branch_protection:
       - "Release Readiness Gate"
       - "Unit Tests & Coverage"
       - "ga / gate"
+      - "AI Determinism Gate"
+      - "Evidence ID Consistency"
 
 # Always Required Checks
 # ----------------------
@@ -57,6 +59,14 @@ always_required:
   - name: "CI Core (Primary Gate)"
     workflow: "ci-core.yml"
     rationale: "Primary blocking gate - lint, typecheck, tests, build"
+
+  - name: "AI Determinism Gate"
+    workflow: "ai-replay.yml"
+    rationale: "Enforces deterministic AI behavior via replay-only mode"
+
+  - name: "Evidence ID Consistency"
+    workflow: "evidence-check.yml"
+    rationale: "Ensures all documentation citations map to valid Evidence IDs"
 
 # Conditional Required Checks
 # ---------------------------
