@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/evidence/evidence-id-consistency-patch-manifest.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["patches"],
+  "propertyNames": {
+    "not": {
+      "pattern": "(?i)(timestamp|time|created_at|updated_at|last_update|started_at|finished_at|ended_at|duration_ms)"
+    }
+  },
+  "properties": {
+    "patches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["file", "sha256"],
+        "properties": {
+          "file": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      }
+    }
+  }
+}
