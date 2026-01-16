@@ -25,16 +25,39 @@
   ],
   "updatedAt": "2026-01-02T15:40:37Z",
   "createdAt": "2025-12-27T16:42:49Z",
-  "classification": "unknown",
-  "solved_status": "not_solved",
+  "classification": "verification",
+  "solved_status": "solved",
   "evidence": {
     "prs": [],
     "commits": [],
-    "paths": [],
-    "tests": []
+    "paths": [
+      "server/tests/soc-controls/soc-controls.test.ts",
+      "scripts/test-soc-controls.sh",
+      ".github/workflows/ci.yml",
+      ".github/workflows/ci-core.yml",
+      "docs/governance/GATES/soc-control-verification.md"
+    ],
+    "tests": [
+      "server/tests/soc-controls/soc-controls.test.ts"
+    ]
   },
-  "actions_taken": [],
-  "verification": [],
-  "notes": "",
+  "actions_taken": [
+    "Verified SOC control test suite exists and is functional",
+    "Verified CI integration in both ci.yml and ci-core.yml workflows",
+    "Verified artifact uploads with 90-day retention",
+    "Verified gate documentation exists",
+    "Created evidence artifacts documenting completion state",
+    "Identified 3 improvement opportunities for follow-up"
+  ],
+  "verification": [
+    "Test suite exists: server/tests/soc-controls/soc-controls.test.ts",
+    "Test runner script exists: scripts/test-soc-controls.sh",
+    "CI integration verified in ci.yml (lines 74-85) with if: always()",
+    "CI integration verified in ci-core.yml (lines 316-326)",
+    "Gate documentation verified: docs/governance/GATES/soc-control-verification.md",
+    "Artifact name: soc-compliance-report, retention: 90 days",
+    "Coverage: 5 SOC controls (CC1.1, CC2.1, CC3.1, CC4.1, CC5.1)"
+  ],
+  "notes": "Issue #14700 is COMPLETE - SOC control tests are already integrated into CI. Created evidence artifacts in evidence/issue-14700-soc-control-tests-verification.{md,json}. Identified 3 improvement opportunities documented in evidence/issue-14700-improvement-issues.md for future enhancement.",
   "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
 }
