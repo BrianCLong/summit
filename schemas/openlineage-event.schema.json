@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://intelgraph.com/schemas/openlineage-event.schema.json",
+  "title": "OpenLineage Event",
+  "description": "Schema for OpenLineage-compliant events emitted by Summit",
+  "type": "object",
+  "required": ["eventType", "eventTime", "run", "job", "producer"],
+  "properties": {
+    "eventType": {
+      "type": "string",
+      "enum": ["START", "RUNNING", "COMPLETE", "ABORT", "FAIL", "OTHER"]
+    },
+    "eventTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "run": {
+      "type": "object",
+      "required": ["runId"],
+      "properties": {
+        "runId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "facets": {
+          "type": "object"
+        }
+      }
+    },
+    "job": {
+      "type": "object",
+      "required": ["namespace", "name"],
+      "properties": {
+        "namespace": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "facets": {
+          "type": "object"
+        }
+      }
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["namespace", "name"],
+        "properties": {
+          "namespace": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "facets": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["namespace", "name"],
+        "properties": {
+          "namespace": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "facets": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "producer": {
+      "type": "string",
+      "format": "uri"
+    },
+    "schemaURL": {
+      "type": "string",
+      "format": "uri"
+    }
+  }
+}
