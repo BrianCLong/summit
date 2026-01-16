@@ -1,14 +1,25 @@
 receivers:
   otlp:
-    protocols: { http: {}, grpc: {} }
-exporters:
-  otlphttp:
-    endpoint: ${OTLP_BACKEND}
-  prometheus:
-    endpoint: 0.0.0.0:9464
+    protocols:
+      grpc:
+      http:
+
 processors:
-  batch: {}
+  batch:
+
+exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+  logging:
+    loglevel: debug
+
 service:
   pipelines:
-    traces: { receivers: [otlp], processors: [batch], exporters: [otlphttp] }
-    metrics: { receivers: [otlp], processors: [batch], exporters: [prometheus] }
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus, logging]
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging]
