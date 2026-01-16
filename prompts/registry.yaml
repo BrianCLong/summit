@@ -104,6 +104,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: supply-chain-integrity-update
+    version: v1
+    path: prompts/docs/supply-chain-integrity-update@v1.md
+    sha256: 5c1a7f1fec47d1e557053fa44415c30058b9bb98273632828f34a7802b987bf6
+    description: Add a supply chain integrity update and record the roadmap status revision.
+    scope:
+      paths:
+        - docs/supply-chain/
+        - docs/roadmap/STATUS.json
+        - prompts/docs/supply-chain-integrity-update@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - supply-chain
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
