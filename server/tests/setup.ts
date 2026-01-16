@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { jest, beforeAll, afterAll, beforeEach, afterEach, expect } from '@jest/globals';
 import { seedTestTenants, teardownTestTenants } from './helpers/testTenants';
 
 const resolvedMock = (value: unknown) => jest.fn(async () => value);
@@ -68,7 +69,7 @@ afterEach(async () => {
 global.testDb = testDbPool;
 
 // Mock external services
-jest.mock('../src/services/ExternalAPIService', () => ({
+jest.mock('@/services/ExternalAPIService', () => ({
   ExternalAPIService: jest.fn().mockImplementation(() => ({
     sendSlackNotification: resolvedMock(true),
     createJiraIssue: resolvedMock({ id: 'JIRA-123' }),

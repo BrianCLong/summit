@@ -2,9 +2,10 @@ import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
+import { createRequire } from 'node:module';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const jestBin = path.join(__dirname, '..', 'node_modules', 'jest', 'bin', 'jest.js');
+const require = createRequire(import.meta.url);
+const jestBin = require.resolve('jest/bin/jest');
 
 const baseArgs = [
   '--config',
