@@ -13,6 +13,7 @@ import {
   History,
   LogOut,
   Command,
+  Rocket,
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -41,6 +42,11 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
+  {
+    name: 'Getting Started',
+    href: '/getting-started',
+    icon: Rocket as React.ComponentType<{ className?: string }>,
+  },
   {
     name: 'Explore',
     href: '/explore',
@@ -203,23 +209,30 @@ export function Navigation({ user }: NavigationProps) {
       {/* Main Navigation */}
       <div className="flex-1 p-4 space-y-2">
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2">
+          Get Started
+        </div>
+        {navItems.slice(0, 1).map(item => (
+          <NavItemComponent key={item.href} item={item} />
+        ))}
+
+        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Intelligence
         </div>
-        {navItems.slice(0, 3).map(item => (
+        {navItems.slice(1, 4).map(item => (
           <NavItemComponent key={item.href} item={item} />
         ))}
 
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Dashboards
         </div>
-        {navItems.slice(3, 7).map(item => (
+        {navItems.slice(4, 8).map(item => (
           <NavItemComponent key={item.href} item={item} />
         ))}
 
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Platform
         </div>
-        {navItems.slice(7).map(item => (
+        {navItems.slice(8).map(item => (
           <NavItemComponent key={item.href} item={item} />
         ))}
       </div>
