@@ -1,0 +1,88 @@
+name: Governance - Branch Protection
+
+on:
+  pull_request_target:
+    branches: [main]
+  merge_group:
+  push:
+    branches: [main]
+
+jobs:
+  branch-protection-drift:
+    name: Branch Protection Drift
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout Base
+        if: github.event_name == 'pull_request_target'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+
+      - name: Checkout Default
+        if: github.event_name != 'pull_request_target'
+        uses: actions/checkout@v4
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Run Drift Check
+        env:
+          GH_TOKEN: ${{ secrets.GOVERNANCE_DRIFT_TOKEN }}
+          OUT_DIR: artifacts/drift
+        run: |
+          mkdir -p $OUT_DIR
+          chmod +x scripts/release/check_branch_protection_drift.sh
+          chmod +x scripts/release/extract_required_checks_from_policy.sh
+
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo "::error::Missing GOVERNANCE_DRIFT_TOKEN secret. Please configure this secret with Administration: read permissions."
+            echo "See RUNBOOKS/governance-branch-protection.md for setup instructions."
+            exit 1
+          fi
+
+          ./scripts/release/check_branch_protection_drift.sh \
+            --out-dir "$OUT_DIR" \
+            --verbose
+
+      - name: Process Results
+        id: results
+        working-directory: artifacts/drift
+        run: |
+          DRIFT=$(jq -r '.drift_detected' branch_protection_drift_report.json)
+          HASH=$(jq -r '.drift_hash' branch_protection_drift_report.json)
+
+          echo "drift_detected=$DRIFT" >> $GITHUB_OUTPUT
+          echo "drift_hash=$HASH" >> $GITHUB_OUTPUT
+
+          if [[ "$DRIFT" == "true" ]]; then
+            echo "::error::Branch protection drift detected! (Hash: $HASH)"
+            echo "Branch protection settings do not match REQUIRED_CHECKS_POLICY.yml"
+          else
+            echo "::notice::Branch protection is aligned."
+          fi
+
+      - name: Generate Summary
+        if: always()
+        run: |
+          if [[ -f artifacts/drift/branch_protection_drift_report.md ]]; then
+            cat artifacts/drift/branch_protection_drift_report.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## Branch Protection Drift Check Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Could not generate report." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-evidence
+          path: artifacts/drift/
+
+      - name: Fail on Drift
+        if: steps.results.outputs.drift_detected == 'true'
+        run: exit 1

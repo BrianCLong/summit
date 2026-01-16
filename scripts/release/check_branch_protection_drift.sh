@@ -293,10 +293,17 @@ EXCEPTED_EXTRA_JSON=$(printf '%s\n' "${EXCEPTED_EXTRA[@]}" | jq -R -s 'split("\n
 POLICY_JSON_ARRAY=$(echo "$POLICY_CHECKS" | jq -R -s 'split("\n") | map(select(length > 0))')
 GITHUB_JSON_ARRAY=$(echo "$GITHUB_CHECKS" | jq -R -s 'split("\n") | map(select(length > 0))')
 
+# Compute drift hash (SHA256 of drift state)
+# Used to track if drift has changed over time
+DRIFT_STATE_CONTENT="${MISSING_JSON}${EXTRA_JSON}${EXCEPTED_MISSING_JSON}${EXCEPTED_EXTRA_JSON}"
+DRIFT_HASH=$(echo -n "$DRIFT_STATE_CONTENT" | sha256sum | awk '{print $1}')
+echo "$DRIFT_HASH" > "$OUT_DIR/drift_hash.txt"
+
 cat > "$OUT_DIR/branch_protection_drift_report.json" << EOF
 {
   "version": "1.1",
   "generated_at": "$TIMESTAMP",
+  "drift_hash": "$DRIFT_HASH",
   "repository": "$REPO",
   "branch": "$BRANCH",
   "policy_file": "$POLICY_FILE",
