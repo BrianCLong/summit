@@ -1,0 +1,154 @@
+# Stabilization Policy Configuration
+#
+# This policy governs the stabilization retrospective and roadmap handoff processes.
+# It defines thresholds, automation behavior, and governance rules for systemic
+# improvement identification and tracking.
+
+version: '1.0.0'
+
+stabilization:
+  # Weekly closeout configuration
+  weekly_closeout:
+    enabled: true
+    artifacts_path: 'artifacts/reports'
+    retention_days: 90
+
+  # Monthly retrospective configuration
+  retrospective:
+    enabled: true
+    default_window_weeks: 4
+    schedule: 'monthly'  # First business day of month
+    artifacts_path: 'artifacts/stabilization/retrospective'
+
+  # Roadmap handoff configuration
+  roadmap_handoff:
+    enabled: true
+    mode: 'draft'  # draft | apply
+    max_candidates: 5
+    artifacts_path: 'artifacts/stabilization/roadmap-handoff'
+
+    # Rule-based trigger thresholds
+    thresholds:
+      # Minimum weeks an issue must appear to be considered "recurring"
+      recurring_overdue_weeks: 2
+
+      # Risk index threshold (average must be >= this to trigger)
+      min_risk_index_avg: 30
+
+      # Evidence compliance minimum (trigger if < this)
+      evidence_compliance_min: 0.95
+
+      # Blocked & unissued P0 threshold (trigger if > this)
+      blocked_unissued_p0_threshold: 0
+
+      # Overdue P0 threshold (trigger if > this in multiple weeks)
+      overdue_p0_threshold: 0
+
+      # On-time rate minimum (trigger if < this)
+      on_time_rate_min: 0.80
+
+      # Stabilization score minimum
+      stabilization_score_min: 70
+
+    # GitHub issue configuration
+    github:
+      labels:
+        base:
+          - 'roadmap'
+          - 'stabilization'
+        triage:
+          - 'needs-triage'
+        categories:
+          process: 'process'
+          governance: 'governance'
+          technical: 'technical-debt'
+          infrastructure: 'infrastructure'
+
+      # Dedupe: search by slug marker to prevent duplicate issues
+      dedupe_by_slug: true
+
+    # Candidate scoring weights
+    scoring:
+      severity_weights:
+        critical: 100
+        high: 70
+        medium: 40
+        low: 20
+      persistence_multiplier: 10
+
+  # Notification configuration
+  notifications:
+    enabled: false
+    slack_webhook: ''  # Optional: Slack webhook for notifications
+    channels:
+      - '#stabilization'
+      - '#engineering-leads'
+
+# Governance rules
+governance:
+  # Require review before applying (creating GitHub issues)
+  require_review_for_apply: true
+
+  # Auto-approve drafts (no approval needed for draft mode)
+  auto_approve_drafts: true
+
+  # Reviewers for apply mode
+  apply_reviewers:
+    - 'eng-leads'
+    - 'release-team'
+
+  # Audit trail
+  audit:
+    enabled: true
+    log_path: 'docs/releases/_state/stabilization_audit_log.json'
+
+# Data quality requirements
+data_quality:
+  # Minimum number of weeks required for retrospective
+  min_weeks_for_analysis: 2
+
+  # Fail if data is missing for more than this percentage
+  max_missing_data_percent: 25
+
+  # Warn if data quality indicators are below thresholds
+  quality_thresholds:
+    completeness: 0.90
+    freshness_hours: 48
+
+# Integration points
+integrations:
+  # CI/CD integration
+  ci:
+    upload_artifacts: true
+    retention_days: 90
+    create_pr_for_drafts: true
+
+  # Roadmap integration
+  roadmap:
+    auto_link_to_roadmap: false  # Manual triage recommended
+    project_board: ''  # Optional: GitHub project board
+
+  # Metrics integration
+  metrics:
+    export_to_prometheus: false
+    export_path: 'artifacts/metrics/stabilization.prom'
+
+# Feature flags
+features:
+  # Enable advanced analytics
+  advanced_analytics: false
+
+  # Enable ML-based candidate scoring (future)
+  ml_scoring: false
+
+  # Enable automatic candidate prioritization
+  auto_prioritization: false
+
+# Metadata
+metadata:
+  owner: 'release-team'
+  maintainers:
+    - 'release-team'
+    - 'eng-leads'
+  documentation: 'docs/releases/STABILIZATION_RETROSPECTIVE.md'
+  last_updated: '2026-01-14'
