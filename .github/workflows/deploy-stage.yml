@@ -1,0 +1,59 @@
+name: Deploy to Stage
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'deploy/charts/**'
+      - 'deploy/values/stage.yaml'
+
+env:
+  CHART_PATH: ./deploy/charts/summit
+  RELEASE_NAME: summit-stage
+  NAMESPACE: stage
+
+jobs:
+  deploy:
+    name: Deploy to Stage
+    runs-on: ubuntu-latest
+    environment: stage
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.2.0
+        with:
+          version: 'v3.14.0'
+
+      # In a real scenario, we would set up Kubeconfig here.
+      # For now, we lint and dry-run to ensure the chart is valid.
+      
+      - name: Lint Helm Chart
+        run: helm lint ${{ env.CHART_PATH }}
+
+      - name: Template Helm Chart (Validation)
+        run: |
+          helm template ${{ env.RELEASE_NAME }} ${{ env.CHART_PATH }} \
+            -f deploy/values/stage.yaml \
+            --set image.tag=${{ github.sha }} \
+            > manifest.yaml
+            
+      - name: Upload Manifest Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage-manifest
+          path: manifest.yaml
+
+      # Placeholder for actual deployment step
+      # - name: Deploy
+      #   run: |
+      #     helm upgrade --install ${{ env.RELEASE_NAME }} ${{ env.CHART_PATH }} \
+      #       --namespace ${{ env.NAMESPACE }} \
+      #       --create-namespace \
+      #       -f deploy/values/stage.yaml \
+      #       --set image.tag=${{ github.sha }}
+      #       --wait

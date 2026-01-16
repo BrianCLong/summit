@@ -1,0 +1,28 @@
+# Stage Environment Values
+replicaCount: 2
+
+image:
+  pullPolicy: Always
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+env:
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+  # DB Configs would typically be injected via Secrets, but here are placeholders or non-sensitive refs
+  DB_HOST: "stage-db.summit.internal"
+
+ingress:
+  enabled: true
+  className: "nginx"
+  hosts:
+    - host: stage.summit.local
+      paths:
+        - path: /
+          pathType: Prefix
