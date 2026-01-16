@@ -1,0 +1,93 @@
+name: Project 19 / Generate Board Snapshot
+on:
+  schedule:
+    # Run weekly on Mondays at 6 AM UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish snapshot to docs/releases/GA_READINESS_WEEKLY/'
+        required: false
+        default: false
+        type: boolean
+      dry_run:
+        description: 'Dry run mode (don\'t actually publish)'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  repository-projects: read
+
+env:
+  DRY_RUN: ${{ inputs.dry_run || 'true' }}
+  PROJECT19_OWNER: ${{ vars.PROJECT19_OWNER || 'BrianCLong' }}
+  PROJECT19_NUMBER: ${{ vars.PROJECT19_NUMBER || '19' }}
+  REPO_NAME: ${{ github.event.repository.name }}
+
+jobs:
+  generate-snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate board snapshot
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OUTPUT_DIR: artifacts/project19/snapshots
+        run: |
+          node scripts/governance/project19/bin/generate-board-snapshot.mjs
+
+      - name: Upload snapshot artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: project19-board-snapshot-${{ github.run_number }}
+          path: |
+            artifacts/project19/snapshots/*
+
+      - name: Publish snapshot if requested
+        if: ${{ inputs.publish == true && inputs.dry_run == false }}
+        run: |
+          set -e
+          
+          # Get the generated snapshot file
+          SNAPSHOT_FILE=$(find artifacts/project19/snapshots -name "snapshot-*.md" -type f | head -n 1)
+          if [ -z "$SNAPSHOT_FILE" ]; then
+            echo "ERROR: No snapshot file found"
+            exit 1
+          fi
+          
+          # Create weekly directory if it doesn't exist
+          WEEKLY_DIR="docs/releases/GA_READINESS_WEEKLY"
+          mkdir -p $WEEKLY_DIR
+          
+          # Copy the snapshot to the weekly directory
+          cp "$SNAPSHOT_FILE" "$WEEKLY_DIR/$(basename $SNAPSHOT_FILE)"
+          echo "Published snapshot to $WEEKLY_DIR/"
+          
+          # Optional: Create a symlink or index update for the latest snapshot
+          # This is just to show the pattern - in reality you'd want more sophisticated indexing
+          echo "Latest snapshot: $(basename $SNAPSHOT_FILE)" > $WEEKLY_DIR/LATEST_SNAPSHOT
+
+      - name: Print snapshot summary
+        run: |
+          # Find the latest snapshot
+          LATEST_SNAPSHOT=$(find artifacts/project19/snapshots -name "snapshot-*.md" -type f | sort -r | head -n 1)
+          if [ -f "$LATEST_SNAPSHOT" ]; then
+            echo "=== SNAPSHOT SUMMARY ==="
+            head -50 "$LATEST_SNAPSHOT"
+            echo "..."
+            echo "Full snapshot available in artifacts"
+          fi

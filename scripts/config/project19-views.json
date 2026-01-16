@@ -1,0 +1,64 @@
+{
+  "version": "2026-01-15",
+  "views": {
+    "release_readiness_cockpit": {
+      "name": "Release Readiness Cockpit",
+      "description": "Track GA and upcoming release progress",
+      "filter": "Release Train in ('GA', 'MVP-4', 'Post-GA')",
+      "groupBy": "Governance Gate",
+      "sortBy": ["Release Blocker desc", "True Priority desc"],
+      "showColumns": ["Gate Status", "Evidence Complete", "CI Status Snapshot", "Determinism Risk", "Planned Finish", "Owner", "Actual Finish"]
+    },
+    "top_blockers": {
+      "name": "Top Blockers",
+      "description": "Identify critical items blocking progress",
+      "filter": "Blocked Reason != 'None' OR Status = 'Blocked'",
+      "groupBy": "Blocked Reason",
+      "sortBy": ["True Priority desc", "Release Blocker desc"],
+      "showColumns": ["Blocked Detail", "Upstream Dependency Count", "Owner", "Release Train"]
+    },
+    "portfolio_allocation": {
+      "name": "Portfolio Allocation",
+      "description": "Work distribution across delivery classes and strategic themes",
+      "groupBy": "Delivery Class",
+      "secondGroupBy": "Strategic Theme",
+      "showColumns": ["count", "avg(impactScore)", "avg(truePriority)"]
+    },
+    "automation_throughput": {
+      "name": "Automation Throughput",
+      "description": "Agent and automation effectiveness tracking",
+      "filter": "Work Type in ('Agent', 'Hybrid')",
+      "groupBy": "Primary Agent",
+      "showColumns": ["Automation Eligibility", "Human Approval Required", "Auto-Merge Allowed", "Execution Confidence", "Automation ROI"]
+    },
+    "audit_scope_wip": {
+      "name": "Audit Scope WIP",
+      "description": "Audit-relevant work in progress",
+      "filter": "External Audit Scope = 'Yes' OR Audit Criticality in ('Control', 'Material')",
+      "groupBy": "Control Mapping",
+      "showColumns": ["Evidence Required", "Evidence Complete", "Evidence Bundle ID", "Policy Version", "Governance Gate"]
+    },
+    "evidence_missing": {
+      "name": "Evidence Missing",
+      "description": "Items that require evidence but are not complete",
+      "filter": "Evidence Required = 'Yes' AND Evidence Complete = 'No'",
+      "groupBy": "Governance Gate",
+      "sortBy": ["Release Blocker desc", "True Priority desc"],
+      "showColumns": ["Blocked Reason", "Evidence Required", "Policy Version", "Owner"]
+    },
+    "determinism_exceptions": {
+      "name": "Determinism Exceptions",
+      "description": "Items with determinism or CI health issues",
+      "filter": "Determinism Risk != 'None' OR CI Status Snapshot != 'Green'",
+      "groupBy": "Determinism Risk",
+      "showColumns": ["Artifact Produced", "Gate Status", "Release Train", "Owner"]
+    },
+    "change_control": {
+      "name": "Change Control",
+      "description": "Items requiring explicit approvals",
+      "filter": "Human Approval Required = 'Yes' OR Auto-Merge Allowed = 'Yes'",
+      "groupBy": "Human Approval Required",
+      "showColumns": ["Max Fix Scope", "Dry-Run Supported", "Primary Agent", "Owner", "Policy Version"]
+    }
+  }
+}

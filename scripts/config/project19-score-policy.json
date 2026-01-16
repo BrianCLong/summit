@@ -1,0 +1,130 @@
+{
+  "version": "2026-01-15",
+  "wsjf": {
+    "cost_of_delay": {
+      "fields": ["Impact Score", "Reputation Risk", "Revenue Sensitivity", "Release Blocker"],
+      "weights": {
+        "Impact Score": 2.0,
+        "Reputation Risk": 2.0,
+        "Revenue Sensitivity": 1.0,
+        "Release Blocker": 3.0
+      }
+    },
+    "job_size": {
+      "field": "Effort Score",
+      "min": 1
+    }
+  },
+  "true_priority": {
+    "inputs": ["WSJF Score", "Risk Score", "Determinism Risk", "CI Status Snapshot", "Release Blocker"],
+    "weights": {
+      "WSJF Score": 1.0,
+      "Risk Score": 1.5,
+      "Release Blocker": 2.0
+    },
+    "penalties": {
+      "CI Status Snapshot": {
+        "Failing": -5,
+        "Flaky": -2
+      },
+      "Determinism Risk": {
+        "Confirmed": -5,
+        "Potential": -2
+      }
+    }
+  },
+  "ga_readiness": {
+    "inputs": ["Governance Gate", "Gate Status", "Evidence Required", "Evidence Complete", "CI Status Snapshot"],
+    "scoring": {
+      "base": 50,
+      "gate": {
+        "GA": 20,
+        "Release": 10,
+        "Compliance": 10,
+        "Security": 5,
+        "Design": 2,
+        "None": 0
+      },
+      "gate_status": {
+        "Approved": 20,
+        "In Review": 10,
+        "Not Started": 0,
+        "Blocked": -10
+      },
+      "evidence": {
+        "required_and_complete": 20,
+        "required_and_incomplete": -20
+      },
+      "ci": {
+        "Green": 10,
+        "Flaky": 0,
+        "Failing": -10,
+        "Unknown": -5
+      }
+    }
+  },
+  "automation_safety": {
+    "inputs": ["Automation Eligibility", "Human Approval Required", "Max Fix Scope", "Determinism Risk"],
+    "scoring": {
+      "eligibility": {
+        "Manual Only": 10,
+        "Agent Assist": 5,
+        "Agent Execute": 3,
+        "Fully Autonomous": 1
+      },
+      "approval": {
+        "Yes": 5,
+        "No": 0
+      },
+      "fix_scope": {
+        "multiplier": 0.1
+      },
+      "risk": {
+        "Confirmed": -20,
+        "Potential": -10,
+        "None": 0
+      }
+    }
+  },
+  "agent_confidence": {
+    "inputs": ["Primary Agent", "Agent Output Determinism", "Execution Confidence"],
+    "scoring": {
+      "agent": {
+        "Jules": 8,
+        "Codex": 7,
+        "Claude": 9,
+        "Qwen": 7,
+        "Atlas": 8,
+        "Antigravity": 6,
+        "Human": 10
+      },
+      "determinism": {
+        "Deterministic": 10,
+        "Bounded": 5,
+        "Freeform": 2
+      },
+      "execution_confidence_weight": 1.0
+    }
+  },
+  "expected_cycle_time": {
+    "inputs": ["Effort Score", "WIP Risk", "Work Type", "CI Status Snapshot"],
+    "calculation": {
+      "base_multiplier": 2.0,
+      "wip_risk": {
+        "Low": 0.8,
+        "Medium": 1.0,
+        "High": 1.5
+      },
+      "work_type": {
+        "Human": 1.0,
+        "Agent": 0.7,
+        "Hybrid": 0.9
+      },
+      "ci_status": {
+        "Green": 1.0,
+        "Flaky": 1.2,
+        "Failing": 1.5
+      }
+    }
+  }
+}
