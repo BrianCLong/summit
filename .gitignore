@@ -291,6 +291,7 @@ data/automl/
 tmp-audit/
 **/digest-sandbox/
 **/tmp-security/
+.maestro-workboard/
 
 # Test reports
 reports/
