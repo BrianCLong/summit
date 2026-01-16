@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["version", "triggers", "actions", "guardrails", "remediation_whitelist"],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "triggers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "description"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["anomaly", "drift", "missing_evidence", "expiring_exception"]
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "actions": {
+      "type": "object",
+      "required": ["allowed", "prohibited"],
+      "properties": {
+        "allowed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "prohibited": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "guardrails": {
+      "type": "object",
+      "required": ["blast_radius", "approval_requirements"],
+      "properties": {
+        "blast_radius": {
+          "type": "object",
+          "required": ["max_files_changed_per_pr", "max_prs_per_day"],
+          "properties": {
+            "max_files_changed_per_pr": { "type": "integer" },
+            "max_prs_per_day": { "type": "integer" },
+            "max_repos_affected": { "type": "integer" }
+          }
+        },
+        "approval_requirements": {
+          "type": "object",
+          "patternProperties": {
+            "^.*$": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "remediation_whitelist": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["class", "description"],
+        "properties": {
+          "class": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      }
+    }
+  }
+}

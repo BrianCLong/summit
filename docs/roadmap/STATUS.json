@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-16T12:00:00Z",
+  "revision_note": "Added Assurance-Driven Autonomy initiative",
   "initiatives": [
     {
       "id": "A",
@@ -136,14 +136,55 @@
           "target_completion": "Q4"
         }
       ]
+    },
+    {
+      "id": "F",
+      "name": "Assurance-Driven Autonomy",
+      "epics": [
+        {
+          "id": "F1",
+          "name": "Autonomy Policy-of-Record",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "evidence": "Created docs/autonomy/AUTONOMY_POLICY.md, docs/autonomy/autonomy_policy.yml, schemas/autonomy/autonomy_policy.schema.json, scripts/autonomy/validate_autonomy_policy.ts"
+        },
+        {
+          "id": "F2",
+          "name": "Signal -> Ticket Generation",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "evidence": "Created scripts/autonomy/create_or_update_issue.ts, .github/ISSUE_TEMPLATE/autonomy_signal.md"
+        },
+        {
+          "id": "F3",
+          "name": "Safe Remediation PR Generation",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "evidence": "Created scripts/autonomy/generate_remediation_patch.ts, scripts/autonomy/open_pr.ts"
+        },
+        {
+          "id": "F4",
+          "name": "Stop-the-Line Enforcement",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "evidence": "Created docs/autonomy/STOP_THE_LINE.md, scripts/autonomy/enforce_stop_the_line.ts"
+        },
+        {
+          "id": "F5",
+          "name": "Autonomy Action Ledger",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "evidence": "Created docs/autonomy/ACTION_LEDGER.md, scripts/autonomy/write_action_ledger.ts"
+        }
+      ]
     }
   ],
   "summary": {
-    "rc_ready": 5,
+    "rc_ready": 10,
     "partial": 1,
     "incomplete": 0,
     "not_started": 6,
-    "total": 12,
+    "total": 17,
     "ga_blockers": []
   }
 }
