@@ -8,7 +8,7 @@ Pillow==12.1.0
 scikit-image==0.26.0
 
 # Object Detection and Computer Vision Models
-ultralytics==8.3.250
+ultralytics==8.3.252
 torch==2.9.1
 torchvision==0.24.1
 torchaudio==2.9.1
