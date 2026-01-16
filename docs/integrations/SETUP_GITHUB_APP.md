@@ -11,6 +11,8 @@
 - Permissions (minimum for tickets demo):
   - Repository: Contents (Read), Issues (Read), Pull requests (Read)
   - Metadata (Read)
+  > **Note regarding User Consent:** Since this app requests repository-level permissions (e.g., Contents, Issues), users will see the "Act on your behalf" warning during authorization. This is expected behavior under GitHub's [January 2026 update](https://github.blog/changelog/2026-01-12-selectively-showing-act-on-your-behalf-warning-for-github-apps-is-in-public-preview/) which selectively displays this warning for apps requesting access beyond basic profile data.
+
 - Subscribe to events: Issues, Issue comment, Pull request
 - Save.
 
@@ -22,6 +24,8 @@
 
 - From the App page → Install App → choose user/org → select repos.
 - The Installation ID is in the URL `.../settings/installations/<ID>` (also in webhooks/API).
+
+> **Organization Governance:** If you are installing this into an Organization, be aware of the [App Request controls](https://github.blog/changelog/2026-01-12-controlling-who-can-request-apps-for-your-organization-is-now-generally-available/) introduced in Jan 2026. Admins can now restrict who can request apps (Members + Outside Collaborators, Members only, or Disabled). If installation fails or is blocked, check your Organization Settings → Third-party access.
 
 4. Environment variables (never commit secrets)
    Set these in env/Secrets Manager:
