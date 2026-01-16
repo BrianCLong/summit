@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
   ArrowRight,
   Search,
@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/Badge'
 import { KPIStrip } from '@/components/panels/KPIStrip'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { RetryableErrorState } from '@/components/ui/RetryableErrorState'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { ActivationProgressTile } from '@/components/activation/ActivationProgressTile'
@@ -29,6 +30,7 @@ export default function HomePage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
   const [kpiMetrics, setKpiMetrics] = useState<KPIMetric[]>([])
   const [recentInvestigations, setRecentInvestigations] = useState<
     Investigation[]
@@ -37,37 +39,40 @@ export default function HomePage() {
   const [recentCases, setRecentCases] = useState<Case[]>([])
   const isDemoMode = useDemoMode()
 
-  useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        setLoading(true)
+  const loadDashboardData = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
 
-        if (!isDemoMode) {
-          setKpiMetrics([])
-          setRecentInvestigations([])
-          setRecentAlerts([])
-          setRecentCases([])
-          return
-        }
-
-        // Simulate API calls
-        await new Promise(resolve => setTimeout(resolve, 1000))
-
-        setKpiMetrics(mockData.kpiMetrics as KPIMetric[])
-        setRecentInvestigations(
-          mockData.investigations.slice(0, 3) as Investigation[]
-        )
-        setRecentAlerts(mockData.alerts.slice(0, 4) as Alert[])
-        setRecentCases(mockData.cases.slice(0, 2) as Case[])
-      } catch (error) {
-        console.error('Failed to load dashboard data:', error)
-      } finally {
-        setLoading(false)
+      if (!isDemoMode) {
+        setKpiMetrics([])
+        setRecentInvestigations([])
+        setRecentAlerts([])
+        setRecentCases([])
+        return
       }
-    }
 
-    loadDashboardData()
+      // Simulate API calls
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      setKpiMetrics(mockData.kpiMetrics as KPIMetric[])
+      setRecentInvestigations(
+        mockData.investigations.slice(0, 3) as Investigation[]
+      )
+      setRecentAlerts(mockData.alerts.slice(0, 4) as Alert[])
+      setRecentCases(mockData.cases.slice(0, 2) as Case[])
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to load dashboard data')
+      setError(error)
+      console.error('Failed to load dashboard data:', err)
+    } finally {
+      setLoading(false)
+    }
   }, [isDemoMode])
+
+  useEffect(() => {
+    loadDashboardData()
+  }, [loadDashboardData])
 
   const quickActions = [
     {
@@ -131,6 +136,29 @@ export default function HomePage() {
     }
   }
 
+  // Show error state if data loading failed
+  if (error) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">
+              Welcome back, {user?.name?.split(' ')[0] || 'User'}
+            </h1>
+          </div>
+        </div>
+        <RetryableErrorState
+          error={error}
+          onRetry={loadDashboardData}
+          onNavigateHome={() => navigate('/')}
+          title="Unable to load dashboard"
+          description="We encountered an error while loading your dashboard data. Please try again."
+          showDetails={import.meta.env.DEV}
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Welcome Header */}
@@ -185,28 +213,33 @@ export default function HomePage() {
       {/* Quick Actions */}
       <div>
         <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+          role="group"
+          aria-label="Quick action shortcuts"
+        >
           {quickActions.map(action => {
             const Icon = action.icon
             return (
               <Card
                 key={action.title}
-                className="cursor-pointer hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                onClick={() => navigate(action.href)}
+                className="cursor-pointer hover:shadow-md transition-shadow focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
                 tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    navigate(action.href);
-                  }
-                }}
                 role="button"
                 aria-label={`${action.title}: ${action.description}`}
+                onClick={() => navigate(action.href)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    navigate(action.href)
+                  }
+                }}
               >
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3">
                     <div
                       className={`p-2 rounded-lg ${action.color} text-white`}
+                      aria-hidden="true"
                     >
                       <Icon className="h-5 w-5" />
                     </div>
@@ -223,7 +256,7 @@ export default function HomePage() {
                         {action.description}
                       </div>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                   </div>
                 </CardContent>
               </Card>

@@ -8,7 +8,7 @@
  * - Status tracking
  */
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Search,
@@ -25,6 +25,8 @@ import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { RetryableErrorState } from '@/components/ui/RetryableErrorState'
+import { Skeleton } from '@/components/ui/Skeleton'
 import type { Case, CaseStatus, Priority } from '@/types'
 
 // Mock data for development
@@ -93,11 +95,49 @@ const STATUS_COLORS: Record<CaseStatus, string> = {
 
 export default function CasesPage() {
   const navigate = useNavigate()
-  const [cases] = useState<Case[]>(generateMockCases())
+  const [cases, setCases] = useState<Case[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState<CaseStatus | 'all'>('all')
   const [filterPriority, setFilterPriority] = useState<Priority | 'all'>('all')
   const [sortBy, setSortBy] = useState<'priority' | 'updated' | 'due'>('priority')
+
+  // Load cases data
+  useEffect(() => {
+    const loadCases = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 500))
+        setCases(generateMockCases())
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Failed to load cases')
+        setError(error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadCases()
+  }, [])
+
+  const handleRetry = () => {
+    const loadCases = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        await new Promise(resolve => setTimeout(resolve, 500))
+        setCases(generateMockCases())
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Failed to load cases')
+        setError(error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadCases()
+  }
 
   // Filter and sort cases
   const filteredCases = useMemo(() => {
@@ -159,6 +199,27 @@ export default function CasesPage() {
     if (diffDays < 7) return `Due in ${diffDays}d`
 
     return `Due ${due.toLocaleDateString()}`
+  }
+
+  // Show error state if data loading failed
+  if (error) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Case Management</h1>
+          </div>
+        </div>
+        <RetryableErrorState
+          error={error}
+          onRetry={handleRetry}
+          onNavigateHome={() => navigate('/')}
+          title="Unable to load cases"
+          description="We encountered an error while loading case data. Please try again."
+          showDetails={import.meta.env.DEV}
+        />
+      </div>
+    )
   }
 
   return (
@@ -251,7 +312,31 @@ export default function CasesPage() {
       </Card>
 
       {/* Case List */}
-      {filteredCases.length === 0 ? (
+      {loading ? (
+        <div className="grid gap-4">
+          {[...Array(5)].map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 space-y-3">
+                    <Skeleton className="h-6 w-3/4" />
+                    <div className="flex gap-2">
+                      <Skeleton className="h-6 w-20" />
+                      <Skeleton className="h-6 w-24" />
+                    </div>
+                    <Skeleton className="h-4 w-full" />
+                    <div className="flex gap-4">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-8 w-24" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : filteredCases.length === 0 ? (
         <EmptyState
           title="No cases found"
           description="Try adjusting your search or filters, or create a new case to get started."
@@ -265,8 +350,17 @@ export default function CasesPage() {
             return (
               <Card
                 key={caseItem.id}
-                className="hover:shadow-md transition-shadow cursor-pointer"
+                className="hover:shadow-md transition-shadow cursor-pointer focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
+                tabIndex={0}
+                role="button"
+                aria-label={`Open case: ${caseItem.title}`}
                 onClick={() => navigate(`/cases/${caseItem.id}`)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    navigate(`/cases/${caseItem.id}`)
+                  }
+                }}
               >
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">
