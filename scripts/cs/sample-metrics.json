@@ -1,0 +1,7 @@
+{
+  "adoption": 0.85,
+  "slo_compliance": 0.995,
+  "incident_frequency": 1,
+  "version_drift": 2,
+  "security_exceptions": 1
+}

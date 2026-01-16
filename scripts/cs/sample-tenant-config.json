@@ -1,0 +1,8 @@
+{
+  "tenantId": "acme-corp",
+  "profile": {
+    "name": "ACME Corporation",
+    "technicalContact": "tech@acme.corp"
+  },
+  "tag": "v1-onboarding"
+}
