@@ -1,0 +1,40 @@
+{
+  "task_id": "OSINT_ARCH_MEMO_001",
+  "agent_id": "gpt-5.2-codex",
+  "prompt_ref": {
+    "id": "osint-architecture-memo",
+    "version": "v1",
+    "sha256": "c3eec0cd0c0711f15a207c5addfb1273ce796651d1cd2ed7f476f4e23978c4b7",
+    "path": "prompts/docs/osint-architecture-memo@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/osint/",
+      "docs/roadmap/STATUS.json",
+      "prompts/docs/osint-architecture-memo@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/"
+    ],
+    "domains": ["documentation", "architecture", "osint", "governance"],
+    "exclusions": []
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/osint/OSINT_ARCHITECTURE_MEMO.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "OSINT architecture memo is added with comparison table and public references.",
+    "Roadmap status file is updated with a revision note and timestamp.",
+    "Prompt registry and task spec reference the same prompt hash."
+  ],
+  "stop_conditions": [
+    "Scope drift outside declared documentation paths.",
+    "Missing prompt hash registration in prompts/registry.yaml.",
+    "Policy or governance conflicts requiring escalation."
+  ]
+}
