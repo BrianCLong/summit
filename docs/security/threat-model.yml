@@ -1,0 +1,13 @@
+system: Summit CI/CD
+method: STRIDE
+
+threats:
+  - id: TM-BUILD-01
+    category: Tampering
+    control: Signed provenance + immutable artifacts
+    evidence: provenance.json
+
+  - id: TM-DEPS-02
+    category: ElevationOfPrivilege
+    control: SBOM vulnerability gating
+    evidence: sbom.cdx.json
