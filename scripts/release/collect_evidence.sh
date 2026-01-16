@@ -188,6 +188,18 @@ collect_governance_evidence() {
       "echo 'Skipped: GITHUB_TOKEN not available'" \
       "$gov_dir/release-blockers-$RUN_ID.json"
   fi
+
+  # Calibration smoke evidence
+  collect_evidence "calibration_smoke" \
+    "pnpm ci:calibration-smoke 2>&1 || true" \
+    "$gov_dir/calibration-smoke-$RUN_ID.log"
+
+  if [[ -f artifacts/calibration/calibration_report.json ]]; then
+    cp artifacts/calibration/calibration_report.json "$gov_dir/" || true
+  fi
+  if [[ -f artifacts/calibration/calibration_report.md ]]; then
+    cp artifacts/calibration/calibration_report.md "$gov_dir/" || true
+  fi
 }
 
 # Collect audit evidence (from state files)

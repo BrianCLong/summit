@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`calibration report renders deterministic markdown snapshot 1`] = `
+"# Calibration Smoke Report
+
+**Generated:** 2026-01-14T00:00:00.000Z
+
+## Summary
+
+- **Total scenarios:** 2
+- **Capped scenarios:** 1
+- **Evidence scenarios:** 1
+- **Verification scenarios:** 1
+
+## Scenarios
+
+### evidence-noise
+
+Noisy evidence without verification triggers confidence cap.
+
+- **Tool types:** EVIDENCE
+- **Raw p_correct:** 0.82
+- **Final p_correct:** 0.65
+- **Cap applied:** Yes
+- **Notes:** Confidence capped at 0.65 due to noisy evidence without verification.
+
+### verification-check
+
+Verification tool emits explicit failure signals.
+
+- **Tool types:** VERIFICATION
+- **Raw p_correct:** 0.42
+- **Final p_correct:** 0.42
+- **Cap applied:** No
+
+"
+`;

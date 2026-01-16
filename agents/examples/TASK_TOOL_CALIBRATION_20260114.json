@@ -1,0 +1,40 @@
+{
+  "task_id": "TOOL_CALIBRATION_20260114",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "agent-native-loop-n4",
+    "version": "v1",
+    "sha256": "2fcf3ef5535a5dd116439d1fc8a665e03945e1c6981373895fd9344bd486b658",
+    "path": "prompts/governance/agent-native-loop-n4.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/maestro-core/src/**",
+      "scripts/ci/**",
+      "scripts/release/**",
+      "docs/governance/**",
+      "agents/examples/**",
+      ".github/workflows/**",
+      "docs/roadmap/STATUS.json"
+    ],
+    "domains": ["governance", "ci", "maestro", "calibration"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "A",
+    "artifacts": [
+      "artifacts/calibration/calibration_report.json",
+      "artifacts/calibration/calibration_report.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "ConfidenceReport contract and evidence-noise model implemented",
+    "Calibration smoke suite emits JSON and Markdown artifacts",
+    "CI workflow includes calibration smoke step"
+  ],
+  "stop_conditions": ["Missing evidence artifacts", "CI calibration smoke failure"]
+}

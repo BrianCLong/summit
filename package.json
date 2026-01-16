@@ -104,6 +104,7 @@
     "ci:branch-protection:apply": "node scripts/ci/apply_branch_protection_policy.mjs --apply",
     "ci:branch-protection:plan": "node scripts/ci/apply_branch_protection_policy.mjs --dry-run",
     "ci:evidence-id-consistency": "node scripts/ci/verify_evidence_id_consistency.mjs",
+    "ci:calibration-smoke": "npx tsx scripts/ci/run-calibration-smoke.ts",
     "verify:living-documents": "node scripts/governance/verify-living-documents.cjs",
     "check:debt": "node scripts/ci/check_debt_regression.cjs",
     "check:jest-config": "node scripts/ci/validate-jest-config.cjs",
