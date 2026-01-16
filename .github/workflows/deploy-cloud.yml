@@ -1,0 +1,43 @@
+name: Cloud Deploy Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  iac-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: false
+      - name: Validate IaC
+        run: scripts/ci/validate-iac.sh
+
+  deploy:
+    needs: iac-validate
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [dev, stage, prod]
+    environment: ${{ matrix.environment }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Deploy to ${{ matrix.environment }}
+        run: |
+          echo "Deploying to ${{ matrix.environment }}"
+          # In a real scenario, we would do:
+          # cd terraform
+          # terraform init
+          # terraform workspace select ${{ matrix.environment }} || terraform workspace new ${{ matrix.environment }}
+          # terraform apply -auto-approve -var-file=../iac/env/${{ matrix.environment }}.tfvars
+
+          # For now, we simulate success
+          echo "Simulated deployment to ${{ matrix.environment }} completed."

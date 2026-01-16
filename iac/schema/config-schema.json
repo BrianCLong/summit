@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Summit IaC Config Schema",
+  "type": "object",
+  "properties": {
+    "region": {
+      "type": "string",
+      "enum": ["us-west-2", "us-east-1"],
+      "description": "AWS deployment region"
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["dev", "stage", "prod"],
+      "description": "Deployment environment"
+    },
+    "tags": {
+      "type": "object",
+      "required": ["Tenant", "ManagedBy", "Project"],
+      "properties": {
+        "Tenant": { "type": "string" },
+        "ManagedBy": { "type": "string" },
+        "Project": { "type": "string" }
+      }
+    }
+  },
+  "required": ["region", "environment", "tags"]
+}
