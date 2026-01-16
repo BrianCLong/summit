@@ -1,0 +1,91 @@
+{
+  "version": "1.0",
+  "generated_at": "2026-01-16T01:15:54Z",
+  "repository": "BrianCLong/summit",
+  "branch": "main",
+  "policy_version": "2.0.0",
+  "issue": "15790",
+  "priority": "Tier-1",
+  "status": "ACTION_REQUIRED",
+  "current_state": {
+    "required_status_checks_enabled": false,
+    "api_endpoint_status": "404 Not Found",
+    "admin_access_available": false,
+    "gh_auth_status": "Not authenticated"
+  },
+  "policy_requirements": {
+    "strict": true,
+    "required_checks_count": 7,
+    "contexts": [
+      "CI Core (Primary Gate)",
+      "CI / config-guard",
+      "CI / unit-tests",
+      "GA Gate",
+      "Release Readiness Gate",
+      "Unit Tests & Coverage",
+      "ga / gate"
+    ]
+  },
+  "actions_required": {
+    "enable_required_status_checks": true,
+    "add_contexts": [
+      "CI Core (Primary Gate)",
+      "CI / config-guard",
+      "CI / unit-tests",
+      "GA Gate",
+      "Release Readiness Gate",
+      "Unit Tests & Coverage",
+      "ga / gate"
+    ],
+    "remove_contexts": [],
+    "set_strict": true
+  },
+  "remediation_options": [
+    {
+      "id": "option_a",
+      "name": "Manual GitHub UI",
+      "recommended_for": "Admins without CLI access",
+      "estimated_time_minutes": 5,
+      "url": "https://github.com/BrianCLong/summit/settings/branches"
+    },
+    {
+      "id": "option_b",
+      "name": "GitHub CLI API",
+      "recommended_for": "Admins with gh CLI and token",
+      "estimated_time_minutes": 2,
+      "requires_auth": true,
+      "command": "gh api repos/BrianCLong/summit/branches/main/protection/required_status_checks -X PATCH ..."
+    },
+    {
+      "id": "option_c",
+      "name": "Reconciler Script",
+      "recommended_for": "Automated workflows",
+      "estimated_time_minutes": 1,
+      "requires_auth": true,
+      "note": "Script has compatibility issues - prefer Options A or B",
+      "command": "./scripts/release/reconcile_branch_protection.sh --mode apply --i-understand-admin-required true"
+    }
+  ],
+  "verification": {
+    "endpoint": "repos/BrianCLong/summit/branches/main/protection/required_status_checks",
+    "expected_status_code": 200,
+    "expected_contexts_count": 7
+  },
+  "notes": [
+    "Reconciler script currently extracts from 'always_required' (4 checks) instead of 'branch_protection.required_status_checks.contexts' (7 checks)",
+    "Installed yq version (0.0.0) doesn't support -o=json flag expected by script",
+    "Admin repository permissions required for this change"
+  ],
+  "references": {
+    "policy_file": "docs/ci/REQUIRED_CHECKS_POLICY.yml",
+    "exceptions_file": "docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml",
+    "issue_url": "https://github.com/BrianCLong/summit/issues/15790",
+    "settings_url": "https://github.com/BrianCLong/summit/settings/branches",
+    "work_queue_url": "https://github.com/BrianCLong/summit/issues/16111"
+  },
+  "artifacts": {
+    "plan_markdown": "evidence/branch-protection-reconciliation-2026-01-16T01-15-54Z.md",
+    "plan_json": "evidence/branch-protection-reconciliation-2026-01-16T01-15-54Z.json",
+    "runbook": "evidence/branch-protection-reconciliation-runbook-2026-01-16T01-15-54Z.sh"
+  }
+}
