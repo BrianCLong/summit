@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: summit-databases
+spec:
+  selector:
+    matchLabels:
+      app: summit-db
+  serviceName: summit-db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: summit-db
+    spec:
+      containers:
+      - name: neo4j
+        image: neo4j:5.25
+        env:
+        - name: NEO4J_AUTH
+          valueFrom:
+            secretKeyRef:
+              name: summit-secrets
+              key: NEO4J_AUTH
+        ports:
+        - containerPort: 7474
+        - containerPort: 7687
+        volumeMounts:
+        - name: neo4j-data
+          mountPath: /data
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+      - name: postgres
+        image: postgres:16-alpine
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: summit-secrets
+              key: POSTGRES_PASSWORD
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: neo4j-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
