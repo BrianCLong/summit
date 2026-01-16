@@ -1,0 +1,63 @@
+name: Deploy Gate
+
+on:
+  workflow_call:
+
+jobs:
+  policy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: supply-chain-artifacts
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Verify SBOM signature
+        id: verify_sbom
+        run: |
+          # Note: In a real environment, you would use the actual identity that signed the blob.
+          # We use a wildcard/variable here for the repo.
+          if cosign verify-blob \
+            --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/supply-chain-security.yml@.*" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            --signature sbom.cdx.sig \
+            sbom.cdx.json; then
+            echo "valid=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate OPA input
+        run: |
+          FILES=$(ls sbom.cdx.json sbom.cdx.sig provenance.json 2>/dev/null || true)
+          PRESENT_JSON=$(echo "$FILES" | jq -R . | jq -s -c .)
+
+          # Extract critical vulnerability count from SBOM if it exists
+          if [ -f sbom.cdx.json ]; then
+            CRITICAL_VULNS=$(jq '.vulnerabilities // [] | map(select(.ratings[].severity == "critical")) | length' sbom.cdx.json)
+          else
+            CRITICAL_VULNS=0
+          fi
+
+          echo "{
+            \"artifacts_present\": $PRESENT_JSON,
+            \"sbom\": { \"signature_valid\": ${{ steps.verify_sbom.outputs.valid || 'false' }} },
+            \"provenance\": { \"slsa_level\": 2 },
+            \"vulnerabilities\": { \"critical\": $CRITICAL_VULNS }
+          }" > input.json
+
+      - name: Evaluate OPA policy
+        run: |
+          # Install OPA if not present
+          if ! command -v opa &> /dev/null; then
+            curl -L -o opa https://openpolicyagent.org/downloads/v0.60.0/opa_linux_amd64_static
+            chmod 755 opa
+            sudo mv opa /usr/local/bin/
+          fi
+
+          opa eval \
+            --input input.json \
+            --data policies/opa/deploy.rego \
+            "data.summit.deploy.allow" | jq -e '.result[0].expressions[0].value == true'

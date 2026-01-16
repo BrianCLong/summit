@@ -1,0 +1,66 @@
+name: Supply Chain Security
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+permissions:
+  contents: read
+  id-token: write   # required for OIDC signing
+  packages: write
+
+jobs:
+  sbom-and-provenance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: corepack enable && pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Generate CycloneDX SBOM with vulnerabilities
+        run: |
+          # Install Trivy
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          trivy fs . --format cyclonedx --output sbom.cdx.json
+
+      - name: Enforce SBOM vulnerability threshold
+        run: node scripts/ci/check-sbom-vulns.mjs
+
+      - name: Generate SLSA Provenance
+        uses: slsa-framework/slsa-github-generator@v2
+        with:
+          artifact_path: |
+            dist/**
+            sbom.cdx.json
+
+      - name: Verify threat model evidence
+        run: node scripts/ci/verify-threat-model.mjs
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign SBOM
+        run: |
+          cosign sign-blob \
+            --yes \
+            --output-signature sbom.cdx.sig \
+            sbom.cdx.json
+
+      - name: Upload security artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: supply-chain-artifacts
+          path: |
+            sbom.cdx.json
+            sbom.cdx.sig
+            provenance.json
