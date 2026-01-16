@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Merge Train Summary",
+  "description": "A summary of the current state of the merge train for high-velocity repositories.",
+  "type": "object",
+  "properties": {
+    "generatedAt": {
+      "description": "The ISO 8601 timestamp when the summary was generated.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "queueLength": {
+      "description": "The number of pull requests currently in the merge queue.",
+      "type": "integer"
+    },
+    "blockers": {
+      "description": "A list of any pull requests that are currently blocking the merge train.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "prNumber": { "type": "integer" },
+          "title": { "type": "string" },
+          "reason": { "type": "string" }
+        },
+        "required": ["prNumber", "title", "reason"]
+      }
+    }
+  },
+  "required": ["generatedAt", "queueLength"]
+}

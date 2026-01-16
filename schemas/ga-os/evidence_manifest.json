@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Evidence Manifest",
+  "description": "A manifest of all evidence files for a given commit.",
+  "type": "object",
+  "properties": {
+    "commit": {
+      "description": "The git commit SHA this evidence was generated for.",
+      "type": "string"
+    },
+    "generatedAt": {
+      "description": "The ISO 8601 timestamp when the evidence was generated.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "files": {
+      "description": "A list of evidence files and their hashes.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "description": "The path to the evidence file, relative to the artifact root.",
+            "type": "string"
+          },
+          "sha256": {
+            "description": "The SHA256 hash of the file's contents.",
+            "type": "string"
+          }
+        },
+        "required": ["path", "sha256"]
+      }
+    }
+  },
+  "required": ["commit", "generatedAt", "files"]
+}

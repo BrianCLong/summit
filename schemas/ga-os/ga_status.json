@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GA Status",
+  "description": "A summary of the repository's current release readiness.",
+  "type": "object",
+  "properties": {
+    "status": {
+      "description": "The overall release readiness status.",
+      "type": "string",
+      "enum": ["GO", "NO-GO"]
+    },
+    "commit": {
+      "description": "The git commit SHA this status was generated for.",
+      "type": "string"
+    },
+    "timestamp": {
+      "description": "The ISO 8601 timestamp when the status was generated.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "checks": {
+      "description": "A list of individual readiness checks.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "status": { "type": "string", "enum": ["PASS", "FAIL", "WARN"] },
+          "details": { "type": "string" }
+        },
+        "required": ["name", "status"]
+      }
+    }
+  },
+  "required": ["status", "commit", "timestamp", "checks"]
+}
