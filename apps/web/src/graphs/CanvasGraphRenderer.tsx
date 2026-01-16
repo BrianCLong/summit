@@ -4,6 +4,7 @@ import { select } from 'd3-selection'
 import { drag } from 'd3-drag'
 import { cn } from '@/lib/utils'
 import type { Entity, Relationship, GraphLayout } from '@/types'
+import { ENTITY_COLORS } from './constants'
 
 interface GraphCanvasProps {
   entities: Entity[]
@@ -14,20 +15,6 @@ interface GraphCanvasProps {
   width?: number
   height?: number
   className?: string
-}
-
-// Simple Entity Color Map
-const ENTITY_COLORS: Record<string, string> = {
-  PERSON: '#3b82f6',
-  ORGANIZATION: '#8b5cf6',
-  LOCATION: '#10b981',
-  IP_ADDRESS: '#f59e0b',
-  DOMAIN: '#06b6d4',
-  EMAIL: '#ec4899',
-  FILE: '#ef4444',
-  PROJECT: '#84cc16',
-  SYSTEM: '#6b7280',
-  DEFAULT: '#6b7280',
 }
 
 interface WorkerNode {
