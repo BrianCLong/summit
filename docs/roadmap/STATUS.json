@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-14T19:11:45Z",
+  "revision_note": "Standardized pnpm setup and caching in CI workflows for deterministic installs",
   "initiatives": [
     {
       "id": "A",
