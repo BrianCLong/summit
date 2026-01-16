@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Customer Health Model",
+  "description": "Schema for the customer health model configuration file (health_model.yml)",
+  "type": "object",
+  "properties": {
+    "factors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "description": {
+            "type": "string"
+          },
+          "thresholds": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "level": {
+                  "type": "string",
+                  "enum": ["green", "yellow", "red"]
+                },
+                "gte": {
+                  "type": "number"
+                },
+                "lte": {
+                  "type": "number"
+                },
+                "gt": {
+                  "type": "number"
+                },
+                "lt": {
+                  "type": "number"
+                }
+              },
+              "required": ["level"]
+            }
+          }
+        },
+        "required": ["name", "weight", "description", "thresholds"]
+      }
+    }
+  },
+  "required": ["factors"]
+}

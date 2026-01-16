@@ -1,0 +1,51 @@
+factors:
+  - name: adoption
+    weight: 0.3
+    description: "Active users and queries"
+    thresholds:
+      - level: "green"
+        gte: 0.8
+      - level: "yellow"
+        gte: 0.5
+      - level: "red"
+        lt: 0.5
+  - name: slo_compliance
+    weight: 0.3
+    description: "SLO compliance / error budget burn"
+    thresholds:
+      - level: "green"
+        gte: 0.99
+      - level: "yellow"
+        gte: 0.95
+      - level: "red"
+        lt: 0.95
+  - name: incident_frequency
+    weight: 0.2
+    description: "Incident frequency and severity"
+    thresholds:
+      - level: "green"
+        lte: 1
+      - level: "yellow"
+        lte: 5
+      - level: "red"
+        gt: 5
+  - name: version_drift
+    weight: 0.1
+    description: "Staleness of the deployed version"
+    thresholds:
+      - level: "green"
+        lte: 1
+      - level: "yellow"
+        lte: 3
+      - level: "red"
+        gt: 3
+  - name: security_exceptions
+    weight: 0.1
+    description: "Count and expiry proximity of security exceptions"
+    thresholds:
+      - level: "green"
+        lte: 0
+      - level: "yellow"
+        lte: 2
+      - level: "red"
+        gt: 2
