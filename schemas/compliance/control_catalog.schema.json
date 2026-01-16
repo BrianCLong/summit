@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Control Catalog",
+  "description": "A machine-readable catalog of compliance controls (SOC2, ISO27001, NIST, etc.)",
+  "type": "object",
+  "properties": {
+    "meta": {
+      "type": "object",
+      "properties": {
+        "version": { "type": "string" },
+        "last_updated": { "type": "string", "format": "date" },
+        "author": { "type": "string" }
+      },
+      "required": ["version", "last_updated"]
+    },
+    "controls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the control (e.g., SOC2-CC1.1)"
+          },
+          "framework": {
+            "type": "string",
+            "enum": ["SOC2", "ISO27001", "NIST-800-53", "HIPAA", "GDPR", "INTERNAL"],
+            "description": "The compliance framework this control belongs to"
+          },
+          "category": {
+             "type": "string",
+             "description": "Category of the control (e.g., Security, Availability)"
+          },
+          "statement": {
+            "type": "string",
+            "description": "The official control statement or requirement"
+          },
+          "owner": {
+            "type": "string",
+            "description": "Team or role responsible for this control"
+          },
+          "frequency": {
+            "type": "string",
+            "enum": ["continuous", "daily", "weekly", "monthly", "quarterly", "annually", "event-driven"],
+            "description": "How often this control is executed or verified"
+          },
+          "evidence_class": {
+            "type": "string",
+            "enum": ["configuration", "log", "report", "policy", "artifact", "interview"],
+            "description": "The type of evidence expected for this control"
+          }
+        },
+        "required": ["id", "framework", "statement", "owner", "frequency", "evidence_class"]
+      }
+    }
+  },
+  "required": ["controls"]
+}

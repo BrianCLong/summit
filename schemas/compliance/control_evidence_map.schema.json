@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Control Evidence Map",
+  "description": "Maps controls to checks, artifacts, documentation, and exceptions",
+  "type": "object",
+  "properties": {
+    "mappings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "control_id": { "type": "string" },
+          "checks": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "artifacts": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "docs": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "exceptions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "reason": { "type": "string" },
+                "expiration": { "type": "string", "format": "date" },
+                "owner": { "type": "string" }
+              },
+              "required": ["id", "reason", "expiration", "owner"]
+            }
+          }
+        },
+        "required": ["control_id"]
+      }
+    }
+  },
+  "required": ["mappings"]
+}
