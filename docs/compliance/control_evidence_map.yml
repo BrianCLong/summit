@@ -1,0 +1,37 @@
+mappings:
+  - control_id: "SOC2-CC1.1"
+    checks:
+      - "check_dco"
+      - "check_licenses"
+    artifacts:
+      - "CODE_OF_CONDUCT.md"
+      - "CONTRIBUTING.md"
+    docs:
+      - "docs/compliance/soc2_control_matrix.md"
+
+  - control_id: "SOC2-CC2.1"
+    checks:
+      - "generate_changelog"
+      - "generate_release_notes"
+    artifacts:
+      - "CHANGELOG.md"
+    docs:
+      - "GO_NO_GO_GATE.md"
+
+  - control_id: "SOC2-CC6.1"
+    checks:
+      - "security-scan"
+      - "check-governance"
+    artifacts:
+      - "infra/iam/"
+    docs:
+      - "docs/ga/SECURITY_BASELINE.md"
+
+  - control_id: "SOC2-CC6.6"
+    checks:
+      - "test-backup-restore"
+    artifacts:
+      - "charts/velero/"
+      - "infra/aws/rds-postgres/"
+    docs:
+      - "docs/runbooks/dr/pitr_restore_rds.md"

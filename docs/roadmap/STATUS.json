@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2025-05-19",
+  "revision_note": "Added Project 19 items for Continuous Compliance Packaging",
   "initiatives": [
     {
       "id": "A",
@@ -136,14 +136,65 @@
           "target_completion": "Q4"
         }
       ]
+    },
+    {
+      "id": "P19",
+      "name": "Continuous Compliance Packaging",
+      "epics": [
+        {
+          "id": "P19-1",
+          "name": "Control Catalog & Schemas",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "priority": "P0",
+          "evidence": "docs/compliance/control_catalog.yml, schemas/compliance/control_catalog.schema.json, scripts/compliance/validate_control_catalog.ts",
+          "DoD": "Catalog validates in CI and is the policy-of-record."
+        },
+        {
+          "id": "P19-2",
+          "name": "Control Evidence Map",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "priority": "P0",
+          "evidence": "docs/compliance/control_evidence_map.yml, schemas/compliance/control_evidence_map.schema.json, scripts/compliance/detect_evidence_drift.ts",
+          "DoD": "Any missing evidence mapping is a CI failure."
+        },
+        {
+          "id": "P19-3",
+          "name": "Release Evidence Bundle Export",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "priority": "P0",
+          "evidence": "scripts/release/export_evidence_bundle.ts, scripts/release/verify_evidence_bundle.ts",
+          "DoD": "Bundles can be reproduced for the same SHA and verify cleanly."
+        },
+        {
+          "id": "P19-4",
+          "name": "Auditor Compliance Snapshot",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "priority": "P1",
+          "evidence": "scripts/compliance/generate_compliance_snapshot.ts, docs/compliance/COMPLIANCE_SNAPSHOT.md",
+          "DoD": "Snapshot is produced in CI for tags/releases."
+        },
+        {
+          "id": "P19-5",
+          "name": "Release Checklist",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "priority": "P1",
+          "evidence": "docs/releases/RELEASE_COMPLIANCE_CHECKLIST.md",
+          "DoD": "Compliance packaging is part of the release train."
+        }
+      ]
     }
   ],
   "summary": {
-    "rc_ready": 5,
+    "rc_ready": 10,
     "partial": 1,
     "incomplete": 0,
     "not_started": 6,
-    "total": 12,
+    "total": 17,
     "ga_blockers": []
   }
 }
