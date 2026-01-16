@@ -118,6 +118,8 @@
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
+    "supply-chain:manifest": "node scripts/supply-chain/emit-evidence-manifest.mjs --dir artifacts/supply-chain/$GITHUB_SHA --out artifacts/supply-chain/$GITHUB_SHA/manifest.json",
+    "supply-chain:verify-manifest": "node scripts/supply-chain/verify-evidence-manifest.mjs --dir artifacts/supply-chain/$GITHUB_SHA --manifest artifacts/supply-chain/$GITHUB_SHA/manifest.json",
     "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
     "prepare": "husky"
