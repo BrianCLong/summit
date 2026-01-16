@@ -344,6 +344,21 @@ npm run summitctl -- test
 - Prefer `useMemo`/`useCallback` for expensive computations
 - Keep components small and composable
 
+## Agent Git Workflow
+
+- **Work on the existing branch:** Always work on the existing branch provided in the task context.
+- **Do not create new branches:** Never create a new branch unless explicitly instructed to do so.
+
+## Environment Assumptions
+
+- **Node.js:** v20.x
+- **pnpm:** v9.x
+- **Python:** v3.11+
+
+## Agent Quality Requirements
+
+- **Tests and Build:** Only mark a task complete if all relevant tests pass and the build succeeds. If the build is failing for reasons unrelated to your changes, please note this in your completion message.
+
 ## Git & PR Workflow
 
 - Conventional Commits required
