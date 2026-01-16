@@ -30,6 +30,36 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: capability-fabric
+    version: v1
+    path: prompts/capability-fabric/capability-fabric.md
+    sha256: f1381cd75b9ab6994207fa7b5d2c22dd0526690efc6518a3de849cdd0c503f8e
+    description: Capability-centric registry, mapping, and enforcement for agent tool use.
+    scope:
+      paths:
+        - capability-fabric/
+        - server/src/capability-fabric/
+        - server/src/maestro/mcp/
+        - tools/summitctl/
+        - docs/capability-fabric/
+        - policies/capability-fabric/
+        - prompts/capability-fabric/
+        - agents/examples/
+        - docs/roadmap/STATUS.json
+      domains:
+        - governance
+        - policy
+        - observability
+        - platform
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md

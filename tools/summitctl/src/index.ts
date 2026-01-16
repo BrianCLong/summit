@@ -7,6 +7,7 @@ import { testCommand } from './commands/test';
 import { releaseCommand } from './commands/release';
 import { localTaskCommand } from './commands/local-task';
 import { taskCommand } from './commands/task';
+import { capabilityCommand } from './commands/capability';
 
 const program = new Command();
 
@@ -27,5 +28,6 @@ program.addCommand(releaseCommand);
 program.addCommand(localTaskCommand);
 // We also expose the new agentic task command
 program.addCommand(taskCommand);
+program.addCommand(capabilityCommand);
 
 program.parse();

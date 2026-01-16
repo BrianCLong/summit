@@ -19,6 +19,10 @@ jest.unstable_mockModule('../../../conductor/mcp/client.js', () => ({
   initializeMCPClient: jest.fn(),
 }));
 
+jest.unstable_mockModule('../../../capability-fabric/policy-gate.js', () => ({
+  evaluateCapabilityPolicy: jest.fn(async () => ({ allow: true, reason: 'allow' })),
+}));
+
 const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
 
 describeIf('MCP sessions + invoke', () => {
