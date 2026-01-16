@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-16T05:20:05.632Z",
+  "revision_note": "Added Project 19: Autonomous Multi-Agent Mesh",
   "initiatives": [
     {
       "id": "A",
@@ -39,7 +39,10 @@
           "status": "partial",
           "owner": "Jules",
           "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
-          "blockers": ["Need connector registry", "Missing connector lifecycle management"],
+          "blockers": [
+            "Need connector registry",
+            "Missing connector lifecycle management"
+          ],
           "target_completion": "Sprint N+2"
         },
         {
@@ -48,7 +51,9 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No RSS/Atom connector implementation found",
-          "blockers": ["No implementation exists"],
+          "blockers": [
+            "No implementation exists"
+          ],
           "target_completion": "Sprint N+3"
         },
         {
@@ -57,7 +62,9 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No STIX/TAXII connector implementation found",
-          "blockers": ["No implementation exists"],
+          "blockers": [
+            "No implementation exists"
+          ],
           "target_completion": "Sprint N+3"
         }
       ]
@@ -136,14 +143,62 @@
           "target_completion": "Q4"
         }
       ]
+    },
+    {
+      "id": "F",
+      "name": "Project 19: Autonomous Multi-Agent Mesh",
+      "epics": [
+        {
+          "id": "F1",
+          "name": "Mesh Orchestrator Spec + Schemas",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "evidence": "docs/agent-mesh/MESH_ORCHESTRATOR_SPEC.md, schemas/agent-mesh/, scripts/agent-mesh/validate_schemas.ts"
+        },
+        {
+          "id": "F2",
+          "name": "Prompt Registry",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "evidence": "prompts/registry/, scripts/agent-mesh/register_prompt.ts"
+        },
+        {
+          "id": "F3",
+          "name": "Domain Agent Contracts",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "evidence": "docs/agent-mesh/agents/"
+        },
+        {
+          "id": "F4",
+          "name": "Handoff Bundles",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "evidence": "scripts/agent-mesh/write_handoff_bundle.ts, schemas/agent-mesh/agent_handoff.schema.json"
+        },
+        {
+          "id": "F5",
+          "name": "Deterministic Orchestrator Implementation",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "evidence": "scripts/agent-mesh/run_orchestrator.ts, jobs/nightly_governance_job.json"
+        },
+        {
+          "id": "F6",
+          "name": "PR Hygiene Enforcement",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "evidence": "docs/agent-mesh/PR_HYGIENE_POLICY.md, scripts/agent-mesh/check_pr_hygiene.ts, .github/workflows/pr-hygiene.yml"
+        }
+      ]
     }
   ],
   "summary": {
-    "rc_ready": 5,
+    "rc_ready": 11,
     "partial": 1,
     "incomplete": 0,
-    "not_started": 6,
-    "total": 12,
+    "not_started": 7,
+    "total": 19,
     "ga_blockers": []
   }
 }
