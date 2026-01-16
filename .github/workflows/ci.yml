@@ -1,18 +1,18 @@
 name: CI
 
 on:
+  # UNTRUSTED Workflow Trigger
+  # Runs on pull requests from forks (read-only token)
   pull_request:
-  push:
-    branches: [main]
-
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+    types: [opened, synchronize, reopened]
 
 jobs:
   config-guard:
-    name: config-guard
+    name: Build & Test (Untrusted)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # No other permissions granted
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
