@@ -8,6 +8,19 @@ dotenv.config();
 import { dbConfig } from './config.js';
 import { logger as baseLogger, correlationStorage } from '../config/logger.js';
 import { ResidencyGuard } from '../data-residency/residency-guard.js';
+import {
+  dbQueriesTotal,
+  dbQueryDuration,
+} from '../monitoring/metrics.js';
+import {
+  dbPoolSize,
+  dbPoolIdle,
+  dbPoolWaiting,
+  dbPoolUsage,
+  dbConnectionErrors,
+  circuitBreakerState,
+  dbPoolAcquisitionLatency
+} from '../metrics/dbMetrics.js';
 
 // Constants for pool monitoring and connection management
 const POOL_MONITOR_INTERVAL_MS = 30000; // 30 seconds
@@ -121,6 +134,7 @@ class CircuitBreaker {
     if (this.state === 'open') {
       if (Date.now() >= this.openUntil) {
         this.state = 'half-open';
+        circuitBreakerState.labels(this.name).set(1); // 1 = half-open
         logger.warn(
           { pool: this.name },
           'PostgreSQL circuit breaker half-open',
@@ -139,6 +153,7 @@ class CircuitBreaker {
     }
     this.failureCount = 0;
     this.state = 'closed';
+    circuitBreakerState.labels(this.name).set(0); // 0 = closed
     this.openUntil = 0;
     this.lastError = undefined;
   }
@@ -149,6 +164,7 @@ class CircuitBreaker {
 
     if (this.failureCount >= this.failureThreshold) {
       this.state = 'open';
+      circuitBreakerState.labels(this.name).set(2); // 2 = open
       this.openUntil = Date.now() + this.cooldownMs;
       logger.error(
         { pool: this.name, failureCount: this.failureCount, err: error },
@@ -156,6 +172,7 @@ class CircuitBreaker {
       );
     } else if (this.state === 'half-open') {
       this.state = 'open';
+      circuitBreakerState.labels(this.name).set(2); // 2 = open
       this.openUntil = Date.now() + this.cooldownMs;
       logger.error(
         { pool: this.name, err: error },
@@ -226,6 +243,12 @@ class PoolMonitor {
         },
         'Pool Monitor Stats',
       );
+
+      // Update Prometheus metrics
+      dbPoolSize.labels(wrapper.name, wrapper.type).set(total);
+      dbPoolIdle.labels(wrapper.name, wrapper.type).set(idle);
+      dbPoolWaiting.labels(wrapper.name, wrapper.type).set(waiting);
+      dbPoolUsage.labels(wrapper.name, wrapper.type).set(active);
 
       // Alert on exhaustion
       if (waiting > WAIT_QUEUE_THRESHOLD) {
@@ -686,6 +709,7 @@ async function executeWithRetry(
     } catch (error: any) {
       const err = error as Error;
       wrapper.circuitBreaker.recordFailure(err);
+      dbConnectionErrors.labels(wrapper.name, err.name || 'unknown').inc();
 
       if (!isRetryableError(err) || attempt === 3) {
         throw err;
@@ -710,41 +734,52 @@ async function executeQueryOnClient(
 ): Promise<QueryResult<any>> {
   const start = performance.now();
 
-  // Set statement timeout
-  // Note: It's better to set this per session or query if possible,
-  // but pg driver doesn't support query-level timeout natively without separate command or cancel.
-  // Using simplified approach here.
+  try {
+    // Set statement timeout
+    // Note: It's better to set this per session or query if possible,
+    // but pg driver doesn't support query-level timeout natively without separate command or cancel.
+    // Using simplified approach here.
 
-  const result = await client.query({
-    text: normalizedQuery.text,
-    values: normalizedQuery.values,
-    name: normalizedQuery.name,
-  });
+    const result = await client.query({
+      text: normalizedQuery.text,
+      values: normalizedQuery.values,
+      name: normalizedQuery.name,
+    });
 
-  const duration = performance.now() - start;
+    const duration = performance.now() - start;
 
-  if (duration >= dbConfig.slowQueryThresholdMs) {
-    recordSlowQuery(
-      normalizedQuery.name,
-      duration,
-      wrapper.name,
-      normalizedQuery.text,
+    // Record Metrics
+    dbQueriesTotal.labels(wrapper.name, label, 'success').inc();
+    dbQueryDuration.labels(wrapper.name, label).observe(duration / 1000);
+
+    if (duration >= dbConfig.slowQueryThresholdMs) {
+      recordSlowQuery(
+        normalizedQuery.name,
+        duration,
+        wrapper.name,
+        normalizedQuery.text,
+      );
+    }
+
+    recordQueryCapture(normalizedQuery, duration, wrapper.name, label);
+
+    logger.debug(
+      {
+        pool: wrapper.name,
+        label,
+        durationMs: duration,
+        rows: result.rowCount ?? 0,
+      },
+      'PostgreSQL query executed',
     );
+
+    return result;
+  } catch (error) {
+    const duration = performance.now() - start;
+    dbQueriesTotal.labels(wrapper.name, label, 'error').inc();
+    dbQueryDuration.labels(wrapper.name, label).observe(duration / 1000);
+    throw error;
   }
-
-  recordQueryCapture(normalizedQuery, duration, wrapper.name, label);
-
-  logger.debug(
-    {
-      pool: wrapper.name,
-      label,
-      durationMs: duration,
-      rows: result.rowCount ?? 0,
-    },
-    'PostgreSQL query executed',
-  );
-
-  return result;
 }
 
 // Validation and Lifetime check

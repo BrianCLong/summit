@@ -1,0 +1,66 @@
+apiVersion: 1
+groups:
+  - name: summit-db-health
+    interval: 1m
+    rules:
+      - alert: PostgresHighErrorRate
+        expr: |
+          sum(rate(db_queries_total{status="error"}[5m])) / sum(rate(db_queries_total[5m])) * 100 > 5
+        for: 5m
+        labels:
+          severity: critical
+          service: postgres
+          component: database
+        annotations:
+          summary: "High PostgreSQL error rate"
+          description: "PostgreSQL error rate exceeded 5% over the past 5 minutes."
+
+      - alert: Neo4jHighErrorRate
+        expr: |
+          sum(rate(neo4j_query_errors_total[5m])) / sum(rate(neo4j_query_total[5m])) * 100 > 5
+        for: 5m
+        labels:
+          severity: critical
+          service: neo4j
+          component: database
+        annotations:
+          summary: "High Neo4j error rate"
+          description: "Neo4j error rate exceeded 5% over the past 5 minutes."
+
+      - alert: PostgresPoolExhaustion
+        expr: db_pool_waiting > 10
+        for: 2m
+        labels:
+          severity: warning
+          service: postgres
+          component: database
+        annotations:
+          summary: "PostgreSQL pool exhaustion risk"
+          description: "Requests are waiting for DB connections for more than 2 minutes."
+
+  - name: summit-api-health
+    interval: 1m
+    rules:
+      - alert: GraphQLErrorsHigh
+        expr: |
+          sum(rate(graphql_requests_total{status="error"}[5m])) / sum(rate(graphql_requests_total[5m])) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: graphql
+          component: api
+        annotations:
+          summary: "High GraphQL error rate"
+          description: "GraphQL error rate exceeded 5% over the past 5 minutes."
+
+      - alert: LLMErrorRateHigh
+        expr: |
+          sum(rate(llm_requests_total{status="error"}[5m])) / sum(rate(llm_requests_total[5m])) * 100 > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: llm
+          component: ai
+        annotations:
+          summary: "High LLM error rate"
+          description: "LLM error rate exceeded 10% over the past 5 minutes."

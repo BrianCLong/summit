@@ -1,7 +1,8 @@
 // @ts-nocheck
 /**
  * OpenTelemetry Distributed Tracing for IntelGraph Server
- * Provides end-to-end visibility across all service operations
+ * Provides end-to-end visibility across all service operations.
+ * Configured to support OTLP and Jaeger exporters with auto-instrumentation.
  */
 
 import { NodeSDK } from '@opentelemetry/sdk-node';
