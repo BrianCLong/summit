@@ -1,0 +1,74 @@
+name: Assurance-Driven Autonomy
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # Nightly
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: 'Enable execution mode (create issues/PRs)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  autonomy-engine:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Validate Autonomy Policy
+        run: pnpm exec tsx scripts/autonomy/validate_autonomy_policy.ts
+
+      - name: Detect Anomalies (Placeholder)
+        run: |
+          # This step would invoke the actual anomaly detection logic
+          # e.g., python3 scripts/cost-anomaly-detector.py > anomalies.json
+          # For now, we initialize an empty report if none exists
+          if [ ! -f anomalies.json ]; then
+            echo '{"timestamp": "'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'", "signals": []}' > anomalies.json
+          fi
+
+      - name: Stop-the-Line Check
+        run: pnpm exec tsx scripts/autonomy/enforce_stop_the_line.ts anomalies.json
+
+      - name: Generate Tickets
+        run: |
+          ARGS=""
+          if [ "${{ inputs.execute }}" != "true" ]; then
+            ARGS="--dry-run"
+          fi
+          pnpm exec tsx scripts/autonomy/create_or_update_issue.ts anomalies.json $ARGS
+
+      - name: Generate Remediation (Example)
+        run: |
+          # Example of invoking remediation generation
+          # This would be driven by the anomaly report in a real scenario
+          # Here we demonstrate the capability
+          mkdir -p artifacts/autonomy/patches
+          # pnpm exec tsx scripts/autonomy/generate_remediation_patch.ts --type=policy_alignment --target=docs/autonomy/autonomy_policy.yml --output=artifacts/autonomy/patches/policy.diff
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: autonomy-artifacts
+          path: artifacts/autonomy/

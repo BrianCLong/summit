@@ -1,0 +1,45 @@
+version: "1.0.0"
+
+triggers:
+  - type: anomaly
+    description: "Statistical deviation in KPIs or metrics"
+  - type: drift
+    description: "Configuration drift detected in IaC or Policy"
+  - type: missing_evidence
+    description: "Required compliance or release evidence is missing"
+  - type: expiring_exception
+    description: "Security exception is within 14 days of expiry"
+
+actions:
+  allowed:
+    - open_issue
+    - open_pr
+    - comment
+    - label
+    - assign
+  prohibited:
+    - merge
+    - force_push
+    - delete_branch
+    - delete_tag
+    - access_secrets
+
+guardrails:
+  blast_radius:
+    max_files_changed_per_pr: 5
+    max_prs_per_day: 10
+    max_repos_affected: 1
+
+  approval_requirements:
+    policy_change: ["admin"]
+    enable_execute: ["admin", "ops-lead"]
+
+remediation_whitelist:
+  - class: policy_alignment
+    description: "Sync canonical policy packs"
+  - class: doc_link_fix
+    description: "Fix broken cross-links in documentation"
+  - class: required_checks_update
+    description: "Update required-checks manifest from policy-of-record"
+  - class: schema_validation_fix
+    description: "Non-functional schema validation fixes"
