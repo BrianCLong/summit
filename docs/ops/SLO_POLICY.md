@@ -21,6 +21,7 @@ We define the following SLOs for the Summit platform. These are the binding targ
 | **API (Global)** | General Latency | `http_request_duration_seconds` (p95) | **≤ 350ms** | 28 days |
 | **Graph** | Intelligence Query | `graph_query_latency_seconds` (p95) | **≤ 1.5s** | 28 days |
 | **Ingest** | E2E Processing | Time from ingest to index | **≤ 5s** (p95) | 28 days |
+| **Jobs** | Background Job Freshness | Time since last successful run | **≤ 1h** | 24 hours |
 | **Provenance** | Data Integrity | Bundle verification success rate | **100%** | 24 hours |
 | **Security** | Policy Enforcement | Request denial rate (Guardrails) | **≤ 15%** | 24 hours |
 
