@@ -1,0 +1,56 @@
+name: ci-lineage
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lineage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build + test extractor
+        run: pnpm -C packages/lineage-extractors/postgres test
+
+      - name: Extract lineage (example dry-run)
+        env:
+          GIT_SHA: ${{ github.sha }}
+          CI_RUN_ID: ${{ github.run_id }}
+        run: |
+          mkdir -p artifacts/lineage/${GIT_SHA}
+          node packages/lineage-extractors/postgres/dist/src/cli.js \
+            --input ./ \
+            --outDir artifacts/lineage/${GIT_SHA} \
+            --jobNamespace summit \
+            --jobName repo-sql-scan \
+            --actor github-actions \
+            --sourceSha ${GIT_SHA} \
+            --policyHash aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \
+            --datasetNamespace public \
+            --ciRunId ${CI_RUN_ID}
+
+      - name: Upload lineage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: lineage-artifacts-${{ github.sha }}
+          path: artifacts/lineage/${{ github.sha }}/

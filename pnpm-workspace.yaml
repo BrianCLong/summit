@@ -1,6 +1,7 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+  - 'packages/lineage-extractors/*'
   - 'sdk/*'
   - 'services/*'
   - 'companyos/services/*'
