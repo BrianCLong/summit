@@ -103,6 +103,7 @@
     "ci:branch-protection:check": "node scripts/ci/check_branch_protection_drift.mjs",
     "ci:branch-protection:apply": "node scripts/ci/apply_branch_protection_policy.mjs --apply",
     "ci:branch-protection:plan": "node scripts/ci/apply_branch_protection_policy.mjs --dry-run",
+    "ci:branch-protection:ruleset": "node scripts/ci/generate_ruleset_payload.mjs",
     "ci:evidence-id-consistency": "node scripts/ci/verify_evidence_id_consistency.mjs",
     "verify:living-documents": "node scripts/governance/verify-living-documents.cjs",
     "check:debt": "node scripts/ci/check_debt_regression.cjs",
