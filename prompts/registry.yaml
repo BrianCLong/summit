@@ -104,6 +104,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: minimal-architecture-index
+    version: v1
+    path: prompts/architecture/minimal-architecture-index@v1.md
+    sha256: 9f0d1806447bcaf1fe28cf37559b64b94db7e244392a6a6bc40032992a5cbea8
+    description: Create minimal architecture system index and Summit graph schema artifacts.
+    scope:
+      paths:
+        - docs/architecture/
+        - docs/roadmap/STATUS.json
+        - prompts/architecture/minimal-architecture-index@v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - architecture
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md

@@ -1,0 +1,43 @@
+{
+  "task_id": "ARCH_INDEX_MINIMAL_20260115",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "minimal-architecture-index",
+    "version": "v1",
+    "sha256": "9f0d1806447bcaf1fe28cf37559b64b94db7e244392a6a6bc40032992a5cbea8",
+    "path": "prompts/architecture/minimal-architecture-index@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/architecture/",
+      "docs/roadmap/STATUS.json",
+      "prompts/architecture/minimal-architecture-index@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/ARCH_INDEX_MINIMAL_20260115.json"
+    ],
+    "domains": ["architecture", "governance", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/architecture/system-index.json",
+      "docs/architecture/system-index.md",
+      "docs/architecture/summit-graph.schema.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Architecture index and graph schema exist and are versioned.",
+    "Roadmap status metadata updated to reflect the change.",
+    "Artifacts reference governing authority documents."
+  ],
+  "stop_conditions": [
+    "Scope change outside declared paths.",
+    "Governance conflict with readiness or constitution.",
+    "Detection of PII or secret material."
+  ]
+}
