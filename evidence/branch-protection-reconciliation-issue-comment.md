@@ -132,7 +132,7 @@ Status: 404 Not Found (required_status_checks not configured)
 
 ```
 Status: 200 OK
-Contexts: 7 required checks
+Contexts: 4 required checks
 Strict: true
 ```
 
