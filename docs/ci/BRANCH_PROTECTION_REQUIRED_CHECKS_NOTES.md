@@ -37,3 +37,10 @@ The following status checks MUST be required before merge:
 
 - The `security-policy-check` is a synthesized check run by the `security-gate` workflow.
 - Ensure `CodeQL` analysis is triggered on PRs targeting `main`.
+
+## Verification & Drift Detection
+
+We run an automated drift detector to ensure these settings are enforced:
+
+- **Daily/Weekly Check**: [Drift Detector Workflow](../../.github/workflows/branch-protection-drift.yml)
+- **Documentation**: [docs/security/branch_protection_snapshots/DRIFT_DETECTOR.md](../security/branch_protection_snapshots/DRIFT_DETECTOR.md)
