@@ -1,0 +1,13 @@
+{
+    "attestors": [
+        {
+            "id": "summit-auditor-1",
+            "description": "Primary External Auditor",
+            "public_key": {
+                "algorithm": "ed25519",
+                "value": "MCowBQYDK2VwAyEAqmX7E/M+e4+M/5+fF8/9+G8+9+9+9+9+9+9+9+9+9+8="
+            },
+            "status": "active"
+        }
+    ]
+}

@@ -1,0 +1,93 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://summit.intelgraph.io/schemas/external-attestation.json",
+    "title": "Summit External Attestation",
+    "description": "Schema for third-party attestation of Summit artifacts.",
+    "type": "object",
+    "required": [
+        "attestor",
+        "scope",
+        "assertions",
+        "timestamp",
+        "signature"
+    ],
+    "properties": {
+        "attestor": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "Public Key Fingerprint or DID of the attestor"
+                }
+            }
+        },
+        "scope": {
+            "type": "object",
+            "required": [
+                "artifacts"
+            ],
+            "properties": {
+                "artifacts": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "path",
+                            "sha256"
+                        ],
+                        "properties": {
+                            "path": {
+                                "type": "string"
+                            },
+                            "sha256": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "assertions": {
+            "type": "object",
+            "description": "Claims verified by the third-party",
+            "properties": {
+                "determinism_verified": {
+                    "type": "boolean"
+                },
+                "provenance_verified": {
+                    "type": "boolean"
+                },
+                "clean_execution": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "timestamp": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "signature": {
+            "type": "object",
+            "required": [
+                "algorithm",
+                "value"
+            ],
+            "properties": {
+                "algorithm": {
+                    "type": "string",
+                    "enum": [
+                        "ed25519",
+                        "ecdsa-p256"
+                    ]
+                },
+                "value": {
+                    "type": "string",
+                    "description": "Base64 encoded detached signature of the canonicalized JSON body (excluding signature field)"
+                }
+            }
+        }
+    }
+}

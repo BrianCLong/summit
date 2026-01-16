@@ -1,0 +1,52 @@
+{
+    "_type": "https://in-toto.io/Statement/v0.1",
+    "predicate": {
+        "buildType": "https://github.com/BrianCLong/summit/trusted-builder-v1",
+        "builder": {
+            "id": "https://github.com/BrianCLong/summit/.github/workflows/ci-trusted.yml"
+        },
+        "invocation": {
+            "configSource": {
+                "digest": {
+                    "sha1": "4e79758525797585257975852579758525797585"
+                },
+                "entryPoint": ".github/workflows/ci-trusted.yml",
+                "uri": "git+https://github.com/BrianCLong/summit@refs/heads/main"
+            },
+            "environment": {
+                "github_run_attempt": "1",
+                "github_run_id": "123456789"
+            },
+            "parameters": {
+                "repository_state": "clean"
+            }
+        },
+        "materials": [
+            {
+                "digest": {
+                    "sha1": "4e79758525797585257975852579758525797585"
+                },
+                "uri": "git+https://github.com/BrianCLong/summit"
+            }
+        ],
+        "metadata": {
+            "buildFinishedOn": "2026-01-15T20:05:00Z",
+            "buildStartedOn": "2026-01-15T20:00:00Z",
+            "completeness": {
+                "environment": false,
+                "materials": true,
+                "parameters": true
+            },
+            "reproducible": true
+        }
+    },
+    "predicateType": "https://slsa.dev/provenance/v0.2",
+    "subject": [
+        {
+            "digest": {
+                "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "name": "soc_evidence.json"
+        }
+    ]
+}

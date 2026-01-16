@@ -1,0 +1,34 @@
+failure_economics_version: "1.0.0"
+
+failure_classes:
+  integrity_violation:
+    description: "Compromise of artifact provenance or content integrity."
+    max_tolerated_exposure: "zero"
+    financial_liability_cap: "unlimited"
+    compensating_controls:
+      - "automatic_revocation_of_signing_keys"
+      - "immediate_customer_notification"
+      - "shutdown_of_distribution_channels"
+    escalation: "board_of_directors"
+
+  availability_degradation:
+    description: "Inability to produce or verify release artifacts."
+    max_tolerated_exposure: "24h"
+    financial_liability_cap: "$1M_per_incident"
+    compensating_controls:
+      - "manual_verification_by_quorum_of_3"
+      - "extension_of_existing_artifact_ttls"
+    escalation: "vp_engineering"
+
+  auditability_gap:
+    description: "Loss of logs or ability to replay history."
+    max_tolerated_exposure: "7d"
+    financial_liability_cap: "$100k_per_incident"
+    compensating_controls:
+      - "forensic_reconstruction_from_distributed_nodes"
+      - "temporary_suspension_of_new_releases"
+    escalation: "chief_compliance_officer"
+
+governance:
+  insurance_requirement: "cyber_liability_tier_1"
+  external_audit_frequency: "annual"

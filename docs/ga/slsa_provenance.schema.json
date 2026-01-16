@@ -1,0 +1,152 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Summit SLSA Provenance Schema",
+    "type": "object",
+    "properties": {
+        "_type": {
+            "type": "string",
+            "const": "https://in-toto.io/Statement/v0.1"
+        },
+        "subject": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "digest": {
+                        "type": "object",
+                        "properties": {
+                            "sha256": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "sha256"
+                        ]
+                    }
+                },
+                "required": [
+                    "name",
+                    "digest"
+                ]
+            }
+        },
+        "predicateType": {
+            "type": "string",
+            "const": "https://slsa.dev/provenance/v0.2"
+        },
+        "predicate": {
+            "type": "object",
+            "properties": {
+                "builder": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "id"
+                    ]
+                },
+                "buildType": {
+                    "type": "string"
+                },
+                "invocation": {
+                    "type": "object",
+                    "properties": {
+                        "configSource": {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                },
+                                "digest": {
+                                    "type": "object",
+                                    "properties": {
+                                        "sha1": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "entryPoint": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "parameters": {
+                            "type": "object"
+                        },
+                        "environment": {
+                            "type": "object"
+                        }
+                    }
+                },
+                "metadata": {
+                    "type": "object",
+                    "properties": {
+                        "buildStartedOn": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "buildFinishedOn": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "completeness": {
+                            "type": "object",
+                            "properties": {
+                                "parameters": {
+                                    "type": "boolean"
+                                },
+                                "environment": {
+                                    "type": "boolean"
+                                },
+                                "materials": {
+                                    "type": "boolean"
+                                }
+                            }
+                        },
+                        "reproducible": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "materials": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "uri": {
+                                "type": "string"
+                            },
+                            "digest": {
+                                "type": "object",
+                                "properties": {
+                                    "sha1": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "required": [
+                "builder",
+                "buildType",
+                "invocation",
+                "metadata",
+                "materials"
+            ]
+        }
+    },
+    "required": [
+        "_type",
+        "subject",
+        "predicateType",
+        "predicate"
+    ]
+}

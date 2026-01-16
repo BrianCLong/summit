@@ -1,0 +1,39 @@
+ga_proof_version: "1.0.0"
+project: "summit"
+repository: "BrianCLong/summit"
+
+determinism_policy:
+  timestamp_compliance: "forbidden"
+  uuid_compliance: "forbidden"
+  key_ordering: "lexicographical"
+  locale_independence: "en_US.UTF-8"
+
+workflows:
+  - name: "Trusted CI"
+    path: ".github/workflows/ci-trusted.yml"
+    type: "trusted_builder"
+    inputs:
+      - repository_state: "git_sha"
+      - ci_config: ".github/workflows/ci-trusted.yml"
+    outputs:
+      - artifact: "soc_evidence.json"
+        verification: "hash_match"
+      - artifact: "slsa_provenance.json"
+        verification: "signature_check"
+
+trust_boundary:
+  untrusted_workflows:
+    - ".github/workflows/ci.yml"
+  trusted_workflows:
+    - ".github/workflows/ci-trusted.yml"
+  isolation_mechanism: "GitHub Environment Protection + Secret Scoping"
+
+artifacts:
+  - name: "soc_evidence.json"
+    description: "Automated evidence of SOC-2 controls"
+    format: "json"
+    stability: "deterministic"
+  - name: "slsa_provenance.json"
+    description: "SLSA Level 2+ build provenance"
+    format: "json"
+    stability: "deterministic"

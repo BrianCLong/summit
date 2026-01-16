@@ -1,0 +1,112 @@
+---
+# Source: summit/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: summit-stage
+  labels:
+    helm.sh/chart: summit-0.1.0
+    app.kubernetes.io/name: summit
+    app.kubernetes.io/instance: summit-stage
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: summit
+    app.kubernetes.io/instance: summit-stage
+---
+# Source: summit/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: summit-stage
+  labels:
+    helm.sh/chart: summit-0.1.0
+    app.kubernetes.io/name: summit
+    app.kubernetes.io/instance: summit-stage
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: summit
+      app.kubernetes.io/instance: summit-stage
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: summit
+        app.kubernetes.io/instance: summit-stage
+    spec:
+      serviceAccountName: summit-stage
+      securityContext:
+        {}
+      containers:
+        - name: summit
+          securityContext:
+            {}
+          image: "ghcr.io/brianclong/summit:sha-simulation"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          env:
+            - name: DB_HOST
+              value: "stage-db.summit.internal"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 256Mi
+---
+# Source: summit/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: summit-stage
+  labels:
+    helm.sh/chart: summit-0.1.0
+    app.kubernetes.io/name: summit
+    app.kubernetes.io/instance: summit-stage
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: "stage.summit.local"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: summit-stage
+                port:
+                  number: 80

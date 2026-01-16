@@ -1,0 +1,16 @@
+{
+    "name": "@intelgraph/provenance-exporter",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "main": "./dist/prov-export.js",
+    "types": "./dist/prov-export.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "devDependencies": {
+        "typescript": "^5.3.3",
+        "@types/node": "^20.10.0"
+    }
+}

@@ -1,0 +1,29 @@
+retention_policy_version: "1.0.0"
+
+artifact_classes:
+  build_provenance:
+    retention_period: "forever" # Immutable ledger requirement
+    re_verification_cadence: "on_access"
+    expiration_behavior: "hard_fail"
+    storage_class: "worm_compliant_storage"
+
+  compliance_evidence:
+    retention_period: "7y" # Legal hold standard
+    re_verification_cadence: "annual"
+    expiration_behavior: "degrade_trust_to_amber"
+    storage_class: "standard_archive"
+
+  transient_logs:
+    retention_period: "90d"
+    re_verification_cadence: "never"
+    expiration_behavior: "delete"
+    storage_class: "ephemeral"
+
+expiration_handling:
+  on_expired_reference:
+    action: "flag_as_untrusted"
+    alert: "security_operations"
+    ci_enforcement: "block_promotion"
+
+audit_requirements:
+  purge_logs: "must_be_cryptographically_signed"

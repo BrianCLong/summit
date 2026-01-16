@@ -1,0 +1,52 @@
+trust_model_version: "1.0.0"
+
+states:
+  GREEN:
+    description: "Fully Trusted. All artifacts present, fresh, and deterministic."
+    entry_conditions:
+      provenance_present: true
+      determinism_verified: true
+      runner_trusted: true
+      evidence_freshness: "fresh"
+    allowed_actions:
+      - "deploy_production"
+      - "publish_release_bundle"
+      - "generate_attestation"
+    forbidden_actions: []
+    required_logging:
+      - "trust_state_green_signature"
+
+  AMBER:
+    description: "Degraded Trust. Non-critical evidence staleness or partial availability."
+    entry_conditions:
+      evidence_freshness: "stale_within_grace"
+      runner_trusted: true
+    allowed_actions:
+      - "deploy_staging"
+      - "publish_internal_build"
+    forbidden_actions:
+      - "deploy_production"
+      - "publish_release_bundle"
+    required_logging:
+      - "trust_degradation_warning"
+      - "compensating_control_audit"
+
+  RED:
+    description: "Untrusted. Critical failure in supply chain integrity."
+    entry_conditions:
+      any_of:
+        - provenance_present: false
+        - determinism_verified: false
+        - runner_trusted: false
+        - evidence_freshness: "expired"
+    allowed_actions:
+      - "log_failure_event"
+      - "halt_pipeline"
+    forbidden_actions:
+      - "*"
+    required_logging:
+      - "trust_violation_alert"
+
+transitions:
+  must_emit_evidence: true
+  transition_log_path: "artifacts/trust/state_transition.log"

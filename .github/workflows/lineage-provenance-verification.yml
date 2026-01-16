@@ -1,0 +1,59 @@
+name: Lineage & Provenance Verification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  verify-provenance:
+    name: Verify Provenance Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Provenance Exporter
+        run: |
+          cd packages/provenance-exporter
+          pnpm install
+          pnpm build
+
+      - name: Generate Dummy Artifacts (Test Mode)
+        if: github.event_name == 'pull_request'
+        run: |
+          mkdir -p artifacts
+          echo "test artifact" > artifacts/test.txt
+
+      - name: Generate PROV-JSON
+        run: |
+          node packages/provenance-exporter/dist/prov-export.js
+        env:
+          ARTIFACTS_DIR: artifacts
+          PROV_OUTPUT_FILE: artifacts/provenance/summit.prov.json
+
+      - name: Verify PROV Existence
+        run: |
+          if [ ! -f artifacts/provenance/summit.prov.json ]; then
+            echo "Error: PROV artifact missing!"
+            exit 1
+          fi
+
+      - name: Validate PROV Schema (Basic)
+        run: |
+           # Use a simple node script to validate against the schema we created
+           # Utilizing ajv which is likely available or we can install it
+           npm install -g ajv-cli
+           ajv validate -s packages/provenance-exporter/schemas/prov.schema.json -d artifacts/provenance/summit.prov.json
