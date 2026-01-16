@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-14T18:42:08Z",
+  "revision_note": "Established CI Gate umbrella workflow to eliminate required-check deadlocks and keep readiness signals always-on",
   "initiatives": [
     {
       "id": "A",

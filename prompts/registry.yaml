@@ -30,6 +30,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ci-gate-umbrella
+    version: v1
+    path: prompts/ci/ci-gate-umbrella@v1.md
+    sha256: 08fa582dadc174e6d93fe9a90e823efc7c061fed1e7c432445735f48e81b57d2
+    description: Always-on CI Gate workflow and governance documentation for required-check deadlock prevention.
+    scope:
+      paths:
+        - .github/
+        - docs/ci/
+        - docs/roadmap/STATUS.json
+        - prompts/ci/ci-gate-umbrella@v1.md
+        - prompts/registry.yaml
+      domains:
+        - ci
+        - governance
+        - quality
+        - documentation
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md

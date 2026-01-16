@@ -1,0 +1,226 @@
+name: CI Gate
+
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-gate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect Change Scope
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      docs: ${{ steps.filter.outputs.docs }}
+      infra: ${{ steps.filter.outputs.infra }}
+      ci: ${{ steps.filter.outputs.ci }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect paths
+        id: filter
+        run: |
+          set -euo pipefail
+
+          base_sha=""
+          head_sha=""
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base_sha="${{ github.event.pull_request.base.sha }}"
+            head_sha="${{ github.event.pull_request.head.sha }}"
+          elif [ "${{ github.event_name }}" = "merge_group" ]; then
+            base_sha="${{ github.event.merge_group.base_sha }}"
+            head_sha="${{ github.event.merge_group.head_sha }}"
+          else
+            base_sha="${{ github.event.before }}"
+            head_sha="${{ github.sha }}"
+          fi
+
+          if [ -z "$base_sha" ] || [ -z "$head_sha" ]; then
+            echo "::error::Missing diff base/head for change detection."
+            exit 1
+          fi
+
+          git diff --name-only "$base_sha" "$head_sha" > /tmp/changed_files.txt
+
+          echo "Changed files:"
+          cat /tmp/changed_files.txt || true
+
+          match() {
+            grep -Eq "$1" /tmp/changed_files.txt
+          }
+
+          set_output() {
+            echo "$1=$2" >> "$GITHUB_OUTPUT"
+          }
+
+          backend_regex='^(server/|services/|api/|graphql/|db/|migrations/|packages/|policies/|provenance/|ingest/|ingestion/)'
+          frontend_regex='^(client/|apps/|web/|ui/|frontend/|public/|design-system/)'
+          docs_regex='(^docs/|^README|\\.md$)'
+          infra_regex='^(infra/|k8s/|helm/|terraform/|docker/|compose/|docker-compose|Dockerfile)'
+          ci_regex='^(\\.github/|scripts/ci/|scripts/ga/|agent-contract\\.json|prompts/)'
+
+          backend=false
+          frontend=false
+          docs=false
+          infra=false
+          ci=false
+
+          if match "$backend_regex"; then backend=true; fi
+          if match "$frontend_regex"; then frontend=true; fi
+          if match "$docs_regex"; then docs=true; fi
+          if match "$infra_regex"; then infra=true; fi
+          if match "$ci_regex"; then ci=true; fi
+
+          set_output backend "$backend"
+          set_output frontend "$frontend"
+          set_output docs "$docs"
+          set_output infra "$infra"
+          set_output ci "$ci"
+
+  backend-suite:
+    name: Backend Suite
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: ${{ needs.changes.outputs.backend == 'true' }}
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+
+      - name: Setup Node
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint server
+        run: pnpm lint:server
+
+      - name: Typecheck server
+        run: pnpm typecheck:server
+
+      - name: Server unit tests
+        run: pnpm test:unit
+
+  frontend-suite:
+    name: Frontend Suite
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+
+      - name: Setup Node
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint client
+        run: pnpm lint:client
+
+      - name: Typecheck client
+        run: pnpm typecheck:client
+
+  ci-suite:
+    name: CI Governance Suite
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: ${{ needs.changes.outputs.ci == 'true' }}
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Setup Node
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        with:
+          node-version: "20"
+
+      - name: Validate Jest configuration
+        run: node scripts/ci/validate-jest-config.cjs
+
+      - name: Validate workflow filters
+        run: bash scripts/ci/validate-workflow-filters.sh
+
+  gate:
+    name: Umbrella Gate
+    runs-on: ubuntu-latest
+    needs:
+      - changes
+      - backend-suite
+      - frontend-suite
+      - ci-suite
+    if: always()
+    steps:
+      - name: Evaluate suite results
+        run: |
+          set -euo pipefail
+
+          backend_result="${{ needs.backend-suite.result }}"
+          frontend_result="${{ needs.frontend-suite.result }}"
+          ci_result="${{ needs.ci-suite.result }}"
+
+          fail=0
+
+          for entry in \
+            "Backend Suite|$backend_result" \
+            "Frontend Suite|$frontend_result" \
+            "CI Governance Suite|$ci_result"; do
+            name=$(echo "$entry" | cut -d'|' -f1)
+            result=$(echo "$entry" | cut -d'|' -f2)
+
+            case "$result" in
+              success|skipped)
+                ;;
+              failure|cancelled|timed_out)
+                echo "::error::$name failed with result: $result"
+                fail=1
+                ;;
+              *)
+                echo "::error::$name returned unexpected result: $result"
+                fail=1
+                ;;
+            esac
+          done
+
+          if [ "$fail" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Post gate summary
+        run: |
+          {
+            echo "## CI Gate Summary"
+            echo ""
+            echo "| Suite | Result |"
+            echo "| --- | --- |"
+            echo "| Backend Suite | ${{ needs.backend-suite.result }} |"
+            echo "| Frontend Suite | ${{ needs.frontend-suite.result }} |"
+            echo "| CI Governance Suite | ${{ needs.ci-suite.result }} |"
+            echo ""
+            echo "Skipped suites are treated as Governed Exceptions for this change set."
+          } >> "$GITHUB_STEP_SUMMARY"
