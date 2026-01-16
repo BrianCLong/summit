@@ -1,0 +1,93 @@
+name: Security Report (Strict)
+description: Strict security intake
+title: "[SECURITY] "
+labels: ["type:security", "triage:needed"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Do not include secrets in this report.**
+        For vulnerabilities covered by the security policy, use the disclosure link in the issue menu.
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options: ["P0", "P1", "P2", "P3"]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: ["server", "client", "web", "cli", "ci", "docs", "governance", "security", "release"]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options: ["security"]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: reproducibility
+    attributes:
+      label: Reproducibility
+      options: ["Always", "Intermittent", "Rare", "Unknown"]
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Vulnerability summary
+      description: Concise description of the security concern.
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: Who is affected and what is the severity?
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Exact steps, commands, and inputs.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Logs, screenshots, or traces (redact secrets).
+    validations:
+      required: false
+
+  - type: textarea
+    id: mitigation
+    attributes:
+      label: Proposed mitigation
+      description: Suggested remediation or guardrail.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: 2–5 testable bullets.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true

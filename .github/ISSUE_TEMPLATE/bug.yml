@@ -1,0 +1,76 @@
+name: Bug Report (Strict)
+description: Strict bug intake
+title: "[BUG] "
+labels: ["type:bug", "triage:needed"]
+body:
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options: ["P0", "P1", "P2", "P3"]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: ["server", "client", "web", "cli", "ci", "docs", "governance", "security", "release"]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options: ["bug"]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: reproducibility
+    attributes:
+      label: Reproducibility
+      options: ["Always", "Intermittent", "Rare", "Unable to reproduce"]
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Exact steps, commands, and inputs.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs / screenshots / stack traces
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: 2–5 testable bullets.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
