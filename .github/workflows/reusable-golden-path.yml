@@ -92,7 +92,7 @@ jobs:
           path: sbom.json
 
       - name: Scan for vulnerabilities
-        uses: anchore/scan-action@3343887d815d7b07465f6fdcd395bd66508d486a # v3
+        uses: anchore/scan-action@62b74fb7bb810d2c45b1865f47a77655621862a5 # v3
         with:
           image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ github.sha }}
           fail-on-severity: critical
