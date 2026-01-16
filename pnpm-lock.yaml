@@ -6480,6 +6480,22 @@ importers:
         specifier: ^5.0.0
         version: 5.9.3
 
+  packages/evidence-model:
+    dependencies:
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^25.0.3
+        version: 25.0.3
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
   packages/explainability-sdk:
     dependencies:
       redis:
