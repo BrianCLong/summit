@@ -43,7 +43,34 @@ See [AI Tools Setup](#ai-tools-setup) below for detailed instructions.
 
 ## Quick Start
 
-### One-Command Bootstrap
+### Option 1: Dev Container (Recommended for Teams)
+
+**Fastest way to get started** - containerized environment with all tools and services pre-configured.
+
+```bash
+# Prerequisites: Docker Desktop + VS Code with Dev Containers extension
+
+# Clone and open
+git clone https://github.com/YourOrg/summit.git
+cd summit
+code .
+
+# In VS Code: Command Palette (Cmd/Ctrl+Shift+P)
+# → "Dev Containers: Reopen in Container"
+
+# Wait ~5-10 minutes for setup, then start coding!
+```
+
+**For GitHub Codespaces** (cloud, no local install):
+1. Go to repository on GitHub
+2. Click "Code" → "Codespaces" → "Create codespace"
+3. Wait ~10 minutes, VS Code opens in browser
+
+See [DEVCONTAINER.md](DEVCONTAINER.md) for full guide.
+
+### Option 2: Native Ubuntu Install
+
+**For bare metal or VMs** - install all tools directly on Ubuntu 22.04/24.04.
 
 ```bash
 # Clone the repository
@@ -316,10 +343,18 @@ Expected output:
 
 ## Next Steps
 
+### Choosing the Right Approach
+
+| Approach | Best For | Setup Time | Pros | Cons |
+|----------|----------|------------|------|------|
+| **Dev Container** | Teams, new developers, consistency | 5-10 min | Pre-configured, portable, includes services | Requires Docker |
+| **Native Install** | VMs, bare metal, customization | 10-15 min | Full control, no container overhead | Manual setup |
+| **GitHub Codespaces** | Remote work, cloud-first teams | 10 min | No local setup, access anywhere | Costs ~$0.18/hour |
+
 ### For Cloud Workstations
 
 See `infra/devstation/README.md` for:
-- Dev Container setup (VS Code + Codespaces)
+- Dev Container setup details (VS Code + Codespaces) - **[DEVCONTAINER.md](DEVCONTAINER.md)** for full guide
 - Cloud VM images (Packer templates)
 - Cloud-init examples
 
