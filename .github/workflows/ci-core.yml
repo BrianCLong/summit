@@ -316,10 +316,11 @@ jobs:
       - name: Run SOC control tests
         run: |
           mkdir -p soc-compliance-reports
-          bash scripts/test-soc-controls.sh soc-compliance-reports
+          bash scripts/test-soc-controls.sh ./server/__tests__/soc-controls ./soc-compliance-reports 100 true
 
       - name: Upload SOC compliance reports
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: soc-compliance-report
           path: soc-compliance-reports
