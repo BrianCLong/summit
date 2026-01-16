@@ -57,3 +57,13 @@
 /docs/releases/     @BrianCLong
 /.github/workflows/release*  @BrianCLong
 /scripts/release/   @BrianCLong
+
+# Security & Compliance Enforcement
+/docs/security/ @intelgraph-security
+/server/tests/security/ @intelgraph-security
+/scripts/security/ @intelgraph-security
+/tools/security/ @intelgraph-security
+/tools/security-gates/ @intelgraph-security
+/tools/security-suite/ @intelgraph-security
+/.github/workflows/*drift* @intelgraph-security
+/.github/workflows/ci-trusted.yml @intelgraph-security

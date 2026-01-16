@@ -9,6 +9,7 @@ Welcome to the Security Engineering documentation for IntelGraph. This section d
 - [**Risk Register**](./RISK_REGISTER.md) - Top 10 risks and mitigation plans.
 - [**Exceptions Registry**](./EXCEPTIONS_REGISTRY.md) - Active waivers and process.
 - [**Operations & Governance**](./SECURITY_OPERATIONS.md) - Scorecards, table-tops, and culture.
+- [**Code Ownership**](../../.github/CODEOWNERS) - Ownership map for security-critical paths and enforcement.
 
 ## Standards & Policies
 
