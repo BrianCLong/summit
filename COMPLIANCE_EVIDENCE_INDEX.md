@@ -37,3 +37,5 @@ This table provides a consolidated view of all controls, their mappings to the v
 | **SEC-001** | Secret Scanning | SOC, ISO | [.husky/pre-commit](.husky/pre-commit) |
 | **SEC-002** | Production Guardrails | SOC, ISO | [server/src/config.ts](server/src/config.ts) |
 | **SEC-003** | Dependency Vulnerability Scanning | SOC, ISO | [.github/workflows/pr-quality-gate.yml](.github/workflows/pr-quality-gate.yml) |
+| **GOV-006** | Exception Register | SOC, ISO | [docs/ga/EXCEPTIONS.yml](docs/ga/EXCEPTIONS.yml) |
+| **GOV-007** | Exception Verification | SOC, ISO | [artifacts/governance/exceptions](artifacts/governance/exceptions) |

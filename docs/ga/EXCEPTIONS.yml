@@ -1,0 +1,23 @@
+schema_version: "1"
+policy:
+  expiring_soon_days: 14
+
+exceptions:
+  - id: "EX-0001"
+    title: "Temporary allowlist for known false-positive secret pattern"
+    category: "secrets"
+    severity: "med"
+    owner: "security-team"
+    created: "2025-01-14"
+    expires: "2026-02-15"
+    rationale: "Pattern matches a test token format used in legacy fixtures. Fixing requires refactoring test data generator."
+    mitigation: "Restricted to test fixtures only. blocked in production code."
+    follow_up_issue: "https://github.com/org/repo/issues/123"
+    scope:
+      paths: ["server/tests/fixtures/**"]
+      rule_ids: ["generic_jwt"]
+      environments: ["ci", "local"]
+    signoff:
+      security: "jane.doe"
+      release_captain: "john.smith"
+      date: "2025-01-14"

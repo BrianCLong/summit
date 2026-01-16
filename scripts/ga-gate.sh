@@ -158,7 +158,33 @@ record_check "Deep Health Check" "check_detailed_health" || { generate_report; e
 # We run `make smoke`. It calls bootstrap+up, but up should be fast/noop if already running.
 record_check "Smoke Test" "make smoke" || { generate_report; exit 1; }
 
-# 7. Security Checks
+# 7. Exception Register Verification
+# We verify that no exceptions are expired and all metadata is valid.
+# Output goes to artifacts/governance/exceptions/<sha>/
+verify_exceptions() {
+    local sha=$(git rev-parse HEAD)
+    local out_dir="artifacts/governance/exceptions/$sha"
+
+    # Run the verification script
+    if pnpm ci:exceptions:verify --out "$out_dir" --sha "$sha"; then
+        echo "✅ Exception Register valid"
+        # Copy the report to the main report dir for visibility
+        if [ -f "$out_dir/report.md" ]; then
+             cp "$out_dir/report.md" "$REPORT_DIR/exceptions_report.md"
+        fi
+        return 0
+    else
+        echo "❌ Exception Register verification failed (expired exceptions or invalid schema)"
+        # Copy the report to the main report dir even on failure
+        if [ -f "$out_dir/report.md" ]; then
+             cp "$out_dir/report.md" "$REPORT_DIR/exceptions_report.md"
+        fi
+        return 1
+    fi
+}
+record_check "Exception Verification" "verify_exceptions" || { generate_report; exit 1; }
+
+# 8. Security Checks
 security_gate() {
     make sbom || echo "⚠️ SBOM generation failed (non-critical if tool missing)"
 
