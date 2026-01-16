@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/lineage/openlineage.postgres.extension.schema.json",
+  "title": "Summit OpenLineage Postgres Extension",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["eventType", "eventTime", "producer", "schemaURL", "run", "job"],
+  "properties": {
+    "eventType": { "type": "string", "enum": ["START", "RUNNING", "COMPLETE", "FAIL", "ABORT", "OTHER"] },
+    "eventTime": { "type": "string", "format": "date-time" },
+    "producer": { "type": "string" },
+    "schemaURL": { "type": "string" },
+    "run": {
+      "type": "object",
+      "required": ["runId"],
+      "properties": {
+        "runId": { "type": "string", "minLength": 1 },
+        "facets": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "summit.audit": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["sourceSha", "policyHash", "actor"],
+              "properties": {
+                "actor": { "type": "string", "minLength": 1 },
+                "sourceSha": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+                "policyHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+                "ciRunId": { "type": "string" }
+              }
+            },
+            "summit.governanceVerdict": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["verdict"],
+              "properties": {
+                "verdict": { "type": "string", "enum": ["ALLOW", "WARN", "BLOCK"] },
+                "reasons": { "type": "array", "items": { "type": "string" } }
+              }
+            },
+            "summit.postgres": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["sqlHash"],
+              "properties": {
+                "sqlHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+                "dialect": { "type": "string", "enum": ["postgres"] },
+                "notes": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "job": {
+      "type": "object",
+      "required": ["namespace", "name"],
+      "properties": {
+        "namespace": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "inputs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/dataset" }
+    },
+    "outputs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/dataset" }
+    }
+  },
+  "$defs": {
+    "dataset": {
+      "type": "object",
+      "required": ["namespace", "name"],
+      "properties": {
+        "namespace": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "facets": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["fields"],
+              "properties": {
+                "fields": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["name", "type"],
+                    "properties": {
+                      "name": { "type": "string", "minLength": 1 },
+                      "type": { "type": "string", "minLength": 1 }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}
