@@ -1,0 +1,25 @@
+id: "runtime-governance-v1"
+description: "Core runtime governance policies"
+defaults:
+  action: "DENY" # Fail closed
+policies:
+  - id: "deny-root-login"
+    description: "Prevent root login in runtime"
+    scope:
+      stages: ["runtime"]
+      tenants: ["*"]
+    action: "DENY"
+    rules:
+      - field: "user.role"
+        operator: "eq"
+        value: "root"
+  - id: "require-tls"
+    description: "Enforce TLS for all connections"
+    scope:
+      stages: ["runtime"]
+      tenants: ["*"]
+    action: "DENY"
+    rules:
+      - field: "connection.tls"
+        operator: "eq"
+        value: false

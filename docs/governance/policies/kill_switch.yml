@@ -1,0 +1,14 @@
+id: "kill-switch-config-v1"
+description: "Emergency kill switch configuration"
+features:
+  - name: "global_writes"
+    description: "Block all write operations"
+    default_state: "OFF"
+    overrides: []
+  - name: "ai_inference"
+    description: "Disable AI inference endpoints"
+    default_state: "OFF"
+    overrides: []
+allowed_actors:
+  - role: "admin"
+    permissions: ["EXECUTE_KILL_SWITCH"]

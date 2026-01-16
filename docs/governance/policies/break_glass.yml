@@ -1,0 +1,8 @@
+id: "break-glass-v1"
+description: "Break glass emergency procedures"
+procedures:
+  - id: "admin-override"
+    roles: ["super_admin"]
+    approval_required: false # In emergency
+    audit_level: "MAXIMUM"
+    max_duration_minutes: 60
