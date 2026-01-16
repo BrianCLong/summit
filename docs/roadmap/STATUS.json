@@ -108,42 +108,67 @@
       ]
     },
     {
-      "id": "E",
-      "name": "Graph-XAI Differentiation",
+      "id": "Project 19",
+      "name": "Security Verification Gates",
       "epics": [
         {
-          "id": "E1",
-          "name": "Research Publications",
-          "status": "not-started",
+          "id": "WS1",
+          "name": "Security Gate Spec + Schemas",
+          "status": "rc-ready",
           "owner": "Jules",
-          "evidence": "Publication plan and themes defined in ga-graphai/docs/explainability.md",
-          "target_completion": "Q3"
+          "evidence": "docs/security/SECURITY_GATES.md, docs/security/security_gates.yml, schemas/security/security_gates.schema.json",
+          "DoD": "Gate spec is versioned and validated in CI."
         },
         {
-          "id": "E2",
-          "name": "Public Explainability Benchmarks",
-          "status": "not-started",
+          "id": "WS2",
+          "name": "SAST + Dependency + License Enforcement",
+          "status": "in-progress",
           "owner": "Jules",
-          "evidence": "Benchmark suite, metrics, and harness expectations codified in ga-graphai/docs/explainability.md",
-          "target_completion": "Q2"
+          "evidence": "scripts/security/aggregate_security_reports.mjs",
+          "DoD": "Jobs run on PRs and upload artifacts. Summary.json is stable."
         },
         {
-          "id": "E3",
-          "name": "Case Studies",
-          "status": "not-started",
+          "id": "WS3",
+          "name": "SBOM + Provenance",
+          "status": "in-progress",
           "owner": "Jules",
-          "evidence": "Sector coverage, metrics, and distribution plan defined in ga-graphai/docs/explainability.md",
-          "target_completion": "Q4"
+          "evidence": "scripts/security/verify_sbom_and_attestation.mjs",
+          "DoD": "SBOM + provenance are produced in CI for main builds and are verifiable."
+        },
+        {
+          "id": "WS4",
+          "name": "Secrets + Config Hardening",
+          "status": "in-progress",
+          "owner": "Jules",
+          "evidence": "Updated secret-scan-warn.yml to output to standardized path",
+          "DoD": "Secrets scanning runs on PRs. Config hardening checks run at least on stage/prod promotion."
+        },
+        {
+          "id": "WS5",
+          "name": "Policy-as-Code + Exceptions",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "evidence": "docs/security/EXCEPTION_PROCESS.md, docs/security/exceptions.yml",
+          "DoD": "Exceptions are auditable and expire by default."
+        },
+        {
+          "id": "WS6",
+          "name": "Required Checks + Release Integration",
+          "status": "in-progress",
+          "owner": "Jules",
+          "evidence": "scripts/security/reconcile_required_checks.mjs",
+          "DoD": "The repo has a clear, continuously checked contract for required checks."
         }
       ]
     }
   ],
   "summary": {
-    "rc_ready": 5,
+    "rc_ready": 7,
     "partial": 1,
     "incomplete": 0,
     "not_started": 6,
-    "total": 12,
+    "in_progress": 4,
+    "total": 18,
     "ga_blockers": []
   }
 }

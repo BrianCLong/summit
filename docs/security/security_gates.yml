@@ -1,0 +1,90 @@
+version: "1.0.0"
+description: "Security Gate Policy for Summit Platform"
+last_updated: "2025-05-20"
+
+gates:
+  sast:
+    name: "Static Application Security Testing"
+    description: "CodeQL and linting checks"
+    required_for:
+      - "pr"
+      - "main"
+    blocking: true
+    artifacts:
+      - "codeql-report.sarif"
+
+  dependencies:
+    name: "Dependency Vulnerability Scan"
+    description: "Scans for CVEs in dependencies"
+    required_for:
+      - "pr"
+      - "main"
+      - "release"
+    blocking: true
+    severity_threshold: "high"
+    artifacts:
+      - "deps.report.json"
+
+  secrets:
+    name: "Secrets Detection"
+    description: "Gitleaks scan for hardcoded secrets"
+    required_for:
+      - "pr"
+      - "main"
+    blocking: true
+    artifacts:
+      - "secrets.report.json"
+
+  sbom:
+    name: "SBOM Generation"
+    description: "Software Bill of Materials (CycloneDX)"
+    required_for:
+      - "main"
+      - "release"
+    blocking: true
+    artifacts:
+      - "sbom.json"
+
+  provenance:
+    name: "Provenance Attestation"
+    description: "SLSA Provenance Generation"
+    required_for:
+      - "main"
+      - "release"
+    blocking: true
+    artifacts:
+      - "attestation.json"
+
+  config_hardening:
+    name: "Configuration Hardening"
+    description: "Checks for secure defaults and config best practices"
+    required_for:
+      - "release"
+    blocking: true
+    artifacts:
+      - "config-hardening.report.json"
+
+  license:
+    name: "License Compliance"
+    description: "Checks for prohibited licenses"
+    required_for:
+      - "release"
+    blocking: true
+    artifacts:
+      - "license.report.json"
+
+required_checks:
+  pr:
+    - dependencies
+    - secrets
+  main:
+    - dependencies
+    - secrets
+    - sbom
+    - provenance
+  release:
+    - dependencies
+    - sbom
+    - provenance
+    - config_hardening
+    - license

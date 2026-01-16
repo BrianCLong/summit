@@ -1,50 +1,40 @@
-# Security Gates & Verification
+# Security Verification Gates
 
-## Overview
+This document defines the security gates that verify the security posture of the Summit platform. These gates are enforced during Pull Requests, Merges to Main, and Release Promotion.
 
-This document outlines the security gates and verification procedures enforced by the Release Engineering team.
+## Guiding Principles
 
-## Verification Quickstart
+1.  **Continuous Verification**: Security is not a one-time check but a continuous process.
+2.  **Evidence-Based**: All security claims must be backed by cryptographically verifiable evidence.
+3.  **Policy-as-Code**: Security policies are defined in code and version controlled.
+4.  **Deterministic**: Verification results must be reproducible for the same commit SHA.
 
-To verify the integrity of a release bundle locally:
+## Security Gates
 
-```bash
-# 1. Verify Structure & Checksums (Strict Policy)
-# Note: Skips signature check if you don't have Cosign installed or are offline.
-REQUIRE_SIGNATURE=false node scripts/release/verify-release-bundle.mjs --path dist/release --strict
+The following gates are currently enforced:
 
-# 2. Complete Verification (CI/Production)
-# Requires 'cosign' and internet access to Sigstore
-node scripts/release/verify-release-bundle.mjs --path dist/release --strict
-```
+| Gate | Description | Required For |
+| :--- | :--- | :--- |
+| **SAST & Linting** | Static Analysis Security Testing and code quality checks. | PR, Main |
+| **Dependency Scanning** | Scans dependencies for known vulnerabilities. | PR, Main |
+| **Secrets Detection** | Scans for hardcoded secrets and credentials. | PR, Main |
+| **SBOM Generation** | Generates Software Bill of Materials. | Main, Release |
+| **Provenance Attestation** | Generates SLSA provenance attestations. | Main, Release |
+| **Configuration Hardening** | Verifies secure configuration defaults. | Release |
+| **License Compliance** | Checks for prohibited licenses in dependencies. | Release |
 
-## Gate Definitions
+## Exceptions Process
 
-### 1. Evidence Drift Gate
+If a security check fails, it must be fixed. In rare cases where a fix is not immediately possible (e.g., false positive, low risk with planned mitigation), an exception can be requested.
 
-**Enforcement**: CI Pipeline (`publish-guard` job)
-**Description**: Prevents the release of artifacts that do not match the source-of-truth generation logic.
-**command**: `node scripts/release/verify-release-bundle.mjs --regenerate-and-compare ...`
+See [EXCEPTION_PROCESS.md](./EXCEPTION_PROCESS.md) for details on how to request and manage exceptions.
 
-### 3. Dependency Audit Gate
+## Evidence Artifacts
 
-**Enforcement**: CI Pipeline (`verify` job)
-**Description**: Enforces zero unwaived Critical/High vulnerabilities in production dependencies using `pnpm audit`.
-**Command**: `node scripts/ci/security_audit_gate.mjs`
-**Remediation**:
+Security gates produce deterministic artifacts stored in:
 
-1. Run `pnpm audit` locally to identify vulnerable packages.
-2. Update packages if possible (`pnpm update`).
-3. If no fix is available and the risk is acceptable, add a waiver to `.github/security-waivers.yml`.
+-   `artifacts/security-gate/<sha>/`
+-   `artifacts/sbom/<sha>/`
+-   `artifacts/provenance/<sha>/`
 
-### 4. Secrets Scanning Gate
-
-**Enforcement**: CI Pipeline (`verify` job) & Pre-commit
-**Description**: Prevents committing or merging secrets (API keys, tokens, etc.) into the repository.
-**Command**: `./scripts/ci/scan_secrets.sh`
-**Tooling**: Powered by [Gitleaks](https://github.com/gitleaks/gitleaks).
-**Remediation**:
-
-1. Remove the secret from the code.
-2. If the secret was already committed, rotate the secret immediately.
-3. Use `git reset HEAD <file>` to unstage the sensitive file.
+These artifacts are bundled into the Release Evidence Bundle.

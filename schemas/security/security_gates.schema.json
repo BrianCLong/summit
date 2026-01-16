@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Security Gates Policy Schema",
+  "type": "object",
+  "required": ["version", "gates", "required_checks"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "description": {
+      "type": "string"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date"
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["name", "description", "required_for", "blocking", "artifacts"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "required_for": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["pr", "main", "stage", "prod", "release"]
+            }
+          },
+          "blocking": {
+            "type": "boolean"
+          },
+          "severity_threshold": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"]
+          },
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "required_checks": {
+      "type": "object",
+      "properties": {
+        "pr": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "main": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "release": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "stage": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "prod": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}
