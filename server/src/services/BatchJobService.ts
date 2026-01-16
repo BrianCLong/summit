@@ -5,6 +5,7 @@ import { createReportingService } from '../reporting/service.js';
 import { AccessControlService } from '../reporting/access-control.js';
 import { AccessRule, AccessContext } from '../reporting/types.js';
 import { registerRevenueJobs } from '../jobs/revenue/RevenueJobs.js';
+import { aiJobsProcessing } from '../monitoring/metrics.js';
 
 // Define system-level access rules for background jobs
 const systemRules: AccessRule[] = [
@@ -97,6 +98,7 @@ class BatchJobService {
     // Register worker for report generation
     await this.boss.work(JOB_QUEUE_GENERATE_REPORT, async (job: any) => {
       console.log(`[PG-BOSS] Processing report job ${job.id} (${job.name})`);
+      aiJobsProcessing.inc({ job_type: JOB_QUEUE_GENERATE_REPORT });
       try {
         const { request, userId, reportName } = job.data;
         console.log(`[PG-BOSS] Generating report: ${reportName || 'unnamed'}`);
@@ -112,6 +114,8 @@ class BatchJobService {
       } catch (error: any) {
         console.error(`[PG-BOSS] Report generation failed for job ${job.id}:`, error);
         throw error;
+      } finally {
+        aiJobsProcessing.dec({ job_type: JOB_QUEUE_GENERATE_REPORT });
       }
     });
   }

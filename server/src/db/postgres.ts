@@ -8,6 +8,7 @@ dotenv.config();
 import { dbConfig } from './config.js';
 import { logger as baseLogger, correlationStorage } from '../config/logger.js';
 import { ResidencyGuard } from '../data-residency/residency-guard.js';
+import { dbConnectionsActive } from '../monitoring/metrics.js';
 
 // Constants for pool monitoring and connection management
 const POOL_MONITOR_INTERVAL_MS = 30000; // 30 seconds
@@ -372,7 +373,12 @@ function createPool(
   // Track connection lifetime
   pool.on('connect', (client: ExtendedPoolClient) => {
     client.connectedAt = Date.now();
+    dbConnectionsActive.inc({ database: 'postgres' });
     logger.debug({ pool: name }, 'New PostgreSQL connection established');
+  });
+
+  pool.on('remove', () => {
+    dbConnectionsActive.dec({ database: 'postgres' });
   });
 
   return {
