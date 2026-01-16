@@ -376,3 +376,17 @@ pipelines-list: ## List registered pipelines
 
 pipelines-validate: ## Validate pipeline manifests
 	@python3 pipelines/cli.py validate
+
+# Copilot CLI lanes
+.PHONY: copilot-explore copilot-plan copilot-task copilot-review
+copilot-explore: ## Run Copilot CLI in explore lane (set PROMPT/ARGS vars)
+	@tools/copilot/summit-copilot explore $(ARGS) $(PROMPT)
+
+copilot-plan: ## Run Copilot CLI in plan lane (set PROMPT/ARGS vars)
+	@tools/copilot/summit-copilot plan $(ARGS) $(PROMPT)
+
+copilot-task: ## Run Copilot CLI in task lane (set PROMPT/ARGS vars)
+	@tools/copilot/summit-copilot task $(ARGS) $(PROMPT)
+
+copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
+	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)
