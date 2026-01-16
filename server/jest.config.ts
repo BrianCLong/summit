@@ -18,8 +18,11 @@ const config: Config = {
     ]
     : [
       '<rootDir>/tests/**/*.test.ts',
+      '<rootDir>/tests/**/*.test.js',
       '<rootDir>/src/tests/**/*.test.ts',
+      '<rootDir>/src/tests/**/*.test.js',
       '<rootDir>/src/**/__tests__/**/*.test.ts',
+      '<rootDir>/src/**/__tests__/**/*.test.js',
     ],
   testPathIgnorePatterns: [
     '/node_modules/',
