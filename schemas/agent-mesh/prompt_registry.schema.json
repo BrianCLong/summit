@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Prompt Registry Entry",
+  "type": "object",
+  "required": ["name", "agent", "version", "hash", "content_path", "inputs_schema", "outputs_schema"],
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "agent": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "hash": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "content_path": {
+      "type": "string",
+      "description": "Relative path to the prompt markdown file"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "inputs_schema": {
+      "type": "object",
+      "description": "JSON Schema for the prompt inputs"
+    },
+    "outputs_schema": {
+      "type": "object",
+      "description": "JSON Schema for the expected model output"
+    }
+  }
+}

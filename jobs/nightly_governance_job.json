@@ -1,0 +1,23 @@
+{
+  "job_id": "nightly-gov-001",
+  "name": "Nightly Governance",
+  "steps": [
+    {
+      "id": "security-scan",
+      "agent": "security-agent",
+      "version": "1.0.0",
+      "inputs": {
+        "target": "."
+      }
+    },
+    {
+      "id": "compliance-audit",
+      "agent": "compliance-agent",
+      "version": "1.0.0",
+      "dependencies": ["security-scan"],
+      "inputs": {
+        "scope": ["SOC2"]
+      }
+    }
+  ]
+}

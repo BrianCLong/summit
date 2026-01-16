@@ -1,0 +1,32 @@
+{
+  "job_id": "rc-001",
+  "name": "Release Candidate Flow",
+  "steps": [
+    {
+      "id": "build",
+      "agent": "release-agent",
+      "version": "1.0.0",
+      "inputs": {
+        "action": "build"
+      }
+    },
+    {
+      "id": "security-gate",
+      "agent": "security-agent",
+      "version": "1.0.0",
+      "dependencies": ["build"],
+      "inputs": {
+        "artifact_ref": "${build.outputs.artifact_uri}"
+      }
+    },
+    {
+      "id": "compliance-gate",
+      "agent": "compliance-agent",
+      "version": "1.0.0",
+      "dependencies": ["security-gate"],
+      "inputs": {
+        "evidence_refs": ["${security-gate.outputs.report_uri}"]
+      }
+    }
+  ]
+}
