@@ -1,0 +1,21 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
+# Governance Evidence
+
+## Evidence Locations
+
+- Docs integrity: `artifacts/governance/docs-integrity/<sha>/`
+- Branch protection drift: `artifacts/governance/branch-protection-drift/`
+- SOC control verification: `soc-compliance-reports/`
+- Release evidence bundles: `evidence-bundles/`
+- Control evidence index: `docs/governance/CONTROL_EVIDENCE_INDEX.md`
+
+## Evidence Collection
+
+- Run `pnpm ci:docs-governance` to emit docs integrity artifacts.
+- Run `pnpm ci:branch-protection:check` to emit drift artifacts.
+- Run `bash scripts/test-soc-controls.sh soc-compliance-reports` for SOC reports.
+- SOC report outputs: `soc-compliance-reports/server-soc-controls.xml`, `soc-compliance-reports/soc2-compliance-service.xml`.

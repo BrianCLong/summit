@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Ombudsman Review Process
 
 - Intake queue for appeals, access denials, and misuse alerts.

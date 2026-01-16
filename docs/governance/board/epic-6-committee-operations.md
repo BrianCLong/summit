@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 6 — Committee Operations (audit/comp/risk that actually works)
 
 1.  **Define committee charters with clear scope and annual calendars.**

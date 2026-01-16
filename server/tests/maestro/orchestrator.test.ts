@@ -17,7 +17,8 @@ describe('Maestro Core', () => {
       createRun: jest.fn(),
       createTask: jest.fn(),
       updateTask: jest.fn(),
-      createArtifact: jest.fn(),
+      updateTask: jest.fn(),
+      createArtifact: jest.fn().mockImplementation((a) => Promise.resolve(a)),
     } as unknown as IntelGraphClient;
 
     mockCostMeter = {

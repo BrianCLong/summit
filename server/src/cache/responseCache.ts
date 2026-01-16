@@ -158,6 +158,11 @@ export async function setCachedJson(
   } catch (e: any) { }
 }
 
+export const responseCache = {
+  getCachedJson,
+  setCachedJson,
+};
+
 /**
  * Cache query result specifically
  */

@@ -10,12 +10,15 @@ import { makePubSub } from '../subscriptions/pubsub';
 import Redis from 'ioredis';
 import { CausalGraphService } from '../services/CausalGraphService';
 import type { GraphQLContext } from './apollo-v5-server.js';
+import { createRequire } from 'node:module';
 
 const COHERENCE_EVENTS = 'COHERENCE_EVENTS';
 
 const redisClient = process.env.REDIS_URL
   ? new Redis(process.env.REDIS_URL)
   : null;
+
+const require = createRequire(import.meta.url);
 
 export const resolvers = {
   DateTime: new (require('graphql-iso-date').GraphQLDateTime)(),

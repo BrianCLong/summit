@@ -50,3 +50,36 @@ jobs:
 
       - name: Unit Tests
         run: pnpm -w test:unit
+
+  soc-controls:
+    name: SOC Controls
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [config-guard]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node (from .nvmrc)
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install (frozen lockfile)
+        run: pnpm -w install --frozen-lockfile
+
+      - name: SOC Control Unit Tests
+        run: bash scripts/test-soc-controls.sh soc-compliance-reports
+        env:
+          TZ: UTC
+
+      - name: Upload SOC compliance reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soc-compliance-report
+          path: soc-compliance-reports
+          retention-days: 90

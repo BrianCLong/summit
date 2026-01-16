@@ -1,3 +1,5 @@
+import { jest } from '@jest/globals';
+
 // ESM mocking helper for Jest 29+
 // Usage: const mod = await mockEsmModule('../path/to/mod.js', () => ({ named: jest.fn(), default: jest.fn() }));
 

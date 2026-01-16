@@ -1,6 +1,7 @@
 import { getNeo4jDriver } from '../../db/neo4j.js';
 import { randomUUID } from 'node:crypto';
 import pino from 'pino';
+import { GraphQLError } from 'graphql';
 import {
   pubsub,
   RELATIONSHIP_CREATED,
@@ -45,6 +46,19 @@ const relationshipResolvers = {
           `,
           { from: input.from, to: input.to, tenantId, props },
         );
+
+        // Check if entities were found
+        if (result.records.length === 0) {
+          throw new GraphQLError('One or both entities not found', {
+            extensions: {
+              code: 'BAD_USER_INPUT',
+              http: { status: 400 },
+              fromEntityId: input.from,
+              toEntityId: input.to,
+            },
+          });
+        }
+
         const record = result.records[0].get('r');
         const relationship = {
           id: record.properties.id,
@@ -61,8 +75,17 @@ const relationshipResolvers = {
         return relationship;
       } catch (error: any) {
         logger.error({ error, input }, 'Error creating relationship');
+        // Re-throw GraphQLErrors as-is to preserve status codes
+        if (error instanceof GraphQLError) {
+          throw error;
+        }
         const message = error instanceof Error ? error.message : 'Unknown error';
-        throw new Error(`Failed to create relationship: ${message}`);
+        throw new GraphQLError(`Failed to create relationship: ${message}`, {
+          extensions: {
+            code: 'INTERNAL_SERVER_ERROR',
+            http: { status: 500 },
+          },
+        });
       } finally {
         await session.close();
       }

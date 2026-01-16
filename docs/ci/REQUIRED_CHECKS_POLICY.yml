@@ -34,6 +34,7 @@ branch_protection:
       - "CI / unit-tests"
       - "GA Gate"
       - "Release Readiness Gate"
+      - "SOC Controls"
       - "Unit Tests & Coverage"
       - "ga / gate"
 
@@ -53,6 +54,10 @@ always_required:
   - name: "Unit Tests & Coverage"
     workflow: "unit-test-coverage.yml"
     rationale: "Test suite and coverage gates must pass for all code changes"
+
+  - name: "SOC Controls"
+    workflow: "ci.yml"
+    rationale: "SOC control verification is required for audit readiness"
 
   - name: "CI Core (Primary Gate)"
     workflow: "ci-core.yml"

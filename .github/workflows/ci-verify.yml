@@ -256,6 +256,56 @@ jobs:
           fi
         continue-on-error: true # Non-blocking for PRs
 
+  ga-evidence-completeness:
+    name: GA Evidence Completeness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        with:
+          node-version: "20"
+      - name: Create stub evidence bundle (opt-in)
+        if: env.ALLOW_STUB_EVIDENCE == '1'
+        run: |
+          EVIDENCE_DIR="dist/evidence/${GITHUB_SHA}"
+          python3 scripts/evidence/create_stub_evidence_bundle.py --evidence-dir "$EVIDENCE_DIR"
+      - name: Validate control evidence
+        run: |
+          EVIDENCE_DIR="dist/evidence/${GITHUB_SHA}"
+          if [ ! -d "$EVIDENCE_DIR" ]; then
+            echo "::error::Missing evidence bundle at $EVIDENCE_DIR"
+            exit 1
+          fi
+          python3 scripts/evidence/generate_control_evidence_index.py --evidence-dir "$EVIDENCE_DIR"
+          python3 scripts/evidence/validate_control_evidence.py --evidence-dir "$EVIDENCE_DIR"
+
+      - name: Upload evidence index
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: ga-evidence-index-${{ github.sha }}
+          path: |
+            dist/evidence/${{ github.sha }}/control_evidence_index.json
+            dist/evidence/${{ github.sha }}/validation_report.json
+          retention-days: 30
+
+      - name: Evidence completeness summary
+        if: always()
+        run: |
+          REPORT="dist/evidence/${GITHUB_SHA}/validation_report.json"
+          if [ -f "$REPORT" ]; then
+            STATUS=$(node -e "const r=require('./'+process.argv[1]); console.log(r.status);" "$REPORT")
+            FAILS=$(node -e "const r=require('./'+process.argv[1]); console.log(r.summary.failures);" "$REPORT")
+            WARN=$(node -e "const r=require('./'+process.argv[1]); console.log(r.summary.warnings);" "$REPORT")
+            echo "## GA Evidence Completeness" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Status:** ${STATUS}" >> $GITHUB_STEP_SUMMARY
+            echo "**Failures:** ${FAILS}" >> $GITHUB_STEP_SUMMARY
+            echo "**Warnings:** ${WARN}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Artifacts: ga-evidence-index-${GITHUB_SHA}" >> $GITHUB_STEP_SUMMARY
+          fi
+
   ci-verify-gate:
     name: CI Verify Gate ✅
     runs-on: ubuntu-latest
@@ -266,6 +316,7 @@ jobs:
       - provenance
       - schema-validation
       - compliance-evidence
+      - ga-evidence-completeness
     if: always()
     steps:
       - name: Check critical gates passed
@@ -277,6 +328,7 @@ jobs:
           echo "Provenance & SBOM: ${{ needs.provenance.result }}"
           echo "Schema Validation: ${{ needs.schema-validation.result }}"
           echo "Compliance Evidence: ${{ needs.compliance-evidence.result }}"
+          echo "GA Evidence Completeness: ${{ needs.ga-evidence-completeness.result }}"
           echo ""
 
           # Critical gates (BLOCKING)
@@ -290,12 +342,17 @@ jobs:
             exit 1
           fi
 
+          if [[ "${{ needs.ga-evidence-completeness.result }}" != "success" ]]; then
+            echo "::error::GA Evidence Completeness FAILED - CI BLOCKED"
+            exit 1
+          fi
+
           # Non-critical gates (informational)
           # Governance, provenance, schema, compliance are non-blocking until implementation complete
 
           echo ""
           echo "✅ CI VERIFY GATE: PASSED"
-          echo "All critical security and compliance checks passed."
+          echo "All critical security, policy, and GA evidence checks passed."
 
       - name: Post summary
         run: |
@@ -304,6 +361,7 @@ jobs:
           echo "### Critical Gates (BLOCKING)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Security Scan (Gitleaks, pnpm audit)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Policy Compliance (OPA check + test)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ GA Evidence Completeness" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Informational Gates (Non-blocking)" >> $GITHUB_STEP_SUMMARY
           echo "- ℹ️ Governance Checks" >> $GITHUB_STEP_SUMMARY

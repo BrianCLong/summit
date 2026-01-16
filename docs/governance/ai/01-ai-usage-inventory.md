@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 1: AI Usage Inventory & Policy Baseline (stop shadow AI)
 
 1.  Inventory every AI use: internal tools, customer-facing features, vendor AI, employee copilots.

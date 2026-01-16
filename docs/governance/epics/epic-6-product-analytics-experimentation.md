@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 ## Epic 6 — Product Analytics & Experimentation Platform (stop guessing)
 
 1. Define canonical event taxonomy and schema governance.

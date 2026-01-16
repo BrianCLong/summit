@@ -1,0 +1,153 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "AI Patches Index Schema",
+  "description": "Schema for the AI-generated patch index file",
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Schema version"
+    },
+    "generator": {
+      "type": "string",
+      "const": "ai-patch-generator"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Generated at time (for audit only, not for determinism)"
+    },
+    "patches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "patch_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "description": "SHA256 of canonical patch descriptor"
+          },
+          "suggestion_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true,
+            "description": "Sorted array of related suggestion IDs"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "add_registry_entry",
+              "remove_registry_entry",
+              "rename_id",
+              "add_doc_reference",
+              "deprecate_id",
+              "other"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "files_touched": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true,
+            "description": "Sorted array of file paths touched"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Short, redacted-safe description"
+          },
+          "rationale": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Short, redacted-safe rationale"
+          },
+          "safety_notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true,
+            "description": "Sorted safety considerations"
+          },
+          "patch_path": {
+            "type": "string",
+            "description": "Relative path to the patch file"
+          },
+          "prerequisites": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true,
+            "description": "Sorted prerequisite conditions"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["applicable", "stale_context", "suppressed", "pending", "error"],
+            "description": "Validation status of the patch"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true,
+            "description": "Reasons for suppressed status"
+          }
+        },
+        "required": [
+          "patch_id",
+          "suggestion_ids",
+          "kind",
+          "severity",
+          "confidence",
+          "files_touched",
+          "summary",
+          "rationale",
+          "patch_path",
+          "status"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "validation": {
+      "type": "object",
+      "properties": {
+        "validation_path": {
+          "type": "string"
+        },
+        "bundle_patch_path": {
+          "type": "string"
+        },
+        "bundle_patch_id": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "bundle_includes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": ["validation_path"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["version", "generator", "patches"],
+  "additionalProperties": false
+}

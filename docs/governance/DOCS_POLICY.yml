@@ -1,0 +1,13 @@
+schema_version: "1"
+max_days_since_reviewed: 90
+required_headers:
+  - Owner
+  - Last-Reviewed
+  - Evidence-IDs
+  - Status
+allowed_status:
+  - active
+  - planned
+  - deprecated
+index_file: "docs/governance/INDEX.md"
+report_out_dir: "artifacts/governance/docs-integrity/${sha}"

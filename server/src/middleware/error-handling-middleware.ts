@@ -5,6 +5,7 @@ import { z } from 'zod';
 const ZodError = z.ZodError;
 import { logger } from '../config/logger.js';
 import { recordEndpointResult } from '../observability/reliability-metrics.js';
+import * as fs from 'node:fs';
 
 const deriveStatusCode = (error: unknown): number => {
   if (error instanceof GraphQLError) {
@@ -66,6 +67,21 @@ export const centralizedErrorHandler = (
   res: Response,
   next: NextFunction,
 ) => {
+  // Debug logging for GraphQL routes
+  if (req.path?.startsWith('/graphql')) {
+    try {
+      fs.appendFileSync('/tmp/debug_error_handler.txt', `[centralizedErrorHandler] GraphQL error caught\n`);
+      fs.appendFileSync('/tmp/debug_error_handler.txt', `[centralizedErrorHandler] Error type: ${err?.constructor?.name}\n`);
+      fs.appendFileSync('/tmp/debug_error_handler.txt', `[centralizedErrorHandler] Error message: ${(err as any)?.message}\n`);
+      fs.appendFileSync('/tmp/debug_error_handler.txt', `[centralizedErrorHandler] Is GraphQLError? ${err instanceof GraphQLError}\n`);
+      if ((err as any)?.stack) {
+        fs.appendFileSync('/tmp/debug_error_handler.txt', `[centralizedErrorHandler] Stack: ${(err as any)?.stack?.split('\n').slice(0, 3).join('\n')}\n`);
+      }
+    } catch (e) {
+      // Ignore logging errors
+    }
+  }
+
   if (res.headersSent) {
     return next(err);
   }

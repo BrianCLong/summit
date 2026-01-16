@@ -282,10 +282,26 @@ claude-preflight: ## Fast local checks before make ga (lint + typecheck + unit t
 ga: ## Run Enforceable GA Gate (Lint -> Clean Up -> Deep Health -> Smoke -> Security)
 	@mkdir -p artifacts/ga
 	@./scripts/ga-gate.sh
+	@$(MAKE) ga-validate-evidence
 
 ga-verify: ## Run GA tier B/C verification sweep (deterministic)
 	@node --test testing/ga-verification/*.ga.test.mjs
 	@node scripts/ga/verify-ga-surface.mjs
+
+ga-validate-evidence: ## Validate control evidence completeness for GA
+	@EVIDENCE_DIR="dist/evidence/$$(git rev-parse HEAD)"; \
+	if [ ! -d "$$EVIDENCE_DIR" ]; then \
+		echo "Missing evidence bundle at $$EVIDENCE_DIR"; \
+		exit 1; \
+	fi; \
+	python3 scripts/evidence/generate_control_evidence_index.py --evidence-dir "$$EVIDENCE_DIR"; \
+	python3 scripts/evidence/validate_control_evidence.py --evidence-dir "$$EVIDENCE_DIR"
+
+ga-evidence: ## Create a minimal local evidence bundle for GA validation
+	@set -e; \
+	EVIDENCE_DIR="dist/evidence/$$(git rev-parse HEAD)"; \
+	python3 scripts/evidence/create_stub_evidence_bundle.py --evidence-dir "$$EVIDENCE_DIR"; \
+	echo "Created stub evidence bundle at $$EVIDENCE_DIR"
 
 ops-verify: ## Run unified Ops Verification (Observability + Storage/DR)
 	./scripts/verification/verify_ops.sh

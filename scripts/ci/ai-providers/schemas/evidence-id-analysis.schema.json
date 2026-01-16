@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Evidence ID Analysis Result",
+  "description": "Structured analysis of Evidence-IDs from a governance document",
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version identifier",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["invalid_format", "mapping_missing", "orphaned_id", "missing_header", "other"]
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["error", "warning", "info"]
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable description of the issue"
+          },
+          "evidence_id": {
+            "type": "string",
+            "description": "The specific Evidence-ID that has an issue"
+          },
+          "location": {
+            "type": "string",
+            "description": "Specific document location (line, section) where issue occurs"
+          }
+        },
+        "required": ["type", "severity", "message"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["issues"],
+  "additionalProperties": false
+}

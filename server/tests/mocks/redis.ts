@@ -1,3 +1,5 @@
+import { jest } from '@jest/globals';
+
 export const mockRedisClient = {
   connect: jest.fn().mockResolvedValue(undefined),
   quit: jest.fn().mockResolvedValue(undefined),

@@ -1,0 +1,47 @@
+{
+  "task_id": "GOVERNANCE_DOCS_SOC_CONTROLS",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "governance-docs-soc-controls",
+    "version": "v1",
+    "sha256": "34c74a151cb9bfa1dc22250d51139ad229da7bd6bbb4a5ad64593cefe7c7a01a",
+    "path": "prompts/governance/governance-docs-soc-controls@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/governance/",
+      "docs/ci/REQUIRED_CHECKS_POLICY.yml",
+      "docs/SOC_CONTROL_UNIT_TESTS_PLAN.md",
+      "scripts/ci/",
+      ".github/workflows/",
+      "server/tests/",
+      "server/src/",
+      "server/scripts/",
+      "compliance/",
+      "prompts/",
+      "agents/examples/"
+    ],
+    "domains": ["governance", "compliance", "ci", "documentation", "testing"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "A",
+    "artifacts": [
+      "artifacts/governance/docs-integrity/<sha>/report.json",
+      "artifacts/governance/docs-integrity/<sha>/report.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 1
+  },
+  "success_criteria": [
+    "Governance docs index and leaf docs are standardized with required headers.",
+    "SOC Controls tests run in CI with a stable job name.",
+    "GA verification lane is deterministic and release:ready passes."
+  ],
+  "stop_conditions": [
+    "CI enforcement rejects missing prompt metadata or scope violations.",
+    "Detected governance contradictions between docs and code."
+  ]
+}

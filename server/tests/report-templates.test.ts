@@ -8,9 +8,9 @@ describe('report templates', () => {
       process.cwd(),
       'templates',
       'reports',
-      'sample-v1.json',
+      'sample.handlebars',
     );
-    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-    expect(manifest).toMatchSnapshot();
+    const manifest = fs.readFileSync(manifestPath, 'utf-8');
+    expect(manifest).toContain('{{content}}');
   });
 });

@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 2 — Board Pack Production System (reduce scramble, increase truth)
 
 1.  **Centralize board pack source data** (one repo + one metrics layer).

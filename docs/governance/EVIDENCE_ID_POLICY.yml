@@ -1,0 +1,25 @@
+# Evidence ID Policy
+# Defines the standards for Evidence-IDs header usage
+
+schema_version: "1"
+max_days_since_reviewed: 90
+required_headers:
+  - Owner
+  - Last-Reviewed
+  - Evidence-IDs
+  - Status
+allowed_status:
+  - active
+  - planned
+  - deprecated
+evidence_id_format: /^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*$/
+max_evidence_ids_per_document: 50
+evidence_map_path: "evidence/map.yml"
+required_evidence_types: []
+optional_evidence_types: []
+index_file: "docs/governance/INDEX.md"
+index_yml: "docs/governance/INDEX.yml"
+enforce_index_drift: true
+enforce_active_gate_existence: true
+allow_best_effort_workflow_parse: true
+report_out_dir: "artifacts/governance/evidence-id-consistency/${sha}"

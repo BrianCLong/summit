@@ -7,9 +7,8 @@ import argparse
 import json
 import os
 import subprocess
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import List, Tuple
 
 
 def read_json(path: Path) -> dict:
@@ -35,7 +34,7 @@ def normalize_status(value: str | None) -> str:
     return val
 
 
-def extract_controls(index_data: dict) -> List[dict]:
+def extract_controls(index_data: dict) -> list[dict]:
     candidates = []
     if isinstance(index_data.get("controls"), list):
         candidates = index_data["controls"]
@@ -69,7 +68,7 @@ def extract_controls(index_data: dict) -> List[dict]:
     return controls
 
 
-def extract_exceptions(validation_data: dict) -> List[dict]:
+def extract_exceptions(validation_data: dict) -> list[dict]:
     exceptions = validation_data.get("exceptions") or validation_data.get("waivers") or []
     if not isinstance(exceptions, list):
         return []
@@ -97,8 +96,8 @@ def parse_date(date_str: str | None) -> datetime | None:
         return None
 
 
-def count_expiring(exceptions: List[dict], within_days: int) -> int:
-    now = datetime.now(timezone.utc)
+def count_expiring(exceptions: list[dict], within_days: int) -> int:
+    now = datetime.now(UTC)
     horizon = now + timedelta(days=within_days)
     count = 0
     for item in exceptions:
@@ -108,8 +107,8 @@ def count_expiring(exceptions: List[dict], within_days: int) -> int:
     return count
 
 
-def resolve_baseline(repo_root: Path, env: dict) -> Tuple[str | None, str]:
-    def git(cmd: List[str]) -> str:
+def resolve_baseline(repo_root: Path, env: dict) -> tuple[str | None, str]:
+    def git(cmd: list[str]) -> str:
         return subprocess.check_output(cmd, cwd=repo_root, text=True).strip()
 
     if not (repo_root / ".git").exists():
@@ -134,7 +133,7 @@ def resolve_baseline(repo_root: Path, env: dict) -> Tuple[str | None, str]:
         return None, "none"
 
 
-def select_primary_evidence(entry: dict) -> Tuple[str, str]:
+def select_primary_evidence(entry: dict) -> tuple[str, str]:
     evidence = entry.get("evidence") or []
     if not evidence:
         return "", ""
@@ -236,7 +235,7 @@ def escape_pdf(text: str) -> str:
     return text.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
 
 
-def write_pdf(path: Path, lines: List[str]) -> None:
+def write_pdf(path: Path, lines: list[str]) -> None:
     max_lines = 40
     lines = lines[:max_lines]
     content_lines = ["BT", "/F1 10 Tf", "50 760 Td", "12 TL"]
@@ -394,7 +393,7 @@ def build_report(evidence_dir: Path, baseline_dir: Path | None, baseline_sha: st
             "repo": repo,
             "branch": env.get("GITHUB_REF_NAME", "unknown"),
             "sha": meta.get("sha") or env.get("GITHUB_SHA") or "unknown",
-            "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "generated_at": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "ci_run_url": run_url,
             "bundle_id": evidence_dir.name,
         },

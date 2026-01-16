@@ -1,4 +1,7 @@
 import { describe, test, expect } from '@jest/globals';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
 describe('runCommandCheck', () => {
   test('reports success for passing commands', () => {
     const {

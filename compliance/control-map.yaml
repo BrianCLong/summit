@@ -7,7 +7,7 @@ controls:
       - "AGENTS.md"
       - "docs/governance/README.md"
     evidence:
-      - "repo/files/AGENTS.md"
+      - "repo/AGENTS.md"
     status: covered
     owner: "governance-team"
 

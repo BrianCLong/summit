@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 1 — Data Correctness & Invariants (GA means “it’s right,” not “it runs”)
 
 1.  Define canonical invariants for Tier-0 objects (uniqueness, ordering, state transitions).

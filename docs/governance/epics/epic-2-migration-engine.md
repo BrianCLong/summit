@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 2 — Migration & Backfill Engine (every major change gets a safe path)
 
 1.  Standardize expand/migrate/contract pattern for schema + storage changes.

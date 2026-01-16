@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Board Governance Framework
 
 This section of the governance library outlines the comprehensive framework for board-level governance, decision-making, and risk management. The framework is organized into nine distinct epics, each addressing a critical aspect of board operations and fiduciary responsibility.

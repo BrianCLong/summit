@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 ## Epic 3 — Workflow Expansion Beyond MVP3 (new value without new chaos)
 
 1. Identify top 3 post-GA workflows from the wishbooks (highest impact + evidence).

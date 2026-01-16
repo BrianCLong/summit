@@ -1,8 +1,8 @@
 import json
 import os
 import tempfile
-from pathlib import Path
 import unittest
+from pathlib import Path
 
 from scripts.evidence.generate_soc_report import build_report, resolve_baseline
 

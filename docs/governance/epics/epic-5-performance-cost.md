@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 5 — Performance + Cost “Hot Path” Strike Team (speed and margin together)
 
 1.  Identify top 10 expensive/slow Tier-0 operations by volume × cost × latency.
