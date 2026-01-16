@@ -4,7 +4,12 @@ import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const jestBin = path.join(__dirname, '..', 'node_modules', 'jest', 'bin', 'jest.js');
+// Look for jest in root node_modules as well due to hoisting
+import fs from 'node:fs';
+let jestBin = path.join(__dirname, '..', 'node_modules', 'jest', 'bin', 'jest.js');
+if (!fs.existsSync(jestBin)) {
+  jestBin = path.join(__dirname, '../../node_modules/jest/bin/jest.js');
+}
 
 const baseArgs = [
   '--config',
