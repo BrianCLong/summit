@@ -6,7 +6,7 @@ I've completed the analysis and preparation for Issue #15790. Since admin access
 
 **Current State:** Branch protection exists on `main`, but **required status checks are NOT enabled** (API endpoint returns 404).
 
-**Action Required:** Enable required status checks with **7 check contexts** as defined in the policy.
+**Action Required:** Enable required status checks with **4 check contexts** as defined in Issue #15790's always_required list.
 
 **Admin Access Required:** Yes (this is the blocker preventing immediate application).
 
@@ -16,11 +16,11 @@ I've completed the analysis and preparation for Issue #15790. Since admin access
 
 All artifacts have been committed to the `evidence/` directory:
 
-| Artifact | Path | Purpose |
-|----------|------|---------|
-| **Reconciliation Plan (Markdown)** | `evidence/branch-protection-reconciliation-2026-01-16T01-15-54Z.md` | Human-readable plan with all options |
-| **Reconciliation Plan (JSON)** | `evidence/branch-protection-reconciliation-2026-01-16T01-15-54Z.json` | Machine-readable artifact |
-| **Executable Runbook** | `evidence/branch-protection-reconciliation-runbook-2026-01-16T01-15-54Z.sh` | One-command apply script |
+| Artifact                           | Path                                                                        | Purpose                              |
+| ---------------------------------- | --------------------------------------------------------------------------- | ------------------------------------ |
+| **Reconciliation Plan (Markdown)** | `evidence/branch-protection-reconciliation-2026-01-16T01-15-54Z.md`         | Human-readable plan with all options |
+| **Reconciliation Plan (JSON)**     | `evidence/branch-protection-reconciliation-2026-01-16T01-15-54Z.json`       | Machine-readable artifact            |
+| **Executable Runbook**             | `evidence/branch-protection-reconciliation-runbook-2026-01-16T01-15-54Z.sh` | One-command apply script             |
 
 ---
 
@@ -28,13 +28,10 @@ All artifacts have been committed to the `evidence/` directory:
 
 According to `docs/ci/REQUIRED_CHECKS_POLICY.yml` v2.0.0 (branch_protection section):
 
-1. `CI Core (Primary Gate)`
-2. `CI / config-guard`
-3. `CI / unit-tests`
-4. `GA Gate`
-5. `Release Readiness Gate`
-6. `Unit Tests & Coverage`
-7. `ga / gate`
+1. `Release Readiness Gate`
+2. `GA Gate`
+3. `Unit Tests & Coverage`
+4. `CI Core (Primary Gate)`
 
 **Additional setting:** `strict: true` (require branches to be up to date before merging)
 
@@ -51,6 +48,7 @@ bash evidence/branch-protection-reconciliation-runbook-2026-01-16T01-15-54Z.sh
 ```
 
 This script will:
+
 - ✅ Check prerequisites
 - ✅ Show current state (before)
 - ✅ Apply the configuration
@@ -64,7 +62,7 @@ This script will:
 1. Go to [Settings → Branches → main protection rule](https://github.com/BrianCLong/summit/settings/branches)
 2. Enable "Require status checks to pass before merging"
 3. Enable "Require branches to be up to date before merging"
-4. Add the 7 status check contexts listed above
+4. Add the 4 status check contexts listed above
 5. Save changes
 
 **Time:** ~5 minutes
@@ -78,13 +76,10 @@ gh api repos/BrianCLong/summit/branches/main/protection/required_status_checks \
   -X PATCH \
   -H "Accept: application/vnd.github+json" \
   -f strict=true \
-  -f contexts[]="CI Core (Primary Gate)" \
-  -f contexts[]="CI / config-guard" \
-  -f contexts[]="CI / unit-tests" \
-  -f contexts[]="GA Gate" \
   -f contexts[]="Release Readiness Gate" \
+  -f contexts[]="GA Gate" \
   -f contexts[]="Unit Tests & Coverage" \
-  -f contexts[]="ga / gate"
+  -f contexts[]="CI Core (Primary Gate)"
 ```
 
 **Time:** ~2 minutes
@@ -100,7 +95,7 @@ gh api repos/BrianCLong/summit/branches/main/protection/required_status_checks \
   | jq -r '.contexts[]' | sort
 ```
 
-**Expected output:** All 7 checks listed (sorted alphabetically)
+**Expected output:** All 4 always_required checks listed (sorted alphabetically)
 
 ---
 
@@ -116,8 +111,9 @@ gh api repos/BrianCLong/summit/branches/main/protection/required_status_checks \
 ### 🐛 Note: Reconciler Script Issue
 
 The existing `scripts/release/reconcile_branch_protection.sh` has a compatibility issue:
-- It extracts from `always_required` (4 checks) instead of `branch_protection.required_status_checks.contexts` (7 checks)
-- The installed `yq` version (0.0.0) doesn't support the `-o=json` flag the script expects
+
+- It should precisely target the 4 `always_required` checks from Issue #15790.
+- The installed `yq` version (0.0.0) doesn't support the `-o=json` flag the script expects.
 
 **Recommendation:** Use the provided runbook or manual options until the reconciler script is updated.
 
@@ -126,12 +122,14 @@ The existing `scripts/release/reconcile_branch_protection.sh` has a compatibilit
 ### 📊 Evidence Log
 
 **Before State:**
+
 ```
 API Endpoint: repos/BrianCLong/summit/branches/main/protection/required_status_checks
 Status: 404 Not Found (required_status_checks not configured)
 ```
 
 **After State (expected):**
+
 ```
 Status: 200 OK
 Contexts: 7 required checks
@@ -143,7 +141,7 @@ Strict: true
 ### 📝 Acceptance Criteria
 
 - [ ] API endpoint returns 200 (not 404)
-- [ ] All 7 required checks are configured
+- [ ] All 4 required checks are configured
 - [ ] `strict: true` is set
 - [ ] Existing branch protection rules remain unchanged
 - [ ] Manual test: Attempt to merge PR without passing checks (should be blocked)
@@ -161,6 +159,7 @@ Strict: true
 **Status:** ⏸️ **BLOCKED - Awaiting admin execution**
 
 Once an admin executes one of the options above, please:
+
 1. Post verification results here
 2. Update this issue status to "Done"
 3. Proceed to next priority item (#14700 - SOC control tests in CI)

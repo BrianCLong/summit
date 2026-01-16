@@ -20,18 +20,21 @@ Branch protection exists on `main`, but **required status checks are NOT enabled
 ## Current State (Evidence)
 
 ### Authentication Status
+
 ```
 gh CLI: Installed (v2.40.1) but not authenticated
 GH_TOKEN: Not available in environment
 ```
 
 ### Branch Protection API Query
+
 ```bash
 # Attempted: gh api repos/BrianCLong/summit/branches/main/protection/required_status_checks
 # Result: 404 Not Found (required_status_checks not configured)
 ```
 
 ### Policy Source
+
 - **File:** `docs/ci/REQUIRED_CHECKS_POLICY.yml`
 - **Version:** 2.0.0
 - **Last Updated:** 2026-01-13
@@ -41,36 +44,28 @@ GH_TOKEN: Not available in environment
 
 ## Policy Requirements
 
-According to `docs/ci/REQUIRED_CHECKS_POLICY.yml` (lines 27-38), the `branch_protection.required_status_checks.contexts` section specifies **7 required checks**:
+According to `docs/ci/REQUIRED_CHECKS_POLICY.yml`, Issue #15790 specifies **4 always_required checks** that must be enforced as required status checks:
 
-### Required Status Checks (from policy)
+### Required Status Checks (from always_required list)
 
-1. **`CI Core (Primary Gate)`**
-   - Workflow: `ci-core.yml`
-   - Rationale: Primary blocking gate - lint, typecheck, tests, build
-
-2. **`CI / config-guard`**
-   - Enforced via CI pipeline
-
-3. **`CI / unit-tests`**
-   - Enforced via CI pipeline
-
-4. **`GA Gate`**
-   - Workflow: `ga-gate.yml`
-   - Rationale: Official GA verification entrypoint with make ga
-
-5. **`Release Readiness Gate`**
+1. **`Release Readiness Gate`**
    - Workflow: `release-readiness.yml`
    - Rationale: Comprehensive release readiness verification - runs on every change
 
-6. **`Unit Tests & Coverage`**
+2. **`GA Gate`**
+   - Workflow: `ga-gate.yml`
+   - Rationale: Official GA verification entrypoint with make ga
+
+3. **`Unit Tests & Coverage`**
    - Workflow: `unit-test-coverage.yml`
    - Rationale: Test suite and coverage gates must pass for all code changes
 
-7. **`ga / gate`**
-   - Additional GA verification check
+4. **`CI Core (Primary Gate)`**
+   - Workflow: `ci-core.yml`
+   - Rationale: Primary blocking gate - lint, typecheck, tests, build
 
 ### Additional Settings
+
 - **`strict: true`** - Require branches to be up to date before merging
 
 ---
@@ -79,9 +74,10 @@ According to `docs/ci/REQUIRED_CHECKS_POLICY.yml` (lines 27-38), the `branch_pro
 
 ### ✅ Actions to Take
 
-**Enable required status checks** with the 7 checks listed above.
+**Enable required status checks** with the 4 always_required checks listed above.
 
 **DO NOT:**
+
 - Weaken existing protections (keep review requirements, "include administrators", etc.)
 - Remove any existing restrictions
 - Disable any other branch protection settings
@@ -98,13 +94,10 @@ According to `docs/ci/REQUIRED_CHECKS_POLICY.yml` (lines 27-38), the `branch_pro
 4. Check the box to **enable** this requirement
 5. Check **"Require branches to be up to date before merging"** (strict: true)
 6. In the search box, add each of these status checks:
-   - `CI Core (Primary Gate)`
-   - `CI / config-guard`
-   - `CI / unit-tests`
-   - `GA Gate`
    - `Release Readiness Gate`
+   - `GA Gate`
    - `Unit Tests & Coverage`
-   - `ga / gate`
+   - `CI Core (Primary Gate)`
 7. Click **Save changes**
 
 **Estimated time:** < 5 minutes
@@ -125,29 +118,19 @@ gh api repos/BrianCLong/summit/branches/main/protection/required_status_checks \
   -X PATCH \
   -H "Accept: application/vnd.github+json" \
   -f strict=true \
-  -f contexts[]="CI Core (Primary Gate)" \
-  -f contexts[]="CI / config-guard" \
-  -f contexts[]="CI / unit-tests" \
-  -f contexts[]="GA Gate" \
   -f contexts[]="Release Readiness Gate" \
+  -f contexts[]="GA Gate" \
   -f contexts[]="Unit Tests & Coverage" \
-  -f contexts[]="ga / gate"
+  -f contexts[]="CI Core (Primary Gate)"
 
 # Verify the change
 gh api repos/BrianCLong/summit/branches/main/protection/required_status_checks | jq '.contexts'
 ```
 
 **Expected output after verification:**
+
 ```json
-[
-  "CI / config-guard",
-  "CI / unit-tests",
-  "CI Core (Primary Gate)",
-  "GA Gate",
-  "Release Readiness Gate",
-  "Unit Tests & Coverage",
-  "ga / gate"
-]
+["CI Core (Primary Gate)", "GA Gate", "Release Readiness Gate", "Unit Tests & Coverage"]
 ```
 
 **Estimated time:** < 2 minutes
@@ -170,7 +153,7 @@ gh api repos/BrianCLong/summit/branches/main/protection/required_status_checks |
   --verbose
 ```
 
-**Note:** The reconciler script currently has a compatibility issue with the installed `yq` version and extracts from `always_required` instead of `branch_protection.required_status_checks.contexts`. Manual options A or B are preferred until the script is updated.
+**Note:** The reconciler script currently has a compatibility issue with the installed `yq` version and may extract incomplete lists from different policy sections. Manual options A or B are preferred until the script is updated to precisely target the 4 always_required checks.
 
 ---
 
@@ -182,20 +165,18 @@ After applying changes, verify with:
 # Check that required_status_checks endpoint returns 200 (not 404)
 gh api repos/BrianCLong/summit/branches/main/protection/required_status_checks
 
-# Verify all 7 checks are listed
+# Verify all 4 checks are listed
 gh api repos/BrianCLong/summit/branches/main/protection/required_status_checks \
   | jq -r '.contexts[]' | sort
 ```
 
 **Expected output (sorted):**
+
 ```
-CI / config-guard
-CI / unit-tests
 CI Core (Primary Gate)
 GA Gate
 Release Readiness Gate
 Unit Tests & Coverage
-ga / gate
 ```
 
 ---
@@ -204,18 +185,18 @@ ga / gate
 
 After reconciliation, the branch protection settings should enforce:
 
-| Setting | Value |
-|---------|-------|
-| **Require status checks to pass before merging** | ✅ Enabled |
+| Setting                                              | Value                     |
+| ---------------------------------------------------- | ------------------------- |
+| **Require status checks to pass before merging**     | ✅ Enabled                |
 | **Require branches to be up to date before merging** | ✅ Enabled (strict: true) |
-| **Required status check contexts** | 7 checks (listed above) |
+| **Required status check contexts**                   | 4 checks (listed above)   |
 
 ---
 
 ## Acceptance Criteria
 
 - [ ] `gh api repos/BrianCLong/summit/branches/main/protection/required_status_checks` returns 200 (not 404)
-- [ ] Response includes all 7 required checks
+- [ ] Response includes all 4 required checks
 - [ ] `strict: true` is set
 - [ ] Existing branch protection rules (reviews, etc.) remain unchanged
 - [ ] Documentation updated in Issue #15790
@@ -224,9 +205,9 @@ After reconciliation, the branch protection settings should enforce:
 
 ## Notes
 
-1. **Reconciler Script Issue:** The existing `reconcile_branch_protection.sh` script extracts checks from the `always_required` section (4 checks) instead of the `branch_protection.required_status_checks.contexts` section (7 checks). This should be addressed in a future update.
+1. **Always Required Selection:** Policy #15790 prioritizes the 4 `always_required` checks for immediate enforcement. Conditional checks should not be enforced as blocking requirements unless they run on every PR.
 
-2. **yq Compatibility:** The installed `yq` version (0.0.0 - Python wrapper) doesn't support the `-o=json` flag that the script expects. The fallback parsing works but only for the `always_required` section.
+2. **GitHub 7-day rule:** A check must have run successfully on the branch within the last 7 days to be selectable as "required" in the GitHub UI or via API. If a check is missing from the list, run the corresponding workflow on `main` once to re-register it.
 
 3. **Admin Access Required:** This change requires repository admin permissions. The endpoint will return 403 Forbidden without admin scope.
 

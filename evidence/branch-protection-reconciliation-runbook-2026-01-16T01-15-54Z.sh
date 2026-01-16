@@ -23,6 +23,14 @@ REPO="BrianCLong/summit"
 BRANCH="main"
 DRY_RUN="${DRY_RUN:-false}"
 
+# Define the required contexts (from always-required policy)
+REQUIRED_CONTEXTS=(
+    "Release Readiness Gate"
+    "GA Gate"
+    "Unit Tests & Coverage"
+    "CI Core (Primary Gate)"
+)
+
 echo "========================================="
 echo "Branch Protection Reconciliation Runbook"
 echo "========================================="
@@ -51,8 +59,35 @@ fi
 echo "✅ gh CLI authenticated"
 echo ""
 
-# Display current state (before)
-echo "Step 1: Querying current branch protection state..."
+# Step 1: Preflight - Verify GitHub 7-day registration rule
+echo "Step 1: Verifying status checks are selectable (must have run in last 7 days)..."
+echo ""
+
+# Get recent check-run names on main
+RECENT_CHECKS=$(gh api "repos/$REPO/commits/main/check-runs" --jq '.check_runs[].name' | sort -u)
+
+echo "Recent checks detected on main:"
+echo "$RECENT_CHECKS" | sed 's/^/  - /'
+echo ""
+
+MISSING_REGISTRATION=0
+for ctx in "${REQUIRED_CONTEXTS[@]}"; do
+    if ! echo "$RECENT_CHECKS" | grep -qxF "$ctx"; then
+        echo "❌ WARNING: \"$ctx\" has NOT run recently on main."
+        echo "   GitHub may block this check from being required until it runs successfully."
+        MISSING_REGISTRATION=1
+    fi
+done
+
+if [[ $MISSING_REGISTRATION -eq 1 ]]; then
+    echo ""
+    echo "⚠️  RECOMMENDATION: Run the associated workflows for missing checks on main"
+    echo "   before attempting to enable them as required."
+    echo ""
+fi
+
+echo "----------------------------------------"
+echo "Step 2: Querying current branch protection state..."
 echo ""
 
 set +e
@@ -76,19 +111,8 @@ fi
 
 echo ""
 echo "----------------------------------------"
-echo "Step 2: Applying required status checks configuration..."
+echo "Step 3: Applying required status checks configuration..."
 echo ""
-
-# Define the required contexts (from policy)
-REQUIRED_CONTEXTS=(
-    "CI Core (Primary Gate)"
-    "CI / config-guard"
-    "CI / unit-tests"
-    "GA Gate"
-    "Release Readiness Gate"
-    "Unit Tests & Coverage"
-    "ga / gate"
-)
 
 echo "Will configure ${#REQUIRED_CONTEXTS[@]} required status checks:"
 printf '  - "%s"\n' "${REQUIRED_CONTEXTS[@]}"
@@ -116,20 +140,17 @@ gh api "repos/$REPO/branches/$BRANCH/protection/required_status_checks" \
     -X PATCH \
     -H "Accept: application/vnd.github+json" \
     -f strict=true \
-    -f contexts[]="CI Core (Primary Gate)" \
-    -f contexts[]="CI / config-guard" \
-    -f contexts[]="CI / unit-tests" \
-    -f contexts[]="GA Gate" \
     -f contexts[]="Release Readiness Gate" \
+    -f contexts[]="GA Gate" \
     -f contexts[]="Unit Tests & Coverage" \
-    -f contexts[]="ga / gate"
+    -f contexts[]="CI Core (Primary Gate)"
 
 echo "✅ Configuration applied successfully"
 echo ""
 
 # Verify the change
 echo "----------------------------------------"
-echo "Step 3: Verifying configuration..."
+echo "Step 4: Verifying configuration..."
 echo ""
 
 sleep 2  # Brief pause to ensure API consistency

@@ -14,8 +14,8 @@ export function canonicalJsonStringify(obj) {
   }
   
   if (typeof obj === 'object') {
-    // Sort keys in deterministic order
-    const sortedKeys = Object.keys(obj).sort((a, b) => a.localeCompare(b));
+    // Sort keys in deterministic codepoint-based order (not locale-dependent)
+    const sortedKeys = Object.keys(obj).sort((a, b) => compareStringsCodepoint(a, b));
     const pairs = sortedKeys.map(key => {
       const value = canonicalJsonStringify(obj[key]);
       return `"${key}":${value}`;
@@ -25,6 +25,19 @@ export function canonicalJsonStringify(obj) {
   
   // Primitive types can be stringified normally
   return JSON.stringify(obj);
+}
+
+/**
+ * Deterministic string comparison using codepoint ordering (not locale-dependent)
+ * Provides total order for cross-platform determinism
+ */
+function compareStringsCodepoint(a, b) {
+  if (a === b) return 0;
+  if (typeof a !== 'string' || typeof b !== 'string') {
+    a = String(a || '');
+    b = String(b || '');
+  }
+  return a < b ? -1 : 1;
 }
 
 /**

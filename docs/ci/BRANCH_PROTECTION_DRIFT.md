@@ -120,7 +120,12 @@ Checks that are enforced by GitHub but NOT listed in policy.
 
 ### Exit Codes
 
-The script always exits 0 (advisory mode). Check the JSON output for `drift_detected: true|false`.
+The script uses non-zero exit codes to signal state:
+
+- `0` - No drift detected (Success)
+- `2` - Drift detected (Escalation triggered)
+- `3` - API or permission error (Access required)
+- `1` - Configuration or other error
 
 ---
 

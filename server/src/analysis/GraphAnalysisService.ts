@@ -15,9 +15,11 @@ import { degreeCentrality } from './algorithms/centrality.js';
 import { connectedComponents } from './algorithms/community.js';
 import { v4 as uuidv4 } from 'uuid';
 import logger from '../utils/logger.js';
+import { OpenLineageClient } from '../lib/openlineage.js';
 
 export class GraphAnalysisService {
   private static instance: GraphAnalysisService;
+  private olClient = OpenLineageClient.getInstance();
 
   private constructor() { }
 
@@ -118,6 +120,23 @@ export class GraphAnalysisService {
     const job = this.jobs.get(jobId);
     if (!job) throw new Error(`Job ${jobId} not found`);
 
+    // OpenLineage: Initialize Run
+    const olRunId = this.olClient.createRunId();
+    const jobName = `graph_analysis_${job.algorithm}`;
+    const tenantNamespace = `tenant_${job.tenantId}`;
+
+    // Define Input Dataset (The Graph Slice)
+    const inputDataset = {
+      namespace: tenantNamespace,
+      name: 'neo4j_graph_slice',
+      facets: {
+        description: `Graph slice for tenant ${job.tenantId}`
+      }
+    };
+
+    // Emit START
+    this.olClient.emit(this.olClient.buildStartEvent(olRunId, jobName, [inputDataset]));
+
     job.status = 'running';
     job.startTime = new Date();
     this.jobs.set(jobId, job);
@@ -159,10 +178,28 @@ export class GraphAnalysisService {
 
       job.result = result;
       job.status = 'completed';
+
+      // OpenLineage: Emit COMPLETE
+      // Define Output Dataset (The Analysis Result)
+      const outputDataset = {
+        namespace: tenantNamespace,
+        name: `analysis_result_${jobId}`,
+        facets: {
+          algorithm: job.algorithm,
+          nodeCount: graph.nodes.length
+        }
+      };
+      
+      this.olClient.emit(this.olClient.buildCompleteEvent(olRunId, jobName, [outputDataset]));
+
     } catch (error: any) {
       logger.error(`Graph analysis job ${jobId} failed`, error);
       job.status = 'failed';
       job.error = error.message;
+
+      // OpenLineage: Emit FAIL
+      this.olClient.emit(this.olClient.buildFailEvent(olRunId, jobName, error.message));
+
     } finally {
       job.endTime = new Date();
       this.jobs.set(jobId, job);

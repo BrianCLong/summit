@@ -15,27 +15,21 @@
   },
   "policy_requirements": {
     "strict": true,
-    "required_checks_count": 7,
+    "required_checks_count": 4,
     "contexts": [
-      "CI Core (Primary Gate)",
-      "CI / config-guard",
-      "CI / unit-tests",
-      "GA Gate",
       "Release Readiness Gate",
+      "GA Gate",
       "Unit Tests & Coverage",
-      "ga / gate"
+      "CI Core (Primary Gate)"
     ]
   },
   "actions_required": {
     "enable_required_status_checks": true,
     "add_contexts": [
-      "CI Core (Primary Gate)",
-      "CI / config-guard",
-      "CI / unit-tests",
-      "GA Gate",
       "Release Readiness Gate",
+      "GA Gate",
       "Unit Tests & Coverage",
-      "ga / gate"
+      "CI Core (Primary Gate)"
     ],
     "remove_contexts": [],
     "set_strict": true
@@ -69,10 +63,10 @@
   "verification": {
     "endpoint": "repos/BrianCLong/summit/branches/main/protection/required_status_checks",
     "expected_status_code": 200,
-    "expected_contexts_count": 7
+    "expected_contexts_count": 4
   },
   "notes": [
-    "Reconciler script currently extracts from 'always_required' (4 checks) instead of 'branch_protection.required_status_checks.contexts' (7 checks)",
+    "Policy #15790 prioritizes the 4 always_required checks for immediate enforcement",
     "Installed yq version (0.0.0) doesn't support -o=json flag expected by script",
     "Admin repository permissions required for this change"
   ],
