@@ -1,0 +1,31 @@
+name: "Policy Enforcement"
+
+on:
+  workflow_run:
+    workflows: [ "Build + Prove + Sign" ]
+    types: [ completed ]
+
+jobs:
+  opa:
+    name: OPA Policy Check
+    runs-on: ubuntu-latest
+    environment: production
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: supply-chain-evidence
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Run Policy Check
+        uses: open-policy-agent/conftest-action@v5
+        with:
+          policy: ./policy
+          files: |
+            build/sbom/sbom.spdx.json
+            build/sbom/sbom.cdx.json

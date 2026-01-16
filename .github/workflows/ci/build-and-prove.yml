@@ -1,0 +1,89 @@
+name: "Build + Prove + Sign"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Build Artifact + SBOMs + Attestations
+    runs-on: ubuntu-22.04
+    environment: production
+
+    steps:
+    - name: Checkout Source
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 9
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20.x"
+        cache: "pnpm"
+
+    - name: Install Dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Install Tools
+      run: |
+        pip install in-toto
+        sudo apt-get update && sudo apt-get install -y jq
+
+    - name: Build + Provenance
+      run: |
+        echo "${{ secrets.IN_TOTO_SIGNING_KEY }}" > in-toto.key
+        mkdir -p .slsa
+        in-toto-run --step-name build \
+          --key in-toto.key \
+          --product-name summit \
+          --materials . \
+          --run-command "pnpm run build" \
+          --output .slsa/provenance.link
+        rm -f in-toto.key
+
+    - name: Install Syft
+      uses: anchore/sbom-action/download-syft@v0.18.0
+
+    - name: Generate SBOMs
+      run: |
+        mkdir -p build/sbom
+        syft . --scope all-layers -o spdx-json=./build/sbom/sbom.spdx.json
+        syft . --scope all-layers -o cyclonedx-json=./build/sbom/sbom.cdx.json
+      env:
+        SYFT_CACHE_DIR: ${{ github.workspace }}/.syft-cache
+
+    - name: Verify Reproducibility
+      run: bash scripts/ci/run-repro-build.sh
+
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@v3.8.0
+
+    - name: Sign Artifacts
+      run: |
+        echo "${{ secrets.COSIGN_KEY }}" > cosign.key
+        # Sign SBOMs
+        for f in build/sbom/*.json; do
+          cosign sign-blob --key cosign.key --yes --bundle "$f.bundle" "$f"
+        done
+        # Sign Provenance
+        cosign sign-blob --key cosign.key --yes --bundle .slsa/provenance.bundle .slsa/provenance.link
+        rm -f cosign.key
+      env:
+        COSIGN_PASSWORD: ""
+
+    - name: Upload Evidence Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: supply-chain-evidence
+        path: |
+          build/
+          .slsa/
+          current_build_hashes.txt
