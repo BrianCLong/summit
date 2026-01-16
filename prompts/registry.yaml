@@ -104,6 +104,36 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: provider-conformance-harness
+    version: v1
+    path: prompts/engineering/provider-conformance-harness.md
+    sha256: 4665eeb98684eb953b5f4708498d1dcd0995d3f948e50c3adae42a78304ce694
+    description: Provider conformance harness with contract tests and redacted evidence outputs.
+    scope:
+      paths:
+        - libs/provider-conformance/
+        - scripts/provider-conformance.ts
+        - docs/provider-conformance.md
+        - docs/roadmap/STATUS.json
+        - .github/workflows/provider-conformance.yml
+        - .github/workflows/ci.yml
+        - prompts/engineering/provider-conformance-harness.md
+        - prompts/registry.yaml
+        - agents/examples/provider-conformance-harness-task.json
+      domains:
+        - governance
+        - quality
+        - observability
+        - provenance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md

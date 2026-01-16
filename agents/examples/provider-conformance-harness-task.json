@@ -1,0 +1,48 @@
+{
+  "task_id": "PROVIDER_CONFORMANCE_HARNESS",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "provider-conformance-harness",
+    "version": "v1",
+    "sha256": "4665eeb98684eb953b5f4708498d1dcd0995d3f948e50c3adae42a78304ce694",
+    "path": "prompts/engineering/provider-conformance-harness.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "libs/provider-conformance/",
+      "scripts/provider-conformance.ts",
+      "docs/provider-conformance.md",
+      "docs/roadmap/STATUS.json",
+      ".github/workflows/provider-conformance.yml",
+      ".github/workflows/ci.yml",
+      "prompts/engineering/provider-conformance-harness.md",
+      "prompts/registry.yaml",
+      "agents/examples/provider-conformance-harness-task.json",
+      "package.json"
+    ],
+    "domains": ["governance", "quality", "observability", "provenance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "artifacts/provider-conformance/<timestamp>/capabilities.json",
+      "artifacts/provider-conformance/<timestamp>/capabilities.md",
+      "artifacts/provider-conformance/<timestamp>/raw/*.jsonl"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "pnpm provider:conformance produces redacted capability artifacts",
+    "No secrets are logged or stored in artifacts",
+    "Contract results populate capability matrix"
+  ],
+  "stop_conditions": [
+    "Provider credentials are missing or invalid",
+    "Secrets are detected in output",
+    "Contract runner crashes"
+  ]
+}
