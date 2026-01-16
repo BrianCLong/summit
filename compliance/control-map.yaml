@@ -18,16 +18,28 @@ controls:
       - "docs/governance/ci-enforcement.md"
     evidence:
       - "ci/pr-approvals"
+      - "artifacts/governance/pr-classification"
     status: covered
     owner: "devops-team"
+
+  CC5.2:
+    description: "System inputs are complete and accurate (Audit Logging)"
+    summit_artifacts:
+      - "server/src/tenancy/types.ts"
+    evidence:
+      - "ci/opa-decisions"
+    status: covered
+    owner: "security-team"
 
   CC6.1:
     description: "Logical access controls (AuthZ)"
     summit_artifacts:
       - "policies/"
       - "server/src/middleware/auth.ts"
+      - "artifacts/ga/ga_snapshot.json"
     evidence:
       - "ci/opa-decisions"
+      - "server/tests/tenant-isolation.test.ts"
     status: covered
     owner: "security-team"
 
@@ -41,11 +53,61 @@ controls:
     status: covered
     owner: "devops-team"
 
+  CC7.3:
+    description: "Incident response allows emergency override or shutdown"
+    summit_artifacts:
+      - "config/tenant-killswitch.json"
+      - "server/src/tenancy/killSwitch.ts"
+    evidence:
+      - "server/src/tenancy/killSwitch.ts"
+    status: covered
+    owner: "ops-team"
+
   CC8.1:
     description: "Tested changes only"
     summit_artifacts:
       - ".github/workflows/ci.yml"
+      - "artifacts/ga/ga_report.json"
+      - "artifacts/ga/ga_snapshot.json"
     evidence:
       - "ci/test-reports"
+      - "artifacts/ga/ga_report.json"
     status: covered
     owner: "qa-team"
+
+evidence_index:
+  - id: runtime_governance_boot_snapshot
+    path: artifacts/ga/ga_snapshot.json
+    verifier: json
+    required_fields:
+      - timestamp
+      - commit_sha
+      - environment
+
+  - id: runtime_governance_report
+    path: artifacts/ga/ga_report.json
+    verifier: json
+    required_fields:
+      - checks
+      - total_duration_seconds
+      - status
+
+  - id: tenant_isolation_tests
+    path: server/tests/tenant-isolation.test.ts
+    verifier: exists
+    description: "Verification of cross-tenant leakage protection"
+
+  - id: kill_switch_implementation
+    path: server/src/tenancy/killSwitch.ts
+    verifier: sha256
+    description: "Source code for emergency tenant lockout"
+
+  - id: governance_verdict_logic
+    path: server/src/tenancy/types.ts
+    verifier: sha256
+    description: "Type definition for TenantPolicyDecision (Authorization Verdict)"
+
+  - id: control_map_definition
+    path: compliance/control-map.yaml
+    verifier: exists
+    description: "Mapping of regulatory controls to Summit artifacts"
