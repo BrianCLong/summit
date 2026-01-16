@@ -1,0 +1,325 @@
+{
+  "version": "2026-01-15",
+  "project": {
+    "projectId": "PVT_kwHOA6AIQLYAAAAAB2zsQQ",
+    "owner": "BrianCLong",
+    "number": 19,
+    "name": "Summit Development Roadmap"
+  },
+  "fields": {
+    "Status": "PVTSSF_lADOA6AIQLY4tgEwzgFNXQ",
+    "Phase": "PVTSSF_lADOA6AIQLY4tgEwzgFNXQ",
+    "Priority": "PVTSSF_lADOA6AIQLY4tgEwzgFNXR",
+    "Release": "PVTSSF_lADOA6AIQLY4tgEwzgFNY0",
+    "TargetQuarter": "PVTSSF_lADOA6AIQLY4tgEwzgFNY1",
+    "Sequence": "PVTSSF_lADOA6AIQLY4tgEwzgFNY2",
+    "Risk": "PVTSSF_lADOA6AIQLY4tgEwzgFNY3",
+    "OwnerType": "PVTSSF_lADOA6AIQLY4tgEwzgFNY4",
+    "DependencyClass": "PVTSSF_lADOA6AIQLY4tgEwzgFNY5",
+    "Override": "PVTSSF_lADOA6AIQLY4tgEwzgFNY6",
+    "DeliveryClass": "PVTSSF_lADOA6AIQLY4tgEwzgFNY7",
+    "WorkType": "PVTSSF_lADOA6AIQLY4tgEwzgFNY8",
+    "AutomationEligibility": "PVTSSF_lADOA6AIQLY4tgEwzgFNY9",
+    "WIPRisk": "PVTSSF_lADOA6AIQLY4tgEwzgFNYa",
+    "ExecutionConfidence": "PVTSSF_lADOA6AIQLY4tgEwzgFNYb",
+    "PlannedStart": "PVTSSF_lADOA6AIQLY4tgEwzgFNYc",
+    "PlannedFinish": "PVTSSF_lADOA6AIQLY4tgEwzgFNYd",
+    "ActualStart": "PVTSSF_lADOA6AIQLY4tgEwzgFNYe",
+    "ActualFinish": "PVTSSF_lADOA6AIQLY4tgEwzgFNYf",
+    "BlockedReason": "PVTSSF_lADOA6AIQLY4tgEwzgFNYg",
+    "BlockedDetail": "PVTSSF_lADOA6AIQLY4tgEwzgFNYh",
+    "UpstreamDependencyCount": "PVTSSF_lADOA6AIQLY4tgEwzgFNYi",
+    "DownstreamImpactCount": "PVTSSF_lADOA6AIQLY4tgEwzgFNYj",
+    "GovernanceGate": "PVTSSF_lADOA6AIQLY4tgEwzgFNYk",
+    "GateStatus": "PVTSSF_lADOA6AIQLY4tgEwzgFNYl",
+    "PolicyVersion": "PVTSSF_lADOA6AIQLY4tgEwzgFNYm",
+    "EvidenceRequired": "PVTSSF_lADOA6AIQLY4tgEwzgFNYn",
+    "EvidenceComplete": "PVTSSF_lADOA6AIQLY4tgEwzgFNyo",
+    "EvidenceBundleID": "PVTSSF_lADOA6AIQLY4tgEwzgFNyp",
+    "AuditCriticality": "PVTSSF_lADOA6AIQLY4tgEwzgFNYq",
+    "ExternalAuditScope": "PVTSSF_lADOA6AIQLY4tgEwzgFNYr",
+    "ControlMapping": "PVTSSF_lADOA6AIQLY4tgEwzgFNYs",
+    "CIStatusSnapshot": "PVTSSF_lADOA6AIQLY4tgEwzgFNYt",
+    "DeterminismRisk": "PVTSSF_lADOA6AIQLY4tgEwzgFNYu",
+    "TestCoverageDelta": "PVTSSF_lADOA6AIQLY4tgEwzgFNYv",
+    "ArtifactProduced": "PVTSSF_lADOA6AIQLY4tgEwzgFNYw",
+    "ReleaseTrain": "PVTSSF_lADOA6AIQLY4tgEwzgFNYx",
+    "ReleaseBlocker": "PVTSSF_lADOA6AIQLY4tgEwzgFNYy",
+    "RollbackRequired": "PVTSSF_lADOA6AIQLY4tgEwzgFNYz",
+    "KillSwitchAvailable": "PVTSSF_lADOA6AIQLY4tgEwzgFNYA",
+    "PrimaryAgent": "PVTSSF_lADOA6AIQLY4tgEwzgFNYB",
+    "SecondaryAgents": "PVTSSF_lADOA6AIQLY4tgEwzgFNYC",
+    "AgentPromptID": "PVTSSF_lADOA6AIQLY4tgEwzgFNYD",
+    "PromptVersion": "PVTSSF_lADOA6AIQLY4tgEwzgFNYE",
+    "AgentOutputDeterminism": "PVTSSF_lADOA6AIQLY4tgEwzgFNYF",
+    "MaxFixScope": "PVTSSF_lADOA6AIQLY4tgEwzgFNYG",
+    "HumanApprovalRequired": "PVTSSF_lADOA6AIQLY4tgEwzgFNYH",
+    "DryRunSupported": "PVTSSF_lADOA6AIQLY4tgEwzgFNYI",
+    "AutoMergeAllowed": "PVTSSF_lADOA6AIQLY4tgEwzgFNYJ",
+    "StrategicTheme": "PVTSSF_lADOA6AIQLY4tgEwzgFNYK",
+    "CustomerImpact": "PVTSSF_lADOA6AIQLY4tgEwzgFNYL",
+    "RevenueSensitivity": "PVTSSF_lADOA6AIQLY4tgEwzgFNYM",
+    "ReputationRisk": "PVTSSF_lADOA6AIQLY4tgEwzgFNYN",
+    "ImpactScore": "PVTSSF_lADOA6AIQLY4tgEwzgFNYO",
+    "EffortScore": "PVTSSF_lADOA6AIQLY4tgEwzgFNYP",
+    "RiskScore": "PVTSSF_lADOA6AIQLY4tgEwzgFNYQ",
+    "WSJFScore": "PVTSSF_lADOA6AIQLY4tgEwzgFNYR",
+    "TruePriority": "PVTSSF_lADOA6AIQLY4tgEwzgFNYT",
+    "GareadinessScore": "PVTSSF_lADOA6AIQLY4tgEwzgFNYU",
+    "AutomationSafetyScore": "PVTSSF_lADOA6AIQLY4tgEwzgFNYV",
+    "AgentConfidenceScore": "PVTSSF_lADOA6AIQLY4tgEwzgFNYW",
+    "ExpectedCycleTime": "PVTSSF_lADOA6AIQLY4tgEwzgFNYX"
+  },
+  "singleSelectOptions": {
+    "Status": {
+      "Todo": "PVSOS_lADOA6AIQLY4tgEwzgFNY001",
+      "In Progress": "PVSOS_lADOA6AIQLY4tgEwzgFNY002",
+      "Blocked": "PVSOS_lADOA6AIQLY4tgEwzgFNY003",
+      "In Review": "PVSOS_lADOA6AIQLY4tgEwzgFNY004",
+      "Done": "PVSOS_lADOA6AIQLY4tgEwzgFNY005"
+    },
+    "Phase": {
+      "Foundation": "PVSOS_lADOA6AIQLY4tgEwzgFNY006",
+      "Core Platform": "PVSOS_lADOA6AIQLY4tgEwzgFNY007",
+      "Operational Maturity": "PVSOS_lADOA6AIQLY4tgEwzgFNY008",
+      "Ecosystem & Expansion": "PVSOS_lADOA6AIQLY4tgEwzgFNY009",
+      "Advanced / Strategic": "PVSOS_lADOA6AIQLY4tgEwzgFNY010"
+    },
+    "Priority": {
+      "P0": "PVSOS_lADOA6AIQLY4tgEwzgFNY011",
+      "P1": "PVSOS_lADOA6AIQLY4tgEwzgFNY012",
+      "P2": "PVSOS_lADOA6AIQLY4tgEwzgFNY013",
+      "P3": "PVSOS_lADOA6AIQLY4tgEwzgFNY014",
+      "P4": "PVSOS_lADOA6AIQLY4tgEwzgFNY015"
+    },
+    "Release": {
+      "Alpha": "PVSOS_lADOA6AIQLY4tgEwzgFNY016",
+      "Beta": "PVSOS_lADOA6AIQLY4tgEwzgFNY017",
+      "GA": "PVSOS_lADOA6AIQLY4tgEwzgFNY018",
+      "v1.1": "PVSOS_lADOA6AIQLY4tgEwzgFNY019",
+      "v2.0+": "PVSOS_lADOA6AIQLY4tgEwzgFNY020"
+    },
+    "Risk": {
+      "Low": "PVSOS_lADOA6AIQLY4tgEwzgFNY021",
+      "Medium": "PVSOS_lADOA6AIQLY4tgEwzgFNY022",
+      "High": "PVSOS_lADOA6AIQLY4tgEwzgFNY023"
+    },
+    "OwnerType": {
+      "Human": "PVSOS_lADOA6AIQLY4tgEwzgFNY024",
+      "Agent": "PVSOS_lADOA6AIQLY4tgEwzgFNY025",
+      "Hybrid": "PVSOS_lADOA6AIQLY4tgEwzgFNY026"
+    },
+    "DependencyClass": {
+      "Soft": "PVSOS_lADOA6AIQLY4tgEwzgFNY027",
+      "Hard": "PVSOS_lADOA6AIQLY4tgEwzgFNY028"
+    },
+    "Override": {
+      "true": "PVSOS_lADOA6AIQLY4tgEwzgFNY029",
+      "false": "PVSOS_lADOA6AIQLY4tgEwzgFNY030"
+    },
+    "DeliveryClass": {
+      "Feature": "PVSOS_lADOA6AIQLY4tgEwzgFNY031",
+      "Infra": "PVSOS_lADOA6AIQLY4tgEwzgFNY032",
+      "Security": "PVSOS_lADOA6AIQLY4tgEwzgFNY033",
+      "Compliance": "PVSOS_lADOA6AIQLY4tgEwzgFNY034",
+      "Release": "PVSOS_lADOA6AIQLY4tgEwzgFNY035",
+      "Tech Debt": "PVSOS_lADOA6AIQLY4tgEwzgFNY036",
+      "Research": "PVSOS_lADOA6AIQLY4tgEwzgFNY037"
+    },
+    "WorkType": {
+      "Human": "PVSOS_lADOA6AIQLY4tgEwzgFNY038",
+      "Agent": "PVSOS_lADOA6AIQLY4tgEwzgFNY039",
+      "Hybrid": "PVSOS_lADOA6AIQLY4tgEwzgFNY040"
+    },
+    "AutomationEligibility": {
+      "Manual Only": "PVSOS_lADOA6AIQLY4tgEwzgFNY041",
+      "Agent Assist": "PVSOS_lADOA6AIQLY4tgEwzgFNY042",
+      "Agent Execute": "PVSOS_lADOA6AIQLY4tgEwzgFNY043",
+      "Fully Autonomous": "PVSOS_lADOA6AIQLY4tgEwzgFNY044"
+    },
+    "WIPRisk": {
+      "Low": "PVSOS_lADOA6AIQLY4tgEwzgFNY045",
+      "Medium": "PVSOS_lADOA6AIQLY4tgEwzgFNY046",
+      "High": "PVSOS_lADOA6AIQLY4tgEwzgFNY047"
+    },
+    "BlockedReason": {
+      "None": "PVSOS_lADOA6AIQLY4tgEwzgFNY048",
+      "Dependency": "PVSOS_lADOA6AIQLY4tgEwzgFNY049",
+      "Decision": "PVSOS_lADOA6AIQLY4tgEwzgFNY050",
+      "CI": "PVSOS_lADOA6AIQLY4tgEwzgFNY051",
+      "Security": "PVSOS_lADOA6AIQLY4tgEwzgFNY052",
+      "Compliance": "PVSOS_lADOA6AIQLY4tgEwzgFNY053",
+      "Infra": "PVSOS_lADOA6AIQLY4tgEwzgFNY054",
+      "Scope": "PVSOS_lADOA6AIQLY4tgEwzgFNY055",
+      "Unknown": "PVSOS_lADOA6AIQLY4tgEwzgFNY056"
+    },
+    "GovernanceGate": {
+      "None": "PVSOS_lADOA6AIQLY4tgEwzgFNY057",
+      "Design": "PVSOS_lADOA6AIQLY4tgEwzgFNY058",
+      "Security": "PVSOS_lADOA6AIQLY4tgEwzgFNY059",
+      "Compliance": "PVSOS_lADOA6AIQLY4tgEwzgFNY060",
+      "Release": "PVSOS_lADOA6AIQLY4tgEwzgFNY061",
+      "GA": "PVSOS_lADOA6AIQLY4tgEwzgFNY062"
+    },
+    "GateStatus": {
+      "Not Started": "PVSOS_lADOA6AIQLY4tgEwzgFNY063",
+      "In Review": "PVSOS_lADOA6AIQLY4tgEwzgFNY064",
+      "Blocked": "PVSOS_lADOA6AIQLY4tgEwzgFNY065",
+      "Approved": "PVSOS_lADOA6AIQLY4tgEwzgFNY066"
+    },
+    "EvidenceRequired": {
+      "No": "PVSOS_lADOA6AIQLY4tgEwzgFNY067",
+      "Yes": "PVSOS_lADOA6AIQLY4tgEwzgFNY068"
+    },
+    "EvidenceComplete": {
+      "No": "PVSOS_lADOA6AIQLY4tgEwzgFNY069",
+      "Yes": "PVSOS_lADOA6AIQLY4tgEwzgFNY070"
+    },
+    "AuditCriticality": {
+      "Informational": "PVSOS_lADOA6AIQLY4tgEwzgFNY071",
+      "Control": "PVSOS_lADOA6AIQLY4tgEwzgFNY072",
+      "Material": "PVSOS_lADOA6AIQLY4tgEwzgFNY073"
+    },
+    "ExternalAuditScope": {
+      "No": "PVSOS_lADOA6AIQLY4tgEwzgFNY074",
+      "Yes": "PVSOS_lADOA6AIQLY4tgEwzgFNY075"
+    },
+    "CIStatusSnapshot": {
+      "Green": "PVSOS_lADOA6AIQLY4tgEwzgFNY076",
+      "Flaky": "PVSOS_lADOA6AIQLY4tgEwzgFNY077",
+      "Failing": "PVSOS_lADOA6AIQLY4tgEwzgFNY078",
+      "Unknown": "PVSOS_lADOA6AIQLY4tgEwzgFNY079"
+    },
+    "DeterminismRisk": {
+      "None": "PVSOS_lADOA6AIQLY4tgEwzgFNY080",
+      "Potential": "PVSOS_lADOA6AIQLY4tgEwzgFNY081",
+      "Confirmed": "PVSOS_lADOA6AIQLY4tgEwzgFNY082"
+    },
+    "ArtifactProduced": {
+      "No": "PVSOS_lADOA6AIQLY4tgEwzgFNY083",
+      "Yes": "PVSOS_lADOA6AIQLY4tgEwzgFNY084"
+    },
+    "ReleaseTrain": {
+      "Nightly": "PVSOS_lADOA6AIQLY4tgEwzgFNY085",
+      "Weekly": "PVSOS_lADOA6AIQLY4tgEwzgFNY086",
+      "MVP-4": "PVSOS_lADOA6AIQLY4tgEwzgFNY087",
+      "GA": "PVSOS_lADOA6AIQLY4tgEwzgFNY088",
+      "Post-GA": "PVSOS_lADOA6AIQLY4tgEwzgFNY089"
+    },
+    "ReleaseBlocker": {
+      "No": "PVSOS_lADOA6AIQLY4tgEwzgFNY090",
+      "Yes": "PVSOS_lADOA6AIQLY4tgEwzgFNY091"
+    },
+    "RollbackRequired": {
+      "No": "PVSOS_lADOA6AIQLY4tgEwzgFNY092",
+      "Yes": "PVSOS_lADOA6AIQLY4tgEwzgFNY093"
+    },
+    "KillSwitchAvailable": {
+      "No": "PVSOS_lADOA6AIQLY4tgEwzgFNY094",
+      "Yes": "PVSOS_lADOA6AIQLY4tgEwzgFNY095"
+    },
+    "PrimaryAgent": {
+      "Jules": "PVSOS_lADOA6AIQLY4tgEwzgFNY096",
+      "Codex": "PVSOS_lADOA6AIQLY4tgEwzgFNY097",
+      "Claude": "PVSOS_lADOA6AIQLY4tgEwzgFNY098",
+      "Qwen": "PVSOS_lADOA6AIQLY4tgEwzgFNY099",
+      "Atlas": "PVSOS_lADOA6AIQLY4tgEwzgFNY100",
+      "Antigravity": "PVSOS_lADOA6AIQLY4tgEwzgFNY101",
+      "Human": "PVSOS_lADOA6AIQLY4tgEwzgFNY102"
+    },
+    "AgentOutputDeterminism": {
+      "Deterministic": "PVSOS_lADOA6AIQLY4tgEwzgFNY103",
+      "Bounded": "PVSOS_lADOA6AIQLY4tgEwzgFNY104",
+      "Freeform": "PVSOS_lADOA6AIQLY4tgEwzgFNY105"
+    },
+    "HumanApprovalRequired": {
+      "No": "PVSOS_lADOA6AIQLY4tgEwzgFNY106",
+      "Yes": "PVSOS_lADOA6AIQLY4tgEwzgFNY107"
+    },
+    "DryRunSupported": {
+      "No": "PVSOS_lADOA6AIQLY4tgEwzgFNY108",
+      "Yes": "PVSOS_lADOA6AIQLY4tgEwzgFNY109"
+    },
+    "AutoMergeAllowed": {
+      "No": "PVSOS_lADOA6AIQLY4tgEwzgFNY110",
+      "Yes": "PVSOS_lADOA6AIQLY4tgEwzgFNY111"
+    },
+    "StrategicTheme": {
+      "GA Readiness": "PVSOS_lADOA6AIQLY4tgEwzgFNY112",
+      "Trust": "PVSOS_lADOA6AIQLY4tgEwzgFNY113",
+      "Scale": "PVSOS_lADOA6AIQLY4tgEwzgFNY114",
+      "Cost": "PVSOS_lADOA6AIQLY4tgEwzgFNY115",
+      "Velocity": "PVSOS_lADOA6AIQLY4tgEwzgFNY116",
+      "Moat": "PVSOS_lADOA6AIQLY4tgEwzgFNY117"
+    },
+    "CustomerImpact": {
+      "None": "PVSOS_lADOA6AIQLY4tgEwzgFNY118",
+      "Internal": "PVSOS_lADOA6AIQLY4tgEwzgFNY119",
+      "Pilot": "PVSOS_lADOA6AIQLY4tgEwzgFNY120",
+      "GA": "PVSOS_lADOA6AIQLY4tgEwzgFNY121"
+    },
+    "RevenueSensitivity": {
+      "None": "PVSOS_lADOA6AIQLY4tgEwzgFNY122",
+      "Indirect": "PVSOS_lADOA6AIQLY4tgEwzgFNY123",
+      "Direct": "PVSOS_lADOA6AIQLY4tgEwzgFNY124"
+    },
+    "ReputationRisk": {
+      "Low": "PVSOS_lADOA6AIQLY4tgEwzgFNY125",
+      "Medium": "PVSOS_lADOA6AIQLY4tgEwzgFNY126",
+      "High": "PVSOS_lADOA6AIQLY4tgEwzgFNY127",
+      "Existential": "PVSOS_lADOA6AIQLY4tgEwzgFNY128"
+    },
+    "OutcomeClassification": {
+      "Success": "PVSOS_lADOA6AIQLY4tgEwzgFNY129",
+      "Partial": "PVSOS_lADOA6AIQLY4tgEwzgFNY130",
+      "Failed": "PVSOS_lADOA6AIQLY4tgEwzgFNY131",
+      "Abandoned": "PVSOS_lADOA6AIQLY4tgEwzgFNY132"
+    },
+    "RootCauseCategory": {
+      "Design": "PVSOS_lADOA6AIQLY4tgEwzgFNY133",
+      "Execution": "PVSOS_lADOA6AIQLY4tgEwzgFNY134",
+      "Dependency": "PVSOS_lADOA6AIQLY4tgEwzgFNY135",
+      "Tooling": "PVSOS_lADOA6AIQLY4tgEwzgFNY136",
+      "Governance": "PVSOS_lADOA6AIQLY4tgEwzgFNY137"
+    },
+    "AutomationROI": {
+      "Negative": "PVSOS_lADOA6AIQLY4tgEwzgFNY138",
+      "Neutral": "PVSOS_lADOA6AIQLY4tgEwzgFNY139",
+      "Positive": "PVSOS_lADOA6AIQLY4tgEwzgFNY140",
+      "Breakthrough": "PVSOS_lADOA6AIQLY4tgEwzgFNY141"
+    },
+    "ReusableArtifact": {
+      "No": "PVSOS_lADOA6AIQLY4tgEwzgFNY142",
+      "Yes": "PVSOS_lADOA6AIQLY4tgEwzgFNY143"
+    },
+    "RunbookCreated": {
+      "No": "PVSOS_lADOA6AIQLY4tgEwzgFNY144",
+      "Yes": "PVSOS_lADOA6AIQLY4tgEwzgFNY145"
+    },
+    "ADRRequired": {
+      "No": "PVSOS_lADOA6AIQLY4tgEwzgFNY146",
+      "Yes": "PVSOS_lADOA6AIQLY4tgEwzgFNY147"
+    },
+    "PatternExtracted": {
+      "No": "PVSOS_lADOA6AIQLY4tgEwzgFNY148",
+      "Yes": "PVSOS_lADOA6AIQLY4tgEwzgFNY149"
+    }
+  },
+  "multiSelectOptions": {
+    "ControlMapping": {
+      "SOC2": "PVMSOS_lADOA6AIQLY4tgEwzgFNYM01",
+      "ISO27001": "PVMSOS_lADOA6AIQLY4tgEwzgFNYM02",
+      "NIST800-53": "PVMSOS_lADOA6AIQLY4tgEwzgFNYM03",
+      "SLSA": "PVMSOS_lADOA6AIQLY4tgEwzgFNYM04",
+      "SBOM": "PVMSOS_lADOA6AIQLY4tgEwzgFNYM05"
+    },
+    "SecondaryAgents": {
+      "Jules": "PVMSOS_lADOA6AIQLY4tgEwzgFNYM06",
+      "Codex": "PVMSOS_lADOA6AIQLY4tgEwzgFNYM07",
+      "Claude": "PVMSOS_lADOA6AIQLY4tgEwzgFNYM08",
+      "Qwen": "PVMSOS_lADOA6AIQLY4tgEwzgFNYM09",
+      "Atlas": "PVMSOS_lADOA6AIQLY4tgEwzgFNYM10",
+      "Antigravity": "PVMSOS_lADOA6AIQLY4tgEwzgFNYM11"
+    }
+  }
+}

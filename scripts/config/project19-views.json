@@ -1,0 +1,146 @@
+{
+  "version": "2026-01-15",
+  "views": {
+    "exec_release_readiness": {
+      "name": "Exec / Release Readiness",
+      "description": "Track GA and upcoming release progress",
+      "filter": "Release Train in ('GA', 'MVP-4', 'Post-GA')",
+      "groupBy": "Governance Gate",
+      "secondGroupBy": "Gate Status",
+      "sortBy": ["Release Blocker desc", "True Priority desc"],
+      "showColumns": [
+        "Gate Status",
+        "Evidence Complete",
+        "CI Status Snapshot",
+        "Determinism Risk",
+        "Planned Finish",
+        "Owner",
+        "Actual Finish",
+        "Strategic Theme"
+      ]
+    },
+    "exec_top_blockers": {
+      "name": "Exec / Top Blockers",
+      "description": "Identify critical items blocking progress",
+      "filter": "Blocked Reason != 'None' OR Status = 'Blocked'",
+      "groupBy": "Blocked Reason",
+      "sortBy": ["True Priority desc", "Release Blocker desc"],
+      "showColumns": [
+        "Blocked Detail",
+        "Upstream Dependency Count",
+        "Owner",
+        "Release Train",
+        "Customer Impact",
+        "Reputation Risk"
+      ]
+    },
+    "exec_portfolio_allocation": {
+      "name": "Exec / Portfolio Allocation",
+      "description": "Work distribution across delivery classes and strategic themes",
+      "groupBy": "Delivery Class",
+      "secondGroupBy": "Strategic Theme",
+      "showColumns": [
+        "count",
+        "avg(Impact Score)",
+        "avg(True Priority)",
+        "avg(GA Readiness Score)",
+        "avg(Automation Safety Score)"
+      ]
+    },
+    "exec_automation_throughput": {
+      "name": "Exec / Automation Throughput",
+      "description": "Agent and automation effectiveness tracking",
+      "filter": "Work Type in ('Agent', 'Hybrid')",
+      "groupBy": "Primary Agent",
+      "sortBy": ["Automation Safety Score desc"],
+      "showColumns": [
+        "Automation Eligibility",
+        "Human Approval Required",
+        "Auto-Merge Allowed",
+        "Execution Confidence",
+        "Agent Confidence Score",
+        "Agent Output Determinism",
+        "Max Fix Scope",
+        "Automation ROI"
+      ]
+    },
+    "audit_scope_wip": {
+      "name": "Audit / Scope WIP",
+      "description": "Audit-relevant work in progress",
+      "filter": "External Audit Scope = 'Yes' OR Audit Criticality in ('Control', 'Material')",
+      "groupBy": "Control Mapping",
+      "secondGroupBy": "Governance Gate",
+      "showColumns": [
+        "Evidence Required",
+        "Evidence Complete",
+        "Evidence Bundle ID",
+        "Policy Version",
+        "Governance Gate",
+        "Gate Status",
+        "Owner",
+        "Planned Finish"
+      ]
+    },
+    "audit_evidence_missing": {
+      "name": "Audit / Evidence Missing",
+      "description": "Items that require evidence but are not complete",
+      "filter": "Evidence Required = 'Yes' AND Evidence Complete = 'No'",
+      "groupBy": "Governance Gate",
+      "sortBy": ["Release Blocker desc", "True Priority desc"],
+      "showColumns": [
+        "Blocked Reason",
+        "Evidence Required",
+        "Policy Version",
+        "Owner",
+        "Upstream Dependency Count",
+        "Customer Impact"
+      ]
+    },
+    "audit_determinism_exceptions": {
+      "name": "Audit / Determinism Exceptions",
+      "description": "Items with determinism or CI health issues",
+      "filter": "Determinism Risk != 'None' OR CI Status Snapshot != 'Green'",
+      "groupBy": "Determinism Risk",
+      "secondGroupBy": "CI Status Snapshot",
+      "showColumns": [
+        "Artifact Produced",
+        "Gate Status",
+        "Release Train",
+        "Owner",
+        "WIP Risk",
+        "Work Type"
+      ]
+    },
+    "audit_change_control": {
+      "name": "Audit / Change Control",
+      "description": "Items requiring explicit approvals",
+      "filter": "Human Approval Required = 'Yes' OR Auto-Merge Allowed = 'Yes'",
+      "groupBy": "Human Approval Required",
+      "showColumns": [
+        "Max Fix Scope",
+        "Dry-Run Supported",
+        "Primary Agent",
+        "Owner",
+        "Policy Version",
+        "Automation Eligibility",
+        "Auto-Merge Allowed"
+      ]
+    },
+    "reliability_slo_monitoring": {
+      "name": "Reliability / SLO Monitoring",
+      "description": "SLO-critical items and their health",
+      "filter": "Customer Impact = 'GA' OR Reputation Risk in ('High', 'Existential')",
+      "groupBy": "Customer Impact",
+      "secondGroupBy": "Reputation Risk",
+      "showColumns": [
+        "Release Train",
+        "CI Status Snapshot",
+        "Determinism Risk",
+        "Evidence Complete",
+        "Planned Finish",
+        "Actual Finish",
+        "Owner"
+      ]
+    }
+  }
+}

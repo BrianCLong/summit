@@ -1,0 +1,64 @@
+name: Project 19 / CI Signals
+
+on:
+  workflow_run:
+    workflows:
+      [
+        "CI Core",
+        "Evidence ID Consistency",
+        "Governance / Docs Integrity",
+        "GA Verify",
+        "Security Scan",
+        "Compliance Check",
+      ]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+  issues: write
+  pull-requests: write
+  organization-projects: write
+  repository-projects: write
+
+env:
+  PROJECT19_OWNER: ${{ vars.PROJECT19_OWNER || 'BrianCLong' }}
+  PROJECT19_NUMBER: ${{ vars.PROJECT19_NUMBER || '19' }}
+  DRY_RUN: "true" # Default to dry-run for safety
+  MAX_FIX_SCOPE: 200
+
+jobs:
+  signals:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download workflow artifacts
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: ${{ github.event.workflow_run.name }}
+          run_id: ${{ github.event.workflow_run.id }}
+          path: /tmp/artifacts
+
+      - name: Process CI artifacts and update fields
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm run governance:ci-sync
+
+      - name: Upload CI signals report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: project19-ci-signals-${{ github.event.workflow_run.id }}-${{ github.run_number }}
+          path: |
+            artifacts/project19/ci-signals/**

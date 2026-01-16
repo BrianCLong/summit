@@ -1,0 +1,77 @@
+name: Project 19 / Nightly Reconciliation
+
+on:
+  schedule:
+    # Run daily at 3 AM UTC
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run mode (no actual field changes)"
+        required: true
+        default: "true"
+      max_fix_scope:
+        description: "Maximum number of field updates allowed"
+        required: true
+        default: "500"
+        type: number
+      force_execute:
+        description: "Override safety checks and execute"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  organization-projects: write
+  repository-projects: write
+
+env:
+  PROJECT19_OWNER: ${{ vars.PROJECT19_OWNER || 'BrianCLong' }}
+  PROJECT19_NUMBER: ${{ vars.PROJECT19_NUMBER || '19' }}
+  DRY_RUN: ${{ inputs.dry_run || 'true' }}
+  MAX_FIX_SCOPE: ${{ inputs.max_fix_scope || '500' }}
+  POLICY_VERSION: v2026.01.15
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run nightly reconciliation
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          POLICY_VERSION: ${{ env.POLICY_VERSION }}
+        run: |
+          npm run governance:reconcile
+
+      - name: Upload reconciliation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: project19-nightly-reconciliation-${{ github.run_number }}
+          path: |
+            artifacts/project19/nightly-reconciliation/**
+            !artifacts/project19/nightly-reconciliation/temp/**
+
+      - name: Post summary to issues if critical issues found
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // If reconciliation fails critically, create an issue
+            const fs = require('fs');
+
+            // This would check for critical issues and post if needed
+            // Implementation depends on the actual reconcile output

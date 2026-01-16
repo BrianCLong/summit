@@ -1,0 +1,119 @@
+{
+  "version": "2026-01-15",
+  "workflows": [
+    {
+      "name_match": "CI Core",
+      "sets": ["CI Status Snapshot", "Artifact Produced"],
+      "required_artifacts": ["stamp.json"],
+      "optional_artifacts": ["coverage-summary.json", "report.json"]
+    },
+    {
+      "name_match": "Evidence ID Consistency",
+      "sets": [
+        "CI Status Snapshot",
+        "Artifact Produced",
+        "Determinism Risk",
+        "Evidence Complete",
+        "Evidence Bundle ID"
+      ],
+      "required_artifacts": ["stamp.json"],
+      "optional_artifacts": ["report.json"]
+    },
+    {
+      "name_match": "Governance / Docs Integrity",
+      "sets": ["CI Status Snapshot", "Artifact Produced", "Evidence Complete"],
+      "required_artifacts": ["stamp.json"],
+      "optional_artifacts": ["docs-report.json"]
+    },
+    {
+      "name_match": "GA Verify",
+      "sets": [
+        "CI Status Snapshot",
+        "Artifact Produced",
+        "Determinism Risk",
+        "Evidence Complete",
+        "Evidence Bundle ID",
+        "Policy Version"
+      ],
+      "required_artifacts": ["stamp.json"],
+      "optional_artifacts": ["report.json"]
+    },
+    {
+      "name_match": "Security Scan",
+      "sets": [
+        "CI Status Snapshot",
+        "Audit Criticality",
+        "External Audit Scope",
+        "Control Mapping"
+      ],
+      "required_artifacts": ["security-results.json"],
+      "optional_artifacts": ["vulnerability-report.json"]
+    },
+    {
+      "name_match": "Compliance Check",
+      "sets": [
+        "CI Status Snapshot",
+        "Evidence Required",
+        "External Audit Scope",
+        "Control Mapping"
+      ],
+      "required_artifacts": ["compliance-results.json"],
+      "optional_artifacts": ["framework-coverage.json"]
+    },
+    {
+      "name_match": "Coverage Analysis",
+      "sets": ["Test Coverage Delta"],
+      "required_artifacts": ["coverage-summary.json"],
+      "optional_artifacts": ["coverage-details.json"]
+    },
+    {
+      "name_match": "Determinism Check",
+      "sets": ["Determinism Risk", "CI Status Snapshot"],
+      "required_artifacts": ["determinism-report.json"],
+      "optional_artifacts": ["analysis-details.json"]
+    }
+  ],
+  "artifact_processing": {
+    "stamp.json": {
+      "field_mapping": {
+        "status": "CI Status Snapshot",
+        "determinism_risk": "Determinism Risk",
+        "policy_version": "Policy Version",
+        "evidence_bundle_id": "Evidence Bundle ID",
+        "evidence_complete": "Evidence Complete"
+      }
+    },
+    "report.json": {
+      "field_mapping": {
+        "determinism_risk": "Determinism Risk",
+        "gate_status": "Gate Status",
+        "evidence_complete": "Evidence Complete",
+        "readiness_score": "GA Readiness Score",
+        "violations": "Blocked Count"
+      }
+    },
+    "coverage-summary.json": {
+      "field_mapping": {
+        "delta_percent": "Test Coverage Delta",
+        "current_percent": "Current Coverage",
+        "baseline_percent": "Baseline Coverage"
+      }
+    },
+    "security-results.json": {
+      "field_mapping": {
+        "audit_criticality": "Audit Criticality",
+        "external_audit_scope": "External Audit Scope",
+        "critical_count": "Critical Vulnerabilities",
+        "high_count": "High Vulnerabilities"
+      }
+    },
+    "compliance-results.json": {
+      "field_mapping": {
+        "evidence_required": "Evidence Required",
+        "external_audit_scope": "External Audit Scope",
+        "frameworks": "Control Mapping",
+        "outstanding_items": "Outstanding Compliance Items"
+      }
+    }
+  }
+}

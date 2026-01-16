@@ -1,0 +1,56 @@
+name: Project 19 / Fields Ensure
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run only (no actual changes)"
+        required: true
+        default: "true"
+      max_fix_scope:
+        description: "Maximum number of field mutations allowed"
+        required: true
+        default: "50"
+        type: number
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  organization-projects: write
+  repository-projects: write
+
+env:
+  PROJECT19_SCHEMA: scripts/config/project19-field-schema.json
+  DRY_RUN: ${{ inputs.dry_run }}
+  MAX_FIX_SCOPE: ${{ inputs.max_fix_scope }}
+
+jobs:
+  ensure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Ensure fields exist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROJECT19_OWNER: ${{ vars.PROJECT19_OWNER || 'BrianCLong' }}
+          PROJECT19_NUMBER: ${{ vars.PROJECT19_NUMBER || '19' }}
+        run: |
+          npm run governance:ensure-fields
+
+      - name: Upload field provisioning report
+        uses: actions/upload-artifact@v4
+        with:
+          name: project19-field-provisioning-${{ github.run_number }}
+          path: |
+            artifacts/project19/field-provision/**

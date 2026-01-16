@@ -1,0 +1,62 @@
+name: Project 19 / Event Sync
+
+on:
+  issues:
+    types:
+      [
+        opened,
+        edited,
+        labeled,
+        unlabeled,
+        milestoned,
+        demilestoned,
+        assigned,
+        unassigned,
+        reopened,
+        closed,
+      ]
+  pull_request:
+    types:
+      [opened, edited, labeled, unlabeled, ready_for_review, reopened, closed, converted_to_draft]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  organization-projects: write
+  repository-projects: write
+
+env:
+  PROJECT19_OWNER: ${{ vars.PROJECT19_OWNER || 'BrianCLong' }}
+  PROJECT19_NUMBER: ${{ vars.PROJECT19_NUMBER || '19' }}
+  DRY_RUN: "true" # Default to dry-run for safety
+  MAX_FIX_SCOPE: 50
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Process event and update fields
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PROJECT19_EVENT_PATH=/tmp/event_payload.json npm run governance:sync
+
+      - name: Upload event processing report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: project19-event-sync-${{ github.run_number }}
+          path: |
+            artifacts/project19/event-processing/**

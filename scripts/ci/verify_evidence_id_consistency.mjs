@@ -593,19 +593,10 @@ async function writeReports(report, outputPath) {
   }
   
   await fs.writeFile(mdPath, mdContent, 'utf8');
-  
-  // Write stamp file for tracking with performance metrics
-  const stamp = {
-    sha: report.sha,
-    status: report.status,
-    timestamp: new Date().toISOString(),  // Runtime timestamp goes in stamp, not report
-    generator: report.generator,
-    violations: report.totals.violations
-  };
 
-  // Use canonical serialization for stamp.json too, but allow timestamps since it's runtime metadata
-  const canonicalStamp = canonicalJsonStringify(stamp);
-  await fs.writeFile(stampPath, canonicalStamp, 'utf8');
+  // DO NOT create stamp.json in writeReports - that's main's responsibility to ensure single-writer pattern
+  // This ensures stamp is written only once with complete information in main function
+  return { jsonPath, mdPath, stampPath };
 }
 
 /**
@@ -807,9 +798,38 @@ async function main() {
       }
     };
 
+    // Create comprehensive stamp with both basic and performance information in a single write
+    const comprehensiveStamp = {
+      sha: report.sha,
+      status: report.status,
+      timestamp: new Date().toISOString(),  // Runtime timestamp goes in stamp, not report/metrics
+      generator: report.generator,
+      violations: report.totals.violations,
+      performance: {
+        total_time_ms: totalTime,
+        evidence_map_load_ms: evidenceMapDuration,
+        document_discovery_ms: findDocsDuration,
+        document_processing_ms: processDuration,
+        report_building_ms: buildReportDuration,
+        report_writing_ms: writeReportsDuration,
+        average_doc_processing_ms: documents.length > 0 ? Math.round(processDuration / documents.length) : 0
+      }
+    };
+
     const stampPath = join(outputDir, 'stamp.json');
     // Use canonical serialization for stamp.json too, but allow timestamps since it's runtime metadata
-    const canonicalStamp = canonicalJsonStringify(stamp);
+    const canonicalStamp = JSON.stringify(stamp, (key, value) => {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        // Create sorted object to ensure consistent key order
+        const sorted = {};
+        const keys = Object.keys(value).sort(compareStringsCodepoint);
+        for (const k of keys) {
+          sorted[k] = value[k];
+        }
+        return sorted;
+      }
+      return value;
+    }, 2);
     await fs.writeFile(stampPath, canonicalStamp, 'utf8');
 
 

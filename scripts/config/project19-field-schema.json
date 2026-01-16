@@ -1,0 +1,398 @@
+{
+  "version": "2026-01-15",
+  "project": {
+    "projectId": "PVT_kwHOA6AIQLYAAAAAB2zsQQ",
+    "owner": "BrianCLong",
+    "number": 19,
+    "name": "Summit Development Roadmap"
+  },
+  "fields": [
+    {
+      "name": "Status",
+      "type": "singleSelect",
+      "description": "Current status of the work item",
+      "options": ["Todo", "In Progress", "Blocked", "In review", "Done"]
+    },
+    {
+      "name": "Phase",
+      "type": "singleSelect",
+      "description": "Development phase for work item",
+      "options": [
+        "Foundation",
+        "Core Platform",
+        "Operational Maturity",
+        "Ecosystem & Expansion",
+        "Advanced / Strategic"
+      ]
+    },
+    {
+      "name": "Priority",
+      "type": "singleSelect",
+      "description": "Business priority level",
+      "options": ["P0", "P1", "P2", "P3", "P4"]
+    },
+    {
+      "name": "Release",
+      "type": "singleSelect",
+      "description": "Target release for the work item",
+      "options": ["Alpha", "Beta", "GA", "v1.1", "v2.0+"]
+    },
+    {
+      "name": "Target Quarter",
+      "type": "singleSelect",
+      "description": "Target quarter for completion",
+      "options": ["Q1 2026", "Q2 2026", "Q3 2026", "Q4 2026"]
+    },
+    {
+      "name": "Sequence",
+      "type": "number",
+      "description": "Sequence number within phase",
+      "number": { "min": 1, "max": 1000 }
+    },
+    {
+      "name": "Risk",
+      "type": "singleSelect",
+      "description": "Risk level assessment",
+      "options": ["Low", "Medium", "High"]
+    },
+    {
+      "name": "Delivery Class",
+      "type": "singleSelect",
+      "description": "Portfolio classification for reporting and release discipline",
+      "options": ["Feature", "Infra", "Security", "Compliance", "Release", "Tech Debt", "Research"]
+    },
+    {
+      "name": "Work Type",
+      "type": "singleSelect",
+      "description": "Human vs agent execution pattern",
+      "options": ["Human", "Agent", "Hybrid"]
+    },
+    {
+      "name": "Automation Eligibility",
+      "type": "singleSelect",
+      "description": "How far automation may go without human intervention",
+      "options": ["Manual Only", "Agent Assist", "Agent Execute", "Fully Autonomous"]
+    },
+    {
+      "name": "WIP Risk",
+      "type": "singleSelect",
+      "description": "Execution risk used in prioritization and SLA views",
+      "options": ["Low", "Medium", "High"]
+    },
+    {
+      "name": "Execution Confidence",
+      "type": "number",
+      "description": "0-100 automation confidence score (algorithmic only, no manual override)",
+      "number": { "min": 0, "max": 100 }
+    },
+    {
+      "name": "Planned Start",
+      "type": "date",
+      "description": "Planned start date (optional; typically set for active initiatives)"
+    },
+    {
+      "name": "Planned Finish",
+      "type": "date",
+      "description": "Planned completion date (optional; typically set for active initiatives)"
+    },
+    {
+      "name": "Actual Start",
+      "type": "date",
+      "description": "First time work entered In Progress state"
+    },
+    {
+      "name": "Actual Finish",
+      "type": "date",
+      "description": "Completion date when item enters Done/Closed"
+    },
+    {
+      "name": "Blocked Reason",
+      "type": "singleSelect",
+      "description": "Primary blocker category for flow optimization",
+      "options": [
+        "None",
+        "Dependency",
+        "Decision",
+        "CI",
+        "Security",
+        "Compliance",
+        "Infra",
+        "Scope",
+        "Unknown"
+      ]
+    },
+    {
+      "name": "Blocked Detail",
+      "type": "text",
+      "description": "Short free-text detail for current blocker (optional)"
+    },
+    {
+      "name": "Upstream Dependency Count",
+      "type": "number",
+      "description": "Count of prerequisites; derived from linked issues/PRs and explicit refs",
+      "number": { "min": 0, "max": 100 }
+    },
+    {
+      "name": "Downstream Impact Count",
+      "type": "number",
+      "description": "Count of dependents/consumers; derived",
+      "number": { "min": 0, "max": 100 }
+    },
+    {
+      "name": "Governance Gate",
+      "type": "singleSelect",
+      "description": "Which gate is in force for this work item",
+      "options": ["None", "Design", "Security", "Compliance", "Release", "GA"]
+    },
+    {
+      "name": "Gate Status",
+      "type": "singleSelect",
+      "description": "Current state of the governing gate",
+      "options": ["Not Started", "In Review", "Blocked", "Approved"]
+    },
+    {
+      "name": "Policy Version",
+      "type": "text",
+      "description": "Governance policy version (e.g., gov-2026-01)"
+    },
+    {
+      "name": "Evidence Required",
+      "type": "singleSelect",
+      "description": "Whether evidence is required for this item under current gate",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Evidence Complete",
+      "type": "singleSelect",
+      "description": "Whether required evidence is present and validated",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Evidence Bundle ID",
+      "type": "text",
+      "description": "Content-addressed bundle identifier (hash/slug) if produced"
+    },
+    {
+      "name": "Audit Criticality",
+      "type": "singleSelect",
+      "description": "Audit materiality classification",
+      "options": ["Informational", "Control", "Material"]
+    },
+    {
+      "name": "External Audit Scope",
+      "type": "singleSelect",
+      "description": "Whether this work item is in external audit scope",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Control Mapping",
+      "type": "multiSelect",
+      "description": "Control frameworks impacted/covered by this work item",
+      "options": ["SOC2", "ISO27001", "NIST800-53", "SLSA", "SBOM"]
+    },
+    {
+      "name": "CI Status Snapshot",
+      "type": "singleSelect",
+      "description": "Current CI health signal from required checks",
+      "options": ["Green", "Flaky", "Failing", "Unknown"]
+    },
+    {
+      "name": "Determinism Risk",
+      "type": "singleSelect",
+      "description": "Risk assessment of non-determinism introduced/observed",
+      "options": ["None", "Potential", "Confirmed"]
+    },
+    {
+      "name": "Test Coverage Delta",
+      "type": "number",
+      "description": "Delta percentage relative to baseline; derived from CI coverage artifacts if available",
+      "number": { "min": -100, "max": 100 }
+    },
+    {
+      "name": "Artifact Produced",
+      "type": "singleSelect",
+      "description": "Whether CI produced required artifacts for this work item",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Release Train",
+      "type": "singleSelect",
+      "description": "Release cadence bucket used for executive reporting",
+      "options": ["Nightly", "Weekly", "MVP-4", "GA", "Post-GA"]
+    },
+    {
+      "name": "Release Blocker",
+      "type": "singleSelect",
+      "description": "Whether this item blocks the active train",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Rollback Required",
+      "type": "singleSelect",
+      "description": "Whether rollout requires rollback plan",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Kill-Switch Available",
+      "type": "singleSelect",
+      "description": "Whether kill-switch mechanism exists for feature/behavior",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Primary Agent",
+      "type": "singleSelect",
+      "description": "Primary executor (agent or human)",
+      "options": ["Jules", "Codex", "Claude", "Qwen", "Atlas", "Antigravity", "Human"]
+    },
+    {
+      "name": "Secondary Agents",
+      "type": "multiSelect",
+      "description": "Additional agents participating",
+      "options": ["Jules", "Codex", "Claude", "Qwen", "Atlas", "Antigravity"]
+    },
+    {
+      "name": "Agent Prompt ID",
+      "type": "text",
+      "description": "Prompt identifier (hash/slug) used to execute"
+    },
+    {
+      "name": "Prompt Version",
+      "type": "text",
+      "description": "Prompt spec version"
+    },
+    {
+      "name": "Agent Output Determinism",
+      "type": "singleSelect",
+      "description": "Determinism classification for generated artifacts",
+      "options": ["Deterministic", "Bounded", "Freeform"]
+    },
+    {
+      "name": "Max Fix Scope",
+      "type": "number",
+      "description": "Safety valve limit for automation changes",
+      "number": { "min": 0, "max": 10000 }
+    },
+    {
+      "name": "Human Approval Required",
+      "type": "singleSelect",
+      "description": "Hard stop requiring human approval",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Dry-Run Supported",
+      "type": "singleSelect",
+      "description": "Whether this work supports a dry-run mode",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Auto-Merge Allowed",
+      "type": "singleSelect",
+      "description": "Whether changes can auto-merge",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Strategic Theme",
+      "type": "singleSelect",
+      "description": "Executive alignment category",
+      "options": ["GA Readiness", "Trust", "Scale", "Cost", "Velocity", "Moat"]
+    },
+    {
+      "name": "Customer Impact",
+      "type": "singleSelect",
+      "description": "Externality of the work",
+      "options": ["None", "Internal", "Pilot", "GA"]
+    },
+    {
+      "name": "Revenue Sensitivity",
+      "type": "singleSelect",
+      "description": "Revenue linkage strength",
+      "options": ["None", "Indirect", "Direct"]
+    },
+    {
+      "name": "Reputation Risk",
+      "type": "singleSelect",
+      "description": "Brand and trust risk",
+      "options": ["Low", "Medium", "High", "Existential"]
+    },
+    {
+      "name": "Impact Score",
+      "type": "number",
+      "description": "1-10; may be set by PM; used in WSJF",
+      "number": { "min": 1, "max": 10 }
+    },
+    {
+      "name": "Effort Score",
+      "type": "number",
+      "description": "1-10; may be set by engineering; used in WSJF",
+      "number": { "min": 1, "max": 10 }
+    },
+    {
+      "name": "Risk Score",
+      "type": "number",
+      "description": "1-10; may be set by security/release; used in WSJF",
+      "number": { "min": 1, "max": 10 }
+    }
+  ],
+  "computed": [
+    {
+      "name": "WSJF Score",
+      "type": "number",
+      "description": "Weighted Shortest Job First score (automatically calculated, no manual edits)",
+      "number": { "min": 0, "max": 1000 }
+    },
+    {
+      "name": "True Priority",
+      "type": "number",
+      "description": "Composite priority score combining WSJF, risk, and release blocker signals (automatically calculated)",
+      "number": { "min": 0, "max": 100 }
+    },
+    {
+      "name": "GA Readiness Score",
+      "type": "number",
+      "description": "Calculated gate health and evidence completeness (automatically calculated)",
+      "number": { "min": 0, "max": 100 }
+    },
+    {
+      "name": "Automation Safety Score",
+      "type": "number",
+      "description": "Derived from Max Fix Scope, approval flags, determinism risk (automatically calculated)",
+      "number": { "min": 0, "max": 100 }
+    },
+    {
+      "name": "Agent Confidence Score",
+      "type": "number",
+      "description": "Calculated from agent selection and output determinism (automatically calculated)",
+      "number": { "min": 0, "max": 100 }
+    },
+    {
+      "name": "Expected Cycle Time (Days)",
+      "type": "number",
+      "description": "Estimate of cycle time based on effort and risk factors (automatically calculated)",
+      "number": { "min": 0, "max": 365 }
+    }
+  ],
+  "constraints": [
+    {
+      "name": "Computed field protection",
+      "fields": [
+        "WSJF Score",
+        "True Priority",
+        "GA Readiness Score",
+        "Automation Safety Score",
+        "Agent Confidence Score",
+        "Expected Cycle Time (Days)"
+      ],
+      "enforcement": "reject_manual_edits"
+    },
+    {
+      "name": "Evidence Required implies Governance Gate",
+      "rule": "if Evidence Required == 'Yes' then Governance Gate != 'None'",
+      "enforcement": "enforce_gate_requirement"
+    },
+    {
+      "name": "GA Gate requires Evidence Required",
+      "rule": "if Governance Gate == 'GA' then Evidence Required == 'Yes'",
+      "enforcement": "enforce_ga_evidence_requirement"
+    }
+  ]
+}

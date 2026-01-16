@@ -1,0 +1,99 @@
+name: Project 19 / Generate Snapshot
+
+on:
+  schedule:
+    # Run weekly on Mondays at 6 AM UTC
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      output_dir:
+        description: "Output directory for snapshot"
+        required: false
+        default: "docs/releases/GA_READINESS_WEEKLY"
+      publish:
+        description: "Publish snapshot to docs directory"
+        required: false
+        default: true
+        type: boolean
+      dry_run:
+        description: "Dry run mode (no actual publishing)"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  organization-projects: read
+
+env:
+  OUTPUT_DIR: ${{ inputs.output_dir || 'docs/releases/GA_READINESS_WEEKLY' }}
+  PUBLISH: ${{ inputs.publish || 'false' }}
+  DRY_RUN: ${{ inputs.dry_run || 'true' }}
+  AS_OF_DATE: ${{ github.event.inputs.as_of_date || '' }}
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate board snapshot
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROJECT19_OWNER: ${{ vars.PROJECT19_OWNER || 'BrianCLong' }}
+          PROJECT19_NUMBER: ${{ vars.PROJECT19_NUMBER || '19' }}
+          AS_OF_DATE: ${{ env.AS_OF_DATE }}
+        run: |
+          npm run generate:snapshot
+
+      - name: Upload snapshot artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: project19-board-snapshot-${{ github.run_number }}
+          path: |
+            artifacts/project19/board-snapshot/**
+            ${{ env.OUTPUT_DIR }}/**/*.md
+            ${{ env.OUTPUT_DIR }}/**/*.json
+
+      - name: Publish snapshot if requested
+        if: ${{ inputs.publish == true && inputs.dry_run == false }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create output directory if needed
+          mkdir -p $OUTPUT_DIR
+
+          # Copy generated snapshot to output directory with date suffix
+          DATE_STAMP=$(date -u +%Y-%m-%d)
+          cp artifacts/project19/board-snapshot/board_snapshot.md $OUTPUT_DIR/board_snapshot_${DATE_STAMP}.md
+          cp artifacts/project19/board-snapshot/board_snapshot.json $OUTPUT_DIR/board_snapshot_${DATE_STAMP}.json
+
+          echo "Published snapshot to $OUTPUT_DIR/"
+
+          # If this is the weekly schedule run, also update the LATEST file
+          if [[ "${{ github.event_name }}" == "schedule" ]]; then
+            cp artifacts/project19/board-snapshot/board_snapshot.md $OUTPUT_DIR/LATEST_BOARD_SNAPSHOT.md
+            echo "Updated LATEST snapshot"
+          fi
+
+      - name: Print snapshot summary
+        run: |
+          LATEST_SNAPSHOT=$(ls -t $OUTPUT_DIR/board_snapshot_*.md 2>/dev/null | head -n 1 || echo "")
+          if [ -f "$LATEST_SNAPSHOT" ]; then
+            echo "📄 Latest board snapshot: $LATEST_SNAPSHOT"
+            echo "Preview:"
+            head -30 "$LATEST_SNAPSHOT"
+          else
+            echo "No snapshot file available"
+          fi
