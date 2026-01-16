@@ -1,0 +1,9 @@
+# Threat Model for Summit CI Core Gate
+# This file is used by the verify_threat_model_evidence.mjs script.
+
+threat_model:
+  name: CI Core Gate
+  description: Verifies supply chain integrity and security thresholds.
+
+evidence: README.md
+evidence: package.json

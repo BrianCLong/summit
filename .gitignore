@@ -309,6 +309,15 @@ trivy-results.json
 *.patch
 *.diff
 
+# GA Core Gate Artifacts
+sbom.cdx.json
+sbom.cdx.sigstore.json
+provenance.slsa.json
+provenance.slsa.sigstore.json
+trivy.sbom.vuln.json
+deploy-gate-input.json
+opa-deploy-gate-decision.json
+
 # Temporary Artifacts
 package.tmp.json
 typecheck-output.txt
