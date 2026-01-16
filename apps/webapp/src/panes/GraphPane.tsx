@@ -1,11 +1,12 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import cytoscape from 'cytoscape';
 import $ from 'jquery';
 import { useDispatch } from 'react-redux';
 import { fetchGraph } from '../data/mockGraph';
 import { selectNode } from '../store';
 
-export function GraphPane() {
+// Memoized to prevent re-renders on global state changes (like theme toggle)
+export const GraphPane = React.memo(function GraphPane() {
   const containerRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
 
@@ -41,4 +42,4 @@ export function GraphPane() {
   }, [dispatch]);
 
   return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
-}
+});

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { useSelector } from 'react-redux';
 import { fetchGraph, GraphData } from '../data/mockGraph';
@@ -12,7 +12,8 @@ function getTestStub(): MapboxTestStub | undefined {
   return window.__MAPBOX_STUB__;
 }
 
-export function MapPane() {
+// Memoized to prevent re-renders on global state changes (like theme toggle)
+export const MapPane = React.memo(function MapPane() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const markerFactoryRef = useRef<(() => any) | null>(null);
@@ -62,4 +63,4 @@ export function MapPane() {
   }, [selectedNode, graphData]);
 
   return <div ref={mapContainer} style={{ width: '100%', height: '100%' }} />;
-}
+});
