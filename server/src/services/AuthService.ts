@@ -49,6 +49,7 @@ import { SECRETS } from '../config/secretRefs.js';
 import type { Pool, PoolClient } from 'pg';
 import GAEnrollmentService from './GAEnrollmentService.js';
 import { PrometheusMetrics } from '../utils/metrics.js';
+import { businessUserSignupsTotal } from '../monitoring/metrics.js';
 import { checkScope } from '../api/scopeGuard.js';
 
 /**
@@ -388,6 +389,9 @@ export class AuthService {
       const [seconds, nanoseconds] = process.hrtime(start);
       const duration = seconds + nanoseconds / 1e9;
       this.metrics?.observeHistogram('user_registration_duration_seconds', { status: 'success' }, duration);
+
+      // Increment business metric
+      businessUserSignupsTotal.inc({ tenant: user.tenant_id || 'unknown', plan: 'default' });
 
       return {
         user: this.formatUser(user),

@@ -116,6 +116,14 @@ export class IntelGraphTracer {
                 '@opentelemetry/instrumentation-graphql': {
                   enabled: true,
                 },
+                '@opentelemetry/instrumentation-pg': {
+                  enabled: true,
+                  requireParentSpan: true,
+                },
+                '@opentelemetry/instrumentation-redis': {
+                  enabled: true,
+                  requireParentSpan: true,
+                },
               }),
             ]
             : [],

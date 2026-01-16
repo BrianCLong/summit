@@ -2,6 +2,7 @@ import { Queue, Worker, QueueEvents } from 'bullmq';
 import { getRedisClient } from '../config/database.js';
 import logger from '../utils/logger.js';
 import { ingestionProcessor } from '../jobs/processors/ingestionProcessor.js';
+import { aiJobsProcessing, aiJobsTotal } from '../monitoring/metrics.js';
 
 export class IngestionService {
    private queue: Queue | null = null;
@@ -22,17 +23,28 @@ export class IngestionService {
       this.queue = new Queue('evidence-ingestion', { connection });
       this.queueEvents = new QueueEvents('evidence-ingestion', { connection });
 
-      this.worker = new Worker('evidence-ingestion', ingestionProcessor, {
+      this.worker = new Worker('evidence-ingestion', async (job) => {
+         const jobType = 'ingestion';
+         aiJobsProcessing.inc({ job_type: jobType });
+         try {
+            return await ingestionProcessor(job);
+         } finally {
+            aiJobsProcessing.dec({ job_type: jobType });
+            aiJobsTotal.inc({ job_type: jobType, status: 'processed' });
+         }
+      }, {
          connection,
          concurrency: 5
       });
 
       this.worker.on('completed', (job: any) => {
          logger.info({ jobId: job.id }, 'Ingestion job completed');
+         aiJobsTotal.inc({ job_type: 'ingestion', status: 'success' });
       });
 
       this.worker.on('failed', (job: any, err: any) => {
          logger.error({ jobId: job?.id, error: err }, 'Ingestion job failed');
+         aiJobsTotal.inc({ job_type: 'ingestion', status: 'failed' });
       });
 
       logger.info('IngestionService initialized');
