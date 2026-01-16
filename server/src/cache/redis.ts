@@ -1,6 +1,9 @@
 // @ts-nocheck
 import Redis, { Cluster, type ClusterNode } from 'ioredis';
 import config from '../config/index.js';
+import pino from 'pino';
+
+const logger = (pino as any)({ name: 'RedisService' });
 
 type RedisLike = Redis | Cluster;
 
@@ -40,11 +43,28 @@ export class RedisService {
     const shouldUseCluster =
       (clusterNodes?.length ?? 0) > 0 || config.redis.useCluster;
 
+    const commonOptions = {
+        retryStrategy: (times: number) => {
+            const delay = Math.min(times * 50, 2000);
+            logger.warn({ times, delay }, 'Redis connection retry');
+            return delay;
+        },
+        reconnectOnError: (err: Error) => {
+             const targetError = 'READONLY';
+             if (err.message.slice(0, targetError.length) === targetError) {
+                 // Only reconnect when the error starts with "READONLY"
+                 return true;
+             }
+             return false;
+        }
+    };
+
     if (shouldUseCluster && parsedNodes.length) {
       const redisOptions = {
         redisOptions: {
           tls: config.redis.tls ? {} : undefined,
           lazyConnect: true,
+          ...commonOptions
         },
       };
       this.pub = new Cluster(parsedNodes, redisOptions);
@@ -52,9 +72,14 @@ export class RedisService {
     } else {
       const resolvedUrl =
         url || `redis://${config.redis.host}:${config.redis.port}`;
-      this.pub = new Redis(resolvedUrl);
-      this.sub = new Redis(resolvedUrl);
+      this.pub = new Redis(resolvedUrl, commonOptions);
+      this.sub = new Redis(resolvedUrl, commonOptions);
     }
+
+    this.pub.on('error', (err) => logger.error({ err }, 'Redis Pub connection error'));
+    this.sub.on('error', (err) => logger.error({ err }, 'Redis Sub connection error'));
+    this.pub.on('connect', () => logger.info('Redis Pub connected'));
+    this.sub.on('connect', () => logger.info('Redis Sub connected'));
   }
 
   getClient(): RedisLike {
