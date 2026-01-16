@@ -1,0 +1,15 @@
+evidence_schema: "supply_chain_provenance/1.0"
+properties:
+  sbom_spdx:
+    type: string
+    description: "Path to SPDX SBOM"
+  sbom_cyclonedx:
+    type: string
+    description: "Path to CycloneDX SBOM"
+  provenance:
+    type: string
+    description: "Path to signed provenance attestation"
+required:
+  - sbom_spdx
+  - sbom_cyclonedx
+  - provenance
