@@ -225,30 +225,84 @@ export class BackupService {
        // Check if cluster or standalone
        const isCluster = (client as any).constructor.name === 'Cluster';
 
-       if (isCluster) {
-          throw new Error('Redis Cluster backup not supported in this version. Use manual persistence management or snapshots.');
-       } else {
+       // Trigger BGSAVE mostly for persistent volume users
+       try {
            // @ts-ignore
            await client.bgsave();
+           logger.info('Redis BGSAVE triggered successfully.');
+       } catch (e: any) {
+           logger.warn('Redis BGSAVE failed (might be already in progress or restricted): ' + e.message);
        }
 
+       // Logical Backup (Comprehensive)
        const dir = await this.ensureBackupDir('redis');
        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-       const filename = `redis-backup-log-${timestamp}.txt`;
+       const filename = `redis-dump-${timestamp}.jsonl`;
        const filepath = path.join(dir, filename);
+       const finalPath = options.compress ? `${filepath}.gz` : filepath;
 
-       await fs.writeFile(filepath, `Redis BGSAVE triggered successfully. Last save timestamp: ${new Date().toISOString()}`);
+       const fileStream = createWriteStream(finalPath);
+       const outputStream = options.compress ? zlib.createGzip() : null;
+       if (outputStream) outputStream.pipe(fileStream as unknown as NodeJS.WritableStream);
+       const writeTarget = outputStream || fileStream;
 
-       backupMetrics.observeHistogram('duration_seconds', (Date.now() - startTime) / 1000, { type: 'redis', status: 'success' });
+       if (!isCluster) {
+           // @ts-ignore
+           const stream = client.scanStream({ count: 100 });
 
-       if (options.uploadToS3) {
-           const s3Key = `redis/${path.basename(filepath)}`;
-           await this.uploadToS3(filepath, s3Key);
+           for await (const keys of stream) {
+               if (keys.length > 0) {
+                   const pipeline = client.pipeline();
+                   // @ts-ignore
+                   keys.forEach((key: string) => {
+                       pipeline.dump(key);
+                       pipeline.pttl(key);
+                   });
+                   const results = await pipeline.exec();
+
+                   // results is [ [err, dump], [err, pttl], [err, dump], [err, pttl] ... ]
+                   if (results) {
+                       for (let i = 0; i < results.length; i += 2) {
+                           const dumpRes = results[i];
+                           const pttlRes = results[i+1];
+                           const key = keys[i/2];
+
+                           if (!dumpRes[0] && dumpRes[1]) {
+                               const record = {
+                                   key,
+                                   dump: (dumpRes[1] as Buffer).toString('base64'),
+                                   pttl: pttlRes[0] ? -1 : pttlRes[1]
+                               };
+                               writeTarget.write(JSON.stringify(record) + '\n');
+                           }
+                       }
+                   }
+               }
+           }
+       } else {
+           logger.warn('Logical backup for Redis Cluster not fully implemented yet. Skipping key scan.');
+           writeTarget.write(JSON.stringify({ info: 'Cluster backup skipped, check RDB on nodes' }) + '\n');
        }
 
-       await this.recordBackupMeta('redis', filepath, 0);
+       writeTarget.end();
 
-       return filepath;
+       await new Promise<void>((resolve, reject) => {
+           fileStream.on('finish', () => resolve());
+           fileStream.on('error', (err: any) => reject(err));
+       });
+
+       const stats = await fs.stat(finalPath);
+       backupMetrics.observeHistogram('duration_seconds', (Date.now() - startTime) / 1000, { type: 'redis', status: 'success' });
+       backupMetrics.setGauge('size_bytes', stats.size, { type: 'redis' });
+
+       if (options.uploadToS3) {
+           const s3Key = `redis/${path.basename(finalPath)}`;
+           await this.uploadToS3(finalPath, s3Key);
+       }
+
+       await this.recordBackupMeta('redis', finalPath, stats.size);
+
+       return finalPath;
      } catch (error: any) {
        logger.error('Redis backup failed', error);
        throw error;

@@ -5,6 +5,7 @@ import { promisify } from 'util';
 import { exec } from 'child_process';
 import path from 'path';
 import fs from 'fs/promises';
+import { getPostgresPool } from '../db/postgres.js';
 
 const execAsync = promisify(exec);
 
@@ -53,7 +54,7 @@ export class ColdStorageService {
 
   /**
    * Archive a table partition
-   * 1. Export partition data to file (CSV/Parquet)
+   * 1. Export partition data to file (CSV/Parquet/SQL)
    * 2. Upload to Cold Storage
    * 3. (Optional) Drop partition from DB
    */
@@ -64,28 +65,48 @@ export class ColdStorageService {
   ): Promise<void> {
     logger.info(`Archiving partition ${partitionName} of table ${tableName}...`);
 
-    // In a real implementation, we would use pg_dump or COPY command
-    // For now, we'll simulate creating a file
     const exportDir = path.join(process.env.TEMP_DIR || '/tmp', 'archives');
     await fs.mkdir(exportDir, { recursive: true });
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `${partitionName}-${timestamp}.csv.gz`;
+    const filename = `${partitionName}-${timestamp}.sql.gz`;
     const filepath = path.join(exportDir, filename);
 
+    // DB Connection details for pg_dump
+    const pgHost = process.env.POSTGRES_HOST || 'localhost';
+    const pgUser = process.env.POSTGRES_USER || 'intelgraph';
+    const pgDb = process.env.POSTGRES_DB || 'intelgraph_dev';
+    const pgPassword = process.env.POSTGRES_PASSWORD || 'devpassword';
+
     try {
-        // Simulate export
-        await fs.writeFile(filepath, `Simulated export of ${partitionName}\n`);
+        // Use pg_dump to export the partition table
+        // Note: pg_dump must be available in the environment
+        const cmd = `PGPASSWORD='${pgPassword}' pg_dump -h ${pgHost} -U ${pgUser} -t ${partitionName} ${pgDb} | gzip > "${filepath}"`;
+
+        if (process.env.MOCK_ARCHIVE === 'true') {
+             await fs.writeFile(filepath, `Simulated export of ${partitionName}\n`);
+             logger.info('Simulated pg_dump execution');
+        } else {
+            await execAsync(cmd);
+        }
 
         // Upload
-        await this.upload(filepath, `archives/${tableName}/${filename}`);
+        const s3Key = `archives/${tableName}/${filename}`;
+        await this.upload(filepath, s3Key);
 
         // Cleanup local file
         await fs.unlink(filepath);
 
         if (dropAfterArchive) {
-            logger.info(`Ready to drop partition ${partitionName} (dry-run)`);
-            // await client.query(`DROP TABLE ${partitionName}`);
+            logger.info(`Dropping partition ${partitionName} after successful archive...`);
+            const pool = getPostgresPool();
+            const client = await pool.connect();
+            try {
+                await client.query(`DROP TABLE IF EXISTS ${partitionName}`);
+                logger.info(`Partition ${partitionName} dropped.`);
+            } finally {
+                client.release();
+            }
         }
 
     } catch (error: any) {
