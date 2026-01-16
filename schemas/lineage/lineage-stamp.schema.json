@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "version": { "type": "integer", "const": 1 },
+    "sourceSha": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "bytes": { "type": "integer", "minimum": 0 }
+        },
+        "required": ["path", "sha256", "bytes"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["version", "sourceSha", "policyHash", "files"],
+  "additionalProperties": false
+}
