@@ -1,4 +1,4 @@
-
+// CODEOWNERS SMOKE TEST: no functional change.
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import { MigrationFramework } from '../../src/migrations/migrationFramework.js';
