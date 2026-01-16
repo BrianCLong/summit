@@ -1,0 +1,28 @@
+schema_version: "1.0.0"
+mappings:
+  - control_id: "SOC2-CC6.1"
+    framework: "SOC2"
+    description: "The entity checks that logical access to system resources is controlled."
+    evidence_sources:
+      - path_pattern: "docs/security/SECURITY_MERGE_POLICY.yml"
+        rationale: "Defines strict merge policies and access controls for code changes."
+      - path_pattern: "artifacts/trust/trust_state.json"
+        rationale: "Proves that the runtime state matches the trusted codebase."
+
+  - control_id: "SOC2-CC2.2"
+    framework: "SOC2"
+    description: "The entity checks that internal anomalies are identified and addressed."
+    evidence_sources:
+      - path_pattern: "docs/ga/FAILURE_ECONOMICS.yml"
+        rationale: "Defines the financial and operational handling of trust failures."
+      - path_pattern: "artifacts/risk/risk_metrics.json"
+        rationale: "Quantifies integrity and availability exposure in near real-time."
+
+  - control_id: "GDPR-Art32"
+    framework: "GDPR"
+    description: "Security of processing."
+    evidence_sources:
+      - path_pattern: "docs/ga/EVIDENCE_RETENTION_POLICY.yml"
+        rationale: "Ensures evidence of security measures is retained for audit."
+      - path_pattern: "schemas/external_attestation.schema.json"
+        rationale: "Provides mechanism for third-party verification of security claims."

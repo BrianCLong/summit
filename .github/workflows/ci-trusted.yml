@@ -1,29 +1,91 @@
 name: CI (Trusted)
 
 on:
-  # TRUSTED Workflow Trigger
-  # Runs on pushes to main (post-merge) or PRs from internal branches if configured via pull_request_target (careful!)
   push:
     branches: [main]
-  
-  # Allow manual trigger for authorized users
   workflow_dispatch:
 
 jobs:
-  deploy:
-    name: Deploy to Staging
+  trust-pipeline:
+    name: Trust Pipeline
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # Required for OIDC
+      id-token: write
+      deployments: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify Artifact Determinism
+        run: |
+          # Verify build reproducibility
+          node scripts/ci/verify_determinism.mjs
+
+      - name: Verify External Attestations
+        run: |
+          # Ingest and verify third-party attestations (read-only, non-blocking)
+          node scripts/ci/verify_external_attestation.mjs
+
+      - name: Evaluate Trust State
+        run: |
+          # Compute trust state and block if RED
+          node scripts/ci/evaluate_trust_state.mjs
+
+      - name: Compute Risk Metrics
+        run: |
+          # Generate insurance-grade risk snapshot
+          node scripts/ci/compute_risk_metrics.mjs
+        if: always()
+
+      - name: Generate Evidence Dossier
+        run: |
+          # Aggregate evidence for regulators (SOC2, GDPR)
+          node scripts/ci/generate_evidence_dossier.mjs
+        if: always()
+
+      - name: Upload Risk Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: risk-metrics
+          path: artifacts/risk/
+          retention-days: 90
+
+      - name: Upload Dossier Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: regulator-dossier
+          path: artifacts/dossiers/
+          retention-days: 90
+
+  deploy:
+    name: Deploy to Staging
+    needs: [trust-pipeline]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
       deployments: write
     steps:
       - uses: actions/checkout@v4
       - name: Authenticate to Cloud
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
-          service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
+          workload_identity_provider: "projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider"
+          service_account: "my-service-account@my-project.iam.gserviceaccount.com"
       - name: Deploy
         run: |
           echo "Deploying to staging..."
