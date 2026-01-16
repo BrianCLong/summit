@@ -1,0 +1,37 @@
+{
+  "task_id": "SUMMIT_LABS_SCAFFOLD_001",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "summit-labs-scaffold",
+    "version": "v1",
+    "sha256": "4497084e918cf58c6e8e4394085706d5cf94484a7fcb53cc63853592839c952b",
+    "path": "prompts/labs/summit-labs-scaffold-v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "labs/",
+      "docs/roadmap/STATUS.json",
+      "prompts/labs/",
+      "prompts/registry.yaml",
+      "agents/examples/"
+    ],
+    "domains": ["governance", "documentation", "roadmap", "labs"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["roadmap update", "labs scaffolding"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Summit Labs scaffolding docs exist with preview and promotion gates",
+    "Roadmap status reflects the Labs track initiative"
+  ],
+  "stop_conditions": [
+    "Governance conflicts with policy-as-code requirements",
+    "Roadmap update omitted from the change set"
+  ]
+}
