@@ -1,0 +1,18 @@
+evidence:
+  - id: EVID-IAC-VALIDATE-001
+    name: IaC Validation Gate Artifacts
+    path_glob: artifacts/iac-validate/*
+    produced_by: .github/workflows/iac-validate.yml
+    description: Terraform fmt/validate + semantic schema checks + drift detection report and stamp.
+
+  - id: EVID-SEC-IAC-001
+    name: IaC Security Scan SARIF
+    path_glob: artifacts/security-iac/trivy-iac.sarif
+    produced_by: .github/workflows/security-iac.yml
+    description: Trivy config (IaC) scan results in SARIF format uploaded to GitHub Security.
+
+  - id: EVID-GA-VERIFY-001
+    name: GA Verify Stamp
+    path_glob: artifacts/ga-verify/**/stamp.json
+    produced_by: .github/workflows/ga-verify.yml
+    description: GA verify stamp and deterministic report describing which gates passed/skipped/missing.

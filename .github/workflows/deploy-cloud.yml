@@ -1,0 +1,68 @@
+name: deploy:cloud
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options: [dev, stage, prod]
+      apply:
+        description: "Apply (true) or Plan-only (false)"
+        required: true
+        default: "false"
+        type: choice
+        options: ["false", "true"]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-cloud-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'dev' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.5"
+          terraform_wrapper: false
+
+      - name: Determine target environment
+        id: env
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "target=dev" >> $GITHUB_OUTPUT
+            echo "apply=false" >> $GITHUB_OUTPUT
+          else
+            echo "target=${{ inputs.environment }}" >> $GITHUB_OUTPUT
+            echo "apply=${{ inputs.apply }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy (plan/apply)
+        shell: bash
+        env:
+          DEPLOY_ENV: ${{ steps.env.outputs.target }}
+          DEPLOY_APPLY: ${{ steps.env.outputs.apply }}
+        run: |
+          chmod +x scripts/deploy/deploy-cloud.sh
+          scripts/deploy/deploy-cloud.sh
+
+      - name: Upload Deploy Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-cloud-${{ steps.env.outputs.target }}-${{ github.sha }}
+          path: artifacts/deploy-cloud/
+          if-no-files-found: ignore
