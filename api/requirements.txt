@@ -1,4 +1,4 @@
-fastapi==0.128.0
-uvicorn==0.40.0
-neo4j==6.0.3
-redis==7.1.0
+fastapi==0.130.0
+uvicorn==0.40.1
+neo4j==6.1.0
+redis==7.2.0
