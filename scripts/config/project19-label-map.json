@@ -1,0 +1,115 @@
+{
+  "version": "2026-01-15",
+  "delivery_class": {
+    "security": "Security",
+    "compliance": "Compliance",
+    "release": "Release",
+    "infra": "Infra",
+    "tech-debt": "Tech Debt",
+    "research": "Research",
+    "feature": "Feature",
+    "bug": "Bug Fix",
+    "enhancement": "Feature",
+    "documentation": "Feature"
+  },
+  "governance_gate": {
+    "gate:design": "Design",
+    "gate:security": "Security",
+    "gate:compliance": "Compliance",
+    "gate:release": "Release",
+    "gate:ga": "GA",
+    "security-review": "Security",
+    "compliance-review": "Compliance",
+    "release-review": "Release"
+  },
+  "evidence_required": {
+    "gate:ga": "Yes",
+    "gate:compliance": "Yes",
+    "gate:security": "Yes",
+    "evidence:required": "Yes",
+    "evidence:none": "No",
+    "audit-required": "Yes"
+  },
+  "control_mapping": {
+    "ctrl:soc2": ["SOC2"],
+    "ctrl:iso27001": ["ISO27001"],
+    "ctrl:nist800-53": ["NIST800-53"],
+    "ctrl:slsa": ["SLSA"],
+    "ctrl:sbom": ["SBOM"],
+    "compliance:soc2": ["SOC2"],
+    "compliance:iso": ["ISO27001"],
+    "compliance:nist": ["NIST800-53"]
+  },
+  "automation_eligibility": {
+    "auto:manual": "Manual Only",
+    "auto:assist": "Agent Assist",
+    "auto:execute": "Agent Execute",
+    "auto:autonomous": "Fully Autonomous",
+    "agent:assist": "Agent Assist",
+    "agent:execute": "Agent Execute"
+  },
+  "work_type": {
+    "work:human": "Human",
+    "work:agent": "Agent",
+    "work:hybrid": "Hybrid"
+  },
+  "agent": {
+    "agent:jules": "Jules",
+    "agent:codex": "Codex",
+    "agent:claude": "Claude",
+    "agent:qwen": "Qwen",
+    "agent:atlas": "Atlas",
+    "agent:antigravity": "Antigravity"
+  },
+  "milestone_release_train": [
+    { "pattern": "GA", "value": "GA" },
+    { "pattern": "MVP-4", "value": "MVP-4" },
+    { "pattern": "Post-GA", "value": "Post-GA" },
+    { "pattern": "Weekly", "value": "Weekly" },
+    { "pattern": "Nightly", "value": "Nightly" }
+  ],
+  "release_blocker": {
+    "blocker:release": "Yes",
+    "priority:p0": "Yes"
+  },
+  "audit_criticality": {
+    "audit:control": "Control",
+    "audit:material": "Material",
+    "audit:info": "Informational",
+    "criticality:control": "Control",
+    "criticality:material": "Material"
+  },
+  "strategic_theme": {
+    "theme:ga": "GA Readiness",
+    "theme:trust": "Trust",
+    "theme:scale": "Scale",
+    "theme:cost": "Cost",
+    "theme:velocity": "Velocity",
+    "theme:moat": "Moat",
+    "strategic:ga": "GA Readiness"
+  },
+  "customer_impact": {
+    "impact:customer": "GA",
+    "impact:pilot": "Pilot",
+    "impact:internal": "Internal",
+    "customer-facing": "GA"
+  },
+  "reputation_risk": {
+    "risk:existential": "Existential",
+    "risk:high": "High",
+    "risk:medium": "Medium",
+    "risk:low": "Low"
+  },
+  "determinism_risk": {
+    "det:confirmed": "Confirmed",
+    "det:potential": "Potential",
+    "det:none": "None"
+  },
+  "ci_status": {
+    "ci:green": "Green",
+    "ci:flaky": "Flaky",
+    "ci:failing": "Failing",
+    "status:passing": "Green",
+    "status:failing": "Failing"
+  }
+}

@@ -593,19 +593,10 @@ async function writeReports(report, outputPath) {
   }
   
   await fs.writeFile(mdPath, mdContent, 'utf8');
-  
-  // Write stamp file for tracking with performance metrics
-  const stamp = {
-    sha: report.sha,
-    status: report.status,
-    timestamp: new Date().toISOString(),  // Runtime timestamp goes in stamp, not report
-    generator: report.generator,
-    violations: report.totals.violations
-  };
 
-  // Use canonical serialization for stamp.json too, but allow timestamps since it's runtime metadata
-  const canonicalStamp = canonicalJsonStringify(stamp);
-  await fs.writeFile(stampPath, canonicalStamp, 'utf8');
+  // DO NOT create stamp here - that's the responsibility of main() to avoid duplicate writes.
+  // This maintains a single-writer pattern for stamp.json which ensures deterministic behavior.
+  // All runtime metadata (performance, timing) belongs in main() for proper separation of concerns.
 }
 
 /**

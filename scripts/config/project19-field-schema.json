@@ -1,0 +1,410 @@
+{
+  "version": "2026-01-15",
+  "project": {
+    "projectId": "PVT_kwHOA6AIQLYAAAAAB2zsQQ",
+    "owner": "BrianCLong",
+    "number": 19,
+    "name": "Summit Development Roadmap"
+  },
+  "fields": [
+    {
+      "name": "Delivery Class",
+      "type": "single_select",
+      "description": "Portfolio classification for reporting and release discipline.",
+      "options": ["Feature", "Infra", "Security", "Compliance", "Release", "Tech Debt", "Research"]
+    },
+    {
+      "name": "Work Type",
+      "type": "single_select",
+      "description": "Human vs agent execution pattern.",
+      "options": ["Human", "Agent", "Hybrid"]
+    },
+    {
+      "name": "Automation Eligibility",
+      "type": "single_select",
+      "description": "How far automation may go without human intervention.",
+      "options": ["Manual Only", "Agent Assist", "Agent Execute", "Fully Autonomous"]
+    },
+    {
+      "name": "WIP Risk",
+      "type": "single_select",
+      "description": "Execution risk used in prioritization and SLA views.",
+      "options": ["Low", "Medium", "High"]
+    },
+    {
+      "name": "Execution Confidence",
+      "type": "number",
+      "description": "0-100 confidence score (automation derived; manual override forbidden).",
+      "number": { "min": 0, "max": 100 }
+    },
+    {
+      "name": "Planned Start",
+      "type": "date",
+      "description": "Plan date (optional; typically set for active initiatives)."
+    },
+    {
+      "name": "Planned Finish",
+      "type": "date",
+      "description": "Plan date (optional; typically set for active initiatives)."
+    },
+    {
+      "name": "Actual Start",
+      "type": "date",
+      "description": "First time work entered In Progress or equivalent."
+    },
+    {
+      "name": "Actual Finish",
+      "type": "date",
+      "description": "Completion date when item enters Done/Closed."
+    },
+    {
+      "name": "Blocked Reason",
+      "type": "single_select",
+      "description": "Primary blocker category for flow optimization.",
+      "options": [
+        "None",
+        "Dependency",
+        "Decision",
+        "CI",
+        "Security",
+        "Compliance",
+        "Infra",
+        "Scope",
+        "Unknown"
+      ]
+    },
+    {
+      "name": "Blocked Detail",
+      "type": "text",
+      "description": "Short free-text detail for current blocker (optional)."
+    },
+    {
+      "name": "Upstream Dependency Count",
+      "type": "number",
+      "description": "Count of prerequisites; derived from linked issues/PRs and explicit refs.",
+      "number": { "min": 0, "max": 1000 }
+    },
+    {
+      "name": "Downstream Impact Count",
+      "type": "number",
+      "description": "Count of dependents/consumers; derived.",
+      "number": { "min": 0, "max": 1000 }
+    },
+    {
+      "name": "Governance Gate",
+      "type": "single_select",
+      "description": "Which gate is in force for this work item.",
+      "options": ["None", "Design", "Security", "Compliance", "Release", "GA"]
+    },
+    {
+      "name": "Gate Status",
+      "type": "single_select",
+      "description": "Current state of the governing gate.",
+      "options": ["Not Started", "In Review", "Blocked", "Approved"]
+    },
+    {
+      "name": "Policy Version",
+      "type": "text",
+      "description": "Governance policy version (e.g., gov-2026-01)."
+    },
+    {
+      "name": "Evidence Required",
+      "type": "single_select",
+      "description": "Whether evidence is required for this item under current gate.",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Evidence Complete",
+      "type": "single_select",
+      "description": "Whether required evidence is present and validated.",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Evidence Bundle ID",
+      "type": "text",
+      "description": "Content-addressed bundle identifier (hash/slug) if produced."
+    },
+    {
+      "name": "Audit Criticality",
+      "type": "single_select",
+      "description": "Audit materiality classification.",
+      "options": ["Informational", "Control", "Material"]
+    },
+    {
+      "name": "External Audit Scope",
+      "type": "single_select",
+      "description": "Whether this work item is in external audit scope.",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Control Mapping",
+      "type": "multi_select",
+      "description": "Control frameworks impacted/covered by this work item.",
+      "options": ["SOC2", "ISO27001", "NIST800-53", "SLSA", "SBOM"]
+    },
+    {
+      "name": "CI Status Snapshot",
+      "type": "single_select",
+      "description": "Current CI health signal from required checks.",
+      "options": ["Green", "Flaky", "Failing", "Unknown"]
+    },
+    {
+      "name": "Determinism Risk",
+      "type": "single_select",
+      "description": "Risk assessment of nondeterminism introduced/observed.",
+      "options": ["None", "Potential", "Confirmed"]
+    },
+    {
+      "name": "Test Coverage Delta",
+      "type": "number",
+      "description": "Delta percentage relative to baseline; derived from CI coverage artifacts if available.",
+      "number": { "min": -100, "max": 100 }
+    },
+    {
+      "name": "Artifact Produced",
+      "type": "single_select",
+      "description": "Whether CI produced required artifacts for this work item.",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Release Train",
+      "type": "single_select",
+      "description": "Release cadence bucket used for executive reporting.",
+      "options": ["Nightly", "Weekly", "MVP-4", "GA", "Post-GA"]
+    },
+    {
+      "name": "Release Blocker",
+      "type": "single_select",
+      "description": "Whether this item blocks the active train.",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Rollback Required",
+      "type": "single_select",
+      "description": "Whether rollout requires rollback plan.",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Kill-Switch Available",
+      "type": "single_select",
+      "description": "Whether kill-switch exists for feature/behavior.",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Primary Agent",
+      "type": "single_select",
+      "description": "Primary executor (agent or human).",
+      "options": ["Jules", "Codex", "Claude", "Qwen", "Atlas", "Antigravity", "Human"]
+    },
+    {
+      "name": "Secondary Agents",
+      "type": "multi_select",
+      "description": "Additional agents participating.",
+      "options": ["Jules", "Codex", "Claude", "Qwen", "Atlas", "Antigravity"]
+    },
+    {
+      "name": "Agent Prompt ID",
+      "type": "text",
+      "description": "Prompt identifier (hash/slug) used to execute."
+    },
+    {
+      "name": "Prompt Version",
+      "type": "text",
+      "description": "Prompt spec version."
+    },
+    {
+      "name": "Agent Output Determinism",
+      "type": "single_select",
+      "description": "Determinism classification for generated artifacts.",
+      "options": ["Deterministic", "Bounded", "Freeform"]
+    },
+    {
+      "name": "Max Fix Scope",
+      "type": "number",
+      "description": "Safety valve limit for automation changes.",
+      "number": { "min": 0, "max": 10000 }
+    },
+    {
+      "name": "Human Approval Required",
+      "type": "single_select",
+      "description": "Hard stop requiring human approval.",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Dry-Run Supported",
+      "type": "single_select",
+      "description": "Whether automation supports dry-run mode for this item.",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Auto-Merge Allowed",
+      "type": "single_select",
+      "description": "Whether PRs from automation may auto-merge.",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Strategic Theme",
+      "type": "single_select",
+      "description": "Executive alignment category.",
+      "options": ["GA Readiness", "Trust", "Scale", "Cost", "Velocity", "Moat"]
+    },
+    {
+      "name": "Customer Impact",
+      "type": "single_select",
+      "description": "Externality of the work.",
+      "options": ["None", "Internal", "Pilot", "GA"]
+    },
+    {
+      "name": "Revenue Sensitivity",
+      "type": "single_select",
+      "description": "Revenue linkage strength.",
+      "options": ["None", "Indirect", "Direct"]
+    },
+    {
+      "name": "Reputation Risk",
+      "type": "single_select",
+      "description": "Brand and trust risk.",
+      "options": ["Low", "Medium", "High", "Existential"]
+    },
+    {
+      "name": "Impact Score",
+      "type": "number",
+      "description": "1-10; may be set by PM; used in WSJF.",
+      "number": { "min": 1, "max": 10 }
+    },
+    {
+      "name": "Effort Score",
+      "type": "number",
+      "description": "1-10; may be set by engineering; used in WSJF.",
+      "number": { "min": 1, "max": 10 }
+    },
+    {
+      "name": "Risk Score",
+      "type": "number",
+      "description": "1-10; may be set by security/release; used in WSJF.",
+      "number": { "min": 1, "max": 10 }
+    },
+    {
+      "name": "WSJF Score",
+      "type": "number",
+      "description": "Derived; manual edits forbidden.",
+      "number": { "min": 0, "max": 1000 }
+    },
+    {
+      "name": "Outcome Classification",
+      "type": "single_select",
+      "description": "Post-completion outcome.",
+      "options": ["Success", "Partial", "Failed", "Abandoned"]
+    },
+    {
+      "name": "Root Cause Category",
+      "type": "single_select",
+      "description": "For failures/partials; feeds learning loops.",
+      "options": ["Design", "Execution", "Dependency", "Tooling", "Governance"]
+    },
+    {
+      "name": "Automation ROI",
+      "type": "single_select",
+      "description": "Post-completion assessment.",
+      "options": ["Negative", "Neutral", "Positive", "Breakthrough"]
+    },
+    {
+      "name": "Reusable Artifact",
+      "type": "single_select",
+      "description": "Whether output is reusable pattern/runbook/module.",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "Runbook Created",
+      "type": "single_select",
+      "description": "Whether a runbook exists/was created.",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "ADR Required",
+      "type": "single_select",
+      "description": "Whether an ADR is required under policy.",
+      "options": ["No", "Yes"]
+    },
+    {
+      "name": "ADR Linked",
+      "type": "text",
+      "description": "Link or identifier for ADR if present."
+    },
+    {
+      "name": "Pattern Extracted",
+      "type": "single_select",
+      "description": "Whether a reusable pattern was extracted.",
+      "options": ["No", "Yes"]
+    }
+  ],
+  "computed": [
+    {
+      "name": "True Priority",
+      "type": "number",
+      "description": "Derived priority score combining WSJF, risk, and release blocker signals."
+    },
+    {
+      "name": "GA Readiness Score",
+      "type": "number",
+      "description": "Derived gate health and evidence completeness."
+    },
+    {
+      "name": "Automation Safety Score",
+      "type": "number",
+      "description": "Derived from Max Fix Scope, approval flags, determinism risk."
+    },
+    {
+      "name": "Expected Cycle Time (Days)",
+      "type": "number",
+      "description": "Derived from historical cycle times by class/gate."
+    }
+  ],
+  "constraints": [
+    {
+      "name": "No manual edits to computed fields",
+      "fields": [
+        "Execution Confidence",
+        "WSJF Score",
+        "True Priority",
+        "GA Readiness Score",
+        "Automation Safety Score",
+        "Expected Cycle Time (Days)"
+      ],
+      "enforcement": "reject_or_revert"
+    },
+    {
+      "name": "Evidence Required implies Governance Gate",
+      "rule": "if Evidence Required == Yes then Governance Gate != None",
+      "enforcement": "reject_or_warn"
+    },
+    {
+      "name": "GA Gate requires Evidence",
+      "rule": "if Governance Gate == GA then Evidence Required == Yes",
+      "enforcement": "reject_or_revert"
+    }
+  ],
+  "mappings": [
+    {
+      "source": "labels",
+      "match": ["security", "compliance", "release", "infra", "tech-debt", "research"],
+      "targets": ["Delivery Class", "Governance Gate", "Audit Criticality", "Control Mapping"]
+    },
+    {
+      "source": "milestone",
+      "match": ["MVP-4", "GA", "Post-GA"],
+      "targets": ["Release Train", "Release Blocker"]
+    },
+    {
+      "source": "ci_artifacts",
+      "targets": [
+        "CI Status Snapshot",
+        "Artifact Produced",
+        "Determinism Risk",
+        "Test Coverage Delta",
+        "Evidence Complete",
+        "Evidence Bundle ID"
+      ]
+    }
+  ]
+}
