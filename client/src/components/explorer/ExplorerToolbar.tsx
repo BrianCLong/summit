@@ -96,6 +96,7 @@ export function ExplorerToolbar({
             <button
               onClick={() => onFiltersChange({ ...filters, searchQuery: '' })}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              aria-label="Clear search"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -143,6 +144,7 @@ export function ExplorerToolbar({
             onClick={onZoomOut}
             className="h-8 w-8 p-0"
             title="Zoom out"
+            aria-label="Zoom out"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -166,6 +168,7 @@ export function ExplorerToolbar({
             onClick={onZoomIn}
             className="h-8 w-8 p-0"
             title="Zoom in"
+            aria-label="Zoom in"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -190,6 +193,7 @@ export function ExplorerToolbar({
             onClick={onFitGraph}
             className="h-8 w-8 p-0"
             title="Fit to screen"
+            aria-label="Fit to screen"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -211,6 +215,7 @@ export function ExplorerToolbar({
             onClick={onCenterSelected}
             className="h-8 w-8 p-0"
             title="Center on selected"
+            aria-label="Center on selected"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
