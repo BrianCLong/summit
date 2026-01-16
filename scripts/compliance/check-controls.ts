@@ -25,8 +25,9 @@ type ControlResult = {
   id: string;
   name: string;
   category: string;
-  status: 'PASS' | 'FAIL' | 'UNKNOWN';
+  status: 'PASS' | 'FAIL' | 'UNKNOWN' | 'DEFERRED';
   evidence: EvidenceResult[];
+  exception?: string;
 };
 
 type ComplianceReport = {
@@ -36,6 +37,23 @@ type ComplianceReport = {
 };
 
 const DEFAULT_MATRIX_PATH = 'compliance/control-matrix.yml';
+const EXCEPTIONS_PATH = 'compliance/exceptions/EXCEPTIONS.yml';
+
+type Exception = {
+  exception_id: string;
+  control_ids: string[];
+  status: string;
+  expires_at_utc: string;
+};
+
+function loadExceptions(exceptionsPath: string): Exception[] {
+  if (!existsSync(exceptionsPath)) {
+    return [];
+  }
+  const raw = readFileSync(exceptionsPath, 'utf-8');
+  const parsed = yaml.load(raw) as Exception[];
+  return Array.isArray(parsed) ? parsed : [];
+}
 
 function parseArgs(): { outputPath: string; markdownPath?: string } {
   const args = process.argv.slice(2);
@@ -110,9 +128,21 @@ function runEvidenceScript(controlId: string, scriptPath: string, logDir: string
   };
 }
 
-function evaluateControl(control: ControlMapping, logDir: string): ControlResult {
+function evaluateControl(control: ControlMapping, logDir: string, exceptions: Exception[]): ControlResult {
   const evidenceScripts = control.evidence_scripts ?? [];
+
+  // Find active exception for this control
+  const now = new Date();
+  const activeException = exceptions.find(ex =>
+    ex.control_ids.includes(control.id) &&
+    ex.status === 'active' &&
+    new Date(ex.expires_at_utc) > now
+  );
+
   if (evidenceScripts.length === 0) {
+     if (activeException) {
+       return { id: control.id, name: control.name, category: control.category, status: 'DEFERRED', evidence: [], exception: activeException.exception_id };
+     }
     return { id: control.id, name: control.name, category: control.category, status: 'UNKNOWN', evidence: [] };
   }
 
@@ -123,7 +153,11 @@ function evaluateControl(control: ControlMapping, logDir: string): ControlResult
 
   let status: ControlResult['status'] = 'UNKNOWN';
   if (hasFailure) {
-    status = 'FAIL';
+    if (activeException) {
+      status = 'DEFERRED';
+    } else {
+      status = 'FAIL';
+    }
   } else if (hasPass) {
     status = 'PASS';
   } else if (allSkipped) {
@@ -136,17 +170,19 @@ function evaluateControl(control: ControlMapping, logDir: string): ControlResult
     category: control.category,
     status,
     evidence: evidenceResults,
+    exception: activeException ? activeException.exception_id : undefined
   };
 }
 
 function writeMarkdown(report: ComplianceReport, markdownPath: string) {
-  const lines = ['# Compliance Check Summary', '', `Generated: ${report.generatedAt}`, '', '| Control | Status | Evidence |', '| --- | --- | --- |'];
+  const lines = ['# Compliance Check Summary', '', `Generated: ${report.generatedAt}`, '', '| Control | Status | Evidence | Exception |', '| --- | --- | --- | --- |'];
 
   report.controls.forEach((control) => {
     const evidenceList = control.evidence
       .map((item) => `${item.script} (${item.status}${item.outputPath ? ` → ${item.outputPath}` : ''})`)
       .join('<br>');
-    lines.push(`| ${control.id} — ${control.name} | ${control.status} | ${evidenceList || 'None'} |`);
+    const exceptionLink = control.exception ? `**${control.exception}**` : '';
+    lines.push(`| ${control.id} — ${control.name} | ${control.status} | ${evidenceList || 'None'} | ${exceptionLink} |`);
   });
 
   ensureDir(path.dirname(markdownPath));
@@ -155,11 +191,13 @@ function writeMarkdown(report: ComplianceReport, markdownPath: string) {
 
 function generateReport(matrixPath: string, outputPath: string, markdownPath?: string) {
   const controls = loadControlMatrix(matrixPath);
+  const exceptions = loadExceptions(EXCEPTIONS_PATH);
+
   const logDir = path.join(path.dirname(outputPath), 'compliance-logs');
   ensureDir(logDir);
   ensureDir(path.dirname(outputPath));
 
-  const results = controls.map((control) => evaluateControl(control, logDir));
+  const results = controls.map((control) => evaluateControl(control, logDir, exceptions));
   const report: ComplianceReport = {
     generatedAt: new Date().toISOString(),
     reportPath: path.resolve(outputPath),

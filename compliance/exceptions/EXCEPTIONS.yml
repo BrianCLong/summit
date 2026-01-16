@@ -1,0 +1,18 @@
+- exception_id: "EX-2025-001"
+  control_ids:
+    - "SOC2-CC6.1"
+  status: "resolved"
+  owner: "@intelgraph-security"
+  approvers:
+    - "@intelgraph-security"
+  created_at_utc: "2025-01-01T00:00:00Z"
+  expires_at_utc: "2025-03-01T00:00:00Z"
+  max_extension_days: 90
+  renewal_window_days: 30
+  reason: "Initial baseline exception for testing."
+  risk_statement: "Low risk as this is a test exception."
+  compensating_controls:
+    - "Manual review"
+  evidence_plan: "Will resolve by 2025-02-01"
+  links: []
+  notes: "Example exception."
