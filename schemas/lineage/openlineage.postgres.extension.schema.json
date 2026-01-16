@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "eventType": { "type": "string" },
+    "eventTime": { "type": "string", "format": "date-time" },
+    "run": {
+      "type": "object",
+      "properties": {
+        "facets": {
+          "type": "object",
+          "properties": {
+            "summit.audit": {
+              "type": "object",
+              "required": ["actor", "sourceSha", "policyHash"],
+              "properties": {
+                "actor": { "type": "string" },
+                "sourceSha": { "type": "string" },
+                "policyHash": { "type": "string" }
+              }
+            },
+            "summit.governanceVerdict": {
+              "type": "object",
+              "required": ["verdict"],
+              "properties": {
+                "verdict": { "type": "string", "enum": ["ALLOW", "WARN", "BLOCK"] }
+              }
+            },
+            "summit.postgres": {
+              "type": "object",
+              "required": ["sqlHash", "dialect"],
+              "properties": {
+                "sqlHash": { "type": "string" },
+                "dialect": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
