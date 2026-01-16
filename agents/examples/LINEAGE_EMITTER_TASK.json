@@ -1,0 +1,42 @@
+{
+  "task_id": "LINEAGE_EMITTER_V1",
+  "agent_id": "Codex",
+  "prompt_ref": {
+    "id": "lineage-emitter",
+    "version": "v1",
+    "sha256": "bf10041da0f4c264ab34161cff2bcfae4aa9b1a08cc1c036f4febe4308efb5a5",
+    "path": "prompts/lineage/lineage-emitter@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/lineage-emitter/",
+      "schemas/openlineage-event.schema.json",
+      "src/data-pipeline/",
+      "tests/",
+      "tsconfig.base.json",
+      "package.json",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/"
+    ],
+    "domains": ["lineage", "pipelines", "determinism"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["unit-tests", "schema-validation"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Deterministic OpenLineage event emission is implemented with schema validation.",
+    "Pipeline integration emits an OpenLineage artifact deterministically.",
+    "Schema and documentation updates are recorded."
+  ],
+  "stop_conditions": [
+    "CI failure in main.",
+    "Schema validation errors.",
+    "Sandbox violation alert."
+  ]
+}

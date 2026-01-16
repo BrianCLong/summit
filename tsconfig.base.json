@@ -13,6 +13,7 @@
     "baseUrl": ".",
     "paths": {
       "@intelgraph/maestro-sdk/*": ["packages/maestro-sdk/src/*"],
+      "@intelgraph/lineage-emitter": ["packages/lineage-emitter/src/index.ts"],
       "@summitsec/vcr-kit/*": ["packages/vcr-kit/src/*"],
       "@intelgraph/flags/*": ["libs/flags/node/*"],
       "@intelgraph/audit/*": ["libs/audit/node/*"]
