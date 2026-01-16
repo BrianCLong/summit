@@ -1,0 +1,80 @@
+name: Customer Security Package
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag to release (e.g. v1.2.3)'
+        required: true
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # To upload release assets
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Fetch Release Evidence
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ github.event.release.tag_name || inputs.tag_name }}
+        run: |
+          mkdir -p dist/release/evidence
+          # Try to download the evidence bundle if it exists
+          if gh release download "$TAG_NAME" -p "evidence-bundle*.tar.gz" -D dist/release; then
+            echo "Downloaded evidence bundle."
+            tar -xzf dist/release/evidence-bundle*.tar.gz -C dist/release/evidence
+          else
+            echo "Warning: Evidence bundle not found in release assets. Export script will use placeholders (checked behaviors)."
+          fi
+
+      - name: VDP Sanity Check
+        run: npx tsx scripts/security/vdp_sanity_check.ts
+
+      - name: Generate Questionnaire Pack
+        run: npx tsx scripts/customer-security/generate_questionnaire_pack.ts
+
+      - name: Validate Questionnaires
+        run: npx tsx scripts/customer-security/validate_questionnaire_pack.ts
+
+      - name: Lint Hardening Docs
+        run: npx tsx scripts/customer-security/hardening_doc_lint.ts
+
+      - name: Export Security Package
+        env:
+          EVIDENCE_DIR: dist/release/evidence
+        run: npx tsx scripts/customer-security/export_customer_security_package.ts
+
+      - name: Verify Security Package
+        run: npx tsx scripts/customer-security/verify_customer_security_package.ts
+
+      - name: Zip Package
+        run: |
+          cd artifacts/customer-security/latest/
+          zip -r security-package.zip security-package/
+          cd -
+
+      - name: Upload Release Asset
+        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: artifacts/customer-security/latest/security-package.zip
+          asset_name: customer-security-package-${{ github.event.release.tag_name || inputs.tag_name }}.zip
+          asset_content_type: application/zip
