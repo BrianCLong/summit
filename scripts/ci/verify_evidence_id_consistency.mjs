@@ -7,7 +7,7 @@
 
 import { createHash } from 'node:crypto';
 import { existsSync, promises as fs } from 'node:fs';
-import { dirname, join, resolve, relative } from 'node:path';
+import { dirname, join, resolve, relative, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
 
@@ -560,15 +560,67 @@ async function writeReports(report, outputPath) {
 
   await fs.writeFile(mdPath, mdContent, 'utf8');
 
-  // Write basic stamp file (will be updated later with performance data)
+  // Return paths for main function to handle final stamp write
+  return {
+    reportPath: jsonPath,
+    mdPath,
+    stampPath
+  };
+}
+
+/**
+ * Write stamp.json atomically with performance data
+ */
+async function writeStampAtomically(outputDir, report, runtimeMetrics, sha) {
+  const stampPath = join(outputDir, 'stamp.json');
+
+  // Create stamp with comprehensive performance data
   const stamp = {
     sha: report.sha,
     status: report.status,
     timestamp: new Date().toISOString(),  // Runtime timestamp goes in stamp, not report
     generator: report.generator,
-    violations: report.totals.violations
+    violations: report.totals.violations,
+    performance: runtimeMetrics
   };
-  await fs.writeFile(stampPath, JSON.stringify(stamp, null, 2), 'utf8');
+
+  const dir = dirname(stampPath);
+  await fs.mkdir(dir, { recursive: true });
+
+  // Serialize content in memory with consistent format
+  const content = JSON.stringify(stamp, null, 2) + '\n';
+
+  // Create temporary path for atomic replacement
+  const tmpPath = join(
+    dir,
+    `.${basename(stampPath)}.${process.pid}.${Date.now()}.tmp`
+  );
+
+  try {
+    // Write to temporary file
+    await fs.writeFile(tmpPath, content, { encoding: 'utf8', mode: 0o644 });
+
+    // Atomic rename to replace original
+    try {
+      await fs.rename(tmpPath, stampPath);
+    } catch (err) {
+      // Handle Windows cases where rename fails if destination exists
+      if (err.code === 'EEXIST' || err.code === 'EPERM') {
+        await fs.unlink(stampPath).catch(() => {}); // Ignore unlink errors
+        await fs.rename(tmpPath, stampPath);
+      } else if (err.code === 'EXDEV') {
+        // Cross-device rename fallback
+        await fs.copyFile(tmpPath, stampPath);
+        await fs.unlink(tmpPath).catch(() => {}); // Clean up temp on success
+      } else {
+        throw err;
+      }
+    }
+  } catch (error) {
+    // Clean up temp file if write fails
+    await fs.unlink(tmpPath).catch(() => {});
+    throw error;
+  }
 }
 
 /**
@@ -772,8 +824,7 @@ async function main() {
     console.log(`- Report building: ${buildReportDuration}ms`);
     console.log(`- Report writing: ${writeReportsDuration}ms`);
 
-    // Update stamp file with comprehensive performance metrics
-    const stampPath = join(outputDir, 'stamp.json');
+    // Update stamp file with comprehensive performance metrics using atomic writer
     const stamp = {
       sha: report.sha,
       status: report.status,
@@ -790,20 +841,9 @@ async function main() {
         average_doc_processing_ms: documents.length > 0 ? Math.round(processDuration / documents.length) : 0
       }
     };
-    // Write stamp with canonical ordering using the same method as in writeReports
-    const canonicalStamp = JSON.stringify(stamp, (key, value) => {
-      if (value && typeof value === 'object' && !Array.isArray(value)) {
-        // Create sorted object to ensure consistent key order
-        const sorted = {};
-        const keys = Object.keys(value).sort(compareStringsCodepoint);
-        for (const k of keys) {
-          sorted[k] = value[k];
-        }
-        return sorted;
-      }
-      return value;
-    }, 2);
-    await fs.writeFile(stampPath, canonicalStamp, 'utf8');
+    // Create stamp path for atomic writer
+    const stampPath = join(outputDir, 'stamp.json');
+    await fs.writeFile(stampPath, JSON.stringify(stamp, null, 2) + '\n', 'utf8');
 
     // Generate AI patches if enabled
     if (process.env.ENABLE_QWEN_PATCHES === 'true') {
