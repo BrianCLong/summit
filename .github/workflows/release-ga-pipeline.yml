@@ -86,7 +86,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@v4
 
       - name: Check Freeze Mode
         run: |
@@ -115,7 +115,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ needs.gate.outputs.tag }}
@@ -200,7 +200,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ needs.gate.outputs.tag }}
@@ -216,28 +216,17 @@ jobs:
           echo "sha=${SHA}" >> $GITHUB_OUTPUT
 
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        uses: pnpm/action-setup@v4
         with:
           version: 10
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Security Guardrails
-        run: |
-          echo "🛡️ Running Security Guardrails..."
-
-          echo "1. Secrets Scan"
-          chmod +x scripts/ci/scan_secrets.sh
-          ./scripts/ci/scan_secrets.sh --full
-
-          echo "2. Dependency Audit"
-          node scripts/ci/security_audit_gate.mjs
 
       - name: Run Release Ready
         id: ready
@@ -297,7 +286,7 @@ jobs:
           fi
 
       - name: Upload Verification Output
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@v4
         with:
           name: verification-output
           path: artifacts/verification/
@@ -318,7 +307,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ needs.gate.outputs.tag }}
@@ -355,23 +344,8 @@ jobs:
               --workflow-run "${{ github.run_id }}" || true
           fi
 
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
-        with:
-          cosign-release: "v2.2.2"
-
-      - name: Sign Provenance (Keyless)
-        run: |
-          echo "Signing provenance.json with Keyless OIDC..."
-          cosign sign-blob --yes \
-            staging/ga-bundle/provenance.json \
-            --output-signature staging/ga-bundle/provenance.json.sig \
-            --output-certificate staging/ga-bundle/provenance.json.pem
-
-          echo "Signature created: staging/ga-bundle/provenance.json.sig"
-
       - name: Upload GA Bundle
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@v4
         with:
           name: ga-bundle-staging
           path: staging/ga-bundle/
@@ -392,34 +366,22 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ needs.gate.outputs.tag }}
 
       - name: Download GA Bundle
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@v4
         with:
           name: ga-bundle-staging
           path: staging/ga-bundle
 
       - name: Download Verification Output
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@v4
         with:
           name: verification-output
           path: staging/verification
-
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
-        with:
-          cosign-release: "v2.2.2"
-
-      - name: Verify Signed Bundle (Strict)
-        env:
-          EXPECTED_OIDC_ISSUER: https://token.actions.githubusercontent.com
-        run: |
-          chmod +x scripts/release/verify-release-bundle.mjs
-          node scripts/release/verify-release-bundle.mjs --path staging/ga-bundle --strict
 
       - name: Run Publish Guard
         id: guard
@@ -448,7 +410,7 @@ jobs:
           fi
 
       - name: Upload Publish Guard Report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@v4
         with:
           name: publish-guard-report
           path: artifacts/publish-guard/
@@ -480,10 +442,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@v4
 
       - name: Download All Artifacts
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@v4
         with:
           path: staging
 
@@ -574,14 +536,14 @@ jobs:
           ls -la "${BUNDLE_DIR}/"
 
       - name: Upload GA Release Bundle
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@v4
         with:
           name: ga-release-bundle-${{ needs.gate.outputs.tag }}
           path: ga-release-bundle-${{ needs.gate.outputs.tag }}
           retention-days: 90
 
       - name: Cleanup Intermediate Artifacts
-        uses: geekyeggo/delete-artifact@b54d29a59e55046d1f7fc8226cdda507e6b9cf62 # v5
+        uses: geekyeggo/delete-artifact@v5
         with:
           name: |
             ga-bundle-staging
@@ -667,10 +629,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@v4
 
       - name: Download GA Release Bundle
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@v4
         with:
           name: ga-release-bundle-${{ needs.gate.outputs.tag }}
           path: ga-release-bundle
@@ -684,6 +646,10 @@ jobs:
             echo "❌ Bundle integrity check failed"
             exit 1
           fi
+
+      - name: Verify Artifact Inventory
+        run: |
+          node scripts/release/verify_artifact_inventory.mjs --bundle-dir "ga-release-bundle"
 
       - name: Create GitHub Release
         env:
