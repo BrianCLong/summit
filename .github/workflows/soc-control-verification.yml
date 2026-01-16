@@ -1,0 +1,39 @@
+name: SOC Control Verification
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  soc-verification:
+    runs-on: ubuntu-latest
+    name: SOC Control Verification
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run SOC Control Tests
+        run: bash scripts/test-soc-controls.sh
+
+      - name: Upload SOC Compliance Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soc-compliance-reports
+          path: soc-compliance-reports/
+          retention-days: 90
