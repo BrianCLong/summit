@@ -93,7 +93,7 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
     }
 
     return (
-      <Badge variant={variant} className="pl-2 pr-2.5">
+      <Badge variant={variant} className="pl-2 pr-2.5" aria-label={`Status: ${text}`}>
         {icon}
         {text}
       </Badge>
@@ -130,8 +130,12 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                 />
 
                 {!input && (
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    <span className="text-[10px] font-medium text-slate-500">
+                  <div
+                    className="flex flex-wrap gap-2 pt-1"
+                    role="group"
+                    aria-label="Suggested prompts"
+                  >
+                    <span className="text-[10px] font-medium text-slate-500" aria-hidden="true">
                       Try:
                     </span>
                     {QUICK_PROMPTS.map(prompt => (
@@ -312,7 +316,11 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
           </CardHeader>
           <CardContent className="p-0">
             <ScrollArea className="h-[280px]">
-              <div className="divide-y divide-slate-800/70">
+              <div
+                className="divide-y divide-slate-800/70"
+                aria-live="polite"
+                aria-atomic="false"
+              >
                 {!selectedRun && (
                   <div className="p-4 text-xs text-slate-400">
                     No tasks yet. Submit a request to see Maestro’s plan and
