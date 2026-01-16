@@ -11,6 +11,7 @@ prompts:
         - prompts/
         - scripts/ci/
         - docs/ga/
+        - docs/roadmap/STATUS.json
         - artifacts/
         - metrics/
         - observability/
