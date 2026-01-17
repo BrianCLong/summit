@@ -86,13 +86,14 @@ export class DisasterRecoveryService {
       const client = await pool.connect();
 
       try {
+          // CREATE DATABASE cannot run inside a transaction block, so ensure we are not in one
           await client.query(`CREATE DATABASE "${tempDbName}"`);
           logger.info(`Created temp DB ${tempDbName}`);
 
-          // Simulation
-          await new Promise(r => setTimeout(r, 2000));
+          // Perform actual restore
+          await this.backupService.restorePostgres(backupFile, tempDbName);
 
-          logger.info('Simulated restore complete.');
+          logger.info('Postgres restore verification complete.');
 
       } finally {
            // Cleanup

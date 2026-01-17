@@ -112,12 +112,13 @@ export class BackupService {
       const pgDb = process.env.POSTGRES_DB || 'intelgraph_dev';
       const pgPassword = process.env.POSTGRES_PASSWORD || 'devpassword';
 
-      const cmd = `PGPASSWORD='${pgPassword}' pg_dump -h ${pgHost} -U ${pgUser} ${pgDb}`;
+      const cmd = `pg_dump -h ${pgHost} -U ${pgUser} ${pgDb}`;
+      const env = { ...process.env, PGPASSWORD: pgPassword };
 
       if (options.compress) {
-        await execAsync(`${cmd} | gzip > "${finalPath}"`);
+        await execAsync(`${cmd} | gzip > "${finalPath}"`, { env });
       } else {
-        await execAsync(`${cmd} > "${finalPath}"`);
+        await execAsync(`${cmd} > "${finalPath}"`, { env });
       }
 
       const stats = await fs.stat(finalPath);
@@ -222,37 +223,131 @@ export class BackupService {
        const client = this.redis.getClient();
        if (!client) throw new Error('Redis client not available');
 
-       // Check if cluster or standalone
-       const isCluster = (client as any).constructor.name === 'Cluster';
-
-       if (isCluster) {
-          throw new Error('Redis Cluster backup not supported in this version. Use manual persistence management or snapshots.');
-       } else {
-           // @ts-ignore
-           await client.bgsave();
-       }
-
        const dir = await this.ensureBackupDir('redis');
        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-       const filename = `redis-backup-log-${timestamp}.txt`;
+       const filename = `redis-logical-backup-${timestamp}.jsonl`;
        const filepath = path.join(dir, filename);
+       const finalPath = options.compress ? `${filepath}.gz` : filepath;
 
-       await fs.writeFile(filepath, `Redis BGSAVE triggered successfully. Last save timestamp: ${new Date().toISOString()}`);
+       const fileStream = createWriteStream(finalPath);
+       const outputStream = options.compress ? zlib.createGzip() : null;
+       if (outputStream) outputStream.pipe(fileStream as unknown as NodeJS.WritableStream);
+       const writeTarget = outputStream || fileStream;
 
+       let cursor = '0';
+       do {
+         // Scan keys
+         const result = await client.scan(cursor, 'MATCH', '*', 'COUNT', 1000);
+         cursor = result[0];
+         const keys = result[1];
+
+         if (keys.length > 0) {
+             const pipeline = client.pipeline();
+             keys.forEach(key => {
+                 // Use dumpBuffer to ensure we get a Buffer, preventing UTF-8 corruption of binary data
+                 (pipeline as any).dumpBuffer(key);
+                 pipeline.pttl(key); // Returns TTL in ms
+             });
+             const results = await pipeline.exec();
+
+             if (results) {
+                 for (let i = 0; i < keys.length; i++) {
+                     const [dumpErr, dumpVal] = results[i * 2];
+                     const [ttlErr, ttlVal] = results[i * 2 + 1];
+                     const key = keys[i];
+
+                     if (!dumpErr && dumpVal) {
+                         // Serialize binary dump to base64
+                         const dumpBase64 = (dumpVal as Buffer).toString('base64');
+                         // RESTORE expects TTL in ms. PTTL returns -1 for no expiry, -2 for not found.
+                         // We map -1 (no expiry) to 0 (persist) for RESTORE command.
+                         const ttlMs = (ttlVal as number) > 0 ? (ttlVal as number) : 0;
+
+                         const record = JSON.stringify({ k: key, v: dumpBase64, t: ttlMs });
+                         writeTarget.write(record + '\n');
+                     } else if (dumpErr) {
+                         logger.warn(`Failed to dump key ${key}`, dumpErr);
+                     }
+                 }
+             }
+         }
+       } while (cursor !== '0');
+
+       if (outputStream) outputStream.end();
+       else writeTarget.end();
+
+       await new Promise<void>((resolve, reject) => {
+           fileStream.on('finish', () => resolve());
+           fileStream.on('error', reject);
+       });
+
+       const stats = await fs.stat(finalPath);
+       backupMetrics.setGauge('size_bytes', stats.size, { type: 'redis' });
        backupMetrics.observeHistogram('duration_seconds', (Date.now() - startTime) / 1000, { type: 'redis', status: 'success' });
 
+       logger.info({ path: finalPath, size: stats.size }, 'Redis logical backup completed');
+
        if (options.uploadToS3) {
-           const s3Key = `redis/${path.basename(filepath)}`;
-           await this.uploadToS3(filepath, s3Key);
+           const s3Key = `redis/${path.basename(finalPath)}`;
+           await this.uploadToS3(finalPath, s3Key);
        }
 
-       await this.recordBackupMeta('redis', filepath, 0);
-
-       return filepath;
+       await this.recordBackupMeta('redis', finalPath, stats.size);
+       return finalPath;
      } catch (error: any) {
        logger.error('Redis backup failed', error);
        throw error;
      }
+  }
+
+  async restoreRedis(backupFile: string): Promise<void> {
+    logger.info(`Restoring Redis from ${backupFile}...`);
+    const startTime = Date.now();
+    try {
+        const client = this.redis.getClient();
+        if (!client) throw new Error('Redis client not available');
+
+        await fs.access(backupFile);
+
+        const readline = await import('readline');
+        const fsStream = await import('fs');
+        const stream = fsStream.createReadStream(backupFile);
+
+        let input: NodeJS.ReadableStream = stream;
+        if (backupFile.endsWith('.gz')) {
+            const unzip = zlib.createGunzip();
+            stream.pipe(unzip);
+            input = unzip;
+        }
+
+        const rl = readline.createInterface({
+            input: input,
+            crlfDelay: Infinity
+        });
+
+        for await (const line of rl) {
+            try {
+                const { k, v, t } = JSON.parse(line);
+                if (!k || !v) continue;
+
+                const buffer = Buffer.from(v, 'base64');
+                // RESTORE key ttl serialized-value [REPLACE]
+                // REPLACE modifier (Redis 3.0+) overwrites existing key.
+                await client.restore(k, t, buffer, 'REPLACE');
+
+            } catch (e) {
+                logger.warn(`Failed to restore key`, e);
+            }
+        }
+
+        backupMetrics.observeHistogram('duration_seconds', (Date.now() - startTime) / 1000, { type: 'redis_restore', status: 'success' });
+        logger.info('Redis restore completed');
+
+    } catch (error: any) {
+         backupMetrics.incrementCounter('ops_total', { type: 'redis_restore', status: 'failure' });
+         logger.error('Redis restore failed', error);
+         throw error;
+    }
   }
 
   async recordBackupMeta(type: string, filepath: string, size: number): Promise<void> {
@@ -291,5 +386,38 @@ export class BackupService {
         results.redis = `Failed: ${e}`;
      }
      return results;
+  }
+
+  async restorePostgres(backupFile: string, targetDb?: string): Promise<void> {
+    logger.info(`Restoring PostgreSQL from ${backupFile}...`);
+    const startTime = Date.now();
+    try {
+        const pgHost = process.env.POSTGRES_HOST || 'localhost';
+        const pgUser = process.env.POSTGRES_USER || 'intelgraph';
+        const pgDb = targetDb || process.env.POSTGRES_DB || 'intelgraph_dev';
+        const pgPassword = process.env.POSTGRES_PASSWORD || 'devpassword';
+
+        // Check if file exists
+        await fs.access(backupFile);
+
+        let cmd = `psql -h ${pgHost} -U ${pgUser} -d ${pgDb}`;
+        const env = { ...process.env, PGPASSWORD: pgPassword };
+
+        if (backupFile.endsWith('.gz')) {
+            cmd = `gunzip -c "${backupFile}" | ${cmd}`;
+        } else {
+            cmd = `${cmd} < "${backupFile}"`;
+        }
+
+        await execAsync(cmd, { env });
+
+        backupMetrics.observeHistogram('duration_seconds', (Date.now() - startTime) / 1000, { type: 'postgres_restore', status: 'success' });
+        logger.info(`PostgreSQL restore to ${pgDb} completed successfully.`);
+
+    } catch (error: any) {
+        backupMetrics.incrementCounter('ops_total', { type: 'postgres_restore', status: 'failure' });
+        logger.error(`PostgreSQL restore failed`, error);
+        throw error;
+    }
   }
 }
