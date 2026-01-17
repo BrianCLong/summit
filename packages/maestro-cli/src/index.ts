@@ -23,6 +23,7 @@ import { ConfigCommand } from './commands/config';
 import { TemplateCommand } from './commands/template';
 import { registerDsarCommands } from './commands/dsar';
 import { registerReleaseCommands } from './commands/release';
+import { ExplicateCommand } from './commands/explicate';
 
 const program = new Command();
 
@@ -201,6 +202,30 @@ program
         await templateCmd.create(name, options);
       }),
   );
+
+// Explicate command
+program
+  .command('explicate')
+  .description('Generate an explicitation artifact for a multimodal request')
+  .requiredOption('-t, --text <text>', 'User text to explicate')
+  .option(
+    '-i, --image <json>',
+    'Image ref JSON (repeatable, e.g. --image \'{"id":"img-1","type":"screenshot","altText":"..."}\')',
+    (value, previous: string[] | undefined) => {
+      const next = previous ?? [];
+      next.push(value);
+      return next;
+    },
+    [],
+  )
+  .option(
+    '-c, --context <json>',
+    'Conversation context JSON (e.g. \'{"summary":"..."}\')',
+  )
+  .action(async (options) => {
+    const explicateCmd = new ExplicateCommand();
+    await explicateCmd.execute(options);
+  });
 
 // Register DSAR commands
 registerDsarCommands(program);
