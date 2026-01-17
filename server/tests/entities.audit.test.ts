@@ -1,6 +1,8 @@
 import express from 'express';
 import request from 'supertest';
 import { jest, describe, it, expect } from '@jest/globals';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 jest.mock('../src/config/database', () => {
   const query = jest.fn().mockResolvedValue({});

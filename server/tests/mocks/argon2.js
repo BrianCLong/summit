@@ -4,5 +4,5 @@ const mock = {
   verify: async () => true,
 };
 
-module.exports = mock;
+export default mock;
 module.exports.default = mock;

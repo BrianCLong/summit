@@ -4,6 +4,8 @@ import fs from 'fs';
 import path from 'path';
 import recipesRouter from '../src/routes/recipes.js';
 import { jest } from '@jest/globals';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 // Mock dependencies
 jest.mock('../src/recipes/loader.js');

@@ -1,6 +1,8 @@
 import request from 'supertest';
 import { createApp } from '../../src/app.js';
 import { jest, describe, it, test, expect, beforeAll, afterAll } from '@jest/globals';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 // Mock database and external dependencies
 // Mock database and external dependencies

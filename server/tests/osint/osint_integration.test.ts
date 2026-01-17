@@ -1,6 +1,8 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 
 // Use require to bypass potential ESM/TS import issues in test environment
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 const { OSINTPrioritizationService } = require('../../src/services/OSINTPrioritizationService');
 const { VeracityScoringService } = require('../../src/services/VeracityScoringService');
 const { enqueueOSINT } = require('../../src/services/OSINTQueueService');

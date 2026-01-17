@@ -544,4 +544,4 @@ describe('Graph Operations Tests', () => {
   });
 });
 
-module.exports = { createGraphTestApp };
+export default { createGraphTestApp };

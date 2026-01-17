@@ -7,6 +7,8 @@ import {
   afterEach,
 } from '@jest/globals';
 import {
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
   addTicketRunLink,
   addTicketDeploymentLink,
   extractTicketFromPR,

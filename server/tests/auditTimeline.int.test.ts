@@ -4,6 +4,8 @@ import fs from 'fs';
 import path from 'path';
 import { Pool } from 'pg';
 import { AuditTimelineRollupService } from '../src/audit/AuditTimelineRollupService.js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 // Use process.cwd() since tests run from server directory
 const testsDir = process.cwd();

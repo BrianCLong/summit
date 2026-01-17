@@ -8,6 +8,8 @@ import {
   buildDropIndexSql,
 } from '../../src/db/migrations/indexing.js';
 import { MigrationManager } from '../../src/db/migrations/versioning.js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 // testcontainers typings expect NodeNext resolution; fall back to require to keep Jest CommonJS happy
 // eslint-disable-next-line @typescript-eslint/no-var-requires

@@ -1,6 +1,8 @@
 import request from 'supertest';
 import { createTestUser, createTestCase } from '../setup';
 import { jest, describe, it, test, expect, beforeAll, afterAll } from '@jest/globals';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 let createServer: ((options?: any) => Promise<any>) | null = null;
 const allowIntegration = process.env.RUN_GRAPHQL_INTEGRATION === 'true';

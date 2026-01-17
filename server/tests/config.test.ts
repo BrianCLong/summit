@@ -64,7 +64,7 @@ describe('Configuration System', () => {
       const HISTORY_FILE = path.join(MIGRATIONS_DIR, '.history.json');
       fs.mkdirSync(MIGRATIONS_DIR, { recursive: true });
       fs.writeFileSync(path.join(MIGRATIONS_DIR, '1.js'), `
-        module.exports = {
+        export default {
           up: (config) => {
             config.bar = 'baz';
             return config;
@@ -91,7 +91,7 @@ describe('Configuration System', () => {
       const HISTORY_FILE = path.join(MIGRATIONS_DIR, '.history.json');
       fs.mkdirSync(MIGRATIONS_DIR, { recursive: true });
       fs.writeFileSync(path.join(MIGRATIONS_DIR, '1.js'), `
-        module.exports = {
+        export default {
           up: (config) => {
             config.bar = 'baz'; // This should be rolled back
             return config;
@@ -103,7 +103,7 @@ describe('Configuration System', () => {
         };
       `);
       fs.writeFileSync(path.join(MIGRATIONS_DIR, '2.js'), `
-        module.exports = {
+        export default {
           up: (config) => {
             throw new Error('Migration failed');
           },

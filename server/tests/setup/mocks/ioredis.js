@@ -65,4 +65,4 @@ class MockRedis extends EventEmitter {
   exists() { return Promise.resolve(0); }
 }
 
-module.exports = MockRedis;
+export default MockRedis;

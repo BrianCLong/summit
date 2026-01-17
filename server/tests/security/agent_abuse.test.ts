@@ -89,6 +89,8 @@ jest.mock('../../src/utils/tracing.js', tracingFactory);
 
 // Import after mocks
 import { AbuseGuard } from '../../src/middleware/abuseGuard.js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 describe('AbuseGuard Middleware', () => {
     let abuseGuard: AbuseGuard;

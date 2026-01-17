@@ -2,5 +2,5 @@ const pLimit = (_concurrency) => {
   return async (fn) => Promise.resolve(fn());
 };
 
-module.exports = pLimit;
+export default pLimit;
 module.exports.default = pLimit;

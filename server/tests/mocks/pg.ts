@@ -1,73 +1,40 @@
 import { jest } from '@jest/globals';
-import fs from 'fs';
+import { newDb } from 'pg-mem';
 
-const logFile = '/tmp/debug_pg_mock.txt';
-try { fs.appendFileSync(logFile, `PG MOCK LOADED at ${new Date().toISOString()}\n`); } catch (_) { }
+const db = newDb();
 
-const mockUser = {
-  id: 'mock-user-id',
-  email: 'guardrails-test@example.com',
-  username: 'guardrails-test',
-  password_hash: 'hashed',
-  first_name: 'Guard',
-  last_name: 'Rails',
-  role: 'ADMIN',
-  is_active: true,
-  created_at: new Date(),
-  tenant_id: 'public',
-};
+// Register some custom functions if needed, or extensions
+db.public.registerFunction({
+    name: 'current_database',
+    implementation: () => 'test_db',
+});
+db.public.registerFunction({
+    name: 'version',
+    implementation: () => 'PostgreSQL 14.0 (pg-mem)',
+});
+
+// Mock pg-vector if needed (pg-mem might not support it fully, but basic inserts might work)
+// db.public.none('CREATE EXTENSION IF NOT EXISTS vector'); // pg-mem doesn't support vector types natively easily
+
+const { Client: PgMemClient, Pool: PgMemPool } = db.adapters.createPg();
 
 export const mockClient = {
-  query: jest.fn().mockImplementation((text: string, _params: any[]) => {
-    try { fs.appendFileSync(logFile, `QUERY: ${text}\n`); } catch (_) { }
-    const normalizedText = text.trim().toUpperCase();
-
-    if (normalizedText.includes('SELECT COUNT(*)')) {
-      return Promise.resolve({ rowCount: 1, rows: [{ count: '0' }] });
-    }
-
-    if (normalizedText.includes('SELECT VALUE FROM SYSTEM_KV_STORE')) {
-      return Promise.resolve({ rowCount: 1, rows: [{ value: { status: 'public', maxUsers: 1000, maxTenants: 100, allowedDomains: ['*'], blockedDomains: [] } }] });
-    }
-
-    if (normalizedText.includes('SELECT ID FROM USERS')) {
-      return Promise.resolve({ rowCount: 0, rows: [] });
-    }
-
-    if (normalizedText.includes('INSERT INTO USERS')) {
-      return Promise.resolve({ rowCount: 1, rows: [mockUser] });
-    }
-
-    if (normalizedText.includes('INSERT INTO USER_SESSIONS')) {
-      return Promise.resolve({ rowCount: 1, rows: [] });
-    }
-
-    if (normalizedText.includes('UPDATE USERS')) {
-      return Promise.resolve({ rowCount: 1, rows: [mockUser] });
-    }
-
-    if (normalizedText.includes('FROM USERS')) {
-      return Promise.resolve({ rowCount: 1, rows: [mockUser] });
-    }
-
-    if (normalizedText.includes('PROVENANCE_LEDGER_V2')) {
-      return Promise.resolve({
-        rowCount: 1,
-        rows: [{
-          id: 'mock-prov-id',
-          tenant_id: 'public',
-          sequence_number: 1,
-          current_hash: 'mock-hash',
-          timestamp: new Date()
-        }]
-      });
-    }
-
-    if (normalizedText.includes('INSERT INTO AUDIT_EVENTS')) {
-      return Promise.resolve({ rowCount: 1, rows: [] });
-    }
-
-    return Promise.resolve({ rowCount: 0, rows: [] });
+  query: jest.fn().mockImplementation(async (text: string, params: any[]) => {
+      console.log('PG MOCK QUERY:', text);
+      // Intercept specific queries if needed, otherwise pass to pg-mem
+      try {
+          // pg-mem might throw on unsupported syntax
+          // We can create a throw-away client/pool from pg-mem to run the query
+          const client = new PgMemClient();
+          await client.connect();
+          const result = await client.query(text, params);
+          await client.end();
+          console.log('PG MOCK RETURN (success):', result);
+          return result;
+      } catch (e) {
+          console.warn('pg-mem query failed, returning empty result:', text, e.message);
+          return { rowCount: 0, rows: [] };
+      }
   }),
   release: jest.fn(),
   on: jest.fn(),
@@ -85,12 +52,17 @@ export const mockPool = {
   waitingCount: 0,
 };
 
+// We need to support the class constructor usage: new Pool(), new Client()
 export class Pool {
-  constructor() { return mockPool; }
+    constructor() {
+        return mockPool;
+    }
 }
 
 export class Client {
-  constructor() { return mockClient; }
+    constructor() {
+        return mockClient;
+    }
 }
 
 export const types = {

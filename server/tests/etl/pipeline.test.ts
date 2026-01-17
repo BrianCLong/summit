@@ -6,6 +6,11 @@ import { GeoIPEnricher } from '../../src/ingest/enrichers/implementations';
 import { ProvenanceLedgerV2 } from '../../src/provenance/ledger';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Mock Ledger
 const mockLedger = {
