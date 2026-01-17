@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-17T20:02:55Z",
+  "revision_note": "Added Maestro parity plan vs 1Code to competitive docs",
   "initiatives": [
     {
       "id": "A",
