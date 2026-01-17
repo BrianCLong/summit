@@ -73,10 +73,32 @@ const verifyJiraSecret = (req: any, res: any, next: any) => {
   }
 
   // Check for secret in header or query param (common Jira patterns)
-  const incomingSecret = req.headers['x-webhook-secret'] || req.query.secret;
+  let incomingSecret = req.headers['x-webhook-secret'] || req.query.secret;
 
-  if (!incomingSecret || incomingSecret !== secret) {
-    logger.warn('Jira webhook rejected: Invalid secret');
+  if (!incomingSecret) {
+    logger.warn('Jira webhook rejected: Missing secret');
+    return res.status(401).json({ error: 'Unauthorized: Invalid webhook secret' });
+  }
+
+  // Handle potential array from headers
+  if (Array.isArray(incomingSecret)) {
+    incomingSecret = incomingSecret[0];
+  }
+
+  // Use timingSafeEqual to prevent timing attacks
+  try {
+    const secretBuffer = Buffer.from(secret);
+    const incomingBuffer = Buffer.from(incomingSecret as string);
+
+    if (
+      secretBuffer.length !== incomingBuffer.length ||
+      !crypto.timingSafeEqual(secretBuffer, incomingBuffer)
+    ) {
+      logger.warn('Jira webhook rejected: Invalid secret');
+      return res.status(401).json({ error: 'Unauthorized: Invalid webhook secret' });
+    }
+  } catch (error) {
+    logger.warn('Jira webhook rejected: Error verifying secret');
     return res.status(401).json({ error: 'Unauthorized: Invalid webhook secret' });
   }
 
@@ -95,10 +117,31 @@ const verifyLifecycleSecret = (req: any, res: any, next: any) => {
     return next();
   }
 
-  const incomingSecret = req.headers['x-lifecycle-secret'] || req.headers['x-webhook-secret'];
+  let incomingSecret = req.headers['x-lifecycle-secret'] || req.headers['x-webhook-secret'];
 
-  if (!incomingSecret || incomingSecret !== secret) {
-    logger.warn('Lifecycle webhook rejected: Invalid secret');
+  if (!incomingSecret) {
+    logger.warn('Lifecycle webhook rejected: Missing secret');
+    return res.status(401).json({ error: 'Unauthorized: Invalid webhook secret' });
+  }
+
+  // Handle potential array from headers
+  if (Array.isArray(incomingSecret)) {
+    incomingSecret = incomingSecret[0];
+  }
+
+  try {
+    const secretBuffer = Buffer.from(secret);
+    const incomingBuffer = Buffer.from(incomingSecret as string);
+
+    if (
+      secretBuffer.length !== incomingBuffer.length ||
+      !crypto.timingSafeEqual(secretBuffer, incomingBuffer)
+    ) {
+      logger.warn('Lifecycle webhook rejected: Invalid secret');
+      return res.status(401).json({ error: 'Unauthorized: Invalid webhook secret' });
+    }
+  } catch (error) {
+    logger.warn('Lifecycle webhook rejected: Error verifying secret');
     return res.status(401).json({ error: 'Unauthorized: Invalid webhook secret' });
   }
 
