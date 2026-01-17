@@ -55,6 +55,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: summit-simplifier-contract
+    version: v1
+    path: prompts/governance/summit-simplifier-contract@v1.md
+    sha256: bd6b2b96d0e11eaecbddbf5166f26d3542d39fd870e428959b2e0dff824ca182
+    description: Define the Summit Simplifier Contract, evidence schema, and CI enforcement modes.
+    scope:
+      paths:
+        - docs/governance/SUMMIT_SIMPLIFIER_CONTRACT.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/governance/summit-simplifier-contract@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - documentation
+        - ci
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
