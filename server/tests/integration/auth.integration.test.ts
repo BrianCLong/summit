@@ -13,6 +13,8 @@ import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll 
 import AuthService from '../../src/services/AuthService';
 import { ensureAuthenticated, requirePermission } from '../../src/middleware/auth';
 import { Request, Response } from 'express';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 // Mock database and external dependencies
 jest.mock('../../src/db/config', () => ({

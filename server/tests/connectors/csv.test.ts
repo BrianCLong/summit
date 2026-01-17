@@ -17,6 +17,11 @@ import { CSVConnector } from '../../src/connectors/implementations/csv-s3';
 import { ConnectorConfig } from '../../src/connectors/types';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 describe('CSVConnector', () => {
     const testFile = path.join(__dirname, 'test.csv');

@@ -3,6 +3,11 @@ import fs from 'fs/promises';
 import path from 'path';
 import { createGraphStore } from '../../src/services/GraphStore';
 import { getNeo4jDriver, closeNeo4jDriver } from '../../src/db/neo4j';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const maybe = GenericContainer ? describe : describe.skip;
 

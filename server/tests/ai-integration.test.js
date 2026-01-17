@@ -444,4 +444,4 @@ describe('AI Integration Tests', () => {
   });
 });
 
-module.exports = { createTestApp };
+export default { createTestApp };

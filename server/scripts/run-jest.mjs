@@ -2,9 +2,20 @@ import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
+import fs from 'node:fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const jestBin = path.join(__dirname, '..', 'node_modules', 'jest', 'bin', 'jest.js');
+let jestBin = path.join(__dirname, '..', 'node_modules', 'jest', 'bin', 'jest.js');
+
+if (!fs.existsSync(jestBin)) {
+  // Fallback to root node_modules
+  jestBin = path.join(__dirname, '..', '..', 'node_modules', 'jest', 'bin', 'jest.js');
+}
+
+if (!fs.existsSync(jestBin)) {
+    console.error('Could not find jest binary');
+    process.exit(1);
+}
 
 const baseArgs = [
   '--config',

@@ -33,6 +33,8 @@ jest.mock('../src/conductor/governance/opa-integration.js', () => ({
 
 import { AppendOnlyAuditStore } from '../src/audit/appendOnlyAuditStore.js';
 import { createSensitiveContextMiddleware } from '../src/middleware/sensitive-context.js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 const buildMiddleware = (auditPath: string, allow = true) => {
   if (fs.existsSync(auditPath)) {

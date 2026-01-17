@@ -4,6 +4,8 @@
  */
 
 import 'jest-extended';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 // Mock ioredis globally - using a simple mock implementation since module resolution fails
 jest.mock('ioredis', () => {

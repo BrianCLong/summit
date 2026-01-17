@@ -1,6 +1,6 @@
 // Minimal deterministic RNG mock for tests
 // Usage: const rng = require('seedrandom')('seed'); const n = rng();
-module.exports = function seedrandom(seed) {
+export default function seedrandom(seed) {
   // Simple LCG seeded by string hash
   let s = 0;
   for (let i = 0; i < String(seed).length; i++) {

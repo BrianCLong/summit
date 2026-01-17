@@ -1,6 +1,8 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import OSINTAggregator from '../../src/services/OSINTAggregator.js';
 import { VeracityScoringService } from '../../src/services/VeracityScoringService';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 // Mock dependencies
 jest.mock('../../src/config/database', () => ({

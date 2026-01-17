@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   createCacheClient: jest.fn().mockReturnValue({
     get: jest.fn(),
     set: jest.fn(),

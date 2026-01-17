@@ -85,6 +85,8 @@ async function runVerification() {
     // 2. Streaming Distributed State Logic
     console.log('\n--- Testing Streaming State ---');
     // We can't fully integration test without mocking the redis import inside GraphStreamer.
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
     // But we can check if startStream returns an ID.
     try {
         // We expect this to fail or hang if it tries to connect to real Redis in this env

@@ -1,4 +1,6 @@
 import { describe, test, expect } from '@jest/globals';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 describe('findUnhandledAwaitExpressions', () => {
   test('detects await expressions outside try/catch', () => {
     const {

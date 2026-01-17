@@ -3,6 +3,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, test } from '@jest/globals';
 import {
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
   CryptoPipeline,
   InMemoryKeyStore,
   type KeyVersion,

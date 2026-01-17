@@ -2,6 +2,8 @@ import express from 'express';
 import request from 'supertest';
 import { describe, beforeEach, expect, test, jest } from '@jest/globals';
 import exportRouter from '../../src/routes/export.js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 const describeNetwork =
   process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;

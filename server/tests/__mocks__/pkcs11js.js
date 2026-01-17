@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   PKCS11: jest.fn().mockImplementation(() => ({
     load: jest.fn(),
     C_Initialize: jest.fn(),

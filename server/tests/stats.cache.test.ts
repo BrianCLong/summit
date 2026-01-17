@@ -1,4 +1,6 @@
 import { jest, describe, test, expect } from '@jest/globals';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 jest.mock('../src/metrics/cacheMetrics.js', () => ({
   recHit: jest.fn(),
