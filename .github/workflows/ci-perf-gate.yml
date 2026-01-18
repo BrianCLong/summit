@@ -1,0 +1,49 @@
+name: ci-perf-gate
+on:
+  workflow_run:
+    workflows: ["ci-telemetry"]
+    types: [completed]
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download telemetry artifact
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: ci-telemetry
+          path: artifacts
+
+      - name: Extract telemetry
+        run: |
+          cd artifacts
+          # Identify the zip file
+          ZIP=$(ls *.zip | head -n1)
+          unzip $ZIP
+
+      - name: Ingest and Check
+        env:
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          CI_PERF_STRICT: 'false' # Set to true to fail build on regression
+        run: |
+          # Locate the extracted folder
+          # The zip structure is telemetry/<run_id>/...
+          TELEMETRY_DIR=$(find artifacts -type d -name "telemetry" | head -n1)
+          TARGET_DIR="$TELEMETRY_DIR/${{ github.event.workflow_run.id }}"
+
+          if [ ! -d "$TARGET_DIR" ]; then
+             # Fallback if zip structure is different
+             TARGET_DIR=$(find artifacts -name "jobs.csv" -exec dirname {} \;)
+          fi
+
+          echo "Target dir: $TARGET_DIR"
+
+          # Run Ingest
+          node scripts/telemetry/ingest.mjs "$TARGET_DIR"
+
+          # Run Check
+          node scripts/telemetry/check_perf.mjs "$TARGET_DIR"
