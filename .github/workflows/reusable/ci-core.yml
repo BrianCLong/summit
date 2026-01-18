@@ -1,0 +1,49 @@
+name: ci-core
+on:
+  workflow_call:
+    inputs:
+      node_version:
+        required: false
+        type: string
+        default: '20'
+    secrets:
+      NPM_TOKEN:
+        required: false
+concurrency:
+  group: ci-core-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  setup-build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: 'pnpm'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: true
+
+      - name: Cache build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            .turbo
+            node_modules
+            **/node_modules
+            dist
+          key: build-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml', '**/package.json') }}
+          restore-keys: |
+            build-${{ runner.os }}-
+
+      - name: Build
+        run: pnpm -r build
+
+      - name: Test
+        # Using -r to test all packages, which is an upgrade from just server unit tests
+        run: pnpm -r test -- --ci --reporter=default

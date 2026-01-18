@@ -1,0 +1,25 @@
+name: ci-metrics
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+permissions:
+  actions: read
+  contents: write
+jobs:
+  summarize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            // Fetch last N runs on default branch and compute medians + cache-hit rate by parsing job logs/steps.
+            // Persist a small JSON in a metrics/ folder via REST (or print to summary).
+            core.summary
+              .addHeading('CI Metrics')
+              .addList([
+                'Target cache-hit ≥ 80% on main',
+                'Track median job duration over last 20 runs'
+              ])
+              .write();
