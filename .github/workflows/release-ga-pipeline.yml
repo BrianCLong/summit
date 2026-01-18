@@ -454,6 +454,32 @@ jobs:
           path: artifacts/publish-guard/
           retention-days: 90
 
+      - name: Generate GA_READY Promotion Contract
+        if: steps.guard.outputs.publish_allowed == 'true'
+        run: |
+          chmod +x scripts/release/generate-ga-ready-contract.sh
+
+          TAG="${{ needs.gate.outputs.tag }}"
+          SHA="${{ needs.verify.outputs.sha }}"
+
+          echo "Generating GA_READY promotion contract..."
+
+          scripts/release/generate-ga-ready-contract.sh \
+            --sha "${SHA}" \
+            --tag "${TAG}" \
+            --bundle-dir "staging/ga-bundle" \
+            --verbose
+
+          echo "Contract generated: artifacts/ga-proof/${SHA}/GA_READY.json"
+
+      - name: Upload GA_READY Contract
+        if: steps.guard.outputs.publish_allowed == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ga-ready-contract-${{ needs.verify.outputs.sha }}
+          path: artifacts/ga-proof/${{ needs.verify.outputs.sha }}/
+          retention-days: 90
+
       - name: Publish Guard Summary
         if: always()
         run: |
@@ -516,6 +542,13 @@ jobs:
           # Copy publish guard report
           if [[ -f "staging/publish-guard-report/PUBLISH_GUARD_REPORT.txt" ]]; then
             cp staging/publish-guard-report/PUBLISH_GUARD_REPORT.txt "${BUNDLE_DIR}/"
+          fi
+
+          # Copy GA_READY contract
+          if [[ -d "staging/ga-ready-contract-${SHA}" ]]; then
+            mkdir -p "${BUNDLE_DIR}/promotion-contract"
+            cp -r staging/ga-ready-contract-${SHA}/* "${BUNDLE_DIR}/promotion-contract/" 2>/dev/null || true
+            echo "✓ GA_READY promotion contract included"
           fi
 
           # Create pipeline_metadata.json using jq
