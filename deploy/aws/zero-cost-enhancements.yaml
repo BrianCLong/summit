@@ -262,6 +262,10 @@ metadata:
   namespace: enhancements
 data:
   buildspec.yml: |
+    # SECURITY NOTICE: If using webhooks with this project, ensure all filters
+    # (especially ACTOR_ACCOUNT_ID) use ANCHORED REGEX (e.g., ^user$) to prevent
+    # "CodeBreach" supply chain attacks. See docs/security/AWS_CODEBUILD_ADVISORY.md.
+
     version: 0.2
 
     phases:
