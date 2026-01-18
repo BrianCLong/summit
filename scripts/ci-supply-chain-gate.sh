@@ -135,6 +135,47 @@ if [ "$CHECK_SIGNING" = true ]; then
     fi
 fi
 
+# 5. OPA Policy Enforcement
+echo "🔍 Running OPA Policy Enforcement..."
+SBOM_SIGNED=false
+PROVENANCE_EXISTS=false
+
+if [ -f "./sboms/sbom.spdx.json.sig" ] || ls ./sboms/*.sig 1> /dev/null 2>&1; then
+    SBOM_SIGNED=true
+fi
+
+if ls ./sboms/*.link 1> /dev/null 2>&1; then
+    PROVENANCE_EXISTS=true
+fi
+
+# Generate OPA input
+cat > opa_input.json << EOF
+{
+  "sbom_signed": $SBOM_SIGNED,
+  "provenance_exists": $PROVENANCE_EXISTS
+}
+EOF
+
+if command -v opa &> /dev/null; then
+    if [ -f "policy/opa/supply_chain.rego" ]; then
+        OPA_RESULT=$(opa eval -i opa_input.json -d policy/opa/supply_chain.rego "data.supply_chain.deny" --format json)
+        DENY_COUNT=$(echo "$OPA_RESULT" | jq '.result[0].expressions[0].value | length')
+
+        if [ "$DENY_COUNT" -eq 0 ]; then
+            echo "✅ OPA Policy: PASSED"
+        else
+            echo "❌ OPA Policy: FAILED"
+            echo "   Violations: $(echo "$OPA_RESULT" | jq -c '.result[0].expressions[0].value')"
+            PASS=false
+            FAILURE_SUMMARY="$FAILURE_SUMMARYOPA policy violation\n"
+        fi
+    else
+        echo "⚠️  OPA Policy: policy/opa/supply_chain.rego not found"
+    fi
+else
+    echo "⚠️  OPA Policy: opa command not found"
+fi
+
 # Create final CI report
 cat > "$REPORT_DIR/ci-gate-report-$TIMESTAMP.json" << EOF
 {
