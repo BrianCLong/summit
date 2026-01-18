@@ -12,6 +12,7 @@ This sweep captures the minimum credible verification for the GA-hardening surfa
 | Data Classification & Governance | `testing/ga-verification/ga-features.ga.test.mjs` (ensures governance reference file is present)                            | B    | `make ga-verify`          | Guards the authoritative governance doc.                                                                      |
 | Policy Preflight & Receipts      | `scripts/ga/verify-ga-surface.mjs` (schema validation for verification map + provenance doc presence)                       | C    | `make ga-verify`          | Policy-as-code validation without depending on the test runner.                                               |
 | Ingestion Security Hardening     | `testing/ga-verification/ga-features.ga.test.mjs` (checks ingestion hardening evidence)                                     | B    | `make ga-verify`          | Ensures security expectations remain documented and discoverable.                                             |
+| Deep Research Eval Gate          | `scripts/ci/deep-research-eval.mjs` + `docs/ga/deep-research-eval.md`                                                        | B    | `node scripts/ci/deep-research-eval.mjs` | Enforces task-specific success, policy compliance, and fact-check coverage for deep research outputs.        |
 
 ## Deferred / To-Improve Items
 

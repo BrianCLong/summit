@@ -1,0 +1,17 @@
+[
+  {
+    "taskId": "task-001",
+    "reportId": "report-001",
+    "content": "In 2024, SOC 2 Type II evidence expectations emphasize continuous monitoring windows of 6-12 months across security and availability controls. FedRAMP Moderate baselines require over 300 controls and updated NIST 800-53 Rev. 5 mappings, which expanded documentation requirements in 2023. The trade-off is speed vs. depth: SOC 2 can be achieved in 3-6 months while FedRAMP authorization often exceeds 9 months. Sources include SOC2.org and FedRAMP.gov guidance [SOC2.org 2024] [FedRAMP.gov 2023]."
+  },
+  {
+    "taskId": "task-002",
+    "reportId": "report-002",
+    "content": "HIPAA retention expectations vary by state, but HHS guidance notes documentation must be retained for 6 years from creation or last effective date. In California and New York, health agencies recommend retention schedules that extend to 7-10 years for certain records. A risk-based retention schedule should prioritize clinical records for 7 years and audit logs for 6 years, with evidence drawn from HHS.gov and state-health.gov advisories (https://www.hhs.gov)."
+  },
+  {
+    "taskId": "task-003",
+    "reportId": "report-003",
+    "content": "The SEC cybersecurity disclosure rule effective in 2023 requires public companies to report material incidents within 4 business days, according to SEC.gov releases and the Federal Register. This accelerates disclosure timing and requires readiness playbooks with evidence-backed materiality assessments. The implications include stronger incident triage and board reporting within 72 hours, supported by SEC.gov fact sheets and FederalRegister.gov notices."
+  }
+]

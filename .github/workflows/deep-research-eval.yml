@@ -1,0 +1,60 @@
+name: Deep Research Eval
+
+on:
+  pull_request:
+    paths:
+      - 'packages/deep-research-eval/**'
+      - 'packages/cli/**'
+      - 'docs/ga/deep-research-eval.md'
+      - 'scripts/ci/deep-research-eval.mjs'
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Evaluation mode (advisory or strict)'
+        required: false
+        default: 'advisory'
+
+jobs:
+  eval-advisory:
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --filter @summit/deep-research-eval --filter @summit/cli
+      - name: Run deep research eval (advisory)
+        run: node scripts/ci/deep-research-eval.mjs --mode advisory
+      - name: Summarize
+        run: |
+          echo "### Deep Research Eval (Advisory)" >> $GITHUB_STEP_SUMMARY
+          echo "Mode: advisory" >> $GITHUB_STEP_SUMMARY
+
+  eval-strict:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --filter @summit/deep-research-eval --filter @summit/cli
+      - name: Run deep research eval (strict)
+        run: node scripts/ci/deep-research-eval.mjs --mode strict
+      - name: Summarize
+        run: |
+          echo "### Deep Research Eval (Strict)" >> $GITHUB_STEP_SUMMARY
+          echo "Mode: strict" >> $GITHUB_STEP_SUMMARY

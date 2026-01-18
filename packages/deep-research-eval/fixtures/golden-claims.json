@@ -1,0 +1,44 @@
+{
+  "report-001": [
+    {
+      "id": "claim-1",
+      "text": "In 2024, SOC 2 Type II evidence expectations emphasize continuous monitoring windows of 6-12 months across security and availability controls.",
+      "startOffset": 0,
+      "endOffset": 142
+    },
+    {
+      "id": "claim-2",
+      "text": "FedRAMP Moderate baselines require over 300 controls and updated NIST 800-53 Rev.",
+      "startOffset": 143,
+      "endOffset": 224
+    },
+    {
+      "id": "claim-6",
+      "text": "Sources include SOC2.org and FedRAMP.gov guidance [SOC2.org 2024] [FedRAMP.gov 2023].",
+      "startOffset": 410,
+      "endOffset": 495
+    }
+  ],
+  "report-002": [
+    {
+      "id": "claim-2",
+      "text": "In California and New York, health agencies recommend retention schedules that extend to 7-10 years for certain records.",
+      "startOffset": 148,
+      "endOffset": 268
+    }
+  ],
+  "report-003": [
+    {
+      "id": "claim-1",
+      "text": "The SEC cybersecurity disclosure rule effective in 2023 requires public companies to report material incidents within 4 business days, according to SEC.gov releases and the Federal Register.",
+      "startOffset": 0,
+      "endOffset": 190
+    },
+    {
+      "id": "claim-3",
+      "text": "The implications include stronger incident triage and board reporting within 72 hours, supported by SEC.gov fact sheets and FederalRegister.gov notices.",
+      "startOffset": 305,
+      "endOffset": 457
+    }
+  ]
+}
