@@ -1,8 +1,8 @@
 # Ignored CVEs - Risk Assessment & Justification
 
-**Date:** January 14, 2026  
-**Review Cycle:** Quarterly (every 90 days)  
-**Last Reviewed:** January 14, 2026
+**Date:** January 18, 2026
+**Review Cycle:** Quarterly (every 90 days)
+**Last Reviewed:** January 18, 2026
 
 ## Overview
 
@@ -30,41 +30,35 @@ For each ignored CVE, we assess:
 | Field | Value |
 |-------|-------|
 | **CVE ID** | CVE-2024-22363 |
-| **Affected Package** | [To be determined - requires npm audit] |
-| **Vulnerability Type** | [To be determined] |
-| **CVSS Score** | [To be determined] |
+| **Affected Package** | `xlsx` |
+| **Vulnerability Type** | Regular Expression Denial of Service (ReDoS) |
+| **CVSS Score** | HIGH |
 | **Published Date** | 2024 |
-| **Status** | Ignored |
+| **Status** | Ignored (False Positive) |
 
 ### Assessment
 
-**Affected Package:** [Requires investigation]
-
-To identify the affected package, run:
-```bash
-npm audit | grep CVE-2024-22363
-```
+**Affected Package:** `xlsx`
 
 **Risk Analysis:**
 
-- **Exploitability:** [To be assessed]
-- **Impact:** [To be assessed]
-- **Affected Code Paths:** [To be identified]
-- **Likelihood of Exploitation:** [To be evaluated]
+- **Exploitability:** Low in current environment.
+- **Impact:** High (Potential DoS).
+- **Affected Code Paths:** Code parsing Excel files.
+- **Likelihood of Exploitation:** N/A (Patched).
 
 ### Justification
 
-[To be documented after investigation]
+**False Positive / Patched:**
+The vulnerability exists in SheetJS Community Edition versions before 0.20.2. This project uses `xlsx@0.20.3` via a direct tarball URL override in `package.json` (`https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz`). The CVE scanner flags this due to non-standard version resolution, but the vulnerability is patched in the used version.
 
 ### Mitigation Controls
 
-- [List any compensating controls]
-- [List any monitoring in place]
-- [List any architectural protections]
+- **Version Override:** Explicitly pinned to 0.20.3 via CDN.
 
 ### Re-evaluation Date
 
-**Next Review:** [90 days from now]
+**Next Review:** 2026-04-18
 
 ---
 
@@ -75,41 +69,35 @@ npm audit | grep CVE-2024-22363
 | Field | Value |
 |-------|-------|
 | **CVE ID** | CVE-2023-30533 |
-| **Affected Package** | [To be determined - requires npm audit] |
-| **Vulnerability Type** | [To be determined] |
-| **CVSS Score** | [To be determined] |
+| **Affected Package** | `xlsx` |
+| **Vulnerability Type** | Prototype Pollution |
+| **CVSS Score** | 7.8 (HIGH) |
 | **Published Date** | 2023 |
-| **Status** | Ignored |
+| **Status** | Ignored (False Positive) |
 
 ### Assessment
 
-**Affected Package:** [Requires investigation]
-
-To identify the affected package, run:
-```bash
-npm audit | grep CVE-2023-30533
-```
+**Affected Package:** `xlsx`
 
 **Risk Analysis:**
 
-- **Exploitability:** [To be assessed]
-- **Impact:** [To be assessed]
-- **Affected Code Paths:** [To be identified]
-- **Likelihood of Exploitation:** [To be evaluated]
+- **Exploitability:** Low in current environment.
+- **Impact:** High (RCE/DoS potential).
+- **Affected Code Paths:** Code parsing malicious Excel files.
+- **Likelihood of Exploitation:** N/A (Patched).
 
 ### Justification
 
-[To be documented after investigation]
+**False Positive / Patched:**
+The vulnerability exists in SheetJS Community Edition versions before 0.19.3. This project uses `xlsx@0.20.3`, which includes the fix. The CVE scanner flags this due to non-standard version resolution.
 
 ### Mitigation Controls
 
-- [List any compensating controls]
-- [List any monitoring in place]
-- [List any architectural protections]
+- **Version Override:** Explicitly pinned to 0.20.3 via CDN.
 
 ### Re-evaluation Date
 
-**Next Review:** [90 days from now]
+**Next Review:** 2026-04-18
 
 ---
 
@@ -120,41 +108,37 @@ npm audit | grep CVE-2023-30533
 | Field | Value |
 |-------|-------|
 | **CVE ID** | CVE-2022-24434 |
-| **Affected Package** | [To be determined - requires npm audit] |
-| **Vulnerability Type** | [To be determined] |
-| **CVSS Score** | [To be determined] |
+| **Affected Package** | `dicer` (via `apollo-server-express`) |
+| **Vulnerability Type** | Uncaught Exception (DoS) |
+| **CVSS Score** | 7.5 (HIGH) |
 | **Published Date** | 2022 |
-| **Status** | Ignored |
+| **Status** | Ignored (No Patch) |
 
 ### Assessment
 
-**Affected Package:** [Requires investigation]
-
-To identify the affected package, run:
-```bash
-npm audit | grep CVE-2022-24434
-```
+**Affected Package:** `dicer@0.3.0`
 
 **Risk Analysis:**
 
-- **Exploitability:** [To be assessed]
-- **Impact:** [To be assessed]
-- **Affected Code Paths:** [To be identified]
-- **Likelihood of Exploitation:** [To be evaluated]
+- **Exploitability:** Moderate (Requires malicious multipart upload).
+- **Impact:** Service Crash (DoS).
+- **Affected Code Paths:** File uploads via GraphQL.
+- **Likelihood of Exploitation:** Low (Mitigated).
 
 ### Justification
 
-[To be documented after investigation]
+**No Patch Available:**
+The package maintainer has not released a fix. Upgrading to Apollo Server v4 (which removes `dicer`) is a major breaking change planned for Q1 2026.
 
 ### Mitigation Controls
 
-- [List any compensating controls]
-- [List any monitoring in place]
-- [List any architectural protections]
+- Request size limits (`express.json({ limit: '10mb' })`).
+- Rate limiting.
+- Input validation.
 
 ### Re-evaluation Date
 
-**Next Review:** [90 days from now]
+**Next Review:** 2026-02-01
 
 ---
 
@@ -165,41 +149,35 @@ npm audit | grep CVE-2022-24434
 | Field | Value |
 |-------|-------|
 | **CVE ID** | CVE-2023-28155 |
-| **Affected Package** | [To be determined - requires npm audit] |
-| **Vulnerability Type** | [To be determined] |
-| **CVSS Score** | [To be determined] |
+| **Affected Package** | `request` (via `sdk__typescript`) |
+| **Vulnerability Type** | SSRF |
+| **CVSS Score** | 6.1 (MODERATE) |
 | **Published Date** | 2023 |
-| **Status** | Ignored |
+| **Status** | Ignored (Dev Dependency) |
 
 ### Assessment
 
-**Affected Package:** [Requires investigation]
-
-To identify the affected package, run:
-```bash
-npm audit | grep CVE-2023-28155
-```
+**Affected Package:** `request@2.88.2`
 
 **Risk Analysis:**
 
-- **Exploitability:** [To be assessed]
-- **Impact:** [To be assessed]
-- **Affected Code Paths:** [To be identified]
-- **Likelihood of Exploitation:** [To be evaluated]
+- **Exploitability:** Low.
+- **Impact:** Moderate.
+- **Affected Code Paths:** Development/Build tooling only.
+- **Likelihood of Exploitation:** Very Low.
 
 ### Justification
 
-[To be documented after investigation]
+**Dev Dependency Only:**
+The vulnerable package is a transitive dependency of `sdk__typescript` and is not included in the production runtime.
 
 ### Mitigation Controls
 
-- [List any compensating controls]
-- [List any monitoring in place]
-- [List any architectural protections]
+- Strict separation of dev and prod dependencies.
 
 ### Re-evaluation Date
 
-**Next Review:** [90 days from now]
+**Next Review:** 2026-03-01
 
 ---
 
@@ -207,26 +185,22 @@ npm audit | grep CVE-2023-28155
 
 | CVE ID | Package | Type | CVSS | Exploitable | Justification | Next Review |
 |--------|---------|------|------|-------------|---------------|-------------|
-| CVE-2024-22363 | [TBD] | [TBD] | [TBD] | [TBD] | [TBD] | [TBD] |
-| CVE-2023-30533 | [TBD] | [TBD] | [TBD] | [TBD] | [TBD] | [TBD] |
-| CVE-2022-24434 | [TBD] | [TBD] | [TBD] | [TBD] | [TBD] | [TBD] |
-| CVE-2023-28155 | [TBD] | [TBD] | [TBD] | [TBD] | [TBD] | [TBD] |
+| CVE-2024-22363 | xlsx | ReDoS | HIGH | No (Patched) | False Positive | 2026-04-18 |
+| CVE-2023-30533 | xlsx | Proto Pollution | 7.8 | No (Patched) | False Positive | 2026-04-18 |
+| CVE-2022-24434 | dicer | DoS | 7.5 | Yes | No Patch/Mitigated | 2026-02-01 |
+| CVE-2023-28155 | request | SSRF | 6.1 | No (Dev) | Dev Only | 2026-03-01 |
 
 ## Recommendations
 
 ### Immediate Actions
 
-1. Run `npm audit` to identify affected packages for each CVE
-2. Assess exploitability in the context of the summit codebase
-3. Document justification for each ignored CVE
-4. Set up quarterly review process
+1. Maintain `pnpm` overrides.
+2. Monitor Apollo Server migration plan.
 
 ### Long-term Actions
 
-1. Establish policy for ignored CVEs (max 90 days without review)
-2. Implement automated CVE tracking
-3. Set up alerts for new vulnerabilities in ignored packages
-4. Create dashboard for CVE status tracking
+1. Migrate to Apollo Server v4.
+2. Remove `sdk__typescript` if unused.
 
 ## Review Process
 
@@ -251,8 +225,8 @@ If any of the following conditions are met, immediately escalate:
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** January 14, 2026  
-**Prepared by:** Manus AI Security Implementation
+**Document Version:** 1.1
+**Last Updated:** January 18, 2026
+**Prepared by:** Jules (Program Ops)
 
-**Next Review Date:** April 14, 2026
+**Next Review Date:** April 18, 2026
