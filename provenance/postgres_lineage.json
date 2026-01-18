@@ -1,0 +1,16 @@
+[
+  {
+    "tuple_id": 1,
+    "provenance": "token1",
+    "data": {
+      "val": 100
+    }
+  },
+  {
+    "tuple_id": 2,
+    "provenance": "token2",
+    "data": {
+      "val": 200
+    }
+  }
+]
