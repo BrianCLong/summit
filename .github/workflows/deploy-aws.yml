@@ -13,10 +13,32 @@ env:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
 
 jobs:
+  log-deploy-start:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 10
+      - name: Install dependencies
+        run: pnpm install # Install commander from package.json respecting lockfile (non-frozen for speed/safety?) or frozen
+      - name: Log Deploy Started
+        run: |
+          node scripts/metrics/log_event.mjs \
+            --type deploy_started \
+            --env prod \
+            --sha ${{ github.sha }} \
+            --commit
+
   build-and-push:
+    needs: log-deploy-start
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -148,3 +170,30 @@ jobs:
           # Optional: Run app-level functional smoke tests
           # pnpm run test:smoke
 
+  log-deploy-result:
+    needs: [deploy-k8s]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 10
+      - name: Log Deploy Result
+        run: |
+          pnpm install # Install commander from package.json
+          if [ "${{ needs.deploy-k8s.result }}" == "success" ]; then
+            TYPE="deploy_succeeded"
+          else
+            TYPE="deploy_failed"
+          fi
+
+          node scripts/metrics/log_event.mjs \
+            --type $TYPE \
+            --env prod \
+            --sha ${{ github.sha }} \
+            --commit
