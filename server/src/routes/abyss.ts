@@ -1,17 +1,36 @@
 // server/src/routes/abyss.ts
 import { Router, NextFunction, Request, Response } from 'express';
+import crypto from 'crypto';
 import { abyssService } from '../abyss/AbyssService.js';
 
 const router = Router();
 
 /**
  * Middleware for extreme authorization.
- * In a real system, this would involve multiple, independent, and cryptographically secure checks.
- * For this simulation, it checks for a specific, hardcoded header.
+ * Uses environment variable and timing-safe comparison.
  */
 const extremeAuth = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers['x-abyss-authorization'];
-    if (authHeader === 'CONFIRM_FINAL_PROTOCOL_ARMING_SEQUENCE_OMEGA') {
+    const expectedToken = process.env.ABYSS_AUTH_TOKEN;
+
+    // Fail secure if token is not configured in environment
+    if (!expectedToken) {
+        return res.status(403).json({ message: 'Forbidden: Authorization configuration missing.' });
+    }
+
+    if (!authHeader || typeof authHeader !== 'string') {
+        return res.status(403).json({ message: 'Forbidden: Unimaginable authorization is required.' });
+    }
+
+    // Use timing-safe comparison to prevent side-channel attacks
+    const authBuf = Buffer.from(authHeader);
+    const expectedBuf = Buffer.from(expectedToken);
+
+    if (authBuf.length !== expectedBuf.length) {
+        return res.status(403).json({ message: 'Forbidden: Unimaginable authorization is required.' });
+    }
+
+    if (crypto.timingSafeEqual(authBuf, expectedBuf)) {
         next();
     } else {
         res.status(403).json({ message: 'Forbidden: Unimaginable authorization is required.' });
