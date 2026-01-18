@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/maestro/reasoning-evidence.schema.json",
+  "title": "Maestro Reasoning Evidence Bundle",
+  "type": "object",
+  "required": ["runId", "decision", "lanes", "artifacts"],
+  "additionalProperties": false,
+  "properties": {
+    "runId": { "type": "string" },
+    "decision": {
+      "type": "object",
+      "required": ["selectedLaneId", "finalAnswer", "scoreByLane", "disagreement"],
+      "additionalProperties": false,
+      "properties": {
+        "selectedLaneId": { "type": "string" },
+        "finalAnswer": { "type": "string" },
+        "scoreByLane": {
+          "type": "object",
+          "additionalProperties": { "type": "number" }
+        },
+        "disagreement": { "type": "boolean" },
+        "rationale": { "type": "string" }
+      }
+    },
+    "lanes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["laneId", "finalAnswer", "structuredClaims", "evidenceArtifacts"],
+        "additionalProperties": false,
+        "properties": {
+          "laneId": { "type": "string" },
+          "finalAnswer": { "type": "string" },
+          "structuredClaims": { "type": "object" },
+          "evidenceArtifacts": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/EvidenceArtifact" }
+          },
+          "confidence": { "type": "number" },
+          "metadata": { "type": "object" }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/EvidenceArtifact" }
+    },
+    "provenance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "timestamp", "payload"],
+        "properties": {
+          "type": { "type": "string" },
+          "timestamp": { "type": "string" },
+          "payload": { "type": "object" }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "EvidenceArtifact": {
+      "type": "object",
+      "required": ["id", "kind", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "execution-log",
+            "test-result",
+            "policy-evaluation",
+            "counterexample",
+            "provenance",
+            "trace",
+            "note"
+          ]
+        },
+        "description": { "type": "string" },
+        "uri": { "type": "string" },
+        "sha256": { "type": "string" },
+        "mimeType": { "type": "string" },
+        "metadata": { "type": "object" }
+      }
+    }
+  }
+}
