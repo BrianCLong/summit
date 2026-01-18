@@ -2,6 +2,7 @@ package ci_gate
 
 import data.supply_chain
 import data.ci_agent_gate
+import data.pauth.cicd as pauth
 
 # CI Gate Policy
 # Enforces security requirements for Pull Requests and Pre-Merge builds
@@ -35,6 +36,11 @@ deny contains msg if {
 # Enforce Agent Permission Tiers
 deny contains msg if {
     msg := data.ci_agent_gate.deny[_]
+}
+
+# Enforce Least Privilege Tokens (Policy-as-Code)
+deny contains msg if {
+    msg := pauth.deny[_]
 }
 
 # Warn on High Vulnerabilities (non-blocking, but visible)

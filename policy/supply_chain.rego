@@ -10,7 +10,7 @@ import rego.v1
 # Require SLSA provenance for all artifacts
 deny contains msg if {
 	not input.slsa_provenance
-	msg := "Artifact must include SLSA provenance attestation"
+	msg := "Missing signed provenance attestation: Artifact must include SLSA provenance"
 }
 
 # Validate SLSA level
@@ -38,11 +38,10 @@ deny contains msg if {
 
 # SBOM Validation
 
-# Require SBOM for all container images
+# Require SBOM for all artifacts (Harden: removed type restriction)
 deny contains msg if {
-	input.type == "container_image"
 	not input.sbom
-	msg := "Container images must include Software Bill of Materials (SBOM)"
+	msg := "Missing SBOM: All artifacts must include Software Bill of Materials (SBOM)"
 }
 
 # Validate SBOM format
