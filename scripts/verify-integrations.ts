@@ -1,6 +1,7 @@
 // Usage:
 //   npx ts-node scripts/verify-integrations.ts github
 //   npx ts-node scripts/verify-integrations.ts jira
+//   npx ts-node scripts/verify-integrations.ts notion
 //   npx ts-node scripts/verify-integrations.ts maestro
 
 import 'dotenv/config';
@@ -17,6 +18,9 @@ const GH_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET || '';
 const JIRA_BASE_URL = process.env.JIRA_BASE_URL || '';
 const JIRA_EMAIL = process.env.JIRA_EMAIL || '';
 const JIRA_API_TOKEN = process.env.JIRA_API_TOKEN || '';
+
+const NOTION_DATABASE_ID = process.env.NOTION_DATABASE_ID || '';
+const NOTION_API_TOKEN = process.env.NOTION_API_TOKEN || '';
 
 const MAESTRO_BASE =
   process.env.MAESTRO_BASE_URL || 'https://maestro.dev.topicality.co';
@@ -80,6 +84,31 @@ async function verifyJira() {
   return true;
 }
 
+async function verifyNotion() {
+  console.log('→ Verifying Notion API access…');
+  assert(NOTION_DATABASE_ID && NOTION_API_TOKEN, 'Missing Notion envs');
+
+  const response = await fetch(
+    `https://api.notion.com/v1/databases/${NOTION_DATABASE_ID}`,
+    {
+      headers: {
+        Authorization: `Bearer ${NOTION_API_TOKEN}`,
+        'Notion-Version': '2022-06-28',
+        'Content-Type': 'application/json',
+      },
+    },
+  );
+
+  assert(
+    response.ok,
+    `Notion database fetch failed: ${response.status} ${response.statusText}`,
+  );
+  const data: any = await response.json();
+  const title = data.title?.[0]?.plain_text || 'Untitled';
+  console.log(`✔ Notion OK — Database: "${title}" (ID: ${data.id})`);
+  return true;
+}
+
 async function verifyMaestro() {
   console.log('→ Verifying Maestro safe mutations + tickets…');
   // 1) Safe mutation (dryRun)
@@ -129,6 +158,7 @@ const task = process.argv[2];
       await verifyWebhookSignatureSample();
     }
     if (!task || task === 'jira') await verifyJira();
+    if (!task || task === 'notion') await verifyNotion();
     if (!task || task === 'maestro') await verifyMaestro();
     console.log('✅ All selected checks passed.');
   } catch (e: any) {
