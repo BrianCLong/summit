@@ -18,6 +18,7 @@ import { auditCommands } from './commands/audit.js';
 import { complianceCommands } from './commands/compliance.js';
 import { configCommands } from './commands/config.js';
 import { pluginCommands } from './commands/plugin.js';
+import { agentsCommands } from './commands/agents.js';
 import { doctor } from './commands/doctor.js';
 import { loadConfig, getConfig } from './config.js';
 
@@ -94,6 +95,9 @@ program
   .addCommand(pluginCommands.build)
   .addCommand(pluginCommands.publish)
   .addCommand(pluginCommands.list);
+
+// Agent registry commands
+program.addCommand(agentsCommands);
 
 // Login command
 program
