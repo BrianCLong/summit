@@ -45,16 +45,6 @@ const mergeDataSource = (
   }
 });
 
-const replaceMapping = (
-  _current: SchemaMappingState,
-  next: SchemaMappingState
-): SchemaMappingState => ({
-  ...next,
-  sourceSample: [...next.sourceSample],
-  targetSchema: [...next.targetSchema],
-  mappings: next.mappings.map((mapping) => ({ ...mapping }))
-});
-
 const ingestWizardSlice = createSlice({
   name: 'ingestWizard',
   initialState: initialWizardState,
@@ -81,10 +71,13 @@ const ingestWizardSlice = createSlice({
       );
     },
     updateSchemaMapping(state, action: PayloadAction<SchemaMappingState>) {
-      state.schemaMapping = replaceMapping(state.schemaMapping, action.payload);
+      // Optimized: removed replaceMapping deep cloning.
+      // Immer handles the immutability and structural sharing.
+      state.schemaMapping = action.payload;
     },
     setValidation(state, action: PayloadAction<ValidationState>) {
-      state.validation = { ...action.payload, issues: [...action.payload.issues] };
+      // Optimized: removed unnecessary spreading of issues array
+      state.validation = action.payload;
     },
     resetWizard() {
       return initialWizardState;
