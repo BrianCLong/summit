@@ -16,7 +16,7 @@ import logging
 import os
 import tarfile
 from pathlib import Path
-from typing import Optional, Set
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
