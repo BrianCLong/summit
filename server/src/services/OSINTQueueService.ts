@@ -6,6 +6,7 @@ import { VeracityScoringService } from './VeracityScoringService';
 import config from '../config/index.js';
 import { ExternalAPIService } from './ExternalAPIService';
 import { OSINTService } from './OSINTService';
+import { trackAiJob } from '../monitoring/middleware.js';
 
 interface OSINTJobData {
   type: string; // 'comprehensive_scan', 'wikipedia', 'search'
@@ -28,38 +29,41 @@ export function startOSINTWorkers(): Worker {
     'osint-ingest',
     async (job: Job<OSINTJobData>) => {
       const { type, targetId, tenantId, params } = job.data;
-      logger.info(`Processing OSINT job ${job.id}: ${type} for ${targetId}`);
 
-      const extApi = new ExternalAPIService(logger as any);
-      const osintService = new OSINTService();
-      const veracityService = new VeracityScoringService();
+      await trackAiJob(`osint-${type}`, async () => {
+        logger.info(`Processing OSINT job ${job.id}: ${type} for ${targetId}`);
 
-      try {
-        if (type === 'wikipedia' || type === 'comprehensive_scan') {
-          // 1. Enrich from Wikipedia
-          let title = targetId;
-          if (targetId.includes(':')) {
-            title = targetId.split(':')[1];
+        const extApi = new ExternalAPIService(logger as any);
+        const osintService = new OSINTService();
+        const veracityService = new VeracityScoringService();
+
+        try {
+          if (type === 'wikipedia' || type === 'comprehensive_scan') {
+            // 1. Enrich from Wikipedia
+            let title = targetId;
+            if (targetId.includes(':')) {
+              title = targetId.split(':')[1];
+            }
+
+            try {
+              // Basic fetch from Wikipedia if it looks like a wiki entity or we treat the ID as a title
+              // If targetId is a UUID, this might fail unless we look up the label first.
+              // For this MVP, we assume targetId is usable or we just try.
+              await osintService.enrichFromWikipedia({ entityId: targetId, title });
+            } catch (e: any) {
+              logger.warn(`Wikipedia enrichment failed for ${targetId}`, e);
+            }
           }
 
-          try {
-            // Basic fetch from Wikipedia if it looks like a wiki entity or we treat the ID as a title
-            // If targetId is a UUID, this might fail unless we look up the label first.
-            // For this MVP, we assume targetId is usable or we just try.
-            await osintService.enrichFromWikipedia({ entityId: targetId, title });
-          } catch (e: any) {
-            logger.warn(`Wikipedia enrichment failed for ${targetId}`, e);
-          }
+          // 2. Score Veracity
+          await veracityService.scoreEntity(targetId);
+
+          logger.info(`OSINT job ${job.id} completed.`);
+        } catch (err: any) {
+          logger.error(`OSINT job ${job.id} failed`, err);
+          throw err;
         }
-
-        // 2. Score Veracity
-        await veracityService.scoreEntity(targetId);
-
-        logger.info(`OSINT job ${job.id} completed.`);
-      } catch (err: any) {
-        logger.error(`OSINT job ${job.id} failed`, err);
-        throw err;
-      }
+      });
     },
     { connection }
   );

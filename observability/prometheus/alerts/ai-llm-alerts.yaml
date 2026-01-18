@@ -1,0 +1,68 @@
+groups:
+  - name: ai-llm-alerts
+    interval: 30s
+    rules:
+      # AI Job Queue Alerts
+      - alert: AIJobQueueBacklog
+        expr: sum(ai_jobs_queued) by (job_type) > 50
+        for: 5m
+        labels:
+          severity: warning
+          component: ai-worker
+        annotations:
+          summary: "AI Job Queue Backlog High"
+          description: "AI job queue for {{ $labels.job_type }} has over 50 jobs pending for 5 minutes."
+
+      - alert: AIJobQueueCritical
+        expr: sum(ai_jobs_queued) by (job_type) > 200
+        for: 2m
+        labels:
+          severity: critical
+          component: ai-worker
+        annotations:
+          summary: "AI Job Queue Critical"
+          description: "AI job queue for {{ $labels.job_type }} has over 200 jobs pending. Processing may be stalled."
+
+      # LLM Cost Alerts
+      - alert: LLMCostHigh
+        expr: rate(llm_cost_total_usd[1h]) * 3600 > 50
+        for: 5m
+        labels:
+          severity: warning
+          component: llm-gateway
+        annotations:
+          summary: "High LLM Cost Detected"
+          description: "Estimated LLM cost is running at ${{ $value | humanize }} per hour."
+
+      - alert: LLMCostSpike
+        expr: rate(llm_cost_total_usd[5m]) * 3600 > 200
+        for: 2m
+        labels:
+          severity: critical
+          component: llm-gateway
+        annotations:
+          summary: "Critical LLM Cost Spike"
+          description: "LLM cost spiked to ${{ $value | humanize }}/hr rate. Investigate immediately."
+
+      # Circuit Breaker Alerts
+      - alert: CircuitBreakerOpen
+        expr: circuit_breaker_state == 1
+        for: 1m
+        labels:
+          severity: critical
+          component: resilience
+        annotations:
+          summary: "Circuit Breaker Open"
+          description: "Circuit breaker for {{ $labels.service }} is OPEN. Calls are failing fast."
+
+      # LLM Error Rate
+      - alert: LLMErrorRateHigh
+        expr: |
+          (sum(rate(llm_requests_total{status="error"}[5m])) by (provider) / sum(rate(llm_requests_total[5m])) by (provider)) > 0.10
+        for: 5m
+        labels:
+          severity: warning
+          component: llm-gateway
+        annotations:
+          summary: "High LLM Error Rate"
+          description: "LLM Provider {{ $labels.provider }} has > 10% error rate."

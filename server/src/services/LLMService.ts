@@ -248,6 +248,23 @@ export class LLMService {
     throw new Error('Ollama provider not implemented');
   }
 
+  private calculateCost(model: string, promptTokens: number, completionTokens: number): number {
+    // Approximate costs (per 1k tokens)
+    let inputCost = 0.0010;
+    let outputCost = 0.0020;
+
+    if (model.includes('gpt-4')) {
+      // GPT-4 Turbo pricing roughly
+      inputCost = 0.01;
+      outputCost = 0.03;
+    } else if (model.includes('gpt-3.5') || model.includes('turbo')) {
+      inputCost = 0.0005;
+      outputCost = 0.0015;
+    }
+
+    return (promptTokens / 1000) * inputCost + (completionTokens / 1000) * outputCost;
+  }
+
   private updateMetrics(latency: number, usage: { total_tokens?: number; prompt_tokens?: number; completion_tokens?: number } | undefined, provider: string = 'openai', model: string = 'unknown'): void {
     this.metrics.totalRequests++;
     this.metrics.totalTokens += usage?.total_tokens || 0;
@@ -263,6 +280,14 @@ export class LLMService {
         model,
         type: 'total'
       }, usage?.total_tokens || 0);
+    }
+
+    if (prometheusMetrics.llmCostTotal && usage) {
+      const cost = this.calculateCost(model, usage.prompt_tokens || 0, usage.completion_tokens || 0);
+      prometheusMetrics.llmCostTotal.inc({
+        provider,
+        model
+      }, cost);
     }
 
     if (prometheusMetrics.llmRequestDuration) {
