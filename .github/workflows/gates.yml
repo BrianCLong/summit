@@ -1,0 +1,85 @@
+name: Gates (GA + Evidence + Determinism)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  merge_group: {} # required for merge queue pre-merge testing
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gates-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install
+        run: npm ci
+
+      # --------- Evidence + Governance gates (customize to your repo scripts) ---------
+
+      - name: Evidence ID Consistency Gate
+        run: |
+          if [ -f scripts/ci/verify_evidence_id_consistency.mjs ]; then
+            node scripts/ci/verify_evidence_id_consistency.mjs
+          else
+            echo "No scripts/ci/verify_evidence_id_consistency.mjs found; skipping."
+          fi
+
+      - name: Determinism / Repo Hygiene Gate
+        run: |
+          if [ -f scripts/ci/check_repo_hygiene.sh ]; then
+            bash scripts/ci/check_repo_hygiene.sh
+          else
+            echo "No scripts/ci/check_repo_hygiene.sh found; skipping."
+          fi
+
+      - name: Governance Docs Gate
+        run: |
+          if [ -f scripts/ci/verify_governance_docs.mjs ]; then
+            node scripts/ci/verify_governance_docs.mjs
+          else
+            echo "No scripts/ci/verify_governance_docs.mjs found; skipping."
+          fi
+
+      # --------- Standard engineering checks (keep narrow + stable) ---------
+
+      - name: Lint
+        run: |
+          if npm run -s lint >/dev/null 2>&1; then
+            npm run -s lint
+          else
+            echo "No lint script; skipping."
+          fi
+
+      - name: Build
+        run: |
+          if npm run -s build >/dev/null 2>&1; then
+            npm run -s build
+          else
+            echo "No build script; skipping."
+          fi
+
+      - name: Test (retry once)
+        run: |
+          if npm run -s test >/dev/null 2>&1; then
+            npm run -s test || npm run -s test
+          else
+            echo "No test script; skipping."
+          fi

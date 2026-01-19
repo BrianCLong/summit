@@ -1,0 +1,40 @@
+name: Merge Queue Auto-Dequeue on Failure
+
+on:
+  workflow_run:
+    workflows:
+      - "Gates (GA + Evidence + Determinism)"
+    types: [completed]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  dequeue:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion != 'success' }}
+    steps:
+      - name: Dequeue any PRs involved in failed merge_group
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Only act on merge_group-triggered runs
+          event=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }} --jq '.event')
+          if [ "$event" != "merge_group" ]; then
+            echo "Not a merge_group run ($event). No dequeue."
+            exit 0
+          fi
+
+          # Try to extract PR numbers from workflow_run payload
+          prs=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }} --jq '.pull_requests[].number' || true)
+
+          if [ -z "$prs" ]; then
+            echo "No PRs associated with this run; cannot dequeue."
+            exit 0
+          fi
+
+          for pr in $prs; do
+            echo "Attempting dequeue PR #$pr"
+            gh api -X POST repos/${{ github.repository }}/pulls/$pr/merge-queue/dequeue || true
+          done
