@@ -14,6 +14,8 @@ from maestro.models import (
     DisclosurePack,
     Run,
     RunStatus,
+    TaskRun,
+    Workflow,
 )
 
 router = APIRouter(prefix="/maestro", tags=["maestro"])
@@ -29,6 +31,7 @@ class CreateRunRequest(BaseModel):
     related_entity_ids: list[str] = Field(default_factory=list)
     related_decision_ids: list[str] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
+    workflow_id: str | None = None
 
 
 class UpdateRunRequest(BaseModel):
@@ -73,6 +76,12 @@ class RunManifest(BaseModel):
 def create_run(request: CreateRunRequest, req: Request):
     """Create a new run."""
     store = req.app.state.maestro_store
+    task_runs = []
+    if request.workflow_id:
+        workflow = store.get_workflow(request.workflow_id)
+        if not workflow:
+            raise HTTPException(status_code=404, detail=f"Workflow {request.workflow_id} not found")
+        task_runs = [TaskRun(task_id=task.id) for task in workflow.tasks]
 
     run = Run(
         name=request.name,
@@ -81,6 +90,8 @@ def create_run(request: CreateRunRequest, req: Request):
         related_entity_ids=request.related_entity_ids,
         related_decision_ids=request.related_decision_ids,
         metadata=request.metadata,
+        workflow_id=request.workflow_id,
+        task_runs=task_runs,
     )
 
     return store.create_run(run)
@@ -260,3 +271,28 @@ def check_run_release_gate(run_id: str, req: Request):
         "message": result.message,
         "details": result.details,
     }
+
+
+# Workflow endpoints
+@router.post("/workflows", response_model=Workflow, status_code=201)
+def create_workflow(workflow: Workflow, req: Request):
+    """Create a new workflow template."""
+    store = req.app.state.maestro_store
+    return store.create_workflow(workflow)
+
+
+@router.get("/workflows", response_model=list[Workflow])
+def list_workflows(req: Request):
+    """List all workflow templates."""
+    store = req.app.state.maestro_store
+    return store.list_workflows()
+
+
+@router.get("/workflows/{workflow_id}", response_model=Workflow)
+def get_workflow(workflow_id: str, req: Request):
+    """Get a specific workflow template by ID."""
+    store = req.app.state.maestro_store
+    workflow = store.get_workflow(workflow_id)
+    if not workflow:
+        raise HTTPException(status_code=404, detail=f"Workflow {workflow_id} not found")
+    return workflow

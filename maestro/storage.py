@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from .models import Artifact, DisclosurePack, Run
+from .models import Artifact, DisclosurePack, Run, Workflow
 
 
 class MaestroStore:
@@ -12,6 +12,7 @@ class MaestroStore:
         self.runs: dict[str, Run] = {}
         self.artifacts: dict[str, Artifact] = {}
         self.disclosure_packs: dict[str, DisclosurePack] = {}
+        self.workflows: dict[str, Workflow] = {}
 
     # Run operations
     def create_run(self, run: Run) -> Run:
@@ -81,3 +82,17 @@ class MaestroStore:
     def list_disclosure_packs(self) -> list[DisclosurePack]:
         """List all disclosure packs."""
         return sorted(self.disclosure_packs.values(), key=lambda p: p.created_at, reverse=True)
+
+    # Workflow operations
+    def create_workflow(self, workflow: Workflow) -> Workflow:
+        """Create a new workflow."""
+        self.workflows[workflow.id] = workflow
+        return workflow
+
+    def get_workflow(self, workflow_id: str) -> Workflow | None:
+        """Get a workflow by ID."""
+        return self.workflows.get(workflow_id)
+
+    def list_workflows(self) -> list[Workflow]:
+        """List all workflows."""
+        return list(self.workflows.values())
