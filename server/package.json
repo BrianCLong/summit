@@ -103,6 +103,7 @@
     "express-rate-limit": "6.11.2",
     "express-validator": "7.2.1",
     "fast-json-stable-stringify": "2.1.0",
+    "fast-xml-parser": "^5.3.3",
     "ffmpeg-static": "5.2.0",
     "ffprobe-static": "3.1.0",
     "flagsmith-nodejs": "4.0.0",

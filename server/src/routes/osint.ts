@@ -1,10 +1,10 @@
-// @ts-nocheck
 import express, { type Request, type Response } from 'express';
 // import { OSINTPrioritizationService } from '../services/OSINTPrioritizationService.js';
 // import { VeracityScoringService } from '../services/VeracityScoringService.js';
 import { osintQueue } from '../services/OSINTQueueService.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { osintRateLimiter } from '../middleware/osintRateLimiter.js';
+import { osintService } from '../services/osint_service.js';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -17,6 +17,39 @@ const router = express.Router();
 // const veracityService = new VeracityScoringService();
 
 router.use(osintRateLimiter);
+
+// GET latest IOCs
+router.get('/iocs', async (req: Request, res: Response) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+    const iocs = await osintService.getLatestIOCs(limit);
+    res.json({ success: true, data: iocs });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Trigger Ingestion
+router.post('/ingest', async (req: Request, res: Response) => {
+  try {
+    const url = req.body.url; // Optional: custom URL
+    const result = await osintService.ingestFeed(url);
+    res.json({ success: true, ...result });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Trigger Analysis
+router.post('/analyze', async (req: Request, res: Response) => {
+  try {
+    const limit = req.body.limit || 5;
+    const result = await osintService.analyzePending(limit);
+    res.json({ success: true, processed: result.length, results: result });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 // Trigger prioritization cycle
 router.post('/prioritize', ensureAuthenticated, async (req: Request, res: Response) => {
