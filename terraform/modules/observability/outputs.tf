@@ -1,3 +1,3 @@
-output "dashboard_names" {
-  value = [for d in aws_cloudwatch_dashboard.this : d.dashboard_name]
+output "dashboard_arns" {
+  value = { for k, v in aws_cloudwatch_dashboard.main : k => v.dashboard_arn }
 }

@@ -1,0 +1,25 @@
+evidence_map:
+  - id: iac_validation
+    description: "Terraform syntax and schema validation"
+    artifact: "artifacts/ga-verify/{sha}/stamp.json"
+    key: "iac_validation"
+
+  - id: security_scan
+    description: "Static analysis of IaC for security vulnerabilities"
+    artifact: "artifacts/ga-verify/{sha}/stamp.json"
+    key: "security_scan"
+
+  - id: smoke_test
+    description: "Post-deployment smoke tests"
+    artifact: "artifacts/ga-verify/{sha}/stamp.json"
+    key: "smoke_test"
+
+  - id: integration_test
+    description: "End-to-end integration tests"
+    artifact: "artifacts/ga-verify/{sha}/stamp.json"
+    key: "integration_test"
+
+releases:
+  - version: "v1.0.0-ga"
+    sha: "pending"
+    status: "planned"
