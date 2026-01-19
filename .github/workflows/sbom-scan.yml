@@ -7,7 +7,7 @@ jobs:
   sbom:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       - uses: anchore/sbom-action@0b82b0b1a22399a1c542d4d656f70cd903571b5c # v0
         with:
           format: cyclonedx-json
@@ -20,7 +20,7 @@ jobs:
           only-fixed: false
       - name: Upload SBOM artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@0b2207062494160a33bd674828362627b9c46d9a # v4
         with:
           name: sbom-scan-results
           path: |

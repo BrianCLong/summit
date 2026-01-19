@@ -42,22 +42,22 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7 (pinned to v4 branch tip)
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4 (pinned to v4 branch tip)
         with:
           fetch-depth: 0
 
       - name: Set up pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        uses: pnpm/action-setup@feaa6391d8481eb0db9d5b066fba94be3691684c # v4
         # version is read from package.json packageManager field
 
       - name: Set up Node.js
-        uses: actions/setup-node@65d868f8d4d85d7d4abb7de0875cde3fcc8798f5 # v4.0.3
+        uses: actions/setup-node@1d1121627393d3093b167069a74422b94a9ec3f2 # v4
         with:
           node-version: "20"
           cache: "pnpm"
 
       - name: Set up Python
-        uses: actions/setup-python@4f41a90a1f38628c7ccc608d05fbafe701bc20ae # v5.1.0
+        uses: actions/setup-python@f6771096d27771765fa9d05e3566540498b375d1 # v5.1.0
         with:
           python-version: "3.11"
 
@@ -123,7 +123,7 @@ jobs:
 
       # Upload source SBOMs immediately to free disk space before Docker build
       - name: Upload Source SBOMs
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
+        uses: actions/upload-artifact@0b2207062494160a33bd674828362627b9c46d9a # v4
         with:
           name: sboms-source-${{ env.VERSION }}
           path: ./sboms/
@@ -131,7 +131,7 @@ jobs:
 
       # Upload source vulnerability reports immediately
       - name: Upload Source Vulnerability Reports
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
+        uses: actions/upload-artifact@0b2207062494160a33bd674828362627b9c46d9a # v4
         with:
           name: vulnerability-reports-source-${{ env.VERSION }}
           path: ./vulnerability-reports/
@@ -207,7 +207,7 @@ jobs:
       # Upload container SBOMs (generated during Docker build)
       - name: Upload Container SBOMs
         if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
+        uses: actions/upload-artifact@0b2207062494160a33bd674828362627b9c46d9a # v4
         with:
           name: sboms-container-${{ env.VERSION }}
           path: ./sboms/
@@ -216,7 +216,7 @@ jobs:
       # Upload container vulnerability reports (generated during Docker build)
       - name: Upload Container Vulnerability Reports
         if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
+        uses: actions/upload-artifact@0b2207062494160a33bd674828362627b9c46d9a # v4
         with:
           name: vulnerability-reports-container-${{ env.VERSION }}
           path: ./vulnerability-reports/
@@ -225,7 +225,7 @@ jobs:
       # Upload release evidence bundle
       - name: Upload Release Evidence Bundle
         if: github.event_name == 'push' && github.ref_type == 'tag'
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
+        uses: actions/upload-artifact@0b2207062494160a33bd674828362627b9c46d9a # v4
         with:
           name: release-evidence-${{ env.VERSION }}
           path: ./release-evidence/summit-release-${{ env.VERSION }}-evidence.tar.gz
@@ -239,16 +239,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: Download Source SBOMs
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d1c # v4
         with:
           name: sboms-source-${{ needs.supply-chain-integrity.outputs.release-version }}
           path: ./sboms
 
       - name: Download Source Vulnerability Reports
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d1c # v4
         with:
           name: vulnerability-reports-source-${{ needs.supply-chain-integrity.outputs.release-version }}
           path: ./vulnerability-reports
@@ -277,7 +277,7 @@ jobs:
 
     steps:
       - name: Download Release Evidence Bundle
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d1c # v4
         with:
           name: release-evidence-${{ needs.supply-chain-integrity.outputs.release-version }}
           path: ./releases

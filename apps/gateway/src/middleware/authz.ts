@@ -1,5 +1,6 @@
 import { randomUUID, createHash } from "crypto";
 import { Request, Response, NextFunction } from "express";
+import { trace } from "@opentelemetry/api";
 import { logger } from "../logger";
 
 interface AuthzInput {
@@ -83,7 +84,11 @@ function buildInput(req: Request): AuthzInput {
 export async function authzMiddleware(req: Request, res: Response, next: NextFunction) {
   if (req.path === "/healthz") return next();
 
-  const traceId = (req.headers["x-trace-id"] as string | undefined) || randomUUID();
+  // Extract traceId from OTel context or header
+  const span = trace.getSpan(trace.getActiveSpan()?.spanContext() ? trace.getActiveSpan() : undefined);
+  const otelTraceId = span?.spanContext().traceId;
+  const traceId = otelTraceId || (req.headers["x-trace-id"] as string | undefined) || randomUUID();
+
   res.setHeader("x-trace-id", traceId);
 
   const input = buildInput(req);
@@ -114,12 +119,19 @@ export async function authzMiddleware(req: Request, res: Response, next: NextFun
 
     logger.info("authz_decision", {
       traceId,
+      decision_id: decision.metadata?.decision_id || randomUUID(),
+      policy_version: decision.metadata?.policy_version || "v1",
       subject: redacted(input.subject.id),
-      roles: input.subject.roles,
-      action: input.action,
       tenant: input.resource.tenant,
+      action: input.action,
+      resource: {
+        type: input.resource.type,
+        id: redacted(input.resource.id),
+        classification: input.resource.classification,
+      },
       decision: decision.allow ? "allow" : "deny",
       deny_reasons: denyReasons,
+      timestamp: new Date().toISOString(),
     });
 
     if (!decision.allow) {

@@ -76,6 +76,19 @@ updates:
       runtime-dependencies:
         dependency-type: "production"
 
+  # Gateway
+  - package-ecosystem: "npm"
+    directory: "/apps/gateway"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+      runtime-dependencies:
+        dependency-type: "production"
+
   # SLO Exporter
   - package-ecosystem: "npm"
     directory: "/apps/slo-exporter"

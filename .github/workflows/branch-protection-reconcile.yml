@@ -63,7 +63,7 @@ jobs:
           echo "::warning::Apply mode confirmed - will attempt to modify branch protection"
 
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: Install yq
         run: |
@@ -111,7 +111,7 @@ jobs:
           fi
 
       - name: Upload Reconciliation Plan
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@0b2207062494160a33bd674828362627b9c46d9a # v4
         with:
           name: branch-protection-reconcile-plan
           path: |
@@ -133,7 +133,7 @@ jobs:
 
       - name: Create Issue for Plan
         if: steps.reconcile.outputs.needs_reconciliation == 'true' && github.event.inputs.mode == 'plan'
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@604723e2c817b3a4a9cfd11897962b93198de70e # v7
         with:
           script: |
             const fs = require('fs');

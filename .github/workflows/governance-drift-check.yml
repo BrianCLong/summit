@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
         with:
           fetch-depth: 0
 
@@ -133,7 +133,7 @@ jobs:
       - name: Create Drift Alert Issue
         if: steps.drift-check.outputs.drift_detected == 'true' || steps.drift-check.outputs.current_status == 'CHANGED'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GOVERNANCE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           # Check if there's already an open drift issue
           EXISTING=$(gh issue list \
@@ -143,16 +143,52 @@ jobs:
             -q '.[0].number' \
             --repo ${{ github.repository }} || echo "")
 
+          # Build the issue body
+          cat > drift_body.md << EOF
+          ## Governance Drift Alert
+
+          The governance drift checker has detected policy changes.
+
+          ### Details
+
+          | Metric | Value |
+          |--------|-------|
+          | Transitions | ${{ steps.drift-check.outputs.transitions }} |
+          | Unique Hashes | ${{ steps.drift-check.outputs.unique_hashes }} |
+          | Current Status | ${{ steps.drift-check.outputs.current_status }} |
+          | Workflow Run | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+
+          ### Investigation Steps
+
+          1. Review the workflow run for detailed transition information
+          2. Check recent commits to policy files in \`docs/ci/\`
+          3. Verify if the change was intentional
+          4. If intentional, close this issue with explanation
+          5. If unintentional, investigate and remediate
+
+          ### Commands
+
+          \`\`\`bash
+          # View current governance hash
+          sha256sum docs/releases/_state/governance_lockfile.json
+
+          # Check drift locally
+          ./scripts/release/check_governance_drift.sh \\
+            --timeseries site/release-ops/redaction_metrics_timeseries.json \\
+            --verbose
+          \`\`\`
+
+          ---
+          *This issue was automatically updated by the governance drift checker.*
+          EOF
+
           if [[ -n "${EXISTING}" ]]; then
             echo "Drift issue already exists: #${EXISTING}"
-            # Add comment with new findings
+            # Update the issue body
+            gh issue edit "${EXISTING}" --body-file drift_body.md --repo ${{ github.repository }}
+            # Add comment with update
             gh issue comment "${EXISTING}" \
-              --body "### Drift Check Update ($(date -u +%Y-%m-%d))
-
-          **Transitions in window:** ${{ steps.drift-check.outputs.transitions }}
-          **Current hash status:** ${{ steps.drift-check.outputs.current_status }}
-
-          See workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+              --body "### Drift Check Update ($(date -u +%Y-%m-%d)) - Issue body updated." \
               --repo ${{ github.repository }}
           else
             # Create new issue
@@ -219,7 +255,7 @@ jobs:
             || echo "::warning::Failed to update audit log"
 
       - name: Upload Drift Report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@0b2207062494160a33bd674828362627b9c46d9a # v4
         with:
           name: governance-drift-report-${{ github.run_number }}
           path: drift_report.json
