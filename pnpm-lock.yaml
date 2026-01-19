@@ -42,6 +42,8 @@ overrides:
   '@types/react-dom': 18.3.0
   apollo-server-express: '>=3.13.0'
   redis: '>=5.9.0'
+  '@types/hapi__catbox': npm:@hapi/catbox@^12.1.1
+  '@types/hapi__shot': npm:@hapi/shot@^6.0.0
 
 pnpmfileChecksum: sha256-a6bZRKVps8e/vFm+ZHjptEhSt2AMVrBBZPNF7tFCrHw=
 
@@ -155,12 +157,6 @@ importers:
       '@semantic-release/npm':
         specifier: ^12.0.2
         version: 12.0.2(semantic-release@24.2.9(typescript@5.9.3))
-      '@types/hapi__catbox':
-        specifier: ^12.1.0
-        version: 12.1.0
-      '@types/hapi__shot':
-        specifier: ^6.0.0
-        version: 6.0.0
       '@types/jest':
         specifier: ^29.5.14
         version: 29.5.14
@@ -35108,19 +35104,11 @@ packages:
     resolution: {integrity: sha512-gq9YweFKNNB1uFK71eRqsd4niVkXrxHugqWFQkeLRJvGjnxsLr16bYtcsG4tOFwmYi0Bax+wCkbf1reUfdl4kA==}
     deprecated: This is a stub types definition. handlebars provides its own type definitions, so you do not need this installed.
 
-  '@types/hapi__catbox@12.1.0':
-    resolution: {integrity: sha512-v4XNUu6w9LmGgDZ4+OT1dSuvme5qNxFFyMVpqYPNugw4zN5xpWsNCsN7/0jG7wCKx39EQctW9iTT1O55UnH6/Q==}
-    deprecated: This is a stub types definition. @hapi/catbox provides its own type definitions, so you do not need this installed.
-
   '@types/hapi__hapi@20.0.13':
     resolution: {integrity: sha512-LP4IPfhIO5ZPVOrJo7H8c8Slc0WYTFAUNQX1U0LBPKyXioXhH5H2TawIgxKujIyOhbwoBbpvOsBf6o5+ToJIrQ==}
 
   '@types/hapi__mimos@4.1.4':
     resolution: {integrity: sha512-i9hvJpFYTT/qzB5xKWvDYaSXrIiNqi4ephi+5Lo6+DoQdwqPXQgmVVOZR+s3MBiHoFqsCZCX9TmVWG3HczmTEQ==}
-
-  '@types/hapi__shot@6.0.0':
-    resolution: {integrity: sha512-CUxk0AEQRpIT2cx7EYXkqaXm60LP46ZyEhr/7uov7D/ZLysA5DKkfBtPIYnoWvn8qfcFV/7YHLd3U9gThuhb0A==}
-    deprecated: This is a stub types definition. @hapi/shot provides its own type definitions, so you do not need this installed.
 
   '@types/hast@3.0.4':
     resolution: {integrity: sha512-WPs+bbQw5aCj+x6laNGWLH3wviHtoCv/P3+otBhbOhJgG8qtpdAMlTCxLtsTWA7LH1Oh/bFCHsBn0TPS5m30EQ==}
@@ -49674,6 +49662,7 @@ packages:
   tar@7.5.2:
     resolution: {integrity: sha512-7NyxrTE4Anh8km8iEy7o0QYPs+0JKBTj5ZaqHg6B39erLg0qYXN3BijtShwbsNSvQ+LN75+KV+C4QR/f6Gwnpg==}
     engines: {node: '>=18'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   tdigest@0.1.2:
     resolution: {integrity: sha512-+G0LLgjjo9BZX2MfdvPfH+MKLCrxlXSYec5DaPYP1fe6Iyhf0/fSmJ0bFiZ1F8BT6cGXl2LpltQptzjXKWEkKA==}
@@ -72732,28 +72721,20 @@ snapshots:
     dependencies:
       handlebars: 4.7.8
 
-  '@types/hapi__catbox@12.1.0':
-    dependencies:
-      '@hapi/catbox': 12.1.1
-
   '@types/hapi__hapi@20.0.13':
     dependencies:
       '@hapi/boom': 9.1.4
       '@hapi/iron': 6.0.0
       '@hapi/podium': 4.1.3
-      '@types/hapi__catbox': 12.1.0
+      '@types/hapi__catbox': '@hapi/catbox@12.1.1'
       '@types/hapi__mimos': 4.1.4
-      '@types/hapi__shot': 6.0.0
+      '@types/hapi__shot': '@hapi/shot@6.0.2'
       '@types/node': 20.19.27
       joi: 17.13.3
 
   '@types/hapi__mimos@4.1.4':
     dependencies:
       '@types/mime-db': 1.43.6
-
-  '@types/hapi__shot@6.0.0':
-    dependencies:
-      '@hapi/shot': 6.0.2
 
   '@types/hast@3.0.4':
     dependencies:
