@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-15T00:10:00Z",
+  "revision_note": "Documented Linear governance runbook and board specification for roadmap linkage gating",
   "initiatives": [
     {
       "id": "A",
