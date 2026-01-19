@@ -5,6 +5,8 @@ type OsintFixtures = {
   mockWikipedia: () => Promise<void>;
   mockOsintFeeds: () => Promise<void>;
   createEntity: (data: any) => Promise<any>;
+  loginAsAnalyst: () => Promise<void>;
+  osintMocks: void;
 };
 
 export const test = base.extend<OsintFixtures>({
@@ -67,6 +69,22 @@ export const test = base.extend<OsintFixtures>({
       return await response.json();
     });
   },
+
+  loginAsAnalyst: async ({ page }, use) => {
+    await use(async () => {
+      // Use mock auth callback
+      await page.goto('/maestro/auth/callback?code=mock_code&state=mock_state');
+      // Wait for app to load slightly
+      await page.waitForLoadState('networkidle');
+    });
+  },
+
+  osintMocks: async ({ mockWikipedia, mockOsintFeeds }, use) => {
+      // Activate the mocks
+      await mockWikipedia();
+      await mockOsintFeeds();
+      await use();
+  }
 });
 
 export { expect };

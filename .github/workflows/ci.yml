@@ -1,55 +1,220 @@
 name: CI
 
 on:
-  # UNTRUSTED Workflow Trigger
-  # Runs on pull requests from forks (read-only token)
   pull_request:
     types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
 
 jobs:
   config-guard:
-    name: Build & Test (Untrusted)
+    name: Config Guard
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      # No other permissions granted
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node (from .nvmrc)
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-
       - name: Enable Corepack
         run: corepack enable
-
-      - name: Validate Jest & pnpm Configuration (pre-install)
+      - name: Validate Jest & pnpm Configuration
         run: pnpm -w check:jest-config
 
-  unit-tests:
-    name: unit-tests
+  client-tests:
+    name: Client Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node (from .nvmrc)
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
-
       - name: Enable Corepack
         run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run Client Tests with Coverage
+        run: pnpm --filter intelgraph-client test:coverage --coverageReporters=json-summary --coverageReporters=text
+      - name: Upload Coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-coverage
+          path: client/coverage
 
-      - name: Install (frozen lockfile)
-        run: pnpm -w install --frozen-lockfile
+  server-tests:
+    name: Server Unit Tests
+    runs-on: ubuntu-latest
+    needs: [config-guard]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run Server Unit Tests with Coverage
+        run: pnpm --filter intelgraph-server test:coverage --coverageReporters=json-summary --coverageReporters=text
+      - name: Upload Coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-coverage
+          path: server/coverage
 
-      - name: Unit Tests
-        run: pnpm -w test:unit
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [config-guard]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: intelgraph_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      neo4j:
+        image: neo4j:5.25
+        env:
+          NEO4J_AUTH: neo4j/test
+          NEO4J_PLUGINS: '["apoc"]'
+        ports:
+          - 7687:7687
+          - 7474:7474
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run Integration Tests
+        run: pnpm --filter intelgraph-server test:integration
+        env:
+          CI: true
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/intelgraph_db
+          NEO4J_URI: bolt://localhost:7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: test
+          REDIS_URL: redis://localhost:6379
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [config-guard]
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: intelgraph_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      neo4j:
+        image: neo4j:5.25
+        env:
+          NEO4J_AUTH: neo4j/test
+        ports:
+          - 7687:7687
+          - 7474:7474
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps
+      - name: Run Playwright tests
+        run: pnpm exec playwright test
+        env:
+          CI: true
+          PLAYWRIGHT_USE_WEBSERVER: "true"
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/intelgraph_db
+          NEO4J_URI: bolt://localhost:7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: test
+          REDIS_URL: redis://localhost:6379
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+  coverage-gate:
+    name: Coverage Gate
+    runs-on: ubuntu-latest
+    needs: [client-tests, server-tests]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Download Client Coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: client-coverage
+          path: client/coverage
+      - name: Download Server Coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: server-coverage
+          path: server/coverage
+      - name: Verify Coverage
+        run: node scripts/coverage-aggregate.js
 
   soc-controls:
     name: SOC Controls
@@ -58,24 +223,19 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node (from .nvmrc)
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
-
       - name: Enable Corepack
         run: corepack enable
-
-      - name: Install (frozen lockfile)
-        run: pnpm -w install --frozen-lockfile
-
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: SOC Control Unit Tests
         run: bash scripts/test-soc-controls.sh soc-compliance-reports
         env:
           TZ: UTC
-
       - name: Upload SOC compliance reports
         uses: actions/upload-artifact@v4
         if: always()
