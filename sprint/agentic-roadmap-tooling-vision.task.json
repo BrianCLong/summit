@@ -1,0 +1,22 @@
+{
+  "task_id": "task-20260114-agentic-roadmap-tooling-vision",
+  "prompt_id": "companyos-sprint-04",
+  "prompt_hash": "434a88382afaa83775ef9055171b2095acb3595b82566da8c0e2a21d1625dac2",
+  "requested_by": "user",
+  "scope": {
+    "paths": ["sprint/"],
+    "domains": ["companyos", "sprint-planning", "roadmap"]
+  },
+  "verification_tier": "C",
+  "allowed_operations": ["create"],
+  "summary": "Draft agentic roadmap tooling vision aligned to governance and roadmap execution.",
+  "evidence": {
+    "sources": [
+      "docs/SUMMIT_READINESS_ASSERTION.md",
+      "docs/roadmap/STATUS.json",
+      ".github/PULL_REQUEST_TEMPLATE.md"
+    ],
+    "checks": ["manual review"],
+    "artifacts": []
+  }
+}
