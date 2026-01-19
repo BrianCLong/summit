@@ -1,0 +1,68 @@
+name: Fresh Evidence Rate
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: fresh-evidence-rate
+  cancel-in-progress: true
+
+jobs:
+  compute:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Collect last 7 days of main runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p .rate/summaries
+          since="$(date -u -d '7 days ago' +%Y-%m-%d)"
+          gh run list --branch main --created "$since" --limit 200 --json databaseId,conclusion,status \
+            > .rate/runs.json
+
+          jq -r '.[] | select(.conclusion=="success") | .databaseId' .rate/runs.json \
+            | while read -r id; do
+                # Expect an artifact named "evidence" containing summary.json
+                gh run download "$id" -n evidence --dir ".rate/$id" >/dev/null 2>&1 || true
+                if [ -f ".rate/$id/summary.json" ]; then
+                  cp ".rate/$id/summary.json" ".rate/summaries/$id.json"
+                fi
+              done
+
+      - name: Verify freshness (soft gate for metric)
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for f in .rate/summaries/*.json; do
+            # verifier exits non-zero if stale/invalid
+            bash scripts/ci/verify_fresh_evidence.sh "$f" >/dev/null 2>&1 || true
+          done
+
+      - name: Aggregate + write shields endpoint
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          node scripts/ci/collect_fresh_evidence_rate.mjs .rate/summaries/*.json
+
+      - name: Commit metric to main
+        run: |
+          set -euo pipefail
+          git config user.name "summit-bot"
+          git config user.email "bot@summit.local"
+          git add docs/governance/metrics/fresh-evidence-rate.json docs/governance/metrics/fresh-evidence-rate.raw.json
+          git commit -m "chore(governance): update Fresh Evidence Rate metric" || exit 0
+          git push

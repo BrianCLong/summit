@@ -4,6 +4,8 @@ The unified intelligence analysis platform with AI-augmented graph analytics.
 
 ## 🚀 Deployment Status
 
+![Fresh Evidence Rate (7d)](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/BrianCLong/summit/main/docs/governance/metrics/fresh-evidence-rate.json)
+
 | Environment | Status | CI/CD | Infra |
 | :--- | :--- | :--- | :--- |
 | **Production** | 🟢 Ready | [GitHub Actions](.github/workflows/deploy-aws.yml) | [AWS EKS (Terraform)](terraform/environments/prod) |
