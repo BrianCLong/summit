@@ -52,6 +52,7 @@
     "lint:cjs": "node scripts/check-cjs-commonjs.cjs",
     "lint:strict": "eslint . && (ruff check . || true)",
     "security:check": "node scripts/security-check.js",
+    "security:verify-critical": "scripts/ci/verify_no_criticals.sh",
     "security:evidence-pack": "npx tsx scripts/security/evidence-pack.ts --mode=live",
     "security:evidence-pack:offline": "npx tsx scripts/security/evidence-pack.ts --mode=offline --fixturesDir=scripts/security/fixtures",
     "security:drift-check": "npx tsx scripts/security/drift-check.ts",

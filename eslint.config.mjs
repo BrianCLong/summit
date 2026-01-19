@@ -112,7 +112,7 @@ export default tseslint.config(
       'no-dupe-class-members': 'warn',
       'import/first': 'warn',
       'react/no-array-index-key': 'warn',
-      'no-console': 'warn', // Warn about console statements
+      'no-console': 'error', // Warn about console statements
     },
   },
   {
