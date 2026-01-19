@@ -240,6 +240,8 @@ jobs:
           path: ./diff-reports
 
       - name: Record in audit log
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
           mkdir -p audit/ga-evidence/api-contracts/audit-log
 
@@ -248,7 +250,7 @@ jobs:
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "event": "schema_diff_check",
             "pr_number": "${{ github.event.pull_request.number }}",
-            "pr_title": "${{ github.event.pull_request.title }}",
+            "pr_title": "${PR_TITLE}",
             "author": "${{ github.event.pull_request.user.login }}",
             "workflow_run": "${{ github.run_id }}",
             "result": "${{ needs.schema-diff.result }}",

@@ -91,7 +91,7 @@ jobs:
           echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
 
       - name: Cache dependencies
-        id: cache-deps
+        id: cache-pnpm
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5
         with:
           path: |

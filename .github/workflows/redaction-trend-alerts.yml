@@ -42,6 +42,7 @@ jobs:
       alert_triggers: ${{ steps.analyze.outputs.alert_triggers }}
       issue_action: ${{ steps.dedup.outputs.action }}
       issue_number: ${{ steps.dedup.outputs.issue_number }}
+      state_key: ${{ steps.dedup.outputs.state_key }}
 
     steps:
       - name: Checkout
