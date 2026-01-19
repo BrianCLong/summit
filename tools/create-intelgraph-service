@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Wrapper for Summit Paved Road Scaffolding
+# Invokes the Golden Path CLI to scaffold new services
+
+set -e
+
+echo "🚀 Summit Paved Road Service Generator"
+echo "========================================"
+echo "This tool scaffolds a new Summit service with:"
+echo " - Node/TS + Express + Apollo GraphQL"
+echo " - CI/CD pipelines (Lint, Test, Docker, Helm)"
+echo " - Observability (OTel, Metrics, Dashboards)"
+echo " - Compliance (SBOM, OPA, Provenance)"
+echo ""
+
+# Check if pnpm is available
+if ! command -v pnpm &> /dev/null; then
+    echo "❌ Error: pnpm is required but not installed."
+    exit 1
+fi
+
+echo "Invoking @intelgraph/scaffold-cli..."
+exec pnpm dlx @intelgraph/scaffold-cli create "$@"

@@ -263,6 +263,15 @@ jobs:
           path: artifacts/governance/docs-integrity
           retention-days: 30
 
+  policy-sim:
+    name: OPA Policy Simulation
+    runs-on: ubuntu-latest
+    needs: [config-preflight]
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - name: Run Policy Simulation
+        run: make policy-sim
+
   golden-path:
     name: Golden Path Smoke Test
     runs-on: ubuntu-latest
@@ -276,6 +285,7 @@ jobs:
         with:
           node-version: "20"
           cache: pnpm
+      - uses: grafana/setup-k6-action@98db1bcacc2d06234a3cade8629ebc97e0130ec2 # v1
 
       - name: Bootstrap and smoke test
         run: |
@@ -285,8 +295,12 @@ jobs:
           echo "=== Starting Services ==="
           make up || echo "Service startup skipped (Docker may not be available)"
 
-          echo "=== Smoke Test ==="
+          echo "=== Smoke Test (Curl) ==="
           make smoke || echo "Smoke test skipped (services may not be running)"
+
+          echo "=== Smoke Test (k6) ==="
+          export TARGET=http://localhost:8080
+          make k6 || echo "k6 smoke failed"
 
           echo "=== Cleanup ==="
           make down || true
@@ -382,6 +396,7 @@ jobs:
       - verification-suite
       - deterministic-build
       - governance-docs-integrity
+      - policy-sim
       - golden-path
       - soc-control-verification
       - branch-protection-drift
@@ -397,6 +412,7 @@ jobs:
           echo "Verification Suite: ${{ needs.verification-suite.result }}"
           echo "Deterministic Build: ${{ needs.deterministic-build.result }}"
           echo "Governance / Docs Integrity: ${{ needs.governance-docs-integrity.result }}"
+          echo "Policy Sim: ${{ needs.policy-sim.result }}"
           echo "Golden Path: ${{ needs.golden-path.result }}"
           echo "SOC Control Verification: ${{ needs.soc-control-verification.result }}"
           echo "Branch Protection Drift: ${{ needs.branch-protection-drift.result }}"
@@ -438,6 +454,11 @@ jobs:
             exit 1
           fi
 
+          if [[ "${{ needs.policy-sim.result }}" != "success" ]]; then
+            echo "::error::OPA Policy Simulation FAILED"
+            exit 1
+          fi
+
           if [[ "${{ needs.golden-path.result }}" != "success" ]]; then
             echo "::error::Golden Path FAILED"
             exit 1
@@ -469,6 +490,7 @@ jobs:
           echo "- ✅ Verification Suite" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Deterministic Build" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Governance / Docs Integrity" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ OPA Policy Simulation" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Golden Path Smoke Test" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ SOC Control Verification" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Governance / Branch Protection Drift" >> $GITHUB_STEP_SUMMARY

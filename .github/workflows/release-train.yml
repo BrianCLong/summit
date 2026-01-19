@@ -2,6 +2,9 @@ name: Release Train
 
 on:
   workflow_dispatch:
+  # Weekly cut -> staging (Monday 09:00 UTC)
+  schedule:
+    - cron: '0 9 * * 1'
   pull_request:
     types: [opened, synchronize, reopened]
 
