@@ -28,7 +28,7 @@ const config: Config = {
       '<rootDir>/src/provenance-integrity-gateway/__tests__/ProvenanceIntegrityGateway.test.ts',
     ]
     : [
-      '<rootDir>/tests/**/*.test.ts',
+      '<rootDir>/tests/unit/**/*.test.ts', // Only specific unit tests in tests/ folder if any
       '<rootDir>/src/tests/**/*.test.ts',
       '<rootDir>/src/**/__tests__/**/*.test.ts',
     ],
@@ -106,6 +106,8 @@ const config: Config = {
     '.*services/CIBDetectionService(\\.js)?$': '<rootDir>/tests/mocks/cib-detection-service.ts',
     '.*db/redis(\\.js)?$': '<rootDir>/tests/mocks/db-redis.ts',
     '.*graph/neo4j(\\.js)?$': '<rootDir>/tests/mocks/graph-neo4j.ts',
+    '.*middleware/auth(\\.js)?$': '<rootDir>/tests/mocks/auth.ts',
+    '.*ingestion/QueueService(\\.js)?$': '<rootDir>/tests/mocks/queue-service.ts',
     '.*auth/multi-tenant-rbac(\\.js)?$': '<rootDir>/tests/mocks/multi-tenant-rbac.ts',
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',

@@ -1,36 +1,12 @@
 
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll } from '@jest/globals';
 import request from 'supertest';
 import express from 'express';
+// Static imports work because they are now globally mocked via moduleNameMapper
 import ingestionRouter from '../../routes/ingestion';
 import { BackpressureGuard } from '../guard';
 
-// Mock dependencies
-jest.mock('../../middleware/auth', () => ({
-  ensureAuthenticated: (req: any, res: any, next: any) => {
-    req.user = { tenantId: 'test-tenant' };
-    next();
-  },
-}));
-
-jest.mock('../../ingestion/QueueService', () => {
-  return {
-    QueueService: jest.fn().mockImplementation(() => ({
-      enqueueIngestion: jest.fn().mockResolvedValue('job-123'),
-      getJobStatus: jest.fn(),
-    })),
-  };
-});
-
-// Mock database pool
-jest.mock('pg', () => {
-  return {
-    Pool: jest.fn().mockImplementation(() => ({
-      connect: jest.fn(),
-      query: jest.fn(),
-    })),
-  };
-});
+// NO LOCAL MOCKS NEEDED - handled by jest.config.ts moduleNameMapper
 
 describe('Ingestion Route Backpressure', () => {
   let app: express.Express;
@@ -86,6 +62,7 @@ describe('Ingestion Route Backpressure', () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
+      // The mocked QueueService returns job-123
       jobId: 'job-123',
       status: 'queued'
     });

@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "config:validate": "ts-node scripts/validate-config.ts",
     "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest --config jest.config.ts",
+    "test:e2e": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest --config jest.e2e.config.ts",
     "test:watch": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest --config jest.config.ts --watch",
     "test:coverage": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest --config jest.config.ts --coverage",
     "test:ci": "node scripts/run-jest.mjs --coverage --reporters=default --reporters=jest-junit",
