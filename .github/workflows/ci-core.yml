@@ -18,7 +18,6 @@ on:
       # - scripts/**, tools/**, Dockerfile (build/test/infra changes must trigger this)
   push:
     branches: [main]
-    paths-ignore:
   merge_group:
 
 concurrency:
