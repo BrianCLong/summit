@@ -189,6 +189,33 @@ jobs:
           path: provenance.json
           retention-days: 90 # 2 years retention
 
+      - name: Prepare evidence directory
+        run: |
+          mkdir -p evidence
+          [ -f provenance.json ] && cp provenance.json evidence/
+          [ -f sbom.json ] && cp sbom.json evidence/sbom.cdx.json || true
+
+      - name: Generate Evidence Index (deterministic)
+        run: |
+          node scripts/release/generate_evidence_index.mjs \
+            --evidence-dir evidence \
+            --provenance evidence/provenance.json \
+            --outjson evidence/evidence-index.json \
+            --outmd evidence/EVIDENCE_INDEX.md
+
+      - name: Create deterministic evidence tarball
+        run: |
+          tar --sort=name \
+              --mtime='UTC 1970-01-01' \
+              --owner=0 --group=0 --numeric-owner \
+              -czf evidence/evidence-bundle.tgz evidence
+
+      - name: Upload evidence bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-evidence-bundle
+          path: evidence
+
   schema-validation:
     name: Schema Validation
     runs-on: ubuntu-latest
