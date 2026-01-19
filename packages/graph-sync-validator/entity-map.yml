@@ -1,0 +1,14 @@
+entities:
+  User:
+    pk: user_id
+    labels: ["User"]
+    props: [email, status, created_at]
+    edges:
+      - rel: OWNS
+        to: Org
+        from_pk: org_id
+        direction: OUT
+  Org:
+    pk: org_id
+    labels: ["Org"]
+    props: [name, tier]

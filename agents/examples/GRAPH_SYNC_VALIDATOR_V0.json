@@ -1,0 +1,40 @@
+{
+  "task_id": "GRAPH_SYNC_VALIDATOR_V0",
+  "agent_id": "GPT-5.2-Codex",
+  "prompt_ref": {
+    "id": "graph-sync-validator-v0",
+    "version": "v1",
+    "sha256": "5668e8c4e0b0c17e9321e23a31d44fcad0542fc3c4d3222e36a3bd0b0a77a7b8",
+    "path": "prompts/graph-sync-validator/v0-scaffold.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/graph-sync-validator/",
+      ".github/workflows/graph-parity.yml",
+      "docs/roadmap/STATUS.json",
+      "prompts/graph-sync-validator/v0-scaffold.md",
+      "prompts/registry.yaml",
+      "agents/examples/GRAPH_SYNC_VALIDATOR_V0.json"
+    ],
+    "domains": ["graph-integrity", "governance", "ci", "testing", "tooling"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["scripts/check-boundaries.cjs output"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Graph sync validator package builds and exposes CLI entrypoints.",
+    "Parity workflow emits artifacts and gates on threshold.",
+    "Roadmap status updated with revision note."
+  ],
+  "stop_conditions": [
+    "CI failure in main.",
+    "Detection of PII in output.",
+    "Sandbox violation alert."
+  ]
+}
