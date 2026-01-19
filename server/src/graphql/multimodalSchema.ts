@@ -582,4 +582,4 @@ const multimodalTypeDefs = gql`
   }
 `;
 
-module.exports = { multimodalTypeDefs };
+export { multimodalTypeDefs };

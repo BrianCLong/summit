@@ -133,4 +133,4 @@ const gnnTypes = gql`
   }
 `;
 
-module.exports = gnnTypes;
+export default gnnTypes;

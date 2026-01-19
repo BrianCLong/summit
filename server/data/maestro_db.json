@@ -41,10 +41,7 @@
       "name": "Planner Agent V2",
       "hypothesis": "New prompt structure reduces planning latency by 15%",
       "status": "running",
-      "variants": [
-        "control",
-        "v2-prompt"
-      ],
+      "variants": ["control", "v2-prompt"],
       "metrics": {
         "latency": -12,
         "successRate": 2
@@ -57,12 +54,8 @@
       "id": "pb-restart-pods",
       "name": "Restart Stuck Pods",
       "description": "Automatically restarts pods that are in CrashLoopBackOff for > 10m",
-      "triggers": [
-        "pod_crash_loop"
-      ],
-      "actions": [
-        "k8s.delete_pod"
-      ],
+      "triggers": ["pod_crash_loop"],
+      "actions": ["k8s.delete_pod"],
       "isEnabled": true
     }
   ],
@@ -163,6 +156,15 @@
       "actor": "agent-1",
       "action": "coordination_start",
       "resource": "5a468ee6-89b5-4b15-af74-edcb8b48c939",
+      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
+      "status": "allowed"
+    },
+    {
+      "id": "xchma9",
+      "timestamp": "2026-01-19T00:40:49.139Z",
+      "actor": "agent-1",
+      "action": "coordination_start",
+      "resource": "e58a7434-c7dc-4b76-84f3-a40da0074491",
       "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
       "status": "allowed"
     }
