@@ -1,0 +1,32 @@
+name: Lineage & Provenance CI
+
+on:
+  pull_request:
+    branches: [ main, master ]
+  push:
+    branches: [ main, master ]
+
+jobs:
+  validate-lineage:
+    name: Validate Lineage & PROV
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install -g ajv-cli
+
+      - name: Verify Migration Lineage
+        # Fails if a migration file is present but no corresponding lineage event/def is found.
+        # This is a placeholder for the actual logic in the script.
+        run: node scripts/lineage/verify_migration_lineage.mjs
+
+      - name: Validate PROV Profile
+        # Validates generated PROV-O JSON-LD artifacts against the schema/profile.
+        run: node scripts/lineage/validate_prov_profile.mjs

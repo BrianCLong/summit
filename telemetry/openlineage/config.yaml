@@ -1,0 +1,4 @@
+transport:
+  type: http
+  url: http://localhost:5000
+namespace: intelgraph
