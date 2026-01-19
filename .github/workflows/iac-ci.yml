@@ -1,0 +1,51 @@
+name: IaC Validation
+
+on:
+  pull_request:
+    paths:
+      - 'terraform/**'
+      - 'infra/**'
+
+env:
+  AWS_REGION: us-east-1
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  validate-and-plan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-deploy-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      - name: Install tfsec
+        run: |
+          curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+
+      - name: Run tfsec
+        run: tfsec . --config-file infra/policies/tfsec.yaml
+
+      - name: Terraform Init (Prod)
+        working-directory: terraform/environments/prod
+        run: terraform init
+
+      - name: Terraform Validate (Prod)
+        working-directory: terraform/environments/prod
+        run: terraform validate
+
+      - name: Terraform Plan (Prod)
+        working-directory: terraform/environments/prod
+        run: terraform plan -no-color

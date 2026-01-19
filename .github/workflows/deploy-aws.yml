@@ -83,15 +83,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-deploy-role
+          aws-region: ${{ env.AWS_REGION }}
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+
+      - name: Install tfsec
+        run: |
+          curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+
+      - name: Run tfsec
+        run: tfsec . --config-file infra/policies/tfsec.yaml
 
       - name: Terraform Apply
         working-directory: terraform/environments/prod
         run: |
           terraform init
-          terraform apply -auto-approve
+          terraform plan -out=tfplan
+          terraform apply -auto-approve tfplan
 
   deploy-k8s:
     needs: deploy-infra
