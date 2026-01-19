@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-19T17:05:04Z",
+  "revision_note": "Added narrative engineering and counter-campaign epics with schema and copilot scope",
   "initiatives": [
     {
       "id": "A",
@@ -136,14 +136,56 @@
           "target_completion": "Q4"
         }
       ]
+    },
+    {
+      "id": "F",
+      "name": "Narrative Engineering & Counter-Campaign Design",
+      "epics": [
+        {
+          "id": "F1",
+          "name": "Narrative Structure Graph Layer",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Epic definition and schema scope captured in docs/narrative/narrative-engineering-counter-campaign-epics.md",
+          "blockers": [
+            "Finalize narrative ontology alignment with schema governance",
+            "Define story-element taxonomy in policy-as-code"
+          ],
+          "target_completion": "Sprint N+3"
+        },
+        {
+          "id": "F2",
+          "name": "Doctrine-Aware Playbooks",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Epic definition and policy gates captured in docs/narrative/narrative-engineering-counter-campaign-epics.md",
+          "blockers": [
+            "Codify doctrine authority references as policy-as-code",
+            "Define message constraint schema"
+          ],
+          "target_completion": "Sprint N+3"
+        },
+        {
+          "id": "F3",
+          "name": "Counter-Campaign Templates & Simulation Workbench",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Epic definition and simulation scope captured in docs/narrative/narrative-engineering-counter-campaign-epics.md",
+          "blockers": [
+            "Define effect metric calibration standards",
+            "Implement simulation run provenance logging"
+          ],
+          "target_completion": "Sprint N+4"
+        }
+      ]
     }
   ],
   "summary": {
     "rc_ready": 5,
     "partial": 1,
     "incomplete": 0,
-    "not_started": 6,
-    "total": 12,
+    "not_started": 9,
+    "total": 15,
     "ga_blockers": []
   }
 }

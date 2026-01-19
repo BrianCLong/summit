@@ -55,6 +55,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: narrative-engineering-epics
+    version: v1
+    path: prompts/docs/narrative-engineering-epics@v1.md
+    sha256: 25f33e48e9fd539aa8a7e65660c47eea99c98ab2b21b745b635b50f576ff1fbd
+    description: Define narrative engineering epics with schema, GraphQL, and copilot chains.
+    scope:
+      paths:
+        - docs/narrative/
+        - docs/roadmap/STATUS.json
+        - prompts/docs/narrative-engineering-epics@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - roadmap
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
