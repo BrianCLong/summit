@@ -1,0 +1,53 @@
+name: "Verify Build + Signatures"
+
+on:
+  workflow_run:
+    workflows: [ "Build + Prove + Sign" ]
+    types: [ completed ]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: supply-chain-evidence
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Supply Chain Tools
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.5.0
+
+      - name: Verify Signatures
+        run: |
+          if [ -n "${{ secrets.COSIGN_PUB_KEY }}" ]; then
+            echo "${{ secrets.COSIGN_PUB_KEY }}" > cosign.pub
+            # Verify all signed files in build/
+            find build/ -type f -name "*.sig" | while read sig; do
+              f="${sig%.sig}"
+              echo "Verifying $f..."
+              cosign verify-blob --key cosign.pub --signature "$sig" "$f"
+            done
+            # Verify provenance
+            if [ -f ".slsa/provenance.link.sig" ]; then
+              cosign verify-blob --key cosign.pub --signature .slsa/provenance.link.sig .slsa/provenance.link
+            fi
+            rm cosign.pub
+          else
+            echo "COSIGN_PUB_KEY not set, skipping verification"
+          fi
+
+      - name: Validate SBOMs
+        run: |
+          # Use syft to check if SBOMs are readable
+          syft sbom:build/sbom/sbom.spdx.json
+          syft sbom:build/sbom/sbom.cdx.json

@@ -1,0 +1,4 @@
+provenance:
+  sbom_spdx: "build/sbom/sbom.spdx.json"
+  sbom_cyclonedx: "build/sbom/sbom.cdx.json"
+  provenance: ".slsa/provenance.link"

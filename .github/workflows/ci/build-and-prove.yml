@@ -1,0 +1,112 @@
+name: "Build + Prove + Sign"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Build Artifact + SBOMs + Attestations
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout Source
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20.x"
+        cache: "pnpm"
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install Dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Install Supply Chain Tools
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+        pip install in-toto
+
+    - name: Install cosign
+      uses: sigstore/cosign-installer@v3.5.0
+
+    - name: Build and Prove
+      run: |
+        if [ -n "${{ secrets.IN_TOTO_SIGNING_KEY }}" ]; then
+          echo "${{ secrets.IN_TOTO_SIGNING_KEY }}" > in-toto.key
+          in-toto-run --step-name build --products build/ --materials . --key in-toto.key -- pnpm run build
+          mkdir -p .slsa
+          mv build.link .slsa/provenance.link
+          rm in-toto.key
+        else
+          echo "IN_TOTO_SIGNING_KEY not set, running build without in-toto"
+          pnpm run build
+        fi
+
+    - name: Verify Reproducibility
+      run: |
+        chmod +x scripts/ci/run-repro-build.sh
+        ./scripts/ci/run-repro-build.sh
+
+    - name: Generate SBOMs
+      run: |
+        mkdir -p build/sbom
+        syft . --scope all-layers -o spdx-json=./build/sbom/sbom.spdx.json
+        syft . --scope all-layers -o cyclonedx-json=./build/sbom/sbom.cdx.json
+
+    - name: Sign Artifacts
+      run: |
+        if [ -n "${{ secrets.COSIGN_KEY }}" ]; then
+          echo "${{ secrets.COSIGN_KEY }}" > cosign.key
+          find build/ -type f | while read f; do
+            cosign sign-blob --key cosign.key --output-signature "$f.sig" "$f"
+          done
+          cosign sign-blob --key cosign.key --output-signature .slsa/provenance.link.sig .slsa/provenance.link
+          rm cosign.key
+        else
+          echo "COSIGN_KEY not set, skipping signing"
+        fi
+
+    - name: Upload Evidence Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: supply-chain-evidence
+        path: |
+          build/
+          .slsa/
+
+  policy-enforcement:
+    name: OPA Policy Check
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: supply-chain-evidence
+
+      - name: Run Policy Check
+        uses: open-policy-agent/conftest-action@v2
+        with:
+          policy: ./policy
+          files: |
+            build/sbom/sbom.spdx.json
+            build/sbom/sbom.cdx.json
+            .slsa/provenance.link
