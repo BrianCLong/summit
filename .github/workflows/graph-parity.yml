@@ -1,0 +1,56 @@
+name: graph-parity
+
+on:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 7 * * *"
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      NODE_ENV: test
+      GRAPH_ENTITY_MAP: packages/graph-sync-validator/entity-map.yml
+      GRAPH_SYNC_OUTPUT: "junit,jsonl,text"
+      GRAPH_PARITY_THRESHOLD: "0.999"
+      GRAPH_SYNC_BATCH: "1000"
+      PG_DSN: ${{ secrets.PG_DSN_READONLY }}
+      NEO4J_URI: ${{ secrets.NEO4J_URI_READONLY }}
+      NEO4J_USER: ${{ secrets.NEO4J_USER_READONLY }}
+      NEO4J_PASS: ${{ secrets.NEO4J_PASS_READONLY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build graph-sync-validator
+        run: pnpm -C packages/graph-sync-validator build
+
+      - name: Graph parity audit (read-only)
+        run: pnpm -C packages/graph-sync-validator graph-sync:audit --outdir artifacts/graph-parity/${{ github.sha }} --output junit,jsonl,text
+
+      - name: Evidence stamp (GA Evidence Map)
+        run: |
+          mkdir -p artifacts/graph-parity/${{ github.sha }}
+          node -e "const fs=require('fs'); fs.writeFileSync('artifacts/graph-parity/${{ github.sha }}/stamp.json', JSON.stringify({ sha: '${{ github.sha }}', ts: new Date().toISOString(), threshold: process.env.GRAPH_PARITY_THRESHOLD }, null, 2));"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: graph-parity-${{ github.sha }}
+          path: artifacts/graph-parity/${{ github.sha }}

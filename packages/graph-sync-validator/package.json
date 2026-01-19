@@ -1,0 +1,32 @@
+{
+  "name": "@summit/graph-sync-validator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "graph-sync-audit": "bin/graph-sync-audit.mjs",
+    "graph-sync-repair": "bin/graph-sync-repair.mjs",
+    "graph-sync-reconcile": "bin/graph-sync-reconcile.mjs"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "graph-sync:audit": "node bin/graph-sync-audit.mjs",
+    "graph-sync:repair": "node bin/graph-sync-repair.mjs",
+    "graph-sync:reconcile:full": "node bin/graph-sync-reconcile.mjs"
+  },
+  "dependencies": {
+    "neo4j-driver": "^5.27.0",
+    "pg": "^8.11.5",
+    "pino": "^9.4.0",
+    "prom-client": "^15.1.3",
+    "yaml": "^2.4.5",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.3"
+  }
+}
