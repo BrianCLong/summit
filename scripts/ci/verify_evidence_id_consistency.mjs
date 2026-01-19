@@ -7,9 +7,12 @@
 
 import { createHash } from 'node:crypto';
 import { existsSync, promises as fs } from 'node:fs';
-import { dirname, join, resolve, relative } from 'node:path';
+import { dirname, join, resolve, relative, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
+
+// Import canonical serializer for deterministic output
+import { canonicalJsonStringify } from './lib/canonical-serializer.mjs';
 
 // Debug logging utility
 const DEBUG = process.env.EVIDENCE_DEBUG === 'true' || process.argv.includes('--debug');
@@ -35,52 +38,43 @@ function compareStringsCodepoint(a, b) {
   return a < b ? -1 : 1;
 }
 
+
 /**
- * Canonical JSON serialization to ensure deterministic output
- * Recursively sorts object keys and avoids nondeterministic ordering
+ * Write file atomically using temp file + rename pattern (cross-platform safe)
  */
-function canonicalJsonStringify(obj) {
-  if (obj === null) return 'null';
+async function writeAtomic(filePath, content, encoding = 'utf8') {
+  const dir = dirname(filePath);
+  await fs.mkdir(dir, { recursive: true }); // Ensure directory exists
+  const fileName = basename(filePath);
+  const tmpPath = join(dir, `.${fileName}.${process.pid}.${Date.now()}.tmp`);
 
-  if (Array.isArray(obj)) {
-    // Serialize array elements with canonical serialization
-    return '[' + obj.map(canonicalJsonStringify).join(',') + ']';
-  }
+  try {
+    // Write to temporary file first
+    await fs.writeFile(tmpPath, content, encoding);
 
-  if (typeof obj === 'object') {
-    // Sort keys deterministically using codepoint comparison
-    const sorted = {};
-    const keys = Object.keys(obj).sort(compareStringsCodepoint);
-    for (const key of keys) {
-      sorted[key] = canonicalJsonStringify(obj[key]);
+    // Atomic rename (safe cross-platform operation)
+    try {
+      await fs.rename(tmpPath, filePath);
+    } catch (renameErr) {
+      // Handle Windows-specific rename failures
+      if (renameErr.code === 'EEXIST' || renameErr.code === 'EPERM') {
+        await fs.unlink(filePath).catch(() => {}); // Remove existing file
+        await fs.rename(tmpPath, filePath);        // Then rename
+      } else if (renameErr.code === 'EXDEV') {
+        // Cross-device rename fallback
+        await fs.copyFile(tmpPath, filePath);
+        await fs.unlink(tmpPath);
+      } else {
+        // Clean up and rethrow original error
+        await fs.unlink(tmpPath).catch(() => {});
+        throw renameErr;
+      }
     }
-
-    const pairs = keys.map(key => {
-      const valueStr = canonicalJsonStringify(obj[key]);
-      return `"${escapeJsonString(key)}":${valueStr}`;
-    });
-    return '{' + pairs.join(',') + '}';
+  } catch (error) {
+    // Clean up temp file if write fails
+    await fs.unlink(tmpPath).catch(() => {});
+    throw error;
   }
-
-  // For primitive types, use standard JSON serialization
-  return JSON.stringify(obj);
-}
-
-/**
- * Escape string for JSON serialization
- */
-function escapeJsonString(str) {
-  if (typeof str !== 'string') {
-    str = String(str);
-  }
-  return str
-    .replace(/[\\]/g, '\\\\')
-    .replace(/["]/g, '\\"')
-    .replace(/[\b]/g, '\\b')
-    .replace(/[\f]/g, '\\f')
-    .replace(/[\n]/g, '\\n')
-    .replace(/[\r]/g, '\\r')
-    .replace(/[\t]/g, '\\t');
 }
 
 /**
@@ -531,11 +525,11 @@ async function writeReports(report, outputPath) {
   // Ensure output directory exists
   await fs.mkdir(outputPath, { recursive: true });
   
-  // Write JSON report with canonical serialization for deterministic output
+  // Write JSON report with canonical serialization for deterministic output and atomic replacement
   const canonicalReport = canonicalJsonStringify(report);
-  await fs.writeFile(jsonPath, canonicalReport, 'utf8');
-  
-  // Write Markdown report
+  await writeAtomic(jsonPath, canonicalReport, 'utf8');
+
+  // Write Markdown report with atomic replacement
   let mdContent = `# Evidence ID Consistency Report\n\n`;
   mdContent += `Status: ${report.status.toUpperCase()}\n\n`;
 
@@ -591,21 +585,12 @@ async function writeReports(report, outputPath) {
       (!report.metadata.orphaned_ids || report.metadata.orphaned_ids.length === 0)) {
     mdContent += `✅ No issues detected!\n`;
   }
-  
-  await fs.writeFile(mdPath, mdContent, 'utf8');
-  
-  // Write stamp file for tracking with performance metrics
-  const stamp = {
-    sha: report.sha,
-    status: report.status,
-    timestamp: new Date().toISOString(),  // Runtime timestamp goes in stamp, not report
-    generator: report.generator,
-    violations: report.totals.violations
-  };
 
-  // Use canonical serialization for stamp.json too, but allow timestamps since it's runtime metadata
-  const canonicalStamp = canonicalJsonStringify(stamp);
-  await fs.writeFile(stampPath, canonicalStamp, 'utf8');
+  await writeAtomic(mdPath, mdContent, 'utf8');
+
+  // DO NOT write stamp.json here - that's main()'s responsibility to prevent duplicate writing
+  // writeReports only handles deterministic artifacts: report.json, report.md
+  // This maintains the single-writer contract for stamp.json
 }
 
 /**
@@ -784,12 +769,12 @@ async function main() {
       }
     };
 
-    // Write deterministic metrics with canonical serialization
+    // Write deterministic metrics with canonical serialization and atomic replacement
     const metricsPath = join(outputDir, 'metrics.json');
     const canonicalMetrics = canonicalJsonStringify(metrics);
-    await fs.writeFile(metricsPath, canonicalMetrics, 'utf8');
+    await writeAtomic(metricsPath, canonicalMetrics, 'utf8');
 
-    // Create runtime stamp with performance metrics and timestamps
+    // Create runtime stamp with performance metrics and timestamps (atomic replacement)
     const stamp = {
       sha: report.sha,
       status: report.status,
@@ -810,7 +795,7 @@ async function main() {
     const stampPath = join(outputDir, 'stamp.json');
     // Use canonical serialization for stamp.json too, but allow timestamps since it's runtime metadata
     const canonicalStamp = canonicalJsonStringify(stamp);
-    await fs.writeFile(stampPath, canonicalStamp, 'utf8');
+    await writeAtomic(stampPath, canonicalStamp, 'utf8');
 
 
     console.log(`\nEvidence ID Consistency Report:`);
