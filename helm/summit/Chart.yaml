@@ -1,11 +1,12 @@
 apiVersion: v2
 name: summit
-description: Summit (formerly IntelGraph) - Comprehensive Deployment
+description: The Summit Intelligence Platform (IntelGraph + Maestro)
+
+# GA Release v4.1.4
+version: 4.1.4
+appVersion: "4.1.4"
+
 type: application
-version: 0.2.0
-appVersion: '1.0.0'
-aliases:
-  - intelgraph
 
 dependencies:
   - name: server
