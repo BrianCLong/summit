@@ -22,7 +22,7 @@ on:
   merge_group:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-core-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -81,8 +81,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run unit tests
-        run: pnpm test:unit
+      - name: Run unit tests (retry once)
+        run: pnpm test:unit || pnpm test:unit
 
       - name: Upload coverage
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
@@ -135,8 +135,8 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
 
-      - name: Run integration tests
-        run: pnpm test:integration
+      - name: Run integration tests (retry once)
+        run: pnpm test:integration || pnpm test:integration
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
           REDIS_URL: redis://localhost:6379

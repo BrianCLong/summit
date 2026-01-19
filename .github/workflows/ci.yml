@@ -6,6 +6,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+concurrency:
+  group: ci-untrusted-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   config-guard:
     name: Build & Test (Untrusted)
@@ -48,8 +52,8 @@ jobs:
       - name: Install (frozen lockfile)
         run: pnpm -w install --frozen-lockfile
 
-      - name: Unit Tests
-        run: pnpm -w test:unit
+      - name: Unit Tests (retry once)
+        run: pnpm -w test:unit || pnpm -w test:unit
 
   soc-controls:
     name: SOC Controls

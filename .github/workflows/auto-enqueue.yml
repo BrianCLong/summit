@@ -1,0 +1,89 @@
+name: Auto Enqueue Merge Queue
+
+on:
+  pull_request:
+    types: [labeled, synchronize, reopened, ready_for_review]
+  pull_request_review:
+    types: [submitted]
+  check_suite:
+    types: [completed]
+
+permissions:
+  pull-requests: write
+  contents: read
+  checks: read
+
+jobs:
+  enqueue:
+    # Run if it's a PR event OR a completed check_suite
+    if: >
+      github.event_name == 'pull_request' ||
+      github.event_name == 'pull_request_review' ||
+      (github.event_name == 'check_suite' && github.event.check_suite.conclusion == 'success')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enqueue if ready
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          # PR_NUMBER is only available for pull_request events directly
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          PR_NUMBERS=""
+
+          if [ "$EVENT_NAME" == "check_suite" ]; then
+             # Extract PR numbers from check_suite payload using jq
+             # check_suite.pull_requests is an array of objects { number: 123, ... }
+             # Note: GITHUB_EVENT_PATH contains the full json payload
+             PR_NUMBERS=$(jq -r '.check_suite.pull_requests[].number' "$GITHUB_EVENT_PATH")
+          else
+             # For pull_request and pull_request_review, use the context directly
+             PR_NUMBERS="$PR_NUMBER"
+          fi
+
+          # If PR_NUMBERS is "null" or empty, exit
+          if [ "$PR_NUMBERS" == "null" ] || [ -z "$PR_NUMBERS" ]; then
+            echo "No PRs associated with this event."
+            exit 0
+          fi
+
+          for pr in $PR_NUMBERS; do
+            echo "Processing PR #$pr..."
+
+            # Fetch details
+            # We want to check:
+            # 1. Label queue:ready
+            # 2. Approved reviews >= 1
+            # 3. Status checks are passing
+
+            json=$(gh pr view $pr --json labels,reviews --jq '{labels: [.labels[].name], approvals: [.reviews[] | select(.state=="APPROVED") ] | length}')
+
+            labels=$(echo "$json" | jq -r '.labels[]')
+            approvals=$(echo "$json" | jq -r '.approvals')
+
+            # Check required checks status.
+            # We look for any required check that is NOT SUCCESS.
+            # If the list is empty, it means all required checks passed (or there are none).
+            checks_status=$(gh pr checks $pr --required --json state --jq 'map(select(.state != "SUCCESS")) | length')
+
+            is_ready=false
+            if echo "$labels" | grep -q "queue:ready"; then
+              if [ "$approvals" -ge 1 ]; then
+                 if [ "$checks_status" -eq 0 ]; then
+                    is_ready=true
+                 else
+                    echo "PR #$pr has failing or pending checks."
+                 fi
+              else
+                 echo "PR #$pr needs approval."
+              fi
+            else
+              echo "PR #$pr missing queue:ready label."
+            fi
+
+            if [ "$is_ready" == "true" ]; then
+              echo "Enqueuing PR #$pr"
+              gh api repos/${{ github.repository }}/pulls/$pr/merge-queue/enqueue \
+                -f merge_method=squash || echo "Failed to enqueue (maybe already in queue or conflicts)"
+            fi
+          done

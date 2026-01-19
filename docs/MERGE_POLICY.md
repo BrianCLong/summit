@@ -2,6 +2,12 @@
 
 To maintain high throughput and minimize conflicts, **Summit** enforces the following merge hygiene rules.
 
+> **Team Operating Policy:**
+> *   All changes to `main` must land via the merge queue.
+> *   Required checks: build, test, lint, security.
+> *   Approved, CI-green PRs are labeled `queue:ready`.
+> *   No direct merges. No bypasses.
+
 ## The Happy Path (PR -> Merge)
 
 1.  **Open PR:**
@@ -13,8 +19,10 @@ To maintain high throughput and minimize conflicts, **Summit** enforces the foll
 3.  **Review:**
     *   Code Owners review boundary-crossing changes.
     *   Agents verify scope compliance.
-4.  **Merge:**
-    *   Use **Squash and Merge** to maintain a linear history.
+    *   **Approval required** (minimum 1).
+4.  **Enqueue:**
+    *   Apply the `queue:ready` label.
+    *   The **Merge Train** will pick it up, test it with the latest `main`, and merge it automatically.
 
 ## Merge Ordering Rules
 
@@ -34,7 +42,7 @@ When multiple PRs are open, prioritize:
     # Resolve conflicts
     git push --force-with-lease
     ```
-*   **Merge Queue:** The repository uses a Merge Queue (configured in `.github/workflows/merge-queue-config.yml`). Use it to serialize merges during high traffic.
+*   **Merge Queue:** The repository uses a Merge Queue (configured in `.github/workflows/auto-enqueue.yml`). Use it to serialize merges during high traffic.
 
 ## Anti-Patterns
 
