@@ -12,12 +12,10 @@ echo "🛡️ Setting up branch protection for $REPO:$BRANCH"
 
 # Required status checks based on our workflows
 REQUIRED_CHECKS=(
-  "🔍 PR Validation"
-  "🚢 Release Captain"
-  "🔍 CodeQL Analysis"
-  "🏆 Golden PR Tests"
-  "🛡️ Full Validation Suite"
-  "📋 Policy Validation"
+  "Release Readiness Gate"
+  "GA Readiness Gate"
+  "CI Core Gate ✅"
+  "test (20.x)"
 )
 
 echo "📋 Required status checks:"
