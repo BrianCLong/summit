@@ -10,6 +10,10 @@ The unified intelligence analysis platform with AI-augmented graph analytics.
 | **Staging** | 🟡 Provisioned | Manual Promotion | AWS EKS |
 | **Dev** | 🔵 Active | Auto-Deploy on Merge | AWS EKS |
 
+## 🛡️ Governance & Quality
+
+![Fresh Evidence Rate (7d)](https://img.shields.io/endpoint?url=https://<your-endpoint>/fresh-evidence-rate.json)
+
 ## 📚 Documentation
 
 *   **[Infrastructure & Operations](infra/README.md):** The central hub for all DevOps tasks.

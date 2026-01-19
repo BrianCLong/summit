@@ -1,0 +1,74 @@
+name: Fresh Evidence Rate
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  compute:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch last 7d main runs
+        id: fetch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run list --branch main --created "$(date -u -d '7 days ago' +%Y-%m-%d)" \
+            --json databaseId,headSha,status,conclusion,updatedAt \
+            --limit 200 \
+            > runs.json
+      - name: Download summaries for each run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p .rate/summaries
+          jq -c '.[]' runs.json | while read -r r; do
+            id=$(echo "$r" | jq -r '.databaseId')
+            headSha=$(echo "$r" | jq -r '.headSha')
+
+            # Try to download artifact from the run
+            if gh run download "$id" -n "ga-evidence-index-$headSha" --dir ".rate/$id" 2>/dev/null; then
+               :
+            else
+               # Fallback or retry if needed, but current pattern matches ci-verify.yml
+               true
+            fi
+
+            summary_file=$(find ".rate/$id" -name summary.json -print -quit)
+            if [ -n "$summary_file" ]; then
+              cp "$summary_file" ".rate/summaries/$id.json"
+            fi
+          done
+      - name: Compute numerator/denominator
+        id: calc
+        run: |
+          # Denominator: Runs where the summary artifact was successfully downloaded.
+          # This implies the run reached the evidence generation stage.
+          den=$(ls .rate/summaries/*.json 2>/dev/null | wc -l | xargs)
+
+          # Numerator: Runs with valid fresh evidence.
+          num=0
+          for f in .rate/summaries/*.json; do
+            [ -e "$f" ] || continue
+            if bash scripts/ci/verify_fresh_evidence.sh "$f"; then num=$((num+1)); fi
+          done
+
+          rate=0
+          if [ "$den" -gt 0 ]; then rate=$(( 100 * num / den )); fi
+
+          printf '{"num":%s,"den":%s,"rate":%s}\n' "$num" "$den" "$rate" > .rate/result.json
+
+      - name: Upload metric artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fresh-evidence-rate
+          path: .rate/result.json
+      - name: Emit badge json
+        run: |
+          jq -r '.rate' .rate/result.json > .rate/rate.txt

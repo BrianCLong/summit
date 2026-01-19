@@ -283,6 +283,12 @@ jobs:
           node scripts/evidence/generate_control_evidence_index.mjs --evidence-dir "$EVIDENCE_DIR"
           node scripts/evidence/validate_control_evidence.mjs --evidence-dir "$EVIDENCE_DIR"
 
+      - name: Emit evidence summary
+        if: always()
+        run: |
+          export EVIDENCE_DIR="dist/evidence/${GITHUB_SHA}"
+          node scripts/ci/emit_evidence_summary.mjs
+
       - name: Upload evidence index
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
@@ -291,6 +297,7 @@ jobs:
           path: |
             dist/evidence/${{ github.sha }}/control_evidence_index.json
             dist/evidence/${{ github.sha }}/validation_report.json
+            dist/evidence/${{ github.sha }}/summary.json
           retention-days: 30
 
       - name: Evidence completeness summary
