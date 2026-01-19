@@ -13,68 +13,194 @@ export interface GraphStore {
   deleteEdge(id: string): Promise<boolean>;
 }
 
+// prettier-ignore
 const typeDefs = /* GraphQL */ `
-  scalar DateTime
-  scalar JSON
+scalar DateTime
+scalar JSON
 
-  type Query {
-    node(id: ID!): Node
-    nodes(type: String, status: String, limit: Int): [Node!]!
-    tickets(status: String, priority: String, assignee: String): [Ticket!]!
-    prs(status: String, author: String): [PR!]!
-    agents(status: String): [Agent!]!
-    commitments(status: String): [Commitment!]!
-    sprints(status: String): [Sprint!]!
-    edges(sourceId: ID, targetId: ID, type: String): [Edge!]!
-    healthScore: HealthScore!
-  }
+type Query {
+  node(id: ID!): Node
+  nodes(type: String, status: String, limit: Int): [Node!]!
+  tickets(status: String, priority: String, assignee: String): [Ticket!]!
+  prs(status: String, author: String): [PR!]!
+  agents(status: String): [Agent!]!
+  commitments(status: String): [Commitment!]!
+  sprints(status: String): [Sprint!]!
+  edges(sourceId: ID, targetId: ID, type: String): [Edge!]!
+  healthScore: HealthScore!
+  stats: GraphStats!
+}
 
-  type Mutation {
-    createTicket(input: CreateTicketInput!): Ticket!
-    updateTicket(id: ID!, input: UpdateTicketInput!): Ticket
-    deleteNode(id: ID!): Boolean!
-    assignTicket(ticketId: ID!, assigneeId: ID!): Ticket
-    createEdge(input: CreateEdgeInput!): Edge!
-    deleteEdge(id: ID!): Boolean!
-  }
+type Mutation {
+  createTicket(input: CreateTicketInput!): Ticket!
+  updateTicket(id: ID!, input: UpdateTicketInput!): Ticket
+  deleteNode(id: ID!): Boolean!
+  assignTicket(ticketId: ID!, assigneeId: ID!): Ticket
+  createEdge(input: CreateEdgeInput!): Edge!
+  deleteEdge(id: ID!): Boolean!
+}
 
-  interface Node { id: ID!; type: String!; createdAt: DateTime!; updatedAt: DateTime!; createdBy: String!; metadata: JSON }
+interface Node {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  createdBy: String!
+  metadata: JSON
+}
 
-  type Ticket implements Node {
-    id: ID!; type: String!; createdAt: DateTime!; updatedAt: DateTime!; createdBy: String!; metadata: JSON
-    title: String!; description: String!; status: String!; priority: String!; estimate: Float; assignee: String
-    labels: [String!]!; linearId: String; jiraKey: String; agentEligible: Boolean!; complexity: String!
-  }
+type Ticket implements Node {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  createdBy: String!
+  metadata: JSON
+  title: String!
+  description: String!
+  status: String!
+  priority: String!
+  estimate: Float
+  assignee: String
+  labels: [String!]!
+  linearId: String
+  jiraKey: String
+  agentEligible: Boolean!
+  complexity: String!
+}
 
-  type PR implements Node {
-    id: ID!; type: String!; createdAt: DateTime!; updatedAt: DateTime!; createdBy: String!; metadata: JSON
-    title: String!; description: String!; url: String!; number: Int!; author: String!; authorType: String!
-    status: String!; checksStatus: String!; reviewers: [String!]!; additions: Int!; deletions: Int!; filesChanged: Int!
-  }
+type PR implements Node {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  createdBy: String!
+  metadata: JSON
+  title: String!
+  description: String!
+  url: String!
+  number: Int!
+  author: String!
+  authorType: String!
+  status: String!
+  checksStatus: String!
+  reviewers: [String!]!
+  additions: Int!
+  deletions: Int!
+  filesChanged: Int!
+}
 
-  type Agent implements Node {
-    id: ID!; type: String!; createdAt: DateTime!; updatedAt: DateTime!; createdBy: String!; metadata: JSON
-    name: String!; agentType: String!; status: String!; capabilities: [String!]!; completedTasks: Int!; successRate: Float!; reputation: Float!
-  }
+type Agent implements Node {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  createdBy: String!
+  metadata: JSON
+  name: String!
+  agentType: String!
+  status: String!
+  capabilities: [String!]!
+  completedTasks: Int!
+  successRate: Float!
+  reputation: Float!
+}
 
-  type Commitment implements Node {
-    id: ID!; type: String!; createdAt: DateTime!; updatedAt: DateTime!; createdBy: String!; metadata: JSON
-    title: String!; description: String!; customer: String!; dueDate: DateTime!; status: String!; confidence: Float!
-  }
+type Commitment implements Node {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  createdBy: String!
+  metadata: JSON
+  title: String!
+  description: String!
+  customer: String!
+  dueDate: DateTime!
+  status: String!
+  confidence: Float!
+}
 
-  type Sprint implements Node {
-    id: ID!; type: String!; createdAt: DateTime!; updatedAt: DateTime!; createdBy: String!; metadata: JSON
-    name: String!; number: Int!; status: String!; startDate: DateTime!; endDate: DateTime!; committed: Float!; completed: Float!
-  }
+type Sprint implements Node {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  createdBy: String!
+  metadata: JSON
+  name: String!
+  number: Int!
+  status: String!
+  startDate: DateTime!
+  endDate: DateTime!
+  committed: Float!
+  completed: Float!
+}
 
-  type Edge { id: ID!; type: String!; sourceId: ID!; targetId: ID!; createdAt: DateTime!; createdBy: String!; weight: Float!; metadata: JSON }
+type Edge {
+  id: ID!
+  type: String!
+  sourceId: ID!
+  targetId: ID!
+  createdAt: DateTime!
+  createdBy: String!
+  weight: Float!
+  metadata: JSON
+}
 
-  type HealthScore { overall: Float!; velocity: Float!; quality: Float!; predictability: Float!; agentEfficiency: Float!; alerts: [Alert!]! }
-  type Alert { severity: String!; message: String!; timestamp: DateTime! }
+type HealthScore {
+  overall: Float!
+  velocity: Float!
+  quality: Float!
+  predictability: Float!
+  agentEfficiency: Float!
+  alerts: [Alert!]!
+}
 
-  input CreateTicketInput { title: String!; description: String!; priority: String; status: String; labels: [String!]; assignee: String; estimate: Float }
-  input UpdateTicketInput { title: String; description: String; priority: String; status: String; labels: [String!]; assignee: String; estimate: Float }
-  input CreateEdgeInput { type: String!; sourceId: ID!; targetId: ID!; weight: Float; metadata: JSON }
+type Alert {
+  severity: String!
+  message: String!
+  timestamp: DateTime!
+}
+
+type GraphStats {
+  totalNodes: Int!
+  totalEdges: Int!
+  nodesByType: [NodeTypeCount!]!
+}
+
+type NodeTypeCount {
+  type: String!
+  count: Int!
+}
+
+input CreateTicketInput {
+  title: String!
+  description: String!
+  priority: String
+  status: String
+  labels: [String!]
+  assignee: String
+  estimate: Float
+}
+
+input UpdateTicketInput {
+  title: String
+  description: String
+  priority: String
+  status: String
+  labels: [String!]
+  assignee: String
+  estimate: Float
+}
+
+input CreateEdgeInput {
+  type: String!
+  sourceId: ID!
+  targetId: ID!
+  weight: Float
+  metadata: JSON
+}
 `;
 
 export function createWorkGraphAPI(graphStore: GraphStore) {
@@ -83,45 +209,58 @@ export function createWorkGraphAPI(graphStore: GraphStore) {
       node: (_: unknown, { id }: { id: string }) => graphStore.getNode(id),
       nodes: async (_: unknown, { type, status, limit }: { type?: string; status?: string; limit?: number }) => {
         const filter: Record<string, unknown> = {};
-        if (type) filter.type = type;
-        if (status) filter.status = status;
+        if (type) {filter.type = type;}
+        if (status) {filter.status = status;}
         let results = await graphStore.getNodes(filter as Record<string, unknown>);
-        if (limit) results = results.slice(0, limit);
+        if (limit) {results = results.slice(0, limit);}
         return results;
       },
-      tickets: async (_: unknown, args: { status?: string; priority?: string; assignee?: string }) => {
+      tickets: (_: unknown, args: { status?: string; priority?: string; assignee?: string }) => {
         const filter: Partial<Ticket> = { type: 'ticket' };
-        if (args.status) filter.status = args.status as Ticket['status'];
-        if (args.priority) filter.priority = args.priority as Ticket['priority'];
-        if (args.assignee) filter.assignee = args.assignee;
+        if (args.status) {filter.status = args.status as Ticket['status'];}
+        if (args.priority) {filter.priority = args.priority as Ticket['priority'];}
+        if (args.assignee) {filter.assignee = args.assignee;}
         return graphStore.getNodes<Ticket>(filter);
       },
-      prs: async (_: unknown, args: { status?: string; author?: string }) => {
+      prs: (_: unknown, args: { status?: string; author?: string }) => {
         const filter: Partial<PR> = { type: 'pr' };
-        if (args.status) filter.status = args.status as PR['status'];
-        if (args.author) filter.author = args.author;
+        if (args.status) {filter.status = args.status as PR['status'];}
+        if (args.author) {filter.author = args.author;}
         return graphStore.getNodes<PR>(filter);
       },
-      agents: async (_: unknown, args: { status?: string }) => {
+      agents: (_: unknown, args: { status?: string }) => {
         const filter: Partial<Agent> = { type: 'agent' };
-        if (args.status) filter.status = args.status as Agent['status'];
+        if (args.status) {filter.status = args.status as Agent['status'];}
         return graphStore.getNodes<Agent>(filter);
       },
-      commitments: async (_: unknown, args: { status?: string }) => {
+      commitments: (_: unknown, args: { status?: string }) => {
         const filter: Partial<Commitment> = { type: 'commitment' };
-        if (args.status) filter.status = args.status as Commitment['status'];
+        if (args.status) {filter.status = args.status as Commitment['status'];}
         return graphStore.getNodes<Commitment>(filter);
       },
-      sprints: async (_: unknown, args: { status?: string }) => {
+      sprints: (_: unknown, args: { status?: string }) => {
         const filter: Partial<Sprint> = { type: 'sprint' };
-        if (args.status) filter.status = args.status as Sprint['status'];
+        if (args.status) {filter.status = args.status as Sprint['status'];}
         return graphStore.getNodes<Sprint>(filter);
       },
       edges: (_: unknown, args: { sourceId?: string; targetId?: string; type?: string }) => graphStore.getEdges(args),
       healthScore: () => ({ overall: 75, velocity: 80, quality: 70, predictability: 75, agentEfficiency: 85, alerts: [] }),
+      stats: async () => {
+        const allNodes = await graphStore.getNodes({});
+        const allEdges = await graphStore.getEdges({});
+        const typeCountMap = new Map<string, number>();
+        for (const node of allNodes) {
+          const nodeType = (node as { type?: string }).type || 'unknown';
+          typeCountMap.set(nodeType, (typeCountMap.get(nodeType) || 0) + 1);
+        }
+        const nodesByType = Array.from(typeCountMap.entries())
+          .map(([type, count]) => ({ type, count }))
+          .sort((a, b) => b.count - a.count);
+        return { totalNodes: allNodes.length, totalEdges: allEdges.length, nodesByType };
+      },
     },
     Mutation: {
-      createTicket: async (_: unknown, { input }: { input: Partial<Ticket> }) => {
+      createTicket: (_: unknown, { input }: { input: Partial<Ticket> }) => {
         const ticket: Ticket = {
           id: crypto.randomUUID(), type: 'ticket', createdAt: new Date(), updatedAt: new Date(), createdBy: 'api',
           title: input.title || '', description: input.description || '', status: (input.status as Ticket['status']) || 'backlog',
@@ -133,9 +272,12 @@ export function createWorkGraphAPI(graphStore: GraphStore) {
       updateTicket: (_: unknown, { id, input }: { id: string; input: Partial<Ticket> }) => graphStore.updateNode<Ticket>(id, input),
       deleteNode: (_: unknown, { id }: { id: string }) => graphStore.deleteNode(id),
       assignTicket: (_: unknown, { ticketId, assigneeId }: { ticketId: string; assigneeId: string }) => graphStore.updateNode<Ticket>(ticketId, { assignee: assigneeId }),
-      createEdge: async (_: unknown, { input }: { input: Partial<WorkGraphEdge> }) => {
+      createEdge: (_: unknown, { input }: { input: Partial<WorkGraphEdge> }) => {
+        if (!input.sourceId || !input.targetId) {
+          throw new Error('sourceId and targetId are required');
+        }
         const edge: WorkGraphEdge = {
-          id: crypto.randomUUID(), type: input.type as WorkGraphEdge['type'], sourceId: input.sourceId!, targetId: input.targetId!,
+          id: crypto.randomUUID(), type: input.type as WorkGraphEdge['type'], sourceId: input.sourceId, targetId: input.targetId,
           createdAt: new Date(), createdBy: 'api', weight: input.weight || 1, metadata: input.metadata,
         };
         return graphStore.createEdge(edge);
