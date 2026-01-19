@@ -1,0 +1,38 @@
+{
+  "task_id": "DOCS_1CODE_PARITY_PLAN",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "competitive-1code-parity-plan",
+    "version": "v1",
+    "sha256": "42bbe61f6c96c9285f5bedcd19fb40681c36367e610e9838a160cbb2861a1ddd",
+    "path": "prompts/competitive/1code-parity-plan@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/competitive/1code-parity-maestro.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/competitive/1code-parity-plan@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/DOCS_1CODE_PARITY_PLAN.json"
+    ],
+    "domains": ["competitive", "maestro", "governance", "roadmap"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["documentation-review"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Competitive parity memo is documented with governance alignment.",
+    "Roadmap status file updated with current revision note and timestamp.",
+    "Prompt registry entry added with correct SHA-256 hash."
+  ],
+  "stop_conditions": [
+    "Scope expansion beyond docs requires governance escalation.",
+    "Any conflict with authority files requires pause and escalation."
+  ]
+}

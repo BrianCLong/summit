@@ -55,6 +55,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: competitive-1code-parity-plan
+    version: v1
+    path: prompts/competitive/1code-parity-plan@v1.md
+    sha256: 42bbe61f6c96c9285f5bedcd19fb40681c36367e610e9838a160cbb2861a1ddd
+    description: Competitive parity plan for 1Code signals, aligned to Summit governance and Maestro MVP execution.
+    scope:
+      paths:
+        - docs/competitive/
+        - docs/roadmap/STATUS.json
+        - prompts/competitive/
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - competitive
+        - governance
+        - maestro
+        - roadmap
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
