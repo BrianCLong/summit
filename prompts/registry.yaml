@@ -30,6 +30,34 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: branch-protection-enforcement
+    version: v1
+    path: prompts/ci/branch-protection-enforcement.md
+    sha256: b7c6e142e27f32dfaca8ac77e6e9af7b5093670e90534094e14b0687974e9b6a
+    description: Align branch protection enforcement artifacts and ruleset payloads with required checks policy.
+    scope:
+      paths:
+        - .github/
+        - docs/ci/
+        - docs/roadmap/STATUS.json
+        - scripts/ci/
+        - agents/examples/
+        - package.json
+        - prompts/ci/
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - ci
+        - quality
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md

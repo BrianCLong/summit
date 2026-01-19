@@ -1,6 +1,7 @@
 # GitHub Branch Protection and Merge Queue Configuration
-# This file documents the required protection rules for the GREEN TRAIN framework
-# Apply these settings via GitHub UI or API
+# This file documents the required protection rules for the GREEN TRAIN framework.
+# Required check contexts MUST align with docs/ci/REQUIRED_CHECKS_POLICY.yml.
+# Apply these settings via GitHub UI or API.
 
 branch_protection:
   main:
@@ -8,14 +9,15 @@ branch_protection:
     required_status_checks:
       strict: true # Require branches to be up to date before merging
       checks:
-        - 'setup'
-        - 'lint-and-typecheck'
-        - 'unit-integration-tests'
-        - 'security-gates'
-        - 'build-and-attestation'
-        - 'merge-readiness'
-        # Optional but recommended
-        - 'schema-api-validation' # Only when schema changes detected
+        - "CI Core (Primary Gate)"
+        - "CI / config-guard"
+        - "CI / unit-tests"
+        - "GA Gate"
+        - "Release Readiness Gate"
+        - "Unit Tests & Coverage"
+        - "ga / gate"
+      # Conditional checks (Workflow Lint, CodeQL, SBOM, Schema Compatibility)
+      # are enforced via REQUIRED_CHECKS_POLICY.yml + drift detection.
 
     # Code review requirements
     required_pull_request_reviews:
@@ -25,12 +27,12 @@ branch_protection:
       require_last_push_approval: false # Allow author's final updates
       bypass_pull_request_allowances:
         users: []
-        teams: ['platform-admins']
+        teams: ["platform-admins"]
 
     # Additional restrictions
     restrictions:
       users: []
-      teams: ['platform-leads', 'security-team']
+      teams: ["platform-leads", "security-team"]
       apps: []
 
     # Advanced settings
@@ -45,23 +47,25 @@ branch_protection:
     merge_queue:
       enabled: true
       required_status_checks:
-        - 'CI - Comprehensive Gates / merge-readiness'
-      merge_method: 'merge' # Preserve full history
+        - "CI Core (Primary Gate)"
+        - "Release Readiness Gate"
+        - "GA Gate"
+      merge_method: "merge" # Preserve full history
       min_entries_to_merge: 1
       max_entries_to_merge: 10
-      merge_commit_title: 'AUTO_MERGE_TITLE'
-      merge_commit_message: 'AUTO_MERGE_BODY'
+      merge_commit_title: "AUTO_MERGE_TITLE"
+      merge_commit_message: "AUTO_MERGE_BODY"
 
 # Ruleset configuration for advanced protection
 rulesets:
-  - name: 'GREEN TRAIN Protection'
-    target: 'branch'
-    source_type: 'Repository'
-    source: 'default_branch'
-    enforcement: 'active'
+  - name: "GREEN TRAIN Protection"
+    target: "branch"
+    source_type: "Repository"
+    source: "default_branch"
+    enforcement: "active"
 
     rules:
-      - type: 'pull_request'
+      - type: "pull_request"
         parameters:
           required_approving_review_count: 2
           dismiss_stale_reviews_on_push: true
@@ -69,66 +73,61 @@ rulesets:
           require_last_push_approval: false
           required_review_thread_resolution: true
 
-      - type: 'required_status_checks'
+      - type: "required_status_checks"
         parameters:
           strict_required_status_checks_policy: true
           required_status_checks:
-            - context: 'CI - Comprehensive Gates / setup'
-              integration_id: 15368
-            - context: 'CI - Comprehensive Gates / lint-and-typecheck'
-              integration_id: 15368
-            - context: 'CI - Comprehensive Gates / unit-integration-tests'
-              integration_id: 15368
-            - context: 'CI - Comprehensive Gates / security-gates'
-              integration_id: 15368
-            - context: 'CI - Comprehensive Gates / build-and-attestation'
-              integration_id: 15368
-            - context: 'CI - Comprehensive Gates / merge-readiness'
-              integration_id: 15368
+            - context: "CI Core (Primary Gate)"
+            - context: "CI / config-guard"
+            - context: "CI / unit-tests"
+            - context: "GA Gate"
+            - context: "Release Readiness Gate"
+            - context: "Unit Tests & Coverage"
+            - context: "ga / gate"
 
-      - type: 'required_signatures'
+      - type: "required_signatures"
         parameters: {}
 
-      - type: 'non_fast_forward'
+      - type: "non_fast_forward"
         parameters: {}
 
 # Deployment configuration for protection rules
 deployment:
-  method: 'github_api' # or "terraform" for IaC
+  method: "github_api" # or "terraform" for IaC
 
   # GitHub CLI commands to apply these rules
   cli_commands:
-    - name: 'Enable branch protection'
+    - name: "Enable branch protection"
       command: |
         gh api repos/:owner/:repo/branches/main/protection \
           --method PUT \
-          --field required_status_checks='{"strict":true,"checks":[{"context":"CI - Comprehensive Gates / merge-readiness"}]}' \
+          --field required_status_checks='{"strict":true,"checks":[{"context":"CI Core (Primary Gate)"},{"context":"CI / config-guard"},{"context":"CI / unit-tests"},{"context":"GA Gate"},{"context":"Release Readiness Gate"},{"context":"Unit Tests & Coverage"},{"context":"ga / gate"}]}' \
           --field required_pull_request_reviews='{"required_approving_review_count":2,"dismiss_stale_reviews":true,"require_code_owner_reviews":true}' \
           --field enforce_admins=false \
           --field restrictions=null
 
-    - name: 'Enable merge queue'
+    - name: "Enable merge queue"
       command: |
         gh api repos/:owner/:repo/merge-queue \
           --method PATCH \
           --field enabled=true \
-          --field required_status_checks='[{"context":"CI - Comprehensive Gates / merge-readiness"}]' \
+          --field required_status_checks='[{"context":"CI Core (Primary Gate)"},{"context":"Release Readiness Gate"},{"context":"GA Gate"}]' \
           --field merge_method="merge"
 
 # Environment-specific overrides
 environments:
   production:
     additional_required_checks:
-      - 'deployment-approval'
-      - 'security-scan-clean'
+      - "deployment-approval"
+      - "security-scan-clean"
 
   staging:
     bypass_users:
-      - 'staging-deploy-bot'
+      - "staging-deploy-bot"
 
 # Emergency procedures
 emergency_access:
   # When critical hotfixes are needed
-  emergency_teams: ['platform-admins', 'security-incident-response']
-  temporary_bypass_duration: '2 hours'
-  required_documentation: 'incident ticket and post-mortem plan'
+  emergency_teams: ["platform-admins", "security-incident-response"]
+  temporary_bypass_duration: "2 hours"
+  required_documentation: "incident ticket and post-mortem plan"
