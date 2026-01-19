@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-19T17:18:09Z",
+  "revision_note": "Documented cross-lingual narrative tracking architecture and platform-shift graph model",
   "initiatives": [
     {
       "id": "A",
