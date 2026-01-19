@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.intelgraph.io/schemas/control_mapping.schema.json",
+  "type": "object",
+  "title": "Summit Regulator Control Mapping",
+  "description": "Mapping of Summit artifacts to external regulatory controls.",
+  "required": ["schema_version", "mappings"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "mappings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["control_id", "framework", "description", "evidence_sources"],
+        "properties": {
+          "control_id": {
+            "type": "string",
+            "description": "The external control identifier (e.g., SOC2-CC6.1, GDPR-Art32)"
+          },
+          "framework": {
+            "type": "string",
+            "enum": ["SOC2", "GDPR", "ISO27001", "NIST-800-53"]
+          },
+          "description": {
+            "type": "string"
+          },
+          "evidence_sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path_pattern", "rationale"],
+              "properties": {
+                "path_pattern": {
+                  "type": "string",
+                  "description": "Glob pattern for evidence artifacts relative to repo root"
+                },
+                "rationale": {
+                  "type": "string",
+                  "description": "Explanation of how this artifact satisfies the control"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

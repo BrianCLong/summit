@@ -23,3 +23,4 @@ LICENSE
 .git/
 .husky/
 .github/workflows/release-ops-slo-issue.yml
+deploy/charts/**
