@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/content-model/block.schema.json",
+  "title": "Block",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "kind", "body", "language", "audience", "related_entities", "policy_tags"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["narrative", "procedure", "context", "risk", "metric"]
+    },
+    "body": {
+      "type": "string",
+      "minLength": 1
+    },
+    "language": {
+      "type": "string",
+      "minLength": 1
+    },
+    "audience": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "related_entities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "work_items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/WorkItemRef"
+      }
+    },
+    "policy_tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "WorkItemRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "repo", "number", "state"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["issue", "pr", "workflow"]
+        },
+        "repo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "state": {
+          "type": "string",
+          "enum": ["open", "closed", "merged", "blocked", "stale"]
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

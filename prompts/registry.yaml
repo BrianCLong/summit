@@ -55,6 +55,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: content-model-brief-claim-block
+    version: v1
+    path: prompts/docs/content-model-brief-claim-block@v1.md
+    sha256: b93b430404a0b69d627a0771d91753dc2f21e0d250f2c76cfd515bd281cbebf5
+    description: Define or update Brief/Claim/Block content-model schemas and example artifacts.
+    scope:
+      paths:
+        - docs/specs/content-model/
+        - docs/roadmap/STATUS.json
+        - prompts/docs/content-model-brief-claim-block@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - content-model
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
