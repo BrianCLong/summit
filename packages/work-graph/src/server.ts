@@ -14,7 +14,7 @@ import { PolicyEngine } from './policy/engine.js';
 import { PortfolioSimulator } from './portfolio/simulator.js';
 import { MetricsDashboard } from './metrics/dashboard.js';
 import { AutoTriageEngine } from './triage/auto-triage.js';
-import type { Intent, Ticket, Agent, Commitment, Epic, Sprint } from './schema/nodes.js';
+import type { Intent, Ticket, Agent, Commitment, Epic, Sprint, Board, Roadmap, Milestone } from './schema/nodes.js';
 
 const PORT = process.env.PORT || 4000;
 
@@ -226,14 +226,113 @@ async function seedData(graphStore: InMemoryGraphStore) {
     });
   }
 
+  // Create Boards
+  const boards: Board[] = [];
+  const boardDefs = [
+    { name: 'Product Backlog', boardType: 'kanban' as const, description: 'Main product backlog' },
+    { name: 'Sprint Board', boardType: 'scrum' as const, description: 'Current sprint work' },
+    { name: 'Security Queue', boardType: 'kanban' as const, description: 'Security-related items' },
+  ];
+
+  for (const def of boardDefs) {
+    const board = await graphStore.createNode<Board>({
+      id: crypto.randomUUID(),
+      type: 'board',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      createdBy: 'system',
+      name: def.name,
+      description: def.description,
+      boardType: def.boardType,
+      columns: [
+        { id: crypto.randomUUID(), name: 'Backlog', position: 0 },
+        { id: crypto.randomUUID(), name: 'Ready', position: 1 },
+        { id: crypto.randomUUID(), name: 'In Progress', position: 2, wipLimit: 5 },
+        { id: crypto.randomUUID(), name: 'Review', position: 3 },
+        { id: crypto.randomUUID(), name: 'Done', position: 4 },
+      ],
+      isDefault: def.name === 'Product Backlog',
+      archived: false,
+      itemCount: Math.floor(Math.random() * 20) + 5,
+    });
+    boards.push(board);
+  }
+
+  // Create Roadmap
+  const roadmap = await graphStore.createNode<Roadmap>({
+    id: crypto.randomUUID(),
+    type: 'roadmap',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: 'system',
+    name: 'Summit 2026 Roadmap',
+    description: 'Product roadmap for 2026',
+    status: 'active',
+    timeframe: {
+      start: new Date(2026, 0, 1),
+      end: new Date(2026, 11, 31),
+      granularity: 'quarter',
+    },
+    swimlanes: [
+      { id: crypto.randomUUID(), name: 'Platform', color: '#3B82F6', position: 0 },
+      { id: crypto.randomUUID(), name: 'Security', color: '#EF4444', position: 1 },
+      { id: crypto.randomUUID(), name: 'Features', color: '#10B981', position: 2 },
+      { id: crypto.randomUUID(), name: 'Operations', color: '#F59E0B', position: 3 },
+    ],
+    visibility: 'team',
+  });
+
+  // Create Milestones
+  const milestones: Milestone[] = [];
+  const milestoneDefs = [
+    { name: 'MVP 4 GA', date: new Date(2026, 1, 15), type: 'release' as const, progress: 40, status: 'on_track' as const },
+    { name: 'Security Audit Complete', date: new Date(2026, 2, 15), type: 'checkpoint' as const, progress: 0, status: 'planned' as const },
+    { name: 'Q2 Platform Release', date: new Date(2026, 5, 30), type: 'release' as const, progress: 0, status: 'planned' as const },
+    { name: 'Q3 Features Launch', date: new Date(2026, 8, 30), type: 'release' as const, progress: 0, status: 'planned' as const },
+  ];
+
+  for (const def of milestoneDefs) {
+    const milestone = await graphStore.createNode<Milestone>({
+      id: crypto.randomUUID(),
+      type: 'milestone',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      createdBy: 'system',
+      name: def.name,
+      description: `Milestone: ${def.name}`,
+      targetDate: def.date,
+      milestoneType: def.type,
+      status: def.status,
+      progress: def.progress,
+      successCriteria: [],
+      stakeholders: ['engineering', 'product'],
+      linkedRoadmapId: roadmap.id,
+    });
+    milestones.push(milestone);
+
+    // Link milestone to roadmap
+    await graphStore.createEdge({
+      id: crypto.randomUUID(),
+      type: 'milestone_for',
+      sourceId: milestone.id,
+      targetId: roadmap.id,
+      createdAt: new Date(),
+      createdBy: 'system',
+      weight: 1,
+    });
+  }
+
   console.log(`   ✓ Created ${agents.length} agents`);
   console.log(`   ✓ Created ${intents.length} intents`);
   console.log(`   ✓ Created ${epics.length} epics`);
   console.log(`   ✓ Created ${tickets.length} tickets`);
   console.log(`   ✓ Created ${commitments.length} commitments`);
   console.log(`   ✓ Created 1 active sprint`);
+  console.log(`   ✓ Created ${boards.length} boards`);
+  console.log(`   ✓ Created 1 roadmap`);
+  console.log(`   ✓ Created ${milestones.length} milestones`);
 
-  return { agents, intents, epics, tickets, commitments, currentSprint };
+  return { agents, intents, epics, tickets, commitments, currentSprint, boards, roadmap, milestones };
 }
 
 async function main() {
@@ -245,7 +344,7 @@ async function main() {
 
   // Initialize services
   const planner = new PlannerOrchestrator(graphStore);
-  const market = new WorkMarket(graphStore, eventBus);
+  const market = new WorkMarket(graphStore);
   const policyEngine = new PolicyEngine(graphStore);
   const simulator = new PortfolioSimulator(graphStore);
   const metrics = new MetricsDashboard(graphStore);

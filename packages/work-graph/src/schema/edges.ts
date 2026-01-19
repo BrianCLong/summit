@@ -98,6 +98,16 @@ export const ProvenanceEdgeTypes = [
   'imported_from', // Node imported from system
 ] as const;
 
+// Containment Edges - Board/Roadmap relationships
+export const ContainmentEdgeTypes = [
+  'contains', // Board/Roadmap contains Ticket/Epic
+  'displayed_on', // Ticket displayed on Board
+  'scheduled_on', // Epic scheduled on Roadmap
+  'milestone_for', // Milestone marks Roadmap progress
+  'targets', // Ticket/Epic targets Milestone
+  'part_of', // Item is part of Sprint/Board
+] as const;
+
 // ============================================
 // All Edge Types
 // ============================================
@@ -111,6 +121,7 @@ export const AllEdgeTypes = [
   ...ArtifactEdgeTypes,
   ...CustomerEdgeTypes,
   ...ProvenanceEdgeTypes,
+  ...ContainmentEdgeTypes,
 ] as const;
 
 export type EdgeType = (typeof AllEdgeTypes)[number];
@@ -189,6 +200,14 @@ export const EdgeValidationRules: EdgeValidationRule[] = [
   { edgeType: 'derived_from', validSourceTypes: ['*'], validTargetTypes: ['*'] },
   { edgeType: 'synced_from', validSourceTypes: ['ticket', 'epic'], validTargetTypes: ['*'] },
   { edgeType: 'imported_from', validSourceTypes: ['*'], validTargetTypes: ['*'] },
+
+  // Containment
+  { edgeType: 'contains', validSourceTypes: ['board', 'roadmap', 'sprint'], validTargetTypes: ['ticket', 'epic'] },
+  { edgeType: 'displayed_on', validSourceTypes: ['ticket', 'epic'], validTargetTypes: ['board'] },
+  { edgeType: 'scheduled_on', validSourceTypes: ['epic', 'ticket'], validTargetTypes: ['roadmap'] },
+  { edgeType: 'milestone_for', validSourceTypes: ['milestone'], validTargetTypes: ['roadmap'] },
+  { edgeType: 'targets', validSourceTypes: ['ticket', 'epic'], validTargetTypes: ['milestone'] },
+  { edgeType: 'part_of', validSourceTypes: ['ticket', 'epic'], validTargetTypes: ['sprint', 'board'] },
 ];
 
 // ============================================

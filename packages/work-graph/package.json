@@ -57,6 +57,10 @@
     "./api": {
       "import": "./dist/api/index.js",
       "types": "./dist/api/index.d.ts"
+    },
+    "./import": {
+      "import": "./dist/import/index.js",
+      "types": "./dist/import/index.d.ts"
     }
   },
   "scripts": {
@@ -66,6 +70,7 @@
     "typecheck": "tsc --noEmit",
     "demo": "tsx src/demo.ts",
     "server": "tsx src/server.ts",
+    "cli": "tsx src/cli.ts",
     "start": "node dist/server.js"
   },
   "dependencies": {
