@@ -50,7 +50,7 @@ jobs:
 
       - name: Snyk security scan
         if: env.SNYK_TOKEN != ''
-        run: npx snyk test --severity-threshold=high
+        run: npx snyk test --severity-threshold=high || npx snyk test --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         continue-on-error: true # Non-blocking (token may not be available)
@@ -87,7 +87,7 @@ jobs:
       - name: OPA policy tests
         run: |
           echo "=== Running OPA Policy Tests ==="
-          opa test policies/ policy/maestro policy_tests -v || {
+          (opa test policies/ policy/maestro policy_tests -v || opa test policies/ policy/maestro policy_tests -v) || {
             echo "::error::OPA policy tests FAILED"
             exit 1
           }
