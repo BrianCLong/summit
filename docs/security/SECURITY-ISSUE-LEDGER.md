@@ -12,8 +12,8 @@
 
 This ledger documents all security issues identified in the Summit (IntelGraph) platform during a comprehensive security audit conducted on 2025-12-30.
 
-**Total Issues:** 187
-**Critical:** 18
+**Total Issues:** 188
+**Critical:** 19
 **High:** 42
 **Medium:** 85
 **Low:** 42
@@ -319,6 +319,29 @@ return { allowed: true, remaining: Infinity, ... };
 **Remediation:** Implement fail-closed mode for security-critical endpoints.
 **Priority:** P0 — Fix immediately
 **ETA:** 3 hours
+
+---
+
+### SUPPLY-CRIT-010: n8n Remote Code Execution (Ni8mare / CVE-2026-21858)
+**Severity:** CRITICAL
+**CWE:** CWE-94 (Improper Control of Generation of Code)
+**CVSS:** 10.0 (Critical)
+**Status:** ❌ UNRESOLVED
+
+**Affected Components:**
+- External n8n instances (self-hosted) used for Summit automations
+
+**Vulnerability:**
+Unauthenticated RCE in n8n versions 1.65.0 to 1.120.x via improper webhook/form input parsing.
+
+**Impact:**
+- Remote code execution on n8n host
+- Exfiltration of GitHub PATs and AI API keys
+- Full compromise of automation pipelines
+
+**Remediation:** Upgrade all n8n instances to >= 1.121.0. See [ADVISORY-CVE-2026-21858-N8N.md](./ADVISORY-CVE-2026-21858-N8N.md).
+**Priority:** P0 — Fix immediately
+**ETA:** 15 minutes (Upgrade task)
 
 ---
 
