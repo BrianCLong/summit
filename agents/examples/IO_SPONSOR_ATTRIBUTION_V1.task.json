@@ -1,0 +1,42 @@
+{
+  "task_id": "IO_SPONSOR_ATTRIBUTION_V1",
+  "agent_id": "gpt-5.2-codex",
+  "prompt_ref": {
+    "id": "io-sponsor-attribution",
+    "version": "v1",
+    "sha256": "752c0154d54541627bd3917549bd5f72d75bd6dd49fa73fac5cfe5825468d263",
+    "path": "prompts/attribution/io-sponsor-attribution@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "server/src/services/attribution/",
+      "server/src/graphql/schema/",
+      "server/src/graphql/resolvers.ts",
+      "server/src/services/attribution/__tests__/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/",
+      "prompts/attribution/",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["attribution", "cti", "graph-analytics", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["unit-test-log", "boundary-check"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Graph-based attribution model aggregates indicators into sponsor hypotheses with confidence and caveats.",
+    "GraphQL queries support baseline attribution and sandbox scenario comparisons.",
+    "Unit tests cover ranking and scenario weighting shifts."
+  ],
+  "stop_conditions": [
+    "Conflicts with governance policy-as-code requirements.",
+    "Missing prompt hash registration or scope mismatch.",
+    "Detected regression in attribution ranking logic tests."
+  ]
+}

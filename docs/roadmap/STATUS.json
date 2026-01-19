@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-14T19:25:00Z",
+  "revision_note": "Added IO sponsor attribution model and scenario sandbox to CTI GraphQL",
   "initiatives": [
     {
       "id": "A",

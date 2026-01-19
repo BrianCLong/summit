@@ -9,6 +9,14 @@ import { gqlDuration, subscriptionFanoutLatency } from '../metrics';
 import { makePubSub } from '../subscriptions/pubsub';
 import Redis from 'ioredis';
 import { CausalGraphService } from '../services/CausalGraphService';
+import {
+  IOSponsorAttributionService,
+  AttributionCategory,
+  AttributionIndicator,
+  AttributionSignal,
+  SponsorAttributionRequest,
+  AttributionWeights,
+} from '../services/attribution/IOSponsorAttributionService.js';
 import type { GraphQLContext } from './apollo-v5-server.js';
 import { createRequire } from 'node:module';
 
@@ -19,6 +27,84 @@ const redisClient = process.env.REDIS_URL
   : null;
 
 const require = createRequire(import.meta.url);
+const sponsorAttributionService = new IOSponsorAttributionService();
+
+const categoryMap: Record<string, AttributionCategory> = {
+  INFRASTRUCTURE: 'infrastructure',
+  TIMING: 'timing',
+  CONTENT_FINGERPRINT: 'contentFingerprint',
+  LANGUAGE_MARKER: 'languageMarker',
+};
+
+type AttributionIndicatorInput = {
+  id: string;
+  category: keyof typeof categoryMap;
+  description: string;
+  confidence: number;
+  observedAt?: string | null;
+  metadata?: Record<string, unknown> | null;
+};
+
+type SponsorCandidateInput = {
+  id: string;
+  name: string;
+  description?: string | null;
+};
+
+type AttributionSignalInput = {
+  indicatorId: string;
+  sponsorId: string;
+  signalStrength: number;
+  rationale?: string | null;
+};
+
+type SponsorAttributionRequestInput = {
+  indicators: AttributionIndicatorInput[];
+  candidates: SponsorCandidateInput[];
+  signals: AttributionSignalInput[];
+  weights?: AttributionWeights | null;
+};
+
+function mapIndicators(indicators: AttributionIndicatorInput[]): AttributionIndicator[] {
+  return indicators.map((indicator) => {
+    const category = categoryMap[indicator.category];
+    if (!category) {
+      throw new Error(`Unsupported indicator category: ${indicator.category}`);
+    }
+    return {
+      id: indicator.id,
+      category,
+      description: indicator.description,
+      confidence: indicator.confidence,
+      observedAt: indicator.observedAt ?? null,
+      metadata: indicator.metadata ?? null,
+    };
+  });
+}
+
+function mapSignals(signals: AttributionSignalInput[]): AttributionSignal[] {
+  return signals.map((signal) => ({
+    indicatorId: signal.indicatorId,
+    sponsorId: signal.sponsorId,
+    signalStrength: signal.signalStrength,
+    rationale: signal.rationale ?? null,
+  }));
+}
+
+function buildRequest(
+  request: SponsorAttributionRequestInput,
+): SponsorAttributionRequest {
+  return {
+    indicators: mapIndicators(request.indicators),
+    candidates: request.candidates.map((candidate) => ({
+      id: candidate.id,
+      name: candidate.name,
+      description: candidate.description ?? null,
+    })),
+    signals: mapSignals(request.signals),
+    weights: request.weights ?? undefined,
+  };
+}
 
 export const resolvers = {
   DateTime: new (require('graphql-iso-date').GraphQLDateTime)(),
@@ -116,6 +202,24 @@ export const resolvers = {
     async causalGraph(_: any, { investigationId }: any, _ctx: any) {
       const causalService = new CausalGraphService();
       return await causalService.generateCausalGraph(investigationId);
+    },
+    sponsorAttribution(
+      _: unknown,
+      { request }: { request: SponsorAttributionRequestInput },
+    ) {
+      return sponsorAttributionService.computeRanking(buildRequest(request));
+    },
+    sponsorAttributionSandbox(
+      _: unknown,
+      {
+        request,
+        scenarioWeights,
+      }: { request: SponsorAttributionRequestInput; scenarioWeights: AttributionWeights },
+    ) {
+      return sponsorAttributionService.computeScenario(
+        buildRequest(request),
+        scenarioWeights,
+      );
     },
   },
   Mutation: {
