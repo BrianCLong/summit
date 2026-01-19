@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Timeline } from 'vis-timeline/standalone';
 import { DataSet } from 'vis-data';
 import $ from 'jquery';
@@ -6,7 +6,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchGraph } from '../data/mockGraph';
 import { RootState, selectNode, setTimeRange } from '../store';
 
-export function TimelinePane() {
+// Memoized to prevent re-renders on global state changes (like theme toggle)
+export const TimelinePane = React.memo(function TimelinePane() {
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<Timeline | null>(null);
   const dispatch = useDispatch();
@@ -52,4 +53,4 @@ export function TimelinePane() {
   }, [selectedNode]);
 
   return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
-}
+});
