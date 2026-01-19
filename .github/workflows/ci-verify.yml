@@ -19,7 +19,7 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
         with:
           fetch-depth: 0 # Full history required for Gitleaks
 
@@ -29,8 +29,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: false # BLOCKING: secrets block merge
 
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: pnpm/action-setup@feaa6391d8481eb0db9d5b066fba94be3691684c # v4
+      - uses: actions/setup-node@1d1121627393d3093b167069a74422b94a9ec3f2 # v4
         with:
           node-version: "20"
           cache: pnpm
@@ -56,7 +56,7 @@ jobs:
         continue-on-error: true # Non-blocking (token may not be available)
 
       - name: Upload security scan results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@0b2207062494160a33bd674828362627b9c46d9a # v4
         if: always()
         with:
           name: security-scan-results
@@ -69,7 +69,7 @@ jobs:
     name: Policy Compliance
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@34a30e8a924d1b03ce2cf7abe97250bbb1f332b5 # v2
@@ -93,7 +93,7 @@ jobs:
           }
 
       - name: Upload OPA test results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@0b2207062494160a33bd674828362627b9c46d9a # v4
         if: always()
         with:
           name: opa-test-results
@@ -105,9 +105,9 @@ jobs:
     name: Governance Checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: pnpm/action-setup@feaa6391d8481eb0db9d5b066fba94be3691684c # v4
+      - uses: actions/setup-node@1d1121627393d3093b167069a74422b94a9ec3f2 # v4
         with:
           node-version: "20"
           cache: pnpm
@@ -141,9 +141,9 @@ jobs:
     name: Provenance & SBOM
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: pnpm/action-setup@feaa6391d8481eb0db9d5b066fba94be3691684c # v4
+      - uses: actions/setup-node@1d1121627393d3093b167069a74422b94a9ec3f2 # v4
         with:
           node-version: "20"
           cache: pnpm
@@ -174,7 +174,7 @@ jobs:
         continue-on-error: true # Non-blocking for PRs, required for releases
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@0b2207062494160a33bd674828362627b9c46d9a # v4
         if: always()
         with:
           name: sbom
@@ -182,7 +182,7 @@ jobs:
           retention-days: 90 # 2 years retention
 
       - name: Upload SLSA provenance
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@0b2207062494160a33bd674828362627b9c46d9a # v4
         if: always()
         with:
           name: slsa-provenance
@@ -193,12 +193,12 @@ jobs:
     name: Schema Validation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
         with:
           fetch-depth: 0 # Needed for schema diff
 
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: pnpm/action-setup@feaa6391d8481eb0db9d5b066fba94be3691684c # v4
+      - uses: actions/setup-node@1d1121627393d3093b167069a74422b94a9ec3f2 # v4
         with:
           node-version: "20"
           cache: pnpm
@@ -228,9 +228,9 @@ jobs:
     name: Compliance Evidence
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: pnpm/action-setup@feaa6391d8481eb0db9d5b066fba94be3691684c # v4
+      - uses: actions/setup-node@1d1121627393d3093b167069a74422b94a9ec3f2 # v4
         with:
           node-version: "20"
           cache: pnpm
@@ -260,8 +260,8 @@ jobs:
     name: GA Evidence Completeness
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/setup-node@1d1121627393d3093b167069a74422b94a9ec3f2 # v4
         with:
           node-version: "20"
       - name: Ensure evidence bundle exists
@@ -285,7 +285,7 @@ jobs:
 
       - name: Upload evidence index
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@0b2207062494160a33bd674828362627b9c46d9a # v4
         with:
           name: ga-evidence-index-${{ github.sha }}
           path: |

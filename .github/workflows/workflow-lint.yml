@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: Download actionlint
         run: |
@@ -39,7 +39,23 @@ jobs:
       - name: Run actionlint
         run: |
           # Run actionlint with shell check integration
+          # We don't use -shellcheck here as it might not be installed in the runner
           actionlint -color -verbose
+
+      - name: Enforce pinned action refs
+        run: |
+          echo "=== Checking for unpinned actions ==="
+          # Find all 'uses:' lines that don't use a 40-character SHA
+          # Exclude internal actions (starting with ./)
+          # Exclude docker:// actions
+          # Exclude common reusable workflows (starting with ./.github/workflows/)
+          UNPINNED=$(grep -r "uses:" .github/workflows/ | grep -v "\./" | grep -v "docker://" | grep -vE "@[0-9a-f]{40}" || true)
+          if [[ -n "$UNPINNED" ]]; then
+            echo "::warning::Unpinned actions detected. Please use a 40-character SHA for 3rd-party actions for better security."
+            echo "$UNPINNED"
+          else
+            echo "✅ All 3rd-party actions appear to be pinned to SHAs"
+          fi
 
       - name: Validate workflow syntax
         run: |

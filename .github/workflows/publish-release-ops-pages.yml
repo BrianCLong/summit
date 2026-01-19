@@ -114,7 +114,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
         with:
           fetch-depth: 0 # Full history for snapshot branch access
 
@@ -234,7 +234,7 @@ jobs:
 
       - name: Upload Triage Packet
         if: steps.health-check.outputs.level == 'WARN' || steps.health-check.outputs.level == 'FAIL' || steps.verify-site.outputs.safety_passed == 'false'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@0b2207062494160a33bd674828362627b9c46d9a # v4
         with:
           name: redaction-triage-${{ needs.check-trigger.outputs.artifact_run_id }}
           path: artifacts/redaction-triage/

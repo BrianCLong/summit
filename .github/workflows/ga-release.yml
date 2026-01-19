@@ -40,18 +40,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: Enable Corepack
         run: corepack enable
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@1e1c8eafbd745f64b1ef30a7d7ed7965034c486c # v3.0.0
+        uses: pnpm/action-setup@feaa6391d8481eb0db9d5b066fba94be3691684c # v4
         with:
           version: 9.12.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@65d868f8d4d85d7d4abb7de0875cde3fcc8798f5 # v4.1.0
+        uses: actions/setup-node@1d1121627393d3093b167069a74422b94a9ec3f2 # v4
         with:
           node-version: "20.x"
           cache: "pnpm"
@@ -80,7 +80,7 @@ jobs:
       version: ${{ steps.extract-version.outputs.version }}
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: Extract Version
         id: extract-version
@@ -99,12 +99,12 @@ jobs:
         run: corepack enable
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@1e1c8eafbd745f64b1ef30a7d7ed7965034c486c # v3.0.0
+        uses: pnpm/action-setup@feaa6391d8481eb0db9d5b066fba94be3691684c # v4
         with:
           version: 9.12.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@65d868f8d4d85d7d4abb7de0875cde3fcc8798f5 # v4.1.0
+        uses: actions/setup-node@1d1121627393d3093b167069a74422b94a9ec3f2 # v4
         with:
           node-version: "20.x"
           cache: "pnpm"
@@ -173,7 +173,7 @@ jobs:
           echo "hashes=$(cat SHA256SUMS | base64 -w0)" >> "$GITHUB_OUTPUT"
 
       - name: Upload Build Artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@0b2207062494160a33bd674828362627b9c46d9a # v4
         with:
           name: release-artifacts
           path: |
@@ -189,10 +189,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: Download Build Artifacts
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d1c # v4
         with:
           name: release-artifacts
           path: dist
@@ -214,7 +214,7 @@ jobs:
           format: spdx-json
 
       - name: Upload SBOM Artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@0b2207062494160a33bd674828362627b9c46d9a # v4
         with:
           name: sbom-artifacts
           path: |
@@ -231,13 +231,13 @@ jobs:
         uses: sigstore/cosign-installer@dc72c7d5c4d10195b02b81eb88bd40881fffc95b # v3.7.0
 
       - name: Download Build Artifacts
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d1c # v4
         with:
           name: release-artifacts
           path: dist
 
       - name: Download SBOM Artifacts
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d1c # v4
         with:
           name: sbom-artifacts
           path: dist
@@ -270,7 +270,7 @@ jobs:
           done
 
       - name: Upload Signed Artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@0b2207062494160a33bd674828362627b9c46d9a # v4
         with:
           name: signed-artifacts
           path: |
@@ -300,28 +300,28 @@ jobs:
     if: ${{ !inputs.dry_run }}
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: Download Build Artifacts
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d1c # v4
         with:
           name: release-artifacts
           path: dist
 
       - name: Download SBOM Artifacts
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d1c # v4
         with:
           name: sbom-artifacts
           path: dist
 
       - name: Download Signed Artifacts
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d1c # v4
         with:
           name: signed-artifacts
           path: dist
 
       - name: Download Provenance
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d1c # v4
         with:
           pattern: "*.intoto.jsonl"
           path: dist
