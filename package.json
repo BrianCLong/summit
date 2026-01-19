@@ -122,10 +122,12 @@
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
-    "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
+    "ga:verify": "node scripts/ga/ga-proof.mjs",
+    "ga:verify:legacy": "node scripts/ga/ga-verify-runner.mjs",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
     "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
-    "release:ready": "pnpm ga:verify && GA_VERIFY_MODE=true pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
+    "ga:readiness-marker": "node scripts/ga/generate-readiness-marker.mjs",
+    "release:ready": "pnpm ga:verify && pnpm ga:readiness-marker && GA_VERIFY_MODE=true pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
     "prepare": "husky"
   },
   "keywords": [

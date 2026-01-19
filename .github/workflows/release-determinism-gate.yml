@@ -1,0 +1,208 @@
+name: Release Determinism Gate
+
+# This workflow enforces deterministic release readiness.
+# It MUST pass before merging to main.
+# It verifies that GA proof artifacts are:
+# - Deterministic (no timestamps, no environment variance)
+# - Content-addressed (hashes match expected structure)
+# - Reproducible (re-runs produce identical outputs)
+
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/PULL_REQUEST_TEMPLATE/**"
+      - "LICENSE"
+      - ".gitignore"
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  determinism-gate:
+    name: Determinism Release Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        with:
+          node-version: "20"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run GA Proof (First Run)
+        id: ga-proof-1
+        run: |
+          pnpm ga:verify
+          SHA=$(git rev-parse HEAD)
+          echo "sha=${SHA}" >> $GITHUB_OUTPUT
+          echo "artifact_dir=artifacts/ga-proof/${SHA}" >> $GITHUB_OUTPUT
+
+      - name: Validate Proof Artifacts Exist
+        run: |
+          ARTIFACT_DIR="${{ steps.ga-proof-1.outputs.artifact_dir }}"
+          echo "Validating artifacts in: ${ARTIFACT_DIR}"
+
+          if [ ! -f "${ARTIFACT_DIR}/stamp.json" ]; then
+            echo "ERROR: stamp.json not found"
+            exit 1
+          fi
+
+          if [ ! -f "${ARTIFACT_DIR}/report.json" ]; then
+            echo "ERROR: report.json not found"
+            exit 1
+          fi
+
+          if [ ! -f "${ARTIFACT_DIR}/checksums.txt" ]; then
+            echo "ERROR: checksums.txt not found"
+            exit 1
+          fi
+
+          echo "✓ All required artifacts present"
+
+      - name: Validate No Timestamps in Artifacts
+        run: |
+          ARTIFACT_DIR="${{ steps.ga-proof-1.outputs.artifact_dir }}"
+
+          # Check stamp.json for banned timestamp fields
+          if grep -E '"(timestamp|startedAt|finishedAt|createdAt|updatedAt)"' "${ARTIFACT_DIR}/stamp.json"; then
+            echo "ERROR: Timestamp fields found in stamp.json"
+            exit 1
+          fi
+
+          # Check report.json for banned timestamp fields (excluding verifiedAt in GA_READY.json)
+          if grep -E '"(timestamp|startedAt|finishedAt|createdAt|updatedAt)"' "${ARTIFACT_DIR}/report.json"; then
+            echo "ERROR: Timestamp fields found in report.json"
+            exit 1
+          fi
+
+          # Check for ISO timestamp values
+          if grep -E '"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}' "${ARTIFACT_DIR}/stamp.json" "${ARTIFACT_DIR}/report.json"; then
+            echo "ERROR: ISO timestamp values found in artifacts"
+            exit 1
+          fi
+
+          echo "✓ No timestamps found in core artifacts"
+
+      - name: Validate JSON Determinism (Sorted Keys)
+        run: |
+          ARTIFACT_DIR="${{ steps.ga-proof-1.outputs.artifact_dir }}"
+
+          # Verify stamp.json has sorted keys
+          node -e "
+            const fs = require('fs');
+            const stamp = JSON.parse(fs.readFileSync('${ARTIFACT_DIR}/stamp.json', 'utf8'));
+            const keys = Object.keys(stamp);
+            const sorted = [...keys].sort();
+            if (JSON.stringify(keys) !== JSON.stringify(sorted)) {
+              console.error('ERROR: stamp.json keys are not sorted');
+              process.exit(1);
+            }
+            console.log('✓ stamp.json keys are deterministically sorted');
+          "
+
+          # Verify report.json has sorted keys
+          node -e "
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('${ARTIFACT_DIR}/report.json', 'utf8'));
+            const keys = Object.keys(report);
+            const sorted = [...keys].sort();
+            if (JSON.stringify(keys) !== JSON.stringify(sorted)) {
+              console.error('ERROR: report.json keys are not sorted');
+              process.exit(1);
+            }
+            console.log('✓ report.json keys are deterministically sorted');
+          "
+
+      - name: Validate Report Status
+        run: |
+          ARTIFACT_DIR="${{ steps.ga-proof-1.outputs.artifact_dir }}"
+          STATUS=$(node -e "console.log(require('./${ARTIFACT_DIR}/report.json').summary.status)")
+
+          if [ "$STATUS" != "PASSED" ]; then
+            echo "ERROR: GA proof did not pass"
+            echo "Status: $STATUS"
+            exit 1
+          fi
+
+          echo "✓ GA proof status: PASSED"
+
+      - name: Validate Determinism Check Passed
+        run: |
+          ARTIFACT_DIR="${{ steps.ga-proof-1.outputs.artifact_dir }}"
+          DETERMINISM_PASSED=$(node -e "console.log(require('./${ARTIFACT_DIR}/report.json').determinismCheck.passed)")
+
+          if [ "$DETERMINISM_PASSED" != "true" ]; then
+            echo "ERROR: Determinism check failed"
+            node -e "console.log(JSON.stringify(require('./${ARTIFACT_DIR}/report.json').determinismCheck.violations, null, 2))"
+            exit 1
+          fi
+
+          echo "✓ Determinism check passed"
+
+      - name: Generate Readiness Marker
+        run: |
+          pnpm ga:readiness-marker
+
+      - name: Validate Readiness Marker
+        run: |
+          if [ ! -f "GA_READY.json" ]; then
+            echo "ERROR: GA_READY.json not generated"
+            exit 1
+          fi
+
+          READY=$(node -e "console.log(require('./GA_READY.json').releaseTrainReady)")
+          if [ "$READY" != "true" ]; then
+            echo "ERROR: Release train not ready"
+            exit 1
+          fi
+
+          echo "✓ Release readiness marker validated"
+
+      - name: Upload GA Proof Artifacts
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: ga-proof-${{ github.sha }}
+          path: |
+            artifacts/ga-proof/${{ github.sha }}/**/*
+            GA_READY.json
+          retention-days: 90
+
+      - name: Job Summary
+        if: always()
+        run: |
+          ARTIFACT_DIR="${{ steps.ga-proof-1.outputs.artifact_dir }}"
+
+          if [ -f "${ARTIFACT_DIR}/report.json" ]; then
+            echo "## GA Determinism Gate Report" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            STATUS=$(node -e "console.log(require('./${ARTIFACT_DIR}/report.json').summary.status)")
+            PASSED=$(node -e "console.log(require('./${ARTIFACT_DIR}/report.json').summary.passed)")
+            TOTAL=$(node -e "console.log(require('./${ARTIFACT_DIR}/report.json').summary.totalSteps)")
+            CRITICAL_PASSED=$(node -e "console.log(require('./${ARTIFACT_DIR}/report.json').summary.criticalPassed)")
+            CRITICAL_TOTAL=$(node -e "const r=require('./${ARTIFACT_DIR}/report.json'); console.log(r.summary.criticalPassed + r.summary.criticalFailed)")
+
+            echo "**Status:** ${STATUS}" >> $GITHUB_STEP_SUMMARY
+            echo "**Steps:** ${PASSED}/${TOTAL} passed" >> $GITHUB_STEP_SUMMARY
+            echo "**Critical Steps:** ${CRITICAL_PASSED}/${CRITICAL_TOTAL} passed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Artifacts:** \`artifacts/ga-proof/${{ github.sha }}/\`" >> $GITHUB_STEP_SUMMARY
+            echo "**Readiness Marker:** \`GA_READY.json\`" >> $GITHUB_STEP_SUMMARY
+          fi
