@@ -200,7 +200,19 @@ export default function AlertsPage() {
           icon="alert"
           title="Failed to load alerts"
           description={error.message}
-          action={{ label: 'Retry', onClick: () => window.location.reload() }}
+          action={{ label: 'Retry', onClick: () => window.location.reload(), variant: 'default' }}
+          quickActions={[
+            {
+              label: 'View Demo Data',
+              onClick: () => (window.location.href = '/demo'),
+              id: 'demo',
+            },
+            {
+              label: 'Check Settings',
+              onClick: () => (window.location.href = '/data/sources'),
+              id: 'settings',
+            },
+          ]}
         />
       </div>
     )
@@ -312,7 +324,7 @@ export default function AlertsPage() {
             <EmptyState
               icon="search"
               title="No alerts found"
-              description="Try adjusting your filters or search criteria"
+              description="Try adjusting your filters or search criteria to find what you're looking for"
               action={{
                 label: 'Clear Filters',
                 onClick: () => {
@@ -321,6 +333,22 @@ export default function AlertsPage() {
                   setSelectedStatus('')
                 },
               }}
+              quickActions={
+                alerts.length === 0
+                  ? [
+                      {
+                        label: 'Connect Data Source',
+                        onClick: () => (window.location.href = '/data/sources'),
+                        id: 'connect-data',
+                      },
+                      {
+                        label: 'View Demo',
+                        onClick: () => (window.location.href = '/demo'),
+                        id: 'view-demo',
+                      },
+                    ]
+                  : undefined
+              }
             />
           ) : (
             <Table>

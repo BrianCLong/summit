@@ -176,7 +176,28 @@ export default function HomePage() {
             <EmptyState
               icon="chart"
               title="No live metrics"
-              description="Connect a data source to populate KPI metrics."
+              description="Connect a data source to populate KPI metrics and start monitoring your intelligence operations."
+              action={{
+                label: 'Connect Data Source',
+                onClick: () => navigate('/data/sources'),
+              }}
+              quickActions={[
+                {
+                  label: 'View Demo',
+                  onClick: () => navigate('/demo'),
+                  id: 'view-demo',
+                },
+                {
+                  label: 'Explore Platform',
+                  onClick: () => navigate('/explore'),
+                  id: 'explore',
+                },
+                {
+                  label: 'Read Documentation',
+                  onClick: () => navigate('/help'),
+                  id: 'help',
+                },
+              ]}
             />
           </div>
         )}
