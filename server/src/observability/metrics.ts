@@ -29,6 +29,7 @@ import {
   maestroJobExecutionDurationSeconds,
   // LLM Metrics
   llmTokensTotal,
+  llmCostTotal,
   llmRequestDuration,
   // New Metrics from metrics.js
   intelgraphCacheHits,
@@ -77,6 +78,7 @@ export {
   maestroDagExecutionDurationSeconds,
   maestroJobExecutionDurationSeconds,
   llmTokensTotal,
+  llmCostTotal,
   llmRequestDuration,
   intelgraphCacheHits,
   intelgraphCacheMisses,
@@ -122,6 +124,7 @@ export const metrics = {
   maestroDagExecutionDurationSeconds,
   maestroJobExecutionDurationSeconds,
   llmTokensTotal,
+  llmCostTotal,
   llmRequestDuration,
   intelgraphCacheHits,
   intelgraphCacheMisses,
