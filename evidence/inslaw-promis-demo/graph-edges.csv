@@ -1,5 +1,0 @@
-source_id,relationship,target_id,evidence_ref,confidence
-ENT-AFF-0001,AFFIRMS,CLM-AFF-0001,affidavit:pending,0.3
-ENT-AFF-0001,AFFIRMS,CLM-AFF-0002,affidavit:pending,0.3
-ENT-AFF-0002,DEVELOPED,ENT-AFF-0003,affidavit:pending,0.4
-ENT-AFF-0004,INTERACTED_WITH,ENT-AFF-0002,affidavit:pending,0.4
