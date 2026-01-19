@@ -17,3 +17,6 @@ langchain_community
 pytest-cov
 requests
 urllib3>=2.6.0
+psycopg2-binary
+neo4j
+tenacity

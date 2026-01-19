@@ -1,0 +1,5 @@
+namespace: summit
+producer: summit-openlineage-producer-v1
+endpoint: http://localhost:5000/api/v1/lineage
+enabled: true
+log_path: lineage_events.log

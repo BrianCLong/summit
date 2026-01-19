@@ -1,0 +1,38 @@
+{
+  "prefix": {
+    "summit": "https://summit.intelgraph/provenance/",
+    "prov": "http://www.w3.org/ns/prov#"
+  },
+  "entity": {
+    "summit:artifact:summit-example-artifact": {
+      "prov:label": "summit-example-artifact",
+      "summit:digest": "d41d8cd98f00b204e9800998ecf8427e"
+    }
+  },
+  "activity": {
+    "summit:activity:.github_workflows_security-gate.yml": {
+      "prov:label": ".github/workflows/security-gate.yml",
+      "summit:uri": "git+https://github.com/summit/summit"
+    }
+  },
+  "agent": {
+    "summit:agent:builder": {
+      "prov:label": "https://github.com/summit/actions/builder",
+      "prov:type": "prov:SoftwareAgent"
+    }
+  },
+  "wasGeneratedBy": {
+    "_:86ee43df": {
+      "prov:entity": "summit:artifact:summit-example-artifact",
+      "prov:activity": "summit:activity:.github_workflows_security-gate.yml"
+    }
+  },
+  "used": {},
+  "wasAssociatedWith": {
+    "_:49a07e9c": {
+      "prov:activity": "summit:activity:.github_workflows_security-gate.yml",
+      "prov:agent": "summit:agent:builder"
+    }
+  },
+  "wasAttributedTo": {}
+}

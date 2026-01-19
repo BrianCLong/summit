@@ -1,0 +1,32 @@
+type LineageNode @node {
+    id: ID! @id
+    name: String!
+    type: String! # e.g., table, view, column
+    namespace: String!
+    dataSourceUri: String
+    createdAt: DateTime @timestamp(operations: [CREATE])
+
+    # Relationships
+    inputs: [LineageNode!]! @relationship(type: "DEPENDS_ON", direction: IN)
+    outputs: [LineageNode!]! @relationship(type: "DEPENDS_ON", direction: OUT)
+
+    # Associated Jobs/Activities
+    activities: [ActivityNode!]! @relationship(type: "PRODUCED_BY", direction: IN)
+}
+
+type ActivityNode @node {
+    id: ID! @id
+    runId: String! @unique
+    jobName: String!
+    status: String!
+    startedAt: DateTime
+    completedAt: DateTime
+
+    # Relationships
+    inputs: [LineageNode!]! @relationship(type: "USED", direction: OUT)
+    outputs: [LineageNode!]! @relationship(type: "PRODUCED", direction: OUT)
+}
+
+extend type Query {
+    lineageTrace(id: ID!, depth: Int = 5): [LineageNode!]!
+}
