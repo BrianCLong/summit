@@ -1,0 +1,41 @@
+name: "Verify Build + Signatures"
+
+on:
+  workflow_run:
+    workflows: [ "Build + Prove + Sign" ]
+    types: [ completed ]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    environment: production
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: supply-chain-evidence
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.8.0
+
+      - name: Verify Signatures
+        run: |
+          echo "${{ secrets.COSIGN_PUB_KEY }}" > cosign.pub
+          # Verify SBOMs
+          for f in build/sbom/*.json; do
+            cosign verify-blob --key cosign.pub --bundle "$f.bundle" "$f"
+          done
+          # Verify Provenance
+          cosign verify-blob --key cosign.pub --bundle .slsa/provenance.bundle .slsa/provenance.link
+          rm -f cosign.pub
+
+      - name: Validate SBOM Presence
+        run: |
+          test -f build/sbom/sbom.spdx.json
+          test -f build/sbom/sbom.cdx.json
+          echo "SBOMs are present."
