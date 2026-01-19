@@ -2,7 +2,7 @@
 
 **Status:** Active (MVP-4)
 **Owner:** Platform Engineering
-**Last Updated:** 2026-01-08
+**Last Updated:** 2026-01-14
 
 ---
 
@@ -22,58 +22,36 @@ Without drift detection:
 
 Automated daily comparison that:
 
-1. Extracts always-required checks from policy
+1. Extracts required checks from policy (`branch_protection` section)
 2. Queries GitHub branch protection API
-3. Reports mismatches with remediation steps
-4. Creates/updates deduped issues when drift exists
+3. Reports mismatches (Missing vs Extra)
+4. Filters out allowed exceptions (`REQUIRED_CHECKS_EXCEPTIONS.yml`)
+5. Creates/updates deduped issues when drift exists
 
 ---
 
 ## How It Works
 
-### Policy Extraction
+### Script
 
-The `extract_required_checks_from_policy.sh` script reads `REQUIRED_CHECKS_POLICY.yml` and extracts the `always_required` check names.
-
-```bash
-# Extract policy requirements
-./scripts/release/extract_required_checks_from_policy.sh
-
-# Output:
-{
-  "always_required": ["Release Readiness Gate", "GA Gate", "Unit Tests & Coverage", "CI Core (Primary Gate)"],
-  "policy_version": "2.0.0",
-  "count": 4
-}
-```
-
-### Drift Detection
-
-The `check_branch_protection_drift.sh` script:
-
-1. Extracts policy requirements
-2. Queries GitHub API for branch protection
-3. Compares the two sets
-4. Generates a report
+The detection logic uses a Node.js script: `scripts/ci/check_branch_protection_drift.mjs`.
 
 ```bash
-# Check for drift
-./scripts/release/check_branch_protection_drift.sh --branch main
-
-# Outputs:
-# - artifacts/release-train/branch_protection_drift_report.md
-# - artifacts/release-train/branch_protection_drift_report.json
+# Run drift check
+node scripts/ci/check_branch_protection_drift.mjs --branch main
 ```
 
-### API Endpoint
+### Policy
 
-The script queries:
+The script reads `docs/ci/REQUIRED_CHECKS_POLICY.yml`, specifically the `branch_protection.required_status_checks.contexts` section.
 
-```
-GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
-```
+### Exceptions
 
-This returns the list of required status check contexts.
+The script reads `docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml` to filter out known/allowed mismatches.
+
+### Workflow
+
+The `.github/workflows/branch-protection-drift.yml` workflow runs daily and on policy changes.
 
 ---
 
@@ -81,19 +59,19 @@ This returns the list of required status check contexts.
 
 ### Missing in GitHub
 
-Checks that are required by policy but NOT enforced in branch protection.
+Checks that are listed in `REQUIRED_CHECKS_POLICY.yml` but NOT enforced in GitHub branch protection.
 
 **Risk:** PRs can merge without these checks passing.
 
-**Remediation:** Add the checks to branch protection settings.
+**Remediation:** Add the checks to GitHub branch protection settings.
 
 ### Extra in GitHub
 
-Checks that are enforced by GitHub but NOT listed in policy.
+Checks that are enforced by GitHub but NOT listed in `REQUIRED_CHECKS_POLICY.yml`.
 
 **Risk:** Documentation is inaccurate; policy doesn't reflect reality.
 
-**Remediation:** Either add to policy or remove from branch protection.
+**Remediation:** Either add to policy or remove from GitHub branch protection.
 
 ---
 
@@ -101,49 +79,30 @@ Checks that are enforced by GitHub but NOT listed in policy.
 
 ### Prerequisites
 
+- Node.js 18+
 - `gh` CLI authenticated with repo access
-- `jq` for JSON processing
-- (Optional) `yq` for YAML parsing
+- Dependencies installed (`pnpm install`)
 
 ### Commands
 
 ```bash
 # Check main branch
-./scripts/release/check_branch_protection_drift.sh --branch main --verbose
+node scripts/ci/check_branch_protection_drift.mjs --branch main
 
 # Check specific repo
-./scripts/release/check_branch_protection_drift.sh --repo owner/repo --branch main
+node scripts/ci/check_branch_protection_drift.mjs --repo owner/repo --branch main
 
 # Output to custom directory
-./scripts/release/check_branch_protection_drift.sh --out-dir ./my-reports
+node scripts/ci/check_branch_protection_drift.mjs --out artifacts/report
 ```
 
 ### Exit Codes
 
-The script always exits 0 (advisory mode). Check the JSON output for `drift_detected: true|false`.
+- `0`: Success (Drift may be detected, but script execution was successful)
+- `1`: Reserved
+- `2`: Error (API failure, config error)
 
----
-
-## Workflow
-
-### Triggers
-
-| Trigger  | Schedule          | Purpose                  |
-| -------- | ----------------- | ------------------------ |
-| Schedule | Daily 10:00 UTC   | Routine drift check      |
-| PR       | On policy changes | Catch drift before merge |
-| Manual   | workflow_dispatch | Ad-hoc checks            |
-
-### Behavior
-
-1. Runs drift detection script
-2. Uploads report artifact
-3. If drift detected:
-   - Checks dedup state (24h cooldown)
-   - Creates or updates issue
-   - Commits state update
-4. If no drift:
-   - Auto-closes existing drift issues
+Check the JSON output `drift_detected` field to see if drift was found.
 
 ---
 
@@ -158,10 +117,6 @@ Issues are deduplicated by a key combining:
 - Number of extra checks
 
 If the drift signature changes, a new issue is created.
-
-### Rate Limiting
-
-Issues are only updated once per 24 hours to avoid spam.
 
 ### Auto-Close
 
@@ -186,157 +141,11 @@ Reading branch protection requires one of:
 - Admin access to the repository
 - `read:org` scope (for organization repos)
 
-If permissions are insufficient, the script reports the limitation and creates an issue explaining the access requirement.
-
----
-
-## Graceful Degradation
-
-If the API is inaccessible:
-
-1. Script reports the specific error
-2. Drift is treated as "unknown" (potential drift)
-3. Issue is created explaining the permission limitation
-4. Report includes remediation steps for access
-
----
-
-## Example Drift Report
-
-```markdown
-# Branch Protection Drift Report
-
-**Repository:** org/repo
-**Branch:** main
-**Drift Detected:** true
-
-## Summary
-
-| Metric             | Value |
-| ------------------ | ----- |
-| Policy Check Count | 4     |
-| GitHub Check Count | 3     |
-| Missing in GitHub  | 1     |
-| Extra in GitHub    | 0     |
-
-## Missing in GitHub Branch Protection
-
-These checks are required by policy but NOT enforced:
-
-- `Unit Tests & Coverage`
-
-### Remediation
-
-1. Go to Settings → Branches → Branch protection rules
-2. Edit the rule for `main`
-3. Add `Unit Tests & Coverage` to required status checks
-```
-
----
-
-## Remediation Steps
-
-### Adding Missing Checks to GitHub
-
-**Via UI:**
-
-1. Go to **Settings** → **Branches**
-2. Click **Edit** on the branch rule
-3. Under "Require status checks to pass":
-   - Enable if not already
-   - Search for and add missing checks
-4. Save changes
-
-**Via CLI:**
-
-```bash
-# View current protection
-gh api repos/OWNER/REPO/branches/main/protection/required_status_checks
-
-# Note: Updating requires admin access
-```
-
-### Removing Extra Checks from GitHub
-
-1. Go to **Settings** → **Branches**
-2. Click **Edit** on the branch rule
-3. Remove the extra checks from required status checks
-4. Save changes
-
-### Updating Policy to Match GitHub
-
-1. Edit `docs/ci/REQUIRED_CHECKS_POLICY.yml`
-2. Add/remove entries from `always_required` section
-3. Create PR for review
-
----
-
-## State Files
-
-### Drift State
-
-Location: `docs/releases/_state/branch_protection_drift_state.json`
-
-```json
-{
-  "version": "1.0",
-  "issues": {
-    "main_1_0": {
-      "issue_number": 123,
-      "last_updated": "2026-01-08T10:00:00Z",
-      "drift_key": "main_1_0"
-    }
-  }
-}
-```
-
----
-
-## Troubleshooting
-
-### "Insufficient permissions" Error
-
-The GitHub token lacks access to read branch protection.
-
-**Solution:**
-
-- Ensure workflow has appropriate permissions
-- For organization repos, may need `read:org` scope
-- Contact admin to verify token access
-
-### No Drift Detected but Expected
-
-1. Verify the policy file path is correct
-2. Check the `always_required` section has entries
-3. Run with `--verbose` to see extracted checks
-4. Verify branch protection is actually configured
-
-### Issues Not Creating
-
-1. Check workflow has `issues: write` permission
-2. Verify state file is not locked
-3. Check cooldown period (24h between updates)
-4. Review workflow run logs
-
 ---
 
 ## References
 
-- **Extraction Script**: `scripts/release/extract_required_checks_from_policy.sh`
-- **Drift Script**: `scripts/release/check_branch_protection_drift.sh`
+- **Script**: `scripts/ci/check_branch_protection_drift.mjs`
 - **Workflow**: `.github/workflows/branch-protection-drift.yml`
-- **State File**: `docs/releases/_state/branch_protection_drift_state.json`
 - **Policy File**: `docs/ci/REQUIRED_CHECKS_POLICY.yml`
-
----
-
-## Change History
-
-| Version | Date       | Changes                                   |
-| ------- | ---------- | ----------------------------------------- |
-| 1.0.0   | 2026-01-08 | Initial branch protection drift detection |
-
----
-
-**Document Authority**: Platform Engineering
-**Next Review**: 2026-02-08 (or before MVP-5 kickoff)
+- **Exceptions File**: `docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml`

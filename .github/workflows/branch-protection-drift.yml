@@ -53,6 +53,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install -g pnpm && pnpm install
+
       - name: Determine Branch
         id: branch
         run: |
@@ -71,10 +79,8 @@ jobs:
         run: |
           mkdir -p "${{ env.OUT_DIR }}"
 
-          chmod +x scripts/release/check_branch_protection_drift.sh
-          chmod +x scripts/release/extract_required_checks_from_policy.sh
-
-          scripts/release/check_branch_protection_drift.sh \
+          # Use Node.js script (pnpm ci:branch-protection:check)
+          node scripts/ci/check_branch_protection_drift.mjs \
             --repo "${{ github.repository }}" \
             --branch "${{ steps.branch.outputs.branch }}" \
             --out-dir "${{ env.OUT_DIR }}" \
