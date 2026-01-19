@@ -152,9 +152,9 @@ jobs:
 
       - name: Install Cosign
         if: inputs.sign
-        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
+        uses: sigstore/cosign-installer@v4
         with:
-          cosign-release: v2.2.4
+          cosign-release: v3.5.0
 
       - name: Sign image (OIDC keyless)
         if: inputs.sign && inputs.push
@@ -164,6 +164,7 @@ jobs:
           IMAGE="${{ steps.image-uri.outputs.uri }}"
 
           cosign sign --yes \
+            --bundle cosign.bundle.json \
             -a "repo=${{ github.repository }}" \
             -a "ref=${{ github.ref }}" \
             -a "sha=${{ github.sha }}" \
@@ -188,7 +189,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.4.1
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.39.0
 
           if [ "${{ inputs.push }}" = "true" ]; then
             IMAGE="${{ steps.image-uri.outputs.uri }}"
@@ -243,6 +244,7 @@ jobs:
           path: |
             sbom.cdx.json
             sbom.spdx.json
+            cosign.bundle.json
           retention-days: 90
 
   # SLSA provenance generation using official generator

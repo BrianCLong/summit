@@ -78,7 +78,7 @@ jobs:
           grype version
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@053f9b74638557590800a301da1ba82351507e2c # v3.8.1
+        uses: sigstore/cosign-installer@v4
 
       # Set version variables
       - name: Set version variables
@@ -183,7 +183,7 @@ jobs:
           # Sign container image with keyless signing
           if [ -f "Dockerfile" ] && [ -n "$DOCKER_TAG" ]; then
             echo "Signing container image: $DOCKER_IMAGE:$DOCKER_TAG"
-            cosign sign --yes $DOCKER_IMAGE:$DOCKER_TAG
+            cosign sign --yes --bundle cosign.bundle.json $DOCKER_IMAGE:$DOCKER_TAG
             
             # Verify the signature
             cosign verify $DOCKER_IMAGE:$DOCKER_TAG --certificate-identity-regexp=".*" --certificate-oidc-issuer-regexp=".*"
@@ -246,6 +246,15 @@ jobs:
         with:
           name: sboms-source-${{ needs.supply-chain-integrity.outputs.release-version }}
           path: ./sboms
+
+      - name: Install Conftest
+        uses: open-policy-agent/conftest-action@v1
+        with:
+          version: v0.48.0
+
+      - name: Run Policy Check
+        run: |
+          conftest test --policy policy/supply_chain.rego .
 
       - name: Download Source Vulnerability Reports
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7

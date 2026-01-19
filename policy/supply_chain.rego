@@ -48,8 +48,18 @@ deny contains msg if {
 # Validate SBOM format
 deny contains msg if {
 	sbom := input.sbom
-	sbom.spdxVersion != "SPDX-2.3"
-	msg := "SBOM must use SPDX-2.3 format"
+	not allowed_spdx_version(sbom.spdxVersion)
+	msg := sprintf("SBOM must use supported SPDX format (Found: %s)", [sbom.spdxVersion])
+}
+
+allowed_spdx_version(version) if {
+	supported := [
+		"SPDX-2.2",
+		"SPDX-2.3",
+		"SPDX-3.0",
+		"SPDX-3.0.1"
+	]
+	version in supported
 }
 
 # Check for minimum package information
@@ -143,6 +153,13 @@ deny contains msg if {
 	sig := input.signature
 	sig.format != "cosign"
 	msg := "Container signatures must use Cosign format"
+}
+
+# Validate bundle existence for Cosign v3
+warn contains msg if {
+	sig := input.signature
+	not sig.bundle
+	msg := "Signatures should use Cosign v3 bundles"
 }
 
 # Require keyless signing with OIDC

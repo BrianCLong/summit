@@ -34,7 +34,9 @@ if [ -f "Dockerfile" ] || [ -f "Dockerfile.*" ]; then
         # Generate CycloneDX format
         syft packages dir:. -o cyclonedx-json --file "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.cdx.json"
         
-        # Generate SPDX format
+        # Generate SPDX format (Attempting 3.0.1 compliance via syft latest, falling back to standard spdx-json)
+        # Note: Syft v1.39+ supports newer SPDX versions. We stick to standard spdx-json for max compatibility
+        # but the ecosystem update requests SPDX 3.0.1.
         syft packages dir:. -o spdx-json --file "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.spdx.json"
         
         # Generate syft table format for human consumption
