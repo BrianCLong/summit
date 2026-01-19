@@ -1,0 +1,251 @@
+{
+  "schema_version": "1.0",
+  "generated_for": "Summit",
+  "index_date": "2026-01-14",
+  "artifact_contract": {
+    "required_files": [
+      "{artifact_root}/{YYYY-MM-DD}.md",
+      "{artifact_root}/{YYYY-MM-DD}.json",
+      "{artifact_root}/{YYYY-MM-DD}.stamp.json"
+    ],
+    "cross_system_targets": [
+      "github_projects",
+      "linear",
+      "jira",
+      "notion"
+    ],
+    "determinism": {
+      "stable_outputs_no_timestamps": true,
+      "stamp_file_allows_generated_at": true
+    }
+  },
+  "meetings": [
+    {
+      "id": 1,
+      "name": "Daily Standup (Orchestrator)",
+      "priority": 1,
+      "cadence": "daily",
+      "primary_owner_agent": "Jules",
+      "artifact_root": "docs/standup",
+      "goal": "Align execution, produce daily plan, dispatch agents"
+    },
+    {
+      "id": 2,
+      "name": "CI Health & Merge Readiness Triage",
+      "priority": 2,
+      "cadence": "daily",
+      "primary_owner_agent": "Jules",
+      "artifact_root": "docs/ci/triage",
+      "goal": "Keep required checks green; burn down CI failures"
+    },
+    {
+      "id": 3,
+      "name": "PR Merge Board Review (Oldest-First)",
+      "priority": 3,
+      "cadence": "daily",
+      "primary_owner_agent": "Jules",
+      "artifact_root": "docs/merge/standup",
+      "goal": "Maximize merge throughput without breaking gates"
+    },
+    {
+      "id": 4,
+      "name": "GA Evidence & Governance Gate Review",
+      "priority": 4,
+      "cadence": "daily_until_stable_then_2-3x_week",
+      "primary_owner_agent": "Antigravity",
+      "artifact_root": "docs/ga/review",
+      "goal": "Evidence completeness, governance integrity, determinism"
+    },
+    {
+      "id": 5,
+      "name": "Release Captain Checkpoint",
+      "priority": 5,
+      "cadence": "2-3x_week_daily_in_release_week",
+      "primary_owner_agent": "Atlas",
+      "artifact_root": "docs/releases/checkpoint",
+      "goal": "Candidate selection, go/no-go, merge train, cut plan"
+    },
+    {
+      "id": 6,
+      "name": "Security Posture & Supply-Chain Integrity Standup",
+      "priority": 6,
+      "cadence": "weekly_2x_week_pre_ga",
+      "primary_owner_agent": "Antigravity",
+      "artifact_root": "docs/security/standup",
+      "goal": "Vulnerabilities, SBOM/provenance, policy violations"
+    },
+    {
+      "id": 7,
+      "name": "Architecture & Design Review Board",
+      "priority": 7,
+      "cadence": "weekly",
+      "primary_owner_agent": "Claude Code",
+      "artifact_root": "docs/architecture/review",
+      "goal": "Durable decisions, interface contracts, risk-managed change",
+      "additional_outputs": [
+        "docs/architecture/adr/ADR-{NNNN}-{slug}.md (as needed)"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Roadmap / Backlog Grooming & Scoring",
+      "priority": 8,
+      "cadence": "weekly",
+      "primary_owner_agent": "Jules",
+      "artifact_root": "docs/roadmap/grooming",
+      "goal": "Keep Next saturated with executable, scored work"
+    },
+    {
+      "id": 9,
+      "name": "Operational Readiness Review (ORR)",
+      "priority": 9,
+      "cadence": "weekly_2x_week_pre_ga",
+      "primary_owner_agent": "Jules",
+      "artifact_root": "docs/ops/orr",
+      "goal": "SLOs, runbooks, alerting, deploy verification, DR readiness"
+    },
+    {
+      "id": 10,
+      "name": "Demo / Narrative Readiness Sync",
+      "priority": 10,
+      "cadence": "weekly_ramp_before_demos",
+      "primary_owner_agent": "Jules",
+      "artifact_root": "docs/demo/sync",
+      "goal": "Demo reliability, seeded states, fallback package"
+    },
+    {
+      "id": 11,
+      "name": "Retrospective & Process Improvement",
+      "priority": 11,
+      "cadence": "biweekly",
+      "primary_owner_agent": "Jules",
+      "artifact_root": "docs/process/retro",
+      "goal": "Convert failure modes into durable improvements"
+    },
+    {
+      "id": 12,
+      "name": "Compliance & Audit Pack Review",
+      "priority": 12,
+      "cadence": "weekly_2x_week_pre_ga",
+      "primary_owner_agent": "Antigravity",
+      "artifact_root": "docs/compliance/review",
+      "goal": "Control coverage, evidence freshness, exceptions lifecycle"
+    },
+    {
+      "id": 13,
+      "name": "Incident Review & Postmortem Triage",
+      "priority": 13,
+      "cadence": "weekly_and_after_sev1_sev2",
+      "primary_owner_agent": "Jules",
+      "artifact_root": "docs/ops/incidents/review",
+      "goal": "Root causes, corrective actions, prevention gates"
+    },
+    {
+      "id": 14,
+      "name": "Performance, Reliability, and Cost Review (FinOps)",
+      "priority": 14,
+      "cadence": "biweekly_weekly_pre_scale",
+      "primary_owner_agent": "Claude Code",
+      "artifact_root": "docs/perf/review",
+      "goal": "Budgets, regressions, hotspots, cost controls"
+    },
+    {
+      "id": 15,
+      "name": "Documentation & Knowledge Base Hygiene Review",
+      "priority": 15,
+      "cadence": "weekly",
+      "primary_owner_agent": "Jules",
+      "artifact_root": "docs/docs-hygiene/review",
+      "goal": "Reduce drift, broken links, policy violations"
+    },
+    {
+      "id": 16,
+      "name": "Customer Signal & Feedback Triage",
+      "priority": 16,
+      "cadence": "weekly_2-3x_week_in_pilots",
+      "primary_owner_agent": "Jules",
+      "artifact_root": "docs/feedback/triage",
+      "goal": "Convert feedback into prioritized, testable work"
+    },
+    {
+      "id": 17,
+      "name": "Data Quality, Provenance, and Graph Integrity Review",
+      "priority": 17,
+      "cadence": "weekly_2x_week_during_heavy_ingest",
+      "primary_owner_agent": "Claude Code",
+      "artifact_root": "docs/data/review",
+      "goal": "Correctness, provenance, ER stability, integrity tests"
+    },
+    {
+      "id": 18,
+      "name": "Access, Permissions, and Secrets Governance Review",
+      "priority": 18,
+      "cadence": "weekly_2x_week_pre_ga",
+      "primary_owner_agent": "Antigravity",
+      "artifact_root": "docs/security/access-review",
+      "goal": "Least privilege, secrets hygiene, CI token posture"
+    },
+    {
+      "id": 19,
+      "name": "Integrations & Partner Reliability Review",
+      "priority": 19,
+      "cadence": "weekly_more_during_onboarding",
+      "primary_owner_agent": "Claude Code",
+      "artifact_root": "docs/integrations/review",
+      "goal": "Contract stability, resilience, deterministic test strategy"
+    },
+    {
+      "id": 20,
+      "name": "Test Strategy, Coverage, and Flake Governance Review",
+      "priority": 20,
+      "cadence": "biweekly_weekly_during_stabilization",
+      "primary_owner_agent": "Jules",
+      "artifact_root": "docs/testing/review",
+      "goal": "Flake burn-down, hang mitigation, risk-based coverage"
+    },
+    {
+      "id": 21,
+      "name": "Privacy, Data Retention, and Deletion Lifecycle Review",
+      "priority": 21,
+      "cadence": "monthly_biweekly_pre_ga",
+      "primary_owner_agent": "Antigravity",
+      "artifact_root": "docs/privacy/review",
+      "goal": "Retention/deletion policy, verification, no-PII artifacts"
+    },
+    {
+      "id": 22,
+      "name": "UX Consistency & Design System Review",
+      "priority": 22,
+      "cadence": "biweekly_weekly_during_ui_churn",
+      "primary_owner_agent": "Jules",
+      "artifact_root": "docs/ux/review",
+      "goal": "Prevent UI drift; accessibility; flow reliability"
+    },
+    {
+      "id": 23,
+      "name": "Developer Experience, Tooling, and Workflow Review",
+      "priority": 23,
+      "cadence": "biweekly",
+      "primary_owner_agent": "Jules",
+      "artifact_root": "docs/dx/review",
+      "goal": "Reduce setup friction; CI/local parity; tooling guardrails"
+    },
+    {
+      "id": 24,
+      "name": "Dependency Lifecycle, Upgrade, and Deprecation Review",
+      "priority": 24,
+      "cadence": "monthly_biweekly_during_stabilization",
+      "primary_owner_agent": "Antigravity",
+      "artifact_root": "docs/deps/review",
+      "goal": "Predictable upgrades, lockfile integrity, policy checks"
+    }
+  ],
+  "agent_role_mapping": {
+    "Jules": "Coordinator/PM execution; triage; roadmap; docs; demos; retros; DX; testing governance",
+    "Atlas": "Release captain; required checks; merge sequencing; cut/go-no-go",
+    "Antigravity": "Governance/evidence; compliance; supply-chain integrity; access/secrets; privacy; dependency policy",
+    "Claude Code": "Architecture; contracts; perf/cost; data/provenance; integration reliability; risk-managed refactors",
+    "Codex CLI": "Deterministic implementation of work orders into PR-ready diffs",
+    "Qwen": "Replay/cache-only analysis; never introduces nondeterminism on critical path"
+  }
+}
