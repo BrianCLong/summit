@@ -55,6 +55,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: multi-agent-topology-update
+    version: v1
+    path: prompts/docs/multi-agent-topology-update@v1.md
+    sha256: 1cf4621d95d470046496b47bce303fc8bb465007abcd8c0a0ddd0d0e87c9dc72
+    description: Update orchestration documentation with coordinator-first topology guidance.
+    scope:
+      paths:
+        - docs/orchestration/
+        - docs/roadmap/STATUS.json
+        - prompts/docs/multi-agent-topology-update@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - orchestration
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
