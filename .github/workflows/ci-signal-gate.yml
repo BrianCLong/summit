@@ -1,0 +1,127 @@
+name: CI Signal Gate
+
+# Monitors CI health metrics and enforces quality thresholds
+# Prevents merging when CI infrastructure is degraded
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "*/30 * * * *" # Every 30 minutes
+  workflow_dispatch:
+    inputs:
+      sample_size:
+        description: "Number of runs to analyze"
+        default: "100"
+        type: string
+
+concurrency:
+  group: ci-signal-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: write
+
+jobs:
+  gate:
+    name: CI Signal Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup GitHub CLI
+        run: gh auth setup-git
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Harvest CI run data
+        run: |
+          chmod +x scripts/ci/harvest_actions.sh
+          scripts/ci/harvest_actions.sh "${{ github.repository }}" "${{ inputs.sample_size || '100' }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute metrics
+        run: |
+          jq -f scripts/ci/compute_metrics.jq runs_raw.json > runs_metrics.json
+          echo "=== CI Metrics Summary ==="
+          jq . runs_metrics.json
+
+      - name: Enforce policy
+        id: enforce
+        run: |
+          chmod +x scripts/ci/enforce_policy.sh
+          scripts/ci/enforce_policy.sh runs_metrics.json .ci/policy.json
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ci-signal-${{ github.run_number }}
+          path: |
+            runs_raw.json
+            runs_metrics.json
+          retention-days: 30
+
+      - name: Comment on PR (if degraded)
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const metrics = JSON.parse(fs.readFileSync('runs_metrics.json', 'utf8'));
+            const policy = JSON.parse(fs.readFileSync('.ci/policy.json', 'utf8'));
+
+            const body = `## CI Signal Gate: Degraded
+
+            CI infrastructure is currently experiencing issues. Merging is temporarily blocked.
+
+            | Metric | Current | Threshold |
+            |--------|---------|-----------|
+            | Success Rate | ${metrics.success_rate_pct}% | >= ${policy.min_success_rate_pct}% |
+            | Queue P50 | ${metrics.queue_s.p50}s | <= ${policy.max_queue_p50_s}s |
+            | Sample Size | ${metrics.sample_size} | - |
+
+            **Action:** Wait for CI to stabilize before merging.
+
+            <details>
+            <summary>Top workflows by volume</summary>
+
+            \`\`\`json
+            ${JSON.stringify(metrics.by_workflow.slice(0, 5), null, 2)}
+            \`\`\`
+            </details>`;
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+
+      - name: Summary
+        if: always()
+        run: |
+          if [[ -f runs_metrics.json ]]; then
+            cat <<EOF >> $GITHUB_STEP_SUMMARY
+          ## CI Signal Gate Results
+
+          | Metric | Value |
+          |--------|-------|
+          | Sample Size | $(jq -r '.sample_size' runs_metrics.json) |
+          | Success Rate | $(jq -r '.success_rate_pct' runs_metrics.json)% |
+          | Queue P50 | $(jq -r '.queue_s.p50 // "N/A"' runs_metrics.json)s |
+          | Queue P95 | $(jq -r '.queue_s.p95 // "N/A"' runs_metrics.json)s |
+          | Run P50 | $(jq -r '.run_s.p50 // "N/A"' runs_metrics.json)s |
+          | Run P95 | $(jq -r '.run_s.p95 // "N/A"' runs_metrics.json)s |
+
+          ### Policy Thresholds
+          - Max Queue P50: $(jq -r '.max_queue_p50_s' .ci/policy.json)s
+          - Min Success Rate: $(jq -r '.min_success_rate_pct' .ci/policy.json)%
+          EOF
+          fi
