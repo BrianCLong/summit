@@ -20,3 +20,8 @@
 
 **Learning:** Even when assigned a focused task (e.g., UX), one may inherit a broken branch or be required to fix blocking architectural issues (e.g., API drift, Type mismatches) to land changes.
 **Action:** Be prepared to step outside the assigned persona to unblock the build.
+
+## 2025-10-29 - Mixed Extension Confusion
+
+**Learning:** Mixed usage of `.tsx` and `.jsx` for the same components leads to ambiguity and test failures (e.g., resolving the wrong file), wasting time on debugging environment instead of UX.
+**Action:** When spotting duplicate files with different extensions, prioritize cleanup/consolidation as a prerequisite to UX improvements.
