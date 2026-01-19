@@ -15,3 +15,8 @@
 1.  **Mandatory Middleware:** Apply `ensureAuthenticated` at the router level (`router.use(...)`) or use a linter rule to enforce it on all route definitions.
 2.  **Authoritative Binding:** Never trust client-provided `tenantId` for authorization. Always overwrite or validate it against the trusted `req.user` context.
 3.  **Strict Role Checks:** Use explicit role checks (e.g., `req.user.role === 'ADMIN'`) for sensitive administrative endpoints like DLQ.
+
+## 2025-10-26 - [HIGH] DOM-based Reflected XSS in IntelligentCopilot
+**Vulnerability:** The `IntelligentCopilot` component reflected user input directly into `dangerouslySetInnerHTML` after only a simple regex replacement for bold markdown (`**text**`). This allowed arbitrary HTML/JS injection via chat messages.
+**Learning:** Partial formatting (like regex replacement) does not make input safe for `dangerouslySetInnerHTML`. It is easy to overlook the original input leaking through if the regex doesn't match the entire string or if it leaves non-matching parts untouched.
+**Prevention:** Always sanitize input using a library like DOMPurify or explicitly escape HTML entities before using `dangerouslySetInnerHTML`. Preferably, use safe React components or markdown renderers that handle sanitization automatically.

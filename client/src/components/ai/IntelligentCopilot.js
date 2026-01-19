@@ -149,6 +149,17 @@ const aiInsights = [
   '🔍 Cross-reference opportunity with Case #34B',
 ];
 
+// Helper to escape HTML characters to prevent XSS
+const escapeHtml = (text) => {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
 function ChatMessage({ message, isUser, isLoading }) {
   return (
     <ListItem
@@ -188,7 +199,7 @@ function ChatMessage({ message, isUser, isLoading }) {
                   '& em': { fontStyle: 'italic' },
                 }}
                 dangerouslySetInnerHTML={{
-                  __html: message.replace(
+                  __html: escapeHtml(message).replace(
                     /\*\*(.*?)\*\*/g,
                     '<strong>$1</strong>',
                   ),
