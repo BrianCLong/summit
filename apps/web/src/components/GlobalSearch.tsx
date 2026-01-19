@@ -120,10 +120,17 @@ export function GlobalSearch() {
       return
     }
 
-    setLoading(true)
-    searchFunction(query)
-      .then(setResults)
-      .finally(() => setLoading(false))
+    // Performance Optimization: Debounce search execution by 300ms.
+    // This prevents firing a search request (and state update) for every keystroke,
+    // significantly reducing unnecessary re-renders and potential API calls.
+    const timerId = setTimeout(() => {
+      setLoading(true)
+      searchFunction(query)
+        .then(setResults)
+        .finally(() => setLoading(false))
+    }, 300)
+
+    return () => clearTimeout(timerId)
   }, [query, isDemoMode])
 
   const handleSelect = (result: SearchResult) => {
