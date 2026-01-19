@@ -1,0 +1,41 @@
+name: iac:validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  iac-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.5"
+          terraform_wrapper: false
+
+      - name: IaC Validate (syntax + semantic)
+        shell: bash
+        run: |
+          chmod +x scripts/ci/validate-iac.sh
+          scripts/ci/validate-iac.sh
+
+      - name: Upload IaC Validation Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iac-validate-artifacts
+          path: artifacts/iac-validate/
+          if-no-files-found: ignore
