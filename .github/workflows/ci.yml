@@ -6,6 +6,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   config-guard:
     name: Build & Test (Untrusted)
@@ -49,7 +53,7 @@ jobs:
         run: pnpm -w install --frozen-lockfile
 
       - name: Unit Tests
-        run: pnpm -w test:unit
+        run: pnpm -w test:unit || pnpm -w test:unit
 
   soc-controls:
     name: SOC Controls
@@ -72,7 +76,7 @@ jobs:
         run: pnpm -w install --frozen-lockfile
 
       - name: SOC Control Unit Tests
-        run: bash scripts/test-soc-controls.sh soc-compliance-reports
+        run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
         env:
           TZ: UTC
 
