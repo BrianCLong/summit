@@ -1,0 +1,51 @@
+groups:
+  - name: sprint-14-alerts
+    rules:
+      # SLO Burn Alert (High Priority)
+      - alert: GraphQuerySLOBurn
+        expr: |
+          (
+            histogram_quantile(0.95, sum(rate(graphql_resolver_duration_seconds_bucket{type="Query"}[5m])) by (le))
+            > 1.5
+          )
+        for: 5m
+        labels:
+          severity: critical
+          team: sre
+          sprint: "14"
+        annotations:
+          summary: "Graph Query p95 Latency > 1.5s (SLO Breach)"
+          description: "95th percentile of graph query latency is {{ $value }}s, exceeding the 1.5s SLO for > 5 minutes."
+          runbook_url: "https://github.com/BrianCLong/intelgraph/blob/main/runbooks/slo-breach-graph.md"
+
+      # Slow Query Killer Activation (Warning)
+      - alert: SlowQueryKillerActive
+        expr: increase(gateway_query_killed_total[10m]) > 5
+        for: 1m
+        labels:
+          severity: warning
+          team: gateway
+        annotations:
+          summary: "High rate of slow queries killed"
+          description: "The Cost Guard killed {{ $value }} queries in the last 10 minutes due to budget/timeout exceeedance."
+
+      # Policy Denial Spike (Security)
+      - alert: PolicyDenialSpike
+        expr: rate(opa_policy_decisions_total{result="deny"}[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "Spike in Policy Denials"
+          description: "Unusual spike in OPA denials detected ({{ $value }} req/s). Investigate potential misuse or policy regression."
+
+      # Bundle Verification Failure (Integrity)
+      - alert: BundleVerificationFailed
+        expr: increase(prov_ledger_verification_failures_total[1h]) > 0
+        labels:
+          severity: critical
+          team: prov-ledger
+        annotations:
+          summary: "Evidence Bundle Verification Failed"
+          description: "A downloaded bundle failed integrity verification. Potential tampering or signing issue."

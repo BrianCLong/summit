@@ -1,0 +1,62 @@
+{
+  "title": "IntelGraph Sprint 14",
+  "shortDescription": "Provenance Ledger Beta, ABAC/OPA, Tri-Pane UI",
+  "items": [
+    {
+      "title": "S1: Register Evidence & Export Verifiable Bundle",
+      "body": "Export bundle with manifest (hash tree) + signature; external Verifier CLI validates.",
+      "labels": ["sprint-14", "prov-ledger", "export"],
+      "status": "Todo",
+      "estimate": 13,
+      "assignees": []
+    },
+    {
+      "title": "S2: Claim Graph & Contradictions",
+      "body": "Claim nodes; supports/contradicts edges; UI pane.",
+      "labels": ["sprint-14", "graph", "claims", "ui"],
+      "status": "Todo",
+      "estimate": 8,
+      "assignees": []
+    },
+    {
+      "title": "S3: ABAC/OPA Field-Level Authz",
+      "body": "OPA sidecar; persisted queries; field elision; audit.",
+      "labels": ["sprint-14", "security", "opa", "authz"],
+      "status": "Todo",
+      "estimate": 8,
+      "assignees": []
+    },
+    {
+      "title": "S4: Reason-for-Access Prompt",
+      "body": "User justification modal; persist to audit.",
+      "labels": ["sprint-14", "security", "ux"],
+      "status": "Todo",
+      "estimate": 5,
+      "assignees": []
+    },
+    {
+      "title": "S5: NL→Cypher Sandbox",
+      "body": "LLM-generated Cypher preview; run in sandbox DB; cost/row estimate.",
+      "labels": ["sprint-14", "nlp", "cypher", "sandbox"],
+      "status": "Todo",
+      "estimate": 13,
+      "assignees": []
+    },
+    {
+      "title": "S6: Tri‑Pane Skeleton & Provenance Tooltip",
+      "body": "Graph/Map/Timeline sync; provenance hover tooltip; brushing.",
+      "labels": ["sprint-14", "web", "graph", "ux"],
+      "status": "Todo",
+      "estimate": 8,
+      "assignees": []
+    },
+    {
+      "title": "S7: SLO Dashboard & Cost Guard",
+      "body": "Prometheus/OTEL p95/p99; slow-query killer; Slack alerts.",
+      "labels": ["sprint-14", "sre", "observability", "cost"],
+      "status": "Todo",
+      "estimate": 8,
+      "assignees": []
+    }
+  ]
+}
