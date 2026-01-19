@@ -1,0 +1,40 @@
+{
+  "task_id": "MAESTRO_REASONING_CREW_V1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "maestro-reasoning-crew",
+    "version": "v1",
+    "sha256": "56f5ad21ae6df018c1df38e122d9a80e66bb290459517c69670d256d4220bd68",
+    "path": "prompts/maestro/reasoning-crew@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/maestro-reasoning/",
+      "docs/maestro/",
+      "docs/roadmap/STATUS.json",
+      "prompts/maestro/reasoning-crew@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/MAESTRO_REASONING_CREW_TASK.json"
+    ],
+    "domains": ["maestro", "reasoning", "governance", "provenance", "testing"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["unit-test-output", "evidence-schema"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Reasoning Crew package with lanes, aggregation, and cascade controller exists",
+    "Evidence schema and Reasoning Crew documentation are published",
+    "Unit tests cover evidence scoring and disagreement detection"
+  ],
+  "stop_conditions": [
+    "Policy hooks cannot be represented as policy-as-code",
+    "Provenance data cannot be captured for lane outputs"
+  ],
+  "dependencies": ["docs/SUMMIT_READINESS_ASSERTION.md"]
+}

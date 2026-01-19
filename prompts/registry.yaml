@@ -30,6 +30,34 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: maestro-reasoning-crew
+    version: v1
+    path: prompts/maestro/reasoning-crew@v1.md
+    sha256: 56f5ad21ae6df018c1df38e122d9a80e66bb290459517c69670d256d4220bd68
+    description: Implement Maestro Reasoning Crew with MoT lanes, evidence-weighted aggregation, and cascade escalation.
+    scope:
+      paths:
+        - packages/maestro-reasoning/
+        - docs/maestro/
+        - docs/roadmap/STATUS.json
+        - prompts/maestro/reasoning-crew@v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - maestro
+        - reasoning
+        - governance
+        - provenance
+        - testing
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md
