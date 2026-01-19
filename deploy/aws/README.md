@@ -11,7 +11,7 @@ This deployment strategy leverages AWS Free Tier services to create a powerful, 
 - **Container Platform**: k3s on EC2 with comprehensive monitoring
 - **Security**: Multi-layer defense with OPA Gatekeeper, Falco, and WAF
 - **Observability**: Prometheus + Grafana + CloudWatch integration
-- **CI/CD**: GitHub Actions with automated testing and deployment
+- **CI/CD**: GitHub Actions with automated testing and deployment. **Note:** See [CodeBuild Security Advisory](../../docs/security/AWS_CODEBUILD_ADVISORY.md) if using AWS CodeBuild.
 
 ## 🏗️ Architecture
 
