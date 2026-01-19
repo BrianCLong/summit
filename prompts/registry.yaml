@@ -138,6 +138,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: io-actor-causal-impact
+    version: v1
+    path: prompts/features/io-actor-causal-impact.md
+    sha256: 621e8914b6e08b086a91d6b02f9a17f7b82cf736aca1a0700afc19607ca79066
+    description: IO actor scoring and causal influence estimation in threat analytics.
+    scope:
+      paths:
+        - ga-graphai/packages/threat-analytics/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/features/io-actor-causal-impact.md
+        - prompts/registry.yaml
+      domains:
+        - threat-analytics
+        - io-detection
+        - causal-inference
+        - roadmap
+        - governance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md

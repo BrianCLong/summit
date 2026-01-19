@@ -151,3 +151,79 @@ export interface ThreatAnalyticsOptions {
   rules?: DetectionRule[];
   intel?: ThreatIntelOptions;
 }
+
+export interface IOActorActivity {
+  actorId: string;
+  timestamp: number;
+  content?: string;
+  urls?: string[];
+  templateId?: string;
+  attributes?: Record<string, unknown>;
+}
+
+export interface IOActorGraphEdge {
+  source: string;
+  target: string;
+  weight?: number;
+  type?: string;
+}
+
+export interface IOActorScore {
+  actorId: string;
+  compositeScore: number;
+  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  signals: {
+    synchrony: number;
+    sharedUrls: number;
+    templateSimilarity: number;
+    graphCentrality: number;
+  };
+  evidence: string[];
+}
+
+export interface IOActorScoringOptions {
+  synchronyWindowMs?: number;
+  weights?: Partial<IOActorScore['signals']>;
+  evidenceThresholds?: Partial<IOActorScore['signals']>;
+  riskThresholds?: {
+    medium?: number;
+    high?: number;
+    critical?: number;
+  };
+}
+
+export interface CascadeNode {
+  id: string;
+  actorId: string;
+  reach?: number;
+  timestamp?: number;
+}
+
+export interface CascadeEdge {
+  source: string;
+  target: string;
+}
+
+export interface CascadeGraph {
+  nodes: CascadeNode[];
+  edges: CascadeEdge[];
+}
+
+export interface CausalImpactResult {
+  removedActorIds: string[];
+  removedNodeIds: string[];
+  affectedNodeIds: string[];
+  baselineReach: number;
+  counterfactualReach: number;
+  reachDelta: number;
+  baselineDepth: number;
+  counterfactualDepth: number;
+  depthDelta: number;
+  baselineBreadth: number;
+  counterfactualBreadth: number;
+  breadthDelta: number;
+}
+
+export interface CausalImpactOptions {
+  defaultReach?: number;
+}

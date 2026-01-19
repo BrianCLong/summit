@@ -1,0 +1,35 @@
+{
+  "task_id": "IO_ACTOR_CAUSAL_IMPACT_20260119",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "io-actor-causal-impact",
+    "version": "v1",
+    "sha256": "621e8914b6e08b086a91d6b02f9a17f7b82cf736aca1a0700afc19607ca79066",
+    "path": "prompts/features/io-actor-causal-impact.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "ga-graphai/packages/threat-analytics/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/",
+      "prompts/features/io-actor-causal-impact.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["threat-analytics", "io-detection", "causal-inference", "roadmap", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["ga-graphai/packages/threat-analytics/tests", "docs/roadmap/STATUS.json"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "IO actor scoring and causal impact estimator available in threat analytics exports",
+    "Unit tests cover scoring and causal impact outputs",
+    "Roadmap status metadata updated"
+  ],
+  "stop_conditions": ["Detected PII in output", "CI failure in main", "Sandbox violation alert"]
+}

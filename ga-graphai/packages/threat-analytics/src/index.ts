@@ -1,7 +1,9 @@
 export { AlertManager } from './alert-manager';
 export { BehavioralModel } from './behavioral-model';
+export { CausalImpactEstimator } from './causal-impact';
 export { CorrelationEngine } from './correlation-engine';
 export { EntityResolver } from './entity-resolution';
+export { IOActorScorer } from './io-actor-scoring';
 export { PatternRecognizer, defaultPatterns } from './pattern-recognition';
 export { DetectionRuleEngine } from './rule-engine';
 export { ThreatAnalyticsEngine } from './engine';

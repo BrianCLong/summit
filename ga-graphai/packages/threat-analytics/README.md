@@ -3,6 +3,7 @@
 Advanced threat detection and anomaly analysis toolkit providing behavioral analytics, pattern recognition, correlation, and automated triage suitable for SOC-grade workflows.
 
 ## Features
+
 - Adaptive behavioral baselines with z-score anomaly detection
 - Pattern recognition for credential abuse, lateral movement, and exfiltration
 - Correlation of behavioral signals with threat intelligence from MISP/STIX/TAXII
@@ -10,10 +11,13 @@ Advanced threat detection and anomaly analysis toolkit providing behavioral anal
 - Entity resolution with alias merging and profile enrichment
 - Threat scoring and automated triage planning
 - Custom detection rules and alert lifecycle management
+- IO actor coordination scoring (synchrony, shared URLs, template reuse, graph centrality)
+- Causal impact estimation for actor or subnetwork removal on narrative cascades
 
 ## Usage
+
 ```ts
-import { ThreatAnalyticsEngine, MispClient, StixBundleAdapter } from '@ga-graphai/threat-analytics';
+import { ThreatAnalyticsEngine, MispClient, StixBundleAdapter } from "@ga-graphai/threat-analytics";
 
 const engine = new ThreatAnalyticsEngine({
   intel: { minConfidence: 50 },
@@ -23,14 +27,33 @@ engine.registerIntelClient(new StixBundleAdapter(() => fetchStixBundle()));
 await engine.syncIntel();
 
 const alerts = engine.processEvent({
-  entityId: 'user-1',
-  actor: 'user-1',
-  action: 'auth.fail',
+  entityId: "user-1",
+  actor: "user-1",
+  action: "auth.fail",
   timestamp: Date.now(),
 });
 ```
 
+### IO actor scoring
+
+```ts
+import { IOActorScorer } from "@ga-graphai/threat-analytics";
+
+const scorer = new IOActorScorer();
+const scores = scorer.scoreActors(activities, graphEdges);
+```
+
+### Causal influence estimation
+
+```ts
+import { CausalImpactEstimator } from "@ga-graphai/threat-analytics";
+
+const estimator = new CausalImpactEstimator({ defaultReach: 1 });
+const impact = estimator.estimateActorRemovalImpact(cascadeGraph, ["actor-17"]);
+```
+
 ### Intel hygiene
+
 - Indicators below `minConfidence` are ignored.
 - Expired indicators (based on `validUntil`) are dropped during `syncIntel`.
 - When the same indicator arrives from multiple sources, the highest-confidence (or latest-expiring tie) wins.
