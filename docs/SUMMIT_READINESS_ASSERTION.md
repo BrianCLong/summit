@@ -43,6 +43,22 @@ The Continuous Integration (CI) pipeline enforces the following invariants. No c
 *   **Compliance:** All API endpoints must have a corresponding OpenAPI specification entry.
 *   **Governance:** Every Pull Request must be linked to a certified Roadmap Item or Issue.
 
+### 4. GOLDEN PATH DEFINITION
+
+The "Golden Path" represents the set of branches and workflows that must remain green to ensure GA readiness.
+
+*   **Golden Branches:**
+    *   `main` (Primary Golden Path)
+    *   `release/*` (Release Branches)
+
+*   **Required Status Checks:**
+    *   **CI Core Gate:** Aggregates unit tests, integration tests, deterministic build, and the golden path smoke test.
+    *   **CI Verify Gate:** Aggregates security scans, policy compliance, and evidence collection.
+
+*   **Troubleshooting Common Failures:**
+    *   **Golden Path Smoke Test:** If `make smoke` fails, check the `smoke-test-logs` artifact. The test waits up to 120s for UI (port 3000) and Gateway (port 8080). Slow runners may cause timeouts; ensure Docker has sufficient resources.
+    *   **Integration Tests:** Database startup issues are mitigated by extended health retries (10x10s). If `pg_isready` fails, verify the `timescale/timescaledb` image pull was successful.
+
 ## OPERATING POSTURE
 
 We do not "fix" bugs; we resolve deviations.

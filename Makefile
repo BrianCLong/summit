@@ -128,12 +128,11 @@ sbom:   ## Generate CycloneDX SBOM
 	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
 
 smoke: bootstrap up ## Fresh clone smoke test: bootstrap -> up -> health check
-	@echo "Waiting for services to start..."
-	@sleep 45
-	@echo "Checking UI health..."
-	@curl -s -f http://localhost:3000 > /dev/null && echo "✅ UI is up" || (echo "❌ UI failed" && exit 1)
-	@echo "Checking Gateway health..."
-	@curl -s -f http://localhost:8080/healthz > /dev/null && echo "✅ Gateway is up" || (curl -s -f http://localhost:8080/health > /dev/null && echo "✅ Gateway is up" || (echo "❌ Gateway failed" && exit 1))
+	@echo "Waiting for services to start (max 120s)..."
+	@timeout 120s bash -c 'until curl -s -f http://localhost:3000 > /dev/null; do sleep 2; done' || (echo "❌ UI timed out" && exit 1)
+	@echo "✅ UI is up"
+	@timeout 120s bash -c 'until curl -s -f http://localhost:8080/healthz > /dev/null || curl -s -f http://localhost:8080/health > /dev/null; do sleep 2; done' || (echo "❌ Gateway timed out" && exit 1)
+	@echo "✅ Gateway is up"
 	@echo "Smoke test complete."
 
 rollback: ## Rollback deployment (Usage: make rollback v=v3.0.0 env=prod)
