@@ -22,6 +22,10 @@
 
 - From the App page → Install App → choose user/org → select repos.
 - The Installation ID is in the URL `.../settings/installations/<ID>` (also in webhooks/API).
+- Consent screen behavior (effective 2026-01-12):
+  - The “Act on your behalf” warning is shown only when the app requests access beyond basic
+    read-only user profile data (e.g., repo/org/enterprise scopes). Align requested permissions to
+    the minimum required so the consent screen reflects the intended access level.
 
 4. Environment variables (never commit secrets)
    Set these in env/Secrets Manager:
@@ -42,3 +46,12 @@ GITHUB_WEBHOOK_SECRET=
 
 - App → Recent deliveries → Ping / Redeliver → expect HTTP 200 after signature check.
 - Run `npx ts-node scripts/verify-integrations.ts github` (script included) to list installation repositories.
+
+7. Organization governance (effective 2026-01-12)
+
+- Organization admins can now set who may request GitHub Apps or OAuth Apps:
+  - Members + outside collaborators (default)
+  - Members only
+  - No app requests
+- If app requests are restricted, coordinate with org admins before installation so approval flow
+  is predictable and aligned to security policy.
