@@ -99,7 +99,36 @@ critical_vulnerabilities: 0
 
 ---
 
-### 4. k6 Synthetics Suite
+### 4. Agent Prompt Integrity + PR Metadata
+
+**Workflow**: `.github/workflows/pr-quality-gate.yml`
+
+**Checks**:
+
+1. `scripts/ci/verify-prompt-integrity.ts` validates PR changes against
+   `prompts/registry.yaml` scope and SHA-256 prompt hashes.
+2. `scripts/ci/validate-pr-metadata.ts` enforces the PR body metadata block:
+3. `.github/PULL_REQUEST_TEMPLATE.md` is the authoritative template for the
+   required `AGENT-METADATA` block.
+4. `scripts/ga/check-pr-metadata.mjs` is the local preflight for metadata
+   presence and JSON validity.
+
+```
+<!-- AGENT-METADATA:START -->
+{
+  "promptId": "...",
+  "taskId": "...",
+  "tags": ["..."]
+}
+<!-- AGENT-METADATA:END -->
+```
+
+**Failure Condition**: missing metadata block, invalid JSON, missing template
+alignment, or prompt scope mismatch.
+
+---
+
+### 5. k6 Synthetics Suite
 
 **Workflow**: `.github/workflows/k6-golden-flow.yml`
 
@@ -126,7 +155,7 @@ critical_vulnerabilities: 0
 
 ---
 
-### 5. Golden Path E2E
+### 6. Golden Path E2E
 
 **Workflow**: `.github/workflows/e2e-golden-path.yml`
 
