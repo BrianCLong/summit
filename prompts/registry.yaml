@@ -55,6 +55,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: roadmap-standards-update
+    version: v1
+    path: prompts/docs/roadmap-standards-update@v1.md
+    sha256: a79f996c1cc2ec7f437c3ab76c5a2ca96b3684760b54a45e41cdded0e7064966
+    description: Update roadmap documentation to capture MCP/A2A standard protocol guidance and status tracking.
+    scope:
+      paths:
+        - ROADMAP.md
+        - docs/roadmap/STATUS.json
+        - prompts/docs/roadmap-standards-update@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - roadmap
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
