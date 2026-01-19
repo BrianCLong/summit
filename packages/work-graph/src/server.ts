@@ -245,7 +245,7 @@ async function main() {
 
   // Initialize services
   const planner = new PlannerOrchestrator(graphStore);
-  const market = new WorkMarket(graphStore, eventBus);
+  const market = new WorkMarket(graphStore);
   const policyEngine = new PolicyEngine(graphStore);
   const simulator = new PortfolioSimulator(graphStore);
   const metrics = new MetricsDashboard(graphStore);
