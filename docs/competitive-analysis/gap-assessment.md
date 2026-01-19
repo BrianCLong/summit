@@ -3,6 +3,15 @@
 **Date:** November 20, 2025
 **Branch:** `claude/summit-competitive-analysis-011hfxsNVvNSqfYfUepMtK52`
 
+> [!IMPORTANT]
+> This document provides a high-level assessment. For the **Next Level Down** of execution-ready documentation, please see:
+>
+> - **[Gap Register](./GAP_REGISTER.md):** Granular tracking of buyer outcomes and product capabilities.
+> - **[Competitive Scorecard](./COMPETITIVE_SCORECARD.md):** Single-page feature matrix vs. market leaders.
+> - **[Gap Closure Epics](../backlog/GAP_CLOSURE_EPICS.md):** Acceptance tests and "receipt requirements" for all priority gaps.
+> - **[Execution Plan](../planning/GAP_CLOSURE_SPRINT_PLAN.md):** The 2–3 sprint roadmap to parity.
+> - **[Competitive Demo Scripts](../demo/COMPETITIVE_DEMO_SCRIPTS.md):** Repeatable scripts to prove value end-to-end.
+
 ## Executive Summary
 
 Summit has **strong foundations in platform, governance, and orchestration**, but needs development in **last-mile UX, AI agent experiences, and GTM materials** to compete effectively with Finna, Notion, Dotwork, Leapsome, and Soom.
@@ -12,6 +21,7 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 ### ✅ STRENGTHS (Production-Ready)
 
 #### 1. Governance & Compliance
+
 - **Multi-stage approval engine** (`/active-measures-module/src/approval/approvalEngine.ts`)
   - 4+ approval stages with role-based access
   - Risk assessment with conditional approvals
@@ -33,6 +43,7 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
   - Compliance status recording
 
 #### 2. Orchestration & Workflows
+
 - **Maestro orchestration engine** (`/packages/maestro-core/src/engine.ts`)
   - DAG execution with plugins
   - Retry, backoff, exponential retry
@@ -50,6 +61,7 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
   - Analytics and execution metrics
 
 #### 3. Integration Infrastructure
+
 - **17+ pre-built connectors** (`/connectors/`)
   - SIEM/XDR: Chronicle, Splunk, Sentinel
   - Threat Intel: STIX/TAXII
@@ -63,6 +75,7 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
   - Bridge, eDiscovery, GIS, MISP, Productivity, SIEM-XDR, STIX-TAXII
 
 #### 4. Knowledge Graph
+
 - **Graph core** (`/services/graph-core/`)
   - Neo4j-backed knowledge graph
   - GraphQL API layer
@@ -71,6 +84,7 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
   - Standardized IntelGraph entity model
 
 #### 5. Agent Orchestration
+
 - **Agent orchestrator** (`/src/agents/index.ts`)
   - Multi-phase orchestration (Planning → Implementation → Testing → Review)
   - CriticAgent, FixerAgent implementations
@@ -82,13 +96,16 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 ### ❌ CRITICAL GAPS (Competitive Disadvantages)
 
 #### Gap 1: No Pre-Built Agent Archetypes
+
 **Competitor Standard:**
+
 - Dotwork: "Enterprise Agents" on operating ontology
 - Soom: AI COO agent for project management
 - Leapsome: AI analytics, meeting assistant, copilot
 - Finna: AI agent connecting docs/CRM/product/ATS
 
 **Summit Current State:**
+
 - Agent orchestrator exists but no named, opinionated agents
 - No "AI COO," "AI Chief of Staff," "AI RevOps" personas
 - No pre-configured agent roles for business functions
@@ -96,6 +113,7 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 **Risk:** Buyers expect named agents, not "build your own"
 
 **Solution Required:**
+
 - AI Chief of Staff: inbox triage, meeting prep, follow-ups
 - AI COO: SLAs, incidents, process drift, approvals
 - AI RevOps: pipeline sanity, forecast deltas, attribution, churn risk
@@ -103,11 +121,14 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 ---
 
 #### Gap 2: No Visual Workflow Builder
+
 **Competitor Standard:**
+
 - Notion: Non-technical users build and extend
 - Finna: No-code customization
 
 **Summit Current State:**
+
 - Workflow engine backend is production-ready
 - Workflow schema and templates exist
 - **Zero no-code/low-code UI**
@@ -116,6 +137,7 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 **Risk:** Perceived as "platform teams only," forcing Notion/Retool on top
 
 **Solution Required:**
+
 - Visual DAG composer with drag-and-drop
 - Policy checkpoint integration
 - Form/record builder for graph entities
@@ -123,11 +145,14 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 ---
 
 #### Gap 3: No Policy Editor/Debugger UI
+
 **Competitor Standard:**
+
 - Notion: Visual permission builder
 - Dotwork: Operating ontology with policy simulation
 
 **Summit Current State:**
+
 - 20+ OPA/Rego policies (production-grade)
 - Policy engine integration works
 - **Zero UI for editing, testing, or debugging policies**
@@ -135,6 +160,7 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 **Risk:** Policy changes require engineers; limits operational agility
 
 **Solution Required:**
+
 - Policy studio with Rego editor
 - Policy simulation/testing interface
 - Visual ABAC rule builder
@@ -142,12 +168,15 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 ---
 
 #### Gap 4: Incomplete "Work Hub" / Daily Workspace
+
 **Competitor Standard:**
+
 - Notion: Docs, wiki, projects, tasks, CRM all integrated
 - Finna: Documents, CRM, product management, ATS pre-connected
 - Leapsome: People OS with performance, goals, feedback
 
 **Summit Current State:**
+
 - Switchboard exists but incomplete (many endpoints return 501)
 - Graph supports any entity type
 - **No pre-built modules for tasks, projects, wiki, CRM, contacts**
@@ -155,6 +184,7 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 **Risk:** Not the place people "live all day," leaving room for competitors
 
 **Solution Required:**
+
 - Work Hub with tasks, projects, wiki, CRM as graph-native entities
 - Prebuilt layouts: "Founder cockpit," "Team OS," "Board pack"
 - Integration between Switchboard and Work Hub
@@ -162,11 +192,14 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 ---
 
 #### Gap 5: No Integration Management UI
+
 **Competitor Standard:**
+
 - Notion: Integration gallery with synced databases
 - Dotwork: Schemaless integration layer with status monitoring
 
 **Summit Current State:**
+
 - 17+ connectors work
 - Integration services deployed
 - **No UI to view, configure, or monitor integrations**
@@ -174,6 +207,7 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 **Risk:** Integration management requires DevOps; limits self-service
 
 **Solution Required:**
+
 - Integration gallery with health status, SLAs, policies
 - Connector configuration UI
 - Real-time sync status and error logs
@@ -181,12 +215,15 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 ---
 
 #### Gap 6: No "Operating Model Packs" / Vertical Solutions
+
 **Competitor Standard:**
+
 - Notion: Templates for agencies, SaaS, creators
 - Leapsome: Deep verticalization around People/HR
 - Dotwork: Strategy/portfolio/product ops with SAFe architectures
 
 **Summit Current State:**
+
 - Generic capabilities (graph, workflows, policies)
 - No explicit vertical packs
 - **Every deployment looks like consulting project**
@@ -194,6 +231,7 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 **Risk:** Long time-to-value; custom work required for each customer
 
 **Solution Required:**
+
 - Operating Model Packs per function (RevOps, People, Eng, Finance)
 - Pre-configured entities, policies, dashboards, runbooks
 - Sample data and documentation
@@ -202,12 +240,15 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 ---
 
 #### Gap 7: All GTM Materials Missing
+
 **Competitor Standard:**
+
 - Dotwork: Public SOC 2, partner program, case studies
 - Notion: Pricing page, templates gallery, case studies
 - Leapsome: Trust center, GDPR compliance, AI principles
 
 **Summit Current State:**
+
 - Excellent internal documentation
 - **Zero external-facing materials:**
   - No pricing page
@@ -219,6 +260,7 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 **Risk:** Looks like internal platform, not category leader
 
 **Solution Required:**
+
 - Public pricing/editions page
 - Trust Center v0: uptime, security stance, AI data handling
 - Reference architectures
@@ -228,21 +270,22 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 
 ## Gap Prioritization Matrix
 
-| Gap | Impact | Effort | Priority | Timeline |
-|-----|--------|--------|----------|----------|
-| Pre-built agent archetypes | HIGH | MEDIUM | **P0** | Week 1-2 |
-| Visual workflow builder | HIGH | HIGH | **P1** | Week 3-5 |
-| Integration management UI | MEDIUM | MEDIUM | **P1** | Week 3-4 |
-| GTM materials (pricing, trust center) | HIGH | LOW | **P1** | Week 1-2 |
-| Work Hub modules | HIGH | HIGH | **P2** | Week 5-8 |
-| Policy editor UI | MEDIUM | MEDIUM | **P2** | Week 6-7 |
-| Operating Model Packs | HIGH | HIGH | **P2** | Week 8-12 |
+| Gap                                   | Impact | Effort | Priority | Timeline  |
+| ------------------------------------- | ------ | ------ | -------- | --------- |
+| Pre-built agent archetypes            | HIGH   | MEDIUM | **P0**   | Week 1-2  |
+| Visual workflow builder               | HIGH   | HIGH   | **P1**   | Week 3-5  |
+| Integration management UI             | MEDIUM | MEDIUM | **P1**   | Week 3-4  |
+| GTM materials (pricing, trust center) | HIGH   | LOW    | **P1**   | Week 1-2  |
+| Work Hub modules                      | HIGH   | HIGH   | **P2**   | Week 5-8  |
+| Policy editor UI                      | MEDIUM | MEDIUM | **P2**   | Week 6-7  |
+| Operating Model Packs                 | HIGH   | HIGH   | **P2**   | Week 8-12 |
 
 ---
 
 ## Implementation Roadmap
 
 ### Phase 1: Quick Wins (Weeks 1-2)
+
 1. **Pre-built agent archetypes** (AI COO, Chief of Staff, RevOps)
    - Leverage existing agent orchestrator
    - Define agent schemas and capabilities
@@ -256,6 +299,7 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
    - First case study (internal dogfooding)
 
 ### Phase 2: No-Code/Low-Code (Weeks 3-5)
+
 3. **Visual workflow builder**
    - DAG composer UI
    - Policy checkpoint integration
@@ -267,6 +311,7 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
    - Connector configuration
 
 ### Phase 3: Daily Workspace (Weeks 5-8)
+
 5. **Work Hub modules**
    - Tasks, projects, wiki, CRM as graph entities
    - Switchboard integration
@@ -278,6 +323,7 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
    - Visual ABAC rule builder
 
 ### Phase 4: Vertical Solutions (Weeks 8-12)
+
 7. **Operating Model Packs**
    - Pick strongest internal function (RevOps or Eng)
    - Pre-configured entities, policies, dashboards, runbooks
@@ -289,6 +335,7 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 ## Success Metrics
 
 ### Product Metrics
+
 - [ ] 3+ named agent archetypes shipped and documented
 - [ ] Visual workflow builder allows non-engineer to create workflow in <10 min
 - [ ] Integration gallery shows health status for all 17+ connectors
@@ -296,6 +343,7 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 - [ ] 1+ Operating Model Pack fully documented and demoed
 
 ### GTM Metrics
+
 - [ ] Public pricing page live
 - [ ] Trust Center v0 published with security stance
 - [ ] 2+ reference architectures documented
@@ -303,6 +351,7 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 - [ ] Competitive positioning doc shared with team
 
 ### Technical Metrics
+
 - [ ] <5 sec p95 latency for agent responses
 - [ ] 99.9% uptime for workflow engine
 - [ ] Integration sync latency <30 sec for real-time connectors
@@ -314,6 +363,7 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 ## File Locations Reference
 
 ### Core Systems (Production-Ready)
+
 - **Agents:** `/src/agents/index.ts`, `/src/agents/critic.ts`, `/src/agents/fixer.ts`
 - **Workflows:** `/apps/workflow-engine/src/`, `/packages/maestro-core/src/engine.ts`
 - **Approvals:** `/active-measures-module/src/approval/approvalEngine.ts`
@@ -323,11 +373,13 @@ Summit has **strong foundations in platform, governance, and orchestration**, bu
 - **Graph:** `/services/graph-core/`, `/apps/graph-analytics/`
 
 ### UI (Needs Development)
+
 - **Switchboard:** `/october2025/companyos-switchboard/apps/web/src/components/Switchboard.tsx`
 - **Web App:** `/apps/web/src/`
 - **Conductor:** `/apps/web/src/components/conductor/`
 
 ### Documentation
+
 - **User Docs:** `/docs/`
 - **API Docs:** Various schema files
 
