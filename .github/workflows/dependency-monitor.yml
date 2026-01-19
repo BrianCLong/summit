@@ -36,7 +36,7 @@ jobs:
     needs: dependency-review
     runs-on: ubuntu-latest
     # Only run on same-repo PRs (not forks) and when SNYK_TOKEN is configured
-    if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && secrets.SNYK_TOKEN != '' }}
+    if: (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && secrets.SNYK_TOKEN != '' }}
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     steps:
@@ -76,7 +76,7 @@ jobs:
     needs: dependency-review
     runs-on: ubuntu-latest
     # Only show this when SNYK_TOKEN is not configured
-    if: ${{ secrets.SNYK_TOKEN == '' }}
+    if: secrets.SNYK_TOKEN == '' }}
     steps:
       - name: Notice
         run: |
