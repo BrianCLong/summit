@@ -1,6 +1,6 @@
 {
   "name": "intelgraph-platform",
-  "version": "4.2.3",
+  "version": "4.1.4",
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "type": "module",
@@ -155,22 +155,18 @@
     "@semantic-release/git": "10.0.1",
     "@semantic-release/github": "^11.0.4",
     "@semantic-release/npm": "^12.0.2",
-    "@types/glob": "^9.0.0",
+    "@types/hapi__catbox": "^12.1.0",
+    "@types/hapi__shot": "^6.0.0",
     "@types/jest": "^29.5.14",
     "@types/js-yaml": "^4.0.9",
-    "@types/jsonwebtoken": "^9.0.10",
     "@types/minimatch": "^6.0.0",
-    "@types/ms": "^2.1.0",
     "@types/node": "^25.0.3",
-    "@types/pg-pool": "^2.0.7",
     "@types/uuid": "^11.0.0",
-    "@types/webgl-ext": "^0.0.37",
-    "@types/webgl2": "^0.0.12",
-    "@types/webrtc": "^0.0.47",
     "@typescript-eslint/eslint-plugin": "^8.50.1",
     "@typescript-eslint/parser": "^8.50.1",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
+    "babel-plugin-transform-import-meta": "^2.3.3",
     "body-parser": "^2.2.1",
     "commander": "^12.1.0",
     "concurrently": "^9.2.0",
@@ -290,6 +286,7 @@
       "d3-color": ">=3.1.0",
       "node-fetch": ">=2.6.7",
       "debug": ">=4.3.5",
+      "chalk": ">=5.3.0",
       "color": ">=4.2.3",
       "ansi-regex": ">=6.1.0",
       "ws": ">=8.18.4",
@@ -323,12 +320,6 @@
       "@types/react-dom": "18.3.0",
       "apollo-server-express": ">=3.13.0",
       "redis": ">=5.9.0"
-    },
-    "patchedDependencies": {
-      "@types/jsonwebtoken@9.0.10": "patches/@types__jsonwebtoken@9.0.10.patch",
-      "@types/connect-redis": "patches/@types__connect-redis.patch",
-      "@types/multer@1.4.13": "patches/@types__multer@1.4.13.patch",
-      "@types/request": "patches/@types__request.patch"
     }
   }
 }
