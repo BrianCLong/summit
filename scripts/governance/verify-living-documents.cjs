@@ -87,10 +87,29 @@ async function processRule(rule) {
 
     console.log(`- ${rule.document} is out of date. Updating...`);
 
+    const { execSync } = require('child_process');
+
     const fullNewContent = `${contentBefore}\n${generatedContent}\n${contentAfter}`;
 
+    // Write the raw generated content first
     await fs.writeFile(documentPath, fullNewContent, 'utf8');
-    console.log(`- Successfully updated ${rule.document}`);
+    
+    // Apply Prettier to stabilize the format
+    try {
+        execSync(`npx prettier --write "${documentPath}"`, { stdio: 'ignore' });
+    } catch (e) {
+        console.warn('Warning: Failed to run prettier on updated document.');
+    }
+
+    // Read it back to compare with original
+    const finalizedContent = await fs.readFile(documentPath, 'utf8');
+    
+    if (finalizedContent === originalContent) {
+        console.log(`- ${rule.document} is up to date (after formatting).`);
+        return false;
+    }
+
+    console.log(`- ${rule.document} updated and formatted.`);
     return true;
 }
 
