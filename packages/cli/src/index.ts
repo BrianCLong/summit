@@ -18,6 +18,7 @@ import { auditCommands } from './commands/audit.js';
 import { complianceCommands } from './commands/compliance.js';
 import { configCommands } from './commands/config.js';
 import { pluginCommands } from './commands/plugin.js';
+import { evalCommands } from './commands/eval.js';
 import { doctor } from './commands/doctor.js';
 import { loadConfig, getConfig } from './config.js';
 
@@ -94,6 +95,12 @@ program
   .addCommand(pluginCommands.build)
   .addCommand(pluginCommands.publish)
   .addCommand(pluginCommands.list);
+
+// Evaluation commands
+program
+  .command('eval')
+  .description('Evaluation workflows for agent outputs')
+  .addCommand(evalCommands.deepResearch);
 
 // Login command
 program

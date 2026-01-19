@@ -1,0 +1,81 @@
+{
+  "version": "v1",
+  "tasks": [
+    {
+      "id": "task-001",
+      "topic": "Cloud compliance posture",
+      "language": "en",
+      "prompt": "Compare SOC 2 and FedRAMP evidence requirements for a mid-market SaaS provider. Provide a timeline, highlight trade-offs, and cite external sources that demonstrate recent changes to audit expectations.",
+      "persona": {
+        "tenant": "northwind",
+        "industry": "saas",
+        "riskProfile": "moderate",
+        "complianceRegimes": ["SOC2", "FedRAMP"],
+        "missionContext": "Security assurance planning"
+      },
+      "policy": {
+        "tenantId": "northwind",
+        "allowSources": ["soc2.org", "fedramp.gov"],
+        "denySources": ["unverified-blog"],
+        "jurisdictions": ["US"],
+        "rateLimit": { "requestsPerMinute": 60 }
+      },
+      "objectives": [
+        "Summarize key evidence artifacts",
+        "Provide a comparison table",
+        "Call out regulatory updates"
+      ],
+      "requiredSources": ["soc2.org", "fedramp.gov"]
+    },
+    {
+      "id": "task-002",
+      "topic": "Healthcare data retention",
+      "language": "en",
+      "prompt": "Analyze HIPAA data retention expectations across three US jurisdictions, compare guidance from at least two sources, and recommend a retention schedule with a risk assessment backed by evidence.",
+      "persona": {
+        "tenant": "contoso-health",
+        "industry": "healthcare",
+        "riskProfile": "high",
+        "complianceRegimes": ["HIPAA"],
+        "missionContext": "Retention policy update"
+      },
+      "policy": {
+        "tenantId": "contoso-health",
+        "allowSources": ["hhs.gov", "state-health.gov"],
+        "denySources": ["social-media"],
+        "jurisdictions": ["US"],
+        "rateLimit": { "requestsPerMinute": 30 }
+      },
+      "objectives": [
+        "Compare retention requirements",
+        "Deliver a recommended schedule"
+      ],
+      "requiredSources": ["hhs.gov"]
+    },
+    {
+      "id": "task-003",
+      "topic": "SEC cyber disclosure",
+      "language": "en",
+      "prompt": "Evaluate the latest SEC cybersecurity disclosure rule for public companies, synthesize updates from authoritative sources, and provide a briefing with evidence-backed implications for disclosure timing.",
+      "persona": {
+        "tenant": "fabrikam",
+        "industry": "finance",
+        "riskProfile": "high",
+        "complianceRegimes": ["SEC"],
+        "missionContext": "Disclosure readiness"
+      },
+      "policy": {
+        "tenantId": "fabrikam",
+        "allowSources": ["sec.gov", "federalregister.gov"],
+        "denySources": ["anonymous-forum"],
+        "jurisdictions": ["US"],
+        "rateLimit": { "requestsPerMinute": 40 }
+      },
+      "objectives": [
+        "Summarize rule changes",
+        "Outline timing obligations"
+      ],
+      "requiredSources": ["sec.gov"]
+    }
+  ]
+}

@@ -55,6 +55,40 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: deep-research-eval-harness
+    version: v1
+    path: prompts/engineering/deep-research-eval@v1.md
+    sha256: fdc2c0d50c14ba7c5a2d0e5bb3cf57b5937adb055a8c86b8878510ccea461e11
+    description: Deep research evaluation harness with task packs, rubrics, fact checking, and GA gates.
+    scope:
+      paths:
+        - packages/deep-research-eval/
+        - packages/cli/
+        - scripts/ci/
+        - docs/ga/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - AGENT_ACTIVITY.md
+        - TASK_BACKLOG.md
+        - agent-contract.json
+        - .github/workflows/
+        - prompts/engineering/deep-research-eval@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - evaluation
+        - ci
+        - quality
+        - documentation
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md

@@ -1,0 +1,49 @@
+{
+  "task_id": "DEEP_RESEARCH_EVAL_HARNESS",
+  "agent_id": "Codex",
+  "prompt_ref": {
+    "id": "deep-research-eval-harness",
+    "version": "v1",
+    "sha256": "fdc2c0d50c14ba7c5a2d0e5bb3cf57b5937adb055a8c86b8878510ccea461e11",
+    "path": "prompts/engineering/deep-research-eval@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/deep-research-eval/",
+      "packages/cli/",
+      "scripts/ci/",
+      "docs/ga/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/",
+      "AGENT_ACTIVITY.md",
+      "TASK_BACKLOG.md",
+      "agent-contract.json",
+      ".github/workflows/",
+      "prompts/engineering/deep-research-eval@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["evaluation", "governance", "ci", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "docs/ga/deep-research-eval.md",
+      "scripts/ci/deep-research-eval.mjs",
+      "packages/deep-research-eval/fixtures/taskpack.sample.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Deep research evaluation package provides task packs, rubrics, fact checking, and evidence bundles.",
+    "CLI command summit eval deep-research produces summary and evidence outputs.",
+    "GA verification map updated for deep research evaluation gate."
+  ],
+  "stop_conditions": [
+    "Verification artifacts missing or non-deterministic.",
+    "Scope expansion beyond declared paths is required."
+  ]
+}
