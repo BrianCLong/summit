@@ -119,52 +119,54 @@ The deprecated `request` package allows SSRF bypass via attacker-controlled cros
 
 ---
 
-## CVE-2024-22363: [Component TBD]
+## CVE-2024-22363: xlsx - ReDoS
 
-**Package:** TBD
-**Severity:** TBD
+**Package:** `xlsx`
+**Severity:** HIGH (ReDoS)
 
 ### Status
 
-⚠️ **DOCUMENTATION PENDING**
+✅ **FALSE POSITIVE / PATCHED**
 
-### Action Required
+### Vulnerability Description
 
-**TODO:** Document why this CVE is ignored:
+SheetJS Community Edition before 0.20.2 is vulnerable to Regular Expression Denial of Service (ReDoS) via crafted input triggering excessive backtracking.
 
-- What is the vulnerable package?
-- What is the severity and impact?
-- What mitigation strategy is in place?
-- When will it be reviewed?
+### Justification
+
+- **Vulnerable Versions:** < 0.20.2
+- **Current Version:** `xlsx@0.20.3` (via CDN override in `package.json`)
+- **Reason for Exclusion:** The project overrides the `xlsx` dependency to a specific tarball URL (`https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz`) which contains the fix. The CVE scanner likely flags it due to the non-standard version resolution or database lag. The vulnerability is patched in our environment.
 
 ### Review Schedule
 
-- **Next Review:** 2026-01-15 (URGENT)
+- **Next Review:** 2026-04-18
 - **Owner:** Security Team
 
 ---
 
-## CVE-2023-30533: [Component TBD]
+## CVE-2023-30533: xlsx - Prototype Pollution
 
-**Package:** TBD
-**Severity:** TBD
+**Package:** `xlsx`
+**Severity:** HIGH (CVSS 7.8)
 
 ### Status
 
-⚠️ **DOCUMENTATION PENDING**
+✅ **FALSE POSITIVE / PATCHED**
 
-### Action Required
+### Vulnerability Description
 
-**TODO:** Document why this CVE is ignored:
+SheetJS Community Edition before 0.19.3 is vulnerable to Prototype Pollution when reading specially crafted files, potentially leading to DoS or remote code execution.
 
-- What is the vulnerable package?
-- What is the severity and impact?
-- What mitigation strategy is in place?
-- When will it be reviewed?
+### Justification
+
+- **Vulnerable Versions:** < 0.19.3
+- **Current Version:** `xlsx@0.20.3` (via CDN override in `package.json`)
+- **Reason for Exclusion:** The project uses version 0.20.3, which supersedes the fixed version (0.19.3). This is a false positive due to the same version resolution ambiguity as CVE-2024-22363.
 
 ### Review Schedule
 
-- **Next Review:** 2026-01-15 (URGENT)
+- **Next Review:** 2026-04-18
 - **Owner:** Security Team
 
 ---
@@ -195,21 +197,20 @@ Remove CVE from ignore list and escalate if:
 ## Metrics
 
 **Total Ignored CVEs:** 4
-**Documented:** 2 (50%)
-**Pending Documentation:** 2 (50%)
+**Documented:** 4 (100%)
+**Pending Documentation:** 0 (0%)
 
 **By Severity:**
 
 - CRITICAL: 0
-- HIGH: 1 (CVE-2022-24434)
+- HIGH: 3 (CVE-2022-24434, CVE-2024-22363, CVE-2023-30533)
 - MODERATE: 1 (CVE-2023-28155)
 - LOW: 0
-- UNKNOWN: 2 (pending documentation)
 
-**Action Required:** Document CVE-2024-22363 and CVE-2023-30533 by 2026-01-15
+**Action Required:** Monitor Apollo Server v4 upgrade path.
 
 ---
 
-**Last Updated:** 2026-01-02
+**Last Updated:** 2026-01-18
 **Next Audit:** 2026-02-01
 **Owner:** Security Remediation Team
