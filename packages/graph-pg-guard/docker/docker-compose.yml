@@ -1,0 +1,19 @@
+version: '3.9'
+services:
+  pg:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports: [ "5432:5432" ]
+    command: ["postgres", "-c", "wal_level=logical"]
+    volumes:
+      - ./init/pg.sql:/docker-entrypoint-initdb.d/pg.sql:ro
+
+  neo4j:
+    image: neo4j:5
+    environment:
+      NEO4J_AUTH: neo4j/test
+      NEO4J_PLUGINS: '["apoc"]'
+    ports: [ "7687:7687", "7474:7474" ]
+    volumes:
+      - ./init/neo4j.cypher:/docker-entrypoint-initdb.d/neo4j.cypher:ro
