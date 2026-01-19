@@ -3,6 +3,8 @@
 The OSINT feed subsystem loads provider definitions from `osint-sources.md` and
 retrieves data from external services such as weather, news and threat feeds.
 
+**Note:** The architecture for the OSINT product is evolving. See [OSINT Data Product Architecture](architecture/OSINT_DATA_PRODUCT_ARCHITECTURE.md) for the recommended target state, including modular ingestion pipelines, data fusion, and graph model extensions.
+
 ## Configuration
 
 1. Edit `osint-sources.md` and add or remove feed entries. Each entry maps to a
