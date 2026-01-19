@@ -1,4 +1,7 @@
+import { readFile, rm } from 'node:fs/promises';
+import path from 'node:path';
 import axios from 'axios';
+import { prepareOpenLineageArtifact } from '@intelgraph/lineage-emitter';
 import {
   AirflowScheduleBuilder,
   ApiSource,
@@ -93,6 +96,45 @@ describe('DataPipeline', () => {
     expect(lineage.map((event) => event.source)).toEqual(
       expect.arrayContaining(['csv', 'json', 'db'])
     );
+  });
+
+  it('emits deterministic OpenLineage artifacts when configured', async () => {
+    const registry = new SchemaRegistry();
+    registry.register({ version: '1.0.0', schema });
+    const quality = new DataQualityChecker();
+    const transforms = new TransformationPipeline();
+    const source = new JsonSource('json', [{ id: '1', value: 10, updated_at: 1 }]);
+
+    const lineageConfig = {
+      jobName: 'summit-data-pipeline',
+      runId: 'run-0001',
+      inputs: [{ namespace: 'summit', name: 'json' }],
+      outputs: [{ namespace: 'summit', name: 'normalized-records' }],
+    };
+
+    const pipeline = new DataPipeline(
+      [source],
+      registry,
+      transforms,
+      quality,
+      {
+        schemaVersion: '1.0.0',
+        deduplicationKey: 'id',
+        watermarkField: 'updated_at',
+        qualityRules: {},
+        lineage: lineageConfig,
+      }
+    );
+
+    const artifact = prepareOpenLineageArtifact(lineageConfig);
+    await pipeline.run();
+    const payload = await readFile(artifact.path, 'utf-8');
+    expect(JSON.parse(payload).run.runId).toBe('run-0001');
+
+    await rm(path.join('artifacts', 'lineage', artifact.sha256), {
+      recursive: true,
+      force: true,
+    });
   });
 
   it('honors schema versions from the registry for validation', async () => {

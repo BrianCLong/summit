@@ -1,5 +1,36 @@
 version: 1
 prompts:
+  - id: lineage-emitter
+    version: v1
+    path: prompts/lineage/lineage-emitter@v1.md
+    sha256: bf10041da0f4c264ab34161cff2bcfae4aa9b1a08cc1c036f4febe4308efb5a5
+    description: Deterministic OpenLineage emission layer with schema validation and pipeline integration.
+    scope:
+      paths:
+        - packages/lineage-emitter/
+        - schemas/openlineage-event.schema.json
+        - src/data-pipeline/
+        - tests/
+        - tsconfig.base.json
+        - package.json
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/lineage/lineage-emitter@v1.md
+        - prompts/registry.yaml
+      domains:
+        - lineage
+        - governance
+        - pipelines
+        - determinism
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: agent-native-loop-n4
     version: v1
     path: prompts/governance/agent-native-loop-n4.md

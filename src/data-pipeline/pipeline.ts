@@ -5,6 +5,10 @@ import { DataQualityChecker, QualityRuleset } from './quality.js';
 import { SchemaRegistry } from './schemaRegistry.js';
 import { TransformationPipeline } from './transforms.js';
 import {
+  emitOpenLineageArtifact,
+  type OpenLineageEmissionInput,
+} from '@intelgraph/lineage-emitter';
+import {
   DataRecord,
   DeadLetterEntry,
   IngestionResult,
@@ -22,6 +26,7 @@ export interface PipelineConfig {
   watermarkField: string;
   initialWatermark?: number | string;
   maxPagesPerSource?: number;
+  lineage?: OpenLineageEmissionInput;
 }
 
 export interface PipelineOutcome {
@@ -45,6 +50,7 @@ export class DataPipeline {
   private readonly baseQualityRules: QualityRuleset;
   private readonly maxPagesPerSource: number;
   private readonly schemaVersion: string;
+  private readonly lineageConfig?: OpenLineageEmissionInput;
   private readonly seenKeys: Set<unknown> = new Set();
   private watermark: number | string | undefined;
 
@@ -68,6 +74,7 @@ export class DataPipeline {
     this.baseQualityRules = config.qualityRules;
     this.maxPagesPerSource = config.maxPagesPerSource ?? 50;
     this.watermark = config.initialWatermark;
+    this.lineageConfig = config.lineage;
   }
 
   async run(): Promise<PipelineOutcome> {
@@ -159,11 +166,17 @@ export class DataPipeline {
       } while (cursor !== undefined && pageCount < this.maxPagesPerSource);
     }
 
-    return {
+    const outcome = {
       processed,
       metrics: this.monitor.snapshot(),
       deadLetters: this.dlq.drain(),
     };
+
+    if (this.lineageConfig) {
+      await emitOpenLineageArtifact(this.lineageConfig);
+    }
+
+    return outcome;
   }
 
   private buildQualityRules(): QualityRuleset {
