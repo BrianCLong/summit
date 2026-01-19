@@ -71,6 +71,76 @@ log_error() {
     echo "[ERROR] $*" >&2
 }
 
+trim_whitespace() {
+    local value="$1"
+    value="${value#"${value%%[![:space:]]*}"}"
+    value="${value%"${value##*[![:space:]]}"}"
+    printf '%s' "$value"
+}
+
+normalize_check_name() {
+    local value
+    value="$(trim_whitespace "$1")"
+
+    if [[ "$value" =~ ^\".*\"$ || "$value" =~ ^\'.*\'$ ]]; then
+        value="${value:1:${#value}-2}"
+    fi
+
+    value="$(trim_whitespace "$value")"
+
+    if [[ "$value" =~ ^\".*\"$ || "$value" =~ ^\'.*\'$ ]]; then
+        value="${value:1:${#value}-2}"
+    fi
+
+    printf '%s' "$value"
+}
+
+extract_github_checks() {
+    local response="$1"
+    local raw_checks=""
+    local normalized_checks=()
+
+    if echo "$response" | jq -e . >/dev/null 2>&1; then
+        raw_checks=$(echo "$response" | jq -r '.contexts[]? // empty' 2>/dev/null || echo "")
+
+        if [[ -z "$raw_checks" ]]; then
+            raw_checks=$(echo "$response" | jq -r '
+                .checks[]? |
+                (
+                    .context //
+                    .name //
+                    .check //
+                    .workflow_name //
+                    .workflow //
+                    .workflow_file //
+                    .workflow_file_name //
+                    empty
+                )
+            ' 2>/dev/null || echo "")
+        fi
+
+        if [[ -z "$raw_checks" ]]; then
+            raw_checks=$(echo "$response" | jq -r '.required_status_checks[]? // empty' 2>/dev/null || echo "")
+        fi
+    else
+        log_warn "GitHub API response was not valid JSON; falling back to context regex"
+        raw_checks=$(echo "$response" | sed -nE 's/.*"context"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p')
+    fi
+
+    while IFS= read -r check; do
+        check="$(normalize_check_name "$check")"
+        [[ -z "$check" ]] && continue
+        normalized_checks+=("$check")
+    done <<< "$raw_checks"
+
+    if [[ ${#normalized_checks[@]} -eq 0 ]]; then
+        printf '%s' ""
+        return 0
+    fi
+
+    printf '%s\n' "${normalized_checks[@]}" | sort -u
+}
+
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -226,13 +296,8 @@ if [[ $API_EXIT_CODE -ne 0 ]]; then
         log_warn "$API_ERROR"
     fi
 else
-    # Extract required contexts (check names)
-    GITHUB_CHECKS=$(echo "$API_RESPONSE" | jq -r '.contexts[]? // empty' 2>/dev/null | sort || echo "")
-
-    # Also try the newer 'checks' array format
-    if [[ -z "$GITHUB_CHECKS" ]]; then
-        GITHUB_CHECKS=$(echo "$API_RESPONSE" | jq -r '.checks[]?.context // empty' 2>/dev/null | sort || echo "")
-    fi
+    # Extract required contexts (check names), with defensive fallbacks.
+    GITHUB_CHECKS=$(extract_github_checks "$API_RESPONSE")
 
     GITHUB_COUNT=$(echo "$GITHUB_CHECKS" | grep -c . || echo 0)
     log "GitHub requires $GITHUB_COUNT status checks"
