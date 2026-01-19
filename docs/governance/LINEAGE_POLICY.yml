@@ -1,0 +1,42 @@
+version: 1
+policy_id: lineage-output-allowlist
+description: >
+  Allowlist of output datasets that the SQL lineage extractor is permitted to emit
+  without manual review. This is intended to prevent silent creation of new marts/views
+  without governance acknowledgement.
+
+# Deterministic evaluation:
+# - Rules are applied in order.
+# - First match wins.
+# - If no match: BLOCK.
+
+default_verdict: BLOCK
+
+rules:
+  - id: allow-public-views
+    verdict: ALLOW
+    match:
+      namespace_regex: "^public$"
+      name_regex: "^(v_|view_).*"
+
+  - id: allow-analytics-views
+    verdict: ALLOW
+    match:
+      namespace_regex: "^analytics$"
+      name_regex: ".*"
+
+  - id: allow-mart-tables
+    verdict: WARN
+    match:
+      namespace_regex: "^mart$"
+      name_regex: ".*"
+    notes:
+      - "mart outputs permitted but require periodic review"
+
+  - id: block-sensitive
+    verdict: BLOCK
+    match:
+      namespace_regex: "^sensitive$"
+      name_regex: ".*"
+    notes:
+      - "sensitive schema outputs require explicit governance approval"
