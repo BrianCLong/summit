@@ -19,7 +19,7 @@ overrides:
   validator: '>=13.15.20'
   nanoid: '>=5.0.9'
   cross-spawn: '>=7.0.6'
-  tar: '>=7.5.3'
+  tar: '>=6.2.1'
   cookie: '>=0.7.0'
   send: '>=0.19.0'
   serve-static: '>=1.16.0'
@@ -34,20 +34,16 @@ overrides:
   qs: '>=6.14.1'
   form-data: '>=2.5.4'
   tough-cookie: '>=4.1.3'
-  '@modelcontextprotocol/sdk': '>=1.25.2'
-  '@remix-run/router': '>=1.23.2'
-  react-router: '>=7.12.0'
-  preact: '>=10.28.2'
+  '@modelcontextprotocol/sdk': '>=1.1.0'
+  '@remix-run/router': '>=1.21.0'
+  react-router: '>=6.28.0'
+  preact: '>=10.25.4'
   '@types/react': 18.3.11
   '@types/react-dom': 18.3.0
   apollo-server-express: '>=3.13.0'
   redis: '>=5.9.0'
-  hono: '>=4.11.4'
-  '@hono/node-server': '>=1.19.9'
-  diff: '>=8.0.3'
-  undici: '>=7.18.2'
 
-pnpmfileChecksum: sha256-9O0t5s4TSKS68vQVVz8mbk4z4ywD0TUJelsnRznjAEc=
+pnpmfileChecksum: sha256-a6bZRKVps8e/vFm+ZHjptEhSt2AMVrBBZPNF7tFCrHw=
 
 importers:
 
@@ -159,6 +155,12 @@ importers:
       '@semantic-release/npm':
         specifier: ^12.0.2
         version: 12.0.2(semantic-release@24.2.9(typescript@5.9.3))
+      '@types/hapi__catbox':
+        specifier: ^12.1.0
+        version: 12.1.0
+      '@types/hapi__shot':
+        specifier: ^6.0.0
+        version: 6.0.0
       '@types/jest':
         specifier: ^29.5.14
         version: 29.5.14
@@ -3532,8 +3534,8 @@ importers:
         specifier: ^7.6.3
         version: 7.7.3
       tar:
-        specifier: '>=7.5.3'
-        version: 7.5.3
+        specifier: '>=6.2.1'
+        version: 7.5.2
       zod:
         specifier: 3.25.76
         version: 3.25.76
@@ -11232,7 +11234,7 @@ importers:
         version: 3.958.0
       '@strands-agents/sdk':
         specifier: ^0.1.0
-        version: 0.1.3(hono@4.11.4)(ws@8.19.0)
+        version: 0.1.3(hono@4.11.3)(ws@8.19.0)
       neo4j-driver:
         specifier: ^5.27.0
         version: 5.28.2
@@ -12479,8 +12481,8 @@ importers:
   sdk/acc:
     dependencies:
       undici:
-        specifier: '>=7.18.2'
-        version: 7.18.2
+        specifier: ^6.19.5
+        version: 6.22.0
     devDependencies:
       '@types/node':
         specifier: ^20.11.30
@@ -13013,7 +13015,7 @@ importers:
         version: 11.11.0
       '@types/cookie-parser':
         specifier: ^1.4.10
-        version: 1.4.10(@types/express@5.0.6)
+        version: 1.4.10(@types/express@4.17.25)
       '@types/cors':
         specifier: 2.8.19
         version: 2.8.19
@@ -13021,8 +13023,8 @@ importers:
         specifier: ^1.11.5
         version: 1.11.5
       '@types/express':
-        specifier: 5.0.6
-        version: 5.0.6
+        specifier: ^4.17.21
+        version: 4.17.25
       '@types/express-mongo-sanitize':
         specifier: 2.1.2
         version: 2.1.2
@@ -15120,8 +15122,8 @@ importers:
         specifier: ^10.0.0
         version: 10.5.0
       undici:
-        specifier: '>=7.18.2'
-        version: 7.18.2
+        specifier: ^6.18.0
+        version: 6.22.0
     devDependencies:
       '@types/express':
         specifier: ^4.17.21
@@ -22445,8 +22447,8 @@ importers:
   tools/issue-sweeper:
     dependencies:
       undici:
-        specifier: '>=7.18.2'
-        version: 7.18.2
+        specifier: ^6.19.2
+        version: 6.22.0
       yargs:
         specifier: ^17.7.2
         version: 17.7.2
@@ -25164,6 +25166,10 @@ packages:
   '@fastify/ajv-compiler@4.0.5':
     resolution: {integrity: sha512-KoWKW+MhvfTRWL4qrhUwAAZoaChluo0m0vbiJlGMt2GXvL4LVPQEjt8kSpHI3IBq5Rez8fg+XeH3cneztq+C7A==}
 
+  '@fastify/busboy@2.1.1':
+    resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
+    engines: {node: '>=14'}
+
   '@fastify/busboy@3.2.0':
     resolution: {integrity: sha512-m9FVDXU3GT2ITSe0UaMA5rU3QkfC/UXtCU8y0gSN/GugTqtVldOBWIB5V6V3sbmenVZUIpU6f+mPEO2+m5iTaA==}
 
@@ -26399,11 +26405,11 @@ packages:
     peerDependencies:
       react: '>= 16 || ^19.0.0-rc'
 
-  '@hono/node-server@1.19.9':
-    resolution: {integrity: sha512-vHL6w3ecZsky+8P5MD+eFfaGTyCeOHUIFYMGpQGbrBTSmNNoxv0if69rEZ5giu36weC5saFuznL411gRX7bJDw==}
+  '@hono/node-server@1.19.7':
+    resolution: {integrity: sha512-vUcD0uauS7EU2caukW8z5lJKtoGMokxNbJtBiwHgpqxEXokaHCBkQUmCHhjFB1VUTWdqj25QoMkMKzgjq+uhrw==}
     engines: {node: '>=18.14.1'}
     peerDependencies:
-      hono: '>=4.11.4'
+      hono: ^4
 
   '@hookform/resolvers@5.2.2':
     resolution: {integrity: sha512-A/IxlMLShx3KjV/HeTcTfaMxdwy690+L/ZADoeaTltLx+CVuzkeVIPuybK3jrRfw7YZnmdKsVVHAlEPIAEUNlA==}
@@ -27598,8 +27604,8 @@ packages:
   '@mixmark-io/domino@2.2.0':
     resolution: {integrity: sha512-Y28PR25bHXUg88kCV7nivXrP2Nj2RueZ3/l/jdx6J9f8J4nsEGcgX0Qe6lt7Pa+J79+kPiJU3LguR6O/6zrLOw==}
 
-  '@modelcontextprotocol/sdk@1.25.2':
-    resolution: {integrity: sha512-LZFeo4F9M5qOhC/Uc1aQSrBHxMrvxett+9KLHt7OhcExtoiRN9DKgbZffMP/nxjutWDQpfMDfP3nkHI4X9ijww==}
+  '@modelcontextprotocol/sdk@1.25.1':
+    resolution: {integrity: sha512-yO28oVFFC7EBoiKdAn+VqRm+plcfv4v0xp6osG/VsCB0NlPZWi87ajbCZZ8f/RvOFLEu7//rSRmuZZ7lMoe3gQ==}
     engines: {node: '>=18'}
     peerDependencies:
       '@cfworker/json-schema': ^4.1.1
@@ -32375,8 +32381,8 @@ packages:
       react-redux:
         optional: true
 
-  '@remix-run/router@1.23.2':
-    resolution: {integrity: sha512-Ic6m2U/rMjTkhERIa/0ZtXJP17QUi2CbWE7cqx4J58M8aA3QTfW+2UlQ4psvTX9IO1RfNVhK3pcpdjej7L+t2w==}
+  '@remix-run/router@1.23.1':
+    resolution: {integrity: sha512-vDbaOzF7yT2Qs4vO6XV1MHcJv+3dgR1sT+l3B8xxOVhUC336prMvqrvsLL/9Dnw2xr6Qhz4J0dmS0llNAbnUmQ==}
     engines: {node: '>=14.0.0'}
 
   '@repeaterjs/repeater@3.0.6':
@@ -39695,8 +39701,16 @@ packages:
     resolution: {integrity: sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
 
-  diff@8.0.3:
-    resolution: {integrity: sha512-qejHi7bcSD4hQAZE0tNAawRK1ZtafHDmMTMkrrIGgSLl7hTnQHmKCeB45xAcbfTqK2zowkM3j3bHt/4b/ARbYQ==}
+  diff@3.5.0:
+    resolution: {integrity: sha512-A46qtFgd+g7pDZinpnwiRJtxbC1hpgf0uzP3iG89scHk0AUC7A1TGxf5OiiOUv/JMZR8GOt8hL900hV0bOy5xA==}
+    engines: {node: '>=0.3.1'}
+
+  diff@4.0.2:
+    resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
+    engines: {node: '>=0.3.1'}
+
+  diff@8.0.2:
+    resolution: {integrity: sha512-sSuxWU5j5SR9QQji/o2qMvqRNYRDOcBTgsJ/DeCf4iSN4gW+gNMXM7wFIP+fdXZxoNiAnHUTGjCr+TSWXdRDKg==}
     engines: {node: '>=0.3.1'}
 
   diffie-hellman@5.0.3:
@@ -41845,8 +41859,8 @@ packages:
   hoist-non-react-statics@3.3.2:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
 
-  hono@4.11.4:
-    resolution: {integrity: sha512-U7tt8JsyrxSRKspfhtLET79pU8K+tInj5QZXs1jSugO1Vq5dFj3kmZsRldo29mTBfcjDRVRXrEZ6LS63Cog9ZA==}
+  hono@4.11.3:
+    resolution: {integrity: sha512-PmQi306+M/ct/m5s66Hrg+adPnkD5jiO6IjA7WhWw0gSBSo1EcRegwuI1deZ+wd5pzCGynCcn2DprnE4/yEV4w==}
     engines: {node: '>=16.9.0'}
 
   hook-std@4.0.0:
@@ -45213,7 +45227,7 @@ packages:
   native-fetch@4.0.2:
     resolution: {integrity: sha512-4QcVlKFtv2EYVS5MBgsGX5+NWKtbDbIECdUXDBGDMAZXq3Jkv9zf+y8iS7Ub8fEdga3GpYeazp9gauNqXHJOCg==}
     peerDependencies:
-      undici: '>=7.18.2'
+      undici: '*'
 
   nativewind@4.2.1:
     resolution: {integrity: sha512-10uUB2Dlli3MH3NDL5nMHqJHz1A3e/E6mzjTj6cl7hHECClJ7HpE6v+xZL+GXdbwQSnWE+UWMIMsNz7yOQkAJQ==}
@@ -46694,8 +46708,8 @@ packages:
   pqc-kyber@0.7.0:
     resolution: {integrity: sha512-mu8Mq2zYekx81iHkjXILQ+cojeuqgI+JM8p/NqoQm7/A1JTvBLOQzMpWwm89km2DDlnlyA/aeeuHwRMNvUOkwg==}
 
-  preact@10.28.2:
-    resolution: {integrity: sha512-lbteaWGzGHdlIuiJ0l2Jq454m6kcpI1zNje6d8MlGAFlYvP2GO4ibnat7P74Esfz4sPTdM6UxtTwh/d3pwM9JA==}
+  preact@10.28.1:
+    resolution: {integrity: sha512-u1/ixq/lVQI0CakKNvLDEcW5zfCjUQfZdK9qqWuIJtsezuyG6pk9TWj75GMuI/EzRSZB/VAE43sNWWZfiy8psw==}
 
   prebuild-install@5.3.0:
     resolution: {integrity: sha512-aaLVANlj4HgZweKttFNUVNRxDukytuIuxeK2boIMHjagNJCiVKWFsKF4tCE3ql3GbrD2tExPQ7/pwtEJcHNZeg==}
@@ -47843,8 +47857,14 @@ packages:
       react: '>=18'
       react-dom: '>=18'
 
-  react-router@7.12.0:
-    resolution: {integrity: sha512-kTPDYPFzDVGIIGNLS5VJykK0HfHLY5MF3b+xj0/tTyNYL1gF1qs7u67Z9jEhQk2sQ98SUaHxlG31g1JtF7IfVw==}
+  react-router@6.30.2:
+    resolution: {integrity: sha512-H2Bm38Zu1bm8KUE5NVWRMzuIyAV8p/JrOaBJAwVmp37AXG72+CZJlEBw6pdn9i5TBgLMhNDgijS4ZlblpHyWTA==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      react: '>=16.8'
+
+  react-router@7.10.1:
+    resolution: {integrity: sha512-gHL89dRa3kwlUYtRQ+m8NmxGI6CgqN+k4XyGjwcFoQwwCWF6xXpOCUlDovkXClS0d0XJN/5q7kc5W3kiFEd0Yw==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       react: '>=18'
@@ -49651,8 +49671,8 @@ packages:
   tar-stream@3.1.7:
     resolution: {integrity: sha512-qJj60CXt7IU1Ffyc3NJMjh6EkuCFej46zUqJ4J7pqYlThyd9bO0XBTmcOIhSzZJVWfsLks0+nle/j538YAW9RQ==}
 
-  tar@7.5.3:
-    resolution: {integrity: sha512-ENg5JUHUm2rDD7IvKNFGzyElLXNjachNLp6RaGf4+JOgxXHkqA+gq81ZAMCUmtMtqBsoU62lcp6S27g1LCYGGQ==}
+  tar@7.5.2:
+    resolution: {integrity: sha512-7NyxrTE4Anh8km8iEy7o0QYPs+0JKBTj5ZaqHg6B39erLg0qYXN3BijtShwbsNSvQ+LN75+KV+C4QR/f6Gwnpg==}
     engines: {node: '>=18'}
 
   tdigest@0.1.2:
@@ -50736,8 +50756,16 @@ packages:
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
 
-  undici@7.18.2:
-    resolution: {integrity: sha512-y+8YjDFzWdQlSE9N5nzKMT3g4a5UBX1HKowfdXh0uvAnTaqqwqB92Jt4UXBAeKekDs5IaDKyJFR4X1gYVCgXcw==}
+  undici@5.29.0:
+    resolution: {integrity: sha512-raqeBD6NQK4SkWhQzeYKd1KmIG6dllBOTt55Rmkt4HtI9mwdWtJljnrXjAFUBLTSN67HWrOIZ3EPF4kjUw80Bg==}
+    engines: {node: '>=14.0'}
+
+  undici@6.22.0:
+    resolution: {integrity: sha512-hU/10obOIu62MGYjdskASR3CUAiYaFTtC9Pa6vHyf//mAipSvSQg6od2CnJswq7fvzNS3zJhxoRkgNVaHurWKw==}
+    engines: {node: '>=18.17'}
+
+  undici@7.16.0:
+    resolution: {integrity: sha512-QEg3HPMll0o3t2ourKwOeUAZ159Kn9mx5pnzHRQO8+Wixmh88YdZRiIwat0iNzNNXn0yoEtXJqFpyW7eM8BV7g==}
     engines: {node: '>=20.18.1'}
 
   unfetch@4.2.0:
@@ -52315,7 +52343,7 @@ snapshots:
   '@actions/http-client@2.2.3':
     dependencies:
       tunnel: 0.0.6
-      undici: 7.18.2
+      undici: 5.29.0
 
   '@actions/io@1.1.3': {}
 
@@ -56143,7 +56171,7 @@ snapshots:
     dependencies:
       '@deck.gl/core': 9.2.5
       '@luma.gl/core': 9.2.5
-      preact: 10.28.2
+      preact: 10.28.1
 
   '@definitelytyped/header-parser@0.2.20':
     dependencies:
@@ -56163,7 +56191,7 @@ snapshots:
       cachedir: 2.4.0
       charm: 1.0.2
       minimatch: 9.0.5
-      tar: 7.5.3
+      tar: 7.5.2
       tar-stream: 3.1.7
       which: 4.0.0
     transitivePeerDependencies:
@@ -56204,7 +56232,7 @@ snapshots:
       ms: 2.1.3
       secure-json-parse: 4.1.0
       tslib: 2.8.1
-      undici: 7.18.2
+      undici: 7.16.0
     transitivePeerDependencies:
       - supports-color
 
@@ -56250,7 +56278,7 @@ snapshots:
       nopt: 6.0.0
       proc-log: 2.0.1
       semver: 7.7.3
-      tar: 7.5.3
+      tar: 7.5.2
       which: 2.0.2
     transitivePeerDependencies:
       - bluebird
@@ -56289,7 +56317,7 @@ snapshots:
       ora: 5.4.1
       read-binary-file-arch: 1.0.6
       semver: 7.7.3
-      tar: 7.5.3
+      tar: 7.5.2
       yargs: 17.7.2
     transitivePeerDependencies:
       - bluebird
@@ -56735,6 +56763,8 @@ snapshots:
       ajv: 8.17.1
       ajv-formats: 3.0.1(ajv@8.17.1)
       fast-uri: 3.1.0
+
+  '@fastify/busboy@2.1.1': {}
 
   '@fastify/busboy@3.2.0': {}
 
@@ -59005,9 +59035,9 @@ snapshots:
     dependencies:
       react: 19.2.1
 
-  '@hono/node-server@1.19.9(hono@4.11.4)':
+  '@hono/node-server@1.19.7(hono@4.11.3)':
     dependencies:
-      hono: 4.11.4
+      hono: 4.11.3
 
   '@hookform/resolvers@5.2.2(react-hook-form@7.68.0(react@19.2.1))':
     dependencies:
@@ -60691,7 +60721,7 @@ snapshots:
       npmlog: 5.0.1
       rimraf: 3.0.2
       semver: 7.7.3
-      tar: 7.5.3
+      tar: 7.5.2
     transitivePeerDependencies:
       - supports-color
 
@@ -60705,7 +60735,7 @@ snapshots:
       npmlog: 5.0.1
       rimraf: 3.0.2
       semver: 7.7.3
-      tar: 7.5.3
+      tar: 7.5.2
     transitivePeerDependencies:
       - supports-color
 
@@ -60823,9 +60853,9 @@ snapshots:
 
   '@mixmark-io/domino@2.2.0': {}
 
-  '@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@4.2.1)':
+  '@modelcontextprotocol/sdk@1.25.1(hono@4.11.3)(zod@4.2.1)':
     dependencies:
-      '@hono/node-server': 1.19.9(hono@4.11.4)
+      '@hono/node-server': 1.19.7(hono@4.11.3)
       ajv: 8.17.1
       ajv-formats: 3.0.1(ajv@8.17.1)
       content-type: 1.0.5
@@ -67395,9 +67425,7 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - '@babel/preset-env'
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   '@react-native/normalize-colors@0.76.9': {}
 
@@ -67844,7 +67872,7 @@ snapshots:
       react: 19.2.1
       react-redux: 9.2.0(@types/react@18.3.11)(react@19.2.1)(redux@5.0.1)
 
-  '@remix-run/router@1.23.2': {}
+  '@remix-run/router@1.23.1': {}
 
   '@repeaterjs/repeater@3.0.6': {}
 
@@ -69696,10 +69724,10 @@ snapshots:
       '@types/express': 4.17.25
       file-system-cache: 2.3.0
 
-  '@strands-agents/sdk@0.1.3(hono@4.11.4)(ws@8.19.0)':
+  '@strands-agents/sdk@0.1.3(hono@4.11.3)(ws@8.19.0)':
     dependencies:
       '@aws-sdk/client-bedrock-runtime': 3.958.0
-      '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.4)(zod@4.2.1)
+      '@modelcontextprotocol/sdk': 1.25.1(hono@4.11.3)(zod@4.2.1)
       zod: 4.2.1
     optionalDependencies:
       openai: 6.15.0(ws@8.19.0)(zod@4.2.1)
@@ -70019,7 +70047,7 @@ snapshots:
       https-proxy-agent: 2.2.4
       progress: 2.0.3
       rimraf: 2.7.1
-      tar: 7.5.3
+      tar: 7.5.2
     transitivePeerDependencies:
       - seedrandom
       - supports-color
@@ -72328,10 +72356,6 @@ snapshots:
   '@types/cookie-parser@1.4.10(@types/express@4.17.25)':
     dependencies:
       '@types/express': 4.17.25
-
-  '@types/cookie-parser@1.4.10(@types/express@5.0.6)':
-    dependencies:
-      '@types/express': 5.0.6
 
   '@types/cookiejar@2.1.5': {}
 
@@ -75627,7 +75651,7 @@ snapshots:
       plist: 3.1.0
       resedit: 1.7.2
       semver: 7.7.3
-      tar: 7.5.3
+      tar: 7.5.2
       temp-file: 3.4.0
       tiny-async-pool: 1.3.0
     transitivePeerDependencies:
@@ -76800,7 +76824,7 @@ snapshots:
       promise-inflight: 1.0.1
       rimraf: 3.0.2
       ssri: 9.0.1
-      tar: 7.5.3
+      tar: 7.5.2
       unique-filename: 2.0.1
     transitivePeerDependencies:
       - bluebird
@@ -76817,7 +76841,7 @@ snapshots:
       minipass-pipeline: 1.2.4
       p-map: 4.0.0
       ssri: 10.0.6
-      tar: 7.5.3
+      tar: 7.5.2
       unique-filename: 3.0.0
 
   cacheable-lookup@5.0.4: {}
@@ -77032,7 +77056,7 @@ snapshots:
       parse5: 7.3.0
       parse5-htmlparser2-tree-adapter: 7.1.0
       parse5-parser-stream: 7.1.2
-      undici: 7.18.2
+      undici: 7.16.0
       whatwg-mimetype: 4.0.0
 
   chevrotain-allstar@0.3.1(chevrotain@11.0.3):
@@ -78880,7 +78904,11 @@ snapshots:
 
   diff-sequences@29.6.3: {}
 
-  diff@8.0.3: {}
+  diff@3.5.0: {}
+
+  diff@4.0.2: {}
+
+  diff@8.0.2: {}
 
   diffie-hellman@5.0.3:
     dependencies:
@@ -78937,9 +78965,9 @@ snapshots:
   dns-over-http-resolver@2.1.3:
     dependencies:
       debug: 4.4.3(supports-color@5.5.0)
-      native-fetch: 4.0.2(undici@7.18.2)
+      native-fetch: 4.0.2(undici@5.29.0)
       receptacle: 1.3.2
-      undici: 7.18.2
+      undici: 5.29.0
     transitivePeerDependencies:
       - supports-color
 
@@ -80962,7 +80990,7 @@ snapshots:
     dependencies:
       d3-selection: 3.0.0
       kapsule: 1.16.3
-      preact: 10.28.2
+      preact: 10.28.1
 
   flow-enums-runtime@0.0.6: {}
 
@@ -81937,7 +81965,7 @@ snapshots:
     dependencies:
       react-is: 16.13.1
 
-  hono@4.11.4: {}
+  hono@4.11.3: {}
 
   hook-std@4.0.0: {}
 
@@ -86990,9 +87018,9 @@ snapshots:
     dependencies:
       node-fetch: 3.3.2
 
-  native-fetch@4.0.2(undici@7.18.2):
+  native-fetch@4.0.2(undici@5.29.0):
     dependencies:
-      undici: 7.18.2
+      undici: 5.29.0
 
   nativewind@4.2.1(react-native-reanimated@4.2.1(react-native-worklets@0.7.1(@babel/core@7.28.5)(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@18.3.11)(react@19.2.1))(react@19.2.1))(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@18.3.11)(react@19.2.1))(react@19.2.1))(react-native-safe-area-context@5.6.2(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@18.3.11)(react@19.2.1))(react@19.2.1))(react-native-svg@15.15.1(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@18.3.11)(react@19.2.1))(react@19.2.1))(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@18.3.11)(react@19.2.1))(react@19.2.1)(tailwindcss@3.4.18(tsx@4.21.0)(yaml@2.8.2)):
     dependencies:
@@ -88752,7 +88780,7 @@ snapshots:
 
   pqc-kyber@0.7.0: {}
 
-  preact@10.28.2: {}
+  preact@10.28.1: {}
 
   prebuild-install@5.3.0:
     dependencies:
@@ -90124,24 +90152,29 @@ snapshots:
 
   react-router-dom@6.30.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@remix-run/router': 1.23.2
+      '@remix-run/router': 1.23.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      react-router: 7.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-router: 6.30.2(react@18.3.1)
 
   react-router-dom@7.10.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      react-router: 7.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-router: 7.10.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   react-router-dom@7.10.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
     dependencies:
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
-      react-router: 7.12.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      react-router: 7.10.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
 
-  react-router@7.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-router@6.30.2(react@18.3.1):
+    dependencies:
+      '@remix-run/router': 1.23.1
+      react: 18.3.1
+
+  react-router@7.10.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       cookie: 1.1.1
       react: 18.3.1
@@ -90149,7 +90182,7 @@ snapshots:
     optionalDependencies:
       react-dom: 18.3.1(react@18.3.1)
 
-  react-router@7.12.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
+  react-router@7.10.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
     dependencies:
       cookie: 1.1.1
       react: 19.2.1
@@ -91507,7 +91540,7 @@ snapshots:
       '@sinonjs/commons': 3.0.1
       '@sinonjs/fake-timers': 15.1.0
       '@sinonjs/samsam': 8.0.3
-      diff: 8.0.3
+      diff: 8.0.2
       supports-color: 7.2.0
 
   sisteransi@1.0.5: {}
@@ -92473,7 +92506,7 @@ snapshots:
       - bare-abort-controller
       - react-native-b4a
 
-  tar@7.5.3:
+  tar@7.5.2:
     dependencies:
       '@isaacs/fs-minipass': 4.0.1
       chownr: 3.0.0
@@ -92629,7 +92662,7 @@ snapshots:
       ssh-remote-port-forward: 1.0.4
       tar-fs: 3.1.1
       tmp: 0.2.5
-      undici: 7.18.2
+      undici: 7.16.0
     transitivePeerDependencies:
       - bare-abort-controller
       - bare-buffer
@@ -93230,7 +93263,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 8.0.3
+      diff: 4.0.2
       make-error: 1.3.6
       typescript: 5.6.3
       v8-compile-cache-lib: 3.0.1
@@ -93250,7 +93283,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 8.0.3
+      diff: 4.0.2
       make-error: 1.3.6
       typescript: 5.9.3
       v8-compile-cache-lib: 3.0.1
@@ -93270,7 +93303,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 8.0.3
+      diff: 4.0.2
       make-error: 1.3.6
       typescript: 5.9.3
       v8-compile-cache-lib: 3.0.1
@@ -93290,7 +93323,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 8.0.3
+      diff: 4.0.2
       make-error: 1.3.6
       typescript: 5.9.3
       v8-compile-cache-lib: 3.0.1
@@ -93310,7 +93343,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 8.0.3
+      diff: 4.0.2
       make-error: 1.3.6
       typescript: 5.9.3
       v8-compile-cache-lib: 3.0.1
@@ -93367,7 +93400,7 @@ snapshots:
       builtin-modules: 1.1.1
       chalk: 5.6.2
       commander: 2.20.3
-      diff: 8.0.3
+      diff: 3.5.0
       glob: 13.0.0
       js-yaml: 3.14.2
       minimatch: 3.1.2
@@ -93967,7 +94000,13 @@ snapshots:
 
   undici-types@7.16.0: {}
 
-  undici@7.18.2: {}
+  undici@5.29.0:
+    dependencies:
+      '@fastify/busboy': 2.1.1
+
+  undici@6.22.0: {}
+
+  undici@7.16.0: {}
 
   unfetch@4.2.0: {}
 
