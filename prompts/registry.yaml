@@ -55,6 +55,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: agentic-reading-order
+    version: v1
+    path: prompts/docs/agentic-reading-order@v1.md
+    sha256: 4dcdb79951ae9d1fad4e814e5ddd4fc030f1818a28775c3843092a2d86f77e21
+    description: Document Summit agentic AI reading order with actionable takeaways and roadmap alignment.
+    scope:
+      paths:
+        - docs/research/agentic-reading-order.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/docs/agentic-reading-order@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - research
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
