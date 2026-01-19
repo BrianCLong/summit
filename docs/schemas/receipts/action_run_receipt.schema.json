@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.summit.example/receipts/action_run_receipt.schema.json",
+  "title": "ActionRunReceipt",
+  "allOf": [
+    { "$ref": "common.schema.json#/$defs/receipt_envelope" },
+    {
+      "type": "object",
+      "properties": {
+        "receipt_type": { "const": "ActionRunReceipt" },
+        "action": {
+          "type": "object",
+          "required": ["action_id", "action_name", "target_system"],
+          "properties": {
+            "action_id": { "type": "string" },
+            "action_name": { "type": "string" },
+            "target_system": { "type": "string" },
+            "category": { "type": "string", "enum": ["read", "write", "privileged", "destructive"] },
+            "ttl_seconds": { "type": ["integer", "null"], "minimum": 1 }
+          },
+          "additionalProperties": false
+        },
+        "request": {
+          "type": "object",
+          "required": ["requested_at"],
+          "properties": {
+            "requested_at": { "type": "string", "format": "date-time" },
+            "inputs": { "type": "object", "additionalProperties": true },
+            "inputs_redacted": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        "approvals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["approver", "approved_at", "decision"],
+            "properties": {
+              "approver": { "$ref": "common.schema.json#/$defs/principal" },
+              "approved_at": { "type": "string", "format": "date-time" },
+              "decision": { "type": "string", "enum": ["approved", "rejected"] },
+              "rationale": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "execution": {
+          "type": "object",
+          "required": ["started_at", "ended_at", "status"],
+          "properties": {
+            "started_at": { "type": "string", "format": "date-time" },
+            "ended_at": { "type": "string", "format": "date-time" },
+            "status": { "type": "string", "enum": ["success", "failed", "partial", "canceled"] },
+            "remote_change_ids": { "type": "array", "items": { "type": "string" } },
+            "outputs": { "type": "object", "additionalProperties": true },
+            "outputs_redacted": { "type": "boolean" },
+            "error": {
+              "type": ["object", "null"],
+              "properties": {
+                "code": { "type": "string" },
+                "message": { "type": "string" },
+                "retriable": { "type": "boolean" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "post_conditions": {
+          "type": "object",
+          "properties": {
+            "ttl_enforced": { "type": "boolean" },
+            "ttl_revoked_at": { "type": ["string", "null"], "format": "date-time" },
+            "compensation_run_id": { "type": ["string", "null"] }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["action", "request", "execution"],
+      "additionalProperties": false
+    }
+  ]
+}
