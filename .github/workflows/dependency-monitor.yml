@@ -60,12 +60,13 @@ jobs:
             --sarif-file-output=${{ env.REPORT_DIR }}/snyk.sarif
 
       - name: Upload Snyk SARIF
+        if: env.SNYK_TOKEN != ''
         uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
         with:
           sarif_file: ${{ env.REPORT_DIR }}/snyk.sarif
 
       - name: Persist Snyk report
-        if: always()
+        if: always() && env.SNYK_TOKEN != ''
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           retention-days: 14
