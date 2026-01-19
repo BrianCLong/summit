@@ -63,6 +63,27 @@ export interface LoadBalancerConfig {
   recoveryThreshold: number;
 }
 
+// Processor Registry
+type ProcessorFn = (ctx: RequestContext) => Promise<any>;
+const processorRegistry = new Map<string, ProcessorFn>();
+
+export class ProcessorRegistry {
+  static register(name: string, fn: ProcessorFn) {
+    if (processorRegistry.has(name)) {
+      throw new Error(`Processor ${name} already registered`);
+    }
+    processorRegistry.set(name, fn);
+  }
+
+  static get(name: string): ProcessorFn | undefined {
+    return processorRegistry.get(name);
+  }
+
+  static clear() {
+      processorRegistry.clear();
+  }
+}
+
 // Request validation schema
 const RequestContextSchema = z.object({
   id: z.string(),
@@ -92,18 +113,21 @@ export class ConcurrentRequestHandler extends EventEmitter {
   private maxConcurrent: number = 50;
   private batchSize: number = 10;
   private backpressureThreshold: number = 100;
+  private processorsPath?: string;
 
   constructor(
     redis: Redis,
     logger: Logger,
     workerPoolConfig: WorkerPoolConfig,
     loadBalancerConfig: LoadBalancerConfig,
+    processorsPath?: string
   ) {
     super();
 
     this.redis = redis;
     this.logger = logger;
-    this.workerPool = new WorkerPool(workerPoolConfig, logger);
+    this.processorsPath = processorsPath;
+    this.workerPool = new WorkerPool(workerPoolConfig, logger, processorsPath);
     this.loadBalancer = new LoadBalancer(loadBalancerConfig, logger);
     this.rateLimiter = new RateLimiter(redis, logger);
     this.metrics = new MetricsCollector(logger);
@@ -127,14 +151,19 @@ export class ConcurrentRequestHandler extends EventEmitter {
   /**
    * Submit request for concurrent processing
    */
-  async submitRequest<T>(
+  async submitRequest(
     request: RequestContext,
-    processor: (ctx: RequestContext) => Promise<T>,
+    processorName: string,
   ): Promise<string> {
     // Validate request
     const validation = RequestContextSchema.safeParse(request);
     if (!validation.success) {
       throw new Error(`Invalid request: ${validation.error.message}`);
+    }
+
+    // Check if processor name is a non-empty string
+    if (typeof processorName !== 'string' || !processorName.trim()) {
+        throw new Error('Processor name must be a non-empty string');
     }
 
     const startTime = Date.now();
@@ -159,12 +188,13 @@ export class ConcurrentRequestHandler extends EventEmitter {
         request.correlationId = randomUUID();
       }
 
-      // Store processor function for the worker
+      // Store processor name for the worker
+      // NOTE: We no longer store code strings to avoid eval()
       await this.redis.setex(
         `processor:${request.id}`,
         300, // 5 minutes
         JSON.stringify({
-          processorCode: processor.toString(),
+          processorName,
           context: request,
         }),
       );
@@ -525,10 +555,12 @@ class WorkerPool {
   private workers: Map<string, Worker> = new Map();
   private config: WorkerPoolConfig;
   private logger: Logger;
+  private processorsPath?: string;
 
-  constructor(config: WorkerPoolConfig, logger: Logger) {
+  constructor(config: WorkerPoolConfig, logger: Logger, processorsPath?: string) {
     this.config = config;
     this.logger = logger;
+    this.processorsPath = processorsPath;
     this.initializeWorkers();
   }
 
@@ -541,7 +573,7 @@ class WorkerPool {
   private createWorker(): Worker {
     const workerId = randomUUID();
     const worker = new Worker(__filename, {
-      workerData: { workerId },
+      workerData: { workerId, processorsPath: this.processorsPath },
     });
 
     worker.on('error', (error) => {
@@ -762,7 +794,16 @@ class MetricsCollector {
  * Worker thread implementation
  */
 if (!isMainThread && parentPort) {
-  const { workerId } = workerData;
+  const { workerId, processorsPath } = workerData;
+
+  // Load processors if path is provided
+  let processorsLoaded = Promise.resolve();
+  if (processorsPath) {
+      processorsLoaded = import(processorsPath).catch(err => {
+          // We can't use the logger here easily if it wasn't passed, but we can console.error
+          console.error(`Failed to load processors from ${processorsPath}`, err);
+      });
+  }
 
   parentPort.on('message', async ({ type, requestId, context }) => {
     if (type === 'execute') {
@@ -770,18 +811,26 @@ if (!isMainThread && parentPort) {
       const startMemory = process.memoryUsage().heapUsed;
 
       try {
-        // Get processor from Redis
+        await processorsLoaded;
+
+        // Get processor info from Redis
         const redis = new Redis(process.env.REDIS_URL);
         const processorData = await redis.get(`processor:${requestId}`);
 
         if (!processorData) {
-          throw new Error('Processor not found');
+          throw new Error('Processor data not found');
         }
 
-        const { processorCode } = JSON.parse(processorData);
+        const { processorName } = JSON.parse(processorData);
+
+        // Look up processor in registry
+        const processor = ProcessorRegistry.get(processorName);
+
+        if (!processor) {
+            throw new Error(`Processor '${processorName}' not found in registry. Ensure it is registered via ProcessorRegistry.register()`);
+        }
 
         // Execute processor function
-        const processor = eval(`(${processorCode})`);
         const result = await processor(context);
 
         const endTime = Date.now();
