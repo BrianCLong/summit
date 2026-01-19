@@ -1,5 +1,8 @@
 # Connector Conformance Checklist
 
+> [!IMPORTANT]
+> For the automated verification suite and certification tiers (Bronze/Silver/Gold), see the [Conformance Test Plan](./CONFORMANCE_TEST_PLAN.md).
+
 This checklist codifies the expectations for any connector contributed to the platform. It is intended to be **actionable**, enforceable through automated harness tests, and evidence-friendly for audits.
 
 ## Idempotency

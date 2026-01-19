@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.summit.example/receipts/ingest_receipt.schema.json",
+  "title": "IngestReceipt",
+  "allOf": [
+    { "$ref": "common.schema.json#/$defs/receipt_envelope" },
+    {
+      "type": "object",
+      "properties": {
+        "receipt_type": { "const": "IngestReceipt" },
+        "connector": {
+          "type": "object",
+          "required": ["connector_id", "source_system", "connector_version"],
+          "properties": {
+            "connector_id": { "type": "string" },
+            "source_system": { "type": "string" },
+            "connector_version": { "type": "string" },
+            "scopes": { "type": "array", "items": { "type": "string" } },
+            "mode": { "type": "string", "enum": ["pull", "push", "webhook"] }
+          },
+          "additionalProperties": false
+        },
+        "cursor": {
+          "type": "object",
+          "properties": {
+            "from": { "type": ["string", "null"] },
+            "to": { "type": ["string", "null"] },
+            "next": { "type": ["string", "null"] }
+          },
+          "additionalProperties": false
+        },
+        "window": {
+          "type": "object",
+          "required": ["started_at", "ended_at"],
+          "properties": {
+            "started_at": { "type": "string", "format": "date-time" },
+            "ended_at": { "type": "string", "format": "date-time" }
+          },
+          "additionalProperties": false
+        },
+        "counts": {
+          "type": "object",
+          "required": ["read", "created", "updated", "deleted", "skipped", "errors"],
+          "properties": {
+            "read": { "type": "integer", "minimum": 0 },
+            "created": { "type": "integer", "minimum": 0 },
+            "updated": { "type": "integer", "minimum": 0 },
+            "deleted": { "type": "integer", "minimum": 0 },
+            "skipped": { "type": "integer", "minimum": 0 },
+            "errors": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "dedupe": {
+          "type": "object",
+          "properties": {
+            "dedupe_applied": { "type": "boolean" },
+            "dedupe_keys": { "type": "array", "items": { "type": "string" } }
+          },
+          "additionalProperties": false
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["code", "message"],
+            "properties": {
+              "code": { "type": "string" },
+              "message": { "type": "string" },
+              "retriable": { "type": "boolean" },
+              "source_object_id": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "artifacts": {
+          "type": "object",
+          "properties": {
+            "payload_manifest": { "type": "array", "items": { "type": "string" } },
+            "lineage_events": { "type": "integer", "minimum": 0 },
+            "entities_emitted": { "type": "integer", "minimum": 0 },
+            "edges_emitted": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["connector", "counts", "window"],
+      "additionalProperties": false
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.summit.example/receipts/workflow_run_receipt.schema.json",
+  "title": "WorkflowRunReceipt",
+  "allOf": [
+    { "$ref": "common.schema.json#/$defs/receipt_envelope" },
+    {
+      "type": "object",
+      "properties": {
+        "receipt_type": { "const": "WorkflowRunReceipt" },
+        "workflow": {
+          "type": "object",
+          "required": ["workflow_id", "workflow_name", "workflow_version"],
+          "properties": {
+            "workflow_id": { "type": "string" },
+            "workflow_name": { "type": "string" },
+            "workflow_version": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "run": {
+          "type": "object",
+          "required": ["run_id", "started_at", "ended_at", "status"],
+          "properties": {
+            "run_id": { "$ref": "common.schema.json#/$defs/ulid" },
+            "started_at": { "type": "string", "format": "date-time" },
+            "ended_at": { "type": "string", "format": "date-time" },
+            "status": { "type": "string", "enum": ["success", "failed", "canceled", "timed_out"] },
+            "replayed": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["step_id", "name", "started_at", "ended_at", "status"],
+            "properties": {
+              "step_id": { "type": "string" },
+              "name": { "type": "string" },
+              "started_at": { "type": "string", "format": "date-time" },
+              "ended_at": { "type": "string", "format": "date-time" },
+              "status": { "type": "string", "enum": ["success", "failed", "skipped", "compensated"] },
+              "attempt": { "type": "integer", "minimum": 1 },
+              "inputs_hash": { "type": "string" },
+              "outputs_hash": { "type": "string" },
+              "policy_decision_id": { "$ref": "common.schema.json#/$defs/ulid" },
+              "linked_action_run_id": { "type": ["string", "null"] },
+              "error": {
+                "type": ["object", "null"],
+                "properties": {
+                  "code": { "type": "string" },
+                  "message": { "type": "string" },
+                  "retriable": { "type": "boolean" }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["ts", "type"],
+            "properties": {
+              "ts": { "type": "string", "format": "date-time" },
+              "type": { "type": "string" },
+              "data_hash": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["workflow", "run", "steps"],
+      "additionalProperties": false
+    }
+  ]
+}

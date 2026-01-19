@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.summit.example/receipts/common.schema.json",
+  "title": "Receipt Common Definitions",
+  "type": "object",
+  "$defs": {
+    "ulid": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "iso_datetime": { "type": "string", "format": "date-time" },
+    "principal": {
+      "type": "object",
+      "required": ["principal_id", "principal_type"],
+      "properties": {
+        "principal_id": { "type": "string" },
+        "principal_type": { "type": "string", "enum": ["human", "service", "agent"] },
+        "display_name": { "type": "string" },
+        "roles": { "type": "array", "items": { "type": "string" } },
+        "attributes": { "type": "object", "additionalProperties": true }
+      },
+      "additionalProperties": false
+    },
+    "policy_ref": {
+      "type": "object",
+      "required": ["decision", "decision_id"],
+      "properties": {
+        "decision": { "type": "string", "enum": ["allow", "deny"] },
+        "decision_id": { "$ref": "#/$defs/ulid" },
+        "policy_bundle": { "type": "string" },
+        "policy_version": { "type": "string" },
+        "reason_codes": { "type": "array", "items": { "type": "string" } },
+        "rationale": { "type": "string" },
+        "inputs_redacted": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "integrity_block": {
+      "type": "object",
+      "required": ["payload_hash", "hash_alg"],
+      "properties": {
+        "hash_alg": { "type": "string", "enum": ["sha256", "sha512"] },
+        "payload_hash": { "type": "string", "pattern": "^[a-f0-9]{64,128}$" },
+        "canonicalization": { "type": "string", "enum": ["JCS", "RFC8785"] },
+        "manifest_hash": { "type": "string", "pattern": "^[a-f0-9]{64,128}$" },
+        "redactions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["json_path", "reason"],
+            "properties": {
+              "json_path": { "type": "string" },
+              "reason": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "signature_block": {
+      "type": "object",
+      "required": ["sig_alg", "key_id", "signature"],
+      "properties": {
+        "sig_alg": { "type": "string", "enum": ["ed25519", "ecdsa-p256"] },
+        "key_id": { "type": "string" },
+        "signature": { "type": "string" },
+        "signed_at": { "$ref": "#/$defs/iso_datetime" }
+      },
+      "additionalProperties": false
+    },
+    "receipt_envelope": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "receipt_type",
+        "receipt_id",
+        "tenant_id",
+        "issued_at",
+        "actor",
+        "policy",
+        "integrity",
+        "signature"
+      ],
+      "properties": {
+        "schema_version": { "type": "string", "pattern": "^1\\.[0-9]+$" },
+        "receipt_type": { "type": "string" },
+        "receipt_id": { "$ref": "#/$defs/ulid" },
+        "tenant_id": { "type": "string" },
+        "issued_at": { "$ref": "#/$defs/iso_datetime" },
+        "actor": { "$ref": "#/$defs/principal" },
+        "policy": { "$ref": "#/$defs/policy_ref" },
+        "correlation": {
+          "type": "object",
+          "properties": {
+            "request_id": { "$ref": "#/$defs/ulid" },
+            "workflow_run_id": { "$ref": "#/$defs/ulid" },
+            "action_run_id": { "$ref": "#/$defs/ulid" },
+            "ingest_run_id": { "$ref": "#/$defs/ulid" },
+            "trace_id": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "integrity": { "$ref": "#/$defs/integrity_block" },
+        "signature": { "$ref": "#/$defs/signature_block" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

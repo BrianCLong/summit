@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.summit.example/receipts/control_check_receipt.schema.json",
+  "title": "ControlCheckReceipt",
+  "allOf": [
+    { "$ref": "common.schema.json#/$defs/receipt_envelope" },
+    {
+      "type": "object",
+      "properties": {
+        "receipt_type": { "const": "ControlCheckReceipt" },
+        "control": {
+          "type": "object",
+          "required": ["control_id", "control_name", "framework"],
+          "properties": {
+            "control_id": { "type": "string" },
+            "control_name": { "type": "string" },
+            "framework": { "type": "string", "enum": ["SOC2", "ISO27001", "PCI_LITE", "CUSTOM"] },
+            "check_version": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "result": {
+          "type": "object",
+          "required": ["status", "checked_at"],
+          "properties": {
+            "status": { "type": "string", "enum": ["pass", "fail", "warn", "unknown"] },
+            "checked_at": { "type": "string", "format": "date-time" },
+            "evidence_refs": { "type": "array", "items": { "type": "string" } },
+            "findings": { "type": "array", "items": { "type": "string" } },
+            "remediation": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["control", "result"],
+      "additionalProperties": false
+    }
+  ]
+}
