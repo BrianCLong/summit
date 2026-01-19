@@ -74,5 +74,14 @@
     "evidence": ["docs/security/security-architecture-and-policies.md"],
     "keyword": "ingestion",
     "notes": "Ensures ingestion hardening expectations stay documented."
+  },
+  {
+    "feature": "Auditor Verification Guide",
+    "tier": "B",
+    "artifact": "testing/ga-verification/ga-features.ga.test.mjs",
+    "ciStatus": "wired",
+    "evidence": ["docs/ga/GA_EVIDENCE_BUNDLE_AUDITOR_GUIDE.md"],
+    "keyword": "Auditor",
+    "notes": "Independent auditor guide for verifying GA evidence bundles."
   }
 ]
