@@ -347,6 +347,99 @@ export const SprintSchema = BaseNodeSchema.extend({
 export type Sprint = z.infer<typeof SprintSchema>;
 
 // ============================================
+// Board Node (Kanban/Scrum Board)
+// ============================================
+
+export const BoardColumnSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  position: z.number(),
+  wipLimit: z.number().optional(),
+  color: z.string().optional(),
+});
+
+export type BoardColumn = z.infer<typeof BoardColumnSchema>;
+
+export const BoardSchema = BaseNodeSchema.extend({
+  type: z.literal('board'),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  boardType: z.enum(['kanban', 'scrum', 'custom']),
+  columns: z.array(BoardColumnSchema).default([]),
+  owner: z.string().optional(),
+  team: z.string().optional(),
+  isDefault: z.boolean().default(false),
+  archived: z.boolean().default(false),
+  itemCount: z.number().default(0),
+});
+
+export type Board = z.infer<typeof BoardSchema>;
+
+// ============================================
+// Roadmap Node
+// ============================================
+
+export const SwimlaneSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  color: z.string().optional(),
+  position: z.number(),
+});
+
+export type Swimlane = z.infer<typeof SwimlaneSchema>;
+
+export const TimeframeSchema = z.object({
+  start: z.date(),
+  end: z.date(),
+  granularity: z.enum(['day', 'week', 'month', 'quarter']),
+});
+
+export type Timeframe = z.infer<typeof TimeframeSchema>;
+
+export const RoadmapSchema = BaseNodeSchema.extend({
+  type: z.literal('roadmap'),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  timeframe: TimeframeSchema,
+  swimlanes: z.array(SwimlaneSchema).default([]),
+  status: z.enum(['draft', 'active', 'archived']),
+  owner: z.string().optional(),
+  team: z.string().optional(),
+  visibility: z.enum(['private', 'team', 'public']).default('team'),
+});
+
+export type Roadmap = z.infer<typeof RoadmapSchema>;
+
+// ============================================
+// Milestone Node
+// ============================================
+
+export const SuccessCriterionSchema = z.object({
+  id: z.string(),
+  description: z.string(),
+  met: z.boolean().default(false),
+});
+
+export type SuccessCriterion = z.infer<typeof SuccessCriterionSchema>;
+
+export const MilestoneSchema = BaseNodeSchema.extend({
+  type: z.literal('milestone'),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  targetDate: z.date(),
+  milestoneType: z.enum(['release', 'checkpoint', 'deadline', 'event']),
+  status: z.enum(['planned', 'on_track', 'at_risk', 'achieved', 'missed']),
+  progress: z.number().min(0).max(100).default(0),
+  successCriteria: z.array(SuccessCriterionSchema).default([]),
+  owner: z.string().optional(),
+  stakeholders: z.array(z.string()).default([]),
+  linkedRoadmapId: z.string().optional(),
+  color: z.string().optional(),
+});
+
+export type Milestone = z.infer<typeof MilestoneSchema>;
+
+// ============================================
 // Union Type
 // ============================================
 
@@ -364,7 +457,10 @@ export type WorkGraphNode =
   | Agent
   | Environment
   | Policy
-  | Sprint;
+  | Sprint
+  | Board
+  | Roadmap
+  | Milestone;
 
 export const WorkGraphNodeSchema = z.discriminatedUnion('type', [
   IntentSchema,
@@ -381,6 +477,9 @@ export const WorkGraphNodeSchema = z.discriminatedUnion('type', [
   EnvironmentSchema,
   PolicySchema,
   SprintSchema,
+  BoardSchema,
+  RoadmapSchema,
+  MilestoneSchema,
 ]);
 
 // Node type string literal

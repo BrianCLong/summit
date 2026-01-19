@@ -126,7 +126,7 @@
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
     "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
     "release:ready": "pnpm ga:verify && GA_VERIFY_MODE=true pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
-    "prepare": "husky"
+    "prepare": "bash scripts/setup-type-stubs.sh && husky"
   },
   "keywords": [
     "intelligence-analysis",
