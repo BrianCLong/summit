@@ -1,0 +1,77 @@
+name: ci-telemetry
+on:
+  workflow_run:
+    workflows: ["ci", "build", "test", "release"]
+    types: [completed]
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract workflow_run context
+        id: ctx
+        run: |
+          echo "RUN_JSON<<EOF" >> $GITHUB_OUTPUT
+          echo '${{ toJson(github.event.workflow_run) }}' >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Compute config hash (workflows + lockfiles)
+        run: |
+          tar cf - .github/workflows package-lock.json pnpm-lock.yaml yarn.lock 2>/dev/null | sha256sum | awk '{print $1}' > config.hash
+          echo "CONFIG_HASH=$(cat config.hash)" >> $GITHUB_ENV
+
+      - name: Parse jobs & steps via Actions API
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RUN_ID=$(jq -r '.id' <<< "${{ steps.ctx.outputs.RUN_JSON }}")
+          gh api repos/${{ github.repository }}/actions/runs/$RUN_ID/jobs --paginate > jobs.json
+          # Flatten minimal table
+          jq -r '
+            .jobs[] as $j |
+            ($j.id|tostring)+","+
+            ($j.name | gsub(","; " "))+","+
+            ($j.runner_name // "self-hosted")+","+
+            ((($j.completed_at|fromdate) - ($j.started_at|fromdate))|tostring)
+          ' jobs.json > jobs.csv || true
+
+      - name: Emit git context
+        run: |
+          git fetch --depth=2000
+          # Use HEAD of the workflow_run if possible, or fallback
+          SHA=$(jq -r '.head_sha' <<< '${{ steps.ctx.outputs.RUN_JSON }}')
+          PARENT=$(git rev-list --parents -n1 "$SHA" | awk '{print $2}' || echo "")
+
+          if [ -z "$PARENT" ]; then
+             CHANGED=0
+             LOC=0
+          else
+             CHANGED=$(git diff --name-only $PARENT $SHA | wc -l | xargs)
+             LOC=$(git diff --shortstat $PARENT $SHA | awk '{print $(NF-1)}')
+          fi
+
+          # Handle empty LOC if awk failed
+          LOC=${LOC:-0}
+
+          jq -n --arg sha "$SHA" --arg parent "$PARENT" --arg files "$CHANGED" --arg loc "$LOC" --arg cfg "$CONFIG_HASH" \
+            '{sha:$sha,parent_sha:$parent,files_changed:($files|tonumber),loc_delta:($loc|tonumber),config_hash:$cfg}' > git_context.json
+
+      - name: Package evidence
+        run: |
+          mkdir -p artifacts/telemetry/${{ github.run_id }}
+          cp -v jobs.csv git_context.json config.hash artifacts/telemetry/${{ github.run_id }}/
+          (cd artifacts && zip -r ci-telemetry-${{ github.run_id }}.zip telemetry) >/dev/null
+          sha256sum artifacts/ci-telemetry-${{ github.run_id }}.zip | awk '{print $1}' > artifacts/ci-telemetry.sha256
+
+      - name: Upload artifact (tamper-evident)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-telemetry
+          path: |
+            artifacts/ci-telemetry-${{ github.run_id }}.zip
+            artifacts/ci-telemetry.sha256
