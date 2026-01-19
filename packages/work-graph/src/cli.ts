@@ -262,6 +262,62 @@ async function listAgents(): Promise<void> {
 }
 
 // ============================================
+// Import Commands
+// ============================================
+
+async function handleImport(subCommand?: string, pathArg?: string): Promise<void> {
+  // Dynamic import to avoid loading fs in browser environments
+  const { runImport } = await import('./import/backlog-importer.js');
+
+  const rootDir = pathArg || process.cwd();
+
+  switch (subCommand) {
+    case 'all': {
+      console.log(`\n📥 Importing all backlogs from ${rootDir}...\n`);
+      const result = await runImport(rootDir, true);
+
+      console.log('\n📊 Import Summary:');
+      console.log(`  Epics:      ${result.summary.totalEpics}`);
+      console.log(`  Tickets:    ${result.summary.totalTickets}`);
+      console.log(`  Milestones: ${result.summary.totalMilestones}`);
+      console.log('\n  By Source:');
+      for (const [source, count] of Object.entries(result.summary.bySource)) {
+        console.log(`    ${source}: ${count} items`);
+      }
+
+      // Show sample data
+      console.log('\n📋 Sample Epics:');
+      for (const epic of result.epics.slice(0, 5)) {
+        console.log(`  • ${epic.title} [${epic.status}]`);
+      }
+
+      console.log('\n🎫 Sample Tickets:');
+      for (const ticket of result.tickets.slice(0, 5)) {
+        const icon: Record<string, string> = { P0: '🔴', P1: '🟠', P2: '🟡', P3: '🟢' };
+        console.log(`  ${icon[ticket.priority] || '⚪'} ${ticket.title}`);
+      }
+
+      console.log('\n🏁 Milestones:');
+      for (const milestone of result.milestones) {
+        const icon: Record<string, string> = { release: '🚀', checkpoint: '🏁', deadline: '⏰' };
+        console.log(`  ${icon[milestone.milestoneType] || '📌'} ${milestone.name} - ${milestone.targetDate.toLocaleDateString()}`);
+      }
+      break;
+    }
+
+    case 'roadmap':
+    case 'warroom':
+    case 'tasks':
+      console.log(`Import from specific file: ${pathArg}`);
+      console.log('Use "import all" to import from a directory containing all backlog files.');
+      break;
+
+    default:
+      console.error('Unknown import subcommand. Use: all, roadmap, warroom, or tasks');
+  }
+}
+
+// ============================================
 // Help
 // ============================================
 
@@ -289,6 +345,12 @@ Visualization Commands:
   viz intent [id]       Intent-to-delivery flow diagram
   viz all               Generate all visualizations
 
+Import Commands:
+  import all [dir]      Import all backlogs from directory
+  import roadmap <file> Import from ROADMAP.md format
+  import warroom <file> Import from 90_DAY_WAR_ROOM_BACKLOG.md format
+  import tasks <file>   Import from TASK_BACKLOG.md format
+
 Options:
   --help, -h            Show this help message
   --url URL             GraphQL server URL (default: http://localhost:4000/graphql)
@@ -301,6 +363,7 @@ Examples:
   work-graph viz sprint 47
   work-graph viz epic abc123
   work-graph viz all > report.md
+  work-graph import all /path/to/summit
 
 Environment Variables:
   WORK_GRAPH_URL        GraphQL server URL
@@ -339,6 +402,10 @@ async function main(): Promise<void> {
 
       case 'agents':
         await listAgents();
+        break;
+
+      case 'import':
+        await handleImport(subCommand, arg);
         break;
 
       case 'viz':
