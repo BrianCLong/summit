@@ -14,17 +14,31 @@ const debounce = (fn, delay = 50) => {
   };
 };
 
+const applyLod = (cy) => {
+  const zoom = cy.zoom();
+  cy.startBatch();
+  if (zoom < LOD_ZOOM) {
+    cy.nodes().style('label', '');
+    cy.edges().style('target-arrow-shape', 'none');
+  } else {
+    cy.nodes().style('label', 'data(label)');
+    cy.edges().style('target-arrow-shape', 'triangle');
+  }
+  cy.endBatch();
+};
+
 const Graph = ({ elements, neighborhoodMode }) => {
   const cyRef = useRef(null);
   const cyInstance = useRef(null);
   const workerRef = useRef(null);
 
+  // Initialize Cytoscape instance once
   useEffect(() => {
     if (!cyRef.current) return;
 
     cyInstance.current = cytoscape({
       container: cyRef.current,
-      elements,
+      elements: [], // Start empty, will be populated by second effect
       style: [
         {
           selector: 'node',
@@ -62,50 +76,60 @@ const Graph = ({ elements, neighborhoodMode }) => {
 
     const cy = cyInstance.current;
 
-    const updateLod = () => {
-      const zoom = cy.zoom();
-      cy.startBatch();
-      if (zoom < LOD_ZOOM) {
-        cy.nodes().style('label', '');
-        cy.edges().style('target-arrow-shape', 'none');
-      } else {
-        cy.nodes().style('label', 'data(label)');
-        cy.edges().style('target-arrow-shape', 'triangle');
-      }
-      cy.endBatch();
-    };
-
-    cy.on('zoom', debounce(updateLod, 50));
-    updateLod();
-
-    const runAsyncLayout = () => {
-      workerRef.current = new Worker(
-        new URL('./layoutWorker.ts', import.meta.url),
-      );
-      workerRef.current.onmessage = (e) => {
-        const { positions } = e.data;
-        cy.startBatch();
-        Object.keys(positions).forEach((id) => {
-          cy.getElementById(id).position(positions[id]);
-        });
-        cy.endBatch();
-        workerRef.current.terminate();
-      };
-      workerRef.current.postMessage({ elements: cy.json().elements });
-    };
-
-    runAsyncLayout();
+    cy.on('zoom', debounce(() => applyLod(cy), 50));
 
     const handleResize = debounce(() => cy.resize(), 100);
     window.addEventListener('resize', handleResize);
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      workerRef.current && workerRef.current.terminate();
+      if (workerRef.current) workerRef.current.terminate();
       cy.destroy();
+      cyInstance.current = null;
     };
+  }, []);
+
+  // Handle Data Updates
+  useEffect(() => {
+    const cy = cyInstance.current;
+    if (!cy) return;
+
+    // Update graph elements without destroying the instance
+    cy.startBatch();
+    cy.elements().remove();
+    cy.add(elements);
+    cy.endBatch();
+
+    // Re-run layout
+    if (workerRef.current) {
+      workerRef.current.terminate();
+    }
+
+    workerRef.current = new Worker(
+      new URL('./layoutWorker.ts', import.meta.url),
+    );
+
+    workerRef.current.onmessage = (e) => {
+      const { positions } = e.data;
+      cy.startBatch();
+      Object.keys(positions).forEach((id) => {
+        const el = cy.getElementById(id);
+        if (el.length > 0) el.position(positions[id]);
+      });
+      cy.endBatch();
+      workerRef.current.terminate();
+      workerRef.current = null;
+    };
+
+    // Send current elements to worker for layout calculation
+    workerRef.current.postMessage({ elements: cy.json().elements });
+
+    // Apply LOD check
+    applyLod(cy);
+
   }, [elements]);
 
+  // Handle Neighborhood Mode
   useEffect(() => {
     const cy = cyInstance.current;
     if (!cy) return;
