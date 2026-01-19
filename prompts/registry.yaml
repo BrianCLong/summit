@@ -112,6 +112,7 @@ prompts:
     scope:
       paths:
         - docs/governance/
+        - docs/roadmap/STATUS.json
         - docs/ci/REQUIRED_CHECKS_POLICY.yml
         - docs/SOC_CONTROL_UNIT_TESTS_PLAN.md
         - scripts/ci/
