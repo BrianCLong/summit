@@ -1,9 +1,9 @@
+import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import { RBACManager } from '../../../packages/authentication/src/rbac/rbac-manager.js';
 
 import { buildApp } from '../src/app.js';
-import { InMemoryPolicyDecisionStore } from '../src/services/PolicyDecisionStore.js';
-import { PolicyDecisionStore } from '../src/db/models/policy_decisions.js';
+import { InMemoryPolicyDecisionStore, type PolicyDecisionStore } from '../src/services/PolicyDecisionStore.js';
 import { PolicySimulationService } from '../src/services/policyService.js';
 import { ReceiptStore, ReceiptVerifier } from '../src/routes/receipts/get.js';
 import { EventPublisher } from '../src/services/EventPublisher.js';
@@ -45,14 +45,14 @@ class StubEventPublisher extends EventPublisher {
 describe('API authentication, tenant isolation, and RBAC', () => {
   const buildTestApp = () => {
     const rbacManager = new RBACManager();
-    const preflightStore = new InMemoryPolicyDecisionStore();
     const executeEvents = new StubEventPublisher();
+    const decisionStore = new InMemoryPolicyDecisionStore(() => new Date('2024-01-01T00:00:00Z'));
 
-    preflightStore.upsertPreflight({
+    decisionStore.upsertPreflight({
       id: 'pf-allowed',
       action: 'collect',
       input: { target: 'alpha' },
-      expiresAt: new Date(Date.now() + 60_000).toISOString(),
+      expiresAt: new Date(Date.now() + 120_000).toISOString(),
       request: {
         subject: { id: 'user-1', roles: ['action_operator'], tenantId: 'tenant-a' },
         action: { name: 'collect' },
@@ -63,15 +63,14 @@ describe('API authentication, tenant isolation, and RBAC', () => {
       rbacManager,
       app: buildApp({
         rbacManager,
-        preflightStore,
+        decisionStore,
         events: executeEvents,
-        decisionStore: new PolicyDecisionStore(() => new Date('2024-01-01T00:00:00Z')),
         policyService: new AllowAllPolicyService(),
         store: new StubReceiptStore(),
         verifier: new StubReceiptVerifier(),
       }),
       executeEvents,
-      preflightStore,
+      preflightStore: decisionStore,
     };
   };
 
@@ -89,7 +88,7 @@ describe('API authentication, tenant isolation, and RBAC', () => {
 
     const response = await request(app)
       .get('/epics')
-      .set('Authorization', 'Bearer token-123');
+      .set('Authorization', 'Bearer dev-token-67890');
 
     expect(response.status).toBe(400);
     expect(response.body.error).toBe('tenant_context_required');
@@ -98,9 +97,10 @@ describe('API authentication, tenant isolation, and RBAC', () => {
   it('denies operations when role lacks permission', async () => {
     const { app } = buildTestApp();
 
+    // Use API key which does NOT have epic update permission
     const response = await request(app)
       .post('/epics/epic-1/tasks/task-1/status')
-      .set('Authorization', 'Bearer token-123')
+      .set('X-API-Key', 'dev-key-12345')
       .set('X-Tenant-ID', 'tenant-a')
       .send({ status: 'in_progress' });
 
@@ -111,11 +111,11 @@ describe('API authentication, tenant isolation, and RBAC', () => {
   it('enforces RBAC on privileged actions and succeeds when permitted', async () => {
     const { app } = buildTestApp();
 
+    // Use API key which HAS action_operator role
     const preflightResponse = await request(app)
       .post('/actions/preflight')
-      .set('Authorization', 'Bearer token-allowed')
+      .set('X-API-Key', 'dev-key-12345')
       .set('X-Tenant-ID', 'tenant-a')
-      .set('X-Roles', 'action_operator')
       .send({
         subject: { id: 'user-1', roles: ['action_operator'], tenantId: 'tenant-a' },
         action: { name: 'collect' },
@@ -126,9 +126,8 @@ describe('API authentication, tenant isolation, and RBAC', () => {
 
     const executeResponse = await request(app)
       .post('/actions/execute')
-      .set('Authorization', 'Bearer token-allowed')
+      .set('X-API-Key', 'dev-key-12345')
       .set('X-Tenant-ID', 'tenant-a')
-      .set('X-Roles', 'action_operator')
       .send({ preflight_id: 'pf-allowed', action: 'collect', input: { target: 'alpha' } });
 
     expect(executeResponse.status).toBe(200);
@@ -140,7 +139,7 @@ describe('API authentication, tenant isolation, and RBAC', () => {
 
     const response = await request(app)
       .get('/epics')
-      .set('Authorization', 'Bearer token-tenant')
+      .set('Authorization', 'Bearer dev-token-67890')
       .set('X-Actor-Tenant-ID', 'tenant-a')
       .set('X-Tenant-ID', 'tenant-b');
 

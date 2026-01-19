@@ -1,13 +1,14 @@
-import { Router, type Request, type Response } from 'express';
+import { Router, type Response } from 'express';
 
 import {
   type PreflightDecisionContract,
   type PreflightRequestContract
 } from '../../contracts/actions.js';
+import { type AuthenticatedRequest } from '../../middleware/security.js';
 import {
-  PolicyDecisionStore,
-  type PolicyDecisionRecord
-} from '../../db/models/policy_decisions.js';
+  type PolicyDecisionStore,
+  type PreflightRecord as PolicyDecisionRecord,
+} from '../../services/PolicyDecisionStore.js';
 import {
   type PolicyDecisionResult,
   type PolicySimulationService
@@ -112,7 +113,7 @@ export function createPreflightRouter({
     '/preflight',
     requirePermission(rbacManager, 'actions:preflight', 'evaluate'),
     async (
-      req: Request<unknown, unknown, Partial<PreflightRequestContract>>,
+      req: AuthenticatedRequest,
       res: Response
     ) => {
       const normalized = normalizeRequest(req.body || {});
@@ -120,6 +121,15 @@ export function createPreflightRouter({
       if (!normalized.valid || !normalized.request) {
         return res.status(400).json({
           error: normalized.error || 'invalid_request'
+        });
+      }
+
+      // SECURITY: Enforce tenant isolation (CN-003)
+      // Ensure the preflight subject's tenant matches the authenticated tenant context
+      if (req.tenantId && normalized.request.subject.tenantId !== req.tenantId) {
+        return res.status(403).json({
+          error: 'tenant_isolation_violation',
+          message: 'Cannot preflight for a different tenant context'
         });
       }
 

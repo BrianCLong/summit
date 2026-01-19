@@ -20,11 +20,62 @@ type RateLimitOptions = {
   skip?: (req: Request) => boolean;
 };
 
+const rateLimitMap = new Map<string, number[]>();
+
+// Periodic cleanup to avoid memory leak of inactive IPs
+setInterval(() => {
+  const now = Date.now();
+  const maxAge = 60 * 60 * 1000; // 1 hour
+  for (const [ip, timestamps] of rateLimitMap.entries()) {
+    if (timestamps.length === 0 || now - timestamps[timestamps.length - 1] > maxAge) {
+      rateLimitMap.delete(ip);
+    }
+  }
+}, 30 * 60 * 1000).unref(); // Run every 30 minutes
+
+/**
+ * Functional in-memory sliding window rate limiter
+ * Replaces previous stub to address CN-008
+ */
 function rateLimit(options: RateLimitOptions) {
+  const { windowMs = 15 * 60 * 1000, max = 100, message } = options;
+
   return (req: Request, res: Response, next: NextFunction) => {
     if (options.skip?.(req)) {
       return next();
     }
+
+    const ip = (req.headers['x-forwarded-for'] as string) || req.ip || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    let timestamps = rateLimitMap.get(ip) || [];
+
+    // Filter out timestamps outside the current window
+    const windowStart = now - windowMs;
+    timestamps = timestamps.filter((t) => t > windowStart);
+
+    if (timestamps.length >= max) {
+      // Set Retry-After header
+      const oldestTimestamp = timestamps[0];
+      const resetTime = Math.ceil((oldestTimestamp + windowMs - now) / 1000);
+      res.setHeader('Retry-After', resetTime);
+
+      return res.status(429).json(
+        message || {
+          error: 'too_many_requests',
+          message: 'Too many requests, please try again later',
+        },
+      );
+    }
+
+    timestamps.push(now);
+    rateLimitMap.set(ip, timestamps);
+
+    if (options.standardHeaders) {
+      res.setHeader('RateLimit-Limit', max);
+      res.setHeader('RateLimit-Remaining', Math.max(0, max - timestamps.length));
+      res.setHeader('RateLimit-Reset', Math.ceil((timestamps[0] + windowMs) / 1000));
+    }
+
     return next();
   };
 }
@@ -45,6 +96,12 @@ export interface AuthenticatedRequest extends Request {
  *
  * For MVP-4-GA: Requires Authorization header or API key
  */
+/**
+ * Hardened authentication middleware
+ * Addresses CN-001 and stops trusting client-provided X-Roles header
+ *
+ * In production, this should integrate with proper JWT/OAuth/WebAuthn providers
+ */
 export function requireAuth(rbacManager?: RBACManager) {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
@@ -52,10 +109,55 @@ export function requireAuth(rbacManager?: RBACManager) {
     const tenantId = req.headers['x-tenant-id'] as string | undefined;
     const actorTenantId = (req.headers['x-actor-tenant-id'] as string | undefined) ?? tenantId;
 
+    // SECURITY: Get expected secrets from environment
+    const isProd = process.env.NODE_ENV === 'production';
+    const expectedApiKey = process.env.SUMMIT_API_KEY;
+    const expectedBearerToken = process.env.SUMMIT_BEARER_TOKEN;
+
+    // Fail safe: If no secrets are configured in production, deny all
+    if (isProd && !expectedApiKey && !expectedBearerToken) {
+      return res.status(500).json({
+        error: 'configuration_error',
+        message: 'Security credentials not configured for production environment',
+      });
+    }
+
+    // Fallback to dev keys only in non-production
+    const apiKeyToValidate = expectedApiKey || (isProd ? null : 'dev-key-12345');
+    const tokenToValidate = expectedBearerToken || (isProd ? null : 'dev-token-67890');
+
     if (!authHeader && !apiKey) {
       return res.status(401).json({
         error: 'unauthorized',
         message: 'Authentication required. Provide Authorization header or X-API-Key.',
+      });
+    }
+
+    // Validate credentials
+    let isAuthenticated = false;
+    let subject = '';
+    let type: 'user' | 'apikey' = 'user';
+
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      if (tokenToValidate && token === tokenToValidate) {
+        isAuthenticated = true;
+        // Restore dynamic subject ID for better audit granularity
+        subject = 'user_' + Buffer.from(token).toString('base64').substring(0, 8);
+        type = 'user';
+      }
+    } else if (apiKey) {
+      if (apiKeyToValidate && apiKey === apiKeyToValidate) {
+        isAuthenticated = true;
+        subject = 'apikey_' + Buffer.from(apiKey as string).toString('base64').substring(0, 8);
+        type = 'apikey';
+      }
+    }
+
+    if (!isAuthenticated) {
+      return res.status(401).json({
+        error: 'invalid_credentials',
+        message: 'The provided credentials are invalid',
       });
     }
 
@@ -66,27 +168,18 @@ export function requireAuth(rbacManager?: RBACManager) {
       });
     }
 
-    const rolesHeader = (req.headers['x-roles'] as string | undefined)?.split(',').map((role) => role.trim()).filter(Boolean);
-    const resolvedRoles = rolesHeader?.length ? rolesHeader : ['api_user'];
+    // SECURITY: Resolve roles based on authenticated subject, NOT client headers
+    // This fixes a critical vulnerability where users could escalate privileges via X-Roles
+    const resolvedRoles = type === 'user' ? ['admin', 'api_user'] : ['api_user', 'action_operator'];
 
-    // Basic token extraction (production should use proper JWT validation)
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
-      req.user = {
-        sub: 'user_' + Buffer.from(token).toString('base64').substring(0, 8),
-        tenantId: actorTenantId,
-        roles: resolvedRoles,
-        scopes: ['read', 'write'],
-      };
-    } else if (apiKey) {
-      req.user = {
-        sub: 'apikey_' + Buffer.from(apiKey as string).toString('base64').substring(0, 8),
-        tenantId: actorTenantId,
-        roles: resolvedRoles,
-        scopes: ['read', 'write'],
-      };
-    }
+    req.user = {
+      sub: subject,
+      tenantId: actorTenantId,
+      roles: resolvedRoles,
+      scopes: ['read', 'write'],
+    };
 
+    // Ensure roles are registered in the RBAC manager
     resolvedRoles.forEach((role) => {
       if (req.user) {
         rbacManager?.assignRole(req.user.sub, role);

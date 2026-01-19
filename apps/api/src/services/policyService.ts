@@ -3,6 +3,8 @@ import {
   type PreflightRequestContract
 } from '../contracts/actions.js';
 
+export { type PreflightObligation };
+
 interface OpaSimulationResponse {
   result?: {
     allow?: boolean;

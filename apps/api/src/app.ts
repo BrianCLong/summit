@@ -7,8 +7,7 @@ import {
   GetReceiptDependencies,
   createGetReceiptRouter,
 } from './routes/receipts/get.js';
-import { PolicyDecisionStore } from './db/models/policy_decisions.js';
-import { InMemoryPolicyDecisionStore } from './services/PolicyDecisionStore.js';
+import { InMemoryPolicyDecisionStore, type PolicyDecisionStore } from './services/PolicyDecisionStore.js';
 import { EventPublisher } from './services/EventPublisher.js';
 import { EpicService } from './services/EpicService.js';
 import { OpaPolicySimulationService, type PolicySimulationService } from './services/policyService.js';
@@ -25,7 +24,6 @@ import { RBACManager } from '../../../packages/authentication/src/rbac/rbac-mana
 
 export interface ApiDependencies extends Partial<GetReceiptDependencies> {
   decisionStore?: PolicyDecisionStore;
-  preflightStore?: InMemoryPolicyDecisionStore;
   events?: EventPublisher;
   epicService?: EpicService;
   policyService?: PolicySimulationService;
@@ -108,22 +106,23 @@ export function buildApp(dependencies: ApiDependencies = {}) {
   }
 
   // Privileged operations require tenant isolation and stricter rate limiting
+  // Unified store addresses tech debt where preflight and execute used different backends
   const decisionStore =
-    dependencies.decisionStore ?? new PolicyDecisionStore(() => new Date());
+    dependencies.decisionStore ?? new InMemoryPolicyDecisionStore(() => new Date());
   const policyService = dependencies.policyService ?? new OpaPolicySimulationService();
+
   app.use('/actions', privilegedRateLimiter, requireTenantIsolation(), createPreflightRouter({
     decisionStore,
     policyService,
     rbacManager,
   }));
 
-  const preflightStore = dependencies.preflightStore ?? new InMemoryPolicyDecisionStore();
   const events = dependencies.events ?? new EventPublisher();
   app.use(
     '/actions',
     privilegedRateLimiter,
     requireTenantIsolation(),
-    createExecuteRouter(preflightStore, events, policyService, rbacManager),
+    createExecuteRouter(decisionStore, events, policyService, rbacManager),
   );
 
   return app;
