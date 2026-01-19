@@ -24,7 +24,12 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     postgresql-client \
     redis-tools \
+    ripgrep \
+    fd-find \
     && rm -rf /var/lib/apt/lists/*
+
+# Create fd symlink (Ubuntu names it fdfind)
+RUN ln -sf $(which fdfind) /usr/local/bin/fd
 
 # Install additional CLI tools
 RUN npm install -g \
@@ -115,6 +120,36 @@ RUN DEB_ARCH="$(dpkg --print-architecture)" \
     && wget -O /tmp/dive.deb "https://github.com/wagoodman/dive/releases/download/v${DIVE_VERSION}/dive_${DIVE_VERSION}_linux_${DEB_ARCH}.deb" \
     && dpkg -i /tmp/dive.deb \
     && rm /tmp/dive.deb
+
+# Install gitleaks for secret scanning (pinned)
+ARG GITLEAKS_VERSION=8.18.2
+RUN wget -qO- "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" | tar xz -C /usr/local/bin gitleaks \
+    && chmod +x /usr/local/bin/gitleaks
+
+# Install kubectl (pinned, arch-aware) - Optional but useful for K8s development
+ARG KUBECTL_VERSION=1.29.0
+RUN ARCH_UNAME="$(uname -m)"; \
+    if [ "$ARCH_UNAME" = "x86_64" ]; then K8S_ARCH=amd64; elif [ "$ARCH_UNAME" = "aarch64" ] || [ "$ARCH_UNAME" = "arm64" ]; then K8S_ARCH=arm64; else K8S_ARCH=amd64; fi; \
+    curl -LO "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/${K8S_ARCH}/kubectl" \
+    && curl -LO "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/${K8S_ARCH}/kubectl.sha256" \
+    && echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check \
+    && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
+    && rm kubectl kubectl.sha256
+
+# Install helm (pinned)
+ARG HELM_VERSION=3.14.0
+RUN curl -fsSL "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" -o helm.tar.gz \
+    && tar -zxf helm.tar.gz \
+    && mv linux-amd64/helm /usr/local/bin/helm \
+    && rm -rf linux-amd64 helm.tar.gz \
+    && chmod +x /usr/local/bin/helm
+
+# Install k9s (pinned)
+ARG K9S_VERSION=0.32.4
+RUN wget -q "https://github.com/derailed/k9s/releases/download/v${K9S_VERSION}/k9s_Linux_amd64.tar.gz" \
+    && tar xzf k9s_Linux_amd64.tar.gz -C /usr/local/bin k9s \
+    && rm k9s_Linux_amd64.tar.gz \
+    && chmod +x /usr/local/bin/k9s
 
 # Install semantic-release for automated releases
 RUN npm install -g \

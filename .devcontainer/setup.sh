@@ -235,6 +235,12 @@ EOF
 # Source the updated bashrc
 source ~/.bashrc
 
+# Run devstation verification if available
+if [ -f "scripts/devstation/ubuntu/verify.sh" ]; then
+    log_info "Running devstation verification..."
+    bash scripts/devstation/ubuntu/verify.sh || log_warning "Some optional tools may not be available"
+fi
+
 # Setup completion
 log_success "DevContainer setup complete!"
 echo

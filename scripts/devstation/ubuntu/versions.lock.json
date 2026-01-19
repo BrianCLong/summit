@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Pinned versions for Summit Dev Station Ubuntu bootstrap",
+  "updated": "2026-01-16",
+  "versions": {
+    "node": {
+      "major": "20",
+      "comment": "LTS version - use nvm or official NodeSource repo"
+    },
+    "pnpm": {
+      "version": "latest",
+      "comment": "Installed via corepack enable after Node.js"
+    },
+    "docker": {
+      "version": "latest",
+      "comment": "Installed from official Docker CE repository"
+    },
+    "kubectl": {
+      "version": "1.29.0",
+      "comment": "Kubernetes CLI - pinned to stable version"
+    },
+    "helm": {
+      "version": "3.14.0",
+      "comment": "Helm package manager for Kubernetes"
+    },
+    "k9s": {
+      "version": "0.32.4",
+      "comment": "Terminal UI for Kubernetes"
+    },
+    "terraform": {
+      "version": "1.7.0",
+      "comment": "HashiCorp Terraform - infrastructure as code"
+    },
+    "opentofu": {
+      "version": "1.6.0",
+      "comment": "OpenTofu - open-source Terraform alternative (optional)"
+    },
+    "packer": {
+      "version": "1.10.0",
+      "comment": "HashiCorp Packer - image building tool (optional)"
+    },
+    "pre-commit": {
+      "version": "latest",
+      "comment": "Installed via pipx"
+    },
+    "gitleaks": {
+      "version": "8.18.2",
+      "comment": "Secret scanning tool"
+    },
+    "vscode": {
+      "version": "latest",
+      "comment": "Visual Studio Code - installed from official MS repo"
+    },
+    "claude-code-cli": {
+      "version": "latest",
+      "comment": "Anthropic Claude Code CLI - see docs for install instructions"
+    }
+  },
+  "apt_packages": {
+    "core": [
+      "build-essential",
+      "git",
+      "curl",
+      "wget",
+      "jq",
+      "yq",
+      "ripgrep",
+      "fd-find",
+      "unzip",
+      "zip",
+      "gnupg",
+      "ca-certificates",
+      "apt-transport-https",
+      "software-properties-common",
+      "lsb-release"
+    ],
+    "python": [
+      "python3",
+      "python3-pip",
+      "python3-venv",
+      "pipx"
+    ],
+    "optional": [
+      "vim",
+      "tmux",
+      "htop",
+      "tree",
+      "ncdu"
+    ]
+  }
+}

@@ -34,7 +34,15 @@
         "ms-vscode.vscode-jest",
         "streetsidesoftware.code-spell-checker",
         "formulahendry.auto-rename-tag",
-        "christian-kohler.path-intellisense"
+        "christian-kohler.path-intellisense",
+        "GraphQL.vscode-graphql",
+        "GraphQL.vscode-graphql-syntax",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "hashicorp.terraform",
+        "hashicorp.hcl",
+        "redhat.vscode-xml",
+        "timonwong.shellcheck",
+        "foxundermoon.shell-format"
       ],
       "settings": {
         "typescript.preferences.importModuleSpecifier": "relative",
