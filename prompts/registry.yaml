@@ -1,5 +1,35 @@
 version: 1
 prompts:
+  - id: maestro-explicate-query-stage
+    version: v1
+    path: prompts/maestro/explicate-query-stage@v1.md
+    sha256: eaf524f2b984cb085d54c476545dcc81b202aa06490b94a90a9a13319a1f0c2f
+    description: Implement Maestro query explicitation stage with retrieval gating and tool endpoint.
+    scope:
+      paths:
+        - packages/maestro-core/
+        - packages/maestro-cli/
+        - packages/agent-lab/
+        - docs/
+        - prompts/maestro/explicate-query-stage@v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+        - docs/roadmap/STATUS.json
+      domains:
+        - maestro
+        - multimodal
+        - retrieval
+        - governance
+        - tools
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: agent-native-loop-n4
     version: v1
     path: prompts/governance/agent-native-loop-n4.md

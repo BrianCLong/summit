@@ -3,6 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import { setTimeout as wait } from 'timers/promises';
 
+import { explicateQuery } from '@maestro/core/explicitation';
+
 import { ContentBoundary } from './contentBoundary';
 import { PolicyDecision } from './policy';
 
@@ -135,8 +137,57 @@ export const localGrepTool = (root: string): ToolDefinition => ({
   },
 });
 
+export const explicateQueryTool: ToolDefinition = {
+  name: 'explicate_query',
+  version: '0.1.0',
+  description:
+    'Explicates underspecified multimodal queries into a structured artifact for retrieval gating.',
+  async execute(inputs) {
+    const userText = String(inputs.user_text ?? inputs.userText ?? '').trim();
+    if (!userText) {
+      throw new Error('user_text is required');
+    }
+
+    const imageRefs = Array.isArray(inputs.image_refs)
+      ? inputs.image_refs.map((ref, index) => ({
+          id: String(ref?.id ?? `image-${index + 1}`),
+          type: ref?.type,
+          altText: ref?.altText ?? ref?.alt_text,
+          detectedText: ref?.detectedText ?? ref?.detected_text,
+        }))
+      : [];
+
+    const conversationContext =
+      inputs.conversation_context && typeof inputs.conversation_context === 'object'
+        ? {
+            summary: String(inputs.conversation_context.summary ?? ''),
+            project: inputs.conversation_context.project
+              ? String(inputs.conversation_context.project)
+              : undefined,
+            priorEntities: Array.isArray(inputs.conversation_context.priorEntities)
+              ? inputs.conversation_context.priorEntities.map(String)
+              : Array.isArray(inputs.conversation_context.prior_entities)
+                ? inputs.conversation_context.prior_entities.map(String)
+                : undefined,
+          }
+        : undefined;
+
+    const artifact = explicateQuery({
+      userText,
+      imageRefs,
+      conversationContext,
+    });
+
+    return {
+      output: artifact,
+      stdout: JSON.stringify(artifact, null, 2),
+    };
+  },
+};
+
 export const builtInTools = (artifactRoot: string): ToolDefinition[] => [
   httpHeadTool,
   dnsLookupTool,
   localGrepTool(path.join(artifactRoot, 'raw')),
+  explicateQueryTool,
 ];

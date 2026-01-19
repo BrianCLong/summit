@@ -98,6 +98,10 @@
     "./plugins/web-scraper-plugin": {
       "types": "./dist/plugins/web-scraper-plugin.d.ts",
       "import": "./dist/plugins/web-scraper-plugin.js"
+    },
+    "./explicitation": {
+      "types": "./dist/explicitation/index.d.ts",
+      "import": "./dist/explicitation/index.js"
     }
   }
 }
