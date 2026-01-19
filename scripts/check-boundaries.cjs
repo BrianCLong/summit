@@ -10,7 +10,7 @@ const BOUNDARIES = [
   {
     name: 'client',
     root: 'client',
-    forbidden: ['server'],
+    forbidden: ['server', 'packages/maestro-core'],
   },
   {
     name: 'apps/web',
