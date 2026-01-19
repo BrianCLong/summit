@@ -328,8 +328,7 @@
       "@types/jsonwebtoken@9.0.10": "patches/@types__jsonwebtoken@9.0.10.patch",
       "@types/connect-redis": "patches/@types__connect-redis.patch",
       "@types/multer@1.4.13": "patches/@types__multer@1.4.13.patch",
-      "@types/request": "patches/@types__request.patch",
-      "strip-ansi@6.0.1": "patches/strip-ansi@6.0.1.patch"
+      "@types/request": "patches/@types__request.patch"
     }
   }
 }
