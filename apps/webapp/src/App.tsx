@@ -28,7 +28,7 @@ export function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <BrowserRouter>
-          <CommandPalette />
+          <CommandPalette onToggleTheme={toggleMode} />
           <Box
             display="flex"
             justifyContent="space-between"
