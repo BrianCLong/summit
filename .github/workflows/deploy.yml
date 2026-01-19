@@ -1,0 +1,24 @@
+name: Deploy
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Environment to deploy"
+        required: true
+        type: choice
+        options: [dev, stage, prod]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target }} # GitHub Environments: set reviewers, wait timer, secrets
+    permissions:
+      id-token: write   # for OIDC
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select stack
+        run: echo "TARGET=${{ inputs.target }}" >> $GITHUB_ENV
+      - name: Deploy
+        run: |
+          # replace with your real deploy (terraform/pulumi/helm/custom)
+          echo "Deploying to $TARGET"

@@ -1,0 +1,28 @@
+name: GA Cloud Readiness
+on:
+  schedule: [{ cron: "0 * * * *" }] # hourly
+  workflow_dispatch: {}
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: node scripts/ga/cloud-readiness.mjs
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ga-cloud-readiness-${{ github.sha }}
+          path: artifacts/ga-cloud-readiness/${{ github.sha }}
+      - name: Open PR if thresholds breached
+        if: failure() # prior step set nonzero exit on breaches
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "GA Cloud Readiness: remediation required (${{ github.sha }})"
+          commit-message: "GA Cloud Readiness auto‑remediation"
+          branch: chore/ga-cloud-readiness/${{ github.sha }}
+          labels: ga-readiness, remediation, blocking
