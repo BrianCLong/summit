@@ -1,0 +1,18 @@
+# Evidence Map
+# Contract:
+# - Every Evidence ID emitted into evidence/ga-evidence-manifest.json MUST be registered here
+#   either as an exact `evidence[].id` entry OR matched by `patterns[]`.
+# - Patterns support '*' wildcard only (glob-style).
+
+schemaVersion: "1.0"
+
+patterns:
+  # Allow whole classes of verify artifacts without enumerating each output file
+  - "EV-VERIFY-*"
+  # Allow subject artifacts with varying hashes
+  - "EV-SUBJECT-*"
+
+evidence:
+  # Subjects are typically stable and should be explicit (recommended).
+  # However, to avoid churn when subject digests change, we use patterns above.
+  # Exact IDs can be added here if strict control is needed for specific items.

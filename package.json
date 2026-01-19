@@ -106,6 +106,7 @@
     "ci:branch-protection:check": "node scripts/ci/check_branch_protection_drift.mjs",
     "ci:branch-protection:apply": "node scripts/ci/apply_branch_protection_policy.mjs --apply",
     "ci:branch-protection:plan": "node scripts/ci/apply_branch_protection_policy.mjs --dry-run",
+    "ci:ga:validate-map": "node scripts/ci/validate_ga_manifest_against_evidence_map.mjs --manifest evidence/ga-evidence-manifest.json --evidence-map docs/governance/evidence-map.yml",
     "ci:evidence-id-consistency": "node scripts/ci/verify_evidence_id_consistency.mjs",
     "validate:gate-installation": "node scripts/ci/verify_gate_installation.mjs",
     "ci:evidence-id:monitoring": "node scripts/ci/integrations/evidence-id-monitoring-hook.mjs",

@@ -283,6 +283,12 @@ jobs:
           node scripts/evidence/generate_control_evidence_index.mjs --evidence-dir "$EVIDENCE_DIR"
           node scripts/evidence/validate_control_evidence.mjs --evidence-dir "$EVIDENCE_DIR"
 
+      - name: Validate GA manifest against Evidence Map
+        run: |
+          node scripts/ci/validate_ga_manifest_against_evidence_map.mjs \
+            --manifest dist/evidence/${GITHUB_SHA}/ga-evidence-manifest.json \
+            --evidence-map docs/governance/evidence-map.yml
+
       - name: Upload evidence index
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
