@@ -55,6 +55,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: mcp-agent-age-alignment
+    version: v1
+    path: prompts/docs/mcp-agent-age-alignment@v1.md
+    sha256: eec71973750c02eecb1ff676251d85afd7ea68e2b6ef0078cd2739d00867874b
+    description: Align Summit MCP strategy documentation to agent-era server architecture practices.
+    scope:
+      paths:
+        - intelgraph-mcp/docs/strategy/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/docs/mcp-agent-age-alignment@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - mcp
+        - architecture
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
