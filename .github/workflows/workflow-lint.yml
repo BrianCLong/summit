@@ -39,7 +39,8 @@ jobs:
       - name: Run actionlint
         run: |
           # Run actionlint with shell check integration
-          actionlint -color -verbose
+          # Exclude archived workflows that are not actively used
+          find .github/workflows -maxdepth 1 -name '*.yml' -o -name '*.yaml' | xargs actionlint -color -verbose
 
       - name: Validate workflow syntax
         run: |
