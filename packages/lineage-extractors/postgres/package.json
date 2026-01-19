@@ -1,0 +1,17 @@
+{
+  "name": "@summit/postgres-lineage",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test dist/tests/*.test.js",
+    "pretest": "pnpm -s build",
+    "validate:events": "node dist/src/validate-events.js",
+    "materialize:graph": "node dist/src/materialize-graph.js",
+    "diff:graph": "node dist/src/diff-graph.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
+  }
+}
