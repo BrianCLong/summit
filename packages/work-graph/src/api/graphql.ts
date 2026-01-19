@@ -1,6 +1,17 @@
 import { createSchema, createYoga } from 'graphql-yoga';
-import type { WorkGraphNode, Ticket, PR, Agent, Commitment, Sprint } from '../schema/nodes.js';
+import type { WorkGraphNode, Ticket, PR, Agent, Commitment, Sprint, Epic, Roadmap, Milestone, Board, Intent } from '../schema/nodes.js';
 import type { WorkGraphEdge } from '../schema/edges.js';
+import {
+  generateRoadmapGantt,
+  generateSprintGantt,
+  generateDependencyGraph,
+  generateEpicBreakdown,
+  generateMilestoneTimeline,
+  generatePriorityQuadrant,
+  generateKanbanBoard,
+  generateAgentWorkload,
+  generateIntentFlow,
+} from '../visualizations/mermaid.js';
 
 export interface GraphStore {
   getNode<T>(id: string): Promise<T | null>;
@@ -29,6 +40,15 @@ type Query {
   edges(sourceId: ID, targetId: ID, type: String): [Edge!]!
   healthScore: HealthScore!
   stats: GraphStats!
+  vizRoadmap: MermaidDiagram!
+  vizSprint(number: Int): MermaidDiagram!
+  vizDependencies: MermaidDiagram!
+  vizEpic(id: ID): MermaidDiagram!
+  vizTimeline: MermaidDiagram!
+  vizPriority: MermaidDiagram!
+  vizKanban: MermaidDiagram!
+  vizAgents: MermaidDiagram!
+  vizIntent(id: ID): MermaidDiagram!
 }
 
 type Mutation {
@@ -174,6 +194,13 @@ type NodeTypeCount {
   count: Int!
 }
 
+type MermaidDiagram {
+  type: String!
+  title: String!
+  mermaid: String!
+  description: String
+}
+
 input CreateTicketInput {
   title: String!
   description: String!
@@ -257,6 +284,66 @@ export function createWorkGraphAPI(graphStore: GraphStore) {
           .map(([type, count]) => ({ type, count }))
           .sort((a, b) => b.count - a.count);
         return { totalNodes: allNodes.length, totalEdges: allEdges.length, nodesByType };
+      },
+      vizRoadmap: async () => {
+        const roadmaps = await graphStore.getNodes<Roadmap>({ type: 'roadmap' } as Partial<Roadmap>);
+        const epics = await graphStore.getNodes<Epic>({ type: 'epic' } as Partial<Epic>);
+        const milestones = await graphStore.getNodes<Milestone>({ type: 'milestone' } as Partial<Milestone>);
+        const tickets = await graphStore.getNodes<Ticket>({ type: 'ticket' } as Partial<Ticket>);
+        const roadmap = roadmaps[0] || { id: 'default', type: 'roadmap', name: 'Roadmap', timeframe: { start: new Date(), end: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000), granularity: 'month' }, swimlanes: [], status: 'active', createdAt: new Date(), updatedAt: new Date(), createdBy: 'system' };
+        return { type: 'gantt', title: roadmap.name, mermaid: generateRoadmapGantt(roadmap as Roadmap, epics, milestones, tickets), description: 'Roadmap Gantt chart with epics and milestones' };
+      },
+      vizSprint: async (_: unknown, { number }: { number?: number }) => {
+        const sprints = await graphStore.getNodes<Sprint>({ type: 'sprint' } as Partial<Sprint>);
+        const tickets = await graphStore.getNodes<Ticket>({ type: 'ticket' } as Partial<Ticket>);
+        const sprint = number ? sprints.find(s => s.number === number) : sprints.find(s => s.status === 'active') || sprints[0];
+        if (!sprint) { return { type: 'gantt', title: 'No Sprint', mermaid: '', description: 'No sprint found' }; }
+        return { type: 'gantt', title: sprint.name, mermaid: generateSprintGantt(sprint, tickets.slice(0, 15)), description: `Sprint ${sprint.number} Gantt chart` };
+      },
+      vizDependencies: async () => {
+        const tickets = await graphStore.getNodes<Ticket>({ type: 'ticket' } as Partial<Ticket>);
+        const epics = await graphStore.getNodes<Epic>({ type: 'epic' } as Partial<Epic>);
+        const edges = await graphStore.getEdges({});
+        const nodes = [...tickets, ...epics] as Array<Ticket | Epic>;
+        return { type: 'flowchart', title: 'Dependencies', mermaid: generateDependencyGraph(nodes, edges), description: 'Dependency graph showing ticket and epic relationships' };
+      },
+      vizEpic: async (_: unknown, { id }: { id?: string }) => {
+        const epics = await graphStore.getNodes<Epic>({ type: 'epic' } as Partial<Epic>);
+        const tickets = await graphStore.getNodes<Ticket>({ type: 'ticket' } as Partial<Ticket>);
+        const edges = await graphStore.getEdges({});
+        const epic = id ? epics.find(e => e.id === id || e.id.startsWith(id)) : epics.find(e => e.status === 'in_progress') || epics[0];
+        if (!epic) { return { type: 'flowchart', title: 'No Epic', mermaid: '', description: 'No epic found' }; }
+        return { type: 'flowchart', title: epic.title, mermaid: generateEpicBreakdown(epic, tickets.slice(0, 12), edges), description: 'Epic breakdown with ticket status' };
+      },
+      vizTimeline: async () => {
+        const milestones = await graphStore.getNodes<Milestone>({ type: 'milestone' } as Partial<Milestone>);
+        const roadmaps = await graphStore.getNodes<Roadmap>({ type: 'roadmap' } as Partial<Roadmap>);
+        if (milestones.length === 0) { return { type: 'timeline', title: 'No Milestones', mermaid: '', description: 'No milestones found' }; }
+        return { type: 'timeline', title: 'Milestones', mermaid: generateMilestoneTimeline(milestones, roadmaps[0]), description: 'Milestone timeline' };
+      },
+      vizPriority: async () => {
+        const tickets = await graphStore.getNodes<Ticket>({ type: 'ticket' } as Partial<Ticket>);
+        return { type: 'quadrant', title: 'Priority Matrix', mermaid: generatePriorityQuadrant(tickets), description: 'Priority vs complexity quadrant chart' };
+      },
+      vizKanban: async () => {
+        const boards = await graphStore.getNodes<Board>({ type: 'board' } as Partial<Board>);
+        const tickets = await graphStore.getNodes<Ticket>({ type: 'ticket' } as Partial<Ticket>);
+        const board = boards.find(b => b.isDefault) || boards[0] || { id: 'default', type: 'board', name: 'Board', boardType: 'kanban', columns: [{ id: '1', name: 'Backlog', position: 0 }, { id: '2', name: 'Ready', position: 1 }, { id: '3', name: 'In Progress', position: 2 }, { id: '4', name: 'Review', position: 3 }, { id: '5', name: 'Done', position: 4 }], isDefault: true, archived: false, itemCount: 0, createdAt: new Date(), updatedAt: new Date(), createdBy: 'system' };
+        return { type: 'flowchart', title: board.name, mermaid: generateKanbanBoard(board as Board, tickets), description: 'Kanban board visualization' };
+      },
+      vizAgents: async () => {
+        const agents = await graphStore.getNodes<Agent>({ type: 'agent' } as Partial<Agent>);
+        const tickets = await graphStore.getNodes<Ticket>({ type: 'ticket' } as Partial<Ticket>);
+        return { type: 'pie', title: 'Agent Workload', mermaid: generateAgentWorkload(agents, tickets), description: 'Agent workload distribution' };
+      },
+      vizIntent: async (_: unknown, { id }: { id?: string }) => {
+        const intents = await graphStore.getNodes<Intent>({ type: 'intent' } as Partial<Intent>);
+        const epics = await graphStore.getNodes<Epic>({ type: 'epic' } as Partial<Epic>);
+        const tickets = await graphStore.getNodes<Ticket>({ type: 'ticket' } as Partial<Ticket>);
+        const edges = await graphStore.getEdges({});
+        const intent = id ? intents.find(i => i.id === id || i.id.startsWith(id)) : intents[0];
+        if (!intent) { return { type: 'flowchart', title: 'No Intent', mermaid: '', description: 'No intent found' }; }
+        return { type: 'flowchart', title: intent.title, mermaid: generateIntentFlow(intent, epics.slice(0, 5), tickets.slice(0, 10), edges), description: 'Intent to delivery flow' };
       },
     },
     Mutation: {
