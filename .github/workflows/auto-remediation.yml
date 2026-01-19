@@ -85,7 +85,8 @@ jobs:
           LABELS='${{ toJson(github.event.issue.labels.*.name) }}'
 
           # Check if issue has a remediation-triggering label
-          if echo "$LABELS" | grep -qE '"release-blocker"|"needs-remediation"|"flaky-test"|"build-failure"|"dependency"'; then
+          # Using jq for robust JSON parsing instead of unanchored regex
+          if echo "$LABELS" | jq -e 'any(.[]; . == "release-blocker" or . == "needs-remediation" or . == "flaky-test" or . == "build-failure" or . == "dependency")' > /dev/null 2>&1; then
             echo "should_run=true" >> $GITHUB_OUTPUT
             echo "issue_number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
           else

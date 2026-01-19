@@ -40,7 +40,7 @@ jobs:
         if: success()
         continue-on-error: true
         run: |
-          for branch in $(git branch -r | grep 'origin/release/' | sed 's|origin/||'); do
+          for branch in $(git branch -r | grep -E '^\s*origin/release/' | sed 's|origin/||'); do
             echo "Syncing branch: $branch"
             git checkout -b $branch origin/$branch 2>/dev/null || git checkout $branch
             git push personal $branch --force
