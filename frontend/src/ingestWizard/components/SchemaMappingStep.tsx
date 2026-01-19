@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { nanoid } from 'nanoid';
 import { SchemaMappingState } from '../types';
 import '../styles.css';
@@ -10,16 +11,23 @@ export interface SchemaMappingStepProps {
   disabled?: boolean;
 }
 
-const ensureId = (value: SchemaMappingState) => ({
-  ...value,
-  mappings: value.mappings.map((mapping) => ({
-    ...mapping,
-    id: mapping.id || nanoid(8)
-  }))
-});
+const ensureId = (value: SchemaMappingState) => {
+  let hasChanges = false;
+  const newMappings = value.mappings.map((mapping) => {
+    if (!mapping.id) {
+      hasChanges = true;
+      return { ...mapping, id: nanoid(8) };
+    }
+    return mapping;
+  });
+
+  return hasChanges ? { ...value, mappings: newMappings } : value;
+};
 
 export const SchemaMappingStep = ({ value, onChange, onNext, onBack, disabled }: SchemaMappingStepProps) => {
-  const hydrated = ensureId(value);
+  // Memoize hydrated value to prevent re-creation on every render if value hasn't changed.
+  // Note: ensureId will only return a new object if IDs are missing.
+  const hydrated = useMemo(() => ensureId(value), [value]);
 
   const handleMappingChange = (index: number, field: 'sourceField' | 'targetField' | 'transformation' | 'required', input: string | boolean) => {
     const next = hydrated.mappings.map((mapping, mappingIndex) => {
