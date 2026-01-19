@@ -309,6 +309,67 @@ export class MaestroService {
   // --- Subagent Coordination Methods ---
 
   /**
+   * Centralized governance enforcement for agent actions.
+   * Intercepts requests to ensure compliance with OPA policies and safety rails.
+   * Part of Epic 1: "Glass Box" Agent Governance.
+   */
+  private async enforceGovernance(
+    actor: string,
+    action: string,
+    context: any
+  ): Promise<void> {
+    // 1. Kill Switch Check
+    const healthCheck = killSwitchService.checkSystemHealth({ agentId: actor, feature: action });
+    if (!healthCheck.allowed) {
+      const error = new Error(`System Kill Switch Active: ${healthCheck.reason}`);
+      (error as any).status = 503;
+      throw error;
+    }
+
+    // 2. Policy-as-Code & Safety Rail Evaluation
+    const governanceCheck = await agentGovernance.evaluateAction(
+      {
+        id: actor,
+        name: 'MaestroService',
+        tenantId: 'system',
+        capabilities: ['coordination', 'orchestration', 'governance'],
+        metadata: { role: 'orchestrator', policyVersion: '1.2' },
+        status: 'active',
+        health: { cpuUsage: 0, memoryUsage: 0, lastHeartbeat: new Date(), activeTasks: 0, errorRate: 0 }
+      } as MaestroAgent,
+      action,
+      context
+    );
+
+    // 3. Telemetry for Auditability
+    telemetryService.logEvent('policy_decision', {
+      id: `pol-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+      policyId: 'agent_governance_v2',
+      decision: governanceCheck.allowed ? 'allow' : 'deny',
+      reason: governanceCheck.reason,
+      actorId: actor,
+      resourceId: action,
+      timestamp: new Date(),
+      context: { ...context, riskScore: governanceCheck.riskScore }
+    });
+
+    // 4. Enforcement
+    if (!governanceCheck.allowed) {
+      logger.warn({
+        actor,
+        action,
+        reason: governanceCheck.reason,
+        violations: governanceCheck.violations?.length
+      }, 'Agent action blocked by governance middleware');
+
+      const error = new Error(`Forbidden: ${governanceCheck.reason}`);
+      (error as any).status = 403; // Requirement for 403 Forbidden
+      (error as any).violations = governanceCheck.violations;
+      throw error;
+    }
+  }
+
+  /**
    * Coordinate tasks between multiple agents
    */
   async coordinateAgents(
@@ -316,42 +377,12 @@ export class MaestroService {
     participantAgentIds: string[],
     actor: string
   ): Promise<CoordinationTask> {
-    // 1. Kill Switch Check
-    const healthCheck = killSwitchService.checkSystemHealth({ agentId: actor, feature: 'agent_coordination' });
-    if (!healthCheck.allowed) {
-        throw new Error(`System Kill Switch Active: ${healthCheck.reason}`);
-    }
-
-    // 2. First, check governance compliance
-    const governanceCheck = await agentGovernance.evaluateAction(
-      {
-        id: actor,
-        name: 'MaestroService',
-        tenantId: 'system',
-        capabilities: ['coordination', 'orchestration'],
-        metadata: {},
-        status: 'active',
-        health: { cpuUsage: 0, memoryUsage: 0, lastHeartbeat: new Date(), activeTasks: 0, errorRate: 0 }
-      } as MaestroAgent,
-      'coordinate_agents',
-      { task, participants: participantAgentIds }
-    );
-
-    // Telemetry for Policy Decision
-    telemetryService.logEvent('policy_decision', {
-        id: `pol-${Date.now()}`,
-        policyId: 'agent_governance',
-        decision: governanceCheck.allowed ? 'allow' : 'deny',
-        reason: governanceCheck.reason,
-        actorId: actor,
-        resourceId: 'coordinate_agents',
-        timestamp: new Date(),
-        context: { task, participants: participantAgentIds }
+    // Intercept with governance middleware
+    await this.enforceGovernance(actor, 'coordinate_agents', {
+      taskTitle: task.title,
+      participants: participantAgentIds,
+      target: 'SubagentCoordinator'
     });
-
-    if (!governanceCheck.allowed) {
-      throw new Error(`Agent coordination prohibited: ${governanceCheck.reason}`);
-    }
 
     const coordinationTask = await this.subagentCoordinator.assignTask(task, participantAgentIds);
 
@@ -385,41 +416,12 @@ export class MaestroService {
     participantAgentIds: string[],
     actor: string
   ): Promise<CoordinationChannel> {
-    // 1. Kill Switch Check
-    const healthCheck = killSwitchService.checkSystemHealth({ agentId: actor, feature: 'coordination_channel' });
-    if (!healthCheck.allowed) {
-        throw new Error(`System Kill Switch Active: ${healthCheck.reason}`);
-    }
-
-    // Check governance compliance
-    const governanceCheck = await agentGovernance.evaluateAction(
-      {
-        id: actor,
-        name: 'MaestroService',
-        tenantId: 'system',
-        capabilities: ['coordination', 'orchestration'],
-        metadata: {},
-        status: 'active',
-        health: { cpuUsage: 0, memoryUsage: 0, lastHeartbeat: new Date(), activeTasks: 0, errorRate: 0 }
-      },
-      'create_coordination_channel',
-      { topic, participants: participantAgentIds }
-    );
-
-    telemetryService.logEvent('policy_decision', {
-        id: `pol-${Date.now()}`,
-        policyId: 'agent_governance',
-        decision: governanceCheck.allowed ? 'allow' : 'deny',
-        reason: governanceCheck.reason,
-        actorId: actor,
-        resourceId: 'create_coordination_channel',
-        timestamp: new Date(),
-        context: { topic, participants: participantAgentIds }
+    // Intercept with governance middleware
+    await this.enforceGovernance(actor, 'create_coordination_channel', {
+      topic,
+      participants: participantAgentIds,
+      target: 'SubagentCoordinator'
     });
-
-    if (!governanceCheck.allowed) {
-      throw new Error(`Coordination channel creation prohibited: ${governanceCheck.reason}`);
-    }
 
     const channel = await this.subagentCoordinator.createChannel(topic, participantAgentIds);
 
@@ -455,24 +457,12 @@ export class MaestroService {
     deadlineHours: number = 24,
     actor: string
   ): Promise<ConsensusProposal<T>> {
-    // Check governance compliance
-    const governanceCheck = await agentGovernance.evaluateAction(
-      {
-        id: actor,
-        name: 'MaestroService',
-        tenantId: 'system',
-        capabilities: ['consensus', 'governance'],
-        metadata: {},
-        status: 'active',
-        health: { cpuUsage: 0, memoryUsage: 0, lastHeartbeat: new Date(), activeTasks: 0, errorRate: 0 }
-      },
-      'initiate_consensus',
-      { topic, voters: voterAgentIds }
-    );
-
-    if (!governanceCheck.allowed) {
-      throw new Error(`Consensus initiation prohibited: ${governanceCheck.reason}`);
-    }
+    // Intercept with governance middleware
+    await this.enforceGovernance(actor, 'initiate_consensus', {
+      topic,
+      voters: voterAgentIds,
+      target: 'SubagentCoordinator'
+    });
 
     const consensusProposal = await this.subagentCoordinator.submitConsensusProposal(
       coordinatorId,

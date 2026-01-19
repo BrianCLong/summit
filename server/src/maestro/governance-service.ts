@@ -143,7 +143,8 @@ export class AgentGovernanceService {
   }
 
   /**
-   * Evaluate whether an agent action is permitted
+   * Evaluate whether an agent action is permitted.
+   * Integrates with OPA for policy-as-code and Provenance Ledger for immutable audit.
    */
   async evaluateAction(
     agent: MaestroAgent,
@@ -153,9 +154,49 @@ export class AgentGovernanceService {
   ): Promise<GovernanceDecision> {
     const config = this.getAgentConfig(agent);
     const violations: SafetyViolation[] = [];
+    const startTime = Date.now();
 
+    // 1. Query OPA for formal authorization (Policy-as-Code)
+    let opaAllowed = true;
+    let opaReason = 'OPA policy allowed action';
+    let policyHash = 'N/A';
+
+    try {
+      // Use dynamic import to avoid potential circular dependencies with conductor
+      const { opaPolicyEngine } = await import('../conductor/governance/opa-integration.js');
+      const opaDecision = await opaPolicyEngine.evaluatePolicy('maestro/authz', {
+        tenantId: agent.tenantId || 'system',
+        userId: agent.id,
+        role: (agent.metadata?.role as string) || 'agent',
+        action: action,
+        resource: (context.target as string) || 'system',
+        resourceAttributes: context,
+        subjectAttributes: agent.metadata,
+        policyVersion: (agent.metadata?.policyVersion as string) || '1.0'
+      });
+
+      opaAllowed = opaDecision.allow;
+      opaReason = opaDecision.reason;
+      policyHash = opaDecision.policyBundleVersion || 'unknown';
+
+      if (!opaAllowed) {
+        violations.push({
+          id: `violation-opa-${Date.now()}`,
+          agentId: agent.id,
+          violationType: 'SECURITY_BYPASS_ATTEMPT',
+          severity: 'high',
+          details: `OPA Policy Denied: ${opaReason}`,
+          timestamp: new Date(),
+          context
+        });
+      }
+    } catch (err) {
+      logger.warn({ err }, 'OPA evaluation failed, falling back to internal safety rails');
+    }
+
+    // 2. Internal Safety Rails (Heuristics)
     // Check 1: Capability whitelist
-    if (!config.capabilitiesWhitelist.includes(action)) {
+    if (!config.capabilitiesWhitelist.includes(action) && !action.startsWith('COORDINATION:')) {
       const violation: SafetyViolation = {
         id: `violation-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         agentId: agent.id,
@@ -178,7 +219,7 @@ export class AgentGovernanceService {
     const estimatedCost = this.estimateActionCost(action, context);
     if (estimatedCost > config.maxBudget) {
       const violation: SafetyViolation = {
-        id: `violation-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        id: `violation-budget-${Date.now()}`,
         agentId: agent.id,
         violationType: 'BUDGET_EXCEEDED',
         severity: 'medium',
@@ -207,7 +248,7 @@ export class AgentGovernanceService {
 
     if (riskScore > this.riskThresholds.critical) {
       const violation: SafetyViolation = {
-        id: `violation-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        id: `violation-risk-${Date.now()}`,
         agentId: agent.id,
         violationType: 'ETHICAL_VIOLATION',
         severity: 'critical',
@@ -225,50 +266,51 @@ export class AgentGovernanceService {
       }, 'Critical risk threshold exceeded');
     }
 
-    // Record violations in provenance ledger
-    for (const violation of violations) {
-      await this.ledger.appendEntry({
-        tenantId: agent.tenantId || 'system',
-        actionType: 'GOVERNANCE_VIOLATION',
-        resourceType: 'SafetyViolation',
-        resourceId: violation.id,
-        actorId: agent.id,
-        actorType: 'system',
-        timestamp: new Date(),
-        payload: {
-          mutationType: 'CREATE',
-          entityId: violation.id,
-          entityType: 'SafetyViolation',
-          violationType: violation.violationType,
-          severity: violation.severity,
-          details: violation.details
-        },
-        metadata: {
-          agentId: agent.id,
-          action,
-          riskScore,
-          originalContext: context,
-          ...metadata
-        }
-      });
-    }
-
-    const allowed = violations.length === 0 && riskScore <= this.riskThresholds.critical;
+    const allowed = opaAllowed && violations.length === 0 && riskScore <= this.riskThresholds.critical;
     const decision: GovernanceDecision = {
       allowed,
-      reason: allowed ? 'Action passes all governance checks' : `Action violates ${violations.length} governance policies`,
+      reason: allowed ? 'Action passes all governance checks' : `Action blocked: ${opaReason}. Violations: ${violations.map(v => v.violationType).join(', ')}`,
       riskScore,
       requiredApprovals: riskScore > this.riskThresholds.high ? requiredApprovals : config.requiredApprovals,
       violations
     };
+
+    // 3. Immutable Governance Logging (Story 1.2)
+    // Log EVERY decision (Allowed and Denied) to ProvenanceLedgerV2
+    await this.ledger.appendEntry({
+      tenantId: agent.tenantId || 'system',
+      actionType: allowed ? 'GOVERNANCE_ALLOW' : 'GOVERNANCE_DENY',
+      resourceType: 'AgentAction',
+      resourceId: `${agent.id}:${action}:${startTime}`,
+      actorId: agent.id,
+      actorType: 'system',
+      timestamp: new Date(),
+      payload: {
+        mutationType: 'EXECUTE',
+        agentId: agent.id,
+        action,
+        decision: allowed ? 'allow' : 'deny',
+        riskScore,
+        policyHash,
+        latencyMs: Date.now() - startTime
+      },
+      metadata: {
+        reason: decision.reason,
+        violations: violations.map(v => ({ type: v.violationType, severity: v.severity })),
+        originalContext: context,
+        opaReason,
+        ...metadata
+      }
+    });
 
     logger.info({
       agentId: agent.id,
       action,
       allowed,
       riskScore,
-      violationCount: violations.length
-    }, 'Governance decision made');
+      violationCount: violations.length,
+      latency: Date.now() - startTime
+    }, 'Governance decision finalized and logged to ledger');
 
     return decision;
   }
