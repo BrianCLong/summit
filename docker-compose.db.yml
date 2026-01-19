@@ -23,7 +23,8 @@ services:
   redis:
     image: redis:7-alpine
     container_name: maestro-redis
-    command: redis-server --requirepass redis-dev-secret
+    # Enable AOF (Append Only File) for durability
+    command: redis-server --requirepass redis-dev-secret --appendonly yes
     ports:
       - '6379:6379'
     volumes:
@@ -35,6 +36,20 @@ services:
       retries: 5
     restart: unless-stopped
 
+  # Mock Replica for HA simulation
+  redis-replica:
+    image: redis:7-alpine
+    container_name: maestro-redis-replica
+    command: redis-server --replicaof redis 6379 --masterauth redis-dev-secret --requirepass redis-dev-secret
+    depends_on:
+      - redis
+    ports:
+      - '6380:6379'
+    volumes:
+      - redis_replica_data:/data
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   redis_data:
+  redis_replica_data:
