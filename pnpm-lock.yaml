@@ -57,9 +57,6 @@ patchedDependencies:
   '@types/request':
     hash: 3ee7b22debd981b12808766f540509d3f836ba03dffb58fd408e3de75a2f1f86
     path: patches/@types__request.patch
-  strip-ansi@6.0.1:
-    hash: 4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392
-    path: patches/strip-ansi@6.0.1.patch
 
 importers:
 
@@ -59792,7 +59789,7 @@ snapshots:
       micromatch: 4.0.8
       pretty-format: 29.7.0
       slash: 3.0.0
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -59827,7 +59824,7 @@ snapshots:
       micromatch: 4.0.8
       pretty-format: 29.7.0
       slash: 3.0.0
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -60101,7 +60098,7 @@ snapshots:
       jest-worker: 29.7.0
       slash: 3.0.0
       string-length: 4.0.2
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
       v8-to-istanbul: 9.3.0
     transitivePeerDependencies:
       - supports-color
@@ -67514,9 +67511,7 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - '@babel/preset-env'
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   '@react-native/normalize-colors@0.76.9': {}
 
@@ -74920,14 +74915,14 @@ snapshots:
       msw: 2.12.4(@types/node@20.19.27)(typescript@5.9.3)
       vite: 7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
-  '@vitest/mocker@4.0.16(msw@2.12.4(@types/node@22.19.3)(typescript@5.9.3))(vite@7.2.6(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
+  '@vitest/mocker@4.0.16(msw@2.12.4(@types/node@22.19.3)(typescript@5.9.3))(vite@7.2.6(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@vitest/spy': 4.0.16
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
       msw: 2.12.4(@types/node@22.19.3)(typescript@5.9.3)
-      vite: 7.2.6(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+      vite: 7.2.6(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   '@vitest/mocker@4.0.16(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(vite@7.2.6(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
@@ -77384,19 +77379,19 @@ snapshots:
   cliui@6.0.0:
     dependencies:
       string-width: 4.2.3
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
       wrap-ansi: 6.2.0
 
   cliui@7.0.4:
     dependencies:
       string-width: 4.2.3
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
       wrap-ansi: 7.0.0
 
   cliui@8.0.1:
     dependencies:
       string-width: 4.2.3
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
       wrap-ansi: 7.0.0
 
   clone-deep@0.2.4:
@@ -78976,7 +78971,7 @@ snapshots:
       shell-quote: 1.8.3
       signal-exit: 3.0.7
       stream-json: 1.9.1
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
       telnet-client: 1.2.8
       tmp: 0.2.5
       trace-event-lib: 1.4.1
@@ -79543,7 +79538,7 @@ snapshots:
   enquirer@2.4.1:
     dependencies:
       ansi-colors: 4.1.3
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
 
   entities@2.2.0: {}
 
@@ -80258,7 +80253,7 @@ snapshots:
       minimatch: 3.1.2
       natural-compare: 1.4.0
       optionator: 0.9.4
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
       text-table: 0.2.0
     transitivePeerDependencies:
       - supports-color
@@ -81399,7 +81394,7 @@ snapshots:
       object-assign: 4.1.1
       signal-exit: 3.0.7
       string-width: 4.2.3
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
       wide-align: 1.1.5
 
   gaussian@1.3.0: {}
@@ -82607,7 +82602,7 @@ snapshots:
       run-async: 2.4.1
       rxjs: 7.8.2
       string-width: 4.2.3
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
       through: 2.3.8
       wrap-ansi: 6.2.0
     transitivePeerDependencies:
@@ -82627,7 +82622,7 @@ snapshots:
       run-async: 2.4.1
       rxjs: 7.8.2
       string-width: 4.2.3
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
       through: 2.3.8
       wrap-ansi: 6.2.0
     transitivePeerDependencies:
@@ -82644,7 +82639,7 @@ snapshots:
       run-async: 3.0.0
       rxjs: 7.8.2
       string-width: 4.2.3
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
       wrap-ansi: 6.2.0
       yoctocolors-cjs: 2.1.3
     transitivePeerDependencies:
@@ -84083,7 +84078,7 @@ snapshots:
       funpermaproxy: 1.1.0
       lodash.merge: 4.6.2
       node-ipc: 9.2.1
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
       tslib: 2.8.1
     optionalDependencies:
       '@jest/environment': 30.2.0
@@ -84192,7 +84187,7 @@ snapshots:
   jest-junit@16.0.0:
     dependencies:
       mkdirp: 1.0.4
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
       uuid: 8.3.2
       xml: 1.0.1
 
@@ -87969,7 +87964,7 @@ snapshots:
       is-interactive: 1.0.0
       is-unicode-supported: 0.1.0
       log-symbols: 4.1.0
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
       wcwidth: 1.0.1
 
   ora@7.0.1:
@@ -90812,7 +90807,7 @@ snapshots:
       dom-converter: 0.2.0
       htmlparser2: 6.1.0
       lodash: 4.17.21
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
 
   request-progress@3.0.0:
     dependencies:
@@ -92167,7 +92162,7 @@ snapshots:
   string-length@4.0.2:
     dependencies:
       char-regex: 1.0.2
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
 
   string-length@5.0.1:
     dependencies:
@@ -92189,7 +92184,7 @@ snapshots:
     dependencies:
       emoji-regex: 8.0.0
       is-fullwidth-code-point: 3.0.0
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
 
   string-width@6.1.0:
     dependencies:
@@ -92278,7 +92273,7 @@ snapshots:
     dependencies:
       ansi-regex: 6.2.2
 
-  strip-ansi@6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392):
+  strip-ansi@6.0.1:
     dependencies:
       ansi-regex: 6.2.2
 
@@ -92571,7 +92566,7 @@ snapshots:
       lodash.truncate: 4.4.2
       slice-ansi: 4.0.0
       string-width: 4.2.3
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
 
   tagged-tag@1.0.0: {}
 
@@ -95668,7 +95663,7 @@ snapshots:
   vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.3)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.3)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
     dependencies:
       '@vitest/expect': 4.0.16
-      '@vitest/mocker': 4.0.16(msw@2.12.4(@types/node@22.19.3)(typescript@5.9.3))(vite@7.2.6(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+      '@vitest/mocker': 4.0.16(msw@2.12.4(@types/node@22.19.3)(typescript@5.9.3))(vite@7.2.6(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       '@vitest/pretty-format': 4.0.16
       '@vitest/runner': 4.0.16
       '@vitest/snapshot': 4.0.16
@@ -95935,7 +95930,7 @@ snapshots:
     dependencies:
       ansi-html-community: 0.0.8
       html-entities: 2.6.0
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
 
   webpack-sources@1.4.3:
     dependencies:
@@ -96392,13 +96387,13 @@ snapshots:
     dependencies:
       ansi-styles: 4.3.0
       string-width: 4.2.3
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
 
   wrap-ansi@7.0.0:
     dependencies:
       ansi-styles: 4.3.0
       string-width: 4.2.3
-      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
+      strip-ansi: 6.0.1
 
   wrap-ansi@9.0.2:
     dependencies:

@@ -148,7 +148,11 @@ const RunComparisonView: React.FC<RunComparisonViewProps> = ({ runIdA, runIdB })
               placeholder="Enter second run ID"
               sx={{ flexGrow: 1 }}
             />
-            <Button variant="contained" onClick={handleCompare} disabled={loading || !runA || !runB}>
+            <Button
+              variant="contained"
+              onClick={() => void handleCompare()}
+              disabled={loading || !runA || !runB}
+            >
               Compare
             </Button>
           </Stack>
