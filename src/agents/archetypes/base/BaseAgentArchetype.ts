@@ -19,7 +19,10 @@ import {
   PolicyResult,
   AuditRecord,
   GraphEntity,
-} from './types';
+} from './types.js';
+import { createLogger } from '../../../../packages/authentication/src/utils/logger.js';
+
+const auditLogger = createLogger('audit-trail');
 
 export abstract class BaseAgentArchetype {
   protected instanceId: string;
@@ -197,6 +200,7 @@ export abstract class BaseAgentArchetype {
 
   /**
    * Create audit log entry
+   * Persistent audit logging implemented to address CN-005
    */
   protected async createAuditLog(action: AgentAction, context: AgentContext): Promise<AuditRecord> {
     const { requestId, user, organization, classification } = context;
@@ -219,9 +223,12 @@ export abstract class BaseAgentArchetype {
     };
 
     try {
-      // TODO: Integrate with actual audit log service
-      // For now, just log to console
-      console.log(`[AUDIT] ${JSON.stringify(auditRecord, null, 2)}`);
+      // SECURITY: Persistent audit logging using pino
+      // In production, this would be picked up by a log collector and sent to a secure store
+      auditLogger.info({
+        audit: true,
+        record: auditRecord,
+      }, `Audit event: ${action.actionType} by ${user.id}`);
 
       return auditRecord;
     } catch (error) {
