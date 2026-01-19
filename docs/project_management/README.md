@@ -10,10 +10,11 @@ This directory contains the project management materials for the IntelGraph proj
 - **[RACI Matrix](04_raci_matrix.md):** A RACI matrix outlining the roles and responsibilities for the project.
 - **[GitHub Project Boards](github_project_boards/):** A directory containing markdown templates for creating GitHub project boards for each epic.
 - **[Jira Import File](jira_import.csv):** A CSV file that you can use to import the entire project plan into Jira.
+- **[Linear Setup](linear/):** The authoritative guide for the Summit Linear setup, including board structure and agent integration.
 
 ## Development Process
 
-We use a sprint-based development process to manage our work. Each sprint is two weeks long and focuses on a small set of high-priority tasks. We use GitHub project boards to track the progress of our work.
+We use a sprint-based development process to manage our work. Each sprint is two weeks long and focuses on a small set of high-priority tasks. We use Linear (configured as per `linear/LINEAR_SETUP.md`) or GitHub project boards to track the progress of our work.
 
 ### Sprint Planning
 
