@@ -104,6 +104,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: implement-influence-pathway-cascade-mapper
+    version: v1
+    path: prompts/implement.influence-pathway-cascade-mapper@v1.md
+    sha256: 6978ddc50ae84fb853087e133e6ace54254883fea09e363ad1cc1525d07fb5e3
+    description: Implement narrative cascade mapping with influence pathway metrics and typologies.
+    scope:
+      paths:
+        - packages/fake-account-detection/
+        - docs/roadmap/STATUS.json
+        - prompts/implement.influence-pathway-cascade-mapper@v1.md
+        - prompts/registry.yaml
+      domains:
+        - graph-analysis
+        - influence
+        - detection
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: governance-docs-soc-controls
     version: v1
     path: prompts/governance/governance-docs-soc-controls@v1.md

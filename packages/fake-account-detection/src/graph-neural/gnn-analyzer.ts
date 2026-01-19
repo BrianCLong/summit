@@ -133,6 +133,7 @@ export interface CollectiveAnomaly {
 
 export interface PropagationAnalysis {
   cascades: InformationCascade[];
+  narrativeCascades: NarrativeCascade[];
   influenceMaximization: InfluenceAnalysis;
   viralPatterns: ViralPattern[];
   artificialAmplification: AmplificationDetection;
@@ -146,6 +147,64 @@ export interface InformationCascade {
   nodes: CascadeNode[];
   speed: CascadeSpeed;
   organicScore: number;
+}
+
+export interface NarrativeCascade {
+  cascadeId: string;
+  narrativeId: string;
+  origin: CascadeHop;
+  hops: CascadeHop[];
+  pathways: InfluencePathway[];
+  metrics: CascadeMetrics;
+  typologies: CascadeTypology[];
+}
+
+export interface CascadeHop {
+  hopId: string;
+  messageId: string;
+  accountId: string;
+  channelId?: string;
+  platform?: string;
+  timestamp: Date;
+  reach: number;
+  engagement: number;
+  parentHopId?: string;
+}
+
+export interface InfluencePathway {
+  pathId: string;
+  hopIds: string[];
+  metrics: PathMetrics;
+  motifs: CascadeTypology[];
+}
+
+export interface PathMetrics {
+  hopCount: number;
+  totalReach: number;
+  reachPerHop: number;
+  timeToPeakMs: number;
+}
+
+export interface CascadeMetrics {
+  totalReach: number;
+  peakTimestamp: Date;
+  durationMs: number;
+  uniqueAccounts: number;
+  crossPlatformHops: number;
+}
+
+export enum PathwayMotif {
+  BOTNET_AMPLIFICATION = 'botnet_amplification',
+  ELITE_MASS_RELAY = 'elite_mass_relay',
+  FRINGE_TO_MAINSTREAM = 'fringe_to_mainstream',
+  DIRECT_BROADCAST = 'direct_broadcast',
+  ORGANIC_CHAIN = 'organic_chain',
+}
+
+export interface CascadeTypology {
+  motif: PathwayMotif;
+  confidence: number;
+  evidence: string[];
 }
 
 export interface CascadeNode {
@@ -249,11 +308,300 @@ export interface GraphEmbeddings {
   temporalEmbeddings: TemporalEmbedding[];
 }
 
+export interface GraphMessage {
+  id: string;
+  accountId: string;
+  channelId?: string;
+  platform?: string;
+  timestamp: Date;
+  reach?: number;
+  engagement?: number;
+  parentMessageId?: string;
+  narrativeId?: string;
+}
+
+export interface GraphChannel {
+  id: string;
+  name: string;
+  platform: string;
+  tier?: 'fringe' | 'mainstream' | 'elite';
+}
+
 export interface TemporalEmbedding {
   timestamp: Date;
   embedding: number[];
   changeFromPrevious: number;
 }
+
+export function mapNarrativeCascades(graph: SocialGraph): NarrativeCascade[] {
+  if (!graph.messages || graph.messages.length === 0) {
+    return [];
+  }
+
+  const nodesById = new Map(graph.nodes.map(node => [node.id, node]));
+  const channelsById = new Map((graph.channels ?? []).map(channel => [channel.id, channel]));
+  const messageById = new Map(graph.messages.map(message => [message.id, message]));
+
+  const resolveRootId = (message: GraphMessage): string => {
+    let current = message;
+    const visited = new Set<string>();
+    while (current.parentMessageId && messageById.has(current.parentMessageId)) {
+      if (visited.has(current.parentMessageId)) {
+        break;
+      }
+      visited.add(current.parentMessageId);
+      current = messageById.get(current.parentMessageId)!;
+    }
+    return current.id;
+  };
+
+  const grouped = new Map<string, GraphMessage[]>();
+  for (const message of graph.messages) {
+    const groupId = message.narrativeId ?? resolveRootId(message);
+    const list = grouped.get(groupId) ?? [];
+    list.push(message);
+    grouped.set(groupId, list);
+  }
+
+  const cascades: NarrativeCascade[] = [];
+  for (const [narrativeId, messages] of grouped.entries()) {
+    const sorted = [...messages].sort(
+      (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+    );
+    const hops: CascadeHop[] = sorted.map(message => {
+      const node = nodesById.get(message.accountId);
+      const channel = message.channelId ? channelsById.get(message.channelId) : undefined;
+      return {
+        hopId: message.id,
+        messageId: message.id,
+        accountId: message.accountId,
+        channelId: message.channelId,
+        platform: message.platform ?? channel?.platform ?? node?.platform,
+        timestamp: message.timestamp,
+        reach: message.reach ?? node?.audienceSize ?? 0,
+        engagement: message.engagement ?? 0,
+        parentHopId: message.parentMessageId,
+      };
+    });
+
+    const hopById = new Map(hops.map(hop => [hop.hopId, hop]));
+    const origin = hops[0];
+    const pathways = buildInfluencePathways(hops, hopById, nodesById, channelsById);
+
+    const totalReach = hops.reduce((sum, hop) => sum + hop.reach, 0);
+    const peakHop = hops.reduce((max, hop) => (hop.reach > max.reach ? hop : max), hops[0]);
+    const earliest = hops[0].timestamp.getTime();
+    const latest = hops.reduce((max, hop) => Math.max(max, hop.timestamp.getTime()), earliest);
+    const crossPlatformHops = hops.reduce((count, hop) => {
+      if (!hop.parentHopId) {
+        return count;
+      }
+      const parent = hopById.get(hop.parentHopId);
+      if (parent?.platform && hop.platform && parent.platform !== hop.platform) {
+        return count + 1;
+      }
+      return count;
+    }, 0);
+
+    cascades.push({
+      cascadeId: `cascade-${narrativeId}`,
+      narrativeId,
+      origin,
+      hops,
+      pathways,
+      metrics: {
+        totalReach,
+        peakTimestamp: peakHop.timestamp,
+        durationMs: latest - earliest,
+        uniqueAccounts: new Set(hops.map(hop => hop.accountId)).size,
+        crossPlatformHops,
+      },
+      typologies: aggregateTypologies(pathways),
+    });
+  }
+
+  return cascades;
+}
+
+const buildInfluencePathways = (
+  hops: CascadeHop[],
+  hopById: Map<string, CascadeHop>,
+  nodesById: Map<string, GraphNode>,
+  channelsById: Map<string, GraphChannel>
+): InfluencePathway[] => {
+  const children = new Map<string, string[]>();
+  for (const hop of hops) {
+    if (!hop.parentHopId || !hopById.has(hop.parentHopId)) {
+      continue;
+    }
+    const list = children.get(hop.parentHopId) ?? [];
+    list.push(hop.hopId);
+    children.set(hop.parentHopId, list);
+  }
+
+  const roots = hops.filter(hop => !hop.parentHopId || !hopById.has(hop.parentHopId));
+  const pathways: InfluencePathway[] = [];
+
+  const walk = (currentHopId: string, path: string[]) => {
+    const nextPath = [...path, currentHopId];
+    const nextChildren = children.get(currentHopId);
+    if (!nextChildren || nextChildren.length === 0) {
+      const pathHops = nextPath.map(id => hopById.get(id)!).filter(Boolean);
+      const metrics = calculatePathMetrics(pathHops);
+      const motifs = evaluatePathwayMotifs(pathHops, nodesById, channelsById);
+      pathways.push({
+        pathId: `path-${pathways.length + 1}`,
+        hopIds: nextPath,
+        metrics,
+        motifs,
+      });
+      return;
+    }
+    for (const child of nextChildren) {
+      walk(child, nextPath);
+    }
+  };
+
+  for (const root of roots) {
+    walk(root.hopId, []);
+  }
+
+  return pathways;
+};
+
+const calculatePathMetrics = (pathHops: CascadeHop[]): PathMetrics => {
+  if (pathHops.length === 0) {
+    return {
+      hopCount: 0,
+      totalReach: 0,
+      reachPerHop: 0,
+      timeToPeakMs: 0,
+    };
+  }
+  const totalReach = pathHops.reduce((sum, hop) => sum + hop.reach, 0);
+  const hopCount = pathHops.length;
+  const peakHop = pathHops.reduce((max, hop) => (hop.reach > max.reach ? hop : max), pathHops[0]);
+  const timeToPeakMs =
+    peakHop.timestamp.getTime() - pathHops[0].timestamp.getTime();
+  return {
+    hopCount,
+    totalReach,
+    reachPerHop: hopCount === 0 ? 0 : totalReach / hopCount,
+    timeToPeakMs,
+  };
+};
+
+const evaluatePathwayMotifs = (
+  pathHops: CascadeHop[],
+  nodesById: Map<string, GraphNode>,
+  channelsById: Map<string, GraphChannel>
+): CascadeTypology[] => {
+  if (pathHops.length === 0) {
+    return [];
+  }
+
+  const candidates: CascadeTypology[] = [];
+  const botCount = pathHops.filter(hop => isBotAccount(hop.accountId, nodesById)).length;
+  const botShare = botCount / pathHops.length;
+  const delays = pathHops.slice(1).map((hop, index) => {
+    const prev = pathHops[index];
+    return hop.timestamp.getTime() - prev.timestamp.getTime();
+  });
+  const averageDelay =
+    delays.length === 0 ? 0 : delays.reduce((sum, value) => sum + value, 0) / delays.length;
+
+  if (pathHops.length >= 3 && botShare >= 0.5 && averageDelay < 10 * 60 * 1000) {
+    candidates.push({
+      motif: PathwayMotif.BOTNET_AMPLIFICATION,
+      confidence: Math.min(1, botShare + 0.2),
+      evidence: [
+        `bot_share:${botShare.toFixed(2)}`,
+        `avg_delay_ms:${Math.round(averageDelay)}`,
+      ],
+    });
+  }
+
+  const originNode = nodesById.get(pathHops[0].accountId);
+  if (originNode && isEliteAccount(originNode)) {
+    const massShare =
+      pathHops.slice(1).filter(hop => isMassAccount(hop.accountId, nodesById)).length /
+      Math.max(1, pathHops.length - 1);
+    if (massShare >= 0.6) {
+      candidates.push({
+        motif: PathwayMotif.ELITE_MASS_RELAY,
+        confidence: Math.min(1, massShare + 0.25),
+        evidence: [`mass_share:${massShare.toFixed(2)}`],
+      });
+    }
+  }
+
+  const channelTiers = pathHops.map(hop => {
+    if (!hop.channelId) {
+      return undefined;
+    }
+    return channelsById.get(hop.channelId)?.tier;
+  });
+  const firstTier = channelTiers.find(tier => tier !== undefined);
+  const lastTier = [...channelTiers].reverse().find(tier => tier !== undefined);
+  if (firstTier === 'fringe' && lastTier === 'mainstream') {
+    candidates.push({
+      motif: PathwayMotif.FRINGE_TO_MAINSTREAM,
+      confidence: 0.7,
+      evidence: ['tier_shift:fringe->mainstream'],
+    });
+  }
+
+  if (pathHops.length <= 2 && pathHops[0].reach >= 10000) {
+    candidates.push({
+      motif: PathwayMotif.DIRECT_BROADCAST,
+      confidence: 0.6,
+      evidence: [`root_reach:${pathHops[0].reach}`],
+    });
+  }
+
+  if (candidates.length === 0) {
+    candidates.push({
+      motif: PathwayMotif.ORGANIC_CHAIN,
+      confidence: 0.4,
+      evidence: ['default_pattern'],
+    });
+  }
+
+  return candidates;
+};
+
+const aggregateTypologies = (pathways: InfluencePathway[]): CascadeTypology[] => {
+  const combined = new Map<PathwayMotif, CascadeTypology>();
+  for (const pathway of pathways) {
+    for (const typology of pathway.motifs) {
+      const existing = combined.get(typology.motif);
+      if (!existing || typology.confidence > existing.confidence) {
+        combined.set(typology.motif, typology);
+      }
+    }
+  }
+  return Array.from(combined.values()).sort((a, b) => b.confidence - a.confidence);
+};
+
+const isBotAccount = (accountId: string, nodesById: Map<string, GraphNode>): boolean => {
+  const node = nodesById.get(accountId);
+  return Boolean(node?.isBot || node?.accountType === 'bot');
+};
+
+const isEliteAccount = (node: GraphNode): boolean => {
+  return Boolean(
+    node.verificationStatus || (node.audienceSize ?? 0) >= 100000 || node.accountType === 'elite'
+  );
+};
+
+const isMassAccount = (accountId: string, nodesById: Map<string, GraphNode>): boolean => {
+  const node = nodesById.get(accountId);
+  if (!node) {
+    return false;
+  }
+  const audience = node.audienceSize ?? 0;
+  return audience < 10000 && !node.verificationStatus;
+};
 
 export class GraphNeuralNetworkAnalyzer {
   private gnnLayers: GNNLayer[];
@@ -659,8 +1007,8 @@ export class GraphNeuralNetworkAnalyzer {
     graph: SocialGraph,
     embeddings: GraphEmbeddings
   ): Promise<PropagationAnalysis> {
-    // Detect cascades
-    const cascades = this.detectCascades(graph);
+    const narrativeCascades = mapNarrativeCascades(graph);
+    const cascades = this.detectCascades(graph, narrativeCascades);
 
     // Analyze influence
     const influenceMaximization = this.analyzeInfluence(graph, embeddings);
@@ -673,15 +1021,109 @@ export class GraphNeuralNetworkAnalyzer {
 
     return {
       cascades,
+      narrativeCascades,
       influenceMaximization,
       viralPatterns,
       artificialAmplification,
     };
   }
 
-  private detectCascades(graph: SocialGraph): InformationCascade[] {
-    // Simplified cascade detection
-    return [];
+  private detectCascades(
+    graph: SocialGraph,
+    narrativeCascades?: NarrativeCascade[]
+  ): InformationCascade[] {
+    const cascades = narrativeCascades ?? mapNarrativeCascades(graph);
+    if (cascades.length === 0) {
+      return [];
+    }
+
+    return cascades.map(cascade => {
+      const hopById = new Map(cascade.hops.map(hop => [hop.hopId, hop]));
+      const children = new Map<string, string[]>();
+      for (const hop of cascade.hops) {
+        if (!hop.parentHopId) {
+          continue;
+        }
+        const list = children.get(hop.parentHopId) ?? [];
+        list.push(hop.hopId);
+        children.set(hop.parentHopId, list);
+      }
+
+      const depthByHop = new Map<string, number>();
+      const resolveDepth = (hopId: string): number => {
+        if (depthByHop.has(hopId)) {
+          return depthByHop.get(hopId)!;
+        }
+        const hop = hopById.get(hopId);
+        if (!hop || !hop.parentHopId || !hopById.has(hop.parentHopId)) {
+          depthByHop.set(hopId, 0);
+          return 0;
+        }
+        const depth = resolveDepth(hop.parentHopId) + 1;
+        depthByHop.set(hopId, depth);
+        return depth;
+      };
+
+      const cascadeNodes: CascadeNode[] = cascade.hops.map(hop => {
+        const depth = resolveDepth(hop.hopId);
+        const parent = hop.parentHopId ? hopById.get(hop.parentHopId) : undefined;
+        return {
+          nodeId: hop.accountId,
+          depth,
+          timestamp: hop.timestamp,
+          parentNode: parent?.accountId ?? cascade.origin.accountId,
+          activationProbability: this.calculateActivationProbability(
+            hop,
+            cascade.metrics.totalReach
+          ),
+        };
+      });
+
+      const totalDepth = cascadeNodes.reduce((max, node) => Math.max(max, node.depth), 0);
+      const breadth =
+        cascadeNodes.length === 0
+          ? 0
+          : cascadeNodes.length /
+            Math.max(
+              1,
+              cascadeNodes.filter(node => node.depth === 1).length
+            );
+
+      const delays: number[] = [];
+      for (const hop of cascade.hops) {
+        if (!hop.parentHopId) {
+          continue;
+        }
+        const parent = hopById.get(hop.parentHopId);
+        if (parent) {
+          delays.push(hop.timestamp.getTime() - parent.timestamp.getTime());
+        }
+      }
+      const averageDelay =
+        delays.length === 0
+          ? 0
+          : delays.reduce((sum, value) => sum + value, 0) / delays.length;
+      const variance =
+        delays.length === 0
+          ? 0
+          : delays.reduce((sum, value) => sum + Math.pow(value - averageDelay, 2), 0) /
+            delays.length;
+
+      return {
+        cascadeId: cascade.cascadeId,
+        rootNode: cascade.origin.accountId,
+        depth: totalDepth,
+        breadth,
+        nodes: cascadeNodes,
+        speed: {
+          averageDelay,
+          variance,
+          acceleration: averageDelay === 0 ? 0 : 1 / averageDelay,
+          naturalness: 1 - Math.min(1, variance / (averageDelay || 1)),
+        },
+        organicScore: this.calculateCascadeOrganicScore(cascade),
+      };
+    });
   }
 
   private analyzeInfluence(
@@ -748,6 +1190,26 @@ export class GraphNeuralNetworkAnalyzer {
       stateTransitions: [],
     };
   }
+
+  private calculateActivationProbability(hop: CascadeHop, totalReach: number): number {
+    if (totalReach <= 0) {
+      return 0;
+    }
+    return Math.min(1, hop.reach / totalReach);
+  }
+
+  private calculateCascadeOrganicScore(cascade: NarrativeCascade): number {
+    if (cascade.hops.length === 0) {
+      return 0;
+    }
+    const botLikeShare =
+      cascade.typologies.find(t => t.motif === PathwayMotif.BOTNET_AMPLIFICATION)
+        ?.confidence ?? 0;
+    const crossPlatformRatio =
+      cascade.metrics.crossPlatformHops / Math.max(1, cascade.hops.length - 1);
+    const diversityScore = Math.min(1, cascade.metrics.uniqueAccounts / cascade.hops.length);
+    return Math.max(0, 1 - botLikeShare) * 0.5 + crossPlatformRatio * 0.2 + diversityScore * 0.3;
+  }
 }
 
 // Supporting classes and interfaces
@@ -758,14 +1220,16 @@ interface GNNConfig {
   embeddingDim?: number;
 }
 
-interface SocialGraph {
+export interface SocialGraph {
   nodes: GraphNode[];
   getNeighbors(nodeId: string): string[];
   getEdgeWeight(source: string, target: string): number;
   getEdgeWeights(nodeId: string): number[];
+  messages?: GraphMessage[];
+  channels?: GraphChannel[];
 }
 
-interface GraphNode {
+export interface GraphNode {
   id: string;
   degree: number;
   inDegree: number;
@@ -778,6 +1242,10 @@ interface GraphNode {
   profileCompleteness: number;
   accountAge: number;
   verificationStatus: boolean;
+  platform?: string;
+  audienceSize?: number;
+  accountType?: 'elite' | 'mass' | 'bot' | 'media' | 'fringe';
+  isBot?: boolean;
 }
 
 interface GNNLayer {
