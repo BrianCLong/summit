@@ -1,0 +1,12 @@
+name: summit-baseline
+description: "Standard baseline skills for all Summit agents"
+version: 1.0.0
+skills:
+  - name: react-best-practices
+    source: github.com/vercel-labs/agent-skills
+  - name: web-design-guidelines
+    source: github.com/vercel-labs/agent-skills
+  - name: evidence-id-consistency
+    source: internal/summit
+  - name: supply-chain-integrity
+    source: internal/summit

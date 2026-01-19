@@ -1,0 +1,9 @@
+assertions:
+  - id: no-cascading-styles
+    description: "Should not use inline styles that cause cascading issues"
+    pattern: "style=\\{\\{.*\\}\\}"
+    type: forbidden
+  - id: use-next-image
+    description: "Should use Next.js Image component instead of img"
+    pattern: "<img"
+    type: forbidden

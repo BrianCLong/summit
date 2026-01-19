@@ -1,0 +1,29 @@
+name: Skill Evals
+
+on:
+  push:
+    paths:
+      - 'skills/**'
+      - 'evals/**'
+      - 'scripts/skills/**'
+  pull_request:
+    paths:
+      - 'skills/**'
+      - 'evals/**'
+      - 'scripts/skills/**'
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 10.0.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: node scripts/skills/install-pack.mjs
+      - run: node scripts/skills/run-skill-evals.mjs

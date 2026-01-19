@@ -1,0 +1,5 @@
+assertions:
+  - id: no-date-now
+    description: "Should not use Date.now() for build artifacts"
+    pattern: "Date.now\\(\\)"
+    type: forbidden

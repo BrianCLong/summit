@@ -1,0 +1,32 @@
+version: 1.0.0
+registry:
+  - source: "github.com/vercel-labs/agent-skills"
+    sha: "ac6a79af08f6d32c34ee03c829824990f3de0a6d"
+    skills:
+      - name: "react-best-practices"
+        path: "skills/react-best-practices"
+        capabilities: ["read-only"]
+        owners: ["@frontend-platform"]
+      - name: "web-design-guidelines"
+        path: "skills/web-design-guidelines"
+        capabilities: ["read-only"]
+        owners: ["@design-system"]
+  - source: "internal/summit"
+    sha: "local"
+    skills:
+      - name: "evidence-id-consistency"
+        path: "skills/summit/evidence-id-consistency"
+        capabilities: ["read-only"]
+        owners: ["@governance"]
+      - name: "ga-release-captain"
+        path: "skills/summit/ga-release-captain"
+        capabilities: ["read-only"]
+        owners: ["@release-engineering"]
+      - name: "supply-chain-integrity"
+        path: "skills/summit/supply-chain-integrity"
+        capabilities: ["read-only"]
+        owners: ["@security"]
+      - name: "project19-governance-enforcement"
+        path: "skills/summit/project19-governance-enforcement"
+        capabilities: ["read-only"]
+        owners: ["@governance"]
