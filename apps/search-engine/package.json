@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/search-engine",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Advanced Search and Query Engine for IntelGraph",
   "main": "dist/server.js",
   "scripts": {
