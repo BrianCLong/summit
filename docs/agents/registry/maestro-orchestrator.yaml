@@ -1,0 +1,30 @@
+id: maestro-orchestrator
+name: Maestro Orchestrator
+version: 0.1.0
+description: Orchestrates multi-agent workflows, dispatching SOPs and coordinating outputs.
+role: orchestrator
+inputs:
+  - name: objective
+    type: string
+    required: true
+    description: Mission objective or task statement.
+  - name: context
+    type: string
+    required: false
+    description: Optional background context for orchestration.
+outputs:
+  - name: execution_plan
+    type: json
+    description: Structured plan with agent assignments and milestones.
+  - name: decision_artifacts
+    type: bundle
+    description: References to generated decision artifacts and evidence.
+sop_refs:
+  - SOP-MAESTRO-ORCH-001
+allowed_tools:
+  - summit-cli
+  - policy-engine
+policies:
+  - docs/governance/RULEBOOK.md
+  - docs/SUMMIT_READINESS_ASSERTION.md
+owner: platform-governance

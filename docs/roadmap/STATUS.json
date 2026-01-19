@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-17T22:29:59Z",
+  "revision_note": "Added agent registry v0 scaffolding with CLI validation and docs",
   "initiatives": [
     {
       "id": "A",

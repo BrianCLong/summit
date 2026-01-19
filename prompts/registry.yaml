@@ -55,6 +55,34 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: agent-registry-v0
+    version: v1
+    path: prompts/agents/agent-registry-v0.md
+    sha256: 87bba436d33f7b69ea50e655f0b2f4c008a8edb9d6f213d1e7853cceaf4a8ff7
+    description: Implement the Agent Registry v0 scaffolding with schema, loader, CLI, tests, and documentation.
+    scope:
+      paths:
+        - packages/agent-registry/
+        - packages/cli/
+        - docs/agents/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/agents/agent-registry-v0.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - tooling
+        - agents
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md

@@ -10,6 +10,7 @@ Before deploying any agent, review the mandatory governance standards:
 *   **[Risk Scoring Model](./risk-scoring.md)**: How agent risk is calculated based on files touched, permissions, and scope.
 *   **[Budget Enforcement](./budget-enforcement.md)**: Mechanisms for invocation-time checks, runtime throttling, and kill switches.
 *   **[Telemetry & Audit](./agent-telemetry.md)**: Required metrics, audit logs, and anomaly detection schemas.
+*   **[Agent Registry v0](./AGENT_REGISTRY_V0.md)**: Canonical registry of agent definitions, validation rules, and CLI usage.
 
 ---
 
