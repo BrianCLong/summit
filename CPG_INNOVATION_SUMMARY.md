@@ -88,6 +88,40 @@ The Context Provenance Graph (CPG) system represents a paradigm shift in AI cont
 - Enable verification of AI responses based on context lineage
 - Provide transparency for AI-assisted decision making
 
+## Research-Driven Moat Expansions (Agent Memory + Orchestration)
+
+### 1. Intrinsic Memory Agents → Graph-Resident Memory Cells
+
+- **Innovation**: Persist agent-specific memory cells as IntelGraph nodes with CPG segments bound to role + mission scope.
+- **Novelty**: Memory cells evolve under policy, evidence, and temporal decay instead of static scratchpads.
+- **Advantage**: Context survives multi-agent handoffs without token bloat, while provenance and policy gates stay intact.
+
+### 2. Memory Taxonomy → Memory Lattice with Policy-As-Code
+
+- **Innovation**: Formalize memory classes (token, parametric, episodic, semantic, procedural) as a governed lattice with read/write policies.
+- **Novelty**: Memory movement across layers is mediated by policy-as-code and provenance validation at MCP assembly.
+- **Advantage**: Drift-proof, auditable memory that supports long-horizon OSINT investigations and multi-tenant separation.
+
+### 3. Evolving Orchestration → Policy-Aware Puppeteer Routing
+
+- **Innovation**: Maestro selects, prunes, and re-wires agents using cost/quality/SLO signals plus policy constraints.
+- **Novelty**: Orchestration policies and routing evidence are recorded as CPG segments, enabling replayable decisions.
+- **Advantage**: Reduced redundancy and higher reasoning efficiency while preserving compliance and auditability.
+
+### 4. MCP Extensions → Governed Context Channels
+
+- **Innovation**: Extend MCP to carry signed context capsules, memory grants, and decision receipts.
+- **Novelty**: Context channels are versioned and revocable, aligned to CPG segment identities and policy inheritance.
+- **Advantage**: Lower hallucination risk in graph fusion and clear enterprise audit trails across MCP toolchains.
+
+## Moated Summit Innovations (Goal/State Fabric)
+
+- **Goal/State Fabric**: Unify objectives, constraints, and execution state as CPG-backed graph primitives shared across agents.
+- **Evidence-Bound Memory**: Every memory write requires a provenance edge to OSINT/graph evidence or an approved synthetic source.
+- **Drift-Proof Context Capsules**: Context packaging with invariants, signed envelopes, and transitive policy propagation.
+- **Orchestrator-Neo4j Co-Design**: Maestro emits graph-native orchestration states, enabling cost-aware routing and state replay.
+- **Policy-Native MCP Gateways**: MCP server responses are signed, policy-validated, and stored as attestable context segments.
+
 ## Patentability Analysis
 
 ### Novelty Score: High

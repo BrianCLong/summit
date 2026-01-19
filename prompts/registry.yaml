@@ -55,6 +55,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: cpg-moat-expansion
+    version: v1
+    path: prompts/docs/cpg-moat-expansion@v1.md
+    sha256: 0cc890a2623dbf54a2eceb65b21305e744001ee0ab111e4465adcab99c0e43b3
+    description: Expand CPG innovation summary with moated agent memory and MCP orchestration capabilities.
+    scope:
+      paths:
+        - CPG_INNOVATION_SUMMARY.md
+        - docs/roadmap/STATUS.json
+        - prompts/docs/cpg-moat-expansion@v1.md
+        - prompts/registry.yaml
+        - agents/examples/CPG_MOAT_EXPANSION_TASK.json
+      domains:
+        - documentation
+        - governance
+        - moat
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
