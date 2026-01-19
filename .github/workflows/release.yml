@@ -1,0 +1,14 @@
+name: Release
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+concurrency:
+  group: rel-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    uses: ./.github/workflows/reusable/release.yml
+    with:
+      registry: ghcr.io
