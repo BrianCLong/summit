@@ -5,15 +5,19 @@ on:
     branches:
       - main
       - 'release/**'
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: true
 
 jobs:
   semver-check:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      
+
       - name: Check Commit Messages (Conventional Commits)
         uses: wagoid/commitlint-github-action@v5
         with:
@@ -21,6 +25,7 @@ jobs:
           failOnWarnings: false # Be gentle for now
 
   changelog-verify:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     if: startsWith(github.head_ref, 'release/')
     steps:

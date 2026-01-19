@@ -38,6 +38,7 @@ jobs:
   # Gate: Exclude RC tags - only process GA tags
   # ═══════════════════════════════════════════════════════════════════════════
   gate:
+    timeout-minutes: 30
     name: "0️⃣ Gate Check"
     runs-on: ubuntu-latest
     outputs:
@@ -79,6 +80,7 @@ jobs:
   # Blocks GA promotion when error budget is exhausted (unless override active)
   # ═══════════════════════════════════════════════════════════════════════════
   freeze-gate:
+    timeout-minutes: 30
     name: "🔒 Freeze Gate"
     runs-on: ubuntu-latest
     needs: gate
@@ -104,9 +106,10 @@ jobs:
   # Verify GA tag points to successful RC commit
   # ═══════════════════════════════════════════════════════════════════════════
   lineage:
+    timeout-minutes: 30
     name: "1️⃣ Lineage Check"
     runs-on: ubuntu-latest
-    needs: [gate, freeze-gate]
+    needs: [ gate, freeze-gate ]
     if: needs.gate.outputs.is_ga == 'true'
 
     outputs:
@@ -189,9 +192,10 @@ jobs:
   # Run release readiness checks
   # ═══════════════════════════════════════════════════════════════════════════
   verify:
+    timeout-minutes: 30
     name: "2️⃣ Verification"
     runs-on: ubuntu-latest
-    needs: [gate, lineage]
+    needs: [ gate, lineage ]
     if: needs.gate.outputs.is_ga == 'true'
 
     outputs:
@@ -215,15 +219,16 @@ jobs:
           fi
           echo "sha=${SHA}" >> $GITHUB_OUTPUT
 
-      - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: "20"
-
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        uses: pnpm/action-setup@v4
         with:
           version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -308,9 +313,10 @@ jobs:
   # Create comprehensive GA release bundle
   # ═══════════════════════════════════════════════════════════════════════════
   build-bundle:
+    timeout-minutes: 30
     name: "3️⃣ Build GA Bundle"
     runs-on: ubuntu-latest
-    needs: [gate, lineage, verify]
+    needs: [ gate, lineage, verify ]
     if: needs.gate.outputs.is_ga == 'true'
 
     outputs:
@@ -382,9 +388,10 @@ jobs:
   # Final verification before publishing
   # ═══════════════════════════════════════════════════════════════════════════
   publish-guard:
+    timeout-minutes: 30
     name: "4️⃣ Publish Guard"
     runs-on: ubuntu-latest
-    needs: [gate, lineage, verify, build-bundle]
+    needs: [ gate, lineage, verify, build-bundle ]
     if: needs.gate.outputs.is_ga == 'true'
 
     outputs:
@@ -473,9 +480,10 @@ jobs:
   # Combine all artifacts into ga-release-bundle-{tag}
   # ═══════════════════════════════════════════════════════════════════════════
   assemble:
+    timeout-minutes: 30
     name: "5️⃣ Assemble Release Bundle"
     runs-on: ubuntu-latest
-    needs: [gate, lineage, verify, build-bundle, publish-guard]
+    needs: [ gate, lineage, verify, build-bundle, publish-guard ]
     if: needs.gate.outputs.is_ga == 'true'
 
     steps:
@@ -651,9 +659,10 @@ jobs:
   # Two-person approval gate before publishing
   # ═══════════════════════════════════════════════════════════════════════════
   publish:
+    timeout-minutes: 30
     name: "6️⃣ Publish Release"
     runs-on: ubuntu-latest
-    needs: [gate, lineage, verify, build-bundle, publish-guard, assemble]
+    needs: [ gate, lineage, verify, build-bundle, publish-guard, assemble ]
     if: |
       needs.gate.outputs.is_ga == 'true' &&
       needs.publish-guard.outputs.publish_allowed == 'true'

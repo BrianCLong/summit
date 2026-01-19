@@ -13,7 +13,7 @@ name: Auto-Triage Release Blockers
 
 on:
   issues:
-    types: [opened, labeled]
+    types: [ opened, labeled ]
   workflow_dispatch:
     inputs:
       issue_number:
@@ -40,6 +40,7 @@ permissions:
 
 jobs:
   check-trigger:
+    timeout-minutes: 30
     name: Check Trigger Conditions
     runs-on: ubuntu-latest
     outputs:
@@ -69,6 +70,7 @@ jobs:
           fi
 
   auto-triage:
+    timeout-minutes: 30
     name: Route Issue
     needs: check-trigger
     if: needs.check-trigger.outputs.should_run == 'true'

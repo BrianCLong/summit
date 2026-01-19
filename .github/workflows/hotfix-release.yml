@@ -51,6 +51,7 @@ permissions:
 jobs:
   # Job 1: Validate inputs and verify the hotfix is safe to release
   verify-hotfix:
+    timeout-minutes: 30
     name: Verify Hotfix
     runs-on: ubuntu-latest
     outputs:
@@ -136,10 +137,10 @@ jobs:
 
           echo "📦 Hotfix Tag: ${TAG}"
 
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
@@ -264,8 +265,9 @@ jobs:
 
   # Job 2: Publish hotfix (requires environment approval)
   publish-hotfix:
+    timeout-minutes: 30
     name: Publish Hotfix
-    needs: [verify-hotfix]
+    needs: [ verify-hotfix ]
     if: needs.verify-hotfix.outputs.gates_passed == 'true'
     runs-on: ubuntu-latest
     # HOTFIX APPROVAL GATE

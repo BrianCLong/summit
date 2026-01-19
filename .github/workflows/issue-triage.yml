@@ -2,15 +2,19 @@ name: Issue Triage Automation
 
 on:
   issues:
-    types: [opened, edited, reopened, labeled, unlabeled]
+    types: [ opened, edited, reopened, labeled, unlabeled ]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   issues: write
   contents: read
 
 jobs:
   classify:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

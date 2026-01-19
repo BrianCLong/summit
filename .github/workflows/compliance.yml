@@ -2,7 +2,7 @@ name: Compliance
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
     # SAFETY: Conservative paths-ignore to prevent skipping compliance checks
     # This workflow MUST run on any code/config/policy changes
     paths-ignore:
@@ -13,7 +13,7 @@ on:
       # - package.json, pnpm-lock.yaml (dependency changes must trigger this)
       # - policy/**, scripts/compliance/** (policy/compliance changes must trigger this)
   pull_request:
-    branches: [main]
+    branches: [ main ]
     paths-ignore:
       - "**.md"
       - "docs/**"
@@ -32,14 +32,15 @@ concurrency:
 
 jobs:
   drift-detection:
+    timeout-minutes: 30
     name: Compliance Drift Detection
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "pnpm"
@@ -51,15 +52,16 @@ jobs:
         run: pnpm compliance:check
 
   evidence-generation:
+    timeout-minutes: 30
     name: Evidence Generation Dry-Run
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "pnpm"

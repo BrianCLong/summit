@@ -5,6 +5,9 @@ on:
     branches: [ "main" ]
   release:
     types: [ published ]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   AWS_REGION: us-east-1
@@ -17,10 +20,11 @@ permissions:
 
 jobs:
   build-and-push:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [maestro, prov-ledger, policy-lac]
+        service: [ maestro, prov-ledger, policy-lac ]
         include:
           - service: maestro
             dockerfile: docker/Dockerfile.maestro
@@ -79,11 +83,12 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
   deploy-infra:
+    timeout-minutes: 30
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
@@ -94,6 +99,7 @@ jobs:
           terraform apply -auto-approve
 
   deploy-k8s:
+    timeout-minutes: 30
     needs: deploy-infra
     runs-on: ubuntu-latest
     steps:
@@ -120,14 +126,14 @@ jobs:
             --set ingress.hosts[0].paths[0].path=/maestro \
             --set ingress.hosts[0].paths[0].pathType=Prefix \
             --namespace default
-          
+
           # Deploy Prov Ledger
           helm upgrade --install prov-ledger charts/universal-app \
             --set image.repository=$ECR_REGISTRY/summit/prov-ledger \
             --set image.tag=${{ github.sha }} \
             --set service.targetPort=4010 \
             --namespace default
-          
+
           # Deploy Policy LAC
           helm upgrade --install policy-lac charts/universal-app \
             --set image.repository=$ECR_REGISTRY/summit/policy-lac \
@@ -139,12 +145,11 @@ jobs:
         run: |
           # Wait for rollout
           kubectl rollout status deployment/maestro --timeout=120s
-          
+
           # Run the project's internal smoke test script
           # We use kubectl exec to run it from inside a pod or curl the ingress
           echo "Running Health Check..."
           ./scripts/verify-deployment.sh
-          
+
           # Optional: Run app-level functional smoke tests
           # pnpm run test:smoke
-

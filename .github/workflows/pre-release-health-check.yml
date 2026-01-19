@@ -41,6 +41,9 @@ on:
       score:
         description: "Health score percentage"
         value: ${{ jobs.health-check.outputs.score }}
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -48,6 +51,7 @@ permissions:
 
 jobs:
   run-fresh-audits:
+    timeout-minutes: 30
     name: Run Fresh Audits
     runs-on: ubuntu-latest
     if: inputs.run_fresh == true
@@ -57,12 +61,12 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        uses: pnpm/action-setup@v4
         with:
           version: 8
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "pnpm"
@@ -79,9 +83,10 @@ jobs:
         continue-on-error: true
 
   health-check:
+    timeout-minutes: 30
     name: Aggregate Health Check
     runs-on: ubuntu-latest
-    needs: [run-fresh-audits]
+    needs: [ run-fresh-audits ]
     if: always()
     outputs:
       status: ${{ steps.check.outputs.status }}
@@ -168,6 +173,7 @@ jobs:
           fi
 
   block-release:
+    timeout-minutes: 30
     name: Block Release on Failure
     runs-on: ubuntu-latest
     needs: health-check

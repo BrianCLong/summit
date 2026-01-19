@@ -8,12 +8,12 @@ name: Governance Dashboard Publish
 on:
   # Run after policy validation completes
   workflow_run:
-    workflows: ["Governance Policy Validation", "Governance Drift Check"]
-    types: [completed]
+    workflows: [ "Governance Policy Validation", "Governance Drift Check" ]
+    types: [ completed ]
 
   # Run on policy file changes
   push:
-    branches: [main]
+    branches: [ main ]
     paths:
       - "docs/ci/*.yml"
       - "docs/ci/*.yaml"
@@ -38,6 +38,7 @@ concurrency:
 
 jobs:
   generate-dashboard:
+    timeout-minutes: 30
     name: Generate Governance Dashboard
     runs-on: ubuntu-latest
 
@@ -111,6 +112,7 @@ jobs:
           path: site/governance/
 
   deploy-dashboard:
+    timeout-minutes: 30
     name: Deploy to Pages
     needs: generate-dashboard
     runs-on: ubuntu-latest

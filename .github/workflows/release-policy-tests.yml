@@ -101,9 +101,10 @@ jobs:
           ./scripts/release/tests/base_selection.test.sh
 
   summary:
+    timeout-minutes: 30
     name: Test Summary
     runs-on: ubuntu-latest
-    needs: [policy-tests, base-selection-tests]
+    needs: [ policy-tests, base-selection-tests ]
     if: always()
 
     steps:

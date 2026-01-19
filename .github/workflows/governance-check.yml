@@ -2,7 +2,7 @@ name: Governance Check
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, labeled]
+    types: [ opened, synchronize, reopened, labeled ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
@@ -10,6 +10,7 @@ concurrency:
 
 jobs:
   enforce-classification:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -26,6 +27,7 @@ jobs:
             }
 
   check-approvals:
+    timeout-minutes: 30
     needs: enforce-classification
     runs-on: ubuntu-latest
     if: contains(github.event.pull_request.labels.*.name, 'major')

@@ -34,6 +34,7 @@ permissions:
 
 jobs:
   escalate:
+    timeout-minutes: 30
     name: Escalate Blockers
     runs-on: ubuntu-latest
     steps:

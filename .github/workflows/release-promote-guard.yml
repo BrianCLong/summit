@@ -41,6 +41,9 @@ on:
         required: false
         type: boolean
         default: false
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: true
 
 permissions:
   contents: read

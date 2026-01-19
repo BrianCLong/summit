@@ -42,6 +42,7 @@ permissions:
 
 jobs:
   test-and-verify:
+    timeout-minutes: 30
     name: Verification Gates
     runs-on: ubuntu-latest
     steps:
@@ -50,10 +51,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
@@ -161,8 +162,9 @@ jobs:
 
   # Job: Collect and unify SBOM artifacts
   collect-sboms:
+    timeout-minutes: 30
     name: Collect SBOMs & Generate Provenance
-    needs: [build-server, build-client]
+    needs: [ build-server, build-client ]
     runs-on: ubuntu-latest
     outputs:
       bundle_path: ${{ steps.collect.outputs.bundle_path }}
@@ -245,8 +247,9 @@ jobs:
 
   # Job: Prepare release artifacts (runs automatically)
   prepare-release:
+    timeout-minutes: 30
     name: Prepare Release Bundle
-    needs: [build-server, build-client, collect-sboms]
+    needs: [ build-server, build-client, collect-sboms ]
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.version.outputs.tag }}
@@ -402,8 +405,9 @@ jobs:
 
   # Job: Publish release (requires environment approval)
   publish:
+    timeout-minutes: 30
     name: Publish Release
-    needs: [prepare-release]
+    needs: [ prepare-release ]
     runs-on: ubuntu-latest
     # TWO-PERSON APPROVAL: This job requires approval from the ga-release environment
     # Configure required reviewers in GitHub: Settings → Environments → ga-release

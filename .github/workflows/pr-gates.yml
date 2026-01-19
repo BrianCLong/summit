@@ -2,7 +2,7 @@ name: PR Gates
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [ opened, synchronize, reopened ]
     paths-ignore:
       - "**.md"
       - "docs/**"
@@ -22,6 +22,7 @@ permissions:
 
 jobs:
   compliance-security:
+    timeout-minutes: 30
     name: Compliance & Security
     runs-on: ubuntu-latest
     steps:
@@ -55,15 +56,16 @@ jobs:
         env:
           MIGRATION_GATE: ${{ vars.MIGRATION_GATE }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
-        with:
-          node-version: "18"
-
       - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        uses: pnpm/action-setup@v4
         with:
           version: "10.0.0"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -84,21 +86,23 @@ jobs:
         run: npm run lint
 
   build-test:
+    timeout-minutes: 30
     name: Build & Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
-      - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
-        with:
-          node-version: "18"
-
       - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        uses: pnpm/action-setup@v4
         with:
           version: "10.0.0"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -113,6 +117,7 @@ jobs:
         run: make ops-verify
 
   infrastructure:
+    timeout-minutes: 30
     name: Infrastructure Checks
     runs-on: ubuntu-latest
     steps:
@@ -138,8 +143,9 @@ jobs:
           AWS_REGION: us-east-1
 
   preview-env:
+    timeout-minutes: 30
     name: Preview Environment
-    needs: [build-test, infrastructure]
+    needs: [ build-test, infrastructure ]
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -147,15 +153,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
-      - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
-        with:
-          node-version: "18"
-
       - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        uses: pnpm/action-setup@v4
         with:
           version: "10.0.0"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

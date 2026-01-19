@@ -48,6 +48,7 @@ env:
 
 jobs:
   aws-operation:
+    timeout-minutes: 30
     name: AWS ${{ inputs.operation }}
     runs-on: ubuntu-latest
     if: ${{ inputs.has_aws }}

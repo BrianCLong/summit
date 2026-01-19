@@ -5,7 +5,7 @@ name: CI/CD Supply Chain Integrity
 
 on:
   push:
-    branches: [main, develop]
+    branches: [ main, develop ]
     # Tag triggers removed - GA releases handled by release-ga-pipeline.yml
     # tags: ["v*.*.*"]
     paths-ignore:
@@ -13,7 +13,7 @@ on:
       - "docs/**"
       - ".github/workflows/*.md"
   pull_request:
-    branches: [main]
+    branches: [ main ]
     paths:
       - "package.json"
       - "pnpm-lock.yaml"
@@ -36,6 +36,7 @@ permissions:
 
 jobs:
   supply-chain-integrity:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     outputs:
       release-version: ${{ steps.vars.outputs.release_version }}
@@ -47,11 +48,11 @@ jobs:
           fetch-depth: 0
 
       - name: Set up pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        uses: pnpm/action-setup@v4
         # version is read from package.json packageManager field
 
       - name: Set up Node.js
-        uses: actions/setup-node@65d868f8d4d85d7d4abb7de0875cde3fcc8798f5 # v4.0.3
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "pnpm"
@@ -233,6 +234,7 @@ jobs:
 
   # CI Gate: Final verification of all supply chain integrity
   ci-gate:
+    timeout-minutes: 30
     needs: supply-chain-integrity
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || github.event_name == 'pull_request'
@@ -267,7 +269,8 @@ jobs:
 
   # Create GitHub Release (only for tags)
   release:
-    needs: [supply-chain-integrity, ci-gate]
+    timeout-minutes: 30
+    needs: [ supply-chain-integrity, ci-gate ]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref_type == 'tag'
     permissions:

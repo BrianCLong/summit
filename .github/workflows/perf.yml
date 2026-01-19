@@ -8,9 +8,13 @@ on:
     paths:
       - 'k6/**'
       - '.github/workflows/perf.yml'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   perf:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

@@ -29,6 +29,9 @@ on:
         description: "Type 'I UNDERSTAND' to confirm apply mode"
         type: string
         default: ""
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -39,6 +42,7 @@ env:
 
 jobs:
   reconcile:
+    timeout-minutes: 30
     name: Reconcile Branch Protection
     runs-on: ubuntu-latest
 

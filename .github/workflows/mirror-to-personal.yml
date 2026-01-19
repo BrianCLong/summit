@@ -9,9 +9,13 @@ on:
         description: "Reason for manual run"
         required: false
         type: string
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   mirror:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     # Prevent infinite loop by checking if the push came from GitHub Actions
     if: github.event.head_commit.author.name != 'BrianCLong Mirror Bot'

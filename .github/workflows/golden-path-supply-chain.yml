@@ -9,6 +9,9 @@ on:
         description: "Reason for manual run"
         required: false
         type: string
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -28,6 +31,7 @@ jobs:
   # The reusable workflows require container registry access and signing keys.
   # See: docs/releases/MVP-4_POST_GA_STABILIZATION_PLAN.md for re-enablement criteria
   placeholder:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - name: Workflow status

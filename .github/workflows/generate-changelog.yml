@@ -14,7 +14,7 @@ on:
 
   # Generate on release
   release:
-    types: [created, published]
+    types: [ created, published ]
 
   # Manual generation
   workflow_dispatch:
@@ -35,12 +35,16 @@ on:
         description: "Dry run (show without writing)"
         type: boolean
         default: false
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
 
 jobs:
   generate-changelog:
+    timeout-minutes: 30
     name: Generate Changelog
     runs-on: ubuntu-latest
     steps:

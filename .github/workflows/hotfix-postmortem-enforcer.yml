@@ -20,6 +20,9 @@ on:
         description: "Tag pattern to check (default: hotfix tags)"
         type: string
         default: "*-hotfix.*"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -27,6 +30,7 @@ permissions:
 
 jobs:
   enforce-postmortems:
+    timeout-minutes: 30
     name: Check Post-Mortems
     runs-on: ubuntu-latest
     steps:

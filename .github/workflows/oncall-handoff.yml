@@ -52,6 +52,7 @@ permissions:
 
 jobs:
   generate-handoff:
+    timeout-minutes: 30
     name: Generate Handoff Note
     runs-on: ubuntu-latest
     steps:

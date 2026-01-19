@@ -26,6 +26,9 @@ on:
         required: false
         type: boolean
         default: false
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -36,22 +39,19 @@ permissions:
 jobs:
   # GA Gate - Run critical tests before building
   ga-gate:
+    timeout-minutes: 30
     name: GA Release Gate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-
-      - name: Enable Corepack
-        run: corepack enable
-
       - name: Setup pnpm
-        uses: pnpm/action-setup@1e1c8eafbd745f64b1ef30a7d7ed7965034c486c # v3.0.0
+        uses: pnpm/action-setup@v4
         with:
-          version: 9.12.0
+          version: 10.0.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@65d868f8d4d85d7d4abb7de0875cde3fcc8798f5 # v4.1.0
+        uses: actions/setup-node@v4
         with:
           node-version: "20.x"
           cache: "pnpm"
@@ -72,6 +72,7 @@ jobs:
 
   # Build - Create release artifacts
   build:
+    timeout-minutes: 30
     name: Build Release Artifacts
     needs: ga-gate
     runs-on: ubuntu-latest
@@ -94,17 +95,13 @@ jobs:
           VERSION="${VERSION#v}"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "Extracted version: ${VERSION}"
-
-      - name: Enable Corepack
-        run: corepack enable
-
       - name: Setup pnpm
-        uses: pnpm/action-setup@1e1c8eafbd745f64b1ef30a7d7ed7965034c486c # v3.0.0
+        uses: pnpm/action-setup@v4
         with:
-          version: 9.12.0
+          version: 10.0.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@65d868f8d4d85d7d4abb7de0875cde3fcc8798f5 # v4.1.0
+        uses: actions/setup-node@v4
         with:
           node-version: "20.x"
           cache: "pnpm"
@@ -184,6 +181,7 @@ jobs:
 
   # SBOM - Generate Software Bill of Materials
   sbom:
+    timeout-minutes: 30
     name: Generate SBOM
     needs: build
     runs-on: ubuntu-latest
@@ -223,8 +221,9 @@ jobs:
 
   # Sign - Sign artifacts with cosign
   sign:
+    timeout-minutes: 30
     name: Sign Artifacts
-    needs: [build, sbom]
+    needs: [ build, sbom ]
     runs-on: ubuntu-latest
     steps:
       - name: Install Cosign
@@ -294,8 +293,9 @@ jobs:
 
   # Release - Create GitHub Release
   release:
+    timeout-minutes: 30
     name: Create GitHub Release
-    needs: [build, sbom, sign, provenance]
+    needs: [ build, sbom, sign, provenance ]
     runs-on: ubuntu-latest
     if: ${{ !inputs.dry_run }}
     steps:

@@ -10,12 +10,16 @@ on:
   push:
     tags:
       - "v*"
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
   verify-evidence:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

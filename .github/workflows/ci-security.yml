@@ -20,6 +20,9 @@ on:
       snyk_token:
         description: "Snyk API token when invoking as a reusable workflow."
         required: false
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   actions: read
@@ -34,6 +37,7 @@ env:
 
 jobs:
   context:
+    timeout-minutes: 30
     name: Determine execution context
     runs-on: ubuntu-latest
     outputs:
@@ -62,6 +66,7 @@ jobs:
           echo "run_snyk=$RUN_SNYK" >> "$GITHUB_OUTPUT"
 
   secret-scan:
+    timeout-minutes: 30
     name: Secret scanning (Gitleaks)
     runs-on: ubuntu-latest
     needs: context
@@ -88,6 +93,7 @@ jobs:
           if-no-files-found: ignore
 
   sast:
+    timeout-minutes: 30
     name: Static application security testing (CodeQL)
     runs-on: ubuntu-latest
     needs: context
@@ -98,7 +104,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [javascript, python]
+        language: [ javascript, python ]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Initialize CodeQL
@@ -114,6 +120,7 @@ jobs:
           category: "/language:${{ matrix.language }}"
 
   semgrep:
+    timeout-minutes: 30
     name: Semgrep policy-as-code (SAST)
     runs-on: ubuntu-latest
     needs: context
@@ -145,6 +152,7 @@ jobs:
           path: ${{ env.REPORT_DIR }}/semgrep.sarif
 
   dependency-scan:
+    timeout-minutes: 30
     name: Dependency vulnerability scan (Snyk)
     runs-on: ubuntu-latest
     needs: context
@@ -167,10 +175,7 @@ jobs:
         with:
           command: test
           args: >-
-            --all-projects
-            --severity-threshold=${{ env.SNYK_FAIL_THRESHOLD }}
-            --fail-on=all
-            --sarif-file-output=${{ env.REPORT_DIR }}/snyk.sarif
+            --all-projects --severity-threshold=${{ env.SNYK_FAIL_THRESHOLD }} --fail-on=all --sarif-file-output=${{ env.REPORT_DIR }}/snyk.sarif
       - name: Upload Snyk SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
         uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
@@ -185,6 +190,7 @@ jobs:
           path: ${{ env.REPORT_DIR }}/snyk.sarif
 
   filesystem-scan:
+    timeout-minutes: 30
     name: File system vulnerability scan (Trivy)
     runs-on: ubuntu-latest
     needs: context
@@ -220,6 +226,7 @@ jobs:
           path: ${{ env.REPORT_DIR }}/trivy-fs.sarif
 
   container-scan:
+    timeout-minutes: 30
     name: Container image scan (Trivy)
     runs-on: ubuntu-latest
     needs: context
@@ -271,6 +278,7 @@ jobs:
             ${{ env.REPORT_DIR }}/trivy-client.sarif
 
   license-compliance:
+    timeout-minutes: 30
     name: License compliance verification
     runs-on: ubuntu-latest
     needs: context
@@ -296,6 +304,7 @@ jobs:
           path: ${{ env.REPORT_DIR }}/trivy-license.json
 
   iac-scan:
+    timeout-minutes: 30
     name: Infrastructure-as-code scan (Checkov)
     runs-on: ubuntu-latest
     needs: context
@@ -326,6 +335,7 @@ jobs:
           path: ${{ env.REPORT_DIR }}/results.sarif
 
   opa-policy:
+    timeout-minutes: 30
     name: Policy enforcement (OPA/Conftest)
     runs-on: ubuntu-latest
     needs: context
@@ -358,6 +368,7 @@ jobs:
           path: rendered
 
   cis-benchmark:
+    timeout-minutes: 30
     name: CIS benchmark validation
     runs-on: ubuntu-latest
     needs:
@@ -397,6 +408,7 @@ jobs:
           path: ${{ env.REPORT_DIR }}/trivy-cis.json
 
   baseline:
+    timeout-minutes: 30
     name: Security baseline verification
     runs-on: ubuntu-latest
     needs: context
@@ -464,6 +476,7 @@ jobs:
             ${{ env.REPORT_DIR }}/zap-report.json
 
   security-summary:
+    timeout-minutes: 30
     name: Aggregate security coverage
     runs-on: ubuntu-latest
     needs:
@@ -568,6 +581,7 @@ jobs:
         run: echo "dashboard_url=$DASHBOARD_URL" >> "$GITHUB_OUTPUT"
 
   production-approval:
+    timeout-minutes: 30
     name: Security gate approval for deployments
     runs-on: ubuntu-latest
     needs: security-summary

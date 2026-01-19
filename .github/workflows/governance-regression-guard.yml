@@ -8,7 +8,7 @@ name: Governance Regression Guard
 
 on:
   pull_request:
-    branches: [main]
+    branches: [ main ]
     paths:
       # Policy files
       - "docs/ci/*.yml"
@@ -30,7 +30,7 @@ on:
   # Manual trigger for testing
   workflow_dispatch:
 
-# Cancel in-progress runs for the same PR
+    # Cancel in-progress runs for the same PR
 concurrency:
   group: governance-guard-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
@@ -41,6 +41,7 @@ permissions:
 
 jobs:
   regression-guard:
+    timeout-minutes: 30
     name: Governance Regression Guard
     runs-on: ubuntu-latest
     outputs:

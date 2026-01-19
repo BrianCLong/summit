@@ -79,6 +79,7 @@ permissions:
 jobs:
   # Check if we should skip (avoid infinite loops from state commits)
   pre-check:
+    timeout-minutes: 30
     name: Pre-flight Check
     runs-on: ubuntu-latest
     outputs:

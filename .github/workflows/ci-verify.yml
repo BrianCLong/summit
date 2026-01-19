@@ -5,9 +5,9 @@ name: CI Verify (Security & Compliance)
 
 on:
   pull_request:
-    branches: [main]
+    branches: [ main ]
   push:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
 
 concurrency:
@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   security-scan:
+    timeout-minutes: 30
     name: Security Scan
     runs-on: ubuntu-latest
     steps:
@@ -29,8 +30,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: false # BLOCKING: secrets block merge
 
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: pnpm
@@ -66,6 +67,7 @@ jobs:
           retention-days: 90
 
   policy-compliance:
+    timeout-minutes: 30
     name: Policy Compliance
     runs-on: ubuntu-latest
     steps:
@@ -102,12 +104,13 @@ jobs:
           retention-days: 90
 
   governance-checks:
+    timeout-minutes: 30
     name: Governance Checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: pnpm
@@ -138,12 +141,13 @@ jobs:
         continue-on-error: true # Non-blocking until implementation complete
 
   provenance:
+    timeout-minutes: 30
     name: Provenance & SBOM
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: pnpm
@@ -190,6 +194,7 @@ jobs:
           retention-days: 90 # 2 years retention
 
   schema-validation:
+    timeout-minutes: 30
     name: Schema Validation
     runs-on: ubuntu-latest
     steps:
@@ -197,8 +202,8 @@ jobs:
         with:
           fetch-depth: 0 # Needed for schema diff
 
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: pnpm
@@ -225,12 +230,13 @@ jobs:
         continue-on-error: true # Non-blocking until implementation complete
 
   compliance-evidence:
+    timeout-minutes: 30
     name: Compliance Evidence
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: pnpm
@@ -257,13 +263,15 @@ jobs:
         continue-on-error: true # Non-blocking for PRs
 
   ga-evidence-completeness:
+    timeout-minutes: 30
     name: GA Evidence Completeness
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: pnpm
       - name: Ensure evidence bundle exists
         run: |
           EVIDENCE_DIR="dist/evidence/${GITHUB_SHA}"
@@ -314,6 +322,7 @@ jobs:
           fi
 
   ci-verify-gate:
+    timeout-minutes: 30
     name: CI Verify Gate ✅
     runs-on: ubuntu-latest
     needs:

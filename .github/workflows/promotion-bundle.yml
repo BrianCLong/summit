@@ -16,16 +16,19 @@ on:
         description: "Commit SHA (default: tag points to)"
         required: false
         type: string
-
   # NOTE: RC tag push trigger removed - now handled by release-rc.yml
   # Use workflow_dispatch for manual bundle generation only
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
   actions: read
 
 jobs:
   build-bundle:
+    timeout-minutes: 30
     name: Build Promotion Bundle
     runs-on: ubuntu-latest
 

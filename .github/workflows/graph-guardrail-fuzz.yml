@@ -4,12 +4,15 @@ on:
   schedule:
     - cron: "0 7 * * *"
   pull_request:
-    branches: [main]
+    branches: [ main ]
     paths:
       - "test/fuzz/graphGuardrails/**"
       - "server/src/middleware/cypher-sandbox.ts"
       - ".github/workflows/graph-guardrail-fuzz.yml"
       - "package.json"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   guardrail-fuzz:
@@ -17,10 +20,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: pnpm/action-setup@v4
         with:
           version: 9.12.3
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@v4
         with:
           node-version: 20.14.0
           cache: pnpm

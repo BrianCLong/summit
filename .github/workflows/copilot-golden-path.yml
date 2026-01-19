@@ -9,16 +9,19 @@ on:
         description: "Reason for manual run"
         required: false
         type: string
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   # DISABLED: Reusable workflows in subdirectories are not supported by GitHub Actions
   # The referenced workflows need to be moved to the top-level workflows directory
   placeholder:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - name: Placeholder
         run: echo "This workflow is disabled pending refactoring of reusable workflow locations"
-
   # pipeline:
   #   uses: ./.github/workflows/golden-path/_golden-path-pipeline.yml
   #   with:

@@ -20,16 +20,19 @@ on:
         description: "Enable verbose output"
         type: boolean
         default: false
-
   # NOTE: RC tag push trigger removed - now handled by release-rc.yml
   # Use workflow_dispatch for manual verification only
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
   actions: read
 
 jobs:
   verify:
+    timeout-minutes: 30
     name: Verify Green for Promotion
     runs-on: ubuntu-latest
 

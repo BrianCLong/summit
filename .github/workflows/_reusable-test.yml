@@ -51,8 +51,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        node: ["20.x"]
+        os: [ ubuntu-latest ]
+        node: [ "20.x" ]
     outputs:
       coverage: ${{ steps.coverage-check.outputs.percentage }}
       passed: ${{ steps.test-run.outcome == 'success' }}
@@ -66,20 +66,14 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U test"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=10
+          --health-cmd="pg_isready -U test" --health-interval=5s --health-timeout=5s --health-retries=10
 
       redis:
         image: redis:7-alpine
         ports:
           - 6379:6379
         options: >-
-          --health-cmd="redis-cli ping"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=10
+          --health-cmd="redis-cli ping" --health-interval=5s --health-timeout=5s --health-retries=10
 
       neo4j:
         image: neo4j:5-community
@@ -91,27 +85,20 @@ jobs:
           - 7474:7474
           - 7687:7687
         options: >-
-          --health-cmd="neo4j status"
-          --health-interval=10s
-          --health-timeout=10s
-          --health-retries=10
+          --health-cmd="neo4j status" --health-interval=10s --health-timeout=10s --health-retries=10
 
     steps:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
         with:
           fetch-depth: 0
-
-      - name: Enable Corepack
-        run: corepack enable
-
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        uses: pnpm/action-setup@v4
         with:
-          version: 9.12.0
+          version: 10.0.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
           cache: "pnpm"

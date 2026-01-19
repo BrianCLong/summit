@@ -8,7 +8,7 @@ name: Schema Compatibility Check
 on:
   # Check on PRs that modify schema files
   pull_request:
-    branches: [main, release/*]
+    branches: [ main, release/* ]
     paths:
       - "graphql/schema.graphql"
       - "**/schema.graphql"
@@ -38,6 +38,9 @@ on:
   push:
     tags:
       - "v*.*.*-rc.*"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -45,6 +48,7 @@ permissions:
 
 jobs:
   check-compatibility:
+    timeout-minutes: 30
     name: Verify Schema Compatibility
     runs-on: ubuntu-latest
 

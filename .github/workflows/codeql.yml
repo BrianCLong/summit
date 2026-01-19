@@ -2,14 +2,14 @@ name: "CodeQL"
 
 on:
   push:
-    branches: ["main", "master"]
+    branches: [ "main", "master" ]
     # Exclude documentation changes to reduce unnecessary runs
     paths-ignore:
       - "**.md"
       - "docs/**"
       - ".github/workflows/*.md"
   pull_request:
-    branches: ["main", "master"]
+    branches: [ "main", "master" ]
     # Exclude documentation changes to reduce unnecessary runs
     paths-ignore:
       - "**.md"
@@ -19,9 +19,9 @@ on:
     - cron: "30 1 * * 0"
   workflow_dispatch:
 
-# Prevent multiple CodeQL runs from queuing and wasting resources
-# For PRs, cancel in-progress runs when new commits are pushed
-# For push to main, let each run complete (use run_id for unique grouping)
+    # Prevent multiple CodeQL runs from queuing and wasting resources
+    # For PRs, cancel in-progress runs when new commits are pushed
+    # For push to main, let each run complete (use run_id for unique grouping)
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -39,7 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ["javascript-typescript", "python", "go"]
+        language: [ "javascript-typescript", "python", "go" ]
 
     steps:
       - name: Checkout repository
@@ -52,13 +52,13 @@ jobs:
       # ============================================================================
       - name: Setup pnpm
         if: matrix.language == 'javascript-typescript'
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        uses: pnpm/action-setup@v4
         with:
           version: 10
 
       - name: Setup Node.js
         if: matrix.language == 'javascript-typescript'
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"

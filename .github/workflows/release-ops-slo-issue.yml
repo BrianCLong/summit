@@ -24,6 +24,9 @@ on:
         description: "Month to report (YYYY-MM, default: previous)"
         type: string
         required: false
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -36,6 +39,7 @@ env:
 
 jobs:
   create-slo-issue:
+    timeout-minutes: 30
     name: Create Monthly SLO Issue
     runs-on: ubuntu-latest
 

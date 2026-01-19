@@ -2,7 +2,7 @@ name: Doc Link Check
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
     paths:
       - 'docs/**'
       - 'README.md'
@@ -14,18 +14,23 @@ on:
       - 'README.md'
       - 'scripts/check-doc-links.ts'
       - '.doclinkignore'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   link-check:
+    timeout-minutes: 30
     name: Check Documentation Links
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: pnpm
 
       - name: Install tsx
         run: npm install -g tsx

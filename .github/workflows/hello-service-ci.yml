@@ -13,6 +13,9 @@ on:
       - 'services/hello-service/**'
       - '.github/workflows/hello-service-ci.yml'
       - '.github/workflows/reusable-golden-path.yml'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   call-reusable-workflow:

@@ -1,10 +1,14 @@
 name: SBOM & Vulnerability Scanning
-on: [push, pull_request]
+on: [ push, pull_request ]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
   security-events: write
 jobs:
   sbom:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
@@ -27,4 +31,5 @@ jobs:
             sbom.json
             results.sarif
           retention-days: 90
+
 # Linked: https://linear.app/summi7/issue/SUM-10197

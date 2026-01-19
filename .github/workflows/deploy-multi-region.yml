@@ -22,9 +22,13 @@ on:
         description: "Comma-separated list of regions to deploy to (e.g., us-east-1,eu-west-1). Leave blank for all."
         required: false
         default: ""
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   deploy:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     environment:
       name: production

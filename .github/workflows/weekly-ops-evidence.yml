@@ -22,9 +22,13 @@ on:
       notes:
         description: "Optional run notes"
         required: false
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-weekly-evidence:
+    timeout-minutes: 30
     name: Build weekly ops evidence
     runs-on: ubuntu-latest
     permissions:

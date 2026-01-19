@@ -8,14 +8,14 @@ name: Governance Policy Validation
 on:
   # Run on policy file changes
   push:
-    branches: [main]
+    branches: [ main ]
     paths:
       - "docs/ci/*.yml"
       - "docs/ci/*.yaml"
       - "docs/releases/_state/*.json"
 
   pull_request:
-    branches: [main]
+    branches: [ main ]
     paths:
       - "docs/ci/*.yml"
       - "docs/ci/*.yaml"
@@ -28,12 +28,16 @@ on:
         description: "Treat warnings as errors"
         type: boolean
         default: false
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
   validate-policies:
+    timeout-minutes: 30
     name: Validate Governance Policies
     runs-on: ubuntu-latest
 

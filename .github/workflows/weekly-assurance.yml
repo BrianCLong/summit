@@ -5,8 +5,12 @@ on:
     - cron: "0 0 * * 0" # Run every Sunday at midnight
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   assurance-snapshot:
+    timeout-minutes: 30
     name: Assurance Snapshot
     runs-on: ubuntu-latest
     steps:

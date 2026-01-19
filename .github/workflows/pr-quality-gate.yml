@@ -2,7 +2,7 @@ name: PR Quality Gate
 
 on:
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
@@ -10,6 +10,7 @@ concurrency:
 
 jobs:
   validate-release-policy:
+    timeout-minutes: 30
     name: Validate Release Policy
     runs-on: ubuntu-latest
     steps:
@@ -17,7 +18,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
@@ -29,6 +30,7 @@ jobs:
         run: pnpm lint:release-policy
 
   lint-reason-codes:
+    timeout-minutes: 30
     name: Lint Release Reason Codes
     runs-on: ubuntu-latest
     steps:
@@ -36,7 +38,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
@@ -56,7 +58,7 @@ jobs:
 
   security-scan:
     name: Vulnerability and Security Scan
-    needs: [ga-risk-gate]
+    needs: [ ga-risk-gate ]
     uses: ./.github/workflows/ci-security.yml
     with:
       run_dast: false # DAST is too slow for a PR check
@@ -64,6 +66,7 @@ jobs:
       snyk_token: ${{ secrets.SNYK_TOKEN }}
 
   sbom:
+    timeout-minutes: 30
     name: SBOM (warn-only policy)
     runs-on: ubuntu-latest
     steps:
