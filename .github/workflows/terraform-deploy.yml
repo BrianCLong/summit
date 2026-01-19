@@ -1,0 +1,119 @@
+name: Terraform Deploy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: write
+  id-token: write
+  pull-requests: write
+
+concurrency:
+  group: terraform-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  pre_deploy_checks:
+    name: Pre-deploy Security & Parity Gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Secret scanning gate
+        run: ./scripts/ci/secret_scan_gate.sh
+
+      - name: Image vulnerability gate
+        run: ./scripts/ci/image_scan_gate.sh
+
+      - name: Environment parity validation
+        run: node ./scripts/ci/validate_env_parity.mjs
+
+  plan:
+    name: Terraform Plan
+    needs: pre_deploy_checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+    outputs:
+      plan_artifact: tf-plan-${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init -upgrade
+
+      - name: Terraform Plan
+        run: terraform plan -input=false -out=plan.tfplan
+
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tf-plan-${{ github.sha }}
+          path: terraform/plan.tfplan
+          retention-days: 14
+
+  apply_staging:
+    name: Terraform Apply (Staging)
+    needs: plan
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: tf-plan-${{ github.sha }}
+          path: terraform
+
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform Init
+        run: terraform init -upgrade
+
+      - name: Terraform Apply
+        run: terraform apply -input=false plan.tfplan
+
+  deploy_prod:
+    name: Deploy Production
+    needs: apply_staging
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: prod
+      url: https://app.example.com
+    steps:
+      - uses: actions/checkout@v4
+      - name: Production Deploy
+        run: ./scripts/deploy.sh
+
+  release_docs:
+    name: Publish Release Provenance
+    needs: deploy_prod
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate Release Artifacts
+        run: |
+          DATE=$(date -u +%F)
+          mkdir -p docs/releases/$DATE
+          ./scripts/release/generate_provenance.sh > docs/releases/$DATE/provenance.json
+          ./scripts/release/generate_deployment_changelog.sh > docs/releases/$DATE/CHANGELOG.md
+
+      - name: Commit Release Docs
+        run: |
+          git config user.name "actions-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/releases
+          git commit -m "docs(release): publish $DATE provenance & changelog"
+          git push
