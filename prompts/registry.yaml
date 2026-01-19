@@ -1,5 +1,29 @@
 version: 1
 prompts:
+  - id: integrations-backlog-sync
+    version: v1
+    path: prompts/integrations/backlog-sync.md
+    sha256: e196bfe98de03f7f4ef7a63414c4fad60b171f9282989b719f2bdda25d6668dc
+    description: Align Jira/Linear/GitHub Projects backlog metadata for priority lanes.
+    scope:
+      paths:
+        - docs/integrations/
+        - scripts/verify-integrations.ts
+        - docs/roadmap/STATUS.json
+        - prompts/integrations/
+      domains:
+        - integrations
+        - program-management
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: agent-native-loop-n4
     version: v1
     path: prompts/governance/agent-native-loop-n4.md
