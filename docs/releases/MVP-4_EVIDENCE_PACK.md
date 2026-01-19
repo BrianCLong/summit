@@ -1,7 +1,7 @@
 # MVP-4 Evidence Pack — v4.1.4
 
-Git range: `v2025.10.07..HEAD`
-Commit: `0853b089cb8205b4879bef95b9ff0667f29fe631`
+Git range: `v2026.01.19..HEAD`
+Commit: `42367ef677490f60bed4d5a8a28b521f8d00cc28`
 
 ## Environment
 
@@ -10,7 +10,7 @@ Commit: `0853b089cb8205b4879bef95b9ff0667f29fe631`
 
 ## GA Verify Stamp
 
-- artifacts/ga-verify/0853b089cb8205b4879bef95b9ff0667f29fe631/stamp.json
+- artifacts/ga-verify/42367ef677490f60bed4d5a8a28b521f8d00cc28/stamp.json
 
 ## Commands
 
