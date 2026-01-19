@@ -119,6 +119,7 @@
     "compliance:check": "npx tsx scripts/compliance/check_drift.ts",
     "verify:governance": "npx tsx scripts/compliance/verify_governance.ts",
     "verify:compliance": "npx tsx scripts/compliance/verify_compliance_drift.ts",
+    "ci:soc-controls": "pnpm compliance:check && pnpm verify:governance && pnpm verify:compliance && pnpm test:soc-report",
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
