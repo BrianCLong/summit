@@ -115,11 +115,54 @@
       "type": "table",
       "datasource": "${DS_BUILD_LAKE}",
       "gridPos": { "h": 4, "w": 8, "x": 0, "y": 12 }
+    },
+    {
+      "id": 7,
+      "title": "SLO Compliance (Query Latency)",
+      "type": "stat",
+      "datasource": "${DS_BUILD_LAKE}",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 28 },
+      "description": "Percentage of queries meeting <500ms target",
+      "fieldConfig": {
+        "defaults": {
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 95 },
+              { "color": "green", "value": 99 }
+            ]
+          },
+          "unit": "percent"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "Slow Query Kills (Last 24h)",
+      "type": "stat",
+      "datasource": "${DS_BUILD_LAKE}",
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 28 },
+      "description": "Number of queries terminated by Cost Guard",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+             "mode": "absolute",
+             "steps": [
+                { "color": "green", "value": null },
+                { "color": "red", "value": 1 }
+             ]
+          }
+        }
+      }
     }
   ],
   "schemaVersion": 37,
   "style": "dark",
-  "tags": ["maestro", "finops"],
+  "tags": ["maestro", "finops", "cost-guard"],
   "templating": {
     "list": [
       {
@@ -145,6 +188,6 @@
   "timezone": "browser",
   "title": "Maestro FinOps Dashboard",
   "uid": "maestro-finops-v1",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
