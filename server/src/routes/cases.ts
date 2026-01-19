@@ -18,6 +18,7 @@ import { INVESTIGATION_SUMMARY_TEMPLATE } from '../cases/reporting/templates.js'
 import { goldenPathStepTotal } from '../monitoring/metrics.js';
 import logger from '../config/logger.js';
 import { emitAuditEvent } from '../audit/emit.js';
+import { opaClient } from '../services/opa-client.js';
 
 const routeLogger = logger.child({ name: 'CaseRoutes' });
 const overviewService = new CaseOverviewService(getPostgresPool(), {
@@ -71,6 +72,90 @@ function getAuditContext(
   };
 }
 
+async function emitAccessDeniedAudit(params: {
+  req: any;
+  tenantId: string;
+  userId: string;
+  caseId?: string;
+  action: string;
+  reason: string;
+}): Promise<void> {
+  const { req, tenantId, userId, caseId, action, reason } = params;
+  await emitAuditEvent({
+    eventId: randomUUID(),
+    occurredAt: new Date().toISOString(),
+    actor: {
+      type: 'user',
+      id: userId,
+      ipAddress: req.ip,
+    },
+    action: {
+      type: 'case_access',
+      outcome: 'failure',
+      name: action,
+    },
+    target: {
+      type: 'case',
+      id: caseId,
+      path: req.originalUrl,
+    },
+    tenantId,
+    traceId: req.headers['x-trace-id'] as string | undefined,
+    metadata: {
+      reason,
+      userAgent: req.headers['user-agent'],
+      requestId: req.headers['x-request-id'],
+    },
+  });
+}
+
+async function enforceCaseAccess(params: {
+  req: any;
+  res: any;
+  tenantId: string;
+  userId: string;
+  action: 'read' | 'write' | 'update' | 'export';
+  caseId?: string;
+}): Promise<boolean> {
+  const { req, res, tenantId, userId, action, caseId } = params;
+  const userTenantId = req.user?.tenantId || req.user?.tenant;
+
+  if (userTenantId && userTenantId !== tenantId) {
+    await emitAccessDeniedAudit({
+      req,
+      tenantId,
+      userId,
+      caseId,
+      action,
+      reason: 'tenant_mismatch',
+    });
+    res.status(403).json({ error: 'tenant_forbidden' });
+    return false;
+  }
+
+  const allowed = await opaClient.checkDataAccess(
+    userId,
+    tenantId,
+    'case',
+    action,
+  );
+
+  if (!allowed) {
+    await emitAccessDeniedAudit({
+      req,
+      tenantId,
+      userId,
+      caseId,
+      action,
+      reason: 'opa_denied',
+    });
+    res.status(403).json({ error: 'case_access_denied' });
+    return false;
+  }
+
+  return true;
+}
+
 /**
  * GET /api/cases/:id/overview - Cached overview metrics served from materialized cache
  */
@@ -87,6 +172,17 @@ caseRouter.get('/:id/overview', async (req, res) => {
     }
 
     const { id } = req.params;
+    const allowed = await enforceCaseAccess({
+      req,
+      res,
+      tenantId,
+      userId,
+      action: 'read',
+      caseId: id,
+    });
+    if (!allowed) {
+      return;
+    }
 
     const reason = req.query.reason as string;
     const legalBasis = req.query.legalBasis as LegalBasis;
@@ -155,6 +251,17 @@ caseRouter.post('/', async (req, res) => {
       return res.status(401).json({ error: 'user_required' });
     }
 
+    const allowed = await enforceCaseAccess({
+      req,
+      res,
+      tenantId,
+      userId,
+      action: 'write',
+    });
+    if (!allowed) {
+      return;
+    }
+
     const input: CaseInput = {
       tenantId,
       title: req.body.title,
@@ -205,6 +312,17 @@ caseRouter.get('/:id', async (req, res) => {
     }
 
     const { id } = req.params;
+    const allowed = await enforceCaseAccess({
+      req,
+      res,
+      tenantId,
+      userId,
+      action: 'read',
+      caseId: id,
+    });
+    if (!allowed) {
+      return;
+    }
 
     // Require reason and legal basis for viewing
     const reason = req.query.reason as string;
@@ -264,6 +382,17 @@ caseRouter.put('/:id', async (req, res) => {
     }
 
     const { id } = req.params;
+    const allowed = await enforceCaseAccess({
+      req,
+      res,
+      tenantId,
+      userId,
+      action: 'update',
+      caseId: id,
+    });
+    if (!allowed) {
+      return;
+    }
 
     // Require reason and legal basis for modification
     if (!req.body.reason) {
@@ -320,10 +449,25 @@ caseRouter.put('/:id', async (req, res) => {
  */
 caseRouter.get('/', async (req, res) => {
   try {
-    const { tenantId } = getRequestContext(req);
+    const { tenantId, userId } = getRequestContext(req);
 
     if (!tenantId) {
       return res.status(400).json({ error: 'tenant_required' });
+    }
+
+    if (!userId) {
+      return res.status(401).json({ error: 'user_required' });
+    }
+
+    const allowed = await enforceCaseAccess({
+      req,
+      res,
+      tenantId,
+      userId,
+      action: 'read',
+    });
+    if (!allowed) {
+      return;
     }
 
     const pg = getPostgresPool();
@@ -365,6 +509,17 @@ caseRouter.post('/:id/archive', async (req, res) => {
     }
 
     const { id } = req.params;
+    const allowed = await enforceCaseAccess({
+      req,
+      res,
+      tenantId,
+      userId,
+      action: 'update',
+      caseId: id,
+    });
+    if (!allowed) {
+      return;
+    }
 
     // Require reason and legal basis for archiving
     if (!req.body.reason) {
@@ -422,6 +577,17 @@ caseRouter.post('/:id/export', async (req, res) => {
     }
 
     const { id } = req.params;
+    const allowed = await enforceCaseAccess({
+      req,
+      res,
+      tenantId,
+      userId,
+      action: 'export',
+      caseId: id,
+    });
+    if (!allowed) {
+      return;
+    }
 
     // Require reason and legal basis for export
     if (!req.body.reason) {
@@ -483,6 +649,17 @@ caseRouter.post('/:id/release-criteria', async (req, res) => {
     }
 
     const { id } = req.params;
+    const allowed = await enforceCaseAccess({
+      req,
+      res,
+      tenantId,
+      userId,
+      action: 'update',
+      caseId: id,
+    });
+    if (!allowed) {
+      return;
+    }
     const config = req.body; // ReleaseCriteriaConfig
 
     const pg = getPostgresPool();
@@ -507,13 +684,28 @@ caseRouter.post('/:id/release-criteria', async (req, res) => {
  */
 caseRouter.get('/:id/release-criteria/status', async (req, res) => {
   try {
-    const { tenantId } = getRequestContext(req);
+    const { tenantId, userId } = getRequestContext(req);
 
     if (!tenantId) {
       return res.status(400).json({ error: 'tenant_required' });
     }
 
+    if (!userId) {
+      return res.status(401).json({ error: 'user_required' });
+    }
+
     const { id } = req.params;
+    const allowed = await enforceCaseAccess({
+      req,
+      res,
+      tenantId,
+      userId,
+      action: 'read',
+      caseId: id,
+    });
+    if (!allowed) {
+      return;
+    }
 
     const pg = getPostgresPool();
     const { ReleaseCriteriaService } = await import('../cases/ReleaseCriteriaService.js');
