@@ -104,6 +104,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: osint-architecture-memo
+    version: v1
+    path: prompts/docs/osint-architecture-memo@v1.md
+    sha256: c3eec0cd0c0711f15a207c5addfb1273ce796651d1cd2ed7f476f4e23978c4b7
+    description: Summarize Summit-aligned OSINT architecture patterns and produce a concise memo with references.
+    scope:
+      paths:
+        - docs/osint/
+        - docs/roadmap/STATUS.json
+        - prompts/docs/osint-architecture-memo@v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - documentation
+        - architecture
+        - osint
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: governance-docs-soc-controls
     version: v1
     path: prompts/governance/governance-docs-soc-controls@v1.md
