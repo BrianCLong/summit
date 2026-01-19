@@ -1,0 +1,11 @@
+{
+  "thresholds": {
+    "lineage_coverage_pct_min": 95,
+    "provenance_completeness_pct_min": 95
+  },
+  "severity_rules": {
+    "missing_job_emission": "P0",
+    "missing_dataset_edges": "P1",
+    "missing_agents": "P1"
+  }
+}
