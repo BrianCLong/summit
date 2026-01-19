@@ -1,0 +1,12 @@
+suite: react-best-practices
+assertions:
+  - id: avoid-waterfall
+    pattern: "waterfall"
+  - id: memoize-expensive
+    pattern: "useMemo|useCallback"
+cases:
+  - id: component-review
+    file: cases/component-review.md
+    asserts:
+      - avoid-waterfall
+      - memoize-expensive

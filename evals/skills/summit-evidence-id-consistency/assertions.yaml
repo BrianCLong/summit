@@ -1,0 +1,12 @@
+suite: summit-evidence-id-consistency
+assertions:
+  - id: evidence-id
+    pattern: "Evidence ID"
+  - id: provenance-link
+    pattern: "Provenance"
+cases:
+  - id: evidence-annotation
+    file: cases/evidence-annotation.md
+    asserts:
+      - evidence-id
+      - provenance-link

@@ -1,0 +1,12 @@
+suite: summit-supply-chain-integrity
+assertions:
+  - id: pinned-sha
+    pattern: "SHA"
+  - id: provenance-record
+    pattern: "provenance"
+cases:
+  - id: registry-review
+    file: cases/registry-review.md
+    asserts:
+      - pinned-sha
+      - provenance-record

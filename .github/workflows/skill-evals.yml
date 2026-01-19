@@ -1,0 +1,20 @@
+name: skill-evals
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  skill-evals:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Verify skill registry
+        run: node scripts/skills/verify-registry.mjs
+      - name: Run skill evals
+        run: node scripts/skills/run-skill-evals.mjs

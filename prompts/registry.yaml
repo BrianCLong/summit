@@ -30,6 +30,36 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: skills-governance-v1
+    version: v1
+    path: prompts/governance/skills-governance-v1.md
+    sha256: dea608440aba9e2d8c7c6016983041fd6b78a671cfd2eca4bc4dcd07672081e6
+    description: Govern skill registry, packs, evals, and provenance artifacts with pinned sources.
+    scope:
+      paths:
+        - skills/
+        - evals/skills/
+        - scripts/skills/
+        - .github/workflows/skill-evals.yml
+        - .github/workflows/skill-provenance.yml
+        - docs/roadmap/STATUS.json
+        - prompts/governance/skills-governance-v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - governance
+        - supply-chain
+        - evaluation
+        - provenance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md

@@ -1,0 +1,23 @@
+version: 1
+pack:
+  id: summit-baseline
+  description: "Summit governed baseline skill pack with pinned sources and local governance skills."
+  skills:
+    - id: vercel/react-best-practices
+      source: vercel-labs/agent-skills
+      path: skills/react-best-practices
+    - id: vercel/web-design-guidelines
+      source: vercel-labs/agent-skills
+      path: skills/web-design-guidelines
+    - id: vercel/vercel-deploy-claimable
+      source: vercel-labs/agent-skills
+      path: skills/vercel-deploy-claimable
+      gated_by:
+        - explicit-opt-in
+        - action-ledger
+    - id: summit/evidence-id-consistency
+      source: summit/internal
+      path: skills/evidence-id-consistency
+    - id: summit/supply-chain-integrity
+      source: summit/internal
+      path: skills/supply-chain-integrity

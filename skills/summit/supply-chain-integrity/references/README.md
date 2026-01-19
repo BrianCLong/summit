@@ -1,0 +1,5 @@
+# References
+
+- `docs/SUMMIT_READINESS_ASSERTION.md`
+- `SECURITY_GA_GATE.md`
+- `COMPLIANCE_CONTROLS.md`

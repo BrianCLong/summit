@@ -1,0 +1,12 @@
+suite: web-design-guidelines
+assertions:
+  - id: label-required
+    pattern: "label"
+  - id: focus-visible
+    pattern: "focus-visible"
+cases:
+  - id: form-accessibility
+    file: cases/form-accessibility.md
+    asserts:
+      - label-required
+      - focus-visible

@@ -1,0 +1,46 @@
+version: 1
+registry:
+  allowlisted_sources:
+    - id: vercel-labs/agent-skills
+      repo: https://github.com/vercel-labs/agent-skills
+      pinned_sha: INTENTIONALLY_CONSTRAINED
+      integrity: deferred-pending-governed-import
+      vendor_path: skills/vendored/vercel-labs__agent-skills/INTENTIONALLY_CONSTRAINED/skills
+      capabilities: ["read-only"]
+      owners: ["summit-governance"]
+      governed_exception:
+        authority: docs/SUMMIT_READINESS_ASSERTION.md
+        rationale: "Intentionally constrained: external fetch path gated; use governed import pipeline for verified content." 
+        expires: "2026-03-31"
+    - id: summit/internal
+      repo: local://skills/summit
+      pinned_sha: local
+      integrity: local
+      vendor_path: skills/summit
+      capabilities: ["read-only"]
+      owners: ["summit-governance", "platform-security"]
+  skills:
+    - id: vercel/react-best-practices
+      source: vercel-labs/agent-skills
+      path: skills/react-best-practices
+      version: v1
+    - id: vercel/web-design-guidelines
+      source: vercel-labs/agent-skills
+      path: skills/web-design-guidelines
+      version: v1
+    - id: vercel/vercel-deploy-claimable
+      source: vercel-labs/agent-skills
+      path: skills/vercel-deploy-claimable
+      version: v1
+      capabilities: ["deploy"]
+      gated_by:
+        - explicit-opt-in
+        - action-ledger
+    - id: summit/evidence-id-consistency
+      source: summit/internal
+      path: skills/evidence-id-consistency
+      version: v1
+    - id: summit/supply-chain-integrity
+      source: summit/internal
+      path: skills/supply-chain-integrity
+      version: v1
