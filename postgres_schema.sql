@@ -27,13 +27,32 @@ CREATE TABLE IF NOT EXISTS projects (
 
 -- Outbox for reliable dual-writes (see notes below)
 CREATE TABLE IF NOT EXISTS outbox_events (
-  id BIGSERIAL PRIMARY KEY,
+  id BIGSERIAL,
   aggregate_type TEXT NOT NULL,
   aggregate_id UUID NOT NULL,
   type TEXT NOT NULL,
   payload JSONB NOT NULL,
   occurred_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  processed_at TIMESTAMPTZ
-);
+  processed_at TIMESTAMPTZ,
+  PRIMARY KEY (id, occurred_at)
+) PARTITION BY RANGE (occurred_at);
 
 CREATE INDEX IF NOT EXISTS idx_outbox_unprocessed ON outbox_events(processed_at) WHERE processed_at IS NULL;
+
+-- Audit logs (Partitioned)
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id UUID DEFAULT uuid_generate_v4(),
+  user_id UUID,
+  action TEXT NOT NULL,
+  resource_type TEXT,
+  resource_id TEXT,
+  details JSONB,
+  ip_address TEXT,
+  user_agent TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (id, created_at)
+) PARTITION BY RANGE (created_at);
+
+-- Default partitions to prevent insert errors before maintenance runs
+CREATE TABLE IF NOT EXISTS outbox_events_default PARTITION OF outbox_events DEFAULT;
+CREATE TABLE IF NOT EXISTS audit_logs_default PARTITION OF audit_logs DEFAULT;
