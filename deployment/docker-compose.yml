@@ -1,0 +1,55 @@
+version: '3.9'
+# Production Deployment Manifest
+# Derived from root docker-compose.yml
+services:
+  neo4j:
+    image: neo4j:5.25
+    environment:
+      - NEO4J_AUTH=${NEO4J_AUTH:-neo4j/test}
+    ports: [ "7474:7474", "7687:7687" ]
+    volumes:
+      - neo4j_data:/data
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    ports: [ "6379:6379" ]
+    restart: always
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+    ports: [ "5432:5432" ]
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: always
+
+  prov-ledger:
+    build: ../services/prov-ledger
+    command: node dist/index.js
+    ports: [ "4010:4010" ]
+    depends_on: [ redis ]
+    restart: always
+
+  policy-lac:
+    build: ../gateway/policy-lac
+    command: node dist/index.js
+    ports: [ "4000:4000" ]
+    restart: always
+
+  nl2cypher:
+    build: ../server/ai/nl2cypher
+    command: node dist/index.js
+    ports: [ "4020:4020" ]
+    restart: always
+
+  report-studio:
+    build: ../apps/web/report-studio
+    command: node dist/index.js
+    ports: [ "3000:3000" ]
+    restart: always
+
+volumes:
+  neo4j_data: {}
+  pg_data: {}
