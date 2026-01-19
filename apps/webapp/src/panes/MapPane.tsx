@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { useSelector } from 'react-redux';
 import { fetchGraph, GraphData } from '../data/mockGraph';
@@ -21,6 +21,13 @@ export function MapPane() {
   );
   const [graphData, setGraphData] = useState<GraphData | null>(null);
 
+  // ⚡ Bolt: Optimize node lookup from O(N) to O(1) using a map.
+  // This prevents expensive array searches when selecting nodes in large graphs.
+  const nodeMap = useMemo(() => {
+    if (!graphData) return null;
+    return new Map(graphData.nodes.map((n) => [n.id, n]));
+  }, [graphData]);
+
   useEffect(() => {
     const stub = getTestStub();
     const map =
@@ -40,7 +47,7 @@ export function MapPane() {
 
     return () => {
       (map as any).__marker?.remove?.();
-      map.remove?.();
+      (map as any).remove?.();
     };
   }, []);
 
@@ -49,8 +56,8 @@ export function MapPane() {
     const map = mapRef.current;
     const stub = getTestStub();
     (map as any).__marker?.remove?.();
-    if (selectedNode) {
-      const node = graphData.nodes.find((n) => n.id === selectedNode);
+    if (selectedNode && nodeMap) {
+      const node = nodeMap.get(selectedNode);
       if (node) {
         const marker = markerFactoryRef.current();
         marker.setLngLat(node.coords).addTo(map);
@@ -59,7 +66,7 @@ export function MapPane() {
         stub?.onNodeFocused?.(selectedNode);
       }
     }
-  }, [selectedNode, graphData]);
+  }, [selectedNode, nodeMap]);
 
   return <div ref={mapContainer} style={{ width: '100%', height: '100%' }} />;
 }
