@@ -4,3 +4,4 @@ export * from './BehavioralAnalyzer';
 export * from './NarrativeTracker';
 export * from './GraphDetector';
 export * from './InfluenceOperationsEngine';
+export * from './AudienceSegmentModeler';
