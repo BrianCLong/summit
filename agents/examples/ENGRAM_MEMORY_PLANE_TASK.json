@@ -1,0 +1,43 @@
+{
+  "task_id": "ENGRAM_MEMORY_PLANE_V1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "engram-memory-plane",
+    "version": "v1",
+    "sha256": "9b6ee7f1321b45964227a81b31fc105c325e863633f855c1f9e6ce059ed5acf2",
+    "path": "prompts/memory/engram-memory-plane@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/memory-engram/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/ENGRAM_MEMORY_PLANE_TASK.json",
+      "prompts/memory/engram-memory-plane@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["memory", "orchestration", "governance", "observability"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "packages/memory-engram/test/engram.test.ts",
+      "docs/roadmap/STATUS.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 1
+  },
+  "success_criteria": [
+    "Deterministic canonicalization and hashing utilities are implemented.",
+    "Memory gating enforces policy evaluator decisions.",
+    "Maestro memory lookup returns gated bundles with telemetry.",
+    "Unit tests cover canonicalization, hashing determinism, collision behavior, and policy filtering."
+  ],
+  "stop_conditions": [
+    "Policy evaluation cannot be expressed as policy-as-code inputs.",
+    "Determinism is compromised by non-deterministic dependencies.",
+    "Changes would cross primary zone boundaries without explicit coupling rationale."
+  ]
+}

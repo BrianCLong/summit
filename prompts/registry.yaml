@@ -55,6 +55,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: engram-memory-plane
+    version: v1
+    path: prompts/memory/engram-memory-plane@v1.md
+    sha256: 9b6ee7f1321b45964227a81b31fc105c325e863633f855c1f9e6ce059ed5acf2
+    description: Deterministic Engram-style memory plane primitives for Summit/Maestro.
+    scope:
+      paths:
+        - packages/memory-engram/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/memory/engram-memory-plane@v1.md
+        - prompts/registry.yaml
+      domains:
+        - memory
+        - orchestration
+        - governance
+        - observability
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 1
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
