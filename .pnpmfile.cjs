@@ -12,6 +12,16 @@ function readPackage(pkg, context) {
     }
   }
 
+  // Force hono >= 4.11.4 to fix JWT vulnerabilities (GHSA-3vhc-576x-3qv4, GHSA-f67f-6cw9-8mq4)
+  if (pkg.dependencies && pkg.dependencies.hono) {
+    context.log(`Overriding hono version in ${pkg.name} from ${pkg.dependencies.hono} to >=4.11.4`);
+    pkg.dependencies.hono = '>=4.11.4';
+  }
+  if (pkg.peerDependencies && pkg.peerDependencies.hono) {
+    context.log(`Overriding hono peer dependency in ${pkg.name} from ${pkg.peerDependencies.hono} to >=4.11.4`);
+    pkg.peerDependencies.hono = '>=4.11.4';
+  }
+
   return pkg;
 }
 

@@ -12,19 +12,46 @@ const mockKubernetesClient = {
 const mockDbMigrator = {
   runDownMigrations: async (steps: number): Promise<void> => {
     console.log(`[MockDbMigrator] Running ${steps} down migration(s).`);
-    // Execute the rollback script
+    // Execute the rollback script with proper input validation
     try {
-        const { exec } = await import('child_process');
+        const { spawn } = await import('child_process');
         const path = await import('path');
         const scriptPath = path.resolve(process.cwd(), 'server/scripts/db_rollback.cjs');
 
-        console.log(`[RollbackEngine] Executing: npx tsx ${scriptPath} --steps=${steps}`);
+        // Validate steps is a positive integer to prevent command injection
+        const validatedSteps = Math.max(1, Math.min(100, Math.floor(Number(steps))));
+        if (isNaN(validatedSteps) || validatedSteps !== Number(steps)) {
+          throw new Error(`Invalid steps parameter: ${steps}. Must be a positive integer.`);
+        }
+
+        console.log(`[RollbackEngine] Executing: npx tsx ${scriptPath} --steps=${validatedSteps}`);
 
         await new Promise<void>((resolve, reject) => {
-            exec(`npx tsx ${scriptPath} --steps=${steps}`, (error, stdout, stderr) => {
-                if (error) {
-                    console.error(`[RollbackEngine] Rollback script failed: ${error.message}`);
-                    reject(error);
+            // Use spawn with array args to prevent command injection
+            const proc = spawn('npx', ['tsx', scriptPath, `--steps=${validatedSteps}`], {
+                stdio: ['ignore', 'pipe', 'pipe']
+            });
+
+            let stdout = '';
+            let stderr = '';
+
+            proc.stdout?.on('data', (data) => {
+                stdout += data.toString();
+            });
+
+            proc.stderr?.on('data', (data) => {
+                stderr += data.toString();
+            });
+
+            proc.on('error', (error) => {
+                console.error(`[RollbackEngine] Rollback script failed: ${error.message}`);
+                reject(error);
+            });
+
+            proc.on('close', (code) => {
+                if (code !== 0) {
+                    console.error(`[RollbackEngine] stderr: ${stderr}`);
+                    reject(new Error(`Rollback script exited with code ${code}`));
                     return;
                 }
                 if (stderr) console.error(`[RollbackEngine] stderr: ${stderr}`);
@@ -34,6 +61,7 @@ const mockDbMigrator = {
         });
     } catch (e) {
         console.error(`[RollbackEngine] Failed to execute rollback script:`, e);
+        throw e;
     }
   },
 };
