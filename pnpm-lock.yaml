@@ -44,6 +44,23 @@ overrides:
 
 pnpmfileChecksum: sha256-a6bZRKVps8e/vFm+ZHjptEhSt2AMVrBBZPNF7tFCrHw=
 
+patchedDependencies:
+  '@types/connect-redis':
+    hash: 484cd039b5690ea07b07941d41cc6232f25cdc8cccd0dc38da8769045a06cfae
+    path: patches/@types__connect-redis.patch
+  '@types/jsonwebtoken@9.0.10':
+    hash: e3108a8f4a54c4a2bd90b05c7e659aea8da6e80b4843b5064fdfca9769d9211a
+    path: patches/@types__jsonwebtoken@9.0.10.patch
+  '@types/multer@1.4.13':
+    hash: 562739b2d957abb3859ae04a795b5d601d1115f77e45b5c9272974c909892d6c
+    path: patches/@types__multer@1.4.13.patch
+  '@types/request':
+    hash: 3ee7b22debd981b12808766f540509d3f836ba03dffb58fd408e3de75a2f1f86
+    path: patches/@types__request.patch
+  strip-ansi@6.0.1:
+    hash: 4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392
+    path: patches/strip-ansi@6.0.1.patch
+
 importers:
 
   .:
@@ -165,16 +182,13 @@ importers:
         version: 4.0.9
       '@types/jsonwebtoken':
         specifier: ^9.0.10
-        version: 9.0.10
+        version: 9.0.10(patch_hash=e3108a8f4a54c4a2bd90b05c7e659aea8da6e80b4843b5064fdfca9769d9211a)
       '@types/minimatch':
         specifier: ^6.0.0
         version: 6.0.0
       '@types/ms':
         specifier: ^2.1.0
         version: 2.1.0
-      '@types/multer':
-        specifier: ^1.4.12
-        version: 1.4.13
       '@types/node':
         specifier: ^25.0.3
         version: 25.0.3
@@ -376,7 +390,7 @@ importers:
         version: 30.0.0
       '@types/jsonwebtoken':
         specifier: ^9.0.5
-        version: 9.0.10
+        version: 9.0.10(patch_hash=e3108a8f4a54c4a2bd90b05c7e659aea8da6e80b4843b5064fdfca9769d9211a)
       '@types/lodash':
         specifier: ^4.14.202
         version: 4.17.21
@@ -833,7 +847,7 @@ importers:
         version: 30.0.0
       '@types/jsonwebtoken':
         specifier: ^9.0.5
-        version: 9.0.10
+        version: 9.0.10(patch_hash=e3108a8f4a54c4a2bd90b05c7e659aea8da6e80b4843b5064fdfca9769d9211a)
       '@types/lodash':
         specifier: ^4.14.202
         version: 4.17.21
@@ -933,7 +947,7 @@ importers:
         version: 7.4.4
       '@types/jsonwebtoken':
         specifier: ^9.0.6
-        version: 9.0.10
+        version: 9.0.10(patch_hash=e3108a8f4a54c4a2bd90b05c7e659aea8da6e80b4843b5064fdfca9769d9211a)
       '@types/node':
         specifier: 20.19.27
         version: 20.19.27
@@ -1962,7 +1976,7 @@ importers:
         version: 30.0.0
       '@types/jsonwebtoken':
         specifier: ^9.0.5
-        version: 9.0.10
+        version: 9.0.10(patch_hash=e3108a8f4a54c4a2bd90b05c7e659aea8da6e80b4843b5064fdfca9769d9211a)
       '@types/lodash':
         specifier: ^4.14.202
         version: 4.17.21
@@ -2053,7 +2067,7 @@ importers:
         version: 1.19.6
       '@types/connect-redis':
         specifier: ^0.0.22
-        version: 0.0.22
+        version: 0.0.22(patch_hash=484cd039b5690ea07b07941d41cc6232f25cdc8cccd0dc38da8769045a06cfae)
       '@types/cookie-parser':
         specifier: ^1.4.8
         version: 1.4.10(@types/express@4.17.25)
@@ -2721,7 +2735,7 @@ importers:
         version: 30.0.0
       '@types/jsonwebtoken':
         specifier: ^9.0.5
-        version: 9.0.10
+        version: 9.0.10(patch_hash=e3108a8f4a54c4a2bd90b05c7e659aea8da6e80b4843b5064fdfca9769d9211a)
       '@types/lodash':
         specifier: ^4.14.202
         version: 4.17.21
@@ -4147,7 +4161,7 @@ importers:
         version: 30.0.0
       '@types/jsonwebtoken':
         specifier: ^9.0.7
-        version: 9.0.10
+        version: 9.0.10(patch_hash=e3108a8f4a54c4a2bd90b05c7e659aea8da6e80b4843b5064fdfca9769d9211a)
       '@types/node':
         specifier: 20.19.27
         version: 20.19.27
@@ -11593,7 +11607,7 @@ importers:
         version: 3.958.0
       '@intelgraph/maestro-sdk':
         specifier: workspace:*
-        version: link:../maestro-sdk
+        version: link:../../sdk/typescript
       ajv:
         specifier: ^8.17.1
         version: 8.17.1
@@ -13629,7 +13643,7 @@ importers:
         version: 30.0.0
       '@types/jsonwebtoken':
         specifier: ^9.0.7
-        version: 9.0.10
+        version: 9.0.10(patch_hash=e3108a8f4a54c4a2bd90b05c7e659aea8da6e80b4843b5064fdfca9769d9211a)
       '@types/lodash':
         specifier: ^4.17.15
         version: 4.17.21
@@ -14187,7 +14201,7 @@ importers:
         version: 29.5.14
       '@types/jsonwebtoken':
         specifier: ^9.0.9
-        version: 9.0.10
+        version: 9.0.10(patch_hash=e3108a8f4a54c4a2bd90b05c7e659aea8da6e80b4843b5064fdfca9769d9211a)
       '@types/node':
         specifier: ^22.15.21
         version: 22.19.3
@@ -15874,7 +15888,7 @@ importers:
         version: 4.17.25
       '@types/jsonwebtoken':
         specifier: ^9.0.5
-        version: 9.0.10
+        version: 9.0.10(patch_hash=e3108a8f4a54c4a2bd90b05c7e659aea8da6e80b4843b5064fdfca9769d9211a)
       '@types/node':
         specifier: ^20.11.0
         version: 20.19.27
@@ -16002,7 +16016,7 @@ importers:
         version: 5.0.6
       '@types/multer':
         specifier: ^1.4.12
-        version: 1.4.13
+        version: 1.4.13(patch_hash=562739b2d957abb3859ae04a795b5d601d1115f77e45b5c9272974c909892d6c)
       '@types/node':
         specifier: 20.19.27
         version: 20.19.27
@@ -16361,7 +16375,7 @@ importers:
         version: 30.0.0
       '@types/jsonwebtoken':
         specifier: ^9.0.5
-        version: 9.0.10
+        version: 9.0.10(patch_hash=e3108a8f4a54c4a2bd90b05c7e659aea8da6e80b4843b5064fdfca9769d9211a)
       '@types/node':
         specifier: 20.19.27
         version: 20.19.27
@@ -17030,7 +17044,7 @@ importers:
         version: 29.5.14
       '@types/jsonwebtoken':
         specifier: ^9.0.5
-        version: 9.0.10
+        version: 9.0.10(patch_hash=e3108a8f4a54c4a2bd90b05c7e659aea8da6e80b4843b5064fdfca9769d9211a)
       '@types/node':
         specifier: 20.19.27
         version: 20.19.27
@@ -22095,7 +22109,7 @@ importers:
         version: 5.0.6
       '@types/multer':
         specifier: ^1.4.12
-        version: 1.4.13
+        version: 1.4.13(patch_hash=562739b2d957abb3859ae04a795b5d601d1115f77e45b5c9272974c909892d6c)
       '@types/node':
         specifier: ^22.14.0
         version: 22.19.3
@@ -22193,7 +22207,7 @@ importers:
         version: 30.0.0
       '@types/jsonwebtoken':
         specifier: ^9.0.7
-        version: 9.0.10
+        version: 9.0.10(patch_hash=e3108a8f4a54c4a2bd90b05c7e659aea8da6e80b4843b5064fdfca9769d9211a)
       '@types/node':
         specifier: 20.19.27
         version: 20.19.27
@@ -59778,7 +59792,7 @@ snapshots:
       micromatch: 4.0.8
       pretty-format: 29.7.0
       slash: 3.0.0
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -59813,7 +59827,7 @@ snapshots:
       micromatch: 4.0.8
       pretty-format: 29.7.0
       slash: 3.0.0
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -60087,7 +60101,7 @@ snapshots:
       jest-worker: 29.7.0
       slash: 3.0.0
       string-length: 4.0.2
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
       v8-to-istanbul: 9.3.0
     transitivePeerDependencies:
       - supports-color
@@ -72406,7 +72420,7 @@ snapshots:
 
   '@types/config@3.3.5': {}
 
-  '@types/connect-redis@0.0.22':
+  '@types/connect-redis@0.0.22(patch_hash=484cd039b5690ea07b07941d41cc6232f25cdc8cccd0dc38da8769045a06cfae)':
     dependencies:
       '@types/express': 4.17.25
       '@types/express-session': 1.18.2
@@ -72929,7 +72943,7 @@ snapshots:
     dependencies:
       '@types/node': 20.19.27
 
-  '@types/jsonwebtoken@9.0.10':
+  '@types/jsonwebtoken@9.0.10(patch_hash=e3108a8f4a54c4a2bd90b05c7e659aea8da6e80b4843b5064fdfca9769d9211a)':
     dependencies:
       '@types/ms': 0.7.34
       '@types/node': 20.19.27
@@ -73007,7 +73021,7 @@ snapshots:
 
   '@types/ms@2.1.0': {}
 
-  '@types/multer@1.4.13':
+  '@types/multer@1.4.13(patch_hash=562739b2d957abb3859ae04a795b5d601d1115f77e45b5c9272974c909892d6c)':
     dependencies:
       '@types/express': 4.17.25
 
@@ -73265,7 +73279,7 @@ snapshots:
     dependencies:
       '@types/node': 20.19.27
 
-  '@types/request@2.48.13':
+  '@types/request@2.48.13(patch_hash=3ee7b22debd981b12808766f540509d3f836ba03dffb58fd408e3de75a2f1f86)':
     dependencies:
       '@types/caseless': 0.12.5
       '@types/node': 20.19.27
@@ -77370,19 +77384,19 @@ snapshots:
   cliui@6.0.0:
     dependencies:
       string-width: 4.2.3
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
       wrap-ansi: 6.2.0
 
   cliui@7.0.4:
     dependencies:
       string-width: 4.2.3
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
       wrap-ansi: 7.0.0
 
   cliui@8.0.1:
     dependencies:
       string-width: 4.2.3
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
       wrap-ansi: 7.0.0
 
   clone-deep@0.2.4:
@@ -78962,7 +78976,7 @@ snapshots:
       shell-quote: 1.8.3
       signal-exit: 3.0.7
       stream-json: 1.9.1
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
       telnet-client: 1.2.8
       tmp: 0.2.5
       trace-event-lib: 1.4.1
@@ -79529,7 +79543,7 @@ snapshots:
   enquirer@2.4.1:
     dependencies:
       ansi-colors: 4.1.3
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
 
   entities@2.2.0: {}
 
@@ -80244,7 +80258,7 @@ snapshots:
       minimatch: 3.1.2
       natural-compare: 1.4.0
       optionator: 0.9.4
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
       text-table: 0.2.0
     transitivePeerDependencies:
       - supports-color
@@ -80558,7 +80572,7 @@ snapshots:
 
   express-jwt@8.5.1:
     dependencies:
-      '@types/jsonwebtoken': 9.0.10
+      '@types/jsonwebtoken': 9.0.10(patch_hash=e3108a8f4a54c4a2bd90b05c7e659aea8da6e80b4843b5064fdfca9769d9211a)
       express-unless: 2.1.3
       jsonwebtoken: 9.0.2
 
@@ -81385,7 +81399,7 @@ snapshots:
       object-assign: 4.1.1
       signal-exit: 3.0.7
       string-width: 4.2.3
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
       wide-align: 1.1.5
 
   gaussian@1.3.0: {}
@@ -82593,7 +82607,7 @@ snapshots:
       run-async: 2.4.1
       rxjs: 7.8.2
       string-width: 4.2.3
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
       through: 2.3.8
       wrap-ansi: 6.2.0
     transitivePeerDependencies:
@@ -82613,7 +82627,7 @@ snapshots:
       run-async: 2.4.1
       rxjs: 7.8.2
       string-width: 4.2.3
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
       through: 2.3.8
       wrap-ansi: 6.2.0
     transitivePeerDependencies:
@@ -82630,7 +82644,7 @@ snapshots:
       run-async: 3.0.0
       rxjs: 7.8.2
       string-width: 4.2.3
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
       wrap-ansi: 6.2.0
       yoctocolors-cjs: 2.1.3
     transitivePeerDependencies:
@@ -84069,7 +84083,7 @@ snapshots:
       funpermaproxy: 1.1.0
       lodash.merge: 4.6.2
       node-ipc: 9.2.1
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
       tslib: 2.8.1
     optionalDependencies:
       '@jest/environment': 30.2.0
@@ -84178,7 +84192,7 @@ snapshots:
   jest-junit@16.0.0:
     dependencies:
       mkdirp: 1.0.4
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
       uuid: 8.3.2
       xml: 1.0.1
 
@@ -85113,7 +85127,7 @@ snapshots:
   jwks-rsa@3.2.0:
     dependencies:
       '@types/express': 4.17.25
-      '@types/jsonwebtoken': 9.0.10
+      '@types/jsonwebtoken': 9.0.10(patch_hash=e3108a8f4a54c4a2bd90b05c7e659aea8da6e80b4843b5064fdfca9769d9211a)
       debug: 4.4.3(supports-color@5.5.0)
       jose: 4.15.9
       limiter: 1.1.5
@@ -87955,7 +87969,7 @@ snapshots:
       is-interactive: 1.0.0
       is-unicode-supported: 0.1.0
       log-symbols: 4.1.0
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
       wcwidth: 1.0.1
 
   ora@7.0.1:
@@ -90798,7 +90812,7 @@ snapshots:
       dom-converter: 0.2.0
       htmlparser2: 6.1.0
       lodash: 4.17.21
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
 
   request-progress@3.0.0:
     dependencies:
@@ -90931,7 +90945,7 @@ snapshots:
 
   retry-request@7.0.2:
     dependencies:
-      '@types/request': 2.48.13
+      '@types/request': 2.48.13(patch_hash=3ee7b22debd981b12808766f540509d3f836ba03dffb58fd408e3de75a2f1f86)
       extend: 3.0.2
       teeny-request: 9.0.0
     transitivePeerDependencies:
@@ -92153,7 +92167,7 @@ snapshots:
   string-length@4.0.2:
     dependencies:
       char-regex: 1.0.2
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
 
   string-length@5.0.1:
     dependencies:
@@ -92175,7 +92189,7 @@ snapshots:
     dependencies:
       emoji-regex: 8.0.0
       is-fullwidth-code-point: 3.0.0
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
 
   string-width@6.1.0:
     dependencies:
@@ -92264,7 +92278,7 @@ snapshots:
     dependencies:
       ansi-regex: 6.2.2
 
-  strip-ansi@6.0.1:
+  strip-ansi@6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392):
     dependencies:
       ansi-regex: 6.2.2
 
@@ -92557,7 +92571,7 @@ snapshots:
       lodash.truncate: 4.4.2
       slice-ansi: 4.0.0
       string-width: 4.2.3
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
 
   tagged-tag@1.0.0: {}
 
@@ -95921,7 +95935,7 @@ snapshots:
     dependencies:
       ansi-html-community: 0.0.8
       html-entities: 2.6.0
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
 
   webpack-sources@1.4.3:
     dependencies:
@@ -96378,13 +96392,13 @@ snapshots:
     dependencies:
       ansi-styles: 4.3.0
       string-width: 4.2.3
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
 
   wrap-ansi@7.0.0:
     dependencies:
       ansi-styles: 4.3.0
       string-width: 4.2.3
-      strip-ansi: 6.0.1
+      strip-ansi: 6.0.1(patch_hash=4eba2e1b077e6b4489936e892eb013d674c706bb2363f9f39a29f165fc2f4392)
 
   wrap-ansi@9.0.2:
     dependencies:

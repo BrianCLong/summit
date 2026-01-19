@@ -160,8 +160,7 @@
     "@types/js-yaml": "^4.0.9",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/minimatch": "^6.0.0",
-    "@types/ms": "^0.7.31",
-    "@types/multer": "^1.4.12",
+    "@types/ms": "^2.1.0",
     "@types/node": "^25.0.3",
     "@types/pg-pool": "^2.0.7",
     "@types/uuid": "^11.0.0",
@@ -324,6 +323,13 @@
       "@types/react-dom": "18.3.0",
       "apollo-server-express": ">=3.13.0",
       "redis": ">=5.9.0"
+    },
+    "patchedDependencies": {
+      "@types/jsonwebtoken@9.0.10": "patches/@types__jsonwebtoken@9.0.10.patch",
+      "@types/connect-redis": "patches/@types__connect-redis.patch",
+      "@types/multer@1.4.13": "patches/@types__multer@1.4.13.patch",
+      "@types/request": "patches/@types__request.patch",
+      "strip-ansi@6.0.1": "patches/strip-ansi@6.0.1.patch"
     }
   }
 }
