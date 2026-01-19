@@ -1,0 +1,28 @@
+{
+  "name": "@intelgraph/graph-pg-guard",
+  "version": "0.1.0",
+  "description": "Postgres-to-Neo4j change capture and reconciliation guard",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "dev": "tsx src/cli.ts",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "commander": "^14.0.2",
+    "dotenv": "^17.2.3",
+    "fast-json-stable-stringify": "2.1.0",
+    "neo4j-driver": "5.28.2",
+    "pg": "8.16.3"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.27",
+    "@types/pg": "8.11.11",
+    "typescript": "^5.9.3",
+    "tsx": "^4.19.3",
+    "vitest": "^3.2.4"
+  }
+}
