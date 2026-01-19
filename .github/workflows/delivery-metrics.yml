@@ -1,0 +1,100 @@
+name: Delivery Metrics
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    types: [ closed ]
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight
+
+permissions:
+  contents: write
+
+jobs:
+  track-event:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Log Commit Pushed
+        if: github.event_name == 'push'
+        run: |
+          node scripts/metrics/log_event.mjs \
+            --type commit_pushed \
+            --repo ${{ github.repository }} \
+            --sha ${{ github.sha }} \
+            --author "${{ github.actor }}" \
+            --commit-timestamp "$(date -u +%FT%TZ)" \
+            --commit
+
+      - name: Log PR Merged
+        if: github.event_name == 'pull_request'
+        run: |
+          node scripts/metrics/log_event.mjs \
+            --type pr_merged \
+            --repo ${{ github.repository }} \
+            --sha ${{ github.sha }} \
+            --merge-timestamp "$(date -u +%FT%TZ)" \
+            --commit
+
+  compute-metrics:
+    needs: track-event
+    if: always() && (needs.track-event.result == 'success' || needs.track-event.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull latest changes
+        run: git pull --rebase
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      # We just need commander and fs, which are installed in devDeps
+      # Since we are in the root, we might need to install dependencies
+      # But standard checkout might not have node_modules.
+      # So we install dependencies.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Compute Four Keys
+        run: |
+          node scripts/metrics/compute_four_keys.mjs
+
+      - name: Commit Dashboard
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/delivery/FOUR_KEYS.md artifacts/delivery-metrics/
+          if git diff --cached --exit-code; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore(metrics): update DORA dashboard [skip ci]"
+            git push
+          fi
