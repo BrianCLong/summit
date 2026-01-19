@@ -1,0 +1,67 @@
+name: IaC Validation
+
+on:
+  pull_request:
+    paths:
+      - 'terraform/**'
+      - '.tflint.hcl'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write # For commenting on PRs (optional, but good to have)
+
+jobs:
+  validate:
+    name: Terraform Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
+
+      - name: Terraform Format Check
+        run: terraform fmt -recursive -check
+        working-directory: terraform
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v3
+        with:
+          tflint_version: v0.48.0
+
+      - name: Init TFLint
+        run: tflint --init
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run TFLint
+        run: tflint -f compact --recursive
+        working-directory: terraform
+
+      - name: Terraform Init & Validate (Prod)
+        working-directory: terraform/environments/prod
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+  security-scan:
+    name: IaC Security Scan (Trivy)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Run Trivy vulnerability scanner in IaC mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          hide-progress: false
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
