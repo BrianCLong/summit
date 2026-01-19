@@ -9,9 +9,17 @@
 #   ./scripts/release/check_branch_protection_drift.sh --branch main
 #   ./scripts/release/check_branch_protection_drift.sh --repo owner/repo --branch main
 #
+# Simulation Mode (env: BRANCH_PROTECTION_DRIFT_MODE):
+#   normal               - real check (default)
+#   simulate_drift       - exit 2, synthetic report
+#   simulate_permissions - exit 3
+#   simulate_error       - exit 1
+#
 # Exit codes:
-#   0 - Always (advisory mode)
-# Outputs drift_detected: true|false in JSON report
+#   0 - No drift detected
+#   2 - Drift detected
+#   3 - API or permission error
+#   1 - Configuration or other error
 #
 # Authority: docs/ci/BRANCH_PROTECTION_DRIFT.md
 
@@ -43,12 +51,18 @@ Options:
   --verbose           Enable verbose logging
   --help              Show this help
 
+Simulation Modes (set via BRANCH_PROTECTION_DRIFT_MODE env var):
+  normal, simulate_drift, simulate_permissions, simulate_error
+
 Outputs:
   - branch_protection_drift_report.md
   - branch_protection_drift_report.json
 
-Exit Code:
-  Always 0 (advisory mode). Check drift_detected in JSON output.
+Exit Codes:
+  0 - No drift
+  2 - Drift detected
+  3 - Permission/API error
+  1 - Other error
 EOF
     exit 0
 }
@@ -125,6 +139,64 @@ log "Policy: $POLICY_FILE"
 
 mkdir -p "$OUT_DIR"
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+# --- Simulation Mode ---
+BRANCH_PROTECTION_DRIFT_MODE="${BRANCH_PROTECTION_DRIFT_MODE:-normal}"
+
+if [[ "$BRANCH_PROTECTION_DRIFT_MODE" != "normal" ]]; then
+    log_info "SIMULATION MODE: $BRANCH_PROTECTION_DRIFT_MODE"
+    mkdir -p "$OUT_DIR"
+    
+    case "$BRANCH_PROTECTION_DRIFT_MODE" in
+        simulate_drift)
+            log_info "SIMULATION: drift"
+            cat > "$OUT_DIR/branch_protection_drift_report.json" << EOF
+{
+  "version": "1.1-synthetic",
+  "generated_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "repository": "$REPO",
+  "branch": "$BRANCH",
+  "mode": "simulate_drift",
+  "drift_detected": true,
+  "summary": {
+    "policy_check_count": 1,
+    "github_check_count": 2,
+    "missing_in_github_count": 0,
+    "extra_in_github_count": 1
+  },
+  "diff": {
+    "required_checks": {
+      "expected": ["ci-trusted"],
+      "actual": ["ci-trusted", "extra-check"]
+    }
+  }
+}
+EOF
+            cat > "$OUT_DIR/branch_protection_drift_report.md" << EOF
+# [TEST] Branch Protection Drift Report (Synthetic)
+
+This is a synthetic drift report generated for workflow automation testing.
+
+- **Mode:** \`simulate_drift\`
+- **Branch:** \`$BRANCH\`
+- **Status:** SIMULATED DRIFT
+EOF
+            exit 2
+            ;;
+        simulate_permissions)
+            log_info "SIMULATION: insufficient permissions"
+            exit 3
+            ;;
+        simulate_error)
+            log_info "SIMULATION: generic error"
+            exit 1
+            ;;
+        *)
+            log_error "Unknown simulation mode: $BRANCH_PROTECTION_DRIFT_MODE"
+            exit 1
+            ;;
+    esac
+fi
 
 # --- Step 1: Extract policy requirements ---
 log "Extracting always-required checks from policy..."
@@ -531,6 +603,12 @@ log_info "Drift report generated:"
 log_info "  JSON: $OUT_DIR/branch_protection_drift_report.json"
 log_info "  Markdown: $OUT_DIR/branch_protection_drift_report.md"
 
+# Exit based on results
+if [[ "$API_ACCESSIBLE" == "false" ]]; then
+    log_warn "Drift check failed due to API errors"
+    exit 3
+fi
+
 if [[ "$DRIFT_DETECTED" == "true" ]]; then
     log_warn "DRIFT DETECTED - Policy and GitHub branch protection are out of sync"
     if [[ ${#MISSING_IN_GITHUB[@]} -gt 0 ]]; then
@@ -539,9 +617,8 @@ if [[ "$DRIFT_DETECTED" == "true" ]]; then
     if [[ ${#EXTRA_IN_GITHUB[@]} -gt 0 ]]; then
         log_warn "  Extra in GitHub: ${EXTRA_IN_GITHUB[*]}"
     fi
+    exit 2
 else
     log_info "No drift detected - Policy and GitHub branch protection are in sync"
+    exit 0
 fi
-
-# Always exit 0 (advisory mode)
-exit 0
