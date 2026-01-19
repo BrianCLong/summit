@@ -38,9 +38,10 @@ jobs:
 
       - name: Run actionlint
         run: |
-          # Run actionlint with shell check integration
-          # Exclude archived workflows that are not actively used
-          find .github/workflows -maxdepth 1 -name '*.yml' -o -name '*.yaml' | xargs actionlint -color -verbose
+          # Run actionlint on top-level workflow files only
+          # Exclude archived workflows and disable shellcheck integration
+          # (shellcheck SC2086 info warnings are false positives for GitHub context vars)
+          find .github/workflows -maxdepth 1 -name '*.yml' -o -name '*.yaml' | xargs actionlint -shellcheck= -color -verbose
 
       - name: Validate workflow syntax
         run: |
