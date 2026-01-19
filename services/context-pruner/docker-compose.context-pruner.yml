@@ -1,0 +1,13 @@
+services:
+  context-pruner:
+    build:
+      context: ../..
+      dockerfile: services/context-pruner/Dockerfile
+    ports:
+      - "8090:8090"
+    environment:
+      CONTEXT_PRUNER_MODE: "mock"
+      CONTEXT_PRUNER_MODEL_ID: "zilliz/semantic-highlight-bilingual-v1"
+      CONTEXT_PRUNER_MODEL_REVISION: "6dfd9cbee6d9309201b4ff4b4bdd814e1c064491"
+      CONTEXT_PRUNER_ALLOWLIST: "zilliz/semantic-highlight-bilingual-v1"
+      CONTEXT_PRUNER_CACHE_TTL_SECONDS: "300"
