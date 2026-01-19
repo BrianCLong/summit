@@ -1,0 +1,30 @@
+Issue Type,Summary,Description,Priority,Labels,Story Points,Components,Epic Name,Epic Link,Sprint,Due Date
+Epic,IG Sprint 14 Vertical,"Prov-ledger beta, ABAC/OPA, tri-pane skeleton, NL→Cypher sandbox, SLO+Cost Guard",Highest,"sprint-14,vertical",,"Graph;Web;Security;Prov-Ledger;SRE;QA",IG Sprint 14 Vertical,,,2025-09-12
+Story,S1: Register Evidence & Export Verifiable Bundle,"Export bundle with manifest (hash tree) + signature; external Verifier CLI validates.",High,"sprint-14,prov-ledger,export",13,"Prov-Ledger;Web;QA",,IG Sprint 14 Vertical,Sprint 14,2025-09-05
+Task,S1-T1: Evidence Register API,"POST /evidence/register → checksum, license, transforms; Postgres schema+migration.",Medium,"prov-ledger,api",5,"Prov-Ledger",,IG Sprint 14 Vertical,Sprint 14,2025-09-01
+Task,S1-T2: Manifest Builder & Signer,"Build Merkle tree manifest; sign with KMS; attach to bundle.",Medium,"prov-ledger,crypto",5,"Prov-Ledger",,IG Sprint 14 Vertical,Sprint 14,2025-09-03
+Task,S1-T3: Bundle Packager + S3 Client,"Stream ZIP; content-addressed paths; upload to S3-compatible store.",Medium,"prov-ledger,storage",3,"Prov-Ledger",,IG Sprint 14 Vertical,Sprint 14,2025-09-04
+Task,S1-T4: Verifier CLI,"Python tool `verifier verify bundle.zip` with SHA-256 checks.",Medium,"cli,qa",3,"QA",,IG Sprint 14 Vertical,Sprint 14,2025-09-05
+Story,S2: Claim Graph & Contradictions,"Claim nodes; supports/contradicts edges; UI pane.",Medium,"graph,claims,ui",8,"Graph;Web;QA",,IG Sprint 14 Vertical,Sprint 14,2025-09-06
+Task,S2-T1: Schema + Migrations,"Create Claim node, edges, indexes.",Medium,"graph,cypher",3,"Graph",,IG Sprint 14 Vertical,Sprint 14,2025-09-02
+Task,S2-T2: Ingest Mapper,"Derive claims from evidence fields; link sources.",Medium,"ingest,graph",3,"Graph",,IG Sprint 14 Vertical,Sprint 14,2025-09-04
+Task,S2-T3: UI Claim Pane,"List claims, provenance badges, conflict chips.",Medium,"web,ui",2,"Web",,IG Sprint 14 Vertical,Sprint 14,2025-09-06
+Story,S3: ABAC/OPA Field-Level Authz,"OPA sidecar; persisted queries; field elision; audit.",High,"security,opa,authz",8,"Security;Gateway;QA",,IG Sprint 14 Vertical,Sprint 14,2025-09-09
+Task,S3-T1: OPA Sidecar + Bundles,"Wire Rego policies; GitOps policy bundles.",Medium,"security,opa",3,"Security",,IG Sprint 14 Vertical,Sprint 14,2025-09-03
+Task,S3-T2: Field-Level Elision,"Gateway evaluates policy→ hides restricted fields.",Medium,"gateway,security",3,"Security;Gateway",,IG Sprint 14 Vertical,Sprint 14,2025-09-06
+Task,S3-T3: Audit Events,"Immutable append-only audit stream.",Medium,"audit,security",2,"Security",,IG Sprint 14 Vertical,Sprint 14,2025-09-09
+Story,S4: Reason-for-Access Prompt,"User justification modal; persist to audit.",Medium,"security,ux",5,"Web;Security;QA",,IG Sprint 14 Vertical,Sprint 14,2025-09-08
+Task,S4-T1: Modal + Flow,"Prompt on sensitive queries; cancel/continue.",Medium,"web,ux",2,"Web",,IG Sprint 14 Vertical,Sprint 14,2025-09-07
+Task,S4-T2: Audit Write,"Attach reason to audit log entries.",Medium,"security,audit",2,"Security",,IG Sprint 14 Vertical,Sprint 14,2025-09-08
+Story,S5: NL→Cypher Sandbox,"LLM-generated Cypher preview; run in sandbox DB; cost/row estimate.",High,"nlp,cypher,sandbox",13,"Graph;Web;Gateway;QA",,IG Sprint 14 Vertical,Sprint 14,2025-09-11
+Task,S5-T1: UI Prompt→Preview,"Text input → generated Cypher + cost.",Medium,"web,nlp",3,"Web",,IG Sprint 14 Vertical,Sprint 14,2025-09-08
+Task,S5-T2: Sandbox Executor,"Ephemeral Neo4j per run; TTL; results labeled ephemeral.",Medium,"graph,sandbox",5,"Graph",,IG Sprint 14 Vertical,Sprint 14,2025-09-10
+Task,S5-T3: Cost Estimator,"Explain plan parse; budget preview.",Medium,"gateway,perf",3,"Gateway",,IG Sprint 14 Vertical,Sprint 14,2025-09-10
+Story,S6: Tri‑Pane Skeleton & Provenance Tooltip,"Graph/Map/Timeline sync; provenance hover tooltip; brushing.",Medium,"web,graph,ux",8,"Web;Graph;QA",,IG Sprint 14 Vertical,Sprint 14,2025-09-10
+Task,S6-T1: Shell + Layout,"3-pane layout; resizable; hotkeys.",Medium,"web,layout",3,"Web",,IG Sprint 14 Vertical,Sprint 14,2025-09-02
+Task,S6-T2: Brushing Sync,"Timeline brush filters map/graph.",Medium,"web,events",3,"Web;Graph",,IG Sprint 14 Vertical,Sprint 14,2025-09-06
+Task,S6-T3: Provenance Tooltip,"Source, license, confidence, last transform.",Medium,"web,ui",2,"Web",,IG Sprint 14 Vertical,Sprint 14,2025-09-09
+Story,S7: SLO Dashboard & Cost Guard,"Prometheus/OTEL p95/p99; slow-query killer; Slack alerts.",High,"sre,observability,cost",8,"SRE;Gateway;QA",,IG Sprint 14 Vertical,Sprint 14,2025-09-12
+Task,S7-T1: OTEL + Prom Dash,"Traces + panels; latency heatmap.",Medium,"observability",3,"SRE",,IG Sprint 14 Vertical,Sprint 14,2025-09-09
+Task,S7-T2: Query Killer,"Budget-based cancel + user hint.",Medium,"gateway,perf",3,"Gateway",,IG Sprint 14 Vertical,Sprint 14,2025-09-11
+Task,S7-T3: Alerts,"SLO burn → Slack; denials spike.",Medium,"alerts,sre",2,"SRE",,IG Sprint 14 Vertical,Sprint 14,2025-09-12
