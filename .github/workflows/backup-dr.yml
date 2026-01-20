@@ -1,0 +1,70 @@
+name: Backup and Disaster Recovery
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # Daily at 02:00 UTC
+  workflow_dispatch:
+    inputs:
+      backup_set:
+        description: 'Backup Set'
+        required: false
+        default: 'full'
+        type: choice
+        options:
+        - full
+        - minimal
+        - disaster_recovery
+      s3_bucket:
+        description: 'S3 Bucket (optional override)'
+        required: false
+
+jobs:
+  backup:
+    name: Run Scheduled Backup
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Start Services
+      run: |
+        docker compose -f docker-compose.db.yml -f docker-compose.neo4j.yml up -d
+        echo "Waiting for services to initialize..."
+        sleep 60
+
+    - name: Run Backup Script
+      env:
+        BACKUP_SET: ${{ inputs.backup_set || 'full' }}
+        S3_BUCKET: ${{ inputs.s3_bucket || secrets.BACKUP_S3_BUCKET }}
+        ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
+        # Default passwords for CI/Dev environment
+        POSTGRES_PASSWORD: maestro-dev-secret
+        NEO4J_PASSWORD: testtest1
+        # Container Names
+        NEO4J_CONTAINER: neo4j-ephemeral
+        POSTGRES_CONTAINER: maestro-postgres
+        REDIS_CONTAINER: maestro-redis
+      run: |
+        # Ensure scripts are executable
+        chmod +x scripts/backup-enhanced.sh
+
+        # Create backups directory
+        mkdir -p backups
+
+        # Run backup
+        ./scripts/backup-enhanced.sh --set=$BACKUP_SET
+
+    - name: Upload Backup Artifact (if not S3)
+      if: env.S3_BUCKET == ''
+      uses: actions/upload-artifact@v4
+      with:
+        name: backup-${{ inputs.backup_set || 'full' }}
+        path: backups/
+        retention-days: 7

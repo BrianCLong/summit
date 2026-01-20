@@ -17,6 +17,11 @@ ENCRYPTION_KEY="${ENCRYPTION_KEY:-}"
 S3_BUCKET="${S3_BUCKET:-}"
 DRY_RUN="${DRY_RUN:-false}"
 
+# Container Names
+NEO4J_CONTAINER="${NEO4J_CONTAINER:-neo4j}"
+POSTGRES_CONTAINER="${POSTGRES_CONTAINER:-postgres}"
+REDIS_CONTAINER="${REDIS_CONTAINER:-redis}"
+
 # Colors
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -102,8 +107,8 @@ backup_neo4j() {
         fi
 
         # Use neo4j-admin dump for full backup
-        if docker exec neo4j sh -c 'neo4j-admin database dump neo4j --to-path=/tmp' 2>/dev/null; then
-            docker cp neo4j:/tmp/neo4j.dump "$BACKUP_DIR/neo4j.dump"
+        if docker exec "$NEO4J_CONTAINER" sh -c 'neo4j-admin database dump neo4j --to-path=/tmp' 2>/dev/null; then
+            docker cp "$NEO4J_CONTAINER":/tmp/neo4j.dump "$BACKUP_DIR/neo4j.dump"
             pass "Neo4j full database backup created"
         else
             fail "Neo4j backup failed"
@@ -126,7 +131,7 @@ backup_neo4j() {
         # Export tenant-specific graph data
         local cypher_query="MATCH (n) WHERE n.tenant_id = '\$tenant_id' WITH n MATCH (n)-[r]-(m) WHERE m.tenant_id = '\$tenant_id' RETURN n, r, m"
 
-        docker exec neo4j cypher-shell -u neo4j -p "${NEO4J_PASSWORD:-local_dev_pw}" \
+        docker exec "$NEO4J_CONTAINER" cypher-shell -u neo4j -p "${NEO4J_PASSWORD:-local_dev_pw}" \
             --param "tenant_id => '$TENANT_ID'" \
             "CALL apoc.export.cypher.query('$cypher_query', '/tmp/tenant-export.cypher', {format: 'cypher-shell'})" \
             > "$BACKUP_DIR/neo4j-tenant-${TENANT_ID}.cypher" 2>/dev/null || warn "Tenant export may be incomplete"
@@ -154,7 +159,7 @@ backup_neo4j() {
         # Export project-specific graph data
         local cypher_query="MATCH (n) WHERE n.project_id = '\$project_id' OR n.investigation_id = '\$project_id' WITH n MATCH (n)-[r]-(m) RETURN n, r, m"
 
-        docker exec neo4j cypher-shell -u neo4j -p "${NEO4J_PASSWORD:-local_dev_pw}" \
+        docker exec "$NEO4J_CONTAINER" cypher-shell -u neo4j -p "${NEO4J_PASSWORD:-local_dev_pw}" \
             --param "project_id => '$PROJECT_ID'" \
             "CALL apoc.export.cypher.query('$cypher_query', '/tmp/project-export.cypher', {format: 'cypher-shell'})" \
             > "$BACKUP_DIR/neo4j-project-${PROJECT_ID}.cypher" 2>/dev/null || warn "Project export may be incomplete"
@@ -168,7 +173,7 @@ backup_neo4j() {
     fi
 
     # Export graph statistics
-    docker exec neo4j cypher-shell -u neo4j -p "${NEO4J_PASSWORD:-local_dev_pw}" \
+    docker exec "$NEO4J_CONTAINER" cypher-shell -u neo4j -p "${NEO4J_PASSWORD:-local_dev_pw}" \
         "CALL db.stats.retrieve('GRAPH') YIELD section, data RETURN section, data" \
         > "$BACKUP_DIR/neo4j-stats.txt" 2>/dev/null || warn "Could not export graph statistics"
 }
@@ -191,10 +196,10 @@ backup_postgres() {
             pg_dump "$postgres_url" --verbose --no-password --clean --create \
                 -Fc -f "$BACKUP_DIR/postgres-full.dump"
         else
-            docker exec postgres pg_dump -U "${POSTGRES_USER:-intelgraph}" \
+            docker exec "$POSTGRES_CONTAINER" pg_dump -U "${POSTGRES_USER:-intelgraph}" \
                 -d "${POSTGRES_DB:-intelgraph_dev}" --verbose --clean --create \
                 -Fc -f /tmp/postgres-full.dump
-            docker cp postgres:/tmp/postgres-full.dump "$BACKUP_DIR/"
+            docker cp "$POSTGRES_CONTAINER":/tmp/postgres-full.dump "$BACKUP_DIR/"
         fi
 
         pass "PostgreSQL full database backup created"
@@ -218,10 +223,10 @@ backup_postgres() {
             pg_dump "$postgres_url" --verbose --no-password $table_args \
                 -Fc -f "$BACKUP_DIR/postgres-core.dump"
         else
-            docker exec postgres pg_dump -U "${POSTGRES_USER:-intelgraph}" \
+            docker exec "$POSTGRES_CONTAINER" pg_dump -U "${POSTGRES_USER:-intelgraph}" \
                 -d "${POSTGRES_DB:-intelgraph_dev}" --verbose $table_args \
                 -Fc -f /tmp/postgres-core.dump
-            docker cp postgres:/tmp/postgres-core.dump "$BACKUP_DIR/"
+            docker cp "$POSTGRES_CONTAINER":/tmp/postgres-core.dump "$BACKUP_DIR/"
         fi
 
         pass "PostgreSQL core tables backup created"
@@ -252,12 +257,12 @@ EOF
         if command -v psql >/dev/null 2>&1; then
             psql "$postgres_url" -f /tmp/export-tenant.sql
         else
-            docker cp /tmp/export-tenant.sql postgres:/tmp/
-            docker exec postgres psql -U "${POSTGRES_USER:-intelgraph}" \
+            docker cp /tmp/export-tenant.sql "$POSTGRES_CONTAINER":/tmp/
+            docker exec "$POSTGRES_CONTAINER" psql -U "${POSTGRES_USER:-intelgraph}" \
                 -d "${POSTGRES_DB:-intelgraph_dev}" -f /tmp/export-tenant.sql
-            docker cp postgres:"$dump_sql.entities.csv" "$BACKUP_DIR/"
-            docker cp postgres:"$dump_sql.investigations.csv" "$BACKUP_DIR/"
-            docker cp postgres:"$dump_sql.users.csv" "$BACKUP_DIR/"
+            docker cp "$POSTGRES_CONTAINER":"$dump_sql.entities.csv" "$BACKUP_DIR/"
+            docker cp "$POSTGRES_CONTAINER":"$dump_sql.investigations.csv" "$BACKUP_DIR/"
+            docker cp "$POSTGRES_CONTAINER":"$dump_sql.users.csv" "$BACKUP_DIR/"
         fi
 
         pass "PostgreSQL tenant backup created"
@@ -288,12 +293,12 @@ EOF
         if command -v psql >/dev/null 2>&1; then
             psql "$postgres_url" -f /tmp/export-project.sql
         else
-            docker cp /tmp/export-project.sql postgres:/tmp/
-            docker exec postgres psql -U "${POSTGRES_USER:-intelgraph}" \
+            docker cp /tmp/export-project.sql "$POSTGRES_CONTAINER":/tmp/
+            docker exec "$POSTGRES_CONTAINER" psql -U "${POSTGRES_USER:-intelgraph}" \
                 -d "${POSTGRES_DB:-intelgraph_dev}" -f /tmp/export-project.sql
-            docker cp postgres:"$dump_sql.investigation.csv" "$BACKUP_DIR/"
-            docker cp postgres:"$dump_sql.runs.csv" "$BACKUP_DIR/"
-            docker cp postgres:"$dump_sql.tasks.csv" "$BACKUP_DIR/"
+            docker cp "$POSTGRES_CONTAINER":"$dump_sql.investigation.csv" "$BACKUP_DIR/"
+            docker cp "$POSTGRES_CONTAINER":"$dump_sql.runs.csv" "$BACKUP_DIR/"
+            docker cp "$POSTGRES_CONTAINER":"$dump_sql.tasks.csv" "$BACKUP_DIR/"
         fi
 
         pass "PostgreSQL project backup created"
@@ -306,7 +311,7 @@ EOF
             -c "SELECT schemaname, tablename, n_tup_ins, n_tup_upd, n_tup_del FROM pg_stat_user_tables;" \
             >> "$BACKUP_DIR/postgres-stats.txt" 2>/dev/null || warn "Could not export table statistics"
     else
-        docker exec postgres psql -U "${POSTGRES_USER:-intelgraph}" \
+        docker exec "$POSTGRES_CONTAINER" psql -U "${POSTGRES_USER:-intelgraph}" \
             -d "${POSTGRES_DB:-intelgraph_dev}" \
             -c "SELECT schemaname, tablename, n_tup_ins, n_tup_upd, n_tup_del FROM pg_stat_user_tables;" \
             >> "$BACKUP_DIR/postgres-stats.txt" 2>/dev/null || warn "Could not export table statistics"
@@ -334,10 +339,10 @@ backup_timescale() {
             pg_dump "$postgres_url" --verbose --no-password -t "$table" \
                 -Fc -f "$BACKUP_DIR/timescale-${table}.dump"
         else
-            docker exec postgres pg_dump -U "${POSTGRES_USER:-intelgraph}" \
+            docker exec "$POSTGRES_CONTAINER" pg_dump -U "${POSTGRES_USER:-intelgraph}" \
                 -d "${POSTGRES_DB:-intelgraph_dev}" --verbose -t "$table" \
                 -Fc -f "/tmp/timescale-${table}.dump"
-            docker cp "postgres:/tmp/timescale-${table}.dump" "$BACKUP_DIR/"
+            docker cp "$POSTGRES_CONTAINER:/tmp/timescale-${table}.dump" "$BACKUP_DIR/"
         fi
 
         pass "Hypertable $table backed up"
@@ -365,10 +370,10 @@ backup_redis() {
         redis-cli -u "$redis_url" --rdb "$BACKUP_DIR/redis.rdb" > /dev/null
         redis-cli -u "$redis_url" INFO > "$BACKUP_DIR/redis-info.txt"
     else
-        docker exec redis redis-cli BGSAVE
+        docker exec "$REDIS_CONTAINER" redis-cli BGSAVE
         sleep 2
-        docker cp redis:/data/dump.rdb "$BACKUP_DIR/redis.rdb"
-        docker exec redis redis-cli INFO > "$BACKUP_DIR/redis-info.txt"
+        docker cp "$REDIS_CONTAINER":/data/dump.rdb "$BACKUP_DIR/redis.rdb"
+        docker exec "$REDIS_CONTAINER" redis-cli INFO > "$BACKUP_DIR/redis-info.txt"
     fi
 
     pass "Redis backup created"
