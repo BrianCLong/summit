@@ -1,4 +1,4 @@
-Page_DownPage_Downname: CI Core (Primary Gate)
+name: CI Core (Primary Gate)
 
 # This is the PRIMARY CI workflow for Summit.
 # All jobs in this workflow are BLOCKING - PRs cannot merge if any job fails.
