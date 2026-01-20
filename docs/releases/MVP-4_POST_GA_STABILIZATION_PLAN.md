@@ -28,9 +28,9 @@
 
 ### Day 4–7 (Week 1 Commitments)
 
-- **Enable `pnpm audit` in CI** at critical level and capture evidence. (Commitment: `docs/ga/GA_DEFINITION.md` 12.1)
-- **Implement error budgets in Prometheus** and document the config location. (Commitment: `docs/ga/GA_DEFINITION.md` 12.1)
-- **Create ADR-009** for MVP-4 GA decisions. (Commitment: `docs/ga/GA_DEFINITION.md` 12.1)
+- **Enable `pnpm audit` in CI** at critical level and capture evidence. (Status: **Done** - Enabled in `.github/workflows/ci-security.yml`)
+- **Implement error budgets in Prometheus** and document the config location. (Status: **Done** - `docs/observability/ERROR_BUDGET.md`, `deploy/monitoring/prometheus-rules.yaml`)
+- **Create ADR-0030** for MVP-4 GA decisions. (Status: **Done** - `adr/0030-mvp4-ga-decisions.md`)
 - **Zero P0 incidents**: record incident log (or “none observed”) in evidence index. (Commitment: `docs/ga/GA_DEFINITION.md` 12.1)
 
 ### Day 8–14 (Week 2 Stabilization)
