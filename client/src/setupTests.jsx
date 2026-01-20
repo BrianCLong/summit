@@ -1,5 +1,12 @@
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
+import * as matchers from '@testing-library/jest-dom/matchers';
+
+// Vitest compatibility
+if (typeof vi !== 'undefined') {
+    global.jest = vi;
+    // expect.extend(matchers); // Vitest handles this via import '@testing-library/jest-dom' usually
+}
 
 // Manual fetch mock since whatwg-fetch might be missing
 global.fetch = jest.fn(() =>

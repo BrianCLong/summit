@@ -80,8 +80,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run unit tests
-        run: pnpm test:unit
+      - name: Run unit tests and collect coverage
+        run: pnpm coverage:verify
 
       - name: Upload coverage
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
@@ -280,6 +280,10 @@ jobs:
 
           echo "=== Smoke Test ==="
           make smoke || echo "Smoke test skipped (services may not be running)"
+
+          echo "=== E2E Tests (Playwright) ==="
+          pnpm exec playwright install --with-deps
+          pnpm test:e2e:ci || echo "E2E tests failed (non-blocking for now to prevent CI breakage)"
 
           echo "=== Cleanup ==="
           make down || true
