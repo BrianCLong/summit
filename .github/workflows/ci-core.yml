@@ -31,7 +31,7 @@ jobs:
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version-file: .nvmrc
       - name: Validate Jest & pnpm Configuration
@@ -46,7 +46,7 @@ jobs:
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -72,7 +72,7 @@ jobs:
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -121,7 +121,7 @@ jobs:
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -162,7 +162,7 @@ jobs:
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -194,7 +194,7 @@ jobs:
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -243,7 +243,7 @@ jobs:
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -271,7 +271,7 @@ jobs:
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -310,10 +310,10 @@ jobs:
       actions: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Use Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "pnpm"
@@ -332,7 +332,7 @@ jobs:
           bash scripts/test-soc-controls.sh soc-compliance-reports
 
       - name: Upload SOC compliance reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: soc-compliance-report
           path: soc-compliance-reports
@@ -349,7 +349,7 @@ jobs:
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
