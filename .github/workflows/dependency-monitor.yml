@@ -35,8 +35,8 @@ jobs:
     name: Snyk dependency vulnerability scan
     needs: dependency-review
     runs-on: ubuntu-latest
-    # Only run on same-repo PRs (not forks) and when SNYK_TOKEN is configured
-    if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && secrets.SNYK_TOKEN != '' }}
+    # Only run on same-repo PRs (not forks)
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     steps:
@@ -47,6 +47,7 @@ jobs:
         run: mkdir -p "$REPORT_DIR"
 
       - name: Run Snyk test across all manifests
+        if: env.SNYK_TOKEN != ''
         uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04 # 1.0.0
         env:
           SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
@@ -59,12 +60,13 @@ jobs:
             --sarif-file-output=${{ env.REPORT_DIR }}/snyk.sarif
 
       - name: Upload Snyk SARIF
+        if: env.SNYK_TOKEN != ''
         uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
         with:
           sarif_file: ${{ env.REPORT_DIR }}/snyk.sarif
 
       - name: Persist Snyk report
-        if: always()
+        if: always() && env.SNYK_TOKEN != ''
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           retention-days: 14
@@ -75,8 +77,7 @@ jobs:
     name: Snyk scan (skipped - no token)
     needs: dependency-review
     runs-on: ubuntu-latest
-    # Only show this when SNYK_TOKEN is not configured
-    if: ${{ secrets.SNYK_TOKEN == '' }}
+    # Shows notice when job might be skipped (this runs always, checks in step)
     steps:
       - name: Notice
         run: |
