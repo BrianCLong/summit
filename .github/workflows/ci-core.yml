@@ -18,7 +18,6 @@ on:
       # - scripts/**, tools/**, Dockerfile (build/test/infra changes must trigger this)
   push:
     branches: [main]
-    paths-ignore:
   merge_group:
 
 concurrency:
@@ -28,7 +27,7 @@ concurrency:
 jobs:
   config-preflight:
     name: Config Preflight
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
@@ -40,7 +39,7 @@ jobs:
 
   lint-typecheck:
     name: Lint & Typecheck
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
@@ -66,7 +65,7 @@ jobs:
 
   unit-tests:
     name: Unit Tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
@@ -94,7 +93,7 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     services:
       postgres:
         image: timescale/timescaledb:latest-pg14
@@ -157,7 +156,7 @@ jobs:
 
   verification-suite:
     name: Verification Suite
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
@@ -188,7 +187,7 @@ jobs:
 
   deterministic-build:
     name: Deterministic Build
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [lint-typecheck, unit-tests]
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
@@ -238,7 +237,7 @@ jobs:
 
   governance-docs-integrity:
     name: Governance / Docs Integrity
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
@@ -265,7 +264,7 @@ jobs:
 
   golden-path:
     name: Golden Path Smoke Test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [deterministic-build, integration-tests]
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
@@ -304,7 +303,7 @@ jobs:
 
   soc-control-verification:
     name: SOC Control Verification
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       checks: write
@@ -341,7 +340,7 @@ jobs:
 
   branch-protection-drift:
     name: Governance / Branch Protection Drift
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       actions: read
@@ -373,7 +372,7 @@ jobs:
 
   ci-core-gate:
     name: CI Core Gate ✅
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs:
       - config-preflight
       - lint-typecheck

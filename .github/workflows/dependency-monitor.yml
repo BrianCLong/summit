@@ -36,30 +36,18 @@ jobs:
     needs: dependency-review
     runs-on: ubuntu-latest
     # Only run on same-repo PRs (not forks)
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     steps:
-      - name: Check for Snyk token
-        id: check-token
-        run: |
-          if [ -z "$SNYK_TOKEN" ]; then
-            echo "::notice::Snyk scan skipped - SNYK_TOKEN not configured."
-            echo "skip=true" >> $GITHUB_OUTPUT
-          else
-            echo "skip=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Checkout
-        if: steps.check-token.outputs.skip != 'true'
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
 
       - name: Prepare report directory
-        if: steps.check-token.outputs.skip != 'true'
         run: mkdir -p "$REPORT_DIR"
 
       - name: Run Snyk test across all manifests
-        if: steps.check-token.outputs.skip != 'true'
+        if: env.SNYK_TOKEN != ''
         uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04 # 1.0.0
         env:
           SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
@@ -72,15 +60,26 @@ jobs:
             --sarif-file-output=${{ env.REPORT_DIR }}/snyk.sarif
 
       - name: Upload Snyk SARIF
-        if: steps.check-token.outputs.skip != 'true'
+        if: env.SNYK_TOKEN != ''
         uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
         with:
           sarif_file: ${{ env.REPORT_DIR }}/snyk.sarif
 
       - name: Persist Snyk report
-        if: always() && steps.check-token.outputs.skip != 'true'
+        if: always() && env.SNYK_TOKEN != ''
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           retention-days: 14
           name: dependency-monitoring
           path: ${{ env.REPORT_DIR }}/snyk.sarif
+
+  snyk-skip-notice:
+    name: Snyk scan (skipped - no token)
+    needs: dependency-review
+    runs-on: ubuntu-latest
+    # Shows notice when job might be skipped (this runs always, checks in step)
+    steps:
+      - name: Notice
+        run: |
+          echo "::notice::Snyk scan skipped - SNYK_TOKEN not configured."
+          echo "Add SNYK_TOKEN to repository secrets to enable Snyk dependency scanning."
