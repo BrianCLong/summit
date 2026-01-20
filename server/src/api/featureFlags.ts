@@ -3,6 +3,7 @@ import express, { Request, Response, Router } from 'express';
 import { FeatureFlagService } from '../featureFlags/FeatureFlagService';
 import { ConfigService } from '../featureFlags/ConfigService';
 import { EvaluationContext } from '../featureFlags/types';
+import { ensureAuthenticated, ensureRole, requirePermission } from '../middleware/auth.js';
 
 export interface FeatureFlagApiDependencies {
   featureFlagService: FeatureFlagService;
@@ -76,14 +77,14 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   });
 
   // Admin API: Create a new feature flag (requires admin privileges)
-  router.post('/', async (req: Request, res: Response) => {
+  router.post('/', ensureAuthenticated, ensureRole(['admin', 'operator']), async (req: Request, res: Response) => {
     try {
       const { key, enabled = false, description, rolloutPercentage, targetUsers, targetGroups, conditions } = req.body;
 
-      // TODO: Add authentication and authorization check here
-      // if (!req.user.isAdmin) {
-      //   return res.status(403).json({ error: 'Admin access required' });
-      // }
+      // Authentication and authorization handled by middleware
+      if (!req.user) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
 
       // Create the feature flag object
       const newFlag = {
@@ -117,12 +118,15 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   });
 
   // Admin API: Update a feature flag (requires admin privileges)
-  router.put('/:flagKey', async (req: Request, res: Response) => {
+  router.put('/:flagKey', ensureAuthenticated, ensureRole(['admin', 'operator']), async (req: Request, res: Response) => {
     try {
       const { flagKey } = req.params;
       const updateData = req.body;
 
-      // TODO: Add authentication and authorization check here
+      // Authentication and authorization handled by middleware
+      if (!req.user) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
 
       // Update the flag
       // await deps.featureFlagService.updateFlag(flagKey, updateData);
@@ -140,11 +144,14 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   });
 
   // Admin API: Delete a feature flag (requires admin privileges)
-  router.delete('/:flagKey', async (req: Request, res: Response) => {
+  router.delete('/:flagKey', ensureAuthenticated, ensureRole(['admin']), async (req: Request, res: Response) => {
     try {
       const { flagKey } = req.params;
 
-      // TODO: Add authentication and authorization check here
+      // Authentication and authorization handled by middleware
+      if (!req.user) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
 
       // Delete the flag
       // await deps.featureFlagService.deleteFlag(flagKey);

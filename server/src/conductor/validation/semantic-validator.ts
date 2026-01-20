@@ -10,6 +10,16 @@
  * - Adversarial perturbation sensitivity (detect brittleness)
  * - LSH injection corpus matching (fuzzy match against known attacks)
  *
+ * ⚠️ WARNING: This module is currently a PROTOTYPE with STUB IMPLEMENTATIONS.
+ * All detection methods return hardcoded 0.0 (safe) values. Do NOT rely on this
+ * for production security. Full implementation requires:
+ * - Sentence transformer embeddings (HuggingFace Transformers)
+ * - Multi-model consensus service (GPU microservice)
+ * - LSH injection corpus database
+ * - Perturbation testing infrastructure
+ *
+ * Status: PENDING IMPLEMENTATION (See audit report P0-5)
+ *
  * Patent Defensive Publication: 2026-01-01
  * Related: ADR-0024, Provisional Patent Application #2
  *
@@ -115,6 +125,13 @@ export class SemanticContextValidator {
    * @returns Poisoning score with policy decision
    */
   async validateContext(fragment: ContextFragment): Promise<PoisoningScore> {
+    // ⚠️ WARNING: Semantic validation is NOT IMPLEMENTED (stub methods return 0.0)
+    // This validator currently provides NO SECURITY PROTECTION.
+    // All checks will pass. Do not rely on this for adversarial detection.
+    if (typeof console !== 'undefined' && console.warn) {
+      console.warn('[SECURITY WARNING] SemanticContextValidator.validateContext() called but validation is NOT IMPLEMENTED. All checks return hardcoded 0.0 (safe). Fragment source:', fragment.source.type);
+    }
+
     // Cascade optimization: run lightweight checks first
     // If P-score already >0.7 from cheap checks, skip expensive multi-model consensus
 
