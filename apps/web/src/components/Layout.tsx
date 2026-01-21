@@ -3,12 +3,16 @@ import { Outlet, Navigate } from 'react-router-dom'
 import { Navigation } from './Navigation'
 import { GlobalSearch } from './GlobalSearch'
 import { useAuth } from '@/contexts/AuthContext'
+import { useSearch } from '@/contexts/SearchContext'
 import { Skeleton } from '@/components/ui/Skeleton'
+import { Button } from '@/components/ui/Button'
 import { SnapshotMenu } from '@/features/snapshots'
 import { GlobalStatusBanner } from '@/features/internal-command/components/GlobalStatusBanner'
+import { Search } from 'lucide-react'
 
 export function Layout() {
   const { user, loading, isAuthenticated } = useAuth()
+  const { openSearch } = useSearch()
 
   if (loading) {
     return (
@@ -54,6 +58,19 @@ export function Layout() {
 
             {/* Search trigger - actual search modal is rendered globally */}
             <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                className="relative h-9 w-full justify-start text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64"
+                onClick={openSearch}
+                aria-label="Search (Cmd+K)"
+              >
+                <Search className="mr-2 h-4 w-4" aria-hidden="true" />
+                <span className="hidden lg:inline-flex">Search platform...</span>
+                <span className="inline-flex lg:hidden">Search...</span>
+                <kbd className="pointer-events-none absolute right-1.5 top-1.5 hidden h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+                  <span className="text-xs">⌘</span>K
+                </kbd>
+              </Button>
               <SnapshotMenu />
               <div className="text-sm text-muted-foreground">
                 Welcome back, {user?.name}
