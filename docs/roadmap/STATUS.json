@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-19T19:07:46Z",
+  "revision_note": "Added model variant runtime backlog slice (registry, router, grounded_search, telemetry)",
   "initiatives": [
     {
       "id": "A",
