@@ -1,0 +1,26 @@
+{
+  "name": "@summit/osint-replay",
+  "version": "0.1.0",
+  "description": "Deterministic case replay tooling for OSINT monitoring and investigation workflows",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./schema": "./schema/case-replay.schema.json",
+    "./cli": "./cli/replay-filter.mjs"
+  },
+  "bin": {
+    "summit-replay-filter": "cli/replay-filter.mjs"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "keywords": [
+    "osint",
+    "replay",
+    "determinism",
+    "provenance",
+    "summit"
+  ],
+  "license": "MIT"
+}

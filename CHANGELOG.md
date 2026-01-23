@@ -13,6 +13,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- OSINT case replay package with deterministic connectors, replay filtering, and schema support.
+- Case replay determinism CI gate to prevent timestamp leakage and unstable ordering.
+- OSINT investigation workbench and connector architecture documentation.
 ## [4.1.4] - MVP-4 - 2026-01-13
 
 ### Changed

@@ -94,6 +94,19 @@ The provenance lifecycle follows a linear progression, ensuring no gap in the ch
    - **Control:** Read-only access to the Provenance Ledger.
    - **Evidence:** A unified graph linking the production error -> runtime trace -> specific build -> source commit -> author.
 
+## 4.1 OSINT Fusion & Lineage Hooks
+
+Summit extends provenance lineage to cover **OSINT fusion** and cross-discipline analysis without
+embedding any restricted collection logic:
+
+- **OSINT -> GEOINT/SIGINT Stubs:** Replay events support lineage edges to future GEOINT/SIGINT
+  nodes (`geoint_stub_id`, `sigint_stub_id`) to preserve analytic intent without collecting
+  privileged data.
+- **Trace Propagation:** Every transform emits a deterministic `trace_id` that links replay events
+  to the provenance ledger, enabling replay, audit, and cross-domain fusion analytics.
+- **Policy-as-Code Gatekeeping:** Fusion edges are subject to OPA rules and must be logged as
+  governed exceptions when legacy data sources are involved.
+
 ## 5. Alignment with Standards
 
 ### SLSA (Supply Chain Levels for Software Artifacts)

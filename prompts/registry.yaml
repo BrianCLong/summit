@@ -54,6 +54,36 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: osint-platform-adoption
+    version: v1
+    path: prompts/osint/osint-platform-adoption.md
+    sha256: 5a220ac3fb319a99ad08b539fac28804f631771310ba4a984562a8c5a19b0d07
+    description: Translate OSINT platform capabilities into Summit workbench, connectors, replay, and deterministic governance gates.
+    scope:
+      paths:
+        - docs/osint/
+        - docs/governance/PROVENANCE_ARCHITECTURE.md
+        - packages/osint-replay/
+        - scripts/ci/verify_case_replay_determinism.mjs
+        - test/fixtures/osint-replay/
+        - .github/workflows/ci.yml
+        - package.json
+        - CHANGELOG.md
+        - docs/roadmap/STATUS.json
+      domains:
+        - osint
+        - governance
+        - connectors
+        - determinism
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md

@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/osint/case-replay.schema.json",
+  "title": "Summit OSINT Case Replay Event",
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_time",
+    "platform",
+    "content",
+    "language",
+    "entities",
+    "provenance",
+    "trace_id",
+    "transform"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Content-addressed hash of the replay event payload."
+    },
+    "event_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "platform": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "language": {
+      "type": "string"
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "repost_of": {
+      "type": "string",
+      "nullable": true
+    },
+    "evidence_urls": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      }
+    },
+    "lookup": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "geoint_stub_id": {
+      "type": "string"
+    },
+    "sigint_stub_id": {
+      "type": "string"
+    },
+    "provenance": {
+      "type": "object",
+      "required": [
+        "source",
+        "query",
+        "auth_mode",
+        "licensing_tags",
+        "raw_payload_hash"
+      ],
+      "properties": {
+        "source": { "type": "string" },
+        "query": { "type": "string" },
+        "auth_mode": { "type": "string" },
+        "licensing_tags": { "type": "array", "items": { "type": "string" } },
+        "raw_payload_hash": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "trace_id": {
+      "type": "string"
+    },
+    "transform": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

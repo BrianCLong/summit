@@ -1,0 +1,32 @@
+{
+  "posts": [
+    {
+      "id": "post-002",
+      "platform": "x",
+      "captured_at": "2026-01-22T10:01:00Z",
+      "text": "Bridge closure reported near Bay Bridge.",
+      "language": "en",
+      "entities": ["Bay Bridge", "San Francisco"],
+      "repost_of": "post-001",
+      "urls": ["https://example.com/post/2"]
+    },
+    {
+      "id": "post-001",
+      "platform": "x",
+      "captured_at": "2026-01-22T10:00:00Z",
+      "text": "Live updates on Bay Bridge closure.",
+      "language": "en",
+      "entities": ["Bay Bridge"],
+      "urls": ["https://example.com/post/1"]
+    },
+    {
+      "id": "post-003",
+      "platform": "mastodon",
+      "captured_at": "2026-01-22T10:02:00Z",
+      "text": "Cierre confirmado en el puente.",
+      "language": "es",
+      "entities": ["Puente", "Bahía"],
+      "urls": ["https://example.com/post/3"]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "records": [
+    {
+      "id": "enrich-001",
+      "lookup": "example.com",
+      "category": "domain",
+      "captured_at": "2026-01-22T09:55:00Z",
+      "summary": "Domain registered in the US.",
+      "language": "en",
+      "entities": ["Example Inc", "US"],
+      "urls": ["https://whois.example.com/example.com"]
+    }
+  ]
+}

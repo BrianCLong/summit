@@ -1,0 +1,47 @@
+{
+  "task_id": "OSINT_PLATFORM_ADOPTION_20260123",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "osint-platform-adoption",
+    "version": "v1",
+    "sha256": "5a220ac3fb319a99ad08b539fac28804f631771310ba4a984562a8c5a19b0d07",
+    "path": "prompts/osint/osint-platform-adoption.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/osint/",
+      "docs/governance/PROVENANCE_ARCHITECTURE.md",
+      "packages/osint-replay/",
+      "scripts/ci/verify_case_replay_determinism.mjs",
+      "test/fixtures/osint-replay/",
+      ".github/workflows/ci.yml",
+      "package.json",
+      "CHANGELOG.md",
+      "docs/roadmap/STATUS.json"
+    ],
+    "domains": ["osint", "governance", "connectors", "determinism"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "packages/osint-replay/test/*.test.mjs",
+      "scripts/ci/verify_case_replay_determinism.mjs"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Case replay bundles are deterministic and content-addressed",
+    "Connectors emit full provenance metadata with isolated retrieval timestamps",
+    "CI determinism gate validates ordering and timestamp isolation",
+    "Docs map OSINT capabilities to Summit workbench and ops"
+  ],
+  "stop_conditions": [
+    "CI failure in main",
+    "Generated documentation contradicts code",
+    "Detection of PII in output"
+  ]
+}
