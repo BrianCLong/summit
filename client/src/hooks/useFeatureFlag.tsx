@@ -24,7 +24,7 @@ const FeatureFlagContext = createContext<FeatureFlagContextType | undefined>(und
 
 // Provider component
 interface FeatureFlagProviderProps {
-  children: React.ReactNode;
+  children: JSX.Element | JSX.Element[];
   apiUrl?: string;
   userId?: string;
   autoRefresh?: boolean;
@@ -34,13 +34,13 @@ interface FeatureFlagProviderProps {
 const DEFAULT_API_URL = '/api/feature-flags';
 const DEFAULT_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
-export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
+export function FeatureFlagProvider({
   children,
   apiUrl = DEFAULT_API_URL,
   userId,
   autoRefresh = true,
   refreshInterval = DEFAULT_REFRESH_INTERVAL
-}) => {
+}: FeatureFlagProviderProps): JSX.Element {
   const [flags, setFlags] = useState<Record<string, FeatureFlag>>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
@@ -146,7 +146,7 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
       {children}
     </FeatureFlagContext.Provider>
   );
-};
+}
 
 // Hook to use the feature flag context
 // eslint-disable-next-line react-refresh/only-export-components

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/maestro-tasks-core",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Reference tasks & connectors for Summit Maestro",
   "license": "UNLICENSED",
   "type": "module",
