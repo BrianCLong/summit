@@ -1,20 +1,20 @@
 import React from 'react';
 import { Skeleton, Stack, Typography } from '@mui/material';
+import { useDB_ServerStatsQuery } from '../../generated/graphql';
 
 export default function StatsOverview() {
-  // TODO: Re-enable GraphQL query when schema is available
-  // const { data, loading, error } = useDB_ServerStatsQuery();
-  const data = null;
-  const loading = false;
-  const error = null;
+  const { data, loading, error } = useDB_ServerStatsQuery({
+    fetchPolicy: 'cache-and-network',
+  });
 
-  // Show placeholder data for now
-  const mockStats = {
-    entities: { total: 0, new24h: 0 },
-    relationships: { total: 0, new24h: 0 },
-    investigations: { active: 0, completed: 0 },
-    queries: { total: 0, avgLatency: 0 },
-  };
+  const stats = data?.serverStats;
+
+  const renderValue = (value: number | string) =>
+    loading ? (
+      <Skeleton width={60} data-testid="skeleton" />
+    ) : (
+      <Typography variant="h5">{value}</Typography>
+    );
 
   return (
     <Stack direction="row" spacing={6} role="group" aria-label="Overview stats">
@@ -22,30 +22,31 @@ export default function StatsOverview() {
         <Typography variant="subtitle2" color="text.secondary">
           Total Entities
         </Typography>
-        <Typography variant="h5">
-          {mockStats.entities.total.toLocaleString()}
-        </Typography>
+        {renderValue((stats?.totalEntities ?? 0).toLocaleString())}
       </div>
       <div>
         <Typography variant="subtitle2" color="text.secondary">
           Total Relationships
         </Typography>
-        <Typography variant="h5">
-          {mockStats.relationships.total.toLocaleString()}
-        </Typography>
+        {renderValue((stats?.totalRelationships ?? 0).toLocaleString())}
       </div>
       <div>
         <Typography variant="subtitle2" color="text.secondary">
           Investigations
         </Typography>
-        <Typography variant="h5">{mockStats.investigations.active}</Typography>
+        {renderValue((stats?.totalInvestigations ?? 0).toLocaleString())}
       </div>
       <div>
         <Typography variant="subtitle2" color="text.secondary">
-          Query Latency
+          Uptime
         </Typography>
-        <Typography variant="h5">{mockStats.queries.avgLatency}ms</Typography>
+        {renderValue(stats?.uptime || 'n/a')}
       </div>
+      {error && (
+        <Typography variant="caption" color="error">
+          {error.message}
+        </Typography>
+      )}
     </Stack>
   );
 }

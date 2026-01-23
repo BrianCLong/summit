@@ -679,9 +679,9 @@ export const createApp = async () => {
       express.json(),
       authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
       advancedRateLimiter.middleware(), // Applied AFTER authentication to enable per-user limits
-      expressMiddleware(apollo, {
+      expressMiddleware(apollo as any, {
         context: async ({ req }) => getContext({ req: req as any })
-      }),
+      }) as unknown as express.RequestHandler,
     );
   } else {
     appLogger.warn('GraphQL disabled via SKIP_GRAPHQL');

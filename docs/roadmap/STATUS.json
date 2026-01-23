@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T19:18:22Z",
-  "revision_note": "Document PR metadata integrity checks in CI release gate runbook",
+  "last_updated": "2026-01-23T05:45:00Z",
+  "revision_note": "Merged with main: includes PR metadata integrity check docs and client GA remediation",
   "initiatives": [
     {
       "id": "A",

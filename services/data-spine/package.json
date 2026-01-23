@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/data-spine",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Data spine schema registry, residency enforcement, and lineage sink",
   "main": "src/index.js",
   "bin": {

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/osint-search",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Advanced search engine for OSINT data with faceted search and alerting",
   "type": "module",
   "main": "dist/index.js",

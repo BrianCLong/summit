@@ -1,6 +1,6 @@
 {
   "name": "golden-service-ts",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "Golden Path Service Template (TypeScript)",
   "type": "module",
   "main": "dist/index.js",
