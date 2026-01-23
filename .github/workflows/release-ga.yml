@@ -1,4 +1,4 @@
-name: GA Release
+name: Release GA Pipeline
 
 # Canonical GA Pipeline - Single authoritative workflow for GA tag events
 # Enforces lineage, verification, publish guard, and two-person approval.

@@ -41,6 +41,12 @@ Quick reference for operational procedures and incident response.
 - [MVP3 Go Live](./mvp3_go_live.md)
 - [V24 Coherence](./v24-coherence.md)
 
+## GA Demo Paths
+
+- [Security Runbook](./security_runbook.md)
+- [Integration Chain Runbook](./integration_chain_runbook.md)
+- [OSINT Slice Demo](./osint_slice_demo.md)
+
 ## Investigation Playbooks
 
 - [AML Suspicious Activity](./aml-suspicious-activity.yaml)
@@ -69,4 +75,4 @@ Quick reference for operational procedures and incident response.
 **🚨 For P1 incidents involving MC Platform v0.4.5 IncidentAutoReweighter, go directly to:**
 [incident-auto-reweighter.md](./incident-auto-reweighter.md)
 
-**Last Updated:** $(date -u +%Y-%m-%d) - Added MC Platform v0.4.5 IncidentAutoReweighter runbook
+**Last Updated:** $(date -u +%Y-%m-%d) - Added GA demo path runbooks
