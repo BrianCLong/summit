@@ -97,7 +97,7 @@ interface ConsciousnessAwareOptimization {
  * Next-Generation Performance Optimization Service with Quantum & Consciousness Awareness
  */
 export class NextGenPerformanceOptimizationService {
-  public config: AdvancedOptimizationConfig;
+  private config: AdvancedOptimizationConfig;
   private consciousnessLevel: number;
   private optimizationMemory: ConsciousnessAwareOptimization[];
   private predictiveAnalytics: PredictionEngine;
@@ -651,7 +651,7 @@ export class NextGenPerformanceOptimizationService {
   /**
    * Warm predictive cache based on future usage patterns
    */
-  public async warmPredictiveCache(): Promise<void> {
+  private async warmPredictiveCache(): Promise<void> {
     // In real system, this would pre-cache items likely to be accessed
     logger.debug('Predictive cache warming initiated');
   }
@@ -1147,7 +1147,7 @@ export const nextGenPerformanceOptimizationMiddleware = (
             tenantId: req.headers['x-tenant-id'] as string || 'global',
             operation: req.method + ' ' + req.path,
             resource: req.path,
-            status: 'flagged',
+            status: responseTime > 2000 ? 'critical' : 'warning',
             details: {
               responseTime,
               path: req.path,
