@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-13T19:58:08Z",
+  "revision_note": "GA verify now uses governed test scope to keep server unit checks deterministic in CI",
   "initiatives": [
     {
       "id": "A",

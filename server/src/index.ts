@@ -28,7 +28,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import { bootstrapSecrets } from './bootstrap-secrets.js';
 import { logger } from './config/logger.js';
-import './monitoring/metrics.js'; // Initialize Prometheus metrics collection
+import { stopMetricsCollection } from './monitoring/metrics.js'; // Initialize Prometheus metrics collection
 
 const startServer = async () => {
   const sdk = initTelemetry('intelgraph-server');
@@ -201,6 +201,7 @@ const startServer = async () => {
     const { PolicyWatcher } = await import('./services/governance/PolicyWatcher.js');
     PolicyWatcher.getInstance().stop();
 
+    stopMetricsCollection(); // Ensure metrics intervals are cleared
     wss.close();
     io.close(); // Close Socket.IO server
     streamingRateLimiter.destroy();
