@@ -18,7 +18,6 @@ on:
       # - scripts/**, tools/**, Dockerfile (build/test/infra changes must trigger this)
   push:
     branches: [main]
-    paths-ignore:
   merge_group:
 
 concurrency:
@@ -28,11 +27,11 @@ concurrency:
 jobs:
   config-preflight:
     name: Config Preflight
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version-file: .nvmrc
       - name: Validate Jest & pnpm Configuration
@@ -40,14 +39,14 @@ jobs:
 
   lint-typecheck:
     name: Lint & Typecheck
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -66,14 +65,14 @@ jobs:
 
   unit-tests:
     name: Unit Tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -94,29 +93,7 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: timescale/timescaledb:latest-pg14
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: summit_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-      redis:
-        image: redis:7-alpine
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
@@ -126,6 +103,17 @@ jobs:
         with:
           node-version: "20"
           cache: pnpm
+
+      - name: Start Test Infrastructure
+        run: |
+          docker run -d --name summit-db-test -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=summit_test timescale/timescaledb:latest-pg14
+          docker run -d --name summit-redis-test -p 6379:6379 redis:7-alpine
+          
+          # Wait for health
+          echo "Waiting for Postgres..."
+          until docker exec summit-db-test pg_isready; do sleep 2; done
+          echo "Waiting for Redis..."
+          until docker exec summit-redis-test redis-cli ping | grep -q PONG; do sleep 2; done
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -146,6 +134,11 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
 
+      - name: Stop Test Infrastructure
+        if: always()
+        run: |
+          docker rm -f summit-db-test summit-redis-test || true
+
       - name: Upload integration test results
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
@@ -157,13 +150,13 @@ jobs:
 
   verification-suite:
     name: Verification Suite
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -188,14 +181,14 @@ jobs:
 
   deterministic-build:
     name: Deterministic Build
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [lint-typecheck, unit-tests]
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -238,13 +231,13 @@ jobs:
 
   governance-docs-integrity:
     name: Governance / Docs Integrity
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -265,14 +258,14 @@ jobs:
 
   golden-path:
     name: Golden Path Smoke Test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [deterministic-build, integration-tests]
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -304,17 +297,17 @@ jobs:
 
   soc-control-verification:
     name: SOC Control Verification
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       checks: write
       actions: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Use Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "pnpm"
@@ -333,7 +326,7 @@ jobs:
           bash scripts/test-soc-controls.sh soc-compliance-reports
 
       - name: Upload SOC compliance reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6.0.0
         with:
           name: soc-compliance-report
           path: soc-compliance-reports
@@ -341,7 +334,7 @@ jobs:
 
   branch-protection-drift:
     name: Governance / Branch Protection Drift
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       actions: read
@@ -350,7 +343,7 @@ jobs:
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -373,7 +366,7 @@ jobs:
 
   ci-core-gate:
     name: CI Core Gate ✅
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs:
       - config-preflight
       - lint-typecheck

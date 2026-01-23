@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-23T06:42:00Z",
+  "revision_note": "Merged: GenUI GA contract artifacts, evidence-id determinism, typecheck gate",
   "initiatives": [
     {
       "id": "A",
