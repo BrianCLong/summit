@@ -8,7 +8,7 @@
  * 4. Providing type-safe query execution
  */
 
-import { Driver, Session, Result, QueryConfig, Integer } from 'neo4j-driver';
+import { Driver, Session, Result, Integer } from 'neo4j-driver';
 import { TenantContext, MinimalTenantContext, validateTenantContext, TenantContextError } from '../security/tenant-context.js';
 import { TenantId } from '../types/identity.js';
 
@@ -111,7 +111,7 @@ export class TenantNeo4jSession {
   async executeRead<T>(
     work: (tx: any) => Promise<T>
   ): Promise<T> {
-    return this.session.executeRead(async (tx) => {
+    return this.session.executeRead(async (tx: any) => {
       // Wrap transaction to inject tenant context
       const tenantAwareTx = this.wrapTransaction(tx);
       return work(tenantAwareTx);
@@ -124,7 +124,7 @@ export class TenantNeo4jSession {
   async executeWrite<T>(
     work: (tx: any) => Promise<T>
   ): Promise<T> {
-    return this.session.executeWrite(async (tx) => {
+    return this.session.executeWrite(async (tx: any) => {
       // Wrap transaction to inject tenant context
       const tenantAwareTx = this.wrapTransaction(tx);
       return work(tenantAwareTx);
