@@ -28,6 +28,9 @@ jobs:
       - name: Verify pnpm workspace hygiene
         run: node scripts/ci/verify_pnpm_workspace_hygiene.mjs
 
+      - name: Verify no untracked build inputs
+        run: bash scripts/ci/verify_no_untracked_build_inputs.sh
+
       - name: Validate Release Policy
         run: pnpm lint:release-policy
 
