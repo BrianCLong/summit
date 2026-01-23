@@ -3,6 +3,7 @@ import express, { Request, Response, Router, NextFunction } from 'express';
 import { FeatureFlagService } from '../featureFlags/FeatureFlagService';
 import { ConfigService } from '../featureFlags/ConfigService';
 import { EvaluationContext } from '../featureFlags/types';
+import { ensureAuthenticated, ensureRole, requirePermission } from '../middleware/auth.js';
 
 export interface FeatureFlagApiDependencies {
   featureFlagService: FeatureFlagService;
@@ -117,9 +118,10 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   });
 
   // Admin API: Create a new feature flag (requires admin privileges)
-  router.post('/', requireAdmin, async (req: Request, res: Response) => {
+  router.post('/', ensureAuthenticated, ensureRole(['admin', 'operator']), async (req: Request, res: Response) => {
     try {
       const { key, enabled = false, description, rolloutPercentage, targetUsers, targetGroups, conditions } = req.body;
+
 
       // Create the feature flag object
       const newFlag = {
@@ -153,10 +155,11 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   });
 
   // Admin API: Update a feature flag (requires admin privileges)
-  router.put('/:flagKey', requireAdmin, async (req: Request, res: Response) => {
+  router.put('/:flagKey', ensureAuthenticated, ensureRole(['admin', 'operator']), async (req: Request, res: Response) => {
     try {
       const { flagKey } = req.params;
       const updateData = req.body;
+
 
       // Update the flag
       // await deps.featureFlagService.updateFlag(flagKey, updateData);
@@ -174,9 +177,10 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   });
 
   // Admin API: Delete a feature flag (requires admin privileges)
-  router.delete('/:flagKey', requireAdmin, async (req: Request, res: Response) => {
+  router.delete('/:flagKey', ensureAuthenticated, ensureRole(['admin']), async (req: Request, res: Response) => {
     try {
       const { flagKey } = req.params;
+
 
       // Delete the flag
       // await deps.featureFlagService.deleteFlag(flagKey);

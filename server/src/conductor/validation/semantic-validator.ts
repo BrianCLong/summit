@@ -10,6 +10,16 @@
  * - Adversarial perturbation sensitivity (detect brittleness)
  * - LSH injection corpus matching (fuzzy match against known attacks)
  *
+ * ⚠️ WARNING: This module is currently a PROTOTYPE with STUB IMPLEMENTATIONS.
+ * All detection methods return hardcoded 0.0 (safe) values. Do NOT rely on this
+ * for production security. Full implementation requires:
+ * - Sentence transformer embeddings (HuggingFace Transformers)
+ * - Multi-model consensus service (GPU microservice)
+ * - LSH injection corpus database
+ * - Perturbation testing infrastructure
+ *
+ * Status: PENDING IMPLEMENTATION (See audit report P0-5)
+ *
  * Patent Defensive Publication: 2026-01-01
  * Related: ADR-0024, Provisional Patent Application #2
  *
@@ -162,6 +172,7 @@ export class SemanticContextValidator {
       `[SECURITY STUB] validateContext called with ENABLED=true but using stub implementations. ` +
       `Fragment source: ${fragment.source.type}, length: ${fragment.content.length}`
     );
+
 
     // Cascade optimization: run lightweight checks first
     // If P-score already >0.7 from cheap checks, skip expensive multi-model consensus
