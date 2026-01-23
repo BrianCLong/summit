@@ -165,6 +165,10 @@ export class NextGenPerformanceOptimizationService {
       metaOptimizationDepth: this.config.metaOptimizationDepth
     }, 'Next-gen optimization system initialized with full quantum and consciousness awareness');
   }
+
+  async getHealthStatus(): Promise<{ status: string }> {
+    return { status: 'ok' };
+  }
   
   /**
    * Consciousness-Aware Performance Optimization

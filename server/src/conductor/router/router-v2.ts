@@ -807,18 +807,59 @@ export class AdaptiveExpertRouter extends EventEmitter {
   }
 
   private calculateRoutingAccuracy(): number {
-    // TODO: Implement based on routing history analysis
-    return 0.85;
+    // P2-1: Basic implementation using expert success rates
+    let totalRequests = 0;
+    let successfulRequests = 0;
+
+    for (const metrics of this.expertMetrics.values()) {
+      totalRequests += metrics.successCount + metrics.failureCount;
+      successfulRequests += metrics.successCount;
+    }
+
+    if (totalRequests === 0) return 0.85; // Default for no history
+
+    return successfulRequests / totalRequests;
   }
 
   private calculateCostEfficiency(): number {
-    // TODO: Implement cost efficiency calculation
-    return 0.9;
+    // P2-1: Cost efficiency = average cost per successful request (inverted & normalized)
+    let totalCost = 0;
+    let totalSuccesses = 0;
+
+    for (const metrics of this.expertMetrics.values()) {
+      totalCost += metrics.totalCost;
+      totalSuccesses += metrics.successCount;
+    }
+
+    if (totalSuccesses === 0) return 0.9; // Default
+
+    const avgCost = totalCost / totalSuccesses;
+    // Normalize: lower cost = higher efficiency (cap at 1.0)
+    return Math.min(1.0, 1.0 / (1.0 + avgCost / 100));
   }
 
   private calculateLatencyAccuracy(): number {
-    // TODO: Implement latency prediction accuracy
-    return 0.82;
+    // P2-1: Latency accuracy = how close actual latency is to predicted
+    let totalPredictions = 0;
+    let accuratePredictions = 0;
+
+    for (const metrics of this.expertMetrics.values()) {
+      if (metrics.successCount > 0) {
+        const avgLatency = metrics.totalLatency / metrics.successCount;
+        // If actual latency is within 20% of baseline, consider it accurate
+        const baseline = 1000; // 1 second baseline (TODO: use per-expert baseline)
+        const withinTolerance = Math.abs(avgLatency - baseline) / baseline < 0.2;
+
+        totalPredictions += metrics.successCount;
+        if (withinTolerance) {
+          accuratePredictions += metrics.successCount;
+        }
+      }
+    }
+
+    if (totalPredictions === 0) return 0.82; // Default
+
+    return accuratePredictions / totalPredictions;
   }
 
   private startMetricsCollection(): void {

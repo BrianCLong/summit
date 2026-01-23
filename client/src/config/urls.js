@@ -1,59 +1,58 @@
-import {
-  VITE_API_BASE_URL,
-  VITE_API_URL,
-  VITE_GRAFANA_URL,
-  VITE_JAEGER_URL,
-  VITE_WS_URL,
-} from './env.js';
+/**
+ * URL configuration helpers for IntelGraph Platform
+ * Provides functions to get various service URLs based on environment
+ */
 
-const normalizeBaseUrl = (value) => value.replace(/\/+$/, '');
-const stripGraphqlPath = (value) => value.replace(/\/graphql\/?$/, '');
-const ensurePath = (base, path) =>
-  `${normalizeBaseUrl(base)}${path.startsWith('/') ? path : `/${path}`}`;
-const getWindowOrigin = () => {
-  if (typeof window === 'undefined') return '';
-  const { origin, protocol, host } = window.location || {};
-  if (origin) return normalizeBaseUrl(origin);
-  if (!host) return '';
-  return normalizeBaseUrl(`${protocol}//${host}`);
-};
+/**
+ * Get the base API URL
+ * @returns {string} The API base URL
+ */
+export function getApiBaseUrl() {
+  return import.meta.env.VITE_API_BASE_URL ||
+         (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:4000');
+}
 
-export const getApiBaseUrl = () => {
-  const envBase = VITE_API_BASE_URL || VITE_API_URL;
-  if (envBase) return normalizeBaseUrl(stripGraphqlPath(envBase));
-  return getWindowOrigin();
-};
+/**
+ * Get the GraphQL HTTP endpoint URL
+ * @returns {string} The GraphQL HTTP URL
+ */
+export function getGraphqlHttpUrl() {
+  return import.meta.env.VITE_GRAPHQL_HTTP_URL ||
+         `${getApiBaseUrl()}/graphql`;
+}
 
-export const getGraphqlHttpUrl = () => {
-  const envUrl = VITE_API_URL || VITE_API_BASE_URL;
-  if (envUrl) {
-    if (/\/graphql\/?$/.test(envUrl)) return normalizeBaseUrl(envUrl);
-    return ensurePath(envUrl, '/graphql');
-  }
-  const base = getWindowOrigin();
-  return base ? ensurePath(base, '/graphql') : '';
-};
+/**
+ * Get the WebSocket base URL for real-time connections
+ * @returns {string} The WebSocket base URL
+ */
+export function getSocketBaseUrl() {
+  const baseUrl = getApiBaseUrl();
+  return baseUrl.replace(/^http/, 'ws');
+}
 
-export const getSocketBaseUrl = () => {
-  if (VITE_WS_URL) return normalizeBaseUrl(VITE_WS_URL);
-  const base = getWindowOrigin();
-  if (!base) return '';
-  const wsProtocol = base.startsWith('https:') ? 'wss:' : 'ws:';
-  return `${wsProtocol}//${base.replace(/^https?:\/\//, '')}`;
-};
+/**
+ * Get the GraphQL WebSocket endpoint URL
+ * @returns {string} The GraphQL WebSocket URL
+ */
+export function getGraphqlWsUrl() {
+  return import.meta.env.VITE_GRAPHQL_WS_URL ||
+         `${getSocketBaseUrl()}/graphql`;
+}
 
-export const getGraphqlWsUrl = () => {
-  if (VITE_WS_URL) {
-    if (/\/graphql\/?$/.test(VITE_WS_URL)) return normalizeBaseUrl(VITE_WS_URL);
-    return ensurePath(VITE_WS_URL, '/graphql');
-  }
-  const httpUrl = getGraphqlHttpUrl();
-  if (!httpUrl) return '';
-  return httpUrl.replace(/^https:/, 'wss:').replace(/^http:/, 'ws:');
-};
+/**
+ * Get the Grafana dashboard URL
+ * @returns {string} The Grafana URL
+ */
+export function getGrafanaUrl() {
+  return import.meta.env.VITE_GRAFANA_URL ||
+         'http://localhost:3001';
+}
 
-export const getGrafanaUrl = () =>
-  VITE_GRAFANA_URL ? normalizeBaseUrl(VITE_GRAFANA_URL) : '';
-
-export const getJaegerUrl = () =>
-  VITE_JAEGER_URL ? normalizeBaseUrl(VITE_JAEGER_URL) : '';
+/**
+ * Get the Jaeger tracing URL
+ * @returns {string} The Jaeger URL
+ */
+export function getJaegerUrl() {
+  return import.meta.env.VITE_JAEGER_URL ||
+         'http://localhost:16686';
+}
