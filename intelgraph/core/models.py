@@ -153,6 +153,24 @@ class Source(SourceBase, table=True):
     ingested_at: datetime = Field(default_factory=datetime.utcnow)
 
 
+class RiskAssessmentBase(SQLModel):
+    """Risk assessment for an entity or IOC."""
+
+    risk_score: float = Field(description="Risk score (0.0 - 1.0)")
+    risk_summary: str = Field(description="LLM-generated risk summary")
+    model_version: str = Field(description="Model version used for assessment")
+    ioc_id: int | None = Field(default=None, description="Related IOC ID")
+
+
+class RiskAssessment(RiskAssessmentBase, table=True):
+    """Risk assessment table model."""
+
+    __tablename__ = "risk_assessments"
+
+    id: int | None = Field(default=None, primary_key=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
 # Response models for API
 
 
