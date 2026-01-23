@@ -29,7 +29,7 @@ const SimilarityQuerySchema = z
     includeText: z.boolean().default(false),
     tenantId: z.string().optional(),
   })
-  .refine((data) => data.entityId || data.text, {
+  .refine((data: { entityId?: string; text?: string }) => data.entityId || data.text, {
     message: 'Either entityId or text must be provided',
   });
 
@@ -207,7 +207,7 @@ export class SimilarityService {
             // This reduces DB roundtrips by avoiding N getEntityEmbedding calls
             const embeddingsMap = await this.getEntitiesEmbeddings(batch);
 
-            const batchPromises = batch.map(async (entityId) => {
+            const batchPromises = batch.map(async (entityId: string) => {
               try {
                 const targetEmbedding = embeddingsMap.get(entityId);
 
