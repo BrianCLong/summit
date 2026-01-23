@@ -56,6 +56,20 @@ For ready-to-use templates that keep issues and PRs crisp, copy the relevant pla
 - Fill out the PR template completely.
 - Ensure all CI checks pass (Lint, Unit, Golden Path).
 
+#### Draft PRs
+
+All draft PRs must be classified within **7 days** of creation. If your PR is in "Active Development", it must include a status block in the description:
+
+```markdown
+## Draft Status
+Owner: <name | agent>
+Next Action: <specific>
+Blocker (if any): <explicit>
+Target Promotion Date: <YYYY-MM-DD>
+```
+
+See the full **[Draft PR Promotion Protocol](docs/governance/draft-pr-protocol.md)** for details.
+
 ## 🤖 Guidelines for External Contributors (Bots & Co-authors)
 
 We welcome contributions from AI agents and automated systems. To reduce friction and ensure safety, please follow these rules:
