@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T20:12:00Z",
-  "revision_note": "Added counter-campaign optimization epics for simulation, robustness, and A/B experiments",
+  "last_updated": "2026-01-23T07:30:00Z",
+  "revision_note": "Merged: Counter-campaign optimization epics, Backlog sync, GA demo runbooks",
   "initiatives": [
     {
       "id": "A",
