@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-19T17:38:02Z",
-  "revision_note": "Added backlog sync canon + Linear verification for integration readiness",
+  "last_updated": "2026-01-23T07:20:00Z",
+  "revision_note": "Merged: Backlog sync + Linear verification, GA demo runbooks, GenUI GA contract artifacts",
   "initiatives": [
     {
       "id": "A",

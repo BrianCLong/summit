@@ -51,7 +51,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
 
       - name: Determine Branch
         id: branch
@@ -94,7 +94,7 @@ jobs:
           echo "Extra in GitHub: ${EXTRA}"
 
       - name: Upload Drift Report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         with:
           name: branch-protection-drift-report
           path: |
@@ -248,7 +248,7 @@ jobs:
       - name: Create Issue
         if: steps.dedup.outputs.action == 'create' && github.event.inputs.dry_run != 'true'
         id: create
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
         with:
           script: |
             const fs = require('fs');
@@ -270,7 +270,7 @@ jobs:
 
       - name: Update Issue
         if: steps.dedup.outputs.action == 'update' && github.event.inputs.dry_run != 'true'
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
         with:
           script: |
             const fs = require('fs');
@@ -323,7 +323,7 @@ jobs:
 
       - name: Auto-Close on Resolution
         if: steps.check.outputs.drift_detected == 'false' && github.event.inputs.dry_run != 'true'
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
         with:
           script: |
             // Find open drift issues and close them

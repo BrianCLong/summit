@@ -4,18 +4,18 @@ on:
   pull_request:
     branches:
       - main
-      - 'release/**'
+      - "release/**"
 
 jobs:
   semver-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      
+
       - name: Check Commit Messages (Conventional Commits)
-        uses: wagoid/commitlint-github-action@v5
+        uses: wagoid/commitlint-github-action@v6
         with:
           configFile: .commitlintrc.js
           failOnWarnings: false # Be gentle for now
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.head_ref, 'release/')
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - name: Verify Changelog Update
         run: |
           if git diff --name-only origin/main...HEAD | grep -q "CHANGELOG.md"; then
