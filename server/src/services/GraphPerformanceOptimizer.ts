@@ -13,7 +13,21 @@
 import { Request, Response, NextFunction } from 'express';
 import logger from '../utils/logger.js';
 import { trackError } from '../monitoring/middleware.js';
-import { GraphAbuseGuard, graphAbuseGuard } from './graphAbuseGuard.js';
+import { GraphAbuseGuard, graphAbuseGuard } from '../middleware/graphAbuseGuard.js';
+
+// Local QueryAnalysis interface (mirrors the one in graphAbuseGuard.ts)
+interface QueryAnalysis {
+  query: string;
+  estimatedNodes: number;
+  estimatedEdges: number;
+  maxDepth: number;
+  fanOutRatio: number;
+  complexity: number;
+  hasRecursion: boolean;
+  patterns: string[];
+  riskScore: number;
+  tenant: string;
+}
 
 declare global {
   namespace Express {
@@ -49,6 +63,7 @@ interface GraphOptimizationConfig {
   nodeMemoryLimit: number;    // Estimated max nodes in memory
   cacheSizeLimit: number;     // Max cached graph elements
   gcThreshold: number;        // When to trigger garbage collection
+  sampleRate: number;         // Sample rate for supernode connections (0.0-1.0)
   
   // Performance monitoring
   enablePerformanceProfiling: boolean;
@@ -109,6 +124,7 @@ export class GraphPerformanceOptimizer {
       nodeMemoryLimit: 1000000,
       cacheSizeLimit: 50000,
       gcThreshold: 0.8,
+      sampleRate: 0.1,  // 10% sampling for supernode connections
       enablePerformanceProfiling: true,
       slowQueryThreshold: 2000,
       renderThreshold: 1000,
@@ -523,8 +539,9 @@ export class GraphPerformanceOptimizer {
     let complexity = 100; // Base complexity
     
     // Add points for complex patterns
-    if (query.match(/\[\s*\*?\s*\d*\s*?\.\.?\s*\d*\s*\]/gi)) {
-      complexity += 50 * (query.match(/\[\s*\*?\s*\d*\s*?\.\.?\s*\d*\s*\]/gi).length);
+    const complexPatterns = query.match(/\[\s*\*?\s*\d*\s*?\.\.?\s*\d*\s*\]/gi);
+    if (complexPatterns) {
+      complexity += 50 * complexPatterns.length;
     }
     
     if ((query.match(/MATCH/gi) || []).length > 5) {
@@ -582,8 +599,10 @@ export class GraphPerformanceOptimizer {
     // Add to cache with size limits
     if (this.nodeCache.size >= this.config.cacheSizeLimit) {
       // Remove oldest entry
-      const oldestKey = this.nodeCache.keys().next().value;
-      this.nodeCache.delete(oldestKey);
+      const oldestKey = this.nodeCache.keys().next().value as string | undefined;
+      if (oldestKey) {
+        this.nodeCache.delete(oldestKey);
+      }
     }
 
     this.nodeCache.set(queryHash, {
@@ -874,9 +893,9 @@ export class GraphPerformanceOptimizer {
   }
 
   /**
-   * Apply supernode-specific optimizations
+   * Apply supernode-specific optimizations to result set
    */
-  private applySupernodeOptimizations(result: any, analysis: any): any {
+  private applySupernodeResultOptimizations(result: any, analysis: any): any {
     if (!result.nodes) return result;
     
     // Identify nodes with too many connections
