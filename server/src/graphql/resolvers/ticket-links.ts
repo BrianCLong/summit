@@ -19,7 +19,7 @@ const ticketLinksResolvers = {
 
             const res = await pool.query(query, queryParams);
 
-            return res.rows.map((row: any) => ({
+            return res.rows.map(row => ({
                 ...row,
                 externalId: row.external_id || row.externalId,
             }));

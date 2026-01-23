@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-23T05:50:00Z",
-  "revision_note": "Merged with main: evidence-id determinism hardening and client GA remediation",
+  "last_updated": "2026-01-23T06:36:00Z",
+  "revision_note": "Merged: evidence-id determinism hardening, PR metadata integrity, typecheck gate",
   "initiatives": [
     {
       "id": "A",

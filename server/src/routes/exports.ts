@@ -4,11 +4,12 @@ import { exportData } from '../analytics/exports/ExportController.js';
 import { WatermarkVerificationService } from '../exports/WatermarkVerificationService.js';
 import { sensitiveContextMiddleware } from '../middleware/sensitive-context.js';
 import { highRiskApprovalMiddleware } from '../middleware/high-risk-approval.js';
+import { ensureAuthenticated } from '../middleware/auth.js';
 
 const router = express.Router();
 const watermarkVerificationService = new WatermarkVerificationService();
 
-router.post('/sign-manifest', async (req, res) => {
+router.post('/sign-manifest', ensureAuthenticated, async (req, res) => {
   try {
     const { tenant, filters, timestamp } = req.body;
 
