@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-19T06:03:05Z",
-  "revision_note": "Governed Exception: deprecated client GA remediation P0-P2 (transport hardening, data reactivation, navigation fixes)",
+  "last_updated": "2026-01-23T06:42:00Z",
+  "revision_note": "Merged: GenUI GA contract artifacts, evidence-id determinism, typecheck gate",
   "initiatives": [
     {
       "id": "A",

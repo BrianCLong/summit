@@ -9,7 +9,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ForbiddenError, AuthenticationError } from 'apollo-server-express';
 import { Pool } from 'pg';
-import pino from 'pino';
+import logger from '../utils/logger.js';
 import { WarrantService } from '../services/WarrantService.js';
 
 export interface GovernanceContext {
@@ -107,6 +107,14 @@ export class EnhancedGovernanceService {
       defaultTenantId: 'global',
       ...config
     };
+  }
+
+  async initialize(): Promise<void> {
+    this.logger.info('Enhanced Governance Service initialized');
+  }
+
+  async healthCheck(): Promise<{ status: string }> {
+    return { status: 'ok' };
   }
 
   /**
@@ -894,8 +902,7 @@ export class EnhancedGovernanceService {
  * Initialize the enhanced governance service
  */
 export const initializeEnhancedGovernance = (db: Pool, warrantService: WarrantService) => {
-  const logger = pino();
-  const service = new EnhancedGovernanceService(db, warrantService, logger);
+  const service = new EnhancedGovernanceService(db, warrantService, logger as any);
   
   return {
     service,
