@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/sdk-js",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "main": "index.ts",
   "types": "index.ts",
   "dependencies": {

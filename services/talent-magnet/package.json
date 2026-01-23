@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/talent-magnet",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Global Talent Magnet AI - Recognize talent signals, offer personalized incentives, and accelerate onboarding",
   "type": "module",
   "main": "dist/index.js",
