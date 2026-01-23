@@ -8,5 +8,6 @@
     "test": "npm run -ws --if-present test",
     "test:smoke": "npm run test --workspace meta-orchestrator -- --threads false --filter=\"Hello-World\"",
     "test:load": "npm run test --workspace meta-orchestrator -- --threads false --filter=\"Hello-Case\""
-  }
+  },
+  "version": "4.2.3"
 }

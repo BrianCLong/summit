@@ -1,6 +1,6 @@
 {
   "name": "graph-core-service",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "main": "dist/index.js",
   "scripts": {
     "build": "npx tsc",

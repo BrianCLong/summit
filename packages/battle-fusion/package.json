@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/battle-fusion",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Multidomain data fusion engine for battle management",
   "type": "module",
   "main": "dist/index.js",
