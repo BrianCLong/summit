@@ -4,14 +4,11 @@
  */
 
 // Main service
-export { CaseWorkflowService } from './CaseWorkflowService.js';
-export type { EventHandler } from './CaseWorkflowService.js';
+export { CaseWorkflowService, EventHandler } from './CaseWorkflowService.js';
 
 // Core engines
-export { WorkflowStateMachine } from './StateMachine.js';
-export type { TransitionContext } from './StateMachine.js';
-export { SLATracker } from './SLATracker.js';
-export type { SLABreachEvent, SLAAtRiskEvent } from './SLATracker.js';
+export { WorkflowStateMachine, TransitionContext } from './StateMachine.js';
+export { SLATracker, SLABreachEvent, SLAAtRiskEvent } from './SLATracker.js';
 
 // Repositories
 export { TaskRepo } from './repos/TaskRepo.js';

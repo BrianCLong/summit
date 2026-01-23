@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/api-management",
-  "version": "4.1.4",
+  "version": "2.0.0",
   "description": "API lifecycle management, versioning, and transformation",
   "type": "module",
   "main": "dist/index.js",

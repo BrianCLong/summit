@@ -12,13 +12,11 @@
   },
   "exclude": [
     "node_modules",
-    "../node_modules",
     "dist",
     "**/*.test.ts",
     "**/*.spec.ts",
     "**/__tests__/**",
     "tests/**",
-    "../tests/**",
     "src/tests/**",
     "src/routes/geoint.js"
   ]

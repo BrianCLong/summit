@@ -1,0 +1,101 @@
+# UNIT 83M [CITADEL][BULWARK][FOUNDRY] SPRINT — Q1'26 • S2 (Jan 15–28)
+
+## 🎯 Objectives
+- Propagate proofs and signatures from CI to release artifacts.
+- Define escalation trees for failed auth, export, or rollout.
+- Enforce signature verification in MC pipelines.
+- CI posture check: SLSA + SBOM attached or block.
+- Implement selective disclosure (redact-on-read).
+- Deploy identity tripwires (decoys, honey-tokens).
+
+---
+
+## ✅ Backlog
+
+| ID | Title | Owner | Definition of Done |
+|----|-------|--------|---------------------|
+| SIG‑13 | CI→Release Proof Propagation | FOUNDRY | All MC outputs have signature + test hash in Evidence Bundle |
+| ESC‑14 | Escalation Tree (Access + Export) | CITADEL | Policy + contact + SLA for each failure type enforced |
+| VER‑15 | Signature Verification Gate | BULWARK | All MC deploys validate cosign/Rekor sigs pre-release |
+| CI‑16 | CI SLSA/SBOM Enforcement | FOUNDRY | Block release if SBOM or provenance missing from image |
+| SD‑17 | Selective Disclosure (Rego) | CITADEL | Redacts record fields unless policy context allows |
+| IDT‑18 | Identity Tripwire Tokens | CITADEL | Place & monitor honey-users and honey-secrets in production |
+
+---
+
+## 🧩 Artifacts
+
+### 1. Signature Verification (MC Step)
+```yaml
+- name: Verify Signature
+  run: cosign verify --key cosign.pub ghcr.io/org/image@sha256:...
+```
+
+### 2. Rego for Selective Disclosure
+```rego
+package export.redact
+
+allow_field[f] {
+  f := input.record.fields[_]
+  not f.sensitive
+} {
+  input.context.role == "auditor"
+  f := input.record.fields[_]
+  f.legal_basis in ["contract", "legal_obligation"]
+}
+```
+
+### 3. Identity Tripwire Deployment
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: honey-secret
+  labels: { trap: "identity" }
+type: Opaque
+data:
+  username: bG9naW5fZGVjb3k=
+  password: cGFzc3dvcmRfZGVjb3k=
+```
+
+### 4. Escalation Tree (YAML)
+```yaml
+failures:
+  export_blocked:
+    escalate_to: secops@unit83m.io
+    sla: 15m
+  auth_fail_high_sensitivity:
+    escalate_to: iam@unit83m.io
+    sla: 5m
+```
+
+### 5. SBOM/SLSA Check (CI Guard)
+```bash
+if ! test -f sbom.json || ! grep -q "_provenance" metadata.json; then
+  echo "Missing SBOM or provenance — blocking"
+  exit 1
+fi
+```
+
+---
+
+## 📅 Sprint Exit Criteria (S2)
+- ✅ All release artifacts carry CI test signature + provenance
+- ✅ Failure escalation trees triggered in test + alert routed
+- ✅ Signature verification blocks unauthorized deploys
+- ✅ CI guardrails enforce SLSA + SBOM presence
+- ✅ Redaction by legal basis context confirmed
+- ✅ Tripwires deployed, confirmed, monitored
+
+---
+
+## 📎 References
+- `intelgraph_mc_sprint_2026_01_21_v_1.md`
+- `maestro-conductor/pipelines/verify.yml`
+- `rego/export.redact.rego`
+- `evidence_bundle/v1.5.json`
+- `companyos/identity/tripwires.yaml`
+
+---
+
+# End of Sprint Plan — UNIT 83M Q1'26 S2

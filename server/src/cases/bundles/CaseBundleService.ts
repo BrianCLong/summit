@@ -334,7 +334,7 @@ export class CaseBundleService {
       archive.on('error', (err: any) => reject(err));
     });
 
-    archive.pipe(output as unknown as NodeJS.WritableStream);
+    archive.pipe(output);
     archive.directory(bundlePath, false);
     archive.finalize();
 

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- vis-timeline types require assertion */
 import React, { useEffect, useRef } from 'react';
 import { Box, Button } from '@mui/material';
 import { gql, useQuery } from '@apollo/client';
@@ -54,7 +53,7 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
       const options: TimelineOptions = {
         zoomable: true,
       };
-      timelineRef.current = new (Timeline as any)(
+      timelineRef.current = new Timeline(
         containerRef.current,
         items,
         options,

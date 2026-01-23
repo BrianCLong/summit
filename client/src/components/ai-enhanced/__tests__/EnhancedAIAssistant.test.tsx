@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- jest mocks require type assertions */
 /**
  * Tests for Enhanced AI Assistant Component - Deterministic Version
  */
@@ -174,7 +173,7 @@ describe('EnhancedAIAssistant', () => {
     const script: AssistantEvent[] = [
       { type: 'status', value: 'thinking' },
       { type: 'token', value: 'No cites here.' },
-      { type: 'done', cites: [] } as any,
+      { type: 'done', cites: [] },
     ];
     const transport = makeFakeTransport(script);
     const clock = makeFakeClock();

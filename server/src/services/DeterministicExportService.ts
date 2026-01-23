@@ -621,8 +621,7 @@ export class DeterministicExportService {
     const output = createWriteStream(bundlePath);
     const archive = archiver('zip', { zlib: { level: 9 } });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    archive.pipe(output as any);
+    archive.pipe(output);
     archive.directory(workDir, false);
     await archive.finalize();
 

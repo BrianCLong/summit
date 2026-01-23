@@ -4,12 +4,22 @@
  */
 
 import React, { useState } from 'react';
-// @ts-ignore
-import * as ReactBootstrap from 'react-bootstrap';
-const { Alert, Button, Card, Form, Modal, Badge, Tooltip } = ReactBootstrap as any;
-// @ts-ignore
-import * as ReactBootstrapIcons from 'react-bootstrap-icons';
-const { InfoCircle, ExclamationTriangle, Clock, Shield, FileText } = ReactBootstrapIcons as any;
+import {
+  Alert,
+  Button,
+  Card,
+  Form,
+  Modal,
+  Badge,
+  Tooltip,
+} from 'react-bootstrap';
+import {
+  InfoCircle,
+  ExclamationTriangle,
+  Clock,
+  Shield,
+  FileText,
+} from 'react-bootstrap-icons';
 import { useMutation, useQuery } from '@apollo/client';
 import { SUBMIT_POLICY_APPEAL, GET_APPEAL_STATUS } from '../graphql/appeals';
 

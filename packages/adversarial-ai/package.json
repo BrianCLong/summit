@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/adversarial-ai",
-  "version": "4.1.4",
+  "version": "2.0.0",
   "description": "Adversarial machine learning and AI robustness testing",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

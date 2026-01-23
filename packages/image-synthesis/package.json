@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/image-synthesis",
-  "version": "4.1.4",
+  "version": "2.0.0",
   "description": "Image and video synthesis with GANs, diffusion models, and augmentation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,12 +8,7 @@
     "build": "tsc",
     "test": "jest"
   },
-  "keywords": [
-    "image-generation",
-    "stylegan",
-    "diffusion",
-    "augmentation"
-  ],
+  "keywords": ["image-generation", "stylegan", "diffusion", "augmentation"],
   "dependencies": {
     "@intelgraph/common-types": "workspace:*",
     "lodash": "^4.17.21"

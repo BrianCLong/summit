@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- jest mocks require type assertions */
 /**
  * Tests for Interactive Graph Canvas Component
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import InteractiveGraphCanvas from '../InteractiveGraphCanvas';
 
@@ -51,8 +50,8 @@ global.requestAnimationFrame = jest.fn((cb) => setTimeout(cb, 16));
 global.cancelAnimationFrame = jest.fn((id) => clearTimeout(id));
 
 beforeAll(() => {
-  (HTMLCanvasElement.prototype as any).getContext = mockCanvas.getContext;
-  (HTMLCanvasElement.prototype as any).getBoundingClientRect =
+  HTMLCanvasElement.prototype.getContext = mockCanvas.getContext;
+  HTMLCanvasElement.prototype.getBoundingClientRect =
     mockCanvas.getBoundingClientRect;
   Object.defineProperty(HTMLCanvasElement.prototype, 'width', {
     get: () => mockCanvas.width,
@@ -70,11 +69,11 @@ beforeAll(() => {
 
 describe('InteractiveGraphCanvas', () => {
   const defaultProps = {
-    data: { nodes: [], edges: [] },
-    onNodeClick: jest.fn(),
-    onSelectionChange: jest.fn(),
+    onNodeSelect: jest.fn(),
+    onEdgeSelect: jest.fn(),
     layoutAlgorithm: 'force' as const,
-    physics: true,
+    enablePhysics: true,
+    showPerformanceMetrics: false,
   };
 
   beforeEach(() => {
@@ -97,22 +96,25 @@ describe('InteractiveGraphCanvas', () => {
     expect(screen.getByText(/Performance/)).toBeInTheDocument();
   });
 
-  it('renders with physics enabled by default', () => {
+  it('renders performance metrics when enabled', () => {
     render(
       <InteractiveGraphCanvas
         {...defaultProps}
-        physics={true}
+        showPerformanceMetrics={true}
       />,
     );
 
-    const canvas = screen.getByTestId('graph-canvas');
-    expect(canvas).toBeInTheDocument();
+    expect(screen.getByTestId('performance-metrics')).toBeInTheDocument();
+    expect(screen.getByText(/FPS:/)).toBeInTheDocument();
+    expect(screen.getByText(/Nodes:/)).toBeInTheDocument();
+    expect(screen.getByText(/Edges:/)).toBeInTheDocument();
   });
 
   it('does not render performance metrics when disabled', () => {
     render(
       <InteractiveGraphCanvas
         {...defaultProps}
+        showPerformanceMetrics={false}
       />,
     );
 
@@ -129,31 +131,40 @@ describe('InteractiveGraphCanvas', () => {
     expect(algorithmSelect).toHaveValue('circular');
   });
 
-  it('toggles physics simulation', () => {
-    render(<InteractiveGraphCanvas {...defaultProps} physics={true} />);
+  it('toggles physics simulation', async () => {
+    const user = userEvent.setup();
+    render(<InteractiveGraphCanvas {...defaultProps} enablePhysics={true} />);
 
-    // Since controls are internal, we mostly check for no errors
-    expect(screen.getByTestId('graph-canvas')).toBeInTheDocument();
+    const physicsCheckbox = screen.getByRole('checkbox', { name: /physics/i });
+    expect(physicsCheckbox).toBeChecked();
+
+    await user.click(physicsCheckbox);
+    expect(physicsCheckbox).not.toBeChecked();
   });
 
-  it('renders with custom width and height', () => {
+  it('toggles performance metrics display', async () => {
+    const user = userEvent.setup();
     render(
       <InteractiveGraphCanvas
         {...defaultProps}
-        width={1000}
-        height={800}
+        showPerformanceMetrics={false}
       />,
     );
 
-    const canvas = screen.getByTestId('graph-canvas') as HTMLCanvasElement;
-    expect(canvas.width).toBe(1000);
-    expect(canvas.height).toBe(800);
+    const metricsCheckbox = screen.getByRole('checkbox', {
+      name: /performance/i,
+    });
+    expect(metricsCheckbox).not.toBeChecked();
+
+    await user.click(metricsCheckbox);
+    expect(metricsCheckbox).toBeChecked();
+    expect(screen.getByTestId('performance-metrics')).toBeInTheDocument();
   });
 
   it('handles canvas mouse events', async () => {
     const onNodeSelect = jest.fn();
     render(
-      <InteractiveGraphCanvas {...defaultProps} onNodeClick={onNodeSelect} />,
+      <InteractiveGraphCanvas {...defaultProps} onNodeSelect={onNodeSelect} />,
     );
 
     const canvas = screen.getByTestId('graph-canvas');
@@ -205,7 +216,7 @@ describe('InteractiveGraphCanvas', () => {
 
   it('renders with custom investigation ID', () => {
     render(
-      <InteractiveGraphCanvas {...defaultProps} />,
+      <InteractiveGraphCanvas {...defaultProps} investigationId="inv-123" />,
     );
 
     const canvas = screen.getByTestId('graph-canvas');
@@ -217,7 +228,7 @@ describe('InteractiveGraphCanvas', () => {
 
     // Simulate resize
     act(() => {
-      const resizeCallback = (global.ResizeObserver as any).mock
+      const resizeCallback = (global.ResizeObserver as jest.Mock).mock
         .calls[0][0];
       resizeCallback([
         {
@@ -244,7 +255,7 @@ describe('InteractiveGraphCanvas', () => {
   it('handles node selection callback', async () => {
     const onNodeSelect = jest.fn();
     render(
-      <InteractiveGraphCanvas {...defaultProps} onNodeClick={onNodeSelect} />,
+      <InteractiveGraphCanvas {...defaultProps} onNodeSelect={onNodeSelect} />,
     );
 
     const canvas = screen.getByTestId('graph-canvas');
@@ -260,7 +271,7 @@ describe('InteractiveGraphCanvas', () => {
   it('handles edge selection callback', async () => {
     const onEdgeSelect = jest.fn();
     render(
-      <InteractiveGraphCanvas {...defaultProps} onNodeClick={onEdgeSelect} />,
+      <InteractiveGraphCanvas {...defaultProps} onEdgeSelect={onEdgeSelect} />,
     );
 
     const canvas = screen.getByTestId('graph-canvas');
@@ -306,16 +317,21 @@ describe('InteractiveGraphCanvas', () => {
     render(
       <InteractiveGraphCanvas
         {...defaultProps}
-        physics={true}
+        showPerformanceMetrics={true}
       />,
     );
 
-    const canvas = screen.getByTestId('graph-canvas');
-    expect(canvas).toBeInTheDocument();
+    const performanceMetrics = screen.getByTestId('performance-metrics');
+    expect(performanceMetrics).toBeInTheDocument();
+
+    // Should show initial metrics
+    expect(screen.getByText(/FPS: \d+/)).toBeInTheDocument();
+    expect(screen.getByText(/Nodes: \d+/)).toBeInTheDocument();
+    expect(screen.getByText(/Edges: \d+/)).toBeInTheDocument();
   });
 
   it('handles animation frame updates', () => {
-    render(<InteractiveGraphCanvas {...defaultProps} physics={true} />);
+    render(<InteractiveGraphCanvas {...defaultProps} enablePhysics={true} />);
 
     // Animation frames should be requested for physics simulation
     expect(global.requestAnimationFrame).toHaveBeenCalled();

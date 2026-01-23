@@ -1,28 +1,8 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { createApp } from '../../app';
 import request from 'supertest';
 import express from 'express';
 import type { NextFunction, Request, Response } from 'express';
-
-// ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../middleware/auth', () => ({
-  ensureAuthenticated: (req: Request, _res: Response, next: NextFunction) => {
-    if (req.headers['x-test-user-role']) {
-      (req as any).user = { role: req.headers['x-test-user-role'] };
-    }
-    next();
-  },
-  ensureRole: (roles: string[]) => (req: Request, res: Response, next: NextFunction) => {
-    const user = (req as any).user;
-    if (user && roles.includes(user.role)) {
-      next();
-    } else {
-      res.status(403).json({ error: 'Forbidden' });
-    }
-  },
-}));
-
-// Dynamic imports AFTER mocks are set up
-const { createApp } = await import('../../app');
 
 let app: express.Application;
 
@@ -39,6 +19,23 @@ const mockNonAdminUser = {
         role: 'ANALYST',
     },
 };
+
+jest.mock('../middleware/auth', () => ({
+  ensureAuthenticated: (req: Request, _res: Response, next: NextFunction) => {
+    if (req.headers['x-test-user-role']) {
+      (req as any).user = { role: req.headers['x-test-user-role'] };
+    }
+    next();
+  },
+  ensureRole: (roles: string[]) => (req: Request, res: Response, next: NextFunction) => {
+    const user = (req as any).user;
+    if (user && roles.includes(user.role)) {
+      next();
+    } else {
+      res.status(403).json({ error: 'Forbidden' });
+    }
+  },
+}));
 
 beforeAll(async () => {
   app = await createApp();

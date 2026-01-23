@@ -24,12 +24,7 @@ import {
 import { mapGraphRAGError, UserFacingError } from '../lib/errors.js';
 import graphragConfig from '../config/graphrag.js';
 
-const resolvedLogger = (logger as any)?.default ?? logger;
-const baseLogger =
-  resolvedLogger && typeof (resolvedLogger as any).child === 'function'
-    ? resolvedLogger
-    : { child: () => console };
-const serviceLogger = baseLogger.child({ name: 'GraphRAGService' });
+const serviceLogger = logger.child({ name: 'GraphRAGService' });
 
 // Zod schemas for type safety and validation
 const GraphRAGRequestSchema = z.object({

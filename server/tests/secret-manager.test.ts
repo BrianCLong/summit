@@ -3,11 +3,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { SecretManager } from '../lib/secrets/secret-manager';
 
-// Use process.cwd() since tests run from server directory
-const testsDir = path.join(process.cwd(), 'tests');
-
 describe('SecretManager', () => {
-  const tmpDir = path.join(testsDir, 'tmp-secrets');
+  const tmpDir = path.join(__dirname, 'tmp-secrets');
 
   beforeEach(() => {
     fs.rmSync(tmpDir, { recursive: true, force: true });

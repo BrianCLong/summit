@@ -6,25 +6,17 @@
  */
 
 import { describe, it, expect, beforeEach, jest, afterEach } from '@jest/globals';
+import { OPAClient, createABACMiddleware, ABACContext } from '../opa-abac';
 import { requestFactory, responseFactory, nextFactory } from '../../../../tests/factories/requestFactory';
 import { userFactory } from '../../../../tests/factories/userFactory';
+import axios from 'axios';
 
-// Mock function declared before mock
-const mockAxiosPost = jest.fn();
-
-// ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('axios', () => ({
-  __esModule: true,
-  default: {
-    post: mockAxiosPost,
-  },
-}));
-
-// Dynamic imports AFTER mocks are set up
-const { OPAClient, createABACMiddleware, ABACContext } = await import('../opa-abac');
+// Mock axios for OPA server calls
+jest.mock('axios');
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('OPAClient', () => {
-  let opaClient: InstanceType<typeof OPAClient>;
+  let opaClient: OPAClient;
   const baseUrl = 'http://localhost:8181';
 
   beforeEach(() => {
@@ -55,7 +47,7 @@ describe('OPAClient', () => {
         },
       };
 
-      mockAxiosPost.mockResolvedValue({
+      mockedAxios.post.mockResolvedValue({
         data: {
           result: {
             allow: true,
@@ -75,7 +67,7 @@ describe('OPAClient', () => {
         reason: 'User has analyst role with read permission',
         obligations: [],
       });
-      expect(mockAxiosPost).toHaveBeenCalledWith(
+      expect(mockedAxios.post).toHaveBeenCalledWith(
         `${baseUrl}/v1/data/summit/authz/allow`,
         { input },
         expect.objectContaining({ timeout: 5000 })
@@ -104,7 +96,7 @@ describe('OPAClient', () => {
         },
       };
 
-      mockAxiosPost.mockResolvedValue({
+      mockedAxios.post.mockResolvedValue({
         data: {
           result: {
             allow: false,
@@ -148,7 +140,7 @@ describe('OPAClient', () => {
         },
       };
 
-      mockAxiosPost.mockResolvedValue({
+      mockedAxios.post.mockResolvedValue({
         data: {
           result: {
             allow: false,
@@ -191,7 +183,7 @@ describe('OPAClient', () => {
         context: { ip: '192.168.1.1', time: Date.now() },
       };
 
-      mockAxiosPost.mockRejectedValue({
+      mockedAxios.post.mockRejectedValue({
         code: 'ECONNABORTED',
         message: 'timeout of 5000ms exceeded',
       });
@@ -211,7 +203,7 @@ describe('OPAClient', () => {
         context: { ip: '192.168.1.1', time: Date.now() },
       };
 
-      mockAxiosPost.mockRejectedValue({
+      mockedAxios.post.mockRejectedValue({
         code: 'ECONNREFUSED',
         message: 'connect ECONNREFUSED 127.0.0.1:8181',
       });
@@ -226,7 +218,7 @@ describe('OPAClient', () => {
       // Arrange
       const input = { userId: 'user-123', action: 'read' };
 
-      mockAxiosPost.mockResolvedValue({
+      mockedAxios.post.mockResolvedValue({
         data: { result: true },
         status: 200,
       });
@@ -241,7 +233,7 @@ describe('OPAClient', () => {
 });
 
 describe('createABACMiddleware', () => {
-  let opaClient: InstanceType<typeof OPAClient>;
+  let opaClient: OPAClient;
   let abacMiddleware: ReturnType<typeof createABACMiddleware>;
 
   beforeEach(() => {
@@ -265,7 +257,7 @@ describe('createABACMiddleware', () => {
       const res = responseFactory();
       const next = nextFactory();
 
-      mockAxiosPost.mockResolvedValue({
+      mockedAxios.post.mockResolvedValue({
         data: {
           result: { allow: true, reason: 'Authorized', obligations: [] },
         },
@@ -296,7 +288,7 @@ describe('createABACMiddleware', () => {
       const res = responseFactory();
       const next = nextFactory();
 
-      mockAxiosPost.mockResolvedValue({
+      mockedAxios.post.mockResolvedValue({
         data: {
           result: { allow: false, reason: 'Insufficient permissions', obligations: [] },
         },
@@ -351,7 +343,7 @@ describe('createABACMiddleware', () => {
       const res = responseFactory();
       const next = nextFactory();
 
-      mockAxiosPost.mockResolvedValue({
+      mockedAxios.post.mockResolvedValue({
         data: {
           result: {
             allow: false,
@@ -400,7 +392,7 @@ describe('createABACMiddleware', () => {
       const res = responseFactory();
       const next = nextFactory();
 
-      mockAxiosPost.mockResolvedValue({
+      mockedAxios.post.mockResolvedValue({
         data: {
           result: {
             allow: false,
@@ -445,7 +437,7 @@ describe('createABACMiddleware', () => {
       const res = responseFactory();
       const next = nextFactory();
 
-      mockAxiosPost.mockResolvedValue({
+      mockedAxios.post.mockResolvedValue({
         data: {
           result: { allow: true, reason: 'Authorized', obligations: [] },
         },
@@ -458,7 +450,7 @@ describe('createABACMiddleware', () => {
       await enforcer(req as any, res, next);
 
       // Assert
-      expect(mockAxiosPost).toHaveBeenCalledWith(
+      expect(mockedAxios.post).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           input: expect.objectContaining({
@@ -485,7 +477,7 @@ describe('createABACMiddleware', () => {
       const res = responseFactory();
       const next = nextFactory();
 
-      mockAxiosPost.mockRejectedValue(new Error('OPA server unavailable'));
+      mockedAxios.post.mockRejectedValue(new Error('OPA server unavailable'));
 
       const enforcer = abacMiddleware.enforce('investigation', 'read');
 

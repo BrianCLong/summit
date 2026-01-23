@@ -65,11 +65,7 @@ export function diffSpecs(previous: ContractSpec, current: ContractSpec): string
       diffs.push(`Field ${name} removed`);
       return;
     }
-    const updated = currentMap.get(name);
-    if (!updated) {
-      // Handle case where updated is undefined
-      return; // or however the logic should handle it
-    }
+    const updated = currentMap.get(name)!;
     if (field.type !== updated.type) {diffs.push(`Field ${name} type changed: ${field.type} -> ${updated.type}`);}
     if (field.nullable !== updated.nullable)
       {diffs.push(`Field ${name} nullability changed: ${field.nullable} -> ${updated.nullable}`);}

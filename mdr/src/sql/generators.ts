@@ -83,11 +83,7 @@ export function buildSqlPieces(spec: MetricSpec, dialect: Dialect): SqlPieces {
 
 export function renderViewSql(spec: MetricSpec, dialect: Dialect): string {
   if (spec.sqlGenerators?.[dialect]?.view) {
-    const dialectGenerators = spec.sqlGenerators[dialect];
-    if (!dialectGenerators) {
-      throw new Error(`No SQL generators defined for dialect: ${dialect}`);
-    }
-    return dialectGenerators.view;
+    return spec.sqlGenerators[dialect]!.view!;
   }
   const pieces = buildSqlPieces(spec, dialect);
   const viewName = `${spec.name}_v${spec.version}`;
@@ -106,11 +102,7 @@ export function renderViewSql(spec: MetricSpec, dialect: Dialect): string {
 
 export function renderUdfSql(spec: MetricSpec, dialect: Dialect): string {
   if (spec.sqlGenerators?.[dialect]?.udf) {
-    const dialectGenerators = spec.sqlGenerators[dialect];
-    if (!dialectGenerators) {
-      throw new Error(`No SQL generators defined for dialect: ${dialect}`);
-    }
-    return dialectGenerators.udf;
+    return spec.sqlGenerators[dialect]!.udf!;
   }
   const pieces = buildSqlPieces(spec, dialect);
   const viewName = `${spec.name}_v${spec.version}`;

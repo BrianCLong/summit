@@ -1,31 +1,38 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import {
+  approveApproval,
+  createApproval,
+  listApprovals,
+  rejectApproval,
+} from '../approvals.js';
+jest.mock('../../monitoring/metrics.js', () => {
+  const createMetric = () => {
+    let value = 0;
+    return {
+      inc: (amount: number = 1) => { value += amount; },
+      dec: (amount: number = 1) => { value -= amount; },
+      set: (amount: number) => { value = amount; },
+      reset: () => { value = 0; },
+      get: () => ({ values: [{ value }] }),
+    };
+  };
+
+  return {
+    approvalsPending: createMetric(),
+    approvalsApprovedTotal: createMetric(),
+    approvalsRejectedTotal: createMetric(),
+  };
+});
+
+const {
+  approvalsApprovedTotal,
+  approvalsPending,
+  approvalsRejectedTotal,
+} = require('../../monitoring/metrics.js');
 
 const approvalsStore: any[] = [];
 
-// Mock metrics - declared before mocks
-const createMetric = () => {
-  let value = 0;
-  return {
-    inc: (amount: number = 1) => { value += amount; },
-    dec: (amount: number = 1) => { value -= amount; },
-    set: (amount: number) => { value = amount; },
-    reset: () => { value = 0; },
-    get: () => ({ values: [{ value }] }),
-  };
-};
-
-const mockApprovalsPending = createMetric();
-const mockApprovalsApprovedTotal = createMetric();
-const mockApprovalsRejectedTotal = createMetric();
-
-// ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../monitoring/metrics.js', () => ({
-  approvalsPending: mockApprovalsPending,
-  approvalsApprovedTotal: mockApprovalsApprovedTotal,
-  approvalsRejectedTotal: mockApprovalsRejectedTotal,
-}));
-
-jest.unstable_mockModule('../../db/postgres.js', () => {
+jest.mock('../../db/postgres.js', () => {
   const buildResponse = (rows: any[]): { rows: any[] } => ({ rows });
 
   return {
@@ -94,20 +101,12 @@ jest.unstable_mockModule('../../db/postgres.js', () => {
   };
 });
 
-// Dynamic imports AFTER mocks are set up
-const {
-  approveApproval,
-  createApproval,
-  listApprovals,
-  rejectApproval,
-} = await import('../approvals.js');
-
 describe('Approvals service', () => {
   beforeEach(() => {
     approvalsStore.splice(0, approvalsStore.length);
-    mockApprovalsPending.set(0);
-    mockApprovalsApprovedTotal.reset();
-    mockApprovalsRejectedTotal.reset();
+    approvalsPending.set(0);
+    approvalsApprovedTotal.reset();
+    approvalsRejectedTotal.reset();
   });
 
   it('creates and lists pending approvals', async () => {
@@ -119,7 +118,7 @@ describe('Approvals service', () => {
     });
 
     expect(created.status).toBe('pending');
-    expect(mockApprovalsPending.get().values[0].value).toBe(1);
+    expect(approvalsPending.get().values[0].value).toBe(1);
 
     const pending = await listApprovals({ status: 'pending' });
     expect(pending).toHaveLength(1);
@@ -132,8 +131,8 @@ describe('Approvals service', () => {
     const approved = await approveApproval(approval.id, 'approver-1', 'looks safe');
     expect(approved?.status).toBe('approved');
     expect(approved?.approver_id).toBe('approver-1');
-    expect(mockApprovalsPending.get().values[0].value).toBe(0);
-    expect(mockApprovalsApprovedTotal.get().values[0].value).toBe(1);
+    expect(approvalsPending.get().values[0].value).toBe(0);
+    expect(approvalsApprovedTotal.get().values[0].value).toBe(1);
   });
 
   it('rejects a pending request and prevents double decisions', async () => {
@@ -141,7 +140,7 @@ describe('Approvals service', () => {
 
     const rejected = await rejectApproval(approval.id, 'approver-2', 'too risky');
     expect(rejected?.status).toBe('rejected');
-    expect(mockApprovalsRejectedTotal.get().values[0].value).toBe(1);
+    expect(approvalsRejectedTotal.get().values[0].value).toBe(1);
 
     const secondDecision = await approveApproval(approval.id, 'approver-3');
     expect(secondDecision).toBeNull();

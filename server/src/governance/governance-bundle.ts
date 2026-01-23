@@ -355,7 +355,7 @@ async function createTarball(sourceDir: string, tarPath: string) {
     writable.on('error', reject);
 
     archive.on('error', reject);
-    archive.pipe(writable as unknown as NodeJS.WritableStream);
+    archive.pipe(writable);
     archive.directory(sourceDir, false);
     archive.finalize().catch(reject);
   });

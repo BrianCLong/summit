@@ -57,8 +57,8 @@ describe('Performance Benchmarks', () => {
       const durationMs = endTime - startTime;
       const opsPerSecond = (100 / durationMs) * 1000;
 
-      // Merge operations: ${opsPerSecond.toFixed(2)} ops/sec
-      // Average time per merge: ${(durationMs / 100).toFixed(2)}ms
+      console.log(`Merge operations: ${opsPerSecond.toFixed(2)} ops/sec`);
+      console.log(`Average time per merge: ${(durationMs / 100).toFixed(2)}ms`);
 
       // Target: at least 100 ops/sec = max 10ms per operation
       expect(opsPerSecond).toBeGreaterThanOrEqual(100);
@@ -85,7 +85,7 @@ describe('Performance Benchmarks', () => {
       const durationMs = endTime - startTime;
       const opsPerSecond = (500 / durationMs) * 1000;
 
-      // Batch merge: ${opsPerSecond.toFixed(2)} ops/sec
+      console.log(`Batch merge: ${opsPerSecond.toFixed(2)} ops/sec`);
 
       expect(opsPerSecond).toBeGreaterThanOrEqual(100);
     });
@@ -112,8 +112,8 @@ describe('Performance Benchmarks', () => {
       const durationMs = endTime - startTime;
       const avgTimeMs = durationMs / 50;
 
-      // Average candidate search time: ${avgTimeMs.toFixed(2)}ms
-      // Population size: ${population.length}
+      console.log(`Average candidate search time: ${avgTimeMs.toFixed(2)}ms`);
+      console.log(`Population size: ${population.length}`);
 
       // Should complete in reasonable time (< 100ms per search)
       expect(avgTimeMs).toBeLessThan(100);

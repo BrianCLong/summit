@@ -71,7 +71,7 @@ export function monitorPostgresPool(
  */
 export function instrumentPostgresPool(pool: Pool, poolName: string = 'default'): Pool {
   // Monitor pool events
-  pool.on('error', (error: Error, client: any) => {
+  pool.on('error', (error, client) => {
     dbConnectionErrors.inc({
       database: 'postgresql',
       pool: poolName,
@@ -80,15 +80,15 @@ export function instrumentPostgresPool(pool: Pool, poolName: string = 'default')
     logger.error({ poolName, error: error.message }, 'PostgreSQL pool error');
   });
 
-  pool.on('connect', (client: any) => {
+  pool.on('connect', (client) => {
     logger.debug({ poolName }, 'New PostgreSQL client connected to pool');
   });
 
-  pool.on('acquire', (client: any) => {
+  pool.on('acquire', (client) => {
     logger.debug({ poolName }, 'PostgreSQL client acquired from pool');
   });
 
-  pool.on('remove', (client: any) => {
+  pool.on('remove', (client) => {
     logger.debug({ poolName }, 'PostgreSQL client removed from pool');
   });
 

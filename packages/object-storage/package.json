@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/object-storage",
-  "version": "4.1.4",
+  "version": "1.0.0",
   "description": "Multi-cloud object storage management for data lakehouse",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

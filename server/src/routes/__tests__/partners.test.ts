@@ -1,46 +1,24 @@
-import { describe, it, expect, jest, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import request from 'supertest';
 import express, { Request, Response, NextFunction } from 'express';
+import partnerRouter from '../partners.js';
+import { apiKeyService } from '../../services/ApiKeyService.js';
+import { partnerService } from '../../services/PartnerService.js';
 
-// Mock functions declared before mocks
-const mockCreateApiKey = jest.fn();
-const mockListApiKeys = jest.fn();
-const mockValidateApiKey = jest.fn();
-const mockRegisterPartner = jest.fn();
-const mockShareCase = jest.fn();
-const mockLoggerInfo = jest.fn();
-const mockLoggerError = jest.fn();
-const mockLoggerWarn = jest.fn();
-const mockMetricsIncrement = jest.fn();
-
-// ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../services/ApiKeyService.js', () => ({
-  apiKeyService: {
-    createApiKey: mockCreateApiKey,
-    listApiKeys: mockListApiKeys,
-    validateApiKey: mockValidateApiKey,
-  },
-}));
-
-jest.unstable_mockModule('../../services/PartnerService.js', () => ({
-  partnerService: {
-    registerPartner: mockRegisterPartner,
-    shareCase: mockShareCase,
-  },
-}));
-
-jest.unstable_mockModule('../../observability/index.js', () => ({
+// Mock Dependencies
+jest.mock('../../services/ApiKeyService.js');
+jest.mock('../../services/PartnerService.js');
+jest.mock('../../observability/index.js', () => ({
   logger: {
-    info: mockLoggerInfo,
-    error: mockLoggerError,
-    warn: mockLoggerWarn,
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
   },
   metrics: {
-    increment: mockMetricsIncrement,
+    increment: jest.fn(),
   },
 }));
-
-jest.unstable_mockModule('../../db/pg.js', () => ({
+jest.mock('../../db/pg.js', () => ({
   pg: {
     oneOrNone: jest.fn(),
     manyOrNone: jest.fn(),
@@ -48,11 +26,6 @@ jest.unstable_mockModule('../../db/pg.js', () => ({
     none: jest.fn(),
   },
 }));
-
-// Dynamic imports AFTER mocks are set up
-const partnerRouter = (await import('../partners.js')).default;
-const { apiKeyService } = await import('../../services/ApiKeyService.js');
-const { partnerService } = await import('../../services/PartnerService.js');
 
 const describeIf =
   process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
@@ -87,7 +60,7 @@ describeIf('Partner Routes', () => {
                 status: 'pending_approval'
             };
 
-            mockRegisterPartner.mockResolvedValue(mockResult as any);
+            jest.spyOn(partnerService, 'registerPartner').mockResolvedValue(mockResult as any);
 
             const res = await request(app)
                 .post('/api/partners/onboard')
@@ -114,7 +87,7 @@ describeIf('Partner Routes', () => {
                 token: 'sk_live_12345'
             };
 
-            mockCreateApiKey.mockResolvedValue(mockResult as any);
+            jest.spyOn(apiKeyService, 'createApiKey').mockResolvedValue(mockResult as any);
 
             const res = await request(app)
                 .post('/api/partners/keys')
@@ -134,7 +107,7 @@ describeIf('Partner Routes', () => {
     describe('GET /api/partners/keys', () => {
         it('should list API keys', async () => {
             const mockKeys = [{ id: 'key-1' }, { id: 'key-2' }];
-            mockListApiKeys.mockResolvedValue(mockKeys as any);
+            jest.spyOn(apiKeyService, 'listApiKeys').mockResolvedValue(mockKeys as any);
 
             const res = await request(app).get('/api/partners/keys');
 
@@ -155,8 +128,8 @@ describeIf('Partner Routes', () => {
                  scopes: ['exchange:all']
              };
 
-             mockValidateApiKey.mockResolvedValue(mockApiKey as any);
-             mockShareCase.mockResolvedValue({ success: true, transferId: '123' } as any);
+             jest.spyOn(apiKeyService, 'validateApiKey').mockResolvedValue(mockApiKey as any);
+             jest.spyOn(partnerService, 'shareCase').mockResolvedValue({ success: true, transferId: '123' } as any);
 
              const res = await request(app)
                  .post('/api/partners/exchange/cases')
@@ -181,7 +154,7 @@ describeIf('Partner Routes', () => {
         });
 
         it('should reject invalid API Key', async () => {
-            mockValidateApiKey.mockResolvedValue(null as any);
+            jest.spyOn(apiKeyService, 'validateApiKey').mockResolvedValue(null as any);
 
             const res = await request(app)
                 .post('/api/partners/exchange/cases')

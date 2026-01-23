@@ -211,12 +211,12 @@ function main(): void {
     writeFileSync(resolve(outputPath), JSON.stringify(output, null, 2));
   }
 
-  process.stdout.write(`${formatSchedule(output)}\n`);
+  process.stdout.write(formatSchedule(output) + '\n');
 }
 
 try {
   main();
 } catch (error) {
-  process.stderr.write(`${(error as Error).message}\n`);
+  process.stderr.write((error as Error).message + '\n');
   process.exit(1);
 }

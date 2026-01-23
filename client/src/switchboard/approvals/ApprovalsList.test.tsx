@@ -40,7 +40,8 @@ describe('ApprovalsList', () => {
 
   it('renders error state when the queue fails to load', async () => {
     global.fetch = jest.fn(() => createFetchResponse('Service unavailable', false)) as
-      typeof fetch;
+      | undefined
+      | typeof fetch;
 
     render(<ApprovalsList />);
 

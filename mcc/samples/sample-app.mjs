@@ -46,11 +46,11 @@ const scenarios = [
 for (const scenario of scenarios) {
   try {
     hooks.denyIfOutOfScope({ purpose: scenario.purpose });
-    process.stdout.write(`✅ ${scenario.description}\n`);
+    console.log(`✅ ${scenario.description}`);
   } catch (error) {
-    process.stderr.write(`❌ ${scenario.description}: ${(error).message}\n`);
+    console.error(`❌ ${scenario.description}: ${(error).message}`);
   }
 }
 
 const verified = verifySignature(canonicalPayload, compiledCard.signature);
-process.stdout.write(verified ? '✅ Signature verified offline.\n' : '❌ Signature verification failed.\n');
+console.log(verified ? '✅ Signature verified offline.' : '❌ Signature verification failed.');

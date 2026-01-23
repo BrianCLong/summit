@@ -2,32 +2,29 @@ import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll 
 import express from 'express';
 import request from 'supertest';
 
-// Mock functions declared before mocks
-const mockGetRollups = jest.fn();
-
-// ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../middleware/auth.js', () => ({
+jest.mock('../../middleware/auth.js', () => ({
   ensureAuthenticated: (req: any, _res: any, next: any) => {
     req.user = { tenantId: 'tenant-1' };
     next();
   },
-}));
+}), { virtual: true });
 
-jest.unstable_mockModule('../../services/FinOpsRollupService.js', () => ({
-  finOpsRollupService: {
-    getRollups: mockGetRollups,
-  },
-}));
-
-// Dynamic imports AFTER mocks are set up
-const finopsRouter = (await import('../finops')).default;
-const { finOpsRollupService } = await import('../../services/FinOpsRollupService.js');
+jest.mock(
+  '../../services/FinOpsRollupService.js',
+  () => ({
+    finOpsRollupService: {
+      getRollups: jest.fn(),
+    },
+  }),
+  { virtual: true },
+);
 
 const describeIf =
   process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
 
 describeIf('finops router', () => {
   const createApp = () => {
+    const finopsRouter = require('../finops').default;
     const app = express();
     app.use(express.json());
     app.use('/api/finops', finopsRouter);
@@ -59,7 +56,10 @@ describeIf('finops router', () => {
   });
 
   it('returns rollup overview for authenticated tenant', async () => {
-    mockGetRollups.mockResolvedValue(mockOverview);
+    const { finOpsRollupService } = require('../../services/FinOpsRollupService.js');
+    (finOpsRollupService.getRollups as jest.Mock).mockResolvedValue(
+      mockOverview,
+    );
 
     const res = await request(createApp()).get('/api/finops/rollups?days=7');
 
@@ -69,7 +69,8 @@ describeIf('finops router', () => {
   });
 
   it('defaults window to 30 days when unspecified', async () => {
-    mockGetRollups.mockResolvedValue({
+    const { finOpsRollupService } = require('../../services/FinOpsRollupService.js');
+    (finOpsRollupService.getRollups as jest.Mock).mockResolvedValue({
       ...mockOverview,
       periodDays: 30,
     });
