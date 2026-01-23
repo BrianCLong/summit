@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-19T19:07:46Z",
-  "revision_note": "Added model variant runtime backlog slice (registry, router, grounded_search, telemetry)",
+  "last_updated": "2026-01-23T06:45:00Z",
+  "revision_note": "Merged: model variant runtime backlog, evidence-id determinism, typecheck gate",
   "initiatives": [
     {
       "id": "A",

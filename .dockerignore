@@ -7,7 +7,8 @@
 node_modules
 npm-debug.log
 yarn-error.log
-pnpm-lock.yaml
+# Note: pnpm-lock.yaml must NOT be ignored - required for Docker builds
+# pnpm-lock.yaml
 package-lock.json
 __pycache__
 *.pyc
