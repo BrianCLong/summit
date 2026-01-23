@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/query-optimizer",
-  "version": "4.1.4",
+  "version": "2.0.0",
   "description": "Advanced query optimizer with cost-based optimization and materialized views",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

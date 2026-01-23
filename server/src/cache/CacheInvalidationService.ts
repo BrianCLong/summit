@@ -128,7 +128,7 @@ export class CacheInvalidationService extends EventEmitter {
 
     await this.subscriber.subscribe(...channels);
 
-    this.subscriber.on('message', async (channel: string, message: string) => {
+    this.subscriber.on('message', async (channel, message) => {
       try {
         const event: InvalidationEvent = JSON.parse(message);
 

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/telemetry-config",
-  "version": "4.1.4",
+  "version": "1.0.0",
   "private": true,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

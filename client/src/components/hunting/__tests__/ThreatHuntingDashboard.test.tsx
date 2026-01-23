@@ -1,16 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- jest mocks require type assertions */
 /**
  * ThreatHuntingDashboard Tests
  */
 
 import React from 'react';
-import { describe, it, jest, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThreatHuntingDashboard } from '../ThreatHuntingDashboard';
 
 // Mock fetch
-const mockFetch = jest.fn() as any;
+const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
 describe('ThreatHuntingDashboard', () => {
@@ -233,7 +232,7 @@ describe('ThreatHuntingDashboard', () => {
 
   describe('Metrics Display', () => {
     it('should display metrics after hunt completion', async () => {
-      mockFetch
+      jest
         .mockResolvedValueOnce({
           ok: true,
           json: () =>

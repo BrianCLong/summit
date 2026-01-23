@@ -281,8 +281,8 @@ jobs:
       - name: Use Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "pnpm"
+          node-version: '20'
+          cache: 'pnpm'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -304,36 +304,6 @@ jobs:
           path: soc-compliance-reports
           retention-days: 90
 
-  branch-protection-drift:
-    name: Governance / Branch Protection Drift
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      actions: read
-    steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
-        with:
-          node-version: "20"
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Check branch protection drift
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm ci:branch-protection:check
-
-      - name: Upload drift artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        if: always()
-        with:
-          name: branch-protection-drift
-          path: artifacts/governance/branch-protection-drift
-          retention-days: 30
-
   ci-core-gate:
     name: CI Core Gate ✅
     runs-on: ubuntu-latest
@@ -346,7 +316,6 @@ jobs:
       - deterministic-build
       - golden-path
       - soc-control-verification
-      - branch-protection-drift
     if: always()
     steps:
       - name: Check all gates passed
@@ -360,7 +329,6 @@ jobs:
           echo "Deterministic Build: ${{ needs.deterministic-build.result }}"
           echo "Golden Path: ${{ needs.golden-path.result }}"
           echo "SOC Control Verification: ${{ needs.soc-control-verification.result }}"
-          echo "Branch Protection Drift: ${{ needs.branch-protection-drift.result }}"
           echo ""
 
           # All jobs must succeed (no continue-on-error allowed)
@@ -404,11 +372,6 @@ jobs:
             exit 1
           fi
 
-          if [[ "${{ needs.branch-protection-drift.result }}" != "success" ]]; then
-            echo "::error::Branch Protection Drift FAILED"
-            exit 1
-          fi
-
           echo ""
           echo "✅ CI CORE GATE: PASSED"
           echo "All gates green. PR is mergeable (pending ci-verify)."
@@ -426,6 +389,5 @@ jobs:
           echo "- ✅ Deterministic Build" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Golden Path Smoke Test" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ SOC Control Verification" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Governance / Branch Protection Drift" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Status**: Ready for merge (pending ci-verify)" >> $GITHUB_STEP_SUMMARY

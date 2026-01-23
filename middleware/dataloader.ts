@@ -522,14 +522,14 @@ export function createDataLoaderMiddleware(
 export const exampleResolverWithDataLoader = {
   Entity: {
     // Resolve relationships using DataLoader (prevents N+1)
-    relationships: (parent: Entity, args: any, context: DataLoaderContext) => {
+    relationships: async (parent: Entity, args: any, context: DataLoaderContext) => {
       return context.loaders.entityRelationshipsLoader.load(parent.id);
     },
   },
 
   Query: {
     // Resolve multiple entities efficiently
-    entities: (parent: any, args: { ids: string[] }, context: DataLoaderContext) => {
+    entities: async (parent: any, args: { ids: string[] }, context: DataLoaderContext) => {
       return Promise.all(
         args.ids.map((id) => context.loaders.entityLoader.load(id)),
       );

@@ -373,8 +373,7 @@ class RuntimeEvidenceService {
       archive.on('error', reject);
       stream.on('close', () => resolve());
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      archive.pipe(stream as any);
+      archive.pipe(stream as unknown as NodeJS.WritableStream);
 
       for (const file of files) {
         archive.file(file, { name: path.relative(workingDir, file) });

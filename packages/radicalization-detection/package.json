@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/radicalization-detection",
-  "version": "4.1.4",
+  "version": "2.0.0",
   "description": "Radicalization monitoring and pathway detection system",
   "license": "MIT",
   "type": "module",

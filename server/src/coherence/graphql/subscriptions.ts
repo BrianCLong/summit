@@ -54,7 +54,7 @@ class CoherenceSubscriptionManager {
     subscriber.subscribe('activity:updates');
     subscriber.subscribe('narrative:updates');
 
-    subscriber.on('message', (channel: string, message: string) => {
+    subscriber.on('message', (channel, message) => {
       try {
         const data = JSON.parse(message);
 

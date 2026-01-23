@@ -1,0 +1,116 @@
+# UNIT 83M [CITADEL][BULWARK][WHITE] SPRINT — Q1'26 • S1 (Jan 1–14)
+
+## 🎯 Objectives
+- Deploy risk-based authentication (step-up based on sensitivity).
+- Automate policy lifecycle checks: stale, orphaned, drifted.
+- Expand audit trail proof chaining via IntelGraph.
+- Run red-team test on PII exfil & rollback handling.
+- Publish DPIA templates for partners (e.g., via Evidence Bundle v1.5).
+
+---
+
+## ✅ Backlog
+
+| ID | Title | Owner | Definition of Done |
+|----|-------|--------|---------------------|
+| IAM‑07 | Risk-Based Auth + Step-Up | CITADEL | Auth pipeline triggers MFA based on resource sensitivity |
+| POL‑08 | Policy Linter for Stale/Orphan | WHITE | Flags any Rego unused or older than threshold |
+| PROV‑09 | Chain Proofs via IntelGraph API | BULWARK | All decisions include pointers to runtime + tests + sign-offs |
+| RED‑10 | PII Red-Team Simulation | BULWARK | Simulated attack logged, blocked, reviewed w/ metrics |
+| DPIA‑11 | Partner DPIA Scaffold Template | WHITE | Template + policy bundle shared via secure portal |
+| CI‑12 | Rego Policy Approval Workflow | FOUNDRY | CI requires dual approval before merging any Rego edits |
+
+---
+
+## 🧩 Artifacts
+
+### 1. Risk-Based Auth Policy (Rego)
+```rego
+package authn.stepup
+
+stepup_required {
+  input.resource.sensitivity == "high"
+  not input.user.has_mfa
+}
+
+allow {
+  not stepup_required
+}
+```
+
+### 2. Policy Lifecycle Linter (Python Sketch)
+```python
+from datetime import datetime, timedelta
+import os
+
+threshold = timedelta(days=60)
+now = datetime.now()
+for f in os.listdir("rego/"):
+    last_modified = datetime.fromtimestamp(os.path.getmtime(f))
+    if now - last_modified > threshold:
+        print(f"STALE POLICY: {f}")
+```
+
+### 3. IntelGraph Proof Chain (JSON)
+```json
+{
+  "decision_id": "d_83492",
+  "linked": [
+    {"type": "test", "ref": "test_redaction_pass"},
+    {"type": "signature", "ref": "cosign://intelgraph.policy.bundle"},
+    {"type": "owner_ack", "ref": "QA-2026-01"}
+  ]
+}
+```
+
+### 4. PII Red-Team Scenario
+- Simulate export of tagged PII record via compromised API key.
+- Check for:
+  - Redaction enforcement
+  - Export block if unauthorized
+  - Alert log to IntelGraph
+  - Auto-invalidation of token
+
+### 5. DPIA Template (v1.5 Excerpt)
+```yaml
+dpia:
+  id: dpia_partner_template_v1
+  legal_basis: contract
+  sensitivity: high
+  retention: 365d
+  dlp_controls:
+    - inline_redaction
+    - watermarking
+    - export_block_unauthorized
+```
+
+### 6. Rego Approval Check (CI Hook)
+```bash
+if git diff --name-only main...HEAD | grep '.rego'; then
+  echo "[!] Policy change detected. Require approvals."
+  # enforce PR labels, reviewers etc
+  exit 1
+fi
+```
+
+---
+
+## 📅 Sprint Exit Criteria (S1)
+- ✅ Step-up auth enforced for high-sensitivity resources
+- ✅ Policy linter flags stale/orphaned policies
+- ✅ All decisions in IntelGraph contain proof chain
+- ✅ Red-team scenario blocked, logged, resolved
+- ✅ DPIA template published & linked
+- ✅ CI approval gate in effect for policy edits
+
+---
+
+## 📎 References
+- `intelgraph_sprint_2026_01_02_v_1.md`
+- `companyos-switchboard/policies/*.rego`
+- `maestro-conductor/docs/runbook_auth_policy.md`
+- `summit_q_1_26_cadence_plan.md`
+
+---
+
+# End of Sprint Plan — UNIT 83M Q1'26 S1

@@ -595,7 +595,7 @@ export class ProvenanceIntegration {
   /**
    * Convert database row to tombstone object
    */
-  private rowToTombstone(row: any): ProvenanceTombstone {
+  private rowToTombstone(row): ProvenanceTombstone {
     return {
       id: row.id,
       resourceType: row.resource_type,

@@ -21,8 +21,7 @@ export async function makeBundle({
   const out = createWriteStream(outPath);
   const zip = archiver('zip');
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  zip.pipe(out as any);
+  zip.pipe(out as unknown as NodeJS.WritableStream);
 
   const manifest = {
     version: '1',

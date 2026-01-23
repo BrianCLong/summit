@@ -103,14 +103,15 @@ describe('TemporalAnalysis', () => {
     expect(viz).toBeInTheDocument();
   });
 
-  it('toggles zoom functionality', () => {
+  it('toggles zoom functionality', async () => {
+    const user = userEvent.setup();
     renderWithProviders(
       <TemporalAnalysis {...defaultProps} enableZoom={true} />,
     );
 
     const viz = screen.getByTestId('timeline-visualization');
-    fireEvent.wheel(viz, { deltaY: -100 });
-    fireEvent.wheel(viz, { deltaY: 100 });
+    await user.wheel(viz, { deltaY: -100 });
+    await user.wheel(viz, { deltaY: 100 });
     expect(viz).toBeInTheDocument();
   });
 

@@ -77,7 +77,7 @@ function main() {
       const flags = parseFlags(flagArgs ?? []);
       const registry = resolveRegistry(flags);
       const diff = registry.diff(metricName, Number(left), Number(right));
-      process.stdout.write(`${diff}\n`);
+      console.log(diff);
       return;
     }
 
@@ -87,13 +87,13 @@ function main() {
       const registry = resolveRegistry(flags);
       const failures = registry.runConformance(dialect, flags.metric);
       if (failures.length > 0) {
-        process.stderr.write('Conformance failures detected:\n');
+        console.error('Conformance failures detected:');
         for (const failure of failures) {
-          process.stderr.write(`- ${failure}\n`);
+          console.error(`- ${failure}`);
         }
         process.exitCode = 1;
       } else {
-        process.stdout.write('All compiled SQL artifacts match golden outputs.\n');
+        console.log('All compiled SQL artifacts match golden outputs.');
       }
       return;
     }
@@ -103,15 +103,15 @@ function main() {
       const flags = parseFlags(rest.slice(1));
       const registry = resolveRegistry(flags);
       const written = registry.exportGoldenFixtures(dialect, flags.metric);
-      process.stdout.write('Exported golden fixtures:\n');
+      console.log('Exported golden fixtures:');
       for (const file of written) {
-        process.stdout.write(`  ${file}\n`);
+        console.log(`  ${file}`);
       }
       return;
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    process.stderr.write(`${message}\n`);
+    console.error(message);
     process.exitCode = 1;
     return;
   }

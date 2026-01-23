@@ -210,7 +210,7 @@ interface GraphPaneProps {
 }
 
 const GraphPane: React.FC<GraphPaneProps> = ({ _data, _onNodeSelect, _onBrush }) => {
-  const { _viewState, _xaiOverlays, _highlightElements } = useTriPaneStore();
+  const { viewState, xaiOverlays, highlightElements } = useTriPaneStore();
 
   // D3 force graph would be initialized here
   useEffect(() => {
@@ -254,7 +254,7 @@ const TimelinePane: React.FC<TimelinePaneProps> = ({
   _onTimeRangeSelect,
   _onEventSelect,
 }) => {
-  const { _viewState } = useTriPaneStore();
+  const { viewState } = useTriPaneStore();
 
   return (
     <div className="timeline-pane" role="application" aria-label="Timeline visualization">
@@ -287,7 +287,7 @@ const MapPane: React.FC<MapPaneProps> = ({
   _onLocationSelect,
   _onExtentChange,
 }) => {
-  const { _viewState } = useTriPaneStore();
+  const { viewState } = useTriPaneStore();
 
   // Leaflet map would be initialized here
   useEffect(() => {
@@ -402,8 +402,8 @@ const useCommandPalette = () => {
         label: 'Save Current View',
         shortcut: 'Ctrl+S',
         action: () => {
-          // const name = prompt('View name:');
-          // if (name) {store.saveView(name);}
+          const name = prompt('View name:');
+          if (name) {store.saveView(name);}
         },
       },
       {

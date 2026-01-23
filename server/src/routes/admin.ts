@@ -107,20 +107,20 @@ router.get('/admin/ga/signals', async (_req, res) => {
     const tenantCount = parseInt(tenantCountRes.rows[0].count, 10);
 
     res.json({
-      config,
-      stats: {
-        users: {
-          current: userCount,
-          max: config.maxUsers,
-          utilization: (userCount / config.maxUsers) * 100
+        config,
+        stats: {
+            users: {
+                current: userCount,
+                max: config.maxUsers,
+                utilization: (userCount / config.maxUsers) * 100
+            },
+            tenants: {
+                current: tenantCount,
+                max: config.maxTenants,
+                utilization: (tenantCount / config.maxTenants) * 100
+            }
         },
-        tenants: {
-          current: tenantCount,
-          max: config.maxTenants,
-          utilization: (tenantCount / config.maxTenants) * 100
-        }
-      },
-      status: config.status
+        status: config.status
     });
   } catch (error: any) {
     res.status(500).json({ ok: false, error: error instanceof Error ? error.message : 'Unknown error' });
@@ -130,18 +130,18 @@ router.get('/admin/ga/signals', async (_req, res) => {
 // GA Config Endpoint (Rollback/Throttle)
 router.post('/admin/ga/config', express.json(), async (req, res) => {
   try {
-    const { status, maxTenants, maxUsers } = req.body;
-    const updates: any = {};
+      const { status, maxTenants, maxUsers } = req.body;
+      const updates: any = {};
 
-    if (status) updates.status = status;
-    if (maxTenants) updates.maxTenants = maxTenants;
-    if (maxUsers) updates.maxUsers = maxUsers;
+      if (status) updates.status = status;
+      if (maxTenants) updates.maxTenants = maxTenants;
+      if (maxUsers) updates.maxUsers = maxUsers;
 
-    await GAEnrollmentService.updateConfig(updates);
+      await GAEnrollmentService.updateConfig(updates);
 
-    res.json({ ok: true, config: await GAEnrollmentService.getConfig() });
+      res.json({ ok: true, config: await GAEnrollmentService.getConfig() });
   } catch (error: any) {
-    res.status(500).json({ ok: false, error: error instanceof Error ? error.message : 'Unknown error' });
+      res.status(500).json({ ok: false, error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
 
@@ -356,7 +356,7 @@ router.get('/admin/opa/bundle-source', async (_req, res) => {
         const r = await axios.get(url, { timeout: 3000 });
         result = r.data;
         break;
-      } catch (_) { }
+      } catch (_) {}
     }
     if (!result)
       return res.json({ ok: false, message: 'status endpoint not available' });
@@ -413,7 +413,7 @@ router.post('/admin/opa/push-n8n-flows', async (_req, res) => {
     let cfg: any = { allowedFlows: [] };
     try {
       cfg = JSON.parse(fs.readFileSync(n8nCfgPath, 'utf8'));
-    } catch { }
+    } catch {}
     const map: Record<string, boolean> = {};
     for (const f of cfg.allowedFlows || []) map[f] = true;
     await axios.put(`${base}/v1/data/maestro/n8n/allowed_flows`, map, {
@@ -447,7 +447,7 @@ router.post('/admin/opa/sync-n8n-flows', async (_req, res) => {
     };
     try {
       cfg = JSON.parse(fs.readFileSync(n8nCfgPath, 'utf8'));
-    } catch { }
+    } catch {}
     const out = { ...cfg, allowedFlows };
     fs.mkdirSync(path.dirname(n8nCfgPath), { recursive: true });
     fs.writeFileSync(n8nCfgPath, JSON.stringify(out, null, 2) + '\n');
@@ -483,7 +483,7 @@ router.post('/admin/secrets/rotate', express.json(), async (req, res) => {
 
   for (const service of services) {
     console.log(`Updating secret for service: ${service}`);
-    await secretManager.setSecret(secretName, 'current', (await secretManager.getSecret(secretName, newVersion as string)) as string);
+    await secretManager.setSecret(secretName, 'current', await secretManager.getSecret(secretName, newVersion));
     console.log(`Health check for service ${service}...`);
     const healthUrl = serviceRegistry.getServiceHealthUrl(service);
     if (!healthUrl) {
@@ -536,7 +536,7 @@ router.post('/admin/opa/push-n8n-prefixes', async (_req, res) => {
     };
     try {
       cfg = JSON.parse(fs.readFileSync(n8nCfgPath, 'utf8'));
-    } catch { }
+    } catch {}
     await axios.put(
       `${base}/v1/data/maestro/n8n/allowed_prefixes`,
       (cfg.allowedPrefixes || []).reduce(
@@ -584,7 +584,7 @@ router.post('/admin/opa/sync-n8n-prefixes', async (_req, res) => {
     };
     try {
       cfg = JSON.parse(fs.readFileSync(n8nCfgPath, 'utf8'));
-    } catch { }
+    } catch {}
     const out = { ...cfg, allowedPrefixes, deniedPrefixes };
     fs.mkdirSync(path.dirname(n8nCfgPath), { recursive: true });
     fs.writeFileSync(n8nCfgPath, JSON.stringify(out, null, 2) + '\n');
@@ -627,7 +627,7 @@ router.post('/admin/opa/push-n8n-flows', async (_req, res) => {
     let cfg: any = { allowedFlows: [] };
     try {
       cfg = JSON.parse(fs.readFileSync(n8nCfgPath, 'utf8'));
-    } catch { }
+    } catch {}
     const map: Record<string, boolean> = {};
     for (const f of cfg.allowedFlows || []) map[f] = true;
     await axios.put(`${base}/v1/data/maestro/n8n/allowed_flows`, map, {
