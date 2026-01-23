@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/training-strategies",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Deep learning training-strategies for Summit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

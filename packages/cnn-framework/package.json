@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/cnn-framework",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Convolutional Neural Network framework for Summit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

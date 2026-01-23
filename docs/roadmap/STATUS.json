@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-15T20:40:00Z",
-  "revision_note": "Added GA demo path runbooks for security, integration chain, and OSINT slice",
+  "last_updated": "2026-01-23T07:15:00Z",
+  "revision_note": "Merged: GA demo runbooks, GenUI GA contract artifacts, evidence-id determinism, typecheck gate",
   "initiatives": [
     {
       "id": "A",

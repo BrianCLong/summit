@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -43,6 +43,7 @@ import {
   Timeline,
 } from '@mui/icons-material';
 import { useSafeQuery } from '../../hooks/useSafeQuery';
+import { useNavigate } from 'react-router-dom';
 
 interface IOC {
   id: string;
@@ -127,14 +128,40 @@ const getTLPColor = (tlp: IOC['tlp']) => {
   }
 };
 
+const IOC_TYPES: IOC['type'][] = [
+  'IP',
+  'DOMAIN',
+  'URL',
+  'FILE_HASH',
+  'EMAIL',
+  'PHONE',
+  'REGISTRY',
+  'CERTIFICATE',
+];
+
+const TLP_LEVELS: IOC['tlp'][] = ['WHITE', 'GREEN', 'AMBER', 'RED'];
+
+const normalizeType = (value?: string): IOC['type'] => {
+  const upper = (value || '').toUpperCase();
+  return IOC_TYPES.includes(upper as IOC['type']) ? (upper as IOC['type']) : 'IP';
+};
+
+const normalizeTlp = (value?: string, fallback: IOC['tlp'] = 'GREEN') => {
+  const upper = (value || '').toUpperCase();
+  return TLP_LEVELS.includes(upper as IOC['tlp'])
+    ? (upper as IOC['tlp'])
+    : fallback;
+};
+
 export default function IOCList() {
+  const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState(0);
   const [filterType, setFilterType] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
 
-  const { data: iocs, loading } = useSafeQuery<IOC[]>({
+  const { data: fetchedIocs, loading } = useSafeQuery<IOC[]>({
     queryKey: `ioc_list_${filterType}_${filterStatus}`,
     mock: [
       {
@@ -226,6 +253,182 @@ export default function IOCList() {
     ],
     deps: [filterType, filterStatus],
   });
+
+  const [localIocs, setLocalIocs] = useState<IOC[]>([]);
+  const [importPayload, setImportPayload] = useState('');
+  const [importTlp, setImportTlp] = useState<IOC['tlp']>('GREEN');
+  const [importError, setImportError] = useState<string | null>(null);
+  const [newIoc, setNewIoc] = useState({
+    type: 'IP' as IOC['type'],
+    value: '',
+    tlp: 'GREEN' as IOC['tlp'],
+    source: '',
+    tags: '',
+    description: '',
+  });
+
+  useEffect(() => {
+    if (fetchedIocs) setLocalIocs(fetchedIocs);
+  }, [fetchedIocs]);
+
+  const resetNewIoc = () =>
+    setNewIoc({
+      type: 'IP',
+      value: '',
+      tlp: 'GREEN',
+      source: '',
+      tags: '',
+      description: '',
+    });
+
+  const closeAddDialog = () => {
+    setAddDialogOpen(false);
+    resetNewIoc();
+  };
+
+  const closeImportDialog = () => {
+    setImportDialogOpen(false);
+    setImportError(null);
+    setImportPayload('');
+  };
+
+  const handleAddIoc = () => {
+    const id =
+      typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : `ioc-${Date.now()}`;
+    const now = new Date().toISOString();
+    const tags = newIoc.tags
+      .split(',')
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+
+    const next: IOC = {
+      id,
+      type: newIoc.type,
+      value: newIoc.value,
+      risk: 50,
+      status: 'INVESTIGATING',
+      source: newIoc.source || 'Manual Entry',
+      firstSeen: now,
+      lastSeen: now,
+      hits: 0,
+      tags,
+      description: newIoc.description || undefined,
+      tlp: newIoc.tlp,
+    };
+
+    setLocalIocs((prev) => [next, ...prev]);
+    closeAddDialog();
+  };
+
+  const handleImport = () => {
+    setImportError(null);
+    const raw = importPayload.trim();
+    if (!raw) {
+      setImportError('Provide IOC data to import.');
+      return;
+    }
+
+    try {
+      let incoming: IOC[] = [];
+      if (raw.startsWith('[') || raw.startsWith('{')) {
+        const parsed: unknown = JSON.parse(raw);
+        const list = Array.isArray(parsed) ? parsed : [parsed];
+        incoming = list.map((entry) => {
+          const item =
+            entry && typeof entry === 'object'
+              ? (entry as Record<string, unknown>)
+              : {};
+          const status =
+            typeof item.status === 'string' &&
+            ['ACTIVE', 'INACTIVE', 'INVESTIGATING', 'FALSE_POSITIVE'].includes(
+              item.status,
+            )
+              ? (item.status as IOC['status'])
+              : 'INVESTIGATING';
+          const tags = Array.isArray(item.tags)
+            ? item.tags.map((tag) => String(tag))
+            : String(item.tags || '')
+                .split(',')
+                .map((tag) => tag.trim())
+                .filter(Boolean);
+          return {
+            id:
+              typeof crypto !== 'undefined' && 'randomUUID' in crypto
+                ? crypto.randomUUID()
+                : `ioc-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            type: normalizeType(
+              typeof item.type === 'string' ? item.type : undefined,
+            ),
+            value: String(item.value || ''),
+            risk: Number(item.risk || 50),
+            status,
+            source: typeof item.source === 'string' ? item.source : 'Imported',
+            firstSeen:
+              typeof item.firstSeen === 'string'
+                ? item.firstSeen
+                : new Date().toISOString(),
+            lastSeen:
+              typeof item.lastSeen === 'string'
+                ? item.lastSeen
+                : new Date().toISOString(),
+            hits: Number(item.hits || 0),
+            tags,
+            description:
+              typeof item.description === 'string' ? item.description : undefined,
+            tlp: normalizeTlp(
+              typeof item.tlp === 'string' ? item.tlp : undefined,
+              importTlp,
+            ),
+          };
+        });
+      } else {
+        const lines = raw.split(/\r?\n/).filter(Boolean);
+        const header = lines[0]?.toLowerCase().includes('type');
+        const dataLines = header ? lines.slice(1) : lines;
+        incoming = dataLines.map((line) => {
+          const [type, value, source, tlp, tags, description] = line
+            .split(',')
+            .map((part) => part.trim());
+          const now = new Date().toISOString();
+          return {
+            id:
+              typeof crypto !== 'undefined' && 'randomUUID' in crypto
+                ? crypto.randomUUID()
+                : `ioc-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            type: normalizeType(type),
+            value: value || '',
+            risk: 50,
+            status: 'INVESTIGATING',
+            source: source || 'Imported',
+            firstSeen: now,
+            lastSeen: now,
+            hits: 0,
+            tags: (tags || '')
+              .split('|')
+              .flatMap((tag) => tag.split(';'))
+              .flatMap((tag) => tag.split(','))
+              .map((tag) => tag.trim())
+              .filter(Boolean),
+            description: description || undefined,
+            tlp: normalizeTlp(tlp, importTlp),
+          };
+        });
+      }
+
+      if (!incoming.length) {
+        setImportError('No valid IOC entries detected.');
+        return;
+      }
+      setLocalIocs((prev) => [...incoming, ...prev]);
+      closeImportDialog();
+    } catch (err) {
+      setImportError(
+        err instanceof Error ? err.message : 'Failed to parse import payload.',
+      );
+    }
+  };
 
   const columns: GridColDef<IOC>[] = [
     {
@@ -385,18 +588,19 @@ export default function IOCList() {
   ];
 
   const filteredIOCs =
-    iocs?.filter((ioc) => {
+    localIocs?.filter((ioc) => {
       if (selectedTab === 1 && ioc.status !== 'ACTIVE') return false;
       if (selectedTab === 2 && ioc.risk < 70) return false;
       if (selectedTab === 3 && ioc.status !== 'INVESTIGATING') return false;
       return true;
     }) || [];
 
-  const activeIOCs = iocs?.filter((i) => i.status === 'ACTIVE').length || 0;
-  const highRiskIOCs = iocs?.filter((i) => i.risk >= 70).length || 0;
-  const totalHits = iocs?.reduce((sum, ioc) => sum + ioc.hits, 0) || 0;
+  const activeIOCs =
+    localIocs?.filter((i) => i.status === 'ACTIVE').length || 0;
+  const highRiskIOCs = localIocs?.filter((i) => i.risk >= 70).length || 0;
+  const totalHits = localIocs?.reduce((sum, ioc) => sum + ioc.hits, 0) || 0;
   const investigatingIOCs =
-    iocs?.filter((i) => i.status === 'INVESTIGATING').length || 0;
+    localIocs?.filter((i) => i.status === 'INVESTIGATING').length || 0;
 
   return (
     <Box sx={{ m: 2 }}>
@@ -525,7 +729,7 @@ export default function IOCList() {
 
           <Box sx={{ width: '100%' }}>
             <Tabs value={selectedTab} onChange={(_, v) => setSelectedTab(v)}>
-              <Tab label={`All IOCs (${iocs?.length || 0})`} />
+              <Tab label={`All IOCs (${localIocs?.length || 0})`} />
               <Tab label={`Active (${activeIOCs})`} />
               <Tab label={`High Risk (${highRiskIOCs})`} />
               <Tab label={`Under Investigation (${investigatingIOCs})`} />
@@ -539,8 +743,8 @@ export default function IOCList() {
               disableRowSelectionOnClick
               density="compact"
               loading={loading}
-              onRowDoubleClick={() => {
-                // TODO: Navigate to IOC detail page
+              onRowDoubleClick={(params) => {
+                navigate(`/ioc/${params.row.id}`);
               }}
               sx={{
                 '& .MuiDataGrid-row:hover': {
@@ -555,7 +759,7 @@ export default function IOCList() {
       {/* Add IOC Dialog */}
       <Dialog
         open={addDialogOpen}
-        onClose={() => setAddDialogOpen(false)}
+        onClose={closeAddDialog}
         maxWidth="md"
         fullWidth
       >
@@ -564,7 +768,16 @@ export default function IOCList() {
           <Stack spacing={3} sx={{ mt: 1 }}>
             <FormControl fullWidth>
               <InputLabel>IOC Type</InputLabel>
-              <Select label="IOC Type">
+              <Select
+                label="IOC Type"
+                value={newIoc.type}
+                onChange={(e) =>
+                  setNewIoc((prev) => ({
+                    ...prev,
+                    type: e.target.value as IOC['type'],
+                  }))
+                }
+              >
                 <MenuItem value="IP">IP Address</MenuItem>
                 <MenuItem value="DOMAIN">Domain Name</MenuItem>
                 <MenuItem value="URL">URL</MenuItem>
@@ -581,10 +794,23 @@ export default function IOCList() {
               fullWidth
               label="IOC Value"
               placeholder="Enter the indicator value..."
+              value={newIoc.value}
+              onChange={(e) =>
+                setNewIoc((prev) => ({ ...prev, value: e.target.value }))
+              }
             />
             <FormControl fullWidth>
               <InputLabel>TLP Classification</InputLabel>
-              <Select label="TLP Classification">
+              <Select
+                label="TLP Classification"
+                value={newIoc.tlp}
+                onChange={(e) =>
+                  setNewIoc((prev) => ({
+                    ...prev,
+                    tlp: e.target.value as IOC['tlp'],
+                  }))
+                }
+              >
                 <MenuItem value="WHITE">TLP:WHITE - Unlimited sharing</MenuItem>
                 <MenuItem value="GREEN">TLP:GREEN - Community sharing</MenuItem>
                 <MenuItem value="AMBER">TLP:AMBER - Limited sharing</MenuItem>
@@ -595,11 +821,19 @@ export default function IOCList() {
               fullWidth
               label="Source"
               placeholder="e.g., VirusTotal, Internal Analysis, ThreatConnect"
+              value={newIoc.source}
+              onChange={(e) =>
+                setNewIoc((prev) => ({ ...prev, source: e.target.value }))
+              }
             />
             <TextField
               fullWidth
               label="Tags"
               placeholder="e.g., APT29, Phishing, Malware (comma-separated)"
+              value={newIoc.tags}
+              onChange={(e) =>
+                setNewIoc((prev) => ({ ...prev, tags: e.target.value }))
+              }
             />
             <TextField
               fullWidth
@@ -607,17 +841,19 @@ export default function IOCList() {
               rows={3}
               label="Description"
               placeholder="Describe the context and significance of this IOC..."
+              value={newIoc.description}
+              onChange={(e) =>
+                setNewIoc((prev) => ({ ...prev, description: e.target.value }))
+              }
             />
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setAddDialogOpen(false)}>Cancel</Button>
+          <Button onClick={closeAddDialog}>Cancel</Button>
           <Button
             variant="contained"
-            onClick={() => {
-              setAddDialogOpen(false);
-              // TODO: Add IOC logic here
-            }}
+            onClick={handleAddIoc}
+            disabled={!newIoc.value.trim()}
           >
             Add IOC
           </Button>
@@ -627,7 +863,7 @@ export default function IOCList() {
       {/* Import IOC Dialog */}
       <Dialog
         open={importDialogOpen}
-        onClose={() => setImportDialogOpen(false)}
+        onClose={closeImportDialog}
         maxWidth="sm"
         fullWidth
       >
@@ -638,6 +874,7 @@ export default function IOCList() {
               Upload a CSV file with columns: type, value, source, tlp, tags,
               description
             </Alert>
+            {importError && <Alert severity="error">{importError}</Alert>}
             <Paper
               variant="outlined"
               sx={{
@@ -658,9 +895,19 @@ export default function IOCList() {
             </Paper>
             <TextField
               fullWidth
+              multiline
+              minRows={4}
+              label="Paste IOC data"
+              placeholder="type,value,source,tlp,tags,description"
+              value={importPayload}
+              onChange={(e) => setImportPayload(e.target.value)}
+            />
+            <TextField
+              fullWidth
               select
               label="Default TLP Classification"
-              defaultValue="GREEN"
+              value={importTlp}
+              onChange={(e) => setImportTlp(e.target.value as IOC['tlp'])}
             >
               <MenuItem value="WHITE">TLP:WHITE</MenuItem>
               <MenuItem value="GREEN">TLP:GREEN</MenuItem>
@@ -670,13 +917,10 @@ export default function IOCList() {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setImportDialogOpen(false)}>Cancel</Button>
+          <Button onClick={closeImportDialog}>Cancel</Button>
           <Button
             variant="contained"
-            onClick={() => {
-              setImportDialogOpen(false);
-              // TODO: Import IOCs logic here
-            }}
+            onClick={handleImport}
           >
             Import
           </Button>
