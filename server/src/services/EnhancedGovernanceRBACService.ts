@@ -9,7 +9,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ForbiddenError, AuthenticationError } from 'apollo-server-express';
 import { Pool } from 'pg';
-import logger from '../utils/logger.js';
+import pino from 'pino';
 import { WarrantService } from '../services/WarrantService.js';
 
 export interface GovernanceContext {
@@ -894,7 +894,8 @@ export class EnhancedGovernanceService {
  * Initialize the enhanced governance service
  */
 export const initializeEnhancedGovernance = (db: Pool, warrantService: WarrantService) => {
-  const service = new EnhancedGovernanceService(db, warrantService, logger as any);
+  const logger = pino();
+  const service = new EnhancedGovernanceService(db, warrantService, logger);
   
   return {
     service,

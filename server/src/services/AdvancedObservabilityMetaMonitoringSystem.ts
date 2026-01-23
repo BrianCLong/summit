@@ -11,12 +11,7 @@ import logger from '../utils/logger.js';
 import { trackError } from '../monitoring/middleware.js';
 import { EnhancedGovernanceService } from './EnhancedGovernanceRBACService.js';
 import { NextGenPerformanceOptimizationService } from './NextGenPerformanceOptimizationService.js';
-// Stub for MultiAgentCollaborationManager (module not yet implemented)
-class MultiAgentCollaborationManager {
-  async initialize(): Promise<void> { /* stub */ }
-  async shutdown(): Promise<void> { /* stub */ }
-  async getHealthStatus(): Promise<{ status: string }> { return { status: 'ok' }; }
-}
+import { MultiAgentCollaborationManager } from './MultiAgentCollaborationWorkflows.js';
 
 interface ObservabilityMetric {
   id: string;
@@ -101,10 +96,10 @@ interface MetaMonitoringReport {
  * Advanced Observability & Meta-Monitoring Service
  */
 export class AdvancedObservabilityMetaMonitoringService {
-  public config: AdvancedObservabilityConfig;
+  private config: AdvancedObservabilityConfig;
   private metricsStore: Map<string, ObservabilityMetric[]>;
   private dashboardData: any;
-  public consciousnessLevel: number;
+  private consciousnessLevel: number;
   private quantumSafetyLevel: number;
   private governedService: EnhancedGovernanceService;
   private perfOptService: NextGenPerformanceOptimizationService;
@@ -144,7 +139,7 @@ export class AdvancedObservabilityMetaMonitoringService {
     this.metricsStore = new Map();
     this.consciousnessLevel = 8.0; // High consciousness for monitoring
     this.quantumSafetyLevel = 0.95; // Quantum-ready
-    this.governedService = governedService || ({} as EnhancedGovernanceService);
+    this.governedService = governedService || new EnhancedGovernanceService();
     this.perfOptService = perfOptService || new NextGenPerformanceOptimizationService();
     this.collaborationManager = collaborationManager || new MultiAgentCollaborationManager();
     
@@ -159,9 +154,9 @@ export class AdvancedObservabilityMetaMonitoringService {
   async initialize(): Promise<void> {
     logger.info('Initializing advanced observability system...');
     
-    // Initialize all integrated services (optional chaining for stub services)
-    await (this.governedService as any)?.initialize?.();
-    await (this.perfOptService as any)?.initialize?.();
+    // Initialize all integrated services
+    await this.governedService.initialize();
+    await this.perfOptService.initialize();
     await this.collaborationManager.initialize();
     
     // Start dashboard data refresh
@@ -503,10 +498,10 @@ export class AdvancedObservabilityMetaMonitoringService {
     const serviceHealth: Record<string, any> = {};
     
     // Governance service health
-    serviceHealth['governance-rbac'] = await (this.governedService as any)?.healthCheck?.() ?? { status: 'ok' };
+    serviceHealth['governance-rbac'] = await this.governedService.healthCheck();
 
     // Performance optimization service health
-    serviceHealth['performance-optimization'] = await (this.perfOptService as any)?.getHealthStatus?.() ?? { status: 'ok' };
+    serviceHealth['performance-optimization'] = await this.perfOptService.getHealthStatus();
     
     // Multi-agent collaboration health
     serviceHealth['multi-agent-collaboration'] = await this.collaborationManager.getHealthStatus();
@@ -667,7 +662,7 @@ export class AdvancedObservabilityMetaMonitoringService {
   /**
    * Generate dashboard-ready data
    */
-  public async generateDashboardData(): Promise<any> {
+  private async generateDashboardData(): Promise<any> {
     const health = await this.getPlatformHealth();
     
     return {
