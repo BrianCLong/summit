@@ -8,7 +8,7 @@ import {
   CardContent,
   CardFooter,
 } from '@/components/ui/Card';
-import { AlertTriangle, RefreshCw, Home, Loader2, ExternalLink } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface ErrorFallbackProps {
@@ -17,12 +17,6 @@ interface ErrorFallbackProps {
   title?: string;
   description?: string;
   showHomeButton?: boolean;
-  showRetry?: boolean;
-  isRetrying?: boolean;
-  retryCount?: number;
-  maxRetries?: number;
-  errorCode?: string;
-  supportLink?: string;
 }
 
 export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
@@ -31,12 +25,6 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   title = 'Something went wrong',
   description = 'An unexpected error occurred. Please try again.',
   showHomeButton = true,
-  showRetry = false,
-  isRetrying = false,
-  retryCount = 0,
-  maxRetries = 3,
-  errorCode,
-  supportLink = '/help',
 }) => {
   const navigate = useNavigate();
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -55,13 +43,6 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
       resetErrorBoundary();
     }
   };
-
-  const canRetry = showRetry && retryCount < maxRetries;
-  const retryButtonText = isRetrying
-    ? `Retrying (${retryCount}/${maxRetries})...`
-    : canRetry
-    ? `Try Again (${retryCount}/${maxRetries})`
-    : 'Retry limit reached';
 
   return (
     <div
@@ -95,60 +76,24 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
             </div>
           )}
           {!import.meta.env.DEV && (
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                Our team has been notified of this issue.
-              </p>
-              {errorCode && (
-                <p className="text-xs text-muted-foreground font-mono">
-                  Error code: <span className="font-semibold">{errorCode}</span>
-                </p>
-              )}
-            </div>
+            <p className="text-sm text-muted-foreground">
+              Our team has been notified of this issue.
+            </p>
           )}
+          {/* Operator safe details - Correlation ID could go here if available */}
         </CardContent>
-        <CardFooter className="flex flex-col gap-3">
-          <div className="flex gap-3 w-full justify-end">
-            {showHomeButton && (
-              <Button variant="outline" onClick={handleHome}>
-                <Home className="mr-2 h-4 w-4" />
-                Back to Workspace
-              </Button>
-            )}
-            {showRetry && resetErrorBoundary && (
-              <Button
-                onClick={resetErrorBoundary}
-                variant="default"
-                disabled={!canRetry || isRetrying}
-              >
-                {isRetrying ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {retryButtonText}
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    {retryButtonText}
-                  </>
-                )}
-              </Button>
-            )}
-            {!showRetry && resetErrorBoundary && (
-              <Button onClick={resetErrorBoundary} variant="default">
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Try Again
-              </Button>
-            )}
-          </div>
-          {supportLink && (
-            <a
-              href={supportLink}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-            >
-              Need help? Contact support
-              <ExternalLink className="h-3 w-3" />
-            </a>
+        <CardFooter className="flex gap-3 justify-end">
+          {showHomeButton && (
+            <Button variant="outline" onClick={handleHome}>
+              <Home className="mr-2 h-4 w-4" />
+              Go Home
+            </Button>
+          )}
+          {resetErrorBoundary && (
+            <Button onClick={resetErrorBoundary} variant="default">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Try Again
+            </Button>
           )}
         </CardFooter>
       </Card>

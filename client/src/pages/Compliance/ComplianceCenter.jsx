@@ -8,7 +8,7 @@
  * @module pages/Compliance/ComplianceCenter
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Container,
@@ -39,11 +39,13 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Divider,
 } from '@mui/material';
 import {
   CheckCircle,
   Error,
   Warning,
+  Refresh,
   Assessment,
   Description,
   Category,

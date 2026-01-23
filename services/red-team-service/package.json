@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/red-team-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Red Team Operations Service - Orchestration and management",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

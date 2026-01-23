@@ -53,7 +53,9 @@ import { usePolicySimulator, usePolicies } from '../../hooks/usePolicies';
 import {
   SimulationRequest,
   SimulationContext,
+  SimulationResult,
   PolicyRule,
+  ImpactAnalysis,
   ManagedPolicy,
 } from '../../services/policy-api';
 
@@ -129,11 +131,6 @@ const defaultContext: SimulationContext = {
   simulation: true,
 };
 
-const getErrorMessage = (err: unknown): string => {
-  if (err instanceof Error) return err.message;
-  return 'Invalid JSON';
-};
-
 // ============================================================================
 // Component
 // ============================================================================
@@ -167,8 +164,8 @@ const PolicySimulator: React.FC = () => {
       JSON.parse(json);
       setJsonErrors((prev) => ({ ...prev, [field]: undefined }));
       return true;
-    } catch (err) {
-      setJsonErrors((prev) => ({ ...prev, [field]: getErrorMessage(err) }));
+    } catch (err: any) {
+      setJsonErrors((prev) => ({ ...prev, [field]: err.message }));
       return false;
     }
   }, []);

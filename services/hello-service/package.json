@@ -1,6 +1,6 @@
 {
   "name": "hello-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "A simple hello world service for the Golden Path pipeline.",
   "main": "index.js",
   "scripts": {

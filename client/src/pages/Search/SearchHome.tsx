@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Tabs,
   Tab,
@@ -9,7 +9,6 @@ import {
   Typography,
   Card,
   CardContent,
-  Chip,
   IconButton,
   Tooltip,
   FormControl,
@@ -43,7 +42,6 @@ import {
 } from '@mui/icons-material';
 import ResultList from './components/ResultList';
 import { useSafeQuery } from '../../hooks/useSafeQuery';
-import { useNavigate } from 'react-router-dom';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -70,11 +68,9 @@ interface SearchResult {
 }
 
 export default function SearchHome() {
-  const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [savedSearches] = useState<string[]>([
     'APT29 related entities',
     'Financial transactions > $10,000',
@@ -120,15 +116,6 @@ export default function SearchHome() {
       : [],
     deps: [searchQuery],
   });
-
-  const filteredResults = useMemo(() => {
-    if (!searchResults) return [];
-    if (!tagFilter) return searchResults;
-    const normalized = tagFilter.toLowerCase();
-    return searchResults.filter((result) =>
-      result.tags.some((tag) => tag.toLowerCase() === normalized),
-    );
-  }, [searchResults, tagFilter]);
 
   const handleSearch = () => {
     setIsSearching(true);
@@ -281,35 +268,10 @@ export default function SearchHome() {
 
             <Grid xs={12} md={9}>
               {searchQuery ? (
-                <>
-                  {tagFilter && (
-                    <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-                      <Chip
-                        label={`Tag: ${tagFilter}`}
-                        onDelete={() => setTagFilter(null)}
-                        variant="outlined"
-                        color="primary"
-                      />
-                    </Stack>
-                  )}
-                  <ResultList
-                    results={filteredResults}
-                    loading={isSearching}
-                    onResultSelect={(result) => {
-                      const href =
-                        result.type === 'IOC'
-                          ? `/ioc/${result.id}`
-                          : `/search/results/${result.id}?type=${result.type}`;
-                      navigate(href);
-                    }}
-                    onTagSelect={(tag) => setTagFilter(tag)}
-                    getResultHref={(result) =>
-                      result.type === 'IOC'
-                        ? `/ioc/${result.id}`
-                        : `/search/results/${result.id}?type=${result.type}`
-                    }
-                  />
-                </>
+                <ResultList
+                  results={searchResults || []}
+                  loading={isSearching}
+                />
               ) : (
                 <Card sx={{ borderRadius: 3 }}>
                   <CardContent sx={{ textAlign: 'center', py: 6 }}>

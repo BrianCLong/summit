@@ -406,12 +406,3 @@ pipelines-list: ## List registered pipelines
 
 pipelines-validate: ## Validate pipeline manifests
 	@python3 pipelines/cli.py validate
-
-test-security: ## Run security verifications
-	@echo "Running Security Tests..."
-	@npx tsx --test server/src/utils/__tests__/security.test.ts
-	@bash scripts/ci/scan_secrets.sh --dry-run || true
-
-test-compliance: ## Run compliance controls as tests
-	@echo "Running Compliance Tests..."
-	@node --test compliance/soc/*.test.mjs

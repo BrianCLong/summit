@@ -7,10 +7,10 @@ pydantic==2.12.5
 
 # Scientific computing & ML
 numpy==1.24.3
-scipy==1.17.0
+scipy==1.16.3
 
 # Metrics and monitoring
-prometheus-client==0.24.1
+prometheus-client==0.23.1
 
 # HTTP client for testing
 requests==2.32.5

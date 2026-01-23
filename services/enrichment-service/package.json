@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/enrichment-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Data enrichment service for OSINT",
   "type": "module",
   "main": "dist/server.js",

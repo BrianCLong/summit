@@ -75,32 +75,3 @@ export interface StudioTickResult {
   operationEffectiveness: Record<string, number>;
   notes: string[];
 }
-
-// Market of Narratives Types
-
-export interface IdentityCluster {
-  id: string;
-  name: string;
-  values: string[]; // e.g., ["security-first", "institutional-trusting"]
-  size: number; // 0.0 to 1.0, representing share of population
-}
-
-export interface NarrativeMarket {
-  id: string;
-  topic: string; // e.g., "Election Integrity"
-  narrativeIds: string[];
-  audienceSegments: string[]; // IdentityCluster IDs
-}
-
-export interface NarrativeAlignment {
-  narrativeId: string;
-  clusterId: string;
-  score: number; // -1.0 to 1.0 (dissonance to resonance)
-}
-
-export interface MarketSnapshot {
-  timestamp: number;
-  marketId: string;
-  narrativeShares: Record<string, number>; // NarrativeID -> Share (0.0 to 1.0)
-  clusterSaturation: Record<string, number>; // ClusterID -> Saturation (0.0 to 1.0)
-}

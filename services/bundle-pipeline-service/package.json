@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/bundle-pipeline-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Evidence Bundle & Briefing Pipeline Service for IntelGraph",
   "main": "dist/index.js",
   "type": "module",

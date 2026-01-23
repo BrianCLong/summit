@@ -97,7 +97,7 @@ jobs:
           echo "Resolved commit: ${COMMIT}"
 
       - name: Setup Node.js
-        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
           node-version: "20"
 
@@ -396,7 +396,7 @@ jobs:
           retention-days: 90
 
       - name: Cleanup Intermediate Artifacts
-        uses: geekyeggo/delete-artifact@f275313e70c08f6120db482d7a6b98377786765b # v5
+        uses: geekyeggo/delete-artifact@b54d29a59e55046d1f7fc8226cdda507e6b9cf62 # v5
         with:
           name: verification-output
           failOnError: false

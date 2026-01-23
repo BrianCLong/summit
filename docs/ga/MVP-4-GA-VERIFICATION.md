@@ -12,7 +12,6 @@ This sweep captures the minimum credible verification for the GA-hardening surfa
 | Data Classification & Governance | `testing/ga-verification/ga-features.ga.test.mjs` (ensures governance reference file is present)                            | B    | `make ga-verify`          | Guards the authoritative governance doc.                                                                      |
 | Policy Preflight & Receipts      | `scripts/ga/verify-ga-surface.mjs` (schema validation for verification map + provenance doc presence)                       | C    | `make ga-verify`          | Policy-as-code validation without depending on the test runner.                                               |
 | Ingestion Security Hardening     | `testing/ga-verification/ga-features.ga.test.mjs` (checks ingestion hardening evidence)                                     | B    | `make ga-verify`          | Ensures security expectations remain documented and discoverable.                                             |
-| Generative UI Plan Contract      | `docs/ga/genui/UI_CONTRACT.md` (contract, tool manual, anti-footguns evidence)                                              | C    | `make ga-verify`          | Confirms the GenUI plan contract, tool schema, and safety guardrails are anchored in GA docs.                 |
 
 ## Deferred / To-Improve Items
 

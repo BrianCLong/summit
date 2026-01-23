@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/scaffold-cli",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Golden Path Platform scaffolding CLI for CompanyOS services",
   "type": "module",
   "bin": {

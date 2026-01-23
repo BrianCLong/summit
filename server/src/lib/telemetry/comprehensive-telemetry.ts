@@ -74,49 +74,21 @@ class ComprehensiveTelemetry {
     duration: number,
     attributes: Record<string, string | number>,
   ) {
-    const labels = {
-      method: String(attributes.method || 'GET'),
-      route: String(attributes.route || 'unknown'),
-      status_code: String(attributes.status || 200),
-    };
-
-    // Forward to standard metrics (for dashboard)
-    if (metrics.stdHttpRequestDuration) {
-      metrics.stdHttpRequestDuration.observe(labels, duration);
-    }
-    if (metrics.stdHttpRequestsTotal) {
-      metrics.stdHttpRequestsTotal.inc(labels);
-    }
-
-    // Forward to legacy metric (intelgraph_ prefix)
-    // Note: legacy metric uses 'status' label instead of 'status_code'
-    const legacyLabels = {
-      method: String(attributes.method || 'GET'),
-      route: String(attributes.route || 'unknown'),
-      status: String(attributes.status || 200),
-    };
-    metrics.httpRequestDuration.observe(legacyLabels, duration);
+    // Forward to new metric
+    metrics.httpRequestDuration.observe(
+      attributes as Record<string, string>,
+      duration,
+    );
   }
 
   public incrementActiveConnections() {
     this.activeConnectionsCount++;
-    if (metrics.websocketConnections) {
-      metrics.websocketConnections.inc();
-    }
-    // Also update legacy metric if possible, assuming single tenant or unknown
-    if (metrics.intelgraphActiveConnections) {
-      metrics.intelgraphActiveConnections.set({ tenant: 'unknown' }, this.activeConnectionsCount);
-    }
+    this.activeConnections.add(1);
   }
 
   public decrementActiveConnections() {
     this.activeConnectionsCount--;
-    if (metrics.websocketConnections) {
-      metrics.websocketConnections.dec();
-    }
-    if (metrics.intelgraphActiveConnections) {
-      metrics.intelgraphActiveConnections.set({ tenant: 'unknown' }, this.activeConnectionsCount);
-    }
+    this.activeConnections.add(-1);
   }
 
   public onMetric(_listener: (metricName: string, value: number) => void) {

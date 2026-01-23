@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/dashboard-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Backend service for dashboard management",
   "main": "dist/index.js",
   "scripts": {

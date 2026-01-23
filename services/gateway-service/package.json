@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/gateway-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Summit API Gateway Service - Main orchestration service",
   "type": "module",
   "main": "dist/index.js",

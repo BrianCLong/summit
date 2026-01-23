@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/geopolitical-analysis",
-  "version": "4.2.3",
+  "version": "4.1.4",
   "description": "Geopolitical risk analysis, indicators, and scenario modeling for IntelGraph",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

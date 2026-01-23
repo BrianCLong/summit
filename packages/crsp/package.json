@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/crsp",
-  "version": "4.2.3",
+  "version": "4.1.4",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
