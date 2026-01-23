@@ -104,6 +104,37 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: genui-plan-scaffold
+    version: v1
+    path: prompts/genui/genui-plan-scaffold@v1.md
+    sha256: 204eaff65c2739b657e996c6b551d47ae1ecdf8ce3b85be654c9372d71016e9b
+    description: Ship the Summit-native GenUI plan scaffold, GA docs, and verification updates.
+    scope:
+      paths:
+        - packages/genui/
+        - docs/ga/genui/
+        - docs/ga/MVP-4-GA-VERIFICATION.md
+        - docs/ga/verification-map.json
+        - scripts/ga/verify-ga-surface.mjs
+        - agent-contract.json
+        - docs/roadmap/STATUS.json
+        - AGENT_ACTIVITY.md
+        - prompts/genui/genui-plan-scaffold@v1.md
+        - prompts/registry.yaml
+      domains:
+        - genui
+        - governance
+        - documentation
+        - verification
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: governance-docs-soc-controls
     version: v1
     path: prompts/governance/governance-docs-soc-controls@v1.md
