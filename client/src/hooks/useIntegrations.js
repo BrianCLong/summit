@@ -273,7 +273,7 @@ export function useIntegrationAudit(params = {}) {
     } finally {
       setLoading(false);
     }
-  }, [params.integrationId, params.from, params.to]);
+  }, [params]);
 
   useEffect(() => {
     fetchAuditLog();
