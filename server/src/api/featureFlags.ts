@@ -1,5 +1,5 @@
 // server/src/api/featureFlags.ts
-import express, { Request, Response, Router } from 'express';
+import express, { Request, Response, Router, NextFunction } from 'express';
 import { FeatureFlagService } from '../featureFlags/FeatureFlagService';
 import { ConfigService } from '../featureFlags/ConfigService';
 import { EvaluationContext } from '../featureFlags/types';
@@ -9,6 +9,47 @@ export interface FeatureFlagApiDependencies {
   featureFlagService: FeatureFlagService;
   configService: ConfigService;
 }
+
+/**
+ * Middleware to require authentication
+ * Assumes req.user is set by upstream auth middleware (e.g., passport, JWT)
+ */
+const requireAuth = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user) {
+    return res.status(401).json({
+      error: 'Authentication required',
+      message: 'You must be logged in to access this resource'
+    });
+  }
+  next();
+};
+
+/**
+ * Middleware to require admin role
+ * Feature flag mutation (create/update/delete) requires admin privileges
+ */
+const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user) {
+    return res.status(401).json({
+      error: 'Authentication required',
+      message: 'You must be logged in to access this resource'
+    });
+  }
+
+  const user = req.user as any;
+  const isAdmin = user.role === 'admin' || user.roles?.includes('admin') || user.isAdmin === true;
+
+  if (!isAdmin) {
+    return res.status(403).json({
+      error: 'Admin access required',
+      message: 'You do not have permission to modify feature flags',
+      requiredRole: 'admin',
+      yourRole: user.role || 'unknown'
+    });
+  }
+
+  next();
+};
 
 export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Router => {
   const router = express.Router();
@@ -81,10 +122,6 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
     try {
       const { key, enabled = false, description, rolloutPercentage, targetUsers, targetGroups, conditions } = req.body;
 
-      // Authentication and authorization handled by middleware
-      if (!req.user) {
-        return res.status(401).json({ error: 'Unauthorized' });
-      }
 
       // Create the feature flag object
       const newFlag = {
@@ -123,10 +160,6 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       const { flagKey } = req.params;
       const updateData = req.body;
 
-      // Authentication and authorization handled by middleware
-      if (!req.user) {
-        return res.status(401).json({ error: 'Unauthorized' });
-      }
 
       // Update the flag
       // await deps.featureFlagService.updateFlag(flagKey, updateData);
@@ -148,10 +181,6 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
     try {
       const { flagKey } = req.params;
 
-      // Authentication and authorization handled by middleware
-      if (!req.user) {
-        return res.status(401).json({ error: 'Unauthorized' });
-      }
 
       // Delete the flag
       // await deps.featureFlagService.deleteFlag(flagKey);

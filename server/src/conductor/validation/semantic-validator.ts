@@ -104,14 +104,42 @@ interface ModelVerdict {
  * Semantic Context Validator
  *
  * Main class implementing multi-layered adversarial detection.
+ *
+ * ⚠️ WARNING: This implementation currently uses STUB methods that return placeholder values (0.0).
+ * Set SEMANTIC_VALIDATION_ENABLED=false in production until full implementation is complete.
+ *
+ * @experimental
  */
 export class SemanticContextValidator {
+  private readonly enabled: boolean;
+  private readonly logger: any; // TODO: Type properly
+
   constructor(
+    logger?: any,
     // TODO: Inject sentence transformer client (e.g., HuggingFace Transformers)
     // TODO: Inject multi-model consensus service client
     // TODO: Inject LSH injection corpus database
     // TODO: Inject Redis cache client
-  ) {}
+  ) {
+    // Feature flag to disable stub validation in production
+    this.enabled = process.env.SEMANTIC_VALIDATION_ENABLED === 'true';
+    this.logger = logger || console;
+
+    if (!this.enabled) {
+      this.logger.warn(
+        '[SECURITY] SemanticContextValidator is DISABLED. Stub implementations return 0.0 (no actual validation). ' +
+        'Set SEMANTIC_VALIDATION_ENABLED=true only after implementing real validation methods. ' +
+        'See: server/src/conductor/validation/semantic-validator.ts'
+      );
+    } else {
+      this.logger.error(
+        '[SECURITY CRITICAL] SemanticContextValidator is ENABLED but uses STUB implementations! ' +
+        'All validation methods return 0.0 (bypasses security checks). ' +
+        'This is NOT SAFE for production. Disable immediately or implement real validation. ' +
+        'See: server/src/conductor/validation/semantic-validator.ts'
+      );
+    }
+  }
 
   /**
    * Validate context fragment and compute P-score.
@@ -121,16 +149,30 @@ export class SemanticContextValidator {
    *
    * Performance: p99 < 50ms (with cascade optimization and caching)
    *
+   * ⚠️ SECURITY WARNING: Currently uses stub implementations (returns 0.0).
+   * If SEMANTIC_VALIDATION_ENABLED=false, returns safe "allow" decision.
+   * If SEMANTIC_VALIDATION_ENABLED=true, logs critical warning and proceeds with stubs.
+   *
    * @param fragment Context fragment to validate
    * @returns Poisoning score with policy decision
    */
   async validateContext(fragment: ContextFragment): Promise<PoisoningScore> {
-    // ⚠️ WARNING: Semantic validation is NOT IMPLEMENTED (stub methods return 0.0)
-    // This validator currently provides NO SECURITY PROTECTION.
-    // All checks will pass. Do not rely on this for adversarial detection.
-    if (typeof console !== 'undefined' && console.warn) {
-      console.warn('[SECURITY WARNING] SemanticContextValidator.validateContext() called but validation is NOT IMPLEMENTED. All checks return hardcoded 0.0 (safe). Fragment source:', fragment.source.type);
+    // If disabled, return safe "allow" decision without validation
+    if (!this.enabled) {
+      return this.buildPScore({
+        semanticDrift: 0,
+        consensusDisagreement: 0,
+        injectionMatch: 0,
+        perturbationSensitivity: 0,
+      });
     }
+
+    // Log warning that stubs are being used
+    this.logger.warn(
+      `[SECURITY STUB] validateContext called with ENABLED=true but using stub implementations. ` +
+      `Fragment source: ${fragment.source.type}, length: ${fragment.content.length}`
+    );
+
 
     // Cascade optimization: run lightweight checks first
     // If P-score already >0.7 from cheap checks, skip expensive multi-model consensus
@@ -205,6 +247,10 @@ export class SemanticContextValidator {
     // TODO: Normalize to [0, 1]
     // return Math.min(distance / this.MAX_EXPECTED_DISTANCE, 1.0);
 
+    // STUB IMPLEMENTATION
+    if (this.enabled) {
+      this.logger.warn('[STUB] computeSemanticDrift returning 0.0 - NO ACTUAL VALIDATION');
+    }
     return 0.0; // TODO: Implement
   }
 
@@ -245,6 +291,10 @@ export class SemanticContextValidator {
     // TODO: Normalize to [0, 1]
     // return Math.min(variance / this.MAX_EXPECTED_VARIANCE, 1.0);
 
+    // STUB IMPLEMENTATION
+    if (this.enabled) {
+      this.logger.warn('[STUB] runMultiModelConsensus returning 0.0 - NO ACTUAL VALIDATION');
+    }
     return 0.0; // TODO: Implement
   }
 
@@ -286,6 +336,10 @@ export class SemanticContextValidator {
     // TODO: Normalize to [0, 1]
     // return Math.min(avgDistance / this.MAX_EXPECTED_PERTURBATION_DISTANCE, 1.0);
 
+    // STUB IMPLEMENTATION
+    if (this.enabled) {
+      this.logger.warn('[STUB] testPerturbationSensitivity returning 0.0 - NO ACTUAL VALIDATION');
+    }
     return 0.0; // TODO: Implement
   }
 
@@ -319,6 +373,10 @@ export class SemanticContextValidator {
     // if (matches.length === 0) return 0.0;
     // return Math.max(...matches.map(m => m.similarity));
 
+    // STUB IMPLEMENTATION
+    if (this.enabled) {
+      this.logger.warn('[STUB] checkInjectionCorpus returning 0.0 - NO ACTUAL VALIDATION');
+    }
     return 0.0; // TODO: Implement
   }
 

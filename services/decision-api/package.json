@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/decision-api",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "Decision Graph API service for IntelGraph",
   "type": "module",
   "main": "dist/index.js",

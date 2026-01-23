@@ -1,6 +1,6 @@
 {
   "name": "mcp-bench-harness",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "scripts": {
     "start": "tsx src/run.ts"
   },
