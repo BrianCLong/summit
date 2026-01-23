@@ -95,6 +95,7 @@
     "release:verify": "node scripts/release/verify-release-bundle.mjs",
     "release:diff": "node scripts/release/diff-bundles.mjs",
     "precommit": "lint-staged",
+    "postinstall": "node scripts/patch-strip-ansi.cjs",
     "db:prisma:diff": "prisma migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema.prisma",
     "db:knex:smoke": "knex migrate:down && knex migrate:up",
     "check:governance": "node scripts/check-governance.cjs",

@@ -376,7 +376,7 @@ class RuntimeEvidenceService {
       archive.on('error', reject);
       stream.on('close', () => resolve());
 
-      archive.pipe(stream as any);
+      archive.pipe(stream);
 
       for (const file of files) {
         archive.file(file, { name: path.relative(workingDir, file) });
