@@ -960,3 +960,214 @@ register.registerMetric(intelgraphCacheMisses);
 register.registerMetric(copilotApiRequestTotal);
 register.registerMetric(copilotApiRequestDurationMs);
 } catch (e) {}
+// Maestro Orchestration Metrics (migrated from telemetry/metrics.ts)
+export const maestroOrchestrationRequests = createCounter({
+  registers: [],
+  name: 'maestro_orchestration_requests_total',
+  help: 'Total number of orchestration requests',
+  labelNames: ['method', 'endpoint', 'status'],
+});
+
+export const maestroOrchestrationDuration = createHistogram({
+  registers: [],
+  name: 'maestro_orchestration_duration_seconds',
+  help: 'Duration of orchestration requests',
+  labelNames: ['endpoint'],
+  buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60, 120],
+});
+
+export const maestroOrchestrationErrors = createCounter({
+  registers: [],
+  name: 'maestro_orchestration_errors_total',
+  help: 'Total number of orchestration errors',
+  labelNames: ['error_type', 'endpoint'],
+});
+
+export const maestroActiveConnections = createGauge({
+  registers: [],
+  name: 'maestro_active_connections',
+  help: 'Number of active connections',
+  labelNames: ['type'],
+});
+
+export const maestroActiveSessions = createGauge({
+  registers: [],
+  name: 'maestro_active_sessions_total',
+  help: 'Number of active user sessions',
+  labelNames: ['type'],
+});
+
+export const maestroAiModelRequests = createCounter({
+  registers: [],
+  name: 'maestro_ai_model_requests_total',
+  help: 'Total AI model requests by model type',
+  labelNames: ['model', 'operation', 'status'],
+});
+
+export const maestroAiModelDuration = createHistogram({
+  registers: [],
+  name: 'maestro_ai_model_response_time_seconds',
+  help: 'AI model response time',
+  labelNames: ['model', 'operation'],
+  buckets: [0.1, 0.5, 1, 2, 5, 10, 20, 30],
+});
+
+export const maestroAiModelErrors = createCounter({
+  registers: [],
+  name: 'maestro_ai_model_errors_total',
+  help: 'Total AI model errors',
+  labelNames: ['model'], // Simplified
+});
+
+export const maestroAiModelCosts = createHistogram({
+  registers: [],
+  name: 'maestro_ai_model_cost_usd',
+  help: 'Cost per AI model request in USD',
+  labelNames: ['model', 'operation'],
+  buckets: [0.001, 0.01, 0.1, 1, 5, 10, 50],
+});
+
+export const maestroThompsonSamplingRewards = createGauge({
+  registers: [],
+  name: 'maestro_thompson_sampling_reward_rate',
+  help: 'Thompson sampling reward rate by model',
+  labelNames: ['model'],
+});
+
+export const maestroGraphOperations = createCounter({
+  registers: [],
+  name: 'maestro_graph_operations_total',
+  help: 'Total graph database operations',
+  labelNames: ['operation', 'status'],
+});
+
+export const maestroGraphQueryDuration = createHistogram({
+  registers: [],
+  name: 'maestro_graph_query_duration_seconds',
+  help: 'Graph query execution time',
+  labelNames: ['operation'],
+  buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10],
+});
+
+export const maestroGraphConnections = createGauge({
+  registers: [],
+  name: 'maestro_graph_connections_active',
+  help: 'Active Neo4j connections',
+});
+
+export const maestroGraphEntities = createGauge({
+  registers: [],
+  name: 'maestro_graph_entities_total',
+  help: 'Total entities in graph database',
+  labelNames: ['entity_type'],
+});
+
+export const maestroGraphRelations = createGauge({
+  registers: [],
+  name: 'maestro_graph_relations_total',
+  help: 'Total relations in graph database',
+});
+
+export const maestroPremiumRoutingDecisions = createCounter({
+  registers: [],
+  name: 'maestro_premium_routing_decisions_total',
+  help: 'Premium routing decisions',
+  labelNames: ['decision', 'model_tier'],
+});
+
+export const maestroPremiumBudgetUtilization = createGauge({
+  registers: [],
+  name: 'maestro_premium_budget_utilization_percent',
+  help: 'Premium model budget utilization percentage',
+});
+
+export const maestroPremiumCostSavings = createCounter({
+  registers: [],
+  name: 'maestro_premium_cost_savings_usd',
+  help: 'Cost savings from premium routing',
+  labelNames: ['model_tier'],
+});
+
+export const maestroSecurityEvents = createCounter({
+  registers: [],
+  name: 'maestro_security_events_total',
+  help: 'Security events by type',
+  labelNames: ['event_type', 'severity', 'user_id'],
+});
+
+export const maestroComplianceGateDecisions = createCounter({
+  registers: [],
+  name: 'maestro_compliance_gate_decisions_total',
+  help: 'Compliance gate decisions',
+  labelNames: ['decision', 'policy', 'reason'],
+});
+
+export const maestroAuthenticationAttempts = createCounter({
+  registers: [],
+  name: 'maestro_authentication_attempts_total',
+  help: 'Authentication attempts',
+  labelNames: ['auth_method', 'status', 'user_id'],
+});
+
+export const maestroAuthorizationDecisions = createCounter({
+  registers: [],
+  name: 'maestro_authorization_decisions_total',
+  help: 'Authorization decisions',
+});
+
+export const maestroInvestigationsCreated = createCounter({
+  registers: [],
+  name: 'maestro_investigations_created_total',
+  help: 'Total investigations created',
+  labelNames: ['investigation_type', 'user_id'],
+});
+
+export const maestroDataSourcesActive = createGauge({
+  registers: [],
+  name: 'maestro_data_sources_active_total',
+  help: 'Number of active data sources',
+  labelNames: ['source_type'],
+});
+
+export const maestroWebScrapingRequests = createCounter({
+  registers: [],
+  name: 'maestro_web_scraping_requests_total',
+  help: 'Web scraping requests',
+  labelNames: ['status', 'domain'],
+});
+
+export const maestroSynthesisOperations = createCounter({
+  registers: [],
+  name: 'maestro_synthesis_operations_total',
+  help: 'Data synthesis operations',
+});
+
+// Register new metrics
+try {
+  register.registerMetric(maestroOrchestrationRequests);
+  register.registerMetric(maestroOrchestrationDuration);
+  register.registerMetric(maestroOrchestrationErrors);
+  register.registerMetric(maestroActiveConnections);
+  register.registerMetric(maestroActiveSessions);
+  register.registerMetric(maestroAiModelRequests);
+  register.registerMetric(maestroAiModelDuration);
+  register.registerMetric(maestroAiModelErrors);
+  register.registerMetric(maestroAiModelCosts);
+  register.registerMetric(maestroThompsonSamplingRewards);
+  register.registerMetric(maestroGraphOperations);
+  register.registerMetric(maestroGraphQueryDuration);
+  register.registerMetric(maestroGraphConnections);
+  register.registerMetric(maestroGraphEntities);
+  register.registerMetric(maestroGraphRelations);
+  register.registerMetric(maestroPremiumRoutingDecisions);
+  register.registerMetric(maestroPremiumBudgetUtilization);
+  register.registerMetric(maestroPremiumCostSavings);
+  register.registerMetric(maestroSecurityEvents);
+  register.registerMetric(maestroComplianceGateDecisions);
+  register.registerMetric(maestroAuthenticationAttempts);
+  register.registerMetric(maestroAuthorizationDecisions);
+  register.registerMetric(maestroInvestigationsCreated);
+  register.registerMetric(maestroDataSourcesActive);
+  register.registerMetric(maestroWebScrapingRequests);
+  register.registerMetric(maestroSynthesisOperations);
+} catch (e) {}
