@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/securiteyes",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
