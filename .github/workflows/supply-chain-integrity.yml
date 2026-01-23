@@ -258,40 +258,6 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.39.0
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin v0.104.3
 
-      - name: Prepare Verify Evidence
-        run: |
-          mkdir -p evidence/verify
-          cp -r vulnerability-reports/* evidence/verify/
-
-      - name: Generate Provenance Bundle
-        run: |
-          # Find the main SBOM file
-          SBOM_FILE=$(find ./sboms -name "*-main-*.cdx.json" | head -n 1)
-          if [ -z "$SBOM_FILE" ]; then
-            SBOM_FILE=$(find ./sboms -name "*.cdx.json" | head -n 1)
-          fi
-          echo "Using SBOM: $SBOM_FILE"
-
-          mkdir -p evidence
-          node scripts/release/generate_provenance_bundle.mjs \
-             --verify-evidence evidence/verify \
-             --sbom "$SBOM_FILE" \
-             --out evidence/provenance.json
-
-      - name: Verify provenance references
-        run: |
-          node scripts/ci/compare_artifact_hashes.mjs \
-            --bundle evidence/provenance.json \
-            --verify-evidence evidence/verify
-
-      - name: Upload Provenance Bundle
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
-        if: always()
-        with:
-          name: provenance-bundle-${{ needs.supply-chain-integrity.outputs.release-version }}
-          path: evidence/provenance.json
-          retention-days: 90
-
       - name: Run CI Supply Chain Gate
         env:
           RELEASE_VERSION: ${{ needs.supply-chain-integrity.outputs.release-version }}
