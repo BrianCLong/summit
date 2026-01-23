@@ -188,6 +188,27 @@ collect_governance_evidence() {
       "echo 'Skipped: GITHUB_TOKEN not available'" \
       "$gov_dir/release-blockers-$RUN_ID.json"
   fi
+
+  # AI Governance Evidence
+  collect_ai_evidence
+}
+
+# Collect AI Governance evidence
+collect_ai_evidence() {
+  local gov_dir="$OUTPUT_DIR/governance"
+
+  echo "" >&2
+  echo "=== AI Governance Evidence ===" >&2
+
+  # AI System Inventory
+  collect_evidence "ai_inventory" \
+    "npx tsx scripts/governance/generate_ai_inventory.ts" \
+    "$gov_dir/ai-inventory-$RUN_ID.json"
+
+  # Risk Assessment Verification
+  collect_evidence "risk_assessment_check" \
+    "ls compliance/assessments/*.md >/dev/null 2>&1 && echo 'Risk assessments found' || (echo 'Missing risk assessments' && exit 1)" \
+    "$gov_dir/risk-assessment-check-$RUN_ID.log"
 }
 
 # Collect audit evidence (from state files)
