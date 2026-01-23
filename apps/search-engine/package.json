@@ -23,7 +23,7 @@
     "winston": "^3.18.3",
     "jsonwebtoken": "^9.0.2",
     "uuid": "^13.0.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "elasticsearch": "^16.7.3",
     "@elastic/elasticsearch": "^9.1.1",
     "natural": "^8.1.0",
