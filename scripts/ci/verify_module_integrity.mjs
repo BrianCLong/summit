@@ -175,7 +175,7 @@ class ModuleIntegrityChecker {
     // Separate current errors into existing and new
     for (const currentError of this.currentErrors) {
       const key = `${currentError.file}::${currentError.import}::${currentError.kind}`;
-      
+
       if (baselineMap.has(key)) {
         this.existingErrors.push(currentError);
       } else {
