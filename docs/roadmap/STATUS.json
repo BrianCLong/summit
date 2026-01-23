@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-23T07:15:00Z",
-  "revision_note": "Merged: GA demo runbooks, GenUI GA contract artifacts, evidence-id determinism, typecheck gate",
+  "last_updated": "2026-01-23T07:20:00Z",
+  "revision_note": "Merged: Backlog sync + Linear verification, GA demo runbooks, GenUI GA contract artifacts",
   "initiatives": [
     {
       "id": "A",
