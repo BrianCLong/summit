@@ -11,7 +11,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import neo4j, { Driver, Session, DriverConfig } from 'neo4j-driver';
+import neo4j, { Driver, Session, Transaction } from 'neo4j-driver';
 import logger from '../utils/logger.js';
 import { trackError } from '../monitoring/middleware.js';
 
@@ -97,7 +97,11 @@ export class SecureCypherQueryBuilder {
       throw new Error('Cypher injection detected');
     }
     
-    const sessionConfig: neo4j.SessionConfig = {
+    const sessionConfig: {
+      defaultAccessMode: any;
+      database: string | undefined;
+      impersonatedUser?: string;
+    } = {
       defaultAccessMode: neo4j.session.READ,
       database: options.database,
     };
@@ -110,7 +114,7 @@ export class SecureCypherQueryBuilder {
     
     try {
       // Add query timeout and other execution configuration
-      const result = await session.executeWrite(tx =>
+      const result = await session.executeWrite((tx: Transaction) =>
         tx.run(cypher, parameters, {
           // Set query timeout
           timeout: queryTimeout,
@@ -384,6 +388,41 @@ export const queryTimeoutMiddleware = (defaultTimeoutMs: number = 30000) => {
 };
 
 /**
+ * Validate input against a schema (standalone function)
+ */
+async function validateInput(data: any, schema: any): Promise<{ valid: boolean; errors: string[] }> {
+  const errors: string[] = [];
+
+  // Basic validation: check for injection patterns
+  const injections = detectInjections(data);
+  if (injections.length > 0) {
+    errors.push(`Potential injection patterns detected: ${injections.join(', ')}`);
+  }
+
+  // If schema has rules, validate against them
+  if (schema && typeof schema === 'object') {
+    for (const [field, rules] of Object.entries(schema)) {
+      const value = data?.[field];
+      const fieldRules = rules as any;
+
+      if (fieldRules.required && (value === undefined || value === null || value === '')) {
+        errors.push(`Field '${field}' is required`);
+      }
+
+      if (fieldRules.maxLength && typeof value === 'string' && value.length > fieldRules.maxLength) {
+        errors.push(`Field '${field}' exceeds maximum length of ${fieldRules.maxLength}`);
+      }
+
+      if (fieldRules.pattern && typeof value === 'string' && !fieldRules.pattern.test(value)) {
+        errors.push(`Field '${field}' does not match required pattern`);
+      }
+    }
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
+/**
  * Advanced Input Validation Middleware
  * Addresses C-008: Missing input validation
  */
@@ -395,7 +434,7 @@ export const advancedInputValidation = (schema: any) => {
       
       // Validate request body
       if (req.body) {
-        const bodyValidation = await this.validateInput(req.body, schema);
+        const bodyValidation = await validateInput(req.body, schema);
         if (!bodyValidation.valid) {
           logger.warn({
             path: req.path,
@@ -413,7 +452,7 @@ export const advancedInputValidation = (schema: any) => {
       
       // Validate query parameters
       if (req.query) {
-        const queryValidation = await this.validateInput(req.query, schema);
+        const queryValidation = await validateInput(req.query, schema);
         if (!queryValidation.valid) {
           logger.warn({
             path: req.path,
@@ -431,7 +470,7 @@ export const advancedInputValidation = (schema: any) => {
       
       // Validate URL parameters
       if (req.params) {
-        const paramsValidation = await this.validateInput(req.params, schema);
+        const paramsValidation = await validateInput(req.params, schema);
         if (!paramsValidation.valid) {
           logger.warn({
             path: req.path,
@@ -898,16 +937,7 @@ export const tenantRateLimiter = (
   };
 };
 
-// Export individual functions and middlewares
-export {
-  SecureCypherQueryBuilder,
-  queryTimeoutMiddleware,
-  advancedInputValidation,
-  injectionProtectionMiddleware,
-  enhancedRateLimiter,
-  tenantRateLimiter
-};
-
+// Default export for convenience
 export default {
   SecureCypherQueryBuilder,
   queryTimeoutMiddleware,
