@@ -98,6 +98,21 @@ export const ProvenanceEdgeTypes = [
   'imported_from', // Node imported from system
 ] as const;
 
+// Containment Edges - Board/Roadmap relationships
+export const ContainmentEdgeTypes = [
+  'contains', // Board/Roadmap contains Ticket/Epic
+  'displayed_on', // Ticket displayed on Board
+  'scheduled_on', // Epic scheduled on Roadmap
+  'part_of', // Ticket part of Sprint
+] as const;
+
+// Milestone Edges - Timeline relationships
+export const MilestoneEdgeTypes = [
+  'milestone_for', // Milestone marks Roadmap progress
+  'targets', // Ticket/Epic targets Milestone
+  'achieved_by', // Milestone achieved by completing work
+] as const;
+
 // ============================================
 // All Edge Types
 // ============================================
@@ -111,6 +126,8 @@ export const AllEdgeTypes = [
   ...ArtifactEdgeTypes,
   ...CustomerEdgeTypes,
   ...ProvenanceEdgeTypes,
+  ...ContainmentEdgeTypes,
+  ...MilestoneEdgeTypes,
 ] as const;
 
 export type EdgeType = (typeof AllEdgeTypes)[number];
@@ -189,6 +206,17 @@ export const EdgeValidationRules: EdgeValidationRule[] = [
   { edgeType: 'derived_from', validSourceTypes: ['*'], validTargetTypes: ['*'] },
   { edgeType: 'synced_from', validSourceTypes: ['ticket', 'epic'], validTargetTypes: ['*'] },
   { edgeType: 'imported_from', validSourceTypes: ['*'], validTargetTypes: ['*'] },
+
+  // Containment
+  { edgeType: 'contains', validSourceTypes: ['board', 'roadmap', 'sprint'], validTargetTypes: ['ticket', 'epic'] },
+  { edgeType: 'displayed_on', validSourceTypes: ['ticket', 'epic'], validTargetTypes: ['board'] },
+  { edgeType: 'scheduled_on', validSourceTypes: ['epic', 'ticket'], validTargetTypes: ['roadmap'] },
+  { edgeType: 'part_of', validSourceTypes: ['ticket'], validTargetTypes: ['sprint'] },
+
+  // Milestone
+  { edgeType: 'milestone_for', validSourceTypes: ['milestone'], validTargetTypes: ['roadmap'] },
+  { edgeType: 'targets', validSourceTypes: ['ticket', 'epic'], validTargetTypes: ['milestone'] },
+  { edgeType: 'achieved_by', validSourceTypes: ['milestone'], validTargetTypes: ['ticket', 'epic', 'pr'] },
 ];
 
 // ============================================

@@ -18,7 +18,6 @@ on:
       # - scripts/**, tools/**, Dockerfile (build/test/infra changes must trigger this)
   push:
     branches: [main]
-    paths-ignore:
   merge_group:
 
 concurrency:
@@ -28,11 +27,11 @@ concurrency:
 jobs:
   config-preflight:
     name: Config Preflight
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version-file: .nvmrc
       - name: Validate Jest & pnpm Configuration
@@ -40,14 +39,14 @@ jobs:
 
   lint-typecheck:
     name: Lint & Typecheck
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -66,14 +65,14 @@ jobs:
 
   unit-tests:
     name: Unit Tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -94,38 +93,27 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: timescale/timescaledb:latest-pg14
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: summit_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-      redis:
-        image: redis:7-alpine
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
+
+      - name: Start Test Infrastructure
+        run: |
+          docker run -d --name summit-db-test -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=summit_test timescale/timescaledb:latest-pg14
+          docker run -d --name summit-redis-test -p 6379:6379 redis:7-alpine
+          
+          # Wait for health
+          echo "Waiting for Postgres..."
+          until docker exec summit-db-test pg_isready; do sleep 2; done
+          echo "Waiting for Redis..."
+          until docker exec summit-redis-test redis-cli ping | grep -q PONG; do sleep 2; done
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -153,6 +141,11 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
 
+      - name: Stop Test Infrastructure
+        if: always()
+        run: |
+          docker rm -f summit-db-test summit-redis-test || true
+
       - name: Upload integration test results
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
@@ -164,13 +157,13 @@ jobs:
 
   verification-suite:
     name: Verification Suite
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -195,14 +188,14 @@ jobs:
 
   deterministic-build:
     name: Deterministic Build
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [lint-typecheck, unit-tests]
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -245,13 +238,13 @@ jobs:
 
   governance-docs-integrity:
     name: Governance / Docs Integrity
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -272,14 +265,14 @@ jobs:
 
   golden-path:
     name: Golden Path Smoke Test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [deterministic-build, integration-tests]
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -309,19 +302,63 @@ jobs:
             logs/
           retention-days: 7
 
+  e2e-tests:
+    name: E2E Tests (Playwright)
+    runs-on: self-hosted
+    needs: [integration-tests]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: "10.0.0"
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps
+
+      - name: Start Services
+        run: make up
+
+      - name: Wait for Services
+        run: sleep 60
+
+      - name: Run E2E Tests
+        run: pnpm test:e2e
+        env:
+          CI: true
+
+      - name: Stop Services
+        if: always()
+        run: make down
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: playwright-report
+          path: reports/playwright
+          retention-days: 7
+
   soc-control-verification:
     name: SOC Control Verification
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       checks: write
       actions: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Use Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "pnpm"
@@ -340,7 +377,7 @@ jobs:
           bash scripts/test-soc-controls.sh soc-compliance-reports
 
       - name: Upload SOC compliance reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: soc-compliance-report
           path: soc-compliance-reports
@@ -348,7 +385,7 @@ jobs:
 
   branch-protection-drift:
     name: Governance / Branch Protection Drift
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       actions: read
@@ -357,7 +394,7 @@ jobs:
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -380,7 +417,7 @@ jobs:
 
   ci-core-gate:
     name: CI Core Gate ✅
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs:
       - config-preflight
       - lint-typecheck
@@ -390,6 +427,7 @@ jobs:
       - deterministic-build
       - governance-docs-integrity
       - golden-path
+      - e2e-tests
       - soc-control-verification
       - branch-protection-drift
     if: always()
@@ -405,6 +443,7 @@ jobs:
           echo "Deterministic Build: ${{ needs.deterministic-build.result }}"
           echo "Governance / Docs Integrity: ${{ needs.governance-docs-integrity.result }}"
           echo "Golden Path: ${{ needs.golden-path.result }}"
+          echo "E2E Tests: ${{ needs.e2e-tests.result }}"
           echo "SOC Control Verification: ${{ needs.soc-control-verification.result }}"
           echo "Branch Protection Drift: ${{ needs.branch-protection-drift.result }}"
           echo ""
@@ -450,6 +489,11 @@ jobs:
             exit 1
           fi
 
+          if [[ "${{ needs.e2e-tests.result }}" != "success" ]]; then
+            echo "::error::E2E Tests FAILED"
+            exit 1
+          fi
+
           if [[ "${{ needs.soc-control-verification.result }}" != "success" ]]; then
             echo "::error::SOC Control Verification FAILED"
             exit 1
@@ -477,6 +521,7 @@ jobs:
           echo "- ✅ Deterministic Build" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Governance / Docs Integrity" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Golden Path Smoke Test" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ E2E Tests (Playwright)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ SOC Control Verification" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Governance / Branch Protection Drift" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

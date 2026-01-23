@@ -1,4 +1,4 @@
-export type TaskStatus = 'queued' | 'running' | 'succeeded' | 'failed';
+export type TaskStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'pending_approval';
 
 export interface UserRef {
   id: string;

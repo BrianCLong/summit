@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/humint-service",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "HUMINT source management service with debrief workflows and asset tracking",
   "type": "module",
   "main": "dist/index.js",
