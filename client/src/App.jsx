@@ -9,6 +9,7 @@ import AdminPanel from './components/AdminPanel';
 import HealthScore from './components/HealthScore/HealthScore';
 import TimelineView from './features/timeline/TimelineView';
 import { useFeatureFlag, useFeatureVariant } from './hooks/useFeatureFlag';
+import { useGraphPersistence } from './hooks/useGraphPersistence';
 import DemoIndicator from './components/common/DemoIndicator';
 import {
   ApolloClient,
@@ -45,26 +46,7 @@ function TestApp() {
 
   // Persist relevant graph state to localStorage
   const graphState = useSelector((state) => state.graph);
-  useEffect(() => {
-    localStorage.setItem('graphLayout', graphState.layout);
-    localStorage.setItem(
-      'graphLayoutOptions',
-      JSON.stringify(graphState.layoutOptions),
-    );
-    localStorage.setItem(
-      'graphFeatureToggles',
-      JSON.stringify(graphState.featureToggles),
-    );
-    localStorage.setItem(
-      'graphNodeTypeColors',
-      JSON.stringify(graphState.nodeTypeColors),
-    );
-  }, [
-    graphState.layout,
-    graphState.layoutOptions,
-    graphState.featureToggles,
-    graphState.nodeTypeColors,
-  ]);
+  useGraphPersistence(graphState);
 
   return (
     <ApolloProvider client={client}>

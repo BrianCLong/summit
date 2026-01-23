@@ -172,7 +172,8 @@ export default function AppHeader() {
           {/* External Tools */}
           <Tooltip title="Grafana Dashboard">
             <IconButton
-              href={grafanaUrl || undefined}
+              component="a"
+              href={grafanaUrl || '#'}
               target="_blank"
               rel="noreferrer"
               sx={{ color: 'text.primary' }}
@@ -184,7 +185,8 @@ export default function AppHeader() {
 
           <Tooltip title="Jaeger Tracing">
             <IconButton
-              href={jaegerUrl || undefined}
+              component="a"
+              href={jaegerUrl || '#'}
               target="_blank"
               rel="noreferrer"
               sx={{ color: 'text.primary' }}
