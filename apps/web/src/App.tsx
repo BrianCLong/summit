@@ -62,27 +62,13 @@ import { WorkbenchShell } from '@/workbench/shell/WorkbenchLayout'
 import { SearchProvider } from '@/contexts/SearchContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ErrorBoundary, NotFound } from '@/components/error'
-import Explain from '@/components/Explain'
 import { CommandStatusProvider } from '@/features/internal-command/CommandStatusProvider'
 import { DemoIndicator } from '@/components/common/DemoIndicator'
 import { DemoModeGate } from '@/components/common/DemoModeGate'
 import { isDemoModeEnabled } from '@/lib/demoMode'
 
 function App() {
-  const [showPalette, setShowPalette] = React.useState(false);
-  const [showExplain, setShowExplain] = React.useState(false);
   const demoModeEnabled = isDemoModeEnabled()
-
-  React.useEffect(()=>{
-    const onKey=(e:KeyboardEvent)=>{
-      if((e.key==='k' || e.key==='K') && (e.ctrlKey||e.metaKey)){
-        e.preventDefault();
-        setShowPalette(true);
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return ()=>window.removeEventListener('keydown', onKey);
-  },[]);
 
   return (
     <ApolloProvider client={apolloClient}>
@@ -106,19 +92,6 @@ function App() {
                       </div>
                     }
                   >
-                    {/* Explain overlay stub */}
-                    {showPalette && (
-                       <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={()=>setShowPalette(false)}>
-                         <div className="bg-white p-4 rounded shadow-lg w-96" onClick={e=>e.stopPropagation()}>
-                           <input type="text" placeholder="Command..." className="w-full border p-2 mb-2" autoFocus />
-                           <button onClick={()=>{ setShowPalette(false); setShowExplain(true); }} className="block w-full text-left p-2 hover:bg-gray-100">
-                             Explain this view
-                           </button>
-                         </div>
-                       </div>
-                    )}
-                    {showExplain && <Explain facts={["Linked via shared IP (1.2.3.4)", "Match score: 0.98"]} />}
-
                     <Routes>
                       {/* Auth routes */}
                     <Route path="/signin" element={<SignInPage />} />
