@@ -219,3 +219,28 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: regulatory-intel-automation-turn-4
+    version: v1
+    path: prompts/regulatory/daily-regulatory-intel-update-20260122.md
+    sha256: a78d534d40715d89531548b2c1b3640910a53446623b1536cd0d0f47500e9ec6
+    description: Capture Automation Turn 4 daily regulatory intelligence update for RAOS.
+    scope:
+      paths:
+        - agents/examples/
+        - docs/raos/regulatory-intel/
+        - docs/roadmap/STATUS.json
+        - prompts/regulatory/
+        - prompts/registry.yaml
+      domains:
+        - compliance
+        - governance
+        - regulatory-intelligence
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
