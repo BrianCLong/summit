@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- vis-timeline types require assertion */
 import React, { useEffect, useRef } from 'react';
 import { Box, Button } from '@mui/material';
 import { gql, useQuery } from '@apollo/client';
 import { DataSet, Timeline } from 'vis-timeline/standalone';
-import type { DataItem, TimelineOptions } from 'vis-timeline/standalone';
 import 'vis-timeline/dist/vis-timeline-graph2d.min.css';
 
 const EVENTS_QUERY = gql`
@@ -32,9 +30,41 @@ type TimelineQueryResult = {
   relationships?: InvestigationEntity[];
 };
 
+type TimelineDataItem = {
+  id: string;
+  content: string;
+  start: string;
+  group?: string;
+  data?: {
+    kind: 'entity' | 'relationship';
+    entity?: InvestigationEntity;
+    relationship?: InvestigationEntity;
+  };
+};
+
+type TimelineSelectEvent = {
+  items: Array<string | number>;
+};
+
+type TimelineItems = {
+  get: (id: string | number) => TimelineDataItem | null | undefined;
+};
+
+type TimelineInstance = {
+  on: (event: 'select', callback: (props: TimelineSelectEvent) => void) => void;
+  setItems: (items: unknown) => void;
+  setWindow: (start: Date, end: Date) => void;
+};
+
+type TimelineConstructor = new (
+  container: HTMLElement,
+  items: TimelineItems,
+  options?: { zoomable?: boolean }
+) => TimelineInstance;
+
 interface TimelineViewerProps {
   investigationId: string;
-  onSelect?: (item: DataItem) => void;
+  onSelect?: (item: TimelineDataItem) => void;
 }
 
 const TimelineViewer: React.FC<TimelineViewerProps> = ({
@@ -42,7 +72,7 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
   onSelect,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const timelineRef = useRef<Timeline | null>(null);
+  const timelineRef = useRef<TimelineInstance | null>(null);
 
   const { data } = useQuery<TimelineQueryResult>(EVENTS_QUERY, {
     variables: { investigationId },
@@ -50,25 +80,24 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
 
   useEffect(() => {
     if (containerRef.current && !timelineRef.current) {
-      const items = new DataSet<DataItem>([]);
-      const options: TimelineOptions = {
-        zoomable: true,
-      };
-      timelineRef.current = new (Timeline as any)(
+      const items = new DataSet([]) as unknown as TimelineItems;
+      const options = { zoomable: true };
+      const TimelineCtor = Timeline as unknown as TimelineConstructor;
+      timelineRef.current = new TimelineCtor(
         containerRef.current,
         items,
         options,
       );
-      timelineRef.current.on('select', (props) => {
-        if (onSelect) {
-          const item = items.get(props.items[0]);
-          if (item) onSelect(item);
-        }
+      timelineRef.current.on('select', (props: TimelineSelectEvent) => {
+        const [selectedId] = props.items;
+        if (selectedId === undefined || selectedId === null || !onSelect) return;
+        const item = items.get(selectedId);
+        if (item) onSelect(item);
       });
     }
 
     if (timelineRef.current && data) {
-      const items = new DataSet<DataItem>([
+      const items = new DataSet([
         ...(data.entities || []).map((e) => ({
           id: `entity-${e.id}`,
           content: `🧩 ${e.type}`,
