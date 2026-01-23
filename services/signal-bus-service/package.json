@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/signal-bus-service",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Real-time signal ingestion, validation, enrichment, and routing service for the IntelGraph platform",
   "type": "module",
   "main": "dist/index.js",

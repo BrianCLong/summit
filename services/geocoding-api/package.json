@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/geocoding-api",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Geocoding and reverse geocoding API service for IntelGraph",
   "main": "dist/server.js",
   "type": "module",

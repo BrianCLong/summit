@@ -5,10 +5,9 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "moduleResolution": "node",
-    "allowImportingTsExtensions": false
+    "allowImportingTsExtensions": false,
+    "types": ["node", "express", "cors", "pg", "jsonwebtoken", "express-jwt", "pino"]
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "references": []
 }

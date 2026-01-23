@@ -1,6 +1,6 @@
 {
   "name": "webapp",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Analyst tri-pane web app",
   "type": "module",
   "scripts": {

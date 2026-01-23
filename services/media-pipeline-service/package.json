@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/media-pipeline-service",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Media and communications pipeline service for intake and processing of audio, video, chat logs, and documents",
   "main": "dist/index.js",
   "scripts": {
