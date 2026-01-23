@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-23T05:52:00Z",
-  "revision_note": "Merged with main: GenUI GA contract artifacts and client GA remediation",
+  "last_updated": "2026-01-23T06:42:00Z",
+  "revision_note": "Merged: GenUI GA contract artifacts, evidence-id determinism, typecheck gate",
   "initiatives": [
     {
       "id": "A",

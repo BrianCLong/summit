@@ -145,6 +145,7 @@ prompts:
         - docs/governance/
         - docs/ci/REQUIRED_CHECKS_POLICY.yml
         - docs/SOC_CONTROL_UNIT_TESTS_PLAN.md
+        - docs/roadmap/STATUS.json
         - scripts/ci/
         - .github/workflows/
         - server/tests/
