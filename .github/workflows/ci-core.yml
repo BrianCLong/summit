@@ -99,7 +99,7 @@ jobs:
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -370,7 +370,7 @@ jobs:
           bash scripts/test-soc-controls.sh soc-compliance-reports
 
       - name: Upload SOC compliance reports
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v6
         with:
           name: soc-compliance-report
           path: soc-compliance-reports

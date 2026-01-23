@@ -93,7 +93,7 @@ jobs:
           TZ: UTC
 
       - name: Upload SOC compliance reports
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: soc-compliance-report
