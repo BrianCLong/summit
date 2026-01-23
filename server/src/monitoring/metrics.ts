@@ -674,6 +674,50 @@ register.registerMetric(breakerState);
 register.registerMetric(intelgraphJobQueueDepth);
 } catch (e) {}
 
+// GraphQL Cost Analysis & Rate Limiting Metrics
+export const graphqlQueryCostHistogram = createHistogram({
+  registers: [],
+  name: 'graphql_query_cost_total',
+  help: 'Distribution of GraphQL query costs',
+  labelNames: ['tenant_id', 'operation_name', 'operation_type'],
+  buckets: [1, 10, 50, 100, 250, 500, 1000, 2000, 5000, 10000],
+});
+
+export const graphqlCostLimitExceededTotal = createCounter({
+  registers: [],
+  name: 'graphql_cost_limit_exceeded_total',
+  help: 'Total number of queries rejected due to cost limits',
+  labelNames: ['tenant_id', 'reason', 'tier'],
+});
+
+export const graphqlCostLimitRemaining = createGauge({
+  registers: [],
+  name: 'graphql_cost_limit_remaining',
+  help: 'Remaining cost capacity for tenant (per minute)',
+  labelNames: ['tenant_id', 'tier'],
+});
+
+export const graphqlTenantCostUsage = createCounter({
+  registers: [],
+  name: 'graphql_tenant_cost_usage_total',
+  help: 'Total cost consumed by tenant',
+  labelNames: ['tenant_id', 'tier', 'user_id'],
+});
+
+export const graphqlCostRateLimitHits = createCounter({
+  registers: [],
+  name: 'graphql_cost_rate_limit_hits_total',
+  help: 'Number of times cost-based rate limit was hit',
+  labelNames: ['tenant_id', 'limit_type', 'tier'],
+});
+
+export const graphqlPerTenantOverageCount = createCounter({
+  registers: [],
+  name: 'graphql_per_tenant_overage_count_total',
+  help: 'Count of cost limit overages per tenant',
+  labelNames: ['tenant_id', 'tier'],
+});
+
 export const metrics = {
   graphExpandRequestsTotal,
   aiRequestTotal,
@@ -886,50 +930,6 @@ export const llmCostTotal = createCounter({
   name: 'llm_cost_total_usd',
   help: 'Total estimated cost of LLM calls in USD',
   labelNames: ['provider', 'model'],
-});
-
-// GraphQL Cost Analysis & Rate Limiting Metrics
-export const graphqlQueryCostHistogram = createHistogram({
-  registers: [],
-  name: 'graphql_query_cost_total',
-  help: 'Distribution of GraphQL query costs',
-  labelNames: ['tenant_id', 'operation_name', 'operation_type'],
-  buckets: [1, 10, 50, 100, 250, 500, 1000, 2000, 5000, 10000],
-});
-
-export const graphqlCostLimitExceededTotal = createCounter({
-  registers: [],
-  name: 'graphql_cost_limit_exceeded_total',
-  help: 'Total number of queries rejected due to cost limits',
-  labelNames: ['tenant_id', 'reason', 'tier'],
-});
-
-export const graphqlCostLimitRemaining = createGauge({
-  registers: [],
-  name: 'graphql_cost_limit_remaining',
-  help: 'Remaining cost capacity for tenant (per minute)',
-  labelNames: ['tenant_id', 'tier'],
-});
-
-export const graphqlTenantCostUsage = createCounter({
-  registers: [],
-  name: 'graphql_tenant_cost_usage_total',
-  help: 'Total cost consumed by tenant',
-  labelNames: ['tenant_id', 'tier', 'user_id'],
-});
-
-export const graphqlCostRateLimitHits = createCounter({
-  registers: [],
-  name: 'graphql_cost_rate_limit_hits_total',
-  help: 'Number of times cost-based rate limit was hit',
-  labelNames: ['tenant_id', 'limit_type', 'tier'],
-});
-
-export const graphqlPerTenantOverageCount = createCounter({
-  registers: [],
-  name: 'graphql_per_tenant_overage_count_total',
-  help: 'Count of cost limit overages per tenant',
-  labelNames: ['tenant_id', 'tier'],
 });
 
 // Register metrics

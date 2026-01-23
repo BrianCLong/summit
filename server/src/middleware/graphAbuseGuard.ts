@@ -47,7 +47,7 @@ interface SuspiciousPattern {
 }
 
 // Query analysis results
-interface QueryAnalysis {
+export interface QueryAnalysis {
   query: string;
   estimatedNodes: number;
   estimatedEdges: number;

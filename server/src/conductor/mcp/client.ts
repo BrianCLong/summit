@@ -62,12 +62,7 @@ export class MCPClient {
       );
     }
 
-    if (this.connections.has(serverName)) {
-      // Close existing connection
-      this.connections.get(serverName)?.close();
-    }
-
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const headers: Record<string, string> = {};
       if (config.authToken) {
         headers.Authorization = `Bearer ${config.authToken}`;

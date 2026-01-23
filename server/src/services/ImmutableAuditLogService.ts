@@ -294,7 +294,7 @@ export class ImmutableAuditLogService {
         
         if (await this.fileExists(logFilePath)) {
           const content = await fs.readFile(logFilePath, 'utf-8');
-          const lines = content.trim().split('\n').filter(line => line.trim() !== '');
+          const lines = content.trim().split('\n').filter((line: string) => line.trim() !== '');
           
           for (const line of lines) {
             try {
@@ -395,7 +395,7 @@ export class ImmutableAuditLogService {
         
         if (await this.fileExists(logFilePath)) {
           const content = await fs.readFile(logFilePath, 'utf-8');
-          const lines = content.trim().split('\n').filter(line => line.trim() !== '');
+          const lines = content.trim().split('\n').filter((line: string) => line.trim() !== '');
           
           for (const line of lines) {
             try {
@@ -605,7 +605,7 @@ export class ImmutableAuditLogService {
         
         if (await this.fileExists(logFilePath)) {
           const content = await fs.readFile(logFilePath, 'utf-8');
-          const lines = content.trim().split('\n').filter(line => line.trim() !== '');
+          const lines = content.trim().split('\n').filter((line: string) => line.trim() !== '');
           
           if (dateFolder === today) {
             stats.eventsToday = lines.length;
@@ -731,7 +731,7 @@ export class ImmutableAuditLogService {
  */
 export const auditLoggingMiddleware = (auditService: ImmutableAuditLogService) => {
   return async (req: any, res: any, next: any) => {
-    if (!auditService.config.enabled) {
+    if (!(auditService as any).config.enabled) {
       return next();
     }
 
