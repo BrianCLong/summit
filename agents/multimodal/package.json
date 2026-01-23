@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/multimodal-fusion",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Agentic multimodal fusion pipeline for OSINT text/image/video into Neo4j embeddings with CLIP/ViT and pgvector",
   "type": "module",
   "main": "dist/index.js",

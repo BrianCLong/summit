@@ -56,6 +56,9 @@ export interface UseSimulatorState {
   error: string | null;
 }
 
+const getErrorMessage = (err: unknown, fallback: string) =>
+  err instanceof Error && err.message ? err.message : fallback;
+
 // ============================================================================
 // Policy List Hook
 // ============================================================================
@@ -89,11 +92,11 @@ export function usePolicies(initialFilters: PolicyListFilters = {}) {
         error: null,
         pagination: response.data.pagination,
       });
-    } catch (err: any) {
+    } catch (err) {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to fetch policies',
+        error: getErrorMessage(err, 'Failed to fetch policies'),
       }));
     }
   }, [filters]);
@@ -113,7 +116,7 @@ export function usePolicies(initialFilters: PolicyListFilters = {}) {
   // Initial load
   useEffect(() => {
     fetchPolicies();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fetchPolicies]);
 
   return {
     ...state,
@@ -157,11 +160,11 @@ export function usePolicyDetail(policyId: string | null) {
         loading: false,
         error: null,
       });
-    } catch (err: any) {
+    } catch (err) {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to fetch policy',
+        error: getErrorMessage(err, 'Failed to fetch policy'),
       }));
     }
   }, [policyId]);
@@ -200,8 +203,8 @@ export function usePolicyOperations() {
         return response.data.policy;
       }
       return null;
-    } catch (err: any) {
-      setError(err.message || 'Failed to create policy');
+    } catch (err) {
+      setError(getErrorMessage(err, 'Failed to create policy'));
       setLoading(false);
       return null;
     }
@@ -220,8 +223,8 @@ export function usePolicyOperations() {
         return response.data.policy;
       }
       return null;
-    } catch (err: any) {
-      setError(err.message || 'Failed to update policy');
+    } catch (err) {
+      setError(getErrorMessage(err, 'Failed to update policy'));
       setLoading(false);
       return null;
     }
@@ -234,8 +237,8 @@ export function usePolicyOperations() {
       const response = await PolicyAPI.deletePolicy(policyId);
       setLoading(false);
       return response.data.success;
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete policy');
+    } catch (err) {
+      setError(getErrorMessage(err, 'Failed to delete policy'));
       setLoading(false);
       return false;
     }
@@ -254,8 +257,8 @@ export function usePolicyOperations() {
         return response.data.policy;
       }
       return null;
-    } catch (err: any) {
-      setError(err.message || 'Failed to rollback policy');
+    } catch (err) {
+      setError(getErrorMessage(err, 'Failed to rollback policy'));
       setLoading(false);
       return null;
     }
@@ -274,8 +277,8 @@ export function usePolicyOperations() {
         return response.data.request;
       }
       return null;
-    } catch (err: any) {
-      setError(err.message || 'Failed to submit for approval');
+    } catch (err) {
+      setError(getErrorMessage(err, 'Failed to submit for approval'));
       setLoading(false);
       return null;
     }
@@ -294,8 +297,8 @@ export function usePolicyOperations() {
         return response.data.policy;
       }
       return null;
-    } catch (err: any) {
-      setError(err.message || 'Failed to approve policy');
+    } catch (err) {
+      setError(getErrorMessage(err, 'Failed to approve policy'));
       setLoading(false);
       return null;
     }
@@ -311,8 +314,8 @@ export function usePolicyOperations() {
         return response.data.policy;
       }
       return null;
-    } catch (err: any) {
-      setError(err.message || 'Failed to publish policy');
+    } catch (err) {
+      setError(getErrorMessage(err, 'Failed to publish policy'));
       setLoading(false);
       return null;
     }
@@ -360,11 +363,11 @@ export function usePolicySimulator() {
         loading: false,
       }));
       return response.data;
-    } catch (err: any) {
+    } catch (err) {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Simulation failed',
+        error: getErrorMessage(err, 'Simulation failed'),
       }));
       return null;
     }
@@ -383,11 +386,11 @@ export function usePolicySimulator() {
         loading: false,
       }));
       return response.data;
-    } catch (err: any) {
+    } catch (err) {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Batch simulation failed',
+        error: getErrorMessage(err, 'Batch simulation failed'),
       }));
       return null;
     }
@@ -406,11 +409,11 @@ export function usePolicySimulator() {
         loading: false,
       }));
       return response.data;
-    } catch (err: any) {
+    } catch (err) {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Impact analysis failed',
+        error: getErrorMessage(err, 'Impact analysis failed'),
       }));
       return null;
     }

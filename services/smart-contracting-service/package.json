@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/smart-contracting-service",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "AI-driven smart contracting service for defense procurement automation",
   "type": "module",
   "main": "dist/index.js",
