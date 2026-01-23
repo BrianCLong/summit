@@ -61,14 +61,29 @@ import { WorkbenchShell } from '@/workbench/shell/WorkbenchLayout'
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
 import { AuthProvider } from '@/contexts/AuthContext'
-import { ErrorBoundary, NotFound } from '@/components/error'
+import { FeatureFlagProvider } from '@/contexts/FeatureFlagContext'
+import { ErrorBoundary, NotFound, DataFetchErrorBoundary, MutationErrorBoundary } from '@/components/error'
+import Explain from '@/components/Explain'
 import { CommandStatusProvider } from '@/features/internal-command/CommandStatusProvider'
 import { DemoIndicator } from '@/components/common/DemoIndicator'
 import { DemoModeGate } from '@/components/common/DemoModeGate'
 import { isDemoModeEnabled } from '@/lib/demoMode'
 
 function App() {
+  const [showPalette, setShowPalette] = React.useState(false);
+  const [showExplain, setShowExplain] = React.useState(false);
   const demoModeEnabled = isDemoModeEnabled()
+
+  React.useEffect(()=>{
+    const onKey=(e:KeyboardEvent)=>{
+      if((e.key==='k' || e.key==='K') && (e.ctrlKey||e.metaKey)){
+        e.preventDefault();
+        setShowPalette(true);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return ()=>window.removeEventListener('keydown', onKey);
+  },[]);
 
   return (
     <ApolloProvider client={apolloClient}>
@@ -76,10 +91,17 @@ function App() {
       <SocketProvider>
         <TooltipProvider>
           <AuthProvider>
-            <SearchProvider>
-              <CommandStatusProvider>
-                <Router>
-                  <ErrorBoundary>
+            <FeatureFlagProvider>
+              <SearchProvider>
+                <CommandStatusProvider>
+                  <Router>
+                    <ErrorBoundary
+                      enableRetry={true}
+                      maxRetries={3}
+                      retryDelay={2000}
+                      severity="critical"
+                      boundaryName="app_root"
+                    >
                   <React.Suspense
                     fallback={
                       <div className="flex h-screen items-center justify-center">
@@ -92,6 +114,19 @@ function App() {
                       </div>
                     }
                   >
+                    {/* Explain overlay stub */}
+                    {showPalette && (
+                       <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={()=>setShowPalette(false)}>
+                         <div className="bg-white p-4 rounded shadow-lg w-96" onClick={e=>e.stopPropagation()}>
+                           <input type="text" placeholder="Command..." className="w-full border p-2 mb-2" autoFocus />
+                           <button onClick={()=>{ setShowPalette(false); setShowExplain(true); }} className="block w-full text-left p-2 hover:bg-gray-100">
+                             Explain this view
+                           </button>
+                         </div>
+                       </div>
+                    )}
+                    {showExplain && <Explain facts={["Linked via shared IP (1.2.3.4)", "Match score: 0.98"]} />}
+
                     <Routes>
                       {/* Auth routes */}
                     <Route path="/signin" element={<SignInPage />} />
@@ -113,22 +148,41 @@ function App() {
                     {/* Protected routes with layout */}
                     <Route path="/" element={<Layout />}>
                       <Route index element={<HomePage />} />
-                      <Route path="explore" element={<ExplorePage />} />
+                      <Route
+                        path="explore"
+                        element={
+                          <DataFetchErrorBoundary dataSourceName="Explore">
+                            <ExplorePage />
+                          </DataFetchErrorBoundary>
+                        }
+                      />
 
-                      {/* Tri-Pane Analysis */}
+                      {/* Tri-Pane Analysis - Wrapped with DataFetchErrorBoundary */}
                       <Route
                         path="analysis/tri-pane"
-                        element={<TriPanePage />}
+                        element={
+                          <DataFetchErrorBoundary dataSourceName="Tri-Pane Analysis">
+                            <TriPanePage />
+                          </DataFetchErrorBoundary>
+                        }
                       />
                       <Route
                         path="geoint"
-                        element={<GeoIntPane />}
+                        element={
+                          <DataFetchErrorBoundary dataSourceName="GeoInt">
+                            <GeoIntPane />
+                          </DataFetchErrorBoundary>
+                        }
                       />
 
                       {/* Narrative Intelligence */}
                       <Route
                         path="analysis/narrative"
-                        element={<NarrativeIntelligencePage />}
+                        element={
+                          <DataFetchErrorBoundary dataSourceName="Narrative Intelligence">
+                            <NarrativeIntelligencePage />
+                          </DataFetchErrorBoundary>
+                        }
                       />
 
                       {/* Alerts */}
@@ -139,28 +193,55 @@ function App() {
                       <Route path="cases" element={<CasesPage />} />
                       <Route path="cases/:id" element={<CaseDetailPage />} />
 
-                      {/* Dashboards */}
+                      {/* Dashboards - Wrapped with DataFetchErrorBoundary */}
                       <Route
                         path="dashboards/command-center"
-                        element={<CommandCenterDashboard />}
+                        element={
+                          <DataFetchErrorBoundary dataSourceName="Command Center">
+                            <CommandCenterDashboard />
+                          </DataFetchErrorBoundary>
+                        }
                       />
                       <Route
                         path="dashboards/supply-chain"
-                        element={<SupplyChainDashboard />}
+                        element={
+                          <DataFetchErrorBoundary dataSourceName="Supply Chain">
+                            <SupplyChainDashboard />
+                          </DataFetchErrorBoundary>
+                        }
                       />
                       <Route
                         path="dashboards/advanced"
-                        element={<AdvancedDashboardPage />}
+                        element={
+                          <DataFetchErrorBoundary dataSourceName="Advanced Dashboard">
+                            <AdvancedDashboardPage />
+                          </DataFetchErrorBoundary>
+                        }
                       />
                       <Route
                         path="dashboards/usage-cost"
-                        element={<UsageCostDashboard />}
+                        element={
+                          <DataFetchErrorBoundary dataSourceName="Usage & Cost">
+                            <UsageCostDashboard />
+                          </DataFetchErrorBoundary>
+                        }
                       />
                       <Route
                         path="internal/command"
-                        element={<InternalCommandDashboard />}
+                        element={
+                          <DataFetchErrorBoundary dataSourceName="Internal Command Dashboard">
+                            <InternalCommandDashboard />
+                          </DataFetchErrorBoundary>
+                        }
                       />
-                      <Route path="mission-control" element={<MissionControlPage />} />
+                      <Route
+                        path="mission-control"
+                        element={
+                          <DataFetchErrorBoundary dataSourceName="Mission Control">
+                            <MissionControlPage />
+                          </DataFetchErrorBoundary>
+                        }
+                      />
 
                       {/* Data & Models */}
                       <Route
@@ -170,10 +251,31 @@ function App() {
                       <Route path="models" element={<ModelsPage />} />
                       <Route path="reports" element={<ReportsPage />} />
 
-                      {/* Admin */}
-                      <Route path="admin/*" element={<AdminPage />} />
-                      <Route path="admin/consistency" element={<ConsistencyDashboard />} />
-                      <Route path="admin/feature-flags" element={<FeatureFlagsPage />} />
+                      {/* Admin - Wrapped with MutationErrorBoundary for critical operations */}
+                      <Route
+                        path="admin/*"
+                        element={
+                          <MutationErrorBoundary operationName="admin operation">
+                            <AdminPage />
+                          </MutationErrorBoundary>
+                        }
+                      />
+                      <Route
+                        path="admin/consistency"
+                        element={
+                          <MutationErrorBoundary operationName="consistency check">
+                            <ConsistencyDashboard />
+                          </MutationErrorBoundary>
+                        }
+                      />
+                      <Route
+                        path="admin/feature-flags"
+                        element={
+                          <MutationErrorBoundary operationName="feature flag update">
+                            <FeatureFlagsPage />
+                          </MutationErrorBoundary>
+                        }
+                      />
 
                       {/* Support */}
                       <Route path="help" element={<HelpPage />} />
@@ -199,10 +301,11 @@ function App() {
                     </Route>
                   </Routes>
                   </React.Suspense>
-                </ErrorBoundary>
-              </Router>
+                  </ErrorBoundary>
+                </Router>
               </CommandStatusProvider>
             </SearchProvider>
+          </FeatureFlagProvider>
           </AuthProvider>
         </TooltipProvider>
       </SocketProvider>
