@@ -1,6 +1,6 @@
 {
   "name": "intelgraph-platform",
-  "version": "4.1.4",
+  "version": "5.0.0",
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "type": "module",
@@ -10,6 +10,7 @@
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "verify:verbose": "tsx scripts/verify.ts --verbose",
     "verify:runtime": "tsx scripts/verification/verify_runtime.ts",
+    "ga:verify": "node scripts/release/ga_verify.mjs",
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
