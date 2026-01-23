@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/ocr",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Multi-language OCR with Tesseract, PaddleOCR, document analysis, and table extraction",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -19,6 +19,7 @@ import ThreadedComments from '../collaboration/ThreadedComments';
 import { LWWElementSet } from '../../utils/lww-element-set';
 import { useSocket } from '../../hooks/useSocket';
 import { v4 as uuidv4 } from 'uuid';
+import { getGraphqlHttpUrl } from '../../config/urls';
 
 // Mock data for demonstration
 const mockEntities = [
@@ -335,7 +336,7 @@ const GraphCollaborationDemo = () => {
                 size="small"
                 sx={{ mb: 1 }}
                 onClick={() =>
-                  window.open('http://localhost:4000/graphql', '_blank')
+                  window.open(getGraphqlHttpUrl(), '_blank')
                 }
               >
                 Open GraphQL Playground
