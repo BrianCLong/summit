@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/transcription-service",
-  "version": "4.2.3",
+  "version": "2.0.0",
   "description": "Multi-provider transcription service",
   "main": "src/main.ts",
   "type": "module",

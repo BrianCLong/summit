@@ -36,6 +36,7 @@ permissions:
   actions: read
 
 env:
+  STATE_FILE: docs/releases/_state/branch_protection_drift_state.json
   OUT_DIR: artifacts/release-train
 
 jobs:
@@ -50,7 +51,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Determine Branch
         id: branch
@@ -93,7 +94,7 @@ jobs:
           echo "Extra in GitHub: ${EXTRA}"
 
       - name: Upload Drift Report
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: branch-protection-drift-report
           path: |
@@ -104,59 +105,43 @@ jobs:
       - name: Check Deduplication
         id: dedup
         if: steps.check.outputs.drift_detected == 'true'
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
-        with:
-          script: |
-            const branch = '${{ steps.branch.outputs.branch }}';
-            const missing = ${{ steps.check.outputs.missing_count }};
-            const extra = ${{ steps.check.outputs.extra_count }};
+        run: |
+          BRANCH="${{ steps.branch.outputs.branch }}"
+          MISSING="${{ steps.check.outputs.missing_count }}"
+          EXTRA="${{ steps.check.outputs.extra_count }}"
 
-            // Create a fingerprint of the drift state
-            const driftKey = `${branch}_${missing}_${extra}`;
-            core.info(`Drift key: ${driftKey}`);
+          mkdir -p "$(dirname "${{ env.STATE_FILE }}")"
 
-            // Search for existing drift issues with matching title
-            const titlePattern = `[Governance Drift] Branch protection does not match REQUIRED_CHECKS_POLICY (${branch})`;
+          if [[ ! -f "${{ env.STATE_FILE }}" ]]; then
+            echo '{"version":"1.0","issues":{}}' > "${{ env.STATE_FILE }}"
+          fi
 
-            const issues = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: 'governance',
-              state: 'open'
-            });
+          # Create a fingerprint of the drift state
+          DRIFT_KEY="${BRANCH}_${MISSING}_${EXTRA}"
 
-            const existingIssue = issues.data.find(issue => issue.title === titlePattern);
+          EXISTING=$(jq -r --arg key "${DRIFT_KEY}" '.issues[$key] // empty' "${{ env.STATE_FILE }}")
 
-            if (existingIssue) {
-              core.info(`Found existing issue #${existingIssue.number}`);
+          if [[ -n "${EXISTING}" ]]; then
+            ISSUE_NUMBER=$(echo "${EXISTING}" | jq -r '.issue_number')
+            LAST_UPDATE=$(echo "${EXISTING}" | jq -r '.last_updated')
 
-              // Check if updated within 24h by looking at comments
-              const comments = await github.rest.issues.listComments({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: existingIssue.number
-              });
+            # Check cooldown (24 hours)
+            LAST_TS=$(date -d "${LAST_UPDATE}" +%s 2>/dev/null || echo 0)
+            NOW_TS=$(date +%s)
+            DIFF=$((NOW_TS - LAST_TS))
 
-              const lastUpdate = comments.data.length > 0
-                ? new Date(comments.data[comments.data.length - 1].created_at)
-                : new Date(existingIssue.created_at);
+            if [[ ${DIFF} -lt 86400 ]]; then
+              echo "::notice::Issue #${ISSUE_NUMBER} updated within 24h, skipping"
+              echo "action=skip" >> $GITHUB_OUTPUT
+            else
+              echo "action=update" >> $GITHUB_OUTPUT
+              echo "issue_number=${ISSUE_NUMBER}" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "action=create" >> $GITHUB_OUTPUT
+          fi
 
-              const now = new Date();
-              const diffHours = (now - lastUpdate) / (1000 * 60 * 60);
-
-              if (diffHours < 24) {
-                core.notice(`Issue #${existingIssue.number} updated within 24h, skipping`);
-                core.setOutput('action', 'skip');
-              } else {
-                core.setOutput('action', 'update');
-                core.setOutput('issue_number', existingIssue.number);
-              }
-            } else {
-              core.info('No existing issue found, will create new one');
-              core.setOutput('action', 'create');
-            }
-
-            core.setOutput('drift_key', driftKey);
+          echo "drift_key=${DRIFT_KEY}" >> $GITHUB_OUTPUT
 
       - name: Generate Issue Body
         id: body
@@ -263,7 +248,7 @@ jobs:
       - name: Create Issue
         if: steps.dedup.outputs.action == 'create' && github.event.inputs.dry_run != 'true'
         id: create
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const fs = require('fs');
@@ -285,7 +270,7 @@ jobs:
 
       - name: Update Issue
         if: steps.dedup.outputs.action == 'update' && github.event.inputs.dry_run != 'true'
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const fs = require('fs');
@@ -303,10 +288,42 @@ jobs:
               console.log(`Updated issue #${issueNumber}`);
             }
 
+      - name: Update State
+        if: (steps.dedup.outputs.action == 'create' || steps.dedup.outputs.action == 'update') && github.event.inputs.dry_run != 'true'
+        run: |
+          DRIFT_KEY="${{ steps.dedup.outputs.drift_key }}"
+          NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          if [[ "${{ steps.dedup.outputs.action }}" == "create" ]]; then
+            ISSUE_NUMBER="${{ steps.create.outputs.result }}"
+          else
+            ISSUE_NUMBER="${{ steps.dedup.outputs.issue_number }}"
+          fi
+
+          jq --arg key "${DRIFT_KEY}" \
+             --arg issue "${ISSUE_NUMBER}" \
+             --arg updated "${NOW}" \
+             '.issues[$key] = {
+                issue_number: ($issue | tonumber),
+                last_updated: $updated,
+                drift_key: $key
+              }' "${{ env.STATE_FILE }}" > state_tmp.json
+
+          mv state_tmp.json "${{ env.STATE_FILE }}"
+
+      - name: Commit State
+        if: steps.dedup.outputs.action == 'create' && github.event.inputs.dry_run != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add "${{ env.STATE_FILE }}" 2>/dev/null || true
+          git commit -m "chore: update branch protection drift state" || true
+          git push || echo "::warning::Could not push state update"
 
       - name: Auto-Close on Resolution
         if: steps.check.outputs.drift_detected == 'false' && github.event.inputs.dry_run != 'true'
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             // Find open drift issues and close them

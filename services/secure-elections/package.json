@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/secure-elections",
-  "version": "4.2.3",
+  "version": "2.0.0",
   "description": "Next-Gen Secure Elections and Digital Democracy Platform",
   "type": "module",
   "main": "dist/index.js",

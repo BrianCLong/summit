@@ -88,31 +88,6 @@ Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
     })),
 });
 
-// SpeechRecognition mock for voice input tests
-class FakeSpeechRecognition {
-    constructor() {
-        if (!window.__srInstances) {
-            window.__srInstances = [];
-        }
-        window.__srInstances.push(this);
-    }
-    start() {
-        if (this.onstart) this.onstart();
-    }
-    stop() {
-        if (this.onend) this.onend();
-    }
-}
-
-Object.defineProperty(window, 'SpeechRecognition', {
-    writable: true,
-    value: FakeSpeechRecognition,
-});
-Object.defineProperty(window, 'webkitSpeechRecognition', {
-    writable: true,
-    value: FakeSpeechRecognition,
-});
-
 // --- Auth Mocks ---
 // Mock the AuthContext used by useAuth
 jest.mock('./context/AuthContext', () => ({

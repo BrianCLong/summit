@@ -1,7 +1,6 @@
 // Usage:
 //   npx ts-node scripts/verify-integrations.ts github
 //   npx ts-node scripts/verify-integrations.ts jira
-//   npx ts-node scripts/verify-integrations.ts linear
 //   npx ts-node scripts/verify-integrations.ts maestro
 
 import 'dotenv/config';
@@ -18,7 +17,6 @@ const GH_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET || '';
 const JIRA_BASE_URL = process.env.JIRA_BASE_URL || '';
 const JIRA_EMAIL = process.env.JIRA_EMAIL || '';
 const JIRA_API_TOKEN = process.env.JIRA_API_TOKEN || '';
-const LINEAR_API_TOKEN = process.env.LINEAR_API_TOKEN || '';
 
 const MAESTRO_BASE =
   process.env.MAESTRO_BASE_URL || 'https://maestro.dev.topicality.co';
@@ -123,27 +121,6 @@ async function verifyMaestro() {
   return true;
 }
 
-async function verifyLinear() {
-  console.log('→ Verifying Linear API token…');
-  assert(LINEAR_API_TOKEN, 'Missing LINEAR_API_TOKEN');
-  const response = await fetch('https://api.linear.app/graphql', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${LINEAR_API_TOKEN}`,
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify({
-      query: 'query { viewer { id name email } }',
-    }),
-  });
-  assert(response.ok, `Linear GraphQL failed: ${response.status}`);
-  const data = await response.json();
-  console.log(
-    `✔ Linear OK — viewer: ${data?.data?.viewer?.name || 'unknown'}`,
-  );
-  return true;
-}
-
 const task = process.argv[2];
 (async () => {
   try {
@@ -152,7 +129,6 @@ const task = process.argv[2];
       await verifyWebhookSignatureSample();
     }
     if (!task || task === 'jira') await verifyJira();
-    if (!task || task === 'linear') await verifyLinear();
     if (!task || task === 'maestro') await verifyMaestro();
     console.log('✅ All selected checks passed.');
   } catch (e: any) {

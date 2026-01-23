@@ -4,18 +4,5 @@ module.exports = {
     ['@babel/preset-env', { targets: { node: 'current' } }],
     ['@babel/preset-react', { runtime: 'automatic' }],
   ],
-  plugins: [
-    '@babel/plugin-transform-runtime',
-    function () {
-      return {
-        visitor: {
-          MetaProperty(path) {
-            if (path.node.meta.name === 'import' && path.node.property.name === 'meta') {
-              path.replaceWithSourceString('process');
-            }
-          },
-        },
-      };
-    },
-  ],
+  plugins: ['@babel/plugin-transform-runtime'],
 };

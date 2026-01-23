@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/ml-engine",
-  "version": "4.2.3",
+  "version": "2.0.0",
   "description": "Machine Learning Engine for IntelGraph Entity Resolution",
   "main": "dist/server.js",
   "scripts": {
@@ -27,7 +27,7 @@
     "winston": "^3.18.3",
     "bull": "^4.12.2",
     "uuid": "^13.0.0",
-    "lodash": "^4.17.23",
+    "lodash": "^4.17.21",
     "moment": "^2.29.4"
   },
   "devDependencies": {

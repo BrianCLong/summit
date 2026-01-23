@@ -20,7 +20,7 @@ const config: Config = {
   setupFiles: ['<rootDir>/tests/setup/env.ts'],
   setupFilesAfterEnv: [
     '<rootDir>/tests/setup/jest.setup.cjs',
-    // 'jest-extended/all',
+    'jest-extended/all',
   ],
   testMatch: gaVerifyMode
     ? [

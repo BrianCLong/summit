@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/logging-pipeline",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Unified audit event ingestion pipeline with backpressure handling",
   "type": "module",
   "main": "dist/index.js",

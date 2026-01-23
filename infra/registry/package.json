@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/registry-tools",
-  "version": "4.2.3",
+  "version": "2.0.0",
   "description": "Air-gapped registry infrastructure tools for IntelGraph platform",
   "type": "module",
   "main": "dist/index.js",

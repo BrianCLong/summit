@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/sandbox-cli",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "CLI tool for managing IntelGraph sandboxes and data labs",
   "type": "module",
   "bin": {
@@ -34,9 +34,7 @@
     "typescript": "^5.3.3",
     "tsx": "^4.7.0"
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "author": "IntelGraph Team",
   "license": "MIT"
 }

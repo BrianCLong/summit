@@ -34,7 +34,6 @@ import { createInputSanitizationPlugin } from './plugins/inputSanitizationPlugin
 import { createAPQPlugin } from './plugins/apqPlugin.js';
 import { createPerformanceMonitoringPlugin } from './plugins/performanceMonitoringPlugin.js';
 import { createCircuitBreakerPlugin } from './plugins/circuitBreakerPlugin.js';
-import { createProductionGraphQLCostPlugin } from './plugins/graphqlCostPlugin.js';
 import resolverMetricsPlugin from './plugins/resolverMetrics.js';
 import depthLimit from 'graphql-depth-limit';
 import { recordEndpointResult } from '../observability/reliability-metrics.js';
@@ -173,18 +172,12 @@ export function createApolloV5Server(
         removeNullBytes: true,
       }),
 
-      // GraphQL Cost Analysis & Rate Limiting Plugin (NEW)
-      // This replaces the simpler complexity plugin with full per-tenant cost tracking
-      createProductionGraphQLCostPlugin(),
-
       // Performance optimization plugins
-      // Note: Keeping legacy complexity plugin for backwards compatibility
-      // Can be removed once cost plugin is fully validated
       createQueryComplexityPlugin({
         maximumComplexity: 1000,
         getMaxComplexityForUser: getMaxComplexityByRole,
-        enforceComplexity: false, // Disabled in favor of cost plugin
-        logComplexity: false,
+        enforceComplexity: process.env.ENFORCE_QUERY_COMPLEXITY === 'true' || process.env.NODE_ENV === 'production',
+        logComplexity: true,
       }),
 
       createAPQPlugin({

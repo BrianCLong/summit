@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/ingest-adapters",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Ingest adapters for S3/GCS, webhooks, SFTP, and Kafka sources with backpressure and replay support",
   "type": "module",
   "main": "dist/index.js",

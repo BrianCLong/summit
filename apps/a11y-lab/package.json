@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/a11y-lab",
-  "version": "4.2.3",
+  "version": "2.0.0",
   "description": "Accessibility lab with Playwright + axe-core gates, keyboard trap detection, contrast budgeting, and SR tooling.",
   "private": true,
   "type": "module",

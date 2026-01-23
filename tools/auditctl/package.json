@@ -1,6 +1,6 @@
 {
   "name": "auditctl",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "CLI tool for querying and verifying audit logs",
   "main": "index.ts",
   "bin": {
