@@ -681,7 +681,7 @@ export const createApp = async () => {
       advancedRateLimiter.middleware(), // Applied AFTER authentication to enable per-user limits
       expressMiddleware(apollo, {
         context: async ({ req }) => getContext({ req: req as any })
-      }),
+      }) as unknown as express.RequestHandler,
     );
   } else {
     appLogger.warn('GraphQL disabled via SKIP_GRAPHQL');
