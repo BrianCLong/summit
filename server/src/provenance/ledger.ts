@@ -15,8 +15,15 @@ import {
   type SignatureBundle,
 } from '../security/crypto/index.js';
 import { MutationWitnessService, mutationWitness } from './witness.js';
-import { ProvenanceEntryV2, MutationPayload, MutationWitness, CrossServiceAttribution } from './types.js';
-import { advancedAuditSystem } from '../audit/advanced-audit-system.js';
+import {
+  ProvenanceEntryV2,
+  MutationPayload,
+  MutationWitness,
+  CrossServiceAttribution,
+  ReceiptEvidence,
+  RecoveryEvidence,
+} from './types.js';
+import { advancedAuditSystem } from '../audit/index.js';
 import { putLocked } from '../audit/worm.js';
 import { CanonicalGraphService } from './CanonicalGraphService.js';
 
@@ -146,8 +153,8 @@ export class ProvenanceLedgerV2 extends EventEmitter {
 
   constructor() {
     super();
-    this.initializeTables();
-    this.initializeCryptoPipeline();
+    // Do not initialize tables in constructor to avoid side effects
+    // Tables should be initialized by migration or explicitly called start() method
     this.startRootSigning();
   }
 
@@ -217,7 +224,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
             );
           }
 
-          const client = await pool.connect();
+          const client = await this.pool.connect();
 
           try {
             await client.query('BEGIN');
@@ -381,6 +388,46 @@ export class ProvenanceLedgerV2 extends EventEmitter {
     );
   }
 
+  async recordReceiptEvidence(receipt: ReceiptEvidence): Promise<ProvenanceEntry> {
+    return this.appendEntry({
+      tenantId: receipt.tenantId,
+      actionType: 'RECEIPT_ISSUED',
+      resourceType: 'receipt',
+      resourceId: receipt.receiptId,
+      actorId: receipt.actorId,
+      actorType: 'system',
+      payload: { receipt },
+      metadata: {
+        receipt,
+        entryId: receipt.entryId,
+        signerKeyId: receipt.signerKeyId,
+      },
+      timestamp: new Date(receipt.issuedAt),
+    });
+  }
+
+  async recordRecoveryEvidence(params: {
+    tenantId: string;
+    actorId: string;
+    actorType?: 'user' | 'system' | 'api' | 'job';
+    evidence: RecoveryEvidence;
+  }): Promise<ProvenanceEntry> {
+    const { tenantId, actorId, actorType, evidence } = params;
+    return this.appendEntry({
+      tenantId,
+      actionType: 'RECOVERY_EVIDENCE_CAPTURED',
+      resourceType: 'recovery',
+      resourceId: evidence.drillId,
+      actorId,
+      actorType: actorType || 'system',
+      payload: { recovery: evidence },
+      metadata: {
+        recovery: evidence,
+      },
+      timestamp: new Date(evidence.completedAt || evidence.startedAt),
+    });
+  }
+
   private isMutationPayload(payload: any): payload is MutationPayload {
     return payload && typeof payload === 'object' && 'mutationType' in payload;
   }
@@ -405,7 +452,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
         const results: ProvenanceEntry[] = [];
 
         try {
-          const client = await pool.connect();
+          const client = await this.pool.connect();
 
           try {
             await client.query('BEGIN');
@@ -550,7 +597,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
     tenantId: string,
     client?: any,
   ): Promise<ProvenanceEntry | null> {
-    const queryClient = client || pool;
+    const queryClient = client || this.pool;
 
     const result = await queryClient.query(
       `SELECT * FROM provenance_ledger_v2 
@@ -595,8 +642,8 @@ export class ProvenanceLedgerV2 extends EventEmitter {
         `;
 
           const result = tenantId
-            ? await pool.query(query, [tenantId])
-            : await pool.query(query);
+            ? await this.pool.query(query, [tenantId])
+            : await this.pool.query(query);
 
           verification.totalEntries = result.rows.length;
 
@@ -735,7 +782,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
       )
     `;
 
-    const rangeResult = await pool.query(rangeQuery, [tenantId]);
+    const rangeResult = await this.pool.query(rangeQuery, [tenantId]);
     const range = rangeResult.rows[0];
 
     if (!range.start_seq) {
@@ -750,7 +797,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
       ORDER BY sequence_number
     `;
 
-    const entriesResult = await pool.query(entriesQuery, [
+    const entriesResult = await this.pool.query(entriesQuery, [
       tenantId,
       range.start_seq,
       range.end_seq,
@@ -774,7 +821,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
     };
 
     // Store the signed root
-    await pool.query(
+    await this.pool.query(
       `
       INSERT INTO provenance_ledger_roots (
         id, tenant_id, root_hash, start_sequence, end_sequence,
@@ -1041,7 +1088,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
   }
 
   async getEntryById(id: string): Promise<ProvenanceEntry | null> {
-    const result = await pool.query(
+    const result = await this.pool.query(
       `SELECT * FROM provenance_ledger_v2 WHERE id = $1`,
       [id]
     );

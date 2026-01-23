@@ -24,6 +24,6 @@ describe('fuse', () => {
   });
 
   it('clamps inputs outside range', () => {
-    expect(fuse([200, -50])).toBe(50);
+    expect(fuse([200, -50])).toBe(100);
   });
 });

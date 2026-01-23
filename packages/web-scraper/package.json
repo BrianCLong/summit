@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/web-scraper",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Advanced web scraping with JavaScript rendering, change detection, and intelligent parsing",
   "type": "module",
   "main": "dist/index.js",

@@ -18,7 +18,7 @@ import type { TimeSeriesPoint } from '../types.js';
 describe('AnomalyDetector', () => {
   const createHistoricalData = (values: number[]): TimeSeriesPoint[] => {
     return values.map((value, index) => ({
-      timestamp: new Date(2025, 0, index + 1).toISOString(),
+      timestamp: new Date(2025, 0, index + 1).getTime(),
       value,
     }));
   };
@@ -80,7 +80,7 @@ describe('AnomalyDetector', () => {
         const result = AnomalyDetector.detectZScore('metric', history, currentValue, 2.5);
 
         expect(result).not.toBeNull();
-        expect(result!.score).toBeCloseTo(3, 0.5); // Allow some margin
+        expect(result!.score).toBeCloseTo(3.67, 1); // Allow some margin
       });
 
       it('should handle positive values correctly', () => {

@@ -29,9 +29,7 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Run | None:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Run | None:
     if response.status_code == 201:
         response_201 = Run.from_dict(response.json())
 
@@ -43,9 +41,7 @@ def _parse_response(
         return None
 
 
-def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Run]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[Run]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,

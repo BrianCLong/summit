@@ -13,7 +13,8 @@ from tenacity import (
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -101,8 +102,7 @@ class IntelGraphAPIClient:
         reraise=True,
     )
     def _get_access_token(self):
-        """Obtains an OAuth2 access token using client credentials flow.
-        """
+        """Obtains an OAuth2 access token using client credentials flow."""
         if self.access_token and time.time() < self.token_expires_at:
             logger.debug("Using existing valid access token.")
             return
@@ -139,7 +139,9 @@ class IntelGraphAPIClient:
         ),
         reraise=True,
     )
-    def _make_request(self, method: str, endpoint: str, data: dict | None = None, params: dict | None = None):
+    def _make_request(
+        self, method: str, endpoint: str, data: dict | None = None, params: dict | None = None
+    ):
         """Helper method to make authenticated API requests.
         Automatically refreshes token if needed.
         """
@@ -152,7 +154,12 @@ class IntelGraphAPIClient:
 
         try:
             response = requests.request(
-                method, url, headers=headers, json=data, params=params, timeout=30,
+                method,
+                url,
+                headers=headers,
+                json=data,
+                params=params,
+                timeout=30,
             )
             response.raise_for_status()
             return response.json()
@@ -211,7 +218,9 @@ class IntelGraphAPIClient:
             f"Publishing counter-message for narrative: {counter_message_data.get('narrative_id')}",
         )
         return self._make_request(
-            "POST", "/api/v2/countermeasures/publish", data=counter_message_data,
+            "POST",
+            "/api/v2/countermeasures/publish",
+            data=counter_message_data,
         )
 
     def search_narratives(self, tags: str | None = None, query_params: dict | None = None) -> dict:

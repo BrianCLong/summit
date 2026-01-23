@@ -2,19 +2,24 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Dict, Iterable, Tuple
 
 import numpy as np
 
 from .lagrangian import FairnessConstraint
-from .metrics import accuracy, demographic_parity_difference, false_positive_rate_gap, true_positive_rate_gap
+from .metrics import (
+    accuracy,
+    demographic_parity_difference,
+    false_positive_rate_gap,
+    true_positive_rate_gap,
+)
 
 
 @dataclass
 class ThresholdAdjusterResult:
-    thresholds: Dict[int, float]
-    report: Dict[str, float]
+    thresholds: dict[int, float]
+    report: dict[str, float]
 
 
 class ThresholdAdjuster:
@@ -31,15 +36,15 @@ class ThresholdAdjuster:
         self.constraint = constraint
         self.tolerance = tolerance
         self.grid = np.linspace(0, 1, grid_size)
-        self._thresholds: Dict[int, float] = {}
-        self._last_report: Dict[str, float] = {}
+        self._thresholds: dict[int, float] = {}
+        self._last_report: dict[str, float] = {}
 
     @property
-    def thresholds(self) -> Dict[int, float]:
+    def thresholds(self) -> dict[int, float]:
         return dict(self._thresholds)
 
     @property
-    def report(self) -> Dict[str, float]:
+    def report(self) -> dict[str, float]:
         return dict(self._last_report)
 
     def fit(
@@ -78,21 +83,25 @@ class ThresholdAdjuster:
 
     def _search_thresholds(
         self, y_true: np.ndarray, y_prob: np.ndarray, sensitive: np.ndarray
-    ) -> Tuple[Dict[int, float], Dict[str, float]]:
+    ) -> tuple[dict[int, float], dict[str, float]]:
         unique = np.unique(sensitive)
         if unique.size != 2:
             raise ValueError("Only binary sensitive attributes are supported")
 
-        best_thresholds: Dict[int, float] = {}
-        best_report: Dict[str, float] = {"accuracy": -np.inf}
+        best_thresholds: dict[int, float] = {}
+        best_report: dict[str, float] = {"accuracy": -np.inf}
 
         for thr_a in self.grid:
             for thr_b in self.grid:
                 thresholds = {int(unique[0]): float(thr_a), int(unique[1]): float(thr_b)}
-                preds = np.where(sensitive == unique[0], y_prob >= thr_a, y_prob >= thr_b).astype(int)
+                preds = np.where(sensitive == unique[0], y_prob >= thr_a, y_prob >= thr_b).astype(
+                    int
+                )
                 report = {
                     "accuracy": accuracy(y_true, preds, threshold=0.5),
-                    "demographic_parity_diff": demographic_parity_difference(y_true, preds, sensitive),
+                    "demographic_parity_diff": demographic_parity_difference(
+                        y_true, preds, sensitive
+                    ),
                     "tpr_gap": true_positive_rate_gap(y_true, preds, sensitive),
                     "fpr_gap": false_positive_rate_gap(y_true, preds, sensitive),
                 }
@@ -107,16 +116,21 @@ class ThresholdAdjuster:
             for thr_a in self.grid:
                 for thr_b in self.grid:
                     thresholds = {int(unique[0]): float(thr_a), int(unique[1]): float(thr_b)}
-                    preds = np.where(sensitive == unique[0], y_prob >= thr_a, y_prob >= thr_b).astype(int)
+                    preds = np.where(
+                        sensitive == unique[0], y_prob >= thr_a, y_prob >= thr_b
+                    ).astype(int)
                     report = {
                         "accuracy": accuracy(y_true, preds, threshold=0.5),
-                        "demographic_parity_diff": demographic_parity_difference(y_true, preds, sensitive),
+                        "demographic_parity_diff": demographic_parity_difference(
+                            y_true, preds, sensitive
+                        ),
                         "tpr_gap": true_positive_rate_gap(y_true, preds, sensitive),
                         "fpr_gap": false_positive_rate_gap(y_true, preds, sensitive),
                     }
                     violation = self._violation_amount(report)
                     if violation < min_violation or (
-                        np.isclose(violation, min_violation) and report["accuracy"] > best_report["accuracy"]
+                        np.isclose(violation, min_violation)
+                        and report["accuracy"] > best_report["accuracy"]
                     ):
                         min_violation = violation
                         best_thresholds = thresholds
@@ -124,14 +138,14 @@ class ThresholdAdjuster:
 
         return best_thresholds, best_report
 
-    def _within_constraint(self, report: Dict[str, float]) -> bool:
+    def _within_constraint(self, report: dict[str, float]) -> bool:
         if self.constraint == FairnessConstraint.DEMOGRAPHIC_PARITY:
             return report["demographic_parity_diff"] <= self.tolerance
         if self.constraint == FairnessConstraint.EQUAL_OPPORTUNITY:
             return report["tpr_gap"] <= self.tolerance
         return max(report["tpr_gap"], report["fpr_gap"]) <= self.tolerance
 
-    def _violation_amount(self, report: Dict[str, float]) -> float:
+    def _violation_amount(self, report: dict[str, float]) -> float:
         if self.constraint == FairnessConstraint.DEMOGRAPHIC_PARITY:
             return report["demographic_parity_diff"]
         if self.constraint == FairnessConstraint.EQUAL_OPPORTUNITY:

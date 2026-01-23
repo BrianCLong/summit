@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-import json
-import sys
 from datetime import datetime
 
 # Prompt definitions
@@ -16,8 +14,8 @@ PROMPTS = [
             "Create ml/config/train.classifier.yaml",
             "Create ml/data/sample/train.classifier.sample.jsonl",
             "Update Makefile",
-            "Create docs/ml/training-classifier.md"
-        ]
+            "Create docs/ml/training-classifier.md",
+        ],
     },
     {
         "id": "A2",
@@ -29,8 +27,8 @@ PROMPTS = [
             "Create ml/eval.py",
             "Create reports/models/classifier/leaderboard.md",
             "Create .github/workflows/ci-train-eval-smoke.yml",
-            "Update Makefile"
-        ]
+            "Update Makefile",
+        ],
     },
     {
         "id": "B1",
@@ -42,8 +40,8 @@ PROMPTS = [
             "Create server/src/intelgraph/schema.ts",
             "Create server/src/examples/ig_seed_graph.ts",
             "Create docs/intelgraph/schema-v1.md",
-            "Create server/src/intelgraph/schema.test.ts"
-        ]
+            "Create server/src/intelgraph/schema.test.ts",
+        ],
     },
     {
         "id": "B2",
@@ -55,8 +53,8 @@ PROMPTS = [
             "Create server/src/maestro/core.ts",
             "Create server/src/maestro/cost_meter.ts",
             "Create server/src/scripts/maestro-run.ts",
-            "Create server/src/maestro/core.test.ts"
-        ]
+            "Create server/src/maestro/core.test.ts",
+        ],
     },
     {
         "id": "C1",
@@ -68,8 +66,8 @@ PROMPTS = [
             "Create .github/workflows/ci-green-baseline.yml",
             "Create scripts/ci/merge_train_manager.sh",
             "Create .github/workflows/fast-lane-check.yml",
-            "Create docs/engineering/ci-baseline.md"
-        ]
+            "Create docs/engineering/ci-baseline.md",
+        ],
     },
     {
         "id": "C3",
@@ -79,8 +77,8 @@ PROMPTS = [
         "priority": "Medium",
         "tasks": [
             "Create scripts/ci/generate_weekly_report.py",
-            "Create .github/workflows/ci-report-generator.yml"
-        ]
+            "Create .github/workflows/ci-report-generator.yml",
+        ],
     },
     {
         "id": "D1",
@@ -91,8 +89,8 @@ PROMPTS = [
         "tasks": [
             "Create apps/web/src/pages/MaestroRunConsole.tsx",
             "Create apps/web/src/api/maestro.ts",
-            "Create docs/ui/maestro-run-console.md"
-        ]
+            "Create docs/ui/maestro-run-console.md",
+        ],
     },
     {
         "id": "E1",
@@ -103,27 +101,31 @@ PROMPTS = [
         "tasks": [
             "Create docs/contributing/quickstart.md",
             "Create docs/agents/roles.md",
-            "Create docs/INDEX.md"
-        ]
-    }
+            "Create docs/INDEX.md",
+        ],
+    },
 ]
 
+
 def main():
-    print(f"--- Multi-Agent Sprint Orchestrator ---")
+    print("--- Multi-Agent Sprint Orchestrator ---")
     print(f"Timestamp: {datetime.now().isoformat()}\n")
 
     for prompt in PROMPTS:
-        print(f"[{prompt['id']}] Assigning '{prompt['title']}' to {prompt['agent']} ({prompt['role']})...")
-        print(f"    Tasks:")
-        for task in prompt['tasks']:
+        print(
+            f"[{prompt['id']}] Assigning '{prompt['title']}' to {prompt['agent']} ({prompt['role']})..."
+        )
+        print("    Tasks:")
+        for task in prompt["tasks"]:
             print(f"    - {task}")
-        print(f"    Status: PENDING_EXECUTION")
+        print("    Status: PENDING_EXECUTION")
         print("-" * 40)
 
     print("\nOrchestration complete. Agents notified.")
 
     # In a real system, this would trigger webhooks or queue jobs.
     # Here we just output the plan.
+
 
 if __name__ == "__main__":
     main()

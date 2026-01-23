@@ -86,25 +86,6 @@ router.get('/status', (_req: Request, res: Response) => {
  *     responses:
  *       200:
  *         description: Service is healthy
- *     description: Basic health check endpoint
- *     responses:
- *       200:
- *         description: Service is running
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: ok
- *                 timestamp:
- *                   type: string
- *                   format: date-time
- *                 uptime:
- *                   type: number
- *                 environment:
- *                   type: string
  */
 import { asyncHandler } from '../middleware/async-handler.js';
 router.get('/health', asyncHandler(async (_req: Request, res: Response) => {
@@ -147,12 +128,6 @@ router.get('/health', asyncHandler(async (_req: Request, res: Response) => {
  *                       type: string
  *       503:
  *         description: Service is degraded or unhealthy
- *     description: Detailed health check with dependency status
- *     responses:
- *       200:
- *         description: System is healthy
- *       503:
- *         description: System is degraded
  */
 router.get('/health/detailed', async (req: Request, res: Response) => {
   telemetryService.track('system_alert', 'system', 'detailed_health_check', 'system', {

@@ -1,0 +1,153 @@
+name: Auto-Triage Release Blockers
+
+# AUTOMATIC TRIAGE ROUTING FOR RELEASE BLOCKERS
+# Routes release blocker issues to appropriate teams based on
+# labels, file paths, and keywords.
+#
+# NOTE: This workflow is event-driven (triggered on issue changes).
+# The Release Ops Orchestrator also calls the routing script hourly
+# for batch processing. This workflow handles real-time routing.
+#
+# See docs/ci/AUTO_TRIAGE_ROUTING.md for full documentation.
+# See docs/ci/RELEASE_OPS_ORCHESTRATOR.md for orchestrator details.
+
+on:
+  issues:
+    types: [opened, labeled]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Specific issue number to triage (leave empty for all)"
+        type: string
+        required: false
+      dry_run:
+        description: "Dry run mode (show routing without making changes)"
+        type: boolean
+        default: false
+      force:
+        description: "Force re-triage even if recently processed"
+        type: boolean
+        default: false
+
+# Prevent concurrent runs to avoid race conditions
+concurrency:
+  group: auto-triage-${{ github.event.issue.number || 'batch' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write # For updating state file
+  issues: write # For editing issues
+
+jobs:
+  check-trigger:
+    name: Check Trigger Conditions
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+      issue_number: ${{ steps.check.outputs.issue_number }}
+    steps:
+      - name: Check if should run
+        id: check
+        run: |
+          # For workflow_dispatch, always run
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "issue_number=${{ inputs.issue_number }}" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # For issue events, check labels
+          LABELS='${{ toJson(github.event.issue.labels.*.name) }}'
+
+          # Check if issue has release-blocker or needs-triage label
+          if echo "$LABELS" | grep -qE '"release-blocker"|"needs-triage"'; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "issue_number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+            echo "Issue does not have required labels, skipping"
+          fi
+
+  auto-triage:
+    name: Route Issue
+    needs: check-trigger
+    if: needs.check-trigger.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Run Auto-Triage
+        id: triage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/release/auto_triage_blockers.sh
+
+          # Build arguments
+          ARGS=""
+          ARGS="$ARGS --policy docs/ci/TRIAGE_ROUTING_POLICY.yml"
+          ARGS="$ARGS --state docs/releases/_state/triage_state.json"
+
+          # Add specific issue if provided
+          if [[ -n "${{ needs.check-trigger.outputs.issue_number }}" ]]; then
+            ARGS="$ARGS --issue ${{ needs.check-trigger.outputs.issue_number }}"
+          fi
+
+          # Add flags
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          if [[ "${{ inputs.force }}" == "true" ]]; then
+            ARGS="$ARGS --force"
+          fi
+
+          # Run triage
+          ./scripts/release/auto_triage_blockers.sh $ARGS
+
+      - name: Check for State Changes
+        id: check_changes
+        run: |
+          if git diff --quiet docs/releases/_state/triage_state.json 2>/dev/null; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit State Changes
+        if: steps.check_changes.outputs.changed == 'true' && inputs.dry_run != true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add docs/releases/_state/triage_state.json
+
+          git commit -m "chore(release-ops): update triage state
+
+          Automated update from Auto-Triage workflow.
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          [skip ci]"
+
+          git push
+
+      - name: Job Summary
+        run: |
+          echo "### Auto-Triage Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ -n "${{ needs.check-trigger.outputs.issue_number }}" ]]; then
+            echo "Processed issue: #${{ needs.check-trigger.outputs.issue_number }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Processed batch of issues with \`needs-triage\` label" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "See workflow logs for detailed routing decisions." >> $GITHUB_STEP_SUMMARY

@@ -45,7 +45,7 @@ export function createRoutes(engine: EREngine): Router {
   router.post(
     '/candidates',
     validate(CandidateRequestSchema),
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
       try {
         const result = engine.candidates(req.body);
         logger.info(
@@ -65,7 +65,7 @@ export function createRoutes(engine: EREngine): Router {
   router.post(
     '/merge',
     validate(MergeRequestSchema),
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
       try {
         const result = engine.merge(req.body);
         logger.info(
@@ -84,7 +84,7 @@ export function createRoutes(engine: EREngine): Router {
    */
   router.post(
     '/merge/:mergeId/revert',
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
       try {
         const { mergeId } = req.params;
         const { actor, reason } = req.body;
@@ -111,7 +111,7 @@ export function createRoutes(engine: EREngine): Router {
   router.post(
     '/split',
     validate(SplitRequestSchema),
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
       try {
         const result = engine.split(req.body);
         logger.info(
@@ -130,7 +130,7 @@ export function createRoutes(engine: EREngine): Router {
    */
   router.get(
     '/explain/:mergeId',
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
       try {
         const { mergeId } = req.params;
         const explanation = engine.explain(mergeId);
@@ -147,7 +147,7 @@ export function createRoutes(engine: EREngine): Router {
   router.post(
     '/explain',
     validate(ExplainPairRequestSchema),
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
       try {
         const explanation = engine.explainPair(req.body);
         res.json(explanation);
@@ -162,7 +162,7 @@ export function createRoutes(engine: EREngine): Router {
    */
   router.get(
     '/merge/:mergeId/export',
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
       try {
         const { mergeId } = req.params;
         const bundle = engine.exportMergeBundle(mergeId);
@@ -178,7 +178,7 @@ export function createRoutes(engine: EREngine): Router {
    */
   router.get(
     '/merge/:mergeId',
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
       try {
         const { mergeId } = req.params;
         const merge = engine.getMerge(mergeId);
@@ -198,7 +198,7 @@ export function createRoutes(engine: EREngine): Router {
    */
   router.get(
     '/split/:splitId',
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
       try {
         const { splitId } = req.params;
         const split = engine.getSplit(splitId);
@@ -218,7 +218,7 @@ export function createRoutes(engine: EREngine): Router {
    */
   router.get(
     '/audit',
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
       try {
         const { tenantId, actor, event, limit } = req.query;
 
@@ -239,7 +239,7 @@ export function createRoutes(engine: EREngine): Router {
   /**
    * GET /stats - Get statistics
    */
-  router.get('/stats', async (_req: Request, res: Response) => {
+  router.get('/stats', (_req: Request, res: Response) => {
     const stats = engine.getStats();
     res.json(stats);
   });
@@ -247,7 +247,7 @@ export function createRoutes(engine: EREngine): Router {
   /**
    * GET /health - Health check
    */
-  router.get('/health', async (_req: Request, res: Response) => {
+  router.get('/health', (_req: Request, res: Response) => {
     res.json({ status: 'healthy', timestamp: new Date().toISOString() });
   });
 
@@ -257,7 +257,7 @@ export function createRoutes(engine: EREngine): Router {
   router.post(
     '/entities',
     validate(EntityRecordSchema),
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
       try {
         engine.storeEntity(req.body);
         logger.info({ entityId: req.body.id }, 'Entity stored');
@@ -273,7 +273,7 @@ export function createRoutes(engine: EREngine): Router {
    */
   router.get(
     '/entities/:id',
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
       try {
         const entity = engine.getEntity(req.params.id);
         if (!entity) {

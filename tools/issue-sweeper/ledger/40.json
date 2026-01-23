@@ -1,0 +1,239 @@
+{
+  "issue_number": 40,
+  "title": "M3: Graph viewer (Cytoscape) with basic layout",
+  "url": "https://github.com/BrianCLong/summit/issues/40",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051532,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5DA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:frontend",
+      "name": "area:frontend",
+      "color": "ededed",
+      "default": false,
+      "description": "Frontend work"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:12:04Z",
+  "createdAt": "2025-08-12T00:15:44Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14526,
+        "url": "https://github.com/BrianCLong/summit/pull/14526",
+        "mergedAt": "2025-12-27T00:20:23Z",
+        "title": "Sprint N+40: Revenue Operations & Usage Metering"
+      },
+      {
+        "number": 14091,
+        "url": "https://github.com/BrianCLong/summit/pull/14091",
+        "mergedAt": "2025-12-20T07:35:31Z",
+        "title": "Add breakdown document for prompts 33–40 tasks"
+      },
+      {
+        "number": 15353,
+        "url": "https://github.com/BrianCLong/summit/pull/15353",
+        "mergedAt": "2026-01-01T11:36:52Z",
+        "title": "Implement Comprehensive Monitoring and Observability"
+      },
+      {
+        "number": 12667,
+        "url": "https://github.com/BrianCLong/summit/pull/12667",
+        "mergedAt": "2025-12-04T17:44:54Z",
+        "title": "Expand tuning decisions for prompts 33-40"
+      },
+      {
+        "number": 15193,
+        "url": "https://github.com/BrianCLong/summit/pull/15193",
+        "mergedAt": null,
+        "title": "Normalize PR backlog and merge to golden path"
+      },
+      {
+        "number": 14788,
+        "url": "https://github.com/BrianCLong/summit/pull/14788",
+        "mergedAt": "2025-12-29T03:44:54Z",
+        "title": "docs: add safeguards to launch playbook"
+      },
+      {
+        "number": 15271,
+        "url": "https://github.com/BrianCLong/summit/pull/15271",
+        "mergedAt": null,
+        "title": "Senior engineer embedded repository work"
+      },
+      {
+        "number": 12395,
+        "url": "https://github.com/BrianCLong/summit/pull/12395",
+        "mergedAt": "2025-12-18T02:53:19Z",
+        "title": "Add wave 5 prompt execution plan"
+      },
+      {
+        "number": 13309,
+        "url": "https://github.com/BrianCLong/summit/pull/13309",
+        "mergedAt": "2025-12-04T08:38:13Z",
+        "title": "chore: Auto-fix ESLint warnings across monorepo"
+      },
+      {
+        "number": 12061,
+        "url": "https://github.com/BrianCLong/summit/pull/12061",
+        "mergedAt": "2025-11-21T04:00:35Z",
+        "title": "Build internationalization system for Summit"
+      },
+      {
+        "number": 12146,
+        "url": "https://github.com/BrianCLong/summit/pull/12146",
+        "mergedAt": "2025-11-21T08:02:38Z",
+        "title": "Improve test coverage"
+      },
+      {
+        "number": 12506,
+        "url": "https://github.com/BrianCLong/summit/pull/12506",
+        "mergedAt": "2025-12-18T02:37:44Z",
+        "title": "Plan additional defensive security sprints"
+      },
+      {
+        "number": 15317,
+        "url": "https://github.com/BrianCLong/summit/pull/15317",
+        "mergedAt": "2026-01-01T11:38:59Z",
+        "title": "Ecosystem Entry Innovation Sprint Documentation"
+      },
+      {
+        "number": 11953,
+        "url": "https://github.com/BrianCLong/summit/pull/11953",
+        "mergedAt": "2025-11-20T10:20:52Z",
+        "title": "Review cloud cost optimization opportunities"
+      },
+      {
+        "number": 12042,
+        "url": "https://github.com/BrianCLong/summit/pull/12042",
+        "mergedAt": "2025-11-21T03:59:41Z",
+        "title": "Audit and improve CI/CD pipeline performance"
+      },
+      {
+        "number": 12512,
+        "url": "https://github.com/BrianCLong/summit/pull/12512",
+        "mergedAt": "2025-12-04T17:45:29Z",
+        "title": "Modernize Build Pipeline with GitHub Actions"
+      },
+      {
+        "number": 12111,
+        "url": "https://github.com/BrianCLong/summit/pull/12111",
+        "mergedAt": "2025-11-21T07:30:42Z",
+        "title": "Build AI-Powered Multi-Language Global Integration"
+      },
+      {
+        "number": 15315,
+        "url": "https://github.com/BrianCLong/summit/pull/15315",
+        "mergedAt": null,
+        "title": "Initialize Pilot Design Innovation Sprint artifacts"
+      },
+      {
+        "number": 15348,
+        "url": "https://github.com/BrianCLong/summit/pull/15348",
+        "mergedAt": "2026-01-01T09:53:05Z",
+        "title": "Improve cost and operational efficiency"
+      },
+      {
+        "number": 12256,
+        "url": "https://github.com/BrianCLong/summit/pull/12256",
+        "mergedAt": "2025-12-18T03:24:39Z",
+        "title": "Add 11 repo-scoped Claude prompts"
+      },
+      {
+        "number": 13189,
+        "url": "https://github.com/BrianCLong/summit/pull/13189",
+        "mergedAt": "2025-12-04T15:38:50Z",
+        "title": "Integrate OPA and Falco for zero-trust security"
+      },
+      {
+        "number": 1435,
+        "url": "https://github.com/BrianCLong/summit/pull/1435",
+        "mergedAt": null,
+        "title": "chore: deliver code quality audit assets"
+      },
+      {
+        "number": 1419,
+        "url": "https://github.com/BrianCLong/summit/pull/1419",
+        "mergedAt": null,
+        "title": "chore: deliver code quality audit assets"
+      },
+      {
+        "number": 15328,
+        "url": "https://github.com/BrianCLong/summit/pull/15328",
+        "mergedAt": null,
+        "title": "feat: add counter-intel osint playbook and tooling"
+      },
+      {
+        "number": 10210,
+        "url": "https://github.com/BrianCLong/summit/pull/10210",
+        "mergedAt": "2025-10-15T16:04:02Z",
+        "title": "SEV-1: CI Backbone - Guarantee Green Signal on Main"
+      },
+      {
+        "number": 15324,
+        "url": "https://github.com/BrianCLong/summit/pull/15324",
+        "mergedAt": null,
+        "title": "Add continuity and succession safeguards"
+      },
+      {
+        "number": 15350,
+        "url": "https://github.com/BrianCLong/summit/pull/15350",
+        "mergedAt": null,
+        "title": "docs: add FMCP-TPCE provisional draft and intake updates"
+      },
+      {
+        "number": 15338,
+        "url": "https://github.com/BrianCLong/summit/pull/15338",
+        "mergedAt": "2026-01-01T11:38:05Z",
+        "title": "Control the Arena: Governance Definitions and Debt Automation"
+      },
+      {
+        "number": 15334,
+        "url": "https://github.com/BrianCLong/summit/pull/15334",
+        "mergedAt": "2026-01-01T11:38:19Z",
+        "title": "Delivery of 8 Strategic Innovations"
+      },
+      {
+        "number": 12093,
+        "url": "https://github.com/BrianCLong/summit/pull/12093",
+        "mergedAt": "2025-11-21T06:30:17Z",
+        "title": "Design database migration and schema strategy"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

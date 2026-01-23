@@ -1,0 +1,26 @@
+{
+  "id": "gov-002-retention-purge-disclosure",
+  "version": "1.0.0",
+  "description": "Imported from legacy structure: gov-002-retention-purge-disclosure",
+  "model_config": {
+    "model": "gpt-4",
+    "temperature": 0.0
+  },
+  "vars": {
+    "recordId": {
+      "type": "string",
+      "description": "Auto-detected"
+    },
+    "id": {
+      "type": "string",
+      "description": "Auto-detected"
+    }
+  },
+  "guardrails": {
+    "tags": [
+      "claude",
+      "legacy"
+    ]
+  },
+  "template_path": "template.md"
+}

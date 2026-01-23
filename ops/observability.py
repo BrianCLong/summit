@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import contextvars
+from collections.abc import Mapping, MutableMapping
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from threading import Lock
-from typing import TYPE_CHECKING, Dict, List, Mapping, MutableMapping, Optional
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
-
 if TYPE_CHECKING:  # pragma: no cover - import hints only
-    from opentelemetry.sdk.trace import SpanProcessor
     from opentelemetry.trace import Span
 
 
@@ -25,7 +24,7 @@ class _MetricSample:
     recorded_at: datetime
 
 
-_RECORDED_PROM_METRICS: Dict[str, List[_MetricSample]] = {}
+_RECORDED_PROM_METRICS: dict[str, list[_MetricSample]] = {}
 _METRICS_LOCK = Lock()
 _CORRELATION_ID = contextvars.ContextVar("correlation_id", default=None)
 
@@ -75,13 +74,13 @@ def init_otel_tracing(
     trace.set_tracer_provider(tracer_provider)
 
 
-def _normalise_labels(labels: Optional[Mapping[str, object]]) -> Dict[str, str]:
+def _normalise_labels(labels: Mapping[str, object] | None) -> dict[str, str]:
     """Normalise label keys and values to strings for consistent storage."""
 
     if not labels:
         return {}
 
-    normalised: Dict[str, str] = {}
+    normalised: dict[str, str] = {}
     for key, value in labels.items():
         if key is None:
             raise ValueError("Metric label keys cannot be None")
@@ -89,7 +88,7 @@ def _normalise_labels(labels: Optional[Mapping[str, object]]) -> Dict[str, str]:
     return normalised
 
 
-def record_prom_metric(metric_name: str, value: float, labels: Optional[Mapping[str, object]] = None):
+def record_prom_metric(metric_name: str, value: float, labels: Mapping[str, object] | None = None):
     """
     Record a Prometheus metric data point for local testing and verification.
 
@@ -110,7 +109,7 @@ def record_prom_metric(metric_name: str, value: float, labels: Optional[Mapping[
     sample = _MetricSample(
         value=numeric_value,
         labels=normalised_labels,
-        recorded_at=datetime.now(timezone.utc),
+        recorded_at=datetime.now(UTC),
     )
 
     with _METRICS_LOCK:
@@ -130,14 +129,14 @@ def generate_correlation_id() -> str:
     return correlation_id
 
 
-def get_correlation_id(headers: Optional[Mapping[str, str]] = None) -> Optional[str]:
+def get_correlation_id(headers: Mapping[str, str] | None = None) -> str | None:
     """Return the active correlation ID, seeding it from incoming headers if present."""
 
     existing = _CORRELATION_ID.get()
     if existing:
         return existing
 
-    header_value: Optional[str] = None
+    header_value: str | None = None
     if headers:
         header_value = headers.get("x-request-id") or headers.get("X-Request-Id")
         header_value = header_value or headers.get("traceparent")
@@ -163,10 +162,10 @@ class _CallbackSpanProcessor:
     def __init__(self, callback):
         self._callback = callback
 
-    def on_start(self, span: "Span", parent_context=None):
+    def on_start(self, span: Span, parent_context=None):
         self._callback(span, parent_context)
 
-    def on_end(self, span: "Span"):  # pragma: no cover - passthrough
+    def on_end(self, span: Span):  # pragma: no cover - passthrough
         return None
 
     def shutdown(self):  # pragma: no cover - passthrough
@@ -177,7 +176,7 @@ class _CallbackSpanProcessor:
 
 
 @contextmanager
-def traced_operation(operation: str, attributes: Optional[Mapping[str, object]] = None):
+def traced_operation(operation: str, attributes: Mapping[str, object] | None = None):
     """Context manager to trace an operation with correlation-aware metadata."""
 
     from opentelemetry import trace
@@ -192,7 +191,7 @@ def traced_operation(operation: str, attributes: Optional[Mapping[str, object]] 
         yield span
 
 
-def get_recorded_prom_metrics(metric_name: Optional[str] = None):
+def get_recorded_prom_metrics(metric_name: str | None = None):
     """Return a copy of the recorded Prometheus metrics registry."""
 
     with _METRICS_LOCK:

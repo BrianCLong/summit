@@ -14,7 +14,7 @@ import {
   vectorQueryDurationSeconds,
 } from '../monitoring/metrics.js';
 import { logger } from '../utils/logger.js';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 
 const serviceLogger = logger.child({ name: 'SimilarityService' });
 
@@ -331,6 +331,7 @@ export class SimilarityService {
       operation: 'similarity-search',
       tenant_id: tenantLabel,
     });
+    const finishTimer = typeof stopTimer === 'function' ? stopTimer : () => { };
     let status: 'success' | 'error' = 'success';
 
     try {
@@ -380,10 +381,15 @@ export class SimilarityService {
       status = 'error';
       throw error;
     } finally {
-      stopTimer();
-      vectorQueriesTotal
-        .labels('similarity-search', tenantLabel, status)
-        .inc();
+      finishTimer();
+      const counter = vectorQueriesTotal?.labels?.(
+        'similarity-search',
+        tenantLabel,
+        status,
+      );
+      if (counter && typeof counter.inc === 'function') {
+        counter.inc();
+      }
       client.release();
     }
   }

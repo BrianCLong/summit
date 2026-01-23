@@ -1,19 +1,17 @@
-dist/
-build/
-coverage/
-node_modules/
-public/
-*.min.js
-.github/workflows/compliance-automation.yml
-.vite/
-.next/
-.cache/
-.turbo/
-generated/
-v4/archive/
-.venv/
-venv/
-v24_modules/
-.archive/
-_salvage_from_refs/
-templates/
+# Build artifacts
+dist
+build
+coverage
+.next
+.nuxt
+target
+node_modules
+.cache
+
+# Configs
+*.config.js
+*.config.ts
+.eslintrc.js
+
+# Generated
+packages/work-graph/packages/work-graph/src/integrations/github.ts

@@ -1,4 +1,10 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 ---
+
 title: Documentation Quality Assurance Framework
 summary: Comprehensive quality assurance procedures, tools, and standards for maintaining excellence in documentation
 version: 1.0.0
@@ -6,6 +12,7 @@ lastUpdated: 2025-09-09
 owner: docs
 status: approved
 reviewers: [qa-team, docs-team, engineering]
+
 ---
 
 # Documentation Quality Assurance Framework
@@ -135,7 +142,7 @@ repos:
       - id: check-yaml
       - id: check-json
       - id: check-added-large-files
-        args: ['--maxkb=1000']
+        args: ["--maxkb=1000"]
 
   - repo: https://github.com/errata-ai/vale
     hooks:
@@ -155,7 +162,7 @@ repos:
 name: Documentation Quality Assurance
 on:
   pull_request:
-    paths: ['docs/**', 'docs-site/**']
+    paths: ["docs/**", "docs-site/**"]
 
 jobs:
   quality-gate:
@@ -329,20 +336,20 @@ node scripts/freshness-check.js >> daily-report.md
 
 ```javascript
 // tests/content-functionality.test.js
-describe('Documentation Functionality', () => {
-  test('All code examples execute successfully', async () => {
-    const codeBlocks = await extractCodeBlocks('docs/');
+describe("Documentation Functionality", () => {
+  test("All code examples execute successfully", async () => {
+    const codeBlocks = await extractCodeBlocks("docs/");
 
     for (const block of codeBlocks) {
-      if (block.language === 'bash') {
+      if (block.language === "bash") {
         const result = await executeShellCommand(block.code);
         expect(result.exitCode).toBe(0);
       }
     }
   });
 
-  test('All API endpoints respond correctly', async () => {
-    const apiExamples = await extractApiExamples('docs/api/');
+  test("All API endpoints respond correctly", async () => {
+    const apiExamples = await extractApiExamples("docs/api/");
 
     for (const example of apiExamples) {
       const response = await fetch(example.endpoint, example.options);
@@ -356,10 +363,10 @@ describe('Documentation Functionality', () => {
 
 ```javascript
 // tests/accessibility.test.js
-const { AxePuppeteer } = require('@axe-core/puppeteer');
-const puppeteer = require('puppeteer');
+const { AxePuppeteer } = require("@axe-core/puppeteer");
+const puppeteer = require("puppeteer");
 
-describe('Accessibility Compliance', () => {
+describe("Accessibility Compliance", () => {
   let browser, page;
 
   beforeAll(async () => {
@@ -367,7 +374,7 @@ describe('Accessibility Compliance', () => {
     page = await browser.newPage();
   });
 
-  test('Documentation pages meet WCAG 2.1 AA standards', async () => {
+  test("Documentation pages meet WCAG 2.1 AA standards", async () => {
     const pages = await getDocumentationPages();
 
     for (const pageUrl of pages) {
@@ -388,18 +395,18 @@ describe('Accessibility Compliance', () => {
 
 ```javascript
 // tests/performance.test.js
-const lighthouse = require('lighthouse');
-const chromeLauncher = require('chrome-launcher');
+const lighthouse = require("lighthouse");
+const chromeLauncher = require("chrome-launcher");
 
-describe('Documentation Performance', () => {
-  test('Pages meet performance benchmarks', async () => {
+describe("Documentation Performance", () => {
+  test("Pages meet performance benchmarks", async () => {
     const chrome = await chromeLauncher.launch();
     const pages = await getDocumentationPages();
 
     for (const page of pages) {
       const results = await lighthouse(page, {
         port: chrome.port,
-        onlyCategories: ['performance', 'accessibility', 'seo'],
+        onlyCategories: ["performance", "accessibility", "seo"],
       });
 
       expect(results.lhr.categories.performance.score).toBeGreaterThan(0.9);
@@ -544,27 +551,27 @@ swap:
 
 ```javascript
 // scripts/axe-audit.js
-const { Builder } = require('selenium-webdriver');
-const chrome = require('selenium-webdriver/chrome');
-const AxeBuilder = require('@axe-core/webdriverjs');
+const { Builder } = require("selenium-webdriver");
+const chrome = require("selenium-webdriver/chrome");
+const AxeBuilder = require("@axe-core/webdriverjs");
 
 async function runAccessibilityAudit() {
   const driver = await new Builder()
-    .forBrowser('chrome')
+    .forBrowser("chrome")
     .setChromeOptions(new chrome.Options().headless())
     .build();
 
   try {
-    await driver.get('http://localhost:3000/docs');
+    await driver.get("http://localhost:3000/docs");
 
     const results = await new AxeBuilder(driver)
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+      .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
       .analyze();
 
     console.log(`Found ${results.violations.length} accessibility violations`);
 
     if (results.violations.length > 0) {
-      console.error('Accessibility violations:');
+      console.error("Accessibility violations:");
       results.violations.forEach((violation) => {
         console.error(`- ${violation.description}`);
       });
@@ -616,7 +623,7 @@ interface QualityTrend {
   metric: string;
   currentValue: number;
   previousValue: number;
-  trend: 'improving' | 'declining' | 'stable';
+  trend: "improving" | "declining" | "stable";
   significance: number;
 }
 
@@ -686,13 +693,13 @@ class QualityImprovement {
   async implementRecommendation(rec: Recommendation): Promise<void> {
     // Automated implementation of approved recommendations
     switch (rec.type) {
-      case 'content-update':
+      case "content-update":
         await this.scheduleContentUpdate(rec);
         break;
-      case 'process-improvement':
+      case "process-improvement":
         await this.updateProcess(rec);
         break;
-      case 'tool-integration':
+      case "tool-integration":
         await this.integrateNewTool(rec);
         break;
     }
@@ -716,19 +723,19 @@ class QualityImprovement {
 # Quality compliance tracking
 compliance_requirements:
   accessibility:
-    standard: 'WCAG 2.1 AA'
-    audit_frequency: 'monthly'
-    compliance_target: '100%'
+    standard: "WCAG 2.1 AA"
+    audit_frequency: "monthly"
+    compliance_target: "100%"
 
   content_quality:
-    accuracy_target: '99.5%'
-    freshness_target: '95% < 6 months old'
-    style_compliance: '98%'
+    accuracy_target: "99.5%"
+    freshness_target: "95% < 6 months old"
+    style_compliance: "98%"
 
   process_efficiency:
-    review_cycle_sla: '3 business days'
-    publication_sla: '48 hours for urgent'
-    first_pass_success: '95%'
+    review_cycle_sla: "3 business days"
+    publication_sla: "48 hours for urgent"
+    first_pass_success: "95%"
 ```
 
 ---

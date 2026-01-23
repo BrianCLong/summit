@@ -1,0 +1,139 @@
+name: Tag Verification
+
+# Verifies commits are green before RC/GA promotion
+# Implements truth table-based check validation per REQUIRED_CHECKS_POLICY.json
+#
+# See docs/ci/TAG_VERIFICATION.md for full documentation.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to verify (e.g., v4.1.2-rc.1)"
+        required: true
+        type: string
+      commit:
+        description: "Commit SHA to verify (default: tag points to)"
+        required: false
+        type: string
+      verbose:
+        description: "Enable verbose output"
+        type: boolean
+        default: false
+
+  # NOTE: RC tag push trigger removed - now handled by release-rc.yml
+  # Use workflow_dispatch for manual verification only
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  verify:
+    name: Verify Green for Promotion
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Determine Tag and Commit
+        id: params
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            TAG="${{ github.ref_name }}"
+            COMMIT="${{ github.sha }}"
+          else
+            TAG="${{ inputs.tag }}"
+            COMMIT="${{ inputs.commit }}"
+            if [[ -z "${COMMIT}" ]]; then
+              # Resolve tag to commit
+              COMMIT=$(git rev-parse "${TAG}" 2>/dev/null || echo "${{ github.sha }}")
+            fi
+          fi
+
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "commit=${COMMIT}" >> $GITHUB_OUTPUT
+
+          echo "Tag: ${TAG}"
+          echo "Commit: ${COMMIT}"
+
+      - name: Install Dependencies
+        run: |
+          # jq is typically pre-installed, but ensure it exists
+          which jq || sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Verify Green for Tag
+        id: verify
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/release/verify-green-for-tag.sh
+
+          ARGS="--tag ${{ steps.params.outputs.tag }} --commit ${{ steps.params.outputs.commit }}"
+
+          if [[ "${{ inputs.verbose }}" == "true" ]]; then
+            ARGS="${ARGS} --verbose"
+          fi
+
+          # Run verification and capture exit code
+          set +e
+          OUTPUT=$(./scripts/release/verify-green-for-tag.sh ${ARGS} 2>&1)
+          EXIT_CODE=$?
+          set -e
+
+          echo "${OUTPUT}"
+
+          # Set outputs for summary
+          if [[ ${EXIT_CODE} -eq 0 ]]; then
+            echo "status=passed" >> $GITHUB_OUTPUT
+          else
+            echo "status=failed" >> $GITHUB_OUTPUT
+          fi
+
+          exit ${EXIT_CODE}
+
+      - name: Job Summary
+        if: always()
+        run: |
+          TAG="${{ steps.params.outputs.tag }}"
+          COMMIT="${{ steps.params.outputs.commit }}"
+          STATUS="${{ steps.verify.outputs.status }}"
+
+          if [[ "${STATUS}" == "passed" ]]; then
+            echo "### ✅ Tag Verification Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Tag Verification Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | \`${TAG}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | \`${COMMIT:0:7}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | ${STATUS} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered By | @${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${STATUS}" == "passed" ]]; then
+            echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "This commit is safe for promotion:" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+            echo "# Build promotion bundle" >> $GITHUB_STEP_SUMMARY
+            echo "./scripts/release/build-promotion-bundle.sh --tag ${TAG} --commit ${COMMIT}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "# Or promote directly" >> $GITHUB_STEP_SUMMARY
+            echo "cd artifacts/promotion-bundles/${TAG} && ./promote_to_ga.sh" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### Actions Required" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "1. Review failed/pending workflow runs" >> $GITHUB_STEP_SUMMARY
+            echo "2. Wait for in-progress workflows to complete" >> $GITHUB_STEP_SUMMARY
+            echo "3. Fix any test/build/lint failures" >> $GITHUB_STEP_SUMMARY
+            echo "4. Re-run this verification" >> $GITHUB_STEP_SUMMARY
+          fi

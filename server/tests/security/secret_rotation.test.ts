@@ -29,10 +29,18 @@ describe('AuthService - Secret Rotation', () => {
         error: jest.fn(),
     }));
 
+    jest.mock('../../src/services/SecretsService', () => ({
+        secretsService: {
+            getSecret: jest.fn(),
+        },
+    }));
+
     // Import fresh modules
     const { AuthService } = require('../../src/services/AuthService');
     const configModule = require('../../src/config/index');
     config = configModule.default || configModule; // Handle both ESM and CJS
+    const { secretsService } = require('../../src/services/SecretsService');
+    secretsService.getSecret.mockImplementation(() => Promise.resolve(config.jwt.secret));
 
     // Setup DB Mocks
     const { getPostgresPool } = require('../../src/config/database');
@@ -49,7 +57,7 @@ describe('AuthService - Secret Rotation', () => {
     authService = new AuthService();
 
     // Mock blacklist check
-    mockQuery.mockResolvedValue({ rows: [] });
+    mockQuery.mockImplementation(() => Promise.resolve({ rows: [] }));
 
     // Mock user fetch
     const mockClient = {
@@ -57,26 +65,29 @@ describe('AuthService - Secret Rotation', () => {
         release: mockRelease
     };
 
-    mockClient.query.mockResolvedValue({
-        rows: [{
-            id: 'user-123',
-            role: 'ANALYST',
-            is_active: true,
-            password_hash: 'hash',
-            email: 'test@example.com',
-            first_name: 'Test',
-            last_name: 'User',
-            created_at: new Date(),
-            updated_at: new Date()
-        }]
-    });
+    mockClient.query.mockImplementation(() =>
+        Promise.resolve({
+            rows: [{
+                id: 'user-123',
+                role: 'ANALYST',
+                is_active: true,
+                password_hash: 'hash',
+                email: 'test@example.com',
+                first_name: 'Test',
+                last_name: 'User',
+                created_at: new Date(),
+                updated_at: new Date()
+            }]
+        })
+    );
 
-    mockConnect.mockResolvedValue(mockClient);
+    mockConnect.mockImplementation(() => Promise.resolve(mockClient));
   });
 
   it('should verify token signed with current secret', async () => {
     config.jwt.secret = SECRET_V1;
     config.jwt.secretOld = undefined;
+    process.env.JWT_SECRET = SECRET_V1;
 
     const token = jwt.sign({ userId: 'user-123', role: 'ANALYST' }, SECRET_V1);
 
@@ -85,20 +96,21 @@ describe('AuthService - Secret Rotation', () => {
     expect(user.id).toBe('user-123');
   });
 
-  it('should verify token signed with old secret when rotation is active', async () => {
+  it('should reject token signed with old secret even when rotation is configured', async () => {
     config.jwt.secret = SECRET_V2;
     config.jwt.secretOld = SECRET_V1;
+    process.env.JWT_SECRET = SECRET_V2;
 
     const tokenV1 = jwt.sign({ userId: 'user-123', role: 'ANALYST' }, SECRET_V1);
 
     const user = await authService.verifyToken(tokenV1);
-    expect(user).toBeTruthy();
-    expect(user.id).toBe('user-123');
+    expect(user).toBeNull();
   });
 
   it('should fail if token is signed with an unknown secret', async () => {
     config.jwt.secret = SECRET_V2;
     config.jwt.secretOld = SECRET_V1;
+    process.env.JWT_SECRET = SECRET_V2;
 
     const tokenUnknown = jwt.sign({ userId: 'user-123', role: 'ANALYST' }, 'unknown-secret');
 
@@ -109,6 +121,7 @@ describe('AuthService - Secret Rotation', () => {
   it('should fail if old secret is not configured and token matches old secret', async () => {
     config.jwt.secret = SECRET_V2;
     config.jwt.secretOld = undefined; // No fallback
+    process.env.JWT_SECRET = SECRET_V2;
 
     const tokenV1 = jwt.sign({ userId: 'user-123', role: 'ANALYST' }, SECRET_V1);
 

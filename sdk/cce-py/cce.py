@@ -1,7 +1,6 @@
 import json
 import urllib.request
 from dataclasses import dataclass
-from typing import List, Optional
 
 
 @dataclass
@@ -23,8 +22,10 @@ class RunJobResponse:
 
 
 class CCEClient:
-    def __init__(self, endpoint: str = "http://localhost:8443", quotes: Optional[List[AttestationQuote]] = None):
-        self.endpoint = endpoint.rstrip('/')
+    def __init__(
+        self, endpoint: str = "http://localhost:8443", quotes: list[AttestationQuote] | None = None
+    ):
+        self.endpoint = endpoint.rstrip("/")
         self.quotes = quotes or []
 
     def run_job(
@@ -32,8 +33,8 @@ class CCEClient:
         job_id: str,
         payload: str,
         manifest_hash: str,
-        quote: Optional[AttestationQuote] = None,
-        region: Optional[str] = None,
+        quote: AttestationQuote | None = None,
+        region: str | None = None,
         allow_egress: bool = False,
         client_public_key: str = "ephemeral-client-key",
     ) -> RunJobResponse:
@@ -52,7 +53,9 @@ class CCEClient:
             }
         ).encode()
         request = urllib.request.Request(
-            f"{self.endpoint}/api.ComputeEnclave/RunJob", data=req_body, headers={"Content-Type": "application/json"}
+            f"{self.endpoint}/api.ComputeEnclave/RunJob",
+            data=req_body,
+            headers={"Content-Type": "application/json"},
         )
         with urllib.request.urlopen(request) as response:
             if response.status != 200:
@@ -61,7 +64,7 @@ class CCEClient:
             return RunJobResponse(**payload)
 
 
-def default_quotes() -> List[AttestationQuote]:
+def default_quotes() -> list[AttestationQuote]:
     return [
         AttestationQuote(
             id="test-quote-1",

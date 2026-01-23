@@ -392,11 +392,11 @@ export class SandboxExecutorService {
 
       session
         .run(cypher, parameters)
-        .then((result) => {
+        .then((result: Result) => {
           clearTimeout(timeoutId);
           resolve(result);
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           clearTimeout(timeoutId);
           reject(error);
         });
@@ -424,7 +424,7 @@ export class SandboxExecutorService {
           operatorType: result.summary.plan.operatorType,
           arguments: result.summary.plan.arguments,
           identifiers: result.summary.plan.identifiers,
-          children: result.summary.plan.children?.map((child) => ({
+          children: result.summary.plan.children?.map((child: any) => ({
             operatorType: child.operatorType,
             arguments: child.arguments,
           })),

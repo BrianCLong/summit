@@ -540,7 +540,6 @@ class ParallelUniverseOptimizer:
                     "constraints": base_problem.get("constraints", [])[:],
                     "tunnel_bias": tunnel_bias,
                 },
-                feasibility=feasibility,
                 entangled_with=[f"{base_id}_universe_{i}" for i in range(max(0, idx - 1), idx)],
             )
 

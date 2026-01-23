@@ -1,6 +1,7 @@
 
-import { ActionSandbox, SandboxConfig } from '../../src/autonomous/sandbox';
-import { Logger } from 'pino';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
+import type { ActionSandbox, SandboxConfig } from '../../src/autonomous/sandbox';
+import type { Logger } from 'pino';
 import { EventEmitter } from 'events';
 
 // Mock pino logger
@@ -12,14 +13,16 @@ const mockLogger = {
 } as unknown as Logger;
 
 // Mock child_process
-jest.mock('child_process', () => ({
-  spawn: jest.fn(),
+const spawnMock = jest.fn();
+
+jest.unstable_mockModule('child_process', () => ({
+  spawn: spawnMock,
 }));
 
-import { spawn } from 'child_process';
-
 describe('ActionSandbox', () => {
-  let sandbox: ActionSandbox;
+  let ActionSandbox: typeof import('../../src/autonomous/sandbox').ActionSandbox;
+  let sandbox: InstanceType<typeof ActionSandbox>;
+  let spawn: typeof spawnMock;
   const defaultConfig: SandboxConfig = {
     timeoutMs: 1000,
     maxMemoryMB: 128,
@@ -32,14 +35,23 @@ describe('ActionSandbox', () => {
     environment: {},
   };
 
+  beforeAll(async () => {
+    ({ ActionSandbox } = await import('../../src/autonomous/sandbox'));
+    ({ spawn } = await import('child_process'));
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     sandbox = new ActionSandbox(mockLogger);
+    (sandbox as any).networkGuard = {
+      monitor: () => ({ on: jest.fn(), stop: jest.fn() }),
+    };
+    jest.spyOn(sandbox as any, 'getContainerStats').mockResolvedValue(null);
     (spawn as jest.Mock).mockImplementation(() => {
         const ee = new EventEmitter();
         (ee as any).stdout = new EventEmitter();
         (ee as any).stderr = new EventEmitter();
-        (ee as any).kill = jest.fn();
+        (ee as any).kill = jest.fn(() => ee.emit('close', 0));
         setTimeout(() => ee.emit('close', 0), 10);
         return ee;
     });
@@ -102,16 +114,18 @@ describe('ActionSandbox', () => {
 
   describe('Timeout', () => {
       it('should kill process on timeout', async () => {
-        jest.useFakeTimers();
         const killMock = jest.fn();
+        const spawnedProcess = new EventEmitter();
 
         (spawn as jest.Mock).mockImplementation(() => {
-            const ee = new EventEmitter();
-            (ee as any).stdout = new EventEmitter();
-            (ee as any).stderr = new EventEmitter();
-            (ee as any).kill = killMock;
+            (spawnedProcess as any).stdout = new EventEmitter();
+            (spawnedProcess as any).stderr = new EventEmitter();
+            (spawnedProcess as any).kill = (...args: any[]) => {
+                killMock(...args);
+                setImmediate(() => spawnedProcess.emit('close', 137));
+            };
             // Never close automatically
-            return ee;
+            return spawnedProcess;
         });
 
         const execPromise = sandbox.execute({
@@ -122,13 +136,6 @@ describe('ActionSandbox', () => {
             logger: mockLogger,
         });
 
-        jest.advanceTimersByTime(200);
-
-        // We need to trigger close to resolve promise in our mock
-        // In real life, SIGKILL would cause close
-        const spawnCall = (spawn as jest.Mock).mock.results[0].value;
-        spawnCall.emit('close', 137); // SIGKILL exit code
-
         const result = await execPromise;
 
         expect(killMock).toHaveBeenCalledWith('SIGKILL');
@@ -136,7 +143,6 @@ describe('ActionSandbox', () => {
             expect.arrayContaining([expect.stringMatching(/Execution timeout/)])
         );
 
-        jest.useRealTimers();
       });
   });
 });

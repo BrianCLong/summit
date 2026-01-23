@@ -1,0 +1,152 @@
+# required-checks-exceptions.yml
+# Validates REQUIRED_CHECKS_EXCEPTIONS.yml on changes
+#
+# Ensures exceptions are properly formatted, have valid expiration dates,
+# and don't exceed maximum duration limits.
+#
+# Authority: docs/ci/REQUIRED_CHECKS_EXCEPTIONS.md
+
+name: Required Checks Exceptions Validation
+
+on:
+  pull_request:
+    paths:
+      - "docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml"
+
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml"
+
+  # Manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      strict:
+        description: "Strict mode (treat warnings as errors)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  validate-exceptions:
+    name: Validate Exceptions
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
+      - name: Validate Exceptions File
+        id: validate
+        run: |
+          chmod +x scripts/release/validate_required_checks_exceptions.sh
+
+          STRICT_FLAG=""
+          if [[ "${{ github.event.inputs.strict }}" == "true" ]]; then
+            STRICT_FLAG="--strict"
+          fi
+
+          if scripts/release/validate_required_checks_exceptions.sh \
+            --file docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml \
+            --verbose \
+            $STRICT_FLAG; then
+            echo "status=success" >> $GITHUB_OUTPUT
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Check for Expiring Exceptions
+        id: expiring
+        if: success()
+        run: |
+          EXCEPTIONS_FILE="docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml"
+          WARN_DAYS=7
+
+          # Calculate warning date
+          WARN_DATE=$(date -d "+${WARN_DAYS} days" +"%Y-%m-%d")
+          TODAY=$(date -u +"%Y-%m-%d")
+
+          echo "Checking for exceptions expiring before $WARN_DATE..."
+
+          EXPIRING_COUNT=0
+          EXPIRED_COUNT=0
+
+          while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
+            ID=$(echo "$line" | cut -d'|' -f1)
+            EXPIRES=$(echo "$line" | cut -d'|' -f2)
+
+            if [[ "$EXPIRES" < "$TODAY" ]]; then
+              echo "::warning::Exception $ID EXPIRED on $EXPIRES"
+              ((EXPIRED_COUNT++))
+            elif [[ "$EXPIRES" < "$WARN_DATE" ]]; then
+              echo "::warning::Exception $ID expires soon: $EXPIRES"
+              ((EXPIRING_COUNT++))
+            fi
+          done < <(yq -r '.exceptions[]? | "\(.id)|\(.expires_at)"' "$EXCEPTIONS_FILE" 2>/dev/null || echo "")
+
+          echo "expiring_count=$EXPIRING_COUNT" >> $GITHUB_OUTPUT
+          echo "expired_count=$EXPIRED_COUNT" >> $GITHUB_OUTPUT
+
+          if [[ $EXPIRED_COUNT -gt 0 ]]; then
+            echo "::warning::$EXPIRED_COUNT exception(s) have expired - consider archiving them"
+          fi
+
+          if [[ $EXPIRING_COUNT -gt 0 ]]; then
+            echo "::notice::$EXPIRING_COUNT exception(s) expire within $WARN_DAYS days"
+          fi
+
+      - name: Generate Summary
+        run: |
+          echo "## Required Checks Exceptions Validation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ steps.validate.outputs.status }}" == "success" ]]; then
+            echo "**Status:** ✅ Valid" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Status:** ❌ Invalid" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Expiring Soon | ${{ steps.expiring.outputs.expiring_count || 0 }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Already Expired | ${{ steps.expiring.outputs.expired_count || 0 }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "[View Exceptions File](docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml)" >> $GITHUB_STEP_SUMMARY
+
+  # Optional: Run drift detection after exceptions change to verify alignment
+  trigger-drift-check:
+    name: Trigger Drift Check
+    runs-on: ubuntu-latest
+    needs: validate-exceptions
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Trigger Drift Detection
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'branch-protection-drift.yml',
+              ref: 'main',
+              inputs: {
+                branch: 'main'
+              }
+            });
+            console.log('Triggered branch protection drift detection');

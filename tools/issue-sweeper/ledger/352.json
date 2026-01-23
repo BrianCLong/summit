@@ -1,0 +1,101 @@
+{
+  "issue_number": 352,
+  "title": "Autonomous Spacecraft AI Navigation",
+  "url": "https://github.com/BrianCLong/summit/issues/352",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9122128940,
+      "node_id": "LA_kwDOPaNncM8AAAACH7ikLA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-interplanetary-ai",
+      "name": "epic-interplanetary-ai",
+      "color": "4ECDC4",
+      "default": false,
+      "description": "Interplanetary AI and space computing"
+    },
+    {
+      "id": 9360062798,
+      "node_id": "LA_kwDOPaNncM8AAAACLec5Tg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/stale",
+      "name": "stale",
+      "color": "e4e669",
+      "default": false,
+      "description": "PR with no activity for 30 days"
+    }
+  ],
+  "updatedAt": "2025-10-01T01:10:42Z",
+  "createdAt": "2025-08-16T22:29:07Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13111,
+        "url": "https://github.com/BrianCLong/summit/pull/13111",
+        "mergedAt": "2025-12-17T05:38:55Z",
+        "title": "API Authorization Matrix Generator & Enforcement"
+      },
+      {
+        "number": 13119,
+        "url": "https://github.com/BrianCLong/summit/pull/13119",
+        "mergedAt": "2025-12-17T05:37:58Z",
+        "title": "Implement Time-Series Intelligence Model for Entity Forecasting"
+      },
+      {
+        "number": 13120,
+        "url": "https://github.com/BrianCLong/summit/pull/13120",
+        "mergedAt": "2025-12-03T01:33:12Z",
+        "title": "Agent-based Trend Forecaster for Narrative Simulation"
+      },
+      {
+        "number": 13117,
+        "url": "https://github.com/BrianCLong/summit/pull/13117",
+        "mergedAt": "2025-12-03T01:35:51Z",
+        "title": "PsyOps Narrative Simulator: Propagation & Suppression"
+      },
+      {
+        "number": 13109,
+        "url": "https://github.com/BrianCLong/summit/pull/13109",
+        "mergedAt": "2025-12-03T00:15:40Z",
+        "title": "Harden Summit inputs against security threats"
+      },
+      {
+        "number": 13115,
+        "url": "https://github.com/BrianCLong/summit/pull/13115",
+        "mergedAt": "2025-12-03T01:37:10Z",
+        "title": "feat: Implement PredictiveRelationshipService for edge inference"
+      },
+      {
+        "number": 11925,
+        "url": "https://github.com/BrianCLong/summit/pull/11925",
+        "mergedAt": "2025-11-20T10:20:13Z",
+        "title": "Build Ingest Wizard and ETL Assistant backend"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 11895,
+        "url": "https://github.com/BrianCLong/summit/pull/11895",
+        "mergedAt": null,
+        "title": "Build Crisis Management and Emergency Response Platform"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

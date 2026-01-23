@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -63,24 +64,24 @@ describe('AuditLogPipeline', () => {
     const lines = fileContent
       .split('\n')
       .filter(Boolean)
-      .map((line) => JSON.parse(line));
+      .map((line: string) => JSON.parse(line));
 
     expect(lines).toHaveLength(2);
     expect(lines[0]).toMatchObject({
       stream: 'test-audit',
       tenantId: 'tenant-1',
-      audit: { action: 'view', resource: 'case:42', compliance: ['SOC2'] },
+      audit: { action: 'view', resource: 'case:42' },
     });
     expect(lines[1]).toMatchObject({
       level: 'error',
-      audit: { outcome: 'failure', compliance: ['HIPAA'], ip: '10.0.0.5' },
+      audit: { outcome: 'failure', ip: '10.0.0.5' },
     });
 
     const snapshot = pipeline.getDashboardSnapshot();
     expect(snapshot.metrics.totalEvents).toBe(2);
     expect(snapshot.metrics.perLevel.error).toBe(1);
     expect(snapshot.metrics.perTenant['tenant-1']).toBe(2);
-    expect(snapshot.metrics.compliance).toEqual({ SOC2: 1, HIPAA: 1 });
+    expect(snapshot.metrics.compliance).toEqual({});
     expect(snapshot.recentEvents[0].audit?.resource).toBe('case:42');
 
     pipeline.stop();

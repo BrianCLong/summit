@@ -2,14 +2,29 @@ name: GA Readiness Check
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".github/workflows/*.md"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/PULL_REQUEST_TEMPLATE/**"
   push:
-    branches: [ main ]
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".github/workflows/*.md"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ga-ready:
     name: GA Readiness Gate
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     permissions:
       contents: read
       pull-requests: write
@@ -18,18 +33,25 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        with:
+          version: "10.0.0"
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Prepare evidence directories
+        run: |
+          mkdir -p .evidence/ga
+          mkdir -p artifacts/ga/ga-ready
 
       - name: Boot Minimal Stack
         run: |
@@ -39,44 +61,64 @@ jobs:
           sleep 30
           # We could use wait-for-it or healthcheck here
 
-      - name: Install Security Tools
-        run: |
-          # Install Gitleaks
-          wget https://github.com/gitleaks/gitleaks/releases/download/v8.18.2/gitleaks_8.18.2_linux_x64.tar.gz
-          tar -xzf gitleaks_8.18.2_linux_x64.tar.gz
-          sudo mv gitleaks /usr/local/bin/
-
-          # Install Trivy
-          wget https://github.com/aquasecurity/trivy/releases/download/v0.50.1/trivy_0.50.1_Linux-64bit.tar.gz
-          tar -xzf trivy_0.50.1_Linux-64bit.tar.gz
-          sudo mv trivy /usr/local/bin/
-
       - name: Run Gitleaks
-        run: |
-          gitleaks detect --source . --report-path gitleaks.json --no-git || true
-          # Note: We allow failure here so ga-check can report it,
-          # but usually we want to fail fast.
-          # bin/ga-check expects gitleaks.json to exist.
+        id: gitleaks
+        continue-on-error: true
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
 
       - name: Run Trivy
-        run: |
-          trivy fs --format json --output trivy-results.json . || true
+        id: trivy
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # v0.24.0
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          scanners: "secret,vuln"
+          severity: "CRITICAL,HIGH"
+          format: "json"
+          output: "trivy-results.json"
+          exit-code: "1"
 
       - name: Run GA Readiness Check
         id: ga_check
         run: |
           ./bin/ga-check.mjs
 
+      - name: Enforce scan status
+        if: always()
+        run: |
+          if [ "${{ steps.gitleaks.outcome }}" = "failure" ]; then
+            echo "Gitleaks reported failure"
+            exit 1
+          fi
+          if [ "${{ steps.trivy.outcome }}" = "failure" ]; then
+            echo "Trivy reported failure"
+            exit 1
+          fi
+
+      - name: Collect evidence bundle
+        if: always()
+        run: |
+          # Preserve raw security scan output for determinism
+          cp -f results.sarif .evidence/ga/gitleaks.sarif || true
+          cp -f trivy-results.json .evidence/ga/trivy-results.json || true
+          cp -rf .evidence/ga artifacts/ga/ga-ready/
+
       - name: Upload Evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
+          retention-days: 14
           name: ga-evidence
-          path: .evidence/ga/
+          path: artifacts/ga/ga-ready/
+          if-no-files-found: error
 
       - name: Comment on PR
         if: github.event_name == 'pull_request' && always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
             const fs = require('fs');

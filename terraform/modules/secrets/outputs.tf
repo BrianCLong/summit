@@ -2,7 +2,7 @@
 
 output "secret_ids" {
   description = "IDs of created secrets"
-  value       = var.provider == "aws" ? { for k, v in aws_secretsmanager_secret.secrets : k => v.id } : (
+  value = var.provider == "aws" ? { for k, v in aws_secretsmanager_secret.secrets : k => v.id } : (
     var.provider == "gcp" ? { for k, v in google_secret_manager_secret.secrets : k => v.id } :
     { for k, v in azurerm_key_vault_secret.secrets : k => v.id }
   )

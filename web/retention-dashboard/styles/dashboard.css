@@ -1,5 +1,6 @@
 .main {
   max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: 32px 24px 64px;
 }
@@ -28,6 +29,14 @@ section {
 section h2 {
   font-size: 1.5rem;
   margin-bottom: 16px;
+}
+
+.table-wrapper {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 16px;
+  overflow: auto;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.4);
 }
 
 .metrics-grid {
@@ -105,11 +114,8 @@ section h2 {
 
 .expirations-table {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
-  background: rgba(15, 23, 42, 0.7);
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.4);
 }
 
 .expirations-table thead {
@@ -155,7 +161,7 @@ section h2 {
   color: #0f172a;
   border: none;
   border-radius: 999px;
-  padding: 10px 18px;
+  padding: 12px 18px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -165,7 +171,7 @@ section h2 {
   color: #e2e8f0;
   border: 1px solid rgba(148, 163, 184, 0.4);
   border-radius: 999px;
-  padding: 10px 18px;
+  padding: 12px 18px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -181,4 +187,102 @@ footer {
   text-align: center;
   color: #64748b;
   font-size: 0.85rem;
+}
+
+@media (max-width: 1024px) {
+  header.page-header h1 {
+    font-size: 2rem;
+  }
+
+  .main {
+    padding: 28px 20px 56px;
+  }
+
+  .expirations-table {
+    min-width: 640px;
+  }
+}
+
+@media (max-width: 768px) {
+  header.page-header {
+    gap: 4px;
+  }
+
+  .main {
+    padding: 24px 16px 48px;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kpi-card header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .kpi-card .badge {
+    padding: 8px 12px;
+  }
+
+  .expirations-table th,
+  .expirations-table td {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .table-wrapper {
+    background: none;
+    border: none;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .expirations-table {
+    min-width: 0;
+    border-collapse: separate;
+  }
+
+  .expirations-table thead {
+    display: none;
+  }
+
+  .expirations-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .expirations-table tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 12px;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.25);
+  }
+
+  .expirations-table td {
+    padding: 6px 0;
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+  }
+
+  .expirations-table td::before {
+    content: attr(data-label);
+    color: #94a3b8;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    min-width: 110px;
+  }
+
+  .expirations-table td:last-child {
+    font-weight: 700;
+  }
 }

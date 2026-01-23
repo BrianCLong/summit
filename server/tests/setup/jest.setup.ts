@@ -42,6 +42,11 @@ jest.mock('ioredis', () => {
 // Mock pg globally to avoid connection errors in tests that don't need real DB
 jest.mock('pg', () => {
   const { EventEmitter } = require('events');
+  class MockClient extends EventEmitter {
+    connect() { return Promise.resolve(); }
+    query() { return Promise.resolve({ rows: [], rowCount: 0 }); }
+    end() { return Promise.resolve(); }
+  }
   class MockPool extends EventEmitter {
     connect() {
       return Promise.resolve({
@@ -53,7 +58,7 @@ jest.mock('pg', () => {
     end() { return Promise.resolve(); }
     on() { return this; }
   }
-  return { Pool: MockPool };
+  return { Pool: MockPool, Client: MockClient };
 });
 
 // Mock fluent-ffmpeg globally
@@ -85,6 +90,15 @@ jest.mock('fluent-ffmpeg', () => {
   ffmpeg.ffprobe = jest.fn();
   return ffmpeg;
 });
+
+// Mock src/config/logger.js to provide a proper logger instance
+jest.mock('/Users/brianlong/Developer/summit/server/src/config/logger.js', () => {
+  const loggerMock = require('../mocks/logger.cjs');
+  return {
+    logger: loggerMock.logger || loggerMock,
+    __esModule: true,
+  };
+}, { virtual: false });
 
 // Global test timeout
 jest.setTimeout(30000);

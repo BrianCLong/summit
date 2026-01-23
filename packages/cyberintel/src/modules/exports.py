@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -33,7 +33,7 @@ def export_stix(
             {
                 "type": "observed-data",
                 "id": f"observed-data--{uuid.uuid4()}",
-                "created": datetime.now(timezone.utc).isoformat(),
+                "created": datetime.now(UTC).isoformat(),
                 "objects": {},
                 "first_observed": sight["log"]["ts"],
                 "last_observed": sight["log"]["ts"],

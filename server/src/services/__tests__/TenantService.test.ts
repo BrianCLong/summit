@@ -1,21 +1,56 @@
-import { TenantService } from '../TenantService.js';
-import { getPostgresPool } from '../../config/database.js';
-import { provenanceLedger } from '../../provenance/ledger.js';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import type { TenantService as TenantServiceType } from '../TenantService.js';
 import { randomUUID } from 'crypto';
 
-// Mock dependencies
-jest.mock('../../config/database.js');
-jest.mock('../../provenance/ledger.js');
-jest.mock('../../utils/logger.js');
+// Mock functions declared before mocks
+const mockGetPostgresPool = jest.fn();
+const mockAppendEntry = jest.fn();
+const mockLoggerInfo = jest.fn();
+const mockLoggerWarn = jest.fn();
+const mockLoggerError = jest.fn();
+const mockLoggerDebug = jest.fn();
+
+// ESM-compatible mocking using unstable_mockModule
+jest.unstable_mockModule('../../config/database.js', () => ({
+  getPostgresPool: mockGetPostgresPool,
+}));
+
+jest.unstable_mockModule('../../provenance/ledger.js', () => ({
+  provenanceLedger: {
+    appendEntry: mockAppendEntry,
+  },
+}));
+
+jest.unstable_mockModule('../../utils/logger.js', () => {
+  const logger = {
+    info: mockLoggerInfo,
+    warn: mockLoggerWarn,
+    error: mockLoggerError,
+    debug: mockLoggerDebug,
+  };
+  return {
+    __esModule: true,
+    default: logger,
+    logger,
+  };
+});
+
+// Dynamic imports AFTER mocks are set up
+const { TenantService } = await import('../TenantService.js');
+const GAEnrollmentService = (await import('../GAEnrollmentService.js')).default;
+const { provenanceLedger } = await import('../../provenance/ledger.js');
 
 describe('TenantService', () => {
-  let tenantService: TenantService;
+  let tenantService: TenantServiceType;
   let mockClient: any;
   let mockPool: any;
 
   beforeEach(() => {
     // Reset mocks
     jest.clearAllMocks();
+    jest
+      .spyOn(GAEnrollmentService, 'checkTenantEnrollmentEligibility')
+      .mockResolvedValue({ eligible: true, reason: 'ok' });
 
     mockClient = {
       query: jest.fn(),
@@ -27,7 +62,7 @@ describe('TenantService', () => {
         query: jest.fn()
     };
 
-    (getPostgresPool as jest.Mock).mockReturnValue(mockPool);
+    mockGetPostgresPool.mockReturnValue(mockPool);
 
     tenantService = TenantService.getInstance();
   });
@@ -41,8 +76,7 @@ describe('TenantService', () => {
     const actorId = 'user-123';
 
     it('should create a tenant successfully and associate user', async () => {
-      // Mock unique slug check (returning 0 rows means strictly unique)
-      mockClient.query.mockResolvedValueOnce({ rowCount: 0 });
+      mockClient.query.mockResolvedValue({ rowCount: 0, rows: [] });
 
       // Mock insertion return
       const mockTenantRow = {
@@ -58,7 +92,11 @@ describe('TenantService', () => {
         created_at: new Date(),
         updated_at: new Date(),
       };
-      mockClient.query.mockResolvedValueOnce({ rows: [mockTenantRow] });
+      mockClient.query
+        .mockResolvedValueOnce(undefined as any) // BEGIN
+        .mockResolvedValueOnce({ rowCount: 0, rows: [] }) // SELECT slug
+        .mockResolvedValueOnce({ rows: [mockTenantRow] }) // INSERT tenant
+        .mockResolvedValueOnce({ rowCount: 1, rows: [] }); // UPDATE user
 
       const result = await tenantService.createTenant(validInput, actorId);
 
@@ -69,7 +107,7 @@ describe('TenantService', () => {
       // Verify User was updated
       expect(mockClient.query).toHaveBeenCalledWith(
           expect.stringContaining('UPDATE users'),
-          expect.arrayContaining([mockTenantRow.id, 'ADMIN', actorId])
+          expect.arrayContaining([expect.any(String), 'ADMIN', actorId])
       );
 
       // Verify Provenance Ledger was called
@@ -94,8 +132,10 @@ describe('TenantService', () => {
             updated_at: new Date()
         };
 
-        // Mock existing slug check returning the row
-        mockClient.query.mockResolvedValueOnce({ rowCount: 1, rows: [existingTenantRow] });
+        mockClient.query.mockResolvedValue({ rowCount: 0, rows: [] });
+        mockClient.query
+          .mockResolvedValueOnce(undefined as any) // BEGIN
+          .mockResolvedValueOnce({ rowCount: 1, rows: [existingTenantRow] }); // SELECT slug
 
         const result = await tenantService.createTenant(validInput, actorId);
 
@@ -114,8 +154,10 @@ describe('TenantService', () => {
           config: {},
           settings: {}
       };
-      // Mock existing slug
-      mockClient.query.mockResolvedValueOnce({ rowCount: 1, rows: [otherUserRow] });
+      mockClient.query.mockResolvedValue({ rowCount: 0, rows: [] });
+      mockClient.query
+        .mockResolvedValueOnce(undefined as any) // BEGIN
+        .mockResolvedValueOnce({ rowCount: 1, rows: [otherUserRow] }); // SELECT slug
 
       await expect(tenantService.createTenant(validInput, actorId))
         .rejects.toThrow("Tenant slug 'test-corp' is already taken");

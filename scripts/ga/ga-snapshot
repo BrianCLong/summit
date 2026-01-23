@@ -1,0 +1,507 @@
+#!/usr/bin/env node
+/**
+ * GA Snapshot Generator
+ *
+ * Produces a machine-readable JSON summary of GA release state
+ * for dashboards and automation consumption.
+ *
+ * Usage:
+ *   ./scripts/ga/ga-snapshot [options]
+ *
+ * Options:
+ *   --out <path>        Output file path (default: ga_snapshot.json)
+ *   --include-ci        Include CI status via gh CLI (best effort)
+ *   --include-release   Include release/tag info if available
+ *   --allow-missing     Don't fail if source docs are missing
+ *   --help              Show this help message
+ */
+
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { execSync } from 'node:child_process';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(__dirname, '..', '..');
+
+// Default input paths (relative to repo root)
+const DEFAULT_INPUTS = {
+  queue: 'docs/release/QUEUE.md',
+  blockers: 'docs/release/BLOCKERS.md',
+  evidence: 'docs/release/EVIDENCE.md',
+  notes: 'docs/release/NOTES.md',
+  state: 'docs/release/STATE.md',
+};
+
+// Valid phases for GA lifecycle
+const VALID_PHASES = [
+  'P0_DISCOVER',
+  'P1_QUEUE',
+  'P2_UNBLOCK',
+  'P3_MERGE',
+  'P4_VERIFY',
+  'P5_RELEASE',
+  'P6_DONE',
+];
+
+/**
+ * Parse command line arguments
+ */
+function parseArgs(argv) {
+  const args = {
+    out: 'ga_snapshot.json',
+    includeCi: false,
+    includeRelease: false,
+    allowMissing: false,
+    help: false,
+  };
+
+  for (let i = 2; i < argv.length; i++) {
+    const arg = argv[i];
+    switch (arg) {
+      case '--out':
+        args.out = argv[++i];
+        break;
+      case '--include-ci':
+        args.includeCi = true;
+        break;
+      case '--include-release':
+        args.includeRelease = true;
+        break;
+      case '--allow-missing':
+        args.allowMissing = true;
+        break;
+      case '--help':
+      case '-h':
+        args.help = true;
+        break;
+    }
+  }
+
+  return args;
+}
+
+/**
+ * Safely read a file, returning null if missing
+ */
+async function readFileSafe(relativePath) {
+  const absolute = path.join(repoRoot, relativePath);
+  try {
+    return await fs.readFile(absolute, 'utf8');
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Parse QUEUE.md to extract PR counts and bucket breakdown
+ */
+function parseQueue(content) {
+  if (!content) {
+    return {
+      total: 'unknown',
+      remaining: 'unknown',
+      merged: 'unknown',
+      deferred: 'unknown',
+      buckets: {
+        A: { remaining: 'unknown', merged: 'unknown' },
+        B: { remaining: 'unknown', merged: 'unknown' },
+        C: { remaining: 'unknown', merged: 'unknown' },
+        D: { remaining: 'unknown', merged: 'unknown' },
+      },
+      top_failing_checks: [],
+    };
+  }
+
+  const lines = content.split('\n');
+
+  // Count PR entries (lines with PR references like #1234 or PR-1234)
+  const prPattern = /(?:#|PR[-\s]?)(\d{4,6})/gi;
+  const mergedPattern = /[✅✓☑]/;
+  const deferredPattern = /[⛔❌🚫]|deferred|skip/i;
+
+  let total = 0;
+  let merged = 0;
+  let deferred = 0;
+
+  // Track current bucket for bucket-level counts
+  let currentBucket = null;
+  const buckets = {
+    A: { remaining: 0, merged: 0 },
+    B: { remaining: 0, merged: 0 },
+    C: { remaining: 0, merged: 0 },
+    D: { remaining: 0, merged: 0 },
+  };
+
+  // Track failing checks mentioned
+  const failingChecks = new Map();
+
+  for (const line of lines) {
+    // Detect bucket headings
+    const bucketMatch = line.match(/Bucket\s*([A-D])/i);
+    if (bucketMatch) {
+      currentBucket = bucketMatch[1].toUpperCase();
+    }
+
+    // Check for PR entries
+    if (prPattern.test(line)) {
+      total++;
+      prPattern.lastIndex = 0; // Reset regex
+
+      const isMerged = mergedPattern.test(line);
+      const isDeferred = deferredPattern.test(line);
+
+      if (isMerged) {
+        merged++;
+        if (currentBucket && buckets[currentBucket]) {
+          buckets[currentBucket].merged++;
+        }
+      } else if (isDeferred) {
+        deferred++;
+      } else {
+        if (currentBucket && buckets[currentBucket]) {
+          buckets[currentBucket].remaining++;
+        }
+      }
+
+      // Extract failing check names (common patterns)
+      const checkMatch = line.match(/(?:failing|failed|blocked by)[:\s]+([^\])\n,]+)/i);
+      if (checkMatch) {
+        const checkName = checkMatch[1].trim();
+        failingChecks.set(checkName, (failingChecks.get(checkName) || 0) + 1);
+      }
+    }
+  }
+
+  // Build top failing checks (sorted by count, limited to top 5)
+  const topFailingChecks = Array.from(failingChecks.entries())
+    .map(([check, count]) => ({ check, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  return {
+    total: total || 'unknown',
+    remaining: total > 0 ? total - merged - deferred : 'unknown',
+    merged: merged || 'unknown',
+    deferred: deferred || 'unknown',
+    buckets: {
+      A: buckets.A.remaining || buckets.A.merged ? buckets.A : { remaining: 'unknown', merged: 'unknown' },
+      B: buckets.B.remaining || buckets.B.merged ? buckets.B : { remaining: 'unknown', merged: 'unknown' },
+      C: buckets.C.remaining || buckets.C.merged ? buckets.C : { remaining: 'unknown', merged: 'unknown' },
+      D: buckets.D.remaining || buckets.D.merged ? buckets.D : { remaining: 'unknown', merged: 'unknown' },
+    },
+    top_failing_checks: topFailingChecks,
+  };
+}
+
+/**
+ * Parse BLOCKERS.md to extract blocker information
+ */
+function parseBlockers(content) {
+  if (!content) {
+    return [];
+  }
+
+  const lines = content.split('\n');
+  const blockers = [];
+
+  // Pattern to detect blocker entries (flexible format)
+  const blockerPatterns = [
+    /^[-*]\s*\[([xX\s])\]\s*(.+)$/,           // Checkbox format: - [x] Check name
+    /^[-*]\s*(\S+):\s*(.+)$/,                  // Label format: - CheckName: description
+    /^#+\s*(.+)$/,                              // Heading format
+  ];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('<!--')) continue;
+
+    // Try checkbox format first
+    const checkboxMatch = trimmed.match(/^[-*]\s*\[([xX\s])\]\s*(.+)$/);
+    if (checkboxMatch) {
+      const isResolved = checkboxMatch[1].toLowerCase() === 'x';
+      const text = checkboxMatch[2].trim();
+
+      // Extract check name (first part before colon or dash)
+      const parts = text.split(/[:\-–—]/);
+      const checkName = parts[0].trim();
+      const summary = parts.slice(1).join(':').trim() || text;
+
+      blockers.push({
+        check: checkName,
+        status: isResolved ? 'resolved' : 'open',
+        summary: summary.slice(0, 100), // Limit to 100 chars
+      });
+      continue;
+    }
+
+    // Try detecting resolved markers in any line format
+    const resolvedPattern = /(?:resolved|fixed|closed|done|✅|✓)/i;
+    const openPattern = /(?:open|pending|blocking|blocked|🔴|❌)/i;
+
+    // Look for lines that seem like blocker entries
+    if (trimmed.startsWith('-') || trimmed.startsWith('*')) {
+      const text = trimmed.replace(/^[-*]\s*/, '');
+      const isResolved = resolvedPattern.test(text);
+      const isOpen = openPattern.test(text);
+
+      // Extract a reasonable check name
+      const words = text.split(/\s+/).slice(0, 3).join(' ');
+
+      if (isResolved || isOpen || text.length > 10) {
+        blockers.push({
+          check: words.slice(0, 50),
+          status: isResolved ? 'resolved' : isOpen ? 'open' : 'unknown',
+          summary: text.slice(0, 100),
+        });
+      }
+    }
+  }
+
+  return blockers;
+}
+
+/**
+ * Parse STATE.md to extract current phase
+ */
+function parseState(content) {
+  if (!content) {
+    return 'unknown';
+  }
+
+  // First, look for explicit "Current Phase:" declaration with a phase
+  const currentPhaseMatch = content.match(/current\s+phase[:\s*]+\**\s*(P\d_\w+)/i);
+  if (currentPhaseMatch) {
+    const found = currentPhaseMatch[1].toUpperCase();
+    if (VALID_PHASES.includes(found)) {
+      return found;
+    }
+  }
+
+  // Try "Phase:" or "Status:" followed by phase name
+  const phaseMatch = content.match(/(?:current\s+)?(?:phase|status|stage)[:\s*]+\**\s*(P\d_\w+|\w+)/i);
+  if (phaseMatch) {
+    const found = phaseMatch[1].toUpperCase();
+    if (VALID_PHASES.includes(found)) {
+      return found;
+    }
+    // Map common names to phases
+    const mapping = {
+      DISCOVER: 'P0_DISCOVER',
+      QUEUE: 'P1_QUEUE',
+      UNBLOCK: 'P2_UNBLOCK',
+      MERGE: 'P3_MERGE',
+      VERIFY: 'P4_VERIFY',
+      RELEASE: 'P5_RELEASE',
+      DONE: 'P6_DONE',
+      COMPLETE: 'P6_DONE',
+    };
+    if (mapping[found]) return mapping[found];
+  }
+
+  // Fall back to looking for any phase in order (last one found is likely current)
+  let lastFound = 'unknown';
+  for (const phase of VALID_PHASES) {
+    if (content.includes(phase)) {
+      lastFound = phase;
+    }
+  }
+
+  return lastFound;
+}
+
+/**
+ * Parse EVIDENCE.md to extract verification status
+ */
+function parseEvidence(content) {
+  if (!content) {
+    return {
+      last_evidence_section: 'unknown',
+      status: 'unknown',
+    };
+  }
+
+  const requiredSections = ['install', 'build', 'tests', 'e2e', 'security', 'smoke'];
+  const foundSections = [];
+  let lastSection = 'unknown';
+
+  for (const section of requiredSections) {
+    // Look for section headings (flexible matching)
+    const pattern = new RegExp(`(?:^#+\\s*|\\*\\*|__)${section}`, 'im');
+    if (pattern.test(content)) {
+      foundSections.push(section);
+      lastSection = section;
+    }
+  }
+
+  // Check for pass/fail indicators
+  const passPattern = /(?:pass|passed|success|✅|✓|all green)/i;
+  const failPattern = /(?:fail|failed|error|❌|🔴)/i;
+
+  let status = 'unknown';
+  if (passPattern.test(content) && !failPattern.test(content)) {
+    status = 'pass';
+  } else if (failPattern.test(content)) {
+    status = 'fail';
+  } else if (foundSections.length >= 4) {
+    // If most sections present, assume pass
+    status = 'pass';
+  }
+
+  return {
+    last_evidence_section: lastSection,
+    status,
+  };
+}
+
+/**
+ * Get CI status via gh CLI (best effort)
+ */
+function getCiStatus() {
+  try {
+    const result = execSync('gh run list --limit 1 --json conclusion -q ".[0].conclusion"', {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      timeout: 10000,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+
+    if (result === 'success') return true;
+    if (result === 'failure') return false;
+    return 'unknown';
+  } catch {
+    return 'unknown';
+  }
+}
+
+/**
+ * Get release/tag info (best effort)
+ */
+function getReleaseInfo() {
+  const result = {
+    version: 'unknown',
+    tag: 'unknown',
+    commit: 'unknown',
+  };
+
+  try {
+    // Get latest tag
+    const tag = execSync('git describe --tags --abbrev=0 2>/dev/null || echo ""', {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      timeout: 5000,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+
+    if (tag) {
+      result.tag = tag;
+      // Extract version from tag (strip v prefix if present)
+      result.version = tag.replace(/^v/, '');
+    }
+
+    // Get current commit
+    const commit = execSync('git rev-parse HEAD 2>/dev/null || echo ""', {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      timeout: 5000,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+
+    if (commit) {
+      result.commit = commit.slice(0, 12);
+    }
+  } catch {
+    // Ignore errors, return defaults
+  }
+
+  return result;
+}
+
+/**
+ * Main function
+ */
+async function main() {
+  const args = parseArgs(process.argv);
+
+  if (args.help) {
+    console.log(`
+GA Snapshot Generator
+
+Produces a machine-readable JSON summary of GA release state.
+
+Usage:
+  ./scripts/ga/ga-snapshot [options]
+
+Options:
+  --out <path>        Output file path (default: ga_snapshot.json)
+  --include-ci        Include CI status via gh CLI (best effort)
+  --include-release   Include release/tag info if available
+  --allow-missing     Don't fail if source docs are missing
+  --help, -h          Show this help message
+
+Output Schema:
+  {
+    "phase": "P0_DISCOVER|...|P6_DONE|unknown",
+    "main_green": true|false|"unknown",
+    "queue": { total, remaining, merged, deferred, buckets, top_failing_checks },
+    "blockers": [{ check, status, summary }],
+    "verification": { last_evidence_section, status },
+    "release": { version, tag, commit },
+    "generated_by": "scripts/ga/ga-snapshot"
+  }
+`);
+    process.exit(0);
+  }
+
+  // Read source documents
+  const [queueContent, blockersContent, evidenceContent, stateContent] = await Promise.all([
+    readFileSafe(DEFAULT_INPUTS.queue),
+    readFileSafe(DEFAULT_INPUTS.blockers),
+    readFileSafe(DEFAULT_INPUTS.evidence),
+    readFileSafe(DEFAULT_INPUTS.state),
+  ]);
+
+  // Check for missing files if not allowing missing
+  const missingFiles = [];
+  if (!queueContent) missingFiles.push(DEFAULT_INPUTS.queue);
+  if (!blockersContent) missingFiles.push(DEFAULT_INPUTS.blockers);
+  if (!stateContent) missingFiles.push(DEFAULT_INPUTS.state);
+
+  if (missingFiles.length > 0 && !args.allowMissing) {
+    console.error('Missing required files:');
+    missingFiles.forEach((f) => console.error(`  - ${f}`));
+    console.error('\nUse --allow-missing to proceed with partial data.');
+    process.exit(1);
+  }
+
+  // Build snapshot
+  const snapshot = {
+    phase: parseState(stateContent),
+    main_green: args.includeCi ? getCiStatus() : 'unknown',
+    queue: parseQueue(queueContent),
+    blockers: parseBlockers(blockersContent),
+    verification: parseEvidence(evidenceContent),
+    release: args.includeRelease ? getReleaseInfo() : {
+      version: 'unknown',
+      tag: 'unknown',
+      commit: 'unknown',
+    },
+    generated_by: 'scripts/ga/ga-snapshot',
+  };
+
+  // Write output with stable key ordering (keys are already in insertion order)
+  const output = JSON.stringify(snapshot, null, 2);
+
+  if (args.out === '-') {
+    console.log(output);
+  } else {
+    const outPath = path.isAbsolute(args.out) ? args.out : path.join(process.cwd(), args.out);
+    await fs.writeFile(outPath, output + '\n', 'utf8');
+    console.log(`GA snapshot written to: ${outPath}`);
+  }
+}
+
+main().catch((err) => {
+  console.error('GA snapshot generation failed:', err.message);
+  process.exit(1);
+});

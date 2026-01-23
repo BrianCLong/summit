@@ -9,8 +9,8 @@ import type { CLIConfig } from '../lib/config.js';
 import { getProfile } from '../lib/config.js';
 import { GraphClient } from '../lib/graph-client.js';
 import { ExportManager } from '../lib/export-manager.js';
-import { formatOutput, success, error, formatTable } from '../utils/output.js';
-import { handleError, ConnectionError, ExportError } from '../utils/errors.js';
+import { success, error, formatTable } from '../utils/output.js';
+import { handleError, ConnectionError } from '../utils/errors.js';
 import { EXPORT_FORMATS, type ExportFormat } from '../lib/constants.js';
 
 export function registerExportCommands(program: Command, config: CLIConfig): void {

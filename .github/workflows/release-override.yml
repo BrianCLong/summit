@@ -1,0 +1,247 @@
+# release-override.yml
+# Request temporary override for change freeze mode
+#
+# Provides a bounded exception to freeze mode without clearing it.
+# Requires environment approval and expires after a set duration.
+#
+# Authority: docs/ci/CHANGE_FREEZE_MODE.md
+
+name: Release Override
+
+on:
+  workflow_dispatch:
+    inputs:
+      justification:
+        description: "Justification for override (required, min 50 chars)"
+        type: string
+        required: true
+      ticket_url:
+        description: "Incident/ticket URL (required)"
+        type: string
+        required: true
+      duration_hours:
+        description: "Override duration in hours (max 24)"
+        type: number
+        default: 24
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  OVERRIDE_FILE: docs/releases/_state/release_override.json
+  FREEZE_FILE: docs/releases/_state/freeze_mode.json
+
+jobs:
+  validate:
+    name: Validate Request
+    runs-on: ubuntu-latest
+    outputs:
+      valid: ${{ steps.validate.outputs.valid }}
+      freeze_active: ${{ steps.check-freeze.outputs.active }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+
+      - name: Check Freeze Status
+        id: check-freeze
+        run: |
+          if [[ -f "${{ env.FREEZE_FILE }}" ]]; then
+            FREEZE=$(jq -r '.freeze_mode // false' "${{ env.FREEZE_FILE }}")
+            echo "active=${FREEZE}" >> $GITHUB_OUTPUT
+            echo "Freeze mode: ${FREEZE}"
+          else
+            echo "active=false" >> $GITHUB_OUTPUT
+            echo "No freeze file found"
+          fi
+
+      - name: Validate Inputs
+        id: validate
+        run: |
+          JUSTIFICATION="${{ github.event.inputs.justification }}"
+          TICKET_URL="${{ github.event.inputs.ticket_url }}"
+          DURATION="${{ github.event.inputs.duration_hours }}"
+
+          VALID=true
+          ERRORS=""
+
+          # Check justification length
+          if [[ ${#JUSTIFICATION} -lt 50 ]]; then
+            ERRORS="${ERRORS}\n- Justification must be at least 50 characters (got ${#JUSTIFICATION})"
+            VALID=false
+          fi
+
+          # Check ticket URL format
+          if [[ ! "$TICKET_URL" =~ ^https?:// ]]; then
+            ERRORS="${ERRORS}\n- Ticket URL must be a valid URL starting with http(s)://"
+            VALID=false
+          fi
+
+          # Check duration
+          if [[ "$DURATION" -gt 24 ]]; then
+            ERRORS="${ERRORS}\n- Duration cannot exceed 24 hours"
+            VALID=false
+          fi
+
+          if [[ "$DURATION" -lt 1 ]]; then
+            ERRORS="${ERRORS}\n- Duration must be at least 1 hour"
+            VALID=false
+          fi
+
+          if [[ "$VALID" == "false" ]]; then
+            echo "::error::Validation failed:${ERRORS}"
+            echo "valid=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          echo "valid=true" >> $GITHUB_OUTPUT
+          echo "All validations passed"
+
+  approval:
+    name: Request Approval
+    runs-on: ubuntu-latest
+    needs: validate
+    if: needs.validate.outputs.valid == 'true'
+    environment: release-override
+
+    steps:
+      - name: Approval Granted
+        run: |
+          echo "Override request approved via release-override environment"
+          echo ""
+          echo "Requester: ${{ github.actor }}"
+          echo "Justification: ${{ github.event.inputs.justification }}"
+          echo "Ticket: ${{ github.event.inputs.ticket_url }}"
+          echo "Duration: ${{ github.event.inputs.duration_hours }} hours"
+
+  write-override:
+    name: Write Override
+    runs-on: ubuntu-latest
+    needs: approval
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Calculate Expiration
+        id: expiry
+        run: |
+          DURATION="${{ github.event.inputs.duration_hours }}"
+          NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          EXPIRES=$(date -u -d "+${DURATION} hours" +"%Y-%m-%dT%H:%M:%SZ")
+
+          echo "now=${NOW}" >> $GITHUB_OUTPUT
+          echo "expires=${EXPIRES}" >> $GITHUB_OUTPUT
+          echo "Override will expire at: ${EXPIRES}"
+
+      - name: Write Override File
+        run: |
+          mkdir -p "$(dirname "${{ env.OVERRIDE_FILE }}")"
+
+          cat > "${{ env.OVERRIDE_FILE }}" << EOF
+          {
+            "active": true,
+            "set_at": "${{ steps.expiry.outputs.now }}",
+            "expires_at": "${{ steps.expiry.outputs.expires }}",
+            "justification": "${{ github.event.inputs.justification }}",
+            "ticket_url": "${{ github.event.inputs.ticket_url }}",
+            "approved_via_environment": "release-override",
+            "approved_by": "${{ github.actor }}",
+            "run_id": "${{ github.run_id }}",
+            "note": "Temporary override - does not clear freeze mode"
+          }
+          EOF
+
+          echo "Override written:"
+          cat "${{ env.OVERRIDE_FILE }}"
+
+      - name: Commit Override
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add "${{ env.OVERRIDE_FILE }}"
+          git commit -m "chore: grant release override until ${{ steps.expiry.outputs.expires }}
+
+          Justification: ${{ github.event.inputs.justification }}
+          Ticket: ${{ github.event.inputs.ticket_url }}
+          Duration: ${{ github.event.inputs.duration_hours }} hours
+          Approved by: ${{ github.actor }}
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          git push
+
+      - name: Generate Summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## Release Override Granted
+
+          **Status:** Active
+          **Expires:** ${{ steps.expiry.outputs.expires }}
+          **Duration:** ${{ github.event.inputs.duration_hours }} hours
+
+          ### Details
+
+          | Field | Value |
+          |-------|-------|
+          | Requester | @${{ github.actor }} |
+          | Justification | ${{ github.event.inputs.justification }} |
+          | Ticket | ${{ github.event.inputs.ticket_url }} |
+          | Approved via | release-override environment |
+
+          ### Important Notes
+
+          - This override provides a **temporary exception** to freeze mode
+          - Freeze mode itself remains **active**
+          - Override will automatically expire at the specified time
+          - Another override can be requested if needed
+
+          ### Next Steps
+
+          You can now proceed with the blocked release operation. The freeze gate will allow:
+          - GA promotions
+          - RC promotions
+          - Pages publishes
+
+          After the override expires, freeze mode will block releases again until manually cleared.
+          EOF
+
+  notify-failure:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: [validate, approval]
+    if: failure()
+
+    steps:
+      - name: Generate Failure Summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## Release Override Request Failed
+
+          The override request was not granted. This could be due to:
+
+          1. **Validation failure** - Check that:
+             - Justification is at least 50 characters
+             - Ticket URL is valid
+             - Duration is between 1-24 hours
+
+          2. **Approval denied** - The request was not approved in the release-override environment
+
+          ### Request Details
+
+          | Field | Value |
+          |-------|-------|
+          | Requester | @${{ github.actor }} |
+          | Justification | ${{ github.event.inputs.justification }} |
+          | Ticket | ${{ github.event.inputs.ticket_url }} |
+          | Duration | ${{ github.event.inputs.duration_hours }} hours |
+
+          ### Alternatives
+
+          1. **Hotfix path** - Use hotfix-release workflow (always allowed)
+          2. **Fix budget** - Resolve underlying issues and wait for manual freeze reset
+          3. **Retry** - Submit another override request with valid inputs
+          EOF

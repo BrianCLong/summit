@@ -26,9 +26,25 @@ export const EnvSchema = z
     CACHE_TTL_DEFAULT: z.coerce.number().default(300), // 5 minutes
     L1_CACHE_MAX_BYTES: z.coerce.number().default(1 * 1024 * 1024 * 1024), // 1 GB
     L1_CACHE_FALLBACK_TTL_SECONDS: z.coerce.number().default(300), // 5 minutes
+    DOCLING_SVC_URL: z.string().url().default('http://localhost:5001'),
+    DOCLING_SVC_TIMEOUT_MS: z.coerce.number().default(30000),
+    // GraphQL Cost Analysis & Rate Limiting
+    ENFORCE_GRAPHQL_COST_LIMITS: z.coerce.boolean().default(true),
+    GRAPHQL_COST_CONFIG_PATH: z.string().optional(),
+    COST_EXEMPT_TENANTS: z.string().optional().default(''),
   });
 
+const TestEnvSchema = EnvSchema.extend({
+  DATABASE_URL: z.string().optional().default('postgresql://postgres:testpassword@localhost:5432/intelgraph_test'),
+  JWT_SECRET: z.string().min(32).optional().default('test-jwt-secret-at-least-32-chars-long'),
+  JWT_REFRESH_SECRET: z.string().min(32).optional().default('test-jwt-refresh-secret-at-least-32-chars-long'),
+  NEO4J_URI: z.string().optional().default('bolt://localhost:7687'),
+  NEO4J_USER: z.string().optional().default('neo4j'),
+  NEO4J_PASSWORD: z.string().optional().default('testpassword'),
+});
+
 const Env = EnvSchema.passthrough(); // Allow extra env vars
+const TestEnv = TestEnvSchema.passthrough();
 
 // Environment variable documentation for helpful error messages
 const ENV_VAR_HELP: Record<string, string> = {
@@ -50,10 +66,15 @@ const ENV_VAR_HELP: Record<string, string> = {
   JWT_SECRET: 'JWT signing secret (min 32 characters, use strong random value)',
   JWT_REFRESH_SECRET: 'JWT refresh token secret (min 32 characters, different from JWT_SECRET)',
   CORS_ORIGIN: 'Allowed CORS origins (comma-separated, e.g., http://localhost:3000)',
+  ENFORCE_GRAPHQL_COST_LIMITS: 'Enable/disable GraphQL cost limit enforcement (default: true)',
+  GRAPHQL_COST_CONFIG_PATH: 'Path to GraphQL cost configuration JSON file (optional)',
+  COST_EXEMPT_TENANTS: 'Comma-separated list of tenant IDs exempt from cost limits',
 };
 
 export const cfg = (() => {
-  const parsed = Env.safeParse(process.env);
+  const isTest = process.env.NODE_ENV === 'test';
+  const schema = isTest ? TestEnv : Env;
+  const parsed = schema.safeParse(process.env);
   if (!parsed.success) {
     console.error('\n❌ Environment Validation Failed\n');
     console.error('Missing or invalid environment variables:\n');

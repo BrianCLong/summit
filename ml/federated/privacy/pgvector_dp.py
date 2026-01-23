@@ -6,10 +6,9 @@ using PostgreSQL pgvector extension with differential privacy.
 """
 
 import logging
-import hashlib
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 import numpy as np
 
@@ -39,7 +38,7 @@ class EmbeddingWithPrivacy:
     noise_added: bool
     source_count: int
     timestamp: float
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class PgVectorDifferentialPrivacy:
@@ -56,7 +55,7 @@ class PgVectorDifferentialPrivacy:
     def __init__(
         self,
         config: PrivacyConfig,
-        connection_string: Optional[str] = None,
+        connection_string: str | None = None,
     ):
         self.config = config
         self.connection_string = connection_string
@@ -64,7 +63,7 @@ class PgVectorDifferentialPrivacy:
 
         # Privacy tracking
         self._total_epsilon_spent = 0.0
-        self._operation_log: List[Dict[str, Any]] = []
+        self._operation_log: list[dict[str, Any]] = []
 
         # Initialize connection if provided
         if connection_string:
@@ -90,10 +89,7 @@ class PgVectorDifferentialPrivacy:
             logger.info("Connected to PostgreSQL with pgvector")
 
         except ImportError:
-            logger.warning(
-                "psycopg2 or pgvector not available - "
-                "running in simulation mode"
-            )
+            logger.warning("psycopg2 or pgvector not available - running in simulation mode")
         except Exception as e:
             logger.error(f"Failed to connect to PostgreSQL: {e}")
 
@@ -144,8 +140,8 @@ class PgVectorDifferentialPrivacy:
     def add_noise_to_embedding(
         self,
         embedding: np.ndarray,
-        epsilon: Optional[float] = None,
-    ) -> Tuple[np.ndarray, float]:
+        epsilon: float | None = None,
+    ) -> tuple[np.ndarray, float]:
         """
         Add calibrated noise to embedding for differential privacy
 
@@ -171,9 +167,9 @@ class PgVectorDifferentialPrivacy:
 
     def aggregate_embeddings_private(
         self,
-        embeddings: List[np.ndarray],
-        epsilon: Optional[float] = None,
-    ) -> Tuple[np.ndarray, float]:
+        embeddings: list[np.ndarray],
+        epsilon: float | None = None,
+    ) -> tuple[np.ndarray, float]:
         """
         Privately aggregate multiple embeddings
 
@@ -221,7 +217,7 @@ class PgVectorDifferentialPrivacy:
         embedding_id: str,
         embedding: np.ndarray,
         add_noise: bool = True,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> EmbeddingWithPrivacy:
         """Store embedding with privacy protection"""
         epsilon_used = 0.0
@@ -252,8 +248,8 @@ class PgVectorDifferentialPrivacy:
         query_embedding: np.ndarray,
         k: int = 10,
         add_query_noise: bool = True,
-        epsilon: Optional[float] = None,
-    ) -> List[Tuple[str, float]]:
+        epsilon: float | None = None,
+    ) -> list[tuple[str, float]]:
         """
         Perform privacy-preserving similarity search
 
@@ -296,8 +292,8 @@ class PgVectorDifferentialPrivacy:
     def federated_embedding_update(
         self,
         embedding_id: str,
-        local_updates: List[np.ndarray],
-        node_ids: List[str],
+        local_updates: list[np.ndarray],
+        node_ids: list[str],
     ) -> EmbeddingWithPrivacy:
         """
         Update embedding with federated contributions
@@ -329,7 +325,7 @@ class PgVectorDifferentialPrivacy:
 
         return result
 
-    def get_privacy_report(self) -> Dict[str, Any]:
+    def get_privacy_report(self) -> dict[str, Any]:
         """Get privacy budget usage report"""
         return {
             "config": {
@@ -381,11 +377,7 @@ class PgVectorDifferentialPrivacy:
     ) -> float:
         """Compute Gaussian noise scale for target epsilon"""
         # Gaussian mechanism: sigma = sensitivity * sqrt(2 * ln(1.25/delta)) / epsilon
-        return (
-            sensitivity
-            * np.sqrt(2 * np.log(1.25 / self.config.delta))
-            / epsilon
-        )
+        return sensitivity * np.sqrt(2 * np.log(1.25 / self.config.delta)) / epsilon
 
     def _store_embedding_pg(self, embedding: EmbeddingWithPrivacy) -> None:
         """Store embedding in PostgreSQL"""
@@ -437,15 +429,17 @@ class PgVectorDifferentialPrivacy:
         self,
         operation: str,
         epsilon: float,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Log privacy operation"""
-        self._operation_log.append({
-            "operation": operation,
-            "epsilon": epsilon,
-            "timestamp": time.time(),
-            "metadata": metadata or {},
-        })
+        self._operation_log.append(
+            {
+                "operation": operation,
+                "epsilon": epsilon,
+                "timestamp": time.time(),
+                "metadata": metadata or {},
+            }
+        )
 
     def can_afford_operation(self, epsilon: float) -> bool:
         """Check if privacy budget allows operation"""

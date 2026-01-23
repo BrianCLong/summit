@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import {
   pickCheapestEligible,
   type PoolCost,
@@ -53,7 +54,8 @@ describe('pickCheapestEligible', () => {
     const est = { cpuSec: 10, gbSec: 10, egressGb: 10 };
     const result = pickCheapestEligible(pools, costs, est, 'us-east');
 
-    expect(result).toEqual({ id: 'pool-a', price: 0.3 });
+    expect(result?.id).toBe('pool-a');
+    expect(result?.price).toBeCloseTo(0.3);
   });
 
   it('skips pools with missing pricing', () => {
@@ -94,7 +96,8 @@ describe('pickCheapestEligible', () => {
     const est = { cpuSec: 5, gbSec: 5, egressGb: 5 };
     const result = pickCheapestEligible(pools, costs, est);
 
-    expect(result).toEqual({ id: 'pool-a', price: 0.15 });
+    expect(result?.id).toBe('pool-a');
+    expect(result?.price).toBeCloseTo(0.15);
   });
 
   it('treats missing or negative estimates as zero', () => {

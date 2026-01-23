@@ -1,23 +1,35 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach, beforeAll } from '@jest/globals';
 
-const mockPolicyEvaluate = jest.fn();
-const mockDlpScanContent = jest.fn();
-const mockDlpApplyActions = jest.fn();
+type LlmSecurityContext = {
+  tenantId: string;
+  principal: {
+    id: string;
+    name: string;
+    role: string;
+  };
+  purpose: 'rag' | 'analysis' | 'enrichment' | 'automation' | 'other';
+  dataSensitivity: 'public' | 'internal' | 'confidential' | 'restricted';
+};
 
-jest.mock('../PolicyService.js', () => ({
+const mockPolicyEvaluate = jest.fn() as jest.Mock<any>;
+const mockDlpScanContent = jest.fn() as jest.Mock<any>;
+const mockDlpApplyActions = jest.fn() as jest.Mock<any>;
+
+jest.unstable_mockModule('../PolicyService.js', () => ({
   policyService: {
     evaluate: mockPolicyEvaluate,
   },
 }));
 
-jest.mock('../DLPService.js', () => ({
+jest.unstable_mockModule('../DLPService.js', () => ({
   dlpService: {
     scanContent: mockDlpScanContent,
     applyActions: mockDlpApplyActions,
   },
 }));
 
-jest.mock('../../utils/logger.js', () => ({
+jest.unstable_mockModule('../../utils/logger.js', () => ({
+  __esModule: true,
   default: {
     info: jest.fn(),
     warn: jest.fn(),
@@ -26,10 +38,9 @@ jest.mock('../../utils/logger.js', () => ({
   },
 }));
 
-import { LlmSecurityService, LlmSecurityContext } from '../LlmSecurityService.js';
-
 describe('LlmSecurityService', () => {
-  let service: LlmSecurityService;
+  let LlmSecurityService: typeof import('../LlmSecurityService.js').LlmSecurityService;
+  let service: ReturnType<typeof LlmSecurityService.getInstance>;
 
   const defaultContext: LlmSecurityContext = {
     tenantId: 'tenant-123',
@@ -42,8 +53,13 @@ describe('LlmSecurityService', () => {
     dataSensitivity: 'internal',
   };
 
+  beforeAll(async () => {
+    ({ LlmSecurityService } = await import('../LlmSecurityService.js'));
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    (LlmSecurityService as any).instance = null;
     service = LlmSecurityService.getInstance();
   });
 
@@ -64,7 +80,7 @@ describe('LlmSecurityService', () => {
       const result = await service.validatePrompt(
         'Analyze this data',
         defaultContext,
-        'gpt-4'
+        'gpt-4',
       );
 
       expect(result.allowed).toBe(true);
@@ -80,7 +96,7 @@ describe('LlmSecurityService', () => {
       const result = await service.validatePrompt(
         'Analyze this data',
         defaultContext,
-        'gpt-4'
+        'gpt-4',
       );
 
       expect(result.allowed).toBe(false);
@@ -100,7 +116,7 @@ describe('LlmSecurityService', () => {
       const result = await service.validatePrompt(
         'Patient SSN is 123-45-6789',
         defaultContext,
-        'gpt-4'
+        'gpt-4',
       );
 
       expect(result.allowed).toBe(false);
@@ -123,7 +139,7 @@ describe('LlmSecurityService', () => {
       const result = await service.validatePrompt(
         'Contact john@example.com for info',
         defaultContext,
-        'gpt-4'
+        'gpt-4',
       );
 
       expect(result.allowed).toBe(true);
@@ -137,7 +153,7 @@ describe('LlmSecurityService', () => {
       const result = await service.validatePrompt(
         'Test prompt',
         defaultContext,
-        'gpt-4'
+        'gpt-4',
       );
 
       expect(result.allowed).toBe(false);

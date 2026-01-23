@@ -1,19 +1,22 @@
-import yaml
-import json
 import csv
+import json
 import sys
 from pathlib import Path
+
+import yaml
+from sre.metrics import ExactMatchMetric, ToolEfficiencyMetric, TraceLengthMetric
 from sre.models import Episode
-from sre.metrics import TraceLengthMetric, ToolEfficiencyMetric, ExactMatchMetric
+
 from experiments.adapter import convert_to_episode
 
 # Ensure we can import from experiments and sre
 sys.path.append(str(Path.cwd()))
 sys.path.append(str(Path.cwd() / "impl"))
 
+
 def main():
     config_path = Path("experiments/configs/math_config.yaml")
-    with open(config_path, "r") as f:
+    with open(config_path) as f:
         config = yaml.safe_load(f)
 
     dataset_path = Path(config["dataset"])
@@ -23,13 +26,13 @@ def main():
     metric_map = {
         "trace_length": TraceLengthMetric(),
         "tool_efficiency": ToolEfficiencyMetric(),
-        "exact_match": ExactMatchMetric()
+        "exact_match": ExactMatchMetric(),
     }
 
     results = []
 
     print(f"Loading dataset from {dataset_path}...")
-    with open(dataset_path, "r") as f:
+    with open(dataset_path) as f:
         for line in f:
             raw_record = json.loads(line)
             episode_dict = convert_to_episode(raw_record)
@@ -54,6 +57,7 @@ def main():
             writer.writerows(results)
 
     print(f"Results written to {output_csv}")
+
 
 if __name__ == "__main__":
     main()

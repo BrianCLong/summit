@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { io as createClient, type Socket as ClientSocket } from 'socket.io-client';
@@ -13,9 +14,12 @@ const waitForEvent = <T>(socket: ClientSocket, event: string) =>
       clearTimeout(timeout);
       resolve(payload);
     });
-  });
+});
 
-describe('CollaborationHub presence channels', () => {
+const NO_NETWORK_LISTEN = process.env.NO_NETWORK_LISTEN === 'true';
+const describeIf = NO_NETWORK_LISTEN ? describe.skip : describe;
+
+describeIf('CollaborationHub presence channels', () => {
   let httpServer: ReturnType<typeof createServer>;
   let io: Server;
   let port: number;

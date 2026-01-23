@@ -1,13 +1,12 @@
 import { jest } from '@jest/globals';
-import { BillingJobService } from '../BillingJobService';
-import { getPostgresPool } from '../../config/database.js';
-import { billingService } from '../BillingService.js';
+const mockGetPostgresPool = jest.fn();
+const mockGenerateAndExportReport = jest.fn();
 
-jest.mock('../../config/database.js', () => ({
-  getPostgresPool: jest.fn(),
+jest.unstable_mockModule('../../config/database.js', () => ({
+  getPostgresPool: mockGetPostgresPool,
 }));
 
-jest.mock('../../config/logger.js', () => ({
+jest.unstable_mockModule('../../config/logger.js', () => ({
   __esModule: true,
   default: {
     info: jest.fn(),
@@ -16,11 +15,15 @@ jest.mock('../../config/logger.js', () => ({
   },
 }));
 
-jest.mock('../BillingService.js', () => ({
+jest.unstable_mockModule('../BillingService.js', () => ({
   billingService: {
-    generateAndExportReport: jest.fn(),
+    generateAndExportReport: mockGenerateAndExportReport,
   },
 }));
+
+const { BillingJobService } = await import('../BillingJobService');
+const { getPostgresPool } = await import('../../config/database.js');
+const { billingService } = await import('../BillingService.js');
 
 describe('BillingJobService', () => {
   let jobService: BillingJobService;
@@ -55,22 +58,27 @@ describe('BillingJobService', () => {
     await jobService.processBillingClose();
 
     expect(mockConnect).toHaveBeenCalled();
-    expect(mockQuery).toHaveBeenCalledWith(
-      'SELECT pg_try_advisory_lock($1) as acquired',
-      expect.any(Array),
-    );
+    expect(mockQuery.mock.calls[0][0]).toMatch(/pg_try_advisory_lock/i);
+    expect(mockQuery.mock.calls[0][1]).toEqual(expect.any(Array));
     expect(billingService.generateAndExportReport).toHaveBeenCalledTimes(2);
-    expect(mockQuery).toHaveBeenCalledWith('SELECT pg_advisory_unlock($1)', expect.any(Array));
+    const hasUnlock = mockQuery.mock.calls.some(
+      (call: unknown[]) => /pg_advisory_unlock/i.test(call[0] as string),
+    );
+    expect(hasUnlock).toBe(true);
     expect(mockRelease).toHaveBeenCalled();
   });
 
   it('skips processing when advisory lock is held elsewhere', async () => {
     mockQuery.mockResolvedValueOnce({ rows: [{ acquired: false }] });
 
-    await jobService.processBillingClose();
+    await jobService.processBillingClose({ lockTimeoutMs: 1 });
 
     expect(billingService.generateAndExportReport).not.toHaveBeenCalled();
-    expect(mockQuery).toHaveBeenCalledTimes(1);
+    expect(mockQuery).toHaveBeenCalled();
+    const hasUnlock = mockQuery.mock.calls.some(
+      (call: unknown[]) => /pg_advisory_unlock/i.test(call[0] as string),
+    );
+    expect(hasUnlock).toBe(false);
     expect(mockRelease).toHaveBeenCalled();
   });
 });

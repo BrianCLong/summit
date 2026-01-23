@@ -1,9 +1,13 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
 import { SecretManager } from '../lib/secrets/secret-manager';
 
+// Use process.cwd() since tests run from server directory
+const testsDir = path.join(process.cwd(), 'tests');
+
 describe('SecretManager', () => {
-  const tmpDir = path.join(__dirname, 'tmp-secrets');
+  const tmpDir = path.join(testsDir, 'tmp-secrets');
 
   beforeEach(() => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -46,7 +50,11 @@ describe('SecretManager', () => {
     const secretFile = path.join(fileBasePath, 'secret.json');
     fs.writeFileSync(secretFile, JSON.stringify({ token: 'file-secret', nested: { value: 'nested' } }));
 
-    const manager = new SecretManager({ fileBasePath, rotationIntervalSeconds: 0 });
+    const manager = new SecretManager({
+      fileBasePath,
+      rotationIntervalSeconds: 0,
+      providerPreference: ['file'],
+    });
 
     const resolved = manager.resolveConfig({ secret: 'file://secret.json#token' }) as { secret: string };
     expect(resolved.secret).toBe('file-secret');

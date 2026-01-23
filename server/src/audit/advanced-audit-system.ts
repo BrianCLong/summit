@@ -13,6 +13,7 @@ import jwt from 'jsonwebtoken';
 const { sign, verify } = jwt;
 import { getPostgresPool, getRedisClient } from '../config/database.js';
 import logger from '../utils/logger.js';
+import { correlationStorage } from '../config/logger.js';
 import { AuditTimelineRollupService } from './AuditTimelineRollupService.js';
 
 // Core audit event types
@@ -288,7 +289,7 @@ export class AdvancedAuditSystem extends EventEmitter {
       }
 
       AdvancedAuditSystem.instance = new AdvancedAuditSystem(
-        db,
+        db as any,
         redis as Redis, // If null, we'll need to handle it in methods
         logger,
         signingKey || 'dev-signing-key-insecure',
@@ -299,7 +300,7 @@ export class AdvancedAuditSystem extends EventEmitter {
   }
 
   public static createForTest(options: {
-    db: Pool;
+    db: any;
     redis?: Redis | null;
     logger: Logger;
     signingKey?: string;
@@ -323,18 +324,35 @@ export class AdvancedAuditSystem extends EventEmitter {
    */
   async recordEvent(eventData: Partial<AuditEvent>): Promise<string> {
     try {
-      // Validate required fields
-      const validation = AuditEventSchema.safeParse(eventData);
+      // 1. Get defaults from AsyncLocalStorage if available
+      const store = correlationStorage.getStore();
+      const defaults = {
+        correlationId: store?.get('correlationId') || randomUUID(),
+        tenantId: store?.get('tenantId') || 'unknown',
+        requestId: store?.get('requestId'),
+        serviceId: 'intelgraph-server',
+        outcome: 'success',
+        complianceRelevant: false,
+        complianceFrameworks: [],
+      };
+
+      // 2. Merge with provided data - filtering out undefined provided values to allow defaults to take over
+      const cleanEventData = Object.fromEntries(
+        Object.entries(eventData).filter(([_, v]) => v !== undefined)
+      );
+      const mergedData = { ...defaults, ...cleanEventData };
+
+      // 3. Validate required fields
+      const validation = AuditEventSchema.safeParse(mergedData);
       if (!validation.success) {
         throw new Error(`Invalid audit event: ${validation.error.message}`);
       }
 
-      // Build complete event
+      // 4. Build complete event
       const event: AuditEvent = {
         id: randomUUID(),
         timestamp: new Date(),
         sessionId: eventData.sessionId,
-        requestId: eventData.requestId,
         userId: eventData.userId,
         resourceType: eventData.resourceType,
         resourceId: eventData.resourceId,
@@ -1271,4 +1289,4 @@ export class AdvancedAuditSystem extends EventEmitter {
 
 // Export singleton instance getter
 // This allows lazy initialization with correct dependencies
-export const advancedAuditSystem = AdvancedAuditSystem.getInstance();
+export const getAuditSystem = () => AdvancedAuditSystem.getInstance();

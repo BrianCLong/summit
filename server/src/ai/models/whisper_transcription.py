@@ -75,7 +75,7 @@ class WhisperTranscription:
 
         except Exception as e:
             return {
-                "error": f"Transcription failed: {str(e)}",
+                "error": f"Transcription failed: {e!s}",
                 "segments": [],
                 "language": "unknown",
             }
@@ -246,7 +246,7 @@ def main():
                     print()
 
     except Exception as e:
-        print(json.dumps({"error": f"Transcription failed: {str(e)}"}))
+        print(json.dumps({"error": f"Transcription failed: {e!s}"}))
         sys.exit(1)
 
 

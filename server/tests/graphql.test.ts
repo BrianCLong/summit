@@ -1,12 +1,18 @@
 import request from 'supertest';
+import type { Express } from 'express';
+import type { Server } from 'http';
 import { createApp } from '../src/app';
 import { describe, it, test, expect, beforeAll, afterAll } from '@jest/globals';
 
-describe('GraphQL Integration Tests', () => {
-  let app;
-  let server;
-  let authToken;
-  let testUserId;
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true'
+  ? describe.skip
+  : describe;
+
+describeIf('GraphQL Integration Tests', () => {
+  let app: Express;
+  let server: Server;
+  let authToken: string;
+  let testUserId: string;
 
   beforeAll(async () => {
     app = await createApp();

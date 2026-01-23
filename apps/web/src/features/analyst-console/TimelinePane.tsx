@@ -31,8 +31,7 @@ export function TimelinePane({ events, className }: TimelinePaneProps) {
   const [dragStart, setDragStart] = useState<number | null>(null)
 
   // Parse time window
-  const fromTime = new Date(timeWindow.from).getTime()
-  const toTime = new Date(timeWindow.to).getTime()
+  const { startMs: fromTime, endMs: toTime } = timeWindow
   const windowDuration = toTime - fromTime
 
   // Filter events within time window and by event types
@@ -110,15 +109,20 @@ export function TimelinePane({ events, className }: TimelinePaneProps) {
       const start = Math.min(dragStart, percent)
       const end = Math.max(dragStart, percent)
 
-      const newFrom = new Date(fromTime + start * windowDuration)
-      const newTo = new Date(fromTime + end * windowDuration)
+      // Calculate new window times
+      const newStartMs = fromTime + start * windowDuration
+      const newEndMs = fromTime + end * windowDuration
 
-      setTimeWindow({
-        from: newFrom.toISOString(),
-        to: newTo.toISOString(),
-      })
+      setTimeWindow(
+        {
+          ...timeWindow,
+          startMs: newStartMs,
+          endMs: newEndMs,
+        },
+        { source: 'timeline' }
+      )
     },
-    [isDragging, dragStart, fromTime, windowDuration, setTimeWindow]
+    [isDragging, dragStart, fromTime, windowDuration, setTimeWindow, timeWindow]
   )
 
   const handleMouseUp = useCallback(() => {
@@ -130,12 +134,16 @@ export function TimelinePane({ events, className }: TimelinePaneProps) {
   const shiftTimeWindow = useCallback(
     (direction: 'forward' | 'backward') => {
       const shift = windowDuration * 0.25 * (direction === 'forward' ? 1 : -1)
-      setTimeWindow({
-        from: new Date(fromTime + shift).toISOString(),
-        to: new Date(toTime + shift).toISOString(),
-      })
+      setTimeWindow(
+        {
+          ...timeWindow,
+          startMs: fromTime + shift,
+          endMs: toTime + shift,
+        },
+        { source: 'timeline-controls' }
+      )
     },
-    [fromTime, toTime, windowDuration, setTimeWindow]
+    [fromTime, toTime, windowDuration, setTimeWindow, timeWindow]
   )
 
   // Get severity color
@@ -177,8 +185,8 @@ export function TimelinePane({ events, className }: TimelinePaneProps) {
           <div className="flex items-center gap-2 text-sm text-slate-300">
             <Calendar className="h-4 w-4" />
             <span>
-              {new Date(timeWindow.from).toLocaleDateString()} -{' '}
-              {new Date(timeWindow.to).toLocaleDateString()}
+              {new Date(timeWindow.startMs).toLocaleDateString()} -{' '}
+              {new Date(timeWindow.endMs).toLocaleDateString()}
             </span>
           </div>
           <div className="flex items-center gap-1">
@@ -231,9 +239,9 @@ export function TimelinePane({ events, className }: TimelinePaneProps) {
         </div>
 
         <div className="flex justify-between text-xs text-slate-500 mt-1">
-          <span>{new Date(timeWindow.from).toLocaleTimeString()}</span>
+          <span>{new Date(timeWindow.startMs).toLocaleTimeString()}</span>
           <span>{filteredEvents.length} events</span>
-          <span>{new Date(timeWindow.to).toLocaleTimeString()}</span>
+          <span>{new Date(timeWindow.endMs).toLocaleTimeString()}</span>
         </div>
       </div>
 

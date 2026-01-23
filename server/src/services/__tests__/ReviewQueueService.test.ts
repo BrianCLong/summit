@@ -1,15 +1,21 @@
 
-import { reviewQueueService, ReviewQueueService } from '../ReviewQueueService';
-import { getPostgresPool } from '../../db/postgres';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
 
 // Mock dependencies
-jest.mock('../../db/postgres', () => ({
+jest.unstable_mockModule('../../db/postgres', () => ({
   getPostgresPool: jest.fn(),
 }));
 
 describe('ReviewQueueService', () => {
+  let reviewQueueService: typeof import('../ReviewQueueService').reviewQueueService;
+  let getPostgresPool: jest.Mock;
   let mockPool: any;
   let mockClient: any;
+
+  beforeAll(async () => {
+    ({ reviewQueueService } = await import('../ReviewQueueService'));
+    ({ getPostgresPool } = await import('../../db/postgres'));
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();

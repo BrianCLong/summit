@@ -5,30 +5,31 @@ import {
 } from '../graph/patternQuery';
 import { runCypher } from '../graph/neo4j';
 import { Entity, Edge } from '../graph/types';
+import { enforceTenantScopeForCypher } from './graphTenantScope.js';
 
 // Helper to sanitize attribute keys to prevent injection
 function sanitizeKey(key: string): string {
-    return key.replace(/[^a-zA-Z0-9_]/g, '');
+  return key.replace(/[^a-zA-Z0-9_]/g, '');
 }
 
 // Helper to unflatten attributes from storage (duplicated for standalone service, ideally shared util)
 function unflattenAttributes(properties: Record<string, any>, prefix = 'attr_'): Record<string, unknown> {
-    const attributes: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(properties)) {
-        if (k.startsWith(prefix)) {
-            const key = k.substring(prefix.length);
-            if (typeof v === 'string' && (v.startsWith('{') || v.startsWith('['))) {
-                try {
-                    attributes[key] = JSON.parse(v);
-                } catch {
-                    attributes[key] = v;
-                }
-            } else {
-                attributes[key] = v;
-            }
+  const attributes: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(properties)) {
+    if (k.startsWith(prefix)) {
+      const key = k.substring(prefix.length);
+      if (typeof v === 'string' && (v.startsWith('{') || v.startsWith('['))) {
+        try {
+          attributes[key] = JSON.parse(v);
+        } catch {
+          attributes[key] = v;
         }
+      } else {
+        attributes[key] = v;
+      }
     }
-    return attributes;
+  }
+  return attributes;
 }
 
 export class GraphPatternService {
@@ -115,11 +116,17 @@ export class GraphPatternService {
     params.limit = limit;
 
     const fullCypher = cypherParts.join(' ');
+    const scoped = await enforceTenantScopeForCypher(fullCypher, params, {
+      tenantId,
+      action: 'graph.read',
+      resource: 'graph.pattern.search',
+    });
 
-    const results = await runCypher(fullCypher, params);
+    const results = await runCypher(scoped.cypher, scoped.params, { tenantId });
 
     // Map results
-    return results.map(record => {
+    return results.map((rec) => {
+        const record = rec as Record<string, any>;
         const nodes: Entity[] = [];
         const edges: Edge[] = [];
 

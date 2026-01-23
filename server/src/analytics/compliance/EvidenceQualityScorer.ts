@@ -12,11 +12,13 @@
 import { v4 as uuidv4 } from 'uuid';
 import { EventEmitter } from 'events';
 import {
-  DataEnvelope,
-  GovernanceVerdict,
   GovernanceResult,
   DataClassification,
   createDataEnvelope,
+} from '../../types/data-envelope.js';
+import type {
+  DataEnvelope,
+  GovernanceVerdict,
 } from '../../types/data-envelope.js';
 import logger from '../../utils/logger.js';
 import type { ComplianceFramework } from './CompliancePredictionEngine.js';
@@ -352,7 +354,7 @@ class FreshnessScorer {
 }
 
 class RelevanceScorer {
-  constructor(private config: ScorerConfig) {}
+  constructor(private config: ScorerConfig) { }
 
   score(evidence: Evidence): DimensionScore {
     let score = 100;
@@ -408,7 +410,7 @@ class RelevanceScorer {
 }
 
 class CredibilityScorer {
-  constructor(private config: ScorerConfig) {}
+  constructor(private config: ScorerConfig) { }
 
   score(evidence: Evidence): DimensionScore {
     let score = 100;
@@ -465,7 +467,7 @@ class CredibilityScorer {
 }
 
 class TraceabilityScorer {
-  constructor(private config: ScorerConfig) {}
+  constructor(private config: ScorerConfig) { }
 
   score(evidence: Evidence): DimensionScore {
     let score = 100;
@@ -498,7 +500,7 @@ class TraceabilityScorer {
 
     // Collection timestamp precision
     const hasTimestamp = evidence.collectedAt instanceof Date &&
-                         !isNaN(evidence.collectedAt.getTime());
+      !isNaN(evidence.collectedAt.getTime());
     if (!hasTimestamp) {
       score -= 15;
       findings.push('Invalid collection timestamp');
@@ -515,7 +517,7 @@ class TraceabilityScorer {
 }
 
 class ConsistencyScorer {
-  constructor(private config: ScorerConfig) {}
+  constructor(private config: ScorerConfig) { }
 
   score(evidence: Evidence, relatedEvidence: Evidence[]): DimensionScore {
     let score = 100;
@@ -656,8 +658,8 @@ export class EvidenceQualityScorer extends EventEmitter {
       ).toISOString(),
       governanceVerdict: createVerdict(
         grade === 'F' ? GovernanceResult.FLAG :
-        grade === 'D' ? GovernanceResult.REVIEW_REQUIRED :
-        GovernanceResult.ALLOW,
+          grade === 'D' ? GovernanceResult.REVIEW_REQUIRED :
+            GovernanceResult.ALLOW,
         `Evidence quality: ${grade} (${Math.round(overallScore)}%)`
       ),
     };
@@ -772,8 +774,8 @@ export class EvidenceQualityScorer extends EventEmitter {
       scoredAt: new Date().toISOString(),
       governanceVerdict: createVerdict(
         overallGrade === 'F' ? GovernanceResult.FLAG :
-        overallGrade === 'D' ? GovernanceResult.REVIEW_REQUIRED :
-        GovernanceResult.ALLOW,
+          overallGrade === 'D' ? GovernanceResult.REVIEW_REQUIRED :
+            GovernanceResult.ALLOW,
         `Batch quality assessment: ${overallGrade} (${Math.round(averageQuality)}%)`
       ),
     };

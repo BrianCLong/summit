@@ -1,11 +1,15 @@
-import express from 'express';
+import express, { type Router } from 'express';
 import request from 'supertest';
+import { jest } from '@jest/globals';
 
-import { ingestRouter } from '../ingest.js';
-import pluginAdminRouter from '../plugins/plugin-admin.js';
-import { opaRoutes } from '../opa.js';
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
 
-jest.mock('../../middleware/auth.js', () => ({
+const mockListPlugins = jest.fn(() =>
+  Promise.resolve({ data: [], pageInfo: { total: 0 } }),
+);
+
+jest.unstable_mockModule('../../middleware/auth.js', () => ({
   ensureAuthenticated: (req: any, _res: express.Response, next: express.NextFunction) => {
     const tenantId = req.headers['x-tenant-id'] as string | undefined;
     req.user = {
@@ -18,27 +22,23 @@ jest.mock('../../middleware/auth.js', () => ({
   },
 }));
 
-jest.mock('../../services/AuthorizationService.js', () => ({
+jest.unstable_mockModule('../../services/AuthorizationService.js', () => ({
   AuthorizationServiceImpl: jest.fn().mockImplementation(() => ({
-    assertCan: jest.fn().mockResolvedValue(undefined),
+    assertCan: jest.fn(() => Promise.resolve()),
   })),
 }));
 
-jest.mock('../../plugins/PluginRegistry.js', () => ({
+jest.unstable_mockModule('../../plugins/PluginRegistry.js', () => ({
   __esModule: true,
-  mockListPlugins: jest.fn().mockResolvedValue({ data: [], pageInfo: { total: 0 } }),
   PluginRegistry: jest.fn().mockImplementation((_opts, _logger, moduleMocks) => ({
-    listPlugins: (moduleMocks?.listPlugins as jest.Mock) ||
-      (jest.requireMock('../../plugins/PluginRegistry.js').mockListPlugins as jest.Mock),
-    getPlugin: jest.fn().mockResolvedValue({ data: {} }),
+    listPlugins: ((moduleMocks as any)?.listPlugins as jest.Mock) || mockListPlugins,
+    getPlugin: jest.fn(() => Promise.resolve({ data: {} })),
     getTenantConfig: jest.fn(),
     saveTenantConfig: jest.fn(),
   })),
 }));
 
-const { mockListPlugins } = jest.requireMock('../../plugins/PluginRegistry.js');
-
-jest.mock('../../plugins/PluginManager.js', () => ({
+jest.unstable_mockModule('../../plugins/PluginManager.js', () => ({
   PluginManager: jest.fn().mockImplementation(() => ({
     enablePlugin: jest.fn(),
     disablePlugin: jest.fn(),
@@ -48,7 +48,7 @@ jest.mock('../../plugins/PluginManager.js', () => ({
   })),
 }));
 
-jest.mock('../../controllers/OpaController.js', () => ({
+jest.unstable_mockModule('../../controllers/OpaController.js', () => ({
   OpaController: {
     getPolicies: jest.fn((req: express.Request, res: express.Response) => res.json({ policies: [] })),
     getPolicyContent: jest.fn((req: express.Request, res: express.Response) => res.json({ name: req.params.filename })),
@@ -60,31 +60,45 @@ jest.mock('../../controllers/OpaController.js', () => ({
   },
 }));
 
-jest.mock('../../services/IngestService.js', () => ({
+jest.unstable_mockModule('../../services/IngestService.js', () => ({
   IngestService: jest.fn().mockImplementation(() => ({
-    ingest: jest.fn().mockResolvedValue({
-      success: true,
-      provenanceId: 'prov-1',
-      entitiesCreated: 1,
-      entitiesUpdated: 0,
-      relationshipsCreated: 0,
-      relationshipsUpdated: 0,
-      errors: [],
-    }),
+    ingest: jest.fn(() =>
+      Promise.resolve({
+        success: true,
+        provenanceId: 'prov-1',
+        entitiesCreated: 1,
+        entitiesUpdated: 0,
+        relationshipsCreated: 0,
+        relationshipsUpdated: 0,
+        errors: [],
+      }),
+    ),
   })),
 }));
 
-jest.mock('../../services/opa-client.js', () => ({
-  verifyTenantAccess: jest.fn().mockResolvedValue(undefined),
+jest.unstable_mockModule('../../services/opa-client.js', () => ({
+  verifyTenantAccess: jest.fn(() => Promise.resolve()),
 }));
 
-jest.mock('../../tenancy/TenantIsolationGuard.js', () => ({
+jest.unstable_mockModule('../../tenancy/TenantIsolationGuard.js', () => ({
   tenantIsolationGuard: {
     evaluatePolicy: jest.fn().mockReturnValue({ allowed: true }),
-    enforceIngestionCap: jest.fn().mockResolvedValue({ allowed: true, limit: 100, reset: Date.now() + 1000 }),
-    enforceStorageQuota: jest.fn().mockResolvedValue({ allowed: true }),
+    enforceIngestionCap: jest.fn(() =>
+      Promise.resolve({ allowed: true, limit: 100, reset: Date.now() + 1000 }),
+    ),
+    enforceStorageQuota: jest.fn(() => Promise.resolve({ allowed: true })),
   },
 }));
+
+let ingestRouter: Router;
+let pluginAdminRouter: Router;
+let opaRoutes: Router;
+
+beforeAll(async () => {
+  ({ ingestRouter } = await import('../ingest.js'));
+  ({ default: pluginAdminRouter } = await import('../plugins/plugin-admin.js'));
+  ({ opaRoutes } = await import('../opa.js'));
+});
 
 const buildIngestApp = () => {
   const app = express();
@@ -114,7 +128,7 @@ const buildOpaApp = () => {
   return app;
 };
 
-describe('tenant context enforcement', () => {
+describeIf('tenant context enforcement', () => {
   const validIngestPayload = {
     tenantId: 'body-tenant',
     sourceType: 'test',

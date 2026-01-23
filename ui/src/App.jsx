@@ -8,6 +8,7 @@ import PoliciesLOA from './components/PoliciesLOA.jsx';
 import Observability from './components/Observability.jsx';
 import CIChaos from './components/CIChaos.jsx';
 import DocsRunbooks from './components/DocsRunbooks.jsx';
+import { formatAbsoluteTime, formatRelativeTime } from '../utils/formatting.js';
 import './App.css';
 
 const App = () => {
@@ -70,7 +71,11 @@ const App = () => {
             </div>
             <div className="flex items-center space-x-4 text-sm text-gray-600">
               <span>Kill: OFF</span>
-              <span>{new Date().toLocaleTimeString()}</span>
+              <span
+                title={`Last update ${formatAbsoluteTime(Date.now(), { includeDate: false })}`}
+              >
+                Updated {formatRelativeTime(Date.now())}
+              </span>
             </div>
           </div>
 

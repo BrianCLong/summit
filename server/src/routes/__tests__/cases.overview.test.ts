@@ -1,11 +1,14 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
-import { Pool, QueryResult } from 'pg';
+import type { Pool } from 'pg';
 import { getPostgresPool } from '../../db/postgres.js';
 import { CaseOverviewCacheRepo } from '../../repos/CaseOverviewCacheRepo.js';
 
 const TENANT_ID = 'tenant-case-overview-route';
 const USER_ID = 'case-overview-route-user';
+const describeIfDb =
+  process.env.ZERO_FOOTPRINT === 'true' ? describe.skip : describe;
 
 async function seedCase(pg: Pool): Promise<string> {
   const { rows } = (await pg.query(
@@ -13,7 +16,7 @@ async function seedCase(pg: Pool): Promise<string> {
      VALUES (gen_random_uuid(), $1, 'Overview Case Route', 'open', $2)
      RETURNING id`,
     [TENANT_ID, USER_ID],
-  )) as QueryResult<{ id: string }>;
+  )) as { rows: Array<{ id: string }> };
 
   const caseId = rows[0].id;
 
@@ -63,7 +66,7 @@ async function cleanupCase(pg: Pool, caseId: string) {
   await pg.query('DELETE FROM maestro.cases WHERE id = $1', [caseId]);
 }
 
-describe('GET /api/cases/:id/overview', () => {
+describeIfDb('GET /api/cases/:id/overview', () => {
   let app: express.Express;
   let pg: Pool;
   let repo: CaseOverviewCacheRepo;

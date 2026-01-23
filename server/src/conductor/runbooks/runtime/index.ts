@@ -27,8 +27,8 @@ export {
   RunbookRuntimeEngine,
   DefaultStepExecutorRegistry,
   InMemoryRunbookDefinitionRepository,
-  RuntimeEngineConfig,
 } from './engine.js';
+export type { RuntimeEngineConfig } from './engine.js';
 
 // Executors
 export * from './executors/index.js';
@@ -37,6 +37,8 @@ export * from './executors/index.js';
 export {
   RapidAttributionRunbook,
   createRapidAttributionRunbook,
+  validateRapidAttributionInput,
+  rapidAttributionExampleInput,
 } from './rapid-attribution-runbook.js';
 
 // API Routes

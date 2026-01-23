@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/agent-lab",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "Policy-gated agent lab runtime with workflows, evidence bundles, and trajectory judge.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

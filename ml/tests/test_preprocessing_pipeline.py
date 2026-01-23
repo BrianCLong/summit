@@ -27,7 +27,9 @@ def test_pipeline_runs_end_to_end() -> None:
     result = pipeline.run()
 
     computed = result.dataframe.compute()
-    assert {"feature_sum", "feature_mean", "feature_std", "feature_l2_norm"} <= set(computed.columns)
+    assert {"feature_sum", "feature_mean", "feature_std", "feature_l2_norm"} <= set(
+        computed.columns
+    )
     assert "anomaly_flag" in computed.columns
     assert "anomaly_score" in computed.columns
 
@@ -36,7 +38,7 @@ def test_pipeline_runs_end_to_end() -> None:
         assert abs(computed[column].mean()) < 1e-6
 
     insights = result.quality_insights
-    assert "timingsMs" in insights and insights["timingsMs"]
+    assert insights.get("timingsMs")
     assert insights["anomalySummary"]["total"] == len(df)
     assert insights["anomalySummary"]["anomalies"] >= 0
 

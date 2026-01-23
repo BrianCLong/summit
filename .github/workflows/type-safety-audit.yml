@@ -1,0 +1,226 @@
+name: Type Safety Audit
+
+# TYPESCRIPT TYPE SAFETY VERIFICATION
+# Detects `any` types and enforces strict TypeScript checks.
+#
+# See docs/ci/TYPE_SAFETY_AUDIT.md for full documentation.
+
+on:
+  # Scheduled daily scan
+  schedule:
+    - cron: "0 7 * * *" # 7 AM UTC daily
+
+  # On PRs to main
+  pull_request:
+    branches: [main]
+    paths:
+      - "**/*.ts"
+      - "**/*.tsx"
+      - "tsconfig*.json"
+
+  # On push to main
+  push:
+    branches: [main]
+    paths:
+      - "**/*.ts"
+      - "**/*.tsx"
+      - "tsconfig*.json"
+
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      max_any:
+        description: "Maximum allowed any types"
+        type: number
+        default: 50
+      strict:
+        description: "Enable strict TypeScript checks"
+        type: boolean
+        default: false
+      coverage:
+        description: "Calculate type coverage"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  audit:
+    name: Type Safety Audit
+    runs-on: ubuntu-latest
+    outputs:
+      total_any: ${{ steps.audit.outputs.total_any }}
+      strict_any: ${{ steps.audit.outputs.strict_any }}
+      type_errors: ${{ steps.audit.outputs.type_errors }}
+      failed: ${{ steps.audit.outputs.failed }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Type Safety Audit
+        id: audit
+        continue-on-error: true
+        run: |
+          chmod +x scripts/release/type_safety_audit.sh
+
+          MAX_ANY="${{ inputs.max_any || 50 }}"
+          ARGS="--max-any $MAX_ANY --report"
+
+          if [[ "${{ inputs.strict }}" == "true" ]]; then
+            ARGS="$ARGS --strict"
+          fi
+
+          if [[ "${{ inputs.coverage }}" == "true" ]]; then
+            ARGS="$ARGS --coverage"
+          fi
+
+          # Run audit and capture exit code
+          EXIT_CODE=0
+          ./scripts/release/type_safety_audit.sh $ARGS || EXIT_CODE=$?
+
+          # Parse results from state file
+          if [[ -f docs/releases/_state/type_safety_state.json ]]; then
+            TOTAL_ANY=$(jq -r '.last_result.total_any // 0' docs/releases/_state/type_safety_state.json)
+            STRICT_ANY=$(jq -r '.last_result.strict_any // 0' docs/releases/_state/type_safety_state.json)
+            TYPE_ERRORS=$(jq -r '.last_result.type_errors // 0' docs/releases/_state/type_safety_state.json)
+            FAILED=$(jq -r '.last_result.failed // false' docs/releases/_state/type_safety_state.json)
+          else
+            TOTAL_ANY=0
+            STRICT_ANY=0
+            TYPE_ERRORS=0
+            FAILED=false
+          fi
+
+          echo "total_any=$TOTAL_ANY" >> $GITHUB_OUTPUT
+          echo "strict_any=$STRICT_ANY" >> $GITHUB_OUTPUT
+          echo "type_errors=$TYPE_ERRORS" >> $GITHUB_OUTPUT
+          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+
+          exit $EXIT_CODE
+
+      - name: Upload Audit Report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: type-safety-report-${{ github.run_id }}
+          path: artifacts/type-safety/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const totalAny = ${{ steps.audit.outputs.total_any || 0 }};
+            const strictAny = ${{ steps.audit.outputs.strict_any || 0 }};
+            const typeErrors = ${{ steps.audit.outputs.type_errors || 0 }};
+            const failed = ${{ steps.audit.outputs.failed || false }};
+            const maxAny = ${{ inputs.max_any || 50 }};
+
+            let statusEmoji = '✅';
+            let statusText = 'PASSED';
+            if (failed) {
+              statusEmoji = '❌';
+              statusText = 'FAILED';
+            } else if (totalAny > maxAny * 0.8) {
+              statusEmoji = '⚠️';
+              statusText = 'WARNING';
+            }
+
+            const body = `## ${statusEmoji} Type Safety Audit ${statusText}
+
+            | Metric | Value | Threshold |
+            |--------|-------|-----------|
+            | Total \`any\` types | ${totalAny} | ${maxAny} |
+            | Strict path \`any\` | ${strictAny} | 5 |
+            | Type errors | ${typeErrors} | 0 |
+
+            ${failed ? '⚠️ **Action Required:** Please reduce \`any\` usage before merging.' : totalAny > 0 ? 'ℹ️ Consider replacing `any` with proper types.' : '🎉 No `any` types detected!'}
+
+            <details>
+            <summary>Remediation Tips</summary>
+
+            \`\`\`typescript
+            // Replace any with proper types
+            function process(data: any) { }  // ❌
+            function process<T>(data: T) { } // ✅
+
+            // Use unknown for truly dynamic data
+            function parse(input: unknown) {
+              if (typeof input === 'string') {
+                // TypeScript knows input is string
+              }
+            }
+            \`\`\`
+
+            </details>
+
+            ---
+            _Generated by [Type Safety Audit](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})_`;
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes('Type Safety Audit')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+
+      - name: Job Summary
+        if: always()
+        run: |
+          TOTAL_ANY="${{ steps.audit.outputs.total_any || 0 }}"
+          STRICT_ANY="${{ steps.audit.outputs.strict_any || 0 }}"
+          TYPE_ERRORS="${{ steps.audit.outputs.type_errors || 0 }}"
+          FAILED="${{ steps.audit.outputs.failed || false }}"
+
+          echo "### Type Safety Audit" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Total \`any\` types | $TOTAL_ANY |" >> $GITHUB_STEP_SUMMARY
+          echo "| Strict path \`any\` | $STRICT_ANY |" >> $GITHUB_STEP_SUMMARY
+          echo "| Type errors | $TYPE_ERRORS |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "$FAILED" == "true" ]]; then
+            echo "**Status:** ❌ FAILED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Status:** ✅ PASSED" >> $GITHUB_STEP_SUMMARY
+          fi

@@ -378,7 +378,7 @@ class AdversarialTrainingEngine:
                 cycle_results["modality_results"][modality] = modality_result
                 total_adversarial_samples += modality_result.get("adversarial_samples_generated", 0)
             except Exception as e:
-                self.logger.error(f"Error training {modality} modality: {str(e)}")
+                self.logger.error(f"Error training {modality} modality: {e!s}")
                 cycle_results["modality_results"][modality] = {"status": "failed", "error": str(e)}
 
         cycle_results["end_time"] = datetime.now().isoformat()
@@ -446,7 +446,7 @@ class AdversarialTrainingEngine:
                 json.dump(self.training_history, f, indent=2, default=str)
             self.logger.info(f"Saved training history to {filepath}")
         except Exception as e:
-            self.logger.error(f"Failed to save training history: {str(e)}")
+            self.logger.error(f"Failed to save training history: {e!s}")
 
     def load_training_history(self, filepath: str | Path) -> dict[str, Any]:
         """
@@ -459,7 +459,7 @@ class AdversarialTrainingEngine:
             self.logger.info(f"Loaded training history from {filepath}")
             return history
         except Exception as e:
-            self.logger.error(f"Failed to load training history: {str(e)}")
+            self.logger.error(f"Failed to load training history: {e!s}")
             return {}
 
 

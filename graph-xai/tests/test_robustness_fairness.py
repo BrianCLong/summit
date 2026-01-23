@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-
 import networkx as nx
 
-from app.explain.robustness import assess
 from app.explain.fairness import check
+from app.explain.robustness import assess
 from app.schemas import ModelOutput
 
 

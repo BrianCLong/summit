@@ -1,0 +1,67 @@
+release_status_blocked:
+  - code: PREFLIGHT_ANCESTRY
+    description: Tag not reachable from allowed branches
+  - code: VERSION_MISMATCH
+    description: Tag version does not match package/version constraints
+  - code: FREEZE_WINDOW
+    description: Release attempted during freeze window
+  - code: VERIFY_FAILED
+    description: Bundle verification failed
+  - code: MISSING_ARTIFACTS
+    description: Required artifacts missing from bundle
+  - code: SECURITY_GUARD
+    description: Security policy blocked release
+  - code: UNKNOWN
+    description: Unclassified failure
+
+maestro_nogo:
+  - code: BUNDLE_SCHEMA_INCOMPATIBLE
+    description: Bundle schema major unsupported
+  - code: BUNDLE_SCHEMA_INVALID
+    description: Bundle violates schema validation
+  - code: BUNDLE_INVALID_JSON
+    description: Invalid JSON in bundle artifacts
+  - code: BUNDLE_MISSING_FIELD
+    description: Required field missing
+  - code: BUNDLE_INVALID_VALUE
+    description: Unsupported enum/value encountered
+
+evidence_check:
+  - code: EVIDENCE_MISSING
+    description: Evidence file absent
+  - code: EVIDENCE_EXPIRED
+    description: Evidence expired
+  - code: EVIDENCE_SHA_MISMATCH
+    description: Evidence sha mismatch
+  - code: EVIDENCE_BUNDLE_DIGEST_MISMATCH
+    description: Evidence digest mismatch
+  - code: EVIDENCE_NOT_GO
+    description: Evidence decision not GO
+  - code: DIR_EXTRA_FILE
+    description: File found on disk but not in SHA256SUMS
+  - code: HASH_MISMATCH
+    description: File hash does not match SHA256SUMS
+  - code: DIR_MISSING_FILE
+    description: File in SHA256SUMS not found on disk
+  - code: INDEX_EXTRA_FILE
+    description: bundle-index.json lists file not in SHA256SUMS
+  - code: INDEX_HASH_MISMATCH
+    description: bundle-index.json hash mismatch
+  - code: INDEX_MISSING_FILE
+    description: SHA256SUMS lists file not in bundle-index.json
+  - code: POINTER_INVALID
+    description: bundle-index.json pointer is invalid
+  - code: INDEX_PARSE_ERROR
+    description: Failed to parse bundle-index.json
+  - code: PROV_EXTRA_SUBJECT
+    description: Provenance subject not in SHA256SUMS
+  - code: PROV_HASH_MISMATCH
+    description: Provenance hash mismatch
+  - code: PROV_MISSING_SUBJECT
+    description: SHA256SUMS file missing from Provenance subjects
+  - code: PROV_PARSE_ERROR
+    description: Failed to parse provenance.json
+  - code: NOTES_MISSING
+    description: notes-source.json exists but release-notes.md is missing
+  - code: INTERNAL_ERROR
+    description: An internal error occurred during verification

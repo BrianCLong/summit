@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/plugin-sdk",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "SDK for building Summit platform plugins",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,7 +12,11 @@
     "lint": "eslint src/**/*.ts",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": ["plugin", "sdk", "development"],
+  "keywords": [
+    "plugin",
+    "sdk",
+    "development"
+  ],
   "author": "IntelGraph Team",
   "license": "MIT",
   "dependencies": {

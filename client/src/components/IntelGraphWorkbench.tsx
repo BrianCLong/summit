@@ -45,16 +45,17 @@ import {
 // Geospatial & DAG layout libs
 import DeckGL from '@deck.gl/react';
 import { ArcLayer, ScatterplotLayer } from '@deck.gl/layers';
+// @ts-ignore
 import Map, { NavigationControl } from 'react-map-gl';
+// @ts-ignore
 import maplibregl from 'maplibre-gl';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import dagre from 'dagre';
 import {
   FormControl as MuiFormControl,
   InputLabel as MuiInputLabel,
   MenuItem as MuiMenuItem,
   Select as MuiSelect,
 } from '@mui/material';
+import { getGraphqlHttpUrl } from '../config/urls';
 
 // ---- Types ----
 type GraphNode = {
@@ -265,6 +266,11 @@ export function IntelGraphWorkbench() {
   // --- NEW: Loading and Error states for GraphQL fetching ---
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [hoverInfo, setHoverInfo] = useState<{
+    x: number;
+    y: number;
+    label: string;
+  } | null>(null);
 
   // --- NEW: GraphQL Query Placeholder ---
   // This is a basic example. You'll need to adjust it based on your actual GraphQL schema.
@@ -298,7 +304,7 @@ export function IntelGraphWorkbench() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('http://localhost:4000/graphql', {
+      const response = await fetch(getGraphqlHttpUrl(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -326,7 +332,7 @@ export function IntelGraphWorkbench() {
       } else {
         setGraphData({ nodes: [], links: [] }); // Set empty if no data
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       console.error('Error fetching graph data:', e);
       setError(e.message || 'Failed to fetch graph data.');
@@ -376,21 +382,72 @@ export function IntelGraphWorkbench() {
     setMaxTimestamp(value[1]);
   }, []);
 
+  const applyLayout = useCallback((layout: LayoutOption) => {
+    setGraphData((prev) => {
+      const count = prev.nodes.length || 1;
+      if (layout === 'force') {
+        return {
+          ...prev,
+          nodes: prev.nodes.map((node) => ({ ...node, fx: undefined, fy: undefined })),
+        };
+      }
+
+      if (layout === 'radial') {
+        const radius = 200;
+        return {
+          ...prev,
+          nodes: prev.nodes.map((node, index) => {
+            const angle = (index / count) * Math.PI * 2;
+            return {
+              ...node,
+              fx: Math.cos(angle) * radius,
+              fy: Math.sin(angle) * radius,
+            };
+          }),
+        };
+      }
+
+      const perRow = Math.max(1, Math.ceil(Math.sqrt(count)));
+      const spacing = 140;
+      return {
+        ...prev,
+        nodes: prev.nodes.map((node, index) => {
+          const row = Math.floor(index / perRow);
+          const col = index % perRow;
+          return {
+            ...node,
+            fx: col * spacing,
+            fy: row * spacing,
+          };
+        }),
+      };
+    });
+
+    if (layout === 'force' && fgRef.current) {
+      fgRef.current.d3ReheatSimulation();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (graphData.nodes.length === 0) return;
+    applyLayout(layoutType);
+  }, [applyLayout, graphData.nodes.length, layoutType]);
+
   const handleLayoutChange = useCallback(
     (value: LayoutOption) => {
       setLayoutType(value);
-      // TODO: Implement layout logic here (dagre, radial)
-      // For now, just reset force layout
-      if (fgRef.current) {
-        fgRef.current.d3ReheatSimulation();
-      }
+      applyLayout(value);
     },
-    [],
+    [applyLayout],
   );
 
   const handleToggleMap = useCallback(() => {
     setShowMap((prev) => !prev);
   }, []);
+
+  useEffect(() => {
+    if (!showMap) setHoverInfo(null);
+  }, [showMap]);
 
   const formatLinkEndpoint = (
     endpoint: GraphLink['source'] | GraphLink['target'],
@@ -420,7 +477,7 @@ export function IntelGraphWorkbench() {
     const filteredNodes = graphData.nodes.filter((node) => {
       const matchesSearch = searchQuery
         ? node.label?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          node.id.toLowerCase().includes(searchQuery.toLowerCase())
+        node.id.toLowerCase().includes(searchQuery.toLowerCase())
         : true;
       const matchesDegree =
         (node.degree ?? 0) >= minDegree && (node.degree ?? 0) <= maxDegree;
@@ -698,6 +755,7 @@ export function IntelGraphWorkbench() {
               mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json" // Example map style
             >
               <NavigationControl position="top-left" />
+              {/* @ts-ignore */}
               <DeckGL
                 initialViewState={{
                   longitude: -100,
@@ -711,28 +769,41 @@ export function IntelGraphWorkbench() {
                     data: filteredGraphData.nodes.filter(
                       (n) => n.lat !== undefined && n.lon !== undefined,
                     ),
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    getPosition: (d: any) => [d.lon, d.lat],
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    getFillColor: (d: any) => {
+                    getPosition: (d: GraphNode) =>
+                      [d.lon ?? 0, d.lat ?? 0] as [number, number],
+                    getFillColor: (d: GraphNode) => {
                       const color = nodeColors[d.id];
                       return color
                         ? [
-                            parseInt(color.slice(1, 3), 16),
-                            parseInt(color.slice(3, 5), 16),
-                            parseInt(color.slice(5, 7), 16),
-                            200,
-                          ]
+                          parseInt(color.slice(1, 3), 16),
+                          parseInt(color.slice(3, 5), 16),
+                          parseInt(color.slice(5, 7), 16),
+                          200,
+                        ]
                         : [0, 0, 0, 200];
                     },
                     getRadius: 10000, // Adjust radius based on zoom level
                     pickable: true,
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-                    onHover: ({ object, x, y }: any) => {
-                      // TODO: Show tooltip on hover
+                    onHover: ({
+                      object,
+                      x,
+                      y,
+                    }: {
+                      object: GraphNode | null;
+                      x: number;
+                      y: number;
+                    }) => {
+                      if (!object) {
+                        setHoverInfo(null);
+                        return;
+                      }
+                      setHoverInfo({
+                        x,
+                        y,
+                        label: object.label || object.id || 'Node',
+                      });
                     },
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onClick: ({ object }: any) => {
+                    onClick: ({ object }: { object: GraphNode | null }) => {
                       if (object) handleNodeClick(object as GraphNode);
                     },
                   }),
@@ -760,8 +831,7 @@ export function IntelGraphWorkbench() {
                         targetNode?.lon !== undefined
                       );
                     }),
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    getSourcePosition: (d: any) => {
+                    getSourcePosition: (d: GraphLink) => {
                       const sourceNode = filteredGraphData.nodes.find(
                         (n) =>
                           n.id ===
@@ -770,11 +840,10 @@ export function IntelGraphWorkbench() {
                             : d.source),
                       );
                       return sourceNode
-                        ? [sourceNode.lon, sourceNode.lat]
-                        : [0, 0];
+                        ? ([sourceNode.lon ?? 0, sourceNode.lat ?? 0] as [number, number])
+                        : ([0, 0] as [number, number]);
                     },
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    getTargetPosition: (d: any) => {
+                    getTargetPosition: (d: GraphLink) => {
                       const targetNode = filteredGraphData.nodes.find(
                         (n) =>
                           n.id ===
@@ -783,98 +852,129 @@ export function IntelGraphWorkbench() {
                             : d.target),
                       );
                       return targetNode
-                        ? [targetNode.lon, targetNode.lat]
-                        : [0, 0];
+                        ? ([targetNode.lon ?? 0, targetNode.lat ?? 0] as [number, number])
+                        : ([0, 0] as [number, number]);
                     },
                     getSourceColor: [0, 128, 255, 160],
                     getTargetColor: [255, 0, 128, 160],
                     getWidth: 2,
                     pickable: true,
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-                    onHover: ({ object, x, y }: any) => {
-                      // TODO: Show tooltip on hover
+                    onHover: ({
+                      object,
+                      x,
+                      y,
+                    }: {
+                      object: GraphLink | null;
+                      x: number;
+                      y: number;
+                    }) => {
+                      if (!object) {
+                        setHoverInfo(null);
+                        return;
+                      }
+                      const label = `${formatLinkEndpoint(object.source)} -> ${formatLinkEndpoint(object.target)}`;
+                      setHoverInfo({ x, y, label });
                     },
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onClick: ({ object }: any) => {
+                    onClick: ({ object }: { object: GraphLink | null }) => {
                       if (object) handleLinkClick(object as GraphLink);
                     },
                   }),
                 ]}
               />
             </Map>
+            {hoverInfo && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: hoverInfo.x,
+                  top: hoverInfo.y,
+                  transform: 'translate(8px, 8px)',
+                  background: 'rgba(0, 0, 0, 0.75)',
+                  color: '#fff',
+                  padding: '4px 8px',
+                  borderRadius: 4,
+                  fontSize: 12,
+                  pointerEvents: 'none',
+                  maxWidth: 240,
+                }}
+              >
+                {hoverInfo.label}
+              </div>
+            )}
           </div>
         )}
 
-        <ForceGraph2D
-          ref={fgRef}
-          graphData={filteredGraphData}
-          nodeLabel="label"
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          nodeColor={(node: any) => nodeColors[node.id]}
-          nodeAutoColorBy="group" // Fallback if nodeColors not set
-          linkWidth={2}
-          linkDirectionalArrowLength={6}
-          linkDirectionalArrowRelPos={1}
-          onNodeClick={handleNodeClick}
-          onLinkClick={handleLinkClick}
-          onBackgroundClick={() => {
-            setSelectedNode(null);
-            setSelectedLink(null);
-          }}
-          // Adjust simulation parameters for better layout
-          d3AlphaDecay={0.02}
-          d3VelocityDecay={0.3}
-          enableNodeDrag={true}
-          // Conditional rendering for map overlay
-          // If showMap is true, ForceGraph2D should not render nodes/links as they are handled by DeckGL
-          // However, ForceGraph2D is still useful for its simulation and controls
-          // We might need to hide its visual elements when map is active
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          nodeCanvasObject={(node: any, ctx: any, globalScale: any) => {
-            if (showMap) return; // Don't draw nodes if map is active
-            const label = node.label || node.id;
-            const fontSize = 12 / globalScale;
-            ctx.font = `${fontSize}px Sans-Serif`;
-            const textWidth = ctx.measureText(label).width;
-            const bckgDimensions = [textWidth, fontSize].map(
-              (n) => n + fontSize * 0.2,
-            ); // some padding
+        <div className={showMap ? 'opacity-0 pointer-events-none' : ''}>
+          <ForceGraph2D
+            ref={fgRef}
+            graphData={filteredGraphData}
+            nodeLabel="label"
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            nodeColor={(node: any) => nodeColors[node.id]}
+            nodeAutoColorBy="group" // Fallback if nodeColors not set
+            linkWidth={2}
+            linkDirectionalArrowLength={6}
+            linkDirectionalArrowRelPos={1}
+            onNodeClick={handleNodeClick}
+            onLinkClick={handleLinkClick}
+            onBackgroundClick={() => {
+              setSelectedNode(null);
+              setSelectedLink(null);
+            }}
+            // Adjust simulation parameters for better layout
+            d3AlphaDecay={0.02}
+            d3VelocityDecay={0.3}
+            enableNodeDrag={true}
+            // Conditional rendering for map overlay
+            // If showMap is true, ForceGraph2D should not render nodes/links as they are handled by DeckGL
+            // However, ForceGraph2D is still useful for its simulation and controls
+            // We might need to hide its visual elements when map is active
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            nodeCanvasObject={(node: any, ctx: any, globalScale: any) => {
+              if (showMap) return; // Don't draw nodes if map is active
+              const label = node.label || node.id;
+              const fontSize = 12 / globalScale;
+              ctx.font = `${fontSize}px Sans-Serif`;
+              const textWidth = ctx.measureText(label).width;
+              const bckgDimensions = [textWidth, fontSize].map(
+                (n) => n + fontSize * 0.2,
+              ); // some padding
 
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.fillRect(
-              node.x - bckgDimensions[0] / 2,
-              node.y - bckgDimensions[1] / 2,
-              bckgDimensions[0],
-              bckgDimensions[1],
-            );
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+              ctx.fillRect(
+                node.x - bckgDimensions[0] / 2,
+                node.y - bckgDimensions[1] / 2,
+                bckgDimensions[0],
+                bckgDimensions[1],
+              );
 
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = nodeColors[node.id] || '#000000';
-            ctx.fillText(label, node.x, node.y);
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillStyle = nodeColors[node.id] || '#000000';
+              ctx.fillText(label, node.x, node.y);
 
-            node.__bckgDimensions = bckgDimensions; // for hit testing
-          }}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          linkCanvasObject={(link: any, ctx: any, globalScale: any) => {
-            if (showMap) return; // Don't draw links if map is active
-            // Draw link as before
-            const start = link.source as GraphNode;
-            const end = link.target as GraphNode;
-            if (!start || !end || !start.x || !start.y || !end.x || !end.y)
-              return;
+              node.__bckgDimensions = bckgDimensions; // for hit testing
+            }}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            linkCanvasObject={(link: any, ctx: any, globalScale: any) => {
+              if (showMap) return; // Don't draw links if map is active
+              // Draw link as before
+              const start = link.source as GraphNode;
+              const end = link.target as GraphNode;
+              if (!start || !end || !start.x || !start.y || !end.x || !end.y)
+                return;
 
-            ctx.beginPath();
-            ctx.moveTo(start.x, start.y);
-            ctx.lineTo(end.x, end.y);
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-            ctx.lineWidth = 1 / globalScale;
-            ctx.stroke();
-          }}
-          linkCanvasObjectMode={() => 'after'} // Draw links after nodes
+              ctx.beginPath();
+              ctx.moveTo(start.x, start.y);
+              ctx.lineTo(end.x, end.y);
+              ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+              ctx.lineWidth = 1 / globalScale;
+              ctx.stroke();
+            }}
+            linkCanvasObjectMode={() => 'after'} // Draw links after nodes
           // Ensure ForceGraph2D is always rendered, but its visual output is conditional
-          className={showMap ? 'opacity-0 pointer-events-none' : ''} // Hide ForceGraph2D when map is active
-        />
+          />
+        </div>
       </div>
     </div>
   );

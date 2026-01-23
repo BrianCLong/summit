@@ -4,7 +4,7 @@ Local Pipeline Runner
 Executes pipeline manifests locally or in CI environments.
 Supports Python, Bash, and Node tasks with retry logic and OpenLineage tracking.
 """
-import asyncio
+
 import importlib
 import json
 import logging
@@ -13,10 +13,9 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pipelines.registry.core import Pipeline, PipelineRegistry
 
@@ -31,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 class TaskStatus(Enum):
     """Task execution status."""
+
     PENDING = "pending"
     RUNNING = "running"
     SUCCESS = "success"
@@ -40,6 +40,7 @@ class TaskStatus(Enum):
 
 class RunStatus(Enum):
     """Pipeline run status."""
+
     RUNNING = "running"
     COMPLETED = "completed"
     FAILED = "failed"
@@ -48,13 +49,14 @@ class RunStatus(Enum):
 @dataclass
 class TaskResult:
     """Result of a task execution."""
+
     task_id: str
     status: TaskStatus
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
-    duration_ms: Optional[int] = None
+    start_time: datetime | None = None
+    end_time: datetime | None = None
+    duration_ms: int | None = None
     attempts: int = 0
-    error: Optional[str] = None
+    error: str | None = None
     output: Any = None
 
     @property
@@ -65,16 +67,17 @@ class TaskResult:
 @dataclass
 class PipelineRun:
     """Represents a pipeline execution run."""
+
     pipeline_name: str
     run_id: str
     status: RunStatus
     start_time: datetime
-    end_time: Optional[datetime] = None
-    task_results: Dict[str, TaskResult] = field(default_factory=dict)
-    context: Dict[str, Any] = field(default_factory=dict)
+    end_time: datetime | None = None
+    task_results: dict[str, TaskResult] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
 
     @property
-    def duration_ms(self) -> Optional[int]:
+    def duration_ms(self) -> int | None:
         if self.end_time and self.start_time:
             delta = self.end_time - self.start_time
             return int(delta.total_seconds() * 1000)
@@ -146,7 +149,9 @@ class OpenLineageEmitter:
 
         event = {
             "eventType": "COMPLETE" if run.succeeded else "FAIL",
-            "eventTime": run.end_time.isoformat() if run.end_time else datetime.now(timezone.utc).isoformat(),
+            "eventTime": run.end_time.isoformat()
+            if run.end_time
+            else datetime.now(UTC).isoformat(),
             "run": {
                 "runId": run.run_id,
                 "facets": {
@@ -178,7 +183,7 @@ class OpenLineageEmitter:
 
         self._send_event(event)
 
-    def _send_event(self, event: Dict[str, Any]):
+    def _send_event(self, event: dict[str, Any]):
         """Send event to OpenLineage server."""
         try:
             import requests
@@ -228,9 +233,7 @@ class LocalRunner:
         else:
             raise ValueError(f"Invalid duration unit: {unit}")
 
-    def execute_python_task(
-        self, task: Dict[str, Any], context: Dict[str, Any]
-    ) -> Any:
+    def execute_python_task(self, task: dict[str, Any], context: dict[str, Any]) -> Any:
         """Execute a Python task."""
         code_config = task.get("code", {})
 
@@ -268,9 +271,7 @@ class LocalRunner:
         else:
             raise ValueError("Python task must specify module+function or script")
 
-    def execute_bash_task(
-        self, task: Dict[str, Any], context: Dict[str, Any]
-    ) -> str:
+    def execute_bash_task(self, task: dict[str, Any], context: dict[str, Any]) -> str:
         """Execute a Bash task."""
         code_config = task.get("code", {})
         command = code_config.get("command") or code_config.get("script")
@@ -291,9 +292,7 @@ class LocalRunner:
 
         return result.stdout
 
-    def execute_node_task(
-        self, task: Dict[str, Any], context: Dict[str, Any]
-    ) -> str:
+    def execute_node_task(self, task: dict[str, Any], context: dict[str, Any]) -> str:
         """Execute a Node.js task."""
         code_config = task.get("code", {})
         script_path = code_config.get("script")
@@ -313,9 +312,7 @@ class LocalRunner:
 
         return result.stdout
 
-    def execute_task(
-        self, task: Dict[str, Any], context: Dict[str, Any]
-    ) -> TaskResult:
+    def execute_task(self, task: dict[str, Any], context: dict[str, Any]) -> TaskResult:
         """
         Execute a single task with retry logic.
         """
@@ -342,7 +339,7 @@ class LocalRunner:
         while attempt < max_attempts:
             attempt += 1
             result.attempts = attempt
-            result.start_time = datetime.now(timezone.utc)
+            result.start_time = datetime.now(UTC)
 
             try:
                 # Execute based on task type
@@ -355,7 +352,7 @@ class LocalRunner:
                 else:
                     raise ValueError(f"Unsupported task type: {task_type}")
 
-                result.end_time = datetime.now(timezone.utc)
+                result.end_time = datetime.now(UTC)
                 result.duration_ms = int(
                     (result.end_time - result.start_time).total_seconds() * 1000
                 )
@@ -366,7 +363,7 @@ class LocalRunner:
                 return result
 
             except Exception as e:
-                result.end_time = datetime.now(timezone.utc)
+                result.end_time = datetime.now(UTC)
                 result.duration_ms = int(
                     (result.end_time - result.start_time).total_seconds() * 1000
                 )
@@ -394,8 +391,8 @@ class LocalRunner:
     def run_pipeline(
         self,
         pipeline_name: str,
-        context: Optional[Dict[str, Any]] = None,
-        run_id: Optional[str] = None,
+        context: dict[str, Any] | None = None,
+        run_id: str | None = None,
     ) -> PipelineRun:
         """
         Execute a pipeline by name.
@@ -421,7 +418,7 @@ class LocalRunner:
             pipeline_name=pipeline_name,
             run_id=run_id,
             status=RunStatus.RUNNING,
-            start_time=datetime.now(timezone.utc),
+            start_time=datetime.now(UTC),
             context=context or {},
         )
 
@@ -446,12 +443,15 @@ class LocalRunner:
                 # Check dependencies
                 deps = task_spec.get("depends_on", [])
                 failed_deps = [
-                    dep for dep in deps
+                    dep
+                    for dep in deps
                     if run.task_results.get(dep) and not run.task_results[dep].succeeded
                 ]
 
                 if failed_deps:
-                    logger.warning(f"⏭️  Skipping {task_id} due to failed dependencies: {failed_deps}")
+                    logger.warning(
+                        f"⏭️  Skipping {task_id} due to failed dependencies: {failed_deps}"
+                    )
                     run.task_results[task_id] = TaskResult(
                         task_id=task_id,
                         status=TaskStatus.SKIPPED,
@@ -473,7 +473,8 @@ class LocalRunner:
 
             # Determine final status
             failed_tasks = [
-                task_id for task_id, result in run.task_results.items()
+                task_id
+                for task_id, result in run.task_results.items()
                 if result.status == TaskStatus.FAILED
             ]
 
@@ -482,14 +483,14 @@ class LocalRunner:
                 logger.error(f"❌ Pipeline failed. Failed tasks: {failed_tasks}")
             else:
                 run.status = RunStatus.COMPLETED
-                logger.info(f"✅ Pipeline completed successfully")
+                logger.info("✅ Pipeline completed successfully")
 
         except Exception as e:
             run.status = RunStatus.FAILED
             logger.error(f"❌ Pipeline failed with error: {e}")
 
         finally:
-            run.end_time = datetime.now(timezone.utc)
+            run.end_time = datetime.now(UTC)
 
             # Emit complete event
             if ol_config.get("enabled", True):
@@ -497,10 +498,18 @@ class LocalRunner:
 
             # Log summary
             logger.info(f"⏱️  Total duration: {run.duration_ms}ms")
-            logger.info(f"📊 Task summary:")
+            logger.info("📊 Task summary:")
             for task_id, result in run.task_results.items():
-                status_icon = "✅" if result.succeeded else "❌" if result.status == TaskStatus.FAILED else "⏭️"
-                logger.info(f"   {status_icon} {task_id}: {result.status.value} ({result.attempts} attempts)")
+                status_icon = (
+                    "✅"
+                    if result.succeeded
+                    else "❌"
+                    if result.status == TaskStatus.FAILED
+                    else "⏭️"
+                )
+                logger.info(
+                    f"   {status_icon} {task_id}: {result.status.value} ({result.attempts} attempts)"
+                )
 
         return run
 

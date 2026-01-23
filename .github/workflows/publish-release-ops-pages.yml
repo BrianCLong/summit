@@ -1,0 +1,478 @@
+name: Publish Release Ops Pages
+
+# Publishes the Release Ops Single Page to GitHub Pages for persistent access.
+# Triggered after orchestrator runs complete, or manually.
+#
+# Safety: Only publishes allowlisted files. State snapshots and sensitive
+# reports are excluded. See docs/ci/RELEASE_OPS_PAGES.md for details.
+#
+# Health Check: After building the site, checks redaction health level:
+#   - OK: Stores snapshot, deploys current site
+#   - WARN: Stores snapshot, deploys current site, generates triage packet
+#   - FAIL: Restores last known-good snapshot, deploys it, generates triage packet
+#
+# Rollback: When FAIL occurs, automatically deploys the last known-good
+# sanitized snapshot instead of blocking. This ensures continuous availability.
+# See docs/ci/PAGES_ROLLBACK.md for details.
+#
+# Authority: docs/ci/RELEASE_OPS_PAGES.md, docs/ci/PAGES_ROLLBACK.md
+
+on:
+  # Trigger after orchestrator completes
+  workflow_run:
+    workflows: ["Release Ops Orchestrator"]
+    types:
+      - completed
+
+  # Manual trigger for testing/recovery
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Orchestrator run ID to publish from (leave empty for latest)"
+        type: string
+        required: false
+      dry_run:
+        description: "Dry run (show what would be published without publishing)"
+        type: boolean
+        default: false
+
+# Only one Pages deploy at a time
+concurrency:
+  group: release-ops-pages
+  cancel-in-progress: false
+
+permissions:
+  contents: write # Needed to push snapshot branch
+  pages: write
+  id-token: write
+  actions: read
+
+jobs:
+  # Check if we should publish
+  check-trigger:
+    name: Check Trigger
+    runs-on: ubuntu-latest
+    outputs:
+      should_publish: ${{ steps.check.outputs.should_publish }}
+      artifact_run_id: ${{ steps.check.outputs.artifact_run_id }}
+    steps:
+      - name: Check trigger conditions
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # For workflow_run trigger, check if orchestrator succeeded
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            CONCLUSION="${{ github.event.workflow_run.conclusion }}"
+            RUN_ID="${{ github.event.workflow_run.id }}"
+
+            if [[ "${CONCLUSION}" != "success" ]]; then
+              echo "Orchestrator run did not succeed (${CONCLUSION}), skipping publish"
+              echo "should_publish=false" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+            echo "artifact_run_id=${RUN_ID}" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # For workflow_dispatch, use provided run_id or find latest
+          if [[ -n "${{ inputs.run_id }}" ]]; then
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+            echo "artifact_run_id=${{ inputs.run_id }}" >> $GITHUB_OUTPUT
+          else
+            # Find latest successful orchestrator run
+            LATEST_RUN=$(gh run list \
+              --workflow=release-ops-orchestrator.yml \
+              --status=success \
+              --limit=1 \
+              --json databaseId \
+              -q '.[0].databaseId' \
+              --repo ${{ github.repository }})
+
+            if [[ -z "${LATEST_RUN}" ]]; then
+              echo "No successful orchestrator run found"
+              echo "should_publish=false" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+            echo "artifact_run_id=${LATEST_RUN}" >> $GITHUB_OUTPUT
+          fi
+
+  # Build and publish the site
+  publish:
+    name: Build & Publish
+    runs-on: ubuntu-latest
+    needs: check-trigger
+    if: needs.check-trigger.outputs.should_publish == 'true'
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          fetch-depth: 0 # Full history for snapshot branch access
+
+      - name: Download Orchestrator Artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RUN_ID="${{ needs.check-trigger.outputs.artifact_run_id }}"
+          echo "Downloading artifacts from run ${RUN_ID}"
+
+          # Find the artifact name (format: release-ops-cycle-{run_id})
+          ARTIFACT_NAME="release-ops-cycle-${RUN_ID}"
+
+          # Download artifact
+          mkdir -p artifacts/release-train
+          gh run download "${RUN_ID}" \
+            --name "${ARTIFACT_NAME}" \
+            --dir artifacts/release-train \
+            --repo ${{ github.repository }} || {
+              echo "::error::Failed to download artifact ${ARTIFACT_NAME}"
+              exit 1
+            }
+
+          echo "Downloaded artifacts:"
+          ls -la artifacts/release-train/
+
+      - name: Make Scripts Executable
+        run: chmod +x scripts/release/*.sh
+
+      - name: Build Pages Site
+        env:
+          PAGES_SITE_TITLE: "${{ github.repository }} - Release Ops"
+          PAGES_REPO_NAME: "${{ github.repository }}"
+        run: |
+          ARGS="--artifacts-dir artifacts/release-train --site-dir site/release-ops --verbose"
+
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            ARGS="${ARGS} --dry-run"
+          fi
+
+          ./scripts/release/build_release_ops_site.sh ${ARGS}
+
+      - name: Verify Site Contents
+        id: verify-site
+        run: |
+          echo "=== Site Contents ==="
+          ls -la site/release-ops/
+
+          echo ""
+          echo "=== Checking for blocked content ==="
+
+          SAFETY_FAILED=false
+
+          # Verify no state files leaked
+          if find site/release-ops -name "*_state.json" | grep -q .; then
+            echo "::error::State files found in site - this should not happen!"
+            SAFETY_FAILED=true
+          fi
+
+          # Verify no full dashboard.json
+          if [[ -f "site/release-ops/dashboard.json" ]]; then
+            echo "::error::Full dashboard.json found - only dashboard_summary.json should be published"
+            SAFETY_FAILED=true
+          fi
+
+          # Verify no state-snapshot directory
+          if [[ -d "site/release-ops/state-snapshot" ]]; then
+            echo "::error::state-snapshot directory found - should not be published"
+            SAFETY_FAILED=true
+          fi
+
+          if [[ "${SAFETY_FAILED}" == "true" ]]; then
+            echo "safety_passed=false" >> $GITHUB_OUTPUT
+            echo "Site verification FAILED"
+          else
+            echo "safety_passed=true" >> $GITHUB_OUTPUT
+            echo "Site verification passed"
+          fi
+
+      - name: Check Redaction Health
+        id: health-check
+        run: |
+          HEALTH_FILE="site/release-ops/redaction_health.json"
+
+          if [[ ! -f "${HEALTH_FILE}" ]]; then
+            echo "::warning::No redaction_health.json found"
+            echo "level=UNKNOWN" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          LEVEL=$(jq -r '.level // "UNKNOWN"' "${HEALTH_FILE}")
+          REASONS=$(jq -r '.reasons | join(", ") // "none"' "${HEALTH_FILE}")
+
+          echo "Redaction health level: ${LEVEL}"
+          echo "Reasons: ${REASONS}"
+
+          echo "level=${LEVEL}" >> $GITHUB_OUTPUT
+          echo "reasons=${REASONS}" >> $GITHUB_OUTPUT
+
+          if [[ "${LEVEL}" == "FAIL" ]]; then
+            echo "::error::Redaction health is FAIL - forbidden patterns detected"
+          elif [[ "${LEVEL}" == "WARN" ]]; then
+            echo "::warning::Redaction health is WARN - thresholds exceeded"
+          fi
+
+      - name: Generate Triage Packet
+        if: steps.health-check.outputs.level == 'WARN' || steps.health-check.outputs.level == 'FAIL' || steps.verify-site.outputs.safety_passed == 'false'
+        run: |
+          RUN_ID="${{ needs.check-trigger.outputs.artifact_run_id }}"
+
+          echo "Generating redaction triage packet..."
+          ./scripts/release/build_redaction_triage_packet.sh \
+            --run-id "${RUN_ID}" \
+            --site-dir site/release-ops \
+            --out-dir artifacts/redaction-triage \
+            --verbose
+
+      - name: Upload Triage Packet
+        if: steps.health-check.outputs.level == 'WARN' || steps.health-check.outputs.level == 'FAIL' || steps.verify-site.outputs.safety_passed == 'false'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        with:
+          name: redaction-triage-${{ needs.check-trigger.outputs.artifact_run_id }}
+          path: artifacts/redaction-triage/
+          retention-days: 30
+
+      # ========================================
+      # ROLLBACK PATH: When FAIL or safety gate fails
+      # ========================================
+      - name: Restore Last Known-Good Snapshot
+        id: restore-snapshot
+        if: steps.health-check.outputs.level == 'FAIL' || steps.verify-site.outputs.safety_passed == 'false'
+        run: |
+          echo "=== Initiating Rollback ==="
+          echo "Health level: ${{ steps.health-check.outputs.level }}"
+          echo "Safety passed: ${{ steps.verify-site.outputs.safety_passed }}"
+
+          # Determine reason
+          if [[ "${{ steps.verify-site.outputs.safety_passed }}" == "false" ]]; then
+            REASON="site_safety_fail"
+          else
+            REASON="redaction_fail"
+          fi
+
+          echo "reason=${REASON}" >> $GITHUB_OUTPUT
+
+          # Attempt to restore snapshot
+          SNAPSHOT_ID=$(./scripts/release/store_pages_snapshot.sh \
+            --mode restore \
+            --site-dir site/release-ops \
+            --verbose 2>&1 | tail -1) || {
+              RESTORE_EXIT=$?
+              echo "restore_success=false" >> $GITHUB_OUTPUT
+              echo "::error::Failed to restore snapshot (exit code: ${RESTORE_EXIT})"
+              exit 0  # Don't fail the step, let next step handle it
+            }
+
+          echo "Restored snapshot: ${SNAPSHOT_ID}"
+          echo "snapshot_id=${SNAPSHOT_ID}" >> $GITHUB_OUTPUT
+          echo "restore_success=true" >> $GITHUB_OUTPUT
+
+      - name: Handle No Snapshot Available
+        if: (steps.health-check.outputs.level == 'FAIL' || steps.verify-site.outputs.safety_passed == 'false') && steps.restore-snapshot.outputs.restore_success != 'true'
+        run: |
+          echo "## ❌ Rollback Failed: No Snapshot Available" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Health Level:** ${{ steps.health-check.outputs.level }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Reasons:** ${{ steps.health-check.outputs.reasons }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "No previous snapshot exists to rollback to." >> $GITHUB_STEP_SUMMARY
+          echo "This typically happens on the first run or if snapshots were deleted." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### To Bootstrap" >> $GITHUB_STEP_SUMMARY
+          echo "1. Fix the redaction issue causing FAIL" >> $GITHUB_STEP_SUMMARY
+          echo "2. Re-run the orchestrator workflow" >> $GITHUB_STEP_SUMMARY
+          echo "3. When health is OK/WARN, a snapshot will be stored" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Triage Packet" >> $GITHUB_STEP_SUMMARY
+          echo "Download the **redaction-triage** artifact from this run for diagnostics." >> $GITHUB_STEP_SUMMARY
+
+          exit 1
+
+      - name: Write Rollback Report
+        if: (steps.health-check.outputs.level == 'FAIL' || steps.verify-site.outputs.safety_passed == 'false') && steps.restore-snapshot.outputs.restore_success == 'true'
+        run: |
+          ./scripts/release/write_rollback_report.sh \
+            --site-dir site/release-ops \
+            --failed-run-id "${{ needs.check-trigger.outputs.artifact_run_id }}" \
+            --snapshot-id "${{ steps.restore-snapshot.outputs.snapshot_id }}" \
+            --reason "${{ steps.restore-snapshot.outputs.reason }}" \
+            --reason-detail "${{ steps.health-check.outputs.reasons }}" \
+            --verbose
+
+      - name: Write Deployment Marker (Rollback)
+        if: (steps.health-check.outputs.level == 'FAIL' || steps.verify-site.outputs.safety_passed == 'false') && steps.restore-snapshot.outputs.restore_success == 'true'
+        run: |
+          ./scripts/release/write_deployment_marker.sh \
+            --site-dir site/release-ops \
+            --status ROLLED_BACK \
+            --run-id "${{ needs.check-trigger.outputs.artifact_run_id }}" \
+            --snapshot-id "${{ steps.restore-snapshot.outputs.snapshot_id }}" \
+            --health-level "${{ steps.health-check.outputs.level }}" \
+            --git-sha "${{ github.sha }}" \
+            --verbose
+
+      - name: Regenerate Index with Rollback Marker
+        if: (steps.health-check.outputs.level == 'FAIL' || steps.verify-site.outputs.safety_passed == 'false') && steps.restore-snapshot.outputs.restore_success == 'true'
+        env:
+          PAGES_SITE_TITLE: "${{ github.repository }} - Release Ops"
+          PAGES_REPO_NAME: "${{ github.repository }}"
+        run: |
+          # Regenerate the index.html to include the deployment marker
+          # For rollback, we use a simple script to create index since artifacts may not match
+          ./scripts/release/build_release_ops_site.sh \
+            --artifacts-dir artifacts/release-train \
+            --site-dir site/release-ops \
+            --verbose 2>/dev/null || {
+              echo "Full rebuild failed, generating minimal index..."
+              # Fallback: just ensure index exists with marker
+              if [[ ! -f "site/release-ops/index.html" ]]; then
+                echo "Warning: index.html not found after rollback"
+              fi
+            }
+          ls -la site/release-ops/
+
+      - name: Rollback Summary
+        if: (steps.health-check.outputs.level == 'FAIL' || steps.verify-site.outputs.safety_passed == 'false') && steps.restore-snapshot.outputs.restore_success == 'true'
+        run: |
+          echo "## 🔄 Rollback Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** Site rolled back to last known-good snapshot" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Failed Run | ${{ needs.check-trigger.outputs.artifact_run_id }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Health Level | ${{ steps.health-check.outputs.level }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Reasons | ${{ steps.health-check.outputs.reasons }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Restored Snapshot | \`${{ steps.restore-snapshot.outputs.snapshot_id }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The site continues to serve safe content from a previous successful build." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. Download the **redaction-triage** artifact for diagnostics" >> $GITHUB_STEP_SUMMARY
+          echo "2. Review \`remediation_checklist.md\`" >> $GITHUB_STEP_SUMMARY
+          echo "3. Fix the issue and re-run the orchestrator" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "See: [PAGES_ROLLBACK.md](../../docs/ci/PAGES_ROLLBACK.md)" >> $GITHUB_STEP_SUMMARY
+
+      # ========================================
+      # SUCCESS PATH: OK/WARN - store snapshot and deploy
+      # ========================================
+      - name: Warn Summary
+        if: steps.health-check.outputs.level == 'WARN' && steps.verify-site.outputs.safety_passed == 'true'
+        run: |
+          echo "## ⚠️ Redaction Health: WARN" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Reasons:** ${{ steps.health-check.outputs.reasons }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Thresholds were exceeded but no forbidden patterns detected." >> $GITHUB_STEP_SUMMARY
+          echo "Publication will proceed, but review is recommended." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "A triage packet has been uploaded as an artifact for review." >> $GITHUB_STEP_SUMMARY
+
+      - name: Write Deployment Marker (Success)
+        if: steps.verify-site.outputs.safety_passed == 'true' && (steps.health-check.outputs.level == 'OK' || steps.health-check.outputs.level == 'WARN')
+        run: |
+          # Determine status based on health level
+          if [[ "${{ steps.health-check.outputs.level }}" == "WARN" ]]; then
+            STATUS="WARN"
+          else
+            STATUS="OK"
+          fi
+
+          ./scripts/release/write_deployment_marker.sh \
+            --site-dir site/release-ops \
+            --status "${STATUS}" \
+            --run-id "${{ needs.check-trigger.outputs.artifact_run_id }}" \
+            --health-level "${{ steps.health-check.outputs.level }}" \
+            --git-sha "${{ github.sha }}" \
+            --verbose
+
+      - name: Regenerate Index with Marker
+        if: steps.verify-site.outputs.safety_passed == 'true' && (steps.health-check.outputs.level == 'OK' || steps.health-check.outputs.level == 'WARN')
+        env:
+          PAGES_SITE_TITLE: "${{ github.repository }} - Release Ops"
+          PAGES_REPO_NAME: "${{ github.repository }}"
+        run: |
+          # Regenerate the index.html to include the deployment marker
+          # The build script's create_pages_index function will read deployment_marker.json
+          ./scripts/release/build_release_ops_site.sh \
+            --artifacts-dir artifacts/release-train \
+            --site-dir site/release-ops \
+            --verbose 2>/dev/null || true
+
+          echo "Index regenerated with deployment marker"
+          ls -la site/release-ops/
+
+      # ========================================
+      # DEPLOY (both success and rollback paths)
+      # ========================================
+      - name: Setup Pages
+        if: inputs.dry_run != true
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v4
+
+      - name: Upload Pages Artifact
+        if: inputs.dry_run != true
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v3
+        with:
+          path: site/release-ops
+
+      - name: Deploy to GitHub Pages
+        if: inputs.dry_run != true
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+
+      # ========================================
+      # POST-DEPLOY: Store snapshot on success
+      # ========================================
+      - name: Store Snapshot
+        if: inputs.dry_run != true && steps.verify-site.outputs.safety_passed == 'true' && (steps.health-check.outputs.level == 'OK' || steps.health-check.outputs.level == 'WARN')
+        run: |
+          echo "Storing site snapshot..."
+
+          # Configure git for commits
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          SNAPSHOT_ID=$(./scripts/release/store_pages_snapshot.sh \
+            --mode store \
+            --site-dir site/release-ops \
+            --run-id "${{ needs.check-trigger.outputs.artifact_run_id }}" \
+            --verbose 2>&1 | tail -1) || {
+              echo "::warning::Failed to store snapshot"
+              exit 0  # Don't fail deploy on snapshot storage failure
+            }
+
+          echo "Stored snapshot: ${SNAPSHOT_ID}"
+
+      - name: Dry Run Summary
+        if: inputs.dry_run == true
+        run: |
+          echo "## Dry Run Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Would publish the following files:" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -la site/release-ops/ >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Publish Summary
+        if: inputs.dry_run != true && (steps.health-check.outputs.level == 'OK' || steps.health-check.outputs.level == 'WARN') && steps.verify-site.outputs.safety_passed == 'true'
+        run: |
+          echo "## ✅ Release Ops Pages Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Source Run:** ${{ needs.check-trigger.outputs.artifact_run_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Health:** ${{ steps.health-check.outputs.level }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Published Files" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -la site/release-ops/ >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

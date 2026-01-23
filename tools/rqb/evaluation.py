@@ -6,8 +6,8 @@ import hashlib
 import random
 import statistics
 import time
+from collections.abc import Iterable, Mapping, MutableMapping
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Mapping, MutableMapping
 
 from .data import DATASET, BenchmarkRecord, PIIEntity
 from .detectors import Detector
@@ -18,13 +18,13 @@ class BenchmarkResult:
     """Structured evaluation output."""
 
     detector_name: str
-    summary: Dict[str, float]
-    per_entity: Dict[str, Dict[str, float]]
-    confusion_matrix: Dict[str, Dict[str, int]]
-    latency: Dict[str, float]
+    summary: dict[str, float]
+    per_entity: dict[str, dict[str, float]]
+    confusion_matrix: dict[str, dict[str, int]]
+    latency: dict[str, float]
     records_evaluated: int
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "detector": self.detector_name,
             "summary": self.summary,
@@ -46,8 +46,8 @@ class BenchmarkHarness:
         overall_tp = 0
         overall_fp = 0
         overall_fn = 0
-        per_entity_counts: Dict[str, Dict[str, int]] = {}
-        latencies: List[float] = []
+        per_entity_counts: dict[str, dict[str, int]] = {}
+        latencies: list[float] = []
         for record in self._dataset:
             record_rng = random.Random(_seed_for(self._seed, record.record_id))
             start = time.perf_counter()
@@ -71,8 +71,8 @@ class BenchmarkHarness:
                 overall_fn += fn
 
         summary = _compute_metrics(overall_tp, overall_fp, overall_fn)
-        per_entity_metrics: Dict[str, Dict[str, float]] = {}
-        confusion_matrix: Dict[str, Dict[str, int]] = {}
+        per_entity_metrics: dict[str, dict[str, float]] = {}
+        confusion_matrix: dict[str, dict[str, int]] = {}
         for label, counts in sorted(per_entity_counts.items()):
             per_entity_metrics[label] = _compute_metrics(counts["tp"], counts["fp"], counts["fn"])
             per_entity_metrics[label]["support"] = float(counts["tp"] + counts["fn"])
@@ -91,7 +91,7 @@ class BenchmarkHarness:
 
 
 def _seed_for(seed: int, record_id: str) -> int:
-    digest = hashlib.sha256(f"{seed}:{record_id}".encode("utf-8")).digest()
+    digest = hashlib.sha256(f"{seed}:{record_id}".encode()).digest()
     return int.from_bytes(digest[:8], "big", signed=False)
 
 
@@ -102,7 +102,7 @@ def _index_entities(entities: Iterable[PIIEntity]) -> Mapping[str, set[str]]:
     return index
 
 
-def _compute_metrics(tp: int, fp: int, fn: int) -> Dict[str, float]:
+def _compute_metrics(tp: int, fp: int, fn: int) -> dict[str, float]:
     precision = tp / (tp + fp) if tp + fp else 1.0 if tp == 0 and fp == 0 else 0.0
     recall = tp / (tp + fn) if tp + fn else 1.0
     if precision + recall:
@@ -116,7 +116,7 @@ def _compute_metrics(tp: int, fp: int, fn: int) -> Dict[str, float]:
     }
 
 
-def _summarise_latency(latencies: List[float]) -> Dict[str, float]:
+def _summarise_latency(latencies: list[float]) -> dict[str, float]:
     if not latencies:
         return {"mean_ms": 0.0, "median_ms": 0.0, "p95_ms": 0.0}
     ordered = sorted(latencies)

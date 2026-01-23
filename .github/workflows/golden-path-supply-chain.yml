@@ -1,14 +1,11 @@
 name: Golden Path Supply Chain
 
-# Disabled: reusable workflow in subdirectory not supported
-# TODO: Move reusable/supply-chain-policy.yml to top-level workflows
 on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
   workflow_dispatch:
-    inputs:
-      reason:
-        description: "Reason for manual run"
-        required: false
-        type: string
 
 permissions:
   contents: read
@@ -16,77 +13,29 @@ permissions:
   id-token: write
   attestations: write
 
-env:
-  REFERENCE_SERVICE: authz-gateway
-  IMAGE_OWNER: ${{ github.repository_owner }}
-  IMAGE_NAME: ${{ github.repository_owner }}/summit-authz-gateway
-  DOCKER_CONTEXT: services/authz-gateway
-  DOCKERFILE: services/authz-gateway/Dockerfile
-
 jobs:
-  # DISABLED: This workflow has issues with reusable workflow references
-  # TODO: Fix and re-enable when the reusable workflow infrastructure is ready
-  placeholder:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Workflow disabled - placeholder job for CI status"
-
-  build-reference:
-    if: false # Temporarily disabled
-    name: Build + sign + attest reference artifact
+  build-server:
+    name: Build Server (SLSA L3)
     uses: ./.github/workflows/_reusable-slsa-build.yml
     with:
-      image_name: ${{ github.repository_owner }}/summit-authz-gateway
-      context: services/authz-gateway
-      dockerfile: services/authz-gateway/Dockerfile
-      push: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+      image_name: server
+      dockerfile: server/Dockerfile
+      context: .
+      push: ${{ github.event_name == 'push' }}
       sign: true
       sbom: true
       slsa_provenance: true
-    secrets:
-      registry_password: ${{ secrets.GITHUB_TOKEN }}
+    secrets: inherit
 
-  # policy-gate:
-  #   name: Enforce supply chain policy gate
-  #   needs: build-reference
-  #   if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
-  #   # DISABLED: Reusable workflows in subdirectories are not supported by GitHub Actions
-  #   # uses: ./.github/workflows/reusable/supply-chain-policy.yml
-  #   # with:
-  #   #   image_uri: ${{ needs.build-reference.outputs.image_uri }}
-  #   #   image_digest: ${{ needs.build-reference.outputs.image_digest }}
-  #   #   sbom_artifact_name: build-artifacts-summit-authz-gateway-${{ github.run_id }}
-  #   #   severity_threshold: HIGH
-
-  publish-evidence:
-    if: false # Temporarily disabled
-    name: Publish bundle
-    runs-on: ubuntu-latest
-    needs: [build-reference]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Download SBOM bundle
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts-summit-authz-gateway-${{ github.run_id }}
-          path: artifacts
-
-      - name: Summarize evidence bundle
-        run: |
-          set -euo pipefail
-          echo "artifact_uri=${{ needs.build-reference.outputs.image_uri }}" >> $GITHUB_OUTPUT
-          echo "sbom_cdx=artifacts/sbom.cdx.json" >> $GITHUB_OUTPUT
-          echo "sbom_spdx=artifacts/sbom.spdx.json" >> $GITHUB_OUTPUT
-          sha256sum artifacts/sbom.cdx.json | awk '{print "sbom_cdx_digest=" $1}' >> $GITHUB_OUTPUT
-          sha256sum artifacts/sbom.spdx.json | awk '{print "sbom_spdx_digest=" $1}' >> $GITHUB_OUTPUT
-
-      - name: Upload evidence bundle
-        uses: actions/upload-artifact@v4
-        with:
-          name: golden-path-bundle-${{ github.run_id }}
-          path: |
-            artifacts/sbom.cdx.json
-            artifacts/sbom.spdx.json
-        retention-days: 30
+  build-client:
+    name: Build Client (SLSA L3)
+    uses: ./.github/workflows/_reusable-slsa-build.yml
+    with:
+      image_name: client
+      dockerfile: client/Dockerfile
+      context: .
+      push: ${{ github.event_name == 'push' }}
+      sign: true
+      sbom: true
+      slsa_provenance: true
+    secrets: inherit

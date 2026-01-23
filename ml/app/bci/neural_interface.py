@@ -801,7 +801,7 @@ def simulate_eeg_signal(
 
         signal_data[ch] = alpha_component + beta_component + noise_component
 
-    channel_names = [f"EEG_{i+1:02d}" for i in range(num_channels)]
+    channel_names = [f"EEG_{i + 1:02d}" for i in range(num_channels)]
 
     return EEGSignal(
         data=signal_data,

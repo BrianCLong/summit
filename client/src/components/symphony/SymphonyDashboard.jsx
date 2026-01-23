@@ -11,14 +11,8 @@ import {
   Box
 } from '@mui/material';
 import {
-  Dashboard as DashboardIcon,
-  BarChart as BarChartIcon,
-  People as PeopleIcon,
-  Settings as SettingsIcon,
-  Info as InfoIcon,
   CheckCircle as CheckCircleIcon,
   Warning as WarningIcon,
-  Menu as MenuIcon,
   Refresh as RefreshIcon
 } from '@mui/icons-material';
 

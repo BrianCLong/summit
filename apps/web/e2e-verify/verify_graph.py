@@ -1,11 +1,13 @@
-from playwright.sync_api import sync_playwright, expect
 import time
+
+from playwright.sync_api import sync_playwright
+
 
 def verify_graph():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         # Create a context with dimensions similar to the test setup
-        context = browser.new_context(viewport={'width': 1200, 'height': 800})
+        context = browser.new_context(viewport={"width": 1200, "height": 800})
         page = context.new_page()
 
         print("Navigating to app...")
@@ -33,7 +35,7 @@ def verify_graph():
 
         try:
             # Wait for at least one node with relaxed timeout
-            page.wait_for_selector('.node', timeout=15000)
+            page.wait_for_selector(".node", timeout=15000)
             print("Nodes found!")
         except:
             print("No nodes found. Taking screenshot anyway to inspect state.")
@@ -46,6 +48,7 @@ def verify_graph():
         print(f"Screenshot saved to {screenshot_path}")
 
         browser.close()
+
 
 if __name__ == "__main__":
     verify_graph()

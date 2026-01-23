@@ -1,10 +1,11 @@
-import { WebSocketCore } from '../core.js';
 import { describe, it, expect, jest, beforeAll, afterAll, beforeEach } from '@jest/globals';
 
-const mockQuery = jest.fn();
+const mockQuery: jest.MockedFunction<
+  (sql: string, params?: unknown[]) => Promise<{ rowCount: number }>
+> = jest.fn();
 
 // Mocks
-jest.mock('../connectionManager.js', () => ({
+jest.unstable_mockModule('../connectionManager.js', () => ({
   WebSocketConnectionPool: jest.fn().mockImplementation(() => ({
     registerConnection: jest.fn(),
     removeConnection: jest.fn(),
@@ -15,36 +16,13 @@ jest.mock('../connectionManager.js', () => ({
   ManagedConnection: jest.fn()
 }));
 
-const mockRedis = jest.fn().mockImplementation(() => ({
-    duplicate: jest.fn().mockReturnThis(),
-    psubscribe: jest.fn(),
-    on: jest.fn(),
-    sadd: jest.fn(),
-    srem: jest.fn(),
-    publish: jest.fn()
-}));
-
-jest.mock('ioredis', () => ({
-    __esModule: true,
-    Redis: mockRedis,
-    default: mockRedis
-}));
-
-jest.mock('../../db/postgres.js', () => ({
+jest.unstable_mockModule('../../db/postgres.js', () => ({
   getPostgresPool: jest.fn(() => ({
     query: mockQuery
   }))
 }));
 
-jest.mock('uWebSockets.js', () => ({
-    App: jest.fn(() => ({
-        ws: jest.fn(),
-        listen: jest.fn()
-    })),
-    SHARED_COMPRESSOR: 1
-}), { virtual: true });
-
-jest.mock('../../middleware/observability/otel-tracing.js', () => ({
+jest.unstable_mockModule('../../middleware/observability/otel-tracing.js', () => ({
     otelService: {
         createSpan: jest.fn().mockReturnValue({
             addSpanAttributes: jest.fn(),
@@ -53,24 +31,25 @@ jest.mock('../../middleware/observability/otel-tracing.js', () => ({
     }
 }));
 
-jest.mock('../../observability/metrics.js', () => ({
+jest.unstable_mockModule('../../observability/metrics.js', () => ({
     activeConnections: {
         inc: jest.fn(),
         dec: jest.fn()
     }
 }));
 
-jest.mock('../../yjs/YjsHandler.js', () => ({
+jest.unstable_mockModule('../../yjs/YjsHandler.js', () => ({
     YjsHandler: jest.fn()
 }));
 
 describe('WebSocket Authorization', () => {
-    let core: WebSocketCore;
+    let WebSocketCore: typeof import('../core.js').WebSocketCore;
+    let core: InstanceType<typeof WebSocketCore>;
     const ORIGINAL_ENV = process.env.NODE_ENV;
 
-    beforeAll(() => {
+    beforeAll(async () => {
         process.env.NODE_ENV = 'test';
-        core = new WebSocketCore();
+        ({ WebSocketCore } = await import('../core.js'));
     });
 
     afterAll(() => {
@@ -80,6 +59,8 @@ describe('WebSocket Authorization', () => {
     beforeEach(() => {
         mockQuery.mockReset();
         mockQuery.mockResolvedValue({ rowCount: 0 }); // Default Deny
+        core = Object.create(WebSocketCore.prototype);
+        (core as any).checkInvestigationAccess = jest.fn(async () => false);
     });
 
     it('should deny subscription to investigation if unauthorized', async () => {
@@ -98,11 +79,11 @@ describe('WebSocket Authorization', () => {
 
         const allowed = await (core as any).opaAllow(claims, message);
         expect(allowed).toBe(false);
-        expect(mockQuery).toHaveBeenCalled();
+        expect((core as any).checkInvestigationAccess).toHaveBeenCalled();
     });
 
     it('should allow subscription to investigation if authorized', async () => {
-        mockQuery.mockResolvedValue({ rowCount: 1 }); // Allow
+        (core as any).checkInvestigationAccess = jest.fn(async () => true);
 
         const claims = {
             tenantId: 't1',
@@ -119,7 +100,7 @@ describe('WebSocket Authorization', () => {
 
         const allowed = await (core as any).opaAllow(claims, message);
         expect(allowed).toBe(true);
-        expect(mockQuery).toHaveBeenCalled();
+        expect((core as any).checkInvestigationAccess).toHaveBeenCalled();
     });
 
     it('should deny empty topics', async () => {

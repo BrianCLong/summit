@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { TrustCenterService, ControlCheck } from '../service';
 
 describe('TrustCenterService', () => {
@@ -65,7 +66,7 @@ describe('TrustCenterService', () => {
       }),
     ).toThrow('High-risk answers require approval or a documented deviation.');
 
-    const approved = service.addQuestionnaireAnswer({
+    service.addQuestionnaireAnswer({
       id: 'answer-1',
       question: 'Do you enforce MFA?',
       answer: 'Yes, enforced for all admins',
@@ -73,10 +74,10 @@ describe('TrustCenterService', () => {
       exportProfiles: ['SIG-Lite'],
       risk: 'medium',
       evidencePointers: ['evidence-1'],
-      approvedBy: 'ciso',
       expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
     });
 
+    const approved = service.approveAnswer('answer-1', 'ciso');
     expect(approved.approvedBy).toBe('ciso');
 
     const control: ControlCheck = {
@@ -110,9 +111,6 @@ describe('TrustCenterService', () => {
       active: true,
     });
 
-    const revoked = service.autoRevokeElevations();
-    expect(revoked).toHaveLength(1);
-
     const review = service.completeAccessReview({
       id: 'review-1',
       reviewer: 'security-ops',
@@ -121,6 +119,9 @@ describe('TrustCenterService', () => {
     });
 
     expect(review.autoRevoked).toContain('alice:admin');
+
+    const revoked = service.autoRevokeElevations();
+    expect(revoked).toHaveLength(1);
 
     const audit = service.exportAuditLog('customer-export', ['entry-1', 'entry-2']);
     expect(audit.manifestHash).toHaveLength(64);

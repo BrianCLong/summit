@@ -1,140 +1,44 @@
-# Summit (IntelGraph)
+# Summit Platform
 
-Enterprise Intelligence Platform: graph analytics, real-time collaboration, and AI-driven insights for high-stakes environments.
+The unified intelligence analysis platform with AI-augmented graph analytics.
 
-## NEW in v2.0.0 (December 2025)
-Summit v2.0.0 consolidates major platform capabilities (infrastructure, AI/ML, security hardening, real-time systems).  
-See: Release Notes | Migration Guide | Roadmap.
+## 🚀 Deployment Status
 
----
+| Environment | Status | CI/CD | Infra |
+| :--- | :--- | :--- | :--- |
+| **Production** | 🟢 Ready | [GitHub Actions](.github/workflows/deploy-aws.yml) | [AWS EKS (Terraform)](terraform/environments/prod) |
+| **Staging** | 🟡 Provisioned | Manual Promotion | AWS EKS |
+| **Dev** | 🔵 Active | Auto-Deploy on Merge | AWS EKS |
 
-## Quickstart (Golden Path)
-Prerequisites: Docker Desktop ≥ 4.x, Node.js 20.11.0 (matches `.tool-versions`), pnpm 9, Python 3.11+.
+## 🛡️ Governance Status
 
-```bash
-# 1) Clone & Bootstrap
-git clone https://github.com/BrianCLong/summit.git
-cd summit
-make bootstrap
+![Fresh Evidence Rate (7d)](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/BrianCLong/summit/main/docs/governance/metrics/fresh-evidence-rate.json)
 
-# 2) Start the Stack (Docker)
-make up
+## 📚 Documentation
 
-# 3) Verify (Smoke Test)
-make smoke
-```
+*   **[Infrastructure & Operations](infra/README.md):** The central hub for all DevOps tasks.
+*   **[AWS Deployment Guide](docs/AWS_DEPLOYMENT.md):** Step-by-step instructions to go from zero to live.
+*   **[Runbooks](docs/runbooks/):** Emergency procedures (Database Recovery, Rollbacks).
+*   **[Governance](docs/GOVERNANCE.md):** Branch protection and security rules.
 
-### GA Gate (Pre-Flight)
-
-Before submitting PRs or deploying:
+## 🛠️ Quick Start (Local)
 
 ```bash
-make ga
+# Start the full stack locally
+docker-compose up
+
+# Access Services:
+# - Frontend: http://localhost:3000
+# - Neo4j: http://localhost:7474
+# - Postgres: localhost:5432
 ```
 
-This runs the enforced readiness sequence:
+## 🔐 Architecture
 
-1. Lint & unit tests
-2. Clean environment reset
-3. Deep health checks
-4. End-to-end smoke tests
-5. Security scanning
+The platform runs on a modern "Cattle" architecture on AWS:
 
----
+*   **Compute:** EKS (Spot Instances)
+*   **Data:** Aurora Serverless v2 (Postgres), ElastiCache (Redis), Neo4j (Self-Hosted on K8s)
+*   **Security:** OIDC, Private Subnets, Trivy Scanning
 
-## Service Endpoints (Local)
-
-* Frontend: [http://localhost:3000](http://localhost:3000)
-* GraphQL API: [http://localhost:4000/graphql](http://localhost:4000/graphql)
-* Neo4j Browser: [http://localhost:7474](http://localhost:7474) (User: `neo4j`, Pass: `devpassword`)
-* Adminer: [http://localhost:8080](http://localhost:8080)
-* Grafana: [http://localhost:3001](http://localhost:3001)
-
----
-
-## Architecture (System View)
-
-Summit is built on a modern distributed stack designed for scalability and auditability:
-
-* Frontend: React 18, Vite, Material-UI (`client/`)
-* Backend: Node.js, Express, Apollo GraphQL (`backend/`, `api/`)
-* Data Layer:
-
-  * Neo4j (graph relationships)
-  * PostgreSQL (structured data, audit logs, vectors/embeddings)
-  * TimescaleDB (telemetry and metrics)
-  * Redis (caching, rate limiting, real-time Pub/Sub)
-* Orchestration: Maestro (BullMQ) for background jobs and AI pipelines (`.maestro/`)
-
-See also:
-
-* docs/ARCHITECTURE.md
-
----
-
-## Repo Map (Where Things Live)
-
-This repository is a large monorepo containing:
-
-1. **Platform Runtime**
-
-   * `client/` — Primary user-facing UI
-   * `conductor-ui/` — Admin/Ops UI
-   * `backend/` — API runtime services
-   * `api/`, `apis/`, `api-schemas/` — API surfaces, schemas, contracts
-   * `cli/` — Operator/developer CLI tooling
-   * `.maestro/`, `.orchestrator/` — job orchestration, pipelines, worker controls
-   * `compose/`, `charts/`, `config/`, `configs/` — infra, deployment & configuration
-
-2. **Governance, Security, Operations**
-
-   * `RUNBOOKS/` — incident playbooks, operational procedures
-   * `SECURITY/`, `.security/` — security policies & automation scaffolding
-   * `compliance/` — compliance controls and mapping artifacts
-   * `audit/` — audit readiness artifacts and evidence workflows
-   * `.ci/`, `ci/`, `.ga-check/`, `.github/` — CI and GA readiness gates
-   * `__tests__/`, `__mocks__/`, `GOLDEN/ datasets`, `.evidence/` — tests, fixtures, evidence
-
-3. **Agentic Development Tooling**
-
-   * `.agentic-prompts/`, `.agent-guidance/` — standardized prompts and guidance
-   * `.claude/`, `.gemini/`, `.jules/`, `.qwen/` — per-agent workflows and configuration
-   * `.devcontainer/` — standardized dev environment
-
-4. **AI/ML and Domain Modules**
-
-   * `ai-ml-suite/` plus multiple domain modules (e.g., `cognitive-*`, `active-measures-module/`, etc.)
-
----
-
-## CI & Quality Gates
-
-Our CI pipeline ("Fast Lane") enforces:
-
-1. Lint (ESLint + Ruff)
-2. Verify (deterministic GA verification for critical features)
-3. Test (unit/integration)
-4. Golden Path (full-stack integration via `make smoke`)
-5. Security (SAST, dependency scanning, secret detection)
-
-See: TESTING.md
-
----
-
-## Contributing
-
-* Follow the Golden Path and GA Gate requirements.
-* Prefer small, reviewable PRs with explicit scope.
-* If the build breaks, stop and fix it: the Golden Path is enforced.
-
-See:
-
-* CONTRIBUTING.md
-* docs/ONBOARDING.md
-
----
-
-## License
-
-Summit Enterprise Edition: Proprietary (see LICENSE).
-Historical Open Source: MIT (see OSS-MIT-LICENSE).
+For more details, see [infra/README.md](infra/README.md).

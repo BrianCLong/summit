@@ -1,4 +1,4 @@
-import type { FeatureFlagService } from '../services/FeatureFlagService.js';
+import type { FeatureFlagService } from '@intelgraph/feature-flags';
 import { logger } from './logger.js';
 
 const GLOBAL_KILL_SWITCH_FLAG_KEY = 'platform.kill-switch.global';
@@ -24,7 +24,12 @@ export async function getCachedFeatureFlagService(): Promise<FeatureFlagService 
       return service;
     })
     .catch((error) => {
-      logger.debug({ err: error }, 'Feature flag service unavailable for safety checks');
+      const msg = 'Feature flag service unavailable for safety checks';
+      if (logger && typeof logger.debug === 'function') {
+        logger.debug({ err: error }, msg);
+      } else {
+        console.warn(`[safety.ts] ${msg}:`, error?.message || error);
+      }
       cachedFeatureFlagService = null;
       return undefined;
     });
@@ -36,7 +41,8 @@ async function evaluateFlag(
 ): Promise<boolean> {
   if (!flagService) return false;
   try {
-    return await flagService.isEnabled(key, { key: 'system' }, false);
+    // Cast to any for method compatibility across different FeatureFlagService implementations
+    return await (flagService as any).isEnabled(key, { key: 'system' }, false);
   } catch (error: any) {
     logger.warn({ err: error, flag: key }, 'Feature flag evaluation failed');
     return false;

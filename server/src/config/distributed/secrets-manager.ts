@@ -562,7 +562,7 @@ export class SecretsManager {
     return decrypted;
   }
 
-  private mapRowToPolicy(row): RotationPolicy {
+  private mapRowToPolicy(row: any): RotationPolicy {
     return {
       secretId: row.secret_id,
       rotationIntervalDays: row.rotation_interval_days,
@@ -575,7 +575,7 @@ export class SecretsManager {
     };
   }
 
-  private mapRowToVersion(row): SecretVersion {
+  private mapRowToVersion(row: any): SecretVersion {
     return {
       secretId: row.secret_id,
       version: row.version,

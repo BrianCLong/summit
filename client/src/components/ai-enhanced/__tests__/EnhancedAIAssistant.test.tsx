@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- jest mocks require type assertions */
 /**
  * Tests for Enhanced AI Assistant Component - Deterministic Version
  */
@@ -18,7 +19,6 @@ import {
 } from '../test-utils/text';
 import { emitSpeechResult } from '../test-utils/voice';
 import { flushMicrotasks } from '../test-utils/flush';
-import { installStreamingFetchMock } from '../test-utils/fetch';
 import { waitForIdle } from '../test-utils/wait';
 
 const theme = createTheme();
@@ -26,6 +26,9 @@ const theme = createTheme();
 const renderWithTheme = (component: React.ReactElement) => {
   return render(<ThemeProvider theme={theme}>{component}</ThemeProvider>);
 };
+
+const getUserMessages = () =>
+  screen.queryAllByRole('article', { name: /user/i });
 
 // Global timeout for this file
 jest.setTimeout(60000);
@@ -73,11 +76,15 @@ describe('EnhancedAIAssistant', () => {
     renderWithTheme(<EnhancedAIAssistant {...defaultProps} />);
     const input = screen.getByRole('textbox', { name: /assistant-input/i });
 
-    fireEvent.change(input, { target: { value: 'Hello' } });
-    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+    await withUser(async (u) => {
+      await u.type(input, 'Hello{enter}');
+    });
 
-    const items = await screen.findAllByRole('article');
-    expect(items.some(i => i.textContent?.includes('Hello'))).toBe(true);
+    await waitFor(() => {
+      const items = getUserMessages();
+      if (items.length === 0) throw new Error('No user messages found');
+      expect(items[items.length - 1]).toHaveTextContent('Hello');
+    });
     await waitForIdle();
   });
 
@@ -95,8 +102,9 @@ describe('EnhancedAIAssistant', () => {
     renderWithTheme(<EnhancedAIAssistant {...defaultProps} transport={transport} />);
 
     const input = screen.getByRole('textbox', { name: /assistant-input/i });
-    fireEvent.change(input, { target: { value: 'Hello stream' } });
-    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+    await withUser(async (u) => {
+      await u.type(input, 'Hello stream{enter}');
+    });
 
     await expectLastAssistantMessageToContain(/I think therefore I am/i);
     await waitForIdle();
@@ -106,26 +114,35 @@ describe('EnhancedAIAssistant', () => {
     renderWithTheme(<EnhancedAIAssistant {...defaultProps} />);
     const micButton = screen.getByLabelText(/start voice/i);
 
-    fireEvent.mouseDown(micButton);
+    fireEvent.click(micButton);
     // Wait for instance creation
     await waitFor(() => {
       const insts = (window as any).__srInstances;
       if (!insts || insts.length === 0) throw new Error('No instances');
     }, { timeout: 10000 });
 
-    await emitSpeechResult('I understand your query');
+    await act(async () => {
+      await emitSpeechResult('I understand your query');
+    });
 
-    await expectLastAssistantMessageToContain(/I understand your query/i, 20000);
+    await waitFor(() => {
+      const items = getUserMessages();
+      if (items.length === 0) throw new Error('No user messages found');
+      expect(items[items.length - 1]).toHaveTextContent(
+        /I understand your query/i,
+      );
+    });
   }, 30000);
 
   it('toggles voice commands', async () => {
     renderWithTheme(<EnhancedAIAssistant {...defaultProps} enableVoice={true} />);
     const startBtn = screen.getByLabelText(/start voice/i);
 
-    fireEvent.mouseDown(startBtn);
+    fireEvent.click(startBtn);
     expect(await screen.findByLabelText(/stop voice/i)).toBeInTheDocument();
 
-    fireEvent.mouseUp(window);
+    const stopBtn = screen.getByLabelText(/stop voice/i);
+    fireEvent.click(stopBtn);
     expect(await screen.findByLabelText(/start voice/i)).toBeInTheDocument();
   }, 20000);
 
@@ -133,11 +150,16 @@ describe('EnhancedAIAssistant', () => {
     renderWithTheme(<EnhancedAIAssistant {...defaultProps} />);
     const input = screen.getByRole('textbox', { name: /assistant-input/i });
 
-    fireEvent.change(input, { target: { value: "Line 1\nLine 2" } });
-    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+    await withUser(async (u) => {
+      await u.type(input, 'Line 1{shift>}{enter}{/shift}Line 2');
+      await u.keyboard('{enter}');
+    });
 
-    const items = await screen.findAllByRole('article');
-    expect(items.some(i => i.textContent?.includes('Line 1'))).toBe(true);
+    await waitFor(() => {
+      const items = getUserMessages();
+      if (items.length === 0) throw new Error('No user messages found');
+      expect(items[items.length - 1]).toHaveTextContent('Line 1');
+    });
     await waitForIdle();
   });
 
@@ -145,12 +167,13 @@ describe('EnhancedAIAssistant', () => {
     renderWithTheme(<EnhancedAIAssistant {...defaultProps} />);
     const copyButton = await screen.findByLabelText(/copy message/i);
 
-    fireEvent.click(copyButton);
+    await withUser(async (u) => {
+      await u.click(copyButton);
+    });
     expect(writeTextMock).toHaveBeenCalledWith(expect.stringContaining("Hello! I'm IntelBot"));
   });
 
   it('legacy fallback streams and completes to idle', async () => {
-    installStreamingFetchMock(['I ', 'understand ', 'your ', 'query']);
     renderWithTheme(
       <EnhancedAIAssistant
         {...defaultProps}
@@ -160,10 +183,14 @@ describe('EnhancedAIAssistant', () => {
     );
 
     const input = screen.getByRole('textbox', { name: /assistant-input/i });
-    fireEvent.change(input, { target: { value: 'fallback test' } });
-    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+    await withUser(async (u) => {
+      await u.type(input, 'fallback test{enter}');
+    });
 
-    await expectLastAssistantMessageToContain(/I understand your query/i, 20000);
+    await expectLastAssistantMessageToContain(
+      /I understand your question/i,
+      20000,
+    );
     await waitForIdle();
   }, 30000);
 
@@ -189,8 +216,9 @@ describe('EnhancedAIAssistant', () => {
     );
 
     const input = screen.getByRole('textbox', { name: /assistant-input/i });
-    fireEvent.change(input, { target: { value: 'strict rag test' } });
-    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+    await withUser(async (u) => {
+      await u.type(input, 'strict rag test{enter}');
+    });
 
     await expectLastAssistantMessageToContain(/I cannot confirm/i);
     process.env.ASSISTANT_RAG_STRICT = undefined;

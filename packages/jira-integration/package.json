@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/jira-integration",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "PerfTrace Jira automation toolkit with workflow, field mapping, and audit logging.",
   "type": "module",
   "main": "dist/index.js",

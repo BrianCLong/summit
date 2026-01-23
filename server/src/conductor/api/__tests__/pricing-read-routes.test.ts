@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
 import { pricingReadRoutes } from '../pricing-read-routes';
@@ -31,7 +32,10 @@ const buildApp = () => {
   return app;
 };
 
-describe('pricingReadRoutes', () => {
+const run = process.env.NO_NETWORK_LISTEN !== 'true';
+const describeIf = run ? describe : describe.skip;
+
+describeIf('pricingReadRoutes', () => {
   beforeEach(() => {
     mockedListPools.mockReset();
     mockedCurrentPricing.mockReset();

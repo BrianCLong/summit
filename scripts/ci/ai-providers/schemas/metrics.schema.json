@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Evidence Gate Metrics (Deterministic)",
+  "description": "Quality and configuration metrics - deterministic, no runtime timestamps or performance data",
+  "required": ["sha", "generator", "gate_version", "totals", "accuracy", "configuration"],
+  "properties": {
+    "sha": {"type": "string"},
+    "generator": {"type": "string", "const": "evidence-id-consistency-verifier"},
+    "gate_version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
+    "totals": {
+      "type": "object",
+      "required": ["documents_checked", "evidence_ids_found", "violations", "errors", "warnings", "info_messages"],
+      "properties": {
+        "documents_checked": {"type": "integer", "minimum": 0},
+        "evidence_ids_found": {"type": "integer", "minimum": 0},
+        "evidence_ids_referenced": {"type": "integer", "minimum": 0},
+        "evidence_ids_registered": {"type": "integer", "minimum": 0},
+        "evidence_ids_orphaned": {"type": "integer", "minimum": 0},
+        "violations": {"type": "integer", "minimum": 0},
+        "errors": {"type": "integer", "minimum": 0},
+        "warnings": {"type": "integer", "minimum": 0},
+        "info_messages": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "accuracy": {
+      "type": "object",
+      "properties": {
+        "document_processing_success_rate": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "required": ["document_processing_success_rate"],
+      "additionalProperties": false
+    },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "ai_analysis_enabled": {"type": "boolean"},
+        "ai_patches_enabled": {"type": "boolean"},
+        "replay_only_mode": {"type": "boolean"},
+        "record_mode_allowed": {"type": "boolean"},
+        "debug_enabled": {"type": "boolean"}
+      },
+      "required": ["ai_analysis_enabled", "ai_patches_enabled", "replay_only_mode", "record_mode_allowed", "debug_enabled"],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "not": {
+    "anyOf": [
+      {"required": ["timestamp"]},
+      {"required": ["generated_at"]},
+      {"required": ["created_at"]},
+      {"required": ["last_update"]},
+      {"required": ["performance"]},
+      {"required": ["execution_time"]},
+      {"required": ["total_time_ms"]},
+      {"required": ["processing_ms"]}
+    ]
+  }
+}

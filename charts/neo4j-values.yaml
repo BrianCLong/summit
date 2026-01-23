@@ -1,0 +1,37 @@
+# Values for Official Neo4j Helm Chart
+# https://github.com/neo4j/helm-charts
+
+neo4j:
+  name: "neo4j-cluster"
+  edition: "community" # or "enterprise" if you have a license
+  acceptLicenseAgreement: "yes"
+  password: "password" # CHANGE THIS via --set in CI/CD
+
+  core:
+    numberOfServers: 3
+    persistentVolume:
+      storageClass: "gp3"
+      size: 50Gi
+
+    resources:
+      requests:
+        cpu: "1"
+        memory: "4Gi"
+      limits:
+        cpu: "2"
+        memory: "8Gi"
+
+    # Match the Terraform Node Group
+    nodeSelector:
+      workload: "neo4j"
+
+    tolerations:
+      - key: "workload"
+        operator: "Equal"
+        value: "neo4j"
+        effect: "NoSchedule"
+
+    # Expose internally
+    services:
+      default:
+        type: ClusterIP

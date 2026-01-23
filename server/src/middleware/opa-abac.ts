@@ -4,7 +4,7 @@ import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
 import { verify, JwtPayload } from 'jsonwebtoken';
 import axios from 'axios';
 import { trace } from '@opentelemetry/api';
-import { logger } from '../utils/logger.js';
+import baseLogger, { logger as namedLogger } from '../utils/logger.js';
 import type { User, OPAClient as IOPAClient } from '../graphql/intelgraph/types.js';
 
 const tracer = trace.getTracer('intelgraph-opa-abac');
@@ -52,7 +52,12 @@ interface OPADecision {
 export class OPAClient implements IOPAClient {
   private baseUrl: string;
   private timeout: number;
-  private logger = logger.child({ component: 'opa-client' });
+  private logger = (() => {
+    const resolved = namedLogger ?? baseLogger ?? console;
+    return typeof resolved.child === 'function'
+      ? resolved.child({ component: 'opa-client' })
+      : resolved;
+  })();
 
   constructor(baseUrl: string, timeout = 5000) {
     this.baseUrl = baseUrl.replace(/\/$/, ''); // Remove trailing slash
@@ -67,6 +72,7 @@ export class OPAClient implements IOPAClient {
         'opa.input.action': input.action || 'unknown',
       },
     });
+    const log = this.logger ?? namedLogger ?? baseLogger ?? console;
 
     try {
       const response = await axios.post(
@@ -88,7 +94,7 @@ export class OPAClient implements IOPAClient {
         'opa.response.status': response.status,
       });
 
-      this.logger.debug('OPA policy evaluation result', {
+      log.debug('OPA policy evaluation result', {
         policy,
         input: {
           subject_tenant: input.subject?.tenantId,
@@ -102,7 +108,7 @@ export class OPAClient implements IOPAClient {
       span.recordException(error as Error);
       span.setStatus({ code: 2, message: (error as Error).message });
 
-      this.logger.error('OPA policy evaluation failed', {
+      log.error('OPA policy evaluation failed', {
         policy,
         error: (error as Error).message,
       });
@@ -429,6 +435,118 @@ export function opaAuthzMiddleware(opaClient: OPAClient) {
       // Fail closed
       res.status(403).json({ error: 'Authorization check failed' });
     }
+  };
+}
+
+export class ABACContext {
+  static fromRequest(req: Request) {
+    const forwardedFor = req.headers['x-forwarded-for'];
+    const forwardedIp = Array.isArray(forwardedFor)
+      ? forwardedFor[0]
+      : forwardedFor?.split(',')[0]?.trim();
+
+    return {
+      ip: forwardedIp || req.ip,
+      userAgent: req.get('User-Agent'),
+      time: Date.now(),
+    };
+  }
+}
+
+export function createABACMiddleware(opaClient: OPAClient) {
+  return {
+    enforce(resourceType: string, action: string) {
+      return async (req: Request, res: Response, next: NextFunction) => {
+        const user = (req as any).user;
+        if (!user) {
+          res.status(401).json({ error: 'Unauthorized' });
+          return;
+        }
+
+        const context = ABACContext.fromRequest(req);
+        const resourceId =
+          req.params?.investigationId ||
+          req.params?.id ||
+          (req.body && req.body.id);
+
+        const policyInput: OPAPolicyInput = {
+          subject: {
+            id: user.id,
+            tenantId: user.tenantId || user.tenant || 'default',
+            roles: user.roles || (user.role ? [user.role] : []),
+            residency: user.residency || 'US',
+            clearance: user.clearance || 'public',
+            entitlements: user.entitlements || [],
+          },
+          resource: {
+            type: resourceType,
+            id: resourceId,
+            tenantId:
+              (req.headers['x-tenant-id'] as string) ||
+              user.tenantId ||
+              user.tenant ||
+              'default',
+          },
+          action,
+          context,
+        };
+
+        try {
+          const result = await opaClient.evaluate(
+            'summit.abac.allow',
+            policyInput,
+          );
+          if (typeof result === 'boolean') {
+            if (result) {
+              return next();
+            }
+            res.status(403).json({ error: 'Forbidden', reason: 'Denied' });
+            return;
+          }
+
+          if (result.allow) {
+            return next();
+          }
+
+          if (result.reason === 'opa_unavailable') {
+            res.status(503).json({
+              error: 'ServiceUnavailable',
+              message: 'Authorization service temporarily unavailable',
+            });
+            return;
+          }
+
+          const obligation = result.obligations?.[0];
+          if (obligation?.type === 'step_up_auth') {
+            res.status(403).json({
+              error: 'StepUpRequired',
+              reason: result.reason,
+              obligation,
+            });
+            return;
+          }
+
+          if (obligation?.type === 'dual_control') {
+            res.status(403).json({
+              error: 'DualControlRequired',
+              reason: result.reason,
+              obligation,
+            });
+            return;
+          }
+
+          res.status(403).json({
+            error: 'Forbidden',
+            reason: result.reason,
+          });
+        } catch (error) {
+          res.status(503).json({
+            error: 'ServiceUnavailable',
+            message: 'Authorization service temporarily unavailable',
+          });
+        }
+      };
+    },
   };
 }
 

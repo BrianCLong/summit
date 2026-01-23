@@ -1,6 +1,10 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
 import { usageLedger } from '../../src/usage/usage-ledger.js';
+
+const describeNetwork =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
 
 const mockQuery = jest.fn();
 
@@ -22,7 +26,7 @@ jest.mock('../../src/conductor/auth/rbac-middleware.js', () => ({
   requirePermission: () => (_req: any, _res: any, next: any) => next(),
 }));
 
-describe('receipt usage ledger', () => {
+describeNetwork('receipt usage ledger', () => {
   beforeEach(() => {
     usageLedger.clear();
     mockQuery.mockReset();

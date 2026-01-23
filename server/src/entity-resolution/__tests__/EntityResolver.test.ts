@@ -1,20 +1,23 @@
-import { EntityResolver } from '../engine/EntityResolver';
-import { provenanceLedger } from '../../provenance/ledger';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
-// Mock dependencies
-jest.mock('../../services/IntelGraphService', () => ({
+const mockGetInstance = jest.fn();
+const mockAppendEntry = jest.fn();
+
+jest.unstable_mockModule('../../services/IntelGraphService', () => ({
   IntelGraphService: {
-    getInstance: jest.fn()
-  }
+    getInstance: mockGetInstance,
+  },
 }));
 
-jest.mock('../../provenance/ledger', () => ({
+jest.unstable_mockModule('../../provenance/ledger', () => ({
   provenanceLedger: {
-    appendEntry: jest.fn()
-  }
+    appendEntry: mockAppendEntry,
+  },
 }));
 
-import { IntelGraphService } from '../../services/IntelGraphService';
+const { EntityResolver } = await import('../engine/EntityResolver');
+const { IntelGraphService } = await import('../../services/IntelGraphService');
+const { provenanceLedger } = await import('../../provenance/ledger');
 
 describe('EntityResolver', () => {
   let resolver: EntityResolver;
@@ -27,13 +30,24 @@ describe('EntityResolver', () => {
     mockGraphService = {
       getNodeById: jest.fn(),
       searchNodes: jest.fn(),
+      findSimilarNodes: jest.fn(),
       ensureNode: jest.fn(),
       createEdge: jest.fn(),
     };
 
     (IntelGraphService.getInstance as jest.Mock).mockReturnValue(mockGraphService);
 
-    resolver = new EntityResolver();
+    const stubModel = {
+      predict: jest.fn().mockResolvedValue({
+        score: 0.95,
+        confidence: 'high',
+        explanation: 'mocked model',
+        suggestedAction: 'auto_merge',
+        features: [],
+      }),
+    };
+
+    resolver = new EntityResolver(stubModel as any);
   });
 
   describe('findDuplicates', () => {
@@ -45,20 +59,7 @@ describe('EntityResolver', () => {
       const candidate2 = { id: '3', label: 'Person', name: 'Jane Smith', email: 'jane@example.com' }; // no match
 
       mockGraphService.getNodeById.mockResolvedValue(entity);
-      mockGraphService.searchNodes
-        .mockResolvedValueOnce([entity, candidate1]) // Email
-        .mockResolvedValueOnce([entity, candidate1]) // Phone
-        .mockResolvedValueOnce([entity, candidate1]); // Name
-        // candidate2 is not found by exact match on email/phone/name in this scenario
-        // So we need to ensure candidate2 IS found if we want to test it being scored (and rejected).
-        // But the test only checks results[0] which is candidate1.
-        // If candidate2 is not found, results length will be 1.
-        // The original test expected candidate2 to be found but ignored?
-        // Ah, expect(results).toHaveLength(1). So it EXPECTS candidate2 to be filtered out or rejected.
-        // My new findDuplicates logic returns only candidates found.
-        // If candidate2 (Jane Smith) has different email/name/phone, it won't be found by Blocking.
-        // So results length will be 1 (candidate1).
-        // This matches expectation.
+      mockGraphService.findSimilarNodes.mockResolvedValue([candidate1]);
 
       const results = await resolver.findDuplicates('tenant1', '1', 0.8);
 

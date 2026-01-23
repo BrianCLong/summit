@@ -7,10 +7,31 @@ on:
         description: Version string (without leading v)
         required: true
         type: string
+      skip_governance_gate:
+        description: Skip governance gate (not recommended)
+        type: boolean
+        default: false
+      governance_strict:
+        description: Treat governance warnings as errors
+        type: boolean
+        default: true
 
 jobs:
+  # Governance gate runs first
+  governance-gate:
+    name: Governance Gate
+    if: inputs.skip_governance_gate != true
+    uses: ./.github/workflows/_reusable-governance-gate.yml
+    with:
+      require_lockfile: true
+      strict_mode: ${{ inputs.governance_strict }}
+      fail_on_critical: true
+      fail_on_warning: false
+
   build-server:
     name: Build server image
+    needs: governance-gate
+    if: always() && (needs.governance-gate.result == 'success' || needs.governance-gate.result == 'skipped')
     uses: ./.github/workflows/_reusable-slsa-build.yml
     with:
       image_name: ${{ github.repository }}/server
@@ -21,6 +42,8 @@ jobs:
 
   build-client:
     name: Build client image
+    needs: governance-gate
+    if: always() && (needs.governance-gate.result == 'success' || needs.governance-gate.result == 'skipped')
     uses: ./.github/workflows/_reusable-slsa-build.yml
     with:
       image_name: ${{ github.repository }}/client
@@ -33,42 +56,75 @@ jobs:
     name: Create release bundle
     runs-on: ubuntu-latest
     needs:
+      - governance-gate
       - build-server
       - build-client
+    if: always() && (needs.governance-gate.result == 'success' || needs.governance-gate.result == 'skipped') && needs.build-server.result == 'success' && needs.build-client.result == 'success'
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           name: build-artifacts-${{ github.run_id }}
           path: build-artifacts
           merge-multiple: true
+      - name: Download governance reports
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
+        continue-on-error: true
+        with:
+          name: governance-gate-reports-${{ github.run_number }}
+          path: governance-reports
       - name: Prepare release directory
-        run: mkdir -p release-bundle/compliance
+        run: mkdir -p release-bundle/compliance release-bundle/governance
       - name: Move artifacts to compliance bundle
         run: mv build-artifacts/* release-bundle/compliance/
+      - name: Include governance artifacts
+        run: |
+          # Copy governance reports if available
+          if [[ -d "governance-reports" ]]; then
+            cp governance-reports/* release-bundle/governance/ 2>/dev/null || true
+          fi
+
+          # Copy governance lockfile if available
+          if [[ -f "docs/releases/_state/governance_lockfile.json" ]]; then
+            cp docs/releases/_state/governance_lockfile.json release-bundle/governance/
+          fi
       - name: Generate manifest
         run: |
-          echo '{
+          # Get governance hash if available
+          GOVERNANCE_HASH=""
+          if [[ -f "docs/releases/_state/governance_lockfile.json" ]]; then
+            GOVERNANCE_HASH=$(sha256sum docs/releases/_state/governance_lockfile.json | cut -d' ' -f1)
+          fi
+
+          cat > release-bundle/manifest.json <<EOF
+          {
             "version": "${{ inputs.version }}",
             "releaseDate": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "serverImage": "${{ needs.build-server.outputs.image_uri }}",
             "clientImage": "${{ needs.build-client.outputs.image_uri }}",
-            "slsaLevel": "SLSA_3"
-          }' > release-bundle/manifest.json
+            "slsaLevel": "SLSA_3",
+            "governance": {
+              "status": "${{ needs.governance-gate.outputs.governance_status || 'N/A' }}",
+              "score": ${{ needs.governance-gate.outputs.governance_score || 0 }},
+              "hash": "${GOVERNANCE_HASH}"
+            }
+          }
+          EOF
       - name: Create compliance bundle archive
         run: |
           tar -czf \
             release-bundle/compliance-bundle-v${{ inputs.version }}.tgz \
             -C release-bundle/compliance .
       - name: Upload release artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
+          retention-days: 14
           name: release-bundle
           path: release-bundle/
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
         with:
           tag_name: v${{ inputs.version }}
           name: Summit v${{ inputs.version }}

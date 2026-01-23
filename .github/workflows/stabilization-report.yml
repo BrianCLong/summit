@@ -1,0 +1,139 @@
+name: Stabilization Progress Report
+
+# MVP-4 STABILIZATION PROGRESS TRACKING
+# Generates comprehensive stabilization status reports.
+#
+# See docs/ci/STABILIZATION_REPORT.md for full documentation.
+
+on:
+  # Daily report
+  schedule:
+    - cron: "0 9 * * 1-5" # 9 AM UTC, Mon-Fri
+
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      include_details:
+        description: "Include full audit details"
+        type: boolean
+        default: false
+      notify_slack:
+        description: "Send notification to Slack"
+        type: boolean
+        default: false
+
+  # Trigger on state file changes
+  push:
+    paths:
+      - "docs/releases/_state/*.json"
+    branches: [main]
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  generate-report:
+    name: Generate Stabilization Report
+    runs-on: ubuntu-latest
+
+    outputs:
+      score: ${{ steps.report.outputs.score }}
+      status: ${{ steps.report.outputs.status }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Generate Report
+        id: report
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/release/generate_stabilization_report.sh
+
+          ARGS=""
+          if [[ "${{ inputs.include_details }}" == "true" ]]; then
+            ARGS="$ARGS --include-details"
+          fi
+
+          # Generate markdown report
+          ./scripts/release/generate_stabilization_report.sh $ARGS
+
+          # Generate JSON for outputs
+          JSON_OUTPUT=$(./scripts/release/generate_stabilization_report.sh --json-summary)
+
+          SCORE=$(echo "$JSON_OUTPUT" | jq -r '.stabilization_score')
+          STATUS=$(echo "$JSON_OUTPUT" | jq -r '.overall_status')
+
+          echo "score=$SCORE" >> $GITHUB_OUTPUT
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+
+          # Save JSON for artifact
+          echo "$JSON_OUTPUT" > artifacts/reports/stabilization-report.json
+
+      - name: Upload Report
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: stabilization-report-${{ github.run_id }}
+          path: |
+            artifacts/reports/stabilization-report.md
+            artifacts/reports/stabilization-report.json
+          retention-days: 30
+
+      - name: Job Summary
+        run: |
+          STATUS="${{ steps.report.outputs.status }}"
+          SCORE="${{ steps.report.outputs.score }}"
+
+          STATUS_EMOJI="❓"
+          [[ "$STATUS" == "PASS" ]] && STATUS_EMOJI="✅"
+          [[ "$STATUS" == "WARN" ]] && STATUS_EMOJI="⚠️"
+          [[ "$STATUS" == "FAIL" ]] && STATUS_EMOJI="❌"
+
+          echo "### $STATUS_EMOJI Stabilization Progress Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Stabilization Score:** $SCORE%" >> $GITHUB_STEP_SUMMARY
+          echo "**Overall Status:** $STATUS" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Include full report in summary
+          if [[ -f "artifacts/reports/stabilization-report.md" ]]; then
+            echo "---" >> $GITHUB_STEP_SUMMARY
+            cat artifacts/reports/stabilization-report.md >> $GITHUB_STEP_SUMMARY
+          fi
+
+  notify:
+    name: Send Notifications
+    runs-on: ubuntu-latest
+    needs: generate-report
+    if: inputs.notify_slack == true || needs.generate-report.outputs.status == 'FAIL'
+
+    steps:
+      - name: Prepare Notification
+        id: notification
+        run: |
+          STATUS="${{ needs.generate-report.outputs.status }}"
+          SCORE="${{ needs.generate-report.outputs.score }}"
+
+          if [[ "$STATUS" == "FAIL" ]]; then
+            COLOR="danger"
+            TITLE="🚨 Stabilization Alert: Critical Issues Detected"
+          elif [[ "$STATUS" == "WARN" ]]; then
+            COLOR="warning"
+            TITLE="⚠️ Stabilization Warning: Issues Need Attention"
+          else
+            COLOR="good"
+            TITLE="✅ Stabilization Progress: All Clear"
+          fi
+
+          echo "color=$COLOR" >> $GITHUB_OUTPUT
+          echo "title=$TITLE" >> $GITHUB_OUTPUT
+
+      - name: Notify Slack
+        if: inputs.notify_slack == true
+        run: |
+          echo "Slack notification would be sent here"
+          echo "Title: ${{ steps.notification.outputs.title }}"
+          echo "Score: ${{ needs.generate-report.outputs.score }}%"
+          echo "Status: ${{ needs.generate-report.outputs.status }}"

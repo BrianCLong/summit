@@ -87,7 +87,7 @@ export class TransformerInferenceService {
     };
 
     return new Promise((resolve, reject) => {
-      PythonShell.run('ner.py', options).then(messages => {
+      PythonShell.run('ner.py', options).then((messages: unknown[]) => {
          if (messages && messages.length > 0) {
            const output = messages[0] as Record<string, unknown>;
            resolve({
@@ -99,7 +99,7 @@ export class TransformerInferenceService {
          } else {
            resolve({ error: "No output from NER script" });
          }
-      }).catch(err => {
+      }).catch((err: unknown) => {
         reject(err);
       });
     });

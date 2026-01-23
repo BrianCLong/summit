@@ -9,15 +9,15 @@ Measures:
 """
 
 import time
+
 import numpy as np
 import pytest
-from typing import Dict, List
 
+from ml.federated.aggregation.graph_merger import GraphMerger, MergeStrategy
+from ml.federated.osint.data_loader import OSINTDataLoader
+from ml.federated.osint.osint_model import OSINTClassifier
 from ml.federated.privacy.pgvector_dp import PgVectorDifferentialPrivacy, PrivacyConfig
 from ml.federated.privacy.secure_aggregation import SecureAggregator
-from ml.federated.aggregation.graph_merger import GraphMerger, MergeStrategy
-from ml.federated.osint.osint_model import OSINTClassifier, OSINTEmbedder
-from ml.federated.osint.data_loader import OSINTDataLoader
 
 
 class TestPerformance:
@@ -50,7 +50,7 @@ class TestPerformance:
         dp = PgVectorDifferentialPrivacy(config)
 
         # Vary number of embeddings
-        results: Dict[int, float] = {}
+        results: dict[int, float] = {}
 
         for num_emb in [5, 10, 50, 100]:
             embeddings = [np.random.randn(768) for _ in range(num_emb)]
@@ -69,15 +69,12 @@ class TestPerformance:
     @pytest.mark.benchmark
     def test_secure_aggregation_scaling(self):
         """Benchmark secure aggregation with varying participants"""
-        results: Dict[int, float] = {}
+        results: dict[int, float] = {}
 
         for num_nodes in [3, 5, 10, 20]:
             aggregator = SecureAggregator(threshold=min(3, num_nodes))
 
-            updates = {
-                f"node_{i}": np.random.randn(100)
-                for i in range(num_nodes)
-            }
+            updates = {f"node_{i}": np.random.randn(100) for i in range(num_nodes)}
 
             start = time.time()
             aggregator.pairwise_masking_aggregate(updates)
@@ -95,7 +92,7 @@ class TestPerformance:
         classifier = OSINTClassifier(num_classes=10, embedding_dim=768)
 
         batch_sizes = [1, 32, 64, 128]
-        results: Dict[int, float] = {}
+        results: dict[int, float] = {}
 
         for batch_size in batch_sizes:
             x = np.random.randn(batch_size, 768)
@@ -115,7 +112,7 @@ class TestPerformance:
     @pytest.mark.benchmark
     def test_graph_merge_scaling(self):
         """Benchmark graph merging with varying graph sizes"""
-        results: Dict[int, float] = {}
+        results: dict[int, float] = {}
 
         for num_nodes in [100, 500, 1000, 5000]:
             merger = GraphMerger(strategy=MergeStrategy.WEIGHTED)
@@ -128,8 +125,12 @@ class TestPerformance:
                     for i in range(num_nodes)
                 ]
                 edges = [
-                    {"source": f"node_{i}", "target": f"node_{(i+1)%num_nodes}",
-                     "type": "RELATED", "confidence": np.random.random()}
+                    {
+                        "source": f"node_{i}",
+                        "target": f"node_{(i + 1) % num_nodes}",
+                        "type": "RELATED",
+                        "confidence": np.random.random(),
+                    }
                     for i in range(num_nodes // 2)
                 ]
                 graphs.append({"nodes": nodes, "edges": edges})
@@ -193,7 +194,6 @@ class TestMemoryUsage:
 
     def test_model_parameter_memory(self):
         """Test memory usage of model parameters"""
-        import sys
 
         classifier = OSINTClassifier(
             num_classes=100,

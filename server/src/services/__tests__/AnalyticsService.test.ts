@@ -3,23 +3,24 @@ import { jest } from '@jest/globals';
 
 // Mock runCypher
 jest.mock('../../graph/neo4j.js', () => ({
-  runCypher: jest.fn<() => Promise<any>>(),
-  getDriver: jest.fn<() => any>().mockReturnValue({
-    session: jest.fn<() => any>().mockReturnValue({
-      run: jest.fn<() => Promise<any>>(),
-      close: jest.fn<() => Promise<void>>()
+  runCypher: jest.fn(),
+  getDriver: jest.fn().mockReturnValue({
+    session: jest.fn().mockReturnValue({
+      run: jest.fn(),
+      close: jest.fn()
     })
   })
 }));
 
 import { runCypher } from '../../graph/neo4j.js';
+const runCypherMock = runCypher as any;
 
 describe('AnalyticsService', () => {
   let service: AnalyticsService;
 
   beforeEach(() => {
     service = AnalyticsService.getInstance();
-    (runCypher as jest.Mock).mockClear();
+    runCypherMock.mockClear();
   });
 
   describe('findPaths', () => {
@@ -27,7 +28,7 @@ describe('AnalyticsService', () => {
       const mockResult = [
         { nodeIds: ['1', '2'], relTypes: ['CONNECTED'], cost: 1 }
       ];
-      (runCypher as jest.Mock).mockResolvedValue(mockResult);
+      runCypherMock.mockResolvedValue(mockResult);
 
       const result = await service.findPaths('1', '2', 'shortest');
 
@@ -52,7 +53,7 @@ describe('AnalyticsService', () => {
           { nodeId: '2', neighbors: ['1'] },
           { nodeId: '3', neighbors: [] }
       ];
-      (runCypher as jest.Mock).mockResolvedValue(mockNodes);
+      runCypherMock.mockResolvedValue(mockNodes);
 
       const result = await service.detectCommunities('lpa');
 
@@ -64,7 +65,7 @@ describe('AnalyticsService', () => {
   describe('minePatterns', () => {
     it('should find temporal motifs', async () => {
       const mockResult = [{ nodeId: '1', eventCount: 10 }];
-      (runCypher as jest.Mock).mockResolvedValue(mockResult);
+      runCypherMock.mockResolvedValue(mockResult);
 
       const result = await service.minePatterns('temporal-motifs');
 
@@ -78,7 +79,7 @@ describe('AnalyticsService', () => {
 
   describe('detectAnomalies', () => {
       it('should detect degree anomalies', async () => {
-          (runCypher as jest.Mock).mockResolvedValue([{ nodeId: '1', degree: 100 }]);
+          runCypherMock.mockResolvedValue([{ nodeId: '1', degree: 100 }]);
 
           const result = await service.detectAnomalies('degree');
 

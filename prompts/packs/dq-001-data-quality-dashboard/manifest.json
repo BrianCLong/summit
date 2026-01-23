@@ -1,0 +1,17 @@
+{
+  "id": "dq-001-data-quality-dashboard",
+  "version": "1.0.0",
+  "description": "Imported from legacy structure: dq-001-data-quality-dashboard",
+  "model_config": {
+    "model": "gpt-4",
+    "temperature": 0.0
+  },
+  "vars": {},
+  "guardrails": {
+    "tags": [
+      "claude",
+      "legacy"
+    ]
+  },
+  "template_path": "template.md"
+}

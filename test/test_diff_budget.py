@@ -1,9 +1,9 @@
-import sys
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
 import json
+import sys
 import tempfile
 import unittest
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 # Ensure module import path
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,7 +26,7 @@ class DiffBudgetTests(unittest.TestCase):
         self.assertEqual(counts["low"], 1)
 
     def test_filter_exceptions_with_expiry_and_approvals(self):
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         valid_expiry = (now + timedelta(days=2)).isoformat()
         expired = (now - timedelta(days=1)).isoformat()
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -51,13 +51,11 @@ class DiffBudgetTests(unittest.TestCase):
                                 "expiry": expired,
                                 "approvals": {"security": "alice", "platform": "bob"},
                             },
-                        ]
+                        ],
                     }
                 )
             )
-            accepted, alerts = diff_budget.load_exceptions(
-                exc_dir, "abc123", alert_window_days=3
-            )
+            accepted, alerts = diff_budget.load_exceptions(exc_dir, "abc123", alert_window_days=3)
         self.assertIn("CVE-OK", accepted)
         self.assertNotIn("CVE-OLD", accepted)
         self.assertTrue(any("expired" in a for a in alerts))

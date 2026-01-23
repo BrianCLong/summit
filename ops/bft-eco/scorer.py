@@ -12,7 +12,7 @@ import logging
 import math
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
@@ -181,7 +181,7 @@ class BFTEcoScorer:
             f"score={best_score:.3f}, "
             f"nodes={len(best_candidate.nodes)}, "
             f"carbon={best_candidate.carbon_footprint_gco2_hour:.1f}gCO2/h, "
-            f"time={selection_time*1000:.1f}ms"
+            f"time={selection_time * 1000:.1f}ms"
         )
 
         return best_candidate
@@ -482,7 +482,7 @@ class BFTEcoScorer:
 
             decision = QuorumDecision(
                 decision_id=decision_id,
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                timestamp=datetime.now(UTC).isoformat(),
                 quorum_nodes=[node.node_id for node in self.active_quorum.nodes],
                 proposer_node=proposer.node_id,
                 consensus_achieved=consensus_achieved,
@@ -602,7 +602,7 @@ if __name__ == "__main__":
             proposal = {"operation": f"transfer_{i}", "amount": 1000 + i * 100}
             decision = await scorer.execute_consensus(proposal)
             print(
-                f"Consensus {i+1}: {decision.consensus_achieved}, "
+                f"Consensus {i + 1}: {decision.consensus_achieved}, "
                 f"time={decision.consensus_time_ms:.1f}ms, "
                 f"carbon={decision.carbon_cost_gco2:.4f}gCO2"
             )

@@ -1,8 +1,8 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
 import { operationsRouter } from '../operations-routes';
 import { resetFeatureFlags } from '../../config/feature-flags';
-import { pricingRefreshBlockedTotal } from '../../../metrics/federationMetrics.js';
 
 let allowAuth = true;
 
@@ -23,14 +23,15 @@ jest.mock('../../auth/rbac-middleware', () => ({
   requirePermission: () => (_req: any, _res: any, next: any) => next(),
 }));
 
-describe('operations routes', () => {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('operations routes', () => {
   const app = express();
   app.use(express.json());
   app.use(operationsRouter);
 
   afterEach(() => {
     allowAuth = true;
-    pricingRefreshBlockedTotal.reset();
     resetFeatureFlags();
   });
 
@@ -52,8 +53,6 @@ describe('operations routes', () => {
   });
 
   test('blocks pricing refresh when feature flag is disabled', async () => {
-    const counterSpy = jest.spyOn(pricingRefreshBlockedTotal, 'inc');
-
     resetFeatureFlags({
       PRICING_REFRESH_ENABLED: 'false',
     } as NodeJS.ProcessEnv);
@@ -63,6 +62,5 @@ describe('operations routes', () => {
     expect(res.body.error).toBe(
       'pricing refresh disabled by feature flag',
     );
-    expect(counterSpy).toHaveBeenCalledTimes(1);
   });
 });

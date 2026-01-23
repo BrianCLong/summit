@@ -1,9 +1,8 @@
-import json
-import re
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Any
 
-def convert_to_episode(raw_record: Dict[str, Any]) -> Dict[str, Any]:
+
+def convert_to_episode(raw_record: dict[str, Any]) -> dict[str, Any]:
     """
     Converts a raw chat record to an SRE Episode dict.
     Parses simple 'Thought:', 'Call:', 'Observation:' patterns.
@@ -17,7 +16,7 @@ def convert_to_episode(raw_record: Dict[str, Any]) -> Dict[str, Any]:
 
     # Simple regex parsing for demo purposes
     # Matches lines starting with specific keywords
-    lines = assistant_msg.split('\n')
+    lines = assistant_msg.split("\n")
 
     last_node_id = None
 
@@ -26,7 +25,7 @@ def convert_to_episode(raw_record: Dict[str, Any]) -> Dict[str, Any]:
         if not line:
             continue
 
-        node_type = "thought" # default
+        node_type = "thought"  # default
         content = line
 
         if line.startswith("Thought:"):
@@ -47,25 +46,25 @@ def convert_to_episode(raw_record: Dict[str, Any]) -> Dict[str, Any]:
         node_counter += 1
         node_id = f"n{node_counter}"
 
-        nodes.append({
-            "id": node_id,
-            "type": node_type,
-            "content": content,
-            "metadata": {},
-            "timestamp": datetime.now().isoformat()
-        })
+        nodes.append(
+            {
+                "id": node_id,
+                "type": node_type,
+                "content": content,
+                "metadata": {},
+                "timestamp": datetime.now().isoformat(),
+            }
+        )
 
         if last_node_id:
-            edges.append({
-                "source": last_node_id,
-                "target": node_id,
-                "relation": "follows"
-            })
+            edges.append({"source": last_node_id, "target": node_id, "relation": "follows"})
 
         last_node_id = node_id
 
     # Extract outcome from the last line or specific field
-    outcome = raw_record.get("expected") # Defaulting to expected for demo if parse fails, but really should parse
+    outcome = raw_record.get(
+        "expected"
+    )  # Defaulting to expected for demo if parse fails, but really should parse
     if "Answer:" in assistant_msg:
         outcome = assistant_msg.split("Answer:")[-1].strip()
 
@@ -73,9 +72,6 @@ def convert_to_episode(raw_record: Dict[str, Any]) -> Dict[str, Any]:
         "episode_id": raw_record.get("id", "unknown"),
         "task_id": raw_record.get("id", "unknown"),
         "run_config": {"expected_answer": raw_record.get("expected")},
-        "graph": {
-            "nodes": nodes,
-            "edges": edges
-        },
-        "outcome": outcome
+        "graph": {"nodes": nodes, "edges": edges},
+        "outcome": outcome,
     }

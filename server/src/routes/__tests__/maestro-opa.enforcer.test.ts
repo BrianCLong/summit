@@ -1,9 +1,13 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
 import { createMaestroOPAEnforcer } from '../maestro_routes';
 import { logger } from '../../utils/logger';
 
-describe('createMaestroOPAEnforcer', () => {
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('createMaestroOPAEnforcer', () => {
   const buildApp = (evaluateQuery: jest.Mock) => {
     const app = express();
     app.use(express.json());

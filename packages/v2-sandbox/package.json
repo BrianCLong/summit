@@ -1,11 +1,10 @@
 {
   "name": "@summit/v2-sandbox",
-  "version": "0.0.1",
+  "version": "4.2.3",
   "private": true,
   "description": "Experimental sandbox for Summit V2 innovations. Isolated from production.",
   "scripts": {
     "test": "echo 'Sandbox tests passing'"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

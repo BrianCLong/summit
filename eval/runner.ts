@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import axios from 'axios';
 
 // Placeholder for SDK client (assuming it's available via import)
 // import { createClient } from '../sdk/typescript/src';
@@ -22,23 +21,23 @@ program
     'http://localhost:8080',
   )
   .option('-t, --token <token>', 'Authentication token')
-  .action(async (options) => {
-    console.log(`Running evaluation suite: ${options.suite}`);
-    console.log(`API Base URL: ${options.base}`);
+  .action((options) => {
+    process.stdout.write(`Running evaluation suite: ${options.suite}\n`);
+    process.stdout.write(`API Base URL: ${options.base}\n`);
 
     // Load suite configuration
-    const suiteConfig = JSON.parse(fs.readFileSync(options.suite, 'utf8')); // Assuming YAML is JSON for simplicity
+    const _suiteConfig = JSON.parse(fs.readFileSync(options.suite, 'utf8')); // Assuming YAML is JSON for simplicity
 
     // Placeholder for actual evaluation logic
-    console.log('Evaluation logic to be implemented here.');
-    console.log(
-      'This runner will read datasets, invoke models, and capture metrics.',
+    process.stdout.write('Evaluation logic to be implemented here.\n');
+    process.stdout.write(
+      'This runner will read datasets, invoke models, and capture metrics.\n',
     );
 
     // Example of how to use the SDK (conceptual)
     // const client = createClient(options.base, options.token);
     // const runs = await client.listRuns();
-    // console.log('Runs:', runs.data);
+    // process.stdout.write('Runs: ' + JSON.stringify(runs.data) + '\n');
 
     // Simulate results.json creation
     const results = [
@@ -69,7 +68,7 @@ program
       path.join(reportDir, reportFileName),
       JSON.stringify(results, null, 2),
     );
-    console.log(`Generated report: ${path.join(reportDir, reportFileName)}`);
+    process.stdout.write(`Generated report: ${path.join(reportDir, reportFileName)}\n`);
   });
 
 program.parse(process.argv);

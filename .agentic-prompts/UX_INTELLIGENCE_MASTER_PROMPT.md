@@ -9,9 +9,9 @@ You design the **system that learns whether the UI is actually working**.
 
 Assume:
 
-* UX has already been governed, standardized, and enforced
-* Regressions are blocked by CI
-* The remaining risk is *slow decay, blind spots, and misaligned evolution*
+- UX has already been governed, standardized, and enforced
+- Regressions are blocked by CI
+- The remaining risk is _slow decay, blind spots, and misaligned evolution_
 
 Your job is to make UX **adaptive, self-aware, and self-correcting**.
 
@@ -23,27 +23,27 @@ Define a comprehensive taxonomy of **UX intelligence signals**, including:
 
 ### Behavioral Signals
 
-* Abandonment points
-* Repeated retries
-* Time-to-completion anomalies
-* Backtracking / oscillation patterns
-* Feature underutilization
+- Abandonment points
+- Repeated retries
+- Time-to-completion anomalies
+- Backtracking / oscillation patterns
+- Feature underutilization
 
 ### Cognitive & Trust Signals
 
-* Excessive help/tooltips usage
-* Undo / revert frequency
-* Over-confirmation behavior
-* Avoidance of advanced features
-* Preference for exports over in-app views
+- Excessive help/tooltips usage
+- Undo / revert frequency
+- Over-confirmation behavior
+- Avoidance of advanced features
+- Preference for exports over in-app views
 
 ### Operational Signals
 
-* Error frequency by surface
-* Latency perception vs actual latency
-* Accessibility friction indicators
-* CLI misuse or malformed commands
-* Support / issue correlation to UI areas
+- Error frequency by surface
+- Latency perception vs actual latency
+- Accessibility friction indicators
+- CLI misuse or malformed commands
+- Support / issue correlation to UI areas
 
 Every signal must map to a **specific UX hypothesis**.
 
@@ -53,18 +53,18 @@ Every signal must map to a **specific UX hypothesis**.
 
 Define how to collect UX signals while ensuring:
 
-* No UI clutter
-* No performance degradation
-* No privacy or trust violations
-* No surveillance creep
-* Clear operator visibility into what is tracked
+- No UI clutter
+- No performance degradation
+- No privacy or trust violations
+- No surveillance creep
+- Clear operator visibility into what is tracked
 
 Specify:
 
-* What is instrumented
-* Where instrumentation lives
-* How signals are sampled
-* What is explicitly NOT tracked
+- What is instrumented
+- Where instrumentation lives
+- How signals are sampled
+- What is explicitly NOT tracked
 
 UX intelligence must be ethical and transparent.
 
@@ -74,19 +74,19 @@ UX intelligence must be ethical and transparent.
 
 Define how raw signals are converted into **actionable UX insights**, including:
 
-* Noise filtering
-* False-positive suppression
-* Seasonality awareness
-* Persona segmentation
-* Risk-weighted scoring
+- Noise filtering
+- False-positive suppression
+- Seasonality awareness
+- Persona segmentation
+- Risk-weighted scoring
 
 Produce rules for identifying:
 
-* Emerging UX debt
-* Misaligned mental models
-* Feature over-complexity
-* Silent failure modes
-* Mismatch between design intent and actual use
+- Emerging UX debt
+- Misaligned mental models
+- Feature over-complexity
+- Silent failure modes
+- Mismatch between design intent and actual use
 
 Insights must be **decision-grade**, not dashboards-for-their-own-sake.
 
@@ -96,18 +96,18 @@ Insights must be **decision-grade**, not dashboards-for-their-own-sake.
 
 Define **explicit triggers** that initiate UX action, such as:
 
-* Threshold-based alerts
-* Pattern-based degradation
-* New persona introduction
-* New product surface creation
-* Repeated workarounds detected
+- Threshold-based alerts
+- Pattern-based degradation
+- New persona introduction
+- New product surface creation
+- Repeated workarounds detected
 
 For each trigger:
 
-* Define escalation path
-* Define owning role
-* Define required UX response
-* Define verification method
+- Define escalation path
+- Define owning role
+- Define required UX response
+- Define verification method
 
 UX evolution must be **intentional, not reactive**.
 
@@ -117,11 +117,11 @@ UX evolution must be **intentional, not reactive**.
 
 Define how UX experiments are allowed **without breaking trust or consistency**, including:
 
-* What can be experimented with
-* What must never be experimented with
-* Guardrails for experiments
-* Rollback requirements
-* Auditability of changes
+- What can be experimented with
+- What must never be experimented with
+- Guardrails for experiments
+- Rollback requirements
+- Auditability of changes
 
 Experiments must **not fragment the UX doctrine**.
 
@@ -131,11 +131,11 @@ Experiments must **not fragment the UX doctrine**.
 
 Define how UX learnings are captured and preserved:
 
-* Canonical UX learnings log
-* Retired pattern registry
-* “We tried this and it failed” archive
-* Rationale preservation for decisions
-* Anti-pattern documentation
+- Canonical UX learnings log
+- Retired pattern registry
+- “We tried this and it failed” archive
+- Rationale preservation for decisions
+- Anti-pattern documentation
 
 UX mistakes must be **remembered**, not rediscovered.
 
@@ -160,17 +160,17 @@ All artifacts must align with existing UX doctrine and CI gates.
 
 ## 8. Operating Rules
 
-* No metric without an action
-* No signal without a hypothesis
-* No experiment without guardrails
-* No learning without capture
-* No evolution without verification
+- No metric without an action
+- No signal without a hypothesis
+- No experiment without guardrails
+- No learning without capture
+- No evolution without verification
 
 Your success is measured by:
 
-* Fewer UX surprises
-* Earlier detection of UX decay
-* Confident, evidence-backed UX changes
-* UX that improves quietly and continuously
+- Fewer UX surprises
+- Earlier detection of UX decay
+- Confident, evidence-backed UX changes
+- UX that improves quietly and continuously
 
 Proceed as if UX quality is a **living system**, not a static asset.

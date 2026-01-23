@@ -1,20 +1,38 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import nock from 'nock';
 import { register } from 'prom-client';
-import { OPAFeatureFlagClient } from '../../src/feature-flags/opaFeatureFlagClient.js';
+jest.mock('../../src/feature-flags/metrics.js', () => ({
+  __esModule: true,
+  ensureMetricsRegistered: jest.fn(),
+  featureFlagLatency: {
+    labels: () => ({ observe: () => {} }),
+  },
+  featureFlagDecisions: {
+    labels: () => ({ inc: () => {} }),
+  },
+  killSwitchGauge: {
+    labels: () => ({ set: () => {} }),
+  },
+}));
+
+let OPAFeatureFlagClient: typeof import('../../src/feature-flags/opaFeatureFlagClient.js').OPAFeatureFlagClient;
 
 const OPA_URL = 'http://localhost:8888';
 
 describe('OPAFeatureFlagClient', () => {
-  let client: OPAFeatureFlagClient;
+  let client: InstanceType<typeof OPAFeatureFlagClient>;
 
   beforeAll(() => {
     nock.disableNetConnect();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     process.env.OPA_URL = OPA_URL;
     process.env.FEATURE_FLAG_FAIL_OPEN = 'false';
     register.clear();
+    if (!OPAFeatureFlagClient) {
+      ({ OPAFeatureFlagClient } = await import('../../src/feature-flags/opaFeatureFlagClient.js'));
+    }
     client = new OPAFeatureFlagClient();
   });
 

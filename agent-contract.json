@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "1.3",
   "owner": "GA-hardening",
   "allowedZones": [
     {
@@ -17,18 +17,35 @@
     "gaCriticalWork": "Must reference Tier A/B/C artifact before merge.",
     "legacyMode": "New files cannot self-designate legacy mode; exemptions require documented issue and owner.",
     "ciCommands": ["make ga-verify", "pnpm run test:a11y-gate"],
-    "provenance": "Changes must cite evidence artifacts in PR summaries."
+    "provenance": "Changes must cite evidence artifacts in PR summaries.",
+    "verificationSurfaces": ["docs/ga/genui/UI_CONTRACT.md"]
   },
   "restrictedAreas": [
     {
       "name": "Secrets",
-      "paths": ["secrets/", "sealed-secrets/"],
+      "paths": [
+        "secrets/",
+        "sealed-secrets/",
+        "k8s/secrets/",
+        "deploy/helm/intelgraph/secrets/",
+        "server/src/lib/secrets/",
+        "server/lib/secrets/"
+      ],
       "overrideLabel": "restricted-area-override",
       "notes": "Credential and secret material are human-only unless explicitly overridden."
     },
     {
       "name": "SecurityHardening",
-      "paths": ["security-hardening/", "security/", "trust/"],
+      "paths": [
+        "security-hardening/",
+        "security/",
+        "trust/",
+        "server/src/security/",
+        "server/src/services/security/",
+        "server/security/",
+        "apps/web/src/features/security/",
+        "apps/server/src/security/"
+      ],
       "overrideLabel": "restricted-area-override",
       "notes": "Defense-in-depth policy, attestations, and trust stores require human review."
     },
@@ -39,6 +56,24 @@
       "notes": "Production infrastructure definitions cannot be modified by agents without a human override."
     }
   ],
+  "piiPatterns": [
+    {
+      "name": "Email",
+      "pattern": "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}",
+      "description": "Standard email address format"
+    },
+    {
+      "name": "SSN",
+      "pattern": "\\d{3}-\\d{2}-\\d{4}",
+      "description": "US Social Security Number"
+    },
+    {
+      "name": "CreditCard",
+      "pattern": "\\d{4}[- ]?\\d{4}[- ]?\\d{4}[- ]?\\d{4}",
+      "description": "Credit Card Number"
+    }
+  ],
+  "requiredChecks": ["restricted-path-check", "pr-metadata-check", "pii-scan"],
   "activityTracking": {
     "ledger": "AGENT_ACTIVITY.md",
     "backlog": "TASK_BACKLOG.md",
@@ -47,7 +82,8 @@
   "stopConditions": [
     "Tooling instability that blocks deterministic verification",
     "Requests to bypass Legacy Mode guardrails",
-    "Attempts to change Jest or pnpm global configuration"
+    "Attempts to change Jest or pnpm global configuration",
+    "Detection of PII in PR diffs"
   ],
   "escalation": {
     "contact": "security-council",

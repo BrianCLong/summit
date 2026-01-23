@@ -1,48 +1,46 @@
 
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { InventionService } from '../services/InventionService';
-import * as db from '../../config/database';
+import { describe, it, expect, jest, beforeEach, beforeAll } from '@jest/globals';
 
-// Mock dependencies
 const mockSession = {
-  run: jest.fn().mockResolvedValue({
-    records: [{ get: () => 'mock-uuid-123' }]
-  } as never),
-  close: jest.fn().mockResolvedValue(undefined as never)
+  run: jest.fn(),
+  close: jest.fn().mockResolvedValue(undefined as never),
 };
 const mockDriver = {
-  session: jest.fn(() => mockSession)
+  session: jest.fn(() => mockSession),
 };
-
-// Use spyOn for database mock to ensure it's picked up
-jest.spyOn(db, 'getNeo4jDriver').mockReturnValue(mockDriver as any);
-
-// Create the mock function outside so we can reference it
 const mockFindSimilar = jest.fn();
 
-jest.mock('../services/PriorArtService', () => {
-  return {
-    PriorArtService: {
-      getInstance: () => ({
-        findSimilar: mockFindSimilar
-      })
-    }
-  };
-});
+let InventionService: typeof import('../services/InventionService.js').InventionService;
+let dbModule: typeof import('../../config/database.js');
+let priorArtModule: typeof import('../services/PriorArtService.js');
 
 describe('InventionService', () => {
-  let service: InventionService;
+  let service: ReturnType<typeof InventionService.getInstance>;
+
+  beforeAll(async () => {
+    dbModule = await import('../../config/database.js');
+    priorArtModule = await import('../services/PriorArtService.js');
+    ({ InventionService } = await import('../services/InventionService.js'));
+  });
 
   beforeEach(() => {
+    jest.spyOn(dbModule, 'getNeo4jDriver').mockReturnValue(mockDriver as any);
+    jest
+      .spyOn(priorArtModule.PriorArtService, 'getInstance')
+      .mockReturnValue({ findSimilar: mockFindSimilar } as any);
     // Reset instance to force constructor to run again with fresh mocks
     (InventionService as any).instance = undefined;
     service = InventionService.getInstance();
+    mockDriver.session.mockImplementation(() => mockSession);
+    mockSession.run.mockReset();
     mockFindSimilar.mockReset();
   });
 
   it('should reject invention if too similar to prior art', async () => {
-    // Override mock for this test to return high similarity
     mockFindSimilar.mockResolvedValueOnce([{ title: 'Exact Match', score: 0.95 }] as never);
+    mockSession.run.mockResolvedValueOnce({
+      records: [{ get: () => 'mock-uuid-123' }],
+    } as never);
 
     await expect(
       service.generateInvention(['AI'], 'Solve everything', 'tenant-1')
@@ -50,8 +48,10 @@ describe('InventionService', () => {
   });
 
   it('should generate invention draft if novel', async () => {
-    // Override mock to return low similarity (novel)
     mockFindSimilar.mockResolvedValueOnce([{ title: 'Distant Art', score: 0.3 }] as never);
+    mockSession.run.mockResolvedValueOnce({
+      records: [{ get: () => 'mock-uuid-123' }],
+    } as never);
 
     const result = await service.generateInvention(
       ['Quantum Computing', 'Coffee'],

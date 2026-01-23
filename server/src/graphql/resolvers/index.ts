@@ -15,6 +15,7 @@ import ewResolvers from './electronic-warfare.js';
 import { collaborationResolvers } from './collaboration';
 import { cognitiveSecurityResolvers } from './cognitive-security.js';
 import { deduplicationResolvers } from './deduplication.js';
+import ticketLinksResolvers from './ticket-links.js';
 
 // MC Platform v0.4.0 Transcendent Intelligence Resolvers (DISABLED - incomplete)
 // import { v040Resolvers } from './v040.js';
@@ -41,6 +42,7 @@ const resolvers = {
     ...(collaborationResolvers.Query || {}),
     ...(cognitiveSecurityResolvers.Query || {}),
     ...(deduplicationResolvers.Query || {}),
+    ...(ticketLinksResolvers.Query || {}),
     // MC Platform v0.4.0 Transcendent Intelligence (DISABLED)
     // ...(v040Resolvers.Query || {}),
     // MC Platform v0.4.1 Sovereign Safeguards (DISABLED)
@@ -95,6 +97,7 @@ const resolvers = {
   CogSecCampaign: cognitiveSecurityResolvers.CogSecCampaign,
   CogSecIncident: cognitiveSecurityResolvers.CogSecIncident,
   VerificationAppeal: cognitiveSecurityResolvers.VerificationAppeal,
+  Ticket: ticketLinksResolvers.Ticket,
 };
 
 export default resolvers;

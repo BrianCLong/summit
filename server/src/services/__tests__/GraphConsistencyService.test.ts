@@ -1,13 +1,11 @@
-import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
-import { GraphConsistencyService } from '../GraphConsistencyService.js';
-import { getNeo4jDriver } from '../../db/neo4j.js';
+import { describe, it, expect, jest, beforeEach, afterEach, beforeAll } from '@jest/globals';
 
 // Mock dependencies
-jest.mock('../../db/neo4j.js', () => ({
+jest.unstable_mockModule('../../db/neo4j.js', () => ({
   getNeo4jDriver: jest.fn(),
 }));
 
-jest.mock('../../config/logger.js', () => ({
+jest.unstable_mockModule('../../config/logger.js', () => ({
   __esModule: true,
   default: {
     child: jest.fn().mockReturnThis(),
@@ -18,8 +16,15 @@ jest.mock('../../config/logger.js', () => ({
 }));
 
 describe('GraphConsistencyService', () => {
+  let GraphConsistencyService: typeof import('../GraphConsistencyService.js').GraphConsistencyService;
+  let getNeo4jDriver: jest.Mock;
   let mockSession: any;
   let mockDriver: any;
+
+  beforeAll(async () => {
+    ({ GraphConsistencyService } = await import('../GraphConsistencyService.js'));
+    ({ getNeo4jDriver } = await import('../../db/neo4j.js'));
+  });
 
   beforeEach(() => {
     mockSession = {
@@ -30,14 +35,6 @@ describe('GraphConsistencyService', () => {
       session: jest.fn().mockReturnValue(mockSession),
     };
     (getNeo4jDriver as jest.Mock).mockReturnValue(mockDriver);
-
-    // Reset service driver instance by re-instantiating or hacking private property if needed
-    // But since it calls getDriver in constructor, and we mock getDriver before import/test run...
-    // Actually, because of ESM import order, getDriver might have been called already if we used the exported instance.
-    // So better to instantiate a new one for testing if possible, or ensure getDriver mock works.
-    // In this simple test setup, we might rely on the exported singleton which might have been created already.
-    // To be safe, let's create a new instance using the class constructor.
-    // But constructor calls getDriver(), so we need to mock it first.
   });
 
   afterEach(() => {

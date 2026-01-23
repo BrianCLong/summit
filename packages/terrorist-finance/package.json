@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/terrorist-finance",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Terrorist financing tracking and analysis",
   "license": "MIT",
   "type": "module",

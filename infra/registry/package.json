@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/registry-tools",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Air-gapped registry infrastructure tools for IntelGraph platform",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest --config jest.config.js",
+    "test": "jest --config jest.config.cjs",
     "test:coverage": "jest --coverage",
     "lint": "eslint 'cosign/**/*.ts' 'slsa/**/*.ts' 'sync/**/*.ts'",
     "typecheck": "tsc --noEmit",

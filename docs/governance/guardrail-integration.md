@@ -1,6 +1,12 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Guardrail Integration
 
 ## Architecture
+
 The Governance Kernel is integrated as a synchronous blocking gate in critical system paths.
 
 ## Enforcement Points
@@ -10,4 +16,5 @@ The Governance Kernel is integrated as a synchronous blocking gate in critical s
 3. **Incident Escalation**: Securiteyes checks policy before creating high-severity incidents to prevent automated over-reaction.
 
 ## implementation
+
 The kernel provides a stateless `evaluateGovernancePolicy` function that returns a `GovernanceDecision` object (ALLOWED/CONDITIONAL/DENIED). This object is persisted in IntelGraph for auditability.

@@ -5,7 +5,7 @@
 resource "aws_kms_key" "worm_encryption_key" {
   description             = "KMS key for IntelGraph Federal WORM storage encryption"
   deletion_window_in_days = 30
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -40,10 +40,10 @@ resource "aws_kms_key" "worm_encryption_key" {
   })
 
   tags = {
-    Name         = "IntelGraph Federal WORM Encryption Key"
-    Purpose      = "WORM Storage Encryption"
-    Compliance   = "FedRAMP High"
-    Environment  = "Federal"
+    Name        = "IntelGraph Federal WORM Encryption Key"
+    Purpose     = "WORM Storage Encryption"
+    Compliance  = "FedRAMP High"
+    Environment = "Federal"
   }
 }
 
@@ -56,7 +56,7 @@ resource "aws_kms_alias" "worm_encryption_key_alias" {
 resource "aws_sns_topic" "compliance_notifications" {
   name         = "intelgraph-federal-compliance"
   display_name = "IntelGraph Federal Compliance Notifications"
-  
+
   kms_master_key_id = aws_kms_key.worm_encryption_key.key_id
 
   tags = {
@@ -95,95 +95,95 @@ data "aws_caller_identity" "current" {}
 # Module instantiation for all five federal WORM buckets
 module "worm_audit_bucket" {
   source = "./modules/worm_bucket"
-  
-  bucket_name       = "intelgraph-federal-audit-${random_id.bucket_suffix.hex}"
-  kms_key_arn       = aws_kms_key.worm_encryption_key.arn
-  retention_years   = 20
-  classification    = "UNCLASSIFIED"
+
+  bucket_name        = "intelgraph-federal-audit-${random_id.bucket_suffix.hex}"
+  kms_key_arn        = aws_kms_key.worm_encryption_key.arn
+  retention_years    = 20
+  classification     = "UNCLASSIFIED"
   legal_hold_enabled = true
-  
+
   federal_org_id = var.federal_org_id
   federal_service_principals = [
     "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/IntelGraphFederalRole",
     "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/IntelGraphAuditRole"
   ]
-  
+
   compliance_sns_topic_arn = aws_sns_topic.compliance_notifications.arn
-  access_log_bucket       = aws_s3_bucket.cloudtrail_logs.id
+  access_log_bucket        = aws_s3_bucket.cloudtrail_logs.id
 }
 
 module "worm_billing_bucket" {
   source = "./modules/worm_bucket"
-  
-  bucket_name       = "intelgraph-federal-billing-${random_id.bucket_suffix.hex}"
-  kms_key_arn       = aws_kms_key.worm_encryption_key.arn
-  retention_years   = 20
-  classification    = "UNCLASSIFIED"
+
+  bucket_name        = "intelgraph-federal-billing-${random_id.bucket_suffix.hex}"
+  kms_key_arn        = aws_kms_key.worm_encryption_key.arn
+  retention_years    = 20
+  classification     = "UNCLASSIFIED"
   legal_hold_enabled = true
-  
+
   federal_org_id = var.federal_org_id
   federal_service_principals = [
     "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/IntelGraphFederalRole"
   ]
-  
+
   compliance_sns_topic_arn = aws_sns_topic.compliance_notifications.arn
-  access_log_bucket       = aws_s3_bucket.cloudtrail_logs.id
+  access_log_bucket        = aws_s3_bucket.cloudtrail_logs.id
 }
 
 module "worm_event_bucket" {
   source = "./modules/worm_bucket"
-  
-  bucket_name       = "intelgraph-federal-event-${random_id.bucket_suffix.hex}"
-  kms_key_arn       = aws_kms_key.worm_encryption_key.arn
-  retention_years   = 20
-  classification    = "UNCLASSIFIED"
+
+  bucket_name        = "intelgraph-federal-event-${random_id.bucket_suffix.hex}"
+  kms_key_arn        = aws_kms_key.worm_encryption_key.arn
+  retention_years    = 20
+  classification     = "UNCLASSIFIED"
   legal_hold_enabled = true
-  
+
   federal_org_id = var.federal_org_id
   federal_service_principals = [
     "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/IntelGraphFederalRole"
   ]
-  
+
   compliance_sns_topic_arn = aws_sns_topic.compliance_notifications.arn
-  access_log_bucket       = aws_s3_bucket.cloudtrail_logs.id
+  access_log_bucket        = aws_s3_bucket.cloudtrail_logs.id
 }
 
 module "worm_breakglass_bucket" {
   source = "./modules/worm_bucket"
-  
-  bucket_name       = "intelgraph-federal-breakglass-${random_id.bucket_suffix.hex}"
-  kms_key_arn       = aws_kms_key.worm_encryption_key.arn
-  retention_years   = 20
-  classification    = "CONFIDENTIAL"  # Higher classification for break-glass logs
+
+  bucket_name        = "intelgraph-federal-breakglass-${random_id.bucket_suffix.hex}"
+  kms_key_arn        = aws_kms_key.worm_encryption_key.arn
+  retention_years    = 20
+  classification     = "CONFIDENTIAL" # Higher classification for break-glass logs
   legal_hold_enabled = true
-  
+
   federal_org_id = var.federal_org_id
   federal_service_principals = [
     "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/IntelGraphFederalRole",
     "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/IntelGraphSecurityRole"
   ]
-  
+
   compliance_sns_topic_arn = aws_sns_topic.compliance_notifications.arn
-  access_log_bucket       = aws_s3_bucket.cloudtrail_logs.id
+  access_log_bucket        = aws_s3_bucket.cloudtrail_logs.id
 }
 
 module "worm_compliance_bucket" {
   source = "./modules/worm_bucket"
-  
-  bucket_name       = "intelgraph-federal-compliance-${random_id.bucket_suffix.hex}"
-  kms_key_arn       = aws_kms_key.worm_encryption_key.arn
-  retention_years   = 20
-  classification    = "UNCLASSIFIED"
+
+  bucket_name        = "intelgraph-federal-compliance-${random_id.bucket_suffix.hex}"
+  kms_key_arn        = aws_kms_key.worm_encryption_key.arn
+  retention_years    = 20
+  classification     = "UNCLASSIFIED"
   legal_hold_enabled = true
-  
+
   federal_org_id = var.federal_org_id
   federal_service_principals = [
     "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/IntelGraphFederalRole",
     "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/IntelGraphComplianceRole"
   ]
-  
+
   compliance_sns_topic_arn = aws_sns_topic.compliance_notifications.arn
-  access_log_bucket       = aws_s3_bucket.cloudtrail_logs.id
+  access_log_bucket        = aws_s3_bucket.cloudtrail_logs.id
 }
 
 # Variables
@@ -204,24 +204,24 @@ output "federal_buckets" {
   description = "All federal WORM bucket configurations"
   value = {
     audit = {
-      name   = module.worm_audit_bucket.bucket_name
-      arn    = module.worm_audit_bucket.bucket_arn
+      name = module.worm_audit_bucket.bucket_name
+      arn  = module.worm_audit_bucket.bucket_arn
     }
     billing = {
-      name   = module.worm_billing_bucket.bucket_name
-      arn    = module.worm_billing_bucket.bucket_arn
+      name = module.worm_billing_bucket.bucket_name
+      arn  = module.worm_billing_bucket.bucket_arn
     }
     event = {
-      name   = module.worm_event_bucket.bucket_name
-      arn    = module.worm_event_bucket.bucket_arn
+      name = module.worm_event_bucket.bucket_name
+      arn  = module.worm_event_bucket.bucket_arn
     }
     breakglass = {
-      name   = module.worm_breakglass_bucket.bucket_name
-      arn    = module.worm_breakglass_bucket.bucket_arn
+      name = module.worm_breakglass_bucket.bucket_name
+      arn  = module.worm_breakglass_bucket.bucket_arn
     }
     compliance = {
-      name   = module.worm_compliance_bucket.bucket_name
-      arn    = module.worm_compliance_bucket.bucket_arn
+      name = module.worm_compliance_bucket.bucket_name
+      arn  = module.worm_compliance_bucket.bucket_arn
     }
   }
 }

@@ -3,7 +3,7 @@ import { FeatureFlagRepository, FeatureFlag } from './types';
 
 export class MemoryFlagRepository implements FeatureFlagRepository {
   private flags: Map<string, FeatureFlag>;
-  private logger: Console;
+  private logger: typeof console;
 
   constructor(initialFlags?: FeatureFlag[]) {
     this.flags = new Map();

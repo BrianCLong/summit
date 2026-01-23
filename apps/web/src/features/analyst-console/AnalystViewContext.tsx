@@ -20,6 +20,11 @@ import type {
   AnalystViewFilters,
   AnalystSelectionState,
 } from './types'
+import {
+  normalizeWindow,
+  fromIsoWindow,
+  assertValidWindow
+} from '@/domain/timeWindow'
 
 // =============================================================================
 // Context Types
@@ -27,7 +32,7 @@ import type {
 
 interface AnalystViewContextValue {
   state: AnalystViewState
-  setTimeWindow: (window: TimeWindow) => void
+  setTimeWindow: (window: TimeWindow, meta?: { source: string }) => void
   setFilters: (filters: Partial<AnalystViewFilters>) => void
   setSelection: (selection: Partial<AnalystSelectionState>) => void
   resetSelection: () => void
@@ -60,7 +65,12 @@ export function AnalystViewProvider({
   initialState,
   children,
 }: AnalystViewProviderProps) {
-  const [state, setState] = useState<AnalystViewState>(initialState)
+  // Ensure initial state has timeWindowSeq
+  const [state, setState] = useState<AnalystViewState>(() => ({
+    ...initialState,
+    timeWindowSeq: initialState.timeWindowSeq ?? 0,
+    timeWindow: normalizeWindow(initialState.timeWindow)
+  }))
 
   // Store initial state for reset functionality
   const initialStateRef = React.useRef(initialState)
@@ -68,8 +78,38 @@ export function AnalystViewProvider({
   /**
    * Update the global time window - affects filtering in all panes
    */
-  const setTimeWindow = useCallback((timeWindow: TimeWindow) => {
-    setState(prev => ({ ...prev, timeWindow }))
+  const setTimeWindow = useCallback((timeWindow: TimeWindow, meta?: { source: string }) => {
+    // 1. Normalize
+    const normalized = normalizeWindow(timeWindow)
+
+    // 2. Assert Valid (Dev only check ideally, but safe to keep cheap checks)
+    if (process.env.NODE_ENV !== 'production') {
+      assertValidWindow(normalized)
+    }
+
+    setState(prev => {
+      // Avoid update if identical (optional optimization, but strict equality of objects usually fails)
+      if (prev.timeWindow.startMs === normalized.startMs &&
+          prev.timeWindow.endMs === normalized.endMs &&
+          prev.timeWindow.granularity === normalized.granularity &&
+          prev.timeWindow.tzMode === normalized.tzMode) {
+        return prev
+      }
+
+      // 3. Emit Telemetry (console for now)
+      console.log('triPane.timeWindow.change', {
+        window: normalized,
+        source: meta?.source,
+        prevSeq: prev.timeWindowSeq
+      })
+
+      // 4. Update State & Bump Sequence
+      return {
+        ...prev,
+        timeWindow: normalized,
+        timeWindowSeq: prev.timeWindowSeq + 1
+      }
+    })
   }, [])
 
   /**
@@ -123,8 +163,11 @@ export function AnalystViewProvider({
    * Reset everything to initial state
    */
   const resetAll = useCallback(() => {
-    setState(initialStateRef.current)
-  }, [])
+    setState({
+      ...initialStateRef.current,
+      timeWindowSeq: (state.timeWindowSeq || 0) + 1 // Keep sequence moving forward even on reset
+    })
+  }, [state.timeWindowSeq])
 
   // Memoize context value to prevent unnecessary re-renders
   const value = useMemo<AnalystViewContextValue>(
@@ -182,6 +225,7 @@ export function useGlobalTimeBrush() {
   const { state, setTimeWindow } = useAnalystView()
   return {
     timeWindow: state.timeWindow,
+    timeWindowSeq: state.timeWindowSeq,
     setTimeWindow,
   }
 }
@@ -302,10 +346,8 @@ export function createDefaultViewState(
   const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
 
   return {
-    timeWindow: {
-      from: oneWeekAgo.toISOString(),
-      to: now.toISOString(),
-    },
+    timeWindow: fromIsoWindow(oneWeekAgo.toISOString(), now.toISOString()),
+    timeWindowSeq: 0,
     filters: {
       entityTypes: [],
       eventTypes: [],

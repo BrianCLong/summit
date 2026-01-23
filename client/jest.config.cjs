@@ -2,15 +2,20 @@
 const config = {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
-  globals: {
-    'ts-jest': {
-      tsconfig: '<rootDir>/tsconfig.json',
-    },
-  },
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/__mocks__/fileMock.js',
     '^dompurify$': '<rootDir>/__mocks__/dompurify.js',
+    '^ansi-regex$': '<rootDir>/__mocks__/ansi-regex.js',
+    '^react$': '<rootDir>/../node_modules/react',
+    '^react/(.*)$': '<rootDir>/../node_modules/react/$1',
+    '^react/jsx-runtime$': '<rootDir>/../node_modules/react/jsx-runtime',
+    '^react/jsx-dev-runtime$': '<rootDir>/../node_modules/react/jsx-dev-runtime',
+    '^react-dom$': '<rootDir>/../node_modules/react-dom',
+    '^react-dom/(.*)$': '<rootDir>/../node_modules/react-dom/$1',
+    '^react-redux$': '<rootDir>/../node_modules/react-redux',
+    '^@emotion/react$': '<rootDir>/../node_modules/@emotion/react',
+    '^@emotion/styled$': '<rootDir>/../node_modules/@emotion/styled',
   },
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {

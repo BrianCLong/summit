@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
 import os from 'os';
@@ -20,6 +21,9 @@ jest.mock('../../middleware/auth.js', () => ({
   },
   ensureRole: () => (_req: any, _res: any, next: any) => next(),
 }));
+
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
 
 const buildApp = () => {
   const app = express();
@@ -62,7 +66,7 @@ async function writeBundle(tmp: string, bundleId: string, version: string) {
   return { file, id: bundleId };
 }
 
-describe('policy hot reload endpoints', () => {
+describeIf('policy hot reload endpoints', () => {
   const tmpDir = path.join(os.tmpdir(), 'policy-hot-reload-tests');
   const originalHotReload = process.env.POLICY_HOT_RELOAD;
   const originalUnsigned = process.env.ALLOW_UNSIGNED_POLICY;
@@ -116,7 +120,7 @@ describe('policy hot reload endpoints', () => {
 
     const evaluateSpy = jest
       .spyOn(ActionPolicyService.prototype as any, 'evaluateWithOpa')
-      .mockImplementation(async (req, requestHash, _meta, version) => {
+      .mockImplementation(async (req: any, requestHash, _meta, version) => {
         observedContexts.push(req.context);
         return {
           allow: true,

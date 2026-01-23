@@ -1,6 +1,6 @@
 {
-  "name": "@intelgraph/feature-flags",
-  "version": "1.0.0",
+  "name": "@intelgraph/feature-flags-service",
+  "version": "4.2.3",
   "description": "CompanyOS-driven feature flags and access policies for Summit",
   "type": "module",
   "main": "dist/index.js",

@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import AdaptiveRouter from '../adaptive-router';
 
 // Mock backend data for testing

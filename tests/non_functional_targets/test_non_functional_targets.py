@@ -9,8 +9,8 @@ sys.path.insert(0, project_root)
 from non_functional_targets.chaos_runner import (
     run_broker_kill_chaos_test,
     run_pod_kill_chaos_test,
-    simulate_cross_region_failover,
     simulate_cross_cloud_failover,
+    simulate_cross_region_failover,
     simulate_pitr_recovery,
 )
 from non_functional_targets.ingest_compliance import apply_data_minimization, apply_policy_labels
@@ -23,7 +23,6 @@ from non_functional_targets.slo_monitor import (
 
 
 class TestNonFunctionalTargetsStubs(unittest.TestCase):
-
     def test_check_graph_query_slo(self):
         self.assertTrue(check_graph_query_slo(1000.0))
         self.assertFalse(check_graph_query_slo(2000.0))

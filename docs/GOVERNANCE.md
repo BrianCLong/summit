@@ -1,96 +1,27 @@
-# Summit Governance-as-Code
+# Repository Protection Standards
 
-Summit encodes governance as code: versioned, testable, and enforced by CI.
+To ensure the stability of the Production environment, the following Branch Protection Rules **MUST** be configured in the GitHub Repository Settings.
 
-## Components
+## 1. Branch Protection Rule: `main`
 
-### Portfolio & Focus (Sprint N+55)
+*   **Require a pull request before merging:** Enabled.
+*   **Require approvals:** 1 (minimum).
+*   **Dismiss stale pull request approvals when new commits are pushed:** Enabled.
+*   **Require status checks to pass before merging:** Enabled.
+    *   `build-and-push (maestro)`
+    *   `build-and-push (prov-ledger)`
+    *   `Security Scan (Trivy)`
+*   **Require linear history:** Enabled (prevents merge commits, keeps history clean).
+*   **Include administrators:** Enabled (prevents "cowboy coding" by admins).
 
-To maintain focus and high value density, all new additions must adhere to the **Pruning & Focus** protocols.
+## 2. Environment Protection: `prod`
 
-**1. ROI Rationale Requirement**
-Every new feature, integration, or experimental module PR must include an "ROI Rationale" section in the PR description, answering:
-- **Why Now?** (Urgency/Timeliness)
-- **Who pays/benefits?** (Customer value)
-- **What is the maintenance cost?**
-- **What happens if we don't do it?**
+Go to **Settings -> Environments -> prod**:
+*   **Required Reviewers:** Add the Tech Lead or DevOps team.
+*   **Wait Timer:** 0 minutes (or set 10m to allow for cancellation).
+*   **Deployment Branches:** Only `tags` (e.g., `v*`) or specific release branches.
 
-**2. Focus Guardrails**
-- **Zero-Sum Capacity:** If a new large initiative is added, an existing low-ROI item must be nominated for retirement.
-- **Experimental Cap:** A maximum of 3 concurrent "Incubation" or "Black Project" tracks are allowed active at any time. Excess experiments must be paused or retired.
+## 3. Secret Security
 
-### Schemas (`schemas/`)
-
-Schemas define contracts for governance artifacts:
-
-- `purchase-order.schema.json` – financial events
-- `sbom.schema.json` – software bill of materials
-- `provenance-event.schema.json` – build/deploy provenance
-- `policy-decision.schema.json` – policy evaluation snapshots
-- `agent-run.schema.json` – multi-agent run records
-
-### Policies (`policy/`)
-
-OPA/Rego packages:
-
-- `summit.deploy` – production deploy gate
-- `summit.pr` – PR merge gate
-- `summit.sbom` – SBOM quality gate
-- `summit.provenance` – provenance invariants
-- `summit.access` – access control for governance actions
-- `summit.regulatory` – clean-hands regulatory advantage strategy
-- `summit.shared` – shared helpers
-
-### Legal & IP
-
-- **IP Register**: `docs/legal/IP_REGISTER.yaml` tracks core assets.
-- **Due Diligence**: `docs/legal/IP_PLAYBOOK.md` defines audit and M&A readiness procedures.
-
-### CI Workflow
-
-`.github/workflows/governance.yml` runs on PRs and selected branches:
-
-1. Validate schemas and sample documents
-2. Run OPA policy tests
-3. Build OPA input from GitHub event (`ci/build-opa-input.js`)
-4. Evaluate deploy, PR, and SBOM policies
-5. Emit `governance-decision.json` as an artifact
-
-### Audit
-
-`audit/` stores signed, append-only audit events for:
-
-- policy evaluations
-- SBOM verification
-- deploy execution
-
-### Release Integrity & PR Normalization
-
-We enforce a strict "Golden Path" for all contributions and releases:
-
-1.  **PR Normalization**:
-    All PRs must strictly adhere to the `PR_NORMALIZATION_CHECKLIST.md`.
-    - **Atomic Commits**: Changes must be scoped to a single feature or fix.
-    - **Evidence**: All changes must include evidence artifacts (tests, screenshots).
-
-2.  **Release Gates**:
-    - **SBOM**: A Software Bill of Materials (CycloneDX) is generated for every build (`.evidence/sbom.json`).
-    - **Signing**: All release artifacts are cryptographically signed.
-    - **Vulnerability Gating**: Releases are blocked if critical vulnerabilities are detected.
-
-3.  **SOC 2 Compliance**:
-    See `docs/compliance/SOC_MAPPING.md` for a detailed mapping of technical controls to SOC 2 criteria.
-
-### Developer usage
-
-Local checks:
-
-```bash
-# JSON Schema
-ajv compile -c ajv-formats --spec=draft2020 -s schemas/**/*.json
-
-# OPA tests
-opa test policy/ -v
-```
-
-CI is the final authority: PRs should not merge unless governance is green.
+*   Ensure `AWS_ACCOUNT_ID` is defined at the **Repository** or **Organization** level, not Environment level (unless you have separate AWS accounts per env).
+*   Rotate the IAM Role (`github-actions-deploy-role`) credentials every 90 days.

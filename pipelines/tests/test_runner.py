@@ -1,7 +1,7 @@
 """
 Tests for Local Pipeline Runner
 """
-import json
+
 import tempfile
 from pathlib import Path
 
@@ -28,9 +28,7 @@ def simple_pipeline_manifest():
                 {
                     "id": "hello",
                     "type": "python",
-                    "code": {
-                        "command": "print('Hello from task')"
-                    },
+                    "code": {"command": "print('Hello from task')"},
                     "retry": {
                         "attempts": 1,
                         "delay": "1s",
@@ -61,33 +59,25 @@ def multi_task_pipeline():
                 {
                     "id": "task1",
                     "type": "python",
-                    "code": {
-                        "command": "result = 'task1 complete'"
-                    },
+                    "code": {"command": "result = 'task1 complete'"},
                 },
                 {
                     "id": "task2",
                     "type": "python",
                     "depends_on": ["task1"],
-                    "code": {
-                        "command": "result = 'task2 complete'"
-                    },
+                    "code": {"command": "result = 'task2 complete'"},
                 },
                 {
                     "id": "task3",
                     "type": "python",
                     "depends_on": ["task1"],
-                    "code": {
-                        "command": "result = 'task3 complete'"
-                    },
+                    "code": {"command": "result = 'task3 complete'"},
                 },
                 {
                     "id": "task4",
                     "type": "python",
                     "depends_on": ["task2", "task3"],
-                    "code": {
-                        "command": "result = 'task4 complete'"
-                    },
+                    "code": {"command": "result = 'task4 complete'"},
                 },
             ],
         },
@@ -201,9 +191,7 @@ def test_task_retry():
                 {
                     "id": "failing_task",
                     "type": "python",
-                    "code": {
-                        "command": "raise Exception('Intentional failure')"
-                    },
+                    "code": {"command": "raise Exception('Intentional failure')"},
                     "retry": {
                         "attempts": 2,
                         "delay": "1s",
@@ -245,9 +233,7 @@ def test_dependency_skip_on_failure():
                 {
                     "id": "failing_task",
                     "type": "python",
-                    "code": {
-                        "command": "raise Exception('Failure')"
-                    },
+                    "code": {"command": "raise Exception('Failure')"},
                     "retry": {
                         "attempts": 0,
                     },
@@ -256,9 +242,7 @@ def test_dependency_skip_on_failure():
                     "id": "dependent_task",
                     "type": "python",
                     "depends_on": ["failing_task"],
-                    "code": {
-                        "command": "print('Should not run')"
-                    },
+                    "code": {"command": "print('Should not run')"},
                 },
             ],
         },
@@ -295,9 +279,7 @@ def test_bash_task_execution():
                 {
                     "id": "bash_task",
                     "type": "bash",
-                    "code": {
-                        "command": "echo 'Hello from Bash'"
-                    },
+                    "code": {"command": "echo 'Hello from Bash'"},
                 },
             ],
         },

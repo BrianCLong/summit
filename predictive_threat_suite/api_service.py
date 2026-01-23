@@ -6,44 +6,39 @@ with Prometheus metrics integration.
 """
 
 import logging
-from datetime import datetime
-from typing import Any, Optional
 from contextlib import asynccontextmanager
+from datetime import datetime
+from typing import Any
 
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import Response
-from pydantic import BaseModel, Field
-from prometheus_client import (
-    Counter,
-    Histogram,
-    Gauge,
-    generate_latest,
-    CollectorRegistry,
-    CONTENT_TYPE_LATEST
-)
 import numpy as np
-
-from forecasting_service import (
-    ForecastingService,
-    SignalType,
-    ForecastHorizon,
-    ModelType,
-    prepare_event_count_data,
-    prepare_latency_data,
-    prepare_error_rate_data,
-)
 from counterfactual_service import (
     CounterfactualService,
-    ThreatLevel,
-    InterventionType,
     CurrentState,
     InterventionParameters,
+    InterventionType,
+    ThreatLevel,
 )
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import Response
+from forecasting_service import (
+    ForecastHorizon,
+    ForecastingService,
+    ModelType,
+    SignalType,
+)
+from prometheus_client import (
+    CONTENT_TYPE_LATEST,
+    CollectorRegistry,
+    Counter,
+    Gauge,
+    Histogram,
+    generate_latest,
+)
+from pydantic import BaseModel, Field
 
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -53,109 +48,107 @@ registry = CollectorRegistry()
 
 # Request metrics
 http_requests_total = Counter(
-    'predictive_http_requests_total',
-    'Total HTTP requests',
-    ['method', 'endpoint', 'status'],
-    registry=registry
+    "predictive_http_requests_total",
+    "Total HTTP requests",
+    ["method", "endpoint", "status"],
+    registry=registry,
 )
 
 http_request_duration_seconds = Histogram(
-    'predictive_http_request_duration_seconds',
-    'HTTP request duration in seconds',
-    ['method', 'endpoint'],
-    registry=registry
+    "predictive_http_request_duration_seconds",
+    "HTTP request duration in seconds",
+    ["method", "endpoint"],
+    registry=registry,
 )
 
 # Forecast metrics
 forecast_generation_total = Counter(
-    'predictive_forecast_generation_total',
-    'Total forecasts generated',
-    ['signal_type', 'model_type', 'status'],
-    registry=registry
+    "predictive_forecast_generation_total",
+    "Total forecasts generated",
+    ["signal_type", "model_type", "status"],
+    registry=registry,
 )
 
 forecast_generation_duration_seconds = Histogram(
-    'predictive_forecast_generation_duration_seconds',
-    'Forecast generation duration in seconds',
-    ['signal_type', 'model_type'],
-    registry=registry
+    "predictive_forecast_generation_duration_seconds",
+    "Forecast generation duration in seconds",
+    ["signal_type", "model_type"],
+    registry=registry,
 )
 
 forecast_accuracy_mape = Gauge(
-    'predictive_forecast_accuracy_mape',
-    'Forecast accuracy - Mean Absolute Percentage Error',
-    ['signal_type', 'entity_id', 'model_type'],
-    registry=registry
+    "predictive_forecast_accuracy_mape",
+    "Forecast accuracy - Mean Absolute Percentage Error",
+    ["signal_type", "entity_id", "model_type"],
+    registry=registry,
 )
 
 forecast_accuracy_rmse = Gauge(
-    'predictive_forecast_accuracy_rmse',
-    'Forecast accuracy - Root Mean Square Error',
-    ['signal_type', 'entity_id', 'model_type'],
-    registry=registry
+    "predictive_forecast_accuracy_rmse",
+    "Forecast accuracy - Root Mean Square Error",
+    ["signal_type", "entity_id", "model_type"],
+    registry=registry,
 )
 
 # Prediction value metrics (for dashboards)
 forecast_predicted_value = Gauge(
-    'predictive_forecast_value',
-    'Latest forecast predicted value',
-    ['signal_type', 'entity_id', 'horizon', 'offset_hours'],
-    registry=registry
+    "predictive_forecast_value",
+    "Latest forecast predicted value",
+    ["signal_type", "entity_id", "horizon", "offset_hours"],
+    registry=registry,
 )
 
 forecast_lower_bound = Gauge(
-    'predictive_forecast_lower_bound',
-    'Latest forecast lower confidence bound',
-    ['signal_type', 'entity_id', 'horizon', 'offset_hours'],
-    registry=registry
+    "predictive_forecast_lower_bound",
+    "Latest forecast lower confidence bound",
+    ["signal_type", "entity_id", "horizon", "offset_hours"],
+    registry=registry,
 )
 
 forecast_upper_bound = Gauge(
-    'predictive_forecast_upper_bound',
-    'Latest forecast upper confidence bound',
-    ['signal_type', 'entity_id', 'horizon', 'offset_hours'],
-    registry=registry
+    "predictive_forecast_upper_bound",
+    "Latest forecast upper confidence bound",
+    ["signal_type", "entity_id", "horizon", "offset_hours"],
+    registry=registry,
 )
 
 # Simulation metrics
 simulation_total = Counter(
-    'predictive_simulation_total',
-    'Total simulations run',
-    ['entity_id', 'status'],
-    registry=registry
+    "predictive_simulation_total",
+    "Total simulations run",
+    ["entity_id", "status"],
+    registry=registry,
 )
 
 simulation_duration_seconds = Histogram(
-    'predictive_simulation_duration_seconds',
-    'Simulation duration in seconds',
-    ['entity_id'],
-    registry=registry
+    "predictive_simulation_duration_seconds",
+    "Simulation duration in seconds",
+    ["entity_id"],
+    registry=registry,
 )
 
 simulation_risk_score = Gauge(
-    'predictive_simulation_risk_score',
-    'Latest simulation risk score',
-    ['entity_id', 'scenario_type'],
-    registry=registry
+    "predictive_simulation_risk_score",
+    "Latest simulation risk score",
+    ["entity_id", "scenario_type"],
+    registry=registry,
 )
 
 simulation_recommendation_priority = Gauge(
-    'predictive_simulation_recommendation_priority',
-    'Simulation recommendation priority (0=low, 1=medium, 2=high, 3=critical)',
-    ['entity_id', 'recommended_action'],
-    registry=registry
+    "predictive_simulation_recommendation_priority",
+    "Simulation recommendation priority (0=low, 1=medium, 2=high, 3=critical)",
+    ["entity_id", "recommended_action"],
+    registry=registry,
 )
 
 
 # Pydantic models for API
 class ForecastRequest(BaseModel):
     """Request model for forecast generation."""
+
     signal_type: SignalType
     entity_id: str
-    historical_data: list[float] = Field(
-        ...,
-        description="Historical time series data points"
-    )
+    historical_data: list[float] = Field(..., description="Historical time series data points")
     horizon: ForecastHorizon = "24h"
     confidence_level: float = Field(0.95, ge=0.5, le=0.99)
     model_type: ModelType = "arima"
@@ -163,6 +156,7 @@ class ForecastRequest(BaseModel):
 
 class ForecastPointResponse(BaseModel):
     """Response model for a single forecast point."""
+
     timestamp: datetime
     predicted_value: float
     lower_bound: float
@@ -172,6 +166,7 @@ class ForecastPointResponse(BaseModel):
 
 class ModelMetricsResponse(BaseModel):
     """Response model for model accuracy metrics."""
+
     mape: float
     rmse: float
     mae: float
@@ -180,6 +175,7 @@ class ModelMetricsResponse(BaseModel):
 
 class ModelInfoResponse(BaseModel):
     """Response model for model information."""
+
     type: ModelType
     parameters: dict[str, Any]
     accuracy_metrics: ModelMetricsResponse
@@ -187,6 +183,7 @@ class ModelInfoResponse(BaseModel):
 
 class ForecastResponse(BaseModel):
     """Response model for forecast generation."""
+
     signal_type: SignalType
     entity_id: str
     forecast_horizon: ForecastHorizon
@@ -197,20 +194,20 @@ class ForecastResponse(BaseModel):
 
 class SimulationRequest(BaseModel):
     """Request model for counterfactual simulation."""
+
     entity_id: str
     current_state: dict[str, Any] = Field(
-        ...,
-        description="Current system state with threat_level, error_rate, latency_p95, etc."
+        ..., description="Current system state with threat_level, error_rate, latency_p95, etc."
     )
     interventions: list[dict[str, Any]] = Field(
-        ...,
-        description="List of interventions to simulate"
+        ..., description="List of interventions to simulate"
     )
     timeframe: str = "24h"
 
 
 class OutcomeMetricsResponse(BaseModel):
     """Response model for outcome metrics."""
+
     threat_escalation_probability: float
     expected_error_rate: float
     expected_latency_p95: float
@@ -220,6 +217,7 @@ class OutcomeMetricsResponse(BaseModel):
 
 class InterventionOutcomeResponse(BaseModel):
     """Response model for intervention outcome."""
+
     intervention_id: str
     intervention_type: InterventionType
     probability: float
@@ -231,6 +229,7 @@ class InterventionOutcomeResponse(BaseModel):
 
 class RecommendationResponse(BaseModel):
     """Response model for recommendation."""
+
     action: InterventionType
     priority: str
     reasoning: str
@@ -239,6 +238,7 @@ class RecommendationResponse(BaseModel):
 
 class SimulationResponse(BaseModel):
     """Response model for simulation."""
+
     scenario_id: str
     entity_id: str
     generated_at: datetime
@@ -248,8 +248,8 @@ class SimulationResponse(BaseModel):
 
 
 # Service instances
-forecasting_service: Optional[ForecastingService] = None
-counterfactual_service: Optional[CounterfactualService] = None
+forecasting_service: ForecastingService | None = None
+counterfactual_service: CounterfactualService | None = None
 
 
 @asynccontextmanager
@@ -274,7 +274,7 @@ app = FastAPI(
     title="Predictive Threat Suite API",
     description="Timeline forecasting and counterfactual simulation for threat intelligence",
     version="0.1.0-alpha",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 
@@ -289,8 +289,8 @@ async def root():
             "forecast": "/api/forecast",
             "simulate": "/api/simulate",
             "metrics": "/metrics",
-            "health": "/health"
-        }
+            "health": "/health",
+        },
     }
 
 
@@ -302,8 +302,8 @@ async def health_check():
         "timestamp": datetime.utcnow().isoformat(),
         "services": {
             "forecasting": forecasting_service is not None,
-            "simulation": counterfactual_service is not None
-        }
+            "simulation": counterfactual_service is not None,
+        },
     }
 
 
@@ -328,8 +328,7 @@ async def generate_forecast(request: ForecastRequest):
 
         # Generate forecast
         with forecast_generation_duration_seconds.labels(
-            signal_type=request.signal_type,
-            model_type=request.model_type
+            signal_type=request.signal_type, model_type=request.model_type
         ).time():
             result = forecasting_service.generate_forecast(
                 signal_type=request.signal_type,
@@ -337,26 +336,24 @@ async def generate_forecast(request: ForecastRequest):
                 historical_data=historical_data,
                 horizon=request.horizon,
                 confidence_level=request.confidence_level,
-                model_type=request.model_type
+                model_type=request.model_type,
             )
 
         # Update metrics
         forecast_generation_total.labels(
-            signal_type=request.signal_type,
-            model_type=request.model_type,
-            status="success"
+            signal_type=request.signal_type, model_type=request.model_type, status="success"
         ).inc()
 
         forecast_accuracy_mape.labels(
             signal_type=request.signal_type,
             entity_id=request.entity_id,
-            model_type=request.model_type
+            model_type=request.model_type,
         ).set(result.model_info.accuracy_metrics.mape)
 
         forecast_accuracy_rmse.labels(
             signal_type=request.signal_type,
             entity_id=request.entity_id,
-            model_type=request.model_type
+            model_type=request.model_type,
         ).set(result.model_info.accuracy_metrics.rmse)
 
         # Update forecast value metrics (for Grafana dashboards)
@@ -367,35 +364,30 @@ async def generate_forecast(request: ForecastRequest):
                 signal_type=request.signal_type,
                 entity_id=request.entity_id,
                 horizon=request.horizon,
-                offset_hours=str(offset_hours)
+                offset_hours=str(offset_hours),
             ).set(forecast_point.predicted_value)
 
             forecast_lower_bound.labels(
                 signal_type=request.signal_type,
                 entity_id=request.entity_id,
                 horizon=request.horizon,
-                offset_hours=str(offset_hours)
+                offset_hours=str(offset_hours),
             ).set(forecast_point.lower_bound)
 
             forecast_upper_bound.labels(
                 signal_type=request.signal_type,
                 entity_id=request.entity_id,
                 horizon=request.horizon,
-                offset_hours=str(offset_hours)
+                offset_hours=str(offset_hours),
             ).set(forecast_point.upper_bound)
 
         # Record request
         duration = (datetime.utcnow() - start_time).total_seconds()
-        http_requests_total.labels(
-            method="POST",
-            endpoint="/api/forecast",
-            status="200"
-        ).inc()
+        http_requests_total.labels(method="POST", endpoint="/api/forecast", status="200").inc()
 
-        http_request_duration_seconds.labels(
-            method="POST",
-            endpoint="/api/forecast"
-        ).observe(duration)
+        http_request_duration_seconds.labels(method="POST", endpoint="/api/forecast").observe(
+            duration
+        )
 
         # Convert to response model
         return ForecastResponse(
@@ -409,7 +401,7 @@ async def generate_forecast(request: ForecastRequest):
                     predicted_value=fp.predicted_value,
                     lower_bound=fp.lower_bound,
                     upper_bound=fp.upper_bound,
-                    confidence=fp.confidence
+                    confidence=fp.confidence,
                 )
                 for fp in result.forecasts
             ],
@@ -420,25 +412,19 @@ async def generate_forecast(request: ForecastRequest):
                     mape=result.model_info.accuracy_metrics.mape,
                     rmse=result.model_info.accuracy_metrics.rmse,
                     mae=result.model_info.accuracy_metrics.mae,
-                    r_squared=result.model_info.accuracy_metrics.r_squared
-                )
-            )
+                    r_squared=result.model_info.accuracy_metrics.r_squared,
+                ),
+            ),
         )
 
     except Exception as e:
-        logger.error(f"Error generating forecast: {str(e)}", exc_info=True)
+        logger.error(f"Error generating forecast: {e!s}", exc_info=True)
 
         forecast_generation_total.labels(
-            signal_type=request.signal_type,
-            model_type=request.model_type,
-            status="error"
+            signal_type=request.signal_type, model_type=request.model_type, status="error"
         ).inc()
 
-        http_requests_total.labels(
-            method="POST",
-            endpoint="/api/forecast",
-            status="500"
-        ).inc()
+        http_requests_total.labels(method="POST", endpoint="/api/forecast", status="500").inc()
 
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -465,7 +451,7 @@ async def run_simulation(request: SimulationRequest):
             error_rate=request.current_state.get("error_rate", 0.0),
             latency_p95=request.current_state.get("latency_p95", 0.0),
             request_rate=request.current_state.get("request_rate", 100.0),
-            resource_utilization=request.current_state.get("resource_utilization", 0.7)
+            resource_utilization=request.current_state.get("resource_utilization", 0.7),
         )
 
         # Parse interventions
@@ -473,52 +459,40 @@ async def run_simulation(request: SimulationRequest):
             InterventionParameters(
                 type=InterventionType(i["type"]),
                 timing=i.get("timing", "immediate"),
-                parameters=i.get("parameters", {})
+                parameters=i.get("parameters", {}),
             )
             for i in request.interventions
         ]
 
         # Run simulation
-        with simulation_duration_seconds.labels(
-            entity_id=request.entity_id
-        ).time():
+        with simulation_duration_seconds.labels(entity_id=request.entity_id).time():
             result = counterfactual_service.simulate_scenario(
                 entity_id=request.entity_id,
                 current_state=state,
                 interventions=interventions,
-                timeframe=request.timeframe
+                timeframe=request.timeframe,
             )
 
         # Update metrics
-        simulation_total.labels(
-            entity_id=request.entity_id,
-            status="success"
-        ).inc()
+        simulation_total.labels(entity_id=request.entity_id, status="success").inc()
 
-        simulation_risk_score.labels(
-            entity_id=request.entity_id,
-            scenario_type="baseline"
-        ).set(result.baseline_outcome.threat_escalation_probability)
+        simulation_risk_score.labels(entity_id=request.entity_id, scenario_type="baseline").set(
+            result.baseline_outcome.threat_escalation_probability
+        )
 
         # Priority mapping
         priority_map = {"low": 0, "medium": 1, "high": 2, "critical": 3}
         simulation_recommendation_priority.labels(
-            entity_id=request.entity_id,
-            recommended_action=result.recommendation.action.value
+            entity_id=request.entity_id, recommended_action=result.recommendation.action.value
         ).set(priority_map.get(result.recommendation.priority, 0))
 
         # Record request
         duration = (datetime.utcnow() - start_time).total_seconds()
-        http_requests_total.labels(
-            method="POST",
-            endpoint="/api/simulate",
-            status="200"
-        ).inc()
+        http_requests_total.labels(method="POST", endpoint="/api/simulate", status="200").inc()
 
-        http_request_duration_seconds.labels(
-            method="POST",
-            endpoint="/api/simulate"
-        ).observe(duration)
+        http_request_duration_seconds.labels(method="POST", endpoint="/api/simulate").observe(
+            duration
+        )
 
         # Convert to response model
         return SimulationResponse(
@@ -530,7 +504,7 @@ async def run_simulation(request: SimulationRequest):
                 expected_error_rate=result.baseline_outcome.expected_error_rate,
                 expected_latency_p95=result.baseline_outcome.expected_latency_p95,
                 expected_availability=result.baseline_outcome.expected_availability,
-                risk_reduction=result.baseline_outcome.risk_reduction
+                risk_reduction=result.baseline_outcome.risk_reduction,
             ),
             intervention_outcomes=[
                 InterventionOutcomeResponse(
@@ -542,11 +516,11 @@ async def run_simulation(request: SimulationRequest):
                         expected_error_rate=io.impact.expected_error_rate,
                         expected_latency_p95=io.impact.expected_latency_p95,
                         expected_availability=io.impact.expected_availability,
-                        risk_reduction=io.impact.risk_reduction
+                        risk_reduction=io.impact.risk_reduction,
                     ),
                     confidence=io.confidence,
                     cost_estimate=io.cost_estimate,
-                    time_to_effect=io.time_to_effect
+                    time_to_effect=io.time_to_effect,
                 )
                 for io in result.intervention_outcomes
             ],
@@ -554,23 +528,16 @@ async def run_simulation(request: SimulationRequest):
                 action=result.recommendation.action,
                 priority=result.recommendation.priority,
                 reasoning=result.recommendation.reasoning,
-                expected_benefit=result.recommendation.expected_benefit
-            )
+                expected_benefit=result.recommendation.expected_benefit,
+            ),
         )
 
     except Exception as e:
-        logger.error(f"Error running simulation: {str(e)}", exc_info=True)
+        logger.error(f"Error running simulation: {e!s}", exc_info=True)
 
-        simulation_total.labels(
-            entity_id=request.entity_id,
-            status="error"
-        ).inc()
+        simulation_total.labels(entity_id=request.entity_id, status="error").inc()
 
-        http_requests_total.labels(
-            method="POST",
-            endpoint="/api/simulate",
-            status="500"
-        ).inc()
+        http_requests_total.labels(method="POST", endpoint="/api/simulate", status="500").inc()
 
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -582,18 +549,10 @@ async def metrics():
 
     Exposes metrics in Prometheus format for scraping.
     """
-    return Response(
-        content=generate_latest(registry),
-        media_type=CONTENT_TYPE_LATEST
-    )
+    return Response(content=generate_latest(registry), media_type=CONTENT_TYPE_LATEST)
 
 
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=8091,
-        log_level="info"
-    )
+    uvicorn.run(app, host="0.0.0.0", port=8091, log_level="info")

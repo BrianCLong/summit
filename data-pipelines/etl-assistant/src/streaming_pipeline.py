@@ -3,13 +3,14 @@
 import asyncio
 import logging
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from .enrichers import (
     BaseEnricher,
-    EnrichmentContext,
     EnricherResult,
+    EnrichmentContext,
     ExifScrubEnricher,
     GeoIPEnricher,
     HashingEnricher,
@@ -31,7 +32,7 @@ class PipelineMetrics:
     total_duration_ms: float = 0.0
     enrichments_applied: int = 0
     enrichment_duration_ms: float = 0.0
-    errors: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -44,7 +45,7 @@ class PipelineConfig:
     batch_size: int = 100
     max_workers: int = 4
     enable_enrichers: bool = True
-    enricher_config: Dict[str, Any] = field(default_factory=dict)
+    enricher_config: dict[str, Any] = field(default_factory=dict)
     emit_provenance: bool = True
     backpressure_threshold: int = 1000
 
@@ -64,9 +65,9 @@ class StreamingETLPipeline:
     def __init__(self, config: PipelineConfig):
         self.config = config
         self.metrics = PipelineMetrics()
-        self.enrichers: List[BaseEnricher] = []
-        self.provenance_handler: Optional[Callable] = None
-        self.error_handler: Optional[Callable] = None
+        self.enrichers: list[BaseEnricher] = []
+        self.provenance_handler: Callable | None = None
+        self.error_handler: Callable | None = None
 
         # Initialize enrichers if enabled
         if self.config.enable_enrichers:
@@ -82,41 +83,41 @@ class StreamingETLPipeline:
         enricher_config = self.config.enricher_config
 
         # GeoIP enricher
-        if enricher_config.get('geoip', {}).get('enabled', True):
-            self.enrichers.append(GeoIPEnricher(enricher_config.get('geoip', {})))
+        if enricher_config.get("geoip", {}).get("enabled", True):
+            self.enrichers.append(GeoIPEnricher(enricher_config.get("geoip", {})))
 
         # Language enricher
-        if enricher_config.get('language', {}).get('enabled', True):
-            self.enrichers.append(LanguageEnricher(enricher_config.get('language', {})))
+        if enricher_config.get("language", {}).get("enabled", True):
+            self.enrichers.append(LanguageEnricher(enricher_config.get("language", {})))
 
         # Hashing enricher
-        if enricher_config.get('hashing', {}).get('enabled', True):
-            self.enrichers.append(HashingEnricher(enricher_config.get('hashing', {})))
+        if enricher_config.get("hashing", {}).get("enabled", True):
+            self.enrichers.append(HashingEnricher(enricher_config.get("hashing", {})))
 
         # EXIF scrub enricher
-        if enricher_config.get('exif_scrub', {}).get('enabled', False):
-            self.enrichers.append(ExifScrubEnricher(enricher_config.get('exif_scrub', {})))
+        if enricher_config.get("exif_scrub", {}).get("enabled", False):
+            self.enrichers.append(ExifScrubEnricher(enricher_config.get("exif_scrub", {})))
 
         # OCR enricher
-        if enricher_config.get('ocr', {}).get('enabled', False):
-            self.enrichers.append(OCREnricher(enricher_config.get('ocr', {})))
+        if enricher_config.get("ocr", {}).get("enabled", False):
+            self.enrichers.append(OCREnricher(enricher_config.get("ocr", {})))
 
         # STT enricher
-        if enricher_config.get('stt', {}).get('enabled', False):
-            self.enrichers.append(STTEnricher(enricher_config.get('stt', {})))
+        if enricher_config.get("stt", {}).get("enabled", False):
+            self.enrichers.append(STTEnricher(enricher_config.get("stt", {})))
 
         logger.info(f"Initialized {len(self.enrichers)} enrichers")
 
-    def set_provenance_handler(self, handler: Callable[[Dict[str, Any]], None]):
+    def set_provenance_handler(self, handler: Callable[[dict[str, Any]], None]):
         """Set handler for provenance events."""
         self.provenance_handler = handler
 
-    def set_error_handler(self, handler: Callable[[Exception, Dict[str, Any]], None]):
+    def set_error_handler(self, handler: Callable[[Exception, dict[str, Any]], None]):
         """Set handler for errors."""
         self.error_handler = handler
 
     async def process_stream(
-        self, records: asyncio.Queue, output_queue: Optional[asyncio.Queue] = None
+        self, records: asyncio.Queue, output_queue: asyncio.Queue | None = None
     ) -> PipelineMetrics:
         """
         Process a stream of records through the pipeline.
@@ -159,7 +160,7 @@ class StreamingETLPipeline:
                         await asyncio.gather(*tasks)
                         tasks = []
 
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 # No more records available, process remaining batch
                 if batch:
                     task = asyncio.create_task(self._process_batch(batch, output_queue))
@@ -186,15 +187,13 @@ class StreamingETLPipeline:
         return self.metrics
 
     async def _process_batch(
-        self, batch: List[Dict[str, Any]], output_queue: asyncio.Queue
+        self, batch: list[dict[str, Any]], output_queue: asyncio.Queue
     ) -> None:
         """Process a batch of records."""
         tasks = [self._process_record(record, output_queue) for record in batch]
         await asyncio.gather(*tasks)
 
-    async def _process_record(
-        self, record: Dict[str, Any], output_queue: asyncio.Queue
-    ) -> None:
+    async def _process_record(self, record: dict[str, Any], output_queue: asyncio.Queue) -> None:
         """Process a single record through the pipeline."""
         self.metrics.records_processed += 1
 
@@ -203,9 +202,9 @@ class StreamingETLPipeline:
             context = EnrichmentContext(
                 tenant_id=self.config.tenant_id,
                 source_name=self.config.source_name,
-                record_id=record.get('id'),
+                record_id=record.get("id"),
                 metadata={
-                    'source_type': self.config.source_type,
+                    "source_type": self.config.source_type,
                 },
             )
 
@@ -229,10 +228,10 @@ class StreamingETLPipeline:
                         )
 
             # Add enrichment metadata
-            enriched_record['_enrichment_metadata'] = {
-                'enrichers_applied': len(enrichment_results),
-                'enrichment_duration_ms': sum(r.duration_ms for r in enrichment_results),
-                'enrichment_timestamp': time.time(),
+            enriched_record["_enrichment_metadata"] = {
+                "enrichers_applied": len(enrichment_results),
+                "enrichment_duration_ms": sum(r.duration_ms for r in enrichment_results),
+                "enrichment_timestamp": time.time(),
             }
 
             # Emit provenance event
@@ -257,60 +256,58 @@ class StreamingETLPipeline:
 
     def _create_provenance_event(
         self,
-        original_record: Dict[str, Any],
-        enriched_record: Dict[str, Any],
+        original_record: dict[str, Any],
+        enriched_record: dict[str, Any],
         context: EnrichmentContext,
-        enrichment_results: List[EnricherResult],
-    ) -> Dict[str, Any]:
+        enrichment_results: list[EnricherResult],
+    ) -> dict[str, Any]:
         """Create a provenance event for record processing."""
         return {
-            'event_type': 'etl_enrichment',
-            'tenant_id': context.tenant_id,
-            'source_name': context.source_name,
-            'record_id': context.record_id,
-            'timestamp': time.time(),
-            'enrichers_applied': [
+            "event_type": "etl_enrichment",
+            "tenant_id": context.tenant_id,
+            "source_name": context.source_name,
+            "record_id": context.record_id,
+            "timestamp": time.time(),
+            "enrichers_applied": [
                 {
-                    'enricher': type(enricher).__name__,
-                    'success': result.success,
-                    'duration_ms': result.duration_ms,
-                    'warnings': result.warnings,
+                    "enricher": type(enricher).__name__,
+                    "success": result.success,
+                    "duration_ms": result.duration_ms,
+                    "warnings": result.warnings,
                 }
                 for enricher, result in zip(self.enrichers, enrichment_results)
             ],
-            'original_hash': self._hash_record(original_record),
-            'enriched_hash': self._hash_record(enriched_record),
+            "original_hash": self._hash_record(original_record),
+            "enriched_hash": self._hash_record(enriched_record),
         }
 
-    def _hash_record(self, record: Dict[str, Any]) -> str:
+    def _hash_record(self, record: dict[str, Any]) -> str:
         """Generate hash of record for provenance."""
         import hashlib
         import json
 
         content = json.dumps(record, sort_keys=True, default=str)
-        return hashlib.sha256(content.encode('utf-8')).hexdigest()
+        return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
-    def get_enricher_metrics(self) -> Dict[str, Any]:
+    def get_enricher_metrics(self) -> dict[str, Any]:
         """Get metrics for all enrichers."""
-        return {
-            enricher.__class__.__name__: enricher.get_metrics() for enricher in self.enrichers
-        }
+        return {enricher.__class__.__name__: enricher.get_metrics() for enricher in self.enrichers}
 
 
 async def example_usage():
     """Example usage of streaming pipeline."""
     # Create pipeline config
     config = PipelineConfig(
-        tenant_id='tenant_123',
-        source_name='example_source',
-        source_type='csv',
+        tenant_id="tenant_123",
+        source_name="example_source",
+        source_type="csv",
         batch_size=10,
         max_workers=4,
         enable_enrichers=True,
         enricher_config={
-            'geoip': {'enabled': True},
-            'language': {'enabled': True},
-            'hashing': {'enabled': True, 'hash_all_content': True},
+            "geoip": {"enabled": True},
+            "language": {"enabled": True},
+            "hashing": {"enabled": True, "hash_all_content": True},
         },
     )
 
@@ -324,22 +321,22 @@ async def example_usage():
     # Add sample records to input queue
     sample_records = [
         {
-            'id': '1',
-            'name': 'John Doe',
-            'ip': '8.8.8.8',
-            'text': 'Hello, this is a test message.',
+            "id": "1",
+            "name": "John Doe",
+            "ip": "8.8.8.8",
+            "text": "Hello, this is a test message.",
         },
         {
-            'id': '2',
-            'name': 'Jane Smith',
-            'ip': '1.1.1.1',
-            'text': 'Bonjour, ceci est un message de test.',
+            "id": "2",
+            "name": "Jane Smith",
+            "ip": "1.1.1.1",
+            "text": "Bonjour, ceci est un message de test.",
         },
         {
-            'id': '3',
-            'name': 'Bob Johnson',
-            'source_ip': '192.168.1.1',
-            'content': 'This is some content to hash.',
+            "id": "3",
+            "name": "Bob Johnson",
+            "source_ip": "192.168.1.1",
+            "content": "This is some content to hash.",
         },
     ]
 
@@ -353,14 +350,14 @@ async def example_usage():
     metrics = await pipeline.process_stream(input_queue, output_queue)
 
     # Print results
-    print(f"\n=== Pipeline Metrics ===")
+    print("\n=== Pipeline Metrics ===")
     print(f"Records processed: {metrics.records_processed}")
     print(f"Records succeeded: {metrics.records_succeeded}")
     print(f"Records failed: {metrics.records_failed}")
     print(f"Total duration: {metrics.total_duration_ms:.2f}ms")
     print(f"Enrichments applied: {metrics.enrichments_applied}")
 
-    print(f"\n=== Enricher Metrics ===")
+    print("\n=== Enricher Metrics ===")
     for enricher_name, enricher_metrics in pipeline.get_enricher_metrics().items():
         print(f"{enricher_name}:")
         print(f"  Total: {enricher_metrics['total_enrichments']}")
@@ -368,18 +365,20 @@ async def example_usage():
         print(f"  Avg duration: {enricher_metrics['average_duration_ms']:.2f}ms")
 
     # Get enriched records from output queue
-    print(f"\n=== Sample Enriched Records ===")
+    print("\n=== Sample Enriched Records ===")
     while not output_queue.empty():
         enriched_record = await output_queue.get()
         print(f"\nRecord {enriched_record['id']}:")
         print(f"  Original: {enriched_record.get('name')}")
-        if 'geo' in enriched_record:
+        if "geo" in enriched_record:
             print(f"  Geo enrichment: {enriched_record['geo']}")
-        if 'language' in enriched_record:
+        if "language" in enriched_record:
             print(f"  Language enrichment: {enriched_record['language']}")
-        if 'hashes' in enriched_record:
-            print(f"  Content hash: {enriched_record['hashes'].get('content_hash', {}).get('sha256', 'N/A')[:16]}...")
+        if "hashes" in enriched_record:
+            print(
+                f"  Content hash: {enriched_record['hashes'].get('content_hash', {}).get('sha256', 'N/A')[:16]}..."
+            )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(example_usage())

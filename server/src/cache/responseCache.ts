@@ -42,7 +42,7 @@ class MemoryTier implements CacheTier {
       }
     }
 
-    cacheLocalSize.labels('default').set(this.cache.size);
+    cacheLocalSize?.labels?.('default')?.set?.(this.cache.size);
   }
 
   async del(key: string): Promise<void> {
@@ -157,6 +157,11 @@ export async function setCachedJson(
     }
   } catch (e: any) { }
 }
+
+export const responseCache = {
+  getCachedJson,
+  setCachedJson,
+};
 
 /**
  * Cache query result specifically

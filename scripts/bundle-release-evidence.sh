@@ -131,7 +131,26 @@ for log_file in "${LOG_FILES[@]}"; do
     fi
 done
 
-# 7. Create Evidence Manifest
+# 7. Sign evidence artifacts
+echo "🔏 Signing evidence artifacts..."
+SIGNATURES_VERIFIED=false
+if [ -f "scripts/sign-evidence.sh" ]; then
+    chmod +x scripts/sign-evidence.sh
+    EVIDENCE_DIR="$EVIDENCE_DIR" OUTPUT_DIR="$EVIDENCE_DIR/signatures" scripts/sign-evidence.sh
+else
+    echo "  Evidence signing script not found. Skipping signing."
+fi
+
+if [ -f "scripts/verify-evidence-signatures.sh" ]; then
+    chmod +x scripts/verify-evidence-signatures.sh
+    if scripts/verify-evidence-signatures.sh "$EVIDENCE_DIR"; then
+        SIGNATURES_VERIFIED=true
+    fi
+else
+    echo "  Evidence verification script not found. Skipping signature verification."
+fi
+
+# 8. Create Evidence Manifest
 echo "📋 Creating evidence manifest..."
 MANIFEST_FILE="$EVIDENCE_DIR/MANIFEST.json"
 cat > "$MANIFEST_FILE" << EOF
@@ -151,18 +170,18 @@ cat > "$MANIFEST_FILE" << EOF
   },
   "verification": {
     "checksums": {},
-    "signaturesVerified": false,
+    "signaturesVerified": $SIGNATURES_VERIFIED,
     "sbomsValid": false
   }
 }
 EOF
 
-# 8. Create checksums for integrity verification
+# 9. Create checksums for integrity verification
 echo "✅ Creating checksums for integrity verification..."
 CHECKSUM_FILE="$EVIDENCE_DIR/checksums.sha256"
 find "$EVIDENCE_DIR" -type f -not -name "checksums.sha256" -exec sha256sum {} \; > "$CHECKSUM_FILE"
 
-# 9. Create release bundle (compressed archive)
+# 10. Create release bundle (compressed archive)
 echo "📦 Creating compressed release bundle..."
 RELEASE_BUNDLE="summit-release-${RELEASE_VERSION}-evidence.tar.gz"
 cd "$OUTPUT_DIR"

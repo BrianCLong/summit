@@ -110,7 +110,12 @@ export class FeatureFlagService {
     injectedLogger?: any
   ) {
     this.provider = config.provider;
-    this.logger = injectedLogger || logger.child({ service: 'FeatureFlagService' });
+    const baseLogger =
+      injectedLogger ||
+      (logger && typeof (logger as any).child === 'function'
+        ? logger.child({ service: 'FeatureFlagService' })
+        : console);
+    this.logger = baseLogger;
   }
 
   /**
@@ -609,7 +614,8 @@ export class FeatureFlagService {
    */
   clearCache(): void {
     this.cache.clear();
-    this.logger.info('Feature flag cache cleared');
+    const log = this.logger ?? console;
+    log.info('Feature flag cache cleared');
   }
 
   /**
@@ -618,14 +624,15 @@ export class FeatureFlagService {
    * @returns {Promise<void>}
    */
   async shutdown(): Promise<void> {
-    this.logger.info('Shutting down feature flag service...');
+    const log = this.logger ?? console;
+    log.info('Shutting down feature flag service...');
 
     if (this.ldClient) {
       try {
         await this.ldClient.close();
-        this.logger.info('LaunchDarkly client closed');
+        log.info('LaunchDarkly client closed');
       } catch (error: any) {
-        this.logger.error('Error closing LaunchDarkly client', error);
+        log.error('Error closing LaunchDarkly client', error);
       }
     }
 

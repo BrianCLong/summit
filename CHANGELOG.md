@@ -13,12 +13,44 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-
-### Added
-- (New features will be documented here)
+## [4.1.4] - MVP-4 - 2026-01-13
 
 ### Changed
-- Documented Node.js 20.11.0 as the required runtime to match the repository toolchain.
+- Release notes: docs/releases/MVP-4_RELEASE_NOTES.md
+
+## [4.1.3] - MVP-4 - 2026-01-13
+
+### Changed
+- Release notes: docs/releases/MVP-4_RELEASE_NOTES.md
+
+## [4.1.2] - MVP-4 - 2026-01-13
+
+### Changed
+- Release notes: docs/releases/MVP-4_RELEASE_NOTES.md
+
+
+## [4.1.1] - MVP-4 GA Build Fix - 2026-01-06
+
+### Fixed
+- **Server Build**: Fixed ~25 TypeScript errors preventing server compilation
+  - Fixed zod namespace issues in `maestro/api-types.ts`, `policy-engine/proposal-types.ts`, `brand-packs/brand-pack.schema.ts`
+  - Added missing imports in `maestro-schema.ts` (Entity, BaseNode)
+  - Fixed type casting in `hotReloadService.ts`, `admin/tenants.ts`, `support-center.ts`
+  - Added missing MutationPayload fields in provenance files
+  - Fixed PIGGovernanceService audit import path
+- **CLI Build**: Fixed all CLI TypeScript errors
+  - Fixed PropertyKey[] to string[] conversion in `graph-client.ts`
+  - Fixed version string parsing in `summit-doctor.ts`
+  - Fixed signature verification in `audit-exporter.ts`
+  - Added ESM module mocks for Jest tests
+
+### Changed
+- Updated GA Evidence Index with verification results
+- All governance and security checks pass
+
+### Added
+- Generated SBOM at `.evidence/sbom.json`
+- CLI test suite: 262 tests passing
 
 ## [4.0.0] - MVP-4 GA - 2025-12-30
 

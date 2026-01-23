@@ -209,8 +209,8 @@ interface GraphPaneProps {
   onBrush: (nodeIds: string[]) => void;
 }
 
-const GraphPane: React.FC<GraphPaneProps> = ({ data, onNodeSelect, onBrush }) => {
-  const { viewState, xaiOverlays, highlightElements } = useTriPaneStore();
+const GraphPane: React.FC<GraphPaneProps> = ({ _data, _onNodeSelect, _onBrush }) => {
+  const { _viewState, _xaiOverlays, _highlightElements } = useTriPaneStore();
 
   // D3 force graph would be initialized here
   useEffect(() => {
@@ -250,11 +250,11 @@ interface TimelinePaneProps {
 }
 
 const TimelinePane: React.FC<TimelinePaneProps> = ({
-  data,
-  onTimeRangeSelect,
-  onEventSelect,
+  _data,
+  _onTimeRangeSelect,
+  _onEventSelect,
 }) => {
-  const { viewState } = useTriPaneStore();
+  const { _viewState } = useTriPaneStore();
 
   return (
     <div className="timeline-pane" role="application" aria-label="Timeline visualization">
@@ -283,11 +283,11 @@ interface MapPaneProps {
 }
 
 const MapPane: React.FC<MapPaneProps> = ({
-  data,
-  onLocationSelect,
-  onExtentChange,
+  _data,
+  _onLocationSelect,
+  _onExtentChange,
 }) => {
-  const { viewState } = useTriPaneStore();
+  const { _viewState } = useTriPaneStore();
 
   // Leaflet map would be initialized here
   useEffect(() => {
@@ -402,8 +402,8 @@ const useCommandPalette = () => {
         label: 'Save Current View',
         shortcut: 'Ctrl+S',
         action: () => {
-          const name = prompt('View name:');
-          if (name) {store.saveView(name);}
+          // const name = prompt('View name:');
+          // if (name) {store.saveView(name);}
         },
       },
       {
@@ -472,8 +472,8 @@ export const TriPaneMain: React.FC<TriPaneMainProps> = ({ layout = 'horizontal' 
 
     // Report time to first interaction
     const handleFirstInteraction = () => {
-      const ttfi = performance.now() - startTime;
-      console.log(`[Metrics] TTFI: ${ttfi.toFixed(2)}ms`);
+      const _ttfi = performance.now() - startTime;
+      // [Metrics] TTFI: ${_ttfi.toFixed(2)}ms
 
       // Would send to analytics
       // analytics.track('tri_pane_ttfi', { ttfi });
@@ -604,7 +604,7 @@ export const TriPaneMain: React.FC<TriPaneMainProps> = ({ layout = 'horizontal' 
 
 export function registerUiExtension(extensionId: string): void {
   if (extensionId === 'tri-pane') {
-    console.log('[tri-pane-explain] Registered as UI extension');
+    // [tri-pane-explain] Registered as UI extension
 
     // Register with plugin loader
     if (typeof window !== 'undefined' && (window as any).__INTELGRAPH_PLUGINS__) {

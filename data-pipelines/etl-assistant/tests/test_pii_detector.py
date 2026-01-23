@@ -1,12 +1,12 @@
 """Tests for PII detection and classification."""
 
 import json
-import pytest
 from pathlib import Path
 
+import pytest
 from src.pii_detector import (
-    PIIDetector,
     PIICategory,
+    PIIDetector,
     PIISeverity,
     RedactionStrategy,
 )

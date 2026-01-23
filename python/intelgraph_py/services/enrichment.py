@@ -10,7 +10,9 @@ class EnrichmentService:
     def __init__(self, store: Neo4jStore):
         self.store = store
 
-    def find_matching_entity(self, external_name: str, entities: list[dict], threshold: int = 80) -> Any:
+    def find_matching_entity(
+        self, external_name: str, entities: list[dict], threshold: int = 80
+    ) -> Any:
         """
         Finds the best matching entity from a list based on fuzzy matching.
         """
@@ -49,7 +51,10 @@ class EnrichmentService:
 
             matched_entity = None
             for person in graph_persons:
-                if "name" in person and fuzz.partial_ratio(person["name"].lower(), article_title.lower()) > 75:
+                if (
+                    "name" in person
+                    and fuzz.partial_ratio(person["name"].lower(), article_title.lower()) > 75
+                ):
                     matched_entity = person
                     break
 
@@ -72,12 +77,15 @@ class EnrichmentService:
             "RETURN n, r, a"
         )
         try:
-            self.store.query(query, {
-                "entity_id": entity_id,
-                "article_title": article_title,
-                "article_url": article_url,
-                "sentiment_score": sentiment_score
-            })
+            self.store.query(
+                query,
+                {
+                    "entity_id": entity_id,
+                    "article_title": article_title,
+                    "article_url": article_url,
+                    "sentiment_score": sentiment_score,
+                },
+            )
             logger.info(f"Enriched entity {entity_id} with news article: {article_title}")
         except Exception as e:
             logger.error(f"Failed to enrich entity {entity_id} with news: {e}")

@@ -1,7 +1,6 @@
-import { EntityResolutionV2Service } from '../EntityResolutionV2Service';
-import { provenanceLedger } from '../../../provenance/ledger.js';
+import { jest, describe, it, expect, beforeEach, afterAll, beforeAll } from '@jest/globals';
 
-jest.mock('../../../provenance/ledger.js', () => ({
+jest.unstable_mockModule('../../../provenance/ledger.js', () => ({
   provenanceLedger: {
     appendEntry: jest.fn(),
   },
@@ -11,12 +10,19 @@ const mockDlq = {
   enqueue: jest.fn(),
 };
 
-jest.mock('../../../lib/dlq/index.js', () => ({
+jest.unstable_mockModule('../../../lib/dlq/index.js', () => ({
   dlqFactory: jest.fn(() => mockDlq),
 }));
 
 describe('EntityResolutionV2Service guardrails', () => {
+  let EntityResolutionV2Service: typeof import('../EntityResolutionV2Service').EntityResolutionV2Service;
+  let provenanceLedger: { appendEntry: jest.Mock };
   const originalEnv = { ...process.env };
+
+  beforeAll(async () => {
+    ({ EntityResolutionV2Service } = await import('../EntityResolutionV2Service'));
+    ({ provenanceLedger } = await import('../../../provenance/ledger.js'));
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -33,7 +39,7 @@ describe('EntityResolutionV2Service guardrails', () => {
     process.env.ER_GUARDRAIL_MATCH_THRESHOLD = '0.6';
     process.env.ER_GUARDRAIL_DATASET_ID = 'baseline';
 
-    const service = new EntityResolutionV2Service();
+    const service = new EntityResolutionV2Service({ dlq: mockDlq });
     const result = service.evaluateGuardrails();
 
     expect(result.datasetId).toBe('baseline');
@@ -47,7 +53,7 @@ describe('EntityResolutionV2Service guardrails', () => {
     process.env.ER_GUARDRAIL_MIN_RECALL = '0.99';
     process.env.ER_GUARDRAIL_MATCH_THRESHOLD = '0.8';
 
-    const service = new EntityResolutionV2Service();
+    const service = new EntityResolutionV2Service({ dlq: mockDlq });
     const session = {
       run: jest.fn().mockResolvedValue({
         records: [
@@ -83,7 +89,7 @@ describe('EntityResolutionV2Service guardrails', () => {
     process.env.ER_GUARDRAIL_MIN_RECALL = '0.99';
     process.env.ER_GUARDRAIL_MATCH_THRESHOLD = '0.8';
 
-    const service = new EntityResolutionV2Service();
+    const service = new EntityResolutionV2Service({ dlq: mockDlq });
     const tx = {
       run: jest.fn(async (query: string) => {
         if (query.includes('MERGE (d:ERDecision {idempotencyKey')) {

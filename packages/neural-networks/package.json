@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/neural-networks",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Neural network architecture library and model zoo for Summit intelligence platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

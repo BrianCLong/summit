@@ -9,6 +9,9 @@ const logger = (pino as any)();
 
 const REDIS_HOST = process.env.REDIS_HOST || 'redis';
 const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379', 10);
+const REDIS_USE_CLUSTER = process.env.REDIS_USE_CLUSTER === 'true';
+const REDIS_CLUSTER_NODES = process.env.REDIS_CLUSTER_NODES || '';
+const REDIS_TLS_ENABLED = process.env.REDIS_TLS_ENABLED === 'true';
 
 if (
   process.env.NODE_ENV === 'production' &&
@@ -22,18 +25,40 @@ const REDIS_PASSWORD = process.env.REDIS_PASSWORD || 'devpassword';
 
 import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
 
-let redisClient: Redis;
+let redisClient: Redis | any;
 
 export function getRedisClient(): Redis {
   if (!redisClient) {
     try {
-      redisClient = new Redis({
-        host: REDIS_HOST,
-        port: REDIS_PORT,
-        password: REDIS_PASSWORD,
-        connectTimeout: 5000,
-        lazyConnect: true,
-      });
+      if (REDIS_USE_CLUSTER) {
+        if (!REDIS_CLUSTER_NODES) {
+          throw new Error('Redis Cluster enabled but REDIS_CLUSTER_NODES is not defined');
+        }
+
+        const nodes = REDIS_CLUSTER_NODES.split(',').map((node) => {
+          const [host, port] = node.split(':');
+          return { host, port: parseInt(port, 10) };
+        });
+
+        logger.info({ nodes }, 'Initializing Redis Cluster');
+
+        redisClient = new Redis.Cluster(nodes, {
+          redisOptions: {
+            password: REDIS_PASSWORD,
+            tls: REDIS_TLS_ENABLED ? {} : undefined,
+          },
+          scaleReads: 'slave',
+        });
+      } else {
+        redisClient = new Redis({
+          host: REDIS_HOST,
+          port: REDIS_PORT,
+          password: REDIS_PASSWORD,
+          tls: REDIS_TLS_ENABLED ? {} : undefined,
+          connectTimeout: 5000,
+          lazyConnect: true,
+        });
+      }
 
       redisClient.on('connect', () => logger.info('Redis client connected.'));
       redisClient.on('error', (err: any) => {
@@ -100,6 +125,8 @@ function createMockRedisClient() {
     quit: async () => { },
     on: () => { },
     connect: async () => { },
+    options: { keyPrefix: 'summit:' },
+    duplicate: () => createMockRedisClient(),
   };
 }
 

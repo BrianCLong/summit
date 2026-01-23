@@ -1,42 +1,52 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional
 from datetime import datetime
+
+from pydantic import BaseModel
+
 
 class SourceBase(BaseModel):
     name: str
-    url: Optional[str] = None
+    url: str | None = None
+
 
 class SourceCreate(SourceBase):
     pass
+
 
 class Source(SourceBase):
     id: int
 
     model_config = {"from_attributes": True}
 
+
 class TransformBase(BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
+
 
 class TransformCreate(TransformBase):
     pass
+
 
 class Transform(TransformBase):
     id: int
 
     model_config = {"from_attributes": True}
 
+
 class LicenseBase(BaseModel):
     name: str
-    url: Optional[str] = None
+    url: str | None = None
+
 
 class LicenseCreate(LicenseBase):
     pass
+
 
 class License(LicenseBase):
     id: int
 
     model_config = {"from_attributes": True}
+
 
 class EvidenceBase(BaseModel):
     content: str
@@ -44,8 +54,10 @@ class EvidenceBase(BaseModel):
     transform_id: int
     license_id: int
 
+
 class EvidenceCreate(EvidenceBase):
     pass
+
 
 class Evidence(EvidenceBase):
     id: int
@@ -54,28 +66,35 @@ class Evidence(EvidenceBase):
 
     model_config = {"from_attributes": True}
 
+
 class ClaimBase(BaseModel):
     content: str
 
+
 class ClaimCreate(ClaimBase):
-    evidence_ids: List[int]
+    evidence_ids: list[int]
+
 
 class ClaimLink(BaseModel):
     target_claim_id: int
     relationship_type: str
 
+
 class Claim(ClaimBase):
     id: int
     created_at: datetime
-    evidence_ids: List[int] = []
+    evidence_ids: list[int] = []
 
     model_config = {"from_attributes": True}
 
+
 class DisclosureBundleBase(BaseModel):
-    evidence_ids: List[int]
+    evidence_ids: list[int]
+
 
 class DisclosureBundleCreate(DisclosureBundleBase):
     pass
+
 
 class DisclosureBundle(DisclosureBundleBase):
     id: int

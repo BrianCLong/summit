@@ -1,4 +1,11 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+jest.mock('../MaestroService.js', () => ({
+  maestroService: {
+    logAudit: jest.fn(),
+  },
+}));
+
 import { MaestroEngine } from '../engine';
 import { MaestroDSL } from '../dsl';
 import { MaestroTask, MaestroTemplate } from '../model';
@@ -8,26 +15,17 @@ const mockDb = {
   query: jest.fn(),
   connect: jest.fn().mockResolvedValue({
     query: jest.fn(),
-    release: jest.fn()
-  })
+    release: jest.fn(),
+  }),
 };
-
-const mockQueue = {
-  add: jest.fn(),
-  close: jest.fn()
-};
-
-const mockQueueEvents = {
-  on: jest.fn(),
-  close: jest.fn()
-};
+const mockQueue = { add: jest.fn(), close: jest.fn() };
+const mockQueueEvents = { on: jest.fn(), close: jest.fn() };
+const mockWorker = { close: jest.fn() };
 
 jest.mock('bullmq', () => ({
-  Queue: jest.fn().mockImplementation(() => mockQueue),
-  QueueEvents: jest.fn().mockImplementation(() => mockQueueEvents),
-  Worker: jest.fn().mockImplementation(() => ({
-    close: jest.fn()
-  }))
+  Queue: jest.fn(),
+  QueueEvents: jest.fn(),
+  Worker: jest.fn(),
 }));
 
 describe('MaestroEngine', () => {
@@ -35,6 +33,19 @@ describe('MaestroEngine', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    const bullmq = jest.requireMock('bullmq') as {
+      Queue: jest.Mock;
+      QueueEvents: jest.Mock;
+      Worker: jest.Mock;
+    };
+    mockQueue.add = jest.fn();
+    mockQueue.close = jest.fn();
+    mockQueueEvents.on = jest.fn();
+    mockQueueEvents.close = jest.fn();
+    mockWorker.close = jest.fn();
+    bullmq.Queue.mockImplementation(() => mockQueue);
+    bullmq.QueueEvents.mockImplementation(() => mockQueueEvents);
+    bullmq.Worker.mockImplementation(() => mockWorker);
     engine = new MaestroEngine({
       db: mockDb as any,
       redisConnection: {}

@@ -85,10 +85,15 @@ MCowBQYDK2VwAyEAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=
         // better to use a real generated one or just one that is structurally valid.
         // Let's generate another one.
         const { publicKey: validOtherKey } = generateKeyPairSync('ed25519', {
-            publicKeyEncoding: { type: 'spki', format: 'pem' }
+          publicKeyEncoding: { type: 'spki', format: 'pem' }
         });
 
-        const isValid = await verifyManifest(manifest, signature, { signerType: 'ed25519', publicKey: validOtherKey as string });
+        const validOtherKeyPem =
+          typeof validOtherKey === 'string'
+            ? validOtherKey
+            : validOtherKey.export({ type: 'spki', format: 'pem' }).toString();
+
+        const isValid = await verifyManifest(manifest, signature, { signerType: 'ed25519', publicKey: validOtherKeyPem });
         expect(isValid).toBe(false);
     });
   });

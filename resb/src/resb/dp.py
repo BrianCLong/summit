@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict
 
 import numpy as np
 import pandas as pd
@@ -15,7 +14,7 @@ class DPReport:
 
     epsilon: float
     delta: float
-    sigma: Dict[str, float]
+    sigma: dict[str, float]
 
 
 def gaussian_sigma(epsilon: float, delta: float, sensitivity: float) -> float:
@@ -30,10 +29,10 @@ def gaussian_sigma(epsilon: float, delta: float, sensitivity: float) -> float:
     return float(np.sqrt(2 * np.log(1.25 / delta)) * sensitivity / epsilon)
 
 
-def infer_sensitivity(minority: pd.DataFrame) -> Dict[str, float]:
+def infer_sensitivity(minority: pd.DataFrame) -> dict[str, float]:
     """Estimate feature sensitivities from the minority slice."""
 
-    sensitivities: Dict[str, float] = {}
+    sensitivities: dict[str, float] = {}
     for column in minority.select_dtypes(include=["number"]).columns:
         col = minority[column]
         sensitivities[column] = float(col.max() - col.min() or 1.0)
@@ -42,7 +41,7 @@ def infer_sensitivity(minority: pd.DataFrame) -> Dict[str, float]:
 
 def apply_gaussian_noise(
     df: pd.DataFrame,
-    sigma_map: Dict[str, float],
+    sigma_map: dict[str, float],
     rng: np.random.Generator,
 ) -> pd.DataFrame:
     """Apply Gaussian noise to numeric columns as per ``sigma_map``."""

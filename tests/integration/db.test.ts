@@ -23,7 +23,7 @@ const createMockNeo4jSession = () => ({
     rollback: jest.fn(),
     close: jest.fn(),
   })),
-});
+} as any);
 
 const createMockNeo4jDriver = () => ({
   session: jest.fn(() => createMockNeo4jSession()),
@@ -33,7 +33,7 @@ const createMockNeo4jDriver = () => ({
     address: 'localhost:7687',
     version: 'Neo4j/5.x',
   })),
-});
+} as any);
 
 const createMockPostgresPool = () => {
   const mockClient = {
@@ -48,7 +48,7 @@ const createMockPostgresPool = () => {
     idleCount: 5,
     waitingCount: 0,
     _mockClient: mockClient,
-  };
+  } as any;
 };
 
 const createMockRedisClient = () => ({
@@ -69,22 +69,22 @@ const createMockRedisClient = () => ({
     set: jest.fn().mockReturnThis(),
     exec: jest.fn(),
   })),
-});
+} as any);
 
 describe('Database Integration Tests', () => {
   describe('Neo4j Graph Database', () => {
-    let mockDriver: ReturnType<typeof createMockNeo4jDriver>;
-    let mockSession: ReturnType<typeof createMockNeo4jSession>;
+    let mockDriver: any;
+    let mockSession: any;
 
     beforeEach(() => {
       mockDriver = createMockNeo4jDriver();
-      mockSession = mockDriver.session() as ReturnType<typeof createMockNeo4jSession>;
+      mockSession = mockDriver.session();
       jest.clearAllMocks();
     });
 
     describe('Connection Management', () => {
       it('should verify connectivity on startup', async () => {
-        mockDriver.verifyConnectivity.mockResolvedValue(undefined);
+        (mockDriver.verifyConnectivity as any).mockResolvedValue(undefined);
 
         await mockDriver.verifyConnectivity();
 
@@ -92,7 +92,7 @@ describe('Database Integration Tests', () => {
       });
 
       it('should throw error when Neo4j is unavailable', async () => {
-        mockDriver.verifyConnectivity.mockRejectedValue(
+        (mockDriver.verifyConnectivity as any).mockRejectedValue(
           new Error('ServiceUnavailable: Connection refused')
         );
 
@@ -121,7 +121,7 @@ describe('Database Integration Tests', () => {
           { get: jest.fn((key) => key === 'name' ? 'Alice' : 'Person') },
           { get: jest.fn((key) => key === 'name' ? 'Bob' : 'Person') },
         ];
-        mockSession.run.mockResolvedValue({ records: mockRecords });
+        (mockSession.run as any).mockResolvedValue({ records: mockRecords });
 
         const result = await mockSession.run(
           'MATCH (n:Person) RETURN n.name as name, labels(n)[0] as type'
@@ -132,7 +132,7 @@ describe('Database Integration Tests', () => {
       });
 
       it('should handle parameterized queries safely', async () => {
-        mockSession.run.mockResolvedValue({ records: [] });
+        (mockSession.run as any).mockResolvedValue({ records: [] });
 
         await mockSession.run(
           'MATCH (n:Person {name: $name}) RETURN n',
@@ -146,7 +146,7 @@ describe('Database Integration Tests', () => {
       });
 
       it('should handle empty result sets gracefully', async () => {
-        mockSession.run.mockResolvedValue({ records: [] });
+        (mockSession.run as any).mockResolvedValue({ records: [] });
 
         const result = await mockSession.run('MATCH (n:NonExistent) RETURN n');
 
@@ -154,7 +154,7 @@ describe('Database Integration Tests', () => {
       });
 
       it('should throw error for invalid Cypher syntax', async () => {
-        mockSession.run.mockRejectedValue(
+        (mockSession.run as any).mockRejectedValue(
           new Error('SyntaxError: Invalid Cypher query')
         );
 
@@ -167,8 +167,8 @@ describe('Database Integration Tests', () => {
     describe('Graph Transactions', () => {
       it('should commit transaction successfully', async () => {
         const tx = mockSession.beginTransaction();
-        tx.run.mockResolvedValue({ records: [] });
-        tx.commit.mockResolvedValue(undefined);
+        (tx.run as any).mockResolvedValue({ records: [] });
+        (tx.commit as any).mockResolvedValue(undefined);
 
         await tx.run('CREATE (n:Person {name: $name})', { name: 'Test' });
         await tx.commit();
@@ -179,8 +179,8 @@ describe('Database Integration Tests', () => {
 
       it('should rollback transaction on error', async () => {
         const tx = mockSession.beginTransaction();
-        tx.run.mockRejectedValue(new Error('Constraint violation'));
-        tx.rollback.mockResolvedValue(undefined);
+        (tx.run as any).mockRejectedValue(new Error('Constraint violation'));
+        (tx.rollback as any).mockResolvedValue(undefined);
 
         try {
           await tx.run('CREATE (n:Person {id: $id})', { id: 'duplicate' });
@@ -195,10 +195,10 @@ describe('Database Integration Tests', () => {
         const tx1 = mockSession.beginTransaction();
         const tx2 = mockSession.beginTransaction();
 
-        tx1.run.mockResolvedValue({ records: [] });
-        tx2.run.mockResolvedValue({ records: [] });
-        tx1.commit.mockResolvedValue(undefined);
-        tx2.commit.mockResolvedValue(undefined);
+        (tx1.run as any).mockResolvedValue({ records: [] });
+        (tx2.run as any).mockResolvedValue({ records: [] });
+        (tx1.commit as any).mockResolvedValue(undefined);
+        (tx2.commit as any).mockResolvedValue(undefined);
 
         await Promise.all([
           tx1.run('CREATE (n:Entity {id: 1})').then(() => tx1.commit()),
@@ -219,7 +219,7 @@ describe('Database Integration Tests', () => {
             segments: [{ relationship: { type: 'KNOWS' } }],
           })),
         };
-        mockSession.run.mockResolvedValue({ records: [pathRecord] });
+        (mockSession.run as any).mockResolvedValue({ records: [pathRecord] });
 
         const result = await mockSession.run(
           'MATCH p=shortestPath((a:Person {name: $from})-[*]-(b:Person {name: $to})) RETURN p',
@@ -230,7 +230,7 @@ describe('Database Integration Tests', () => {
       });
 
       it('should execute community detection query', async () => {
-        mockSession.run.mockResolvedValue({
+        (mockSession.run as any).mockResolvedValue({
           records: [
             { get: jest.fn(() => 1) },
             { get: jest.fn(() => 2) },
@@ -248,7 +248,7 @@ describe('Database Integration Tests', () => {
   });
 
   describe('PostgreSQL Relational Database', () => {
-    let mockPool: ReturnType<typeof createMockPostgresPool>;
+    let mockPool: any;
 
     beforeEach(() => {
       mockPool = createMockPostgresPool();
@@ -399,7 +399,7 @@ describe('Database Integration Tests', () => {
   });
 
   describe('Redis Cache', () => {
-    let mockRedis: ReturnType<typeof createMockRedisClient>;
+    let mockRedis: any;
 
     beforeEach(() => {
       mockRedis = createMockRedisClient();
@@ -512,9 +512,9 @@ describe('Database Integration Tests', () => {
   });
 
   describe('Multi-Database Coordination', () => {
-    let mockNeo4j: ReturnType<typeof createMockNeo4jDriver>;
-    let mockPostgres: ReturnType<typeof createMockPostgresPool>;
-    let mockRedis: ReturnType<typeof createMockRedisClient>;
+    let mockNeo4j: any;
+    let mockPostgres: any;
+    let mockRedis: any;
 
     beforeEach(() => {
       mockNeo4j = createMockNeo4jDriver();
@@ -647,3 +647,5 @@ describe('Database Integration Tests', () => {
     });
   });
 });
+
+export { };

@@ -510,7 +510,9 @@ class GraphStreamer:
                 "trend_direction": (
                     "increasing"
                     if avg_growth > 0.1
-                    else "decreasing" if avg_growth < -0.1 else "stable"
+                    else "decreasing"
+                    if avg_growth < -0.1
+                    else "stable"
                 ),
                 "confidence": min(0.7, len(trends) / 10),
             }
@@ -776,7 +778,7 @@ class GraphStreamer:
             Analyze these graph intelligence patterns and provide strategic insights:
             
             Detected Patterns: {len(patterns)}
-            Key Insights: {[i['description'] for i in insights[:3]]}
+            Key Insights: {[i["description"] for i in insights[:3]]}
             
             Provide strategic recommendations for network analysis and intelligence gathering.
             """

@@ -1,0 +1,1 @@
+{ "metrics": { "http_req_duration": { "values": { "p(95)": 180 } }, "http_reqs": { "values": { "rate": 55 } } } }

@@ -7,12 +7,12 @@ import neo4j from 'neo4j-driver';
 // Mock Neo4j driver
 jest.mock('neo4j-driver', () => ({
   driver: jest.fn(() => ({
-    verifyConnectivity: jest.fn().mockResolvedValue(true),
+    verifyConnectivity: jest.fn(async () => true),
     session: jest.fn(() => ({
-      run: jest.fn().mockResolvedValue({ records: [] }),
-      close: jest.fn().mockResolvedValue(undefined),
+      run: jest.fn(async () => ({ records: [] })),
+      close: jest.fn(async () => undefined),
     })),
-    close: jest.fn().mockResolvedValue(undefined),
+    close: jest.fn(async () => undefined),
   })),
   auth: {
     basic: jest.fn(),

@@ -1,9 +1,9 @@
 from playwright.sync_api import Page, expect, sync_playwright
-import time
+
 
 def verify_accessibility_features(page: Page):
     # Find the port from the log
-    url = "http://localhost:5176" # Hardcoded based on log
+    url = "http://localhost:5176"  # Hardcoded based on log
 
     page.goto(url)
 
@@ -29,6 +29,7 @@ def verify_accessibility_features(page: Page):
     page.screenshot(path="/home/jules/verification/accessibility_skip_link.png")
 
     print("Verification complete: Skip link is visible and focused.")
+
 
 if __name__ == "__main__":
     with sync_playwright() as p:

@@ -1,7 +1,7 @@
 """Language detection enricher."""
 
 import re
-from typing import Any, Dict, Optional
+from typing import Any
 
 from .base import BaseEnricher, EnricherResult, EnrichmentContext
 
@@ -21,31 +21,31 @@ class LanguageEnricher(BaseEnricher):
 
     # Simple language detection patterns (very basic heuristics)
     LANGUAGE_PATTERNS = {
-        'es': re.compile(r'\b(el|la|los|las|un|una|de|que|en|por)\b', re.IGNORECASE),
-        'fr': re.compile(r'\b(le|la|les|un|une|de|que|dans|pour|avec)\b', re.IGNORECASE),
-        'de': re.compile(r'\b(der|die|das|ein|eine|und|in|zu|von)\b', re.IGNORECASE),
-        'it': re.compile(r'\b(il|la|i|le|un|una|di|che|in|per)\b', re.IGNORECASE),
-        'pt': re.compile(r'\b(o|a|os|as|um|uma|de|que|em|por)\b', re.IGNORECASE),
-        'ru': re.compile(r'[а-яА-Я]{3,}'),  # Cyrillic characters
-        'zh': re.compile(r'[\u4e00-\u9fff]{2,}'),  # Chinese characters
-        'ja': re.compile(r'[\u3040-\u309f\u30a0-\u30ff]{2,}'),  # Japanese hiragana/katakana
-        'ar': re.compile(r'[\u0600-\u06ff]{3,}'),  # Arabic
-        'ko': re.compile(r'[\uac00-\ud7af]{2,}'),  # Korean
+        "es": re.compile(r"\b(el|la|los|las|un|una|de|que|en|por)\b", re.IGNORECASE),
+        "fr": re.compile(r"\b(le|la|les|un|une|de|que|dans|pour|avec)\b", re.IGNORECASE),
+        "de": re.compile(r"\b(der|die|das|ein|eine|und|in|zu|von)\b", re.IGNORECASE),
+        "it": re.compile(r"\b(il|la|i|le|un|una|di|che|in|per)\b", re.IGNORECASE),
+        "pt": re.compile(r"\b(o|a|os|as|um|uma|de|que|em|por)\b", re.IGNORECASE),
+        "ru": re.compile(r"[а-яА-Я]{3,}"),  # Cyrillic characters
+        "zh": re.compile(r"[\u4e00-\u9fff]{2,}"),  # Chinese characters
+        "ja": re.compile(r"[\u3040-\u309f\u30a0-\u30ff]{2,}"),  # Japanese hiragana/katakana
+        "ar": re.compile(r"[\u0600-\u06ff]{3,}"),  # Arabic
+        "ko": re.compile(r"[\uac00-\ud7af]{2,}"),  # Korean
     }
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         super().__init__(config)
-        self.enabled = self.config.get('enabled', True)
-        self.min_text_length = self.config.get('min_text_length', 10)
-        self.confidence_threshold = self.config.get('confidence_threshold', 0.5)
+        self.enabled = self.config.get("enabled", True)
+        self.min_text_length = self.config.get("min_text_length", 10)
+        self.confidence_threshold = self.config.get("confidence_threshold", 0.5)
 
-    def can_enrich(self, data: Dict[str, Any]) -> bool:
+    def can_enrich(self, data: dict[str, Any]) -> bool:
         """Check if data contains text content."""
         if not self.enabled:
             return False
 
         # Check for text fields
-        text_fields = ['text', 'content', 'body', 'message', 'description', 'title', 'name']
+        text_fields = ["text", "content", "body", "message", "description", "title", "name"]
 
         for field in text_fields:
             if field in data and isinstance(data[field], str):
@@ -54,7 +54,7 @@ class LanguageEnricher(BaseEnricher):
 
         return False
 
-    def enrich(self, data: Dict[str, Any], context: EnrichmentContext) -> EnricherResult:
+    def enrich(self, data: dict[str, Any], context: EnrichmentContext) -> EnricherResult:
         """Detect language of text content."""
         result = EnricherResult(success=True)
 
@@ -74,22 +74,22 @@ class LanguageEnricher(BaseEnricher):
 
                 # Add provenance metadata
                 result.metadata[f"{field_name}_lang_detected"] = True
-                result.metadata[f"{field_name}_lang_code"] = lang_info['language']
+                result.metadata[f"{field_name}_lang_code"] = lang_info["language"]
 
             except Exception as e:
-                result.add_warning(f"Failed to detect language for {field_name}: {str(e)}")
+                result.add_warning(f"Failed to detect language for {field_name}: {e!s}")
 
         # Add language data to result
-        result.add_enrichment('language', language_data)
+        result.add_enrichment("language", language_data)
 
         return result
 
-    def _extract_text_fields(self, data: Dict[str, Any]) -> Dict[str, str]:
+    def _extract_text_fields(self, data: dict[str, Any]) -> dict[str, str]:
         """Extract text fields from data."""
         text_data = {}
 
         # Common text field names
-        text_fields = ['text', 'content', 'body', 'message', 'description', 'title', 'name']
+        text_fields = ["text", "content", "body", "message", "description", "title", "name"]
 
         for field in text_fields:
             if field in data and isinstance(data[field], str):
@@ -99,7 +99,7 @@ class LanguageEnricher(BaseEnricher):
 
         return text_data
 
-    def _detect_language(self, text: str) -> Dict[str, Any]:
+    def _detect_language(self, text: str) -> dict[str, Any]:
         """
         Detect language of text.
 
@@ -117,11 +117,11 @@ class LanguageEnricher(BaseEnricher):
         # Default to English if no matches
         if not language_scores:
             return {
-                'language': 'en',
-                'confidence': 0.6,
-                'script': 'Latin',
-                'is_stub': True,
-                'enricher': 'language-stub-v1',
+                "language": "en",
+                "confidence": 0.6,
+                "script": "Latin",
+                "is_stub": True,
+                "enricher": "language-stub-v1",
             }
 
         # Get language with highest score
@@ -133,30 +133,30 @@ class LanguageEnricher(BaseEnricher):
         script = self._detect_script(text)
 
         return {
-            'language': detected_lang,
-            'confidence': confidence,
-            'script': script,
-            'alternative_languages': [
-                {'language': lang, 'score': score / total_matches}
+            "language": detected_lang,
+            "confidence": confidence,
+            "script": script,
+            "alternative_languages": [
+                {"language": lang, "score": score / total_matches}
                 for lang, score in sorted(
                     language_scores.items(), key=lambda x: x[1], reverse=True
                 )[1:3]
             ],
-            'is_stub': True,
-            'enricher': 'language-stub-v1',
+            "is_stub": True,
+            "enricher": "language-stub-v1",
         }
 
     def _detect_script(self, text: str) -> str:
         """Detect writing script."""
-        if re.search(r'[\u4e00-\u9fff]', text):
-            return 'Han'
-        elif re.search(r'[\u0600-\u06ff]', text):
-            return 'Arabic'
-        elif re.search(r'[а-яА-Я]', text):
-            return 'Cyrillic'
-        elif re.search(r'[\u3040-\u309f\u30a0-\u30ff]', text):
-            return 'Japanese'
-        elif re.search(r'[\uac00-\ud7af]', text):
-            return 'Hangul'
+        if re.search(r"[\u4e00-\u9fff]", text):
+            return "Han"
+        elif re.search(r"[\u0600-\u06ff]", text):
+            return "Arabic"
+        elif re.search(r"[а-яА-Я]", text):
+            return "Cyrillic"
+        elif re.search(r"[\u3040-\u309f\u30a0-\u30ff]", text):
+            return "Japanese"
+        elif re.search(r"[\uac00-\ud7af]", text):
+            return "Hangul"
         else:
-            return 'Latin'
+            return "Latin"

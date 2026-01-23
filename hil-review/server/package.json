@@ -1,6 +1,6 @@
 {
   "name": "hil-review-server",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "type": "module",
   "description": "Policy appeals triage backend with dual-control approvals and audit trail",
   "main": "src/index.js",

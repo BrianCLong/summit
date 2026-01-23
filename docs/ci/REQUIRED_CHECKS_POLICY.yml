@@ -1,0 +1,226 @@
+# Required Checks Policy
+# =====================
+# Single source of truth for release gate requirements.
+# Both RC and GA pipelines derive required checks from this file.
+#
+# Authority: Platform Engineering
+# Last Updated: 2026-01-13
+# Version: 2.0.0
+#
+# How to add/remove checks safely:
+# 1. Create PR modifying this file
+# 2. Workflow Lint will validate YAML syntax
+# 3. Get approval from Platform Engineering
+# 4. Changes take effect on next pipeline run
+#
+# IMPORTANT: Do not add new always_required checks without
+# verifying they run on EVERY commit to main.
+
+version: "2.0.0"
+description: "Canonical policy for release gate requirements"
+last_updated: "2026-01-13"
+owner: "Platform Engineering"
+
+# Branch Protection Policy
+# ------------------------
+# Defines the required status checks enforced on the main branch.
+branch_protection:
+  branch: "main"
+  required_status_checks:
+    strict: true
+    contexts:
+      - "CI Core (Primary Gate)"
+      - "CI / config-guard"
+      - "CI / unit-tests"
+      - "GA Gate"
+      - "Release Readiness Gate"
+      - "SOC Controls"
+      - "Unit Tests & Coverage"
+      - "ga / gate"
+
+# Always Required Checks
+# ----------------------
+# These checks MUST pass for every commit, regardless of what changed.
+# They are blocking for both RC and GA promotion.
+always_required:
+  - name: "Release Readiness Gate"
+    workflow: "release-readiness.yml"
+    rationale: "Comprehensive release readiness verification - runs on every change"
+
+  - name: "GA Gate"
+    workflow: "ga-gate.yml"
+    rationale: "Official GA verification entrypoint with make ga"
+
+  - name: "Unit Tests & Coverage"
+    workflow: "unit-test-coverage.yml"
+    rationale: "Test suite and coverage gates must pass for all code changes"
+
+  - name: "SOC Controls"
+    workflow: "ci.yml"
+    rationale: "SOC control verification is required for audit readiness"
+
+  - name: "CI Core (Primary Gate)"
+    workflow: "ci-core.yml"
+    rationale: "Primary blocking gate - lint, typecheck, tests, build"
+
+# Conditional Required Checks
+# ---------------------------
+# These checks are required ONLY when specific paths are changed.
+# Pattern matching uses POSIX Extended Regular Expressions.
+#
+# Examples:
+#   "^server/" - Matches any file in server/ directory
+#   "^\.github/workflows/" - Matches workflow files (escape dots)
+#   "^Dockerfile$" - Matches exactly "Dockerfile" at root
+conditional_required:
+  - name: "Workflow Lint"
+    workflow: "workflow-lint.yml"
+    rationale: "Validates GitHub Actions workflow syntax and safety"
+    when_paths_match:
+      - "^\\.github/workflows/"
+      - "^\\.github/actions/"
+
+  - name: "CodeQL"
+    workflow: "codeql.yml"
+    rationale: "Security analysis for server and package code"
+    when_paths_match:
+      - "^server/"
+      - "^packages/"
+      - "^cli/"
+
+  - name: "SBOM & Vulnerability Scanning"
+    workflow: "sbom-scan.yml"
+    rationale: "Supply chain security for Docker and dependencies"
+    when_paths_match:
+      - "^Dockerfile"
+      - "^docker-compose"
+      - "^package\\.json$"
+      - "^pnpm-lock\\.yaml$"
+      - "^server/package\\.json$"
+      - "^\\.github/workflows/supply-chain"
+      - "^scripts/security/"
+
+  - name: "Docker Build"
+    workflow: "docker-build.yml"
+    rationale: "Docker image build and security validation"
+    when_paths_match:
+      - "^Dockerfile"
+      - "^docker-compose"
+      - "^\\.dockerignore$"
+
+  - name: "Schema Compatibility"
+    workflow: "schema-compat.yml"
+    rationale: "API schema backward compatibility checks"
+    when_paths_match:
+      - "^server/src/graphql/schema"
+      - "^server/src/maestro/api-types"
+      - "^packages/.*/schema"
+
+# Informational Checks
+# --------------------
+# These checks are NOT blocking for promotion.
+# They provide useful metrics but failures do not prevent release.
+informational:
+  - name: "Release Train"
+    workflow: "release-train.yml"
+    rationale: "Automated release orchestration - informational only"
+
+  - name: "Post-Release Canary"
+    workflow: "post-release-canary.yml"
+    rationale: "Post-deployment smoke tests - informational only"
+
+  - name: "PR Quality Gate"
+    workflow: "pr-quality-gate.yml"
+    rationale: "Additional PR metrics - not blocking"
+
+  - name: "Release Reliability"
+    workflow: "release-reliability.yml"
+    rationale: "Release success metrics - observability only"
+
+  - name: "AI Copilot Canary"
+    workflow: "ai-copilot-canary.yml"
+    rationale: "AI feature monitoring - informational only"
+
+  - name: "Performance Baseline"
+    workflow: "perf.yml"
+    rationale: "Performance benchmarks - informational only"
+
+  - name: "CI Legacy"
+    workflow: "ci-legacy.yml"
+    rationale: "Legacy compatibility checks - non-blocking"
+
+# Base Reference Selection
+# ------------------------
+# Defines how to compute the base reference for changed file detection.
+# This ensures consistent required check computation across pipelines.
+base_selection:
+  # For RC tags: Find the most recent release tag or main branch point
+  rc_tag:
+    description: "For RC tags, base is the previous release or merge-base with main"
+    algorithm:
+      - "1. Look for previous RC tag with same base version (e.g., v4.1.2-rc.1 for v4.1.2-rc.2)"
+      - "2. If no prior RC, look for previous GA tag in same release line (e.g., v4.1.1)"
+      - "3. If no prior GA, use merge-base with main branch"
+    fallback: "origin/main"
+
+  # For GA tags: Base is the corresponding RC tag (should have same SHA)
+  ga_tag:
+    description: "For GA tags, base is the RC tag SHA (lineage enforced)"
+    algorithm:
+      - "1. GA SHA must match RC SHA (lineage verification)"
+      - "2. Use same base as the RC to ensure identical required checks"
+      - "3. This guarantees 'publish what was tested' principle"
+    fallback: "Lineage verification will fail if no matching RC"
+
+  # For manual dispatch: Explicit --base is required
+  manual:
+    description: "For manual runs, --base must be explicitly provided"
+    fallback: "Error if --base not specified"
+
+# Evaluation Rules
+# ----------------
+# How the verification script interprets check states.
+evaluation_rules:
+  description: "Rules for computing required workflow set for a given commit"
+  algorithm:
+    - "1. Always include all 'always_required' workflows"
+    - "2. For each 'conditional_required' workflow:"
+    - "   a. Get changed files: git diff --name-only <base>..<commit>"
+    - "   b. For each changed file, check if it matches any regex in 'when_paths_match'"
+    - "   c. If any file matches, include the workflow in required set"
+    - "3. 'informational' workflows are never required for promotion"
+
+  status_interpretation:
+    success: "Workflow passed - counts as green"
+    failure: "Workflow failed - blocks promotion if required"
+    cancelled: "Workflow was cancelled - blocks promotion if required"
+    timed_out: "Workflow timed out - blocks promotion if required"
+    queued: "Workflow queued - blocks promotion (not completed)"
+    in_progress: "Workflow running - blocks promotion (not completed)"
+    pending: "Workflow pending - blocks promotion (not completed)"
+    skipped: "Workflow skipped by GitHub - treated as success if not required"
+    missing: "Workflow did not run - blocks if required, OK if not required"
+
+  truth_table_states:
+    REQUIRED: "Check is required and must be SUCCESS"
+    NOT_REQUIRED: "Check is not required for this change set"
+    SUCCESS: "Check passed"
+    FAILED: "Check failed"
+    PENDING: "Check queued/in_progress/pending"
+    MISSING: "Check did not run"
+
+# Notes for Maintainers
+# ---------------------
+notes:
+  - "This file is the authoritative source for required checks"
+  - "Both release-rc-pipeline.yml and release-ga-pipeline.yml use this policy"
+  - "The verify-green-for-tag.sh script loads this file at runtime"
+  - "To add a new required check:"
+  - "  1. Ensure the workflow exists and runs on all target commits"
+  - "  2. Add to appropriate section (always_required or conditional_required)"
+  - "  3. Document the rationale clearly"
+  - "  4. Get Platform Engineering approval"
+  - "To remove a check:"
+  - "  1. Move to informational first (deprecation period)"
+  - "  2. After 2 releases, remove entirely"
+  - "  3. Document why in the PR"

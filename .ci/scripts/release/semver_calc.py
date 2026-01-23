@@ -25,7 +25,6 @@ import sys
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Optional
 
 
 class BumpType(Enum):
@@ -39,7 +38,7 @@ class Version:
     major: int
     minor: int
     patch: int
-    prerelease: Optional[str] = None
+    prerelease: str | None = None
 
     @classmethod
     def parse(cls, version_str: str) -> "Version":
@@ -91,8 +90,8 @@ class Commit:
     sha: str
     message: str
     body: str
-    type: Optional[str] = None
-    scope: Optional[str] = None
+    type: str | None = None
+    scope: str | None = None
     breaking: bool = False
 
     def __post_init__(self):

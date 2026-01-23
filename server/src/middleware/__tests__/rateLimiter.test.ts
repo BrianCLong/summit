@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
 import { publicRateLimit, authenticatedRateLimit } from '../rateLimiter';
@@ -10,7 +11,10 @@ app.use('/authenticated', (req, res, next) => {
   next();
 }, authenticatedRateLimit, (req, res) => res.status(200).send('Authenticated OK'));
 
-describe('Rate Limiting Middleware', () => {
+const run = process.env.NO_NETWORK_LISTEN !== 'true';
+const describeIf = run ? describe : describe.skip;
+
+describeIf('Rate Limiting Middleware', () => {
   describe('Public Rate Limiting', () => {
     it('should allow requests under the limit', async () => {
       const response = await request(app).get('/public');

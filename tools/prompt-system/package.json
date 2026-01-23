@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/prompt-system",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "AI Dev Assistant Prompt Template System for Summit/IntelGraph",
   "type": "module",
   "main": "dist/index.js",
@@ -11,9 +11,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
-    "test": "jest --config jest.config.js",
-    "test:watch": "jest --config jest.config.js --watch",
-    "test:coverage": "jest --config jest.config.js --coverage",
+    "test": "jest --config jest.config.cjs",
+    "test:watch": "jest --config jest.config.cjs --watch",
+    "test:coverage": "jest --config jest.config.cjs --coverage",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "typecheck": "tsc --noEmit",

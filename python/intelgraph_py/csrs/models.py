@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
-from typing import Iterable, List, Mapping, Sequence
+from datetime import UTC, datetime, timedelta
 
 ISO_8601 = "%Y-%m-%dT%H:%M:%S%z"
 DATE_ONLY = "%Y-%m-%d"
@@ -61,7 +61,7 @@ class Dataset:
     dependencies: Sequence[DependentArtifact] = field(default_factory=list)
 
     @staticmethod
-    def from_dict(payload: Mapping[str, object]) -> "Dataset":
+    def from_dict(payload: Mapping[str, object]) -> Dataset:
         last_arrival = _parse_datetime(payload["last_arrival"])
         purposes = [
             RetentionPurpose(
@@ -118,10 +118,10 @@ class Dataset:
 def _parse_datetime(value: object) -> datetime:
     if isinstance(value, datetime):
         if value.tzinfo is None:
-            return value.replace(tzinfo=timezone.utc)
+            return value.replace(tzinfo=UTC)
         return value
     if isinstance(value, (int, float)):
-        return datetime.fromtimestamp(float(value), tz=timezone.utc)
+        return datetime.fromtimestamp(float(value), tz=UTC)
     if isinstance(value, str):
         try:
             return datetime.fromisoformat(value.replace("Z", "+00:00"))
@@ -138,5 +138,5 @@ def serialize_datetime(value: datetime) -> str:
     return value.strftime(ISO_8601)
 
 
-def ensure_datasets(payloads: Iterable[Mapping[str, object]]) -> List[Dataset]:
+def ensure_datasets(payloads: Iterable[Mapping[str, object]]) -> list[Dataset]:
     return [Dataset.from_dict(item) for item in payloads]

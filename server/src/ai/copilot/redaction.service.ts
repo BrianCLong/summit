@@ -338,6 +338,7 @@ export class RedactionService {
         pattern: /\b(\+\d{1,3}[-.]?)?\(?\d{3}\)?[-.]?\d{3}[-.]?\d{4}\b/g,
         type: 'PHONE',
       },
+      { pattern: /(\(\d{3}\)\s*\d{3}-\d{4})|(\b\d{3}-\d{2}-\d{4}\b)/g, type: 'PHONE' },
       { pattern: /\bCLASSIFIED\b/gi, type: 'CLASSIFICATION_MARKER' },
       { pattern: /\bSECRET\b/gi, type: 'CLASSIFICATION_MARKER' },
       { pattern: /\bTOP SECRET\b/gi, type: 'CLASSIFICATION_MARKER' },
@@ -521,6 +522,7 @@ export class RedactionService {
       /\bCLASSIFIED\b/i,
       /\bSECRET\b/i,
       /\bTOP SECRET\b/i,
+      /\(\d{3}\)\s*\d{3}-\d{4}/, // Phone Number
     ];
 
     return sensitivePatterns.some((pattern) => pattern.test(text));

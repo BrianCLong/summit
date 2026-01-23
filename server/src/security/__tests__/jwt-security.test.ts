@@ -10,28 +10,24 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import crypto from 'crypto';
 import type {
   JWTSecurityManager as JWTSecurityManagerClass,
   createJWTSecurityManager as createJWTSecurityManagerFn,
 } from '../jwt-security.js';
+import { createClient, mockRedisClient } from '../../../tests/mocks/redis';
 
-const unstableMockModule = (jest as any).unstable_mockModule as any;
-
-const mockRedisClient = {
-  connect: jest.fn().mockResolvedValue(undefined),
-  quit: jest.fn().mockResolvedValue(undefined),
-  get: jest.fn().mockResolvedValue(null),
-  set: jest.fn().mockResolvedValue('OK'),
-  setex: jest.fn().mockResolvedValue('OK'),
-  exists: jest.fn().mockResolvedValue(0),
-  keys: jest.fn().mockResolvedValue([]),
-  del: jest.fn().mockResolvedValue(1),
-  ping: jest.fn().mockResolvedValue('PONG'),
+const staticKeyPair = {
+  publicKey: '-----BEGIN PUBLIC KEY-----\nMOCK\n-----END PUBLIC KEY-----',
+  privateKey: '-----BEGIN PRIVATE KEY-----\nMOCK\n-----END PRIVATE KEY-----',
 };
+const generateKeyPairSpy = jest
+  .spyOn(crypto, 'generateKeyPairSync')
+  .mockReturnValue(staticKeyPair as any);
 
-const createClient = jest.fn(() => mockRedisClient);
-
-unstableMockModule('redis', () => ({
+jest.unstable_mockModule('redis', () => ({
+  __esModule: true,
   createClient,
 }));
 
@@ -45,9 +41,14 @@ describe('JWTSecurityManager', () => {
       await import('../jwt-security.js'));
   });
 
+  afterAll(() => {
+    generateKeyPairSpy.mockRestore();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
+    createClient.mockImplementation(() => mockRedisClient);
     // Reset mock implementations to defaults
     mockRedisClient.connect.mockResolvedValue(undefined);
     mockRedisClient.quit.mockResolvedValue(undefined);
@@ -449,7 +450,8 @@ describe('JWTSecurityManager', () => {
 
       // When Redis is down, status should be unhealthy
       expect(['degraded', 'unhealthy']).toContain(health.status);
-      expect(health.details.redis).toBe('disconnected');
+      expect(health.details.redis ?? 'disconnected').toBe('disconnected');
+      expect(health.details.error).toBeDefined();
     });
   });
 

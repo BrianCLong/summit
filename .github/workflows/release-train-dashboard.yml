@@ -1,0 +1,189 @@
+name: Release Train Dashboard
+
+# Policy-driven Release Train Dashboard Generator
+# Uses the same REQUIRED_CHECKS_POLICY.yml + base-selection + verify-green-for-tag
+# logic as RC/GA pipelines to compute promotability for all release candidates.
+#
+# DEPRECATION NOTICE:
+# This workflow is now the first step in the Release Ops Orchestrator.
+# Primary schedule: release-ops-orchestrator.yml (hourly)
+# This workflow retains triggers for on-demand runs and pipeline completions.
+#
+# Outputs:
+#   - artifacts/release-train/dashboard.json (machine-readable for automation)
+#   - docs/releases/RELEASE_TRAIN_DASHBOARD.md (human-readable)
+#
+# Authority: docs/ci/RELEASE_TRAIN_DASHBOARD.md
+# See also: docs/ci/RELEASE_OPS_ORCHESTRATOR.md
+
+on:
+  # Schedule removed - now handled by release-ops-orchestrator.yml
+  # schedule:
+  #   - cron: "0 * * * *"
+
+  # Manual trigger for on-demand generation
+  workflow_dispatch:
+    inputs:
+      skip_api:
+        description: "Skip GitHub API calls (use cached data)"
+        type: boolean
+        default: false
+      verbose:
+        description: "Enable verbose logging"
+        type: boolean
+        default: false
+
+  # Trigger on relevant events
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/release-train-dashboard.yml"
+      - "scripts/release/generate_release_train_dashboard.sh"
+      - "scripts/release/verify-green-for-tag.sh"
+      - "docs/ci/REQUIRED_CHECKS_POLICY.yml"
+      - "docs/ci/REQUIRED_CHECKS_POLICY.json"
+
+  # Trigger when RC/GA workflows complete
+  workflow_run:
+    workflows:
+      - "Release RC Pipeline"
+      - "Release GA Pipeline"
+    types:
+      - completed
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: release-train-dashboard
+  cancel-in-progress: true
+
+jobs:
+  generate-dashboard:
+    name: Generate Dashboard
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          fetch-depth: 0 # Full history for tag detection
+
+      - name: Install Dependencies
+        run: |
+          # jq is pre-installed on ubuntu-latest
+          which jq || sudo apt-get install -y jq
+
+          # Install yq for YAML processing
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Make Scripts Executable
+        run: |
+          chmod +x scripts/release/generate_release_train_dashboard.sh
+          chmod +x scripts/release/verify-green-for-tag.sh
+          chmod +x scripts/release/compute_base_for_commit.sh || true
+
+      - name: Generate Dashboard
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ARGS=""
+          if [[ "${{ inputs.skip_api }}" == "true" ]]; then
+            ARGS="${ARGS} --skip-api"
+          fi
+          if [[ "${{ inputs.verbose }}" == "true" ]]; then
+            ARGS="${ARGS} --verbose"
+          fi
+
+          ./scripts/release/generate_release_train_dashboard.sh ${ARGS}
+
+      - name: Upload Dashboard JSON
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        with:
+          name: release-train-dashboard
+          path: |
+            artifacts/release-train/dashboard.json
+            docs/releases/RELEASE_TRAIN_DASHBOARD.md
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Generate Summary
+        run: |
+          echo "## Release Train Dashboard" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ -f "artifacts/release-train/dashboard.json" ]]; then
+            PROMOTABLE=$(jq -r '.summary.promotable' artifacts/release-train/dashboard.json)
+            BLOCKED=$(jq -r '.summary.blocked' artifacts/release-train/dashboard.json)
+            PENDING=$(jq -r '.summary.pending' artifacts/release-train/dashboard.json)
+            TOTAL=$(jq -r '.summary.total_candidates' artifacts/release-train/dashboard.json)
+
+            echo "### Summary" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Total Candidates | ${TOTAL} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Promotable | ${PROMOTABLE} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Blocked | ${BLOCKED} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Pending | ${PENDING} |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            # Show candidates
+            echo "### Candidates" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Tag | State | Blocker |" >> $GITHUB_STEP_SUMMARY
+            echo "|-----|-------|---------|" >> $GITHUB_STEP_SUMMARY
+
+            jq -r '.candidates[] | "| \(.tag) | \(.promotable_state) | \(.top_blocker // "-") |"' \
+              artifacts/release-train/dashboard.json >> $GITHUB_STEP_SUMMARY
+
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Full dashboard available in artifacts." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Dashboard generation failed - no output file found." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Notify on blocked candidates
+  notify-blocked:
+    name: Notify Blocked
+    runs-on: ubuntu-latest
+    needs: generate-dashboard
+    if: always() && needs.generate-dashboard.result == 'success'
+
+    steps:
+      - name: Download Dashboard
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
+        with:
+          name: release-train-dashboard
+
+      - name: Check for Blocked Candidates
+        id: check-blocked
+        run: |
+          if [[ -f "artifacts/release-train/dashboard.json" ]]; then
+            BLOCKED=$(jq -r '.summary.blocked' artifacts/release-train/dashboard.json)
+            echo "blocked=${BLOCKED}" >> $GITHUB_OUTPUT
+
+            if [[ "${BLOCKED}" -gt 0 ]]; then
+              echo "has_blocked=true" >> $GITHUB_OUTPUT
+              BLOCKERS=$(jq -r '.candidates[] | select(.promotable_state == "blocked") | "\(.tag): \(.top_blocker // "unknown")"' artifacts/release-train/dashboard.json)
+              echo "blockers<<EOF" >> $GITHUB_OUTPUT
+              echo "${BLOCKERS}" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+            else
+              echo "has_blocked=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "blocked=0" >> $GITHUB_OUTPUT
+            echo "has_blocked=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Log Blocked Status
+        if: steps.check-blocked.outputs.has_blocked == 'true'
+        run: |
+          echo "::warning::Found ${{ steps.check-blocked.outputs.blocked }} blocked release candidates"
+          echo "Blocked candidates:"
+          echo "${{ steps.check-blocked.outputs.blockers }}"

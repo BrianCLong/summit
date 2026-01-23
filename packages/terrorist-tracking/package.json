@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/terrorist-tracking",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Comprehensive terrorist organization tracking and monitoring system",
   "license": "MIT",
   "type": "module",

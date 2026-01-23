@@ -70,7 +70,7 @@ interface SchedulerOutput {
 }
 
 function printUsage(): void {
-  console.log(`dprs schedule <config.json> [--output <file>] [--manifest <path>]`);
+  process.stdout.write(`dprs schedule <config.json> [--output <file>] [--manifest <path>]\n`);
 }
 
 function advancedComposition(epsilons: number[], deltaCap: number, deltaUsed: number): number {
@@ -211,12 +211,12 @@ function main(): void {
     writeFileSync(resolve(outputPath), JSON.stringify(output, null, 2));
   }
 
-  console.log(formatSchedule(output));
+  process.stdout.write(`${formatSchedule(output)}\n`);
 }
 
 try {
   main();
 } catch (error) {
-  console.error((error as Error).message);
+  process.stderr.write(`${(error as Error).message}\n`);
   process.exit(1);
 }

@@ -346,7 +346,7 @@ class ParquetStorage:
             # Write in chunks
             for i in range(0, len(arrow_table), target_rows):
                 chunk = arrow_table.slice(i, target_rows)
-                chunk_path = table_path / f"part_{i//target_rows:04d}.parquet"
+                chunk_path = table_path / f"part_{i // target_rows:04d}.parquet"
 
                 chunk_stats = self._write_arrow_table(chunk, chunk_path)
                 stats.files_written += chunk_stats.files_written
@@ -387,9 +387,7 @@ class ParquetStorage:
         current_time = datetime.now()
 
         for col in self.config.metadata_columns:
-            if col == "_created_at":
-                df_copy[col] = current_time
-            elif col == "_updated_at":
+            if col == "_created_at" or col == "_updated_at":
                 df_copy[col] = current_time
             elif col == "_batch_id":
                 df_copy[col] = batch_id or self._generate_batch_id()
@@ -544,9 +542,7 @@ class ParquetStorage:
 
     def _estimate_value_size(self, arrow_type: pa.DataType) -> int:
         """Estimate average size of values for a given type"""
-        if pa.types.is_integer(arrow_type):
-            return 8
-        elif pa.types.is_floating(arrow_type):
+        if pa.types.is_integer(arrow_type) or pa.types.is_floating(arrow_type):
             return 8
         elif pa.types.is_boolean(arrow_type):
             return 1

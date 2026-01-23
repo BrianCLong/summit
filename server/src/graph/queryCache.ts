@@ -86,7 +86,9 @@ export async function runWithGraphQueryCache<T>(
   const cached = await getCachedJson<T>(cacheKey, { ttlSeconds });
   if (cached !== null) {
     recHit('graph-cache', op, tenantLabel);
-    cacheLatencySeconds.labels(op, 'hit', tenantLabel).observe((Date.now() - start) / 1000);
+  cacheLatencySeconds
+    ?.labels?.(op, 'hit', tenantLabel)
+    ?.observe?.((Date.now() - start) / 1000);
     return cached;
   }
 
@@ -94,7 +96,9 @@ export async function runWithGraphQueryCache<T>(
   const fresh = await fetcher();
   await setCachedJson(cacheKey, fresh, { ttlSeconds, indexPrefixes: tags });
   recSet('graph-cache', op, tenantLabel);
-  cacheLatencySeconds.labels(op, 'miss', tenantLabel).observe((Date.now() - start) / 1000);
+  cacheLatencySeconds
+    ?.labels?.(op, 'miss', tenantLabel)
+    ?.observe?.((Date.now() - start) / 1000);
   return fresh;
 }
 
@@ -122,5 +126,7 @@ export async function invalidateGraphQueryCache(options: {
 }
 
 export function recordCacheBypass(reason: string, op: string, tenantId?: string) {
-  cacheBypassTotal.labels(op, reason, tenantId || 'unknown').inc();
+  cacheBypassTotal
+    ?.labels?.(op, reason, tenantId || 'unknown')
+    ?.inc?.();
 }

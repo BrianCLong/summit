@@ -12,61 +12,113 @@
  * - Security headers
  */
 
-import AuthService from '../../src/services/AuthService';
-import { ensureAuthenticated, requirePermission } from '../../src/middleware/auth';
-import { securityTestVectors, createMockRequest, createMockResponse } from '../utils/auth-test-helpers';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import crypto from 'crypto';
 import type { Pool } from 'pg';
 
-jest.mock('../../src/config/database', () => ({
-    getPostgresPool: jest.fn(() => ({
-        connect: jest.fn(),
-        query: jest.fn(),
-        end: jest.fn(),
-    })),
-    getRedisClient: jest.fn(() => ({
-        get: jest.fn(),
-        set: jest.fn(),
-        on: jest.fn(),
-        quit: jest.fn(),
-        subscribe: jest.fn(),
-    })),
-}));
-jest.mock('../../src/utils/logger', () => ({
-  error: jest.fn(),
-  warn: jest.fn(),
-  info: jest.fn(),
+const mockGetPostgresPool = jest.fn();
+const mockGetRedisClient = jest.fn();
+jest.unstable_mockModule('../../src/config/database.js', () => ({
+  getPostgresPool: mockGetPostgresPool,
+  getRedisClient: mockGetRedisClient,
 }));
 
-jest.mock('../../src/config/index.js', () => ({
+const mockConfig = {
+  jwt: {
+    secret: 'test-secret',
+    expiresIn: '24h',
+    refreshSecret: 'test-refresh',
+  },
+};
+jest.unstable_mockModule('../../src/config/index.js', () => ({
+  __esModule: true,
+  default: mockConfig,
+}));
+
+const mockCheckUserEnrollmentEligibility = jest.fn();
+jest.unstable_mockModule('../../src/services/GAEnrollmentService.js', () => ({
+  __esModule: true,
   default: {
-    jwt: {
-      secret: 'test-secret',
-      expiresIn: '24h',
-    },
+    checkUserEnrollmentEligibility: mockCheckUserEnrollmentEligibility,
   },
 }));
+
+const mockGetSecret = jest.fn();
+jest.unstable_mockModule('../../src/services/SecretsService.js', () => ({
+  __esModule: true,
+  secretsService: {
+    getSecret: mockGetSecret,
+  },
+}));
+
+const mockArgonHash = jest.fn();
+const mockArgonVerify = jest.fn();
+jest.unstable_mockModule('argon2', () => ({
+  __esModule: true,
+  default: {
+    hash: mockArgonHash,
+    verify: mockArgonVerify,
+  },
+  hash: mockArgonHash,
+  verify: mockArgonVerify,
+}));
+
+const mockJwtSign = jest.fn();
+const mockJwtVerify = jest.fn();
+jest.unstable_mockModule('jsonwebtoken', () => ({
+  __esModule: true,
+  default: {
+    sign: mockJwtSign,
+    verify: mockJwtVerify,
+  },
+  sign: mockJwtSign,
+  verify: mockJwtVerify,
+}));
+
+const { default: AuthService } = await import('../../src/services/AuthService.js');
+const { ensureAuthenticated, requirePermission } = await import('../../src/middleware/auth.js');
+const { securityTestVectors, createMockRequest, createMockResponse } =
+  await import('../utils/auth-test-helpers.js');
+const { default: argon2 } = await import('argon2');
+const { default: jwt } = await import('jsonwebtoken');
 
 describe('Authentication Security Tests', () => {
   let authService: AuthService;
   let mockPool: jest.Mocked<Pool>;
-  let mockClient: jest.Mocked<PoolClient>;
+  let mockClient: jest.Mocked<{ query: jest.Mock; release: jest.Mock }>;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     mockClient = {
       query: jest.fn(),
       release: jest.fn(),
-    } as unknown as jest.Mocked<PoolClient>;
+    } as unknown as jest.Mocked<{ query: jest.Mock; release: jest.Mock }>;
 
     mockPool = {
       connect: jest.fn().mockResolvedValue(mockClient),
       query: jest.fn(),
     } as unknown as jest.Mocked<Pool>;
 
-    const { getPostgresPool } = require('../../src/config/database');
-    getPostgresPool.mockReturnValue(mockPool);
+    mockGetPostgresPool.mockReturnValue(mockPool);
+    mockGetRedisClient.mockReturnValue({
+      get: jest.fn(),
+      set: jest.fn(),
+      on: jest.fn(),
+      quit: jest.fn(),
+      subscribe: jest.fn(),
+    });
 
     authService = new AuthService();
-    jest.clearAllMocks();
+    mockConfig.jwt = {
+      secret: 'test-secret',
+      expiresIn: '24h',
+      refreshSecret: 'test-refresh',
+    };
+    jest
+      .spyOn(authService, 'generateTokens')
+      .mockResolvedValue({ token: 'token', refreshToken: 'refresh-token' });
+    mockCheckUserEnrollmentEligibility.mockResolvedValue({ eligible: true });
+    mockGetSecret.mockResolvedValue('test-secret');
   });
 
   describe('OWASP A01:2021 - Broken Access Control', () => {
@@ -75,8 +127,7 @@ describe('Authentication Security Tests', () => {
       const userAToken = 'user-a-token';
       const userBId = 'user-b-id';
 
-      const jwt = require('jsonwebtoken');
-      jwt.verify = jest.fn().mockReturnValue({
+      mockJwtVerify.mockReturnValue({
         userId: 'user-a-id', // Token belongs to User A
         email: 'usera@test.com',
         role: 'ANALYST',
@@ -124,7 +175,14 @@ describe('Authentication Security Tests', () => {
       ];
 
       roles.forEach(({ role, permission, shouldAllow }) => {
-        const user = { id: 'test', role, email: 'test@test.com', isActive: true, createdAt: new Date() };
+        const user = {
+          id: 'test',
+          role,
+          email: 'test@test.com',
+          isActive: true,
+          createdAt: new Date(),
+          scopes: [],
+        };
         const result = authService.hasPermission(user, permission);
         expect(result).toBe(shouldAllow);
       });
@@ -142,16 +200,22 @@ describe('Authentication Security Tests', () => {
         .mockResolvedValueOnce({}) // BEGIN
         .mockResolvedValueOnce({ rows: [] }) // No existing user
         .mockResolvedValueOnce({
-          rows: [{ id: 'user-123', email: userData.email }],
+          rows: [
+            {
+              id: 'user-123',
+              email: userData.email,
+              role: 'ANALYST',
+              is_active: true,
+              created_at: new Date(),
+            },
+          ],
         })
+        .mockResolvedValueOnce({}) // user_tenants
         .mockResolvedValueOnce({}) // Session
         .mockResolvedValueOnce({}); // COMMIT
 
-      const argon2 = require('argon2');
-      argon2.hash = jest.fn().mockResolvedValue('$argon2id$v=19$...');
-
-      const jwt = require('jsonwebtoken');
-      jwt.sign = jest.fn().mockReturnValue('token');
+      mockArgonHash.mockResolvedValue('$argon2id$v=19$...');
+      mockJwtSign.mockReturnValue('token');
 
       await authService.register(userData);
 
@@ -162,13 +226,14 @@ describe('Authentication Security Tests', () => {
       const insertCall = mockClient.query.mock.calls.find((call: any) =>
         call[0].includes('INSERT INTO users'),
       );
-      expect(insertCall).toBeDefined();
+      if (!insertCall) {
+        throw new Error('Expected INSERT INTO users to be called');
+      }
       expect(insertCall[1]).not.toContain(userData.password);
     });
 
     it('should not expose password hashes in user objects', async () => {
-      const jwt = require('jsonwebtoken');
-      jwt.verify = jest.fn().mockReturnValue({
+      mockJwtVerify.mockReturnValue({
         userId: 'user-123',
         email: 'test@example.com',
         role: 'ANALYST',
@@ -193,9 +258,7 @@ describe('Authentication Security Tests', () => {
     });
 
     it('should protect tokens with HMAC (JWT signing)', () => {
-      const jwt = require('jsonwebtoken');
-      const mockSign = jest.fn();
-      jwt.sign = mockSign;
+      mockJwtSign.mockReturnValue('token');
 
       // Tokens should be signed with secret
       expect(jwt.sign).toBeDefined();
@@ -226,16 +289,22 @@ describe('Authentication Security Tests', () => {
           .mockResolvedValueOnce({}) // BEGIN
           .mockResolvedValueOnce({ rows: [] }) // Check existing
           .mockResolvedValueOnce({
-            rows: [{ id: 'user-123', email: 'test@example.com' }],
+            rows: [
+              {
+                id: 'user-123',
+                email: 'test@example.com',
+                role: 'ANALYST',
+                is_active: true,
+                created_at: new Date(),
+              },
+            ],
           })
-          .mockResolvedValueOnce({})
-          .mockResolvedValueOnce({});
+          .mockResolvedValueOnce({}) // user_tenants
+          .mockResolvedValueOnce({}) // Session
+          .mockResolvedValueOnce({}); // COMMIT
 
-        const argon2 = require('argon2');
-        argon2.hash = jest.fn().mockResolvedValue('hash');
-
-        const jwt = require('jsonwebtoken');
-        jwt.sign = jest.fn().mockReturnValue('token');
+        mockArgonHash.mockResolvedValue('hash');
+        mockJwtSign.mockReturnValue('token');
 
         await authService.register({
           email: "test'; DROP TABLE users;--",
@@ -281,16 +350,22 @@ describe('Authentication Security Tests', () => {
             .mockResolvedValueOnce({})
             .mockResolvedValueOnce({ rows: [] })
             .mockResolvedValueOnce({
-              rows: [{ id: 'user-123', first_name: payload }],
+              rows: [
+                {
+                  id: 'user-123',
+                  first_name: payload,
+                  role: 'ANALYST',
+                  is_active: true,
+                  created_at: new Date(),
+                },
+              ],
             })
-            .mockResolvedValueOnce({})
-            .mockResolvedValueOnce({});
+            .mockResolvedValueOnce({}) // user_tenants
+            .mockResolvedValueOnce({}) // Session
+            .mockResolvedValueOnce({}); // COMMIT
 
-          const argon2 = require('argon2');
-          argon2.hash = jest.fn().mockResolvedValue('hash');
-
-          const jwt = require('jsonwebtoken');
-          jwt.sign = jest.fn().mockReturnValue('token');
+          mockArgonHash.mockResolvedValue('hash');
+          mockJwtSign.mockReturnValue('token');
 
           const result = await authService.register(userData);
 
@@ -323,8 +398,7 @@ describe('Authentication Security Tests', () => {
         .mockResolvedValueOnce({}) // Revoke old
         .mockResolvedValueOnce({}); // Insert new
 
-      const jwt = require('jsonwebtoken');
-      jwt.sign = jest.fn().mockReturnValue('new-token');
+      mockJwtSign.mockReturnValue('new-token');
 
       const result = await authService.refreshAccessToken(originalRefreshToken);
 
@@ -355,7 +429,6 @@ describe('Authentication Security Tests', () => {
 
     it('should hash tokens before blacklisting (avoid storing full tokens)', async () => {
       const token = 'sensitive-token';
-      const crypto = require('crypto');
 
       mockPool.query.mockImplementationOnce((query: string, params: any[]) => {
         // Verify token is hashed
@@ -393,9 +466,8 @@ describe('Authentication Security Tests', () => {
 
     it('should handle missing configuration gracefully', () => {
       // Config should have defaults or validation
-      const config = require('../../src/config/index.js').default;
-      expect(config.jwt.secret).toBeDefined();
-      expect(config.jwt.expiresIn).toBeDefined();
+      expect(mockConfig.jwt.secret).toBeDefined();
+      expect(mockConfig.jwt.expiresIn).toBeDefined();
     });
   });
 
@@ -411,8 +483,7 @@ describe('Authentication Security Tests', () => {
         ],
       });
 
-      const argon2 = require('argon2');
-      argon2.verify = jest.fn().mockResolvedValue(false);
+      mockArgonVerify.mockResolvedValue(false);
 
       await expect(
         authService.login('test@example.com', ''),
@@ -421,7 +492,6 @@ describe('Authentication Security Tests', () => {
 
     it('should use constant-time comparison for credentials', async () => {
       // Argon2.verify provides timing-safe comparison
-      const argon2 = require('argon2');
       expect(argon2.verify).toBeDefined();
     });
 
@@ -432,8 +502,7 @@ describe('Authentication Security Tests', () => {
           rows: [{ id: 'user-123', password_hash: 'hash' }],
         }); // Wrong password
 
-      const argon2 = require('argon2');
-      argon2.verify = jest.fn().mockResolvedValue(false);
+      mockArgonVerify.mockResolvedValue(false);
 
       // Both should return same error message
       let error1, error2;
@@ -456,7 +525,7 @@ describe('Authentication Security Tests', () => {
     it('should invalidate sessions on logout', async () => {
       mockClient.query
         .mockResolvedValueOnce({}) // BEGIN
-        .mockResolvedValueOnce({}) // Revoke all sessions
+        .mockResolvedValueOnce({ rows: [{ tenant_id: 'tenant-1', last_login: new Date() }] }) // Revoke all sessions
         .mockResolvedValueOnce({}); // COMMIT
 
       mockPool.query.mockResolvedValueOnce({});
@@ -473,8 +542,7 @@ describe('Authentication Security Tests', () => {
 
   describe('OWASP A08:2021 - Software and Data Integrity Failures', () => {
     it('should verify JWT signature', async () => {
-      const jwt = require('jsonwebtoken');
-      jwt.verify = jest.fn().mockImplementation(() => {
+      mockJwtVerify.mockImplementation(() => {
         throw new Error('invalid signature');
       });
 
@@ -485,8 +553,7 @@ describe('Authentication Security Tests', () => {
     });
 
     it('should reject tokens with "none" algorithm', async () => {
-      const jwt = require('jsonwebtoken');
-      jwt.verify = jest.fn().mockImplementation(() => {
+      mockJwtVerify.mockImplementation(() => {
         throw new Error('invalid algorithm');
       });
 
@@ -510,8 +577,7 @@ describe('Authentication Security Tests', () => {
       await authService.logout('user-123', token);
 
       // Try to use token after logout
-      const jwt = require('jsonwebtoken');
-      jwt.verify = jest.fn().mockReturnValue({
+      mockJwtVerify.mockReturnValue({
         userId: 'user-123',
         email: 'test@example.com',
         role: 'ANALYST',
@@ -540,8 +606,7 @@ describe('Authentication Security Tests', () => {
         .mockResolvedValueOnce({})
         .mockResolvedValueOnce({});
 
-      const jwt = require('jsonwebtoken');
-      jwt.sign = jest.fn().mockReturnValue('new-token');
+      mockJwtSign.mockReturnValue('new-token');
 
       await authService.refreshAccessToken(oldRefreshToken);
 
@@ -564,8 +629,22 @@ describe('Authentication Security Tests', () => {
       const longPassword = 'b'.repeat(10000);
 
       mockClient.query
-        .mockResolvedValueOnce({})
-        .mockResolvedValueOnce({ rows: [] });
+        .mockResolvedValueOnce({}) // BEGIN
+        .mockResolvedValueOnce({ rows: [] }) // No existing user
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              id: 'user-123',
+              email: longEmail,
+              role: 'ANALYST',
+              is_active: true,
+              created_at: new Date(),
+            },
+          ],
+        })
+        .mockResolvedValueOnce({}) // user_tenants
+        .mockResolvedValueOnce({}) // Session
+        .mockResolvedValueOnce({}); // COMMIT
 
       // Should not crash, should handle gracefully
       await expect(
@@ -583,16 +662,22 @@ describe('Authentication Security Tests', () => {
         .mockResolvedValueOnce({})
         .mockResolvedValueOnce({ rows: [] })
         .mockResolvedValueOnce({
-          rows: [{ id: 'user-123', email: 'test@example.com' }],
+          rows: [
+            {
+              id: 'user-123',
+              email: 'test@example.com',
+              role: 'ANALYST',
+              is_active: true,
+              created_at: new Date(),
+            },
+          ],
         })
-        .mockResolvedValueOnce({})
-        .mockResolvedValueOnce({});
+        .mockResolvedValueOnce({}) // user_tenants
+        .mockResolvedValueOnce({}) // Session
+        .mockResolvedValueOnce({}); // COMMIT
 
-      const argon2 = require('argon2');
-      argon2.hash = jest.fn().mockResolvedValue('hash');
-
-      const jwt = require('jsonwebtoken');
-      jwt.sign = jest.fn().mockReturnValue('token');
+      mockArgonHash.mockResolvedValue('hash');
+      mockJwtSign.mockReturnValue('token');
 
       await expect(
         authService.register({
@@ -624,8 +709,7 @@ describe('Authentication Security Tests', () => {
 
       mockPool.query.mockResolvedValue({ rows: [{ token_hash: 'hash' }] });
 
-      const jwt = require('jsonwebtoken');
-      jwt.verify = jest.fn().mockReturnValue({
+      mockJwtVerify.mockReturnValue({
         userId: 'user-123',
         email: 'test@example.com',
         role: 'ANALYST',
@@ -645,11 +729,8 @@ describe('Authentication Security Tests', () => {
           rows: [{ id: 'user-123', email: 'test@example.com' }],
         });
 
-      const argon2 = require('argon2');
-      argon2.hash = jest.fn().mockResolvedValue('hash');
-
-      const jwt = require('jsonwebtoken');
-      jwt.sign = jest.fn().mockReturnValue('token');
+      mockArgonHash.mockResolvedValue('hash');
+      mockJwtSign.mockReturnValue('token');
 
       const requests = Array.from({ length: 10 }, (_, i) =>
         authService.register({

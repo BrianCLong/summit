@@ -53,6 +53,7 @@ import LoginPage from './components/auth/LoginPage.jsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
 import RouteAnnouncer from './components/a11y/RouteAnnouncer';
 import { useFeatureFlag } from './hooks/useFeatureFlag';
+import { getGraphqlHttpUrl } from './config/urls';
 
 // Lazy load heavy components for better initial load performance
 const InteractiveGraphExplorer = React.lazy(() =>
@@ -112,9 +113,21 @@ const ComplianceCenter = React.lazy(() =>
 const SandboxDashboard = React.lazy(() =>
   import('./pages/Sandbox/SandboxDashboard')
 );
+const ReleaseReadinessRoute = React.lazy(() =>
+  import('./routes/ReleaseReadinessRoute')
+);
+const IOCList = React.lazy(() => import('./pages/IOC/IOCList'));
+const IOCDetail = React.lazy(() => import('./pages/IOC/IOCDetail'));
+const HuntList = React.lazy(() => import('./pages/Hunting/HuntList'));
+const HuntDetail = React.lazy(() => import('./pages/Hunting/HuntDetail'));
+const SearchHome = React.lazy(() => import('./pages/Search/SearchHome'));
+const SearchResultDetail = React.lazy(() =>
+  import('./pages/Search/SearchResultDetail')
+);
 
 import { MilitaryTech, Notifications, Extension, Cable, Key, VerifiedUser, Science } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { Security } from '@mui/icons-material';
+import { Assignment as AssignmentIcon } from '@mui/icons-material';
 
 // Demo mode components
 import DemoIndicator from './components/common/DemoIndicator';
@@ -125,6 +138,9 @@ const ADMIN = 'ADMIN';
 const APPROVER_ROLES = [ADMIN, 'SECURITY_ADMIN', 'OPERATIONS', 'SAFETY'];
 const navigationItems = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
+  { path: '/search', label: 'Search', icon: <Search /> },
+  { path: '/hunts', label: 'Hunts', icon: <Security /> },
+  { path: '/ioc', label: 'IOCs', icon: <Timeline /> },
   { path: '/investigations', label: 'Timeline', icon: <Search /> },
   { path: '/graph', label: 'Graph Explorer', icon: <Timeline /> },
   { path: '/copilot', label: 'AI Copilot', icon: <Psychology /> },
@@ -162,6 +178,13 @@ const navigationItems = [
   { path: '/security', label: 'Security', icon: <Key />, roles: [ADMIN] },
   { path: '/compliance', label: 'Compliance', icon: <VerifiedUser />, roles: [ADMIN] },
   { path: '/sandbox', label: 'Sandbox', icon: <Science />, roles: [ADMIN] },
+  {
+    path: '/ops/release-readiness',
+    label: 'Release Readiness',
+    icon: <AssignmentIcon />,
+    roles: [ADMIN, 'OPERATOR'],
+    featureFlag: 'release-readiness-dashboard',
+  },
 ];
 
 // Connection Status Component
@@ -171,7 +194,7 @@ function ConnectionStatus() {
   React.useEffect(() => {
     const checkBackend = async () => {
       try {
-        const response = await fetch('http://localhost:4000/graphql', {
+        const response = await fetch(getGraphqlHttpUrl(), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ query: '{ __typename }' }),
@@ -212,6 +235,7 @@ function NavigationDrawer({ open, onClose }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { hasRole, hasPermission } = useAuth();
+  const { getFlagValue } = useFeatureFlag();
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -222,6 +246,7 @@ function NavigationDrawer({ open, onClose }) {
     if (item.roles && !item.roles.some((r) => hasRole(r))) return false;
     if (item.permissions && !item.permissions.some((p) => hasPermission(p)))
       return false;
+    if (item.featureFlag && !getFlagValue(item.featureFlag, false)) return false;
     return true;
   });
 
@@ -757,6 +782,15 @@ function MainLayout() {
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/search" element={<SearchHome />} />
+              <Route
+                path="/search/results/:id"
+                element={<SearchResultDetail />}
+              />
+              <Route path="/hunts" element={<HuntList />} />
+              <Route path="/hunts/:id" element={<HuntDetail />} />
+              <Route path="/ioc" element={<IOCList />} />
+              <Route path="/ioc/:id" element={<IOCDetail />} />
               <Route path="/investigations" element={<InvestigationsPage />} />
               <Route path="/graph" element={<GraphExplorerPage />} />
               <Route path="/copilot" element={<CopilotPage />} />
@@ -786,6 +820,7 @@ function MainLayout() {
                 <Route path="/security" element={<SecurityDashboard />} />
                 <Route path="/compliance" element={<ComplianceCenter />} />
                 <Route path="/sandbox" element={<SandboxDashboard />} />
+                <Route path="/ops/release-readiness" element={<ReleaseReadinessRoute />} />
               </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Route>

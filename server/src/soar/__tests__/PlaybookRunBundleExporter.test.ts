@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { PlaybookRunBundleExporter } from '../PlaybookRunBundleExporter';
 import { playbookRunManifestSchema } from '../../provenance/playbookRunManifest';
 
@@ -89,7 +90,7 @@ describe('PlaybookRunBundleExporter', () => {
 
     playbookRunManifestSchema.parse(manifest);
     const lineageEdges = manifest.provenance.edges.filter(
-      (edge) => edge.relation === 'DERIVED_FROM',
+      (edge: { relation?: string }) => edge.relation === 'DERIVED_FROM',
     );
     expect(lineageEdges).toHaveLength(1);
     expect(lineageEdges[0]).toMatchObject({

@@ -3,11 +3,10 @@ from __future__ import annotations
 import json
 import random
 import time
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
-
 
 DEFAULT_REGISTRY_PATH = (
     Path(__file__).resolve().parent.parent / "performance" / "model_registry.json"
@@ -136,9 +135,9 @@ class HyperparameterOptimizer:
         for trial in trials[1:]:
             current_metric = trial.metrics.get(self.target_metric, 0)
             best_metric = best.metrics.get(self.target_metric, 0)
-            if self.maximize and current_metric > best_metric:
-                best = trial
-            elif not self.maximize and current_metric < best_metric:
+            if (self.maximize and current_metric > best_metric) or (
+                not self.maximize and current_metric < best_metric
+            ):
                 best = trial
         return best.hyperparameters, trials
 
@@ -176,9 +175,7 @@ class ABTestRunner:
         treatment_data = dataset[split_index:] or dataset
 
         control_metrics = self.evaluation_fn(control.hyperparameters, control_data)
-        treatment_metrics = self.evaluation_fn(
-            treatment.hyperparameters, treatment_data
-        )
+        treatment_metrics = self.evaluation_fn(treatment.hyperparameters, treatment_data)
 
         control_value = control_metrics.get(self.target_metric, 0)
         treatment_value = treatment_metrics.get(self.target_metric, 0)
@@ -260,7 +257,9 @@ class DeploymentManager:
         if baseline is None:
             deployed = self.registry.promote(candidate)
             return DeploymentDecision(
-                deployed=True, reason="No baseline — deploying first model", deployed_version=deployed
+                deployed=True,
+                reason="No baseline — deploying first model",
+                deployed_version=deployed,
             )
 
         candidate_metric = candidate.metrics.get(self.target_metric, 0)

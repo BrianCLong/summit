@@ -74,7 +74,7 @@ export async function searchEntities(
     },
   });
   if (!res.ok) {
-    console.error('Search failed', res.status);
+    process.stderr.write(`Search failed ${res.status}\n`);
     return [];
   }
   return res.json();
@@ -94,7 +94,7 @@ export async function getNeighbors(
     },
   });
   if (!res.ok) {
-    console.error('Neighbors failed', res.status);
+    process.stderr.write(`Neighbors failed ${res.status}\n`);
     return { nodes: [], edges: [] };
   }
   return res.json();

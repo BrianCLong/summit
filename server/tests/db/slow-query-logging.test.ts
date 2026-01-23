@@ -1,33 +1,37 @@
 import { jest } from '@jest/globals';
 
-const mockLogger = {
-  warn: jest.fn(),
-  info: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  child: jest.fn().mockReturnThis(),
-};
-
-const mockCorrelationStorage = {
-  getStore: jest.fn(() => new Map([
-    ['traceId', 'trace-123'],
-    ['tenantId', 'tenant-abc'],
-  ])),
-};
-
-jest.mock('../../src/config/logger.js', () => ({
-  logger: mockLogger,
-  correlationStorage: mockCorrelationStorage,
-}));
-
-import { __private } from '../../src/db/postgres';
-
 describe('slow query logging', () => {
+  let baseLogger: any;
+  let correlationStorage: any;
+  let __private: any;
+  let mockLogger: any;
+
+  beforeAll(async () => {
+    jest.resetModules();
+    // @ts-ignore - dynamic import for test harness
+    ({ logger: baseLogger, correlationStorage } = (await import('../../src/config/logger')) as any);
+    mockLogger = {
+      warn: jest.fn(),
+      info: jest.fn(),
+      error: jest.fn(),
+      child: jest.fn(),
+    };
+    baseLogger.child.mockReturnValue(mockLogger);
+    // @ts-ignore - dynamic import for test harness
+    ({ __private } = (await import('../../src/db/postgres')) as any);
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    baseLogger.child.mockReturnValue(mockLogger);
   });
 
   it('emits a structured log for slow queries', () => {
+    const store = new Map([
+      ['traceId', 'trace-123'],
+      ['tenantId', 'tenant-abc'],
+    ]);
+    correlationStorage.getStore.mockReturnValue(store);
     __private.recordSlowQuery(
       'stmt_test',
       312,

@@ -4,11 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { Pool, PoolClient } from 'pg';
 import { spawn as childSpawn, SpawnOptions } from 'child_process';
-import { fileURLToPath } from 'url';
 import client from 'prom-client';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export interface MigrationManagerOptions {
   migrationsDir?: string;
@@ -43,10 +39,10 @@ export interface MigrationStatus {
 }
 
 const DEFAULT_MIGRATIONS_DIR = path.resolve(
-  __dirname,
-  '../../../db/managed-migrations',
+  process.cwd(),
+  'db/managed-migrations',
 );
-const DEFAULT_SEEDS_DIR = path.resolve(__dirname, '../../../db/managed-seeds');
+const DEFAULT_SEEDS_DIR = path.resolve(process.cwd(), 'db/managed-seeds');
 
 export class MigrationManager {
   private migrationsDir: string;

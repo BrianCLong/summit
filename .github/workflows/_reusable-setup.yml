@@ -63,7 +63,7 @@ jobs:
       cache-hit: ${{ steps.cache-pnpm.outputs.cache-hit }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
       - name: Resolve versions
         id: versions
@@ -72,13 +72,13 @@ jobs:
           echo "pnpm=${{ inputs.pnpm-version }}" >> "$GITHUB_OUTPUT"
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
         with:
           version: ${{ inputs.pnpm-version }}
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: ${{ inputs.node-version }}
           cache: "pnpm"
@@ -91,8 +91,8 @@ jobs:
           echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
 
       - name: Cache dependencies
-        id: cache-deps
-        uses: actions/cache@v4
+        id: cache-pnpm
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5
         with:
           path: |
             ~/.pnpm-store
@@ -109,7 +109,7 @@ jobs:
 
       - name: Setup Python (optional)
         if: inputs.python-version != ''
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6
         with:
           python-version: ${{ inputs.python-version }}
           cache: "pip"

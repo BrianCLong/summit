@@ -338,7 +338,7 @@ class DataMasker:
         """Mask PII in a record"""
 
         if not strategy_map:
-            strategy_map = {pii_type: MaskingStrategy.REDACTION for pii_type in PIIType}
+            strategy_map = dict.fromkeys(PIIType, MaskingStrategy.REDACTION)
 
         masked_record = record.copy()
 
@@ -640,7 +640,6 @@ class PrivacyGovernor:
         masking_strategies: dict[PIIType, MaskingStrategy] | None = None,
         encryption_key: bytes | None = None,
     ):
-
         self.logger = get_logger("privacy-governor")
 
         # Initialize components
@@ -711,9 +710,7 @@ class PrivacyGovernor:
 
                 if not consent_valid:
                     # No valid consent - apply strictest masking
-                    strict_strategies = {
-                        pii_type: MaskingStrategy.REDACTION for pii_type in PIIType
-                    }
+                    strict_strategies = dict.fromkeys(PIIType, MaskingStrategy.REDACTION)
                     masked_record = self.data_masker.mask_record(
                         record, pii_detections, strict_strategies
                     )
@@ -738,7 +735,7 @@ class PrivacyGovernor:
 
             # On error, apply strict masking as fallback
             if pii_detections:
-                strict_strategies = {pii_type: MaskingStrategy.REDACTION for pii_type in PIIType}
+                strict_strategies = dict.fromkeys(PIIType, MaskingStrategy.REDACTION)
                 return self.data_masker.mask_record(record, pii_detections, strict_strategies)
 
             return record

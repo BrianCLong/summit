@@ -1,6 +1,12 @@
+import { getApiBaseUrl } from '../config/urls';
+
 export function apiBase() {
-  const root = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-  return root.replace(/\/$/, '');
+  return getApiBaseUrl().replace(/\/$/, '');
+}
+
+export function getAuthHeaders() {
+  const token = localStorage.getItem('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 export async function apiFetch(path, opts = {}) {

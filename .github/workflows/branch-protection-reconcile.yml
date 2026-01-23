@@ -1,0 +1,229 @@
+# branch-protection-reconcile.yml
+# Generates reconciliation plans for branch protection alignment
+#
+# Manual-only workflow that generates actionable steps to align
+# GitHub branch protection with REQUIRED_CHECKS_POLICY.yml.
+#
+# Apply mode is intentionally guarded and requires explicit admin approval.
+#
+# Authority: docs/ci/BRANCH_PROTECTION_RECONCILIATION.md
+
+name: Branch Protection Reconciliation
+
+on:
+  # Manual trigger only - reconciliation is an intentional action
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to reconcile"
+        type: string
+        default: "main"
+      mode:
+        description: "Mode (plan generates report, apply requires admin)"
+        type: choice
+        options:
+          - plan
+          - apply
+        default: "plan"
+      confirm_apply:
+        description: "Type 'I UNDERSTAND' to confirm apply mode"
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  OUT_DIR: artifacts/release-train
+
+jobs:
+  reconcile:
+    name: Reconcile Branch Protection
+    runs-on: ubuntu-latest
+
+    # For apply mode, require environment approval
+    environment: ${{ github.event.inputs.mode == 'apply' && 'production-admin' || '' }}
+
+    outputs:
+      needs_reconciliation: ${{ steps.reconcile.outputs.needs_reconciliation }}
+      add_count: ${{ steps.reconcile.outputs.add_count }}
+      remove_count: ${{ steps.reconcile.outputs.remove_count }}
+
+    steps:
+      - name: Validate Apply Mode
+        if: github.event.inputs.mode == 'apply'
+        run: |
+          if [[ "${{ github.event.inputs.confirm_apply }}" != "I UNDERSTAND" ]]; then
+            echo "::error::Apply mode requires typing 'I UNDERSTAND' in the confirm field"
+            echo "Apply mode will modify branch protection settings and requires admin access."
+            exit 1
+          fi
+
+          echo "::warning::Apply mode confirmed - will attempt to modify branch protection"
+
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Run Reconciler
+        id: reconcile
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p "${{ env.OUT_DIR }}"
+
+          chmod +x scripts/release/reconcile_branch_protection.sh
+          chmod +x scripts/release/extract_required_checks_from_policy.sh
+
+          APPLY_FLAG=""
+          if [[ "${{ github.event.inputs.mode }}" == "apply" ]]; then
+            APPLY_FLAG="--mode apply --i-understand-admin-required true"
+          fi
+
+          scripts/release/reconcile_branch_protection.sh \
+            --repo "${{ github.repository }}" \
+            --branch "${{ github.event.inputs.branch }}" \
+            --out-dir "${{ env.OUT_DIR }}" \
+            --verbose \
+            $APPLY_FLAG || true
+
+          # Extract results
+          if [[ -f "${{ env.OUT_DIR }}/branch_protection_reconcile_plan.json" ]]; then
+            NEEDS_REC=$(jq -r '.needs_reconciliation' "${{ env.OUT_DIR }}/branch_protection_reconcile_plan.json")
+            ADD_COUNT=$(jq -r '.summary.add_count' "${{ env.OUT_DIR }}/branch_protection_reconcile_plan.json")
+            REMOVE_COUNT=$(jq -r '.summary.remove_count' "${{ env.OUT_DIR }}/branch_protection_reconcile_plan.json")
+
+            echo "needs_reconciliation=${NEEDS_REC}" >> $GITHUB_OUTPUT
+            echo "add_count=${ADD_COUNT}" >> $GITHUB_OUTPUT
+            echo "remove_count=${REMOVE_COUNT}" >> $GITHUB_OUTPUT
+
+            echo "Needs Reconciliation: ${NEEDS_REC}"
+            echo "Checks to Add: ${ADD_COUNT}"
+            echo "Checks to Remove: ${REMOVE_COUNT}"
+          else
+            echo "::error::Reconciliation plan not generated"
+            exit 1
+          fi
+
+      - name: Upload Reconciliation Plan
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        with:
+          name: branch-protection-reconcile-plan
+          path: |
+            ${{ env.OUT_DIR }}/branch_protection_reconcile_plan.md
+            ${{ env.OUT_DIR }}/branch_protection_reconcile_plan.json
+          retention-days: 30
+
+      - name: Display Plan in Summary
+        run: |
+          echo "## Branch Protection Reconciliation Plan" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.event.inputs.branch }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Mode:** ${{ github.event.inputs.mode }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ -f "${{ env.OUT_DIR }}/branch_protection_reconcile_plan.md" ]]; then
+            cat "${{ env.OUT_DIR }}/branch_protection_reconcile_plan.md" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Create Issue for Plan
+        if: steps.reconcile.outputs.needs_reconciliation == 'true' && github.event.inputs.mode == 'plan'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
+        with:
+          script: |
+            const fs = require('fs');
+            const planPath = '${{ env.OUT_DIR }}/branch_protection_reconcile_plan.md';
+
+            if (!fs.existsSync(planPath)) {
+              console.log('No plan file found');
+              return;
+            }
+
+            const planContent = fs.readFileSync(planPath, 'utf8');
+            const branch = '${{ github.event.inputs.branch }}';
+            const addCount = '${{ steps.reconcile.outputs.add_count }}';
+            const removeCount = '${{ steps.reconcile.outputs.remove_count }}';
+
+            const title = `[Reconciliation Plan] Branch protection alignment needed for ${branch}`;
+
+            const body = `## Reconciliation Plan Generated
+
+            A branch protection reconciliation plan has been generated for \`${branch}\`.
+
+            | Action | Count |
+            |--------|-------|
+            | Checks to Add | ${addCount} |
+            | Checks to Remove | ${removeCount} |
+
+            ---
+
+            ${planContent}
+
+            ---
+
+            ### Next Steps
+
+            1. Review the plan above
+            2. If changes are approved, either:
+               - Apply manually via UI/CLI (see plan for instructions)
+               - Re-run this workflow with **apply** mode
+
+            ### Workflow Run
+
+            [View Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+            ---
+
+            *Generated by Branch Protection Reconciliation workflow*
+            `;
+
+            // Check for existing open reconciliation issues
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'governance,reconciliation',
+              state: 'open'
+            });
+
+            const existingIssue = issues.data.find(i =>
+              i.title.includes('[Reconciliation Plan]') &&
+              i.title.includes(branch)
+            );
+
+            if (existingIssue) {
+              // Update existing issue
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: `## Updated Reconciliation Plan\n\n${body}`
+              });
+              console.log(`Updated issue #${existingIssue.number}`);
+            } else {
+              // Create new issue
+              const issue = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['governance', 'reconciliation', 'release-ops']
+              });
+              console.log(`Created issue #${issue.data.number}`);
+            }
+
+      - name: Summary
+        run: |
+          if [[ "${{ steps.reconcile.outputs.needs_reconciliation }}" == "true" ]]; then
+            if [[ "${{ github.event.inputs.mode }}" == "apply" ]]; then
+              echo "::notice::Reconciliation applied (check workflow logs for results)"
+            else
+              echo "::warning::Reconciliation needed - review the generated plan"
+            fi
+          else
+            echo "::notice::No reconciliation needed - branch protection matches policy"
+          fi
