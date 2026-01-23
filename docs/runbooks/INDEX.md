@@ -15,6 +15,7 @@ Quick reference for operational procedures and incident response.
 - [Release Captain Quick Reference](./release-captain-quick-reference.md)
 - [Release Captain Verification](./release-captain-verification.md)
 - [Disaster Recovery Procedures](./disaster-recovery-procedures.yaml)
+- [Agent Skills Governance](./agent-skills-governance.md)
 - [Schema Migration Playbook](./schema-migration-playbook.md)
 - [Postmortem Template](./postmortem_template.md)
 
@@ -69,4 +70,4 @@ Quick reference for operational procedures and incident response.
 **🚨 For P1 incidents involving MC Platform v0.4.5 IncidentAutoReweighter, go directly to:**
 [incident-auto-reweighter.md](./incident-auto-reweighter.md)
 
-**Last Updated:** $(date -u +%Y-%m-%d) - Added MC Platform v0.4.5 IncidentAutoReweighter runbook
+**Last Updated:** $(date -u +%Y-%m-%d) - Added agent skills governance runbook
