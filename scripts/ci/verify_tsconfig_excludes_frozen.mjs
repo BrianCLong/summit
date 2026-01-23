@@ -4,17 +4,29 @@ import { join } from 'path';
 
 // Snapshot taken on 2026-01-22
 // Run python3 -c "import json, hashlib; with open('server/tsconfig.json') as f: data = json.load(f); excludes = sorted(data.get('exclude', [])); content = json.dumps(excludes); print(hashlib.sha256(content.encode('utf-8')).hexdigest())" to get new hash if you reduced excludes.
-const EXPECTED_HASH = 'eaf00c23391389933bc87cb3c156d99175f4ec88e1153fe8ef418d93306772d3';
-const EXPECTED_COUNT = 130;
+const EXPECTED_HASH = 'd6baf8a1874dc56c177b6686bd95016f2ceaa8b5ced6eb982ecac0a4edcd0486';
+const EXPECTED_COUNT = 7;
 
 const tsconfigPath = join(process.cwd(), 'server', 'tsconfig.json');
 
 try {
   const tsconfigContent = readFileSync(tsconfigPath, 'utf8');
   // Simple comment stripping to handle JSONC
-  const jsonContent = tsconfigContent
-    .replace(/\/\/.*/g, '')
-    .replace(/\/\*[\s\S]*?\*\//g, '');
+  // Robust comment stripping that doesn't kill glob patterns like **/*.ts
+  const jsonContent = tsconfigContent.split('\n')
+    .map(line => {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('//')) return '';
+      return line;
+    })
+    .join('\n')
+    .replace(/\/\*[\s\S]*?\*\//g, (match) => {
+       // Only replace if it looks like a real multi-line comment, 
+       // but this is still risky for globs.
+       // Given our known file structure, the only /* are in globs.
+       // Let's just strip the one POLICY comment specifically.
+       return match.includes('POLICY') ? '' : match;
+    });
   
   const tsconfig = JSON.parse(jsonContent);
   const excludes = tsconfig.exclude || [];

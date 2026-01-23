@@ -406,10 +406,10 @@
     "/Users/brianlong/Developer/summit/packages/work-graph/src",
     "/Users/brianlong/Developer/summit/packages/workspace/src"
   ],
-  "checkedFiles": 6677,
-  "currentViolations": 8160,
+  "checkedFiles": 6685,
+  "currentViolations": 8175,
   "existingViolations": 8093,
-  "newViolations": 67,
+  "newViolations": 82,
   "errors": [
     {
       "file": "/Users/brianlong/Developer/summit/client/src/features/export/index.ts",
@@ -10985,6 +10985,12 @@
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/graphql/apollo-v5-server.ts",
+      "import": "./plugins/graphqlCostPlugin.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/graphqlCostPlugin.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/apollo-v5-server.ts",
       "import": "./plugins/resolverMetrics.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/resolverMetrics.js"
@@ -11422,6 +11428,18 @@
       "resolved": "/Users/brianlong/Developer/summit/server/src/policy/store.js"
     },
     {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/__tests__/graphqlCostPlugin.test.ts",
+      "import": "../graphqlCostPlugin.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/graphqlCostPlugin.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/__tests__/graphqlCostPlugin.test.ts",
+      "import": "../../services/CostCalculator.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/services/CostCalculator.js"
+    },
+    {
       "file": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/__tests__/inputSanitizationPlugin.test.ts",
       "import": "../inputSanitizationPlugin.js",
       "kind": "missing",
@@ -11474,6 +11492,30 @@
       "import": "../../utils/logger.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/graphqlCostPlugin.ts",
+      "import": "../apollo-v5-server.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/apollo-v5-server.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/graphqlCostPlugin.ts",
+      "import": "../services/CostCalculator.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/services/CostCalculator.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/graphqlCostPlugin.ts",
+      "import": "../services/TenantRateLimitService.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/services/TenantRateLimitService.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/graphqlCostPlugin.ts",
+      "import": "../../monitoring/metrics.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/monitoring/metrics.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/inputSanitizationPlugin.ts",
@@ -12914,6 +12956,36 @@
       "import": "../../db/postgres.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/db/postgres.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/services/CostCalculator.ts",
+      "import": "../../config/database.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/services/TenantRateLimitService.ts",
+      "import": "../../services/RateLimiter.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/services/RateLimiter.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/services/TenantRateLimitService.ts",
+      "import": "./CostCalculator.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/services/CostCalculator.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/services/TenantRateLimitService.ts",
+      "import": "../../config/database.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/services/__tests__/CostCalculator.test.ts",
+      "import": "../CostCalculator.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/services/CostCalculator.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/graphql/subscriptionEngine.ts",
@@ -22138,6 +22210,12 @@
       "resolved": "/Users/brianlong/Developer/summit/server/src/routes/entity-comments.js"
     },
     {
+      "file": "/Users/brianlong/Developer/summit/server/src/routes/__tests__/exports.security.test.ts",
+      "import": "../exports.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/exports.js"
+    },
+    {
       "file": "/Users/brianlong/Developer/summit/server/src/routes/__tests__/finops.test.ts",
       "import": "../../services/FinOpsRollupService.js",
       "kind": "missing",
@@ -23732,6 +23810,12 @@
       "import": "../analytics/exports/ExportController.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/exports/ExportController.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/routes/exports.ts",
+      "import": "../utils/security.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/security.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/routes/exports.ts",
@@ -28148,12 +28232,6 @@
       "import": "../monitoring/metrics.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/monitoring/metrics.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/services/EnhancedGovernanceRBACService.ts",
-      "import": "../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/services/EnhancedGovernanceRBACService.ts",
@@ -33844,6 +33922,12 @@
       "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
     },
     {
+      "file": "/Users/brianlong/Developer/summit/server/src/telemetry/metrics.ts",
+      "import": "../monitoring/metrics.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/monitoring/metrics.js"
+    },
+    {
       "file": "/Users/brianlong/Developer/summit/server/src/telemetry/otel-v2-bootstrap.ts",
       "import": "../utils/logger.js",
       "kind": "missing",
@@ -35036,6 +35120,12 @@
       "import": "../utils/logger.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/utils/__tests__/security.test.ts",
+      "import": "../security.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/security.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/utils/audit.ts",

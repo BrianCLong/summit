@@ -12,19 +12,15 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Supported file extensions for resolving imports
-const SUPPORTED_EXTENSIONS = ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs', '.json'];
-
 // Regex patterns to extract import/export statements
 // Matches: import ..., export ..., dynamic import()
 const IMPORT_EXPORT_REGEX = /(import\s+|from\s+|export\s+.*?from\s+|import\(\s*)["'](.*?\.[jt]sx?)["']/g;
 
 class ModuleIntegrityChecker {
   constructor() {
-    this.currentErrors = [];  // All current errors
-    this.newErrors = [];      // New errors compared to baseline
-    this.existingErrors = []; // Errors that existed in baseline
-    this.checkedFiles = 0;
+    this.currentErrors = [];  // All current violations
+    this.newErrors = [];      // NEW violations compared to baseline
+    this.existingErrors = []; // Pre-existing violations from baseline
   }
 
   /**
@@ -128,15 +124,15 @@ class ModuleIntegrityChecker {
     try {
       const content = fs.readFileSync(filePath, 'utf8');
       const matches = [...content.matchAll(IMPORT_EXPORT_REGEX)];
-      
+
       for (const match of matches) {
         const importPath = match[2]; // Second capture group contains the path
-        
+
         const resolved = this.resolveImport(filePath, importPath);
         if (!resolved) continue; // Skip non-relative imports
-        
+
         const checkResult = this.checkPathExists(resolved);
-        
+
         if (!checkResult.exists || checkResult.kind === 'case_mismatch') {
           const errorObj = {
             file: filePath,
@@ -144,7 +140,7 @@ class ModuleIntegrityChecker {
             kind: checkResult.kind,
             resolved: checkResult.path
           };
-          
+
           this.currentErrors.push(errorObj);
         }
       }
@@ -175,7 +171,7 @@ class ModuleIntegrityChecker {
     // Separate current errors into existing and new
     for (const currentError of this.currentErrors) {
       const key = `${currentError.file}::${currentError.import}::${currentError.kind}`;
-
+      
       if (baselineMap.has(key)) {
         this.existingErrors.push(currentError);
       } else {
@@ -212,8 +208,6 @@ class ModuleIntegrityChecker {
     const sourceFiles = this.findSourceFiles(sourceRoots);
     console.log(`📄 Found ${sourceFiles.length} source files to check`);
     
-    this.checkedFiles = sourceFiles.length;
-    
     // Check each file for import integrity
     for (const file of sourceFiles) {
       this.parseAndCheckFile(file);
@@ -247,7 +241,7 @@ class ModuleIntegrityChecker {
     // Generate JSON report
     const report = {
       checkedRoots: sourceRoots,
-      checkedFiles: this.checkedFiles,
+      checkedFiles: sourceFiles.length,
       currentViolations: this.currentErrors.length,
       existingViolations: this.existingErrors.length,
       newViolations: this.newErrors.length,
@@ -266,13 +260,11 @@ class ModuleIntegrityChecker {
     const reportPath = path.join(reportDir, 'module-integrity-report.json');
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
     
-    console.log(`📊 Report written to: ${reportPath}`);
-    
     // If we don't have a baseline yet, save current state as baseline
     if (!fs.existsSync(baselinePath)) {
       const baselineReport = {
         checkedRoots: sourceRoots,
-        checkedFiles: this.checkedFiles,
+        checkedFiles: sourceFiles.length,
         errors: this.currentErrors,
         timestamp: new Date().toISOString().split('T')[0], // Date only
         baselineEstablishedOn: new Date().toISOString()
@@ -280,6 +272,8 @@ class ModuleIntegrityChecker {
       fs.writeFileSync(baselinePath, JSON.stringify(baselineReport, null, 2));
       console.log(`📊 Baseline established with ${this.currentErrors.length} initial violations`);
     }
+    
+    console.log(`📊 Report written to: ${reportPath}`);
     
     // Print summary
     if (this.newErrors.length > 0) {
