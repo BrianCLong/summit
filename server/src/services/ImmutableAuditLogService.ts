@@ -76,7 +76,7 @@ export class ImmutableAuditLogService {
   private logPath: string;
   private retentionDays: number;
   private auditQueue: AuditEvent[];
-  private config: AuditLogConfig;
+  public config: AuditLogConfig;
   private isProcessing: boolean;
   private privateKey: crypto.KeyObject;
   private publicKey: crypto.KeyObject;
@@ -294,7 +294,7 @@ export class ImmutableAuditLogService {
         
         if (await this.fileExists(logFilePath)) {
           const content = await fs.readFile(logFilePath, 'utf-8');
-          const lines = content.trim().split('\n').filter(line => line.trim() !== '');
+          const lines = content.trim().split('\n').filter((line: string) => line.trim() !== '');
           
           for (const line of lines) {
             try {
@@ -395,7 +395,7 @@ export class ImmutableAuditLogService {
         
         if (await this.fileExists(logFilePath)) {
           const content = await fs.readFile(logFilePath, 'utf-8');
-          const lines = content.trim().split('\n').filter(line => line.trim() !== '');
+          const lines = content.trim().split('\n').filter((line: string) => line.trim() !== '');
           
           for (const line of lines) {
             try {
@@ -605,7 +605,7 @@ export class ImmutableAuditLogService {
         
         if (await this.fileExists(logFilePath)) {
           const content = await fs.readFile(logFilePath, 'utf-8');
-          const lines = content.trim().split('\n').filter(line => line.trim() !== '');
+          const lines = content.trim().split('\n').filter((line: string) => line.trim() !== '');
           
           if (dateFolder === today) {
             stats.eventsToday = lines.length;
@@ -741,15 +741,15 @@ export const auditLoggingMiddleware = (auditService: ImmutableAuditLogService) =
     res.on('finish', async () => {
       const duration = Date.now() - startTime;
       
-      const auditEvent = {
+      const auditEvent: Omit<AuditEvent, 'id' | 'timestamp' | 'currentHash' | 'signature'> = {
         eventType: 'API_CALL',
         userId: req.user?.id || 'anonymous',
         tenantId: req.headers['x-tenant-id'] || req.user?.tenantId || 'unknown',
         action: `${req.method} ${req.path}`,
         resource: req.path,
-        result: res.statusCode >= 200 && res.statusCode < 300 ? 'success' :
+        result: (res.statusCode >= 200 && res.statusCode < 300 ? 'success' :
                 res.statusCode >= 400 && res.statusCode < 500 ? 'denied' :
-                res.statusCode >= 500 ? 'error' : 'failure',
+                res.statusCode >= 500 ? 'error' : 'failure') as 'success' | 'denied' | 'error' | 'failure',
         ipAddress: req.ip,
         userAgent: req.get('User-Agent'),
         metadata: {
