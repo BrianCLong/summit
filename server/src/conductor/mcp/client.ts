@@ -79,7 +79,7 @@ export class MCPClient {
 
       if (process.env.MCP_CA_CERT_PATH) {
         try {
-          const fs = await import('fs');
+          const fs = require('fs');
           const trustedCA = fs.readFileSync(process.env.MCP_CA_CERT_PATH, 'utf8');
           wsOptions.ca = [trustedCA];
           wsOptions.rejectUnauthorized = true;
@@ -91,7 +91,7 @@ export class MCPClient {
 
       if (process.env.MCP_CLIENT_CERT_PATH && process.env.MCP_CLIENT_KEY_PATH) {
         try {
-          const fs = await import('fs');
+          const fs = require('fs');
           wsOptions.cert = fs.readFileSync(process.env.MCP_CLIENT_CERT_PATH, 'utf8');
           wsOptions.key = fs.readFileSync(process.env.MCP_CLIENT_KEY_PATH, 'utf8');
           logger.info(`Using mTLS client certificate for ${serverName}`);
