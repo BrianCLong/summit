@@ -1,0 +1,153 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "1.0.0",
+  "description": "GraphQL query cost configuration for multi-tenant rate limiting",
+
+  "defaultCosts": {
+    "baseField": 1,
+    "baseListItem": 1,
+    "baseNestedLevel": 2
+  },
+
+  "typeCosts": {
+    "Query": {
+      "health": 0,
+      "version": 0,
+      "user": 5,
+      "users": 10,
+      "investigation": 10,
+      "investigations": 15,
+      "entity": 8,
+      "entities": 12,
+      "relationship": 8,
+      "relationships": 12,
+      "search": 50,
+      "searchEntities": 75,
+      "advancedSearch": 100,
+      "graphTraversal": 150,
+      "pageRank": 300,
+      "communityDetection": 500,
+      "shortestPath": 150,
+      "analytics": 100
+    },
+    "Mutation": {
+      "login": 5,
+      "logout": 1,
+      "createInvestigation": 20,
+      "updateInvestigation": 15,
+      "deleteInvestigation": 10,
+      "createEntity": 15,
+      "updateEntity": 12,
+      "deleteEntity": 10,
+      "mergeEntities": 50,
+      "createRelationship": 15,
+      "deleteRelationship": 10,
+      "bulkImport": 200,
+      "runAnalysis": 100
+    },
+    "Entity": {
+      "relationships": 5,
+      "neighbors": 10,
+      "metadata": 2,
+      "timeline": 8,
+      "riskScore": 5
+    },
+    "Investigation": {
+      "entities": 10,
+      "relationships": 10,
+      "graph": 20,
+      "timeline": 15,
+      "alerts": 8
+    },
+    "User": {
+      "investigations": 5,
+      "activity": 8,
+      "permissions": 3
+    }
+  },
+
+  "operationCosts": {
+    "listMultipliers": {
+      "default": 1,
+      "withLimit": {
+        "costPerItem": 1,
+        "maxLimit": 100
+      }
+    },
+    "nestedMultipliers": {
+      "level1": 1,
+      "level2": 1.5,
+      "level3": 2,
+      "level4": 3,
+      "level5": 5
+    },
+    "argumentMultipliers": {
+      "depth": {
+        "1": 1,
+        "2": 2,
+        "3": 4,
+        "4": 8,
+        "5": 16
+      },
+      "includeDeleted": 1.5,
+      "includeArchived": 1.3,
+      "fullText": 2
+    }
+  },
+
+  "tenantTiers": {
+    "free": {
+      "maxCostPerQuery": 500,
+      "maxCostPerMinute": 5000,
+      "maxCostPerHour": 50000,
+      "burstMultiplier": 1.2
+    },
+    "starter": {
+      "maxCostPerQuery": 1000,
+      "maxCostPerMinute": 20000,
+      "maxCostPerHour": 200000,
+      "burstMultiplier": 1.5
+    },
+    "pro": {
+      "maxCostPerQuery": 2000,
+      "maxCostPerMinute": 50000,
+      "maxCostPerHour": 1000000,
+      "burstMultiplier": 2
+    },
+    "enterprise": {
+      "maxCostPerQuery": 5000,
+      "maxCostPerMinute": 200000,
+      "maxCostPerHour": 5000000,
+      "burstMultiplier": 3
+    }
+  },
+
+  "tenantOverrides": {
+    "_comment": "Specific tenant ID overrides can be added here",
+    "_example_tenant_123": {
+      "maxCostPerQuery": 10000,
+      "maxCostPerMinute": 500000,
+      "maxCostPerHour": 10000000,
+      "burstMultiplier": 5
+    }
+  },
+
+  "userRoleLimits": {
+    "admin": {
+      "multiplier": 5,
+      "exemptFromTenantLimits": false
+    },
+    "analyst": {
+      "multiplier": 2,
+      "exemptFromTenantLimits": false
+    },
+    "viewer": {
+      "multiplier": 1,
+      "exemptFromTenantLimits": false
+    },
+    "guest": {
+      "multiplier": 0.5,
+      "exemptFromTenantLimits": false
+    }
+  }
+}

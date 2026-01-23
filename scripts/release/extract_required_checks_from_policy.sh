@@ -88,8 +88,11 @@ if command -v yq &> /dev/null; then
     POLICY_VERSION=$(yq -r '.version // "unknown"' "$POLICY_FILE")
 
     # Extract check names as JSON array
-    # Note: yq v4 (mikefarah) outputs YAML by default; -o=json ensures valid JSON for jq
-    CHECKS=$(yq -o=json '[.always_required[].name]' "$POLICY_FILE" 2>/dev/null || echo "[]")
+    # For branch protection drift, use branch_protection.required_status_checks.contexts
+    # Try yq v4 syntax first, then fallback to jq-wrapper yq syntax
+    CHECKS=$(yq -o=json '.branch_protection.required_status_checks.contexts' "$POLICY_FILE" 2>/dev/null || \
+             yq '.branch_protection.required_status_checks.contexts' "$POLICY_FILE" 2>/dev/null || \
+             echo "[]")
 
     # Validate CHECKS is valid JSON before proceeding
     if ! echo "$CHECKS" | jq empty 2>/dev/null; then
@@ -102,16 +105,19 @@ else
     # Fallback: extract version
     POLICY_VERSION=$(grep -E "^version:" "$POLICY_FILE" | sed -E 's/version:\s*"?([^"]*)"?/\1/' | tr -d ' ')
 
-    # Fallback: extract names from always_required section
+    # Fallback: extract names from branch_protection.required_status_checks.contexts
     # This is fragile but works for the expected format
     CHECKS=$(awk '
-        /^always_required:/ { in_section=1; next }
-        /^[a-z_]+:/ && !/^  / { in_section=0 }
-        in_section && /^  - name:/ {
-            gsub(/^  - name:\s*"?/, "")
+        /^branch_protection:/ { in_bp=1; next }
+        /^[a-z_]+:/ && !/^  / { in_bp=0; in_contexts=0 }
+        in_bp && /^  required_status_checks:/ { in_rsc=1; next }
+        in_bp && in_rsc && /^    contexts:/ { in_contexts=1; next }
+        in_bp && in_rsc && in_contexts && /^      - / {
+            gsub(/^      - "?/, "")
             gsub(/"?\s*$/, "")
             print
         }
+        in_contexts && /^    [a-z_]+:/ { in_contexts=0 }
     ' "$POLICY_FILE" | jq -R -s 'split("\n") | map(select(length > 0))')
 fi
 
