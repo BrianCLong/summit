@@ -25,6 +25,9 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Verify pnpm workspace hygiene
+        run: node scripts/ci/verify_pnpm_workspace_hygiene.mjs
+
       - name: Validate Release Policy
         run: pnpm lint:release-policy
 
