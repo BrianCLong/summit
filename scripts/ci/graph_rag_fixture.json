@@ -1,0 +1,20 @@
+{
+  "inputs": {
+    "query": "What is the policy on data retention?",
+    "config": {
+      "model": "gpt-4",
+      "temperature": 0,
+      "max_tokens": 1000,
+      "depth": 2
+    }
+  },
+  "mock_data": {
+    "nodes": [
+      { "id": "policy-123", "label": "Policy", "properties": { "text": "Data must be retained for 7 years." }, "trust_level": "trusted" },
+      { "id": "policy-456", "label": "Policy", "properties": { "text": "Personal data must be encrypted." }, "trust_level": "verified" }
+    ],
+    "edges": []
+  },
+  "expected_hash": "sha256:d8c6b7...",
+  "description": "Standard compliance query fixture for determinism check."
+}

@@ -188,6 +188,11 @@ collect_governance_evidence() {
       "echo 'Skipped: GITHUB_TOKEN not available'" \
       "$gov_dir/release-blockers-$RUN_ID.json"
   fi
+
+  # GraphRAG Provenance
+  collect_evidence "graph_rag_provenance" \
+    "npx tsx scripts/ci/verify_graph_rag_provenance.mjs 2>&1 || true" \
+    "$gov_dir/graph-rag-provenance-$RUN_ID.log"
 }
 
 # Collect audit evidence (from state files)
