@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/datalab-service",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Data Lab service for secure sandbox data operations, synthetic data generation, and anonymization",
   "type": "module",
   "main": "dist/index.js",
