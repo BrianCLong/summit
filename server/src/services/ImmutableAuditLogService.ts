@@ -741,7 +741,7 @@ export const auditLoggingMiddleware = (auditService: ImmutableAuditLogService) =
     res.on('finish', async () => {
       const duration = Date.now() - startTime;
       
-      const auditEvent = {
+      const auditEvent: Omit<AuditEvent, 'id' | 'timestamp' | 'currentHash' | 'signature'> = {
         eventType: 'API_CALL',
         userId: req.user?.id || 'anonymous',
         tenantId: req.headers['x-tenant-id'] || req.user?.tenantId || 'unknown',

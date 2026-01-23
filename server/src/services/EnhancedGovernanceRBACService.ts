@@ -109,6 +109,14 @@ export class EnhancedGovernanceService {
     };
   }
 
+  async initialize(): Promise<void> {
+    this.logger.info('Enhanced Governance Service initialized');
+  }
+
+  async healthCheck(): Promise<{ status: string }> {
+    return { status: 'ok' };
+  }
+
   /**
    * Extract governance context from request headers with user context
    */
