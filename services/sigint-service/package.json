@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/sigint-service",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "SIGINT Processing Service - Training Framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
