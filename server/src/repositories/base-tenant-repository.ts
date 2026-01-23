@@ -7,7 +7,8 @@
  * 3. Cross-tenant access is prevented at the database layer
  */
 
-import { Pool, PoolClient, QueryResult } from 'pg';
+import type { PoolClient, QueryResult } from 'pg';
+import { Pool } from 'pg';
 import { getPostgresPool } from '../config/database.js';
 import { TenantId } from '../types/identity.js';
 import {
@@ -49,7 +50,7 @@ export abstract class BaseTenantRepository<T extends TenantEntity> {
    */
   protected async withTenantContext<R>(
     context: TenantContext | MinimalTenantContext,
-    fn: (client: PoolClient) => Promise<R>
+    fn: (client: any) => Promise<R>
   ): Promise<R> {
     validateTenantContext(context);
 
