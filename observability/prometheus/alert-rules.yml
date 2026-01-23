@@ -1,0 +1,163 @@
+groups:
+  - name: summit-alerts
+    rules:
+      # HTTP Availability & Latency
+      - alert: HighHttpErrorRate
+        expr: |
+          sum(rate(http_requests_total{status_code=~"5.."}[5m]))
+          /
+          sum(rate(http_requests_total[5m])) > 0.01
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High HTTP Error Rate detected"
+          description: "Over 1% of HTTP requests are failing with 5xx errors."
+
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 2.0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High HTTP P95 Latency"
+          description: "P95 latency is above 2 seconds for the last 5 minutes."
+
+      # GraphQL Health
+      - alert: HighGraphQLErrorRate
+        expr: |
+          sum(rate(graphql_errors_total[5m]))
+          /
+          sum(rate(graphql_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High GraphQL Error Rate"
+          description: "Over 5% of GraphQL operations are failing."
+
+      # Database Health
+      - alert: PostgresConnectionSaturation
+        expr: db_connections_active{database="postgres"} > 80
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Postgres connection pool near saturation"
+          description: "Active Postgres connections > 80 (assuming 100 max)."
+
+      - alert: Neo4jConnectionSaturation
+        expr: db_connections_active{database="neo4j"} > 80
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Neo4j connection pool near saturation"
+          description: "Active Neo4j connections > 80."
+
+      # Node.js Runtime
+      - alert: EventLoopLagHigh
+        expr: nodejs_eventloop_lag_seconds > 0.1
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Node.js Event Loop Lag"
+          description: "Event loop lag is > 100ms, indicating blocking operations."
+
+      # Maestro / AI
+      - alert: MaestroJobFailures
+        expr: rate(maestro_job_execution_duration_seconds_count{status="failed"}[5m]) > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Maestro Job Failures Detected"
+          description: "Maestro jobs are failing."
+
+      - alert: HighLLMCost
+        expr: sum(rate(docling_cost_usd_total[1h])) * 24 > 100
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Projected Daily LLM Cost"
+          description: "Rate of spend suggests daily cost > $100."
+
+      # Data Pipeline
+      - alert: PipelineDown
+        expr: pipeline_uptime_ratio < 0.99
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Data Pipeline Uptime Low"
+          description: "Pipeline uptime dropped below 99%."
+
+  - name: tripane-sync-alerts
+    rules:
+      # Alert 1 — Divergence rate > threshold
+      - alert: TriPaneDivergenceRateHigh
+        expr: sum(rate(triPane_sync_divergence_total{env="prod"}[5m])) > 0.05
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: "Tri-Pane Divergence Rate High"
+          description: "Divergence rate is > 0.05/s for 10m."
+
+      # Alert 1b — Divergence affecting multiple tenants
+      - alert: TriPaneDivergenceMultiTenant
+        expr: |
+          count(
+            topk(999999,
+              sum by (tenant_id) (rate(triPane_sync_divergence_total{env="prod"}[5m]))
+            ) > 0
+          ) >= 2
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: "Tri-Pane Divergence Affecting Multiple Tenants"
+          description: "At least 2 tenants are experiencing divergence."
+
+      # Alert 2 — Divergence magnitude p95 > 30s
+      - alert: TriPaneDivergenceMagnitudeHigh
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le) (
+              rate(triPane_sync_divergence_delta_ms_bucket{env="prod"}[10m])
+            )
+          ) > 30000
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: "Tri-Pane Divergence Magnitude > 30s"
+          description: "95th percentile of divergence magnitude is > 30 seconds."
+
+      # Alert 3 — Pane latency p95 degraded
+      - alert: TriPaneRefreshLatencyHigh
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le, pane) (
+              rate(triPane_pane_refresh_latency_ms_bucket{env="prod"}[10m])
+            )
+          ) > 2000
+        for: 20m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Tri-Pane Refresh Latency Degraded"
+          description: "P95 refresh latency > 2s for {{ $labels.pane }}."
+
+      # Alert 4 — Error rate elevated
+      - alert: TriPaneErrorRateElevated
+        expr: sum(rate(triPane_pane_refresh_error_total{env="prod"}[5m])) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Tri-Pane Error Rate Elevated"
+          description: "Refresh error rate > 0.1 errors/sec."

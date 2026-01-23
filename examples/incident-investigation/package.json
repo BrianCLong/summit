@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/example-incident-investigation",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "private": true,
   "description": "Incident investigation workflow example using Agentic Mesh",
   "type": "module",
