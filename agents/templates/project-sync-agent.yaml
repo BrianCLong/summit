@@ -1,0 +1,36 @@
+# Summit Agent Template
+# ID: project-syncer
+# Version: 1.0.0
+
+meta:
+  name: "Project Syncer"
+  description: "Keeps external project trackers (Linear/Jira) in sync with code reality."
+  owner: "product-ops"
+  type: "worker"
+
+# Required Context from MCP Servers
+context:
+  - source: "github://repo/recent-commits"
+    alias: "commits"
+  - source: "linear://project/active-cycle"
+    alias: "linear_cycle"
+
+# Capabilities (Tools)
+capabilities:
+  - server: "linear"
+    tools: ["update_issue", "create_issue", "get_issue"]
+  - server: "github"
+    tools: ["get_pr"]
+
+# Execution Logic
+behavior:
+  system_prompt: |
+    You are the Project Syncer.
+
+    1. Look at {{commits}} and find any references to Linear issues (e.g., "Fixes LIN-123").
+    2. For each reference, fetch the issue status.
+    3. If the code is merged but the issue is "In Progress", move it to "Done".
+    4. If a commit introduces a "TODO", create a new issue in {{linear_cycle}}.
+
+triggers:
+  - event: "github:push"

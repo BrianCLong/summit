@@ -1,0 +1,54 @@
+name: Agent MCP Check
+
+on:
+  pull_request:
+    paths:
+      - 'agents/templates/**'
+      - 'config/mcp-servers.yaml'
+  workflow_dispatch:
+
+jobs:
+  validate-agents:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate Agent Templates
+        run: |
+          # Simple validation script (in a real scenario, use ajv-cli)
+          for file in agents/templates/*.yaml; do
+            echo "Validating $file..."
+            # Check for required keys
+            grep -q "meta:" "$file" || { echo "Missing meta in $file"; exit 1; }
+            grep -q "context:" "$file" || { echo "Missing context in $file"; exit 1; }
+            grep -q "capabilities:" "$file" || { echo "Missing capabilities in $file"; exit 1; }
+          done
+          echo "All agent templates are valid YAML structure."
+
+      - name: Mock MCP Connection
+        run: |
+          echo "Simulating MCP Host connection..."
+          # This is a placeholder for the actual test runner
+          # In production, this would start the MCP Host and connect to mock servers
+          echo "Connecting to 'github-context' (MOCK)... OK"
+          echo "Connecting to 'osint-service' (MOCK)... OK"
+
+      - name: Dry Run Governance Agent
+        run: |
+          echo "Running governance-enforcer in DRY_RUN mode..."
+          # Mocking the context injection
+          export CTX_POLICY='{"allowed_tools": ["read_file"]}'
+          export CTX_DIFF='file: server/index.ts, change: console.log("debug")'
+
+          # Simulate Agent Decision (Rule-based for this draft)
+          if [[ "$CTX_DIFF" == *"console.log"* ]]; then
+            echo "Agent decided: flag_violation(reason='No console.log allowed')"
+          else
+            echo "Agent decided: pass"
+          fi

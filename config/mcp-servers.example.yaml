@@ -1,0 +1,50 @@
+# MCP Server Registry Configuration Example
+# This file defines the MCP servers that the Summit MCP Host connects to.
+
+version: "1.0"
+
+defaults:
+  transport: "stdio"
+  restart_policy: "always"
+  environment:
+    NODE_ENV: "production"
+
+servers:
+  # Internal OSINT Service exposed as MCP
+  - name: "osint-service"
+    command: "node"
+    args: ["./services/osint-mcp/build/index.js"]
+    capabilities:
+      - resources
+      - tools
+    env:
+      API_KEY: "${OSINT_API_KEY}"
+
+  # External GitHub Integration
+  - name: "github-context"
+    transport: "sse"
+    url: "http://localhost:3001/sse"
+    capabilities:
+      - resources
+      - prompts
+    # Governance: Limit which repos this server can access
+    permissions:
+      allow_read: ["repo:Summit/*"]
+      allow_write: []
+
+  # Local Filesystem (Sandboxed)
+  - name: "evidence-fs"
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "/var/data/evidence"]
+    capabilities:
+      - tools
+    permissions:
+      allow_read: ["/var/data/evidence/*"]
+      allow_write: ["/var/data/evidence/*.json"]
+
+# Policy enforcement for tool execution
+governance:
+  require_approval_for:
+    - "filesystem:write_file"
+    - "github:push"
+  audit_logging: true

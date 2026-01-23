@@ -1,0 +1,44 @@
+# Summit Agent Template
+# ID: governance-enforcer
+# Version: 1.0.0
+
+meta:
+  name: "Governance Enforcer"
+  description: "Audits code changes against active policy constraints."
+  owner: "security-team"
+  type: "auditor"
+
+# Required Context from MCP Servers
+context:
+  - source: "summit://governance/active-policy"
+    alias: "policy"
+    required: true
+  - source: "summit://project/current"
+    alias: "project"
+    required: true
+  - source: "github://repo/diff"
+    alias: "diff"
+    required: true
+
+# Capabilities (Tools)
+capabilities:
+  - server: "github"
+    tools: ["create_comment", "add_label"]
+  - server: "summit-internal"
+    tools: ["flag_violation"]
+
+# Execution Logic
+behavior:
+  system_prompt: |
+    You are the Governance Enforcer. Your job is to review the provided code diff against the active policy.
+
+    1. Read the {{policy}}.
+    2. Analyze the {{diff}}.
+    3. If you find violations (e.g., disallowed libraries, missing headers), use `flag_violation`.
+    4. If the violation is blocking, use `github.create_comment` to block the PR.
+
+    Do not halluncinate policies. Only enforce what is in the policy bundle.
+
+triggers:
+  - event: "github:pull_request.opened"
+  - event: "github:pull_request.synchronize"

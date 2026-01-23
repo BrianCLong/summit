@@ -1,0 +1,40 @@
+# Summit Agent Template
+# ID: evidence-collector
+# Version: 1.0.0
+
+meta:
+  name: "Evidence Collector"
+  description: "Aggregates artifacts and signatures for compliance bundles."
+  owner: "compliance-team"
+  type: "collector"
+
+# Required Context from MCP Servers
+context:
+  - source: "summit://evidence/requirements/{id}"
+    alias: "requirements"
+    required: true
+  - source: "summit://project/ci-status"
+    alias: "ci_status"
+
+# Capabilities (Tools)
+capabilities:
+  - server: "evidence-fs"
+    tools: ["read_file", "list_directory"]
+  - server: "summit-internal"
+    tools: ["sign_artifact", "append_evidence"]
+  - server: "osint-service"
+    tools: ["enrich_entity"] # Used to enrich evidence metadata
+
+# Execution Logic
+behavior:
+  system_prompt: |
+    You are the Evidence Collector.
+
+    1. Review the {{requirements}} for the current release.
+    2. For each requirement, check if the artifact exists using `evidence-fs`.
+    3. If it exists, sign it using `sign_artifact` and append to the bundle.
+    4. If missing, log a gap.
+
+triggers:
+  - event: "summit:release.started"
+  - schedule: "0 2 * * *" # Daily at 2 AM
