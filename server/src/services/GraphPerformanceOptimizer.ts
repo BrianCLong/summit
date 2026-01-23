@@ -767,7 +767,7 @@ export class GraphPerformanceOptimizer {
     
     // Apply supernode optimizations
     if (analysis.supernodeDetected) {
-      result = this.applySupernodeOptimizations(result, analysis);
+      result = this.applySupernodeResultOptimizations(result, analysis);
     }
     
     return result;
