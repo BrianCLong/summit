@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/threat-assessment-service",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Threat assessment and risk analysis service",
   "license": "MIT",
   "type": "module",

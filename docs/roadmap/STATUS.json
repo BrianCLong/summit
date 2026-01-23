@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-19T18:22:31Z",
-  "revision_note": "Hardened evidence-id consistency determinism with stable ordering and atomic writes",
+  "last_updated": "2026-01-23T05:50:00Z",
+  "revision_note": "Merged with main: evidence-id determinism hardening and client GA remediation",
   "initiatives": [
     {
       "id": "A",

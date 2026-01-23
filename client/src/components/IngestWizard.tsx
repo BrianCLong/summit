@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { getApiBaseUrl } from '../config/urls';
 
 type Connector = { id: string; name: string };
 
 export default function IngestWizard() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const api = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000';
+  const api = getApiBaseUrl();
   const [connectors, setConnectors] = useState<Connector[]>([]);
   const [selected, setSelected] = useState<string>('');
   const [config, setConfig] = useState<string>('{}');
