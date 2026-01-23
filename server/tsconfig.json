@@ -26,6 +26,7 @@
   },
   "include": ["src/**/*"],
   "exclude": [
+    // POLICY: The exclude list is FROZEN. Do not add new files. See docs/ops/typescript/exclude-freeze-policy.md
     "node_modules",
     "dist",
     "tests/**",
