@@ -28,6 +28,10 @@ export const EnvSchema = z
     L1_CACHE_FALLBACK_TTL_SECONDS: z.coerce.number().default(300), // 5 minutes
     DOCLING_SVC_URL: z.string().url().default('http://localhost:5001'),
     DOCLING_SVC_TIMEOUT_MS: z.coerce.number().default(30000),
+    // GraphQL Cost Analysis & Rate Limiting
+    ENFORCE_GRAPHQL_COST_LIMITS: z.coerce.boolean().default(true),
+    GRAPHQL_COST_CONFIG_PATH: z.string().optional(),
+    COST_EXEMPT_TENANTS: z.string().optional().default(''),
   });
 
 const TestEnvSchema = EnvSchema.extend({
@@ -62,6 +66,9 @@ const ENV_VAR_HELP: Record<string, string> = {
   JWT_SECRET: 'JWT signing secret (min 32 characters, use strong random value)',
   JWT_REFRESH_SECRET: 'JWT refresh token secret (min 32 characters, different from JWT_SECRET)',
   CORS_ORIGIN: 'Allowed CORS origins (comma-separated, e.g., http://localhost:3000)',
+  ENFORCE_GRAPHQL_COST_LIMITS: 'Enable/disable GraphQL cost limit enforcement (default: true)',
+  GRAPHQL_COST_CONFIG_PATH: 'Path to GraphQL cost configuration JSON file (optional)',
+  COST_EXEMPT_TENANTS: 'Comma-separated list of tenant IDs exempt from cost limits',
 };
 
 export const cfg = (() => {

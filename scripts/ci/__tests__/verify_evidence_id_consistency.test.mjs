@@ -208,7 +208,9 @@ Content`;
     // Compute policy hash configuration twice
     const config1 = {
       evidence_map_size: evidenceMap.size,
-      evidence_map_entries: Array.from(evidenceMap.entries()).sort((a, b) => a[0].localeCompare(b[0])),
+      evidence_map_entries: Array.from(evidenceMap.entries()).sort((a, b) =>
+        a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1
+      ),
       config_governance_dir: 'docs/governance',
       config_output_dir: 'test/output',
       max_evidence_ids_per_doc: 50,
@@ -218,7 +220,9 @@ Content`;
 
     const config2 = {
       evidence_map_size: evidenceMap.size,
-      evidence_map_entries: Array.from(evidenceMap.entries()).sort((a, b) => a[0].localeCompare(b[0])),
+      evidence_map_entries: Array.from(evidenceMap.entries()).sort((a, b) =>
+        a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1
+      ),
       config_governance_dir: 'docs/governance',
       config_output_dir: 'test/output',
       max_evidence_ids_per_doc: 50,
@@ -230,5 +234,52 @@ Content`;
     const hash2 = generateDeterministicHash(config2);
 
     assert.strictEqual(hash1, hash2, 'Policy hash should be identical for identical policy content');
+  });
+
+  test('writeReports generates deterministic report files', async () => {
+    const { root, docsRoot } = makeTempRepo();
+    const evidenceMap = new Map([['alpha.id', { path: 'some/path', description: 'Alpha' }]]);
+
+    const testDoc = path.join(docsRoot, 'test_doc.md');
+    fs.writeFileSync(testDoc, makeHeaderDoc({ 'Evidence-IDs': 'alpha.id' }));
+
+    const result = await processGovernanceDocument(testDoc, evidenceMap, root);
+    const report = buildConsistencyReport({
+      sha: 'deterministic-sha',
+      policyHash: 'deterministic-policy',
+      results: [result],
+      config: { governanceDir: 'docs/governance', outputDir: 'artifacts/governance/evidence-id-consistency', repoRoot: '.', evidenceMapPath: 'evidence/map.yml' },
+      evidenceMap
+    });
+
+    const outDir1 = path.join(root, 'out1');
+    const outDir2 = path.join(root, 'out2');
+    await writeReports(report, outDir1);
+    await writeReports(report, outDir2);
+
+    const reportJson1 = fs.readFileSync(path.join(outDir1, 'report.json'), 'utf8');
+    const reportJson2 = fs.readFileSync(path.join(outDir2, 'report.json'), 'utf8');
+    const reportMd1 = fs.readFileSync(path.join(outDir1, 'report.md'), 'utf8');
+    const reportMd2 = fs.readFileSync(path.join(outDir2, 'report.md'), 'utf8');
+
+    assert.strictEqual(reportJson1, reportJson2, 'report.json should be byte-for-byte identical');
+    assert.strictEqual(reportMd1, reportMd2, 'report.md should be byte-for-byte identical');
+  });
+
+  test('orphaned evidence IDs are sorted deterministically', () => {
+    const evidenceMap = new Map([
+      ['beta.id', { path: 'path-b', description: 'Beta' }],
+      ['alpha.id', { path: 'path-a', description: 'Alpha' }]
+    ]);
+
+    const report = buildConsistencyReport({
+      sha: 'orphan-sha',
+      policyHash: 'orphan-policy',
+      results: [],
+      config: {},
+      evidenceMap
+    });
+
+    assert.deepEqual(report.metadata.orphaned_ids, ['alpha.id', 'beta.id']);
   });
 });

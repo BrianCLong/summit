@@ -465,6 +465,7 @@ function buildConsistencyReport({ sha, policyHash, results, config, evidenceMap 
       }
     }
   }
+  orphanedEvidenceIds.sort(compareStringsCodepoint);
 
   // Add violations for orphaned evidence IDs if any are found
   const allViolations = [...normalizedResults.flatMap(result => result.violations)];
@@ -527,13 +528,22 @@ async function writeReports(report, outputPath) {
   const jsonPath = join(outputPath, 'report.json');
   const mdPath = join(outputPath, 'report.md');
   const stampPath = join(outputPath, 'stamp.json');  // For workflow tracking
+
+  const normalizeOutput = (content) =>
+    content.endsWith('\n') ? content : `${content}\n`;
+
+  const writeFileAtomic = async (filePath, content) => {
+    const tempPath = `${filePath}.tmp`;
+    await fs.writeFile(tempPath, content, 'utf8');
+    await fs.rename(tempPath, filePath);
+  };
   
   // Ensure output directory exists
   await fs.mkdir(outputPath, { recursive: true });
   
   // Write JSON report with canonical serialization for deterministic output
   const canonicalReport = canonicalJsonStringify(report);
-  await fs.writeFile(jsonPath, canonicalReport, 'utf8');
+  await writeFileAtomic(jsonPath, normalizeOutput(canonicalReport));
   
   // Write Markdown report
   let mdContent = `# Evidence ID Consistency Report\n\n`;
@@ -592,7 +602,7 @@ async function writeReports(report, outputPath) {
     mdContent += `✅ No issues detected!\n`;
   }
   
-  await fs.writeFile(mdPath, mdContent, 'utf8');
+  await writeFileAtomic(mdPath, normalizeOutput(mdContent));
   
   // Write stamp file for tracking with performance metrics
   const stamp = {
@@ -605,7 +615,7 @@ async function writeReports(report, outputPath) {
 
   // Use canonical serialization for stamp.json too, but allow timestamps since it's runtime metadata
   const canonicalStamp = canonicalJsonStringify(stamp);
-  await fs.writeFile(stampPath, canonicalStamp, 'utf8');
+  await writeFileAtomic(stampPath, normalizeOutput(canonicalStamp));
 }
 
 /**
@@ -713,7 +723,9 @@ async function main() {
     const hashStartTime = Date.now();
     const policyConfig = {
       evidence_map_size: evidenceMap.size,
-      evidence_map_entries: Array.from(evidenceMap.entries()).sort((a, b) => a[0].localeCompare(b[0])),
+      evidence_map_entries: Array.from(evidenceMap.entries()).sort((a, b) =>
+        compareStringsCodepoint(a[0], b[0])
+      ),
       config_governance_dir: config.governanceDir,
       max_evidence_ids_per_doc: MAX_EVIDENCE_IDS_PER_DOC,
       max_file_size_bytes: MAX_FILE_SIZE_BYTES,
@@ -974,4 +986,3 @@ export {
   validateFilePathSafety,
   writeReports
 };
-
