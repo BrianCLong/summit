@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/finance-normalizer-types",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Canonical financial schemas for finance normalization layer",
   "type": "module",
   "main": "dist/index.js",
