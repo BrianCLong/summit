@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/sum",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Secure UDF Marketplace service providing static and runtime safety guarantees for tenant code submissions.",
   "type": "module",
   "main": "dist/index.js",

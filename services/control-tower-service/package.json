@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/control-tower-service",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Control Tower - Unified operational command center for CompanyOS",
   "type": "module",
   "main": "dist/index.js",
