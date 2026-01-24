@@ -12,6 +12,7 @@ global:
 rule_files:
   - 'alert-rules.yml'
   - 'summit-alerts.yml'
+  - 'alerts/maestro-alerts.yml'
 
 # Alert manager configuration
 alerting:

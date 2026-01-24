@@ -5,6 +5,7 @@ import { OpenAILLM } from './adapters/llm_openai';
 import { ResidencyGuard } from '../data-residency/residency-guard';
 import { AgentGovernanceService } from './governance-service.js';
 import logger from '../utils/logger.js';
+import { metrics } from '../monitoring/metrics.js';
 
 export interface MaestroConfig {
   defaultPlannerAgent: string;   // e.g. "openai:gpt-4.1"
@@ -80,6 +81,7 @@ export class Maestro {
 
   async executeTask(task: Task): Promise<{ task: Task; artifact: Artifact | null }> {
     const now = new Date().toISOString();
+    const timer = metrics.maestroJobExecutionDurationSeconds.startTimer({ job_type: task.kind, status: 'success' });
     await this.ig.updateTask(task.id, { status: 'running', updatedAt: now });
 
     try {
@@ -197,6 +199,7 @@ export class Maestro {
       let result: string = '';
 
       if (task.agent.kind === 'llm') {
+        metrics.maestroAiModelRequests.inc({ model: task.agent.modelId, operation: 'executeTask', status: 'attempt' });
         let attempts = 0;
         const maxRetries = 3;
         let lastError: any;
@@ -279,6 +282,7 @@ export class Maestro {
       await this.ig.createArtifact(artifact);
       await this.ig.updateTask(task.id, updatedTask);
 
+      timer(); // End timer success
       return {
         task: { ...task, ...updatedTask } as Task,
         artifact,
@@ -291,33 +295,49 @@ export class Maestro {
       };
       await this.ig.updateTask(task.id, updatedTask);
 
+      metrics.maestroAiModelErrors.inc({ model: task.agent.modelId || 'unknown' });
+      timer({ status: 'failed' }); // End timer failed
       return { task: { ...task, ...updatedTask } as Task, artifact: null };
     }
   }
 
   async runPipeline(userId: string, requestText: string, options?: { tenantId?: string }) {
-    const run = await this.createRun(userId, requestText, options);
-    const tasks = await this.planRequest(run);
+    const end = metrics.maestroOrchestrationDuration.startTimer({ endpoint: 'runPipeline' });
+    metrics.maestroOrchestrationRequests.inc({ method: 'runPipeline', endpoint: 'runPipeline', status: 'started' });
+    metrics.maestroActiveSessions.inc({ type: 'pipeline' });
 
-    const executable = tasks.filter(t => t.status === 'queued');
+    try {
+      const run = await this.createRun(userId, requestText, options);
+      const tasks = await this.planRequest(run);
 
-    const results = [];
-    for (const task of executable) {
-      const res = await this.executeTask(task);
-      results.push(res);
+      const executable = tasks.filter(t => t.status === 'queued');
+
+      const results = [];
+      for (const task of executable) {
+        const res = await this.executeTask(task);
+        results.push(res);
+      }
+
+      const costSummary = await this.costMeter.summarize(run.id);
+
+      end();
+      metrics.maestroOrchestrationRequests.inc({ method: 'runPipeline', endpoint: 'runPipeline', status: 'success' });
+      return {
+        run,
+        tasks: tasks.map(t => ({
+          id: t.id,
+          status: t.status,
+          description: t.description,
+        })),
+        results,
+        costSummary,
+      };
+    } catch (error) {
+      metrics.maestroOrchestrationErrors.inc({ error_type: 'pipeline_error', endpoint: 'runPipeline' });
+      metrics.maestroOrchestrationRequests.inc({ method: 'runPipeline', endpoint: 'runPipeline', status: 'error' });
+      throw error;
+    } finally {
+      metrics.maestroActiveSessions.dec({ type: 'pipeline' });
     }
-
-    const costSummary = await this.costMeter.summarize(run.id);
-
-    return {
-      run,
-      tasks: tasks.map(t => ({
-        id: t.id,
-        status: t.status,
-        description: t.description,
-      })),
-      results,
-      costSummary,
-    };
   }
 }
