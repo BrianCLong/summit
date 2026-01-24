@@ -407,9 +407,9 @@
     "/Users/brianlong/Developer/summit/packages/workspace/src"
   ],
   "checkedFiles": 6689,
-  "currentViolations": 8174,
-  "existingViolations": 8090,
-  "newViolations": 84,
+  "currentViolations": 8163,
+  "existingViolations": 8163,
+  "newViolations": 0,
   "errors": [
     {
       "file": "/Users/brianlong/Developer/summit/client/src/features/export/index.ts",
@@ -428,72 +428,6 @@
       "import": "./NlqModal.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/client/src/features/nlq/NlqModal.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/client/src/hooks/usePrefetch.ts",
-      "import": "../generated/graphql.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/client/src/generated/graphql.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/client/src/store/slices/graphSlice.jsx",
-      "import": "../graphql/graphData.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/client/src/store/graphql/graphData.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/client/src/store/slices/graphSlice.jsx",
-      "import": "../services/apollo.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/client/src/store/services/apollo.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/__tests__/security.integration.test.ts",
-      "import": "../middleware/express-validation-pipeline.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/express-validation-pipeline.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/__tests__/security.integration.test.ts",
-      "import": "../middleware/redisRateLimiter.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/redisRateLimiter.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/__tests__/security.integration.test.ts",
-      "import": "../utils/htmlSanitizer.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/htmlSanitizer.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/__tests__/tenantIsolationGuard.test.ts",
-      "import": "../tenancy/TenantIsolationGuard.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/tenancy/TenantIsolationGuard.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/__tests__/tenantIsolationGuard.test.ts",
-      "import": "../tenancy/killSwitch.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/tenancy/killSwitch.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/__tests__/tenantIsolationGuard.test.ts",
-      "import": "../tenancy/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/tenancy/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/__tests__/trust-center-api.test.ts",
-      "import": "../routes/trust-center-api.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/trust-center-api.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/__tests__/trust-center-api.test.ts",
-      "import": "../routes/trust-center-api.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/trust-center-api.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/advisor.ts",
