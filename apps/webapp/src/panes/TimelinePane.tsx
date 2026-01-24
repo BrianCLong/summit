@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Timeline } from 'vis-timeline/standalone';
 import { DataSet } from 'vis-data';
-import $ from 'jquery';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchGraph } from '../data/mockGraph';
 import { RootState, selectNode, setTimeRange } from '../store';
@@ -16,6 +15,8 @@ export function TimelinePane() {
 
   useEffect(() => {
     fetchGraph().then((data) => {
+      if (!containerRef.current) return;
+
       const items = new DataSet(
         data.nodes.map((n) => ({
           id: n.id,
@@ -31,11 +32,16 @@ export function TimelinePane() {
         dispatch(selectNode(id ?? null));
       });
 
-      // jQuery time-brushing stub
-      $((timeline as any).dom.center).on('mouseup', () => {
+      // Native time-brushing stub
+      const centerDom = (timeline as any).dom.center;
+      const onMouseUp = () => {
         const range = timeline.getWindow();
         dispatch(setTimeRange([range.start.valueOf(), range.end.valueOf()]));
-      });
+      };
+
+      if (centerDom) {
+        centerDom.addEventListener('mouseup', onMouseUp);
+      }
     });
   }, [dispatch]);
 
