@@ -1,0 +1,274 @@
+{
+  "name": "Asana to Airtable Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "asana-webhook",
+        "options": {}
+      },
+      "name": "Asana Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "{{ASANA_WEBHOOK_ID}}",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "resource": "task",
+        "operation": "get",
+        "taskId": "={{$json[\"resource\"][\"gid\"]}}"
+      },
+      "name": "Get Task Details",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "asanaApi": {
+          "id": "{{ASANA_API_CREDENTIAL_ID}}",
+          "name": "Asana Personal Access Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "task",
+        "operation": "getAll",
+        "projectId": "={{$json[\"projects\"][0][\"gid\"]}}",
+        "additionalFields": {
+          "opt_fields": "name,notes,assignee.name,due_on,completed,tags.name,custom_fields,projects.name,permalink_url,created_at,modified_at"
+        }
+      },
+      "name": "Get Full Task Data",
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "credentials": {
+        "asanaApi": {
+          "id": "{{ASANA_API_CREDENTIAL_ID}}",
+          "name": "Asana Personal Access Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "base": "={{$env.AIRTABLE_BASE_ID}}",
+        "table": "Issues",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "platform": "Asana",
+            "platform_id": "={{$json[\"gid\"]}}",
+            "title": "={{$json[\"name\"]}}",
+            "description": "={{$json[\"notes\"]}}",
+            "status": "={{$json[\"completed\"] ? 'Complete' : 'In Progress'}}",
+            "assignee": "={{$json[\"assignee\"] ? $json[\"assignee\"][\"name\"] : null}}",
+            "due_date": "={{$json[\"due_on\"]}}",
+            "project": "={{$json[\"projects\"] ? $json[\"projects\"][0][\"name\"] : null}}",
+            "url": "={{$json[\"permalink_url\"]}}",
+            "tags": "={{$json[\"tags\"] ? $json[\"tags\"].map(t => t.name).join(', ') : null}}",
+            "custom_fields": "={{JSON.stringify($json[\"custom_fields\"])}}",
+            "created_at": "={{$json[\"created_at\"]}}",
+            "updated_at": "={{$json[\"modified_at\"]}}",
+            "sync_timestamp": "={{$now}}"
+          }
+        },
+        "options": {
+          "typecast": true,
+          "bulkSize": 10
+        }
+      },
+      "name": "Sync to Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [850, 300],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "{{AIRTABLE_CREDENTIAL_ID}}",
+          "name": "Airtable Personal Access Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": "={{$env.AIRTABLE_BASE_ID}}",
+        "table": "Issues",
+        "filterByFormula": "=AND({platform}='Asana', {platform_id}='{{$json[\"gid\"]}}')" ,
+        "options": {
+          "maxRecords": 1
+        }
+      },
+      "name": "Check Existing Record",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [1050, 300],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "{{AIRTABLE_CREDENTIAL_ID}}",
+          "name": "Airtable Personal Access Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"action\"]}}",
+              "operation": "equals",
+              "value2": "changed"
+            }
+          ]
+        }
+      },
+      "name": "Is Task Changed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 500]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": "={{$env.AIRTABLE_BASE_ID}}",
+        "table": "Sync_Log",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "platform": "Asana",
+            "entity_type": "Task",
+            "entity_id": "={{$json[\"gid\"]}}",
+            "action": "={{$json[\"action\"]}}",
+            "status": "success",
+            "timestamp": "={{$now}}",
+            "workflow_run_id": "={{$execution.id}}",
+            "payload_summary": "={{$json[\"name\"]}}"
+          }
+        }
+      },
+      "name": "Log Sync",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [1050, 500],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "{{AIRTABLE_CREDENTIAL_ID}}",
+          "name": "Airtable Personal Access Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "status",
+              "value": "synced"
+            },
+            {
+              "name": "platform",
+              "value": "Asana"
+            },
+            {
+              "name": "task_gid",
+              "value": "={{$json[\"gid\"]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Format Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [1250, 300]
+    }
+  ],
+  "connections": {
+    "Asana Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Task Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Task Details": {
+      "main": [
+        [
+          {
+            "node": "Get Full Task Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Full Task Data": {
+      "main": [
+        [
+          {
+            "node": "Sync to Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sync to Airtable": {
+      "main": [
+        [
+          {
+            "node": "Log Sync",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Sync": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "{{ERROR_WORKFLOW_ID}}",
+    "timezone": "America/Los_Angeles"
+  },
+  "staticData": null,
+  "meta": {
+    "instanceId": "summit-integration-platform",
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [
+    {
+      "name": "integration",
+      "id": "1"
+    },
+    {
+      "name": "asana",
+      "id": "4"
+    },
+    {
+      "name": "sync",
+      "id": "3"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+  "versionId": "1"
+}

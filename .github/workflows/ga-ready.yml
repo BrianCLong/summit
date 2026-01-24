@@ -33,14 +33,14 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
         with:
-          version: 9
+          version: "10.0.0"
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: "pnpm"
@@ -64,9 +64,10 @@ jobs:
       - name: Run Gitleaks
         id: gitleaks
         continue-on-error: true
-        uses: gitleaks/gitleaks-action@5ee6c46da3db5c6d5b7b8af4564c3ccaf16c5b88 # v2.3.2
-        with:
-          args: "detect --source . --report-format json --report-path gitleaks.json"
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
 
       - name: Run Trivy
         id: trivy
@@ -102,7 +103,7 @@ jobs:
         if: always()
         run: |
           # Preserve raw security scan output for determinism
-          cp -f gitleaks.json .evidence/ga/gitleaks.json || true
+          cp -f results.sarif .evidence/ga/gitleaks.sarif || true
           cp -f trivy-results.json .evidence/ga/trivy-results.json || true
           cp -rf .evidence/ga artifacts/ga/ga-ready/
 

@@ -302,7 +302,7 @@ This document serves as the central index for all Release Operations tooling and
 | `type_safety_audit.sh`                      | Type safety check        | `./scripts/release/type_safety_audit.sh`                      |
 | `api_determinism_check.sh`                  | API consistency          | `./scripts/release/api_determinism_check.sh`                  |
 | `pre_release_health_check.sh`               | Unified health check     | `./scripts/release/pre_release_health_check.sh`               |
-| `collect_evidence.sh`                       | Collect GA evidence      | `./scripts/release/collect_evidence.sh`                       |
+| `generate_evidence_bundle.sh`                       | Collect GA evidence      | `./scripts/release/generate_evidence_bundle.sh`                       |
 | `generate_stabilization_report.sh`          | Progress report          | `./scripts/release/generate_stabilization_report.sh`          |
 | `verify_dependency_freeze.sh`               | Verify dep freeze        | `./scripts/release/verify_dependency_freeze.sh`               |
 | `check_schema_compatibility.sh`             | Check schema compat      | `./scripts/release/check_schema_compatibility.sh`             |

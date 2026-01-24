@@ -20,3 +20,7 @@
 
 **Learning:** Even when assigned a focused task (e.g., UX), one may inherit a broken branch or be required to fix blocking architectural issues (e.g., API drift, Type mismatches) to land changes.
 **Action:** Be prepared to step outside the assigned persona to unblock the build.
+
+## 2025-05-23 - Focus Management for Dynamic UI
+**Learning:** When a user action removes the triggering element from the DOM (e.g., clicking a "quick prompt" chip that disappears upon selection), focus is lost to the body, confusing keyboard users.
+**Action:** Always programmatically move focus to the next logical element (e.g., the input field) before the trigger disappears.

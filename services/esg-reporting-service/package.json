@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/esg-reporting-service",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "ESG (Environmental, Social, Governance) metrics tracking and automated reporting service",
   "type": "module",
   "main": "dist/index.js",

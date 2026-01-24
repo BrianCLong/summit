@@ -1,6 +1,6 @@
 {
   "name": "intelgraph-api-stub",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "IntelGraph Telemetry & Evidence API Stub",
   "main": "server.ts",
   "scripts": {
