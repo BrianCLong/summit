@@ -40,7 +40,7 @@ export function MapPane() {
 
     return () => {
       (map as any).__marker?.remove?.();
-      map.remove?.();
+      (map as any).remove?.();
     };
   }, []);
 
