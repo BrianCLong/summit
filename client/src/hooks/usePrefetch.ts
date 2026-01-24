@@ -4,7 +4,7 @@ import {
   DB_ServerStatsDocument,
   DB_InvestigationsDocument,
   GW_GraphDataDocument,
-} from '../generated/graphql.ts';
+} from '../generated/graphql.js';
 
 /**
  * Hook to prefetch critical dashboard data on route enter
