@@ -16,6 +16,7 @@
       "@summitsec/vcr-kit/*": ["packages/vcr-kit/src/*"],
       "@intelgraph/flags/*": ["libs/flags/node/*"],
       "@intelgraph/audit/*": ["libs/audit/node/*"]
-    }
+    },
+    "types": []
   }
 }
