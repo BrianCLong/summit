@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * OpenTelemetry Distributed Tracing for IntelGraph Server
  * Provides end-to-end visibility across all service operations

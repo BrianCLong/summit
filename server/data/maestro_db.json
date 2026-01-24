@@ -165,6 +165,15 @@
       "resource": "5a468ee6-89b5-4b15-af74-edcb8b48c939",
       "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
       "status": "allowed"
+    },
+    {
+      "id": "1fscah",
+      "timestamp": "2026-01-24T10:16:59.447Z",
+      "actor": "agent-1",
+      "action": "coordination_start",
+      "resource": "7ec798ed-f828-4275-b4a1-ac566925bd5b",
+      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
+      "status": "allowed"
     }
   ],
   "agents": [

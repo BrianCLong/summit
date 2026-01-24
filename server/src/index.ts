@@ -18,7 +18,7 @@ import { subscriptionEngine } from './graphql/subscriptionEngine.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
-import { initTelemetry } from '@intelgraph/telemetry-config';
+import { initializeTracing, getTracer } from './observability/tracer.js';
 import { streamingRateLimiter } from './routes/streaming.js';
 import { startOSINTWorkers } from './services/OSINTQueueService.js';
 import { ingestionService } from './services/IngestionService.js';
@@ -31,7 +31,9 @@ import { logger } from './config/logger.js';
 import './monitoring/metrics.js'; // Initialize Prometheus metrics collection
 
 const startServer = async () => {
-  const sdk = initTelemetry('intelgraph-server');
+  // Initialize OpenTelemetry tracing early in the startup sequence
+  const tracer = initializeTracing();
+  await tracer.initialize();
 
   // Optional Kafka consumer import - only when AI services enabled
   let startKafkaConsumer: any = null;
@@ -207,6 +209,10 @@ const startServer = async () => {
     if (stopKafkaConsumer) {
       await stopKafkaConsumer();
     } // WAR-GAMED SIMULATION - Stop Kafka Consumer
+
+    // Shutdown OpenTelemetry
+    await getTracer().shutdown();
+
     await Promise.allSettled([
       closeNeo4jDriver(),
       closePostgresPool(),
