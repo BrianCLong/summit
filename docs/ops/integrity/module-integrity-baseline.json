@@ -407,8 +407,8 @@
     "/Users/brianlong/Developer/summit/packages/workspace/src"
   ],
   "checkedFiles": 6689,
-  "currentViolations": 8163,
-  "existingViolations": 8163,
+  "currentViolations": 8145,
+  "existingViolations": 8145,
   "newViolations": 0,
   "errors": [
     {
@@ -428,114 +428,6 @@
       "import": "./NlqModal.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/client/src/features/nlq/NlqModal.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/advisor.ts",
-      "import": "./conductor/scheduling/pools.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/conductor/scheduling/pools.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/audit/AgentAuditLogger.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/employees/AgentEmployee.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/employees/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/employees/EmployeeRegistry.ts",
-      "import": "./AgentEmployee.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/employees/AgentEmployee.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/employees/EmployeeRegistry.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/employees/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/employees/SupervisorAgent.ts",
-      "import": "./AgentEmployee.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/employees/AgentEmployee.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/employees/SupervisorAgent.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/employees/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/employees/WorkerAgent.ts",
-      "import": "./AgentEmployee.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/employees/AgentEmployee.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/employees/WorkerAgent.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/employees/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/limits/EnforcementEngine.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/NegotiationRuntime.ts",
-      "import": "../../governance/PolicyEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/governance/PolicyEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/NegotiationRuntime.ts",
-      "import": "../../governance/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/NegotiationRuntime.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/NegotiationRuntime.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/index.ts",
-      "import": "./NegotiationRuntime.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/NegotiationRuntime.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/index.ts",
-      "import": "./NegotiationRuntime.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/NegotiationRuntime.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/index.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/types.ts",
-      "import": "../../governance/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/governance/types.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/agents/policy/PolicyHooks.ts",
