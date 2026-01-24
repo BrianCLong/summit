@@ -26,3 +26,14 @@
 **Prevention:**
 1.  **Strict Middleware Auditing:** Ensure all endpoints in route files have explicit authentication middleware unless publicly intended (e.g., login, health).
 2.  **Secret Usage Review:** Any endpoint using server-side secrets (like signing keys) should automatically trigger a security review for authentication requirements.
+
+## 2025-12-25 - [CRITICAL] Fail-Open Webhook Verification
+**Vulnerability:** Jira and Lifecycle webhook endpoints (`/api/webhooks/jira`, `/api/webhooks/lifecycle`) were configured to skip secret verification if the secret environment variable was missing, even in production (logging a warning instead of blocking).
+
+**Learning:**
+1.  **Fail-Open Defaults:** Security checks that "warn and proceed" on configuration errors are dangerous in production.
+2.  **Environment Assumption:** Assuming that "production will always have secrets set" is unsafe; configuration drift or errors can leave endpoints exposed.
+
+**Prevention:**
+1.  **Fail-Closed Logic:** If a required security configuration (like a secret) is missing, the system must block the request (fail closed), especially in production.
+2.  **Strict Configuration Checks:** Validate critical security configuration at startup, preventing the app from even starting if secrets are missing in production.
