@@ -13,17 +13,8 @@
 import { Request, Response, NextFunction } from 'express';
 import logger from '../utils/logger.js';
 import { trackError } from '../monitoring/middleware.js';
-import { GraphAbuseGuard, graphAbuseGuard } from './graphAbuseGuard.js';
-
-declare global {
-  namespace Express {
-    interface Request {
-      graphTraversalId?: string;
-      graphAnalysis?: QueryAnalysis;
-      performanceOptimized?: boolean;
-    }
-  }
-}
+// GraphAbuseGuard import removed - module doesn't exist, functionality is standalone
+// Note: Express Request augmentation for graphTraversalId and graphAnalysis is in graphAbuseGuard.ts
 
 interface GraphOptimizationConfig {
   // Rendering performance
@@ -44,6 +35,7 @@ interface GraphOptimizationConfig {
   // Supernode handling
   supernodeThreshold: number; // Connections considered "supernode"
   supernodeHandling: 'paginate' | 'collapse' | 'sample' | 'aggregate';
+  sampleRate: number; // Sample rate for 'sample' supernode handling (0-1)
   
   // Memory management
   nodeMemoryLimit: number;    // Estimated max nodes in memory
@@ -106,6 +98,7 @@ export class GraphPerformanceOptimizer {
       initialRenderLimit: 5000,
       supernodeThreshold: 1000,
       supernodeHandling: 'paginate',
+      sampleRate: 0.1, // Default: sample 10% of connections
       nodeMemoryLimit: 1000000,
       cacheSizeLimit: 50000,
       gcThreshold: 0.8,
@@ -523,8 +516,9 @@ export class GraphPerformanceOptimizer {
     let complexity = 100; // Base complexity
     
     // Add points for complex patterns
-    if (query.match(/\[\s*\*?\s*\d*\s*?\.\.?\s*\d*\s*\]/gi)) {
-      complexity += 50 * (query.match(/\[\s*\*?\s*\d*\s*?\.\.?\s*\d*\s*\]/gi).length);
+    const complexPatterns = query.match(/\[\s*\*?\s*\d*\s*?\.\.?\s*\d*\s*\]/gi);
+    if (complexPatterns) {
+      complexity += 50 * complexPatterns.length;
     }
     
     if ((query.match(/MATCH/gi) || []).length > 5) {
@@ -583,7 +577,9 @@ export class GraphPerformanceOptimizer {
     if (this.nodeCache.size >= this.config.cacheSizeLimit) {
       // Remove oldest entry
       const oldestKey = this.nodeCache.keys().next().value;
-      this.nodeCache.delete(oldestKey);
+      if (oldestKey !== undefined) {
+        this.nodeCache.delete(oldestKey);
+      }
     }
 
     this.nodeCache.set(queryHash, {
@@ -874,9 +870,9 @@ export class GraphPerformanceOptimizer {
   }
 
   /**
-   * Apply supernode-specific optimizations
+   * Apply supernode-specific optimizations to results
    */
-  private applySupernodeOptimizations(result: any, analysis: any): any {
+  private applySupernodeResultOptimizations(result: any, analysis: any): any {
     if (!result.nodes) return result;
     
     // Identify nodes with too many connections

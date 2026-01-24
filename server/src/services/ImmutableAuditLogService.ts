@@ -76,7 +76,7 @@ export class ImmutableAuditLogService {
   private logPath: string;
   private retentionDays: number;
   private auditQueue: AuditEvent[];
-  private config: AuditLogConfig;
+  readonly config: AuditLogConfig;
   private isProcessing: boolean;
   private privateKey: crypto.KeyObject;
   private publicKey: crypto.KeyObject;
@@ -294,7 +294,7 @@ export class ImmutableAuditLogService {
         
         if (await this.fileExists(logFilePath)) {
           const content = await fs.readFile(logFilePath, 'utf-8');
-          const lines = content.trim().split('\n').filter(line => line.trim() !== '');
+          const lines = content.trim().split('\n').filter((line: string) => line.trim() !== '');
           
           for (const line of lines) {
             try {
@@ -395,7 +395,7 @@ export class ImmutableAuditLogService {
         
         if (await this.fileExists(logFilePath)) {
           const content = await fs.readFile(logFilePath, 'utf-8');
-          const lines = content.trim().split('\n').filter(line => line.trim() !== '');
+          const lines = content.trim().split('\n').filter((line: string) => line.trim() !== '');
           
           for (const line of lines) {
             try {
@@ -605,7 +605,7 @@ export class ImmutableAuditLogService {
         
         if (await this.fileExists(logFilePath)) {
           const content = await fs.readFile(logFilePath, 'utf-8');
-          const lines = content.trim().split('\n').filter(line => line.trim() !== '');
+          const lines = content.trim().split('\n').filter((line: string) => line.trim() !== '');
           
           if (dateFolder === today) {
             stats.eventsToday = lines.length;
