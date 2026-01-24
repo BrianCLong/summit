@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import {
   ThemeProvider,
@@ -6,9 +6,11 @@ import {
   CssBaseline,
   IconButton,
   Box,
+  Tooltip,
 } from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import SearchIcon from '@mui/icons-material/Search';
 import { Provider } from 'react-redux';
 import { store } from './store';
 import { GraphPane } from './panes/GraphPane';
@@ -19,7 +21,19 @@ import { SelectionSummary } from './components/SelectionSummary';
 
 export function App() {
   const [mode, setMode] = useState<'light' | 'dark'>('light');
+  const [openCmd, setOpenCmd] = useState(false);
   const theme = useMemo(() => createTheme({ palette: { mode } }), [mode]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setOpenCmd((o) => !o);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
 
   const toggleMode = () => setMode((m) => (m === 'light' ? 'dark' : 'light'));
 
@@ -28,7 +42,7 @@ export function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <BrowserRouter>
-          <CommandPalette />
+          <CommandPalette open={openCmd} onClose={() => setOpenCmd(false)} />
           <Box
             display="flex"
             justifyContent="space-between"
@@ -36,14 +50,25 @@ export function App() {
             p={1}
           >
             <SelectionSummary />
-            <IconButton
-              onClick={toggleMode}
-              color="inherit"
-              aria-label="toggle theme"
-              data-testid="theme-toggle"
-            >
-              {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
-            </IconButton>
+            <Box>
+              <Tooltip title="Command Palette (Ctrl+K)">
+                <IconButton
+                  onClick={() => setOpenCmd(true)}
+                  color="inherit"
+                  aria-label="open command palette"
+                >
+                  <SearchIcon />
+                </IconButton>
+              </Tooltip>
+              <IconButton
+                onClick={toggleMode}
+                color="inherit"
+                aria-label="toggle theme"
+                data-testid="theme-toggle"
+              >
+                {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
+              </IconButton>
+            </Box>
           </Box>
           <Routes>
             <Route
