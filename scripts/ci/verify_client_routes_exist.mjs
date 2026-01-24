@@ -60,13 +60,20 @@ function main() {
   }
 
   if (missingImports.length > 0) {
-    console.error('\n❌ Error: Found missing route component imports!');
-    console.error('The following imports could not be resolved:');
-    missingImports.forEach(p => console.error(`  - ${p}`));
-    console.error('\nPlease ensure these files exist and are correctly referenced in the router.');
+    console.error('\n\x1b[31m❌ Error: Found missing route component imports!\x1b[0m');
+    console.error('\x1b[33mThe following imports could be found in App.router.jsx but do not exist on disk:\x1b[0m');
+    missingImports.forEach(p => console.error(`  - \x1b[1m${p}\x1b[0m`));
+
+    console.error('\n\x1b[36m💡 How to fix:\x1b[0m');
+    console.error('1. \x1b[1mCreate the missing component:\x1b[0m If the route is new or should exist, create the file at the expected path.');
+    console.error('2. \x1b[1mCreate a stub page:\x1b[0m If the implementation is pending, create a minimal stub page following the contract in:');
+    console.error('   \x1b[34mdocs/ops/client/stub-pages-contract.md\x1b[0m');
+    console.error('3. \x1b[1mUpdate the router:\x1b[0m If the import path is incorrect, fix it in \x1b[32mclient/src/App.router.jsx\x1b[0m.');
+    console.error('\nFor more details on the router audit, see: \x1b[34mdocs/ops/client/router-audit.md\x1b[0m');
+    
     process.exit(1);
   } else {
-    console.log('\n✅ Success: All route component imports are valid.');
+    console.log('\n\x1b[32m✅ Success: All route component imports are valid.\x1b[0m');
   }
 }
 
