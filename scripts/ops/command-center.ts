@@ -83,9 +83,61 @@ function readJsonFile<T>(filepath: string): T {
     const content = fs.readFileSync(filepath, 'utf-8');
     return JSON.parse(content);
   } catch (error) {
-    console.warn(`Warning: Could not read ${filepath}. Returning empty/default.`);
-    return [] as unknown as T;
+    // console.warn(`Warning: Could not read ${filepath}. Returning empty/default.`);
+    return {} as unknown as T;
   }
+}
+
+function getGovernanceData(ctx: CommandContext) {
+  const govData = {
+    drift: { status: 'UNKNOWN', output: '' },
+    docs: { status: 'UNKNOWN', violations: 0 },
+    evidence: { status: 'UNKNOWN', warnings: 0 },
+  };
+
+  if (ctx.mode === 'live') {
+    // 1. Compliance Drift
+    try {
+      execSync('npx tsx scripts/compliance/check_drift.ts', { stdio: 'pipe' });
+      govData.drift.status = 'PASS';
+    } catch (error: any) {
+      govData.drift.status = 'FAIL';
+      govData.drift.output = error.stderr?.toString() || error.stdout?.toString() || 'Unknown error';
+    }
+
+    // 2. Docs Integrity
+    try {
+      const reportPath = 'artifacts/governance/command-center-docs';
+      fs.rmSync(reportPath, { recursive: true, force: true });
+      execSync(`node scripts/ci/verify_governance_docs.mjs --out ${reportPath}`, { stdio: 'pipe' });
+      govData.docs.status = 'PASS';
+      const report = readJsonFile<any>(path.join(reportPath, 'report.json'));
+      govData.docs.violations = report.violations?.length || 0;
+    } catch (error: any) {
+       govData.docs.status = 'FAIL';
+       const reportPath = 'artifacts/governance/command-center-docs';
+       const report = readJsonFile<any>(path.join(reportPath, 'report.json'));
+       govData.docs.violations = report.violations?.length || 0;
+    }
+
+    // 3. Evidence Consistency
+    try {
+      const reportPath = 'artifacts/governance/command-center-evidence';
+      fs.rmSync(reportPath, { recursive: true, force: true });
+      // Pass --sha=latest to ensure deterministic output path (script appends sha to output dir)
+      execSync(`node scripts/ci/verify_evidence_id_consistency.mjs --evidence-map-path=docs/evidence/evidence-map.yml --output=${reportPath} --sha=latest`, { stdio: 'pipe' });
+      govData.evidence.status = 'PASS';
+      const report = readJsonFile<any>(path.join(reportPath, 'latest', 'report.json'));
+      govData.evidence.warnings = report.totals?.warnings || 0;
+    } catch (error: any) {
+       govData.evidence.status = 'FAIL';
+       const reportPath = 'artifacts/governance/command-center-evidence';
+       const report = readJsonFile<any>(path.join(reportPath, 'latest', 'report.json'));
+       govData.evidence.warnings = report.totals?.warnings || 0;
+    }
+  }
+
+  return govData;
 }
 
 function runGhCommand(args: string[]): any {
@@ -101,6 +153,8 @@ function runGhCommand(args: string[]): any {
 }
 
 function getData(ctx: CommandContext) {
+  const govData = getGovernanceData(ctx);
+
   if (ctx.mode === 'offline') {
     console.log(`[Offline] Reading snapshots from ${ctx.snapshotsDir}...`);
     return {
@@ -112,6 +166,7 @@ function getData(ctx: CommandContext) {
       issues: readJsonFile<Issue[]>(path.join(ctx.snapshotsDir, 'issues.json')),
       codeScanning: readJsonFile<Alert[]>(path.join(ctx.snapshotsDir, 'code_scanning.json')),
       dependabot: readJsonFile<Alert[]>(path.join(ctx.snapshotsDir, 'dependabot.json')),
+      govData,
     };
   } else {
     console.log('[Live] Fetching data from GitHub...');
@@ -143,7 +198,7 @@ function getData(ctx: CommandContext) {
       console.warn('Could not fetch alerts (auth/scope limitations).');
     }
 
-    return { prs, prChecks: [], issues, codeScanning, dependabot };
+    return { prs, prChecks: [], issues, codeScanning, dependabot, govData };
   }
 }
 
@@ -299,6 +354,16 @@ function generateMarkdown(data: any) {
   md += `2. **Merge Green**: Clear the ${processedPRs.filter((p: any) => p.cluster === 'GREEN').length} green PRs.\n`;
   md += `3. **Fix Systemic**: Claude to address CI failures in workflow files.\n`;
   md += `4. **Docs/Gov**: Jules to merge documentation updates.\n`;
+
+  // Governance
+  if (data.govData) {
+    const { drift, docs, evidence } = data.govData;
+    md += `\n## 7. Governance & Evidence\n`;
+    md += `- **Compliance Drift**: ${drift.status === 'PASS' ? '✅ PASS' : '❌ FAIL'}\n`;
+    if (drift.status === 'FAIL') md += `  - Drift Output: ${drift.output.split('\n')[0]}...\n`;
+    md += `- **Docs Integrity**: ${docs.status === 'PASS' ? '✅ PASS' : '❌ FAIL'} (${docs.violations} violations)\n`;
+    md += `- **Evidence Consistency**: ${evidence.status === 'PASS' ? '✅ PASS' : '❌ FAIL'} (${evidence.warnings} warnings)\n`;
+  }
 
   return md;
 }
