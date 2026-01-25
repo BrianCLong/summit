@@ -1,0 +1,191 @@
+name: ci-core-gate
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+permissions:
+  contents: read
+  id-token: write   # required for keyless sigstore signing in CI
+
+jobs:
+  ci-core-gate:
+    runs-on: ubuntu-24.04
+    env:
+      EVIDENCE_DIR: artifacts/ga-evidence/${{ github.sha }}
+      SBOM_PATH: sbom.cdx.json
+      SBOM_BUNDLE: sbom.cdx.sigstore.json
+      PROV_PATH: provenance.slsa.json
+      PROV_BUNDLE: provenance.slsa.sigstore.json
+      TRIVY_JSON: trivy.sbom.vuln.json
+      OPA_INPUT: deploy-gate-input.json
+      OPA_DECISION: opa-deploy-gate-decision.json
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Test
+        run: pnpm test
+
+      - name: Prepare evidence directory
+        run: |
+          mkdir -p "${EVIDENCE_DIR}"
+
+      - name: Create run stamp (non-deterministic; audit only)
+        run: |
+          node -e '
+            const fs=require("fs");
+            const o={
+              run_id: process.env.GITHUB_RUN_ID,
+              run_attempt: process.env.GITHUB_RUN_ATTEMPT,
+              sha: process.env.GITHUB_SHA,
+              ref: process.env.GITHUB_REF,
+              workflow: process.env.GITHUB_WORKFLOW,
+              actor: process.env.GITHUB_ACTOR,
+              created_utc: new Date().toISOString()
+            };
+            fs.writeFileSync(process.env.EVIDENCE_DIR+"/stamp.json", JSON.stringify(o,null,2));
+          '
+
+      - name: Generate CycloneDX SBOM
+        run: |
+          npx @cyclonedx/cyclonedx-npm@1.20.0 --output-format JSON --output-file "${SBOM_PATH}"
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v4.0.0
+
+      - name: Sign SBOM (keyless) to Sigstore bundle
+        run: |
+          cosign sign-blob "${SBOM_PATH}" \
+            --bundle "${SBOM_BUNDLE}" \
+            --yes
+
+      - name: Verify SBOM signature
+        run: |
+          cosign verify-blob "${SBOM_PATH}" \
+            --bundle "${SBOM_BUNDLE}" \
+            --certificate-identity="https://github.com/${{ github.repository }}/.github/workflows/ci-core-gate.yml@${{ github.ref }}" \
+            --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
+
+      - name: Generate SLSA-style provenance (SLSA v1 predicate) for build outputs
+        run: |
+          node scripts/ci/generate_slsa_provenance.mjs \
+            --out "${PROV_PATH}" \
+            --subjects "${SBOM_PATH}" \
+            --subjects "${SBOM_BUNDLE}"
+
+      - name: Sign provenance (keyless) to Sigstore bundle
+        run: |
+          cosign sign-blob "${PROV_PATH}" \
+            --bundle "${PROV_BUNDLE}" \
+            --yes
+
+      - name: Verify provenance signature
+        run: |
+          cosign verify-blob "${PROV_PATH}" \
+            --bundle "${PROV_BUNDLE}" \
+            --certificate-identity="https://github.com/${{ github.repository }}/.github/workflows/ci-core-gate.yml@${{ github.ref }}" \
+            --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
+
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@e07451d2e059ed86c2870430ea286b3a9e0bf241
+
+      - name: Scan SBOM with Trivy (JSON)
+        run: |
+          trivy sbom "${SBOM_PATH}" --format json --output "${TRIVY_JSON}"
+
+      - name: Enforce vulnerability threshold (block on CRITICAL > 0)
+        run: |
+          node scripts/ci/enforce_trivy_threshold.mjs --in "${TRIVY_JSON}" --max-critical 0
+
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      - name: Build OPA input
+        run: |
+          node scripts/ci/build_deploy_gate_input.mjs \
+            --sbom "${SBOM_PATH}" \
+            --sbom-bundle "${SBOM_BUNDLE}" \
+            --provenance "${PROV_PATH}" \
+            --provenance-bundle "${PROV_BUNDLE}" \
+            --trivy "${TRIVY_JSON}" \
+            --out "${OPA_INPUT}"
+
+      - name: Evaluate deploy policy (OPA)
+        run: |
+          opa eval \
+            --format json \
+            --input "${OPA_INPUT}" \
+            --data policies/opa/deploy.rego \
+            "data.summit.deploy" > "${OPA_DECISION}"
+          node scripts/ci/enforce_opa_allow.mjs --decision "${OPA_DECISION}" --query "data.summit.deploy.allow"
+
+      - name: Verify threat-model evidence references
+        run: |
+          node scripts/ci/verify_threat_model_evidence.mjs \
+            --threat-model "docs/security/threat-model.yml" \
+            --evidence-dir "."
+
+      - name: Stage evidence artifacts into bundle directory
+        run: |
+          cp -f "${SBOM_PATH}" "${EVIDENCE_DIR}/"
+          cp -f "${SBOM_BUNDLE}" "${EVIDENCE_DIR}/"
+          cp -f "${PROV_PATH}" "${EVIDENCE_DIR}/"
+          cp -f "${PROV_BUNDLE}" "${EVIDENCE_DIR}/"
+          cp -f "${TRIVY_JSON}" "${EVIDENCE_DIR}/"
+          cp -f "${OPA_INPUT}" "${EVIDENCE_DIR}/"
+          cp -f "${OPA_DECISION}" "${EVIDENCE_DIR}/"
+          # include the rego and threat model as auditable inputs
+          cp -f "policies/opa/deploy.rego" "${EVIDENCE_DIR}/deploy.rego"
+          cp -f "policies/opa/deploy_test.rego" "${EVIDENCE_DIR}/deploy_test.rego"
+          cp -f "docs/security/threat-model.yml" "${EVIDENCE_DIR}/threat-model.yml"
+          cp -f "scripts/ci/README_GA_GATE.md" "${EVIDENCE_DIR}/README_GA_GATE.md"
+
+      - name: Generate GA Evidence Bundle manifest + bundle.sha256
+        run: |
+          node scripts/ci/generate_ga_evidence_manifest.mjs \
+            --evidence-dir "${EVIDENCE_DIR}" \
+            --out "${EVIDENCE_DIR}/manifest.json"
+          node scripts/ci/write_sha256_sums.mjs \
+            --dir "${EVIDENCE_DIR}" \
+            --out "${EVIDENCE_DIR}/bundle.sha256"
+
+      - name: Sign bundle.sha256 (keyless) to Sigstore bundle
+        run: |
+          cosign sign-blob "${EVIDENCE_DIR}/bundle.sha256" \
+            --bundle "${EVIDENCE_DIR}/bundle.sha256.sigstore.json" \
+            --yes
+
+      - name: Verify bundle.sha256 signature
+        run: |
+          cosign verify-blob "${EVIDENCE_DIR}/bundle.sha256" \
+            --bundle "${EVIDENCE_DIR}/bundle.sha256.sigstore.json" \
+            --certificate-identity="https://github.com/${{ github.repository }}/.github/workflows/ci-core-gate.yml@${{ github.ref }}" \
+            --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
+
+      - name: Upload GA evidence bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: ga-evidence-${{ github.sha }}
+          path: artifacts/ga-evidence/${{ github.sha }}
+          retention-days: 30
