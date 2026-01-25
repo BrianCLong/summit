@@ -407,130 +407,10 @@
     "/Users/brianlong/Developer/summit/packages/workspace/src"
   ],
   "checkedFiles": 6690,
-  "currentViolations": 8014,
-  "existingViolations": 8014,
+  "currentViolations": 7991,
+  "existingViolations": 7991,
   "newViolations": 0,
   "errors": [
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/AnomalyDetectionService.ts",
-      "import": "../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/AnomalyDetectionService.ts",
-      "import": "../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/AdoptionAnalyticsService.test.ts",
-      "import": "./AdoptionAnalyticsService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/AdoptionAnalyticsService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/AdoptionAnalyticsService.test.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/AdoptionAnalyticsService.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/AdoptionAnalyticsService.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/AdoptionAnalyticsService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/AdoptionAnalyticsService.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/AdoptionAnalyticsService.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/index.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/index.ts",
-      "import": "./AdoptionAnalyticsService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/AdoptionAnalyticsService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/types.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/types.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/AnomalyController.ts",
-      "import": "./AnomalyDetector.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/AnomalyDetector.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/AnomalyController.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/AnomalyDetector.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/__tests__/AnomalyDetector.comprehensive.test.ts",
-      "import": "../AnomalyDetector.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/AnomalyDetector.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/__tests__/AnomalyDetector.comprehensive.test.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/__tests__/anomalies.test.ts",
-      "import": "../AnomalyDetector.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/AnomalyDetector.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/__tests__/anomalies.test.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/types.js"
-    },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/CohortController.ts",
       "import": "./CohortEvaluator.js",
@@ -800,24 +680,6 @@
       "import": "../types.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/funnels/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/index.ts",
-      "import": "./AnomalyDetectionService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/AnomalyDetectionService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/index.ts",
-      "import": "./policy/index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/policy/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/index.ts",
-      "import": "./compliance/index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/index.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/analytics/policy/PolicyImpactAnalyzer.ts",
