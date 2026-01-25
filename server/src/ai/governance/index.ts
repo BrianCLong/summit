@@ -15,22 +15,22 @@ export * from './types.ts';
 export {
   PolicySuggestionService,
   createPolicySuggestionService,
-} from './PolicySuggestionService.js';
+} from './PolicySuggestionService.ts';
 
 export {
   VerdictExplainerService,
   createVerdictExplainerService,
-} from './VerdictExplainerService.js';
+} from './VerdictExplainerService.ts';
 
 export {
   BehavioralAnomalyService,
   createBehavioralAnomalyService,
-} from './BehavioralAnomalyService.js';
+} from './BehavioralAnomalyService.ts';
 
 // Unified AI Governance Service
-import { PolicySuggestionService, createPolicySuggestionService } from './PolicySuggestionService.js';
-import { VerdictExplainerService, createVerdictExplainerService } from './VerdictExplainerService.js';
-import { BehavioralAnomalyService, createBehavioralAnomalyService } from './BehavioralAnomalyService.js';
+import { PolicySuggestionService, createPolicySuggestionService } from './PolicySuggestionService.ts';
+import { VerdictExplainerService, createVerdictExplainerService } from './VerdictExplainerService.ts';
+import { BehavioralAnomalyService, createBehavioralAnomalyService } from './BehavioralAnomalyService.ts';
 import { AIGovernanceConfig } from './types.ts';
 
 /**
