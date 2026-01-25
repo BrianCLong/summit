@@ -4,6 +4,16 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g. v1.0.0)'
+        required: true
+        type: string
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -91,21 +101,73 @@ jobs:
           name: build-artifacts-client-${{ github.run_id }}
           path: evidence/client
 
-      - name: Create Evidence Bundle
+      - name: Prepare Release Bundle
         run: |
-          mkdir -p release-assets
-          tar -czf release-assets/evidence.tar.gz evidence/
+          mkdir -p dist/release
+          tar -czf dist/release/evidence.tar.gz evidence/
+          echo "GA Release ${{ inputs.tag || github.ref_name }} (SLSA L3 Compliant)" > release-notes.md
 
-      - name: Generate Release Notes
-        id: notes
+      - name: Check Release Status
+        id: check_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag || github.ref_name }}
         run: |
-          echo "notes=GA Release ${{ github.ref_name }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
+          # Check existence and prerelease status
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json tagName,isPrerelease > release_info.json 2>/dev/null; then
+            echo "release_exists=true" >> $GITHUB_OUTPUT
+            IS_PRERELEASE=$(jq -r .isPrerelease release_info.json)
+            echo "is_prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
+          else
+            echo "release_exists=false" >> $GITHUB_OUTPUT
+            # Determine prerelease from tag pattern (if it contains a hyphen)
+            if [[ "$TAG" == *"-"* ]]; then
+              echo "is_prerelease=true" >> $GITHUB_OUTPUT
+            else
+              echo "is_prerelease=false" >> $GITHUB_OUTPUT
+            fi
+          fi
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: release-assets/evidence.tar.gz
-          body: ${{ steps.notes.outputs.notes }}
-          draft: false
-          prerelease: false
-          generate_release_notes: true
+      - name: Publish or Update Release
+        id: publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag || github.ref_name }}
+          IS_EXISTING: ${{ steps.check_release.outputs.release_exists }}
+          IS_PRERELEASE: ${{ steps.check_release.outputs.is_prerelease }}
+        run: |
+          PRERELEASE_FLAG=""
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+
+          if [ "$IS_EXISTING" = "true" ]; then
+            echo "Updating existing release $TAG..."
+            gh release edit "$TAG" \
+              --notes-file release-notes.md \
+              $PRERELEASE_FLAG \
+              --repo "$GITHUB_REPOSITORY"
+
+            gh release upload "$TAG" dist/release/evidence.tar.gz \
+              --clobber \
+              --repo "$GITHUB_REPOSITORY"
+
+            echo "action=updated" >> $GITHUB_OUTPUT
+          else
+            echo "Creating new release $TAG..."
+            gh release create "$TAG" dist/release/evidence.tar.gz \
+              --notes-file release-notes.md \
+              $PRERELEASE_FLAG \
+              --repo "$GITHUB_REPOSITORY"
+
+            echo "action=created" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Release Summary
+        if: always()
+        run: |
+          echo "### Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag:** ${{ inputs.tag || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Action:** ${{ steps.publish.outputs.action }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Prerelease:** ${{ steps.check_release.outputs.is_prerelease }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Concurrency Group:** release-${{ inputs.tag || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
