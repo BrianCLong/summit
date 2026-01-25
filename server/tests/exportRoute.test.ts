@@ -1,6 +1,5 @@
 import request from 'supertest';
-import { createApp } from '../src/app.js';
-import { describe, test, expect, beforeAll } from '@jest/globals';
+import { describe, test, expect, beforeAll, jest } from '@jest/globals';
 import crypto from 'crypto';
 
 const NO_NETWORK_LISTEN = process.env.NO_NETWORK_LISTEN === 'true';
@@ -28,6 +27,8 @@ describeIf('GET /export/provenance', () => {
   let app: any;
   beforeAll(async () => {
     process.env.EXPORT_SIGNING_SECRET = secret;
+    jest.resetModules();
+    const { createApp } = await import('../src/app.js');
     app = await createApp();
   });
 

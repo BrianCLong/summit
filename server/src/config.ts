@@ -32,6 +32,7 @@ export const EnvSchema = z
     ENFORCE_GRAPHQL_COST_LIMITS: z.coerce.boolean().default(true),
     GRAPHQL_COST_CONFIG_PATH: z.string().optional(),
     COST_EXEMPT_TENANTS: z.string().optional().default(''),
+    EXPORT_SIGNING_SECRET: z.string().optional(),
   });
 
 const TestEnvSchema = EnvSchema.extend({
@@ -69,6 +70,7 @@ const ENV_VAR_HELP: Record<string, string> = {
   ENFORCE_GRAPHQL_COST_LIMITS: 'Enable/disable GraphQL cost limit enforcement (default: true)',
   GRAPHQL_COST_CONFIG_PATH: 'Path to GraphQL cost configuration JSON file (optional)',
   COST_EXEMPT_TENANTS: 'Comma-separated list of tenant IDs exempt from cost limits',
+  EXPORT_SIGNING_SECRET: 'Secret used to sign export manifests (optional in dev, required in prod)',
 };
 
 export const cfg = (() => {
@@ -127,6 +129,8 @@ export const cfg = (() => {
     };
     guardSecret('JWT_SECRET');
     guardSecret('JWT_REFRESH_SECRET');
+    if (!env.EXPORT_SIGNING_SECRET) fail('EXPORT_SIGNING_SECRET', 'missing value');
+    guardSecret('EXPORT_SIGNING_SECRET');
     const corsOrigins = env.CORS_ORIGIN.split(',').map((origin: string) => origin.trim());
     if (
       corsOrigins.length === 0 ||

@@ -1,7 +1,6 @@
 import express from 'express';
 import request from 'supertest';
 import { describe, beforeEach, expect, test, jest } from '@jest/globals';
-import exportRouter from '../../src/routes/export.js';
 
 const describeNetwork =
   process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
@@ -41,9 +40,11 @@ describeNetwork('provenance export signing and redaction', () => {
 
   let app: express.Express;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockBy.mockReset();
     process.env.EXPORT_SIGNING_SECRET = secret;
+    jest.resetModules();
+    const { default: exportRouter } = await import('../../src/routes/export.js');
     const newApp = express();
     newApp.use('/export', exportRouter);
     app = newApp;

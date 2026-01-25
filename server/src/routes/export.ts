@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { getPostgresPool } from '../db/postgres.js';
 import { ProvenanceRepo, ProvenanceFilter } from '../repos/ProvenanceRepo.js';
 import { tenantHeader } from '../middleware/tenantHeader.js';
+import { cfg } from '../config.js';
 
 function sign(params: Record<string, string>, secret: string) {
   const base = Object.keys(params)
@@ -102,7 +103,7 @@ exportRouter.get('/provenance', async (req, res) => {
       } catch {}
     }
 
-    const secret = process.env.EXPORT_SIGNING_SECRET || 'dev-secret';
+    const secret = cfg.EXPORT_SIGNING_SECRET || 'dev-secret';
     const params: Record<string, string> = {
       scope,
       id,

@@ -1,5 +1,6 @@
 import express from 'express';
 import crypto from 'crypto';
+import { cfg } from '../config.js';
 import { exportData } from '../analytics/exports/ExportController.js';
 import { validateArtifactId } from '../utils/security.js';
 import { WatermarkVerificationService } from '../exports/WatermarkVerificationService.js';
@@ -18,7 +19,7 @@ router.post('/sign-manifest', ensureAuthenticated, async (req, res) => {
     const manifestString = JSON.stringify({ tenant, filters, timestamp });
 
     // In a real system, we'd use a private key from KMS/Secrets
-    const secret = process.env.EXPORT_SIGNING_SECRET || 'dev-secret';
+    const secret = cfg.EXPORT_SIGNING_SECRET || 'dev-secret';
 
     const signature = crypto
       .createHmac('sha256', secret)
