@@ -1,0 +1,82 @@
+name: Summit CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Install dependencies (Global)
+        run: |
+          npm install -g typescript ts-node
+
+      - name: Install Server Dependencies (Manual Workaround)
+        working-directory: ./server
+        run: |
+          npm install --legacy-peer-deps --ignore-scripts --no-optional
+          npm install --save-dev ts-jest --legacy-peer-deps --ignore-scripts --no-optional
+
+      - name: Run Server Tests
+        working-directory: ./server
+        run: npm run test
+        env:
+          CI: true
+
+  test-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Client Dependencies (Manual Workaround)
+        working-directory: ./apps/web
+        run: |
+          npm install --legacy-peer-deps --ignore-scripts --no-optional
+          npm install --save-dev @rollup/rollup-linux-x64-gnu --legacy-peer-deps
+          npm install --save-dev jest-axe @radix-ui/react-popover --legacy-peer-deps
+          npm install --save @mui/material @mui/icons-material @emotion/react @emotion/styled yjs mermaid y-websocket --legacy-peer-deps
+
+      - name: Run Client Tests
+        working-directory: ./apps/web
+        run: npm run test -- run
+        env:
+          CI: true
+
+  test-e2e:
+    runs-on: ubuntu-latest
+    needs: [test-server, test-client]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Install Deps
+        run: npm install --legacy-peer-deps --ignore-scripts --no-optional
+
+      - name: Run Playwright tests
+        run: npx playwright test
+        env:
+          CI: true
