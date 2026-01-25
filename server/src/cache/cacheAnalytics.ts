@@ -1,14 +1,14 @@
-import config from '../config/index.js';
-import { getRedisClient } from '../config/database.js';
+import config from '../config/index.ts';
+import { getRedisClient } from '../config/database.ts';
 import {
   cacheHits,
   cacheMisses,
   cacheSets,
   cacheInvalidations,
   cacheLocalSize,
-} from '../metrics/cacheMetrics.js';
-import { getWarmerStats } from './warmers.js';
-import { getLocalCacheStats } from './responseCache.js';
+} from '../metrics/cacheMetrics.ts';
+import { getWarmerStats } from './warmers.ts';
+import { getLocalCacheStats } from './responseCache.ts';
 
 interface MetricValue {
   value?: number;
