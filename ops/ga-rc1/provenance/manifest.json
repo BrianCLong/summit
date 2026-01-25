@@ -1,0 +1,19 @@
+{
+  "release": "v2.0.0-rc.1",
+  "timestamp": "2026-01-01T03:14:51Z",
+  "artifacts": {
+    "sbom": {
+      "path": "ops/ga-rc1/security/sbom.json",
+      "sha256": "SIMULATED_HASH_SBOM"
+    },
+    "backlog": {
+      "path": "ops/ga-rc1/backlog.csv",
+      "sha256": "SIMULATED_HASH_BACKLOG"
+    },
+    "pr_triage": {
+      "path": "ops/ga-rc1/pr-triage.md",
+      "sha256": "SIMULATED_HASH_PR_TRIAGE"
+    }
+  },
+  "signature": "SIMULATED_SIGNATURE_BYTES"
+}
