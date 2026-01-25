@@ -68,7 +68,8 @@ const startServer = async () => {
     path: '/graphql',
   });
 
-
+  useServer(
+    {
       schema,
       context: async (ctx: any) => {
         const request = (ctx.extra as any).request ?? (ctx as any).extra;
