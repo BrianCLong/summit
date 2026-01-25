@@ -17,13 +17,13 @@ describe('ForesightService', () => {
   let service: ReturnType<typeof ForesightService.getInstance>;
 
   beforeAll(async () => {
-    const dbSpec = '../../config/database.js';
+    const dbSpec = '../../config/database.ts';
     jest.resetModules();
     // @ts-ignore - unstable API is sufficient for tests
     await (jest as any).unstable_mockModule(dbSpec, () => ({
       getNeo4jDriver: () => mockDriver,
     }));
-    ({ ForesightService } = await import('../services/ForesightService.js'));
+    ({ ForesightService } = await import('../services/ForesightService.ts'));
   });
 
   beforeEach(() => {
