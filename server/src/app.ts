@@ -53,6 +53,7 @@ import { initializeTracing, getTracer } from './observability/tracer.js';
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
 import { startTrustWorker } from './workers/trustScoreWorker.js';
 import { startRetentionWorker } from './workers/retentionWorker.js';
+import { startPartitionWorker } from './workers/partitionWorker.js';
 import { cfg } from './config.js';
 import supportTicketsRouter from './routes/support-tickets.js';
 import ticketLinksRouter from './routes/ticket-links.js';
@@ -693,6 +694,8 @@ export const createApp = async () => {
     startTrustWorker();
     // Start retention worker if enabled
     startRetentionWorker();
+    // Start partition maintenance worker
+    startPartitionWorker();
     // Start streaming ingestion (Epic B)
     streamIngest.start(['ingest-events']).catch(err => {
       appLogger.error({ err }, 'Failed to start streaming ingestion');
