@@ -6,29 +6,27 @@ import { useServer } from 'graphql-ws/lib/use/ws';
 import { WebSocketServer } from 'ws';
 import { randomUUID } from 'node:crypto';
 import pino from 'pino';
-import { getContext } from './lib/auth.js';
+import { getContext } from './lib/auth.ts';
 import path from 'path';
 import { fileURLToPath } from 'url';
-// import WSPersistedQueriesMiddleware from "./graphql/middleware/wsPersistedQueries.js";
-import { createApp } from './app.js';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import { typeDefs } from './graphql/schema.js';
-import resolvers from './graphql/resolvers/index.js';
-import { subscriptionEngine } from './graphql/subscriptionEngine.js';
-import { DataRetentionService } from './services/DataRetentionService.js';
-import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
-import { cfg } from './config.js';
-import { initializeTracing, getTracer } from './observability/tracer.js';
-import { streamingRateLimiter } from './routes/streaming.js';
-import { startOSINTWorkers } from './services/OSINTQueueService.js';
-import { ingestionService } from './services/IngestionService.js';
-import { BackupManager } from './backup/BackupManager.js';
-import { checkNeo4jIndexes } from './db/indexManager.js';
+import { typeDefs } from './graphql/schema.ts';
+import resolvers from './graphql/resolvers/index.ts';
+import { subscriptionEngine } from './graphql/subscriptionEngine.ts';
+import { DataRetentionService } from './services/DataRetentionService.ts';
+import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.ts';
+import { cfg } from './config.ts';
+import { initializeTracing, getTracer } from './observability/tracer.ts';
+import { streamingRateLimiter } from './routes/streaming.ts';
+import { startOSINTWorkers } from './services/OSINTQueueService.ts';
+import { ingestionService } from './services/IngestionService.ts';
+import { BackupManager } from './backup/BackupManager.ts';
+import { checkNeo4jIndexes } from './db/indexManager.ts';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-import { bootstrapSecrets } from './bootstrap-secrets.js';
-import { logger } from './config/logger.js';
-import './monitoring/metrics.js'; // Initialize Prometheus metrics collection
+import { bootstrapSecrets } from './bootstrap-secrets.ts';
+import { logger } from './config/logger.ts';
+import './monitoring/metrics.ts'; // Initialize Prometheus metrics collection
 
 const startServer = async () => {
   // Initialize OpenTelemetry tracing early in the startup sequence
@@ -43,7 +41,7 @@ const startServer = async () => {
     process.env.KAFKA_ENABLED === 'true'
   ) {
     try {
-      const kafkaModule = await import('./realtime/kafkaConsumer.js');
+      const kafkaModule = await import('./realtime/kafkaConsumer.ts');
       startKafkaConsumer = kafkaModule.startKafkaConsumer;
       stopKafkaConsumer = kafkaModule.stopKafkaConsumer;
     } catch (error: any) {
@@ -70,11 +68,7 @@ const startServer = async () => {
     path: '/graphql',
   });
 
-  // const wsPersistedQueries = new WSPersistedQueriesMiddleware();
-  // const wsMiddleware = wsPersistedQueries.createMiddleware();
 
-  useServer(
-    {
       schema,
       context: async (ctx: any) => {
         const request = (ctx.extra as any).request ?? (ctx as any).extra;
@@ -143,7 +137,7 @@ const startServer = async () => {
     });
   }
 
-  const { initSocket, getIO } = await import('./realtime/socket.js'); // JWT auth
+  const { initSocket, getIO } = await import('./realtime/socket.ts'); // JWT auth
 
   const port = Number(cfg.PORT || 4000);
   httpServer.listen(port, async () => {
@@ -162,12 +156,12 @@ const startServer = async () => {
     backupManager.startScheduler();
 
     // Start Policy Watcher (WS-2)
-    const { PolicyWatcher } = await import('./services/governance/PolicyWatcher.js');
+    const { PolicyWatcher } = await import('./services/governance/PolicyWatcher.ts');
     const policyWatcher = PolicyWatcher.getInstance();
     policyWatcher.start();
 
     // Start GA Core Metrics Service
-    const { gaCoreMetrics } = await import('./services/GACoremetricsService.js');
+    const { gaCoreMetrics } = await import('./services/GACoremetricsService.ts');
     gaCoreMetrics.start();
 
     // Check Neo4j Indexes
@@ -180,7 +174,7 @@ const startServer = async () => {
     if (process.env.NODE_ENV === 'development') {
       setTimeout(async () => {
         try {
-          const { createSampleData } = await import('./utils/sampleData.js');
+          const { createSampleData } = await import('./utils/sampleData.ts');
           await createSampleData();
         } catch (error: any) {
           logger.warn('Failed to create sample data, continuing without it');
@@ -192,15 +186,15 @@ const startServer = async () => {
   // Initialize Socket.IO
   const io = initSocket(httpServer);
 
-  const { closeNeo4jDriver } = await import('./db/neo4j.js');
-  const { closePostgresPool } = await import('./db/postgres.js');
-  const { closeRedisClient } = await import('./db/redis.js');
+  const { closeNeo4jDriver } = await import('./db/neo4j.ts');
+  const { closePostgresPool } = await import('./db/postgres.ts');
+  const { closeRedisClient } = await import('./db/redis.ts');
 
   // Graceful shutdown
   const shutdown = async (sig: NodeJS.Signals) => {
     logger.info(`Shutting down. Signal: ${sig}`);
     // Stop Policy Watcher
-    const { PolicyWatcher } = await import('./services/governance/PolicyWatcher.js');
+    const { PolicyWatcher } = await import('./services/governance/PolicyWatcher.ts');
     PolicyWatcher.getInstance().stop();
 
     wss.close();
