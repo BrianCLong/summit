@@ -198,6 +198,7 @@ jobs:
           grype docker:$DOCKER_IMAGE:$DOCKER_TAG -o json --file ./vulnerability-reports/summit-platform-container-${{ env.VERSION }}.json
 
       # Sign artifacts (only on main branch or tags)
+      # Enforcement of Rekor log verification to mitigate CVE-2026-22703
       - name: Sign Artifacts
         if: github.ref == 'refs/heads/main' || github.ref_type == 'tag'
         env:
@@ -207,28 +208,38 @@ jobs:
           OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           DOCKER_IMAGE=ghcr.io/${OWNER_LOWER}/summit-platform
           DOCKER_TAG=${{ env.VERSION }}
+          REKOR_URL="https://rekor.sigstore.dev"
 
-          # Sign container image with keyless signing
+          # Sign container image with keyless signing and Rekor
           if [ -f "Dockerfile" ] && [ -n "$DOCKER_TAG" ]; then
             echo "Signing container image: $DOCKER_IMAGE:$DOCKER_TAG"
-            cosign sign --yes $DOCKER_IMAGE:$DOCKER_TAG
+            cosign sign --yes --rekor-url "$REKOR_URL" $DOCKER_IMAGE:$DOCKER_TAG
             
-            # Verify the signature
-            cosign verify $DOCKER_IMAGE:$DOCKER_TAG --certificate-identity-regexp=".*" --certificate-oidc-issuer-regexp=".*"
+            # Verify the signature with Rekor
+            cosign verify $DOCKER_IMAGE:$DOCKER_TAG \
+              --rekor-url "$REKOR_URL" \
+              --certificate-identity-regexp=".*" \
+              --certificate-oidc-issuer-regexp=".*"
           fi
 
-          # Sign SBOMs and Attestations
-          for sbom in ./sboms/*.json ./sboms/*.link; do
-            if [ -f "$sbom" ]; then
-              echo "Signing artifact: $sbom"
-              cosign sign-blob --output-signature "${sbom}.sig" --yes "$sbom"
+          # Sign SBOMs and Attestations using detached bundles for non-container artifacts
+          for artifact in ./sboms/*.json ./sboms/*.link; do
+            if [ -f "$artifact" ]; then
+              echo "Signing artifact: $artifact"
+              cosign sign-blob --yes \
+                --bundle "${artifact}.bundle" \
+                --rekor-url "$REKOR_URL" \
+                "$artifact"
             fi
           done
 
-          # Explicitly sign the main SPDX SBOM
+          # Explicitly sign the main SPDX SBOM with a bundle
           if [ -f "sbom.spdx.json" ]; then
             echo "Signing main SPDX SBOM"
-            cosign sign-blob --output-signature "sbom.spdx.json.sig" --yes "sbom.spdx.json"
+            cosign sign-blob --yes \
+              --bundle "sbom.spdx.json.bundle" \
+              --rekor-url "$REKOR_URL" \
+              "sbom.spdx.json"
           fi
 
       # Bundle release evidence

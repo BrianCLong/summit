@@ -1,12 +1,18 @@
 package supply_chain
 
 # Default to deny
-default sbom_signed = false
+default spdx_sbom_signed = false
+default cyclonedx_sbom_signed = false
 default provenance_exists = false
 
 deny[msg] {
-  not input.sbom_signed
-  msg := "SBOM must be signed"
+  not input.spdx_sbom_signed
+  msg := "SPDX SBOM must be signed (detected via .bundle)"
+}
+
+deny[msg] {
+  not input.cyclonedx_sbom_signed
+  msg := "CycloneDX SBOM must be signed (detected via .bundle)"
 }
 
 deny[msg] {
@@ -16,7 +22,8 @@ deny[msg] {
 
 # Helper to check if everything is valid
 allow {
-  input.sbom_signed
+  input.spdx_sbom_signed
+  input.cyclonedx_sbom_signed
   input.provenance_exists
   count(deny) == 0
 }
