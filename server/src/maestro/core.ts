@@ -5,7 +5,7 @@ import { OpenAILLM } from './adapters/llm_openai';
 import { ResidencyGuard } from '../data-residency/residency-guard';
 import { AgentGovernanceService } from './governance-service.js';
 import logger from '../utils/logger.js';
-import { metrics } from '../monitoring/metrics.js';
+import { metrics } from '../monitoring/metrics.ts';
 
 export interface MaestroConfig {
   defaultPlannerAgent: string;   // e.g. "openai:gpt-4.1"
