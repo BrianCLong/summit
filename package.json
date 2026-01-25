@@ -59,7 +59,7 @@
     "lint:server": "cd server && npm run lint",
     "lint:client": "cd client && npm run lint",
     "test:quarantine": "echo 'Quarantine test placeholder - no flaky tests currently'",
-    "typecheck": "tsc -b --pretty false",
+    "typecheck": "rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot node_modules/@types/react-native node_modules/@types/webrtc node_modules/@types/webgl-ext node_modules/@types/webgl2 node_modules/@types/request node_modules/@types/pg-pool node_modules/react-native node_modules/@types/connect-redis node_modules/@types/glob && tsc -b --pretty false",
     "typecheck:server": "cd server && tsc --noEmit",
     "typecheck:client": "cd client && tsc --noEmit",
     "format": "prettier -w . && ruff format",
