@@ -99,12 +99,25 @@ jobs:
       - name: Generate Release Notes
         id: notes
         run: |
-          echo "notes=GA Release ${{ github.ref_name }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
+          NOTES="GA Release ${{ github.ref_name }} (SLSA L3 Compliant)"
+          echo "notes=$NOTES" >> $GITHUB_OUTPUT
+          mkdir -p dist/release
+          echo "# $NOTES" > dist/release/release-notes.md
+
+      - name: Create Release Artifacts (SBOM, Provenance)
+        run: node scripts/release/create-release-artifacts.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify Release Bundle
+        run: node scripts/release/verify-release-bundle.mjs
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release-assets/evidence.tar.gz
+          files: |
+            release-assets/evidence.tar.gz
+            dist/release/*
           body: ${{ steps.notes.outputs.notes }}
           draft: false
           prerelease: false
