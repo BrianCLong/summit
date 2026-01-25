@@ -407,142 +407,10 @@
     "/Users/brianlong/Developer/summit/packages/workspace/src"
   ],
   "checkedFiles": 6690,
-  "currentViolations": 7991,
-  "existingViolations": 7991,
+  "currentViolations": 7964,
+  "existingViolations": 7964,
   "newViolations": 0,
   "errors": [
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/CohortController.ts",
-      "import": "./CohortEvaluator.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/CohortEvaluator.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/CohortController.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/CohortEvaluator.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/CohortEvaluator.ts",
-      "import": "../telemetry/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/__tests__/cohorts.test.ts",
-      "import": "../CohortEvaluator.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/CohortEvaluator.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/__tests__/cohorts.test.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/CompliancePredictionEngine.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/CompliancePredictionEngine.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/EvidenceQualityScorer.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/EvidenceQualityScorer.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/EvidenceQualityScorer.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/EvidenceQualityScorer.ts",
-      "import": "./CompliancePredictionEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/CompliancePredictionEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/GapPredictionService.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/GapPredictionService.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/GapPredictionService.ts",
-      "import": "./CompliancePredictionEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/CompliancePredictionEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/RemediationPrioritizer.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/RemediationPrioritizer.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/RemediationPrioritizer.ts",
-      "import": "./CompliancePredictionEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/CompliancePredictionEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/index.ts",
-      "import": "./CompliancePredictionEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/CompliancePredictionEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/index.ts",
-      "import": "./GapPredictionService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/GapPredictionService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/index.ts",
-      "import": "./RemediationPrioritizer.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/RemediationPrioritizer.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/index.ts",
-      "import": "./EvidenceQualityScorer.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/EvidenceQualityScorer.js"
-    },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/analytics/dictionary/__tests__/validator.test.ts",
       "import": "../validator.js",
@@ -778,24 +646,6 @@
       "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/retention/RetentionService.js"
     },
     {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/TelemetryController.ts",
-      "import": "./TelemetryService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/TelemetryService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/TelemetryService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/TelemetryService.ts",
-      "import": "./scrubber.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/scrubber.js"
-    },
-    {
       "file": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/__tests__/telemetry.test.ts",
       "import": "../scrubber.js",
       "kind": "missing",
@@ -810,18 +660,6 @@
     {
       "file": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/__tests__/telemetry.test.ts",
       "import": "../allowlist.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/allowlist.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/allowlist.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/scrubber.ts",
-      "import": "./allowlist.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/allowlist.js"
     },
