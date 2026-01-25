@@ -18,6 +18,7 @@ import { TimelinePane } from './panes/TimelinePane';
 import { MapPane } from './panes/MapPane';
 import { CommandPalette } from './components/CommandPalette';
 import { SelectionSummary } from './components/SelectionSummary';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 export function App() {
   const [mode, setMode] = useState<'light' | 'dark'>('light');
@@ -41,10 +42,11 @@ export function App() {
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <BrowserRouter>
-          <CommandPalette open={openCmd} onClose={() => setOpenCmd(false)} />
-          <Box
-            display="flex"
+        <ErrorBoundary>
+          <BrowserRouter>
+            <CommandPalette open={openCmd} onClose={() => setOpenCmd(false)} />
+            <Box
+              display="flex"
             justifyContent="space-between"
             alignItems="center"
             p={1}
@@ -70,41 +72,42 @@ export function App() {
               </IconButton>
             </Box>
           </Box>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <Box
-                  display="grid"
-                  gridTemplateColumns="2fr 1fr"
-                  gridTemplateRows="1fr 1fr"
-                  gridTemplateAreas="'graph timeline' 'graph map'"
-                  height="calc(100vh - 56px)"
-                >
+            <Routes>
+              <Route
+                path="/"
+                element={
                   <Box
-                    gridArea="graph"
-                    borderRight={1}
-                    borderColor="divider"
-                    data-testid="graph-pane"
+                    display="grid"
+                    gridTemplateColumns="2fr 1fr"
+                    gridTemplateRows="1fr 1fr"
+                    gridTemplateAreas="'graph timeline' 'graph map'"
+                    height="calc(100vh - 56px)"
                   >
-                    <GraphPane />
+                    <Box
+                      gridArea="graph"
+                      borderRight={1}
+                      borderColor="divider"
+                      data-testid="graph-pane"
+                    >
+                      <GraphPane />
+                    </Box>
+                    <Box
+                      gridArea="timeline"
+                      borderBottom={1}
+                      borderColor="divider"
+                      data-testid="timeline-pane"
+                    >
+                      <TimelinePane />
+                    </Box>
+                    <Box gridArea="map" data-testid="map-pane">
+                      <MapPane />
+                    </Box>
                   </Box>
-                  <Box
-                    gridArea="timeline"
-                    borderBottom={1}
-                    borderColor="divider"
-                    data-testid="timeline-pane"
-                  >
-                    <TimelinePane />
-                  </Box>
-                  <Box gridArea="map" data-testid="map-pane">
-                    <MapPane />
-                  </Box>
-                </Box>
-              }
-            />
-          </Routes>
-        </BrowserRouter>
+                }
+              />
+            </Routes>
+          </BrowserRouter>
+        </ErrorBoundary>
       </ThemeProvider>
     </Provider>
   );

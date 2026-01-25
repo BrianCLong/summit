@@ -4,6 +4,7 @@ import { DataSet } from 'vis-data';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchGraph } from '../data/mockGraph';
 import { RootState, selectNode, setTimeRange } from '../store';
+import { trackGoldenPathStep } from '../telemetry';
 
 export function TimelinePane() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -42,6 +43,7 @@ export function TimelinePane() {
       if (centerDom) {
         centerDom.addEventListener('mouseup', onMouseUp);
       }
+      trackGoldenPathStep('timeline_pane_loaded', 'success');
     });
   }, [dispatch]);
 
