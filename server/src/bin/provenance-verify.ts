@@ -6,17 +6,17 @@
  * It recomputes hashes and verifies the Merkle tree to detect tampering.
  *
  * Usage:
- *   provenance-verify <manifest.json> [--evidence-dir <path>]
+ *   provenance-verify <manifest.tson> [--evidence-dir <path>]
  *
  * Examples:
- *   provenance-verify export-manifest.json
- *   provenance-verify export-manifest.json --evidence-dir ./evidence
+ *   provenance-verify export-manifest.tson
+ *   provenance-verify export-manifest.tson --evidence-dir ./evidence
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import type { ExportManifest, ManifestItem } from '../types/provenance-beta.js';
+import type { ExportManifest, ManifestItem } from '../types/provenance-beta.ts';
 
 interface VerificationResult {
   valid: boolean;
@@ -301,15 +301,15 @@ async function main() {
 Provenance Manifest Verification Tool
 
 Usage:
-  provenance-verify <manifest.json> [--evidence-dir <path>]
+  provenance-verify <manifest.tson> [--evidence-dir <path>]
 
 Options:
   --evidence-dir <path>   Directory containing evidence files to verify against hashes
   --help, -h              Show this help message
 
 Examples:
-  provenance-verify export-manifest.json
-  provenance-verify export-manifest.json --evidence-dir ./evidence
+  provenance-verify export-manifest.tson
+  provenance-verify export-manifest.tson --evidence-dir ./evidence
 
 Description:
   This tool verifies the integrity of exported provenance manifests.
