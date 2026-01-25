@@ -407,105 +407,15 @@
     "/Users/brianlong/Developer/summit/packages/workspace/src"
   ],
   "checkedFiles": 6690,
-  "currentViolations": 7865,
-  "existingViolations": 7865,
+  "currentViolations": 7843,
+  "existingViolations": 7843,
   "newViolations": 0,
   "errors": [
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/detectors/behavioral.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/detectors/network.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/detectors/network.ts",
-      "import": "../forest.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/forest.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/detectors/network.ts",
-      "import": "../forest.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/forest.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/detectors/spatial.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/detectors/temporal.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/detectors/traffic.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/detectors/traffic.ts",
-      "import": "../traffic-engine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/traffic-engine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/detectors/traffic.ts",
-      "import": "../traffic-types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/traffic-types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/traffic-engine.ts",
-      "import": "./traffic-types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/traffic-types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/api/featureFlags.ts",
-      "import": "../middleware/auth.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/auth.js"
-    },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/api-schemas/__tests__/schema-snapshot.test.ts",
       "import": "../../types/data-envelope.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app/makeServer.ts",
-      "import": "../graphql/schema/index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/schema/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app/makeServer.ts",
-      "import": "../graphql/resolvers/index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/resolvers/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app/makeServer.ts",
-      "import": "../graphql/authDirective.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/authDirective.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app/makeServer.ts",
-      "import": "../lib/auth.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/lib/auth.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
@@ -13412,48 +13322,6 @@
       "import": "../../config/logger.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/config/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/anomaly-detector.ts",
-      "import": "./diagnostic-snapshotter.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/diagnostic-snapshotter.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/anomaly-detector.ts",
-      "import": "./alerting-service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/alerting-service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/anomaly-detector.ts",
-      "import": "./correlation-engine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/correlation-engine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/comprehensive-telemetry.ts",
-      "import": "../observability/metrics.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/lib/observability/metrics.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/diagnostic-snapshotter.ts",
-      "import": "./comprehensive-telemetry.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/comprehensive-telemetry.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/diagnostic-snapshotter.ts",
-      "import": "../../config/telemetry.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/telemetry.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/diagnostic-snapshotter.ts",
-      "import": "../../config.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/lib/tokcount-enhanced.ts",
