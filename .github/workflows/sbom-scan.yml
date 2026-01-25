@@ -20,7 +20,7 @@ jobs:
           only-fixed: false
       - name: Upload SBOM artifact
         if: always()
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v6
         with:
           name: sbom-scan-results
           path: |

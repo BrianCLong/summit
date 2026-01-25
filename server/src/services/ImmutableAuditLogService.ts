@@ -294,7 +294,7 @@ export class ImmutableAuditLogService {
         
         if (await this.fileExists(logFilePath)) {
           const content = await fs.readFile(logFilePath, 'utf-8');
-          const lines = content.trim().split('\n').filter((line: string) => line.trim() !== '');
+          const lines = content.trim().split('\n').filter(line => line.trim() !== '');
           
           for (const line of lines) {
             try {
@@ -395,7 +395,7 @@ export class ImmutableAuditLogService {
         
         if (await this.fileExists(logFilePath)) {
           const content = await fs.readFile(logFilePath, 'utf-8');
-          const lines = content.trim().split('\n').filter((line: string) => line.trim() !== '');
+          const lines = content.trim().split('\n').filter(line => line.trim() !== '');
           
           for (const line of lines) {
             try {
@@ -605,7 +605,7 @@ export class ImmutableAuditLogService {
         
         if (await this.fileExists(logFilePath)) {
           const content = await fs.readFile(logFilePath, 'utf-8');
-          const lines = content.trim().split('\n').filter((line: string) => line.trim() !== '');
+          const lines = content.trim().split('\n').filter(line => line.trim() !== '');
           
           if (dateFolder === today) {
             stats.eventsToday = lines.length;
@@ -731,7 +731,7 @@ export class ImmutableAuditLogService {
  */
 export const auditLoggingMiddleware = (auditService: ImmutableAuditLogService) => {
   return async (req: any, res: any, next: any) => {
-    if (!(auditService as any).config.enabled) {
+    if (!auditService.config.enabled) {
       return next();
     }
 
@@ -741,7 +741,7 @@ export const auditLoggingMiddleware = (auditService: ImmutableAuditLogService) =
     res.on('finish', async () => {
       const duration = Date.now() - startTime;
       
-      const auditEvent: Omit<AuditEvent, 'id' | 'timestamp' | 'currentHash' | 'signature'> = {
+      const auditEvent = {
         eventType: 'API_CALL',
         userId: req.user?.id || 'anonymous',
         tenantId: req.headers['x-tenant-id'] || req.user?.tenantId || 'unknown',

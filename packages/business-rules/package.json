@@ -11,7 +11,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "lodash": "^4.17.23",
+    "lodash": "^4.17.21",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

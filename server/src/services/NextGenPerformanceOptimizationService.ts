@@ -165,10 +165,6 @@ export class NextGenPerformanceOptimizationService {
       metaOptimizationDepth: this.config.metaOptimizationDepth
     }, 'Next-gen optimization system initialized with full quantum and consciousness awareness');
   }
-
-  async getHealthStatus(): Promise<{ status: string }> {
-    return { status: 'ok' };
-  }
   
   /**
    * Consciousness-Aware Performance Optimization
@@ -1129,9 +1125,9 @@ export const nextGenPerformanceOptimizationMiddleware = (
       const startTime = Date.now();
       
       // Apply predictive performance optimization based on current request
-      if ((optimizationService as any).config.predictiveModeling) {
+      if (optimizationService.config.predictiveModeling) {
         // In a real system, this would use request pattern to predict optimization needs
-        await (optimizationService as any).warmPredictiveCache();
+        await optimizationService.warmPredictiveCache();
       }
       
       // Monitor performance consciousness
@@ -1147,7 +1143,7 @@ export const nextGenPerformanceOptimizationMiddleware = (
             tenantId: req.headers['x-tenant-id'] as string || 'global',
             operation: req.method + ' ' + req.path,
             resource: req.path,
-            status: responseTime > 2000 ? 'denied' : 'flagged', // Use valid status values
+            status: responseTime > 2000 ? 'critical' : 'warning',
             details: {
               responseTime,
               path: req.path,

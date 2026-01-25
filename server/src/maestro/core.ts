@@ -3,8 +3,6 @@ import { Task, Run, Artifact, TaskStatus } from './types';
 import { CostMeter } from './cost_meter';
 import { OpenAILLM } from './adapters/llm_openai';
 import { ResidencyGuard } from '../data-residency/residency-guard';
-import { AgentGovernanceService } from './governance-service.js';
-import logger from '../utils/logger.js';
 
 export interface MaestroConfig {
   defaultPlannerAgent: string;   // e.g. "openai:gpt-4.1"
@@ -95,104 +93,6 @@ export class Maestro {
           const guard = ResidencyGuard.getInstance();
           await guard.validateAgentExecution(tenantId);
       }
-
-      // === GOVERNANCE CHECK (Story 1.1) ===
-      // Check agent governance policies before execution
-      const governanceService = AgentGovernanceService.getInstance();
-      const maestroAgent = {
-        id: task.agent.id,
-        name: task.agent.name,
-        tenantId: tenantId || 'system',
-        capabilities: [], // Could be extracted from agent metadata
-        metadata: {
-          modelId: task.agent.modelId,
-          kind: task.agent.kind
-        },
-        status: 'idle' as const,
-        health: {
-          cpuUsage: 0,
-          memoryUsage: 0,
-          lastHeartbeat: new Date(),
-          activeTasks: 1,
-          errorRate: 0
-        },
-        templateId: task.agent.kind,
-        config: {}
-      };
-
-      const governanceDecision = await governanceService.evaluateAction(
-        maestroAgent,
-        task.kind, // action type: 'plan', 'action', 'subworkflow', 'graph.analysis'
-        {
-          taskId: task.id,
-          runId: task.runId,
-          description: task.description,
-          input: task.input,
-          tenantId
-        },
-        {
-          source: 'maestro_core_executeTask',
-          timestamp: now
-        }
-      );
-
-      // If governance check fails, fail the task
-      if (!governanceDecision.allowed) {
-        const errorMessage = `Governance policy violation: ${governanceDecision.reason}. ` +
-          `Risk score: ${governanceDecision.riskScore.toFixed(2)}. ` +
-          `Violations: ${governanceDecision.violations?.map(v => v.violationType).join(', ') || 'none'}`;
-
-        logger.error({
-          taskId: task.id,
-          runId: task.runId,
-          agentId: task.agent.id,
-          decision: governanceDecision
-        }, 'Task blocked by governance policy');
-
-        await this.ig.updateTask(task.id, {
-          status: 'failed',
-          errorMessage,
-          updatedAt: now
-        });
-
-        throw new Error(errorMessage);
-      }
-
-      // If requires approval, set task to pending_approval state (Story 1.3)
-      if (governanceDecision.requiredApprovals && governanceDecision.requiredApprovals > 0) {
-        logger.warn({
-          taskId: task.id,
-          runId: task.runId,
-          agentId: task.agent.id,
-          requiredApprovals: governanceDecision.requiredApprovals,
-          riskScore: governanceDecision.riskScore
-        }, 'Task requires human approval');
-
-        await this.ig.updateTask(task.id, {
-          status: 'pending_approval',
-          errorMessage: `Awaiting ${governanceDecision.requiredApprovals} approval(s). Risk score: ${governanceDecision.riskScore.toFixed(2)}`,
-          updatedAt: now
-        });
-
-        // Return task in pending_approval state - execution halts here
-        return {
-          task: {
-            ...task,
-            status: 'pending_approval' as TaskStatus,
-            errorMessage: `Awaiting ${governanceDecision.requiredApprovals} approval(s)`,
-            updatedAt: now
-          },
-          artifact: null
-        };
-      }
-
-      logger.info({
-        taskId: task.id,
-        runId: task.runId,
-        agentId: task.agent.id,
-        riskScore: governanceDecision.riskScore
-      }, 'Task passed governance checks, proceeding with execution');
-      // === END GOVERNANCE CHECK ===
 
       let result: string = '';
 

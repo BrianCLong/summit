@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { usageMeteringService } from '../services/UsageMeteringService.js';
-import { quotaService } from '../services/QuotaService.js';
+import UsageMeteringService from '../services/UsageMeteringService.js';
+import QuotaService from '../services/QuotaService.js';
 import logger from '../utils/logger.js';
 import { meteringEmitter } from '../metering/emitter.js';
 
@@ -23,42 +23,50 @@ export const usageMiddleware = async (req: Request, res: Response, next: NextFun
     // 1. Rate Limiting / Quota Check (Blocking)
     // Check if tenant has exceeded request quota
     try {
-        await quotaService.assert({
+        const quotaResult = await QuotaService.checkQuota({
             tenantId,
-            dimension: 'api.calls',
+            kind: 'external_api.requests',
             quantity: 1
         });
-    } catch (e: any) {
-        if (e.name === 'QuotaExceededException') {
-            return res.status(429).json({
+
+        if (!quotaResult.allowed) {
+             res.status(429).json({
                 error: 'Quota Exceeded',
-                message: e.message
+                message: quotaResult.reason
             });
+            return;
         }
+
+        // Add headers for quotas?
+        if (quotaResult.remaining !== undefined) {
+             res.setHeader('X-Quota-Remaining', quotaResult.remaining.toString());
+        }
+
+    } catch (e: any) {
         logger.error('Quota check failed in middleware', e);
         // Fail open
     }
 
     // 2. Usage Recording (Async / Non-blocking)
-    // Send event to metering system
-    const timestamp = new Date().toISOString();
-    usageMeteringService.record({
-        id: `usage_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    // We record after the response is finished to capture status code, or before?
+    // Usually before is safer for "attempts", after is better for "successful calls".
+    // Let's record "request attempted".
+
+    // We can fire and forget
+    UsageMeteringService.record({
         tenantId,
-        dimension: 'api.calls',
+        principalId: user.id,
+        principalKind: 'user', // or api_key
+        kind: 'external_api.requests',
         quantity: 1,
-        unit: 'request',
-        source: 'usageMiddleware',
+        unit: 'requests',
         metadata: {
             method,
             route,
-            ip: req.ip,
-            userId: user.id
-        },
-        occurredAt: timestamp,
-        recordedAt: timestamp
+            userAgent: req.get('user-agent')
+        }
     }).catch(err => {
-        logger.error('Failed to record usage', err);
+        logger.error('Failed to record API usage', err);
     });
 
     meteringEmitter.emitActiveSeat({

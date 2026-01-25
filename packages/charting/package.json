@@ -20,7 +20,7 @@
     "victory": "^37.1.1",
     "@visx/visx": "^3.10.2",
     "@intelgraph/visualization": "workspace:*",
-    "lodash": "^4.17.23"
+    "lodash": "^4.17.21"
   },
   "peerDependencies": {
     "react": "^18.0.0",

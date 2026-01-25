@@ -11,19 +11,7 @@ import logger from '../utils/logger.js';
 import { trackError } from '../monitoring/middleware.js';
 import { EnhancedGovernanceService } from './EnhancedGovernanceRBACService.js';
 import { NextGenPerformanceOptimizationService } from './NextGenPerformanceOptimizationService.js';
-
-// Stub class for MultiAgentCollaborationManager - actual module not yet implemented
-class MultiAgentCollaborationManager {
-  async initialize(): Promise<void> {
-    logger.debug('MultiAgentCollaborationManager stub initialized');
-  }
-  async getHealthStatus(): Promise<{
-    status: 'healthy' | 'degraded' | 'unhealthy';
-    details: Record<string, unknown>;
-  }> {
-    return { status: 'healthy', details: { stub: true } };
-  }
-}
+import { MultiAgentCollaborationManager } from './MultiAgentCollaborationWorkflows.js';
 
 interface ObservabilityMetric {
   id: string;
@@ -151,8 +139,8 @@ export class AdvancedObservabilityMetaMonitoringService {
     this.metricsStore = new Map();
     this.consciousnessLevel = 8.0; // High consciousness for monitoring
     this.quantumSafetyLevel = 0.95; // Quantum-ready
-    this.governedService = governedService || new (EnhancedGovernanceService as any)();
-    this.perfOptService = perfOptService || new (NextGenPerformanceOptimizationService as any)();
+    this.governedService = governedService || new EnhancedGovernanceService();
+    this.perfOptService = perfOptService || new NextGenPerformanceOptimizationService();
     this.collaborationManager = collaborationManager || new MultiAgentCollaborationManager();
     
     logger.info({
@@ -824,7 +812,7 @@ export class AdvancedObservabilityMetaMonitoringService {
  */
 export const advancedObservabilityMiddleware = (observabilityService: AdvancedObservabilityMetaMonitoringService) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (!(observabilityService as any).config.enabled) {
+    if (!observabilityService.config.enabled) {
       return next();
     }
     
@@ -870,15 +858,15 @@ export const advancedObservabilityMiddleware = (observabilityService: AdvancedOb
       });
       
       // Add quantum-safe headers if enabled
-      if ((observabilityService as any).config.quantumSafeMetrics) {
+      if (observabilityService.config.quantumSafeMetrics) {
         res.setHeader('X-Quantum-Safe', 'true');
         res.setHeader('X-Post-Quantum-Ready', 'true');
       }
       
       // Add consciousness awareness headers if enabled
-      if ((observabilityService as any).config.consciousnessAwareMonitoring) {
+      if (observabilityService.config.consciousnessAwareMonitoring) {
         res.setHeader('X-Consciousness-Aware', 'true');
-        res.setHeader('X-Consciousness-Level', (observabilityService as any).consciousnessLevel.toString());
+        res.setHeader('X-Consciousness-Level', observabilityService.consciousnessLevel.toString());
       }
       
       next();
@@ -899,7 +887,7 @@ export const advancedObservabilityMiddleware = (observabilityService: AdvancedOb
 export const registerObservabilityRoutes = (app: any, observabilityService: AdvancedObservabilityMetaMonitoringService) => {
   app.get('/api/v1/observability/dashboard', async (req: Request, res: Response) => {
     try {
-      const dashboardData = await (observabilityService as any).generateDashboardData();
+      const dashboardData = await observabilityService.generateDashboardData();
       res.json(dashboardData);
     } catch (error) {
       logger.error({

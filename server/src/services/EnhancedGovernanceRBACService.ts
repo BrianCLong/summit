@@ -109,14 +109,6 @@ export class EnhancedGovernanceService {
     };
   }
 
-  async initialize(): Promise<void> {
-    this.logger.info('Enhanced Governance Service initialized');
-  }
-
-  async healthCheck(): Promise<{ status: string }> {
-    return { status: 'ok' };
-  }
-
   /**
    * Extract governance context from request headers with user context
    */
@@ -902,7 +894,7 @@ export class EnhancedGovernanceService {
  * Initialize the enhanced governance service
  */
 export const initializeEnhancedGovernance = (db: Pool, warrantService: WarrantService) => {
-  const logger = (pino as any)();
+  const logger = pino();
   const service = new EnhancedGovernanceService(db, warrantService, logger);
   
   return {

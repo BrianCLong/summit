@@ -61,8 +61,7 @@ import { WorkbenchShell } from '@/workbench/shell/WorkbenchLayout'
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
 import { AuthProvider } from '@/contexts/AuthContext'
-import { FeatureFlagProvider } from '@/contexts/FeatureFlagContext'
-import { ErrorBoundary, NotFound, DataFetchErrorBoundary, MutationErrorBoundary } from '@/components/error'
+import { ErrorBoundary, NotFound } from '@/components/error'
 import Explain from '@/components/Explain'
 import { CommandStatusProvider } from '@/features/internal-command/CommandStatusProvider'
 import { DemoIndicator } from '@/components/common/DemoIndicator'
@@ -91,17 +90,10 @@ function App() {
       <SocketProvider>
         <TooltipProvider>
           <AuthProvider>
-            <FeatureFlagProvider>
-              <SearchProvider>
-                <CommandStatusProvider>
-                  <Router>
-                    <ErrorBoundary
-                      enableRetry={true}
-                      maxRetries={3}
-                      retryDelay={2000}
-                      severity="critical"
-                      boundaryName="app_root"
-                    >
+            <SearchProvider>
+              <CommandStatusProvider>
+                <Router>
+                  <ErrorBoundary>
                   <React.Suspense
                     fallback={
                       <div className="flex h-screen items-center justify-center">
@@ -148,41 +140,22 @@ function App() {
                     {/* Protected routes with layout */}
                     <Route path="/" element={<Layout />}>
                       <Route index element={<HomePage />} />
-                      <Route
-                        path="explore"
-                        element={
-                          <DataFetchErrorBoundary dataSourceName="Explore">
-                            <ExplorePage />
-                          </DataFetchErrorBoundary>
-                        }
-                      />
+                      <Route path="explore" element={<ExplorePage />} />
 
-                      {/* Tri-Pane Analysis - Wrapped with DataFetchErrorBoundary */}
+                      {/* Tri-Pane Analysis */}
                       <Route
                         path="analysis/tri-pane"
-                        element={
-                          <DataFetchErrorBoundary dataSourceName="Tri-Pane Analysis">
-                            <TriPanePage />
-                          </DataFetchErrorBoundary>
-                        }
+                        element={<TriPanePage />}
                       />
                       <Route
                         path="geoint"
-                        element={
-                          <DataFetchErrorBoundary dataSourceName="GeoInt">
-                            <GeoIntPane />
-                          </DataFetchErrorBoundary>
-                        }
+                        element={<GeoIntPane />}
                       />
 
                       {/* Narrative Intelligence */}
                       <Route
                         path="analysis/narrative"
-                        element={
-                          <DataFetchErrorBoundary dataSourceName="Narrative Intelligence">
-                            <NarrativeIntelligencePage />
-                          </DataFetchErrorBoundary>
-                        }
+                        element={<NarrativeIntelligencePage />}
                       />
 
                       {/* Alerts */}
@@ -193,55 +166,28 @@ function App() {
                       <Route path="cases" element={<CasesPage />} />
                       <Route path="cases/:id" element={<CaseDetailPage />} />
 
-                      {/* Dashboards - Wrapped with DataFetchErrorBoundary */}
+                      {/* Dashboards */}
                       <Route
                         path="dashboards/command-center"
-                        element={
-                          <DataFetchErrorBoundary dataSourceName="Command Center">
-                            <CommandCenterDashboard />
-                          </DataFetchErrorBoundary>
-                        }
+                        element={<CommandCenterDashboard />}
                       />
                       <Route
                         path="dashboards/supply-chain"
-                        element={
-                          <DataFetchErrorBoundary dataSourceName="Supply Chain">
-                            <SupplyChainDashboard />
-                          </DataFetchErrorBoundary>
-                        }
+                        element={<SupplyChainDashboard />}
                       />
                       <Route
                         path="dashboards/advanced"
-                        element={
-                          <DataFetchErrorBoundary dataSourceName="Advanced Dashboard">
-                            <AdvancedDashboardPage />
-                          </DataFetchErrorBoundary>
-                        }
+                        element={<AdvancedDashboardPage />}
                       />
                       <Route
                         path="dashboards/usage-cost"
-                        element={
-                          <DataFetchErrorBoundary dataSourceName="Usage & Cost">
-                            <UsageCostDashboard />
-                          </DataFetchErrorBoundary>
-                        }
+                        element={<UsageCostDashboard />}
                       />
                       <Route
                         path="internal/command"
-                        element={
-                          <DataFetchErrorBoundary dataSourceName="Internal Command Dashboard">
-                            <InternalCommandDashboard />
-                          </DataFetchErrorBoundary>
-                        }
+                        element={<InternalCommandDashboard />}
                       />
-                      <Route
-                        path="mission-control"
-                        element={
-                          <DataFetchErrorBoundary dataSourceName="Mission Control">
-                            <MissionControlPage />
-                          </DataFetchErrorBoundary>
-                        }
-                      />
+                      <Route path="mission-control" element={<MissionControlPage />} />
 
                       {/* Data & Models */}
                       <Route
@@ -251,31 +197,10 @@ function App() {
                       <Route path="models" element={<ModelsPage />} />
                       <Route path="reports" element={<ReportsPage />} />
 
-                      {/* Admin - Wrapped with MutationErrorBoundary for critical operations */}
-                      <Route
-                        path="admin/*"
-                        element={
-                          <MutationErrorBoundary operationName="admin operation">
-                            <AdminPage />
-                          </MutationErrorBoundary>
-                        }
-                      />
-                      <Route
-                        path="admin/consistency"
-                        element={
-                          <MutationErrorBoundary operationName="consistency check">
-                            <ConsistencyDashboard />
-                          </MutationErrorBoundary>
-                        }
-                      />
-                      <Route
-                        path="admin/feature-flags"
-                        element={
-                          <MutationErrorBoundary operationName="feature flag update">
-                            <FeatureFlagsPage />
-                          </MutationErrorBoundary>
-                        }
-                      />
+                      {/* Admin */}
+                      <Route path="admin/*" element={<AdminPage />} />
+                      <Route path="admin/consistency" element={<ConsistencyDashboard />} />
+                      <Route path="admin/feature-flags" element={<FeatureFlagsPage />} />
 
                       {/* Support */}
                       <Route path="help" element={<HelpPage />} />
@@ -301,11 +226,10 @@ function App() {
                     </Route>
                   </Routes>
                   </React.Suspense>
-                  </ErrorBoundary>
-                </Router>
+                </ErrorBoundary>
+              </Router>
               </CommandStatusProvider>
             </SearchProvider>
-          </FeatureFlagProvider>
           </AuthProvider>
         </TooltipProvider>
       </SocketProvider>
