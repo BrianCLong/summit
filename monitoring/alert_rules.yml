@@ -117,6 +117,17 @@ groups:
           summary: 'Large WebSocket connection drop'
           description: '{{ $value }} WebSocket connections dropped in the last 5 minutes'
 
+      # High WebSocket connection drop rate (Relative)
+      - alert: HighWebSocketDropRate
+        expr: |
+          (decrease(websocket_connections_active[5m]) / websocket_connections_active) > 0.2
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'High WebSocket drop rate (>20%)'
+          description: 'More than 20% of WebSocket connections dropped in the last 5 minutes'
+
       # Disk space alerts
       - alert: LowDiskSpace
         expr: |
