@@ -407,142 +407,10 @@
     "/Users/brianlong/Developer/summit/packages/workspace/src"
   ],
   "checkedFiles": 6690,
-  "currentViolations": 8088,
-  "existingViolations": 8088,
+  "currentViolations": 8065,
+  "existingViolations": 8065,
   "newViolations": 0,
   "errors": [
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/policy/PolicyHooks.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/policy/PolicyHooks.ts",
-      "import": "../audit/AgentAuditLogger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/audit/AgentAuditLogger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/swarm/ConsensusEngine.ts",
-      "import": "./GossipProtocol.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/swarm/GossipProtocol.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/swarm/ConsensusEngine.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/swarm/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/swarm/ConsensusEngine.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/swarm/GossipProtocol.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/swarm/GossipProtocol.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/swarm/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/swarm/GossipProtocol.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/trust/TrustScoringService.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/trust/TrustScoringService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/trust/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/trust/index.ts",
-      "import": "./TrustScoringService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/trust/TrustScoringService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/trust/index.ts",
-      "import": "./TrustScoringService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/trust/TrustScoringService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/trust/index.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/trust/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./engines/OCREngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/engines/OCREngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./engines/ObjectDetectionEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/engines/ObjectDetectionEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./engines/SpeechToTextEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/engines/SpeechToTextEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./engines/FaceDetectionEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/engines/FaceDetectionEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./engines/TextAnalysisEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/engines/TextAnalysisEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./services/EmbeddingService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/services/EmbeddingService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "../services/MediaUploadService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/MediaUploadService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./engines/VideoFrameExtractor.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/engines/VideoFrameExtractor.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/types.js"
-    },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/__tests__/copilot.e2e.test.ts",
       "import": "../copilot.service.js",
@@ -1094,12 +962,6 @@
       "import": "../types.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/ai/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/types.ts",
-      "import": "../services/MediaUploadService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/MediaUploadService.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/analysis/GraphAnalysisService.ts",
