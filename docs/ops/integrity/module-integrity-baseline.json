@@ -407,161 +407,11 @@
     "/Users/brianlong/Developer/summit/packages/workspace/src"
   ],
   "checkedFiles": 6690,
-  "currentViolations": 8092,
-  "existingViolations": 8092,
+  "currentViolations": 8065,
+  "existingViolations": 8065,
   "newViolations": 0,
   "errors": [
     {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/guardrails.service.ts",
-      "import": "../../security/llm-guardrails.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/security/llm-guardrails.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/nl-query.service.ts",
-      "import": "../nl-graph-query/query-patterns.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/query-patterns.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/nl-query.service.ts",
-      "import": "../nl-graph-query/cost-estimator.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/cost-estimator.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/nl-query.service.ts",
-      "import": "../nl-graph-query/validator.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/validator.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/nl-query.service.ts",
-      "import": "../nl-graph-query/explainer.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/explainer.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/sandbox-executor.service.ts",
-      "import": "../nl-graph-query/cost-estimator.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/cost-estimator.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/sandbox-executor.service.ts",
-      "import": "../nl-graph-query/validator.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/validator.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/engines/FaceDetectionEngine.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/engines/OCREngine.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/engines/ObjectDetectionEngine.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/engines/SpeechToTextEngine.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/engines/TextAnalysisEngine.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/BehavioralAnomalyService.ts",
-      "import": "../../governance/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/BehavioralAnomalyService.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/BehavioralAnomalyService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/BehavioralAnomalyService.ts",
-      "import": "./llm/index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/llm/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/PolicySuggestionService.ts",
-      "import": "../../governance/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/PolicySuggestionService.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/PolicySuggestionService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/PolicySuggestionService.ts",
-      "import": "./llm/index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/llm/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/VerdictExplainerService.ts",
-      "import": "../../governance/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/VerdictExplainerService.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/VerdictExplainerService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/VerdictExplainerService.ts",
-      "import": "./llm/index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/llm/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/index.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/types.js"
-    },
-    {
       "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/index.ts",
       "import": "./PolicySuggestionService.js",
       "kind": "missing",
@@ -596,12 +446,6 @@
       "import": "./BehavioralAnomalyService.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/BehavioralAnomalyService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/index.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/types.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/llm/GovernanceLLMClient.ts",
@@ -644,12 +488,6 @@
       "import": "./GovernanceLLMClient.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/llm/GovernanceLLMClient.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/types.ts",
-      "import": "../../governance/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/governance/types.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/__tests__/explainer.test.ts",

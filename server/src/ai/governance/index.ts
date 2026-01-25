@@ -9,7 +9,7 @@
  */
 
 // Types
-export * from './types.js';
+export * from './types.ts';
 
 // Services
 export {
@@ -31,7 +31,7 @@ export {
 import { PolicySuggestionService, createPolicySuggestionService } from './PolicySuggestionService.js';
 import { VerdictExplainerService, createVerdictExplainerService } from './VerdictExplainerService.js';
 import { BehavioralAnomalyService, createBehavioralAnomalyService } from './BehavioralAnomalyService.js';
-import { AIGovernanceConfig } from './types.js';
+import { AIGovernanceConfig } from './types.ts';
 
 /**
  * Unified AI Governance Service
