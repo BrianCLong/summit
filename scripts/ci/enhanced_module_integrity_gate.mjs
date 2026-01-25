@@ -57,29 +57,33 @@ class ModuleIntegrityGate {
   }
 
   resolveImport(fromFile, importPath) {
+    // Only handle relative imports (./ or ../)
     if (!importPath.startsWith('./') && !importPath.startsWith('../')) {
       return null;
     }
 
     const dir = path.dirname(fromFile);
     const resolved = path.resolve(dir, importPath);
-    
+
     return resolved;
   }
 
   checkPathExists(resolvedPath) {
+    // Check if the exact file exists
     if (fs.existsSync(resolvedPath)) {
       return { exists: true, path: resolvedPath, kind: 'exact' };
     }
-    
+
+    // Check if file exists with different case
     const dir = path.dirname(resolvedPath);
     const basename = path.basename(resolvedPath);
-    
+
     if (fs.existsSync(dir)) {
       const dirContents = fs.readdirSync(dir, { withFileTypes: true });
-      
+
+      // Look for file with different case
       for (const entry of dirContents) {
-        if (entry.name.toLowerCase() === basename.toLowerCase() && 
+        if (entry.name.toLowerCase() === basename.toLowerCase() &&
             entry.name !== basename) {
           return {
             exists: true,
@@ -88,7 +92,8 @@ class ModuleIntegrityGate {
           };
         }
       }
-      
+
+      // Check for directory index files (index.js, index.ts, etc.)
       if (fs.statSync(dir).isDirectory()) {
         for (const ext of ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs', '.json']) {
           const indexPath = path.join(resolvedPath, `index${ext}`);
@@ -98,7 +103,7 @@ class ModuleIntegrityGate {
         }
       }
     }
-    
+
     return { exists: false, path: resolvedPath, kind: 'missing' };
   }
 
@@ -106,15 +111,15 @@ class ModuleIntegrityGate {
     try {
       const content = fs.readFileSync(filePath, 'utf8');
       const matches = [...content.matchAll(IMPORT_EXPORT_REGEX)];
-      
+
       for (const match of matches) {
-        const importPath = match[2]; // Capture group 2 contains the import path
-        
+        const importPath = match[2]; // Second capture group contains the import path
+
         const resolved = this.resolveImport(filePath, importPath);
         if (!resolved) continue; // Skip non-relative imports
-        
+
         const checkResult = this.checkPathExists(resolved);
-        
+
         if (!checkResult.exists || checkResult.kind === 'case_mismatch') {
           const errorObj = {
             file: filePath,
@@ -122,7 +127,7 @@ class ModuleIntegrityGate {
             kind: checkResult.kind,
             resolved: checkResult.path
           };
-          
+
           this.currentErrors.push(errorObj);
         }
       }
