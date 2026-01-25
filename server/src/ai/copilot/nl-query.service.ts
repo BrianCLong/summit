@@ -21,7 +21,7 @@ import {
   type QueryPreview,
   type QueryRefinement,
   type QueryCostEstimate,
-} from './types.js';
+} from './types.ts';
 import {
   generateFromPattern,
   queryPatterns,
@@ -37,7 +37,7 @@ import {
   isReadOnlyQuery,
 } from '../nl-graph-query/validator.js';
 import { explainQuery, summarizeQuery } from '../nl-graph-query/explainer.js';
-import type { SchemaContext } from '../nl-graph-query/types.js';
+import type { SchemaContext } from '../nl-graph-query/types.ts';
 
 const logger = (pino as any)({ name: 'nl-query-service' });
 

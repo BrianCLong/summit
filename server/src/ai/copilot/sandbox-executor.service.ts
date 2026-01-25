@@ -18,7 +18,7 @@ import {
   type QueryCostEstimate,
   type QueryRefinement,
   QueryCostEstimateSchema,
-} from './types.js';
+} from './types.ts';
 import { estimateQueryCost } from '../nl-graph-query/cost-estimator.js';
 import { validateCypher, isReadOnlyQuery } from '../nl-graph-query/validator.js';
 

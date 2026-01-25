@@ -23,7 +23,7 @@ import {
   type RiskLevel,
   CopilotRefusalSchema,
   RiskyPromptLogSchema,
-} from './types.js';
+} from './types.ts';
 import { PromptInjectionDetector } from '../../security/llm-guardrails.js';
 
 const logger = (pino as any)({ name: 'guardrails-service' });
