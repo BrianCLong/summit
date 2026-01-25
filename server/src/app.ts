@@ -14,6 +14,7 @@ import { auditLogger } from './middleware/audit-logger.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
+import { apiVersionMiddleware } from './middleware/apiVersion.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
@@ -44,6 +45,9 @@ import { mnemosyneRouter } from './routes/mnemosyne.js';
 import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
+import billingRouter from './routes/billing.js';
+import erAdminRouter from './routes/er_admin.js';
+// import { startBillingExportSchedule } from './billing/sink.js'; // Moved to API trigger
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -58,6 +62,9 @@ export const createApp = async () => {
 
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
+
+  // API Versioning
+  app.use(apiVersionMiddleware);
 
   app.use(helmet());
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
@@ -152,6 +159,11 @@ export const createApp = async () => {
   app.use('/api/necromancer', necromancerRouter);
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
+
+  // Admin Routes for Sprint 31 Triggers
+  app.use('/admin/billing', billingRouter);
+  app.use('/admin/er', erAdminRouter);
+
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {
@@ -314,6 +326,8 @@ export const createApp = async () => {
       // Just referencing it to prevent tree-shaking/unused variable lint errors if any,
       // though import side-effects usually suffice.
   }
+
+  // Billing Export Schedule moved to external trigger via /admin/billing/trigger-export
 
   logger.info('Anomaly detector activated.');
 
