@@ -407,147 +407,15 @@
     "/Users/brianlong/Developer/summit/packages/workspace/src"
   ],
   "checkedFiles": 6690,
-  "currentViolations": 7717,
-  "existingViolations": 7717,
+  "currentViolations": 7695,
+  "existingViolations": 7695,
   "newViolations": 0,
   "errors": [
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/authorization.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/auth/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/github-actions-oidc.ts",
-      "import": "../config/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/multi-tenant-rbac.ts",
-      "import": "../config/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/sso/SSOService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/auth/sso/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/sso/SSOService.ts",
-      "import": "./providers/LocalStubProvider.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/auth/sso/providers/LocalStubProvider.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/sso/SSOService.ts",
-      "import": "../../services/AuthService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/AuthService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/sso/SSOService.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/sso/SSOService.ts",
-      "import": "../../provenance/ledger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/provenance/ledger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/sso/__tests__/sso.test.ts",
-      "import": "../SSOService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/auth/sso/SSOService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/sso/providers/LocalStubProvider.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/auth/sso/types.js"
-    },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/auth/webauthn/middleware.ts",
       "import": "../../config.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/config.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth-sso/SSOService.ts",
-      "import": "../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth-sso/SSOService.ts",
-      "import": "../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth-sso/SSOService.ts",
-      "import": "./SSOProvider.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/auth-sso/SSOProvider.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth-sso/SSOService.ts",
-      "import": "../services/AuthService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/AuthService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth-sso/__tests__/SSOService.test.ts",
-      "import": "../SSOService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/auth-sso/SSOService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth-sso/__tests__/SSOService.test.ts",
-      "import": "../SSOProvider.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/auth-sso/SSOProvider.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/backup/BackupManager.ts",
-      "import": "./BackupService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/backup/BackupService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/backup/BackupManager.ts",
-      "import": "../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/backup/BackupService.ts",
-      "import": "../cache/redis.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/cache/redis.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/backup/BackupService.ts",
-      "import": "../config/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/backup/BackupService.ts",
-      "import": "../db/neo4j.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/db/neo4j.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/backup/BackupService.ts",
-      "import": "../utils/metrics.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/metrics.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/billing/BillingJobService.ts",
