@@ -406,131 +406,11 @@
     "/Users/brianlong/Developer/summit/packages/work-graph/src",
     "/Users/brianlong/Developer/summit/packages/workspace/src"
   ],
-  "checkedFiles": 6689,
-  "currentViolations": 8145,
-  "existingViolations": 8145,
+  "checkedFiles": 6690,
+  "currentViolations": 8128,
+  "existingViolations": 8128,
   "newViolations": 0,
   "errors": [
-    {
-      "file": "/Users/brianlong/Developer/summit/client/src/features/export/index.ts",
-      "import": "./ExportCaseDialog.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/client/src/features/export/ExportCaseDialog.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/client/src/features/nlq/NlqModal.test.tsx",
-      "import": "./NlqModal.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/client/src/features/nlq/NlqModal.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/client/src/features/nlq/index.ts",
-      "import": "./NlqModal.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/client/src/features/nlq/NlqModal.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/policy/PolicyHooks.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/policy/PolicyHooks.ts",
-      "import": "../audit/AgentAuditLogger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/audit/AgentAuditLogger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/swarm/ConsensusEngine.ts",
-      "import": "./GossipProtocol.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/swarm/GossipProtocol.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/swarm/ConsensusEngine.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/swarm/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/swarm/ConsensusEngine.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/swarm/GossipProtocol.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/swarm/GossipProtocol.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/swarm/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/swarm/GossipProtocol.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/trust/TrustScoringService.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/trust/TrustScoringService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/trust/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/trust/index.ts",
-      "import": "./TrustScoringService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/trust/TrustScoringService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/trust/index.ts",
-      "import": "./TrustScoringService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/trust/TrustScoringService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/trust/index.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/trust/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./engines/OCREngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/engines/OCREngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./engines/ObjectDetectionEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/engines/ObjectDetectionEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./engines/SpeechToTextEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/engines/SpeechToTextEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./engines/FaceDetectionEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/engines/FaceDetectionEngine.js"
-    },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
       "import": "./engines/TextAnalysisEngine.js",
@@ -26770,6 +26650,24 @@
       "resolved": "/Users/brianlong/Developer/summit/server/src/security/airgap-vuln-manager.js"
     },
     {
+      "file": "/Users/brianlong/Developer/summit/server/src/security/__tests__/airgap-vuln-manager.test.ts",
+      "import": "../airgap-vuln-manager.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/security/airgap-vuln-manager.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/security/__tests__/airgap-vuln-manager.test.ts",
+      "import": "../airgap-vuln-manager.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/security/airgap-vuln-manager.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/security/__tests__/airgap-vuln-manager.test.ts",
+      "import": "../airgap-vuln-manager.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/security/airgap-vuln-manager.js"
+    },
+    {
       "file": "/Users/brianlong/Developer/summit/server/src/security/__tests__/http-shield.test.ts",
       "import": "../http-shield.js",
       "kind": "missing",
@@ -49282,5 +49180,5 @@
       "resolved": "/Users/brianlong/Developer/summit/packages/work-graph/src/schema/edges.js"
     }
   ],
-  "timestamp": "2026-01-24"
+  "timestamp": "2026-01-25"
 }

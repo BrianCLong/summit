@@ -679,7 +679,7 @@ jest.mock('prom-client', () => {
   }
   class MockRegistry {
     constructor() {
-      this.metrics = {};
+      this._metrics = {};
     }
     registerMetric() { }
     getSingleMetric() { return null; }
