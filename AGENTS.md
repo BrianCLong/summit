@@ -89,6 +89,13 @@ the implementation is considered incomplete.
 
 Violations are treated as build-blocking defects, not stylistic issues.
 
+## Lineage & Resilience Mandates (Automation Turn #6)
+
+- **Replayable Lineage**: All lineage-emitting events must carry stable, deterministic IDs (e.g., `job_id + step_id`).
+- **Deterministic IDs**: Use stable identifiers for all provenance events to ensure replayability.
+- **Idempotency**: Ingestion pipelines and ledger writers must handle duplicate events gracefully (`ON CONFLICT DO NOTHING`).
+- **Recoverability**: Lineage must be treated as critical state. Agents must ensure their components support full graph reconstruction from logs/ledger.
+
 ## Project Structure & Module Organization
 
 ## Project Overview
