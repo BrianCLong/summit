@@ -25,6 +25,8 @@ export class PriorArtService {
     try {
       // Use vector index for similarity search
       // Note: Assuming 'patent_embedding_index' exists as defined in schema.ts
+      // TODO: Migrate to Cypher 25 for Neo4j 2025.01+
+      // db.index.vector.queryNodes is deprecated. Use native VECTOR type and vector search.
       const result = await session.run(`
         CALL db.index.vector.queryNodes('patent_embedding_index', $limit, $embedding)
         YIELD node, score
