@@ -1,124 +1,9 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`design system snapshots > matches snapshot: DefaultTabs 1`] = `
-<DocumentFragment>
-  <div
-    data-orientation="horizontal"
-    dir="ltr"
-  >
-    <div
-      aria-orientation="horizontal"
-      class="h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground grid w-[360px] grid-cols-3"
-      data-orientation="horizontal"
-      role="tablist"
-      style="outline: none;"
-      tabindex="0"
-    >
-      <button
-        aria-controls="radix-_r_0_-content-overview"
-        aria-selected="true"
-        class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
-        data-orientation="horizontal"
-        data-radix-collection-item=""
-        data-state="active"
-        id="radix-_r_0_-trigger-overview"
-        role="tab"
-        tabindex="-1"
-        type="button"
-      >
-        Overview
-      </button>
-      <button
-        aria-controls="radix-_r_0_-content-signals"
-        aria-selected="false"
-        class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
-        data-orientation="horizontal"
-        data-radix-collection-item=""
-        data-state="inactive"
-        id="radix-_r_0_-trigger-signals"
-        role="tab"
-        tabindex="-1"
-        type="button"
-      >
-        Signals
-      </button>
-      <button
-        aria-controls="radix-_r_0_-content-audit"
-        aria-selected="false"
-        class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
-        data-orientation="horizontal"
-        data-radix-collection-item=""
-        data-state="inactive"
-        id="radix-_r_0_-trigger-audit"
-        role="tab"
-        tabindex="-1"
-        type="button"
-      >
-        Audit
-      </button>
-    </div>
-    <div
-      aria-labelledby="radix-_r_0_-trigger-overview"
-      class="mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-      data-orientation="horizontal"
-      data-state="active"
-      id="radix-_r_0_-content-overview"
-      role="tabpanel"
-      style="animation-duration: 0s;"
-      tabindex="0"
-    >
-      <div
-        class="rounded-lg border bg-card text-card-foreground shadow-sm"
-        style="margin-top: var(--ds-space-sm);"
-      >
-        <div
-          class="flex flex-col space-y-1.5 p-6"
-        >
-          <h3
-            class="text-2xl font-semibold leading-none tracking-tight"
-          >
-            Activity summary
-          </h3>
-        </div>
-        <div
-          class="p-6 pt-0"
-        >
-          <p
-            class="text-sm text-muted-foreground"
-          >
-            Analysts completed 12 reviews in the last hour.
-          </p>
-        </div>
-      </div>
-    </div>
-    <div
-      aria-labelledby="radix-_r_0_-trigger-signals"
-      class="mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-      data-orientation="horizontal"
-      data-state="inactive"
-      hidden=""
-      id="radix-_r_0_-content-signals"
-      role="tabpanel"
-      tabindex="0"
-    />
-    <div
-      aria-labelledby="radix-_r_0_-trigger-audit"
-      class="mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-      data-orientation="horizontal"
-      data-state="inactive"
-      hidden=""
-      id="radix-_r_0_-content-audit"
-      role="tabpanel"
-      tabindex="0"
-    />
-  </div>
-</DocumentFragment>
-`;
-
 exports[`design system snapshots > matches snapshot: Primary 1`] = `
 <DocumentFragment>
   <button
-    class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+    class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
   >
     Primary action
   </button>
@@ -131,23 +16,23 @@ exports[`design system snapshots > matches snapshot: Sizes 1`] = `
     style="display: flex; gap: var(--ds-space-sm); padding: var(--ds-space-md);"
   >
     <button
-      class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-3"
+      class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-3"
     >
       Small
     </button>
     <button
-      class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+      class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
     >
       Default
     </button>
     <button
-      class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-md px-8"
+      class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-md px-8"
     >
       Large
     </button>
     <button
       aria-label="Icon button"
-      class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 w-10"
+      class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 w-10"
     >
       🚀
     </button>
