@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-27T17:55:00Z",
-  "revision_note": "Fixed canonical CI serializer codepoint ordering",
+  "last_updated": "2026-01-27T21:20:00Z",
+  "revision_note": "Notion integration readiness verified; setup and validation wired",
   "initiatives": [
     {
       "id": "A",

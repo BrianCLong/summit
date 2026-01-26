@@ -24,6 +24,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: notion-issue-migration-fix
+    version: v1
+    path: prompts/integrations/notion-issue-migration-fix.md
+    sha256: 51aa613e22286ce28308f0b67ade969829803d3681045b8be335ea5bb817c50c
+    description: Wire Notion issue migration verification and setup guidance.
+    scope:
+      paths:
+        - docs/integrations/
+        - scripts/verify-integrations.ts
+        - docs/roadmap/STATUS.json
+        - prompts/integrations/
+        - prompts/registry.yaml
+        - agents/examples/
+        - .env.example
+      domains:
+        - integrations
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: agent-native-loop-n4
     version: v1
     path: prompts/governance/agent-native-loop-n4.md

@@ -20,22 +20,22 @@ Summit's integration platform connects 12 enterprise PM/collaboration tools into
 
 ### Work Management (6 platforms)
 
-| Platform | Status | Setup Guide | n8n Workflow |
-|----------|--------|-------------|---------------|
-| **Linear** | ✅ Complete | [SETUP_LINEAR.md](SETUP_LINEAR.md) | [linear-sync.json](n8n-workflows/linear-sync.json) |
-| **Jira** | ✅ Complete | [SETUP_JIRA.md](SETUP_JIRA.md) | Pending |
-| **Asana** | ✅ Complete | [SETUP_ASANA.md](SETUP_ASANA.md) | [asana-sync.json](n8n-workflows/asana-sync.json) |
-| **ClickUp** | ✅ Complete | [SETUP_CLICKUP.md](SETUP_CLICKUP.md) | Pending |
-| **Monday.com** | ✅ Complete | [SETUP_MONDAY.md](SETUP_MONDAY.md) | Pending |
-| **Notion** | 🔄 Blocked | [SETUP_NOTION.md](SETUP_NOTION.md) | Pending |
+| Platform       | Status      | Setup Guide                          | n8n Workflow                                       |
+| -------------- | ----------- | ------------------------------------ | -------------------------------------------------- |
+| **Linear**     | ✅ Complete | [SETUP_LINEAR.md](SETUP_LINEAR.md)   | [linear-sync.json](n8n-workflows/linear-sync.json) |
+| **Jira**       | ✅ Complete | [SETUP_JIRA.md](SETUP_JIRA.md)       | Pending                                            |
+| **Asana**      | ✅ Complete | [SETUP_ASANA.md](SETUP_ASANA.md)     | [asana-sync.json](n8n-workflows/asana-sync.json)   |
+| **ClickUp**    | ✅ Complete | [SETUP_CLICKUP.md](SETUP_CLICKUP.md) | Pending                                            |
+| **Monday.com** | ✅ Complete | [SETUP_MONDAY.md](SETUP_MONDAY.md)   | Pending                                            |
+| **Notion**     | ✅ Ready    | [SETUP_NOTION.md](SETUP_NOTION.md)   | Pending                                            |
 
 ### Data & Collaboration (3 platforms)
 
-| Platform | Status | Setup Guide | n8n Workflow |
-|----------|--------|-------------|---------------|
-| **Airtable** | ✅ Complete | [SETUP_AIRTABLE.md](SETUP_AIRTABLE.md) | Pending |
-| **Slack** | ✅ Complete | [SETUP_SLACK.md](SETUP_SLACK.md) | Pending |
-| **GitHub** | ✅ Complete | [SETUP_GITHUB_APP.md](SETUP_GITHUB_APP.md) | [github-sync.json](n8n-workflows/github-sync.json) |
+| Platform     | Status      | Setup Guide                                | n8n Workflow                                       |
+| ------------ | ----------- | ------------------------------------------ | -------------------------------------------------- |
+| **Airtable** | ✅ Complete | [SETUP_AIRTABLE.md](SETUP_AIRTABLE.md)     | Pending                                            |
+| **Slack**    | ✅ Complete | [SETUP_SLACK.md](SETUP_SLACK.md)           | Pending                                            |
+| **GitHub**   | ✅ Complete | [SETUP_GITHUB_APP.md](SETUP_GITHUB_APP.md) | [github-sync.json](n8n-workflows/github-sync.json) |
 
 ### Additional Integrations (3 platforms)
 
@@ -175,6 +175,7 @@ docs/integrations/
 ### Airtable as Data Hub
 
 Airtable serves as the central integration hub:
+
 - **Unified Data Model**: All platforms map to common schema
 - **Sync State**: Tracks last sync times, versions, conflicts
 - **Audit Trail**: Complete history of all data changes
@@ -228,12 +229,14 @@ Airtable serves as the central integration hub:
 ### Prompt Registry
 
 Governance-required prompts registered:
+
 - [`prompts/integrations/enterprise-integration-platform-docs@v1.md`](../../prompts/integrations/enterprise-integration-platform-docs@v1.md)
 - [`prompts/registry.yaml`](../../prompts/registry.yaml)
 
 ### Task Specifications
 
 Agent task specifications:
+
 - [`agents/examples/INTEGRATION_PLATFORM_SYNC_TASK.json`](../../agents/examples/INTEGRATION_PLATFORM_SYNC_TASK.json)
 
 ## Support and Resources
