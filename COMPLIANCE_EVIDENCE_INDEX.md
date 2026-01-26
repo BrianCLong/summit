@@ -37,3 +37,6 @@ This table provides a consolidated view of all controls, their mappings to the v
 | **SEC-001** | Secret Scanning | SOC, ISO | [.husky/pre-commit](.husky/pre-commit) |
 | **SEC-002** | Production Guardrails | SOC, ISO | [server/src/config.ts](server/src/config.ts) |
 | **SEC-003** | Dependency Vulnerability Scanning | SOC, ISO | [.github/workflows/pr-quality-gate.yml](.github/workflows/pr-quality-gate.yml) |
+| **OSINT-001** | Explainability Gate | AI, GDPR | [docs/osint/EXPLAINABILITY_REQUIREMENTS.md](docs/osint/EXPLAINABILITY_REQUIREMENTS.md) |
+| **OSINT-002** | Contradiction Exposure | AI | [scripts/ci/verify_contradiction_exposure.mjs](scripts/ci/verify_contradiction_exposure.mjs) |
+| **OSINT-003** | Inference Creep Controls | AI | [docs/governance/OSINT_ETHICS_CONTROLS.md](docs/governance/OSINT_ETHICS_CONTROLS.md) |
