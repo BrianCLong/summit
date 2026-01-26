@@ -6,41 +6,7 @@
   "include": [],
   "exclude": ["node_modules", "**/node_modules", "**/dist", "**/build", "**/.turbo", "**/.next"],
   "references": [
-    {
-      "path": "packages/sdk-ts"
-    },
-    {
-      "path": "packages/tasks-core"
-    },
-    {
-      "path": "packages/sigint-processor"
-    },
-    {
-      "path": "packages/common-types"
-    },
-    {
-      "path": "packages/types"
-    },
-    {
-      "path": "packages/feature-flags"
-    },
-    {
-      "path": "packages/maestro-cli"
-    },
-    {
-      "path": "packages/maestro-core"
-    },
-    {
-      "path": "packages/prov-ledger"
-    },
-    {
-      "path": "services/api-gateway"
-    },
-    {
-      "path": "services/graph-core"
-    },
-    {
-      "path": "services/streaming-ingest"
-    }
+    { "path": "packages/types" },
+    { "path": "packages/sdk-ts" }
   ]
 }
