@@ -59,21 +59,23 @@ jobs:
       - name: Create deterministic build artifact
         run: bash scripts/ci/build_deterministic_artifact.sh
 
-      - name: Generate SBOM (SPDX) for artifact/workspace
-        uses: anchore/sbom-action@v0
-        with:
-          path: .
-          format: spdx-json
-          output-file: artifacts/sbom.spdx.json
+      - name: Generate standardized SBOMs (CycloneDX 1.7 + SPDX 3.0.1)
+        run: make supply-chain/sbom
 
-      # Attest SBOM for the build artifact
-      - name: Attest SBOM
-        uses: actions/attest-sbom@v1
-        with:
-          subject-path: artifacts/build.tar.gz
-          sbom-path: artifacts/sbom.spdx.json
+      # Use Cosign for modern signing and attestation
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
 
-      # Attest build provenance for the build artifact
+      - name: Sign and Attest build artifact (Keyless)
+        run: |
+          make supply-chain/sign \
+            ARTIFACT=artifacts/build.tar.gz \
+            SBOM=artifacts/sbom/summit-platform-main-latest.spdx.json \
+            TYPE=blob
+        env:
+          USE_KEYLESS: "true"
+
+      # Attest build provenance for the build artifact (GitHub native)
       - name: Attest build provenance
         uses: actions/attest-build-provenance@v1
         with:
