@@ -1,0 +1,33 @@
+{
+  "evidence_map_version": "1.0",
+  "generated_at": "2026-01-26T22:45:00Z",
+  "artifacts": {
+    "provenance": {
+      "path": ".evidence/provenance.json",
+      "format": "SLSA v1.1",
+      "canonical_script": "scripts/compliance/generate_provenance.ts"
+    },
+    "sbom": {
+      "path": ".evidence/sbom.json",
+      "format": "CycloneDX v1.4",
+      "canonical_script": "scripts/compliance/generate_sbom.ts"
+    },
+    "security_hardening": {
+      "test_suite": "server/tests/security/exports-signing-fail-closed.test.ts",
+      "status": "verified"
+    },
+    "governance_constraints": {
+      "definition": "governance/constraints.yaml",
+      "verification_script": "scripts/ci/verify_turn_7_compliance.sh",
+      "status": "compliant"
+    },
+    "observability": {
+      "dashboards": "server/infrastructure/monitoring/grafana/dashboards/",
+      "status": "integrated"
+    },
+    "research": {
+      "narrative_analysis": "docs/research/narrative_analysis_2026_01_25.md",
+      "status": "archived"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+[
+  {
+    "pr": "origin/sentinel-fix-export-fail-closed-5110469038163251827",
+    "component": "Security",
+    "relevance": "High",
+    "action": "Re-implement",
+    "justification": "Fixes critical fail-closed vulnerability in export signing route."
+  },
+  {
+    "pr": "origin/jules-turn-7-constraints-8977747588086646087",
+    "component": "Governance",
+    "relevance": "High",
+    "action": "Re-implement",
+    "justification": "Implements Automation Turn #7 constraints and autonomous resilience logic required for GA."
+  },
+  {
+    "pr": "origin/summit-monitoring-observability-13915762154559657540",
+    "component": "Observability",
+    "relevance": "Medium",
+    "action": "Re-implement",
+    "justification": "Adds standard Grafana dashboards and Loki/Promtail configuration."
+  },
+  {
+    "pr": "origin/research-update-automation-turn-4-7284705370141668422",
+    "component": "Research",
+    "relevance": "Medium",
+    "action": "Re-implement",
+    "justification": "Preserves narrative analysis artifact."
+  },
+  {
+    "pr": "origin/ga-readiness-plan-5201687056317130701",
+    "component": "GA Readiness",
+    "relevance": "Low",
+    "action": "Discard",
+    "justification": "Too large/divergent. Key value extracted via specific branches. Will canonicalize via targeted scripts."
+  }
+]

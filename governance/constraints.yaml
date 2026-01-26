@@ -1,0 +1,71 @@
+# Summit Constraint Registry (Turn #7)
+# Defines the hard constraints that govern the autonomous system.
+
+# 1. Release Constraints
+release:
+  error_budget_ceiling:
+    description: "Maximum allowable error budget burn per day"
+    value: 0.1  # 10% of monthly budget
+    unit: "percent_of_budget"
+    enforcement: "release_abort_gate"
+    reversibility: "automatic_rollback"
+
+  blackout_windows:
+    description: "Periods where releases are strictly forbidden"
+    values: ["black_friday", "cyber_monday", "end_of_quarter_close"]
+    enforcement: "release_scheduler"
+    reversibility: "manual_override_with_ceo_approval"
+
+  dependency_freshness:
+    description: "Maximum age of dependencies before release is blocked"
+    value: 90
+    unit: "days"
+    enforcement: "dependency_scanner"
+    reversibility: "exception_grant"
+
+# 2. Reliability Constraints
+reliability:
+  latency_p95:
+    description: "Maximum P95 latency allowed for core APIs"
+    value: 200
+    unit: "ms"
+    enforcement: "load_test_gate"
+    reversibility: "automatic_rollback"
+
+  blast_radius:
+    description: "Maximum percentage of users affected by a canary"
+    value: 5
+    unit: "percent"
+    enforcement: "canary_controller"
+    reversibility: "immediate_traffic_drain"
+
+# 3. Capital Constraints
+capital:
+  infra_roi_floor:
+    description: "Minimum ROI per infrastructure dollar spent"
+    value: 3.0
+    unit: "ratio"
+    enforcement: "finops_agent"
+    reversibility: "resource_reclamation"
+
+  experiment_cost_ceiling:
+    description: "Maximum cost for a single autonomous experiment"
+    value: 50
+    unit: "usd"
+    enforcement: "experiment_controller"
+    reversibility: "kill_switch"
+
+# 4. Governance Constraints
+governance:
+  evidence_freshness:
+    description: "Maximum age of governance evidence"
+    value: 24
+    unit: "hours"
+    enforcement: "compliance_monitor"
+    reversibility: "re-run_collection"
+
+  provenance_completeness:
+    description: "Required SLSA level for all artifacts"
+    value: "SLSA_3"
+    enforcement: "provenance_gate"
+    reversibility: "re-build"
