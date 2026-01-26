@@ -34,7 +34,7 @@ const getDefaultWorkspaceState = (
 const ensurePanelCoverage = (
   panels: WorkspacePreset['panels']
 ): WorkspacePreset['panels'] => {
-  const merged = { ...panels }
+  const merged = { ...panels };
   (Object.keys(defaultWorkspacePresets.investigate.panels) as WorkspacePanelKey[]).forEach(
     panelKey => {
       merged[panelKey] = {
