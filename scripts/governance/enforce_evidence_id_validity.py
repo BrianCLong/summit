@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import os
-import sys
 import re
+import sys
+
 
 def extract_frontmatter(content):
     """
@@ -34,7 +35,7 @@ def main():
     for filename in os.listdir(governance_dir):
         if filename.endswith('.md'):
             filepath = os.path.join(governance_dir, filename)
-            with open(filepath, 'r', encoding='utf-8') as f:
+            with open(filepath, encoding='utf-8') as f:
                 content = f.read()
 
             headers = extract_frontmatter(content)

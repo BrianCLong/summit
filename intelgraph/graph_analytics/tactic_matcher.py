@@ -2,11 +2,13 @@
 Pattern matcher for detecting IO tactics in campaigns.
 """
 
-from typing import List, Any
-from intelgraph.core.tactic_ontology import Campaign, MatchedTactic, TacticType, CampaignEvent
+from typing import Any, List
+
 from intelgraph.core.tactic_library import ALL_TACTICS
+from intelgraph.core.tactic_ontology import Campaign, CampaignEvent, MatchedTactic, TacticType
 from intelgraph.graph_analytics.core_analytics import Graph
 from intelgraph.graph_analytics.gnn_integration import GNNPredictor
+
 
 class TacticMatcher:
     """
@@ -17,7 +19,7 @@ class TacticMatcher:
         self.tactics = tactics or ALL_TACTICS
         self.gnn_predictor = gnn_predictor or GNNPredictor()
 
-    def match(self, campaign: Campaign, graph: Graph) -> List[MatchedTactic]:
+    def match(self, campaign: Campaign, graph: Graph) -> list[MatchedTactic]:
         """
         Analyze the campaign and graph to identify employed tactics.
         """
@@ -62,7 +64,7 @@ class TacticMatcher:
 
         return matches
 
-    def _check_firehose(self, campaign: Campaign, graph: Graph) -> tuple[float, List[str]]:
+    def _check_firehose(self, campaign: Campaign, graph: Graph) -> tuple[float, list[str]]:
         """
         Check for high volume and repetitive content.
         """
@@ -95,7 +97,7 @@ class TacticMatcher:
 
         return score, evidence
 
-    def _check_astroturfing(self, campaign: Campaign, graph: Graph) -> tuple[float, List[str]]:
+    def _check_astroturfing(self, campaign: Campaign, graph: Graph) -> tuple[float, list[str]]:
         """
         Check for coordinated behavior among ostensibly independent actors.
         """
@@ -130,7 +132,7 @@ class TacticMatcher:
 
         return score, evidence
 
-    def _check_sockpuppet_ring(self, campaign: Campaign, graph: Graph) -> tuple[float, List[str]]:
+    def _check_sockpuppet_ring(self, campaign: Campaign, graph: Graph) -> tuple[float, list[str]]:
         """
         Check for dense interconnections between actors.
         """
@@ -159,7 +161,7 @@ class TacticMatcher:
 
         return score, evidence
 
-    def _check_laundering(self, campaign: Campaign, graph: Graph) -> tuple[float, List[str]]:
+    def _check_laundering(self, campaign: Campaign, graph: Graph) -> tuple[float, list[str]]:
         """
         Check for information flow from low to high credibility.
         """
@@ -207,7 +209,7 @@ class TacticMatcher:
 
         return score, evidence
 
-    def _check_front_groups(self, campaign: Campaign, graph: Graph) -> tuple[float, List[str]]:
+    def _check_front_groups(self, campaign: Campaign, graph: Graph) -> tuple[float, list[str]]:
         """
         Check for bridge topology: Node acts as bridge but is opaque.
         """
@@ -251,7 +253,7 @@ class TacticMatcher:
 
         return score, evidence
 
-    def _check_reflexive_control(self, campaign: Campaign, graph: Graph) -> tuple[float, List[str]]:
+    def _check_reflexive_control(self, campaign: Campaign, graph: Graph) -> tuple[float, list[str]]:
         """
         Check for provocative content patterns.
         """

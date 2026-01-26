@@ -2,7 +2,7 @@
 Library of known IO tactics and their signatures.
 """
 
-from .tactic_ontology import Tactic, TacticType, Signature
+from .tactic_ontology import Signature, Tactic, TacticType
 
 # Firehose of Falsehood
 FIREHOSE_TACTIC = Tactic(

@@ -12,12 +12,13 @@ Dependencies:
     - gh CLI (authenticated)
 """
 
-import json
-import subprocess
 import argparse
+import json
+import os
+import subprocess
 import sys
 from datetime import datetime
-import os
+
 
 def run_command(cmd_list):
     try:
@@ -66,12 +67,12 @@ def generate_report(dependabot, code_scanning, secret_scanning):
     report = [f"# Security Triage Report - {datetime.now().strftime('%Y-%m-%d')}\n"]
 
     report.append("## Summary")
-    report.append(f"| Type | Count | Critical | High |")
+    report.append("| Type | Count | Critical | High |")
     report.append("|---|---|---|---|")
 
     # Process Dependabot
     if dependabot == "PERMISSION_DENIED":
-        report.append(f"| Dependabot | ⚠️ Access Denied | - | - |")
+        report.append("| Dependabot | ⚠️ Access Denied | - | - |")
         dep_alerts = []
     else:
         dep_crit = sum(1 for a in dependabot if a.get('security_advisory', {}).get('severity') == 'critical')
@@ -81,7 +82,7 @@ def generate_report(dependabot, code_scanning, secret_scanning):
 
     # Process Code Scanning
     if code_scanning == "PERMISSION_DENIED":
-        report.append(f"| Code Scanning | ⚠️ Access Denied | - | - |")
+        report.append("| Code Scanning | ⚠️ Access Denied | - | - |")
         cs_alerts = []
     else:
         cs_crit = sum(1 for a in code_scanning if a.get('rule', {}).get('security_severity_level') == 'critical')
@@ -91,7 +92,7 @@ def generate_report(dependabot, code_scanning, secret_scanning):
 
     # Process Secret Scanning
     if secret_scanning == "PERMISSION_DENIED":
-        report.append(f"| Secret Scanning | ⚠️ Access Denied | - | - |")
+        report.append("| Secret Scanning | ⚠️ Access Denied | - | - |")
         ss_alerts = []
     else:
         ss_count = len(secret_scanning)

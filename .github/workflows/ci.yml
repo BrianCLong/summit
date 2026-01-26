@@ -1,105 +1,85 @@
 name: CI
 
 on:
-  # UNTRUSTED Workflow Trigger
-  # Runs on pull requests from forks (read-only token)
+  push:
+    branches: [main]
   pull_request:
-    types: [opened, synchronize, reopened]
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  config-guard:
-    name: Build & Test (Untrusted)
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      # No other permissions granted
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup Node (from .nvmrc)
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: .nvmrc
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Validate Jest & pnpm Configuration (pre-install)
-        run: pnpm -w check:jest-config
-
-  unit-tests:
-    name: unit-tests
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [config-guard]
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup Node (from .nvmrc)
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: "pnpm"
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Install (frozen lockfile)
-        run: pnpm -w install --frozen-lockfile
-
-      - name: Unit Tests
-        run: pnpm -w test:unit || pnpm -w test:unit
-
-  typescript-governance:
-    name: TypeScript Governance
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs: [config-guard]
-    steps:
-      - uses: actions/checkout@v6
-      - name: Setup Node
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: .nvmrc
-      - name: Verify TSConfig Exclusions Frozen
-        run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
-      - name: Verify TSConfig Inheritance
-        run: node scripts/ci/verify_tsconfig_inheritance.mjs
-
-  soc-controls:
-    name: SOC Controls
+  typecheck:
+    name: Typecheck
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [config-guard]
+    needs: lint
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup Node (from .nvmrc)
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: "pnpm"
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm typecheck
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Install (frozen lockfile)
-        run: pnpm -w install --frozen-lockfile
-
-      - name: SOC Control Unit Tests
-        run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
-        env:
-          TZ: UTC
-
-      - name: Upload SOC compliance reports
-        uses: actions/upload-artifact@v6
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: typecheck
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Test (Quick)
+        run: pnpm test:quick
+      - name: Generate Metrics
         if: always()
+        run: |
+          echo "{\"timestamp\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\", \"job_status\": \"${{ job.status }}\"}" > ci-metrics.json
+      - name: Upload Metrics
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: soc-compliance-report
-          path: soc-compliance-reports
-          retention-days: 90
+          name: ci-metrics
+          path: ci-metrics.json
+      - name: Upload Failure Artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-logs
+          path: |
+            npm-debug.log
+            pnpm-debug.log

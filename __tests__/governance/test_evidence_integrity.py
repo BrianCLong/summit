@@ -1,8 +1,8 @@
-import unittest
 import os
 import shutil
-import tempfile
 import sys
+import tempfile
+import unittest
 
 # Add the scripts directory to path so we can import (or we can just mock the files)
 # Actually, it's easier to just run the script against a temp directory.
@@ -10,6 +10,7 @@ import sys
 
 sys.path.append(os.path.join(os.getcwd(), 'scripts/governance'))
 from enforce_evidence_id_validity import extract_frontmatter
+
 
 class TestEvidenceIntegrity(unittest.TestCase):
     def test_extract_frontmatter(self):
