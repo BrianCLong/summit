@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { GraphQLError } from 'graphql';
 import jwt from 'jsonwebtoken';
 import { getPostgresPool } from '../db/postgres.js';
@@ -94,8 +93,16 @@ export const getContext = async ({
 
 export const verifyToken = async (token: string): Promise<User> => {
   try {
-    // For development, accept a simple test token
-    if (process.env.NODE_ENV === 'development' && token === 'dev-token') {
+    // Development-only bypass for local testing (NEVER enable in production)
+    if (
+      process.env.NODE_ENV === 'development' &&
+      process.env.ALLOW_DEV_TOKEN === 'true' &&
+      token === 'dev-token'
+    ) {
+      logger.warn(
+        { token: 'dev-token' },
+        'DEV-TOKEN USED: This bypasses authentication. Never use in production.',
+      );
       return {
         id: 'dev-user-1',
         email: 'developer@intelgraph.com',
