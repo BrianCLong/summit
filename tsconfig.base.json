@@ -10,6 +10,7 @@
     "declaration": true,
     "sourceMap": true,
     "resolveJsonModule": true,
+    "types": ["node"],
     "baseUrl": ".",
     "paths": {
       "@intelgraph/maestro-sdk/*": ["packages/maestro-sdk/src/*"],
