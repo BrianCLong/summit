@@ -36,10 +36,10 @@ jobs:
             path: gateway/policy-lac
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@e301518471c62803a63119ac606994770289f660 # v4.0.2
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-deploy-role
           aws-region: ${{ env.AWS_REGION }}
@@ -54,7 +54,7 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@06990b21978a98f273e73481aa019a196fc90508 # v2
 
       - name: Security Scan (Trivy)
         uses: aquasecurity/trivy-action@master
@@ -82,10 +82,10 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@a15682894f3640099451995ef08846f759c63284 # v3
 
       - name: Terraform Apply
         working-directory: terraform/environments/prod
@@ -93,14 +93,21 @@ jobs:
           terraform init
           terraform apply -auto-approve
 
-  deploy-k8s:
+  pre-deploy-gate:
     needs: deploy-infra
+    uses: ./.github/workflows/_deploy.yml
+    with:
+      environment: prod
+
+  deploy-k8s:
+    needs: pre-deploy-gate
     runs-on: ubuntu-latest
+    environment: prod
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@e301518471c62803a63119ac606994770289f660 # v4.0.2
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-deploy-role
           aws-region: ${{ env.AWS_REGION }}
