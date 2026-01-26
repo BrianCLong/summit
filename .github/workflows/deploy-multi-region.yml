@@ -24,17 +24,56 @@ on:
         default: ""
 
 jobs:
-  deploy:
+  resolve-regions:
     runs-on: ubuntu-latest
+    outputs:
+      regions: ${{ steps.set-regions.outputs.regions }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up yq
+        uses: mikefarah/yq@v4.50.1
+      - id: set-regions
+        run: |
+          INPUT_REGIONS="${{ github.event.inputs.regions }}"
+          if [ -z "$INPUT_REGIONS" ]; then
+            REGIONS_JSON=$(yq e '.regions[].name' deploy/regions.yaml -o=json | jq -c .)
+          else
+            REGIONS_JSON=$(echo "$INPUT_REGIONS" | tr ',' '\n' | jq -R . | jq -s -c .)
+          fi
+          echo "regions=$REGIONS_JSON" >> $GITHUB_OUTPUT
+
+  pre-deploy-gate:
+    needs: resolve-regions
+    strategy:
+      matrix:
+        region: ${{ fromJson(needs.resolve-regions.outputs.regions) }}
+    uses: ./.github/workflows/gate.yml
+    with:
+      region: ${{ matrix.region }}
+      prometheus_url: ${{ secrets.PROMETHEUS_URL || 'http://prometheus:9090' }}
+
+  deploy:
+    needs: pre-deploy-gate
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     environment:
       name: production
       url: https://summit.example
     steps:
       - name: Checkout code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-deploy-role
+          aws-region: us-east-1
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
+        uses: sigstore/cosign-installer@v3
 
       - name: Verify SBOM attestation and signature (deployment gate)
         run: scripts/ci/verify-sbom-signature.sh "${{ inputs.image_ref }}"
@@ -45,26 +84,23 @@ jobs:
 
       - name: Upload supply chain compliance receipt
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4
         with:
           retention-days: 14
           name: supply-chain-compliance-receipts
           path: artifacts/compliance-receipts
 
       - name: Set up Helm
-        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
+        uses: azure/setup-helm@v4
         with:
           version: "v3.12.0"
 
       - name: Set up yq
-        uses: mikefarah/yq@065b200af9851db0d5132f50bc10b1406ea5c0a8 # v4.50.1
+        uses: mikefarah/yq@v4.50.1
 
       - name: Resolve target regions
         run: |
-          REGIONS_TO_DEPLOY=$(echo "${{ github.event.inputs.regions }}" | tr ',' ' ')
-          if [ -z "$REGIONS_TO_DEPLOY" ]; then
-            REGIONS_TO_DEPLOY=$(yq e '.regions[].name' deploy/regions.yaml | tr '\n' ' ')
-          fi
+          REGIONS_TO_DEPLOY=$(echo '${{ needs.resolve-regions.outputs.regions }}' | jq -r '.[]' | tr '\n' ' ')
           echo "REGIONS_TO_DEPLOY=$REGIONS_TO_DEPLOY" >> "$GITHUB_ENV"
 
       - name: Run multi-region deployment script and performance tests
@@ -79,15 +115,6 @@ jobs:
               -e REGION=$region \
               k6/cross-region-latency.js
           done
-
-      - name: Canary error rate & latency gate
-        run: |
-          for region in $REGIONS_TO_DEPLOY; do
-            echo "--- Canary metrics gate for $region ---"
-            PROMETHEUS_LABEL_FILTER="region=\"$region\"" ./scripts/canary-gate.sh
-          done
-        env:
-          PROMETHEUS_URL: ${{ secrets.PROMETHEUS_URL || 'http://prometheus:9090' }}
 
       - name: Canary synthetic probe
         run: |
