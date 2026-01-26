@@ -225,9 +225,9 @@ export const createApp = async () => {
   app.use(requestProfilingMiddleware);
 
   app.use(
-    express.tson({
+    express.json({
       limit: '1mb',
-      verify: (req: any, _res, buf) => {
+      verify: (req: any, _res: any, buf: Buffer) => {
         req.rawBody = buf;
       },
     }),
@@ -298,7 +298,7 @@ export const createApp = async () => {
         }
 
         // Default: Reject unauthenticated requests even in dev/test if bypass not enabled
-        res.status(401).tson({ error: 'Unauthorized', message: 'No token provided' });
+        res.status(401).json({ error: 'Unauthorized', message: 'No token provided' });
       };
 
   // Helper to bypass public webhooks from strict tenant/auth enforcement
@@ -382,14 +382,14 @@ export const createApp = async () => {
   app.get('/api/admin/rate-limits/:userId', authenticateToken, async (req, res) => {
     const user = (req as any).user;
     if (!user || user.role !== 'admin') {
-      res.status(403).tson({ error: 'Forbidden' });
+      res.status(403).json({ error: 'Forbidden' });
       return;
     }
     try {
       const status = await advancedRateLimiter.getStatus(req.params.userId);
-      res.tson(status);
+      res.json(status);
     } catch (err: any) {
-      res.status(500).tson({ error: 'Failed to fetch rate limit status' });
+      res.status(500).json({ error: 'Failed to fetch rate limit status' });
     }
   });
 
@@ -676,7 +676,7 @@ export const createApp = async () => {
 
     app.use(
       '/graphql',
-      express.tson(),
+      express.json(),
       authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
       advancedRateLimiter.middleware(), // Applied AFTER authentication to enable per-user limits
       // Note: Type assertion needed due to duplicate @apollo/server in monorepo node_modules

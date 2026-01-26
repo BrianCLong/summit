@@ -1171,4 +1171,10 @@ export const metrics = {
   graphqlTenantCostUsage,
   graphqlCostRateLimitHits,
   graphqlPerTenantOverageCount,
+  maestroAiModelRequests,
+  maestroAiModelErrors,
+  maestroOrchestrationDuration,
+  maestroOrchestrationRequests,
+  maestroActiveSessions,
+  maestroOrchestrationErrors,
 };

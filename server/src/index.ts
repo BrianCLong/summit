@@ -26,6 +26,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import { bootstrapSecrets } from './bootstrap-secrets.ts';
 import { logger } from './config/logger.ts';
+import { createApp } from './app.ts';
 import './monitoring/metrics.ts'; // Initialize Prometheus metrics collection
 
 const startServer = async () => {
