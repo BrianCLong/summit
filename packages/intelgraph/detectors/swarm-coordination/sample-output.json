@@ -1,0 +1,36 @@
+{
+  "detection_id": "det-20231027-8849",
+  "timestamp": "2023-10-27T14:30:00Z",
+  "target_narrative": "narrative-772-syn-inflation",
+  "verdict": {
+    "is_synthetic": true,
+    "confidence": 0.94,
+    "severity": "CRITICAL"
+  },
+  "signals": {
+    "entropy_coefficient": 0.12,
+    "semantic_divergence_score": 0.88,
+    "dormancy_activation_ratio": 0.75
+  },
+  "invariant_violations": [
+    {
+      "code": "INV-001-LOW-ENTROPY",
+      "description": "Inter-arrival variance < 0.2 (Organic baseline > 0.8)",
+      "observed_value": 0.12,
+      "threshold": 0.5
+    },
+    {
+      "code": "INV-004-PARROT-PARADOX",
+      "description": "High embedding similarity with low lexical overlap",
+      "observed_value": 0.88,
+      "threshold": 0.75
+    }
+  ],
+  "swarm_cluster": {
+    "cluster_id": "swarm-grp-992",
+    "size": 450,
+    "central_nodes": ["actor-552", "actor-991", "actor-102"],
+    "topology_type": "HUB_SPOKE"
+  },
+  "evidence_bundle_ref": "evid:bundle:sha256:7f8a9d..."
+}
