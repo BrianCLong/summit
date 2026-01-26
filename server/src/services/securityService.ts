@@ -1,7 +1,7 @@
-// @ts-nocheck
 import { EventEmitter } from 'events';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
+import { randomUUID } from 'node:crypto';
 import { cacheService } from './CacheService';
 
 export interface User {
@@ -587,7 +587,7 @@ export class SecurityService extends EventEmitter {
     ipAddress: string,
     userAgent: string,
   ): Promise<Session> {
-    const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const sessionId = `session-${Date.now()}-${randomUUID().slice(0, 9)}`;
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
 
@@ -693,7 +693,7 @@ export class SecurityService extends EventEmitter {
   ): Promise<void> {
     const securityEvent: SecurityEvent = {
       ...event,
-      id: `sec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `sec-${Date.now()}-${randomUUID().slice(0, 9)}`,
       timestamp: new Date().toISOString(),
       resolved: false,
     };
@@ -733,7 +733,7 @@ export class SecurityService extends EventEmitter {
   ): Promise<void> {
     const auditLog: AuditLog = {
       ...event,
-      id: `audit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `audit-${Date.now()}-${randomUUID().slice(0, 9)}`,
       timestamp: new Date().toISOString(),
       details: event as any,
     };
@@ -925,7 +925,7 @@ export class SecurityService extends EventEmitter {
     return Buffer.from(userAgent).toString('base64').substr(0, 16);
   }
 
-  private cleanupExpiredSessions(): void {
+  private async cleanupExpiredSessions(): Promise<void> {
     const now = new Date();
     let cleanedUp = 0;
 
