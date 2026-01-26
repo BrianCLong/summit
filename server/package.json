@@ -23,7 +23,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "case-overview-cache": "ts-node src/scripts/case-overview-cache.ts",
-    "migrate": "ts-node scripts/migrate.ts up",
+    "migrate": "ts-node scripts/managed-migrate.ts up",
     "migrate:persistence": "node scripts/migrate-persistence.js",
     "verify:policies": "tsx scripts/verify_policy_lifecycle.ts && tsx scripts/verify_policy_simulation.ts",
     "worker:outbox": "node scripts/outbox-worker.js",
