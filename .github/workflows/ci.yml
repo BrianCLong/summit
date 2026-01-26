@@ -1,105 +1,25 @@
 name: CI
 
 on:
-  # UNTRUSTED Workflow Trigger
-  # Runs on pull requests from forks (read-only token)
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref || github.head_ref }}
   cancel-in-progress: true
 
 jobs:
-  config-guard:
-    name: Build & Test (Untrusted)
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      # No other permissions granted
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup Node (from .nvmrc)
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: .nvmrc
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Validate Jest & pnpm Configuration (pre-install)
-        run: pnpm -w check:jest-config
-
-  unit-tests:
-    name: unit-tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [config-guard]
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup Node (from .nvmrc)
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Install (frozen lockfile)
-        run: pnpm -w install --frozen-lockfile
-
-      - name: Unit Tests
-        run: pnpm -w test:unit || pnpm -w test:unit
-
-  typescript-governance:
-    name: TypeScript Governance
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs: [config-guard]
-    steps:
-      - uses: actions/checkout@v6
-      - name: Setup Node
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: .nvmrc
-      - name: Verify TSConfig Exclusions Frozen
-        run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
-      - name: Verify TSConfig Inheritance
-        run: node scripts/ci/verify_tsconfig_inheritance.mjs
-
-  soc-controls:
-    name: SOC Controls
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [config-guard]
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup Node (from .nvmrc)
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Install (frozen lockfile)
-        run: pnpm -w install --frozen-lockfile
-
-      - name: SOC Control Unit Tests
-        run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
-        env:
-          TZ: UTC
-
-      - name: Upload SOC compliance reports
-        uses: actions/upload-artifact@v6
-        if: always()
-        with:
-          name: soc-compliance-report
-          path: soc-compliance-reports
-          retention-days: 90
+  ci:
+    uses: ./.github/workflows/_reusable-ci.yml
+    with:
+      node-version: "20"
+      package-manager: "pnpm"
+      run-lint: true
+      run-typecheck: true
+      run-tests: true
+      run-evidence: true
+      evidence-artifact-name: "ci-evidence-${{ github.run_id }}"
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,0 +1,165 @@
+name: _reusable-ci
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        type: string
+        default: "20"
+      package-manager:
+        description: "pnpm | npm"
+        type: string
+        default: "pnpm"
+      workspace-filter:
+        description: "Optional filter for pnpm -r --filter, e.g. 'intelgraph-server' or './server...'"
+        type: string
+        default: ""
+      run-lint:
+        type: boolean
+        default: true
+      run-typecheck:
+        type: boolean
+        default: true
+      run-tests:
+        type: boolean
+        default: true
+      run-evidence:
+        description: "Run Summit governance/evidence gates if scripts exist"
+        type: boolean
+        default: true
+      evidence-artifact-name:
+        type: string
+        default: "ci-evidence"
+      evidence-paths:
+        description: "Newline-separated glob paths to upload as evidence artifacts"
+        type: string
+        default: |
+          evidence/**
+          artifacts/evidence/**
+          reports/**
+          coverage/**
+          **/coverage/**
+          **/reports/**
+          **/*.junit.xml
+          **/junit*.xml
+          **/test-results/**
+          **/playwright-report/**
+          **/dist/evidence/**
+          **/build/evidence/**
+
+    secrets:
+      NPM_TOKEN:
+        required: false
+
+jobs:
+  ci:
+    name: ci
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: ${{ inputs.package-manager == 'pnpm' && 'pnpm' || 'npm' }}
+
+      - name: Enable Corepack (pnpm)
+        if: ${{ inputs.package-manager == 'pnpm' }}
+        run: corepack enable
+
+      - name: Install (pnpm)
+        if: ${{ inputs.package-manager == 'pnpm' }}
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Install (npm)
+        if: ${{ inputs.package-manager == 'npm' }}
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm ci
+
+      - name: Lint (pnpm)
+        if: ${{ inputs.run-lint && inputs.package-manager == 'pnpm' }}
+        run: |
+          if [ -n "${{ inputs.workspace-filter }}" ]; then
+            pnpm --filter "${{ inputs.workspace-filter }}" run --if-present -s lint
+          else
+            pnpm -r run --if-present -s lint
+          fi
+
+      - name: Lint (npm)
+        if: ${{ inputs.run-lint && inputs.package-manager == 'npm' }}
+        run: npm run --if-present -s lint --workspaces
+
+      - name: Typecheck (pnpm)
+        if: ${{ inputs.run-typecheck && inputs.package-manager == 'pnpm' }}
+        run: |
+          if [ -n "${{ inputs.workspace-filter }}" ]; then
+            pnpm --filter "${{ inputs.workspace-filter }}" run --if-present -s typecheck
+          else
+            pnpm -r run --if-present -s typecheck
+          fi
+
+      - name: Typecheck (npm)
+        if: ${{ inputs.run-typecheck && inputs.package-manager == 'npm' }}
+        run: npm run --if-present -s typecheck --workspaces
+
+      - name: Test (pnpm)
+        if: ${{ inputs.run-tests && inputs.package-manager == 'pnpm' }}
+        run: |
+          if [ -n "${{ inputs.workspace-filter }}" ]; then
+            pnpm --filter "${{ inputs.workspace-filter }}" run --if-present -s test -- --ci
+          else
+            pnpm -r run --if-present -s test -- --ci
+          fi
+
+      - name: Test (npm)
+        if: ${{ inputs.run-tests && inputs.package-manager == 'npm' }}
+        run: npm test --workspaces --if-present -- --ci
+
+      # Summit governance/evidence gates (best-effort, safe-by-default)
+      - name: Governance & Evidence gates (if present)
+        if: ${{ inputs.run-evidence }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          run_if_exists () {
+            local f="$1"
+            if [ -f "$f" ]; then
+              if [[ "$f" == *.sh ]]; then
+                echo "Running: bash $f"
+                bash "$f"
+              else
+                echo "Running: node $f"
+                node "$f"
+              fi
+            else
+              echo "Skip (missing): $f"
+            fi
+          }
+
+          # Common Summit-style CI gates
+          run_if_exists "scripts/ci/verify_evidence_id_consistency.mjs"
+          run_if_exists "scripts/ci/verify_governance_docs.mjs"
+          run_if_exists "scripts/ci/security_audit_gate.mjs"
+          run_if_exists "scripts/ci/validate-jest-config.cjs"
+          run_if_exists "scripts/ci/verify_tsconfig_excludes_frozen.mjs"
+          run_if_exists "scripts/ci/verify_tsconfig_inheritance.mjs"
+          run_if_exists "scripts/test-soc-controls.sh"
+
+      - name: Upload CI Evidence (always)
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.evidence-artifact-name }}
+          if-no-files-found: ignore
+          retention-days: 14
+          path: ${{ inputs.evidence-paths }}
