@@ -744,7 +744,7 @@ app.use(
 );
 
 // 404 handler
-app.use('*', (req, res) => {
+app.use('/{*path}', (req, res) => {
   res.status(404).json({
     error: 'Not found',
     path: req.originalUrl,
@@ -789,7 +789,11 @@ async function startServer() {
   }
 }
 
-if (require.main === module) {
+// Check if this module is the entry point (ESM-compatible)
+const isMainModule = import.meta.url.endsWith(process.argv[1] ?? '') ||
+  process.argv[1]?.includes('server.ts') ||
+  process.argv[1]?.includes('server.js');
+if (isMainModule) {
   startServer();
 }
 

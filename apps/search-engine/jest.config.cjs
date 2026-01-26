@@ -4,7 +4,7 @@ const baseConfig = require('../../jest.config.cjs');
 module.exports = {
   ...baseConfig,
   rootDir: path.resolve(__dirname, '../..'),
-  roots: ['<rootDir>/apps/graph-analytics/src'],
+  roots: ['<rootDir>/apps/search-engine/src'],
   testEnvironment: 'node',
   transform: {
     '^.+\\.[cm]?[tj]sx?$': [
@@ -17,6 +17,6 @@ module.exports = {
   },
   moduleNameMapper: {
     ...baseConfig.moduleNameMapper,
-    '^pg$': '<rootDir>/apps/graph-analytics/__mocks__/pg.js',
+    '^pg$': '<rootDir>/__mocks__/pg.js',
   },
 };

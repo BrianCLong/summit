@@ -7,7 +7,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src",
     "type-check": "tsc --noEmit",
     "setup-python": "cd src/python && pip3 install -r requirements.txt",

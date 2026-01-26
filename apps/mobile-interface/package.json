@@ -9,7 +9,7 @@
     "start": "next start -p 3001",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
