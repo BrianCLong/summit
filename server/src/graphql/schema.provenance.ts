@@ -10,8 +10,27 @@ export const provenanceTypeDefs = gql`
     offset: Int = 0
   }
 
+  type LineageEvent {
+    eventType: String!
+    eventTime: String!
+    runId: ID!
+    jobName: String!
+    inputs: JSON
+    outputs: JSON
+    producer: String
+  }
+
+  type ProvExport {
+    id: ID!
+    format: String!
+    content: String!
+    createdAt: String!
+  }
+
   extend type Query {
     evidenceBundles(filter: EvidenceFilterInput!): [EvidenceBundle!]!
+    lineageEvents(runId: ID!): [LineageEvent!]!
+    provExport(runId: ID!, format: String): ProvExport
   }
 
   extend type Mutation {
