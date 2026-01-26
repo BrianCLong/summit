@@ -182,24 +182,43 @@ jobs:
             --certificate-identity "${{ env.EXPECTED_OIDC_SUBJECT }}" \
             --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}"
 
-      - name: Generate SBOM
+      - name: Generate Build Provenance Attestation
+        uses: actions/attest-build-provenance@v3
+        if: inputs.push
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ inputs.image_name }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
+      - name: Verify Artifact Signature
+        if: inputs.sign && inputs.push
+        run: |
+          cosign verify \
+            --type provenance \
+            --keyless \
+            ${{ env.REGISTRY }}/${{ inputs.image_name }}@${{ steps.build.outputs.digest }}
+
+      - name: Generate CycloneDX SBOM
+        if: inputs.sbom
+        uses: anchore/syft-action@v0
+        with:
+          image-ref: ${{ inputs.push && steps.image-uri.outputs.uri || '.' }}
+          format: cyclonedx-json
+          output-file: sbom.cyclonedx.json
+
+      - name: Generate SPDX SBOM
+        if: inputs.sbom
+        uses: anchore/syft-action@v0
+        with:
+          image-ref: ${{ inputs.push && steps.image-uri.outputs.uri || '.' }}
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Calculate SBOM Digest
         if: inputs.sbom
         id: sbom
         run: |
-          set -euo pipefail
-
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.4.1
-
-          if [ "${{ inputs.push }}" = "true" ]; then
-            IMAGE="${{ steps.image-uri.outputs.uri }}"
-            syft "$IMAGE" -o cyclonedx-json=sbom.cdx.json
-            syft "$IMAGE" -o spdx-json=sbom.spdx.json
-          else
-            syft . -o cyclonedx-json=sbom.cdx.json
-            syft . -o spdx-json=sbom.spdx.json
-          fi
-
-          SBOM_DIGEST=$(sha256sum sbom.cdx.json | cut -d' ' -f1)
+          SBOM_DIGEST=$(sha256sum sbom.cyclonedx.json | cut -d' ' -f1)
           echo "digest=$SBOM_DIGEST" >> "$GITHUB_OUTPUT"
 
       - name: Attest SBOM
@@ -210,7 +229,7 @@ jobs:
           IMAGE="${{ steps.image-uri.outputs.uri }}"
 
           cosign attest --yes \
-            --predicate sbom.cdx.json \
+            --predicate sbom.cyclonedx.json \
             --type cyclonedx \
             "$IMAGE"
 
@@ -241,7 +260,7 @@ jobs:
         with:
           name: build-artifacts-${{ inputs.image_name }}-${{ github.run_id }}
           path: |
-            sbom.cdx.json
+            sbom.cyclonedx.json
             sbom.spdx.json
           retention-days: 90
 
