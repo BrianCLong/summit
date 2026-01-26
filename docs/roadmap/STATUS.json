@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-01-27T00:18:00Z",
-  "revision_note": "Added PR lifecycle report automation and prompt/task governance entries",
+  "revision_note": "Added PR lifecycle report automation, prompt/task governance entries, and Browser Ops extension blueprint runbook",
   "initiatives": [
     {
       "id": "A",
