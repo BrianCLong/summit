@@ -26,7 +26,7 @@ const { getPostgresPool } = await import('../../config/database.ts');
 const { billingService } = await import('../BillingService.ts');
 
 describe('BillingJobService', () => {
-  let jobService: BillingJobService;
+  let jobService: InstanceType<typeof BillingJobService>;
   let mockQuery: jest.MockedFunction<any>;
   let mockRelease: jest.MockedFunction<any>;
   let mockConnect: jest.MockedFunction<() => Promise<any>>;
