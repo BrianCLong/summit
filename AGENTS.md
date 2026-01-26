@@ -631,3 +631,13 @@ To maintain clear accountability and human oversight, the following boundaries a
   - No direct commits to `main`.
   - All generated code must be reviewable by humans (clean, commented).
   - Major refactors require explicit human approval via issue comment.
+
+## Agent Platform Governance
+
+> **AUTHORITATIVE SOURCE:** See [docs/governance/AGENTS.md](docs/governance/AGENTS.md) for the canonical governance definitions.
+
+### MCP-First Mandate
+All agents must consume tools **only via MCP** (Model Context Protocol). Direct API access or unmanaged tool usage is prohibited.
+
+### Agent Roles & Permissions
+Refer to the [H1 2026 Roadmap](docs/roadmap/2026-H1-agent-copilot.md) and [docs/governance/AGENTS.md](docs/governance/AGENTS.md) for the definitive list of Agent Classes and their permissions.

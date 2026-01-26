@@ -1,0 +1,19 @@
+version: 1
+defaults:
+  access: deny
+  sandbox: true
+
+tools:
+  intelgraph.query:
+    owner: data-platform
+    scopes: [read]
+    blast_radius: low
+  evidence.write:
+    owner: governance
+    scopes: [write]
+    blast_radius: medium
+  deployment.execute:
+    owner: platform
+    scopes: [execute]
+    blast_radius: high
+    approvals: [security, release-captain]
