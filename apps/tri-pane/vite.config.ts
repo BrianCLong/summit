@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -8,11 +9,14 @@ export default defineConfig({
     port: 4173
   },
   test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/setupTests.ts'],
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
-      '**/tests/**', // Playwright tests
-      '**/*.spec.ts', // Playwright spec files
+      'tests/**',
     ],
   },
 });

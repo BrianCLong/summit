@@ -1,6 +1,7 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { TriPaneProvider } from '../EventBus';
 import { SavedViewsPanel } from '../SavedViewsPanel';
 import { TimelinePane } from '../TimelinePane';
@@ -15,10 +16,15 @@ function Wrapper({ children }: { children: React.ReactNode }) {
 describe('Saved views', () => {
   beforeEach(() => {
     localStorage.clear();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('saves, persists, reloads, and restores a time window', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     const { unmount } = render(
       <Wrapper>
         <SavedViewsPanel />
@@ -32,8 +38,20 @@ describe('Saved views', () => {
 
     const startSlider = screen.getByLabelText('Start');
     const endSlider = screen.getByLabelText('End');
-    fireEvent.change(startSlider, { target: { value: '6' } });
-    fireEvent.change(endSlider, { target: { value: '12' } });
+
+    // Change sliders and flush rAF callbacks
+    act(() => {
+      fireEvent.change(startSlider, { target: { value: '6' } });
+    });
+    await act(async () => {
+      vi.runAllTimers();
+    });
+    act(() => {
+      fireEvent.change(endSlider, { target: { value: '12' } });
+    });
+    await act(async () => {
+      vi.runAllTimers();
+    });
 
     await user.click(screen.getByRole('button', { name: /Save view/i }));
 
@@ -63,7 +81,7 @@ describe('Saved views', () => {
   });
 
   it('shows a toast when restored view references missing data', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     const snapshot: ViewSnapshot = {
       name: 'Missing data',
       timeRange: { start: 2, end: 5 },
