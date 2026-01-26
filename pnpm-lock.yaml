@@ -8349,6 +8349,15 @@ importers:
         specifier: ^1.0.0
         version: 1.6.1(@types/node@20.19.27)(happy-dom@20.0.11)(jsdom@27.4.0)(lightningcss@1.30.2)(terser@5.44.1)
 
+  packages/mcp:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.10.0
+        version: 20.19.27
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   packages/mdm-analytics:
     dependencies:
       '@intelgraph/mdm-core':
