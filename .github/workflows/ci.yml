@@ -71,6 +71,26 @@ jobs:
       - name: Verify TSConfig Inheritance
         run: node scripts/ci/verify_tsconfig_inheritance.mjs
 
+  agent-governance:
+    name: Agent Governance
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [config-guard]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install (frozen lockfile)
+        run: pnpm -w install --frozen-lockfile
+      - name: Verify MCP Only Tools
+        run: node scripts/ci/verify_mcp_only_tools.mjs
+      - name: Verify Tool Registry Enforcement
+        run: node scripts/ci/verify_tool_registry_enforcement.mjs
+
   soc-controls:
     name: SOC Controls
     runs-on: ubuntu-latest

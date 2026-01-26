@@ -1,0 +1,11 @@
+{
+  "package": "@intelgraph/mcp",
+  "status": "scaffolded",
+  "conformance": "pending",
+  "files": [
+    "package.json",
+    "src/index.ts",
+    "src/schema.ts",
+    "README.md"
+  ]
+}

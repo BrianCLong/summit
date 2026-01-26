@@ -1,0 +1,16 @@
+{
+  "name": "@intelgraph/agent-runtime",
+  "version": "0.1.0",
+  "description": "Agent Runtime v1 for IntelGraph Platform",
+  "main": "src/interfaces.ts",
+  "types": "src/interfaces.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "dependencies": {
+    "zod": "^3.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

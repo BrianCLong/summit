@@ -1,0 +1,30 @@
+{
+  "issues": {
+    "19-A1": {
+      "status": "scaffolded",
+      "evidence": "evidence/mcp/scaffold.report.json",
+      "location": "packages/mcp/"
+    },
+    "19-A2": {
+      "status": "planned",
+      "evidence": "pending"
+    },
+    "19-B1": {
+      "status": "interfaces_defined",
+      "evidence": "evidence/runtime/runtime_interfaces.report.json",
+      "location": "packages/agent-runtime/"
+    },
+    "19-C1": {
+      "status": "enforced",
+      "evidence": "evidence/governance/tool_registry_validation.json",
+      "location": "governance/tool_registry.yaml"
+    },
+    "19-D1": {
+      "status": "scaffolded",
+      "evidence": "evidence/context/context_pipelines.report.json",
+      "location": "context/pipelines/"
+    }
+  },
+  "alignment": "aligned",
+  "timestamp": "2025-05-15T12:20:00Z"
+}

@@ -1,0 +1,7 @@
+{
+  "pipelines": [
+    "context/pipelines/example.yaml"
+  ],
+  "contract": "deterministic_hashing",
+  "status": "defined"
+}
