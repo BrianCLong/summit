@@ -119,7 +119,7 @@ pluggy==1.6.0
     # via
     #   pytest
     #   pytest-cov
-prometheus-client==0.23.1
+prometheus-client==0.24.1
     # via -r requirements.in
 propcache==0.4.1
     # via
@@ -155,7 +155,7 @@ python-dotenv==1.2.1
     #   pydantic-settings
 python-jose[cryptography]==3.5.0
     # via -r requirements.in
-python-multipart==0.0.21
+python-multipart==0.0.22
     # via -r requirements.in
 pyyaml==6.0.3
     # via
@@ -180,7 +180,7 @@ six==1.17.0
     # via ecdsa
 sniffio==1.3.1
     # via anyio
-sqlalchemy==2.0.45
+sqlalchemy==2.0.46
     # via
     #   -r requirements.in
     #   langchain-classic

@@ -8,10 +8,10 @@ Pillow==12.1.0
 scikit-image==0.26.0
 
 # Object Detection and Computer Vision Models
-ultralytics==8.4.6
-torch==2.9.1
-torchvision==0.24.1
-torchaudio==2.9.1
+ultralytics==8.4.7
+torch==2.10.0
+torchvision==0.25.0
+torchaudio==2.10.0
 
 # Face Detection and Analysis
 mtcnn==0.1.1
@@ -21,7 +21,7 @@ insightface==0.7.3
 
 # OCR (Optical Character Recognition)
 pytesseract==0.3.13
-paddleocr==3.3.2
+paddleocr==3.3.3
 easyocr==1.7.2
 paddlepaddle==2.6.2
 # Speech Processing
@@ -44,7 +44,7 @@ polyglot==16.7.4
 # Text Analysis and NLP Models
 scikit-learn==1.8.0
 gensim==4.4.0
-wordcloud==1.9.5
+wordcloud==1.9.6
 rake-nltk==1.0.6
 keybert==0.9.0
 yake==0.6.0
@@ -105,9 +105,9 @@ datasets==4.5.0
 
 # Acceleration (Optional - for GPU support)
 # Uncomment if you have NVIDIA GPU with CUDA support
-# torch==2.9.1+cu121
-# torchvision==0.24.1+cu121
-# torchaudio==2.9.1+cu121
+# torch==2.10.0+cu121
+# torchvision==0.25.0+cu121
+# torchaudio==2.10.0+cu121
 # -f https://download.pytorch.org/whl/cu121/torch_stable.html
 
 # Additional spaCy models (download separately)
