@@ -3,8 +3,10 @@ Integration interface for GNN-based tactic prediction.
 """
 
 from typing import List
+
 from intelgraph.core.tactic_ontology import Campaign, MatchedTactic
 from intelgraph.graph_analytics.core_analytics import Graph
+
 
 class GNNPredictor:
     """
@@ -22,7 +24,7 @@ class GNNPredictor:
         self._model_loaded = True
         pass
 
-    def predict_tactics(self, campaign: Campaign, graph: Graph) -> List[MatchedTactic]:
+    def predict_tactics(self, campaign: Campaign, graph: Graph) -> list[MatchedTactic]:
         """
         Predict tactics using the GNN model.
 
