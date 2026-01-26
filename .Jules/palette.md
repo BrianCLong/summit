@@ -24,3 +24,7 @@
 ## 2025-05-23 - Focus Management for Dynamic UI
 **Learning:** When a user action removes the triggering element from the DOM (e.g., clicking a "quick prompt" chip that disappears upon selection), focus is lost to the body, confusing keyboard users.
 **Action:** Always programmatically move focus to the next logical element (e.g., the input field) before the trigger disappears.
+
+## 2025-10-27 - Test Environment Instability
+**Learning:** The React 19 upgrade seems to have broken the test environment (Vitest + React Testing Library) with "Objects are not valid as a React child" errors across all component tests.
+**Action:** When tests are fundamentally broken due to environment issues, rely on strict type checking (Lint) and careful code review, and flag the environment issue to the Platform team.
