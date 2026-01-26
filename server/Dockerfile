@@ -25,15 +25,15 @@ RUN apk add --no-cache \
     freetype-dev
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@8 --activate
+RUN corepack enable && corepack prepare pnpm@10 --activate
 
 WORKDIR /app
 
 # Copy package files
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml intelgraph-feature-flags-4.2.3.tgz intelgraph-telemetry-config-4.2.3.tgz ./
 
 # Install all dependencies (including dev for build)
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 
 # -----------------------------------------------------------------------------
 # Stage 2: Builder
@@ -41,7 +41,7 @@ RUN pnpm install --frozen-lockfile
 FROM node:20-alpine AS builder
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@8 --activate
+RUN corepack enable && corepack prepare pnpm@10 --activate
 
 WORKDIR /app
 

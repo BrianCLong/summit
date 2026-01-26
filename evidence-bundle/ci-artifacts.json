@@ -1,0 +1,586 @@
+{
+  "ci_pipeline_status": "passed",
+  "ci_run_id": "local-1769459974534",
+  "ci_commit_sha": "074f890bcbffe502eb4296e77b8b1f25fe67e0b2",
+  "ci_branch": "fix/ci-pnpm-setup-order",
+  "workflow_files": [
+    {
+      "file": "_reusable-aws.yml",
+      "hash": "42d965f4ff606693"
+    },
+    {
+      "file": "_reusable-build.yml",
+      "hash": "c1360487cc93b180"
+    },
+    {
+      "file": "_reusable-ci-fast.yml",
+      "hash": "7081da2b3f6ec806"
+    },
+    {
+      "file": "_reusable-ci-metrics.yml",
+      "hash": "4c29858d91cf701d"
+    },
+    {
+      "file": "_reusable-ci-perf.yml",
+      "hash": "bf36e8797ed641d6"
+    },
+    {
+      "file": "_reusable-ci-security.yml",
+      "hash": "0108f2fe7875e9f6"
+    },
+    {
+      "file": "_reusable-governance-gate.yml",
+      "hash": "c6f2b605ec307c57"
+    },
+    {
+      "file": "_reusable-node-pnpm-setup.yml",
+      "hash": "be2a4cc7700af648"
+    },
+    {
+      "file": "_reusable-release.yml",
+      "hash": "f535c97facde3208"
+    },
+    {
+      "file": "_reusable-setup.yml",
+      "hash": "8864e3d0be0cb871"
+    },
+    {
+      "file": "_reusable-slsa-build.yml",
+      "hash": "cce55a6a99a9d346"
+    },
+    {
+      "file": "_reusable-test-suite.yml",
+      "hash": "cef015f01ad837b9"
+    },
+    {
+      "file": "_reusable-test.yml",
+      "hash": "c2fffe2374927f10"
+    },
+    {
+      "file": "_reusable-toolchain-setup.yml",
+      "hash": "eac4ffc27ea7835f"
+    },
+    {
+      "file": "a11y-keyboard-smoke.yml",
+      "hash": "71a77d67dd37f825"
+    },
+    {
+      "file": "agent-guardrails.yml",
+      "hash": "9dd84e32f997a716"
+    },
+    {
+      "file": "ai-copilot-canary.yml",
+      "hash": "1a4faea285e21534"
+    },
+    {
+      "file": "api-determinism-check.yml",
+      "hash": "aca3f0394c8d244b"
+    },
+    {
+      "file": "api-lint.yml",
+      "hash": "866dc6ceab0903fe"
+    },
+    {
+      "file": "audit-exception-expiry.yml",
+      "hash": "c5f04c3faa602b35"
+    },
+    {
+      "file": "auto-enqueue.yml",
+      "hash": "bb35e524f47ceea9"
+    },
+    {
+      "file": "auto-remediation.yml",
+      "hash": "c2c246dba322fa75"
+    },
+    {
+      "file": "auto-triage-blockers.yml",
+      "hash": "41e74fe7b5fc0515"
+    },
+    {
+      "file": "backup-dr.yml",
+      "hash": "da6bce1aec4ccf12"
+    },
+    {
+      "file": "bidirectional-sync.yml",
+      "hash": "03868db8cda3c66d"
+    },
+    {
+      "file": "branch-lifecycle.yml",
+      "hash": "c689fedac765a08d"
+    },
+    {
+      "file": "branch-protection-drift.yml",
+      "hash": "3986a7bc910b172e"
+    },
+    {
+      "file": "branch-protection-reconcile.yml",
+      "hash": "2c71e09be4396d5d"
+    },
+    {
+      "file": "ci-core.yml",
+      "hash": "3dce45cf7f09b66c"
+    },
+    {
+      "file": "ci-health-monitor.yml",
+      "hash": "077cf8f60d63f8e3"
+    },
+    {
+      "file": "ci-legacy.yml",
+      "hash": "202a26c756cea70e"
+    },
+    {
+      "file": "ci-security.yml",
+      "hash": "0eccd8687114156f"
+    },
+    {
+      "file": "ci-signal-gate.yml",
+      "hash": "0fed4ede7d59f653"
+    },
+    {
+      "file": "ci-template-optimized.yml",
+      "hash": "5fbf64c95d21cafb"
+    },
+    {
+      "file": "ci-trusted.yml",
+      "hash": "6fed02420de86ec0"
+    },
+    {
+      "file": "ci-verify.yml",
+      "hash": "f3438d861fddfe4f"
+    },
+    {
+      "file": "ci.yml",
+      "hash": "d40a5929cc62a88e"
+    },
+    {
+      "file": "client-typecheck.yml",
+      "hash": "f92731e7c4663fcd"
+    },
+    {
+      "file": "codeql.yml",
+      "hash": "8a5879f259349cb1"
+    },
+    {
+      "file": "compliance-governance.yml",
+      "hash": "3e2d015b37f47e7c"
+    },
+    {
+      "file": "compliance.yml",
+      "hash": "4768ed2fecd74a41"
+    },
+    {
+      "file": "copilot-golden-path.yml",
+      "hash": "764db77f7dbe3f75"
+    },
+    {
+      "file": "dependency-audit.yml",
+      "hash": "71a8dbd24a3c9c7b"
+    },
+    {
+      "file": "dependency-freeze-check.yml",
+      "hash": "334d6ac8cba3f96b"
+    },
+    {
+      "file": "dependency-monitor.yml",
+      "hash": "c86e328599fdf4a9"
+    },
+    {
+      "file": "deploy-aws.yml",
+      "hash": "943b5a90ad21b966"
+    },
+    {
+      "file": "deploy-multi-region.yml",
+      "hash": "6ad4b89560deb556"
+    },
+    {
+      "file": "doc-link-check.yml",
+      "hash": "e89c97a282138e01"
+    },
+    {
+      "file": "docker-build.yml",
+      "hash": "77c22343ebc62e34"
+    },
+    {
+      "file": "docs-lint.yml",
+      "hash": "712f6433da143a23"
+    },
+    {
+      "file": "error-budget-alerts.yml",
+      "hash": "0b1104e9e7b81028"
+    },
+    {
+      "file": "evidence-collection.yml",
+      "hash": "436a630b5033349e"
+    },
+    {
+      "file": "evidence-id-consistency.yml",
+      "hash": "f8a07b4cb489bf48"
+    },
+    {
+      "file": "export-ops-evidence.yml",
+      "hash": "2a04e8251decf66e"
+    },
+    {
+      "file": "fresh-evidence-rate.yml",
+      "hash": "3c79c892556e87a9"
+    },
+    {
+      "file": "ga-evidence-attest.yml",
+      "hash": "356b60364b69f2bb"
+    },
+    {
+      "file": "ga-evidence-pack.yml",
+      "hash": "6f8c41121702b5ac"
+    },
+    {
+      "file": "ga-gate.yml",
+      "hash": "afc40cd60742957a"
+    },
+    {
+      "file": "ga-ready.yml",
+      "hash": "433e639110f00cc5"
+    },
+    {
+      "file": "ga-risk-gate.yml",
+      "hash": "7f9316167a61c317"
+    },
+    {
+      "file": "gates.yml",
+      "hash": "427531519714c627"
+    },
+    {
+      "file": "generate-changelog.yml",
+      "hash": "a03d2d5b0bcc434a"
+    },
+    {
+      "file": "generate-ops-evidence-pack.yml",
+      "hash": "4e1fda54f890cae5"
+    },
+    {
+      "file": "golden-path-supply-chain.yml",
+      "hash": "f90d9f88da332668"
+    },
+    {
+      "file": "governance-check.yml",
+      "hash": "9b478f3f0572bda3"
+    },
+    {
+      "file": "governance-dashboard-publish.yml",
+      "hash": "41c7cf3efcec3b2e"
+    },
+    {
+      "file": "governance-drift-check.yml",
+      "hash": "e87fc18c9990c964"
+    },
+    {
+      "file": "governance-engine.yml",
+      "hash": "b136bddc1a2b6de9"
+    },
+    {
+      "file": "governance-lockfile-verify.yml",
+      "hash": "f1b9dfea8a704f59"
+    },
+    {
+      "file": "governance-policy-validation.yml",
+      "hash": "a926361fffb43990"
+    },
+    {
+      "file": "governance-regression-guard.yml",
+      "hash": "80f8d2f422ceea7f"
+    },
+    {
+      "file": "graph-guardrail-fuzz.yml",
+      "hash": "fecc1e7f259a5f94"
+    },
+    {
+      "file": "hello-service-ci.yml",
+      "hash": "421c2d3ea96c80f3"
+    },
+    {
+      "file": "hotfix-postmortem-enforcer.yml",
+      "hash": "776e4c182d1e8d07"
+    },
+    {
+      "file": "hotfix-release.yml",
+      "hash": "a1f7cf8a7962540a"
+    },
+    {
+      "file": "intelgraph-ci.yml",
+      "hash": "265460dbae23a646"
+    },
+    {
+      "file": "issue-backfill.yml",
+      "hash": "fde76e82a4bf9c4f"
+    },
+    {
+      "file": "issue-stale-guard.yml",
+      "hash": "750027371897b362"
+    },
+    {
+      "file": "issue-triage.yml",
+      "hash": "4a626e2179fe5341"
+    },
+    {
+      "file": "mega-pr-containment.yml",
+      "hash": "64db711ff8dcfee6"
+    },
+    {
+      "file": "mirror-to-personal.yml",
+      "hash": "97e6badab111a30a"
+    },
+    {
+      "file": "mvp4-gate.yml",
+      "hash": "3e097e1d8a9e8d2c"
+    },
+    {
+      "file": "oncall-handoff.yml",
+      "hash": "4428e0811b729ab1"
+    },
+    {
+      "file": "perf.yml",
+      "hash": "73abef6280027d30"
+    },
+    {
+      "file": "policy-auto-tuning-ci.yml",
+      "hash": "27a713b1580701fc"
+    },
+    {
+      "file": "post-release-canary.yml",
+      "hash": "29e2c1ff12a20691"
+    },
+    {
+      "file": "pr-conflict-forecast.yml",
+      "hash": "96f2a0dc82c098c8"
+    },
+    {
+      "file": "pr-gates.yml",
+      "hash": "e715e356bf835c88"
+    },
+    {
+      "file": "pr-quality-gate.yml",
+      "hash": "cc6b52c3ddb71060"
+    },
+    {
+      "file": "pr-triage.yml",
+      "hash": "aeeb3bc13934b14a"
+    },
+    {
+      "file": "pre-release-health-check.yml",
+      "hash": "86e99bd9e99611b6"
+    },
+    {
+      "file": "promotion-bundle.yml",
+      "hash": "c3906a0b805c058e"
+    },
+    {
+      "file": "promptpack.yml",
+      "hash": "b67ab0fd1d68df4e"
+    },
+    {
+      "file": "publish-release-ops-internal.yml",
+      "hash": "1c5d108a55f5ae4d"
+    },
+    {
+      "file": "publish-release-ops-pages.yml",
+      "hash": "5e877f0f54bc87b8"
+    },
+    {
+      "file": "rc-lockdown.yml",
+      "hash": "41f98dd1495ae8e9"
+    },
+    {
+      "file": "rc-preparation.yml",
+      "hash": "0dd33065e50ed8c4"
+    },
+    {
+      "file": "redaction-tests.yml",
+      "hash": "d26cc3ef9786b97a"
+    },
+    {
+      "file": "redaction-trend-alerts.yml",
+      "hash": "95c538ce85770e40"
+    },
+    {
+      "file": "release-blocker-escalation.yml",
+      "hash": "4d7aca0c5b29224f"
+    },
+    {
+      "file": "release-evidence-check.yml",
+      "hash": "1ea81feb7e08c229"
+    },
+    {
+      "file": "release-ga.yml",
+      "hash": "fddef5c601bf3407"
+    },
+    {
+      "file": "release-integrity.yml",
+      "hash": "75f94eca2e04a41d"
+    },
+    {
+      "file": "release-lint.yml",
+      "hash": "205794376f684f96"
+    },
+    {
+      "file": "release-ops-digest.yml",
+      "hash": "760d41b402d2b67f"
+    },
+    {
+      "file": "release-ops-orchestrator.yml",
+      "hash": "ab97f8a9c01dd7ed"
+    },
+    {
+      "file": "release-ops-slo-issue.yml",
+      "hash": "3dec299e1b0189cf"
+    },
+    {
+      "file": "release-override.yml",
+      "hash": "54bd9a353c6eec1c"
+    },
+    {
+      "file": "release-policy-tests.yml",
+      "hash": "c96a7eb46287f0ad"
+    },
+    {
+      "file": "release-promote-guard.yml",
+      "hash": "e28043fa0ae885d7"
+    },
+    {
+      "file": "release-rc.yml",
+      "hash": "74e5ed1869975cdd"
+    },
+    {
+      "file": "release-readiness.yml",
+      "hash": "8c57cde7787574ad"
+    },
+    {
+      "file": "release-reliability.yml",
+      "hash": "2042702492a0efac"
+    },
+    {
+      "file": "release-rollback.yml",
+      "hash": "12e7763e90b54637"
+    },
+    {
+      "file": "release-train-dashboard.yml",
+      "hash": "5d108cfd8ab68d6f"
+    },
+    {
+      "file": "release-train.yml",
+      "hash": "64e721fa4e3d850b"
+    },
+    {
+      "file": "repro-build-check.yml",
+      "hash": "619f7f32693d9c64"
+    },
+    {
+      "file": "required-checks-exceptions.yml",
+      "hash": "4e861093e0c16722"
+    },
+    {
+      "file": "reusable-golden-path.yml",
+      "hash": "77fd6d1cdeb0e4e7"
+    },
+    {
+      "file": "sbom-scan.yml",
+      "hash": "4a73cbacdf6e18bc"
+    },
+    {
+      "file": "schema-compat.yml",
+      "hash": "d1d621764e571014"
+    },
+    {
+      "file": "schema-compatibility-check.yml",
+      "hash": "09f09c01ce32de27"
+    },
+    {
+      "file": "schema-diff.yml",
+      "hash": "88e1c9daa1d11fd1"
+    },
+    {
+      "file": "secret-scan-warn.yml",
+      "hash": "305f719adcc0e49e"
+    },
+    {
+      "file": "security-observability.yml",
+      "hash": "f24320f6544762d3"
+    },
+    {
+      "file": "security-playbook-automation.yml",
+      "hash": "56e1db9fa494bfaa"
+    },
+    {
+      "file": "semver-label.yml",
+      "hash": "8dbe9a52797cf8f9"
+    },
+    {
+      "file": "server-typecheck.yml",
+      "hash": "a169e32bb18493d3"
+    },
+    {
+      "file": "slsa-provenance.yml",
+      "hash": "971583462cc74f83"
+    },
+    {
+      "file": "stabilization-report.yml",
+      "hash": "0c54acff359bedcc"
+    },
+    {
+      "file": "supply-chain-attest.yml",
+      "hash": "e24e83cc8ac02115"
+    },
+    {
+      "file": "tag-verification.yml",
+      "hash": "faf81988a52b6f1a"
+    },
+    {
+      "file": "test-quarantine.yml",
+      "hash": "827d4f173838dc0f"
+    },
+    {
+      "file": "type-safety-audit.yml",
+      "hash": "0ed52fffe9d25184"
+    },
+    {
+      "file": "unit-test-coverage.yml",
+      "hash": "bfe687b1eead5b01"
+    },
+    {
+      "file": "ux-governance.yml",
+      "hash": "04e31d86f24b9661"
+    },
+    {
+      "file": "verify-claims.yml",
+      "hash": "96e4db697f1d5f39"
+    },
+    {
+      "file": "web-accessibility.yml",
+      "hash": "a624b1256d46a1bd"
+    },
+    {
+      "file": "weekly-assurance.yml",
+      "hash": "9749543664efda8b"
+    },
+    {
+      "file": "weekly-ops-evidence.yml",
+      "hash": "a3ffed2aea6c6cb5"
+    },
+    {
+      "file": "workflow-lint.yml",
+      "hash": "89c8bb1351604ae1"
+    }
+  ],
+  "docker_compose_configs": [
+    {
+      "file": "deploy/compose/docker-compose.dev.yml",
+      "hash": "6d38d39f20161b7f"
+    },
+    {
+      "file": "deploy/compose/otel-config.yaml",
+      "hash": "8778dfcd89a8056e"
+    },
+    {
+      "file": "deploy/compose/prometheus.yml",
+      "hash": "a4b48915e4d7db9c"
+    }
+  ]
+}

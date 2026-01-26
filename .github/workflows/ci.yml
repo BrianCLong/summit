@@ -73,6 +73,13 @@ jobs:
       - name: Verify TSConfig Inheritance
         run: node scripts/ci/verify_tsconfig_inheritance.mjs
 
+  security-compliance:
+    name: Security & Compliance
+    uses: ./.github/workflows/_reusable-security-compliance.yml
+    needs: [config-guard]
+    with:
+      strict: true
+
   soc-controls:
     name: SOC Controls
     runs-on: ubuntu-latest
