@@ -29,7 +29,7 @@ async function loadWaivers() {
     } catch (error) {
         console.error(`${RED}Failed to parse waivers file: ${error.message}${RESET}`);
         // If waivers file exists but is invalid, fail safe
-        process.exit(1);
+        throw error;
     }
 }
 
@@ -99,10 +99,10 @@ async function main() {
                 if (code !== 0) {
                     console.error(`${RED}Audit failed without JSON output:${RESET}`);
                     console.error(stderr || stdout);
-                    process.exit(1);
+                    return false;
                 }
                 console.log(`${GREEN}✅ No vulnerabilities found (clean output).${RESET}`);
-                process.exit(0);
+                return true;
             }
 
             const jsonStr = stdout.slice(jsonStart);
@@ -110,14 +110,14 @@ async function main() {
         } catch (e) {
             console.error(`${RED}Failed to parse audit JSON output.${RESET}`);
             console.error(stderr || stdout);
-            process.exit(1);
+            return false;
         }
 
         if (!auditReport.advisories && !auditReport.vulnerabilities) {
             if (auditReport.metadata && auditReport.metadata.vulnerabilities &&
                 (auditReport.metadata.vulnerabilities.high === 0 && auditReport.metadata.vulnerabilities.critical === 0)) {
                 console.log(`${GREEN}✅ No Critical/High vulnerabilities found.${RESET}`);
-                process.exit(0);
+                return true;
             }
         }
 
@@ -128,7 +128,7 @@ async function main() {
 
         if (criticalHigh.length === 0) {
             console.log(`${GREEN}✅ No Critical/High vulnerabilities found.${RESET}`);
-            process.exit(0);
+            return true;
         }
 
         console.log(`\n${BOLD}${RED}Found ${criticalHigh.length} Critical/High vulnerabilities:${RESET}\n`);
