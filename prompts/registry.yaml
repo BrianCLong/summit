@@ -79,6 +79,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: intelligence-foundry-docs
+    version: v1
+    path: prompts/docs/intelligence-foundry-docs@v1.md
+    sha256: 7104841f9219f66a31d8ef8e650e129791aae50ef3f9f8dd44c5b72c10348b23
+    description: Create the Intelligence Foundry architecture documentation bundle and roadmap update.
+    scope:
+      paths:
+        - docs/architecture/intelligence-foundry/
+        - docs/architecture/comparisons/
+        - docs/architecture/narratives/
+        - docs/adr/ADR-021-intelligence-foundry.md
+        - docs/roadmap/STATUS.json
+        - prompts/docs/intelligence-foundry-docs@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - architecture
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
