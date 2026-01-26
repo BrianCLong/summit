@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-23T07:30:00Z",
-  "revision_note": "Merged: Counter-campaign optimization epics, Backlog sync, GA demo runbooks",
+  "last_updated": "2026-01-23T12:00:00Z",
+  "revision_note": "Added Antigravity judgment model scaffolding and governance artifacts",
   "initiatives": [
     {
       "id": "A",
