@@ -201,7 +201,7 @@ This is a **pnpm workspace** monorepo managed by **Turbo**:
 
 ## Web Codex Global Guidance
 
-Run the following workflow when preparing scoped CI pull requests for the `feat/mstc`, `feat/trr`, and `feat/opa` branches:
+Run the following workflow when preparing scoped CI pull requests for the `feat/mstc`, `feat/trr`, `feat/opa` branches:
 
 ```
 summit/
@@ -533,6 +533,15 @@ All agents must:
 1.  Check `docs/roadmap/STATUS.json` before starting work.
 2.  Update `docs/roadmap/STATUS.json` in the same PR as the implementation.
 3.  Adhere to the contracts defined in `docs/sprints/SPRINT_N_PLUS_7_ROADMAP.md`.
+
+## Graph Intent Mandates
+
+**All agents implementing retrieval logic must adhere to the Graph Intent Architecture:**
+
+1.  **Intent Compilation**: Do not write code that queries the Graph DB directly from user input. Always go through the `IntentCompiler`.
+2.  **Evidence Budgeting**: Do not implement open-ended traversals. Every query must have a `LIMIT` and be validated against the `EvidenceBudget`.
+3.  **Determinism**: Ensure all Cypher queries use `ORDER BY` and avoid non-deterministic `OPTIONAL MATCH` patterns without coalescing.
+4.  **Verification**: When modifying graph logic, run `scripts/ci/verify_query_determinism.ts`.
 
 ---
 

@@ -1,0 +1,59 @@
+# Summit GA Evidence Map
+# This registry defines the authoritative evidence sources for GA Readiness.
+# All artifacts must be machine-verifiable.
+
+schema_version: "1.0"
+status: "active"
+
+evidence_categories:
+  - id: "architecture_integrity"
+    name: "Architecture Integrity"
+    artifacts:
+      - id: "graph_intent_primitives"
+        path: "docs/architecture/graph_intent_primitives.md"
+        description: "Core primitives for deterministic GraphRAG."
+        verifier: "file_exists"
+
+  - id: "governance_policy"
+    name: "Governance & Policy"
+    artifacts:
+      - id: "evidence_budget_policy"
+        path: "docs/governance/evidence_budget_policy.md"
+        description: "Policy limiting graph context size."
+        verifier: "file_exists"
+      - id: "intent_schema"
+        path: "schemas/intent_spec.schema.json"
+        description: "JSON Schema for Intent Compilation."
+        verifier: "json_schema_valid"
+
+  - id: "compliance_controls"
+    name: "Compliance Controls"
+    artifacts:
+      - id: "graph_reasoning_controls"
+        path: "docs/compliance/graph_reasoning_controls.md"
+        description: "Mapping of graph primitives to SOC2/NIST."
+        verifier: "file_exists"
+
+  - id: "ci_gates"
+    name: "CI/CD Gates"
+    artifacts:
+      - id: "query_determinism_script"
+        path: "scripts/ci/verify_query_determinism.ts"
+        description: "Script validating Cypher query shape."
+        verifier: "file_exists"
+
+  - id: "product_strategy"
+    name: "Product Strategy"
+    artifacts:
+      - id: "evidence_first_positioning"
+        path: "docs/marketing/evidence_first_ai.md"
+        description: "Market positioning for Evidence-First AI."
+        verifier: "file_exists"
+      - id: "defensible_graph_ai"
+        path: "docs/pitch/defensible_graph_ai.md"
+        description: "Technical moat definition."
+        verifier: "file_exists"
+      - id: "moat_resilience"
+        path: "docs/strategy/moat_resilience.md"
+        description: "Strategic stress testing."
+        verifier: "file_exists"
