@@ -149,6 +149,35 @@ const aiInsights = [
   '🔍 Cross-reference opportunity with Case #34B',
 ];
 
+/**
+ * Safely renders text with **bold** markdown syntax without using dangerouslySetInnerHTML.
+ * This prevents XSS attacks from user-provided content.
+ */
+function renderMarkdownBold(text) {
+  const parts = [];
+  const regex = /\*\*(.*?)\*\*/g;
+  let lastIndex = 0;
+  let match;
+  let keyIndex = 0;
+
+  while ((match = regex.exec(text)) !== null) {
+    // Add text before the match
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+    // Add the bold text as a React element
+    parts.push(<strong key={keyIndex++}>{match[1]}</strong>);
+    lastIndex = regex.lastIndex;
+  }
+
+  // Add remaining text after last match
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : text;
+}
+
 function ChatMessage({ message, isUser, isLoading }) {
   return (
     <ListItem
@@ -187,13 +216,9 @@ function ChatMessage({ message, isUser, isLoading }) {
                   '& strong': { fontWeight: 'bold' },
                   '& em': { fontStyle: 'italic' },
                 }}
-                dangerouslySetInnerHTML={{
-                  __html: message.replace(
-                    /\*\*(.*?)\*\*/g,
-                    '<strong>$1</strong>',
-                  ),
-                }}
-              />
+              >
+                {renderMarkdownBold(message)}
+              </Typography>
             )}
           </Paper>
         }
