@@ -286,3 +286,17 @@ deny contains msg if {
 	count(missing) > 0
 	msg := sprintf("Evidence bundle missing components: %v", [missing])
 }
+
+# General Artifact Signing
+
+# Deny if SBOM is not signed
+deny contains msg if {
+	not input.sbom_signed
+	msg := "Missing signed SBOM"
+}
+
+# Deny if provenance is not signed
+deny contains msg if {
+	not input.provenance_signed
+	msg := "Missing signed build provenance"
+}
