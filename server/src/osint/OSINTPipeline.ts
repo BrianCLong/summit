@@ -20,6 +20,13 @@ export class OSINTPipeline {
     // 1. Initial Search/Enrichment to get candidates
     const initialEnrichment = await this.enrichmentService.enrich(query);
 
+    // [Automation Turn #5 Implementation Stub]
+    // TODO: Extract discrete Claims from enrichment results.
+    // TODO: Perform Claim-Centric Validation (independent of source trust).
+    // TODO: Check for Contradictions (e.g. validFrom/validTo overlaps with conflicting data).
+    // const claims = this.claimExtractor.extract(initialEnrichment);
+    // const validatedClaims = await this.claimValidator.validate(claims);
+
     // Prepare a temporary profile for matching
     const candidateProfile: Partial<OSINTProfile> = {
       tenantId,
