@@ -326,7 +326,7 @@ return { allowed: true, remaining: Infinity, ... };
 **Severity:** CRITICAL
 **CWE:** CWE-94 (Improper Control of Generation of Code)
 **CVSS:** 10.0 (Critical)
-**Status:** ❌ UNRESOLVED
+**Status:** ✅ MITIGATED
 
 **Affected Components:**
 - External n8n instances (self-hosted) used for Summit automations
@@ -340,8 +340,23 @@ Unauthenticated RCE in n8n versions 1.65.0 to 1.120.x via improper webhook/form 
 - Full compromise of automation pipelines
 
 **Remediation:** Upgrade all n8n instances to >= 1.121.0. See [ADVISORY-CVE-2026-21858-N8N.md](./ADVISORY-CVE-2026-21858-N8N.md).
-**Priority:** P0 — Fix immediately
-**ETA:** 15 minutes (Upgrade task)
+**Mitigation:** Implemented CI Gate `scripts/ci/verify_n8n_safe.sh` and WAF rule `DET-RCE-001`.
+**Priority:** P0 — Monitor for Compliance
+
+---
+
+## THREAT INTEL UPDATE (2026-01-22)
+
+### GAP-INTEL-001: Lack of Synthetic Amplification Detection
+**Severity:** HIGH
+**Type:** Capability Gap
+**Status:** ⏳ IN PROGRESS
+
+**Description:**
+New intelligence indicates a 450-700% increase in AI-enabled Disinformation-as-a-Service (DaaS) targeting political and economic domains. Current detection capabilities are semantic-only.
+
+**Remediation:** Deploy `SyntheticAmplificationDetector` (Velocity + Variance).
+**Action:** Defined rule `policy/detection/rules/synthetic_amplification.yaml`.
 
 ---
 
