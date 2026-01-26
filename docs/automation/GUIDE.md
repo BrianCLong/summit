@@ -13,7 +13,8 @@
 9. [Advanced Orchestration Patterns](#advanced-orchestration-patterns)
 10. [Monitoring & Analytics](#monitoring--analytics)
 11. [Best Practices](#best-practices)
-12. [API Reference](#api-reference)
+12. [Prompt Frameworks](#prompt-frameworks)
+13. [API Reference](#api-reference)
 
 ## Overview
 
@@ -68,26 +69,26 @@ The IntelGraph Automation and Workflow Engine is an enterprise-grade workflow or
 ### Creating a Workflow
 
 ```typescript
-import { WorkflowBuilder } from '@intelgraph/workflow-engine';
+import { WorkflowBuilder } from "@intelgraph/workflow-engine";
 
-const workflow = new WorkflowBuilder('Data Processing Pipeline')
-  .setDescription('Process and analyze incoming data')
-  .addEventTrigger('data.received')
-  .addActionStep('Validate Data', 'validation', {
-    schema: 'data_schema',
-    strict: true
+const workflow = new WorkflowBuilder("Data Processing Pipeline")
+  .setDescription("Process and analyze incoming data")
+  .addEventTrigger("data.received")
+  .addActionStep("Validate Data", "validation", {
+    schema: "data_schema",
+    strict: true,
   })
-  .addConditionStep('Check Quality', {
-    field: 'validation.errors',
-    operator: 'eq',
-    value: 0
+  .addConditionStep("Check Quality", {
+    field: "validation.errors",
+    operator: "eq",
+    value: 0,
   })
-  .addActionStep('Process Data', 'data_processing', {
-    algorithm: 'ml_analysis'
+  .addActionStep("Process Data", "data_processing", {
+    algorithm: "ml_analysis",
   })
   .connectSteps(0, 1)
-  .connectSteps(1, 2, 'success')
-  .setErrorHandling('retry')
+  .connectSteps(1, 2, "success")
+  .setErrorHandling("retry")
   .build();
 ```
 
@@ -114,24 +115,25 @@ The engine supports multiple trigger types:
 ### Example: Incident Response Workflow
 
 ```typescript
-const incidentWorkflow = WorkflowBuilder
-  .createIncidentResponseWorkflow('Security Incident Response')
-  .addActionStep('Create Ticket', 'jira', {
-    project: 'SECURITY',
-    issueType: 'Incident',
-    priority: 'Critical'
+const incidentWorkflow = WorkflowBuilder.createIncidentResponseWorkflow(
+  "Security Incident Response"
+)
+  .addActionStep("Create Ticket", "jira", {
+    project: "SECURITY",
+    issueType: "Incident",
+    priority: "Critical",
   })
-  .addActionStep('Notify Team', 'slack', {
-    channel: '#security',
-    message: 'Critical security incident detected'
+  .addActionStep("Notify Team", "slack", {
+    channel: "#security",
+    message: "Critical security incident detected",
   })
-  .addHumanStep('Assess Impact', ['security-lead'], {
+  .addHumanStep("Assess Impact", ["security-lead"], {
     formConfig: {
       fields: [
-        { name: 'severity', type: 'select', options: ['Low', 'High', 'Critical'] },
-        { name: 'impact', type: 'textarea', required: true }
-      ]
-    }
+        { name: "severity", type: "select", options: ["Low", "High", "Critical"] },
+        { name: "impact", type: "textarea", required: true },
+      ],
+    },
   })
   .build();
 ```
@@ -152,23 +154,23 @@ The RPA engine provides capabilities for:
 ### Example: Web Scraping Task
 
 ```typescript
-import { RPAEngine } from '@intelgraph/rpa';
+import { RPAEngine } from "@intelgraph/rpa";
 
 const rpaEngine = new RPAEngine();
 
 const scrapingTask = rpaEngine.registerTask({
-  name: 'News Scraper',
-  type: 'web_scraping',
+  name: "News Scraper",
+  type: "web_scraping",
   config: {
-    url: 'https://example.com/news',
+    url: "https://example.com/news",
     selectors: {
-      title: '.article-title',
-      content: '.article-body',
-      author: '.author-name'
-    }
+      title: ".article-title",
+      content: ".article-body",
+      author: ".author-name",
+    },
   },
-  schedule: '0 */6 * * *', // Every 6 hours
-  enabled: true
+  schedule: "0 */6 * * *", // Every 6 hours
+  enabled: true,
 });
 
 // Execute immediately
@@ -180,27 +182,27 @@ console.log(execution.result);
 
 ```typescript
 const fileTask = rpaEngine.registerTask({
-  name: 'CSV Processor',
-  type: 'file_processing',
+  name: "CSV Processor",
+  type: "file_processing",
   config: {
-    inputPath: '/data/input/*.csv',
-    outputPath: '/data/processed/',
-    operation: 'transform',
+    inputPath: "/data/input/*.csv",
+    outputPath: "/data/processed/",
+    operation: "transform",
     transformations: [
       {
-        type: 'filter',
-        customTransform: (row) => row.status === 'active'
+        type: "filter",
+        customTransform: (row) => row.status === "active",
       },
       {
-        type: 'map',
+        type: "map",
         customTransform: (row) => ({
           ...row,
-          processed_date: new Date().toISOString()
-        })
-      }
-    ]
+          processed_date: new Date().toISOString(),
+        }),
+      },
+    ],
   },
-  enabled: true
+  enabled: true,
 });
 ```
 
@@ -220,39 +222,39 @@ The task routing system provides:
 ### Example: Register Workers and Route Tasks
 
 ```typescript
-import { TaskRouter } from '@intelgraph/task-routing';
+import { TaskRouter } from "@intelgraph/task-routing";
 
-const router = new TaskRouter({ type: 'skill-based' });
+const router = new TaskRouter({ type: "skill-based" });
 
 // Register workers
 router.registerWorker({
-  id: 'worker-1',
-  name: 'Alice',
-  skills: ['javascript', 'react', 'node.js'],
+  id: "worker-1",
+  name: "Alice",
+  skills: ["javascript", "react", "node.js"],
   skillLevels: {
-    'javascript': 9,
-    'react': 8,
-    'node.js': 7
+    javascript: 9,
+    react: 8,
+    "node.js": 7,
   },
   capacity: 5,
   currentLoad: 0,
-  availability: 'available',
-  performanceRating: 8.5
+  availability: "available",
+  performanceRating: 8.5,
 });
 
 // Create and route a task
 const task = {
-  id: 'task-1',
-  title: 'Build React Component',
-  priority: 'high',
-  requiredSkills: ['react', 'javascript'],
+  id: "task-1",
+  title: "Build React Component",
+  priority: "high",
+  requiredSkills: ["react", "javascript"],
   minimumSkillLevel: 7,
   sla: {
     responseTime: 30, // 30 minutes
-    resolutionTime: 480 // 8 hours
+    resolutionTime: 480, // 8 hours
   },
-  status: 'pending',
-  createdAt: new Date()
+  status: "pending",
+  createdAt: new Date(),
 };
 
 const assignedWorkerId = await router.assignTask(task);
@@ -262,27 +264,27 @@ const assignedWorkerId = await router.assignTask(task);
 
 ```typescript
 router.addEscalationPolicy({
-  id: 'sla-escalation',
-  name: 'SLA Breach Escalation',
+  id: "sla-escalation",
+  name: "SLA Breach Escalation",
   enabled: true,
   conditions: [
     {
-      type: 'sla-breach',
-      threshold: 30 // minutes
-    }
+      type: "sla-breach",
+      threshold: 30, // minutes
+    },
   ],
   actions: [
     {
-      type: 'priority-increase'
+      type: "priority-increase",
     },
     {
-      type: 'reassign'
+      type: "reassign",
     },
     {
-      type: 'notify',
-      target: ['manager@company.com']
-    }
-  ]
+      type: "notify",
+      target: ["manager@company.com"],
+    },
+  ],
 });
 ```
 
@@ -293,64 +295,64 @@ router.addEscalationPolicy({
 The business rules engine supports DMN-compliant decision tables:
 
 ```typescript
-import { BusinessRulesEngine } from '@intelgraph/business-rules';
+import { BusinessRulesEngine } from "@intelgraph/business-rules";
 
 const rulesEngine = new BusinessRulesEngine();
 
 const discountTable = rulesEngine.createDecisionTable({
-  name: 'Customer Discount Rules',
-  version: '1.0.0',
-  hitPolicy: 'FIRST',
+  name: "Customer Discount Rules",
+  version: "1.0.0",
+  hitPolicy: "FIRST",
   inputs: [
     {
-      id: 'customer_tier',
-      label: 'Customer Tier',
-      name: 'customerTier',
-      type: 'string'
+      id: "customer_tier",
+      label: "Customer Tier",
+      name: "customerTier",
+      type: "string",
     },
     {
-      id: 'order_amount',
-      label: 'Order Amount',
-      name: 'orderAmount',
-      type: 'number'
-    }
+      id: "order_amount",
+      label: "Order Amount",
+      name: "orderAmount",
+      type: "number",
+    },
   ],
   outputs: [
     {
-      id: 'discount_percent',
-      label: 'Discount %',
-      name: 'discountPercent',
-      type: 'number'
-    }
+      id: "discount_percent",
+      label: "Discount %",
+      name: "discountPercent",
+      type: "number",
+    },
   ],
   rules: [
     {
-      id: 'rule-1',
+      id: "rule-1",
       priority: 1,
       enabled: true,
       conditions: [
-        { inputId: 'customer_tier', operator: 'eq', value: 'platinum' },
-        { inputId: 'order_amount', operator: 'gte', value: 1000 }
+        { inputId: "customer_tier", operator: "eq", value: "platinum" },
+        { inputId: "order_amount", operator: "gte", value: 1000 },
       ],
-      outputs: { discountPercent: 20 }
+      outputs: { discountPercent: 20 },
     },
     {
-      id: 'rule-2',
+      id: "rule-2",
       priority: 2,
       enabled: true,
       conditions: [
-        { inputId: 'customer_tier', operator: 'eq', value: 'gold' },
-        { inputId: 'order_amount', operator: 'gte', value: 500 }
+        { inputId: "customer_tier", operator: "eq", value: "gold" },
+        { inputId: "order_amount", operator: "gte", value: 500 },
       ],
-      outputs: { discountPercent: 15 }
-    }
-  ]
+      outputs: { discountPercent: 15 },
+    },
+  ],
 });
 
 // Evaluate decision table
 const result = rulesEngine.evaluateDecisionTable(discountTable.id, {
-  customerTier: 'platinum',
-  orderAmount: 1500
+  customerTier: "platinum",
+  orderAmount: 1500,
 });
 
 console.log(result.outputs); // { discountPercent: 20 }
@@ -360,16 +362,17 @@ console.log(result.outputs); // { discountPercent: 20 }
 
 ```typescript
 const expression = rulesEngine.createExpression({
-  name: 'Calculate Total',
-  expression: 'price * quantity * (1 - discount)',
-  language: 'JavaScript',
-  returnType: 'number'
+  name: "Calculate Total",
+  expression: "price * quantity * (1 - discount)",
+  language: "JavaScript",
+  returnType: "number",
 });
 
-const result = rulesEngine.evaluateExpression(
-  expression.expression,
-  { price: 100, quantity: 5, discount: 0.1 }
-);
+const result = rulesEngine.evaluateExpression(expression.expression, {
+  price: 100,
+  quantity: 5,
+  discount: 0.1,
+});
 // Result: 450
 ```
 
@@ -378,34 +381,34 @@ const result = rulesEngine.evaluateExpression(
 ### Creating a Connector
 
 ```typescript
-import { ConnectorRegistry, RestAPIConnector } from '@intelgraph/connectors';
+import { ConnectorRegistry, RestAPIConnector } from "@intelgraph/connectors";
 
 const registry = new ConnectorRegistry();
 
 // Register a REST API connector
 const slackConnector = registry.registerConnector({
-  id: 'slack-connector',
-  name: 'Slack Integration',
-  type: 'rest_api',
-  baseUrl: 'https://slack.com/api',
+  id: "slack-connector",
+  name: "Slack Integration",
+  type: "rest_api",
+  baseUrl: "https://slack.com/api",
   authentication: {
-    type: 'bearer',
+    type: "bearer",
     credentials: {
-      token: process.env.SLACK_BOT_TOKEN
-    }
+      token: process.env.SLACK_BOT_TOKEN,
+    },
   },
   timeout: 10000,
   retryConfig: {
     maxRetries: 3,
     retryDelay: 1000,
-    exponentialBackoff: true
-  }
+    exponentialBackoff: true,
+  },
 });
 
 // Execute connector operation
-const result = await slackConnector.execute('postMessage', {
-  channel: '#general',
-  text: 'Hello from workflow engine!'
+const result = await slackConnector.execute("postMessage", {
+  channel: "#general",
+  text: "Hello from workflow engine!",
 });
 ```
 
@@ -428,72 +431,76 @@ const result = await slackConnector.execute('postMessage', {
 ### Form Builder
 
 ```typescript
-import { FormBuilder } from '@intelgraph/no-code-builder';
+import { FormBuilder } from "@intelgraph/no-code-builder";
 
 const formBuilder = new FormBuilder();
 
 const form = formBuilder.createForm({
-  name: 'Incident Report Form',
-  version: '1.0.0',
+  name: "Incident Report Form",
+  version: "1.0.0",
   fields: [
     {
-      name: 'title',
-      label: 'Incident Title',
-      type: 'text',
+      name: "title",
+      label: "Incident Title",
+      type: "text",
       required: true,
       validation: {
         minLength: 10,
-        maxLength: 200
-      }
+        maxLength: 200,
+      },
     },
     {
-      name: 'severity',
-      label: 'Severity Level',
-      type: 'select',
+      name: "severity",
+      label: "Severity Level",
+      type: "select",
       required: true,
       options: [
-        { label: 'Low', value: 'low' },
-        { label: 'Medium', value: 'medium' },
-        { label: 'High', value: 'high' },
-        { label: 'Critical', value: 'critical' }
-      ]
+        { label: "Low", value: "low" },
+        { label: "Medium", value: "medium" },
+        { label: "High", value: "high" },
+        { label: "Critical", value: "critical" },
+      ],
     },
     {
-      name: 'description',
-      label: 'Description',
-      type: 'textarea',
+      name: "description",
+      label: "Description",
+      type: "textarea",
       required: true,
       validation: {
-        minLength: 50
-      }
-    }
+        minLength: 50,
+      },
+    },
   ],
   layout: {
-    type: 'single-column',
-    responsive: true
+    type: "single-column",
+    responsive: true,
   },
   validation: {
     customRules: [
       {
-        name: 'critical-requires-manager',
+        name: "critical-requires-manager",
         rule: (data) => {
-          if (data.severity === 'critical') {
+          if (data.severity === "critical") {
             return !!data.managerNotified;
           }
           return true;
         },
-        message: 'Critical incidents require manager notification'
-      }
-    ]
-  }
+        message: "Critical incidents require manager notification",
+      },
+    ],
+  },
 });
 
 // Submit form
-const submission = formBuilder.submitForm(form.id, {
-  title: 'Database connection failure',
-  severity: 'high',
-  description: 'Primary database server is not responding...'
-}, 'user-123');
+const submission = formBuilder.submitForm(
+  form.id,
+  {
+    title: "Database connection failure",
+    severity: "high",
+    description: "Primary database server is not responding...",
+  },
+  "user-123"
+);
 ```
 
 ## Advanced Orchestration Patterns
@@ -503,50 +510,50 @@ const submission = formBuilder.submitForm(form.id, {
 Distributed transactions with compensation:
 
 ```typescript
-import { SagaOrchestrator } from '@intelgraph/orchestration';
+import { SagaOrchestrator } from "@intelgraph/orchestration";
 
 const saga = new SagaOrchestrator();
 
-saga.defineSaga('order-saga', [
+saga.defineSaga("order-saga", [
   {
-    id: 'reserve-inventory',
-    name: 'Reserve Inventory',
+    id: "reserve-inventory",
+    name: "Reserve Inventory",
     transaction: async (ctx) => {
       return await inventoryService.reserve(ctx.orderId, ctx.items);
     },
     compensation: async (ctx) => {
       await inventoryService.release(ctx.orderId);
-    }
+    },
   },
   {
-    id: 'charge-payment',
-    name: 'Charge Payment',
+    id: "charge-payment",
+    name: "Charge Payment",
     transaction: async (ctx) => {
       return await paymentService.charge(ctx.customerId, ctx.amount);
     },
     compensation: async (ctx) => {
       await paymentService.refund(ctx.customerId, ctx.amount);
-    }
+    },
   },
   {
-    id: 'ship-order',
-    name: 'Ship Order',
+    id: "ship-order",
+    name: "Ship Order",
     transaction: async (ctx) => {
       return await shippingService.ship(ctx.orderId, ctx.address);
     },
     compensation: async (ctx) => {
       await shippingService.cancel(ctx.orderId);
-    }
-  }
+    },
+  },
 ]);
 
 // Execute saga
-const execution = await saga.executeSaga('order-saga', {
-  orderId: 'ORD-123',
-  customerId: 'CUST-456',
-  items: [{ sku: 'ITEM-1', qty: 2 }],
+const execution = await saga.executeSaga("order-saga", {
+  orderId: "ORD-123",
+  customerId: "CUST-456",
+  items: [{ sku: "ITEM-1", qty: 2 }],
   amount: 99.99,
-  address: '123 Main St'
+  address: "123 Main St",
 });
 ```
 
@@ -555,13 +562,13 @@ const execution = await saga.executeSaga('order-saga', {
 Fault tolerance for external services:
 
 ```typescript
-import { CircuitBreaker } from '@intelgraph/orchestration';
+import { CircuitBreaker } from "@intelgraph/orchestration";
 
-const breaker = new CircuitBreaker('payment-service', {
+const breaker = new CircuitBreaker("payment-service", {
   failureThreshold: 5,
   successThreshold: 2,
   timeout: 60000, // 1 minute
-  monitoringPeriod: 300000 // 5 minutes
+  monitoringPeriod: 300000, // 5 minutes
 });
 
 // Use circuit breaker
@@ -571,7 +578,7 @@ try {
   });
 } catch (error) {
   // Circuit is open, use fallback
-  console.log('Payment service unavailable, queuing for later');
+  console.log("Payment service unavailable, queuing for later");
 }
 ```
 
@@ -580,38 +587,28 @@ try {
 Event-driven state management:
 
 ```typescript
-import { EventStore } from '@intelgraph/orchestration';
+import { EventStore } from "@intelgraph/orchestration";
 
 const eventStore = new EventStore();
 
 // Append events
-await eventStore.appendEvent(
-  'user-123',
-  'User',
-  'UserRegistered',
-  {
-    email: 'user@example.com',
-    name: 'John Doe'
-  }
-);
+await eventStore.appendEvent("user-123", "User", "UserRegistered", {
+  email: "user@example.com",
+  name: "John Doe",
+});
 
-await eventStore.appendEvent(
-  'user-123',
-  'User',
-  'EmailVerified',
-  {
-    verifiedAt: new Date()
-  }
-);
+await eventStore.appendEvent("user-123", "User", "EmailVerified", {
+  verifiedAt: new Date(),
+});
 
 // Rebuild state from events
 const userState = await eventStore.rebuildState(
-  'user-123',
+  "user-123",
   (state, event) => {
     switch (event.type) {
-      case 'UserRegistered':
+      case "UserRegistered":
         return { ...state, ...event.data, isVerified: false };
-      case 'EmailVerified':
+      case "EmailVerified":
         return { ...state, isVerified: true };
       default:
         return state;
@@ -630,6 +627,7 @@ GET /api/analytics/workflow-stats
 ```
 
 Response:
+
 ```json
 {
   "totalWorkflows": 45,
@@ -647,6 +645,7 @@ GET /api/analytics/execution-metrics?workflowId=abc-123&period=7d
 ```
 
 Response:
+
 ```json
 {
   "period": "7d",
@@ -696,11 +695,16 @@ Response:
 4. **Caching strategy**: Implement multi-level caching
 5. **Load balancing**: Distribute load across instances
 
+## Prompt Frameworks
+
+- [Advanced Tool Use Prompt Framework (Summit Dev Station)](./advanced-tool-use-prompt-framework.md)
+
 ## API Reference
 
 ### Workflow Management
 
 #### Create Workflow
+
 ```
 POST /api/workflows
 Content-Type: application/json
@@ -715,6 +719,7 @@ Content-Type: application/json
 ```
 
 #### Execute Workflow
+
 ```
 POST /api/workflows/:id/execute
 Content-Type: application/json
@@ -725,6 +730,7 @@ Content-Type: application/json
 ```
 
 #### Get Workflow Execution
+
 ```
 GET /api/executions/:id
 ```
@@ -732,11 +738,13 @@ GET /api/executions/:id
 ### Human Tasks
 
 #### Get My Tasks
+
 ```
 GET /api/human-tasks?assignee=me&status=pending
 ```
 
 #### Complete Task
+
 ```
 POST /api/human-tasks/:id/complete
 Content-Type: application/json
@@ -749,6 +757,7 @@ Content-Type: application/json
 ### RPA Tasks
 
 #### Register RPA Task
+
 ```
 POST /api/rpa/tasks
 Content-Type: application/json
@@ -762,6 +771,7 @@ Content-Type: application/json
 ```
 
 #### Execute RPA Task
+
 ```
 POST /api/rpa/tasks/:id/execute
 ```

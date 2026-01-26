@@ -79,6 +79,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: automation-advanced-tool-use-framework
+    version: v1
+    path: prompts/automation/advanced-tool-use-framework@v1.md
+    sha256: cf2053545731cf37c27b9ed74490691cd670b94adb1e309b29b08f6104fde5cb
+    description: Document and link the advanced tool use prompt framework for automation workflows.
+    scope:
+      paths:
+        - docs/automation/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/automation/
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - automation
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
