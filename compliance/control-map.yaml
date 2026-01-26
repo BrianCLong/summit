@@ -86,3 +86,13 @@ controls:
       - "docs/models/"
     status: covered
     owner: "data-science-team"
+
+  SC1.1:
+    description: "Software Supply Chain Provenance (SLSA)"
+    summit_artifacts:
+      - ".summit/provenance-policy.json"
+      - ".github/workflows/provenance-verify.yml"
+    evidence:
+      - "ci/gsv-attest-verify"
+    status: covered
+    owner: "security-team"
