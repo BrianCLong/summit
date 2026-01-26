@@ -1,0 +1,154 @@
+# Orchestration Primitives Definition
+# Version: 1.0.0
+# Status: ACTIVE
+# Governance: Enforced by `scripts/ci/verify_data_registry.mjs` (conceptually) and `AgentRuntime`
+
+primitives:
+  - name: AgentExecutionRecord
+    description: >
+      The authoritative, immutable log of a single agent's execution cycle.
+      It captures the input, the output, and the cost/performance metrics.
+      This record is a sub-component of the broader Agent Execution Proof (AEP).
+    schema:
+      type: object
+      required:
+        - executionId
+        - agentId
+        - timestamp
+        - inputHash
+        - outputHash
+        - cost
+        - status
+      properties:
+        executionId:
+          type: string
+          description: "UUIDv4 of the execution run."
+        agentId:
+          type: string
+          description: "Identifier of the agent (e.g., 'agent:analyst:v2')."
+        timestamp:
+          type: string
+          format: date-time
+        inputHash:
+          type: string
+          description: "SHA-256 hash of the input context."
+        outputHash:
+          type: string
+          description: "SHA-256 hash of the generated output/evidence."
+        cost:
+          type: object
+          properties:
+            tokensIn: { type: integer }
+            tokensOut: { type: integer }
+            estimatedCostUsd: { type: number }
+        status:
+          type: string
+          enum: ["SUCCESS", "FAILURE", "POLICY_BLOCKED", "TIMEOUT"]
+        evidenceIds:
+          type: array
+          items:
+            type: string
+            description: "List of Evidence IDs generated or referenced."
+
+  - name: OrchestrationDecisionLog
+    description: >
+      Captures the 'Why' behind routing and tool selection.
+      Used to audit why a specific agent was selected or why a tool was allowed/denied.
+    schema:
+      type: object
+      required:
+        - decisionId
+        - contextId
+        - decisionType
+        - outcome
+        - policyVersion
+      properties:
+        decisionId:
+          type: string
+          description: "UUIDv4 of the decision event."
+        contextId:
+          type: string
+          description: "Link to the parent execution or request."
+        decisionType:
+          type: string
+          enum: ["ROUTING", "TOOL_APPROVAL", "MEMORY_ACCESS", "PLAN_DECOMPOSITION"]
+        outcome:
+          type: string
+          enum: ["ALLOW", "DENY", "MODIFY", "ROUTE_TO_SPECIALIST"]
+        reasoning:
+          type: string
+          description: "The logic or policy clause that drove the decision."
+        policyVersion:
+          type: string
+          description: "Git hash or version tag of the policy set used."
+        candidates:
+          type: array
+          description: "List of agents/tools considered but rejected."
+
+  - name: MemoryScopeManifest
+    description: >
+      Defines the 'Scope of View' for an agent.
+      It explicitly lists which data artifacts an agent is allowed to read (R) or write (W).
+      Implementation of the 'Least Privilege' principle for context.
+    schema:
+      type: object
+      required:
+        - scopeId
+        - rules
+      properties:
+        scopeId:
+          type: string
+        rules:
+          type: array
+          items:
+            type: object
+            required: ["resourcePattern", "access"]
+            properties:
+              resourcePattern:
+                type: string
+                description: "Regex or glob pattern for data resources (e.g., 'evidence:2024:*')."
+              access:
+                type: string
+                enum: ["READ", "WRITE", "READ_WRITE"]
+              justification:
+                type: string
+                description: "Why this access is needed."
+
+  - name: HierarchicalPlanGraph
+    description: >
+      A deterministic Directed Acyclic Graph (DAG) representing the decomposed plan.
+      Unlike a natural language plan, this is strict, with typed inputs/outputs between nodes.
+    schema:
+      type: object
+      required:
+        - planId
+        - nodes
+        - edges
+      properties:
+        planId:
+          type: string
+        nodes:
+          type: array
+          items:
+            type: object
+            properties:
+              nodeId: { type: string }
+              agentRole: { type: string }
+              taskSpec: { type: object }
+              timeoutMs: { type: integer }
+        edges:
+          type: array
+          items:
+            type: object
+            properties:
+              from: { type: string }
+              to: { type: string }
+              dataContract: { type: string, description: "Schema ID of the data passed." }
+
+integration_points:
+  - system: "MaestroService"
+    role: "Enforces `HierarchicalPlanGraph` execution and generates `AgentExecutionRecord`."
+  - system: "PolicyEngine"
+    role: "Evaluates `MemoryScopeManifest` and generates `OrchestrationDecisionLog`."
+  - system: "ProvenanceLedger"
+    role: "Persists `AgentExecutionRecord` and `OrchestrationDecisionLog` for audit."
