@@ -1,0 +1,23 @@
+# Canonical Security Gates
+# This file defines the security gates that must pass for a release to be considered secure.
+
+version: 1
+
+gates:
+  - id: sast
+    type: required
+    description: "Static Application Security Testing (SAST)"
+    tool: "snyk"
+    threshold: 0 # No high or critical vulnerabilities
+
+  - id: sca
+    type: required
+    description: "Software Composition Analysis (SCA)"
+    tool: "snyk"
+    threshold: 0 # No high or critical vulnerabilities
+
+  - id: secret-scanning
+    type: required
+    description: "Secret Scanning"
+    tool: "gitleaks"
+    threshold: 0 # No secrets found
