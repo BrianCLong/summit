@@ -5,11 +5,18 @@
 
 // SBOM Types
 export interface SBOMComponent {
-  type: 'library' | 'framework' | 'application' | 'container' | 'operating-system';
+  type:
+    | 'library'
+    | 'framework'
+    | 'application'
+    | 'container'
+    | 'operating-system'
+    | 'cryptographic-asset'
+    | 'data';
   name: string;
   version: string;
   purl?: string;
-  licenses?: string[];
+  licenses?: (string | { license: { id?: string; name?: string; url?: string } })[];
   hashes?: {
     algorithm: string;
     content: string;
@@ -17,11 +24,34 @@ export interface SBOMComponent {
   supplier?: string;
   author?: string;
   description?: string;
+  // CycloneDX 1.7 Cryptography (CBOM)
+  cryptography?: {
+    assetType: 'algorithm' | 'certificate' | 'protocol' | 'related-asset';
+    algorithmProperties?: {
+      primitive?: string;
+      parameterSet?: string;
+      curve?: string;
+      executionEnvironment?: string;
+      implementationPlatform?: string;
+      certificationLevel?: string[];
+    };
+  };
+  // CycloneDX 1.7 Intellectual Property & Evidence
+  evidence?: {
+    licenses?: { license: { id?: string; name?: string } }[];
+    copyright?: { text: string }[];
+    occurrences?: { line?: number; offset?: number; symbol?: string; location: string }[];
+    citations?: {
+      text: string;
+      links?: string[];
+      reference?: string;
+    }[];
+  };
 }
 
 export interface SBOMDocument {
   bomFormat: 'CycloneDX' | 'SPDX';
-  specVersion: string;
+  specVersion: string; // Updated to '1.7' in generator
   serialNumber: string;
   version: number;
   metadata: {
@@ -31,6 +61,12 @@ export interface SBOMDocument {
       type: string;
       name: string;
       version: string;
+    };
+    // CycloneDX 1.7 IP metadata
+    manufacture?: {
+      name: string;
+      url?: string[];
+      contact?: { name?: string; email?: string }[];
     };
   };
   components: SBOMComponent[];
