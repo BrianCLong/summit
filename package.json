@@ -131,7 +131,7 @@
     "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
     "ga:evidence-pack": "node scripts/release/ga_evidence_pack.mjs",
     "ga:evidence-pack:check": "node scripts/release/ga_evidence_pack.mjs --check-determinism",
-    "release:ready": "pnpm ga:verify && GA_VERIFY_MODE=true pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
+    "release:ready": "npm run compliance:antigravity && pnpm ga:verify && GA_VERIFY_MODE=true pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
     "prepare": "husky"
   },
   "keywords": [
@@ -324,9 +324,13 @@
       "apollo-server-express": ">=3.13.0",
       "redis": ">=5.9.0",
       "@types/express": "4.17.21",
-      "@types/express-serve-static-core": "4.19.6",
-      "react": "18.3.1",
-      "react-dom": "18.3.1"
+      "@types/express-serve-static-core": "4.19.6"
+    },
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "react": "*",
+        "react-dom": "*"
+      }
     }
   }
 }

@@ -6,5 +6,13 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 4173
-  }
+  },
+  test: {
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/tests/**', // Playwright tests
+      '**/*.spec.ts', // Playwright spec files
+    ],
+  },
 });

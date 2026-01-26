@@ -7,7 +7,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
-    "test": "jest",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src",
     "type-check": "tsc --noEmit"
   },

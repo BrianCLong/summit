@@ -17,6 +17,5 @@ module.exports = {
   },
   moduleNameMapper: {
     ...baseConfig.moduleNameMapper,
-    '^pg$': '<rootDir>/__mocks__/pg.js',
   },
 };
