@@ -10,6 +10,7 @@ import Redis from 'ioredis';
 import { trace, context, SpanStatusCode, Span } from '@opentelemetry/api';
 import { Logger } from 'pino';
 import { z } from 'zod';
+import { CostEstimator } from './CostEstimator.js';
 
 // Type definitions
 export interface RunConfig {
@@ -101,6 +102,7 @@ export class EnhancedAutonomousOrchestrator {
   private logger: Logger;
   private tracer: any;
   private policyEngine: PolicyEngine;
+  private costEstimator: CostEstimator;
   private actions: Map<string, Action> = new Map();
   private killSwitchEnabled = false;
 
@@ -109,12 +111,14 @@ export class EnhancedAutonomousOrchestrator {
     redis: Redis,
     logger: Logger,
     policyEngine: PolicyEngine,
+    costEstimator?: CostEstimator,
   ) {
     this.db = db;
     this.redis = redis;
     this.logger = logger;
     this.tracer = trace.getTracer('autonomous-orchestrator');
     this.policyEngine = policyEngine;
+    this.costEstimator = costEstimator || new CostEstimator();
 
     // Monitor kill switch from Redis
     this.redis.subscribe('orchestrator:killswitch');
@@ -526,7 +530,30 @@ export class EnhancedAutonomousOrchestrator {
       }),
     };
 
-    return [baseTask];
+    const tasks = [baseTask];
+
+    // Calculate total estimated cost
+    const totalCost = this.costEstimator.estimatePlan(tasks);
+
+    // Check against run budget
+    if (run.budget_usd && totalCost.usd > run.budget_usd) {
+      throw new Error(
+        `Plan exceeds USD budget: $${totalCost.usd} > $${run.budget_usd}`,
+      );
+    }
+
+    if (run.budget_tokens && totalCost.tokens > run.budget_tokens) {
+      throw new Error(
+        `Plan exceeds token budget: ${totalCost.tokens} > ${run.budget_tokens}`,
+      );
+    }
+
+    this.logger.info(
+      { runId: run.id, totalCost, budget: { usd: run.budget_usd, tokens: run.budget_tokens } },
+      'Plan cost estimated',
+    );
+
+    return tasks;
   }
 
   /**
