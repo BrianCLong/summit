@@ -176,10 +176,18 @@ export class BackupService {
               writeTarget.write(line);
           }
 
-          const relResult = await session.run('MATCH ()-[r]->() RETURN r');
+          const relResult = await session.run('MATCH (a)-[r]->(b) RETURN r, a.id as startId, b.id as endId');
           for (const record of relResult.records) {
               const rel = record.get('r');
-              const line = JSON.stringify({ type: 'rel', typeName: rel.type, props: rel.properties }) + '\n';
+              const startId = record.get('startId');
+              const endId = record.get('endId');
+              const line = JSON.stringify({
+                  type: 'rel',
+                  typeName: rel.type,
+                  props: rel.properties,
+                  startId,
+                  endId
+              }) + '\n';
               writeTarget.write(line);
           }
 
