@@ -2,7 +2,7 @@
 
 **To:** Principal Engineers, Executive Team
 **From:** Jules, Staff Engineer & Platform Strategist
-**Date:** 2025-12-31
+**Date:** 2026-01-25
 **Subject:** Competitive Intelligence Synthesis & 2026 Strategic Advantage Plan
 
 ---
@@ -20,7 +20,7 @@ This report outlines how we convert our core strengths—**Deterministic Provena
 | Dimension | Summit (Target) | Neo4j | TigerGraph | AWS Neptune | Zero-ETL Engines |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Graph Analytics Depth** | **High** (Native) | High | High (Dist.) | Moderate | Moderate |
-| **Vector / AI Integration** | **High** (Native RAG) | High (GDS) | Moderate | Moderate | High |
+| **Vector / AI Integration** | **High** (Native RAG) | High (GDS) | High (TigerVector) | Moderate | High |
 | **Cloud Ops & HA** | **Hybrid/Edge** | High | High | High (Managed) | High |
 | **Pricing & Lock-in** | **Low** (Open Std) | Moderate | High (GSQL) | High (AWS) | High |
 | **Governance & Provenance** | **Absolute** (OPA) | Low | Low | Low | Low |
@@ -90,7 +90,7 @@ This report outlines how we convert our core strengths—**Deterministic Provena
 
 ### Why Summit vs Managed Cloud Graphs (Neptune)
 
-> "Cloud graphs are silos. Summit is **field-ready and multi-cloud**. We deliver enterprise scale without the 'Cloud Tax' or lock-in, using a cost-aware hybrid planner that optimizes for your mission, not the provider's bottom line."
+> "Cloud graphs are silos. While Neptune expands to 30+ regions (including 7 new GA regions in 2026) and integrates with Bedrock, it remains an AWS-locked service. Summit is **field-ready and multi-cloud**. We deliver enterprise scale without the 'Cloud Tax' or lock-in, using a cost-aware hybrid planner that optimizes for your mission, not the provider's bottom line."
 
 ### Why Summit for Regulated Domains
 
@@ -105,6 +105,8 @@ This report outlines how we convert our core strengths—**Deterministic Provena
 | **XAI Superiority** | Neo4j acquires XAI startup to add "transparency" layers. | Open-source our **Graph-XAI Benchmarks** to set the industry standard before they can react. |
 | **Edge Readiness** | Palantir releases "Edge-Lite" for mobile. | Harden the **Governed Sync Protocol** and publish a "Mission-Ready Immutability" whitepaper. |
 | **Policy-as-Code** | AWS adds OPA-like guards to Bedrock KB. | Deepen **Provenance-Weighted Retrieval** to ensure our grounding remains qualitatively superior. |
+| **Hybrid Vector Search** | TigerGraph releases TigerVector with superior hybrid benchmarks. | Accelerate **Hybrid Query Planner MVP** and publish **Deterministic RAG Benchmarks**. |
+| **Zero-ETL Analytics** | PuppyGraph enables graph queries on lakehouses without ingest. | Highlight **Execution-Layer Governance**; Zero-ETL lacks the deterministic ledger needed for audit. |
 
 ---
 
