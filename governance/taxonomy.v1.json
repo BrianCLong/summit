@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "1.0.0",
+  "definitions": {
+    "LifecycleStage": {
+      "type": "string",
+      "enum": [
+        "design",
+        "training",
+        "evaluation",
+        "deployment",
+        "monitoring",
+        "retirement"
+      ]
+    },
+    "RiskClass": {
+      "type": "string",
+      "enum": [
+        "low",
+        "limited",
+        "high",
+        "prohibited"
+      ],
+      "description": "Aligned with EU AI Act classifications"
+    },
+    "ControlType": {
+      "type": "string",
+      "enum": [
+        "access",
+        "traceability",
+        "fairness",
+        "explainability",
+        "safety",
+        "auditability"
+      ]
+    },
+    "ArtifactType": {
+      "type": "string",
+      "enum": [
+        "model",
+        "dataset",
+        "agent",
+        "policy",
+        "report"
+      ]
+    }
+  },
+  "required": ["version", "definitions"]
+}
