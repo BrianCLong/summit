@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-01-26T23:16:51.406Z",
+  "baseVersion": "v1",
+  "hasBreakingChanges": false,
+  "summary": {
+    "breaking": 0,
+    "nonBreaking": 0,
+    "deprecated": 0
+  },
+  "breakingChanges": [],
+  "nonBreakingChanges": [],
+  "deprecatedChanges": [],
+  "recommendations": [
+    "✅ No API changes detected - schemas are identical"
+  ],
+  "schemaHashes": {
+    "current": {
+      "graphql": "sha256:d917320558d8df5aa3b2d0d4f091bff582261bd8ed98250ca78980a75fd78c42",
+      "openapi": "sha256:6207a49038728ea0a8664af4e9a06b235330eb6ae1390d1e3162dcc435e6c3d4"
+    },
+    "snapshot": {
+      "graphql": "sha256:d917320558d8df5aa3b2d0d4f091bff582261bd8ed98250ca78980a75fd78c42",
+      "openapi": "sha256:6207a49038728ea0a8664af4e9a06b235330eb6ae1390d1e3162dcc435e6c3d4"
+    }
+  }
+}
