@@ -1,0 +1,4 @@
+release:
+  blackout_window: false
+  max_risk_level: "medium"
+  min_test_coverage: 80
