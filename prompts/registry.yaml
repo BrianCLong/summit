@@ -243,22 +243,24 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: adr-pr-template-cleanup
+  - id: intelligence-foundry-docs
     version: v1
-    path: prompts/docs/adr-pr-template-cleanup@v1.md
-    sha256: 429dc47c69fb43ee25eff48a54868fc88e2faf48f8de6a213d702794d2cb3d07
-    description: Update PR and ADR templates for current workflow guidance and formatting.
+    path: prompts/docs/intelligence-foundry-docs@v1.md
+    sha256: 7104841f9219f66a31d8ef8e650e129791aae50ef3f9f8dd44c5b72c10348b23
+    description: Create the Intelligence Foundry architecture documentation bundle and roadmap update.
     scope:
       paths:
-        - .github/
-        - docs/ADR/
-        - agents/examples/
-        - prompts/docs/adr-pr-template-cleanup@v1.md
+        - docs/architecture/intelligence-foundry/
+        - docs/architecture/comparisons/
+        - docs/architecture/narratives/
+        - docs/adr/ADR-021-intelligence-foundry.md
+        - docs/roadmap/STATUS.json
+        - prompts/docs/intelligence-foundry-docs@v1.md
         - prompts/registry.yaml
       domains:
         - documentation
+        - architecture
         - governance
-        - quality
     verification:
       tiers_required:
         - C

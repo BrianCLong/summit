@@ -214,14 +214,41 @@
           "evidence": "Roadmap defined in docs/runbooks/elite-governed-ux-analytics-roadmap.md"
         }
       ]
+    },
+    {
+      "id": "H",
+      "name": "Intelligence Foundry",
+      "epics": [
+        {
+          "id": "H1",
+          "name": "Architecture Spec & ADR",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "evidence": "docs/architecture/intelligence-foundry/SPEC.md and ADR-021"
+        },
+        {
+          "id": "H2",
+          "name": "Evidence & Attestation Schema",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "evidence": "docs/architecture/intelligence-foundry/EVIDENCE_ATTESTATIONS.md"
+        },
+        {
+          "id": "H3",
+          "name": "Investor Moat Narrative",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "evidence": "docs/architecture/narratives/investor_moat_narrative.md"
+        }
+      ]
     }
   ],
   "summary": {
-    "rc_ready": 5,
+    "rc_ready": 8,
     "partial": 1,
     "incomplete": 0,
     "not_started": 15,
-    "total": 22,
+    "total": 24,
     "ga_blockers": []
   }
 }
