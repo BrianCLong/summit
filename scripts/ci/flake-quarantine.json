@@ -1,0 +1,4 @@
+{
+  "testNamePattern": "placeholder-flaky-test",
+  "retries": 2
+}
