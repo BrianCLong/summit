@@ -13,6 +13,7 @@ The unified intelligence analysis platform with AI-augmented graph analytics.
 ## 🛡️ Governance Status
 
 ![Fresh Evidence Rate (7d)](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/BrianCLong/summit/main/docs/governance/metrics/fresh-evidence-rate.json)
+![Golden Main](https://github.com/BrianCLong/summit/actions/workflows/golden-main.yml/badge.svg)
 
 ## 📚 Documentation
 
