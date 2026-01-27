@@ -22,8 +22,6 @@ jobs:
   dependency-review:
     name: Block vulnerable dependency changes
     runs-on: ubuntu-latest
-    # dependency-review-action only works for pull_request/merge_group events
-    if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target' || github.event_name == 'merge_group'
     steps:
       - name: Dependency review
         uses: actions/dependency-review-action@3c4e3dcb1aa7874d2c16be7d79418e9b7efd6261 # v4.8.2
@@ -37,11 +35,8 @@ jobs:
     name: Snyk dependency vulnerability scan
     needs: dependency-review
     runs-on: ubuntu-latest
-    # Run if dependency-review passed or was skipped, and not from fork PRs
-    if: |
-      always() &&
-      (needs.dependency-review.result == 'success' || needs.dependency-review.result == 'skipped') &&
-      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    # Only run on same-repo PRs (not forks)
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     steps:
@@ -82,8 +77,7 @@ jobs:
     name: Snyk scan (skipped - no token)
     needs: dependency-review
     runs-on: ubuntu-latest
-    # Run if dependency-review passed or was skipped
-    if: always() && (needs.dependency-review.result == 'success' || needs.dependency-review.result == 'skipped')
+    # Shows notice when job might be skipped (this runs always, checks in step)
     steps:
       - name: Notice
         run: |

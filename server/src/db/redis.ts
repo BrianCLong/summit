@@ -1,48 +1,49 @@
 // @ts-nocheck
-import Redis from 'ioredis';
+import Redis, { Cluster } from 'ioredis';
 import * as dotenv from 'dotenv';
 import pino from 'pino';
+import config from '../config/index.js';
+import { RedisService } from '../cache/redis.js';
 
 dotenv.config();
 
 const logger = (pino as any)();
 
-const REDIS_HOST = process.env.REDIS_HOST || 'redis';
-const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379', 10);
-
+// Validate production security
 if (
   process.env.NODE_ENV === 'production' &&
-  (!process.env.REDIS_PASSWORD || process.env.REDIS_PASSWORD === 'devpassword')
+  config.redis.password === 'devpassword'
 ) {
   throw new Error(
     'Security Error: REDIS_PASSWORD must be set and cannot be "devpassword" in production',
   );
 }
-const REDIS_PASSWORD = process.env.REDIS_PASSWORD || 'devpassword';
 
 import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
 
-let redisClient: Redis;
+let redisClient: Redis | Cluster;
 
-export function getRedisClient(): Redis {
+export function getRedisClient(): Redis | Cluster {
   if (!redisClient) {
     try {
-      redisClient = new Redis({
-        host: REDIS_HOST,
-        port: REDIS_PORT,
-        password: REDIS_PASSWORD,
-        connectTimeout: 5000,
-        lazyConnect: true,
+      // Use RedisService from cache module to handle connection logic including clustering
+      const redisService = new RedisService({
+        url: `redis://${config.redis.host}:${config.redis.port}`,
+        clusterNodes: config.redis.clusterNodes
       });
 
-      redisClient.on('connect', () => logger.info('Redis client connected.'));
-      redisClient.on('error', (err: any) => {
+      redisClient = redisService.getClient() as Redis | Cluster;
+
+      // Attach event listeners (ioredis clients emit events)
+      (redisClient as any).on('connect', () => logger.info('Redis client connected.'));
+      (redisClient as any).on('error', (err: any) => {
         logger.warn(
           `Redis connection failed - using mock responses. Error: ${err.message}`,
         );
         redisClient = createMockRedisClient() as any;
       });
 
+      // Wrap methods for telemetry
       const originalGet = redisClient.get.bind(redisClient);
       redisClient.get = async (key: string) => {
         const value = await originalGet(key);
@@ -55,15 +56,15 @@ export function getRedisClient(): Redis {
       };
 
       const originalSet = redisClient.set.bind(redisClient);
-      redisClient.set = async (key: string, value: string) => {
+      redisClient.set = async (key: string, value: string, ...args: any[]) => {
         telemetry.subsystems.cache.sets.add(1);
-        return await originalSet(key, value);
+        return await originalSet(key, value, ...args);
       };
 
       const originalDel = redisClient.del.bind(redisClient);
-      redisClient.del = (async (key: string) => {
+      redisClient.del = (async (...keys: string[]) => {
         telemetry.subsystems.cache.dels.add(1);
-        return await originalDel(key);
+        return await originalDel(...keys);
       }) as any;
     } catch (error: any) {
       logger.warn(

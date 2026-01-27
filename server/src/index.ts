@@ -18,11 +18,7 @@ import { subscriptionEngine } from './graphql/subscriptionEngine.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
-// Stub for telemetry (module not yet created)
-const initTelemetry = (serviceName: string) => ({
-  shutdown: async () => { /* stub */ },
-  start: async () => { /* stub */ }
-});
+import { initTelemetry } from '@intelgraph/telemetry-config';
 import { streamingRateLimiter } from './routes/streaming.js';
 import { startOSINTWorkers } from './services/OSINTQueueService.js';
 import { ingestionService } from './services/IngestionService.js';
