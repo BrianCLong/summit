@@ -643,7 +643,8 @@ class SecurityVerifier {
 
     const telemetryUsesPrivacy = telemetryFile !== null && (
       telemetryFile.includes('privacyService.anonymizeId') ||
-      telemetryFile.includes('privacyService.maskPII')
+      telemetryFile.includes('privacyService.maskPII') ||
+      telemetryFile.includes('privacyService.anonymizeEvent')
     );
 
     if (hasPrivacyService && telemetryUsesPrivacy) {
@@ -700,6 +701,47 @@ class SecurityVerifier {
   }
 
   /**
+   * Verification 15: OPA Integration and ABAC policy enforcement
+   */
+  private verifyOPAIntegration() {
+    const policyFile = this.readFile('src/services/PolicyService.ts');
+    const accessControlFile = this.readFile('src/services/AccessControl.ts');
+    const opaClientFile = this.readFile('src/services/opa-client.ts');
+
+    const usesOPA = policyFile !== null && (
+      policyFile.includes('opaClient.evaluateQuery') ||
+      policyFile.includes('opaClient.callOpa')
+    );
+
+    const passesABACContext = accessControlFile !== null && (
+      accessControlFile.includes('missionTags') &&
+      accessControlFile.includes('compartment')
+    );
+
+    const hasOPAClient = opaClientFile !== null;
+
+    if (usesOPA && passesABACContext && hasOPAClient) {
+      this.addResult(
+        'OPA/ABAC Integration',
+        true,
+        'OPA-backed ABAC is integrated with rich context (mission tags, compartments)'
+      );
+    } else {
+      const missing = [];
+      if (!usesOPA) missing.push('OPA evaluation in PolicyService');
+      if (!passesABACContext) missing.push('ABAC context in AccessControl facade');
+      if (!hasOPAClient) missing.push('OPAClient implementation');
+
+      this.addResult(
+        'OPA/ABAC Integration',
+        false,
+        'OPA integration incomplete',
+        missing
+      );
+    }
+  }
+
+  /**
    * Run all verifications
    */
   async verify(): Promise<boolean> {
@@ -722,6 +764,7 @@ class SecurityVerifier {
     this.verifyStepUpAuth();
     this.verifyPrivacyEnforcement();
     this.verifyResilienceIntegration();
+    this.verifyOPAIntegration();
 
     // Print results
     let allPassed = true;

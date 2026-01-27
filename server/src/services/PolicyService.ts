@@ -1,4 +1,4 @@
-// @ts-nocheck
+import { opaClient } from './opa-client.js';
 import { writeAudit } from '../utils/audit.js';
 import logger from '../utils/logger.js';
 
@@ -8,6 +8,11 @@ export interface Principal {
   role: string;
   tenantId?: string;
   email?: string;
+  missionTags?: string[];
+  compartment?: {
+    orgId?: string;
+    teamId?: string;
+  };
   [key: string]: unknown;
 }
 
@@ -15,6 +20,14 @@ export interface ResourceRef {
   id?: string;
   type?: string;
   tenantId?: string;
+  sensitivity?: string;
+  missionTags?: string[];
+  compartment?: {
+    orgId?: string;
+    teamId?: string;
+  };
+  validFrom?: string;
+  validUntil?: string;
   [key: string]: unknown;
 }
 
@@ -34,6 +47,7 @@ export interface PolicyContext {
 export interface PolicyDecision {
   allow: boolean;
   reason?: string;
+  violations?: any[];
   obligations?: Record<string, unknown>;
 }
 
@@ -54,15 +68,36 @@ export class PolicyService {
    */
   async evaluate(ctx: PolicyContext): Promise<PolicyDecision> {
     try {
-      // TODO: Call OPA here
-      // const opaDecision = await this.callOpa(ctx);
-      // if (opaDecision) return opaDecision;
+      // 1. Construct OPA Input
+      const opaInput = {
+        action: ctx.action,
+        user: ctx.principal,
+        resource: ctx.resource,
+        context: {
+          time: ctx.environment.time || new Date().toISOString(),
+          ip: ctx.environment.ip,
+        }
+      };
 
-      // Fallback: Basic RBAC/ABAC logic
+      // 2. Call OPA (intelgraph package defined in abac.rego)
+      const opaResult = await opaClient.evaluateQuery('intelgraph/allow', opaInput);
+
+      if (opaResult === true) {
+        return { allow: true, reason: 'OPA policy allowed access' };
+      }
+
+      // If OPA explicitly returns false or null, we still fallback to local RBAC
+      // unless we want OPA to be the definitive source. For now, let's keep fallback 
+      // but log the OPA denial.
+      if (opaResult === false) {
+        logger.debug('OPA denied access, checking local fallback', { ctx });
+      }
+
+      // 3. Fallback: Basic RBAC/ABAC logic
       return this.evaluateLocal(ctx);
     } catch (error: any) {
-      logger.error('Error evaluating policy', { error, ctx });
-      return { allow: false, reason: 'Policy evaluation error' };
+      logger.error('Error evaluating policy with OPA, failing back to local', { error, ctx });
+      return this.evaluateLocal(ctx);
     }
   }
 
@@ -154,7 +189,11 @@ export function withPolicy<T extends (...args: unknown[]) => unknown>(
       : {};
 
     const policyContext: PolicyContext = {
-      principal: user as Principal,
+      principal: {
+        ...user,
+        missionTags: (user.missionTags as string[] | undefined),
+        compartment: (user.compartment as { orgId?: string; teamId?: string } | undefined),
+      } as Principal,
       resource,
       action: spec.action,
       environment: {
@@ -174,19 +213,18 @@ export function withPolicy<T extends (...args: unknown[]) => unknown>(
     try {
       await writeAudit({
         userId: user.id as string | undefined,
-        userEmail: user.email as string | undefined,
-        tenantId: (user.tenantId || resource?.tenantId) as string | undefined,
         action: spec.action,
         resourceType: infoObj?.fieldName as string | undefined,
         resourceId: resource?.id as string | undefined,
         details: {
+          userEmail: user.email as string | undefined,
           decision: decision.allow ? 'allow' : 'deny',
           reason: decision.reason,
           requestId: requestId as string | undefined,
           traceId: traceId as string | undefined,
-        },
-        success: decision.allow,
-        errorMessage: decision.reason
+          success: decision.allow,
+          errorMessage: decision.reason
+        }
       });
     } catch (e: any) {
       // ignore audit errors for now or log them

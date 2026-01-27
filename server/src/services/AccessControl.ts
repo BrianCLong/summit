@@ -18,6 +18,8 @@ export async function evaluate(
       (user.roles as string[] | undefined)?.[0] ||
       'USER',
     tenantId: (user.tenantId as string | undefined),
+    missionTags: (user.missionTags as string[] | undefined),
+    compartment: (user.compartment as { orgId?: string; teamId?: string } | undefined),
   };
 
   const ctx: PolicyContext = {
@@ -26,6 +28,7 @@ export async function evaluate(
     action,
     environment: {
       ...(env || {}),
+      time: new Date().toISOString(),
     },
   };
 
