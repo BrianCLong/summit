@@ -54,6 +54,7 @@ const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
 const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboard'))
 const TrustDashboard = React.lazy(() => import('@/pages/TrustDashboard'))
 const CopilotPage = React.lazy(() => import('@/components/CopilotPanel').then(m => ({ default: m.CopilotPanel })))
+const InvestigationCanvas = React.lazy(() => import('@/pages/InvestigationCanvas'))
 
 // Workbench
 import { WorkbenchShell } from '@/workbench/shell/WorkbenchLayout'
@@ -156,6 +157,8 @@ function App() {
                           </DataFetchErrorBoundary>
                         }
                       />
+
+                      <Route path="investigation" element={<InvestigationCanvas />} />
 
                       {/* Tri-Pane Analysis - Wrapped with DataFetchErrorBoundary */}
                       <Route

@@ -73,6 +73,7 @@ import ssoRouter from './routes/sso.ts';
 import qafRouter from './routes/qaf.ts';
 import siemPlatformRouter from './routes/siem-platform.ts';
 import maestroRouter from './routes/maestro.ts';
+import mcpAppsRouter from './routes/mcp-apps.ts';
 import caseRouter from './routes/cases.ts';
 import entityCommentsRouter from './routes/entity-comments.ts';
 import tenantsRouter from './routes/tenants.ts';
@@ -443,6 +444,7 @@ export const createApp = async () => {
   app.use('/api/qaf', qafRouter);
   app.use('/api/siem-platform', siemPlatformRouter);
   app.use('/api/maestro', maestroRouter);
+  app.use('/api/mcp-apps', mcpAppsRouter);
   app.use('/api/tenants', tenantsRouter);
   app.use('/api/actions', actionsRouter);
   app.use('/api/osint', osintRouter);
