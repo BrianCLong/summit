@@ -1,0 +1,62 @@
+# Evidence Map
+# Maps Evidence-IDs used in governance documents to their descriptions and locations
+# This file is used by scripts/ci/verify_evidence_id_consistency.mjs
+
+# Governance Controls
+GOV-001:
+  description: "Governance Constitution - Core Principles"
+  source: "docs/governance/CONSTITUTION.md"
+  type: policy
+
+GOV-002:
+  description: "Governance Constitution - Decision Framework"
+  source: "docs/governance/CONSTITUTION.md"
+  type: policy
+
+GOV-003:
+  description: "Governance Constitution - Compliance Requirements"
+  source: "docs/governance/CONSTITUTION.md"
+  type: policy
+
+# AI Governance
+AI-001:
+  description: "AI Governance - Model Deployment Controls"
+  source: "docs/governance/CONSTITUTION.md"
+  type: policy
+
+AI-002:
+  description: "AI Governance - Model Review Requirements"
+  source: "docs/governance/CONSTITUTION.md"
+  type: policy
+
+# Audit Controls
+AUD-001:
+  description: "Audit Trail Requirements"
+  source: "docs/governance/CONSTITUTION.md"
+  type: compliance
+
+# Gate Evidence
+control_evidence_index:
+  description: "Control Evidence Index Gate"
+  source: "docs/governance/CONTROL_EVIDENCE_INDEX.md"
+  type: gate
+
+security-audit-gate:
+  description: "Security Audit Gate Evidence"
+  source: "docs/governance/GATES/security-audit-gate.md"
+  type: gate
+
+governance-docs-integrity:
+  description: "Governance Documentation Integrity Gate"
+  source: "docs/governance/GATES/docs-integrity.md"
+  type: gate
+
+branch-protection-drift:
+  description: "Branch Protection Drift Detection Gate"
+  source: "docs/governance/GATES/branch-protection-drift.md"
+  type: gate
+
+soc-compliance-report:
+  description: "SOC Compliance Verification Gate"
+  source: "docs/governance/GATES/soc-control-verification.md"
+  type: gate
