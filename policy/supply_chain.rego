@@ -309,12 +309,32 @@ deny contains msg if {
 
 # Deny if SBOM is not signed
 deny contains msg if {
-	not input.sbom_signed
-	msg := "Missing signed SBOM"
+	some i
+	artifact := input.artifacts[i]
+	not artifact.sbom_spdx
+	msg := sprintf("Artifact %s missing SPDX SBOM", [artifact.name])
 }
 
 # Deny if provenance is not signed
 deny contains msg if {
-	not input.provenance_signed
-	msg := "Missing signed build provenance"
+	some i
+	artifact := input.artifacts[i]
+	not artifact.sbom_cyclonedx
+	msg := sprintf("Artifact %s missing CycloneDX SBOM", [artifact.name])
+}
+
+# Enforce Provenance Attestation presence
+deny contains msg if {
+	some i
+	artifact := input.artifacts[i]
+	not artifact.provenance_attestation
+	msg := sprintf("Artifact %s missing provenance attestation", [artifact.name])
+}
+
+# Enforce Signature Verification
+deny contains msg if {
+	some i
+	artifact := input.artifacts[i]
+	not artifact.signature_verification_passed
+	msg := sprintf("Artifact %s signature verification failed", [artifact.name])
 }
