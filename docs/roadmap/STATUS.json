@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-23T07:30:00Z",
-  "revision_note": "Merged: Counter-campaign optimization epics, Backlog sync, GA demo runbooks",
+  "last_updated": "2026-01-26T23:30:08Z",
+  "revision_note": "Added graph ↔ Postgres drift gate configuration, schema, and CI evidence script",
   "initiatives": [
     {
       "id": "A",

@@ -128,6 +128,36 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: graph-postgres-drift-gate
+    version: v1
+    path: prompts/governance/graph-postgres-drift-gate.md
+    sha256: 830c3eb01ac98130f655f2340f675e6221af11feab34aac8705df9ef8635e61a
+    description: Add a CI drift gate comparing Postgres digests to Neo4j projections.
+    scope:
+      paths:
+        - config/governance/drift.yml
+        - docs/ops/graph-postgres-drift.md
+        - docs/roadmap/STATUS.json
+        - prompts/governance/graph-postgres-drift-gate.md
+        - prompts/registry.yaml
+        - schemas/gates/graph-postgres-drift-report.schema.json
+        - scripts/ci/graph_postgres_drift_check.mjs
+        - scripts/ci/__tests__/graph_postgres_drift_check.test.mjs
+        - agents/examples/graph-postgres-drift-gate.json
+      domains:
+        - governance
+        - data-integrity
+        - ci
+        - observability
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: genui-plan-scaffold
     version: v1
     path: prompts/genui/genui-plan-scaffold@v1.md
