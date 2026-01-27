@@ -5,7 +5,7 @@ include Makefile.merge-train
 
 .PHONY: up down restart logs shell clean
 .PHONY: dev test lint build format ci
-.PHONY: db-migrate db-seed sbom k6
+.PHONY: db-migrate db-seed sbom k6 supply-chain/sbom supply-chain/sign
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
 .PHONY: bootstrap
 .PHONY: dev-prereqs dev-up dev-down dev-smoke
@@ -124,8 +124,15 @@ validate-ops: ## Validate observability assets (dashboards, alerts, runbooks)
 rollback-drill: ## Run simulated rollback drill
 	@node scripts/ops/rollback_drill.js
 
-sbom:   ## Generate CycloneDX SBOM
-	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
+sbom:   ## Generate CycloneDX SBOM (Legacy target, calls scripts/generate-sbom.sh)
+	@bash scripts/generate-sbom.sh
+
+supply-chain/sbom: ## Generate modern SBOMs (CycloneDX 1.7 + SPDX 3.0.1)
+	@bash scripts/generate-sbom.sh "summit-platform" "latest" "./artifacts/sbom"
+
+supply-chain/sign: ## Sign artifacts and SBOMs using Cosign
+	@if [ -z "$(ARTIFACT)" ]; then echo "Usage: make supply-chain/sign ARTIFACT=<image|blob> [SBOM=<path>] [TYPE=image|blob]"; exit 1; fi
+	@bash scripts/supply-chain/sign-and-attest.sh "$(ARTIFACT)" "$(SBOM)" "$(TYPE)"
 
 smoke: bootstrap up ## Fresh clone smoke test: bootstrap -> up -> health check
 	@echo "Waiting for services to start..."
