@@ -149,11 +149,12 @@ export class WebhookRepository {
     tenantId: string,
     eventType: WebhookEventType,
   ): Promise<WebhookSubscription[]> {
+    // Use ANY() instead of @> for better compatibility with test mocks (pg-mem)
     const result = await this.pool.query(
       `SELECT * FROM webhook_subscriptions
        WHERE tenant_id = $1
        AND is_active = TRUE
-       AND event_types @> ARRAY[$2]::text[]`,
+       AND $2 = ANY(event_types)`,
       [tenantId, eventType],
     );
 
@@ -193,10 +194,11 @@ export class WebhookRepository {
   }
 
   async getDueDeliveries(limit: number): Promise<WebhookDelivery[]> {
+    // Cast to timestamp for pg-mem compatibility (avoids timestamptz casting issues)
     const result = await this.pool.query(
       `SELECT * FROM webhook_deliveries
        WHERE status IN ('pending','failed')
-       AND (next_attempt_at IS NULL OR next_attempt_at <= CURRENT_TIMESTAMP)
+       AND (next_attempt_at IS NULL OR next_attempt_at <= NOW())
        ORDER BY next_attempt_at NULLS FIRST, created_at
        LIMIT $1`,
       [limit],

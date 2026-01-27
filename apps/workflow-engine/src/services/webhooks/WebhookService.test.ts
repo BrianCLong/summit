@@ -82,21 +82,35 @@ describe('Webhook HMAC and delivery pipeline', () => {
       idempotencyKey: 'event-123',
     });
 
+    // First attempt - fails
     await worker.processOnce();
-    let delivery = await repository.getDueDeliveries(1);
-    expect(delivery[0].status).toBe('failed');
-    expect(delivery[0].attemptCount).toBe(1);
+    let deliveries = await repository.getDueDeliveries(10);
+    // Get the delivery by ID since timing may prevent getDueDeliveries from returning it
+    const deliveryId = deliveries[0]?.id;
+    let delivery = deliveryId ? await repository.getDelivery(deliveryId) : null;
 
-    await repository.overrideNextAttempt(delivery[0].id, new Date());
+    // If not in due list, find it directly (backoff may not have elapsed)
+    if (!delivery) {
+      // Query all deliveries and find ours
+      const allDeliveries = await repository.getDueDeliveries(100);
+      delivery = allDeliveries.find(d => d.subscriptionId === subscription.id) || null;
+    }
+    expect(delivery).not.toBeNull();
+    expect(delivery!.status).toBe('failed');
+    expect(delivery!.attemptCount).toBe(1);
+
+    // Make it due again and process second attempt
+    await repository.overrideNextAttempt(delivery!.id, new Date(Date.now() - 1000));
     await worker.processOnce();
-    delivery = await repository.getDueDeliveries(1);
-    expect(delivery[0].status).toBe('failed');
-    expect(delivery[0].attemptCount).toBe(2);
+    delivery = await repository.getDelivery(delivery!.id);
+    expect(delivery!.status).toBe('failed');
+    expect(delivery!.attemptCount).toBe(2);
 
-    await repository.overrideNextAttempt(delivery[0].id, new Date());
+    // Make it due again and process third attempt (should succeed)
+    await repository.overrideNextAttempt(delivery!.id, new Date(Date.now() - 1000));
     await worker.processOnce();
 
-    const finalDelivery = await repository.getDelivery(delivery[0].id);
+    const finalDelivery = await repository.getDelivery(delivery!.id);
     expect(finalDelivery?.status).toBe('succeeded');
     expect(metrics.successes).toBe(1);
     expect(metrics.failures).toBeGreaterThanOrEqual(1);
