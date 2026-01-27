@@ -1,8 +1,8 @@
-import { Qwen3TTSProvider } from '../Qwen3TTSProvider.ts';
-import { VoiceProvenanceLedger } from '../../VoiceProvenanceLedger.ts';
-import { SpeechJob } from '../../types.ts';
+import { Qwen3TTSProvider } from '../Qwen3TTSProvider.js';
+import { VoiceProvenanceLedger } from '../../VoiceProvenanceLedger.js';
+import { SpeechJob } from '../../types.js';
 
-jest.mock('../../VoiceProvenanceLedger.ts');
+jest.mock('../../VoiceProvenanceLedger.js');
 
 describe('Qwen3TTSProvider', () => {
   let provider: Qwen3TTSProvider;
