@@ -285,10 +285,6 @@ router.get('/health/detailed', async (req: Request, res: Response) => {
  *                 status:
  *                   type: string
  *                   example: ready
- *     description: Kubernetes readiness probe
- *     responses:
- *       200:
- *         description: Service is ready
  *       503:
  *         description: Service is not ready
  */
@@ -355,10 +351,6 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
  *                 status:
  *                   type: string
  *                   example: alive
- *     description: Kubernetes liveness probe
- *     responses:
- *       200:
- *         description: Service is alive
  */
 router.get('/health/live', (_req: Request, res: Response) => {
   res.status(200).json({ status: 'alive' });
