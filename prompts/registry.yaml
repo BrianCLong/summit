@@ -158,6 +158,21 @@ prompts:
       domains:
         - documentation
         - research
+  - id: siteimprove-agentic-content-intel
+    version: v1
+    path: prompts/competitive/siteimprove-agentic-content-intelligence.md
+    sha256: 81ddc325cbc19253c9d306cfa49801fecd09aea632e7c1ff133bf3e73ec761df
+    description: Competitive brief on Siteimprove's agentic content intelligence and Summit response actions.
+    scope:
+      paths:
+        - docs/competitive/
+        - docs/roadmap/STATUS.json
+        - prompts/competitive/
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - competitive-intel
+        - product-strategy
         - governance
     verification:
       tiers_required:
