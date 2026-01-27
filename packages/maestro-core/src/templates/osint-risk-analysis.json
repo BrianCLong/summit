@@ -1,0 +1,32 @@
+{
+  "name": "osint-risk-analysis-v1",
+  "version": "1.0.0",
+  "steps": [
+    {
+      "id": "ingest-feed",
+      "name": "Ingest OSINT Feed",
+      "plugin": "simple-feed-collector",
+      "config": {
+        "url": "${feed_url}"
+      },
+      "retry": {
+        "max_attempts": 3,
+        "backoff_ms": 1000,
+        "exponential": true
+      }
+    },
+    {
+      "id": "analyze-risks",
+      "name": "Analyze IOC Risks",
+      "plugin": "risk-assessment",
+      "depends_on": ["ingest-feed"],
+      "config": {
+        "model": "llama3-local",
+        "threshold": 0.7
+      },
+      "timeout_ms": 60000
+    }
+  ],
+  "global_timeout_ms": 300000,
+  "on_failure": "stop"
+}

@@ -153,6 +153,42 @@ class Source(SourceBase, table=True):
     ingested_at: datetime = Field(default_factory=datetime.utcnow)
 
 
+class RiskAssessmentBase(SQLModel):
+    """Risk assessment for an entity or IOC."""
+
+    risk_score: float = Field(description="Risk score (0.0 - 1.0)")
+    risk_summary: str = Field(description="LLM-generated risk summary")
+    model_version: str = Field(description="Model version used for assessment")
+    ioc_id: int | None = Field(default=None, description="Related IOC ID")
+
+
+class RiskAssessment(RiskAssessmentBase, table=True):
+    """Risk assessment table model."""
+
+    __tablename__ = "risk_assessments"
+
+    id: int | None = Field(default=None, primary_key=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class IOCBase(SQLModel):
+    """Indicator of Compromise (IOC) detected in the wild."""
+
+    type: str = Field(description="Type of IOC (e.g., ip, domain, hash)")
+    value: str = Field(description="The value of the IOC")
+    source: str = Field(description="Source URI where this IOC was found")
+
+
+class IOC(IOCBase, table=True):
+    """IOC table model."""
+
+    __tablename__ = "iocs"
+
+    id: int | None = Field(default=None, primary_key=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
 # Response models for API
 
 
