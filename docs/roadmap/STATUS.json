@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-27T16:26:51Z",
-  "revision_note": "Added Agent Readiness++ runbook rubric and task spec for governed autonomy evidence",
+  "last_updated": "2026-01-27T17:10:00Z",
+  "revision_note": "Added Swarm Defense Fabric runbook for AI disinformation swarm defense moat",
   "initiatives": [
     {
       "id": "A",
