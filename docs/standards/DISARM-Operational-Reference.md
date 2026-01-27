@@ -1,19 +1,44 @@
 # DISARM Operational Reference
 
-**Standard:** Summit-DISARM-v1
-**Basis:** DISARM Red Framework v4
+This document outlines the DISARM (Disinformation Analysis and Risk Management) taxonomy implementation within the IntelGraph platform.
 
-## 1. Objective
-To provide a machine-readable, operationally enforced mapping of DISARM tactics to Summit detection signals. This is the **reference implementation** for the industry.
+## Package
 
-## 2. Operationalization Strategy
-Unlike static frameworks, Summit treats DISARM as a runtime schema:
-*   **Tactics are Types:** Every tactic (e.g., T0001) is a strong type in the GraphQL schema.
-*   **Signals are Proofs:** Detection of a tactic requires cryptographic evidence of specific signals.
+The canonical taxonomy is maintained in the `@intelgraph/disarm` package. It provides a type-safe, validated loader for the DISARM framework subset used by our detectors and agents.
 
-## 3. Supported Tactics (v1)
-*   **T0001 (Create Inauthentic Accounts):** Detected via `AgentSignalCollector` looking for batch creation velocity > 5 accounts/min.
-*   **T0002 (Coordinate Amplification):** Detected via temporal sync analysis of reposts ( < 500ms variance).
+## Usage
 
-## 4. Integration
-All DISARM detections must generate a `DisarmEvidence` artifact linked to the immutable ledger.
+```typescript
+import { loadDisarmTaxonomy } from '@intelgraph/disarm';
+
+const taxonomy = loadDisarmTaxonomy();
+
+// Access techniques
+const techniques = taxonomy.techniques;
+console.log(techniques[0].technique_name);
+```
+
+## Evidence and Determinism
+
+The taxonomy is versioned and produces a deterministic JSON output. This output is used for evidence chains in Moat capabilities.
+
+The current evidence artifact can be found at: `docs/evidence/moat/PR-0-disarm-taxonomy.evidence.json`.
+
+## Taxonomy Structure
+
+The implementation follows a subset of the DISARM Red Framework:
+
+- **Tactic**: High-level operational phase (e.g., "Plan and Prepare", "Pump and Prime").
+- **Technique**: Specific operational method (e.g., "Create Inauthentic Accounts").
+- **Observables**: Specific indicators or signals that suggest the technique is being used.
+- **Mitigations**: Recommended defensive actions or detection strategies.
+
+## Verification
+
+To verify the integrity of the taxonomy:
+
+1. Run the evidence generation script:
+   ```bash
+   pnpm --filter @intelgraph/disarm run generate:evidence
+   ```
+2. Compare the output hash with the stored evidence artifact.

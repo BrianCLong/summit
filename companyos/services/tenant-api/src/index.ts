@@ -103,6 +103,12 @@ const apolloServer = new ApolloServer<GraphQLContext>({
   introspection: process.env.NODE_ENV !== 'production',
 });
 
+// Ready promise for tests to await
+let readyResolve: () => void;
+export const ready = new Promise<void>((resolve) => {
+  readyResolve = resolve;
+});
+
 // Start server
 async function start() {
   await apolloServer.start();
@@ -130,6 +136,9 @@ async function start() {
       },
     }),
   );
+
+  // Signal that the app is ready
+  readyResolve();
 
   if (process.env.NODE_ENV !== 'test') {
     app.listen(port, () => {
