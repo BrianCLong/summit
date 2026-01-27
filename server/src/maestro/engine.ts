@@ -13,6 +13,7 @@ import {
   TransitionReceiptInput,
   emitTransitionReceipt,
 } from './evidence/transition-receipts.js';
+import { ForkDetector } from '@maestro/core';
 
 // Interface for dependencies
 interface MaestroDependencies {
@@ -188,10 +189,21 @@ export class MaestroEngine {
     // For now assuming we handle this.
 
     for (const row of res.rows) {
+      const taskForEntropy = {
+        name: row.name,
+        kind: row.kind,
+        payload: row.payload,
+        config: row.metadata,
+      };
+      const entropy = ForkDetector.calculateEntropy(taskForEntropy);
+      const priority = 1 + Math.floor((1 - entropy) * 100);
+
       await this.queue.add(row.kind, {
         taskId: row.id,
         runId: row.run_id,
         tenantId: row.tenant_id
+      }, {
+        priority
       });
 
       await this.db.query(
@@ -210,6 +222,8 @@ export class MaestroEngine {
           attributes: {
             kind: row.kind,
             status: 'queued',
+            fork_score: entropy,
+            priority,
           },
         },
         result: { status: 'success' },
@@ -361,10 +375,21 @@ export class MaestroEngine {
         );
 
         // Dispatch
+        const taskForEntropy = {
+          name: dependentRow.name,
+          kind: dependentRow.kind,
+          payload: dependentRow.payload,
+          config: dependentRow.metadata,
+        };
+        const entropy = ForkDetector.calculateEntropy(taskForEntropy);
+        const priority = 1 + Math.floor((1 - entropy) * 100);
+
         await this.queue.add(dependentRow.kind, {
           taskId: dependentRow.id,
           runId: dependentRow.run_id,
           tenantId: dependentRow.tenant_id
+        }, {
+          priority
         });
 
         await this.db.query(
