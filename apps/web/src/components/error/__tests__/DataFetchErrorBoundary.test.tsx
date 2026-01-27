@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import { DataFetchErrorBoundary } from '../DataFetchErrorBoundary';
+import { reportError } from '@/telemetry/metrics';
 
 // Mock dependencies
 vi.mock('@/telemetry/metrics', () => ({
@@ -93,7 +94,6 @@ describe('DataFetchErrorBoundary', () => {
   });
 
   it('passes additional context to telemetry', () => {
-    const { reportError } = require('@/telemetry/metrics');
     const context = { chartType: 'timeseries' };
 
     render(

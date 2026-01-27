@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@jest/globals';
-import { ExportService } from '../ExportService.js';
+import { ExportService } from '../ExportService.ts';
 
 describe('ExportService', () => {
     const service = new ExportService({ kAnonymityThreshold: 3 });

@@ -40,14 +40,16 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
       - name: Setup Node (from .nvmrc)
         uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
-
-      - name: Enable Corepack
-        run: corepack enable
 
       - name: Install (frozen lockfile)
         run: pnpm -w install --frozen-lockfile
@@ -71,6 +73,13 @@ jobs:
       - name: Verify TSConfig Inheritance
         run: node scripts/ci/verify_tsconfig_inheritance.mjs
 
+  security-compliance:
+    name: Security & Compliance
+    uses: ./.github/workflows/_reusable-security-compliance.yml
+    needs: [config-guard]
+    with:
+      strict: true
+
   soc-controls:
     name: SOC Controls
     runs-on: ubuntu-latest
@@ -79,14 +88,16 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
       - name: Setup Node (from .nvmrc)
         uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
-
-      - name: Enable Corepack
-        run: corepack enable
 
       - name: Install (frozen lockfile)
         run: pnpm -w install --frozen-lockfile

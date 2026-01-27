@@ -1,6 +1,6 @@
 {
   "name": "intelgraph-platform",
-  "version": "5.0.0",
+  "version": "5.0.2",
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "type": "module",
@@ -10,7 +10,6 @@
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "verify:verbose": "tsx scripts/verify.ts --verbose",
     "verify:runtime": "tsx scripts/verification/verify_runtime.ts",
-    "ga:verify": "node scripts/release/ga_verify.mjs",
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
@@ -119,6 +118,8 @@
     "ops:command-center": "npx tsx scripts/ops/command-center.ts --mode=live",
     "ops:command-center:offline": "npx tsx scripts/ops/command-center.ts --mode=offline --snapshotsDir=scripts/ops/snapshots",
     "compliance:check": "npx tsx scripts/compliance/check_drift.ts",
+    "compliance:antigravity": "npx tsx scripts/ci/verify-antigravity-compliance.ts",
+    "compliance:seal": "npx tsx scripts/evidence/link_antigravity_decision.ts",
     "verify:governance": "npx tsx scripts/compliance/verify_governance.ts",
     "verify:compliance": "npx tsx scripts/compliance/verify_compliance_drift.ts",
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
@@ -131,7 +132,7 @@
     "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
     "ga:evidence-pack": "node scripts/release/ga_evidence_pack.mjs",
     "ga:evidence-pack:check": "node scripts/release/ga_evidence_pack.mjs --check-determinism",
-    "release:ready": "pnpm ga:verify && GA_VERIFY_MODE=true pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
+    "release:ready": "npm run compliance:antigravity && pnpm ga:verify && GA_VERIFY_MODE=true pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
     "prepare": "husky"
   },
   "keywords": [
@@ -298,6 +299,7 @@
       "path-to-regexp": ">=8.0.0",
       "validator": ">=13.15.20",
       "nanoid": ">=5.0.9",
+      "postcss>nanoid": "^3.3.7",
       "cross-spawn": ">=7.0.6",
       "tar": ">=6.2.1",
       "cookie": ">=0.7.0",
@@ -320,10 +322,18 @@
       "preact": ">=10.25.4",
       "@types/react": "18.3.11",
       "@types/react-dom": "18.3.0",
+      "react": "19.2.1",
+      "react-dom": "19.2.1",
       "apollo-server-express": ">=3.13.0",
       "redis": ">=5.9.0",
       "@types/express": "4.17.21",
       "@types/express-serve-static-core": "4.19.6"
+    },
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "react": "*",
+        "react-dom": "*"
+      }
     }
   }
 }

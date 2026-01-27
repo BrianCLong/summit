@@ -24,32 +24,32 @@ import {
   isAnswer,
   isRefusal,
   isPreview,
-} from './types.js';
-import { NLQueryService, createNLQueryService } from './nl-query.service.js';
+} from './types.ts';
+import { NLQueryService, createNLQueryService } from './nl-query.service.ts';
 import {
   SandboxExecutorService,
   createSandboxExecutor,
   type DryRunPlan,
   type ExecutionResult,
-} from './sandbox-executor.service.js';
+} from './sandbox-executor.service.ts';
 import {
   GraphRAGProvenanceService,
   createGraphRAGProvenanceService,
-} from './graphrag-provenance.service.js';
+} from './graphrag-provenance.service.ts';
 import {
   RedactionService,
   createRedactionService,
   createRedactionServiceForUser,
   type ClassificationLevel,
-} from './redaction.service.js';
+} from './redaction.service.ts';
 import {
   GuardrailsService,
   createGuardrailsService,
-} from './guardrails.service.js';
+} from './guardrails.service.ts';
 import {
   CopilotGovernanceService,
   getCopilotGovernance,
-} from './governance.service.js';
+} from './governance.service.ts';
 
 const logger = (pino as any)({ name: 'copilot-service' });
 

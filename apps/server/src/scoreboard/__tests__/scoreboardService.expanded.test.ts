@@ -389,7 +389,7 @@ describe('ScoreboardService - Comprehensive Tests', () => {
         owner: 'Release Captain',
         metrics: ['latency', 'error_rate', 'throughput'],
         rollbackPlan: 'Feature flag rollback',
-        expiresAt: '2025-02-01',
+        expiresAt: '2027-02-01',
       });
 
       const result = service.getDomainScoreboard('test-domain')!;

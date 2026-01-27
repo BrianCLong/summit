@@ -12,7 +12,7 @@ export {
   GovernanceLLMError,
   getGovernanceLLMClient,
   createGovernanceLLMClient,
-} from './GovernanceLLMClient.js';
+} from './GovernanceLLMClient.ts';
 
 export type {
   GovernanceLLMRequest,
@@ -20,4 +20,4 @@ export type {
   GovernanceLLMConfig,
   GovernanceLLMTaskType,
   GovernanceLLMContext,
-} from './GovernanceLLMClient.js';
+} from './GovernanceLLMClient.ts';

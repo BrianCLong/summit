@@ -146,12 +146,12 @@ collect_security_evidence() {
 
   # SBOM generation
   collect_evidence "sbom_generation" \
-    "echo 'SBOM generation placeholder - run npm run generate:sbom'" \
-    "$sec_dir/sbom-$RUN_ID.log"
+    "npm run generate:sbom" \
+    "$sec_dir/sbom-$RUN_ID.json"
 
   # Secret scan
   collect_evidence "secret_scan" \
-    "gitleaks detect --source . --no-git --report-format json 2>&1 || echo 'No leaks found'" \
+    "gitleaks detect --source . --no-git --report-format json 2>&1" \
     "$sec_dir/secret-scan-$RUN_ID.json"
 }
 
@@ -162,6 +162,11 @@ collect_governance_evidence() {
 
   echo "" >&2
   echo "=== Governance Evidence ===" >&2
+
+  # Antigravity Governance Check
+  collect_evidence "antigravity_governance" \
+    "npm run compliance:antigravity" \
+    "$gov_dir/antigravity-compliance-$RUN_ID.log"
 
   # Type safety audit state
   collect_evidence "type_safety_state" \

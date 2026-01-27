@@ -925,7 +925,7 @@ export class SecurityService extends EventEmitter {
     return Buffer.from(userAgent).toString('base64').substr(0, 16);
   }
 
-  private cleanupExpiredSessions(): void {
+  private async cleanupExpiredSessions(): Promise<void> {
     const now = new Date();
     let cleanedUp = 0;
 

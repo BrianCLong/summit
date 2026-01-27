@@ -113,6 +113,30 @@ function log(icon, message) {
 }
 
 /**
+ * Check 0: Verify Antigravity Governance
+ */
+function checkAntigravity() {
+  log('📋', 'Verifying Antigravity Governance...');
+
+  const result = run('npm run compliance:antigravity', { silent: true });
+
+  results.checks.push({
+    name: 'Antigravity Governance',
+    status: result.success ? 'pass' : 'fail',
+    message: result.success ? 'Governance artifacts verified' : 'Governance verification failed',
+    details: result.success ? null : result.error,
+  });
+
+  if (result.success) {
+    log('✓', 'Antigravity Governance verified');
+  } else {
+    log('✗', 'Antigravity Governance FAILED');
+  }
+
+  return result.success;
+}
+
+/**
  * Check 1: Verify git status
  */
 function checkGitStatus() {
@@ -506,6 +530,7 @@ async function main() {
   parseArgs();
 
   // Run all checks
+  checkAntigravity();
   checkGitStatus();
   checkLint();
   checkTypeCheck();

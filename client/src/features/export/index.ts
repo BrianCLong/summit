@@ -1,1 +1,1 @@
-export { ExportCaseDialog } from './ExportCaseDialog.js';
+export { ExportCaseDialog } from './ExportCaseDialog.tsx';

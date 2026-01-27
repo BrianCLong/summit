@@ -2,10 +2,11 @@ import { readFileSync } from 'fs';
 import { createHash } from 'crypto';
 import { join } from 'path';
 
-// Snapshot taken on 2026-01-22
+// Snapshot taken on 2026-01-26
 // Run python3 -c "import json, hashlib; with open('server/tsconfig.json') as f: data = json.load(f); excludes = sorted(data.get('exclude', [])); content = json.dumps(excludes); print(hashlib.sha256(content.encode('utf-8')).hexdigest())" to get new hash if you reduced excludes.
-const EXPECTED_HASH = 'eaf00c23391389933bc87cb3c156d99175f4ec88e1153fe8ef418d93306772d3';
-const EXPECTED_COUNT = 130;
+// Note: The Node script strips comments which affects glob patterns with /**, resulting in a different count/hash than Python.
+const EXPECTED_HASH = 'da91209bafe0719468214db53ef6611255c483ad3ecd9a62e1967b2227937dca';
+const EXPECTED_COUNT = 126;
 
 const tsconfigPath = join(process.cwd(), 'server', 'tsconfig.json');
 

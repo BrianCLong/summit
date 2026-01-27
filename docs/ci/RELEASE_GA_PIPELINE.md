@@ -59,10 +59,22 @@ Runs the policy-driven verification suite:
 
 - **Policy-driven**: Loads check requirements from `docs/ci/REQUIRED_CHECKS_POLICY.yml`
 - **Deterministic base**: Computes base reference using `compute_base_for_commit.sh`
+- **Strict Evidence Generation**:
+  - **No Mocks**: Evidence generation fails if tools (k6, syft, trivy) are missing.
+  - **Real Security Scans**: Validates against real vulnerability databases.
 - TypeScript compilation
 - Server build
 - Unit tests
 - Required conditional checks (based on changed files vs base)
+
+### Governance Integration
+
+The **Antigravity** agent enforces governance at the pipeline level:
+
+- **Artifact Verification**: Verifies presence and validity of `agents/antigravity/policy/*`.
+- **Ledger Integrity**: Checks `governance/tradeoffs/tradeoff_ledger.jsonl` for tampering.
+- **Strict Compliance**: Fails the build if governance artifacts are missing or invalid.
+- **Command**: `npm run compliance:antigravity`
 
 For GA tags, the base is computed to match the corresponding RC's base, ensuring that GA checks are identical to RC checks. This guarantees the "publish what was tested" principle.
 

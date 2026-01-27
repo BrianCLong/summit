@@ -2,9 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { cfg } from './config.js';
-import logger from './utils/logger.js';
-import { auditLogDashboard } from './logging/structuredLogger.js';
+import { cfg } from './config.ts';
+import logger from './utils/logger.ts';
+import { auditLogDashboard } from './logging/structuredLogger.ts';
 
 interface AppOptions {
   lightweight?: boolean;
@@ -50,7 +50,7 @@ function createApp({ lightweight = false }: AppOptions = {}) {
 
   if (lightweight) return app;
 
-  // In full mode, server.js wires DB + GraphQL + websockets.
+  // In full mode, server.ts wires DB + GraphQL + websockets.
   return app;
 }
 

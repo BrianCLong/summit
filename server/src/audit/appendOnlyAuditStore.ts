@@ -1,10 +1,10 @@
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
-import Ajv from 'ajv/dist/2020.js';
+import Ajv from 'ajv/dist/2020.ts';
 import addFormats from 'ajv-formats';
 import pino, { type Logger } from 'pino';
-import auditEventSchema from '../../../schemas/audit_event_v1.json';
+import auditEventSchema from '../../../schemas/audit_event_v1.tson';
 
 export type AuditClassification = 'public' | 'internal' | 'confidential' | 'restricted';
 
@@ -92,7 +92,7 @@ const hashRecord = (record: Omit<AuditRecord, 'hash'>): string =>
     .digest('hex');
 
 const defaultStorePath = (): string =>
-  process.env.AUDIT_EVENT_STORE ?? path.join(process.cwd(), 'logs', 'audit', 'audit-events.jsonl');
+  process.env.AUDIT_EVENT_STORE ?? path.join(process.cwd(), 'logs', 'audit', 'audit-events.tsonl');
 
 const readLastRecord = (filePath: string): AuditRecord | null => {
   if (!fs.existsSync(filePath)) return null;

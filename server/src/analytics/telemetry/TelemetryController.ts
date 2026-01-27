@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { telemetryService } from './TelemetryService.js';
+import { telemetryService } from './TelemetryService.ts';
 
 export const handleTelemetryEvent = (req: Request, res: Response) => {
   try {
@@ -18,7 +18,7 @@ export const handleTelemetryEvent = (req: Request, res: Response) => {
         // just to other services in the cluster.
         // But for this controller, let's assume standard auth context.
         // If no user, we might reject or use placeholders if allowed.
-        return res.status(401).json({ error: 'Unauthorized' });
+        return res.status(401).tson({ error: 'Unauthorized' });
     }
 
     const tenantId = user.tenant_id || user.tenantId || 'unknown_tenant';
@@ -30,6 +30,6 @@ export const handleTelemetryEvent = (req: Request, res: Response) => {
     res.status(202).send({ status: 'accepted' });
   } catch (error: any) {
     console.error('Telemetry Error:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).tson({ error: 'Internal Server Error' });
   }
 };
