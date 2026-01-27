@@ -1,0 +1,10 @@
+{
+  "name": "ui:build-loop",
+  "version": "1.0.0",
+  "description": "Orchestrates autonomous UI build tasks via a baton file.",
+  "permissions": {
+    "filesystem": ["read", "write"],
+    "network": []
+  },
+  "signature": "sha256:mock-signature-ui-build-loop"
+}
