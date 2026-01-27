@@ -7,7 +7,7 @@ permissions:
   attestations: write
 jobs:
   sbom:
-    runs-on: [self-hosted, linux]
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
       - uses: anchore/sbom-action@62ad5284b8ced813296287a0b63906cb364b73ee # v0

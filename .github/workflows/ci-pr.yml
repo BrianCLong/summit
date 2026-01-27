@@ -22,7 +22,7 @@ permissions:
 jobs:
   build-test:
     name: ${{ matrix.name }}
-    runs-on: [self-hosted, linux]
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
@@ -63,7 +63,7 @@ jobs:
 
   config-guard:
     name: Config Guard
-    runs-on: [self-hosted, linux]
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -79,7 +79,7 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: [self-hosted, linux]
+    runs-on: self-hosted
     needs: [config-guard] # fast fail
     steps:
       - uses: actions/checkout@v4
@@ -123,7 +123,7 @@ jobs:
 
   verification-suite:
     name: Verification Suite
-    runs-on: [self-hosted, linux]
+    runs-on: self-hosted
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
@@ -143,7 +143,7 @@ jobs:
 
   deterministic-build:
     name: Deterministic Build
-    runs-on: [self-hosted, linux]
+    runs-on: self-hosted
     needs: [build-test] # Run after standard build/test matrix
     steps:
       - uses: actions/checkout@v4
@@ -181,7 +181,7 @@ jobs:
 
   golden-path:
     name: Golden Path Smoke Test
-    runs-on: [self-hosted, linux]
+    runs-on: self-hosted
     needs: [integration-tests, build-test]
     steps:
       - uses: actions/checkout@v4
@@ -210,7 +210,7 @@ jobs:
 
   e2e-tests:
     name: E2E Tests (Playwright)
-    runs-on: [self-hosted, linux]
+    runs-on: self-hosted
     needs: [integration-tests]
     timeout-minutes: 20
     steps:
@@ -247,7 +247,7 @@ jobs:
 
   governance:
     name: Governance
-    runs-on: [self-hosted, linux]
+    runs-on: self-hosted
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
@@ -265,7 +265,7 @@ jobs:
 
   soc-controls:
     name: SOC Controls
-    runs-on: [self-hosted, linux]
+    runs-on: self-hosted
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
