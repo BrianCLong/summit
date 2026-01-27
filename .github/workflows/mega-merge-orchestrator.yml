@@ -20,11 +20,16 @@ on:
         required: false
         default: 'true'
 
+concurrency:
+  group: mega-merge-orchestrator
+  cancel-in-progress: false
+
 permissions:
   contents: write
   pull-requests: write
   checks: write
   statuses: write
+  actions: read
 
 jobs:
   # Job 1: Fast analysis

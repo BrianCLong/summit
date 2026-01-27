@@ -16,11 +16,16 @@ on:
         required: false
         default: 'true'
 
+concurrency:
+  group: ultra-merge-orchestrator
+  cancel-in-progress: false
+
 permissions:
   contents: write
   pull-requests: write
   checks: write
   statuses: write
+  actions: read
 
 jobs:
   orchestrate:
