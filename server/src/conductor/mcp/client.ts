@@ -215,6 +215,26 @@ export class MCPClient {
   }
 
   /**
+   * Get a resource from a specific MCP server
+   */
+  public async getResource(serverName: string, uri: string): Promise<any> {
+    if (!this.connections.has(serverName)) {
+      await this.connect(serverName);
+    }
+
+    const request: MCPRequest = {
+      jsonrpc: '2.0',
+      id: uuid(),
+      method: 'resources/read',
+      params: {
+        uri,
+      },
+    };
+
+    return this.sendRequest(serverName, request);
+  }
+
+  /**
    * List available tools on a server
    */
   public async listTools(serverName: string): Promise<MCPTool[]> {
