@@ -29,9 +29,62 @@ type Run {
   updatedAt: DateTime!
 }
 
+type NarrativeMetric {
+  timestamp: DateTime!
+  rt: Float
+  velocity: Float
+  eliteUptake: Int
+  communityPenetration: Float
+}
+
+type NarrativeRiskProfile {
+  narrativeId: ID!
+  currentRt: Float
+  riskScore: Float
+  velocity: Float
+  eliteUptake: Int
+  communityPenetration: Float
+  history(limit: Int): [NarrativeMetric!]!
+}
+
+type Watchlist {
+  id: ID!
+  name: String!
+  ownerId: ID!
+  items: [String!]!
+  alertConfig: AlertConfig
+}
+
+type AlertConfig {
+  rtThreshold: Float
+  riskScoreThreshold: Float
+  notifyChannels: [String!]
+}
+
+type AlertEvent {
+  narrativeId: ID!
+  type: String!
+  value: Float!
+  timestamp: DateTime!
+}
+
 type Query {
   runbooks(limit: Int = 50, after: ID): [Runbook!]!
   run(id: ID!): Run
+  narrativesNearTippingPoint(limit: Int, minRt: Float): [NarrativeRiskProfile!]!
+  myWatchlists: [Watchlist!]!
+}
+
+input AlertConfigInput {
+  rtThreshold: Float
+  riskScoreThreshold: Float
+  notifyChannels: [String!]
+}
+
+input CreateWatchlistInput {
+  name: String!
+  narrativeIds: [ID!]
+  alertConfig: AlertConfigInput
 }
 
 input LaunchRunInput {
@@ -42,4 +95,11 @@ input LaunchRunInput {
 type Mutation {
   launchRun(input: LaunchRunInput!): Run!
   abortRun(id: ID!): Run!
+  createWatchlist(input: CreateWatchlistInput!): Watchlist!
+  addToWatchlist(watchlistId: ID!, narrativeId: ID!): Watchlist!
+  setNarrativeAlertConfig(narrativeId: ID!, config: AlertConfigInput): String!
+}
+
+type Subscription {
+  onNarrativeAlert(watchlistId: ID): AlertEvent!
 }

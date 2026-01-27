@@ -1,11 +1,15 @@
 import { Actor } from '../entities/Actor.js';
 import type { Event, StateUpdate } from './types.js';
 import { NarrativeState } from './NarrativeState.js';
+import { TippingPointDetector } from './TippingPointDetector.js';
 
 export class EventProcessor {
   private propagationLog: string[] = [];
+  private detector: TippingPointDetector;
 
-  constructor(private readonly state: NarrativeState) {}
+  constructor(private readonly state: NarrativeState) {
+    this.detector = new TippingPointDetector();
+  }
 
   processEvent(event: Event): StateUpdate {
     const actor = this.state.getActor(event.actorId);
@@ -25,6 +29,12 @@ export class EventProcessor {
     const triggeredEvents = this.generateTriggeredEvents(actor, event);
     this.propagateInfluence(actor);
     logMessages.push(...this.drainPropagationLog());
+
+    // Check for tipping points
+    const alerts = this.detector.analyze(this.state, [event]);
+    for (const alert of alerts) {
+      logMessages.push(`⚠️ TIPPING POINT ALERT: Narrative ${alert.narrativeId} triggered ${alert.type} (${alert.metric} = ${alert.value.toFixed(2)})`);
+    }
 
     return {
       actorMood: { [actor.id]: actor.getMood() },
