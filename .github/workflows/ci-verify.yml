@@ -138,6 +138,24 @@ jobs:
           fi
         continue-on-error: true # Non-blocking until implementation complete
 
+  mcp-ux-lint:
+    name: MCP Tool UX Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+        with:
+          node-version: "20"
+
+      - name: Run MCP UX Linter
+        run: |
+          if [ -f "scripts/ci/lint-mcp-ux.mjs" ]; then
+            node scripts/ci/lint-mcp-ux.mjs intelgraph-mcp
+          else
+            echo "MCP UX Linter not found, skipping."
+          fi
+        continue-on-error: false # BLOCKING: poor tool UX fails CI
+
   provenance:
     name: Provenance & SBOM
     runs-on: ubuntu-latest
@@ -374,6 +392,7 @@ jobs:
       - security-scan
       - policy-compliance
       - governance-checks
+      - mcp-ux-lint
       - provenance
       - schema-validation
       - compliance-evidence
@@ -386,6 +405,7 @@ jobs:
           echo "Security Scan: ${{ needs.security-scan.result }}"
           echo "Policy Compliance: ${{ needs.policy-compliance.result }}"
           echo "Governance Checks: ${{ needs.governance-checks.result }}"
+          echo "MCP Tool UX Lint: ${{ needs.mcp-ux-lint.result }}"
           echo "Provenance & SBOM: ${{ needs.provenance.result }}"
           echo "Schema Validation: ${{ needs.schema-validation.result }}"
           echo "Compliance Evidence: ${{ needs.compliance-evidence.result }}"
@@ -408,6 +428,11 @@ jobs:
             exit 1
           fi
 
+          if [[ "${{ needs.mcp-ux-lint.result }}" != "success" ]]; then
+            echo "::error::MCP Tool UX Lint FAILED - CI BLOCKED"
+            exit 1
+          fi
+
           # Non-critical gates (informational)
           # Governance, provenance, schema, compliance are non-blocking until implementation complete
 
@@ -423,6 +448,7 @@ jobs:
           echo "- ✅ Security Scan (Gitleaks, pnpm audit)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Policy Compliance (OPA check + test)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ GA Evidence Completeness" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ MCP Tool UX Lint" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Informational Gates (Non-blocking)" >> $GITHUB_STEP_SUMMARY
           echo "- ℹ️ Governance Checks" >> $GITHUB_STEP_SUMMARY
