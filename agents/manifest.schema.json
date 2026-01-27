@@ -1,0 +1,118 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.example.com/schemas/agent-manifest.json",
+  "title": "Summit Agent Manifest",
+  "description": "Canonical definition of a Governed AI Agent in the Summit ecosystem. Enforces Vercel-style explicit configuration wrapped in regulatory-grade compliance controls.",
+  "type": "object",
+  "required": [
+    "agent_id",
+    "version",
+    "governance",
+    "runtime",
+    "evidence"
+  ],
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Unique, immutable identifier for the agent (e.g., 'code-review-agent')."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version of the agent configuration."
+    },
+    "governance": {
+      "type": "object",
+      "required": ["owner", "classification", "policy_set"],
+      "properties": {
+        "owner": {
+          "type": "string",
+          "description": "Team or individual responsible for the agent (must match CODEOWNERS)."
+        },
+        "classification": {
+          "type": "string",
+          "enum": ["public", "internal", "confidential", "restricted"],
+          "description": "Data sensitivity level the agent is authorized to handle."
+        },
+        "policy_set": {
+          "type": "string",
+          "description": "Reference to the OPA policy bundle governing this agent."
+        },
+        "risk_level": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"],
+            "default": "medium"
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "required": ["model", "instructions", "tools"],
+      "properties": {
+        "model": {
+          "type": "object",
+          "required": ["provider", "name", "parameters"],
+          "properties": {
+            "provider": { "type": "string", "enum": ["openai", "anthropic", "google", "meta"] },
+            "name": { "type": "string" },
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "temperature": { "type": "number", "minimum": 0, "maximum": 2 },
+                "top_p": { "type": "number" },
+                "max_tokens": { "type": "integer" }
+              }
+            }
+          }
+        },
+        "instructions": {
+          "type": "object",
+          "required": ["source", "sha256"],
+          "properties": {
+            "source": { "type": "string", "description": "Path to the primary system prompt file." },
+            "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$", "description": "Cryptographic hash of the instruction file content." }
+          }
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "permission"],
+            "properties": {
+              "name": { "type": "string", "description": "Name of the tool as defined in the capability registry." },
+              "permission": { "type": "string", "enum": ["read-only", "read-write", "admin", "sandbox-only"] },
+              "timeout_ms": { "type": "integer", "default": 30000 }
+            }
+          }
+        },
+        "output_schema": {
+            "type": "object",
+            "description": "JSON Schema defining the structure of the agent's final output artifact."
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["log_level", "required_artifacts"],
+      "properties": {
+        "log_level": {
+          "type": "string",
+          "enum": ["info", "debug", "audit", "trace"],
+          "default": "audit"
+        },
+        "required_artifacts": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["trace", "decision_log", "tool_output", "policy_eval"] },
+          "description": "List of evidence types that must be persisted for every run."
+        },
+        "replay_mode": {
+          "type": "string",
+          "enum": ["deterministic", "best-effort", "none"],
+          "default": "deterministic",
+          "description": "Whether the agent run must be replayable from the log."
+        }
+      }
+    }
+  }
+}
