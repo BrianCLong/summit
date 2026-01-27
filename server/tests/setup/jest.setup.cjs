@@ -515,6 +515,13 @@ jest.mock('socket.io', () => {
     constructor() {
       super();
       this.sockets = new MockNamespace();
+      this._namespaces = new Map();
+    }
+    of(namespace) {
+      if (!this._namespaces.has(namespace)) {
+        this._namespaces.set(namespace, new MockNamespace());
+      }
+      return this._namespaces.get(namespace);
     }
     use() { return this; }
     on() { return this; }

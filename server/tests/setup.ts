@@ -105,14 +105,21 @@ jest.mock('neo4j-driver', () => ({
 
 // Mock WebSocket
 jest.mock('socket.io', () => ({
-  Server: jest.fn().mockImplementation(() => ({
-    on: jest.fn(),
-    emit: jest.fn(),
-    to: returnedMock({
+  Server: jest.fn().mockImplementation(() => {
+    const mockNamespace = {
+      on: jest.fn(),
       emit: jest.fn(),
-    }),
-    close: jest.fn(),
-  })),
+      to: jest.fn().mockReturnValue({ emit: jest.fn() }),
+      use: jest.fn(),
+    };
+    return {
+      on: jest.fn(),
+      emit: jest.fn(),
+      of: jest.fn().mockReturnValue(mockNamespace),
+      to: jest.fn().mockReturnValue({ emit: jest.fn() }),
+      close: jest.fn(),
+    };
+  }),
 }));
 
 // Test data factories
