@@ -6,6 +6,7 @@ import { expressMiddleware } from '@as-integrations/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 // import { applyMiddleware } from 'graphql-middleware';
 import cors from 'cors';
+import compression from 'compression';
 import pino from 'pino';
 import pinoHttpModule from 'pino-http';
 const pinoHttp = (pinoHttpModule as any).default || pinoHttpModule;
@@ -170,6 +171,7 @@ export const createApp = async () => {
 
   // Load Shedding / Overload Protection (Second, to reject early)
   app.use(overloadProtection);
+  app.use(compression());
 
   app.use(
     securityHeaders({
