@@ -1,5 +1,5 @@
 // @ts-nocheck
-import Redis from 'ioredis';
+import Redis, { Cluster } from 'ioredis';
 import * as dotenv from 'dotenv';
 import pino from 'pino';
 
@@ -25,9 +25,9 @@ const REDIS_PASSWORD = process.env.REDIS_PASSWORD || 'devpassword';
 
 import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
 
-let redisClient: Redis | any;
+let redisClient: Redis | Cluster | any;
 
-export function getRedisClient(): Redis {
+export function getRedisClient(): Redis | Cluster {
   if (!redisClient) {
     try {
       if (REDIS_USE_CLUSTER) {
@@ -86,9 +86,9 @@ export function getRedisClient(): Redis {
       };
 
       const originalDel = redisClient.del.bind(redisClient);
-      redisClient.del = (async (key: string) => {
+      redisClient.del = (async (...keys: string[]) => {
         telemetry.subsystems.cache.dels.add(1);
-        return await originalDel(key);
+        return await originalDel(...keys);
       }) as any;
     } catch (error: any) {
       logger.warn(
