@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-27T17:15:00Z",
-  "revision_note": "Added Summit AppOS App Surfaces spec and MCP compatibility roadmap notes",
+  "last_updated": "2026-01-27T17:18:00Z",
+  "revision_note": "Added Governed Geo-Intelligence initiative and roadmap",
   "initiatives": [
     {
       "id": "A",
@@ -166,14 +166,62 @@
           "target_completion": "Sprint N+4"
         }
       ]
+    },
+    {
+      "id": "G",
+      "name": "Governed Geo-Intelligence",
+      "epics": [
+        {
+          "id": "G1",
+          "name": "GeoCanvas v1",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Roadmap defined in docs/runbooks/elite-governed-ux-analytics-roadmap.md"
+        },
+        {
+          "id": "G2",
+          "name": "Dossier Composer",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Roadmap defined in docs/runbooks/elite-governed-ux-analytics-roadmap.md"
+        },
+        {
+          "id": "G3",
+          "name": "Confidence Engine",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Roadmap defined in docs/runbooks/elite-governed-ux-analytics-roadmap.md"
+        },
+        {
+          "id": "G4",
+          "name": "Provenance Ledger Enhancements",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Roadmap defined in docs/runbooks/elite-governed-ux-analytics-roadmap.md"
+        },
+        {
+          "id": "G5",
+          "name": "Policy Gates",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Roadmap defined in docs/runbooks/elite-governed-ux-analytics-roadmap.md"
+        },
+        {
+          "id": "G6",
+          "name": "Oversight Analytics",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Roadmap defined in docs/runbooks/elite-governed-ux-analytics-roadmap.md"
+        }
+      ]
     }
   ],
   "summary": {
     "rc_ready": 5,
     "partial": 1,
     "incomplete": 0,
-    "not_started": 9,
-    "total": 15,
+    "not_started": 15,
+    "total": 22,
     "ga_blockers": []
   }
 }
