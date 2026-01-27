@@ -191,6 +191,22 @@ prompts:
         - governance
         - security
         - product
+  - id: secrets-handling-guidance
+    version: v1
+    path: prompts/docs/secrets-handling-guidance@v1.md
+    sha256: 47905844651ae4302a43cb54cc1ae0bcccffadffba5285b7f5fd266bbd03c2eb
+    description: Update contributor guidance with secrets handling and shell history hardening.
+    scope:
+      paths:
+        - CONTRIBUTING.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/docs/secrets-handling-guidance@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - security
+        - governance
     verification:
       tiers_required:
         - C
