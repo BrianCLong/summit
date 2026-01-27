@@ -5,6 +5,7 @@
 
 # Dependencies
 node_modules
+**/node_modules
 npm-debug.log
 yarn-error.log
 # Note: pnpm-lock.yaml must NOT be ignored - required for Docker builds
