@@ -10,6 +10,9 @@ services:
   redis:
     image: redis:7-alpine
     ports: [ "6379:6379" ]
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
 
   postgres:
     image: postgres:16-alpine
@@ -69,3 +72,4 @@ services:
 volumes:
   neo4j_data: {}
   pg_data: {}
+  redis_data: {}
