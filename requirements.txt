@@ -260,7 +260,7 @@ python-dotenv==1.2.1
     #   pydantic-settings
 python-jose[cryptography]==3.5.0
     # via -r requirements.in
-python-multipart==0.0.21
+python-multipart==0.0.22
     # via -r requirements.in
 python-slugify==8.0.4
     # via agate
