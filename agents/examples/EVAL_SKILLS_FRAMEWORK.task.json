@@ -1,0 +1,41 @@
+{
+  "task_id": "EVAL_SKILLS_FRAMEWORK",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "eval-skills-framework",
+    "version": "v1",
+    "sha256": "18ccb9af822641f6e2e75aee84e4767b9ec1c35fb2e259ee77bab63b30719bd1",
+    "path": "prompts/evals/skill-eval-framework.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "evals/",
+      "scripts/",
+      ".github/workflows/",
+      "docs/roadmap/STATUS.json",
+      "Makefile",
+      "prompts/evals/",
+      "agents/examples/"
+    ],
+    "domains": ["evals", "ci", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["evals/skills/**/artifacts/**", "evals/runner/reports/**"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Eval skill runner captures trace JSONL and artifacts",
+    "Deterministic and rubric graders emit schema-constrained results",
+    "CI workflow gates eval skills on PRs and nightly suite"
+  ],
+  "stop_conditions": [
+    "CI failure in main",
+    "Sandbox violation alert",
+    "Detected PII in output"
+  ]
+}

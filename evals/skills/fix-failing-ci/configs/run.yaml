@@ -1,0 +1,18 @@
+skill: fix-failing-ci
+description: Diagnose and fix failing CI checks with verification.
+command:
+  - node
+  - evals/skills/fix-failing-ci/simulate-skill.mjs
+timeout_ms: 60000
+allowed_tools:
+  - shell
+  - filesystem
+forbidden_paths:
+  - server/
+  - client/
+  - apps/web/
+deterministic_grader: evals/skills/fix-failing-ci/graders/deterministic.ts
+rubric:
+  schema: evals/skills/fix-failing-ci/graders/rubric.schema.json
+  prompt: evals/skills/fix-failing-ci/graders/rubric_prompt.txt
+  grader: evals/skills/fix-failing-ci/graders/rubric.ts

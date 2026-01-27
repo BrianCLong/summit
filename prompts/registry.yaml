@@ -54,6 +54,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: eval-skills-framework
+    version: v1
+    path: prompts/evals/skill-eval-framework.md
+    sha256: 18ccb9af822641f6e2e75aee84e4767b9ec1c35fb2e259ee77bab63b30719bd1
+    description: Establish the eval-skills runner, graders, and CI gate for skill regression testing.
+    scope:
+      paths:
+        - evals/
+        - scripts/
+        - .github/workflows/
+        - docs/roadmap/STATUS.json
+        - Makefile
+        - prompts/evals/
+      domains:
+        - evals
+        - governance
+        - ci
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md
