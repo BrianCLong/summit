@@ -232,6 +232,23 @@ prompts:
         - documentation
         - security
         - governance
+  - id: mvp4-ga-gate-artifacts
+    version: v1
+    path: prompts/docs/mvp4-ga-gate-artifacts@v1.md
+    sha256: 2559438794396206479faeb3e06af19df340be2241d70e0e019f97cac76fef6d
+    description: Document and map MVP-4 GA gate artifact closure steps and verification surfaces.
+    scope:
+      paths:
+        - docs/ga/
+        - scripts/ga/
+        - agent-contract.json
+        - prompts/docs/mvp4-ga-gate-artifacts@v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - governance
+        - ga-hardening
+        - documentation
     verification:
       tiers_required:
         - C
