@@ -275,6 +275,7 @@
   "private": true,
   "workspaces": [
     "packages/*",
+    "packages/maestro-skills/*",
     "client",
     "server"
   ],
