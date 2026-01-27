@@ -1,7 +1,7 @@
 name: CI Signal Gate
 on:
   workflow_dispatch:
-  schedule: [{cron: "*/30 * * * *"}]
+  schedule: [{ cron: "*/30 * * * *" }]
   pull_request:
 
 jobs:
@@ -17,7 +17,8 @@ jobs:
 
       - name: Auth GH (GITHUB_TOKEN)
         run: gh auth setup-git
-        env: { GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Harvest runs
         env:
