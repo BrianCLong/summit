@@ -1,0 +1,58 @@
+schema_version: "1.0"
+name: "github-pr"
+version: "1.0.0"
+description: "Create and manage GitHub Pull Requests"
+author: "Summit Team"
+license: "MIT"
+
+inputs:
+  type: object
+  properties:
+    repo:
+      type: string
+      description: "Repository owner/name (e.g. VoltAgent/awesome-clawdbot-skills)"
+    title:
+      type: string
+      description: "PR Title"
+    body:
+      type: string
+      description: "PR Body"
+    base:
+      type: string
+      description: "Base branch (default: main)"
+    head:
+      type: string
+      description: "Head branch"
+  required: ["repo", "title", "head"]
+
+outputs:
+  type: object
+  properties:
+    pr_url:
+      type: string
+      description: "URL of the created PR"
+    pr_number:
+      type: number
+      description: "Number of the created PR"
+
+requirements:
+  mcp_tools:
+    - name: "github"
+      version: "^1.0"
+  runtime: "node >= 18"
+  environment_variables:
+    - "GITHUB_TOKEN"
+
+permissions:
+  filesystem:
+    read: []
+    write: []
+  network:
+    domains: ["api.github.com", "github.com"]
+  env:
+    secrets: ["GITHUB_TOKEN"]
+
+governance:
+  classification: "public"
+  determinism: "best_effort"
+  side_effects: ["network_calls"]
