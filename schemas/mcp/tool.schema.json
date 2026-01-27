@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Summit MCP Tool Schema",
+  "description": "Schema for Summit's Model Context Protocol (MCP) Tool Definition",
+  "type": "object",
+  "properties": {
+    "tool_id": {
+      "type": "string",
+      "description": "Unique identifier for the tool (e.g., summit.github.create_issue)"
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of the tool interface"
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of required permission scopes"
+    },
+    "description": {
+      "type": "string",
+      "description": "Clear description of the tool's purpose"
+    },
+    "inputSchema": {
+      "type": "object",
+      "description": "JSON Schema defining the expected input arguments"
+    },
+    "timeout": {
+      "type": "number",
+      "description": "Maximum execution time in seconds",
+      "default": 30
+    }
+  },
+  "required": [
+    "tool_id",
+    "version",
+    "permissions",
+    "description",
+    "inputSchema"
+  ]
+}
