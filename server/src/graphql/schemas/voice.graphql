@@ -1,0 +1,55 @@
+type VoiceSample {
+  id: ID! @id
+  name: String!
+  description: String
+  s3Path: String!
+  transcript: String
+  language: String
+  durationSeconds: Float
+  qualityScore: Float
+  speakerProfile: SpeakerProfile @relationship(type: "HAS_SAMPLE", direction: IN)
+  createdAt: DateTime! @timestamp
+}
+
+type SpeakerProfile {
+  id: ID! @id
+  name: String!
+  description: String
+  samples: [VoiceSample!]! @relationship(type: "HAS_SAMPLE", direction: OUT)
+  allowedUsePolicy: String
+  consentEvidence: String
+  createdAt: DateTime! @timestamp
+  updatedAt: DateTime! @timestamp
+}
+
+type GenerationRun {
+  id: ID! @id
+  voiceSample: VoiceSample @relationship(type: "USED_SAMPLE", direction: OUT)
+  speakerProfile: SpeakerProfile @relationship(type: "MIMICS_SPEAKER", direction: OUT)
+  engine: String!
+  modelSize: String
+  seed: Int
+  prompt: String
+  transcript: String
+  outputS3Path: String
+  metadataHash: String
+  createdAt: DateTime! @timestamp
+  completedAt: DateTime
+}
+
+extend type Mutation {
+  createSpeakerProfile(
+    name: String!
+    description: String
+    allowedUsePolicy: String
+    consentEvidence: String
+  ): SpeakerProfile
+
+  addVoiceSample(
+    speakerProfileId: ID!
+    name: String!
+    s3Path: String!
+    transcript: String
+    language: String
+  ): VoiceSample
+}
