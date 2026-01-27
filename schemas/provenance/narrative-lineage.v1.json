@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.io/schemas/provenance/narrative-lineage.v1.json",
+  "title": "Narrative Lineage & Attribution Schema",
+  "description": "Defines the multi-hop lineage of a narrative, linking it to actors, evidence, and compliance controls.",
+  "type": "object",
+  "properties": {
+    "narrativeId": { "type": "string" },
+    "rootClaimId": { "type": "string" },
+    "lifecycleStatus": {
+      "type": "string",
+      "enum": ["EMERGING", "TRENDING", "PEAK", "DECAYING", "RESURGENT"]
+    },
+    "attribution": {
+      "type": "object",
+      "properties": {
+        "primaryActorId": { "type": "string" },
+        "actorType": {
+          "type": "string",
+          "enum": ["STATE_SPONSORED", "COMMERCIAL_SWARM", "ORGANIC_CROWD", "HYBRID"]
+        },
+        "confidenceScore": { "type": "number", "minimum": 0, "maximum": 1 },
+        "confidenceDecayDate": { "type": "string", "format": "date-time" },
+        "evidenceBundleId": { "type": "string" }
+      },
+      "required": ["primaryActorId", "confidenceScore"]
+    },
+    "lineageSteps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "stepId": { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "action": {
+            "type": "string",
+            "enum": ["ORIGINATION", "AMPLIFICATION", "MUTATION", "BRIDGING"]
+          },
+          "platform": { "type": "string" },
+          "contentHash": { "type": "string" }
+        },
+        "required": ["stepId", "timestamp", "action"]
+      }
+    },
+    "governance": {
+      "type": "object",
+      "properties": {
+        "riskLevel": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"] },
+        "policyViolationId": { "type": "string" },
+        "regulatoryFrameworks": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  },
+  "required": ["narrativeId", "attribution", "lineageSteps"]
+}
