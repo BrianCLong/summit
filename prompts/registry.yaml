@@ -79,6 +79,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: competitive-osint-platform-developments-turn-3
+    version: v1
+    path: prompts/competitive/osint-platform-developments-turn-3.md
+    sha256: 0c35018c60506de46d105a5a21896c259766956c4ccf5887f57d7ee5092bbb48
+    description: Capture automation turn 3 OSINT platform developments and update roadmap status.
+    scope:
+      paths:
+        - competitive/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/competitive/
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - competitive-intel
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
