@@ -143,6 +143,22 @@ prompts:
         - governance
         - program-management
         - compliance
+  - id: narrative-analysis-update-20260124
+    version: v1
+    path: prompts/research/narrative-analysis-update-20260124.md
+    sha256: 1ebc24bda683cb0b153b0bed8f93ac8a39334c1bea75ee9b896831802c63fb8b
+    description: Daily narrative analysis and information operations research update for 2026-01-24.
+    scope:
+      paths:
+        - docs/research/
+        - docs/roadmap/STATUS.json
+        - prompts/research/
+        - agents/examples/
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - research
+        - governance
     verification:
       tiers_required:
         - C

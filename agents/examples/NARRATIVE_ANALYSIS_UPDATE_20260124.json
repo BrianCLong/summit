@@ -1,0 +1,39 @@
+{
+  "task_id": "NARRATIVE_ANALYSIS_UPDATE_20260124",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "narrative-analysis-update-20260124",
+    "version": "v1",
+    "sha256": "1ebc24bda683cb0b153b0bed8f93ac8a39334c1bea75ee9b896831802c63fb8b",
+    "path": "prompts/research/narrative-analysis-update-20260124.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/research/",
+      "docs/roadmap/STATUS.json",
+      "prompts/research/",
+      "agents/examples/",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["documentation", "research", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/research/narrative_analysis_2026_01_24.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Publish the 2026-01-24 narrative analysis research update in docs/research.",
+    "Record the roadmap status update with the new timestamp and revision note.",
+    "Register the prompt and task spec for governance traceability."
+  ],
+  "stop_conditions": [
+    "CI failure in main.",
+    "Detection of PII in output.",
+    "Sandbox violation alert."
+  ]
+}
