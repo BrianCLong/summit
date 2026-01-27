@@ -128,6 +128,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: intent-decomposition-lead
+    version: v1
+    path: prompts/intent-decomposition/intent-decomposition-lead.md
+    sha256: 1535919cc16d696de8de90170e65c330ab41bf995dd44132b2fa7ac1dec05094
+    description: Implement intent decomposition pipeline, prompts, schemas, and evaluation harness.
+    scope:
+      paths:
+        - packages/intent-decomposition/
+        - prompts/intent-decomposition/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/registry.yaml
+      domains:
+        - intent-decomposition
+        - evaluation
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: pr-lifecycle-report
     version: v1
     path: prompts/governance/pr-lifecycle-report.md

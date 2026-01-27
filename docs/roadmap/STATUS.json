@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-27T00:18:00Z",
-  "revision_note": "Added PR lifecycle report automation and prompt/task governance entries",
+  "last_updated": "2026-02-01T00:00:00Z",
+  "revision_note": "Added intent decomposition package scaffolding, prompts, and task spec artifacts",
   "initiatives": [
     {
       "id": "A",
