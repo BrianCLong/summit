@@ -1,0 +1,45 @@
+"""
+Represents a Lineage Event emitted by the system (OpenLineage compliant).
+"""
+type LineageEvent {
+  id: ID!
+  runId: String!
+  jobName: String!
+  eventType: String! # START, COMPLETE, FAIL, ABORT
+  eventTime: String!
+  inputs: [LineageDataset!]
+  outputs: [LineageDataset!]
+  producer: String
+}
+
+"""
+Represents a Dataset involved in a lineage run.
+"""
+type LineageDataset {
+  namespace: String!
+  name: String!
+  facets: String # JSON string for facets
+}
+
+"""
+Represents a Lineage Run.
+"""
+type LineageRun {
+  runId: String!
+  jobName: String!
+  state: String!
+  startTime: String!
+  endTime: String
+}
+
+extend type Query {
+  """
+  Retrieve lineage events for a specific run.
+  """
+  lineageEvents(runId: String!): [LineageEvent!]!
+
+  """
+  Retrieve details of a specific lineage run.
+  """
+  lineageRun(runId: String!): LineageRun
+}
