@@ -1,7 +1,7 @@
 {
-  "name": "@intelgraph/connector-sdk",
+  "name": "@intelgraph/mandates",
   "version": "0.0.1",
-  "description": "SDK for building agentic connectors",
+  "description": "Mandate management for agentic integration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
