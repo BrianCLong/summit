@@ -7,6 +7,24 @@ import rego.v1
 
 # SLSA Provenance Validation
 
+# Require SPDX SBOM
+deny contains msg if {
+	not input.artifact.sbom_spdx
+	msg := "Artifact must include SPDX SBOM"
+}
+
+# Require CycloneDX SBOM
+deny contains msg if {
+	not input.artifact.sbom_cyclonedx
+	msg := "Artifact must include CycloneDX SBOM"
+}
+
+# Require Build Provenance Attestation
+deny contains msg if {
+	not input.artifact.provenance_attestation
+	msg := "Artifact must include Build Provenance Attestation"
+}
+
 # Require SLSA provenance for all artifacts
 deny contains msg if {
 	not input.slsa_provenance
