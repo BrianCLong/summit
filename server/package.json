@@ -45,6 +45,7 @@
     "@bull-board/api": "6.12.0",
     "@bull-board/express": "5.23.0",
     "@graphql-tools/schema": "10.0.30",
+    "@maestro/core": "workspace:*",
     "@intelgraph/feature-flags": "file:./intelgraph-feature-flags-4.2.3.tgz",
     "@intelgraph/telemetry-config": "file:./intelgraph-telemetry-config-4.2.3.tgz",
     "@node-saml/node-saml": "^5.1.0",

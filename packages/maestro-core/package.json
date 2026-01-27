@@ -71,6 +71,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./fork-detector": {
+      "types": "./dist/fork_detector/index.d.ts",
+      "import": "./dist/fork_detector/index.js"
+    },
     "./engine": {
       "types": "./dist/engine.d.ts",
       "import": "./dist/engine.js"

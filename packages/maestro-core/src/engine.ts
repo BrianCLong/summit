@@ -5,6 +5,7 @@
 
 import { EventEmitter } from 'events';
 import { v4 as uuid } from 'uuid';
+import { ForkDetector } from './fork_detector';
 
 export interface WorkflowStep {
   id: string;
@@ -30,6 +31,7 @@ export interface WorkflowDefinition {
   steps: WorkflowStep[];
   global_timeout_ms?: number;
   on_failure?: 'stop' | 'continue' | 'compensate';
+  schedule_policy?: 'balanced' | 'fork_first' | 'speed_first';
 }
 
 export interface RunContext {
@@ -138,28 +140,72 @@ export class MaestroEngine extends EventEmitter {
 
   private async executeWorkflow(context: RunContext): Promise<void> {
     try {
-      const steps = this.topologicalSort(context.workflow.steps);
+      if (context.workflow.schedule_policy === 'fork_first') {
+        await this.executeWorkflowForkFirst(context);
+      } else {
+        const steps = this.topologicalSort(context.workflow.steps);
 
-      for (const step of steps) {
-        // Check if dependencies are satisfied
-        const ready = await this.areDepenciesSatisfied(context.run_id, step);
-        if (!ready) {
-          continue; // Will be picked up in next iteration
+        for (const step of steps) {
+          // Check if dependencies are satisfied
+          const ready = await this.areDepenciesSatisfied(context.run_id, step);
+          if (!ready) {
+            continue; // Will be picked up in next iteration
+          }
+
+          // Execute step with retry logic
+          await this.executeStepWithRetry(context, step);
+
+          // Check if run should continue
+          const runStatus = await this.stateStore.getRunStatus(context.run_id);
+          if (runStatus === 'cancelled' || runStatus === 'failed') {
+            break;
+          }
         }
 
-        // Execute step with retry logic
-        await this.executeStepWithRetry(context, step);
+        await this.completeRun(context);
+      }
+    } catch (error) {
+      await this.handleRunFailure(context, error as Error);
+    }
+  }
 
-        // Check if run should continue
-        const runStatus = await this.stateStore.getRunStatus(context.run_id);
-        if (runStatus === 'cancelled' || runStatus === 'failed') {
-          break;
+  private async executeWorkflowForkFirst(context: RunContext): Promise<void> {
+    const remainingSteps = new Set(context.workflow.steps.map((s) => s.id));
+    const stepMap = new Map(context.workflow.steps.map((s) => [s.id, s]));
+
+    while (remainingSteps.size > 0) {
+      // Find ready steps
+      const readySteps: WorkflowStep[] = [];
+      for (const stepId of remainingSteps) {
+        const step = stepMap.get(stepId)!;
+        if (await this.areDepenciesSatisfied(context.run_id, step)) {
+          readySteps.push(step);
         }
       }
 
+      if (readySteps.length === 0) {
+        throw new Error('Deadlock detected: steps remaining but none ready.');
+      }
+
+      // Prioritize using ForkDetector
+      const prioritized = ForkDetector.prioritize(readySteps);
+      const nextStep = prioritized[0];
+
+      // Execute step
+      await this.executeStepWithRetry(context, nextStep);
+      remainingSteps.delete(nextStep.id);
+
+      // Check if run should continue
+      const runStatus = await this.stateStore.getRunStatus(context.run_id);
+      if (runStatus === 'cancelled' || runStatus === 'failed') {
+        break;
+      }
+    }
+
+    // Double check status before completing
+    const finalStatus = await this.stateStore.getRunStatus(context.run_id);
+    if (finalStatus !== 'failed' && finalStatus !== 'cancelled') {
       await this.completeRun(context);
-    } catch (error) {
-      await this.handleRunFailure(context, error as Error);
     }
   }
 
