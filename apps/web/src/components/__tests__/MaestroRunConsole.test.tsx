@@ -107,6 +107,21 @@ describe('<MaestroRunConsole />', () => {
     expect(screen.getByText('hello world')).toBeInTheDocument();
   });
 
+  it('focuses textarea when quick prompt is clicked', async () => {
+    render(<MaestroRunConsole userId="user-123" />);
+
+    const promptText = 'Analyze the last 3 PRs for security risks';
+    const quickPrompt = screen.getByText(promptText);
+    const textarea = screen.getByPlaceholderText(/describe what you want/i);
+
+    expect(textarea).not.toHaveFocus();
+
+    fireEvent.click(quickPrompt);
+
+    expect(textarea).toHaveValue(promptText);
+    expect(textarea).toHaveFocus();
+  });
+
   it('copies artifact to clipboard', async () => {
     const writeTextMock = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, {
