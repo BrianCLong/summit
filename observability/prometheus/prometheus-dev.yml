@@ -93,3 +93,11 @@ scrape_configs:
         labels:
           service: 'otel-collector'
           tier: 'observability'
+  # Agentic Mesh Evaluation
+  - job_name: agentic-mesh-evaluation
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['agentic-mesh-evaluation:4200']
+        labels:
+          service: 'agentic-mesh-evaluation'
+          tier: 'backend'
