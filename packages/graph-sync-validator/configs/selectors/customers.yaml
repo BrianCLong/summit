@@ -1,0 +1,18 @@
+table: "public.customers"
+label: "Customer"
+pk:
+  column: "id"
+  asId: "customerId"
+properties:
+  - column: "name"
+    prop: "name"
+    type: "string"
+  - column: "email"
+    prop: "email"
+    type: "string"
+  - column: "created_at"
+    prop: "createdAt"
+    type: "date"
+  - column: "tier"
+    prop: "tier"
+    type: "string"
