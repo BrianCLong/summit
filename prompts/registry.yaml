@@ -266,6 +266,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: daily-disinfo-research-summary
+    version: v1
+    path: prompts/research/daily-disinfo-research-summary@v1.md
+    sha256: 575646f52234f5fc454ee92cad5ad78aba839e2ab3620810beb6212e6cf268bd
+    description: Daily research summary update for disinformation and information operations.
+    scope:
+      paths:
+        - docs/research/
+        - docs/roadmap/STATUS.json
+        - prompts/research/daily-disinfo-research-summary@v1.md
+        - prompts/registry.yaml
+      domains:
+        - research
+        - documentation
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
