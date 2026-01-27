@@ -128,6 +128,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ga-verification-map-ordering
+    version: v1
+    path: prompts/ga/verification-map-ordering@v1.md
+    sha256: 699a606efb9eb3c6748999373879901cd7720ef3949c097171d882e6316c952e
+    description: Enforce deterministic ordering for GA verification map entries.
+    scope:
+      paths:
+        - scripts/ga/verify-ga-surface.mjs
+        - docs/ga/verification-map.json
+        - agent-contract.json
+        - docs/roadmap/STATUS.json
+        - AGENT_ACTIVITY.md
+        - TASK_BACKLOG.md
+        - prompts/ga/verification-map-ordering@v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - governance
+        - verification
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: genui-plan-scaffold
     version: v1
     path: prompts/genui/genui-plan-scaffold@v1.md

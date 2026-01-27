@@ -18,7 +18,8 @@
     "legacyMode": "New files cannot self-designate legacy mode; exemptions require documented issue and owner.",
     "ciCommands": ["make ga-verify", "pnpm run test:a11y-gate"],
     "provenance": "Changes must cite evidence artifacts in PR summaries.",
-    "verificationSurfaces": ["docs/ga/genui/UI_CONTRACT.md"]
+    "verificationSurfaces": ["docs/ga/genui/UI_CONTRACT.md"],
+    "verificationMapOrdering": "docs/ga/verification-map.json entries must be sorted by feature name (case-insensitive)."
   },
   "restrictedAreas": [
     {

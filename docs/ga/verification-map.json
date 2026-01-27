@@ -9,6 +9,24 @@
     "notes": "Blocks GA on serious/critical axe findings or keyboard navigation regressions; artifact upload required."
   },
   {
+    "feature": "AuthN/AuthZ Helpers",
+    "tier": "B",
+    "artifact": "testing/ga-verification/ga-features.ga.test.mjs",
+    "ciStatus": "wired",
+    "evidence": ["docs/AUTHZ_IMPLEMENTATION_SUMMARY.md"],
+    "keyword": "Authorization",
+    "notes": "Ensures helper guidance is anchored to the audited AuthZ summary."
+  },
+  {
+    "feature": "Data Classification & Governance",
+    "tier": "B",
+    "artifact": "testing/ga-verification/ga-features.ga.test.mjs",
+    "ciStatus": "wired",
+    "evidence": ["docs/DATA_GOVERNANCE.md"],
+    "keyword": "Governance",
+    "notes": "Guards the canonical governance document."
+  },
+  {
     "feature": "Demo Mode Hard Gate",
     "tier": "B",
     "artifact": "testing/ga-verification/ga-features.ga.test.mjs",
@@ -18,22 +36,26 @@
     "notes": "Demo mode must remain behind explicit gate; verification is node-native to avoid Jest instability."
   },
   {
-    "feature": "Rate Limiting",
-    "tier": "B",
-    "artifact": "testing/ga-verification/ga-features.ga.test.mjs",
+    "feature": "Generative UI Plan Contract",
+    "tier": "C",
+    "artifact": "docs/ga/genui/UI_CONTRACT.md",
     "ciStatus": "wired",
-    "evidence": ["docs/API_RATE_LIMITING.md"],
-    "keyword": "rate limiting",
-    "notes": "Documentation-driven contract while runtime harness is stabilized."
+    "evidence": [
+      "docs/ga/genui/UI_CONTRACT.md",
+      "docs/ga/genui/TOOL_MANUAL.md",
+      "docs/ga/genui/ANTI_FOOTGUNS.md"
+    ],
+    "keywords": ["Structured Plan", "Tool", "Footguns"],
+    "notes": "Ensures the GenUI contract, tool schema, and anti-footgun guardrails remain anchored."
   },
   {
-    "feature": "AuthN/AuthZ Helpers",
+    "feature": "Ingestion Security Hardening",
     "tier": "B",
     "artifact": "testing/ga-verification/ga-features.ga.test.mjs",
     "ciStatus": "wired",
-    "evidence": ["docs/AUTHZ_IMPLEMENTATION_SUMMARY.md"],
-    "keyword": "Authorization",
-    "notes": "Ensures helper guidance is anchored to the audited AuthZ summary."
+    "evidence": ["docs/security/security-architecture-and-policies.md"],
+    "keyword": "ingestion",
+    "notes": "Ensures ingestion hardening expectations stay documented."
   },
   {
     "feature": "Observability Taxonomy",
@@ -49,15 +71,6 @@
     "notes": "Keeps the metrics/logs/events taxonomy intact."
   },
   {
-    "feature": "Data Classification & Governance",
-    "tier": "B",
-    "artifact": "testing/ga-verification/ga-features.ga.test.mjs",
-    "ciStatus": "wired",
-    "evidence": ["docs/DATA_GOVERNANCE.md"],
-    "keyword": "Governance",
-    "notes": "Guards the canonical governance document."
-  },
-  {
     "feature": "Policy Preflight & Receipts",
     "tier": "C",
     "artifact": "scripts/ga/verify-ga-surface.mjs",
@@ -67,25 +80,12 @@
     "notes": "Validated via schema checks to avoid test runner dependency."
   },
   {
-    "feature": "Ingestion Security Hardening",
+    "feature": "Rate Limiting",
     "tier": "B",
     "artifact": "testing/ga-verification/ga-features.ga.test.mjs",
     "ciStatus": "wired",
-    "evidence": ["docs/security/security-architecture-and-policies.md"],
-    "keyword": "ingestion",
-    "notes": "Ensures ingestion hardening expectations stay documented."
-  },
-  {
-    "feature": "Generative UI Plan Contract",
-    "tier": "C",
-    "artifact": "docs/ga/genui/UI_CONTRACT.md",
-    "ciStatus": "wired",
-    "evidence": [
-      "docs/ga/genui/UI_CONTRACT.md",
-      "docs/ga/genui/TOOL_MANUAL.md",
-      "docs/ga/genui/ANTI_FOOTGUNS.md"
-    ],
-    "keywords": ["Structured Plan", "Tool", "Footguns"],
-    "notes": "Ensures the GenUI contract, tool schema, and anti-footgun guardrails remain anchored."
+    "evidence": ["docs/API_RATE_LIMITING.md"],
+    "keyword": "rate limiting",
+    "notes": "Documentation-driven contract while runtime harness is stabilized."
   }
 ]
