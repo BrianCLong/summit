@@ -178,6 +178,7 @@ export class CacheService {
   async getOrSet<T>(key: string, factory: () => Promise<T>, ttl?: number): Promise<T> {
     // cacheManager.getOrSet signature matches what we need
     // but we need to handle the namespacing of the key
+    logger.debug({ key, ttl }, 'CacheService.getOrSet called');
     return this.cacheManager.getOrSet(
         this.getKey(key),
         factory,

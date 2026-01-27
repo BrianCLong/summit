@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS event_store_partitioned (
   previous_event_hash VARCHAR(64),
   event_timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (tenant_id, event_id)
+  PRIMARY KEY (tenant_id, event_id, event_timestamp)
 ) PARTITION BY LIST (tenant_id);
 
 -- Partitioned indexes mirror the legacy table

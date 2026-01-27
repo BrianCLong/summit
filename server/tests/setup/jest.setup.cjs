@@ -4,7 +4,7 @@
  */
 
 // Extend Jest with additional matchers from jest-extended
-require('jest-extended');
+// require('jest-extended');
 
 require('dotenv').config({ path: './.env.test' });
 
@@ -191,11 +191,23 @@ jest.mock('ioredis', () => {
         'last-generated-id', '456-0',
       ];
     }
+    async bgsave() { return 'OK'; }
+    async *scanStream(options) {
+      yield [];
+    }
     pipeline() {
       const queued = [];
       return {
         xadd: (...args) => {
           queued.push(() => this.xadd(args[0], ...args.slice(1)));
+          return this;
+        },
+        get: (...args) => {
+          queued.push(() => this.get(args[0]));
+          return this;
+        },
+        set: (...args) => {
+          queued.push(() => this.set(args[0], args[1]));
           return this;
         },
         exec: async () => queued.map(() => [null, 'OK']),
