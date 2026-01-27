@@ -32,3 +32,21 @@ evidence:
     criteria:
       - rule: threshold
         min: 0.85
+
+  - id: EVID-OSINT-TURN-003
+    name: OSINT Platform Update (Turn 3)
+    description: High-signal signals from Maltego One, i2, and emerging OSINT platforms.
+    source:
+      type: file
+      path: docs/osint/updates/automation-turn-3.md
+    criteria:
+      - rule: existence
+
+  - id: EVID-OSINT-TURN-004
+    name: Regulatory Intelligence Update (Turn 4)
+    description: AI governance, FedRAMP, CMMC, and GDPR enforcement updates (Jan 2026).
+    source:
+      type: file
+      path: docs/osint/updates/automation-turn-4.md
+    criteria:
+      - rule: existence

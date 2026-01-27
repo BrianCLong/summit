@@ -1,3 +1,10 @@
+Owner: @intelgraph/policy-team
+Last-Reviewed: 2026-01-26
+Evidence-IDs: EVID-OSINT-TURN-003
+Status: active
+ILSA-Level: 3
+IBOM-Verified: true
+
 # OSINT Platform Developments — Automation Turn 3
 
 **Scope:** Maltego, i2 Analyst’s Notebook, and emerging intelligence platforms. This report isolates high-signal feature releases, analytical capabilities, integrations, licensing/pricing signals, and strategic implications for intelligence workflows. It does not repeat prior automation content.
