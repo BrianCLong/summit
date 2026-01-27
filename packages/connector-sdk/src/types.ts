@@ -58,7 +58,8 @@ export type ConnectorCapability =
   | 'batch'
   | 'incremental'
   | 'enrich'
-  | 'geocode';
+  | 'geocode'
+  | 'action';
 
 export type AuthMethod =
   | 'none'
@@ -300,6 +301,17 @@ export interface ConnectorQueryResult {
 }
 
 // -----------------------------------------------------------------------------
+// Action Types
+// -----------------------------------------------------------------------------
+
+export interface ConnectorAction {
+  name: string;
+  description: string;
+  inputSchema: Record<string, unknown>;
+  outputSchema: Record<string, unknown>;
+}
+
+// -----------------------------------------------------------------------------
 // Connector Interface
 // -----------------------------------------------------------------------------
 
@@ -344,6 +356,16 @@ export interface Connector {
    * Enrich an entity (for enrich-capable connectors)
    */
   enrich?(entity: ConnectorEntity, context: ConnectorContext): Promise<ConnectorEntity>;
+
+  /**
+   * Execute an action (for action-capable connectors)
+   */
+  execute?(action: string, params: Record<string, unknown>, context: ConnectorContext): Promise<ConnectorResult>;
+
+  /**
+   * Get available actions (for action-capable connectors)
+   */
+  getActions?(): Promise<ConnectorAction[]>;
 
   /**
    * Clean up resources
