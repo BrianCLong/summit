@@ -1,28 +1,31 @@
 # AI Regulatory Compliance Map
-**Status:** GA Ready
-**Last Updated:** 2025-10-27
-**Scope:** EU AI Act, NIST AI RMF, GDPR, FedRAMP
+**Status:** GA Ready (Updated for 2026 Obligations)
+**Last Updated:** 2026-01-25
+**Scope:** EU AI Act (2026 Enforcement), NIST AI RMF, GDPR, FedRAMP
 
 ## Executive Summary
-This document maps Summit's governance controls to major AI regulatory frameworks. It serves as the primary "bridge document" for external auditors and internal compliance reviews.
+This document maps Summit's governance controls to major AI regulatory frameworks. It serves as the primary "bridge document" for external auditors and internal compliance reviews, specifically addressing the **High-Risk AI obligations effective August 2, 2026**.
 
 ## 1. EU AI Act Compliance Strategy
-Summit adopts a "Privacy by Design" and "Safety First" approach aligned with the EU AI Act (2024).
+Summit adopts a "Privacy by Design" and "Safety First" approach aligned with Regulation (EU) 2024/1689.
 
-### Classification
-*   **Core Platform (Narrative Engine):** Classified as **General Purpose AI (GPAI)** with systemic risk transparency obligations.
+### Classification & Risk Mapping
+*   **Core Platform (Narrative Engine):** Classified as **High-Risk AI** (Annex III: Influence on democratic processes / Safety component of critical digital infra) AND **General Purpose AI (GPAI)** with systemic risk.
 *   **Copilot Features:** Classified as **Limited Risk** (transparency obligations apply).
 *   **Identity/Biometrics:** Summit **DOES NOT** perform real-time remote biometric identification.
 
-### Control Mapping
+### Control Mapping (High-Risk & Systemic Risk)
 | EU AI Act Article | Requirement | Summit Control | Artifact |
 | :--- | :--- | :--- | :--- |
 | **Art 5** | Prohibited Practices | Policy explicit ban on social scoring/manipulation | `compliance/regulatory-lenses.yml` |
-| **Art 9** | Risk Management System | Continuous Risk Assessment | `compliance/assessments/SUMMIT_RISK_ASSESSMENT_v1.md` |
-| **Art 10** | Data Governance | Data Lineage & Provenance Ledger | `provenance/` (Ledger Service) |
+| **Art 9** | Risk Management System | Continuous Risk Assessment (Lifecycle) | `compliance/assessments/SUMMIT_RISK_ASSESSMENT_v1.md` |
+| **Art 10** | Data Governance | Data Lineage, Bias Mitigation, & Provenance Ledger | `provenance/` (Ledger Service) |
+| **Art 11** | Technical Documentation | Automated Documentation Generation | `docs/models/technical_docs/` |
+| **Art 12** | Record Keeping | Automatic Event Logging (7+ years) | `artifacts/logs/governance/` |
 | **Art 13** | Transparency | Model Cards & System Instructions | `docs/models/` |
 | **Art 14** | Human Oversight | "Human-in-the-loop" Review UI | `apps/web/src/components/ReviewQueue.tsx` |
 | **Art 15** | Accuracy & Cybersecurity | Red Teaming & Adversarial Testing | `tests/adversarial/` |
+| **Art 55** | Systemic Risk (GPAI) | Systemic Risk Assessment & Mitigation | `docs/governance/SYSTEMIC_RISK_EVAL.md` |
 
 ## 2. NIST AI RMF Alignment
 We map our workflows to the NIST AI Risk Management Framework functions.
@@ -44,15 +47,17 @@ We map our workflows to the NIST AI Risk Management Framework functions.
 *   **Intervention:** Circuit breakers and rate limits on LLM calls.
 *   **Incident Response:** AI specific incident playbooks in `docs/runbooks/`.
 
-## 3. GDPR & Data Sovereignty
+## 3. GDPR & Data Sovereignty (Modernized 2026)
 *   **Right to Explanation:** Users can query the `Provenance Ledger` to see *why* an AI decision was made.
 *   **Data Minimization:** PII masking is enforced at the Gateway layer.
 *   **Cross-Border Transfer:** All model inference can be pinned to specific regions via `Litellm` config.
+*   **Enforcement:** Automated workflow for Data Subject Access Requests (DSAR).
 
 ## 4. Evidence Artifacts
 The following artifacts are automatically generated during the Release Process:
 
 1.  **AI System Inventory:** JSON list of all models and agents.
-2.  **Risk Assessment:** Signed Markdown document.
+2.  **Risk Assessment:** Signed Markdown document (Art 9 Compliance).
 3.  **Model Cards:** Standardized disclosures for each model.
 4.  **Provenance Log:** Cryptographically verifiable log of AI actions.
+5.  **Technical Documentation:** Comprehensive system design docs (Art 11).
