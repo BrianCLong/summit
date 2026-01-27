@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     outputs:
       hashes: ${{ steps.slsa-subjects.outputs.hashes }}
     steps:
@@ -39,7 +39,7 @@ jobs:
 
   provenance:
     needs: [build]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     permissions:
       id-token: write
       attestations: write
@@ -58,7 +58,7 @@ jobs:
   # Linked: https://linear.app/summi7/issue/SUM-10197
 
   verify:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     needs: [provenance]
     steps:
       - name: Download artifacts
