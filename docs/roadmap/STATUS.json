@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-23T07:30:00Z",
-  "revision_note": "Merged: Counter-campaign optimization epics, Backlog sync, GA demo runbooks",
+  "last_updated": "2026-01-26T23:52:41Z",
+  "revision_note": "Added media authenticity governance, CLI provenance tooling, and CI gate for marketing/public assets",
   "initiatives": [
     {
       "id": "A",

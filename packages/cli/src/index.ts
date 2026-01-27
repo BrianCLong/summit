@@ -19,6 +19,7 @@ import { complianceCommands } from './commands/compliance.js';
 import { configCommands } from './commands/config.js';
 import { pluginCommands } from './commands/plugin.js';
 import { doctor } from './commands/doctor.js';
+import { mediaCommands } from './commands/media.js';
 import { loadConfig, getConfig } from './config.js';
 
 const program = new Command();
@@ -94,6 +95,9 @@ program
   .addCommand(pluginCommands.build)
   .addCommand(pluginCommands.publish)
   .addCommand(pluginCommands.list);
+
+// Media provenance commands
+program.addCommand(mediaCommands);
 
 // Login command
 program

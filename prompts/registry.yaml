@@ -194,6 +194,42 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: media-provenance-governance
+    version: v1
+    path: prompts/governance/media-provenance@v1.md
+    sha256: 138350d9097875be8ee827690814d58abebf79a2f35d49d8206e7d71fe8f958a
+    description: Media authenticity governance, deterministic provenance tooling, and CI gate enforcement.
+    scope:
+      paths:
+        - docs/governance/
+        - docs/ga/
+        - scripts/ci/
+        - .github/workflows/
+        - packages/cli/
+        - testing/ga-verification/
+        - agent-contract.json
+        - COMPLIANCE_CONTROLS.md
+        - COMPLIANCE_EVIDENCE_INDEX.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/governance/media-provenance@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - compliance
+        - ci
+        - provenance
+        - documentation
+        - tooling
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md

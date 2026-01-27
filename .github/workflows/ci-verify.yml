@@ -116,6 +116,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Media provenance gate
+        run: npx tsx scripts/ci/verify_media_provenance.ts
+
       - name: Check governance compliance
         run: npm run check:governance || echo "Governance check skipped (script may not exist)"
         continue-on-error: true # Non-blocking until governance engine is stable

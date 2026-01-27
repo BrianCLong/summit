@@ -87,5 +87,14 @@
     ],
     "keywords": ["Structured Plan", "Tool", "Footguns"],
     "notes": "Ensures the GenUI contract, tool schema, and anti-footgun guardrails remain anchored."
+  },
+  {
+    "feature": "Media Authenticity & Provenance",
+    "tier": "B",
+    "artifact": "scripts/ci/verify_media_provenance.ts",
+    "ciStatus": "wired",
+    "evidence": ["docs/governance/media_provenance.md", "scripts/ci/verify_media_provenance.ts"],
+    "keywords": ["Media Authenticity", "media provenance gate"],
+    "notes": "Blocks marketing/public media changes without deterministic provenance evidence."
   }
 ]

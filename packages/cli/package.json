@@ -27,6 +27,7 @@
     "prepublishOnly": "npm run clean && npm run build",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
+    "test": "vitest run",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit"
   },

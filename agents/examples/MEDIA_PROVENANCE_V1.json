@@ -1,0 +1,53 @@
+{
+  "task_id": "MEDIA_PROVENANCE_V1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "media-provenance-governance",
+    "version": "v1",
+    "sha256": "138350d9097875be8ee827690814d58abebf79a2f35d49d8206e7d71fe8f958a",
+    "path": "prompts/governance/media-provenance@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/governance/",
+      "docs/ga/",
+      "scripts/ci/",
+      ".github/workflows/",
+      "packages/cli/",
+      "testing/ga-verification/",
+      "agent-contract.json",
+      "COMPLIANCE_CONTROLS.md",
+      "COMPLIANCE_EVIDENCE_INDEX.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/",
+      "prompts/"
+    ],
+    "domains": ["governance", "compliance", "ci", "provenance", "documentation", "tooling"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "docs/governance/media_provenance.md",
+      "scripts/ci/verify_media_provenance.ts",
+      "packages/cli/src/media/provenance.ts",
+      "packages/cli/src/commands/media.ts",
+      "testing/ga-verification/ga-features.ga.test.mjs"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Media governance policy published with deterministic evidence requirements.",
+    "summit media commands emit report.json, metrics.json, and stamp.json.",
+    "CI gate blocks marketing/public assets without provenance evidence.",
+    "GA verification map includes Media Authenticity & Provenance control."
+  ],
+  "stop_conditions": [
+    "Tooling instability that blocks deterministic verification",
+    "Requests to bypass media provenance gate",
+    "Detection of PII in outputs"
+  ]
+}
