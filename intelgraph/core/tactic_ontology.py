@@ -4,10 +4,11 @@ Tactic Ontology for IO (Information Operations).
 Defines the core data structures for representing tactics, campaigns, and signatures.
 """
 
+from datetime import datetime
 from enum import Enum
 from typing import Any, List, Optional
+
 from pydantic import BaseModel, Field
-from datetime import datetime
 
 
 class TacticType(str, Enum):
@@ -39,8 +40,8 @@ class Tactic(BaseModel):
     type: TacticType
     name: str
     description: str
-    signatures: List[Signature] = Field(default_factory=list)
-    mitigation_suggestions: List[str] = Field(default_factory=list)
+    signatures: list[Signature] = Field(default_factory=list)
+    mitigation_suggestions: list[str] = Field(default_factory=list)
 
 
 class CampaignEvent(BaseModel):
@@ -64,9 +65,9 @@ class Campaign(BaseModel):
     description: str
     start_date: datetime
     end_date: Optional[datetime] = None
-    events: List[CampaignEvent] = Field(default_factory=list)
-    involved_entities: List[str] = Field(default_factory=list)  # IDs of entities
-    suspected_tactics: List[TacticType] = Field(default_factory=list)
+    events: list[CampaignEvent] = Field(default_factory=list)
+    involved_entities: list[str] = Field(default_factory=list)  # IDs of entities
+    suspected_tactics: list[TacticType] = Field(default_factory=list)
 
 
 class MatchedTactic(BaseModel):
@@ -75,5 +76,5 @@ class MatchedTactic(BaseModel):
     """
     tactic: Tactic
     confidence: float  # 0.0 to 1.0
-    evidence: List[str] = Field(default_factory=list)  # IDs of events or nodes supporting the match
+    evidence: list[str] = Field(default_factory=list)  # IDs of events or nodes supporting the match
     timestamp: datetime = Field(default_factory=datetime.utcnow)

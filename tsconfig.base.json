@@ -6,6 +6,7 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "types": ["node"],
     "moduleResolution": "Bundler",
     "declaration": true,
     "sourceMap": true,
