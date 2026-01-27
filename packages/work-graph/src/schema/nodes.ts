@@ -440,6 +440,79 @@ export const MilestoneSchema = BaseNodeSchema.extend({
 export type Milestone = z.infer<typeof MilestoneSchema>;
 
 // ============================================
+// Gate Schema
+// ============================================
+
+export const GateSchema = z.object({
+  type: z.enum(['tests_pass', 'lint_clean', 'security_scan_ok', 'ui_evidence_ok', 'policy_ok', 'human_review_ok']),
+  status: z.enum(['pending', 'passed', 'failed', 'skipped']),
+  requiredEvidence: z.array(z.string()).default([]), // IDs of Evidence/Artifact nodes
+  lastCheckedAt: z.date().optional(),
+});
+
+export type Gate = z.infer<typeof GateSchema>;
+
+// ============================================
+// Task Node
+// ============================================
+
+export const TaskSchema = BaseNodeSchema.extend({
+  type: z.literal('task'),
+  title: z.string().min(1),
+  description: z.string(),
+  acceptanceCriteria: z.array(z.string()).default([]),
+  ownerAgent: z.string().optional(),
+  status: z.enum(['pending', 'in_progress', 'review', 'done', 'blocked', 'failed']),
+  priority: z.enum(['P0', 'P1', 'P2', 'P3']),
+  tags: z.array(z.string()).default([]),
+  gates: z.array(GateSchema).default([]),
+  parentTaskId: z.string().optional(),
+  budget: z.object({
+    tokens: z.number().optional(),
+    timeMs: z.number().optional(),
+    costUsd: z.number().optional(),
+  }).optional(),
+});
+
+export type Task = z.infer<typeof TaskSchema>;
+
+// ============================================
+// TaskRun Node
+// ============================================
+
+export const TaskRunSchema = BaseNodeSchema.extend({
+  type: z.literal('task_run'),
+  taskId: z.string(),
+  agentId: z.string(),
+  status: z.enum(['running', 'completed', 'failed', 'timed_out']),
+  startedAt: z.date(),
+  endedAt: z.date().optional(),
+  outcome: z.string().optional(),
+  toolCallsCount: z.number().default(0),
+  tokensUsed: z.number().default(0),
+  model: z.string().optional(),
+  permissions: z.array(z.string()).default([]),
+});
+
+export type TaskRun = z.infer<typeof TaskRunSchema>;
+
+// ============================================
+// Artifact Node
+// ============================================
+
+export const ArtifactSchema = BaseNodeSchema.extend({
+  type: z.literal('artifact'),
+  path: z.string(),
+  hash: z.string().optional(),
+  summary: z.string().optional(),
+  contentType: z.string().optional(),
+  size: z.number().optional(),
+  url: z.string().optional(),
+});
+
+export type Artifact = z.infer<typeof ArtifactSchema>;
+
+// ============================================
 // Union Type
 // ============================================
 
@@ -460,7 +533,10 @@ export type WorkGraphNode =
   | Sprint
   | Board
   | Roadmap
-  | Milestone;
+  | Milestone
+  | Task
+  | TaskRun
+  | Artifact;
 
 export const WorkGraphNodeSchema = z.discriminatedUnion('type', [
   IntentSchema,
@@ -480,6 +556,9 @@ export const WorkGraphNodeSchema = z.discriminatedUnion('type', [
   BoardSchema,
   RoadmapSchema,
   MilestoneSchema,
+  TaskSchema,
+  TaskRunSchema,
+  ArtifactSchema,
 ]);
 
 // Node type string literal
