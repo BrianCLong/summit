@@ -138,6 +138,7 @@ import { v4Router } from './routes/v4/index.ts';
 import vectorStoreRouter from './routes/vector-store.ts';
 import intelGraphRouter from './routes/intel-graph.ts';
 import graphragRouter from './routes/graphrag.ts';
+import intentRouter from './routes/intent.ts';
 
 export const createApp = async () => {
   // Initialize OpenTelemetry tracing
@@ -505,6 +506,7 @@ export const createApp = async () => {
 
   app.use('/api/intel-graph', intelGraphRouter);
   app.use('/api/graphrag', graphragRouter);
+  app.use('/api/intent', intentRouter);
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes
