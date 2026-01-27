@@ -1,9 +1,12 @@
 
+from datetime import UTC, datetime, timedelta, timezone
+
 import pytest
-from datetime import datetime, timedelta, timezone
+
 from intelgraph.core.tactic_ontology import Campaign, CampaignEvent, TacticType
 from intelgraph.graph_analytics.core_analytics import Graph
 from intelgraph.graph_analytics.tactic_matcher import TacticMatcher
+
 
 def test_firehose_detection():
     # Setup
@@ -12,7 +15,7 @@ def test_firehose_detection():
 
     # Create a high-volume campaign
     events = []
-    base_time = datetime.now(timezone.utc)
+    base_time = datetime.now(UTC)
     for i in range(100):
         events.append(CampaignEvent(
             id=f"evt-{i}",
@@ -51,7 +54,7 @@ def test_sockpuppet_ring_detection():
             graph.add_edge(actors[i], actors[j])
 
     events = []
-    base_time = datetime.now(timezone.utc)
+    base_time = datetime.now(UTC)
     for actor in actors:
         events.append(CampaignEvent(
             id=f"evt-{actor}",
@@ -83,7 +86,7 @@ def test_reflexive_control_detection():
     graph = Graph()
 
     events = []
-    base_time = datetime.now(timezone.utc)
+    base_time = datetime.now(UTC)
     for i in range(10):
         events.append(CampaignEvent(
             id=f"evt-{i}",
@@ -122,7 +125,7 @@ def test_laundering_detection():
     # But NOT A -> C (linear chain)
 
     events = []
-    base_time = datetime.now(timezone.utc)
+    base_time = datetime.now(UTC)
     for actor in ["source-A", "proxy-B", "mainstream-C"]:
         events.append(CampaignEvent(
             id=f"evt-{actor}",
@@ -166,13 +169,13 @@ def test_front_group_detection():
     # Set attributes
     graph.add_node("FG", attributes={"transparency": 0.1})
 
-    events = [CampaignEvent(id="evt-FG", timestamp=datetime.now(timezone.utc), type="post", source_id="FG")]
+    events = [CampaignEvent(id="evt-FG", timestamp=datetime.now(UTC), type="post", source_id="FG")]
 
     campaign = Campaign(
         id="camp-5",
         name="Front Group Test",
         description="Testing front group detection",
-        start_date=datetime.now(timezone.utc),
+        start_date=datetime.now(UTC),
         events=events
     )
 
@@ -192,7 +195,7 @@ def test_astroturfing_detection():
 
     # Create coordinated burst
     events = []
-    base_time = datetime.now(timezone.utc)
+    base_time = datetime.now(UTC)
 
     # 10 actors posting at almost exactly the same time
     for i in range(10):
