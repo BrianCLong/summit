@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/self-upgrading-infrastructure",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Self-upgrading digital infrastructure that senses market trends, competitive threats, and regulatory changes",
   "type": "module",
   "main": "dist/index.js",

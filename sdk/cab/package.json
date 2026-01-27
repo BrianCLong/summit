@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/cab-sdk",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "TypeScript SDK for the Contextual Access Broker (CAB) risk decision engine",
   "type": "module",
   "main": "dist/index.js",

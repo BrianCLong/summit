@@ -1,6 +1,6 @@
 {
   "name": "claim-verifier",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "type": "module",
   "bin": {
     "claim-verifier": "cli.js"

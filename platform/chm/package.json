@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/chm",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "Content handling and markings platform with taxonomy, rule engine, downgrade workflows, and export controls.",

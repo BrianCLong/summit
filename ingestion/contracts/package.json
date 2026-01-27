@@ -1,6 +1,6 @@
 {
   "name": "ingestion-contracts",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Contract specification and certification toolkit for ingestion pipeline",
   "type": "module",
   "scripts": {

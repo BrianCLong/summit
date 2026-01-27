@@ -1,6 +1,6 @@
 {
   "name": "reo-dashboard",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "type": "module",
   "description": "Comparison dashboard utilities for the Responsible Evaluation Orchestrator",
   "scripts": {

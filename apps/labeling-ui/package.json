@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/labeling-ui",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Labeling UI for data factory annotation workflows",
   "type": "module",
   "scripts": {

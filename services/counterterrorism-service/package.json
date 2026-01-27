@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/counterterrorism-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Counterterrorism operations and intelligence service",
   "license": "MIT",
   "type": "module",

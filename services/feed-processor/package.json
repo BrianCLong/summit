@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/feed-processor",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Data ingestion worker with OpenLineage integration and license enforcement",
   "main": "dist/index.js",
   "scripts": {

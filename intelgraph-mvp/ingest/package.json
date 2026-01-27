@@ -1,6 +1,6 @@
 {
   "name": "ingest-worker",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
     "neo4j-driver": "^5.12.0",

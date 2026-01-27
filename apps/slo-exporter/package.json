@@ -1,6 +1,6 @@
 {
   "name": "slo-exporter",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Exposes calculated SLO metrics for Summit",
   "main": "dist/index.js",
   "scripts": {

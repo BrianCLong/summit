@@ -1,6 +1,6 @@
 {
   "name": "issue-sweeper",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "private": true,
   "description": "A tool to sweep and process issues in a GitHub repository.",
   "main": "dist/index.js",

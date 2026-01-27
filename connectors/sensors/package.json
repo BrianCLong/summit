@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/sensor-connectors",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Sensor connector framework for the Signal Bus - base abstractions for ingesting signals from various sensor types",
   "type": "module",
   "main": "dist/index.js",

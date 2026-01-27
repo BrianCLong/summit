@@ -1,6 +1,6 @@
 {
   "name": "prediction-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "main": "dist/index.js",
   "scripts": {
     "build": "npx tsc",

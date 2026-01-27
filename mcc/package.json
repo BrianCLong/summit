@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/mcc",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Model Card Compiler (MCC) converts YAML model cards into signed JSON artifacts with enforcement hooks.",
   "type": "module",
   "main": "dist/index.js",

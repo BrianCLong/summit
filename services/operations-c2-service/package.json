@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/operations-c2-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Intelligence operations command and control backend service",
   "main": "src/index.js",
   "type": "module",

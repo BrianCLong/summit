@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/realtime-sdk",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "main": "dist/node/index.js",
   "browser": "dist/web/index.js",
   "types": "dist/index.d.ts",

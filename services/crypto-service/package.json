@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/crypto-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Cryptographic service with post-quantum cryptography support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

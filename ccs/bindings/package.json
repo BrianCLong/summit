@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/ccs-bindings",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "TypeScript bindings for the CCS cohort sampler",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/disaster-recovery",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Multi-cloud disaster recovery and backup automation service",
   "main": "dist/index.js",
   "scripts": {

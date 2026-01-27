@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/hypothesis-workbench",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Hypothesis Workbench for Analysis of Competing Hypotheses (ACH)",
   "type": "module",
   "main": "dist/index.js",

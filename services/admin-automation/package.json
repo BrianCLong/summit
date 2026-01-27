@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/admin-automation",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "AI-driven administrative task automation for 70% workload reduction",
   "type": "module",
   "main": "dist/index.js",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/aql-cli",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "TypeScript CLI for the Summit Audit Query Language (AQL)",
   "bin": {
     "aql": "dist/cli.js"

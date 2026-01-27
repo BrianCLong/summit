@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/agentic-mesh-evaluation",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Comprehensive Agentic Mesh Evaluation System - Distributed AI Agent Coordination & Performance Analysis",
   "main": "dist/index.js",
   "type": "module",

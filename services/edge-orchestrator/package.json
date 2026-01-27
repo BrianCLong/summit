@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/edge-orchestrator",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Edge computing orchestrator service",
   "main": "dist/index.js",
   "scripts": {

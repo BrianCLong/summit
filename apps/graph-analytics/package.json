@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/graph-analytics-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Advanced Graph Analytics Engine for IntelGraph",
   "main": "dist/server.js",
   "scripts": {

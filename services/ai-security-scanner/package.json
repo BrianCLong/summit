@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/ai-security-scanner",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Autonomous AI-powered security scanning and red teaming service",
   "type": "module",
   "main": "dist/index.js",

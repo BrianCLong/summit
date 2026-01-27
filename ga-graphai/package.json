@@ -9,5 +9,5 @@
     "test:smoke": "npm run test --workspace meta-orchestrator -- --threads false --filter=\"Hello-World\"",
     "test:load": "npm run test --workspace meta-orchestrator -- --threads false --filter=\"Hello-Case\""
   },
-  "version": "4.2.3"
+  "version": "1.0.0"
 }

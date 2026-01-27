@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/report-assembly",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Report Assembly Service for Briefing Templating and Export",
   "main": "dist/index.js",
   "type": "module",

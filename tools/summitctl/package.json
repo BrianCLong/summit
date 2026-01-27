@@ -1,6 +1,6 @@
 {
   "name": "summitctl",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Control plane CLI for Summit",
   "main": "dist/index.js",
   "bin": {

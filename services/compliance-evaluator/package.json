@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/compliance-evaluator",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Compliance evidence evaluator service with OPA integration",
   "type": "module",
   "main": "dist/server.js",

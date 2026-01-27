@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/config-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Centralized configuration, feature flags, and experimentation service",
   "main": "dist/index.js",
   "scripts": {

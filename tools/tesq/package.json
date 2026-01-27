@@ -1,6 +1,6 @@
 {
   "name": "tesq",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Tool Execution Sandbox & Quotas (TESQ) for running LLM-invoked tools safely.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

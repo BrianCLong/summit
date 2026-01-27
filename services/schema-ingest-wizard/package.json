@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/schema-ingest-wizard",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Schema-aware data ingest wizard with PII detection and lineage tracking",
   "type": "module",
   "main": "dist/index.js",

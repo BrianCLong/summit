@@ -1,6 +1,6 @@
 {
   "name": "ingest-gw",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "type": "module",
   "dependencies": {
     "fastify": "^4.28.0",

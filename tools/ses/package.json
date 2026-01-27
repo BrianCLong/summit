@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/ses",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Schema Evolution Simulator (SES) for what-if planning and migrations",
   "type": "module",
   "main": "dist/index.js",

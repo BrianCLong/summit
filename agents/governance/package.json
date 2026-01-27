@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/agent-governance",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Misuse-aware orchestration framework for AI agent fleets with IC FY28 compliance",
   "type": "module",
   "main": "dist/index.js",

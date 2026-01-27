@@ -7,5 +7,5 @@
     "build": "pnpm -C server build && pnpm -C web build",
     "start": "pnpm -C server start"
   },
-  "version": "4.2.3"
+  "version": "1.0.0"
 }

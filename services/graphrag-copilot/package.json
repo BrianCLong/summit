@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/graphrag-copilot",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "GraphRAG Copilot with inline citations and policy-aware redaction",
   "type": "module",
   "main": "dist/index.js",

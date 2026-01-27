@@ -12,5 +12,5 @@
   "dependencies": {
     "hono": "^4.10.3"
   },
-  "version": "4.2.3"
+  "version": "1.0.0"
 }

@@ -3,6 +3,7 @@ import { OpenAI } from 'openai';
 import logger from '../utils/logger.js';
 import { tracer } from '../observability/tracing.js';
 import { metrics as prometheusMetrics } from '../observability/metrics.js';
+import { CircuitBreaker } from '../utils/CircuitBreaker.js';
 
 export interface LLMConfig {
   defaultProvider: 'openai' | 'anthropic' | 'google' | 'ollama';
@@ -37,6 +38,7 @@ export interface ChatMessage {
 export class LLMService {
   private config: LLMConfig;
   private metrics: LLMMetrics;
+  private circuitBreaker: CircuitBreaker;
   private _openai?: OpenAI;
 
   constructor(config: Partial<LLMConfig> = {}) {
@@ -58,6 +60,12 @@ export class LLMService {
     };
 
     // OpenAI client is initialized lazily
+    this.circuitBreaker = new CircuitBreaker({
+      failureThreshold: 3, // Fail fast for LLM
+      resetTimeout: 60000, // Wait 1 minute before retrying provider
+      p95ThresholdMs: 30000, // LLMs are slow, set high threshold
+      errorRateThreshold: 0.4
+    });
   }
 
   private get openai(): OpenAI {
@@ -74,65 +82,70 @@ export class LLMService {
    * Execute a completion request
    */
   async complete(prompt: string, options: CompletionOptions = {}): Promise<string> {
-    return tracer.trace('llm.complete', async (span: any) => {
-      const startTime = Date.now();
-      const provider = options.provider || this.config.defaultProvider;
-      const model = options.model || this.config.defaultModel;
+    return this.circuitBreaker.execute(async () => {
+      return tracer.trace('llm.complete', async (span: any) => {
+        const startTime = Date.now();
+        const provider = options.provider || this.config.defaultProvider;
+        const model = options.model || this.config.defaultModel;
 
-      span.setAttributes({
-        'llm.provider': provider,
-        'llm.model': model,
-        'llm.temperature': options.temperature || this.config.temperature,
-      });
+        span.setAttributes({
+          'llm.provider': provider,
+          'llm.model': model,
+          'llm.temperature': options.temperature || this.config.temperature,
+        });
 
-      try {
-        let response: { text: string; usage?: any; provider: string };
+        try {
+          let response: { text: string; usage?: any; provider: string };
 
-        switch (provider) {
-          case 'openai':
-            response = await this.callOpenAI(prompt, options);
-            break;
-          case 'anthropic':
-            response = await this.callAnthropic(prompt, options);
-            break;
-          case 'google':
-            response = await this.callGoogle(prompt, options);
-            break;
-          case 'ollama':
-            response = await this.callOllama(prompt, options);
-            break;
-          default:
-            throw new Error(`Unsupported LLM provider: ${provider}`);
-        }
+          switch (provider) {
+            case 'openai':
+              response = await this.callOpenAI(prompt, options);
+              break;
+            case 'anthropic':
+              response = await this.callAnthropic(prompt, options);
+              break;
+            case 'google':
+              response = await this.callGoogle(prompt, options);
+              break;
+            case 'ollama':
+              response = await this.callOllama(prompt, options);
+              break;
+            default:
+              throw new Error(`Unsupported LLM provider: ${provider}`);
+          }
 
-        this.updateMetrics(Date.now() - startTime, response.usage, provider, model);
+          this.updateMetrics(Date.now() - startTime, response.usage, provider, model);
 
-        if (response.usage) {
-          span.setAttributes({
-            'llm.usage.prompt_tokens': response.usage.prompt_tokens,
-            'llm.usage.completion_tokens': response.usage.completion_tokens,
-            'llm.usage.total_tokens': response.usage.total_tokens,
-          });
-        }
+          if (response.usage) {
+            span.setAttributes({
+              'llm.usage.prompt_tokens': response.usage.prompt_tokens,
+              'llm.usage.completion_tokens': response.usage.completion_tokens,
+              'llm.usage.total_tokens': response.usage.total_tokens,
+            });
+          }
 
-        return response.text;
-      } catch (error: any) {
-        this.metrics.errorCount++;
-        // Record failure latency/count if needed
-        if (prometheusMetrics.llmRequestDuration) {
-          prometheusMetrics.llmRequestDuration.observe({
+          return response.text;
+        } catch (error: any) {
+          this.metrics.errorCount++;
+          // Record failure latency/count if needed
+          if (prometheusMetrics.llmRequestDuration) {
+            prometheusMetrics.llmRequestDuration.observe({
+              provider,
+              model,
+              status: 'error'
+            }, (Date.now() - startTime) / 1000);
+          }
+          logger.error('LLM request failed', {
             provider,
             model,
-            status: 'error'
-          }, (Date.now() - startTime) / 1000);
+            error: error instanceof Error ? error.message : String(error),
+          });
+          throw error;
         }
-        logger.error('LLM request failed', {
-          provider,
-          model,
-          error: error instanceof Error ? error.message : String(error),
-        });
-        throw error;
-      }
+      });
+    }, async () => {
+      logger.warn('LLM Circuit Breaker Open - Returning Fallback');
+      return 'I am currently experiencing high load or connection issues. Please try again later.';
     });
   }
 
@@ -140,60 +153,65 @@ export class LLMService {
    * Chat completion (multi-turn)
    */
   async chat(messages: ChatMessage[], options: CompletionOptions = {}): Promise<string> {
-    return tracer.trace('llm.chat', async (span: any) => {
-      const startTime = Date.now();
-      const provider = options.provider || this.config.defaultProvider;
-      const model = options.model || this.config.defaultModel;
+    return this.circuitBreaker.execute(async () => {
+      return tracer.trace('llm.chat', async (span: any) => {
+        const startTime = Date.now();
+        const provider = options.provider || this.config.defaultProvider;
+        const model = options.model || this.config.defaultModel;
 
-      span.setAttributes({
-        'llm.provider': provider,
-        'llm.model': model,
-        'llm.message_count': messages.length,
-      });
-
-      try {
-        // Currently defaulting to OpenAI for chat as well, can be expanded
-        if (provider !== 'openai') {
-          throw new Error(`Provider ${provider} not fully implemented for chat`);
-        }
-
-        const response = await this.openai.chat.completions.create({
-          messages: messages,
-          model: model,
-          temperature: options.temperature || this.config.temperature,
-          max_tokens: options.maxTokens,
+        span.setAttributes({
+          'llm.provider': provider,
+          'llm.model': model,
+          'llm.message_count': messages.length,
         });
 
-        const text = response.choices[0].message.content || '';
+        try {
+          // Currently defaulting to OpenAI for chat as well, can be expanded
+          if (provider !== 'openai') {
+            throw new Error(`Provider ${provider} not fully implemented for chat`);
+          }
 
-        this.updateMetrics(Date.now() - startTime, response.usage, provider, model);
-
-        if (response.usage) {
-          span.setAttributes({
-            'llm.usage.prompt_tokens': response.usage.prompt_tokens,
-            'llm.usage.completion_tokens': response.usage.completion_tokens,
-            'llm.usage.total_tokens': response.usage.total_tokens,
+          const response = await this.openai.chat.completions.create({
+            messages: messages,
+            model: model,
+            temperature: options.temperature || this.config.temperature,
+            max_tokens: options.maxTokens,
           });
-        }
 
-        return text;
+          const text = response.choices[0].message.content || '';
 
-      } catch (error: any) {
-        this.metrics.errorCount++;
-        if (prometheusMetrics.llmRequestDuration) {
-          prometheusMetrics.llmRequestDuration.observe({
+          this.updateMetrics(Date.now() - startTime, response.usage, provider, model);
+
+          if (response.usage) {
+            span.setAttributes({
+              'llm.usage.prompt_tokens': response.usage.prompt_tokens,
+              'llm.usage.completion_tokens': response.usage.completion_tokens,
+              'llm.usage.total_tokens': response.usage.total_tokens,
+            });
+          }
+
+          return text;
+
+        } catch (error: any) {
+          this.metrics.errorCount++;
+          if (prometheusMetrics.llmRequestDuration) {
+            prometheusMetrics.llmRequestDuration.observe({
+              provider,
+              model,
+              status: 'error'
+            }, (Date.now() - startTime) / 1000);
+          }
+          logger.error('LLM chat request failed', {
             provider,
             model,
-            status: 'error'
-          }, (Date.now() - startTime) / 1000);
+            error: error instanceof Error ? error.message : String(error),
+          });
+          throw error;
         }
-        logger.error('LLM chat request failed', {
-          provider,
-          model,
-          error: error instanceof Error ? error.message : String(error),
-        });
-        throw error;
-      }
+      });
+    }, async () => {
+      logger.warn('LLM Circuit Breaker Open - Returning Fallback');
+      return 'I am currently experiencing high load or connection issues. Please try again later.';
     });
   }
 

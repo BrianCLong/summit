@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/coa-planner",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Course-of-Action planner with Monte Carlo simulation",
   "type": "module",
   "main": "dist/index.js",

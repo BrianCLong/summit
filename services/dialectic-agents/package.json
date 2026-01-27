@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/dialectic-agents",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Dialectic Co-Agents for Decision Debate Record (DDR)",
   "type": "module",
   "main": "dist/index.js",

@@ -49,7 +49,7 @@ export class IngestService {
   constructor(
     private pg: Pool,
     private neo4j: Driver,
-  ) {}
+  ) { }
 
   /**
    * Ingest entities and relationships with full provenance tracking
@@ -69,6 +69,7 @@ export class IngestService {
       let entitiesUpdated = 0;
       let relationshipsCreated = 0;
       let relationshipsUpdated = 0;
+      const errors: string[] = [];
 
       const client = await this.pg.connect();
 
@@ -198,71 +199,74 @@ export class IngestService {
         // 5. Commit PostgreSQL transaction
         await client.query('COMMIT');
 
-        // 6. Sync to Neo4j (best effort, with outbox fallback)
-        try {
-          await getTracer().withSpan('IngestService.syncToNeo4j', async () => {
-             await this.syncToNeo4j(input.tenantId, provenanceId);
-          });
-        } catch (neo4jError) {
-          ingestLogger.warn(
-            { provenanceId, error: neo4jError },
-            'Neo4j sync failed, will retry via outbox',
-          );
-        }
-
-        const took = Date.now() - startTime;
-        const throughput = Math.round(
-          ((entitiesCreated + entitiesUpdated) / took) * 1000,
-        );
-
-        ingestLogger.info({
-          provenanceId,
-          tenantId: input.tenantId,
-          entitiesCreated,
-          entitiesUpdated,
-          relationshipsCreated,
-          relationshipsUpdated,
-          errors: errors.length,
-          took,
-          throughput: `${throughput} entities/sec`,
-        });
-
-        try {
-          await meteringEmitter.emitIngestUnits({
-            tenantId: input.tenantId,
-            units:
-              entitiesCreated +
-              entitiesUpdated +
-              relationshipsCreated +
-              relationshipsUpdated,
-            source: 'ingest-service',
-            correlationId: provenanceId,
-            idempotencyKey: provenanceId,
-            metadata: {
-              sourceType: input.sourceType,
-              sourceId: input.sourceId,
-              userId: input.userId,
-            },
-          });
-        } catch (err: any) {
-          ingestLogger.warn({ err, provenanceId }, 'Failed to emit ingest metering');
-        }
-
-        return {
-          success: errors.length === 0,
-          entitiesCreated,
-          entitiesUpdated,
-          relationshipsCreated,
-          relationshipsUpdated,
-          errors,
-          provenanceId,
-        };
       } catch (error: any) {
         await client.query('ROLLBACK');
         throw error;
       } finally {
         client.release();
       }
+
+      // CRITICAL: Connection released, now safe to sync to Neo4j without dedlock risk
+
+      // 6. Sync to Neo4j (best effort, with outbox fallback)
+      try {
+        await getTracer().withSpan('IngestService.syncToNeo4j', async () => {
+          await this.syncToNeo4j(input.tenantId, provenanceId);
+        });
+      } catch (neo4jError) {
+        ingestLogger.warn(
+          { provenanceId, error: neo4jError },
+          'Neo4j sync failed, will retry via outbox',
+        );
+      }
+
+      const took = Date.now() - startTime;
+      const throughput = Math.round(
+        ((entitiesCreated + entitiesUpdated) / took) * 1000,
+      );
+
+      ingestLogger.info({
+        provenanceId,
+        tenantId: input.tenantId,
+        entitiesCreated,
+        entitiesUpdated,
+        relationshipsCreated,
+        relationshipsUpdated,
+        errors: errors.length,
+        took,
+        throughput: `${throughput} entities/sec`,
+      });
+
+      try {
+        await meteringEmitter.emitIngestUnits({
+          tenantId: input.tenantId,
+          units:
+            entitiesCreated +
+            entitiesUpdated +
+            relationshipsCreated +
+            relationshipsUpdated,
+          source: 'ingest-service',
+          correlationId: provenanceId,
+          idempotencyKey: provenanceId,
+          metadata: {
+            sourceType: input.sourceType,
+            sourceId: input.sourceId,
+            userId: input.userId,
+          },
+        });
+      } catch (err: any) {
+        ingestLogger.warn({ err, provenanceId }, 'Failed to emit ingest metering');
+      }
+
+      return {
+        success: errors.length === 0,
+        entitiesCreated,
+        entitiesUpdated,
+        relationshipsCreated,
+        relationshipsUpdated,
+        errors,
+        provenanceId,
+      };
     });
   }
 
@@ -512,7 +516,7 @@ export class IngestService {
           // We could use UNWIND in Cypher for better performance, but keeping logic similar for now
           // to minimize risk, just fixing the memory issue.
           for (const entity of entities) {
-             await session.run(
+            await session.run(
               `MERGE (n {id: $id, tenantId: $tenantId})
                SET n += $properties, n:${entity.kind}
                RETURN n`,
@@ -542,7 +546,7 @@ export class IngestService {
             [provenanceId, BATCH_SIZE, offset],
           );
 
-           if (relationships.length === 0) {
+          if (relationships.length === 0) {
             hasMore = false;
             break;
           }
@@ -570,7 +574,7 @@ export class IngestService {
           }
 
           offset += relationships.length;
-           if (relationships.length < BATCH_SIZE) hasMore = false;
+          if (relationships.length < BATCH_SIZE) hasMore = false;
         }
 
       } finally {

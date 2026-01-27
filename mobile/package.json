@@ -1,6 +1,6 @@
 {
   "name": "summit-mobile",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "private": true,
   "main": "./App.tsx",
   "scripts": {

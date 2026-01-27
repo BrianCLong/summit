@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/scenario-registry",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Scenario registry service for Agentic Mesh evaluation",
   "type": "module",
   "main": "./dist/server.js",

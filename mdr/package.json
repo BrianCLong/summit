@@ -1,6 +1,6 @@
 {
   "name": "mdr",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "private": true,
   "description": "Metric Definition Registry for versioned KPI specs and SQL compilation",
   "main": "dist/index.js",

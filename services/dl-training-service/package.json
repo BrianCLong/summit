@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/dl-training-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Deep learning training service with distributed capabilities",
   "main": "dist/index.js",
   "scripts": {
