@@ -24,3 +24,7 @@
 ## 2025-05-23 - Focus Management for Dynamic UI
 **Learning:** When a user action removes the triggering element from the DOM (e.g., clicking a "quick prompt" chip that disappears upon selection), focus is lost to the body, confusing keyboard users.
 **Action:** Always programmatically move focus to the next logical element (e.g., the input field) before the trigger disappears.
+
+## 2025-10-28 - Keyboard Traps in Modals
+**Learning:** The Command Palette was implemented as a visual-only overlay, creating a keyboard trap where users could open it but not navigate or select items without a mouse.
+**Action:** Ensure all interactive lists (like palettes, dropdowns) implement `role="listbox"` and manage focus or `aria-activedescendant` for keyboard navigation.
