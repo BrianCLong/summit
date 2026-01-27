@@ -7,7 +7,7 @@ providers:
     disableDeletion: false
     updateIntervalSeconds: 10
     options:
-      path: /etc/grafana/provisioning/dashboards
+      path: /etc/grafana/provisioning/dashboards/summit
 
   - name: Summit Dashboards
     orgId: 1
