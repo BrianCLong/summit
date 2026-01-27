@@ -124,7 +124,7 @@ router.get('/render', (req, res) => {
     res.setHeader('Content-Type', 'text/html');
     res.send(INVESTIGATION_CANVAS_HTML);
   } else {
-    logger.warn(\`MCP UI Resource not found: \${uri}\`);
+    logger.warn(`MCP UI Resource not found: ${uri}`);
     res.status(404).send('UI Resource not found');
   }
 });
