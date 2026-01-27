@@ -92,7 +92,7 @@ lint:   ## Lint js/ts + python
 
 format: ## Format code
 	pnpm -w exec prettier -w . || true
-	$(VVENV_BIN)/ruff format .
+	$(VENV_BIN)/ruff format .
 
 build:  ## Build all images
 	docker compose -f $(COMPOSE_DEV_FILE) build
