@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  runner:
+      image: myoung34/github-runner:latest
+          container_name: summit-github-runner
+              environment:
+                    REPO_URL: https://github.com/BrianCLong/summit
+                          RUNNER_TOKEN: ${RUNNER_TOKEN}
+                                RUNNER_NAME: ${RUNNER_NAME:-summit-runner-1}
+                                      RUNNER_LABELS: self-hosted,linux,preview,docker
+                                            RUNNER_GROUP_NAME: Preview
+                                                  RUNNER_WORKDIR: /home/runner
+                                                        DOCKER_IN_DOCKER: "true"
+                                                            volumes:
+                                                                  - /var/run/docker.sock:/var/run/docker.sock
+                                                                        - ./runner:/home/runner
+                                                                            restart: unless-stopped
+                                                                                networks:
+                                                                                      - summit-network
+
+                                                                                      networks:
+                                                                                        summit-network:
+                                                                                            driver: bridge
