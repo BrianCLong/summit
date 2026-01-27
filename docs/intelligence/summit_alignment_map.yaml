@@ -1,0 +1,80 @@
+signals:
+  state_change_centric_collection:
+    components:
+      - IntelGraph
+      - Agent Mesh
+    status: Gap
+    notes: Needs schema update to support state transitions as first-class entities.
+
+  indirect_infrastructure_correlation:
+    components:
+      - IntelGraph
+    status: Aligned
+    notes: Supported by current graph relation models.
+
+  short_horizon_burst_collection:
+    components:
+      - Agent Mesh
+    status: Gap
+    notes: Requires temporal orchestration logic in Agent Mesh.
+
+  claim_lineage_tracking:
+    components:
+      - IntelGraph
+      - Security Ledger
+    status: Gap
+    notes: Needs explicit Claim entity and Mutation relationships.
+
+  context_dependent_trust_scoring:
+    components:
+      - IntelGraph
+    status: Gap
+    notes: Current scoring is likely global/static; needs context dimensions.
+
+  revision_aware_validation:
+    components:
+      - IntelGraph
+      - Evidence-ID Consistency Gate
+    status: Aligned
+    notes: Evidence ID system supports versioning, but validation logic needs update.
+
+  provenance_enforcing_pipelines:
+    components:
+      - GA Evidence Bundle
+      - Evidence-ID Consistency Gate
+      - Graph-Sync-Validator
+    status: Aligned
+    notes: Strong alignment with current GA readiness goals.
+
+  contradiction_surfacing:
+    components:
+      - IntelGraph
+      - CI/CD Gates
+    status: Gap
+    notes: Tooling currently favors synthesis; needs "conflict" highlighting mode.
+
+  role_segmented_automation:
+    components:
+      - Agent Mesh
+    status: Aligned
+    notes: Matches current agent architecture.
+
+  inference_inflation:
+    components:
+      - CI/CD Gates
+      - AGENTS.md
+    status: Policy Gap
+    notes: Needs explicit guardrails in agent prompts.
+
+  automation_authority_bias:
+    components:
+      - AGENTS.md
+    status: Policy Gap
+    notes: Needs UI/Process friction to force human verification.
+
+  explainability_as_obligation:
+    components:
+      - Security Ledger
+      - GA Evidence Bundle
+    status: Aligned
+    notes: Core to Security Ledger value prop.
