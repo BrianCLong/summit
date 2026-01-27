@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
 import AuthService from '../services/AuthService.js';
+import { policyService } from '../services/PolicyService.js';
 import { getAuditSystem } from '../audit/advanced-audit-system.js';
 import logger from '../utils/logger.js';
 import { metrics } from '../observability/metrics.js';
@@ -55,11 +56,68 @@ export function requirePermission(permission: string) {
           details: { permission, role: user.role }
         });
       } catch (error: any) {
-         if (process.env.NODE_ENV !== 'test') {
-             logger.error('Failed to log audit event', error);
-         }
+        if (process.env.NODE_ENV !== 'test') {
+          logger.error('Failed to log audit event', error);
+        }
       }
       return res.status(403).json({ error: 'Forbidden' });
+    }
+  };
+}
+
+
+/**
+ * authorize middleware
+ * Provides OPA-backed ABAC for REST routes.
+ * @param action The action to verify (e.g., 'run:detection')
+ * @param getResource Optional function to extract resource context from the request
+ */
+export function authorize(
+  action: string,
+  getResource?: (req: Request) => Promise<Record<string, any>> | Record<string, any>
+) {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+    try {
+      const resource = getResource ? await getResource(req) : {};
+
+      const policyContext = {
+        principal: {
+          ...user,
+          missionTags: user.missionTags,
+          compartment: user.compartment,
+        },
+        resource,
+        action,
+        environment: {
+          ip: req.ip,
+          userAgent: req.headers['user-agent'],
+          time: new Date().toISOString()
+        }
+      };
+
+      const decision = await policyService.evaluate(policyContext);
+
+      if (decision.allow) {
+        return next();
+      }
+
+      logger.warn('Access denied via ABAC authorize middleware', {
+        userId: user.id,
+        action,
+        resource,
+        reason: decision.reason
+      });
+
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: decision.reason || 'Security policy denied access'
+      });
+    } catch (error: any) {
+      logger.error('Authorization middleware error:', error);
+      return res.status(500).json({ error: 'Internal Server Error during authorization' });
     }
   };
 }
