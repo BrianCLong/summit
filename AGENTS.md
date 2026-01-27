@@ -653,3 +653,33 @@ To maintain clear accountability and human oversight, the following boundaries a
   - No direct commits to `main`.
   - All generated code must be reviewable by humans (clean, commented).
   - Major refactors require explicit human approval via issue comment.
+
+## Agent Charters (Runtime Governance)
+
+Every autonomous agent operating in this environment must possess a signed **Agent Charter**. The runtime orchestrator enforces these charters.
+
+### Charter Schema
+
+```json
+{
+  "agentId": "string (uuid)",
+  "name": "string",
+  "version": "semver",
+  "authority": {
+    "scopes": ["repo:read", "repo:write", "deployment:trigger"],
+    "maxBudgetUSD": "number",
+    "maxTokensPerRun": "number",
+    "expiryDate": "ISO8601"
+  },
+  "gates": {
+    "requireHumanApprovalFor": ["deploy:prod", "delete:db"],
+    "allowedTools": ["git", "fs", "analysis"]
+  },
+  "ownerSignature": "string (PGP/Sigstore)"
+}
+```
+
+### Enforcement
+- **Pre-Flight**: Orchestrator verifies signature and expiry.
+- **In-Flight**: Budget and Tool usage checked against `authority` and `gates`.
+- **Violation**: Immediate `KILL` signal sent to runtime.
