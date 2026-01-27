@@ -530,3 +530,13 @@ This ledger will be updated as issues are resolved.
 **Document Version:** 1.0
 **Last Updated:** 2025-12-30
 **Next Review:** Daily until all Critical issues resolved
+
+---
+
+## AUTONOMY GOVERNANCE (NEW)
+
+### Decision Reversibility — ENFORCED
+✅ **Policy Versioning:** All autonomous decision logic is versioned in `packages/decision-policy/`.
+✅ **Decision Ledger:** All actions are recorded in an append-only ledger (`packages/decision-ledger/`).
+✅ **Rollback Capability:** Automated rollback scripts (`scripts/decision/rollback_policy.ts`) are tested and verified.
+✅ **Agent Negotiation:** Conflicting objectives are resolved via negotiation, not overrides (`packages/agent-negotiation/`).

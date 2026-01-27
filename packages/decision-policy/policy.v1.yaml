@@ -1,0 +1,10 @@
+version: "1.0.0"
+name: "Conservative Baseline"
+risk_tolerance: "low"
+rules:
+  - condition: "cpu_usage > 80%"
+    action: "scale_up"
+    max_cost: 10.0
+  - condition: "error_rate > 1%"
+    action: "rollback"
+    max_cost: 0.0
