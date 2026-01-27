@@ -186,7 +186,7 @@ openlineage-sql==1.43.0
     # via openlineage-integration-common
 orderly-set==5.5.0
     # via deepdiff
-orjson==3.11.4
+orjson==3.11.5
     # via langsmith
 packaging==25.0
     # via
