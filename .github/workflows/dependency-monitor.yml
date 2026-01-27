@@ -8,7 +8,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: "0 7 * * 1"
+    - cron: "0 03 * * *"
   workflow_dispatch:
 
 permissions:
@@ -89,3 +89,19 @@ jobs:
         run: |
           echo "::notice::Snyk scan skipped - SNYK_TOKEN not configured."
           echo "Add SNYK_TOKEN to repository secrets to enable Snyk dependency scanning."
+
+  check-drift:
+    name: Check Lockfile Drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10.0.0
+      - name: Check Drift
+        run: ./scripts/check-lockfile-drift.sh
