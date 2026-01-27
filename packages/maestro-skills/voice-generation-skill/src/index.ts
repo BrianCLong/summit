@@ -32,6 +32,10 @@ export class VoiceGenerationSkill implements StepPlugin {
         const config = step.config as VoiceGenerationConfig;
         const { text, script, voice_id, engine = "qwen3-tts" } = config;
 
+        // NOTE: This skill now delegates to the Summit Voice Runtime (server/src/services/voice)
+        // in production. For this skill package, we maintain a mocked behavior that mirrors
+        // the Qwen3-TTS provider capabilities.
+
         // 1. Governance Check (Mock)
         if (!voice_id.startsWith("approved_") && !voice_id.startsWith("mock_")) {
             // In a real implementation, this would check the ledger
@@ -61,11 +65,14 @@ export class VoiceGenerationSkill implements StepPlugin {
             timestamp,
             governance: {
                 policy_checked: true,
-                consent_verified: true // Mocked
+                consent_verified: true, // Mocked
+                watermark_detected: false,
+                signature: `signed_${runId}` // Mock signature
             },
             reproducibility: {
                 seed: 12345, // Fixed seed for now
-                config_hash: this.hash(JSON.stringify(config))
+                config_hash: this.hash(JSON.stringify(config)),
+                model_hash: "qwen3-tts-v1-hash"
             }
         };
 

@@ -5,6 +5,7 @@ import { GraphQLError } from 'graphql';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import { WebSocketServer } from 'ws';
 import { randomUUID } from 'node:crypto';
+import { VoiceGateway } from './gateways/VoiceGateway.ts';
 import pino from 'pino';
 import { getContext } from './lib/auth.ts';
 import path from 'path';
@@ -68,6 +69,12 @@ const startServer = async () => {
     server: httpServer as import('http').Server,
     path: '/graphql',
   });
+
+  const voiceWss = new WebSocketServer({
+    server: httpServer as import('http').Server,
+    path: '/speak',
+  });
+  new VoiceGateway(voiceWss);
 
   useServer(
     {
