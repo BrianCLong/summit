@@ -1,0 +1,40 @@
+{
+  "task_id": "PR_LIFECYCLE_REPORT_20260127",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "pr-lifecycle-report",
+    "version": "v1",
+    "sha256": "7a8bdc4132e9aa65afaa4686b3a4fe467ff44efc29137d3d2d079c1bed60c2a9",
+    "path": "prompts/governance/pr-lifecycle-report.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/pr-lifecycle-report.md",
+      "scripts/pr-lifecycle-report.mjs",
+      "prompts/governance/pr-lifecycle-report.md",
+      "prompts/registry.yaml",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/pr-lifecycle-report-task.json"
+    ],
+    "domains": ["governance", "program-management", "compliance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/pr-lifecycle-report.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "PR lifecycle report generated with security, integration chain, and OSINT categories.",
+    "Report references readiness assertion and merge-blocker guidance.",
+    "Prompt registry updated with the new prompt entry."
+  ],
+  "stop_conditions": [
+    "CI failure in main.",
+    "Sandbox violation alert.",
+    "Detection of PII in output."
+  ]
+}

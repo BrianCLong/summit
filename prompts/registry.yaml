@@ -128,6 +128,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: pr-lifecycle-report
+    version: v1
+    path: prompts/governance/pr-lifecycle-report.md
+    sha256: 7a8bdc4132e9aa65afaa4686b3a4fe467ff44efc29137d3d2d079c1bed60c2a9
+    description: Generate PR lifecycle report for security, integration chain, and OSINT categories.
+    scope:
+      paths:
+        - docs/pr-lifecycle-report.md
+        - scripts/pr-lifecycle-report.mjs
+        - prompts/governance/pr-lifecycle-report.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - program-management
+        - compliance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: genui-plan-scaffold
     version: v1
     path: prompts/genui/genui-plan-scaffold@v1.md
