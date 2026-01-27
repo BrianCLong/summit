@@ -120,13 +120,20 @@ export class CIBDetectionService {
     const entityActivityProfiles = members.map(m => {
       const events = telemetry.get(m) || [];
       const bins = new Array(totalBins).fill(0);
+      const now = Date.now();
+      const fiveMinutesAgo = now - (totalBins * binSize * 1000);
 
       events.forEach(e => {
-        // Mocking event time-offset within the telemetry window
-        // In real telemetry, each event would have a timestamp.
-        // For this implementation, we distribute clicks into buckets heuristically.
-        const binIndex = Math.min(Math.floor(Math.random() * totalBins), totalBins - 1);
-        bins[binIndex] += e.clicks;
+        const eventTs = e.timestamp ? (typeof e.timestamp === 'string' ? new Date(e.timestamp).getTime() : e.timestamp) : now;
+
+        // Only consider events within the last 5 minutes
+        if (eventTs >= fiveMinutesAgo && eventTs <= now) {
+          const secondsFromStart = Math.floor((eventTs - fiveMinutesAgo) / 1000);
+          const binIndex = Math.min(Math.floor(secondsFromStart / binSize), totalBins - 1);
+          if (binIndex >= 0) {
+            bins[binIndex] += e.clicks;
+          }
+        }
       });
       return bins;
     });

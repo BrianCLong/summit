@@ -150,7 +150,10 @@ export class AgentBasedSimulator {
 
     // Build small-world network (Watts-Strogatz inspired)
     const k = Math.floor(targetDegree);
-    const rewiringProb = 0.1;
+
+    // Higher clustering coefficient in topology reduces rewiring probability
+    // to preserve more local structure
+    const rewiringProb = Math.max(0.01, 0.2 - (topology.clusteringCoefficient || 0.1));
 
     // Initial ring lattice
     for (let i = 0; i < n; i++) {
@@ -265,7 +268,18 @@ export class AgentBasedSimulator {
         // Psychographically aware threshold: 
         // Collective stress lowers the threshold for activation
         // Emotional susceptibility makes agents more reactive to neighbors
-        const effectiveThreshold = agent.threshold * (1 - collectiveStress * 0.2) * (1 - agent.susceptibilityProfile.emotionalAppeals * 0.1);
+        // Loyalty foundation increases resistance to out-group narratives but makes agents more reactive to in-group activations
+        // Authority trust scales the impact of authoritative sources (if we had them in ABM)
+
+        let psychographicBoost = 1.0;
+        if (agent.psychographics.moralFoundations.loyalty > 0.7) {
+          psychographicBoost *= 0.9; // More reactive to neighbor activation if loyal
+        }
+        if (agent.psychographics.authorityTrust < 0.3) {
+          psychographicBoost *= 1.1; // Less reactive if skeptical of authority (baseline)
+        }
+
+        const effectiveThreshold = agent.threshold * (1 - collectiveStress * 0.2) * (1 - agent.susceptibilityProfile.emotionalAppeals * 0.1) * psychographicBoost;
 
         if (activeFraction >= effectiveThreshold) {
           activations.push(agent.id);

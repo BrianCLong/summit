@@ -2,6 +2,7 @@ export interface BehavioralTelemetry {
   clicks: number;
   timeInView: number; // seconds
   editRate: number; // edits per minute
+  timestamp?: string | number;
 }
 
 export interface BehavioralFingerprint {

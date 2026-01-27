@@ -80,12 +80,26 @@ export class GNNService {
         const features: Record<string, number[]> = {};
         nodes.forEach(node => {
             const nodeFeatures: number[] = [];
-            // Extract all numeric properties as features
+
+            // 1. Numeric features
             Object.keys(node).forEach(key => {
                 if (typeof node[key] === 'number') {
                     nodeFeatures.push(node[key]);
                 }
             });
+
+            // 2. Structural features (if already computed and attached)
+            if (node.centrality) nodeFeatures.push(node.centrality);
+            if (node.pageRank) nodeFeatures.push(node.pageRank);
+
+            // 3. Categorical encoding (Simple One-Hot for common types)
+            const typeMap: Record<string, number> = {
+                'ANALYST': 1,
+                'BOT': 2,
+                'CIVILIAN': 3,
+                'ACTOR': 4
+            };
+            nodeFeatures.push(typeMap[node.type] || 0);
 
             // Default feature if none found
             if (nodeFeatures.length === 0) {

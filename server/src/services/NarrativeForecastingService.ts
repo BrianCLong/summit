@@ -88,8 +88,24 @@ export class NarrativeForecastingService {
 
         // Dynamic fallback if no segments in DB
         const totalPopulation = Number(result[0]?.totalPopulation || 100000);
-        const anxietyLevel = Number(result[0]?.anxietyLevel || 0.4);
-        const angerLevel = Number(result[0]?.angerLevel || 0.3);
+        // 2. Dynamic climate from sentiment analysis if available
+        let anxietyLevel = Number(result[0]?.anxietyLevel || 0.4);
+        let angerLevel = Number(result[0]?.angerLevel || 0.3);
+        let moralOutrage = 0.5;
+
+        try {
+            const { SentimentAnalysisService } = await import('./SentimentAnalysisService.js');
+            const sentimentService = new SentimentAnalysisService();
+            // Fetch real sentiment for the investigation/narrative
+            const sentimentResult = await sentimentService.analyzeSentiment(narrativeId);
+            if (sentimentResult) {
+                anxietyLevel = sentimentResult.anxiety || anxietyLevel;
+                angerLevel = sentimentResult.anger || angerLevel;
+                moralOutrage = sentimentResult.toxicity || moralOutrage;
+            }
+        } catch (e) {
+            logger.warn('Failed to fetch real-time sentiment climate, using DB defaults');
+        }
 
         const segments = result[0]?.segments.length > 0 ? result[0].segments : [
             {
@@ -127,7 +143,17 @@ export class NarrativeForecastingService {
                 polarizationIndex: 0.4,
                 consensusTopics: [],
                 contestedTopics: [],
-                emergingNarratives: []
+                emergingNarratives: [
+                    {
+                        id: narrativeId,
+                        content: snapshot.topTopics.map(t => t.topic).join(' '),
+                        prevalence: snapshot.metrics.nodeCount / totalPopulation,
+                        velocity: snapshot.amplificationVelocity / totalPopulation,
+                        sources: [],
+                        variants: [],
+                        counterNarratives: []
+                    }
+                ]
             },
             emotionalClimate: {
                 dominantEmotions: [],
@@ -135,7 +161,7 @@ export class NarrativeForecastingService {
                 angerLevel,
                 hopefulnessLevel: 0.3,
                 collectiveTrauma: 0.1,
-                moralOutrage: 0.5
+                moralOutrage
             },
             informationEnvironment: {
                 informationDensity: 0.7,

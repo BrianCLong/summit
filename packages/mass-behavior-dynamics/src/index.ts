@@ -8,6 +8,7 @@ export * from './models/index.js';
 export * from './simulation/index.js';
 export * from './contagion/index.js';
 export * from './collective/index.js';
+import { CognitiveAgentSimulator } from './models/cognitive-agent.js';
 
 // ============================================================================
 // CORE TYPE DEFINITIONS
@@ -166,13 +167,26 @@ export class MassBehaviorEngine {
     state: PopulationState
   ): Promise<any> {
     const contagionParams = this.contagionEngine.estimateParameters(narrative, state);
+    // Adjusted R0 calculation
     const R0 = (contagionParams.transmissionRate * state.networkTopology.averageDegree) / contagionParams.recoveryRate;
-    const criticalMass = 1 / state.networkTopology.averageDegree;
+
+    // Probability of escape/cascade is 1 - (1/R0)^I0 in simple SIR, simplified here.
+    // We want a value between 0 and 1 that increases with R0 and prevalence.
+
+    let prob = 0.0;
+    if (R0 > 1) {
+      // Base probability if R0 > 1
+      prob = 1 - (1 / R0);
+      // Scale by prevalence factor (if it's already widespread, cascade is certain)
+      prob = Math.min(0.99, prob + narrative.prevalence * 10);
+    } else {
+      prob = 0.01 * R0; // Minimal risk
+    }
 
     return {
       narrative,
       basicReproductionNumber: R0,
-      cascadeProbability: R0 * narrative.prevalence > criticalMass ? 0.8 : 0.2,
+      cascadeProbability: prob,
       vulnerableSegments: state.segments.filter(s => s.susceptibilityProfile?.disinformation > 0.5).map(s => s.id)
     };
   }
@@ -188,22 +202,62 @@ export class MassBehaviorEngine {
 
 // Supporting classes (stubs for implementation)
 class PopulationModel {
-  constructor(private config: unknown) { }
+  constructor(private config: any) { }
   async analyzeBeliefs(state: PopulationState): Promise<any> {
-    return { stable: true, shifts: [] };
+    const simulator = new CognitiveAgentSimulator();
+    // Simplified: Analyze shift for the top emerging narrative
+    const primaryNarrative = state.beliefDistribution.emergingNarratives[0];
+    if (!primaryNarrative) return { stable: true, shifts: [] };
+
+    // Sample a few agents from segments to see baseline reaction
+    const sampleResults = state.segments.map(s => {
+      const agent: any = {
+        beliefs: { beliefs: new Map() },
+        cognition: s.psychographics.cognitiveProfile,
+        socialIdentity: { identityStrength: 0.5 },
+        informationDiet: { sources: [] },
+        state: { cognitiveLoad: 0.2, currentEmotion: { arousal: 0.3 } }
+      };
+      return simulator.processInformation(agent, {
+        topic: primaryNarrative.id,
+        claim: primaryNarrative.content,
+        claimStrength: 0.8,
+        valence: 1,
+        source: 'external',
+        emotionalIntensity: 0.5
+      });
+    });
+
+    const shift = sampleResults.filter(r => r.updated).length / sampleResults.length;
+    return {
+      stable: shift < 0.2,
+      shifts: [{ narrativeId: primaryNarrative.id, potentialShift: shift }]
+    };
   }
 }
 
 class ContagionEngine {
-  constructor(private config: unknown) { }
+  constructor(private config: any) { }
   async detectPatterns(state: PopulationState, shocks: ExternalShock[]): Promise<any[]> {
-    return [];
+    // Simple pattern detection: correlation between shocks and belief shifts
+    return shocks.map(s => ({
+      trigger: s.type,
+      impactRadius: s.affectedSegments.length || state.segments.length,
+      severity: s.magnitude
+    }));
   }
   estimateParameters(narrative: Narrative, state: PopulationState): any {
+    const avgSusceptibility = state.segments.reduce((acc, s) => acc + s.susceptibilityProfile.disinformation, 0) / state.segments.length;
+
+    // Transmission rate scales with susceptibility and narrative velocity
+    const beta = Math.min(0.9, 0.1 + (avgSusceptibility * 0.5) + (narrative.velocity * 0.2));
+    const gamma = 0.1; // Baseline recovery rate
+
     return {
-      transmissionRate: 0.3,
-      recoveryRate: 0.1,
+      transmissionRate: beta,
+      recoveryRate: gamma,
       immunityDecay: 0.01,
+      R0: beta / gamma
     };
   }
 }
@@ -220,6 +274,60 @@ class NarrativeEvolutionTracker {
   async analyze(narratives: Narrative[]): Promise<any> {
     return { dominant: null, emerging: [], declining: [] };
   }
+}
+
+// ============================================================================
+// SHARED PSYCHOGRAPHICS TYPES
+// ============================================================================
+
+export interface Psychographics {
+  cognitiveProfile: CognitiveProfile;
+  institutionalTrust: {
+    government: number;
+    media: number;
+  };
+  authorityTrust: number;
+  moralFoundations: {
+    care: number;
+    loyalty: number;
+    authority: number;
+    fairness?: number;
+    sanctity?: number;
+  };
+}
+
+export interface CognitiveProfile {
+  analyticalThinking: number;
+  needForCognition: number;
+  epistemiChastity?: number;
+}
+
+export interface MediaSource {
+  id: string;
+  name: string;
+  trustLevel: number;
+  outlets: string[];
+}
+
+// ============================================================================
+// PHASE TRANSITION TYPES
+// ============================================================================
+
+export type TransitionType = 'MASS_MOBILIZATION' | 'TRUST_COLLAPSE' | 'OPINION_SHIFT';
+
+export interface EarlyWarningSignal {
+  signal: 'AUTOCORRELATION' | 'VARIANCE' | 'SKEWNESS' | 'FLICKERING';
+  value: number;
+  threshold: number;
+  trend: number;
+  significance: number;
+}
+
+export interface PhaseTransitionIndicator {
+  type: TransitionType;
+  probability: number;
+  timeToCriticality: number;
+  signals: EarlyWarningSignal[];
 }
 
 export interface EngineConfiguration {

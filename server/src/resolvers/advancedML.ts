@@ -318,19 +318,20 @@ const resolvers = {
       _: any,
       { graphId, optimizationType, numQubits }: any,
     ) => {
+      const { Neo4jGraphAnalyticsService } = await import('../services/GraphAnalyticsService.js');
+      const graphService = Neo4jGraphAnalyticsService.getInstance();
+
       try {
-        // Simulate graph data - in production this would come from Neo4j
-        const graphData = {
-          nodes: Array(50)
-            .fill(0)
-            .map((_, i) => ({ id: i, label: `Node${i}` })),
-          edges: Array(100)
-            .fill(0)
-            .map(() => ({
-              source: Math.floor(Math.random() * 50),
-              target: Math.floor(Math.random() * 50),
-            })),
-        };
+        // Fetch real subgraph from Neo4j instead of simulation
+        const graphData = await graphService.kHopNeighborhood({
+          tenantId: 'system',
+          seedIds: [graphId],
+          depth: 2
+        });
+
+        if (!graphData.nodes.length) {
+          throw new Error(`Graph ${graphId} not found or has no nodes`);
+        }
 
         const result = await advancedMLService.optimizeGraphWithQuantum(
           graphData,

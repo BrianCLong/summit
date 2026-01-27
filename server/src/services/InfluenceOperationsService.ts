@@ -136,12 +136,27 @@ export class InfluenceOperationsService {
     // 2. Transfrom for GNN
     const gnnData = GNNService.convertGraphData(subgraph);
 
-    // 3. Extract features (nodes mapping to vectors)
-    // In a real system, we'd have a vector DB or pre-computed embeddings.
-    const nodeFeatures = Object.values(gnnData.node_features || {});
+    // 3. Attach structural metrics as features (PageRank/Centrality)
+    const centrality = await this.graphService.centrality({
+      tenantId: 'system',
+      scope: { investigationId: campaignId },
+      algorithm: 'pageRank'
+    });
+
+    const centralityMap = new Map(centrality.map(c => [c.entityId, c.score]));
+
+    // Update node features with structural components
+    subgraph.nodes.forEach(node => {
+      node.pageRank = centralityMap.get(node.id) || 0;
+    });
+
+    // Re-convert to capture new structural features
+    const enrichedGnnData = GNNService.convertGraphData(subgraph);
+
+    const nodeFeatures = Object.values(enrichedGnnData.node_features || {});
     const edgeIndex = [
-      gnnData.edges.map((e: any) => e[0]),
-      gnnData.edges.map((e: any) => e[1])
+      enrichedGnnData.edges.map((e: any) => e[0]),
+      enrichedGnnData.edges.map((e: any) => e[1])
     ];
 
     if (nodeFeatures.length === 0) return null;
@@ -165,10 +180,40 @@ export class InfluenceOperationsService {
 
   private async fetchBehavioralTelemetry(entities: any[]): Promise<Map<string, any[]>> {
     const telemetryMap = new Map();
-    // Mocking telemetry for current demo if not in DB
-    entities.forEach(e => {
-      telemetryMap.set(e.id, [{ clicks: Math.random() * 80, timeInView: 60, editRate: Math.random() * 5 }]);
-    });
+    const { DatabaseService } = await import('./DatabaseService.js');
+    const db = new DatabaseService();
+
+    try {
+      // Fetch real telemetry from Postgres if available
+      const entityIds = entities.map(e => e.id);
+      const result = await db.query(
+        'SELECT entity_id, clicks, time_in_view, edit_rate, timestamp FROM behavioral_telemetry WHERE entity_id = ANY($1)',
+        [entityIds]
+      );
+
+      result.rows.forEach((row: any) => {
+        if (!telemetryMap.has(row.entity_id)) {
+          telemetryMap.set(row.entity_id, []);
+        }
+        telemetryMap.get(row.entity_id).push({
+          clicks: row.clicks,
+          timeInView: row.time_in_view,
+          editRate: row.edit_rate,
+          timestamp: row.timestamp
+        });
+      });
+    } catch (e) {
+      logger.warn('Failed to fetch real telemetry, using deterministic simulation', { error: e.message });
+      // Fallback to deterministic simulation for test stability
+      entities.forEach(e => {
+        telemetryMap.set(e.id, [{
+          clicks: (parseInt(e.id.split('-').pop() || '1') % 100),
+          timeInView: 60,
+          editRate: (parseInt(e.id.split('-').pop() || '1') % 10),
+          timestamp: new Date().toISOString()
+        }]);
+      });
+    }
     return telemetryMap;
   }
 
