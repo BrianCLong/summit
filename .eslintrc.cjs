@@ -1,9 +1,41 @@
-// Legacy ESLint config - will be migrated to eslint.config.mjs
-// This is kept for backward compatibility during the transition
 module.exports = {
-  // This config is kept minimal to avoid conflicts with the new flat config
-  // Most rules are now defined in eslint.config.mjs
-  ignorePatterns: ['dist', 'build', 'coverage', 'node_modules', '*.min.js'],
-  // Use the new flat config instead
-  root: true,
+  env: {
+    node: true,
+    es2021: true,
+  },
+  extends: ['eslint:recommended'],
+  parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+  },
+  rules: {
+    'no-unused-vars': [
+      'error',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+      },
+    ],
+    'no-console': 'warn',
+    'prefer-const': 'error',
+    'no-var': 'error',
+  },
+  ignorePatterns: [
+    'node_modules/',
+    'dist/',
+    'build/',
+    'coverage/',
+    'client/',
+    'server/',
+    'ml/',
+    'deploy/',
+    'docs/',
+    'scripts/',
+    'tests/',
+    'uploads/',
+    'logs/',
+    'temp/',
+    'tmp/',
+    'backups/',
+  ],
 };

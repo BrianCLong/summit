@@ -13,11 +13,11 @@ const path = require('path');
 require('dotenv').config();
 const config = require('./src/config');
 const logger = require('./src/utils/logger');
-const { 
-  connectNeo4j, 
-  connectPostgres, 
+const {
+  connectNeo4j,
+  connectPostgres,
   connectRedis,
-  closeConnections 
+  closeConnections
 } = require('./src/config/database');
 
 const { typeDefs } = require('./src/graphql/schema');
@@ -25,9 +25,9 @@ const resolvers = require('./src/graphql/resolvers');
 const AuthService = require('./src/services/AuthService');
 const { ensureAuthenticated } = require('./src/middleware/auth');
 
-    const { initSocket } = require('./src/realtime/socket');
-    const { startAIWorker } = require('./src/workers/aiWorker');
-    const { startEmbeddingWorker } = require('./src/workers/embeddingWorker');
+const { initSocket } = require('./src/realtime/socket');
+const { startAIWorker } = require('./src/workers/aiWorker');
+const { startEmbeddingWorker } = require('./src/workers/embeddingWorker');
 const { setIO } = require('./src/copilot/orchestrator');
 const { AnalyticsBridge } = require('./src/realtime/analyticsBridge');
 const tracingService = require('./src/monitoring/tracing');
@@ -36,12 +36,12 @@ const tracingService = require('./src/monitoring/tracing');
 async function findAvailablePort(startPort) {
   return new Promise((resolve, reject) => {
     const server = net.createServer();
-    
+
     server.listen(startPort, () => {
       const port = server.address().port;
       server.close(() => resolve(port));
     });
-    
+
     server.on('error', (err) => {
       if (err.code === 'EADDRINUSE') {
         if (startPort >= 5000) {
@@ -61,7 +61,7 @@ async function startServer() {
     const app = express();
     app.disable('x-powered-by');
     const httpServer = createServer(app);
-    
+
     const io = initSocket(httpServer); // Initialize Socket.IO (with /realtime)
     setIO(io); // Pass Socket.IO instance to orchestrator
     startAIWorker(); // start BullMQ AI worker
@@ -78,7 +78,7 @@ async function startServer() {
     // Enhanced security configuration
     const isProduction = config.env === 'production';
     const isDevelopment = config.env === 'development';
-    
+
     app.use(helmet({
       contentSecurityPolicy: {
         directives: {
@@ -115,7 +115,7 @@ async function startServer() {
       referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
       xssFilter: true
     }));
-    
+
     // CORS configuration with environment-specific settings
     const corsOptions = {
       origin: (origin, callback) => {
@@ -124,10 +124,10 @@ async function startServer() {
           callback(null, true);
         } else {
           // Production: only allow configured origins
-          const allowedOrigins = Array.isArray(config.cors.origin) 
-            ? config.cors.origin 
+          const allowedOrigins = Array.isArray(config.cors.origin)
+            ? config.cors.origin
             : [config.cors.origin];
-          
+
           if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
           } else {
@@ -144,9 +144,9 @@ async function startServer() {
       preflightContinue: false,
       optionsSuccessStatus: 204
     };
-    
+
     app.use(cors(corsOptions));
-    
+
     // Enhanced rate limiting
     const generalLimiter = rateLimit({
       windowMs: config.rateLimit.windowMs,
@@ -170,7 +170,7 @@ async function startServer() {
         return req.path === '/health';
       }
     });
-    
+
     // Stricter rate limiting for auth endpoints
     const authLimiter = rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
@@ -181,24 +181,24 @@ async function startServer() {
       },
       skipSuccessfulRequests: true
     });
-    
+
     app.use(generalLimiter);
     app.use('/api/auth', authLimiter);
     app.use('/graphql', rateLimit({
       windowMs: 1 * 60 * 1000, // 1 minute
       max: isProduction ? 100 : 1000 // GraphQL queries can be more frequent
     }));
-    
+
     app.use(express.json({ limit: '10mb' }));
     app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-    
+
     // Add tracing middleware
     app.use(tracingService.expressMiddleware());
-    
-    app.use(morgan('combined', { 
+
+    app.use(morgan('combined', {
       stream: { write: message => logger.info(message.trim()) }
     }));
-    
+
     app.get('/health', (req, res) => {
       res.status(200).json({
         status: 'OK',
@@ -251,7 +251,7 @@ async function startServer() {
         const limit = recommendations.length || 5;
         const cacheKey = `ai:suggest:${entityId}:${limit}`;
         if (redis) {
-          try { await redis.set(cacheKey, JSON.stringify(recommendations), 'EX', 300); } catch (_) {}
+          try { await redis.set(cacheKey, JSON.stringify(recommendations), 'EX', 300); } catch (_) { }
         }
         await publishAISuggestions(entityId, recommendations);
         return res.json({ ok: true });
@@ -298,7 +298,7 @@ async function startServer() {
           const limit = recommendations.length || 5;
           const cacheKey = `ai:suggest:${entityId}:${limit}`;
           if (redis) {
-            try { await redis.set(cacheKey, JSON.stringify(recommendations), 'EX', 300); } catch (_) {}
+            try { await redis.set(cacheKey, JSON.stringify(recommendations), 'EX', 300); } catch (_) { }
           }
           await publishAISuggestions(entityId, recommendations);
           return res.json({ ok: true });
@@ -308,7 +308,7 @@ async function startServer() {
         }
       });
     }
-    
+
     const { depthLimit } = require('./src/graphql/validation/depthLimit');
     const apolloServer = new ApolloServer({
       typeDefs,
@@ -318,23 +318,23 @@ async function startServer() {
         if (connection) {
           return connection.context;
         }
-        
+
         const token = req.headers.authorization?.replace('Bearer ', '');
         let user = null;
-        
+
         if (token) {
           const authService = new AuthService();
           user = await authService.verifyToken(token);
         }
-        const sessionId = req.headers['x-session-id'] || crypto.randomUUID();
+        const currentSessionId = req.headers['x-session-id'] || crypto.randomUUID();
         const clientIp = req.ip;
         const userAgent = req.get('User-Agent');
-        req.sessionId = sessionId;
+        req.sessionId = currentSessionId;
         return {
           user,
           req,
           logger,
-          sessionId,
+          sessionId: currentSessionId,
           clientIp,
           userAgent,
         };
@@ -343,64 +343,16 @@ async function startServer() {
         onConnect: async (connectionParams) => {
           const token = connectionParams.authorization?.replace('Bearer ', '');
           let user = null;
-          
+
           if (token) {
             const authService = new AuthService();
             user = await authService.verifyToken(token);
           }
-          
-          return { user };
-        }
-      },
-      const realtimeMutationsPlugin = require('./src/graphql/plugins/realtimeMutations');
 
-// ... inside startServer function ...
-
-    const apolloServer = new ApolloServer({
-      typeDefs,
-      resolvers,
-      validationRules: [depthLimit(Number(process.env.GRAPHQL_MAX_DEPTH) || 10)],
-      context: async ({ req, connection }) => {
-        if (connection) {
-          return connection.context;
-        }
-        
-        const token = req.headers.authorization?.replace('Bearer ', '');
-        let user = null;
-        
-        if (token) {
-          const authService = new AuthService();
-          user = await authService.verifyToken(token);
-        }
-        const sessionId = req.headers['x-session-id'] || crypto.randomUUID();
-        const clientIp = req.ip;
-        const userAgent = req.get('User-Agent');
-        req.sessionId = sessionId;
-        return {
-          user,
-          req,
-          logger,
-          sessionId,
-          clientIp,
-          userAgent,
-        };
-      },
-      subscriptions: {
-        onConnect: async (connectionParams) => {
-          const token = connectionParams.authorization?.replace('Bearer ', '');
-          let user = null;
-          
-          if (token) {
-            const authService = new AuthService();
-            user = await authService.verifyToken(token);
-          }
-          
           return { user };
         }
       },
       plugins: [
-        pbacPlugin(),
-        realtimeMutationsPlugin(), // Add the new plugin here
         {
           requestDidStart() {
             return {
@@ -415,11 +367,10 @@ async function startServer() {
         }
       ]
     });
-    });
-    
+
     await apolloServer.start();
-    apolloServer.applyMiddleware({ 
-      app, 
+    apolloServer.applyMiddleware({
+      app,
       path: '/graphql',
       cors: false
     });
@@ -454,17 +405,17 @@ async function startServer() {
 
     io.on('connection', (socket) => {
       logger.info(`Client connected: ${socket.id}`);
-      
+
       socket.on('join_investigation', (investigationId) => {
         socket.join(`investigation_${investigationId}`);
         logger.info(`Client ${socket.id} joined investigation ${investigationId}`);
       });
-      
+
       socket.on('leave_investigation', (investigationId) => {
         socket.leave(`investigation_${investigationId}`);
         logger.info(`Client ${socket.id} left investigation ${investigationId}`);
       });
-      
+
       socket.on('disconnect', () => {
         logger.info(`Client disconnected: ${socket.id}`);
       });
@@ -478,7 +429,7 @@ async function startServer() {
       });
     }
 
-    app.use((err, req, res, next) => {
+    app.use((err, req, res, _next) => {
       logger.error(`Unhandled error: ${err.message}`, err);
       res.status(500).json({
         error: 'Internal Server Error',
@@ -489,9 +440,9 @@ async function startServer() {
     app.use('*', (req, res) => {
       res.status(404).json({ error: 'Endpoint not found' });
     });
-    
+
     const PORT = await findAvailablePort(config.port);
-    
+
     httpServer.listen(PORT, () => {
       logger.info(`🚀 IntelGraph AI Server running on port ${PORT}`);
       logger.info(`📊 GraphQL endpoint: http://localhost:${PORT}/graphql`);
@@ -515,7 +466,7 @@ async function startServer() {
         process.exit(1);
       }
     });
-    
+
     process.on('SIGTERM', async () => {
       logger.info('SIGTERM received, shutting down gracefully');
       await apolloServer.stop();
@@ -525,7 +476,7 @@ async function startServer() {
         process.exit(0);
       });
     });
-    
+
   } catch (error) {
     logger.error(`Failed to start server: ${error.message}`, error);
     process.exit(1);

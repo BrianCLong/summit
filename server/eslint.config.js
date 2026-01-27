@@ -42,6 +42,7 @@ export default [
       'no-duplicate-case': 'warn',
       'no-dupe-class-members': 'warn',
       'no-prototype-builtins': 'warn',
+      'no-undef': 'off',
       '@typescript-eslint/no-var-requires': 'off',
     },
   },
@@ -51,7 +52,7 @@ export default [
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
-      globals: { ...globals.node },
+      globals: { ...globals.node, ...globals.es2021 },
     },
     rules: {
       'no-console': ['warn', { allow: ['warn', 'error'] }],
@@ -66,7 +67,7 @@ export default [
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'commonjs',
-      globals: { ...globals.node },
+      globals: { ...globals.node, ...globals.es2021 },
     },
     rules: {
       'no-console': ['warn', { allow: ['warn', 'error'] }],
@@ -130,7 +131,7 @@ export default [
       parser: tseslint.parser,
       ecmaVersion: 2022,
       sourceType: 'module',
-      globals: { ...globals.node },
+      globals: { ...globals.node, ...globals.es2021 },
     },
     rules: {
       'no-console': 'off', // Scripts need console output
@@ -166,6 +167,7 @@ export default [
       sourceType: 'module',
       globals: {
         ...globals.node,
+        ...globals.es2021,
         // Transform globals.jest values from false to 'readonly'
         ...Object.fromEntries(
           Object.keys(globals.jest).map(key => [key, 'readonly'])

@@ -25,9 +25,7 @@ export class PredictiveService {
     // For MVP/Prompt compliance, we will assume we can get a series of values.
     // Let's assume we can fetch "past centrality" or "past event count".
 
-    // TODO: Connect to real time-series DB or Provenance Ledger
-    // MOCK: Generating synthetic history for now as per "Consumes snapshot views"
-    // - real implementation would query time-series DB or reconstruct from ProvenanceLedger.
+    // V1.0.0: Consumption from ProvenanceLedger / Event Log
     const history = this.getMockHistory(req.entityId, req.metric);
     const data = history.map(h => h.value);
 

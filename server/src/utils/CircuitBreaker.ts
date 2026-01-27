@@ -61,10 +61,10 @@ export class CircuitBreaker {
   private lastFailureTime: number = 0;
   private options: CircuitBreakerOptions;
   private metrics: {
-    totalRequests: number;
-    failedRequests: number;
-    latencies: number[]; // Store recent latencies for P95 calculation
+    requestHistory: Array<{ success: boolean; latency: number; timestamp: number }>;
     stateChanges: number;
+    totalRequests: number; // Historical total (optional)
+    failedRequests: number; // Historical total (optional)
   };
 
   /**
@@ -83,9 +83,9 @@ export class CircuitBreaker {
     };
 
     this.metrics = {
+      requestHistory: [],
       totalRequests: 0,
       failedRequests: 0,
-      latencies: [],
       stateChanges: 0,
     };
 
@@ -109,61 +109,66 @@ export class CircuitBreaker {
    * @returns An object containing metrics such as total requests, failed requests, P95 latency, error rate, and current state.
    */
   public getMetrics() {
+    const recent = this.getRecentRequests();
+    const totalRequests = recent.length;
+    const failedRequests = recent.filter(r => !r.success).length;
+
     return {
-      ...this.metrics,
-      p95Latency: this.calculateP95Latency(),
-      errorRate:
-        this.metrics.totalRequests > 0
-          ? this.metrics.failedRequests / this.metrics.totalRequests
-          : 0,
+      totalRequests,
+      failedRequests,
+      p95Latency: this.calculateP95Latency(recent),
+      errorRate: totalRequests > 0 ? failedRequests / totalRequests : 0,
       state: this.state,
+      stateChanges: this.metrics.stateChanges
     };
   }
 
-  /**
-   * Gets the number of consecutive failures.
-   *
-   * @returns The failure count.
-   */
-  public getFailureCount(): number {
-    return this.failureCount;
+  private getRecentRequests() {
+    // Return last 100 requests for rolling window
+    return this.metrics.requestHistory.slice(-100);
   }
 
-  /**
-   * Gets the timestamp of the last failure.
-   *
-   * @returns The timestamp (in milliseconds) of the last failure.
-   */
-  public getLastFailureTime(): number {
-    return this.lastFailureTime;
-  }
-
-  private calculateP95Latency(): number {
-    if (this.metrics.latencies.length === 0) {
+  private calculateP95Latency(recent: Array<{ latency: number }>): number {
+    if (recent.length === 0) {
       return 0;
     }
-    const sortedLatencies = [...this.metrics.latencies].sort((a, b) => a - b);
+    const sortedLatencies = recent.map(r => r.latency).sort((a, b) => a - b);
     const p95Index = Math.ceil(sortedLatencies.length * 0.95) - 1;
     return sortedLatencies[p95Index];
   }
 
-  private recordLatency(latency: number) {
-    this.metrics.latencies.push(latency);
-    // Keep only a recent window of latencies (e.g., last 100)
-    if (this.metrics.latencies.length > 100) {
-      this.metrics.latencies.shift();
+  private recordRequest(success: boolean, latency: number) {
+    this.metrics.requestHistory.push({
+      success,
+      latency,
+      timestamp: Date.now()
+    });
+
+    // Keep only last 1000 items in history to prevent memory bloat
+    if (this.metrics.requestHistory.length > 1000) {
+      this.metrics.requestHistory.shift();
+    }
+
+    if (success) {
+      this.metrics.totalRequests++;
+    } else {
+      this.metrics.totalRequests++;
+      this.metrics.failedRequests++;
     }
   }
 
   private evaluateState() {
-    const { p95Latency, errorRate } = this.getMetrics();
+    const metrics = this.getMetrics();
+    const { p95Latency, errorRate } = metrics;
 
     if (this.state === CircuitBreakerState.CLOSED) {
-      if (
-        this.failureCount >= this.options.failureThreshold ||
-        p95Latency > this.options.p95ThresholdMs ||
-        errorRate > this.options.errorRateThreshold
-      ) {
+      // Check for opening conditions
+      const hasHighFailureCount = this.failureCount >= this.options.failureThreshold;
+      const hasHighLatency = p95Latency > this.options.p95ThresholdMs;
+      // Only check error rate after a minimum number of requests (e.g. 5) to avoid noise
+      const hasHighErrorRate = metrics.totalRequests >= 5 && errorRate > this.options.errorRateThreshold;
+
+      if (hasHighFailureCount || hasHighLatency || hasHighErrorRate) {
         this.open();
       }
     } else if (this.state === CircuitBreakerState.OPEN) {
@@ -198,27 +203,31 @@ export class CircuitBreaker {
   }
 
   /**
-   * Executes a command within the context of the circuit breaker.
-   *
-   * @typeParam T - The return type of the command.
-   * @param command - The function to execute.
-   * @returns The result of the command.
-   * @throws Error if the circuit is OPEN or if the command itself fails.
-   */
-  public async execute<T>(command: () => Promise<T>): Promise<T> {
-    this.metrics.totalRequests++;
+  * Executes a command within the context of the circuit breaker.
+  *
+  * @typeParam T - The return type of the command.
+  * @param command - The function to execute.
+  * @param fallback - Optional fallback function if the circuit is OPEN or the command fails.
+  * @returns The result of the command or the fallback.
+  * @throws Error if the circuit is OPEN and no fallback is provided, or if the command itself fails.
+  */
+  public async execute<T>(command: () => Promise<T>, fallback?: () => Promise<T>): Promise<T> {
     this.evaluateState(); // Evaluate state before execution
 
     if (this.state === CircuitBreakerState.OPEN) {
+      if (fallback) {
+        logger.debug('Circuit Breaker: Request rejected (OPEN), executing fallback');
+        return fallback();
+      }
       logger.debug('Circuit Breaker: Request rejected (OPEN)');
       throw new Error('CircuitBreaker: Service is currently unavailable');
     }
 
+    const startTime = Date.now();
     try {
-      const startTime = Date.now();
       const result = await command();
       const latency = Date.now() - startTime;
-      this.recordLatency(latency);
+      this.recordRequest(true, latency);
 
       if (this.state === CircuitBreakerState.HALF_OPEN) {
         this.successCount++;
@@ -230,7 +239,8 @@ export class CircuitBreaker {
       }
       return result;
     } catch (error: any) {
-      this.metrics.failedRequests++;
+      const latency = Date.now() - startTime;
+      this.recordRequest(false, latency);
       this.lastFailureTime = Date.now(); // Update last failure time
 
       if (this.state === CircuitBreakerState.HALF_OPEN) {
@@ -240,9 +250,16 @@ export class CircuitBreaker {
         this.failureCount++;
         this.evaluateState(); // Re-evaluate state on failure
       }
+
       logger.error(
         `Circuit Breaker: Command failed. State: ${this.state}, Failure Count: ${this.failureCount}. Error: ${error.message}`,
       );
+
+      if (fallback) {
+        logger.info('Circuit Breaker: Executing fallback after command failure');
+        return fallback();
+      }
+
       throw error;
     }
   }

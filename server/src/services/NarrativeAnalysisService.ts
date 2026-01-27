@@ -52,6 +52,20 @@ export class NarrativeAnalysisService {
     // 3. Calculate amplification velocity
     const velocity = await this.calculateAmplificationVelocity(narrativeId);
 
+    // 4. Estimate Clustering Coefficient (Simplified triangulation)
+    const ccCypher = `
+        MATCH (n:Entity {investigationId: $narrativeId})
+        MATCH (n)-[]-(a:Entity {investigationId: $narrativeId})
+        MATCH (n)-[]-(b:Entity {investigationId: $narrativeId})
+        MATCH (a)-[]-(b)
+        RETURN count(distinct [n, a, b]) as triangles
+    `;
+    const triResult = await runCypher<{ triangles: number }>(ccCypher, { narrativeId });
+    const triangles = Number(triResult[0]?.triangles || 0);
+    // Rough estimate: triangles / triples (where triples = n_neighbors * (n_neighbors - 1) / 2)
+    // For MVP, we provide a normalized density-based boost if triangles found.
+    const clusteringCoefficient = stats.nodeCount > 2 ? Math.min(triangles / (stats.nodeCount * 5), 0.8) : 0;
+
     const snapshot: NarrativeSnapshot = {
       timestamp: new Date(),
       narrativeId,
@@ -60,7 +74,7 @@ export class NarrativeAnalysisService {
         edgeCount: stats.edgeCount,
         avgDegree: stats.avgDegree,
         density: stats.density,
-        clusteringCoefficient: 0 // Expensive to calc on large graph without GDS
+        clusteringCoefficient
       },
       topTopics,
       amplificationVelocity: velocity
@@ -98,14 +112,14 @@ export class NarrativeAnalysisService {
           status: 'emerging'
         });
       } else if (topic.frequency > prevTopic.frequency * 1.2) {
-         trends.push({
+        trends.push({
           topic: topic.topic,
           emergenceTime: recent.timestamp,
           peakVelocity: topic.frequency,
           status: 'peaking'
         });
       } else if (topic.frequency < prevTopic.frequency * 0.8) {
-         trends.push({
+        trends.push({
           topic: topic.topic,
           emergenceTime: recent.timestamp,
           peakVelocity: topic.frequency,
@@ -118,22 +132,22 @@ export class NarrativeAnalysisService {
   }
 
   private async getNarrativeStats(narrativeId: string) {
-      const cypher = `
+    const cypher = `
         MATCH (n:Entity {investigationId: $narrativeId})
         OPTIONAL MATCH (n)-[r]-(m:Entity {investigationId: $narrativeId})
         RETURN count(distinct n) as nodeCount, count(r) as edgeCount
       `;
-      // Note: edgeCount is double counted in undirected sense if we don't handle direction carefully,
-      // but "count(r)" counts relationships.
+    // Note: edgeCount is double counted in undirected sense if we don't handle direction carefully,
+    // but "count(r)" counts relationships.
 
-      const result = await runCypher<{nodeCount: number, edgeCount: number}>(cypher, { narrativeId });
-      const nodeCount = Number(result[0]?.nodeCount || 0);
-      const edgeCount = Number(result[0]?.edgeCount || 0) / 2; // Undirected adjustment if needed, but let's assume directed
+    const result = await runCypher<{ nodeCount: number, edgeCount: number }>(cypher, { narrativeId });
+    const nodeCount = Number(result[0]?.nodeCount || 0);
+    const edgeCount = Number(result[0]?.edgeCount || 0) / 2; // Undirected adjustment if needed, but let's assume directed
 
-      const avgDegree = nodeCount > 0 ? (edgeCount * 2) / nodeCount : 0;
-      const density = nodeCount > 1 ? (2 * edgeCount) / (nodeCount * (nodeCount - 1)) : 0;
+    const avgDegree = nodeCount > 0 ? (edgeCount * 2) / nodeCount : 0;
+    const density = nodeCount > 1 ? (2 * edgeCount) / (nodeCount * (nodeCount - 1)) : 0;
 
-      return { nodeCount, edgeCount, avgDegree, density };
+    return { nodeCount, edgeCount, avgDegree, density };
   }
 
   private async extractTopTopics(narrativeId: string): Promise<{ topic: string; frequency: number }[]> {
@@ -145,32 +159,32 @@ export class NarrativeAnalysisService {
         LIMIT 1000
     `;
 
-    const result = await runCypher<{attributes: string | any}>(cypher, { narrativeId });
+    const result = await runCypher<{ attributes: string | any }>(cypher, { narrativeId });
 
     const topicCounts = new Map<string, number>();
 
     result.forEach(row => {
-        let attrs = row.attributes;
-        if (typeof attrs === 'string') {
-            try {
-                attrs = JSON.parse(attrs);
-            } catch (e: any) {
-                return; // Skip invalid JSON
-            }
+      let attrs = row.attributes;
+      if (typeof attrs === 'string') {
+        try {
+          attrs = JSON.parse(attrs);
+        } catch (e: any) {
+          return; // Skip invalid JSON
         }
+      }
 
-        if (attrs && Array.isArray(attrs.hashtags)) {
-            attrs.hashtags.forEach((tag: string) => {
-                const count = topicCounts.get(tag) || 0;
-                topicCounts.set(tag, count + 1);
-            });
-        }
+      if (attrs && Array.isArray(attrs.hashtags)) {
+        attrs.hashtags.forEach((tag: string) => {
+          const count = topicCounts.get(tag) || 0;
+          topicCounts.set(tag, count + 1);
+        });
+      }
     });
 
     return Array.from(topicCounts.entries())
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10)
-        .map(([topic, frequency]) => ({ topic, frequency }));
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([topic, frequency]) => ({ topic, frequency }));
   }
 
   private async calculateAmplificationVelocity(narrativeId: string): Promise<number> {
@@ -184,7 +198,7 @@ export class NarrativeAnalysisService {
         RETURN count(n) as newNodes
     `;
 
-    const result = await runCypher<{newNodes: number}>(cypher, { narrativeId, oneHourAgo });
+    const result = await runCypher<{ newNodes: number }>(cypher, { narrativeId, oneHourAgo });
     return Number(result[0]?.newNodes || 0);
   }
 }

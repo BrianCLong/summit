@@ -28,6 +28,7 @@ export const EnvSchema = z
     L1_CACHE_FALLBACK_TTL_SECONDS: z.coerce.number().default(300), // 5 minutes
     DOCLING_SVC_URL: z.string().url().default('http://localhost:5001'),
     DOCLING_SVC_TIMEOUT_MS: z.coerce.number().default(30000),
+    TELEMETRY_SALT: z.string().default('summit-intel-graph-default-salt'),
   });
 
 const TestEnvSchema = EnvSchema.extend({
@@ -62,6 +63,7 @@ const ENV_VAR_HELP: Record<string, string> = {
   JWT_SECRET: 'JWT signing secret (min 32 characters, use strong random value)',
   JWT_REFRESH_SECRET: 'JWT refresh token secret (min 32 characters, different from JWT_SECRET)',
   CORS_ORIGIN: 'Allowed CORS origins (comma-separated, e.g., http://localhost:3000)',
+  TELEMETRY_SALT: 'Salt for privacy-preserving ID anonymization in telemetry logs',
 };
 
 export const cfg = (() => {

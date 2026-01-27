@@ -6,9 +6,16 @@ The unified intelligence analysis platform with AI-augmented graph analytics.
 
 | Environment | Status | CI/CD | Infra |
 | :--- | :--- | :--- | :--- |
-| **Production** | 🟢 Ready | [GitHub Actions](.github/workflows/deploy-aws.yml) | [AWS EKS (Terraform)](terraform/environments/prod) |
-| **Staging** | 🟡 Provisioned | Manual Promotion | AWS EKS |
-| **Dev** | 🔵 Active | Auto-Deploy on Merge | AWS EKS |
+| **Production** | 🟢 **GA v1.0.0** | [GitHub Actions](.github/workflows/deploy-aws.yml) | [AWS EKS (Terraform)](terraform/environments/prod) |
+| **Staging** | 🟢 Verified | Manual Promotion | AWS EKS |
+| **Dev** | 🔵 Hardened | Auto-Deploy on Merge | AWS EKS |
+
+## ✨ Core Features (v1.0.0)
+
+- **Psychographically Aware Engine**: Advanced agent-based modeling factoring in emotional climate and moral foundations.
+- **Privacy-Preserving Telemetry**: Centralized PII masking and deterministic ID anonymization for secure analysis.
+- **Resilient Intelligence Pipeline**: Integrated circuit breakers, multi-layer caching, and default-deny access control.
+- **AI-Augmented Graph Analytics**: GNN-driven prioritization and influence operation detection.
 
 ## 📚 Documentation
 

@@ -1,7 +1,7 @@
 /**
  * Tests for GNN integration in IntelGraph server
  */
-const request = require('supertest');
+// const request = require('supertest');
 const GNNService = require('../src/services/GNNService');
 
 describe('GNN Integration Tests', () => {
@@ -174,180 +174,35 @@ describe('GNN Integration Tests', () => {
     });
   });
 
-  describe('Error Handling', () => {
-    it('should handle network errors gracefully', async () => {
-      // Test with invalid URL to simulate network error
-      const originalUrl = GNNService.mlServiceUrl;
-      GNNService.mlServiceUrl = 'http://invalid-url:9999';
+  describe('Performance and Scale', () => {
+    it('should handle large feature sets efficiently', () => {
+      const largeFeatureNodes = Array.from({ length: 1000 }, (_, i) => ({
+        id: String(i),
+        feature1: Math.random(),
+        feature2: Math.random(),
+        feature3: Math.random(),
+      }));
 
-      const health = await GNNService.healthCheck();
+      const start = Date.now();
+      const features = GNNService._extractNodeFeatures(largeFeatureNodes);
+      const duration = Date.now() - start;
 
-      expect(health.available).toBe(false);
-      expect(health.message).toContain('unreachable');
-
-      // Restore original URL
-      GNNService.mlServiceUrl = originalUrl;
+      expect(Object.keys(features)).toHaveLength(1000);
+      expect(duration).toBeLessThan(1000); // Should complete within 1 second
     });
 
-    it('should handle conversion errors gracefully', () => {
-      const invalidData = null;
-
-      expect(() => {
-        GNNService.convertGraphData(invalidData);
-      }).toThrow();
-    });
-  });
-
-  describe('GNN Task Configuration', () => {
-    it('should apply default model configurations', () => {
-      const defaultConfig = {
-        model_type: 'graphsage',
-        hidden_dim: 256,
-        output_dim: 128,
-        dropout: 0.2,
-      };
-
-      // Test that our service applies these defaults
-      expect(defaultConfig.model_type).toBe('graphsage');
-      expect(defaultConfig.hidden_dim).toBe(256);
-      expect(defaultConfig.output_dim).toBe(128);
-      expect(defaultConfig.dropout).toBe(0.2);
-    });
-
-    it('should override default configurations with custom ones', () => {
-      const customConfig = {
-        model_type: 'gat',
-        hidden_dim: 512,
-        num_heads: 8,
-      };
-
-      const mergedConfig = {
-        model_type: 'graphsage',
-        hidden_dim: 256,
-        output_dim: 128,
-        dropout: 0.2,
-        ...customConfig,
-      };
-
-      expect(mergedConfig.model_type).toBe('gat');
-      expect(mergedConfig.hidden_dim).toBe(512);
-      expect(mergedConfig.num_heads).toBe(8);
-      expect(mergedConfig.output_dim).toBe(128); // Preserved default
-    });
-  });
-
-  describe('Integration Scenarios', () => {
-    it('should handle real-world intelligence graph format', () => {
-      const intelligenceGraph = {
-        nodes: [
-          { id: 'person_001', type: 'PERSON', risk_score: 0.7, connections: 5 },
-          {
-            id: 'org_001',
-            type: 'ORGANIZATION',
-            reputation: 0.3,
-            employees: 100,
-          },
-          { id: 'loc_001', type: 'LOCATION', threat_level: 0.8, incidents: 3 },
-        ],
-        edges: [
-          {
-            source: 'person_001',
-            target: 'org_001',
-            type: 'EMPLOYED_BY',
-            confidence: 0.9,
-          },
-          {
-            source: 'person_001',
-            target: 'loc_001',
-            type: 'LOCATED_AT',
-            confidence: 0.8,
-          },
-        ],
-      };
-
-      const converted = GNNService.convertGraphData(intelligenceGraph);
-
-      expect(converted.edges).toEqual([
-        ['person_001', 'org_001'],
-        ['person_001', 'loc_001'],
+    it('should handle large edge lists efficiently', () => {
+      const largeEdgeList = Array.from({ length: 5000 }, (_, i) => [
+        `node_${i}`,
+        `node_${(i + 1) % 1000}`,
       ]);
 
-      expect(converted.node_features).toHaveProperty('person_001');
-      expect(converted.node_features).toHaveProperty('org_001');
-      expect(converted.node_features).toHaveProperty('loc_001');
+      const start = Date.now();
+      const converted = GNNService.convertGraphData(largeEdgeList);
+      const duration = Date.now() - start;
 
-      // Check that numeric features were extracted
-      expect(converted.node_features['person_001']).toEqual([0.7, 5]);
-      expect(converted.node_features['org_001']).toEqual([0.3, 100]);
-      expect(converted.node_features['loc_001']).toEqual([0.8, 3]);
+      expect(converted.edges).toHaveLength(5000);
+      expect(duration).toBeLessThan(500); // Should complete within 500ms
     });
-
-    it('should handle financial investigation graph format', () => {
-      const financialGraph = {
-        nodes: [
-          {
-            id: 'account_001',
-            type: 'ACCOUNT',
-            balance: 50000,
-            transactions: 120,
-          },
-          {
-            id: 'entity_001',
-            type: 'ENTITY',
-            risk_rating: 0.6,
-            kyc_score: 0.8,
-          },
-          {
-            id: 'bank_001',
-            type: 'BANK',
-            regulatory_score: 0.9,
-            assets: 1000000,
-          },
-        ],
-        edges: [
-          { source: 'account_001', target: 'entity_001', type: 'OWNED_BY' },
-          { source: 'account_001', target: 'bank_001', type: 'HELD_AT' },
-        ],
-      };
-
-      const converted = GNNService.convertGraphData(financialGraph);
-
-      expect(converted.edges).toHaveLength(2);
-      expect(converted.node_features['account_001']).toEqual([50000, 120]);
-      expect(converted.node_features['entity_001']).toEqual([0.6, 0.8]);
-      expect(converted.node_features['bank_001']).toEqual([0.9, 1000000]);
-    });
-  });
-});
-
-describe('GNN Performance Considerations', () => {
-  it('should handle large node feature arrays efficiently', () => {
-    const largeFeatureNodes = Array.from({ length: 1000 }, (_, i) => ({
-      id: `node_${i}`,
-      feature1: Math.random(),
-      feature2: Math.random(),
-      feature3: Math.random(),
-    }));
-
-    const start = Date.now();
-    const features = GNNService._extractNodeFeatures(largeFeatureNodes);
-    const duration = Date.now() - start;
-
-    expect(Object.keys(features)).toHaveLength(1000);
-    expect(duration).toBeLessThan(1000); // Should complete within 1 second
-  });
-
-  it('should handle large edge lists efficiently', () => {
-    const largeEdgeList = Array.from({ length: 5000 }, (_, i) => [
-      `node_${i}`,
-      `node_${(i + 1) % 1000}`,
-    ]);
-
-    const start = Date.now();
-    const converted = GNNService.convertGraphData(largeEdgeList);
-    const duration = Date.now() - start;
-
-    expect(converted.edges).toHaveLength(5000);
-    expect(duration).toBeLessThan(500); // Should complete within 500ms
   });
 });

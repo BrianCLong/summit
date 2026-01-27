@@ -1,6 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import { logger } from '../logging';
 import { CacheService } from './CacheService';
+import { CircuitBreaker } from '../utils/CircuitBreaker.js';
 
 /**
  * Advanced ML Service Integration
@@ -45,26 +46,32 @@ export class AdvancedMLService {
   private mlServiceUrl: string;
   private cacheService: CacheService;
   private defaultTimeout: number = 30000; // 30 seconds
+  private circuitBreaker: CircuitBreaker;
 
   constructor() {
     this.mlServiceUrl = process.env.ML_SERVICE_URL || 'http://localhost:8000';
     this.cacheService = new CacheService();
-    logger.info('Advanced ML Service initialized', { url: this.mlServiceUrl });
+    this.circuitBreaker = new CircuitBreaker({
+      failureThreshold: 3,
+      resetTimeout: 60000, // 1 minute
+      p95ThresholdMs: 5000, // 5 seconds
+    });
+    logger.info('Advanced ML Service initialized with Circuit Breaker', { url: this.mlServiceUrl });
   }
 
   /**
    * Health check for ML service
    */
   async healthCheck(): Promise<boolean> {
-    try {
-      const response = await axios.get(`${this.mlServiceUrl}/health`, {
-        timeout: 5000,
-      });
-      return response.status === 200;
-    } catch (error: any) {
-      logger.error('ML service health check failed', { error: error instanceof Error ? error.message : String(error) });
-      return false;
-    }
+    return this.circuitBreaker.execute(
+      async () => {
+        const response = await axios.get(`${this.mlServiceUrl}/health`, {
+          timeout: 5000,
+        });
+        return response.status === 200;
+      },
+      async () => false // Fallback
+    );
   }
 
   /**
@@ -195,9 +202,10 @@ export class AdvancedMLService {
    * Run inference on a model
    */
   async predict(request: InferenceRequest): Promise<any> {
+    const cacheKey = `ml_inference:${request.model_id}:${JSON.stringify(request).slice(0, 100)}`;
+
+    // 1. Check cache first
     try {
-      // Check cache first
-      const cacheKey = `ml_inference:${request.model_id}:${JSON.stringify(request).slice(0, 100)}`;
       const cached = await this.cacheService.get(cacheKey);
       if (cached && typeof cached === 'string') {
         logger.debug('Returning cached ML inference result', {
@@ -205,41 +213,56 @@ export class AdvancedMLService {
         });
         return JSON.parse(cached);
       }
-
-      logger.debug('Running ML inference', {
-        modelId: request.model_id,
-        nodeCount: request.node_features.length,
-        edgeCount: request.edge_index[0]?.length || 0,
-      });
-
-      const response = await axios.post(
-        `${this.mlServiceUrl}/models/${request.model_id}/predict`,
-        request,
-        {
-          timeout: this.defaultTimeout,
-          headers: { 'Content-Type': 'application/json' },
-        },
-      );
-
-      const result = response.data;
-
-      // Cache result for 5 minutes
-      await this.cacheService.set(cacheKey, JSON.stringify(result), 300);
-
-      logger.info('ML inference completed', {
-        modelId: request.model_id,
-        inferenceTime: result.inference_time_ms,
-        predictions: result.predictions.length,
-      });
-
-      return result;
-    } catch (error: any) {
-      logger.error('ML inference failed', {
-        error: error instanceof Error ? error.message : String(error),
-        modelId: request.model_id,
-      });
-      throw new Error(`Inference failed: ${error instanceof Error ? error.message : String(error)}`);
+    } catch (e) {
+      logger.warn('Cache access failed in ML predict', { error: e });
     }
+
+    // 2. Execute with Circuit Breaker
+    return this.circuitBreaker.execute(
+      async () => {
+        logger.debug('Running ML inference', {
+          modelId: request.model_id,
+          nodeCount: request.node_features.length,
+          edgeCount: request.edge_index[0]?.length || 0,
+        });
+
+        const response = await axios.post(
+          `${this.mlServiceUrl}/models/${request.model_id}/predict`,
+          request,
+          {
+            timeout: this.defaultTimeout,
+            headers: { 'Content-Type': 'application/json' },
+          },
+        );
+
+        const result = response.data;
+
+        // Cache result for 5 minutes
+        try {
+          await this.cacheService.set(cacheKey, JSON.stringify(result), 300);
+        } catch (e) {
+          logger.warn('Failed to cache ML result', { error: e });
+        }
+
+        logger.info('ML inference completed', {
+          modelId: request.model_id,
+          inferenceTime: result.inference_time_ms,
+          predictions: result.predictions.length,
+        });
+
+        return result;
+      },
+      async () => {
+        // Fallback: Neutral predictions
+        return {
+          predictions: new Array(request.node_features.length).fill(0),
+          confidence_scores: new Array(request.node_features.length).fill(0.5),
+          inference_time_ms: 0,
+          fallback: true,
+          message: 'Circuit breaker fallback: service unavailable'
+        };
+      }
+    );
   }
 
   /**

@@ -17,12 +17,15 @@ This checklist matches the command flow and endpoints published in the main READ
 
 - [ ] Bootstrap dev environment:
   - `make bootstrap`
+  - **IMPORTANT**: Ensure `TELEMETRY_SALT` is set in your `.env` for privacy-preserving ID anonymization.
 
 - [ ] Start the Docker stack:
   - `make up`
 
 - [ ] Validate baseline health:
   - `make smoke`
+  - **Privacy Check**: Verify that `api/telemetry` logs are using anonymized (hashed) IDs.
+  - **Resilience Check**: Observe the "Resilience Status" badges on the Command Center dashboard.
 
 ## Confirm you can reach required endpoints
 
@@ -33,6 +36,7 @@ Open these in a browser (from README):
 - [ ] Neo4j Browser: `http://localhost:7474` (README lists `neo4j` / `devpassword`)
 - [ ] Adminer: `http://localhost:8080`
 - [ ] Grafana: `http://localhost:3001`
+- [ ] Command Center (Tactical UI): `http://localhost:3000/narrative-intelligence`
 
 ## GA Gate: contribution-grade validation (pre-PR)
 

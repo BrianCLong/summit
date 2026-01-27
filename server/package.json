@@ -1,12 +1,13 @@
 {
   "name": "intelgraph-server",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "IntelGraph Platform Backend API",
   "main": "dist/src/index.js",
   "type": "module",
   "scripts": {
     "start": "node dist/src/index.js",
     "dev": "cross-env PORT=4000 nodemon --watch 'src/**/*' --exec 'npx tsx' src/index.ts",
+    "verify": "npx tsx scripts/verify-ga-security.ts",
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "config:validate": "ts-node scripts/validate-config.ts",
@@ -46,6 +47,7 @@
     "@bull-board/express": "5.23.0",
     "@graphql-tools/schema": "10.0.30",
     "@intelgraph/feature-flags": "workspace:*",
+    "@intelgraph/mass-behavior-dynamics": "workspace:*",
     "@intelgraph/telemetry-config": "file:../packages/telemetry-config",
     "@node-saml/node-saml": "^5.1.0",
     "@opentelemetry/api": "1.9.0",

@@ -20,20 +20,20 @@ This document is the authoritative reference for IntelGraph GA scope, architectu
 ### 1.1 What GA Is
 IntelGraph GA proves end-to-end that a cleared analyst can ingest real data, model it as a governed graph, answer complex questions with graph tradecraft and AI assist, and produce auditable, explainable results suitable for rigorous oversight. Concretely GA delivers:
 
-- **Data Intake & Prep (real, narrow scope):** CSV batch uploads, a curated set of structured connectors (e.g., STIX 2.1 and select REST/JSON APIs), schema mapping into a canonical graph model, and light dedupe/entity resolution with basic PII handling and policy labels.
+- **Data Intake & Prep (real, narrow scope):** CSV batch uploads, a curated set of structured connectors (e.g., STIX 2.1 and select REST/JSON APIs), schema mapping into a canonical graph model, and light dedupe/entity resolution with **centralized PII masking (PrivacyService) and deterministic ID anonymization**.
 - **Canonical Model & Graph Core:** Multi-tenant graph with Person, Organization, Asset, Location, Event, Indicator, Case/Investigation entities; core relationships (AFFILIATED_WITH, LOCATED_AT, PART_OF, PARTICIPATED_IN, OBSERVED_AT, DERIVED_FROM); temporal edge attributes; provenance/claims tying each node/edge to source, pipeline, timestamp, and confidence.
-- **Analytics & Tradecraft Essentials:** Graph exploration (neighbor expansion and filtering), shortest path and k-step neighborhood, degree/simple centrality (with optional betweenness for recent slices), and saved query “tradecraft patterns.”
+- **Analytics & Tradecraft Essentials:** Graph exploration (neighbor expansion and filtering), shortest path and k-step neighborhood, degree/simple centrality, and **advanced psychographic forecasting** factoring in collective emotional climate and moral foundations.
 - **AI Copilot (GA basics):** Natural language → previewed graph query (Cypher/GraphQL-like), execution with explainable results showing the query, highlighted paths, and provenance; RAG over ingested documents/claims with citations; guardrails preventing unpreviewed queries or hallucinated entities.
-- **Security & Governance Core:** SSO (OIDC) with RBAC + ABAC; policy engine enforcing tenant/classification/compartment boundaries and reason-for-access prompts; full audit log of logins/imports/queries/exports.
-- **Tri-Pane UI:** Left search/filter/workspace list, center graph canvas, bottom/right timeline and map views linked to selection, entity inspector with attributes/provenance/relations, and “explain” overlays for queries and AI suggestions.
-- **Operational readiness:** Demo-able, observable (alerts, metrics, logs), and safe for pilot with red-team scrutiny.
+- **Security & Governance Core:** SSO (OIDC) with RBAC + ABAC; policy engine enforcing tenant/classification/compartment boundaries; **Privacy Layer** ensuring all telemetry and logs are PII-clean; full audit log of logins/imports/queries/exports.
+- **Tri-Pane UI:** Left search/filter/workspace list, center graph canvas, bottom/right timeline and map views linked to selection, entity inspector with attributes/provenance/relations, and **Command Center dashboard** with live resilience status and behavioral sensors.
+- **Operational readiness:** Demo-able, **highly resilient** (circuit breakers, multi-tier caching), observable (OpenTelemetry), and safe for pilot with red-team scrutiny.
 
 ### 1.2 What GA Is Not
 GA intentionally excludes rich workflow/case management, predictive threat suite capabilities, orchestrated runbooks, advanced graph-XAI, broad connector catalogs, and any black-ops tooling (e.g., offensive cyber, mass deanonymization, ghost queries).
 
 ### 1.3 Explicit GA / Post-GA / Won’t Build
-- **In GA (must ship):** CSV ingestion, curated connectors, canonical model/multi-tenant storage, provenance for every fact, core graph analytics, NL→query copilot with preview/provenance-aware answers, RAG with citations, SSO+RBAC+ABAC+OPA-style enforcement, full query/export audit logging, tri-pane UI.
-- **Post-GA (deferred):** Predictive threat suite, decision dashboards, rich case management, report studio, automation/runbooks, deep connector catalog, advanced entity resolution, graph ML, offline/disconnected mode with cryptographic resync, advanced XAI suite, shared marketplace.
+- **In GA (must ship):** CSV ingestion, curated connectors, canonical model/multi-tenant storage, provenance for every fact, core graph analytics, NL→query copilot with preview/provenance-aware answers, RAG with citations, SSO+RBAC+ABAC+OPA-style enforcement, **PrivacyService (PII/IDs)**, **Resilience Framework (Circuit Breakers/Caching)**, **Psychographic Forecasting**, full query/export audit logging, tri-pane Command Center UI.
+- **Post-GA (deferred):** Decision dashboards, rich case management, report studio, automation/runbooks, deep connector catalog, advanced entity resolution, graph ML, offline/disconnected mode with cryptographic resync, advanced XAI suite, shared marketplace.
 - **Won’t build (ethics gates):** Social credit/risk scoring, kinetic targeting tools, bulk surveillance facial recognition, consent-bypassing features, unlogged access, automated doxxing/deanonymization, dark-pattern UX, ToS-breaking tools, fully opaque models, data monetization of sensitive personal graphs.
 
 ## 2. Architecture & Services
@@ -48,8 +48,8 @@ Assumed stack: TypeScript/Node services, React+TS frontend, graph DB (Neo4j/Janu
 5. **Provenance & Claim Ledger:** Immutable append-only claim records with source/pipeline/timestamps/confidence/tags, chain-of-custody APIs powering citations.
 6. **Analytics & Tradecraft:** Graph algorithms (shortest path, neighborhood expansion, degree/centrality), saved queries/templates.
 7. **AI Copilot:** LLM-wrapped API for NL→structured query translation, validation with graph/governance, RAG over claims/docs with citations and execution plan.
-8. **UI (React SPA):** Tri-pane layout (nav/search/filter, graph canvas, timeline/map, inspector), copilot chat panel, workspace state management.
-9. **Ops/Telemetry:** Centralized logging/metrics/traces and alerting for ingestion failures, slow queries, policy violations.
+8. **UI (React SPA):** Tri-pane layout (nav/search/filter, graph canvas, timeline/map, inspector), copilot chat panel, **Command Center dashboard with resilience status indicators and psychographic visualizations**.
+9. **Ops/Telemetry:** Centralized logging/metrics/traces via OpenTelemetry; **anonymized telemetry streams**; circuit-breaker monitoring and alerting for service degradation.
 
 ### 2.2 Textual Diagrams
 - **Top-level flow:** Browser → API Gateway → Auth/Graph/Ingest/Copilot/Analytics services, with Graph DB + Provenance Ledger and Kafka event bus backing ingestion/claims.
@@ -71,7 +71,7 @@ Six two-week sprints with themes, key deliverables, and done criteria:
 
 ## 5. Tradeoffs – Deferred vs. Non-Negotiable
 - **Deferred items:** Predictive/decision dashboards, runbooks/automation, deep connector catalog, advanced ER/Graph ML, offline mode, advanced XAI, rich collaboration/reporting, marketplace.
-- **Non-negotiable differentiators:** Provenance & claim ledger for every fact, governance-first access (RBAC+ABAC+policy), explainable automation (copilot with query preview/citations), strong multi-tenant compartmentation, comprehensive auditability.
+- **Non-negotiable differentiators:** Provenance & claim ledger for every fact, governance-first access (RBAC+ABAC+policy), **End-to-end Privacy (PII/Anonymization)**, **System-wide Resilience (Circuit Breakers)**, **Behavioral Intelligence (Psychographics)**, explainable automation (copilot with query preview/citations), strong multi-tenant compartmentation, comprehensive auditability.
 
 ## 6. Success Criteria & Usage
 - **Pilot-ready proof points:** Every node/edge tied to claims; all queries/exports gated by policy; copilot shows queries, paths, and citations before execution; tenant boundaries enforced; audit trails reconstruct who did what, when, and why.

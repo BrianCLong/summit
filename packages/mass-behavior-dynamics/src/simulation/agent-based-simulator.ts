@@ -18,7 +18,16 @@ export interface Agent {
   position: number[];
   beliefs: Map<string, number>;
   threshold: number;
-  susceptibility: number;
+  susceptibilityProfile: {
+    disinformation: number;
+    emotionalAppeals: number;
+    authorityAppeals: number;
+  };
+  psychographics: {
+    cognitiveProfile: { analyticalThinking: number };
+    authorityTrust: number;
+    moralFoundations: { care: number; loyalty: number; authority: number };
+  };
   neighbors: string[];
   state: 'INACTIVE' | 'ACTIVE' | 'RECOVERED';
 }
@@ -29,6 +38,7 @@ export interface SimulationState {
   activeCount: number;
   networkState: NetworkState;
   aggregateBeliefs: Map<string, Distribution>;
+  emotionalClimate?: PopulationState['emotionalClimate'];
 }
 
 interface NetworkState {
@@ -50,6 +60,7 @@ interface Distribution {
 export class AgentBasedSimulator {
   private config: SimulationConfig;
   private agents: Map<string, Agent>;
+  private currentState: PopulationState | null = null;
   private rng: () => number;
 
   constructor(config: SimulationConfig) {
@@ -59,7 +70,7 @@ export class AgentBasedSimulator {
   }
 
   private createRNG(seed?: number): () => number {
-    if (!seed) {return Math.random;}
+    if (!seed) { return Math.random; }
 
     // Simple seeded RNG (Mulberry32)
     let state = seed;
@@ -77,6 +88,7 @@ export class AgentBasedSimulator {
    */
   initialize(populationState: PopulationState): void {
     this.agents.clear();
+    this.currentState = populationState;
 
     // Create agents based on population segments
     let agentId = 0;
@@ -90,8 +102,21 @@ export class AgentBasedSimulator {
           id: `agent_${agentId++}`,
           position: [this.rng(), this.rng()],
           beliefs: new Map(),
-          threshold: this.sampleThreshold(segment.susceptibilityProfile),
-          susceptibility: segment.susceptibilityProfile.disinformation,
+          threshold: this.sampleThreshold(segment),
+          susceptibilityProfile: {
+            disinformation: segment.susceptibilityProfile.disinformation,
+            emotionalAppeals: segment.susceptibilityProfile.emotionalAppeals,
+            authorityAppeals: segment.susceptibilityProfile.authorityAppeals,
+          },
+          psychographics: {
+            cognitiveProfile: { analyticalThinking: segment.psychographics.cognitiveProfile.analyticalThinking },
+            authorityTrust: segment.psychographics.authorityTrust,
+            moralFoundations: {
+              care: segment.psychographics.moralFoundations.care,
+              loyalty: segment.psychographics.moralFoundations.loyalty,
+              authority: segment.psychographics.moralFoundations.authority,
+            },
+          },
           neighbors: [],
           state: 'INACTIVE',
         };
@@ -108,9 +133,13 @@ export class AgentBasedSimulator {
     this.buildNetwork(populationState.networkTopology);
   }
 
-  private sampleThreshold(profile: { disinformation: number }): number {
+  private sampleThreshold(segment: any): number {
+    const profile = segment.susceptibilityProfile;
+    const cog = segment.psychographics.cognitiveProfile;
+
     // Higher susceptibility -> lower threshold
-    const base = 1 - profile.disinformation;
+    // Higher analytical thinking -> higher threshold
+    const base = 0.5 - (profile.disinformation * 0.3) + (cog.analyticalThinking * 0.2);
     return Math.max(0.05, Math.min(0.95, base + (this.rng() - 0.5) * 0.2));
   }
 
@@ -178,7 +207,7 @@ export class AgentBasedSimulator {
       const state = this.getState(t);
       trajectory.push(state);
 
-      if (onStep) {onStep(state);}
+      if (onStep) { onStep(state); }
     }
 
     return {
@@ -203,8 +232,11 @@ export class AgentBasedSimulator {
   private applyShock(shock: ExternalShock): void {
     // Modify agent states based on shock
     for (const agent of this.agents.values()) {
-      if (shock.affectedSegments.length === 0 || this.rng() < 0.5) {
-        agent.susceptibility *= 1 + shock.magnitude * 0.1;
+      const isTargeted = shock.affectedSegments.length === 0 || this.rng() < 0.5;
+      if (isTargeted) {
+        // Shocks now affect specific susceptibility vectors based on shock magnitude
+        agent.susceptibilityProfile.disinformation *= 1 + shock.magnitude * 0.05;
+        agent.susceptibilityProfile.emotionalAppeals *= 1 + shock.magnitude * 0.1;
       }
     }
   }
@@ -213,6 +245,11 @@ export class AgentBasedSimulator {
     const agentList = Array.from(this.agents.values());
     const activations: string[] = [];
     const recoveries: string[] = [];
+
+    // Factor in collective emotional climate from population state
+    const anxietyLevel = this.currentState?.emotionalClimate.anxietyLevel || 0.5;
+    const angerLevel = this.currentState?.emotionalClimate.angerLevel || 0.4;
+    const collectiveStress = (anxietyLevel + angerLevel) / 2;
 
     for (const agent of agentList) {
       if (agent.state === 'INACTIVE') {
@@ -225,12 +262,18 @@ export class AgentBasedSimulator {
           ? activeNeighbors / agent.neighbors.length
           : 0;
 
-        if (activeFraction >= agent.threshold) {
+        // Psychographically aware threshold: 
+        // Collective stress lowers the threshold for activation
+        // Emotional susceptibility makes agents more reactive to neighbors
+        const effectiveThreshold = agent.threshold * (1 - collectiveStress * 0.2) * (1 - agent.susceptibilityProfile.emotionalAppeals * 0.1);
+
+        if (activeFraction >= effectiveThreshold) {
           activations.push(agent.id);
         }
       } else if (agent.state === 'ACTIVE') {
-        // Random recovery
-        if (this.rng() < 0.05) {
+        // Random recovery: less likely if collective anger is high
+        const recoveryProb = 0.05 * (1 - angerLevel * 0.5);
+        if (this.rng() < recoveryProb) {
           recoveries.push(agent.id);
         }
       }
@@ -256,9 +299,10 @@ export class AgentBasedSimulator {
       networkState: {
         clusters: [],
         bridgeNodes: [],
-        averageDegree: agents.reduce((sum, a) => sum + a.neighbors.length, 0) / agents.length,
+        averageDegree: agents.length > 0 ? agents.reduce((sum, a) => sum + a.neighbors.length, 0) / agents.length : 0,
       },
       aggregateBeliefs: this.aggregateBeliefs(agents),
+      emotionalClimate: this.currentState?.emotionalClimate
     };
   }
 

@@ -40,7 +40,7 @@ export interface PolicyDecision {
 export class PolicyService {
   private static instance: PolicyService;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): PolicyService {
     if (!PolicyService.instance) {
@@ -69,29 +69,44 @@ export class PolicyService {
   private evaluateLocal(ctx: PolicyContext): PolicyDecision {
     const { principal, action } = ctx;
 
-    // Default: Deny if no principal
-    if (!principal || !principal.id) {
+    // 1. Authentication Check
+    if (!principal || !principal.id || principal.id === 'anonymous') {
       return { allow: false, reason: 'Unauthenticated' };
     }
 
-    // Admin override
+    // 2. Admin Override
     if (principal.role === 'ADMIN') {
-      return { allow: true, reason: 'Admin override' };
+      return { allow: true, reason: 'Admin superuser access' };
     }
 
-    // Basic role checks (simplified for now, ideally strictly defined)
-    // In a real implementation, we would load the policy matrix
-    // For now, allow known roles for basic actions, deny otherwise
-    // This is a placeholder for the "As-is" behavior which was permissive or relied on AccessControl.js
-
-    // We strictly enforce tenant isolation here if resource has tenantId
+    // 3. Tenant Isolation
+    // If the resource has a tenantId, it MUST match the principal's tenantId.
     if (ctx.resource.tenantId && principal.tenantId) {
-        if (ctx.resource.tenantId !== principal.tenantId) {
-             return { allow: false, reason: 'Tenant mismatch' };
-        }
+      if (ctx.resource.tenantId !== principal.tenantId) {
+        return { allow: false, reason: 'Cross-tenant access forbidden' };
+      }
     }
 
-    return { allow: true, reason: 'Default allow (placeholder)' };
+    // 4. RBAC Matrix
+    // Roles: USER, ANALYST, SENIOR_ANALYST, ADMIN (handled above)
+    const permissions: Record<string, string[]> = {
+      'USER': ['read', 'graphql.query'],
+      'ANALYST': ['read', 'graphql.query', 'execute', 'ml.predict', 'narrative.analyze'],
+      'SENIOR_ANALYST': ['read', 'graphql.query', 'execute', 'ml.predict', 'narrative.analyze', 'ml.train', 'policy.view']
+    };
+
+    const userPerms = permissions[principal.role] || [];
+
+    // Check if the specific action or any of its segments are allowed
+    const isAllowed = userPerms.some(perm =>
+      action === perm || action.startsWith(`${perm}.`) || perm === '*'
+    );
+
+    if (isAllowed) {
+      return { allow: true, reason: `Action allowed for role: ${principal.role}` };
+    }
+
+    return { allow: false, reason: `Action '${action}' not permitted for role: ${principal.role}` };
   }
 }
 
@@ -139,14 +154,14 @@ export function withPolicy<T extends (...args: unknown[]) => unknown>(
       : {};
 
     const policyContext: PolicyContext = {
-        principal: user as Principal,
-        resource,
-        action: spec.action,
-        environment: {
-            ip: (ctx.req as Record<string, unknown>)?.ip as string | undefined,
-            userAgent: ((ctx.req as Record<string, unknown>)?.headers as Record<string, unknown>)?.['user-agent'] as string | undefined,
-            time: new Date().toISOString()
-        }
+      principal: user as Principal,
+      resource,
+      action: spec.action,
+      environment: {
+        ip: (ctx.req as Record<string, unknown>)?.ip as string | undefined,
+        userAgent: ((ctx.req as Record<string, unknown>)?.headers as Record<string, unknown>)?.['user-agent'] as string | undefined,
+        time: new Date().toISOString()
+      }
     };
 
     const decision = await policyService.evaluate(policyContext);
@@ -157,7 +172,7 @@ export function withPolicy<T extends (...args: unknown[]) => unknown>(
 
     // Use the existing writeAudit utility if available, or update it later
     try {
-        await writeAudit({
+      await writeAudit({
         userId: user.id as string | undefined,
         userEmail: user.email as string | undefined,
         tenantId: (user.tenantId || resource?.tenantId) as string | undefined,
@@ -165,17 +180,17 @@ export function withPolicy<T extends (...args: unknown[]) => unknown>(
         resourceType: infoObj?.fieldName as string | undefined,
         resourceId: resource?.id as string | undefined,
         details: {
-            decision: decision.allow ? 'allow' : 'deny',
-            reason: decision.reason,
-            requestId: requestId as string | undefined,
-            traceId: traceId as string | undefined,
+          decision: decision.allow ? 'allow' : 'deny',
+          reason: decision.reason,
+          requestId: requestId as string | undefined,
+          traceId: traceId as string | undefined,
         },
         success: decision.allow,
         errorMessage: decision.reason
-        });
+      });
     } catch (e: any) {
-        // ignore audit errors for now or log them
-        logger.error('Audit write failed', e);
+      // ignore audit errors for now or log them
+      logger.error('Audit write failed', e);
     }
 
     ctx.reasonForAccess = spec.action;

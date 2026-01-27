@@ -270,8 +270,8 @@ class SecurityVerifier {
     const hasRateLimiterConfig = rateLimiterFile !== null;
 
     const allChecks = importsPublicRateLimit && importsAuthRateLimit &&
-                     usesPublicRateLimit && usesAuthRateLimit &&
-                     hasTieredLimits && hasRateLimiterConfig;
+      usesPublicRateLimit && usesAuthRateLimit &&
+      hasTieredLimits && hasRateLimiterConfig;
 
     if (allChecks) {
       this.addResult(
@@ -597,7 +597,7 @@ class SecurityVerifier {
    */
   private verifyStepUpAuth() {
     const stepupFile = this.readFile('middleware/stepup.ts') ||
-                       this.readFile('src/middleware/stepup.ts');
+      this.readFile('src/middleware/stepup.ts');
 
     if (!stepupFile) {
       this.addResult(
@@ -630,6 +630,76 @@ class SecurityVerifier {
   }
 
   /**
+   * Verification 13: Privacy Service and ID Anonymization
+   */
+  private verifyPrivacyEnforcement() {
+    const privacyFile = this.readFile('src/services/PrivacyService.ts');
+    const telemetryFile = this.readFile('src/services/TelemetryService.ts');
+
+    const hasPrivacyService = privacyFile !== null && (
+      privacyFile.includes('anonymizeId') &&
+      privacyFile.includes('maskPII')
+    );
+
+    const telemetryUsesPrivacy = telemetryFile !== null && (
+      telemetryFile.includes('privacyService.anonymizeId') ||
+      telemetryFile.includes('privacyService.maskPII')
+    );
+
+    if (hasPrivacyService && telemetryUsesPrivacy) {
+      this.addResult(
+        'Privacy Enforcement',
+        true,
+        'PrivacyService and telemetry anonymization are present and integrated'
+      );
+    } else {
+      const missing = [];
+      if (!hasPrivacyService) missing.push('PrivacyService (anonymizeId/maskPII)');
+      if (!telemetryUsesPrivacy) missing.push('Privacy integration in TelemetryService');
+
+      this.addResult(
+        'Privacy Enforcement',
+        false,
+        'Privacy enforcement incomplete',
+        missing
+      );
+    }
+  }
+
+  /**
+   * Verification 14: Resilience and Circuit Breaker Integration
+   */
+  private verifyResilienceIntegration() {
+    const cbFile = this.readFile('src/utils/CircuitBreaker.ts') || this.readFile('src/utils/CircuitBreaker.js');
+    const dbFile = this.readFile('src/services/DatabaseService.ts');
+    const mlFile = this.readFile('src/services/AdvancedMLService.ts');
+
+    const hasCircuitBreaker = cbFile !== null;
+    const dbUsesCB = dbFile !== null && dbFile.includes('circuitBreaker.execute');
+    const mlUsesCB = mlFile !== null && mlFile.includes('circuitBreaker.execute');
+
+    if (hasCircuitBreaker && dbUsesCB && mlUsesCB) {
+      this.addResult(
+        'Resilience Framework',
+        true,
+        'System-wide circuit breakers are active across DB and ML paths'
+      );
+    } else {
+      const missing = [];
+      if (!hasCircuitBreaker) missing.push('CircuitBreaker implementation');
+      if (!dbUsesCB) missing.push('Circuit breaker in DatabaseService');
+      if (!mlUsesCB) missing.push('Circuit breaker in AdvancedMLService');
+
+      this.addResult(
+        'Resilience Framework',
+        false,
+        'Resilience integration incomplete',
+        missing
+      );
+    }
+  }
+
+  /**
    * Run all verifications
    */
   async verify(): Promise<boolean> {
@@ -650,6 +720,8 @@ class SecurityVerifier {
     this.verifyProductionSecrets();
     this.verifyAuditLogging();
     this.verifyStepUpAuth();
+    this.verifyPrivacyEnforcement();
+    this.verifyResilienceIntegration();
 
     // Print results
     let allPassed = true;

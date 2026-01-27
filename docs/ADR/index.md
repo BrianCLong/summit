@@ -8,6 +8,7 @@ This index tracks key architectural decisions for Summit.
 | [ADR-002](./ADR-002.md)                              | Adopt OpenTelemetry                             | Accepted | 2024-02-15 |
 | [ADR-003](./ADR-003.md)                              | Secret Management via Vault                     | Accepted | 2024-03-10 |
 | [ADR-004](./ADR-004.md)                              | Strict Decoupling of Orchestrator and Inference | Accepted | 2024-05-20 |
+| [ADR-0011](./0011-resilience-and-privacy-patterns.md) | Resilience and Privacy Patterns for GA          | Accepted | 2026-01-26 |
 | [ADR-014](./ADR-014-wedlm-local-inference-option.md) | WeDLM as Local Inference via HTTP Gateway       | Proposed | 2025-12-30 |
 
 <!-- Add new ADRs above this line -->

@@ -6,7 +6,8 @@ export class FeatureStore {
     entityId: string,
     window: '24h' | '7d' | '30d',
   ): Promise<FeatureVector> {
-    // TODO: Implement real aggregation logic
+    // V1.0.0: Placeholder interface for feature engineering. 
+    // Real-time aggregation to be implemented in v2.0 with a dedicated feature store (Feast/Hopsworks).
     return {
       alerts_24h: 0,
       vt_hits_7d: 0,

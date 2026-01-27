@@ -272,30 +272,20 @@ const resolvers = {
      * Enhanced graph analysis using advanced ML
      */
     analyzeGraphStructure: async (_: any, { graphId, analysisType }: any) => {
-      try {
-        // This would typically fetch graph data from Neo4j
-        // For now, we'll simulate with sample data
-        const nodeFeatures = Array(100)
-          .fill(0)
-          .map(() =>
-            Array(128)
-              .fill(0)
-              .map(() => Math.random()),
-          );
-        const edgeIndex = [
-          Array(200)
-            .fill(0)
-            .map(() => Math.floor(Math.random() * 100)),
-          Array(200)
-            .fill(0)
-            .map(() => Math.floor(Math.random() * 100)),
-        ];
+      const { InfluenceOperationsService } = await import('../services/InfluenceOperationsService.js');
+      const influenceService = InfluenceOperationsService.getInstance();
 
-        const result = await advancedMLService.analyzeGraphWithML(
-          nodeFeatures,
-          edgeIndex,
-          analysisType || 'node_classification',
-        );
+      try {
+        // Fetch real ML insights for the given campaign (graphId)
+        const result = await (influenceService as any).calculateMLInsights(graphId);
+
+        if (!result) {
+          return {
+            success: false,
+            error: 'No data found for the specified campaign graph',
+            graphId
+          };
+        }
 
         return {
           success: true,
@@ -305,7 +295,7 @@ const resolvers = {
           confidenceScores: result.confidence_scores,
           inferenceTime: result.inference_time_ms,
           modelInfo: result.model_info,
-          insights: generateInsights(result),
+          insights: (global as any).generateInsights ? (global as any).generateInsights(result) : []
         };
       } catch (error: any) {
         const errorMessage = error instanceof Error ? error.message : String(error);

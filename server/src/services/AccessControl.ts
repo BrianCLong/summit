@@ -17,9 +17,7 @@ export async function evaluate(
       (user.role as string | undefined) ||
       (user.roles as string[] | undefined)?.[0] ||
       'USER',
-    tenantId:
-      (user.tenantId as string | undefined) ||
-      (resource?.tenantId as string | undefined),
+    tenantId: (user.tenantId as string | undefined),
   };
 
   const ctx: PolicyContext = {
