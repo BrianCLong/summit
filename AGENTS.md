@@ -79,6 +79,9 @@ All agents operating in this repository MUST comply with the following:
 - Log all decisions requiring compliance or ethics review
 - Escalate ambiguity to governance, not workaround it
 - Prefer public standards over proprietary rules
+- **Decision Reversibility:** All autonomous decisions must be recorded in the `DecisionLedger` and have a corresponding rollback path.
+- **Agent Negotiation:** Agents must negotiate using the `agent-negotiation` package rather than overriding each other.
+- **Policy Versioning:** Decision logic must be versioned in `packages/decision-policy/`.
 
 ### Canonical Rule
 

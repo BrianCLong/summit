@@ -1,0 +1,19 @@
+[
+  {
+    "id": "5me2isnbr7",
+    "timestamp": "2026-01-27T00:03:26.906Z",
+    "agentId": "infra-agent-01",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjcHVfdXNhZ2UiOiI5MCUifQ==",
+    "decision": {
+      "action": "scale_up",
+      "rule": {
+        "condition": "cpu_usage > 80%",
+        "action": "scale_up",
+        "max_cost": 10
+      }
+    },
+    "reasoning": "Matched condition: cpu_usage > 80%",
+    "reverted": true
+  }
+]

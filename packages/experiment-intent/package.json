@@ -1,0 +1,17 @@
+{
+  "name": "@intelgraph/experiment-intent",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Calculates expected learning value for experiments.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "@types/node": "^20.17.5"
+  }
+}
