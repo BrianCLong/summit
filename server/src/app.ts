@@ -538,6 +538,52 @@ export const createApp = async () => {
   app.use('/api/maestro', buildMaestroRouter(maestro, maestroQueries));
   process.stdout.write('[DEBUG] Maestro router built\n');
 
+  // Initialize Maestro V2 Engine & Handlers (Stable-DiffCoder Integration)
+  try {
+    const { MaestroEngine } = await import('./maestro/engine.ts');
+    const { MaestroHandlers } = await import('./maestro/handlers.ts');
+    const { MaestroAgentService } = await import('./maestro/agent_service.ts');
+    const { DiffusionCoderAdapter } = await import('./maestro/adapters/diffusion_coder.ts');
+    const { getPostgresPool } = await import('./db/postgres.ts');
+    const { getRedisClient } = await import('./db/redis.ts');
+
+    const pool = getPostgresPool();
+    const redis = getRedisClient();
+
+    const engineV2 = new MaestroEngine({
+      db: pool as any,
+      redisConnection: redis
+    });
+
+    const agentService = new MaestroAgentService(pool as any);
+
+    // Adapt LLM for V2 Handlers
+    const llmServiceV2 = {
+      callCompletion: async (runId: string, taskId: string, payload: any) => {
+         const result = await llmClient.callCompletion(payload.messages[payload.messages.length-1].content, payload.model);
+         return {
+           content: typeof result === 'string' ? result : (result as any).content || JSON.stringify(result),
+           usage: { total_tokens: 0 }
+         };
+      }
+    };
+
+    const diffusionCoder = new DiffusionCoderAdapter(llmServiceV2 as any);
+
+    const handlersV2 = new MaestroHandlers(
+      engineV2,
+      agentService,
+      llmServiceV2 as any,
+      { executeAlgorithm: async () => ({}) } as any,
+      diffusionCoder
+    );
+
+    handlersV2.registerAll();
+    process.stdout.write('[DEBUG] Maestro V2 Engine & Handlers initialized\n');
+  } catch (err) {
+    appLogger.error({ err }, 'Failed to initialize Maestro V2 Engine');
+  }
+
   app.get('/search/evidence', async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
 
