@@ -1,0 +1,137 @@
+name: ADR Index Sync
+
+# Automatically generates and updates the Architecture Decision Records index
+# Ensures ADR discoverability and prevents duplicate decisions
+
+on:
+  push:
+    paths:
+      - 'docs/ADR/**'
+      - 'docs/adr/**'
+  pull_request:
+    paths:
+      - 'docs/ADR/**'
+      - 'docs/adr/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: adr-index-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync-index:
+    name: Sync ADR Index
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate ADR Index
+        run: |
+          ADR_DIR="docs/ADR"
+          INDEX_FILE="$ADR_DIR/ADR_INDEX.md"
+
+          # Create index header
+          cat > "$INDEX_FILE" << 'EOF'
+          # Architecture Decision Records Index
+
+          > **Auto-generated** - Do not edit manually. Updated by `adr-index-sync.yml` workflow.
+
+          This index provides a comprehensive view of all Architecture Decision Records (ADRs) in the Summit platform.
+
+          ## Quick Links
+
+          | Status | Count |
+          |--------|-------|
+          EOF
+
+          # Count ADRs by status
+          ACCEPTED=$(grep -l "Status: Accepted\|status: accepted" "$ADR_DIR"/*.md 2>/dev/null | wc -l || echo 0)
+          PROPOSED=$(grep -l "Status: Proposed\|status: proposed" "$ADR_DIR"/*.md 2>/dev/null | wc -l || echo 0)
+          DEPRECATED=$(grep -l "Status: Deprecated\|status: deprecated" "$ADR_DIR"/*.md 2>/dev/null | wc -l || echo 0)
+          SUPERSEDED=$(grep -l "Status: Superseded\|status: superseded" "$ADR_DIR"/*.md 2>/dev/null | wc -l || echo 0)
+
+          echo "| Accepted | $ACCEPTED |" >> "$INDEX_FILE"
+          echo "| Proposed | $PROPOSED |" >> "$INDEX_FILE"
+          echo "| Deprecated | $DEPRECATED |" >> "$INDEX_FILE"
+          echo "| Superseded | $SUPERSEDED |" >> "$INDEX_FILE"
+          echo "" >> "$INDEX_FILE"
+
+          echo "## All ADRs" >> "$INDEX_FILE"
+          echo "" >> "$INDEX_FILE"
+          echo "| ID | Title | Status | Date |" >> "$INDEX_FILE"
+          echo "|----|-------|--------|------|" >> "$INDEX_FILE"
+
+          # Process each ADR file
+          for file in "$ADR_DIR"/*.md; do
+            if [ -f "$file" ] && [ "$(basename "$file")" != "ADR_INDEX.md" ] && [ "$(basename "$file")" != "README.md" ]; then
+              FILENAME=$(basename "$file")
+
+              # Extract ADR number from filename (e.g., 0001 from 0001-decision-name.md)
+              ADR_ID=$(echo "$FILENAME" | grep -oE '^[0-9]+' || echo "N/A")
+
+              # Extract title from first H1 or filename
+              TITLE=$(head -20 "$file" | grep -m1 "^# " | sed 's/^# //' || echo "$FILENAME")
+              TITLE=${TITLE:-$FILENAME}
+
+              # Extract status
+              STATUS=$(grep -iE "^Status:|^\*\*Status\*\*:" "$file" | head -1 | sed 's/.*: *//' | tr -d '*' || echo "Unknown")
+              STATUS=${STATUS:-Unknown}
+
+              # Get last modified date
+              DATE=$(git log -1 --format="%cs" -- "$file" 2>/dev/null || echo "Unknown")
+
+              # Add to index
+              echo "| $ADR_ID | [$TITLE](./$FILENAME) | $STATUS | $DATE |" >> "$INDEX_FILE"
+            fi
+          done
+
+          echo "" >> "$INDEX_FILE"
+          echo "## ADR Process" >> "$INDEX_FILE"
+          echo "" >> "$INDEX_FILE"
+          echo "1. **Propose**: Create new ADR with status 'Proposed'" >> "$INDEX_FILE"
+          echo "2. **Review**: Team reviews and discusses in PR" >> "$INDEX_FILE"
+          echo "3. **Accept/Reject**: Update status based on decision" >> "$INDEX_FILE"
+          echo "4. **Implement**: Reference ADR in implementation PRs" >> "$INDEX_FILE"
+          echo "" >> "$INDEX_FILE"
+          echo "---" >> "$INDEX_FILE"
+          echo "*Last updated: $(date -u +%Y-%m-%dT%H:%M:%SZ)*" >> "$INDEX_FILE"
+
+      - name: Check for Changes
+        id: check-changes
+        run: |
+          if git diff --quiet docs/ADR/ADR_INDEX.md; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit Index Update
+        if: steps.check-changes.outputs.changed == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add docs/ADR/ADR_INDEX.md
+          git commit -m "docs: auto-update ADR index [skip ci]"
+          git push
+
+      - name: Upload Index
+        uses: actions/upload-artifact@v4
+        with:
+          name: adr-index
+          path: docs/ADR/ADR_INDEX.md
+          retention-days: 7
+
+      - name: Summary
+        run: |
+          echo "## ADR Index Generated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          cat docs/ADR/ADR_INDEX.md >> $GITHUB_STEP_SUMMARY

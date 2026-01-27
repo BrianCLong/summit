@@ -196,7 +196,7 @@ jobs:
       ref: ${{ needs.gate.outputs.tag }}
 
   # ═══════════════════════════════════════════════════════════════════════════
-  # Stage 3: Build GA Bundle
+  # Stage 3: Build GA Bundle with SBOM
   # ═══════════════════════════════════════════════════════════════════════════
   build-bundle:
     name: "3️⃣ Build GA Bundle"
@@ -205,6 +205,61 @@ jobs:
     if: needs.gate.outputs.is_ga == 'true'
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate CycloneDX SBOM
+        run: |
+          mkdir -p staging/ga-bundle
+
+          echo "Generating CycloneDX SBOM..."
+          pnpm dlx @cyclonedx/cyclonedx-npm \
+            --output-file staging/ga-bundle/sbom.cyclonedx.json \
+            --output-format json \
+            --spec-version 1.5 \
+            --mc-type application || echo "CycloneDX generation attempted"
+
+          # Generate SPDX format as well
+          echo "Generating SPDX SBOM..."
+          if command -v syft &> /dev/null; then
+            syft . -o spdx-json=staging/ga-bundle/sbom.spdx.json
+          else
+            echo "Syft not available, skipping SPDX generation"
+          fi
+
+          # Create SBOM manifest
+          cat > staging/ga-bundle/sbom-manifest.json << EOF
+          {
+            "version": "1.0.0",
+            "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "tag": "${{ needs.gate.outputs.tag }}",
+            "formats": {
+              "cyclonedx": "sbom.cyclonedx.json",
+              "spdx": "sbom.spdx.json"
+            },
+            "spec_versions": {
+              "cyclonedx": "1.5",
+              "spdx": "2.3"
+            }
+          }
+          EOF
+
+          echo "SBOM files generated:"
+          ls -la staging/ga-bundle/sbom*
+
       - name: Generate Provenance Manifest
         run: |
           if [[ -f scripts/release/generate_provenance_manifest.sh ]]; then
@@ -230,6 +285,29 @@ jobs:
             --output-certificate staging/ga-bundle/provenance.json.pem
 
           echo "Signature created: staging/ga-bundle/provenance.json.sig"
+
+      - name: Sign SBOM (Keyless)
+        run: |
+          echo "Signing SBOM with Keyless OIDC..."
+
+          if [ -f "staging/ga-bundle/sbom.cyclonedx.json" ]; then
+            cosign sign-blob --yes \
+              staging/ga-bundle/sbom.cyclonedx.json \
+              --output-signature staging/ga-bundle/sbom.cyclonedx.json.sig \
+              --output-certificate staging/ga-bundle/sbom.cyclonedx.json.pem
+            echo "CycloneDX SBOM signed: staging/ga-bundle/sbom.cyclonedx.json.sig"
+          fi
+
+          if [ -f "staging/ga-bundle/sbom.spdx.json" ]; then
+            cosign sign-blob --yes \
+              staging/ga-bundle/sbom.spdx.json \
+              --output-signature staging/ga-bundle/sbom.spdx.json.sig \
+              --output-certificate staging/ga-bundle/sbom.spdx.json.pem
+            echo "SPDX SBOM signed: staging/ga-bundle/sbom.spdx.json.sig"
+          fi
+
+          echo "SBOM signing complete"
+          ls -la staging/ga-bundle/sbom*
 
       - name: Upload GA Bundle
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4

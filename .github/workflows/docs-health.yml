@@ -1,0 +1,247 @@
+name: Documentation Health Check
+
+# Weekly documentation health check for link validation and freshness auditing
+# See docs/analysis/SUMMIT_STATE_ANALYSIS.md for rationale
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly Monday 6 AM UTC
+  workflow_dispatch:
+    inputs:
+      full_scan:
+        description: 'Run full scan including all subdirectories'
+        required: false
+        default: 'false'
+        type: boolean
+  pull_request:
+    paths:
+      - 'docs/**'
+      - '*.md'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: docs-health-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Link Validation: Check for broken internal and external links
+  # ═══════════════════════════════════════════════════════════════════════════
+  linkcheck:
+    name: Link Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Check Markdown Links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          folder-path: 'docs/'
+          file-path: './README.md,./CONTRIBUTING.md,./CHANGELOG.md'
+          config-file: '.markdown-link-check.json'
+          use-quiet-mode: 'no'
+          use-verbose-mode: 'yes'
+        continue-on-error: true
+
+      - name: Generate Link Report
+        if: always()
+        run: |
+          echo "# Documentation Link Check Report" > link-report.md
+          echo "" >> link-report.md
+          echo "**Date:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> link-report.md
+          echo "**Branch:** ${{ github.ref_name }}" >> link-report.md
+          echo "" >> link-report.md
+
+      - name: Upload Link Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: link-check-report
+          path: link-report.md
+          retention-days: 30
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Freshness Audit: Identify stale documentation
+  # ═══════════════════════════════════════════════════════════════════════════
+  freshness:
+    name: Freshness Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for accurate modification dates
+
+      - name: Identify Stale Documentation (180+ days)
+        run: |
+          echo "# Stale Documentation Report" > stale-docs-report.md
+          echo "" >> stale-docs-report.md
+          echo "**Generated:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> stale-docs-report.md
+          echo "**Threshold:** 180 days without modification" >> stale-docs-report.md
+          echo "" >> stale-docs-report.md
+
+          # Find files not modified in 180 days
+          echo "## Critical Documentation (180+ days stale)" >> stale-docs-report.md
+          echo "" >> stale-docs-report.md
+
+          STALE_COUNT=0
+          while IFS= read -r file; do
+            if [ -f "$file" ]; then
+              LAST_MODIFIED=$(git log -1 --format="%ci" -- "$file" 2>/dev/null || echo "unknown")
+              echo "- \`$file\` - Last modified: $LAST_MODIFIED" >> stale-docs-report.md
+              STALE_COUNT=$((STALE_COUNT + 1))
+            fi
+          done < <(find docs -name '*.md' -type f -mtime +180 2>/dev/null | head -50)
+
+          echo "" >> stale-docs-report.md
+          echo "**Total stale files:** $STALE_COUNT" >> stale-docs-report.md
+
+          if [ "$STALE_COUNT" -gt 0 ]; then
+            echo "::warning::Found $STALE_COUNT documentation files not updated in 180+ days"
+          fi
+
+      - name: Identify Very Stale Documentation (365+ days)
+        run: |
+          echo "" >> stale-docs-report.md
+          echo "## Very Stale Documentation (365+ days)" >> stale-docs-report.md
+          echo "" >> stale-docs-report.md
+
+          VERY_STALE_COUNT=0
+          while IFS= read -r file; do
+            if [ -f "$file" ]; then
+              LAST_MODIFIED=$(git log -1 --format="%ci" -- "$file" 2>/dev/null || echo "unknown")
+              echo "- \`$file\` - Last modified: $LAST_MODIFIED" >> stale-docs-report.md
+              VERY_STALE_COUNT=$((VERY_STALE_COUNT + 1))
+            fi
+          done < <(find docs -name '*.md' -type f -mtime +365 2>/dev/null | head -50)
+
+          echo "" >> stale-docs-report.md
+          echo "**Total very stale files:** $VERY_STALE_COUNT" >> stale-docs-report.md
+
+          if [ "$VERY_STALE_COUNT" -gt 20 ]; then
+            echo "::error::Found $VERY_STALE_COUNT documentation files not updated in over a year"
+          fi
+
+      - name: Upload Freshness Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: stale-docs-report
+          path: stale-docs-report.md
+          retention-days: 30
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # README Coverage: Ensure all packages have documentation
+  # ═══════════════════════════════════════════════════════════════════════════
+  readme-coverage:
+    name: README Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Package README Coverage
+        run: |
+          echo "# README Coverage Report" > readme-coverage-report.md
+          echo "" >> readme-coverage-report.md
+          echo "**Generated:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> readme-coverage-report.md
+          echo "" >> readme-coverage-report.md
+
+          MISSING_COUNT=0
+          TOTAL_PACKAGES=0
+
+          echo "## Packages Missing README" >> readme-coverage-report.md
+          echo "" >> readme-coverage-report.md
+
+          # Check packages directory
+          for dir in packages/*/; do
+            if [ -d "$dir" ]; then
+              TOTAL_PACKAGES=$((TOTAL_PACKAGES + 1))
+              if [ ! -f "${dir}README.md" ] && [ ! -f "${dir}readme.md" ]; then
+                echo "- \`$dir\`" >> readme-coverage-report.md
+                MISSING_COUNT=$((MISSING_COUNT + 1))
+              fi
+            fi
+          done
+
+          # Check services directory
+          for dir in services/*/; do
+            if [ -d "$dir" ]; then
+              TOTAL_PACKAGES=$((TOTAL_PACKAGES + 1))
+              if [ ! -f "${dir}README.md" ] && [ ! -f "${dir}readme.md" ]; then
+                echo "- \`$dir\`" >> readme-coverage-report.md
+                MISSING_COUNT=$((MISSING_COUNT + 1))
+              fi
+            fi
+          done
+
+          # Check apps directory
+          for dir in apps/*/; do
+            if [ -d "$dir" ]; then
+              TOTAL_PACKAGES=$((TOTAL_PACKAGES + 1))
+              if [ ! -f "${dir}README.md" ] && [ ! -f "${dir}readme.md" ]; then
+                echo "- \`$dir\`" >> readme-coverage-report.md
+                MISSING_COUNT=$((MISSING_COUNT + 1))
+              fi
+            fi
+          done
+
+          echo "" >> readme-coverage-report.md
+          COVERAGE_PCT=$((100 - (MISSING_COUNT * 100 / TOTAL_PACKAGES)))
+          echo "## Summary" >> readme-coverage-report.md
+          echo "" >> readme-coverage-report.md
+          echo "- **Total packages/services/apps:** $TOTAL_PACKAGES" >> readme-coverage-report.md
+          echo "- **Missing README:** $MISSING_COUNT" >> readme-coverage-report.md
+          echo "- **Coverage:** ${COVERAGE_PCT}%" >> readme-coverage-report.md
+
+          if [ "$COVERAGE_PCT" -lt 80 ]; then
+            echo "::warning::README coverage is below 80% (${COVERAGE_PCT}%)"
+          fi
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: readme-coverage-report
+          path: readme-coverage-report.md
+          retention-days: 30
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Summary: Aggregate all reports
+  # ═══════════════════════════════════════════════════════════════════════════
+  summary:
+    name: Health Summary
+    runs-on: ubuntu-latest
+    needs: [linkcheck, freshness, readme-coverage]
+    if: always()
+
+    steps:
+      - name: Download All Reports
+        uses: actions/download-artifact@v4
+        with:
+          path: reports/
+
+      - name: Generate Summary
+        run: |
+          echo "## 📚 Documentation Health Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Link Validation | ${{ needs.linkcheck.result == 'success' && '✅ Passed' || '⚠️ Issues Found' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Freshness Audit | ${{ needs.freshness.result == 'success' && '✅ Passed' || '⚠️ Stale Docs Found' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| README Coverage | ${{ needs.readme-coverage.result == 'success' && '✅ Passed' || '⚠️ Missing READMEs' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📁 Full reports available in workflow artifacts" >> $GITHUB_STEP_SUMMARY

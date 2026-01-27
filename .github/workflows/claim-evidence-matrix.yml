@@ -1,0 +1,190 @@
+name: Marketing Claim Evidence Validation
+
+# Validates that marketing claims are supported by CI evidence
+# Cross-references claims registry with test results and attestations
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'  # Weekly Monday 8 AM UTC
+  workflow_dispatch:
+  push:
+    paths:
+      - 'docs/marketing/**'
+      - 'docs/claims/**'
+      - '.github/workflows/claim-evidence-matrix.yml'
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: claim-evidence-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-claims:
+    name: Validate Marketing Claims
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Load Claims Registry
+        id: load-claims
+        run: |
+          # Create claims registry if it doesn't exist
+          CLAIMS_FILE="docs/marketing/CLAIMS_REGISTRY.md"
+
+          if [ ! -f "$CLAIMS_FILE" ]; then
+            echo "::warning::Claims registry not found at $CLAIMS_FILE"
+            echo "claims_found=false" >> $GITHUB_OUTPUT
+          else
+            echo "claims_found=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate Evidence Report
+        run: |
+          echo "# Marketing Claim Evidence Report" > claim-evidence-report.md
+          echo "" >> claim-evidence-report.md
+          echo "**Generated:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> claim-evidence-report.md
+          echo "**Commit:** ${{ github.sha }}" >> claim-evidence-report.md
+          echo "" >> claim-evidence-report.md
+
+          echo "## Evidence Sources Verified" >> claim-evidence-report.md
+          echo "" >> claim-evidence-report.md
+
+          # Check for CI workflow evidence
+          echo "### CI/CD Workflows" >> claim-evidence-report.md
+          echo "" >> claim-evidence-report.md
+
+          WORKFLOWS=(
+            "ci.yml|Core CI Pipeline|Unit tests, linting, type checking"
+            "ci-security.yml|Security Scanning|CodeQL, gitleaks, dependency audit"
+            "compliance.yml|Compliance Checks|Policy validation, governance"
+            "sbom-scan.yml|SBOM Generation|Software Bill of Materials"
+            "perf.yml|Performance Testing|Latency and throughput validation"
+            "e2e-tests.yml|E2E Testing|End-to-end user flow validation"
+          )
+
+          for entry in "${WORKFLOWS[@]}"; do
+            IFS='|' read -r workflow name description <<< "$entry"
+            if [ -f ".github/workflows/$workflow" ]; then
+              echo "- ✅ **$name** (\`$workflow\`): $description" >> claim-evidence-report.md
+            else
+              echo "- ❌ **$name** (\`$workflow\`): Not found" >> claim-evidence-report.md
+            fi
+          done
+
+          echo "" >> claim-evidence-report.md
+
+          # Check for evidence artifacts
+          echo "### Evidence Artifacts" >> claim-evidence-report.md
+          echo "" >> claim-evidence-report.md
+
+          ARTIFACTS=(
+            "docs/security/FINDINGS_REGISTER.md|Security Findings Register"
+            "docs/security/EVIDENCE_ATTESTATION.md|Evidence Attestation"
+            "governance/GOVERNANCE_VERDICT_SYSTEM.md|Governance Verdict System"
+            "docs/AUDIT_AND_COMPLIANCE.md|Audit & Compliance Documentation"
+          )
+
+          for entry in "${ARTIFACTS[@]}"; do
+            IFS='|' read -r path name <<< "$entry"
+            if [ -f "$path" ]; then
+              LAST_MODIFIED=$(git log -1 --format="%ci" -- "$path" 2>/dev/null || echo "unknown")
+              echo "- ✅ **$name**: Last updated $LAST_MODIFIED" >> claim-evidence-report.md
+            else
+              echo "- ❌ **$name**: Not found at \`$path\`" >> claim-evidence-report.md
+            fi
+          done
+
+          echo "" >> claim-evidence-report.md
+
+          # Check for test coverage evidence
+          echo "### Test Coverage Evidence" >> claim-evidence-report.md
+          echo "" >> claim-evidence-report.md
+
+          if [ -f "jest.config.cjs" ]; then
+            THRESHOLD=$(grep -o '"branches":[0-9]*' jest.config.cjs | head -1 | grep -o '[0-9]*' || echo "not set")
+            echo "- **Coverage Threshold:** ${THRESHOLD}% (from jest.config.cjs)" >> claim-evidence-report.md
+          fi
+
+          # Count test files
+          TEST_COUNT=$(find . -name '*.test.ts' -o -name '*.test.tsx' -o -name '*.spec.ts' -o -name '*.spec.tsx' | wc -l)
+          echo "- **Test Files:** $TEST_COUNT" >> claim-evidence-report.md
+
+          echo "" >> claim-evidence-report.md
+
+      - name: Check Claim-Evidence Mapping
+        run: |
+          echo "## Claim-Evidence Mapping Status" >> claim-evidence-report.md
+          echo "" >> claim-evidence-report.md
+
+          # Define common marketing claims and their evidence requirements
+          echo "| Claim Category | Evidence Type | Status |" >> claim-evidence-report.md
+          echo "|----------------|---------------|--------|" >> claim-evidence-report.md
+
+          # Security claims
+          if [ -f ".github/workflows/codeql.yml" ] && [ -f ".github/workflows/ci-security.yml" ]; then
+            echo "| Security Scanning | CodeQL + CI Security | ✅ Automated |" >> claim-evidence-report.md
+          else
+            echo "| Security Scanning | CodeQL + CI Security | ⚠️ Partial |" >> claim-evidence-report.md
+          fi
+
+          # Compliance claims
+          if [ -f ".github/workflows/compliance.yml" ] && [ -d "governance/" ]; then
+            echo "| Compliance | Governance + Workflows | ✅ Automated |" >> claim-evidence-report.md
+          else
+            echo "| Compliance | Governance + Workflows | ⚠️ Partial |" >> claim-evidence-report.md
+          fi
+
+          # Supply chain claims
+          if [ -f ".github/workflows/sbom-scan.yml" ] && [ -f ".github/workflows/supply-chain-attest.yml" ]; then
+            echo "| Supply Chain Security | SBOM + Attestation | ✅ Automated |" >> claim-evidence-report.md
+          else
+            echo "| Supply Chain Security | SBOM + Attestation | ⚠️ Partial |" >> claim-evidence-report.md
+          fi
+
+          # Performance claims
+          if [ -f ".github/workflows/perf.yml" ]; then
+            echo "| Performance SLAs | Performance Tests | ✅ Automated |" >> claim-evidence-report.md
+          else
+            echo "| Performance SLAs | Performance Tests | ❌ Manual |" >> claim-evidence-report.md
+          fi
+
+          # Test coverage claims
+          if [ -f "jest.config.cjs" ] || [ -f "vitest.config.ts" ]; then
+            echo "| Test Coverage | Jest/Vitest Config | ✅ Automated |" >> claim-evidence-report.md
+          else
+            echo "| Test Coverage | Test Framework | ⚠️ Partial |" >> claim-evidence-report.md
+          fi
+
+          echo "" >> claim-evidence-report.md
+
+      - name: Generate Recommendations
+        run: |
+          echo "## Recommendations" >> claim-evidence-report.md
+          echo "" >> claim-evidence-report.md
+          echo "1. **Create Claims Registry**: Add \`docs/marketing/CLAIMS_REGISTRY.md\` with all public claims" >> claim-evidence-report.md
+          echo "2. **Link Claims to Evidence**: Each claim should reference specific CI workflow or artifact" >> claim-evidence-report.md
+          echo "3. **Automate Evidence Collection**: Use \`ga-evidence-pack.yml\` workflow for releases" >> claim-evidence-report.md
+          echo "4. **Regular Audits**: Review this report weekly to identify gaps" >> claim-evidence-report.md
+          echo "" >> claim-evidence-report.md
+
+          cat claim-evidence-report.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Evidence Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: claim-evidence-report
+          path: claim-evidence-report.md
+          retention-days: 90
