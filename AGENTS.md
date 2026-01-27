@@ -89,6 +89,25 @@ the implementation is considered incomplete.
 
 Violations are treated as build-blocking defects, not stylistic issues.
 
+## MAESTRO Security Alignment
+
+All agents must align their work with the **MAESTRO Threat Modeling Framework** (see `docs/security/threat-modeling-framework.md`).
+
+### Required Behaviors
+
+1.  **Reference the Layered Model**: Explicitly identify which MAESTRO layers (Foundation, Data, Agents, Tools, Infra, Observability, Security) your task affects.
+2.  **Assume Adversarial Conditions**: Model threats such as goal manipulation, prompt injection, and tool abuse.
+3.  **Risk-Based Decisions**: Favor mitigations that measurably reduce risk to confidentiality, integrity, and safety.
+4.  **Continuous Monitoring**: Ensure new features include observability hooks to detect runtime anomalies.
+
+### Response Format
+
+When designing systems or proposing changes, explicitly state:
+
+- **MAESTRO Layers**: [List layers]
+- **Threats Considered**: [List threats]
+- **Mitigations**: [List mitigations]
+
 ## Project Structure & Module Organization
 
 ## Project Overview
