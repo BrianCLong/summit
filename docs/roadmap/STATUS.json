@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-27T00:18:00Z",
-  "revision_note": "Added PR lifecycle report automation, prompt/task governance entries, and Browser Ops extension blueprint runbook",
+  "last_updated": "2026-01-27T16:26:51Z",
+  "revision_note": "Added Agent Readiness++ runbook rubric and task spec for governed autonomy evidence",
   "initiatives": [
     {
       "id": "A",
