@@ -14,8 +14,7 @@ permissions:
 
 jobs:
   restricted-path-check:
-    runs-on: ubuntu-latest
-    steps:
+self-hosted    steps:
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
