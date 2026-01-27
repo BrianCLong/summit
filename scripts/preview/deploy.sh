@@ -45,14 +45,40 @@ echo "🔗 URL: https://pr-${PR_NUMBER}.preview.summit.ai"
 
 # Seeding (Optional)
 
-if [ "${SEED_DATA:-false}" = "true" ]; then
+if [ "${SEED_DATA:-true}" = "true" ]; then
 
     echo "🧪 Seeding preview data..."
 
-    # Attempt to run seeding via a one-off job or by calling the API
+    
 
-    # For now, we'll just log that we would do it.
+    SEED_JOB_NAME="seed-pr-${PR_NUMBER}-$(date +%s)"
 
-    echo "   (Seeding logic would go here, e.g., kubectl exec into api pod)"
+    
+
+    # Run a one-off job using the API image to seed data
+
+    kubectl run "$SEED_JOB_NAME" \
+
+        --namespace "$NAMESPACE" \
+
+        --image="${REGISTRY:-ghcr.io/brianclong/summit}/summit:${TAG}" \
+
+        --restart=Never \
+
+        --env="NODE_ENV=production" \
+
+        --env="DEMO_MODE=1" \
+
+        --env="DATABASE_URL=$(kubectl get secret postgres-credentials -n "$NAMESPACE" -o jsonpath='{.data.uri}' | base64 -d)" \
+
+        --command -- ./scripts/demo-seed.sh
+
+        
+
+    # Wait for seed to complete (optional, or just fire and forget)
+
+    echo "   Seeding job '$SEED_JOB_NAME' started."
 
 fi
+
+

@@ -27,10 +27,27 @@ jobs:
     name: Smoke Test
     needs: deploy-preview
     runs-on: [self-hosted, linux, preview]
+    container:
+      image: mcr.microsoft.com/playwright:v1.40.0-jammy # Use an image with browsers pre-installed
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Run Playwright Smoke Suite
+        env:
+          BASE_URL: "https://pr-${{ github.event.pull_request.number }}.preview.summit.ai"
+          CI: true
         run: |
-          echo "Running smoke tests against: https://pr-${{ github.event.pull_request.number }}.preview.summit.ai"
-          # Example: pnpm test:e2e --baseUrl "https://pr-${{ github.event.pull_request.number }}.preview.summit.ai"
-          echo "✅ Smoke tests passed"
+          echo "🚀 Running smoke tests against: $BASE_URL"
+          npx playwright test --project=chromium --reporter=list
