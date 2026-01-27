@@ -23,3 +23,6 @@ LICENSE
 .git/
 .husky/
 .github/workflows/release-ops-slo-issue.yml
+# Governance docs with tables validated by scripts/compliance/verify_governance.ts
+docs/governance/GOVERNANCE_RULES.md
+docs/compliance/CONTROL_REGISTRY.md

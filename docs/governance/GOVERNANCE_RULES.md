@@ -11,8 +11,8 @@ This document defines the rules for code changes, releases, and approvals within
 
 We adhere to [Semantic Versioning 2.0.0](https://semver.org/).
 
-| Type      | Description                        | Trigger                               | Version Bump         | Approval Required     |
-| :-------- | :--------------------------------- | :------------------------------------ | :------------------- | :-------------------- |
+| Type | Description | Trigger | Version Bump | Approval Required |
+| :--- | :---------- | :------ | :----------- | :---------------- |
 | **Patch** | Bug fixes, backward-compatible.    | PR merged to `main`                   | `x.y.Z` -> `x.y.Z+1` | Peer Review (1)       |
 | **Minor** | New features, backward-compatible. | PR merged to `main` (feature flagged) | `x.Y.z` -> `x.Y+1.0` | Maintainer Review (1) |
 | **Major** | Breaking changes.                  | Release Branch cut                    | `X.y.z` -> `X+1.0.0` | Governance Board      |
