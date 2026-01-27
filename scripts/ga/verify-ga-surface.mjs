@@ -14,7 +14,8 @@ const requiredFeatures = [
   'Data Classification & Governance',
   'Policy Preflight & Receipts',
   'Ingestion Security Hardening',
-  'Generative UI Plan Contract'
+  'Generative UI Plan Contract',
+  'GA Gate Artifact Closure'
 ];
 
 const allowedTiers = new Set(['A', 'B', 'C']);
