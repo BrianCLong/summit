@@ -36,6 +36,10 @@ const cogSecTypeDefs = fs.readFileSync(cogSecSchemaPath, 'utf8');
 const dedupSchemaPath = path.join(__dirname, '../schemas/deduplication.graphql');
 const dedupTypeDefs = fs.readFileSync(dedupSchemaPath, 'utf8');
 
+// Load Voice schema
+const voiceSchemaPath = path.join(__dirname, '../schemas/voice.graphql');
+const voiceTypeDefs = fs.readFileSync(voiceSchemaPath, 'utf8');
+
 const base = gql`
   scalar JSON
   scalar DateTime
@@ -73,6 +77,7 @@ export const typeDefs = [
   collabTypeDefs,
   cogSecTypeDefs,
   dedupTypeDefs,
+  voiceTypeDefs,
 ];
 
 export default typeDefs;
