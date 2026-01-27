@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-27T17:52:00Z",
-  "revision_note": "Added OSINT platform developments update",
+  "last_updated": "2026-01-27T17:55:00Z",
+  "revision_note": "Fixed canonical CI serializer codepoint ordering",
   "initiatives": [
     {
       "id": "A",

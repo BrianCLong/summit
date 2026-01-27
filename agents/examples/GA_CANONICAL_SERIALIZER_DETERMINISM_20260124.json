@@ -1,0 +1,38 @@
+{
+  "task_id": "GA_CANONICAL_SERIALIZER_DETERMINISM_20260124",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "governance-docs-soc-controls",
+    "version": "v1",
+    "sha256": "34c74a151cb9bfa1dc22250d51139ad229da7bd6bbb4a5ad64593cefe7c7a01a",
+    "path": "prompts/governance/governance-docs-soc-controls@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "scripts/ci/lib/canonical-serializer.mjs",
+      "scripts/ci/__tests__/canonical-serializer.test.mjs",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/GA_CANONICAL_SERIALIZER_DETERMINISM_20260124.json"
+    ],
+    "domains": ["governance", "ci", "documentation", "testing"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "A",
+    "artifacts": ["local-checks/node-test-canonical-serializer", "local-checks/check-boundaries"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 1
+  },
+  "success_criteria": [
+    "Canonical CI serializer orders keys by codepoint for deterministic output.",
+    "Regression coverage added for canonical serializer ordering.",
+    "Roadmap status updated to log governed exception."
+  ],
+  "stop_conditions": [
+    "Detected CI failure in main.",
+    "Scope breach outside declared paths.",
+    "Evidence artifacts cannot be produced deterministically."
+  ]
+}
