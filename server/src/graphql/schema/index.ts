@@ -13,6 +13,7 @@ import provenanceTypeDefs from '../schema.provenance.js';
 import { sprint28TypeDefs } from './sprint28.js';
 import { ingestionTypeDefs } from './ingestion.js';
 import { erTypeDefs } from '../schema.er.js';
+import { foundryTypeDefs } from '../schema.foundry.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -73,6 +74,7 @@ export const typeDefs = [
   sprint28TypeDefs,
   ingestionTypeDefs,
   erTypeDefs,
+  foundryTypeDefs,
   ewTypeDefs,
   collabTypeDefs,
   cogSecTypeDefs,
