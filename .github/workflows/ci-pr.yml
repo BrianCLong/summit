@@ -37,13 +37,15 @@ jobs:
             task: build
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
+        with:
+          version: 9
       - name: Install
         run: pnpm install --frozen-lockfile
       - name: Run ${{ matrix.task }}
@@ -68,7 +70,8 @@ jobs:
         with:
           node-version-file: '.nvmrc'
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
+        with:
+          version: 9
       - name: Install
         run: pnpm install --frozen-lockfile
       - name: Validate Jest & pnpm Configuration
@@ -85,7 +88,8 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
+        with:
+          version: 9
 
       - name: Start Test Infrastructure
         run: |
@@ -128,7 +132,8 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
+        with:
+          version: 9
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Verify runtime configuration
@@ -147,7 +152,8 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
+        with:
+          version: 9
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build twice and compare checksums
@@ -184,7 +190,8 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
+        with:
+          version: 9
 
       - name: Bootstrap and smoke test
         run: |
@@ -213,7 +220,8 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
+        with:
+          version: 9
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Install Playwright Browsers
@@ -266,7 +274,8 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
+        with:
+          version: 9
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Run SOC control tests
