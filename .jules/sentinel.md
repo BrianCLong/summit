@@ -37,3 +37,8 @@
 **Prevention:**
 1.  **Fail-Closed Logic:** If a required security configuration (like a secret) is missing, the system must block the request (fail closed), especially in production.
 2.  **Strict Configuration Checks:** Validate critical security configuration at startup, preventing the app from even starting if secrets are missing in production.
+
+## 2025-10-26 - [CRITICAL] Fail-Open Export Signing Secret
+**Vulnerability:** The `/sign-manifest` endpoint in `server/src/routes/exports.ts` used a hardcoded fallback (`'dev-secret'`) when `EXPORT_SIGNING_SECRET` was missing, without checking the environment. This meant that a production deployment with a missing secret configuration would silently become vulnerable to signature forgery.
+**Learning:** Default fallbacks for security-critical secrets are dangerous. The absence of a secret in production should be treated as a fatal configuration error, not an opportunity to use a default.
+**Prevention:** Use a "Fail-Closed" pattern: Explicitly check for the existence of the secret. If missing in production, throw an error and halt the operation (or startup). Never allow a fallback to a hardcoded string in production code paths.
