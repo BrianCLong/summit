@@ -87,6 +87,12 @@ All agents operating in this repository MUST comply with the following:
 - **Agent Negotiation:** Agents must negotiate using the `agent-negotiation` package rather than overriding each other.
 - **Policy Versioning:** Decision logic must be versioned in `packages/decision-policy/`.
 
+### OSINT & Sensing Mandates
+
+- **Separation of Sensing & Reasoning**: Agents must identify as either "Sensing" (collection-focused, outputting observations) or "Reasoning" (analysis-focused, outputting judgments).
+- **Evidence-First Output**: Agents must output raw evidence bundles (UEF) before narrative summaries. "Output evidence, not stories."
+- **Defensible Restraint**: Do not maximize inference; preserve uncertainty boundaries.
+
 ### Canonical Rule
 
 If a regulatory requirement cannot be expressed as policy-as-code,
