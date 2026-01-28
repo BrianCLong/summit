@@ -259,6 +259,32 @@ prompts:
         - documentation
         - security
         - governance
+  - id: mcp-git-chain-hardening
+    version: v1
+    path: prompts/security/mcp-git-chain-hardening@v1.md
+    sha256: cd4b567258aa3fc30492b51228012212e2719c809e390bfc37dc6040a3f85109
+    description: Extract MCP Git server exploit chains and map Summit hardening controls.
+    scope:
+      paths:
+        - docs/security/
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - agents/examples/
+        - prompts/security/mcp-git-chain-hardening@v1.md
+        - prompts/registry.yaml
+      domains:
+        - security
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: mvp4-ga-gate-artifacts
     version: v1
     path: prompts/docs/mvp4-ga-gate-artifacts@v1.md
