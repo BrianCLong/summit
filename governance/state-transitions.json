@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0",
+  "transitions": {
+    "draft": ["reviewed", "retired"],
+    "reviewed": ["approved", "draft", "blocked"],
+    "approved": ["retired", "blocked"],
+    "blocked": ["draft", "retired"],
+    "retired": []
+  },
+  "roles": {
+    "approve": ["admin", "compliance_officer"],
+    "review": ["senior_engineer", "admin"]
+  }
+}

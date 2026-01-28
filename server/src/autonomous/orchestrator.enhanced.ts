@@ -11,6 +11,7 @@ import { trace, context, SpanStatusCode, Span } from '@opentelemetry/api';
 import { Logger } from 'pino';
 import { z } from 'zod';
 import { CostEstimator } from './CostEstimator.js';
+import { ExecutionTrace } from '../governance/execution-trace.js';
 
 // Type definitions
 export interface RunConfig {
@@ -492,42 +493,66 @@ export class EnhancedAutonomousOrchestrator {
             killSwitch: () => this.killSwitchEnabled,
           };
 
-          // Execute plan and apply
-          const plan = await action.plan(validation.data);
-          await this.logEvent(
-            task.runId,
-            task.id,
-            correlationId,
-            'task_planned',
-            'info',
-            'Task plan generated',
-            { plan },
-          );
+          // Initialize Execution Trace
+          const traceRecorder = new ExecutionTrace({
+            runId: task.runId,
+            taskId: task.id,
+            input: task.params,
+            agentId: task.type,
+          });
 
-          const outcome = await action.apply(plan, ctx);
+          try {
+            // Execute plan and apply
+            const plan = await action.plan(validation.data);
+            await this.logEvent(
+              task.runId,
+              task.id,
+              correlationId,
+              'task_planned',
+              'info',
+              'Task plan generated',
+              { plan },
+            );
 
-          // Record success
-          await this.db.query(
-            `
+            const outcome = await action.apply(plan, ctx);
+
+            // Record success
+            await this.db.query(
+              `
           UPDATE tasks 
           SET status = 'succeeded', finished_at = NOW(), result = $2
           WHERE id = $1
         `,
-            [task.id, JSON.stringify(outcome)],
-          );
+              [task.id, JSON.stringify(outcome)],
+            );
 
-          await this.logEvent(
-            task.runId,
-            task.id,
-            correlationId,
-            'task_completed',
-            'info',
-            'Task completed successfully',
-            { outcome },
-          );
+            await this.logEvent(
+              task.runId,
+              task.id,
+              correlationId,
+              'task_completed',
+              'info',
+              'Task completed successfully',
+              { outcome },
+            );
 
-          span.setStatus({ code: SpanStatusCode.OK });
-          return outcome;
+            // Record trace artifact
+            await traceRecorder.record({
+              output: outcome,
+              metadata: { plan, status: 'success' },
+            });
+
+            span.setStatus({ code: SpanStatusCode.OK });
+            return outcome;
+          } catch (execError: any) {
+            // Record trace artifact for failure
+            await traceRecorder.record({
+              output: null,
+              error: execError.message,
+              metadata: { status: 'failed' },
+            });
+            throw execError;
+          }
         } catch (error: any) {
           // Record failure
           await this.db.query(
