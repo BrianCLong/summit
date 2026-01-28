@@ -75,7 +75,7 @@ imageio==2.37.2
 # Clustering and Dimensionality Reduction
 umap-learn==0.5.11
 hdbscan==0.8.41
-plotly==5.17.0
+plotly==6.5.2
 
 # Data Processing
 numpy==1.24.3
