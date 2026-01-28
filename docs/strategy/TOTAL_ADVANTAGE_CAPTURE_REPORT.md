@@ -96,6 +96,14 @@ This report outlines how we convert our core strengths—**Deterministic Provena
 
 > "In high-risk environments, an unexplained AI decision is a liability. Summit delivers **Evidence-First Intelligence**, where every claim is cryptographically linked to a policy-vetted fact."
 
+### Why Summit vs Maltego (Modern Stacks)
+
+> "Maltego is migrating to the cloud, but it remains focused on 'connecting dots'. Summit is an **Intelligence OS** that governs the lines between those dots. We provide browser-native collaboration without compromising the air-gapped security posture required by the IC."
+
+### Why Summit vs i2 Analyst’s Notebook
+
+> "i2 remains a powerful sense-making layer but relies on external collectors. Summit integrates the **full intelligence lifecycle**—from automated collection to deep relational reasoning—ensuring that provenance is never lost during handoffs."
+
 ---
 
 ## 6. Risk & Counter-Moves
@@ -105,6 +113,8 @@ This report outlines how we convert our core strengths—**Deterministic Provena
 | **XAI Superiority** | Neo4j acquires XAI startup to add "transparency" layers. | Open-source our **Graph-XAI Benchmarks** to set the industry standard before they can react. |
 | **Edge Readiness** | Palantir releases "Edge-Lite" for mobile. | Harden the **Governed Sync Protocol** and publish a "Mission-Ready Immutability" whitepaper. |
 | **Policy-as-Code** | AWS adds OPA-like guards to Bedrock KB. | Deepen **Provenance-Weighted Retrieval** to ensure our grounding remains qualitatively superior. |
+| **Browser-Native Collaboration** | Maltego One completes its cloud rollout for all cohorts. | Accelerate our **Multi-Tenant Collaboration Gateway** and emphasize our deterministic ledger as a trust-multiplier that Maltego lacks. |
+| **Automated Entity Extraction** | i2 Group enhances TextChart accuracy for OSINT dumps. | Integrate **Policy-Gated Extraction** where every relationship suggestion is backed by an Evidence ID, reducing the "hallucination risk" in legacy NLP pipelines. |
 
 ---
 

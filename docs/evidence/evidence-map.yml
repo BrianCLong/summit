@@ -32,3 +32,14 @@ evidence:
     criteria:
       - rule: threshold
         min: 0.85
+
+  - id: EVID-OSINT-TURN-003
+    name: OSINT Platform Development Update - Turn 3
+    description: Periodic update on Maltego, i2 Analyst's Notebook, and emerging OSINT platforms.
+    source:
+      type: file
+      path: docs/osint/updates/automation-turn-3.md
+    criteria:
+      - rule: existence
+      - rule: header_validation
+        headers: [ILSA-Level, IBOM-Verified]
