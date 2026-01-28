@@ -105,6 +105,19 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-deploy-role
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Capture Governance Evidence
+        run: |
+          mkdir -p evidence-artifacts
+          aws sts get-caller-identity > evidence-artifacts/caller-identity.json
+          # Attempt to capture role policy, ignore failure if permission denied
+          aws iam get-role --role-name github-actions-deploy-role --query 'Role.AssumeRolePolicyDocument' --output json > evidence-artifacts/trust-policy.json || echo "Could not fetch trust policy" > evidence-artifacts/trust-policy-error.txt
+
+      - name: Upload Governance Evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-evidence-deploy-k8s
+          path: evidence-artifacts/
+
       - name: Update Kubeconfig
         run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER }}
 
