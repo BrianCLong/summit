@@ -211,6 +211,14 @@ class MutualExclusionRule implements ContradictionRule {
       return null;
     }
 
+    // If temporal information is available, check for overlap
+    // If either claim lacks temporal info, we assume it applies indefinitely (so it overlaps)
+    if (this.hasTemporalBounds(claimA) && this.hasTemporalBounds(claimB)) {
+      if (!this.temporallyOverlaps(claimA, claimB)) {
+        return null;
+      }
+    }
+
     const valueA = this.extractValue(claimA.object);
     const valueB = this.extractValue(claimB.object);
 
@@ -231,6 +239,19 @@ class MutualExclusionRule implements ContradictionRule {
     }
 
     return null;
+  }
+
+  private hasTemporalBounds(claim: Claim): boolean {
+    return !!(claim.validFrom || claim.validTo);
+  }
+
+  private temporallyOverlaps(a: Claim, b: Claim): boolean {
+    const aFrom = a.validFrom ? new Date(a.validFrom) : new Date(0);
+    const aTo = a.validTo ? new Date(a.validTo) : new Date('2100-01-01');
+    const bFrom = b.validFrom ? new Date(b.validFrom) : new Date(0);
+    const bTo = b.validTo ? new Date(b.validTo) : new Date('2100-01-01');
+
+    return aFrom <= bTo && bFrom <= aTo;
   }
 
   private extractValue(obj: unknown): string {
