@@ -5,6 +5,18 @@ import rego.v1
 # Supply chain security policies
 # SLSA compliance and software bill of materials validation
 
+# Mandatory Signatures & Provenance
+
+deny contains msg if {
+	not input.sboms_signed
+	msg := "Signed SBOM required"
+}
+
+deny contains msg if {
+	not input.provenance_signed
+	msg := "Signed provenance required"
+}
+
 # SLSA Provenance Validation
 
 # Require SPDX SBOM
