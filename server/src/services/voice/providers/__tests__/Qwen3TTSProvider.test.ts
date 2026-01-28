@@ -1,14 +1,24 @@
-import { Qwen3TTSProvider } from '../Qwen3TTSProvider.ts';
-import { VoiceProvenanceLedger } from '../../VoiceProvenanceLedger.ts';
-import { SpeechJob } from '../../types.ts';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+import type { SpeechJob } from '../../types.ts';
 
-jest.mock('../../VoiceProvenanceLedger.ts');
+const mockGetInstance = jest.fn();
+
+jest.unstable_mockModule('../../VoiceProvenanceLedger.ts', () => ({
+  VoiceProvenanceLedger: {
+    getInstance: mockGetInstance,
+  },
+}));
+
+const { Qwen3TTSProvider } = await import('../Qwen3TTSProvider.ts');
+const { VoiceProvenanceLedger } = await import('../../VoiceProvenanceLedger.ts');
 
 describe('Qwen3TTSProvider', () => {
-  let provider: Qwen3TTSProvider;
+  let provider: InstanceType<typeof Qwen3TTSProvider>;
   let mockLedger: any;
 
   beforeEach(() => {
+    jest.clearAllMocks();
+
     mockLedger = {
       checkPolicy: jest.fn().mockResolvedValue({ allowed: true }),
       generateManifest: jest.fn().mockReturnValue({
