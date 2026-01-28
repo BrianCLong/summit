@@ -63,7 +63,7 @@ jobs:
       cache-hit: ${{ steps.cache-pnpm.outputs.cache-hit }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4
 
       - name: Resolve versions
         id: versions
@@ -78,7 +78,7 @@ jobs:
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
           cache: "pnpm"
@@ -109,7 +109,7 @@ jobs:
 
       - name: Setup Python (optional)
         if: inputs.python-version != ''
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ inputs.python-version }}
           cache: "pip"
