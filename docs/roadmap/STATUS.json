@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-27T21:20:00Z",
-  "revision_note": "Notion integration readiness verified; setup and validation wired",
+  "last_updated": "2026-01-27T22:30:00Z",
+  "revision_note": "Agent spine sequencing merged (task graph → sandbox execution → ARK) and sandbox boundary regression coverage added",
   "initiatives": [
     {
       "id": "A",

@@ -15,5 +15,22 @@
     },
     "reasoning": "Matched condition: cpu_usage > 80%",
     "reverted": true
+  },
+  {
+    "id": "spine-merge-20260127",
+    "timestamp": "2026-01-27T22:30:30.000Z",
+    "agentId": "codex-agent",
+    "policyVersion": "spine-merge-2026.01",
+    "inputHash": "YWdlbnQtc3BpbmUtc2VxdWVuY2Urc2VjdXJpdHktcmVncmVzc2lvbi1zdWl0ZQ==",
+    "decision": {
+      "action": "merge-agent-spine-sequence",
+      "scope": [
+        "packages/ark",
+        "services/innovation-sandbox"
+      ],
+      "rollbackPlan": "Revert the agent spine commit and remove the sandbox boundary regression suite."
+    },
+    "reasoning": "Sequenced task graph, sandbox execution boundary, and ARK loop to harden the agent spine; added SSRF/path traversal/injection regression coverage to keep sandbox mitigations enforced.",
+    "reverted": false
   }
 ]
