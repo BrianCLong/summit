@@ -74,3 +74,16 @@ Summit defines the reference implementation for **Governed Agentic Systems**. To
 1. **Idempotency Key:** Every task MUST have a deterministic key to prevent replay attacks or accidental double-execution.
 2. **Safety Category:** Every task MUST declare its side-effect level (`READ`, `WRITE`, `DEPLOY`).
 3. **Kill Switch Support:** Every agent runtime MUST subscribe to a standard `killswitch` signal.
+
+## 4. Evidence Contract Standard (ECS)
+
+**Purpose:** A formal contract between Retrieval systems (GraphRAG) and Consumer Agents (LLMs) ensuring deterministic, verifiable, and invariant-shaped evidence.
+
+**Schema Reference:** `EvidenceContract` (`server/src/rag/evidence.ts`)
+
+**Key Requirements:**
+
+1. **Shape Invariance:** All graph queries MUST use `ORDER BY` and `LIMIT` to ensure deterministic result structures regardless of graph growth.
+2. **Explicit Provenance:** Every retrieval result MUST be wrapped in an `EvidenceBundle` containing a unique `contractId` and `manifest` detailing the retrieval strategy.
+3. **Counterfactual Readiness:** The system MUST support "ablation testing" where specific nodes or edges can be virtually removed to verify the necessity of evidence.
+4. **Graph Metadata:** Analytics outputs (e.g., PageRank, Community ID) MUST be persisted to the graph and available for retrieval ranking.
