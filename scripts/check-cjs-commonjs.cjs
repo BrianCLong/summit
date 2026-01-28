@@ -22,6 +22,7 @@ const EXCLUDED_DIRS = new Set([
   '.next',
   '.turbo',
   '.cache',
+  '_worktrees',
 ]);
 
 // Files that are allowed to contain ESM-like syntax (e.g., test fixtures with string literals)

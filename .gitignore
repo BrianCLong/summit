@@ -1,3 +1,6 @@
+# Git worktrees (local development)
+_worktrees/
+
 # Node / JS
 node_modules/
 .pnp/
