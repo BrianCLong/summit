@@ -1,3 +1,7 @@
+> **ARCHIVED: GA PROGRAM v1**
+> This document is part of the GA Program v1 archive. It is read-only and no longer active.
+> **Date:** 2026-01-25
+
 # Summit v5.0.0-GA Release Runbook
 
 **Version:** v5.0.0-ga

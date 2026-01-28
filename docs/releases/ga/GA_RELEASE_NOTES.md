@@ -1,3 +1,7 @@
+> **ARCHIVED: GA PROGRAM v1**
+> This document is part of the GA Program v1 archive. It is read-only and no longer active.
+> **Date:** 2026-01-25
+
 # Summit v5.0.0-GA Release Notes
 
 **Anchor Commit:** `a1f20771eeadcc55fef9f83727edeee0d2c2dbc2`
