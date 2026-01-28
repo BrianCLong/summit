@@ -70,6 +70,28 @@ check_file "docs/security/security-pipeline.md" "Security pipeline documentation
 check_policy_rules ".zap/rules.tsv" "ZAP baseline tuning rules"
 check_yaml_key "infra/helm/intelgraph/values-prod.yaml" "image:" "Production Helm images pinned"
 
+# CI/CD Security Checks
+check_anchored_regex() {
+  local dir="$1"
+  local description="$2"
+  # Look for unanchored bash regex matches
+  # Patterns like =~ v[0-9] without ^ and $
+  # Exclude .archive directory and heuristics in check-image-pinning.sh
+  local unanchored
+  unanchored=$(grep -rE " =~ [^^].*[^$]" "$dir" --include="*.yml" --include="*.yaml" --include="*.sh" --exclude-dir=".archive" 2>/dev/null | grep -v "check-image-pinning.sh" || true)
+  if [[ -z "$unanchored" ]]; then
+    record_result "$description" pass "No unanchored regexes found in ${dir}"
+  else
+    # Replace newlines with spaces to avoid breaking the simple parser
+    local details
+    details=$(echo "$unanchored" | tr '\n' ' ')
+    record_result "$description" fail "Unanchored regexes detected in ${dir}: ${details}"
+  fi
+}
+
+check_anchored_regex ".github/workflows" "GitHub Workflows anchored triggers"
+check_anchored_regex "scripts/ci" "CI Scripts anchored triggers"
+
 tmp_file=$(mktemp)
 printf '%s\n' "${results[@]}" > "$tmp_file"
 python - "$tmp_file" "$REPORT_DIR/baseline-report.json" <<'PY'
