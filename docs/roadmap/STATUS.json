@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-27T21:20:00Z",
-  "revision_note": "Notion integration readiness verified; setup and validation wired",
+  "last_updated": "2026-01-27T22:05:00Z",
+  "revision_note": "OSINT integration elevated to gated product surface pending enforceable checks, stable CI, and end-to-end provenance/evidence validation",
   "initiatives": [
     {
       "id": "A",
@@ -222,6 +222,8 @@
     "incomplete": 0,
     "not_started": 15,
     "total": 22,
-    "ga_blockers": []
+    "ga_blockers": [
+      "OSINT integration merges blocked until required checks policy is enforceable, CI stability is proven, and provenance/evidence schemas validate end-to-end."
+    ]
   }
 }
