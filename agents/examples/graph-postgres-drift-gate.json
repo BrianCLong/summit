@@ -1,0 +1,48 @@
+{
+  "task_id": "GRAPH_POSTGRES_DRIFT_GATE_01",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "graph-postgres-drift-gate",
+    "version": "v1",
+    "sha256": "830c3eb01ac98130f655f2340f675e6221af11feab34aac8705df9ef8635e61a",
+    "path": "prompts/governance/graph-postgres-drift-gate.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "config/governance/drift.yml",
+      "docs/ops/graph-postgres-drift.md",
+      "docs/roadmap/STATUS.json",
+      "schemas/gates/graph-postgres-drift-report.schema.json",
+      "scripts/ci/graph_postgres_drift_check.mjs",
+      "scripts/ci/__tests__/graph_postgres_drift_check.test.mjs",
+      "agents/examples/graph-postgres-drift-gate.json",
+      "prompts/governance/graph-postgres-drift-gate.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["governance", "data-integrity", "ci", "observability"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "artifacts/governance/graph-postgres-drift/report.json",
+      "artifacts/governance/graph-postgres-drift/metrics.json",
+      "artifacts/governance/graph-postgres-drift/stamp.json",
+      "node --test scripts/ci/__tests__/graph_postgres_drift_check.test.mjs"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Drift gate script produces report, metrics, and stamp artifacts.",
+    "Configurable thresholds are enforced per entity.",
+    "Documentation describes execution and evidence outputs."
+  ],
+  "stop_conditions": [
+    "CI failure in main.",
+    "Detection of PII in output.",
+    "Sandbox violation alert."
+  ]
+}
