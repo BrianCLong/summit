@@ -68,20 +68,21 @@ describe('ContradictionDetector', () => {
 
   describe('Temporal Overlap Rule', () => {
     it('should detect contradictions for temporally overlapping claims with different values', () => {
+      // Use a predicate that doesn't trigger MutualExclusionRule to test TemporalOverlapRule in isolation
       const claims = [
         createClaim({
           id: 'claim-1',
           subject: 'company-1',
-          predicate: 'hasStatus',
-          object: 'active',
+          predicate: 'hasLocation',
+          object: 'London',
           validFrom: '2025-01-01',
           validTo: '2025-12-31',
         }),
         createClaim({
           id: 'claim-2',
           subject: 'company-1',
-          predicate: 'hasStatus',
-          object: 'dissolved',
+          predicate: 'hasLocation',
+          object: 'Paris',
           validFrom: '2025-06-01',
           validTo: '2025-12-31',
         }),

@@ -2,12 +2,14 @@ import type { Config } from 'jest';
 
 const gaVerifyMode = process.env.GA_VERIFY_MODE === 'true';
 
-// Coverage thresholds disabled due to Jest coverage reporter bug with v8 provider
-// that causes "Cannot read properties of undefined (reading 'sync')" during
-// threshold checking. Coverage is still collected and reported.
-// TODO: Re-enable when Jest fixes the coverage threshold bug with v8 provider
-// See: https://github.com/jestjs/jest/issues/11956
-const coverageThreshold = undefined;
+const coverageThreshold = {
+  global: {
+    branches: 80,
+    functions: 80,
+    lines: 80,
+    statements: 80,
+  },
+};
 
 // In GA verify mode, use minimal ignore patterns since testMatch is explicit
 // In normal mode, use comprehensive patterns to exclude ESM-incompatible tests
@@ -24,71 +26,6 @@ const testPathIgnorePatterns = gaVerifyMode
     '.*\\.integration\\.test\\.ts$',
     '.*\\.e2e\\.test\\.ts$',
     '.*/integration/.*\\.test\\.ts$',
-    // Skip tests with CommonJS require() that don't work in ESM
-    'src/graphql/plugins/__tests__/',
-    'src/conductor/api/__tests__/',
-    'src/conductor/config/__tests__/',
-    'src/conductor/premium-routing/__tests__/',
-    'src/conductor/scheduling/__tests__/',
-    'src/conductor/__tests__/',
-    'src/analytics/',
-    'src/billing/',
-    'src/auth-sso/',
-    'src/auth/sso/__tests__/',
-    'src/aurelius/',
-    'src/chatops/',
-    'src/compliance/__tests__/',
-    'src/connectors/__tests__/',
-    'src/data-residency/__tests__/',
-    'src/db/__tests__/',
-    'src/entities/comments/__tests__/',
-    'src/evidence/__tests__/',
-    'src/extensions/__tests__/',
-    'src/feature-flags/__tests__/',
-    'src/federation/__tests__/',
-    'src/graph/__tests__/',
-    'src/graphql/services/__tests__/',
-    'src/ingest/__tests__/',
-    'src/intel/cti/__tests__/',
-    'src/lib/resources/__tests__/',
-    'src/maestro/__tests__/',
-    'src/audit/__tests__/',
-    'src/__tests__/fuzz',
-    'src/__tests__/risk/',
-    'src/backpressure/__tests__/',
-    'src/maestro/coordination/__tests__/',
-    'src/maestro/executors/__tests__/',
-    'src/maestro/mcp/__tests__/',
-    'src/maestro/pipelines/__tests__/',
-    'src/maestro/runs/__tests__/',
-    'src/memory/__tests__/',
-    'src/metering/__tests__/',
-    'src/middleware/__tests__/',
-    'src/nlp/__tests__/',
-    'src/observability/__tests__/',
-    'src/pii/__tests__/',
-    'src/provenance/__tests__/',
-    'src/queue/__tests__/',
-    'src/replay/__tests__/',
-    'src/repos/__tests__/',
-    'src/retrieval/__tests__/',
-    'src/routes/__tests__/',
-    'src/securiteyes/',
-    'src/security/__tests__/',
-    'src/security/tenant-simulation/__tests__/',
-    'src/services/__tests__/',
-    'src/services/voice/',
-    'src/summitsight/__tests__/',
-    'src/tests/',
-    'src/trust-center/__tests__/',
-    'src/utils/__tests__/',
-    'src/webhooks/__tests__/',
-    'src/reporting/__tests__/',
-    'src/services/reporting/__tests__/',
-    'src/logging/__tests__/',
-    'src/jobs/__tests__/',
-    'src/ai/nl-graph-query/__tests__/',
-    'tests/',
   ];
 
 const config: Config = {
@@ -207,7 +144,7 @@ const config: Config = {
   ],
   coverageProvider: 'v8',
   coverageThreshold,
-  coverageReporters: ['text', 'lcov', 'cobertura'],
+  coverageReporters: ['text', 'lcov', 'cobertura', 'json-summary'],
   coverageDirectory: '<rootDir>/coverage',
   testTimeout: 30000,
   globalSetup: '<rootDir>/tests/setup/globalSetup.cjs',
