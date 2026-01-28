@@ -431,6 +431,28 @@ New intelligence indicates a 450-700% increase in AI-enabled Disinformation-as-a
 
 ---
 
+## OSINT-SPECIFIC RISKS
+
+### OSINT-RISK-001: Inference Creep
+**Severity:** HIGH
+**Status:** ⚠️ MONITORED
+**Description:** Secondary inferences drifting too far from primary evidence.
+**Mitigation:** Max hop count enforced by `OSINT-003` control.
+
+### OSINT-RISK-002: Hidden Contradictions
+**Severity:** HIGH
+**Status:** ⚠️ MONITORED
+**Description:** Contradictions collapsed or hidden in aggregated scores.
+**Mitigation:** Contradiction exposure enforced by `OSINT-002` control.
+
+### OSINT-RISK-003: Automation Bias
+**Severity:** MEDIUM
+**Status:** ⚠️ MONITORED
+**Description:** Users over-trusting automated scores without verifying evidence.
+**Mitigation:** UI friction and naked score prohibition enforced by `OSINT-002` control.
+
+---
+
 ## POSITIVE SECURITY FINDINGS
 
 ### Supply Chain Security — EXCELLENT
