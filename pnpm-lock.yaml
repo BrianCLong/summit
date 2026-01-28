@@ -3703,6 +3703,31 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  packages/agent-ecosystem:
+    dependencies:
+      uuid:
+        specifier: ^13.0.0
+        version: 13.0.0
+      yaml:
+        specifier: ^2.8.2
+        version: 2.8.2
+      zod:
+        specifier: ^4.2.1
+        version: 4.2.1
+    devDependencies:
+      '@types/node':
+        specifier: ^25.0.3
+        version: 25.0.10
+      '@types/uuid':
+        specifier: ^11.0.0
+        version: 11.0.0
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
   packages/agent-gym:
     dependencies:
       uuid:
