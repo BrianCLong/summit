@@ -101,6 +101,7 @@
     "test:data-governance": "node scripts/ci/verify_data_registry.mjs",
     "ci:docs-governance": "node scripts/ci/verify_governance_docs.mjs",
     "ci:docs-governance:fix": "node scripts/ci/verify_governance_docs.mjs --fix",
+    "ci:osint-governance": "node scripts/ci/verify-osint-evidence.mjs",
     "ci:security-audit-gate": "node scripts/ci/security_audit_gate.mjs",
     "ci:soc-report": "python3 scripts/evidence/generate_soc_report.py --evidence-dir dist/evidence/${GITHUB_SHA}",
     "ci:ga-validate-evidence": "bash -c 'EVIDENCE_DIR=\"dist/evidence/${GITHUB_SHA:-$(git rev-parse HEAD)}\"; node scripts/evidence/generate_control_evidence_index.mjs --evidence-dir \"$EVIDENCE_DIR\" && node scripts/evidence/validate_control_evidence.mjs --evidence-dir \"$EVIDENCE_DIR\"'",
