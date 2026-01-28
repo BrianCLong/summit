@@ -1,0 +1,7 @@
+{
+  "name": "@summit/mcp-gateway",
+  "version": "0.1.0",
+  "description": "Summit Model Context Protocol Gateway",
+  "main": "index.js",
+  "private": true
+}

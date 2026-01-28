@@ -74,3 +74,35 @@ Summit defines the reference implementation for **Governed Agentic Systems**. To
 1. **Idempotency Key:** Every task MUST have a deterministic key to prevent replay attacks or accidental double-execution.
 2. **Safety Category:** Every task MUST declare its side-effect level (`READ`, `WRITE`, `DEPLOY`).
 3. **Kill Switch Support:** Every agent runtime MUST subscribe to a standard `killswitch` signal.
+
+## 4. Context Engineering Standard (CES)
+
+**Purpose:** A standard framework for constructing, retrieving, and governing agent context, replacing ad-hoc "prompt engineering" with structured knowledge assembly.
+
+**Schema Reference:** `ContextFrame` & `ResolutionStrategy` (`packages/maestro-core/src/context/types.ts`)
+
+**Key Definitions:**
+
+1.  **Context Frame:** A bounded, immutable unit of knowledge provided to an agent. It must be versioned and source-traceable.
+    ```json
+    {
+      "frameId": "ctx_8823",
+      "timestamp": "2026-01-27T10:00:00Z",
+      "layers": [
+        { "type": "SYSTEM", "ref": "sys_prompt_v2" },
+        { "type": "EPISODIC", "ref": "mem_trace_442" },
+        { "type": "KNOWLEDGE", "ref": "intelgraph_subgraph_88" }
+      ],
+      "tokenBudget": 8192,
+      "integrityHash": "sha256:..."
+    }
+    ```
+
+2.  **Context Resolution Protocol (CRP):** The deterministic method used to hydrate a frame.
+    *   **Static:** Direct inclusion of immutable strings.
+    *   **RAG:** Retrieval-augmented generation with citation enforcement.
+    *   **MCP:** Live context fetched via Model Context Protocol servers.
+
+3.  **Governance:**
+    *   **Leakage Prevention:** All context frames must pass a PII/Secret scan before injection.
+    *   **Attribution:** Every assertion in a context frame must trace back to a `ProvenanceEntry`.
