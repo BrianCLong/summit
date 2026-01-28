@@ -63,10 +63,21 @@ This report outlines how we convert our core strengths—**Deterministic Provena
 | **Hashed Federation Deconfliction** | Multi-tenant signal sharing without PII leakage. | Human | L | Accelerator |
 | **Zero-Trust LLM Gateway** | Policy-gated access to Bedrock/VertexAI. | Human | S | **Blocker** |
 | **Unit-Economics FinOps Dash** | Cost control advantage over managed cloud graphs. | Human | S | **Blocker** |
+| **Kimi K2.5 Subsumption** | Subsume native multimodal + swarm primitives into OS. | Jules | M | Accelerator |
 
 ---
 
-## 4. Architecture Adjustments
+## 4. Competitive Response: Moonshot Kimi K2.5
+
+Moonshot's release of Kimi K2.5 validates our "Agentic OS" thesis but raises the bar on **multimodal grounding** and **swarm efficiency**. We respond by subsuming their features into our governance layer:
+
+1.  **Vendor-Agnostic Swarm Primitives**: We don't just run Kimi swarms; we provide the **Summit Swarm Kernel** that manages parallel execution and OPA-gated context merging across any model family.
+2.  **Reasoning Budget Contract (RBC)**: We generalize "Thinking vs Instant" into a universal enterprise knob for Latency/Cost/Risk, decoupling the UX from specific model features.
+3.  **Conformance-as-a-Product**: We launch the **Summit Agent Conformance Suite (SACS)** to verify vendor claims (e.g., "Native INT4", "Vision Grounding") before they reach production.
+
+---
+
+## 5. Architecture Adjustments
 
 ### Proposed Shifts
 
