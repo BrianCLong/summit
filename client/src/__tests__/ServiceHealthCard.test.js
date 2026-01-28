@@ -8,7 +8,7 @@ describe('ServiceHealthCard', () => {
   });
 
   it('renders service statuses from /health', async () => {
-    global.fetch = jest.fn().mockResolvedValue({
+    global.fetch = vi.fn().mockResolvedValue({
       json: () =>
         Promise.resolve({
           status: 'OK',

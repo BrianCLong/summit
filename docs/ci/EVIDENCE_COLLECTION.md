@@ -80,22 +80,22 @@ artifacts/evidence/
 
 ```bash
 # Collect all evidence
-./scripts/release/generate_evidence_bundle.sh
+./scripts/release/collect_evidence.sh
 
 # Collect specific category
-./scripts/release/generate_evidence_bundle.sh --category security
+./scripts/release/collect_evidence.sh --category security
 
 # Specify custom output directory
-./scripts/release/generate_evidence_bundle.sh --output ./my-evidence
+./scripts/release/collect_evidence.sh --output ./my-evidence
 
 # Update evidence index
-./scripts/release/generate_evidence_bundle.sh --update-index
+./scripts/release/collect_evidence.sh --update-index
 
 # Dry run (show what would happen)
-./scripts/release/generate_evidence_bundle.sh --dry-run
+./scripts/release/collect_evidence.sh --dry-run
 
 # Show help
-./scripts/release/generate_evidence_bundle.sh --help
+./scripts/release/collect_evidence.sh --help
 ```
 
 ---
@@ -174,7 +174,7 @@ Before creating a release:
 
 ```bash
 # Collect fresh evidence
-./scripts/release/generate_evidence_bundle.sh --category all
+./scripts/release/collect_evidence.sh --category all
 
 # Review summary
 cat artifacts/evidence/evidence-summary-*.md | tail -1
@@ -238,7 +238,7 @@ If evidence collection fails:
 pnpm --filter intelgraph-server typecheck
 
 # Run with verbose output
-bash -x scripts/release/generate_evidence_bundle.sh --category ci
+bash -x scripts/release/collect_evidence.sh --category ci
 ```
 
 ### Missing State Files

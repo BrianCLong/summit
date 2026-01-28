@@ -1,6 +1,6 @@
 {
   "name": "__service_name__",
-  "version": "4.2.3",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "node --loader ts-node/esm cmd/server.ts",

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -77,11 +77,6 @@ const CACHE_KEY_EVIDENCE = 'release-readiness-evidence';
 const CACHE_KEY_TIMESTAMP = 'release-readiness-timestamp';
 const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes
 
-const getErrorMessage = (err: unknown): string => {
-  if (err instanceof Error) return err.message;
-  return 'Failed to load data';
-};
-
 function ReleaseReadinessRoute() {
   const { hasRole } = useAuth();
   const [activeTab, setActiveTab] = useState(0);
@@ -94,10 +89,19 @@ function ReleaseReadinessRoute() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
 
-  const hasAccess = Boolean(hasRole && (hasRole('ADMIN') || hasRole('OPERATOR')));
+  // Check if user has required role
+  if (!hasRole || (!hasRole('ADMIN') && !hasRole('OPERATOR'))) {
+    return (
+      <Box p={3}>
+        <Alert severity="error">
+          You do not have permission to view this page. Admin or Operator role required.
+        </Alert>
+      </Box>
+    );
+  }
 
   // Load from cache
-  const loadFromCache = useCallback(() => {
+  const loadFromCache = () => {
     try {
       const cachedSummary = localStorage.getItem(CACHE_KEY_SUMMARY);
       const cachedEvidence = localStorage.getItem(CACHE_KEY_EVIDENCE);
@@ -120,10 +124,10 @@ function ReleaseReadinessRoute() {
       console.error('Failed to load from cache:', err);
     }
     return false;
-  }, []);
+  };
 
   // Save to cache
-  const saveToCache = useCallback((summaryData: ReadinessSummary, evidenceData: EvidenceIndex) => {
+  const saveToCache = (summaryData: ReadinessSummary, evidenceData: EvidenceIndex) => {
     try {
       localStorage.setItem(CACHE_KEY_SUMMARY, JSON.stringify(summaryData));
       localStorage.setItem(CACHE_KEY_EVIDENCE, JSON.stringify(evidenceData));
@@ -131,10 +135,10 @@ function ReleaseReadinessRoute() {
     } catch (err) {
       console.error('Failed to save to cache:', err);
     }
-  }, []);
+  };
 
   // Fetch data from API
-  const fetchData = useCallback(async () => {
+  const fetchData = async () => {
     setLoading(true);
     setError(null);
     setIsOffline(false);
@@ -167,8 +171,8 @@ function ReleaseReadinessRoute() {
       setEvidenceIndex(evidenceData);
       saveToCache(summaryData, evidenceData);
       setIsStale(false);
-    } catch (err) {
-      setError(getErrorMessage(err));
+    } catch (err: any) {
+      setError(err.message || 'Failed to load data');
       setIsOffline(true);
 
       // Try loading from cache on error
@@ -178,14 +182,10 @@ function ReleaseReadinessRoute() {
     } finally {
       setLoading(false);
     }
-  }, [loadFromCache, saveToCache]);
+  };
 
   // Initial load
   useEffect(() => {
-    if (!hasAccess) {
-      setLoading(false);
-      return;
-    }
     // Try loading from cache first
     const hasCache = loadFromCache();
 
@@ -197,7 +197,7 @@ function ReleaseReadinessRoute() {
       // No cache, fetch now
       fetchData();
     }
-  }, [fetchData, hasAccess, loadFromCache]);
+  }, []);
 
   // Copy to clipboard helper
   const copyToClipboard = (text: string) => {
@@ -223,16 +223,6 @@ function ReleaseReadinessRoute() {
         return <HelpIcon sx={{ color: 'grey.500' }} />;
     }
   };
-
-  if (!hasAccess) {
-    return (
-      <Box p={3}>
-        <Alert severity="error">
-          You do not have permission to view this page. Admin or Operator role required.
-        </Alert>
-      </Box>
-    );
-  }
 
   const getStatusColor = (status: string): 'success' | 'error' | 'warning' | 'default' => {
     switch (status) {

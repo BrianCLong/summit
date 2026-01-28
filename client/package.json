@@ -1,7 +1,7 @@
 {
   "name": "intelgraph-client",
   "private": true,
-  "version": "4.2.3",
+  "version": "4.1.4",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -54,7 +54,7 @@
     "jest-environment-jsdom": "30.2.0",
     "jquery": "3.7.1",
     "leaflet": "1.9.4",
-    "lodash": "4.17.23",
+    "lodash": "4.17.21",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-grid-layout": "1.5.3",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/warehouse-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Data warehouse service with REST and GraphQL APIs",
   "main": "dist/index.js",
   "scripts": {

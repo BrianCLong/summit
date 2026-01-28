@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/mission-coordination-service",
-  "version": "4.2.3",
+  "version": "2.0.0",
   "description": "Mission execution coordination and real-time monitoring service",
   "main": "src/index.js",
   "type": "module",

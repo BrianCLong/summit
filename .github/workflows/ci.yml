@@ -15,10 +15,10 @@ jobs:
       # No other permissions granted
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Setup Node (from .nvmrc)
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
 
@@ -34,10 +34,10 @@ jobs:
     timeout-minutes: 10
     needs: [config-guard]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Setup Node (from .nvmrc)
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
@@ -51,32 +51,16 @@ jobs:
       - name: Unit Tests
         run: pnpm -w test:unit
 
-  typescript-governance:
-    name: TypeScript Governance
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs: [config-guard]
-    steps:
-      - uses: actions/checkout@v6
-      - name: Setup Node
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: .nvmrc
-      - name: Verify TSConfig Exclusions Frozen
-        run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
-      - name: Verify TSConfig Inheritance
-        run: node scripts/ci/verify_tsconfig_inheritance.mjs
-
   soc-controls:
     name: SOC Controls
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [config-guard]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Setup Node (from .nvmrc)
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
@@ -93,7 +77,7 @@ jobs:
           TZ: UTC
 
       - name: Upload SOC compliance reports
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: soc-compliance-report

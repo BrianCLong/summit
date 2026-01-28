@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/pca-verifier",
-  "version": "4.2.3",
+  "version": "0.1.0",
   "description": "Proof-Carrying Analytics verifier and manifest builder",
   "type": "module",
   "main": "dist/index.js",

@@ -1,5 +1,4 @@
 import { io } from 'socket.io-client';
-import { getSocketBaseUrl } from '../config/urls';
 
 let socket = null;
 let reconnectTimer = null;
@@ -115,8 +114,7 @@ function buildSocket() {
   const token = getToken();
   if (!token) return null;
 
-  const url = getSocketBaseUrl();
-  if (!url) return null;
+  const url = import.meta.env.VITE_WS_URL || 'http://localhost:4000';
 
   socket = io(url, {
     transports: ['websocket', 'polling'],

@@ -1,6 +1,6 @@
 // client/src/components/ui/StatusBar.tsx
 import React from 'react';
-import { AppBar, Toolbar, Typography, Stack, Divider } from '@mui/material';
+import { AppBar, Toolbar, Typography, Box, Stack, Divider } from '@mui/material';
 import StatusIndicator from './StatusIndicator';
 
 interface StatusBarProps {
@@ -11,8 +11,6 @@ interface StatusBarProps {
   additionalIndicators?: Array<{ status: string; label: string; description: string }>;
   showBorder?: boolean;
 }
-
-type IndicatorStatus = 'simulated' | 'real' | 'partial' | 'testing' | 'maintenance';
 
 const StatusBar: React.FC<StatusBarProps> = ({
   environment = 'development',
@@ -53,10 +51,6 @@ const StatusBar: React.FC<StatusBarProps> = ({
   const envConfig = getEnvironmentConfig();
   const sysConfig = getSystemStatusConfig();
   const dataConfig = { status: dataStatus, label: dataStatus.toUpperCase(), desc: `Data: ${dataStatus.charAt(0).toUpperCase() + dataStatus.slice(1)}` };
-  const normalizeStatus = (value: string): IndicatorStatus => {
-    const allowed: IndicatorStatus[] = ['simulated', 'real', 'partial', 'testing', 'maintenance'];
-    return allowed.includes(value as IndicatorStatus) ? (value as IndicatorStatus) : 'partial';
-  };
 
   return (
     <AppBar 
@@ -120,7 +114,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
           {additionalIndicators.map((indicator, index) => (
             <StatusIndicator
               key={`additional-${index}`}
-              status={normalizeStatus(indicator.status)}
+              status={indicator.status as any}
               label={indicator.label}
               description={indicator.description}
               size="small"

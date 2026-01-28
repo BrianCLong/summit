@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/approvals",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Policy-Gated Approvals Service for high-risk operations with OPA/ABAC enforcement and provenance tracking",
   "type": "module",
   "main": "dist/index.js",

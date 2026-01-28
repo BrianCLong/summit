@@ -58,6 +58,28 @@ jobs:
             echo "No scripts/ci/verify_governance_docs.mjs found; skipping."
           fi
 
+      - name: GA Evidence Generation
+        run: |
+          chmod +x scripts/ci/generate_ga_evidence_bundle.sh
+          ./scripts/ci/generate_ga_evidence_bundle.sh
+
+      - name: Upload GA Evidence Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: ga-evidence-bundle
+          path: ga-evidence-bundle.tar.gz
+          retention-days: 5
+
+      - name: Security Ledger Gate
+        run: |
+          # Fetch main for baseline comparison if available
+          git fetch origin main:origin/main || echo "Could not fetch origin/main; proceeding with best effort."
+          if [ -f scripts/ci/validate-severity-ledger.ts ]; then
+            npx tsx scripts/ci/validate-severity-ledger.ts --base=origin/main
+          else
+             echo "No scripts/ci/validate-severity-ledger.ts found; skipping."
+          fi
+
       # --------- Standard engineering checks (keep narrow + stable) ---------
 
       - name: Lint

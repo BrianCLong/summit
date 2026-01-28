@@ -4,7 +4,7 @@
  * Side-by-side comparison of two runs showing deltas in inputs, outputs, and confidence.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -15,6 +15,7 @@ import {
   Alert,
   Stack,
   Grid,
+  Divider,
   Table,
   TableBody,
   TableCell,
@@ -29,22 +30,12 @@ import {
   CompareArrows as CompareArrowsIcon,
 } from '@mui/icons-material';
 
-type DiffValue = { before: unknown; after: unknown };
-
-interface RunSummary {
-  run_type: string;
-  explanation: { summary: string };
-  confidence: { overall_confidence: number };
-  actor: { actor_name: string };
-  started_at: string;
-}
-
 interface RunComparison {
-  run_a: RunSummary;
-  run_b: RunSummary;
+  run_a: any;
+  run_b: any;
   deltas: {
-    input_diff: Record<string, DiffValue>;
-    output_diff: Record<string, DiffValue>;
+    input_diff: Record<string, { before: any; after: any }>;
+    output_diff: Record<string, { before: any; after: any }>;
     confidence_delta: number;
     duration_delta_ms: number | null;
     different_capabilities: string[];
@@ -64,11 +55,8 @@ const RunComparisonView: React.FC<RunComparisonViewProps> = ({ runIdA, runIdB })
   const [runA, setRunA] = useState(runIdA || '');
   const [runB, setRunB] = useState(runIdB || '');
 
-  const handleCompare = useCallback(async (overrideA?: string, overrideB?: string) => {
-    const compareA = overrideA ?? runA;
-    const compareB = overrideB ?? runB;
-
-    if (!compareA || !compareB) {
+  const handleCompare = async () => {
+    if (!runA || !runB) {
       setError('Please provide both run IDs');
       return;
     }
@@ -77,9 +65,7 @@ const RunComparisonView: React.FC<RunComparisonViewProps> = ({ runIdA, runIdB })
     setError(null);
 
     try {
-      const response = await fetch(
-        `/api/explainability/compare?run_a=${compareA}&run_b=${compareB}`,
-      );
+      const response = await fetch(`/api/explainability/compare?run_a=${runA}&run_b=${runB}`);
       const result = await response.json();
 
       if (result.success) {
@@ -92,18 +78,13 @@ const RunComparisonView: React.FC<RunComparisonViewProps> = ({ runIdA, runIdB })
     } finally {
       setLoading(false);
     }
-  }, [runA, runB]);
-
-  useEffect(() => {
-    if (runIdA) setRunA(runIdA);
-    if (runIdB) setRunB(runIdB);
-  }, [runIdA, runIdB]);
+  };
 
   useEffect(() => {
     if (runIdA && runIdB) {
-      void handleCompare(runIdA, runIdB);
+      handleCompare();
     }
-  }, [runIdA, runIdB, handleCompare]);
+  }, [runIdA, runIdB]);
 
   const getConfidenceTrend = (delta: number) => {
     if (delta > 0.05) return <TrendingUpIcon color="success" />;
@@ -148,11 +129,7 @@ const RunComparisonView: React.FC<RunComparisonViewProps> = ({ runIdA, runIdB })
               placeholder="Enter second run ID"
               sx={{ flexGrow: 1 }}
             />
-            <Button
-              variant="contained"
-              onClick={() => void handleCompare()}
-              disabled={loading || !runA || !runB}
-            >
+            <Button variant="contained" onClick={handleCompare} disabled={loading || !runA || !runB}>
               Compare
             </Button>
           </Stack>

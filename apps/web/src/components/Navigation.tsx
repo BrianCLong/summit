@@ -126,60 +126,51 @@ const supportItems: NavItem[] = [
   { name: 'Changelog', href: '/changelog', icon: History as React.ComponentType<{ className?: string }> },
 ]
 
-// Optimization: Extracted component to avoid re-definition on every Navigation render.
-// This prevents unnecessary unmounting/remounting of nav items and improves performance.
-const NavItemComponent = ({ item, user }: { item: NavItem; user: User | null }) => {
+export function Navigation({ user }: NavigationProps) {
   const location = useLocation()
-  const { hasPermission } = useRbac(item.resource || '', item.action || '', {
-    user,
-    fallback: !item.resource,
-  })
+  const { logout } = useAuth()
+  const { openSearch } = useSearch()
 
-  if (item.resource && !hasPermission) {
-    return null
-  }
+  const NavItemComponent = ({ item }: { item: NavItem }) => {
+    const { hasPermission } = useRbac(item.resource || '', item.action || '', {
+      user,
+      fallback: !item.resource,
+    })
 
-  const isActive =
-    location.pathname === item.href ||
-    (item.href !== '/' && location.pathname.startsWith(item.href))
+    if (item.resource && !hasPermission) {
+      return null
+    }
 
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <NavLink
-          to={item.href}
-          className={({ isActive: linkIsActive }) =>
-            cn(
+    const isActive =
+      location.pathname === item.href ||
+      (item.href !== '/' && location.pathname.startsWith(item.href))
+
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <NavLink
+            to={item.href}
+            className={({ isActive: linkIsActive }) => cn(
               'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
               linkIsActive || isActive
                 ? 'bg-accent text-accent-foreground'
                 : 'text-muted-foreground'
-            )
-          }
-          aria-current={
-            location.pathname === item.href ||
-            (item.href !== '/' && location.pathname.startsWith(item.href))
-              ? 'page'
-              : undefined
-          }
-        >
-          <item.icon className="h-4 w-4" />
-          <span className="flex-1">{item.name}</span>
-          {item.badge && (
-            <Badge variant="secondary" className="text-xs">
-              {item.badge}
-            </Badge>
-          )}
-        </NavLink>
-      </TooltipTrigger>
-      <TooltipContent side="right">{item.name}</TooltipContent>
-    </Tooltip>
-  )
-}
-
-export function Navigation({ user }: NavigationProps) {
-  const { logout } = useAuth()
-  const { openSearch } = useSearch()
+            )}
+            aria-current={(location.pathname === item.href || (item.href !== '/' && location.pathname.startsWith(item.href))) ? 'page' : undefined}
+          >
+            <item.icon className="h-4 w-4" />
+            <span className="flex-1">{item.name}</span>
+            {item.badge && (
+              <Badge variant="secondary" className="text-xs">
+                {item.badge}
+              </Badge>
+            )}
+          </NavLink>
+        </TooltipTrigger>
+        <TooltipContent side="right">{item.name}</TooltipContent>
+      </Tooltip>
+    )
+  }
 
   return (
     <nav className="w-64 border-r bg-muted/50 flex flex-col">
@@ -215,28 +206,28 @@ export function Navigation({ user }: NavigationProps) {
           Intelligence
         </div>
         {navItems.slice(0, 3).map(item => (
-          <NavItemComponent key={item.href} item={item} user={user} />
+          <NavItemComponent key={item.href} item={item} />
         ))}
 
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Dashboards
         </div>
         {navItems.slice(3, 7).map(item => (
-          <NavItemComponent key={item.href} item={item} user={user} />
+          <NavItemComponent key={item.href} item={item} />
         ))}
 
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Platform
         </div>
         {navItems.slice(7).map(item => (
-          <NavItemComponent key={item.href} item={item} user={user} />
+          <NavItemComponent key={item.href} item={item} />
         ))}
       </div>
 
       {/* Support & User */}
       <div className="p-4 border-t space-y-2">
         {supportItems.map(item => (
-          <NavItemComponent key={item.href} item={item} user={user} />
+          <NavItemComponent key={item.href} item={item} />
         ))}
 
         {/* User Profile & Logout */}

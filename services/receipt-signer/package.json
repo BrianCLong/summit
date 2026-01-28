@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/receipt-signer",
-  "version": "4.2.3",
+  "version": "0.1.0",
   "description": "Receipt KMS-style signer service for provenance receipts.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

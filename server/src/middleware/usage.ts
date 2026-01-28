@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { usageMeteringService } from '../services/UsageMeteringService.js';
-import { quotaService } from '../services/QuotaService.js';
+import UsageMeteringService from '../services/UsageMeteringService.js';
+import QuotaService from '../services/QuotaService.js';
 import logger from '../utils/logger.js';
 import { meteringEmitter } from '../metering/emitter.js';
 
@@ -23,7 +23,7 @@ export const usageMiddleware = async (req: Request, res: Response, next: NextFun
     // 1. Rate Limiting / Quota Check (Blocking)
     // Check if tenant has exceeded request quota
     try {
-        const quotaResult = await quotaService.checkQuota({
+        const quotaResult = await QuotaService.checkQuota({
             tenantId,
             kind: 'external_api.requests',
             quantity: 1
@@ -53,7 +53,7 @@ export const usageMiddleware = async (req: Request, res: Response, next: NextFun
     // Let's record "request attempted".
 
     // We can fire and forget
-    usageMeteringService.record({
+    UsageMeteringService.record({
         tenantId,
         principalId: user.id,
         principalKind: 'user', // or api_key
@@ -65,7 +65,7 @@ export const usageMiddleware = async (req: Request, res: Response, next: NextFun
             route,
             userAgent: req.get('user-agent')
         }
-    }).catch((err: Error) => {
+    }).catch(err => {
         logger.error('Failed to record API usage', err);
     });
 

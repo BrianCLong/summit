@@ -1,38 +1,19 @@
 receivers:
   otlp:
     protocols:
-      grpc:
       http:
-
-processors:
-  batch:
-
+      grpc:
 exporters:
-  prometheus:
-    endpoint: "0.0.0.0:8889"
-    namespace: "otel"
-
-  otlp/jaeger:
-    endpoint: "jaeger-collector:4317"
+  otlp:
+    endpoint: 'otel-collector:4317'
     tls:
       insecure: true
-
-  otlp/tempo:
-    endpoint: "tempo:4317"
-    tls:
-      insecure: true
-
-  logging:
-    verbosity: detailed
-
+  logging: {}
+processors:
+  batch: {}
 service:
-  extensions: []
   pipelines:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp/jaeger, otlp/tempo, logging]
-    metrics:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [prometheus, logging]
+      exporters: [otlp, logging]

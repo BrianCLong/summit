@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/image-forensics",
-  "version": "4.2.3",
+  "version": "4.1.4",
   "description": "Image forensics including deepfake detection, manipulation detection, and authenticity verification",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

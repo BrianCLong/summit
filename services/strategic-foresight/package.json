@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/strategic-foresight-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "AI-Driven Strategic Foresight and Market Domination Suite",
   "private": true,
   "scripts": {

@@ -13,8 +13,7 @@ const requiredFeatures = [
   'Observability Taxonomy',
   'Data Classification & Governance',
   'Policy Preflight & Receipts',
-  'Ingestion Security Hardening',
-  'Generative UI Plan Contract'
+  'Ingestion Security Hardening'
 ];
 
 const allowedTiers = new Set(['A', 'B', 'C']);

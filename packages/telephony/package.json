@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/telephony",
-  "version": "4.2.3",
+  "version": "4.1.4",
   "description": "Telephony and communications integration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

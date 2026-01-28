@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/model-registry-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "type": "module",
   "main": "dist/server.js",
   "description": "Dedicated model registry service with advanced versioning and lineage tracking",

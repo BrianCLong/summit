@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/data-factory-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Data Factory service for dataset curation, labeling workflows, and training data management",
   "type": "module",
   "main": "dist/index.js",

@@ -1,17 +1,15 @@
 import { expect } from '@playwright/test';
-import { test } from '../fixtures/index';
+import { test } from '../fixtures/osint-fixtures';
 
 test.describe('OSINT P0 journey @osint-p0 @journey', () => {
   test('login → search → view results → add to case → export bundle', async ({
     page,
-    login,
-    mockOsintFeeds,
-    mockWikipedia,
+    loginAsAnalyst,
+    osintMocks,
   }) => {
-    await mockOsintFeeds();
-    await mockWikipedia();
+    void osintMocks;
     await test.step('authenticate and open OSINT Studio', async () => {
-      await login();
+      await loginAsAnalyst();
       await page.goto('/osint');
     });
 

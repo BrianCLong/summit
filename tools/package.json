@@ -1,6 +1,6 @@
 {
   "name": "summit-tools",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "CLI tools for Summit platform",
   "main": "index.js",
   "scripts": {

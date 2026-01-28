@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/agent-execution-platform",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Enterprise-grade agent execution platform with safety, logging, and orchestration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

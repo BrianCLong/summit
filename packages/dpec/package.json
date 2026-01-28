@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/dpec",
-  "version": "4.2.3",
+  "version": "4.1.4",
   "description": "Deterministic Prompt Execution Cache with attestable artifacts and client adapters",
   "license": "Apache-2.0",
   "type": "module",

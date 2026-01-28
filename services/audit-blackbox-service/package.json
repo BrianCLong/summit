@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/audit-blackbox-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Immutable audit flight recorder with tamper-evident storage for IntelGraph",
   "type": "module",
   "main": "dist/index.js",

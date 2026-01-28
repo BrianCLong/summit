@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/emergent-pattern-genesis",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Emergent Pattern Genesis - Predicts future patterns that don't yet exist",
   "type": "module",
   "main": "dist/index.js",
