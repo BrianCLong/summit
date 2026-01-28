@@ -591,6 +591,7 @@ instructions for full script). Ensure binaries/large files are sanitized before 
 
 ## Agent-Native Development Loop (Prompt N+4)
 
+- **Tool Registry:** All tools used by agents must be defined in `governance/tool_registry.yaml`. The `scripts/ci/registry_audit_gate.mjs` enforces that agents only use approved tools.
 - **Immutable Prompts:** Every agent task must reference a prompt registered in `prompts/registry.yaml` by its SHA-256 hash. Prompt hashes are authoritative; any mismatch fails CI.
 - **Task Contracts:** Agent tasks must conform to `agents/task-spec.schema.json`; store concrete specs under `agents/examples/` or task-specific folders.
 - **PR Metadata:** PRs MUST include the fenced JSON block between `<!-- AGENT-METADATA:START -->` and `<!-- AGENT-METADATA:END -->` following the template in `.github/PULL_REQUEST_TEMPLATE.md`. The metadata must align with the registered prompt scope and allowed operations.
