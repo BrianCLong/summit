@@ -131,6 +131,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: universal-supremacy-prompt
+    version: v1
+    path: prompts/competitive/universal-supremacy-prompt@v1.md
+    sha256: eb9a6f548bef01188302983aff947c6701f6c72538b400ca0dd5b8d6dfb77603
+    description: Drop-in prompt to structure competitive subsumption, moat, gating, and irreversibility analysis.
+    scope:
+      paths:
+        - prompts/competitive/
+        - docs/roadmap/STATUS.json
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - competitive-intel
+        - governance
+        - product-strategy
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
