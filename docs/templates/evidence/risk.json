@@ -1,0 +1,11 @@
+{
+  "touched_areas": [
+    "server/src/...",
+    "frontend/src/..."
+  ],
+  "risk_level": "low | medium | high",
+  "policy_flags": [
+    "requires_manual_approval"
+  ],
+  "notes": "Automated risk assessment notes."
+}
