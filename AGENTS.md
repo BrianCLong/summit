@@ -37,30 +37,34 @@ order:
 - **Rulebook:** The [Living Rulebook](docs/governance/RULEBOOK.md) contains the full index of laws and standards.
 - **GA Hardening Contract:** Agents must honor the machine-readable contract in [`agent-contract.json`](agent-contract.json) and the Golden Path guardrails described in `docs/ga/TESTING-STRATEGY.md` and `docs/ga/LEGACY-MODE.md`. New GA-critical work must carry Tier A/B/C verification before merge.
 
-## Agent Roles & Permissions
+## Agent Lattice & Roles
+
+The Summit ecosystem operates on a **Lattice Model** (see [`docs/agents/AGENT_LATTICE_V1.md`](docs/agents/AGENT_LATTICE_V1.md)).
+Agents are not unstructured scripts; they are roles within a governed hierarchy.
 
 ### Role: Jules (Release Captain)
+*   **Avatar:** 🧑‍✈️
+*   **Rank:** Strategic
+*   **Mandate:** "The Lawmaker". Owns Architecture, Strategy, and Release Gates.
+*   **Permissions:** Full Repo Access, Merge Authority, Policy Definition.
 
-- **Permissions**:
-  - Full read/write access to repository.
-  - Can modify CI/CD workflows.
-  - Can merge PRs (if checks pass).
-  - Can create release artifacts.
-- **Stop Conditions**:
-  - CI failure in `main`.
-  - Detection of PII in output.
-  - Sandbox violation alert.
-- **Escalation**:
-  - Notify `security-council` on policy violations.
-  - Notify `devops` on persistent CI failures.
+### Role: Maestro (Orchestrator)
+*   **Avatar:** 🎼
+*   **Rank:** System
+*   **Mandate:** "The Engine". Owns Task Dispatch, Safety Enforcement, and Dependency Management.
+*   **Permissions:** Runtime Execution, Kill-Switch Activation.
 
-### Role: Codex (Implementation & Engineering)
+### Role: Codex (Engineer)
+*   **Avatar:** 💻
+*   **Rank:** Tactical
+*   **Mandate:** "The Builder". Owns Implementation, Testing, and Documentation.
+*   **Permissions:** Code Commit (witnessed), Test Execution.
 
-- **Permissions**:
-  - Implement features and fixes in scope with tests and documentation.
-  - Update `docs/` and markdown to reflect changes.
-- **Stop Conditions**:
-  - Generated documentation contradicts code (detected via drift check).
+### Role: Aegis (Guardian)
+*   **Avatar:** 🛡️
+*   **Rank:** Governance
+*   **Mandate:** "The Judge". Owns Policy Evaluation and Risk Scoring.
+*   **Permissions:** Block/Deny Authority, Audit Logging.
 
 ## Regulatory & Ethics Operating Constraints (Non-Negotiable)
 
@@ -513,40 +517,10 @@ make down
 docker system prune -af
 ```
 
-## Sprint N+7 Execution Assignments
+## Execution Assignments
 
-The following agents are assigned to execute the specific epics defined in `docs/sprints/SPRINT_N_PLUS_7_ROADMAP.md`.
-
-### Agent: Jules (Architecture & Core Services)
-
-**Scope:**
-
-- **Epic A1:** Local Vector Store & Embeddings Service
-- **Epic A2:** RAG Ingestion Pipeline
-- **Epic A3:** Copilot Query Service
-- **Epic C1:** Policy-as-Code Engine (OPA)
-- **Epic C2:** Immutable Audit Log
-
-**Change Surface:**
-
-- `server/src/services/`
-- `docker-compose*.yml`
-- `server/src/policies/`
-- `server/src/provenance/`
-
-### Agent: Amp (Frontend & Connectors)
-
-**Scope:**
-
-- **Epic B1:** Connector SDK & Registry
-- **Epic B2:** RSS/Atom Connector
-- **Epic B3:** STIX/TAXII Connector
-
-**Change Surface:**
-
-- `server/src/connectors/`
-- `packages/connector-sdk/` (new)
-- `server/src/ingestion/`
+Assignments are now managed dynamically via the **Agent Lattice**.
+Refer to `docs/roadmap/STATUS.json` for active agent bindings.
 
 ### Execution Invariants
 
