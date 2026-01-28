@@ -6,6 +6,9 @@ services:
     ports: [ "7474:7474", "7687:7687" ]
     volumes:
       - neo4j_data:/data
+    networks:
+      - default
+      - observability
 
   redis:
     image: redis:7-alpine
@@ -13,6 +16,9 @@ services:
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
+    networks:
+      - default
+      - observability
 
   postgres:
     image: postgres:16-alpine
@@ -21,22 +27,34 @@ services:
     ports: [ "5432:5432" ]
     volumes:
       - pg_data:/var/lib/postgresql/data
+    networks:
+      - default
+      - observability
 
   prov-ledger:
     build: ./services/prov-ledger
     command: node dist/index.js
     ports: [ "4010:4010" ]
     depends_on: [ redis ]
+    networks:
+      - default
+      - observability
 
   policy-lac:
     build: ./gateway/policy-lac
     command: node dist/index.js
     ports: [ "4011:4000" ]
+    networks:
+      - default
+      - observability
 
   nl2cypher:
     build: ./server/ai/nl2cypher
     command: node dist/index.js
     ports: [ "4020:4020" ]
+    networks:
+      - default
+      - observability
 
   server:
     build:
@@ -52,24 +70,44 @@ services:
       - JWT_SECRET=dev-secret-do-not-use-in-prod
       - SESSION_SECRET=dev-secret-do-not-use-in-prod
       - NODE_ENV=development
+      - JAEGER_ENDPOINT=http://jaeger-collector:14268/api/traces
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
+      - OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://otel-collector:4318/v1/metrics
     depends_on:
       - postgres
       - neo4j
       - redis
+    networks:
+      - default
+      - observability
 
   api-gateway:
     build: ./services/api-gateway
     ports: [ "4000:4000" ]
     depends_on: [ redis ]
+    networks:
+      - default
+      - observability
 
   gateway:
     build:
       context: .
       dockerfile: apps/gateway/Dockerfile
     ports: [ "8080:8080" ]
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
     depends_on: [ api-gateway ]
+    networks:
+      - default
+      - observability
 
 volumes:
   neo4j_data: {}
   pg_data: {}
   redis_data: {}
+
+networks:
+  observability:
+    driver: bridge
+  intelgraph:
+    external: true
