@@ -6,10 +6,23 @@ import { ResidencyGuard } from '../data-residency/residency-guard';
 import { AgentGovernanceService } from './governance-service.ts';
 import logger from '../utils/logger.ts';
 import { metrics } from '../monitoring/metrics.ts';
+import {
+  buildBudgetEvidence,
+  normalizeReasoningBudget,
+  type ReasoningBudgetContract,
+} from './budget';
+import { AgentGovernanceService } from './governance-service.ts';
+import logger from '../utils/logger.ts';
+import { metrics } from '../monitoring/metrics.ts';
 
 export interface MaestroConfig {
   defaultPlannerAgent: string;   // e.g. "openai:gpt-4.1"
   defaultActionAgent: string;
+}
+
+export interface MaestroRunOptions {
+  tenantId?: string;
+  reasoningBudget?: Partial<ReasoningBudgetContract>;
 }
 
 export class Maestro {
@@ -20,14 +33,22 @@ export class Maestro {
     private config: MaestroConfig,
   ) {}
 
-  async createRun(userId: string, requestText: string, options?: { tenantId?: string }): Promise<Run> {
+  async createRun(
+    userId: string,
+    requestText: string,
+    options?: MaestroRunOptions,
+  ): Promise<Run> {
+    const reasoningBudget = normalizeReasoningBudget(
+      options?.reasoningBudget,
+    );
     const run: Run = {
       id: crypto.randomUUID(),
       user: { id: userId },
       createdAt: new Date().toISOString(),
       requestText,
       // Pass tenant context if available (will need DB schema update for full persistence)
-      ...(options?.tenantId ? { tenantId: options.tenantId } : {})
+      ...(options?.tenantId ? { tenantId: options.tenantId } : {}),
+      reasoningBudget,
     } as Run;
     await this.ig.createRun(run);
     return run;
@@ -301,10 +322,15 @@ export class Maestro {
     }
   }
 
-  async runPipeline(userId: string, requestText: string, options?: { tenantId?: string }) {
+  async runPipeline(
+    userId: string,
+    requestText: string,
+    options?: MaestroRunOptions,
+  ) {
     const end = metrics.maestroOrchestrationDuration.startTimer({ endpoint: 'runPipeline' });
     metrics.maestroOrchestrationRequests.inc({ method: 'runPipeline', endpoint: 'runPipeline', status: 'started' });
     metrics.maestroActiveSessions.inc({ type: 'pipeline' });
+    const startTime = Date.now();
 
     try {
       const run = await this.createRun(userId, requestText, options);
@@ -319,6 +345,17 @@ export class Maestro {
       }
 
       const costSummary = await this.costMeter.summarize(run.id);
+
+      const budgetEvidence = buildBudgetEvidence(run.reasoningBudget!, {
+        success: results.every((result) => result.task.status === 'succeeded'),
+        latencyMs: Date.now() - startTime,
+        totalCostUSD: costSummary.totalCostUSD,
+        totalInputTokens: costSummary.totalInputTokens,
+        totalOutputTokens: costSummary.totalOutputTokens,
+      });
+      await this.ig.updateRun(run.id, {
+        reasoningBudgetEvidence: budgetEvidence,
+      });
 
       end();
       metrics.maestroOrchestrationRequests.inc({ method: 'runPipeline', endpoint: 'runPipeline', status: 'success' });
