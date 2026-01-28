@@ -1,6 +1,6 @@
 # Summit vs. Enterprise AI Platforms: Competitive Positioning
 
-**Date:** 2025-01-23
+**Date:** 2026-01-25
 **Classification:** INTERNAL ONLY
 **Target Audience:** Founders, Executives, Auditors
 
@@ -37,6 +37,7 @@ Platforms like Azure AI Foundry offer "traces" (what happened). Summit offers **
 Microsoft Purview is locked to Azure. Palantir Foundry is often a proprietary cloud silo. Summit is **Engine-Agnostic and Cloud-Portable**.
 
 *   **The Moat**: Summit can run in air-gapped, on-prem, or cross-cloud environments while maintaining a unified governance fabric. This is critical for sovereign governments and global banks that cannot trust a single cloud provider with their entire intelligence governance.
+*   **Cloud vs. Sovereign Footprint**: While competitors like AWS Neptune expand regional availability (7+ new regions in 2026), they remain bound by the cloud provider's jurisdiction. Summit delivers "Intelligence Anywhere," including disconnected edge environments where cloud-native solutions cannot operate.
 
 ---
 
@@ -51,6 +52,12 @@ Microsoft Purview is locked to Azure. Palantir Foundry is often a proprietary cl
 | **Deployment** | Universal / Air-gapped | Cloud-Locked |
 
 ---
+
+## 6. Addressing Emerging "Zero-ETL" Threats
+New competitors like PuppyGraph propose "Zero-ETL" analytics on existing data lakes. While this reduces data movement, it bypasses the **Execution-Layer Governance** that Summit provides.
+
+*   **The Gap**: Zero-ETL engines generally lack a deterministic provenance ledger and the ability to enforce policy *at the moment of computation*.
+*   **Summit Advantage**: We treat data not just as bytes to be queried, but as evidence to be governed. Our integration of OPA and bitemporal ledgers ensures that intelligence remains audit-ready, a requirement that Zero-ETL engines cannot yet fulfill for regulated domains.
 
 ## Conclusion
 Summit is not competing on model size or dashboard count. We are competing on **Trust Integrity**. By governing the *reasoning* and *evidence* of AI systems, we provide the only platform that is truly ready for the "Age of Autonomous Liabilities."
