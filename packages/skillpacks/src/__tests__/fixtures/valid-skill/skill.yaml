@@ -1,0 +1,15 @@
+schema_version: "v2"
+metadata:
+  name: "test-skill"
+  version: "1.0.0"
+  description: "A test skill"
+  author: "Tester"
+  license: "MIT"
+triggers:
+  intents:
+    - "test intent"
+  file_patterns:
+    - "**/*.ts"
+steps:
+  - type: exec
+    command: "echo hello"
