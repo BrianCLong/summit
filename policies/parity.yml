@@ -1,0 +1,14 @@
+# Policy for Parity Checks
+# Used by scripts/governance/compare_scorecards.mjs
+
+terraform:
+  allow_changes: false  # Block GA if Terraform plan shows any changes (drift)
+
+flags:
+  check_parity: true
+  allowed_drift:
+    - "maintenance_mode"
+    - "log_level"
+
+images:
+  check_parity: true
