@@ -15,5 +15,19 @@
     },
     "reasoning": "Matched condition: cpu_usage > 80%",
     "reverted": true
+  },
+  {
+    "id": "evalbaseline-01",
+    "timestamp": "2026-01-28T02:30:00.000Z",
+    "agentId": "codex-builder",
+    "policyVersion": "1.0.0",
+    "inputHash": "ZXZhbF9iYXNlbGluZV9nYXRlcw==",
+    "decision": {
+      "action": "establish_eval_baselines",
+      "scope": "eval/baselines.yaml",
+      "rollback_plan": "Revert eval/baselines.yaml and runner gating changes, then re-run eval harness to restore prior CI behavior."
+    },
+    "reasoning": "Established baseline gates that pass current runs with documented ratchet path.",
+    "reverted": false
   }
 ]

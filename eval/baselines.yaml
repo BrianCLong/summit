@@ -1,0 +1,27 @@
+suites:
+  core_evals:
+    gates:
+      min_mean_score: 0.0
+      max_error_rate: 0.05
+      max_p95_latency_ms: 15000
+      max_mean_cost_per_item_usd: 0.01
+      regression_delta: -0.1
+    tasks:
+      copilot_summary:
+        min_mean_score: 0.0
+      copilot_action:
+        min_mean_score: 0.0
+      safety_pii:
+        min_mean_score: 0.0
+  router:
+    gates:
+      min_mean_score: 0.0
+      max_error_rate: 0.05
+      max_p95_latency_ms: 20000
+      max_mean_cost_per_item_usd: 0.05
+      regression_delta: -0.1
+    tasks:
+      qa_short:
+        min_mean_score: 0.0
+      summarization_news:
+        min_mean_score: 0.0

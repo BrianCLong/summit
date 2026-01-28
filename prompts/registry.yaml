@@ -24,6 +24,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: eval-baseline-ratchet
+    version: v1
+    path: prompts/eval/establish-eval-baselines@v1.md
+    sha256: 83812cd2cffecec04a8e3205951fe85a553f43e16ecde45aa23f7c8950ee8d63
+    description: Establish eval baseline gates and ratchet guidance for CI readiness.
+    scope:
+      paths:
+        - eval/
+        - tests/eval/
+        - packages/decision-ledger/decision_ledger.json
+        - docs/roadmap/STATUS.json
+        - prompts/eval/establish-eval-baselines@v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - eval
+        - ci
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: notion-issue-migration-fix
     version: v1
     path: prompts/integrations/notion-issue-migration-fix.md

@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-27T21:20:00Z",
-  "revision_note": "Notion integration readiness verified; setup and validation wired",
+  "last_updated": "2026-01-28T02:30:00Z",
+  "revision_note": "Established eval baseline gates and ratchet guidance for CI readiness",
   "initiatives": [
     {
       "id": "A",
