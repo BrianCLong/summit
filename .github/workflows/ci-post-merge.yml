@@ -14,7 +14,7 @@ jobs:
   gate:
     # Logic: Run only if the upstream workflow (ci-pr) succeeded AND it was a push event (merge to main)
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     outputs:
       sha: ${{ steps.ref.outputs.sha }}
     steps:
@@ -24,15 +24,15 @@ jobs:
 
   sbom:
     needs: gate
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.gate.outputs.sha }}
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
       - uses: pnpm/action-setup@v4
         with:
           version: 9
@@ -48,15 +48,15 @@ jobs:
 
   provenance:
     needs: gate
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.gate.outputs.sha }}
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
       - uses: pnpm/action-setup@v4
         with:
           version: 9

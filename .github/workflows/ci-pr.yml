@@ -22,7 +22,7 @@ permissions:
 jobs:
   build-test:
     name: ${{ matrix.name }}
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -41,8 +41,8 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
       - uses: pnpm/action-setup@v4
         with:
           version: 9
@@ -63,12 +63,12 @@ jobs:
 
   config-guard:
     name: Config Guard
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: ".nvmrc"
       - uses: pnpm/action-setup@v4
         with:
           version: 9
@@ -79,14 +79,14 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [config-guard] # fast fail
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
       - uses: pnpm/action-setup@v4
         with:
           version: 9
@@ -123,14 +123,14 @@ jobs:
 
   verification-suite:
     name: Verification Suite
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
       - uses: pnpm/action-setup@v4
         with:
           version: 9
@@ -143,14 +143,14 @@ jobs:
 
   deterministic-build:
     name: Deterministic Build
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [build-test] # Run after standard build/test matrix
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
       - uses: pnpm/action-setup@v4
         with:
           version: 9
@@ -181,14 +181,14 @@ jobs:
 
   golden-path:
     name: Golden Path Smoke Test
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [integration-tests, build-test]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
       - uses: pnpm/action-setup@v4
         with:
           version: 9
@@ -210,15 +210,15 @@ jobs:
 
   e2e-tests:
     name: E2E Tests (Playwright)
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [integration-tests]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
       - uses: pnpm/action-setup@v4
         with:
           version: 9
@@ -247,13 +247,13 @@ jobs:
 
   governance:
     name: Governance
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: ".nvmrc"
       - name: Verify TSConfig Exclusions Frozen
         run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
       - name: Verify TSConfig Inheritance
@@ -265,14 +265,14 @@ jobs:
 
   soc-controls:
     name: SOC Controls
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
       - uses: pnpm/action-setup@v4
         with:
           version: 9
