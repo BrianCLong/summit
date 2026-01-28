@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-01-28T12:30:00Z",
-  "revision_note": "Branch protection drift gate now requires privileged audit token for enforceable required-checks policy",
+  "revision_note": "GA verification map ordering guardrail enforced; branch protection audit tokens required",
   "initiatives": [
     {
       "id": "A",
