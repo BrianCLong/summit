@@ -1,0 +1,48 @@
+{
+  "task_id": "ANTIGRAVITY_MOAT_AUGMENTATION_001",
+  "agent_id": "Codex",
+  "prompt_ref": {
+    "id": "antigravity-moat-augmentation",
+    "version": "v1",
+    "sha256": "42d5cc33eafe54f7ab8eef7c16f9bbdc3a25a6f35a5790685e105c5b7d17a865",
+    "path": "prompts/governance/antigravity-moat-augmentation@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "antigravity/",
+      "decision_policy/",
+      "tradeoff_ledger.jsonl",
+      "docs/antigravity/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/",
+      "prompts/governance/antigravity-moat-augmentation@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["governance", "policy", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "decision_policy/antigravity_judgment.rego",
+      "tradeoff_ledger.jsonl",
+      "docs/antigravity/ANTIGRAVITY_JUDGMENT_MODEL_V1.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Outcome charter defines SLO ownership and accountability windows.",
+    "Decision policy emits rationale, confidence, and rollback conditions.",
+    "Tradeoff ledger schema exists and is evidence-linked.",
+    "Judgment model documentation is published with governance anchors.",
+    "Roadmap status updated with Antigravity governance note."
+  ],
+  "stop_conditions": [
+    "Policy outputs missing required decision fields.",
+    "Tradeoff ledger lacks evidence linkage requirements.",
+    "Scope exceeds declared paths without governed exception."
+  ]
+}

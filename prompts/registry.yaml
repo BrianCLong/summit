@@ -81,6 +81,34 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: antigravity-moat-augmentation
+    version: v1
+    path: prompts/governance/antigravity-moat-augmentation@v1.md
+    sha256: 42d5cc33eafe54f7ab8eef7c16f9bbdc3a25a6f35a5790685e105c5b7d17a865
+    description: Establish Antigravity outcome ownership, policy-encoded judgment, and tradeoff ledger scaffolding.
+    scope:
+      paths:
+        - antigravity/
+        - decision_policy/
+        - tradeoff_ledger.jsonl
+        - docs/antigravity/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/governance/antigravity-moat-augmentation@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - policy
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md
