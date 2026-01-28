@@ -20,6 +20,7 @@ import { configCommands } from './commands/config.js';
 import { pluginCommands } from './commands/plugin.js';
 import { foundryCommands } from './commands/foundry.js';
 import { doctor } from './commands/doctor.js';
+import { mediaCommands } from './commands/media.js';
 import { loadConfig, getConfig } from './config.js';
 
 const program = new Command();
@@ -101,6 +102,9 @@ program
   .command('foundry')
   .description('Foundry loop runner commands')
   .addCommand(foundryCommands.loop);
+
+// Media provenance commands
+program.addCommand(mediaCommands);
 
 // Login command
 program
