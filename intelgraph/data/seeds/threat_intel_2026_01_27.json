@@ -1,0 +1,96 @@
+{
+  "meta": {
+    "version": "1.0",
+    "generated_at": "2026-01-27T12:00:00Z",
+    "generator": "Automation Turn 4 Agent"
+  },
+  "sources": [
+    {
+      "id": "src_001",
+      "uri_or_hash": "https://cyberpress.org/microsoft-office-zero-day-actively-exploited-in-targeted-cyberattacks/",
+      "origin": "public",
+      "sensitivity": "low",
+      "legal_basis": "legitimate_interests"
+    },
+    {
+      "id": "src_002",
+      "uri_or_hash": "https://cyberpress.org/critical-vm2-sandbox-vulnerability-in-node-js-lets-attackers-run-untrusted-code/",
+      "origin": "public",
+      "sensitivity": "low",
+      "legal_basis": "legitimate_interests"
+    },
+    {
+      "id": "src_003",
+      "uri_or_hash": "https://cyberpress.org/china-backed-peckbirdy-cert-theft/",
+      "origin": "public",
+      "sensitivity": "low",
+      "legal_basis": "legitimate_interests"
+    }
+  ],
+  "entities": [
+    {
+      "id": "ent_cve_2026_21509",
+      "type": "vulnerability",
+      "labels": ["critical", "zero-day", "microsoft", "office"]
+    },
+    {
+      "id": "ent_cve_2026_22709",
+      "type": "vulnerability",
+      "labels": ["critical", "sandbox-escape", "nodejs", "vm2", "supply-chain"]
+    },
+    {
+      "id": "ent_peckbirdy",
+      "type": "threat_actor_tool",
+      "labels": ["apt", "china-aligned", "c2-framework", "jscript"]
+    },
+    {
+      "id": "ent_vm2_lib",
+      "type": "software_library",
+      "labels": ["npm", "vm2", "sandbox"]
+    }
+  ],
+  "claims": [
+    {
+      "entity_id": "ent_cve_2026_21509",
+      "predicate": "is_actively_exploited",
+      "value": "true",
+      "source_ids": ["src_001"],
+      "policy_labels": {"origin": "public", "sensitivity": "high"}
+    },
+    {
+      "entity_id": "ent_cve_2026_22709",
+      "predicate": "affects_component",
+      "value": "ent_vm2_lib",
+      "source_ids": ["src_002"],
+      "policy_labels": {"origin": "public", "sensitivity": "high"}
+    },
+    {
+      "entity_id": "ent_cve_2026_22709",
+      "predicate": "min_patched_version",
+      "value": "3.10.2",
+      "source_ids": ["src_002"],
+      "policy_labels": {"origin": "public", "sensitivity": "high"}
+    },
+    {
+      "entity_id": "ent_peckbirdy",
+      "predicate": "uses_technique",
+      "value": "certificate_theft",
+      "source_ids": ["src_003"],
+      "policy_labels": {"origin": "public", "sensitivity": "medium"}
+    }
+  ],
+  "risk_assessments": [
+    {
+      "ioc_id": "ent_cve_2026_21509",
+      "risk_score": 0.95,
+      "risk_summary": "Active zero-day exploitation in wild. Immediate patching required.",
+      "model_version": "v4.0-briefing"
+    },
+    {
+      "ioc_id": "ent_cve_2026_22709",
+      "risk_score": 0.98,
+      "risk_summary": "Critical sandbox escape allowing host compromise. Affects all unpatched vm2 versions.",
+      "model_version": "v4.0-briefing"
+    }
+  ]
+}
