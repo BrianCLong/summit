@@ -15,5 +15,39 @@
     },
     "reasoning": "Matched condition: cpu_usage > 80%",
     "reverted": true
+  },
+  {
+    "id": "b2ef1dc3d2",
+    "timestamp": "2026-01-28T06:24:14Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiAibWNwIGdpdCBzZXJ2ZXIgY2hhaW4gaGFyZGVuaW5nIGRvYyArIHJvYWRtYXAgc3RhdHVzIHVwZGF0ZSIsICJmaWxlcyI6IFsiZG9jcy9zZWN1cml0eS9tY3AtZ2l0LXNlcnZlci1jaGFpbi1oYXJkZW5pbmcubWQiLCAiZG9jcy9yb2FkbWFwL1NUQVRVUy5qc29uIl19",
+    "decision": {
+      "action": "document_controls",
+      "rule": {
+        "condition": "security hardening extraction required",
+        "action": "document_controls",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Documented MCP Git server exploit taxonomy and Summit control mapping; updated roadmap status metadata.",
+    "reverted": false
+  },
+  {
+    "id": "6d86288744",
+    "timestamp": "2026-01-28T06:26:33Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiAicmVnaXN0ZXIgcHJvbXB0IGFuZCB0YXNrIHNwZWMgZm9yIG1jcCBnaXQgY2hhaW4gaGFyZGVuaW5nIiwgImZpbGVzIjogWyJwcm9tcHRzL3NlY3VyaXR5L21jcC1naXQtY2hhaW4taGFyZGVuaW5nQHYxLm1kIiwgInByb21wdHMvcmVnaXN0cnkueWFtbCIsICJhZ2VudHMvZXhhbXBsZXMvbWNwLWdpdC1jaGFpbi1oYXJkZW5pbmctdGFzay5qc29uIl19",
+    "decision": {
+      "action": "register_prompt",
+      "rule": {
+        "condition": "task requires registered prompt and task spec",
+        "action": "register_prompt",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Registered MCP Git chain hardening prompt and task spec to satisfy governance invariants.",
+    "reverted": false
   }
 ]

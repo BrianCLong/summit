@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-27T22:05:00Z",
-  "revision_note": "OSINT integration elevated to gated product surface pending enforceable checks, stable CI, and end-to-end provenance/evidence validation",
+  "last_updated": "2026-01-28T06:26:39Z",
+  "revision_note": "MCP Git server exploit-chain hardening memo published; prompt registry and task spec aligned.",
   "initiatives": [
     {
       "id": "A",
