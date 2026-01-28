@@ -209,8 +209,14 @@ async function loadEvidenceMap(mapPath) {
     const cleanedContent = removeBOM(content);
     const parsed = yaml.load(cleanedContent) || {};
 
-    // Convert to Map for faster lookup
-    const map = new Map(Object.entries(parsed));
+    // Convert to Map for faster lookup - handle both flat and structured YAML
+    let map;
+    if (parsed.evidence && Array.isArray(parsed.evidence)) {
+      map = new Map(parsed.evidence.filter(item => item && item.id).map(item => [item.id, item]));
+    } else {
+      map = new Map(Object.entries(parsed));
+    }
+
     debugLog(`Parsed evidence map with ${map.size} entries`);
     return map;
   } catch (error) {
@@ -322,43 +328,30 @@ async function processGovernanceDocument(filePath, evidenceMap, repoRoot) {
 async function findGovernanceDocuments(rootDir, extension = '.md') {
   try {
     // First, try to use git to get a deterministic list of tracked files
-    const { spawn } = await import('child_process');
-    const gitPromise = new Promise((resolve, reject) => {
-      const gitProc = spawn('git', ['ls-files', '--', 'docs/governance/**/*' + extension], {
+    const { execSync } = await import('child_process');
+    try {
+      // Use a more robust git command that handles subdirectories correctly
+      const stdout = execSync('git ls-files "docs/governance/*.md" "docs/governance/**/*.md"', {
         cwd: rootDir,
-        stdio: ['pipe', 'pipe', 'ignore'] // stdin, stdout, stderr
+        encoding: 'utf8'
       });
 
-      let stdout = '';
-      gitProc.stdout.on('data', data => {
-        stdout += data.toString();
-      });
+      const gitFiles = stdout
+        .split('\n')
+        .filter(line => line.trim() !== '' && line.toLowerCase().endsWith(extension))
+        .map(relPath => join(rootDir, relPath));
 
-      gitProc.on('close', (code) => {
-        if (code === 0) {
-          const gitFiles = stdout
-            .split('\n')
-            .filter(line => line.trim() !== '')
-            .map(relPath => join(rootDir, relPath))
-            .filter(absPath => absPath.includes('governance') || absPath.includes('/gov/'));
+      if (gitFiles.length > 0) {
+        // Use a Set to unique files in case both patterns match same files
+        const uniqueFiles = [...new Set(gitFiles)];
+        debugLog(`Found ${uniqueFiles.length} governance documents via git`);
+        return uniqueFiles.sort();
+      }
+    } catch (e) {
+      debugLog(`Git command failed: ${e.message}`);
+    }
 
-          if (gitFiles.length > 0) {
-            debugLog(`Found ${gitFiles.length} governance documents via git`);
-            resolve(gitFiles.sort());  // Sort for deterministic order
-          } else {
-            reject(new Error('No governance files found via git'));
-          }
-        } else {
-          reject(new Error(`Git command failed with code ${code}`));
-        }
-      });
-
-      gitProc.on('error', (err) => {
-        reject(err);
-      });
-    });
-
-    return await gitPromise;
+    throw new Error('No governance files found via git or git failed');
   } catch (gitError) {
     debugLog(`Git-based file discovery failed: ${gitError.message}, falling back to filesystem scan`);
 
