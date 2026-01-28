@@ -12,6 +12,7 @@
     "sourceMap": true,
     "resolveJsonModule": true,
     "baseUrl": ".",
+    "types": [],
     "paths": {
       "@intelgraph/maestro-sdk/*": ["packages/maestro-sdk/src/*"],
       "@summitsec/vcr-kit/*": ["packages/vcr-kit/src/*"],
