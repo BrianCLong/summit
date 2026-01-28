@@ -80,7 +80,7 @@ jobs:
           echo "✅ Valid RC tag format: ${TAG}"
 
       - name: Checkout at tagged commit
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
         with:
           ref: ${{ steps.params.outputs.tag }}
           fetch-depth: 0
@@ -97,8 +97,9 @@ jobs:
           echo "Resolved commit: ${COMMIT}"
 
       - name: Setup Node.js
-        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+        uses: actions/setup-node@v4 # v6
         with:
+          cache: 'pnpm'
           node-version: "20"
 
       - name: Setup pnpm
@@ -134,7 +135,7 @@ jobs:
 
     steps:
       - name: Checkout at tagged commit
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
         with:
           ref: ${{ needs.verify.outputs.tag }}
           fetch-depth: 0
@@ -229,7 +230,7 @@ jobs:
 
     steps:
       - name: Checkout at tagged commit
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
         with:
           ref: ${{ needs.verify.outputs.tag }}
           fetch-depth: 0

@@ -18,10 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab0be3fa8f73c62d0a8d2c0d5a
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@60edb5dd545a775178f9a8e13bce519e160c7479
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab0be3fa8f73c62d0a8d2c0d5a
+        uses: actions/checkout@v4
 
       - name: Install conftest
         run: |

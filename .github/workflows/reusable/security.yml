@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/checkout@v4 # v4
       - name: Generate SBOM (SPDX)
         uses: anchore/sbom-action@0b82b0b1a22399a1c542d4d656f70cd903571b5c # v0
         with:
@@ -37,7 +37,7 @@ jobs:
   trufflehog:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/checkout@v4 # v4
         with:
           fetch-depth: 0
       - uses: trufflesecurity/trufflehog@v3
@@ -46,7 +46,7 @@ jobs:
   license-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/checkout@v4 # v4
       - uses: pilosus/action-pip-license-checker@cc7a461bfa27b44ad187b8578c881ef5138c13fd # v2
         with: { requirements: 'requirements.txt', fail: 'strong' }
       - uses: pilosus/action-licensefinder@v2
@@ -55,8 +55,8 @@ jobs:
   npm-audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/checkout@v4 # v4
+      - uses: actions/setup-node@v4 # v4
         with: { node-version: ${{ inputs.node_version }}, cache: 'pnpm' }
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
         with: { version: 9 }

@@ -20,11 +20,12 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
 
       - name: Setup Node
-        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+        uses: actions/setup-node@v4 # v6
         with:
+          cache: 'pnpm'
           node-version: "20"
 
       - name: Install pnpm
@@ -65,7 +66,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@62ad5284b8ced813296287a0b63906cb364b73ee # v0
@@ -95,11 +96,12 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
 
       - name: Setup Node
-        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+        uses: actions/setup-node@v4 # v6
         with:
+          cache: 'pnpm'
           node-version: "20"
 
       - name: Generate Evidence Bundle (Provenance)

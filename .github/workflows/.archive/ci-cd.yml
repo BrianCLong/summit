@@ -24,6 +24,7 @@ jobs:
       - name: Set up Node.js for evidence bundle generation
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: 20
 
       - name: Install ts-node runtime

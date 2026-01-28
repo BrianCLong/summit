@@ -16,6 +16,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: "20"
 
       - name: Install ajv
@@ -67,6 +68,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: "20"
 
       - uses: open-policy-agent/setup-opa@v2

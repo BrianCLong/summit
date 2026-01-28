@@ -15,7 +15,7 @@ jobs:
       url: https://dev.intelgraph.com # Placeholder
     steps:
       - name: Checkout code
-        uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000
+        uses: actions/checkout@v4
 
       - name: Login to GHCR
         uses: docker/login-action@184bdaa

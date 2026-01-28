@@ -17,10 +17,11 @@ jobs:
       contents: read
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version-file: .nvmrc
       - name: Enable Corepack
         run: corepack enable
@@ -33,13 +34,13 @@ jobs:
     timeout-minutes: 10
     needs: [config-guard]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.0.0
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
@@ -54,13 +55,13 @@ jobs:
     timeout-minutes: 10
     needs: [lint]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.0.0
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
@@ -75,13 +76,13 @@ jobs:
     timeout-minutes: 15
     needs: [typecheck]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.0.0
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
@@ -89,6 +90,16 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Unit Tests
         run: pnpm -w test:unit || pnpm -w test:unit
+      - name: Attach evidence
+        if: always()
+        run: |
+          mkdir -p artifacts
+          node scripts/ci/emit_evidence_stamp.mjs \
+            --job unit-tests \
+            --runner ${{ runner.os }} \
+            --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}" \
+            --out artifacts/stamp.json
+        shell: bash
       - name: Generate Metrics
         if: always()
         run: |
@@ -114,10 +125,11 @@ jobs:
     timeout-minutes: 5
     needs: [config-guard]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version-file: .nvmrc
       - name: Verify TSConfig Exclusions Frozen
         run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
@@ -137,13 +149,13 @@ jobs:
     timeout-minutes: 10
     needs: [config-guard]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.0.0
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
@@ -159,3 +171,27 @@ jobs:
           name: soc-compliance-report
           path: soc-compliance-reports
           retention-days: 90
+
+  verify-versions:
+    name: Verify Workflow Versions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Versions
+        uses: ./.github/actions/verify-workflow-versions
+      - name: Attach evidence
+        if: always()
+        run: |
+          mkdir -p artifacts
+          node scripts/ci/emit_evidence_stamp.mjs \
+            --job verify-versions \
+            --runner ${{ runner.os }} \
+            --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}" \
+            --out artifacts/stamp.json
+        shell: bash
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verification-artifacts
+          path: artifacts/**

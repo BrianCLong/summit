@@ -19,6 +19,7 @@ jobs:
           persist-credentials: true
       - uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: '20'
       - run: npm i yaml@2
       - name: Render catalog.md
