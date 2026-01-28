@@ -4,6 +4,7 @@
 
 import { CollectorBase } from '../core/CollectorBase.js';
 import { CollectionTask, CollectionType, CollectorConfig } from '../types/index.js';
+import { validateSafeUrl } from '../utils/security.js';
 
 export interface SimpleFeedConfig extends CollectorConfig {
   feedUrl?: string;
@@ -22,15 +23,17 @@ export class SimpleFeedCollector extends CollectorBase {
   }
 
   protected async performCollection(task: CollectionTask): Promise<unknown> {
-    const url = task.config?.url || (this.config as SimpleFeedConfig).feedUrl;
+    const url = (task.config?.url as string) || (this.config as SimpleFeedConfig).feedUrl;
 
-    if (!url) {
+    if (!url || typeof url !== 'string') {
       throw new Error('No feed URL provided in task config or collector config');
     }
 
     console.log(`[SimpleFeedCollector] Fetching feed from ${url}`);
 
     try {
+      await validateSafeUrl(url);
+
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Failed to fetch feed: ${response.status} ${response.statusText}`);
