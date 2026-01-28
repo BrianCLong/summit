@@ -965,14 +965,6 @@ async function processGovernanceDocumentWithAI(filePath, evidenceMap, repoRoot, 
   return result;
 }
 
-// Run if called directly
-if (process.argv[1] === __filename) {
-  main().catch(error => {
-    console.error('Uncaught exception:', error);
-    process.exit(1);
-  });
-}
-
 export {
   buildConsistencyReport,
   findGovernanceDocuments,
