@@ -1,0 +1,15 @@
+mappings:
+  - table: users
+    label: User
+    idKey: id
+    driftWindowMinutes: 5
+  - table: orders
+    label: Order
+    idKey: id
+    driftWindowMinutes: 5
+    relationships:
+      - fk: user_id
+        relType: PLACED
+        targetLabel: User
+        targetIdKey: id
+sampleSize: 20
