@@ -135,7 +135,8 @@
     "ga:evidence-pack": "node scripts/release/ga_evidence_pack.mjs",
     "ga:evidence-pack:check": "node scripts/release/ga_evidence_pack.mjs --check-determinism",
     "release:ready": "npm run compliance:antigravity && pnpm ga:verify && GA_VERIFY_MODE=true pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot 2>/dev/null || true"
   },
   "keywords": [
     "intelligence-analysis",
