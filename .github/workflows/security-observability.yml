@@ -24,7 +24,6 @@ jobs:
       actions: read
       contents: read
       security-events: read
-      dependabot-alerts: read
 
     steps:
       - name: Checkout
