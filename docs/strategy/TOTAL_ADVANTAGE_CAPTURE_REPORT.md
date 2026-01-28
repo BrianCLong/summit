@@ -2,7 +2,7 @@
 
 **To:** Principal Engineers, Executive Team
 **From:** Jules, Staff Engineer & Platform Strategist
-**Date:** 2025-12-31
+**Date:** 2026-01-25
 **Subject:** Competitive Intelligence Synthesis & 2026 Strategic Advantage Plan
 
 ---
@@ -20,7 +20,7 @@ This report outlines how we convert our core strengths—**Deterministic Provena
 | Dimension | Summit (Target) | Neo4j | TigerGraph | AWS Neptune | Zero-ETL Engines |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Graph Analytics Depth** | **High** (Native) | High | High (Dist.) | Moderate | Moderate |
-| **Vector / AI Integration** | **High** (Native RAG) | High (GDS) | Moderate | Moderate | High |
+| **Vector / AI Integration** | **High** (Native RAG) | High (GDS) | High (TigerVector) | Moderate | High |
 | **Cloud Ops & HA** | **Hybrid/Edge** | High | High | High (Managed) | High |
 | **Pricing & Lock-in** | **Low** (Open Std) | Moderate | High (GSQL) | High (AWS) | High |
 | **Governance & Provenance** | **Absolute** (OPA) | Low | Low | Low | Low |
@@ -101,7 +101,7 @@ Moonshot's release of Kimi K2.5 validates our "Agentic OS" thesis but raises the
 
 ### Why Summit vs Managed Cloud Graphs (Neptune)
 
-> "Cloud graphs are silos. Summit is **field-ready and multi-cloud**. We deliver enterprise scale without the 'Cloud Tax' or lock-in, using a cost-aware hybrid planner that optimizes for your mission, not the provider's bottom line."
+> "Cloud graphs are silos. While Neptune expands to 30+ regions (including 7 new GA regions in 2026) and integrates with Bedrock, it remains an AWS-locked service. Summit is **field-ready and multi-cloud**. We deliver enterprise scale without the 'Cloud Tax' or lock-in, using a cost-aware hybrid planner that optimizes for your mission, not the provider's bottom line."
 
 ### Why Summit for Regulated Domains
 
@@ -126,6 +126,8 @@ Moonshot's release of Kimi K2.5 validates our "Agentic OS" thesis but raises the
 | **Policy-as-Code** | AWS adds OPA-like guards to Bedrock KB. | Deepen **Provenance-Weighted Retrieval** to ensure our grounding remains qualitatively superior. |
 | **Browser-Native Collaboration** | Maltego One completes its cloud rollout for all cohorts. | Accelerate our **Multi-Tenant Collaboration Gateway** and emphasize our deterministic ledger as a trust-multiplier that Maltego lacks. |
 | **Automated Entity Extraction** | i2 Group enhances TextChart accuracy for OSINT dumps. | Integrate **Policy-Gated Extraction** where every relationship suggestion is backed by an Evidence ID, reducing the "hallucination risk" in legacy NLP pipelines. |
+| **Hybrid Vector Search** | TigerGraph releases TigerVector with superior hybrid benchmarks. | Accelerate **Hybrid Query Planner MVP** and publish **Deterministic RAG Benchmarks**. |
+| **Zero-ETL Analytics** | PuppyGraph enables graph queries on lakehouses without ingest. | Highlight **Execution-Layer Governance**; Zero-ETL lacks the deterministic ledger needed for audit. |
 
 ---
 
