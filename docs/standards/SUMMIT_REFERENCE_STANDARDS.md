@@ -106,3 +106,16 @@ Summit defines the reference implementation for **Governed Agentic Systems**. To
 3.  **Governance:**
     *   **Leakage Prevention:** All context frames must pass a PII/Secret scan before injection.
     *   **Attribution:** Every assertion in a context frame must trace back to a `ProvenanceEntry`.
+
+## 5. Evidence Contract Standard (ECS)
+
+**Purpose:** A formal contract between Retrieval systems (GraphRAG) and Consumer Agents (LLMs) ensuring deterministic, verifiable, and invariant-shaped evidence.
+
+**Schema Reference:** `EvidenceContract` (`server/src/rag/evidence.ts`)
+
+**Key Requirements:**
+
+1. **Shape Invariance:** All graph queries MUST use `ORDER BY` and `LIMIT` to ensure deterministic result structures regardless of graph growth.
+2. **Explicit Provenance:** Every retrieval result MUST be wrapped in an `EvidenceBundle` containing a unique `contractId` and `manifest` detailing the retrieval strategy.
+3. **Counterfactual Readiness:** The system MUST support "ablation testing" where specific nodes or edges can be virtually removed to verify the necessity of evidence.
+4. **Graph Metadata:** Analytics outputs (e.g., PageRank, Community ID) MUST be persisted to the graph and available for retrieval ranking.
