@@ -17,9 +17,9 @@ jobs:
       contents: read
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238
         with:
           node-version-file: .nvmrc
       - name: Enable Corepack
@@ -33,13 +33,13 @@ jobs:
     timeout-minutes: 10
     needs: [config-guard]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.0.0
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
@@ -54,13 +54,13 @@ jobs:
     timeout-minutes: 10
     needs: [lint]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.0.0
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
@@ -75,13 +75,13 @@ jobs:
     timeout-minutes: 15
     needs: [typecheck]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.0.0
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
@@ -114,9 +114,9 @@ jobs:
     timeout-minutes: 5
     needs: [config-guard]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238
         with:
           node-version-file: .nvmrc
       - name: Verify TSConfig Exclusions Frozen
@@ -137,13 +137,13 @@ jobs:
     timeout-minutes: 10
     needs: [config-guard]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.0.0
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
@@ -154,7 +154,7 @@ jobs:
         env:
           TZ: UTC
       - name: Upload SOC compliance reports
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: soc-compliance-report
           path: soc-compliance-reports

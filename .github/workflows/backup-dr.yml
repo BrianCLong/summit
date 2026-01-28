@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Install Dependencies
         run: |
@@ -59,7 +59,7 @@ jobs:
 
       - name: Upload Backup Artifact
         if: ${{ secrets.BACKUP_S3_BUCKET == '' }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: summit-backup-${{ inputs.backup_set || 'full' }}-${{ github.run_id }}
           path: backups/

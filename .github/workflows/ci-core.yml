@@ -355,10 +355,10 @@ jobs:
       actions: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Use Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238
         with:
           node-version: "20"
           cache: "pnpm"
@@ -377,7 +377,7 @@ jobs:
           bash scripts/test-soc-controls.sh soc-compliance-reports
 
       - name: Upload SOC compliance reports
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: soc-compliance-report
           path: soc-compliance-reports

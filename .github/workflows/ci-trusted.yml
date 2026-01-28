@@ -18,7 +18,7 @@ jobs:
       id-token: write # Required for OIDC
       deployments: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
       - name: Authenticate to Cloud
         uses: google-github-actions/auth@v3
         with:
