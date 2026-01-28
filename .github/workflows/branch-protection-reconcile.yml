@@ -70,10 +70,26 @@ jobs:
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
 
+      - name: Validate branch protection token
+        env:
+          BRANCH_PROTECTION_TOKEN: ${{ github.event.inputs.mode == 'apply' && secrets.BRANCH_PROTECTION_ADMIN_TOKEN || secrets.BRANCH_PROTECTION_READ_TOKEN }}
+        run: |
+          if [[ "${{ github.event.inputs.mode }}" == "apply" ]]; then
+            if [[ -z "${BRANCH_PROTECTION_TOKEN}" ]]; then
+              echo "::error::BRANCH_PROTECTION_ADMIN_TOKEN is required for apply mode."
+              exit 1
+            fi
+          else
+            if [[ -z "${BRANCH_PROTECTION_TOKEN}" ]]; then
+              echo "::error::BRANCH_PROTECTION_READ_TOKEN is required for plan mode."
+              exit 1
+            fi
+          fi
+
       - name: Run Reconciler
         id: reconcile
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.event.inputs.mode == 'apply' && secrets.BRANCH_PROTECTION_ADMIN_TOKEN || secrets.BRANCH_PROTECTION_READ_TOKEN }}
         run: |
           mkdir -p "${{ env.OUT_DIR }}"
 

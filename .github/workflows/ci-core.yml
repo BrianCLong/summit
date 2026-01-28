@@ -402,9 +402,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Validate branch protection read token
+        env:
+          BRANCH_PROTECTION_TOKEN: ${{ secrets.BRANCH_PROTECTION_READ_TOKEN }}
+        run: |
+          if [[ -z "${BRANCH_PROTECTION_TOKEN}" ]]; then
+            echo "::error::BRANCH_PROTECTION_READ_TOKEN is required to audit branch protection."
+            exit 1
+          fi
+
       - name: Check branch protection drift
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.BRANCH_PROTECTION_READ_TOKEN }}
         run: pnpm ci:branch-protection:check
 
       - name: Upload drift artifacts
