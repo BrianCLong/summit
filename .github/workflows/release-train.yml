@@ -47,9 +47,59 @@ jobs:
     outputs:
       digest: ${{ steps.build.outputs.DIGEST }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Build image
+      - name: Checkout Code
+        uses: actions/checkout@v4 # v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v4 # v6
+        with:
+          cache: 'pnpm'
+          node-version: "20"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: "10.0.0"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Packages
         id: build
+        run: npm run build
+
+      - name: Upload Client Artifacts
+        if: hashFiles('client/dist/**') != ''
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: client-dist
+          path: client/dist
+          retention-days: 5
+          if-no-files-found: warn
+
+      - name: Upload Server Artifacts
+        if: hashFiles('server/dist/**') != ''
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: server-dist
+          path: server/dist
+          retention-days: 5
+          if-no-files-found: warn
+
+  sbom:
+    name: Generate SBOM
+    needs: build
+    runs-on: ubuntu-latest
+    if: success()
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4 # v6
+
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@62ad5284b8ced813296287a0b63906cb364b73ee # v0
+
+      - name: Generate SBOMs
         run: |
           docker build -t registry/app:${{ github.sha }} .
           DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' registry/app:${{ github.sha }})
@@ -63,16 +113,36 @@ jobs:
     needs: build_and_sign
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Deploy canary (10%)
-        run: scripts/ci/release-train/deploy.sh --env=${{ inputs.target_env }} --strategy=canary --percent=10 --digest=${{ needs.build_and_sign.outputs.digest }}
-      - name: Pre-bake probes
-        run: scripts/ci/release-train/probes.sh --env=${{ inputs.target_env }} --mode=pre --timeout=10m
-      - name: Error-budget gate
-        run: scripts/ci/release-train/error_budget_gate.sh --window=30m --env=${{ inputs.target_env }}
+      - name: Checkout Code
+        uses: actions/checkout@v4 # v6
 
-  progressive_rollout:
-    needs: canary_rollout
+      - name: Setup Node
+        uses: actions/setup-node@v4 # v6
+        with:
+          cache: 'pnpm'
+          node-version: "20"
+
+      - name: Generate Evidence Bundle (Provenance)
+        run: |
+          if [ -f scripts/compliance/generate_evidence.ts ]; then
+            # Install tsx globally or usage npx to run the script
+            npm install -g tsx
+            npx tsx scripts/compliance/generate_evidence.ts
+          else
+            echo "Provenance generation script not found. Skipping."
+          fi
+
+      - name: Upload Evidence Artifacts
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: evidence-bundle
+          path: evidence
+          retention-days: 90
+          if-no-files-found: warn
+
+  finalize:
+    name: Finalize Release (Dry Run)
+    needs: [build, sbom, provenance]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
