@@ -180,6 +180,34 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ssdf-v1.2-posture-assessment
+    version: v1
+    path: prompts/compliance/ssdf-v1.2-posture-assessment@v1.md
+    sha256: 1e0d1ea37cc4f6d359a90868d58b40c72941ce5b4575bbf43291cc9c11edae3f
+    description: Assess SSDF v1.2 posture, map controls, and draft NIST public comment artifacts.
+    scope:
+      paths:
+        - docs/compliance/
+        - docs/architecture/
+        - docs/standards/
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/compliance/
+        - prompts/registry.yaml
+      domains:
+        - compliance
+        - governance
+        - security
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: pr-lifecycle-report
     version: v1
     path: prompts/governance/pr-lifecycle-report.md

@@ -15,5 +15,25 @@
     },
     "reasoning": "Matched condition: cpu_usage > 80%",
     "reverted": true
+  },
+  {
+    "id": "ssdfv12map1",
+    "timestamp": "2026-01-28T06:31:04.000Z",
+    "agentId": "codex-agent",
+    "policyVersion": "ssdf-v1.2",
+    "inputHash": "eyJjaGFuZ2UiOiJzc2RmLXYxLjIgcG9zdHVyZSBhcnRpZmFjdHMifQ==",
+    "decision": {
+      "action": "add-ssdf-v1.2-artifacts",
+      "artifacts": [
+        "docs/compliance/SSDF_v1.2_CONTROL_MAP.json",
+        "docs/compliance/SSDF_v1.2_GAPS_AND_EXCEEDS.md",
+        "docs/architecture/SSDF_DERIVED_CI_BLUEPRINT.md",
+        "docs/standards/NIST_SP_800_218_R1_PUBLIC_COMMENT.md",
+        "docs/standards/NIST_COMMENT_SUBMISSION_CHECKLIST.md"
+      ],
+      "rollback_plan": "Revert commit and remove the SSDF v1.2 docs plus registry entry if scope changes."
+    },
+    "reasoning": "Recorded governance decision with explicit rollback path for SSDF v1.2 posture artifacts.",
+    "reverted": false
   }
 ]
