@@ -166,3 +166,24 @@ class TippingPointDetector {
 2.  **False Positive Rate**: Percentage of alerts that do not result in a breakout event within 24 hours. Target: < 15%.
 3.  **Analyst Action Rate**: % of alerts that result in an analyst taking an action (e.g., deploying a counter-narrative, generating a report).
 4.  **Simulation Fidelity**: Correlation between simulated $R_t$ curves and historical real-world data for known campaigns.
+
+---
+
+## Phase 2: Frame-First & Role-Based Detection (2026-01-27 Strategy)
+
+Based on the strategic directive `docs/strategy/2026_01_27_NARRATIVE_WARFARE_DIRECTIVE.md`, we are expanding detection capabilities to focus on structural frames and baseline drift.
+
+### Core Objectives
+1.  **Frame Extraction**: Identify latent narrative frames (invariant cores) distinct from surface claims.
+2.  **Role Classification**: Classify actors as `INITIATOR`, `VALIDATOR`, or `AMPLIFIER` based on temporal graph behavior.
+3.  **Drift Analytics**: Monitor long-term (30-90 day) shifts in discourse baseline rather than just short-term viral spikes.
+
+### Schema Extensions (Implemented)
+*   **NarrativeFrame**: Tracks the invariant core and stability score of a frame.
+*   **BaselineDrift**: Metrics for tracking slow-burn influence.
+*   **ActorRole**: Enum for behavioral classification.
+
+### Implementation Priorities
+*   Integrate `FrameExtraction` into the OSINT ingestion pipeline.
+*   Update `RiskAssessment` logic to weigh `driftScore` heavily for "safe" but persistent content.
+*   Visualize `Frame` evolution lineages in the frontend.
