@@ -144,6 +144,14 @@ We treat "Agent Health" like "Server Health."
     - [ ] Inter-agent "Conflict Resolution" protocol.
     - [ ] Full "Control Room" UI for operators.
 
+### Phase 4: Multimodal & Swarm Hardening (The Kimi Pivot)
+- **Goal:** Subsume Kimi K2.5-grade capabilities into the Governed Kernel.
+- **Deliverables:**
+    - [ ] **Swarm Runtime Primitives**: Planner/Shard/Execute/Merge with OPA budget gates.
+    - [ ] **Reasoning Budget Contract**: Multi-model routing based on Latency/Cost/Risk targets.
+    - [ ] **Summit Agent Conformance Suite (SACS)**: Signed vision grounding and tool-fidelity reports.
+    - [ ] **Multi-Scale Agent Runtime**: local-to-cloud continuity with unified UX.
+
 ---
 
 **Risks:**
