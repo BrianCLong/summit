@@ -1,0 +1,16 @@
+{
+  "scorecard_id": "COGDEF-SCORECARD-2026W05",
+  "scores": [
+    {
+      "metric_id": "COGDEF-RES-001",
+      "name": "Morale",
+      "pillar": "RESILIENCE",
+      "score": 80,
+      "confidence": 0.9,
+      "coverage": 0.8,
+      "evidence_refs": ["EVD-COGDEF-SCORECARD-001"]
+    }
+  ],
+  "rollup": { "RESILIENCE": 80 },
+  "notes": "Good run."
+}

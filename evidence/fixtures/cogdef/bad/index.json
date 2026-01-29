@@ -1,0 +1,13 @@
+{
+  "evidence": [
+    {
+      "id": "EVD-COGDEF-SCORECARD-BAD",
+      "area": "SCORECARD",
+      "files": {
+        "report": "evidence/fixtures/cogdef/good/report.json",
+        "metrics": "evidence/fixtures/cogdef/bad/metrics.json",
+        "stamp": "evidence/fixtures/cogdef/good/stamp.json"
+      }
+    }
+  ]
+}

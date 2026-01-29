@@ -14,3 +14,13 @@
 ### Security/Governance Review
 - Standard library only. No third-party packages introduced in core governance logic.
 - Redaction logic added for audit trails.
+
+## PR: Cognitive Defense Metrics (PR1)
+**Date**: 2026-02-05
+**Owner**: Jules
+
+### New Dependencies
+- **Python**: `jsonschema` (via `pip`)
+
+### Justification
+- Required for strict schema validation of cognitive defense metrics and evidence artifacts in CI.

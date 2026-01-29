@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["scorecard_id", "scores", "rollup"],
+  "properties": {
+    "scorecard_id": { "type": "string", "pattern": "^COGDEF-SCORECARD-[0-9]{4}W[0-9]{2}$" },
+    "scores": {
+      "type": "array",
+      "items": { "$ref": "metric.schema.json" }
+    },
+    "rollup": {
+      "type": "object",
+      "properties": {
+        "RESILIENCE": { "type": "number", "minimum": 0, "maximum": 100 },
+        "INFOSPACE": { "type": "number", "minimum": 0, "maximum": 100 },
+        "DECISION": { "type": "number", "minimum": 0, "maximum": 100 },
+        "TECHNICAL": { "type": "number", "minimum": 0, "maximum": 100 }
+      },
+      "additionalProperties": false
+    },
+    "notes": { "type": "string" }
+  },
+  "additionalProperties": false
+}

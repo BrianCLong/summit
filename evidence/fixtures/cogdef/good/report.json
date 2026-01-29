@@ -1,0 +1,7 @@
+{
+  "run_id": "RUN-001",
+  "item_slug": "COGDEF-SCORECARD",
+  "evd_ids": ["EVD-COGDEF-SCORECARD-001"],
+  "summary": { "what_ran": "Scorecard Gen", "result": "SUCCESS" },
+  "artifacts": { "metrics": "evidence/fixtures/cogdef/good/metrics.json", "stamp": "evidence/fixtures/cogdef/good/stamp.json" }
+}
