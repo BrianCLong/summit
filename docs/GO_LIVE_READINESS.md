@@ -256,7 +256,127 @@ kubectl rollout status deployment/intelgraph-api -n production
 
 ---
 
-## 6. Known Risks
+## 6. Release Cut Workflow
+
+The Release Cut workflow automates the creation of immutable go-live tags with release notes generated from verified evidence bundles.
+
+### Overview
+
+The workflow ensures:
+- Release notes are generated from verified go-live evidence
+- Tag patterns are validated (semver or prod-date format)
+- All evidence must pass verification before release creation
+- Immutable tags are created with full audit trail
+
+### Prerequisites
+
+Before triggering a release cut:
+
+1. **Generate go-live evidence:**
+   ```bash
+   pnpm evidence:go-live:generate
+   ```
+
+2. **Verify evidence passes:**
+   ```bash
+   pnpm evidence:go-live:verify
+   ```
+
+3. **Commit the evidence bundle** (if not already committed)
+
+### Tag Patterns
+
+The workflow accepts two tag patterns:
+
+| Pattern | Format | Example |
+|---------|--------|---------|
+| Semver | `v{major}.{minor}.{patch}[-prerelease]` | `v5.2.49`, `v5.3.0-beta.1` |
+| Prod Date | `prod-{YYYY}-{MM}-{DD}` | `prod-2026-01-28` |
+
+### Triggering the Workflow
+
+Via GitHub Actions UI:
+
+1. Navigate to **Actions** > **Release Cut**
+2. Click **Run workflow**
+3. Fill in the inputs:
+   - **ref**: Git ref to release from (default: `main`)
+   - **release_tag**: The tag to create (e.g., `v5.2.49`)
+   - **environment**: Target environment (`prod` or `staging`)
+4. Click **Run workflow**
+
+### Workflow Steps
+
+1. **Validate Tag** - Verifies tag matches allowed patterns
+2. **Verify Evidence** - Runs `pnpm evidence:go-live:verify`
+3. **Generate Release Notes** - Creates notes from evidence bundle
+4. **Create Release** - Tags commit and creates GitHub Release
+
+### Evidence Bundle Structure
+
+```
+artifacts/
+├── evidence/
+│   └── go-live/
+│       └── <sha>/
+│           └── evidence.json    # CI checks, endpoints, warnings
+└── release/
+    └── <sha>/
+        ├── RELEASE_NOTES.md     # Generated release notes
+        └── release-manifest.json # Release metadata
+```
+
+### Evidence Schema
+
+```json
+{
+  "version": "1.0.0",
+  "sha": "abc123...",
+  "timestamp": "2026-01-28T12:00:00Z",
+  "branch": "main",
+  "checks": {
+    "lint": { "name": "lint", "status": "pass" },
+    "build": { "name": "build", "status": "pass" },
+    "tests": { "name": "tests", "status": "pass" },
+    "gaVerify": { "name": "gaVerify", "status": "pass" },
+    "smoke": { "name": "smoke", "status": "skip" }
+  },
+  "endpoints": {
+    "validated": ["/health", "/healthz", "/readyz"],
+    "failed": []
+  },
+  "warnings": [],
+  "exceptions": []
+}
+```
+
+### Manual Release Notes Generation
+
+To generate release notes locally:
+
+```bash
+# Generate evidence first
+pnpm evidence:go-live:generate
+
+# Verify evidence
+pnpm evidence:go-live:verify
+
+# Generate release notes
+pnpm release:notes
+```
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Evidence not found | Run `pnpm evidence:go-live:generate` |
+| Evidence verification failed | Check CI checks status in evidence.json |
+| Tag already exists | Use a different tag or delete existing tag |
+| Release notes generation failed | Ensure evidence is valid and SHA matches |
+
+---
+
+## 8. Known Risks
 
 | Risk                                           | Severity | Mitigation                                              |
 | ---------------------------------------------- | -------- | ------------------------------------------------------- |
@@ -269,7 +389,7 @@ kubectl rollout status deployment/intelgraph-api -n production
 
 ---
 
-## 7. Evidence Bundle
+## 9. Evidence Bundle
 
 | Category       | Artifact             | Location                            |
 | -------------- | -------------------- | ----------------------------------- |
