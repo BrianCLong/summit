@@ -1,0 +1,51 @@
+{
+  "id": "basic-investigation",
+  "inputs": {
+    "analyst": "analyst-17",
+    "caseId": "case-042",
+    "region": "emea"
+  },
+  "source": {
+    "procedureId": "basic-investigation",
+    "procedureVersion": "1.0.0"
+  },
+  "steps": [
+    {
+      "id": "step-01",
+      "name": "Seed query",
+      "type": "graph.query",
+      "with": {
+        "fanout": 250,
+        "queryId": "seed-entities"
+      }
+    },
+    {
+      "id": "step-02",
+      "name": "Enrich indicators",
+      "type": "enrich.http",
+      "with": {
+        "domain": "enrich.summit.local",
+        "path": "/whois"
+      }
+    },
+    {
+      "id": "step-03",
+      "name": "Score risk",
+      "type": "score.model",
+      "with": {
+        "modelId": "risk-v1",
+        "threshold": 0.72
+      }
+    },
+    {
+      "id": "step-04",
+      "name": "Notify analysts",
+      "type": "notify.slack",
+      "with": {
+        "channel": "#summit-ops",
+        "messageTemplate": "Procedure {{procedure.id}} complete"
+      }
+    }
+  ],
+  "version": "1.0.0"
+}
