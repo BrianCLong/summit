@@ -8,7 +8,8 @@ import { auditTrailService } from '../services/audit/AuditTrailService.js';
 
 const router = Router();
 
-const healthEndpointsEnabled = () => (process.env.HEALTH_ENDPOINTS_ENABLED ?? 'false').toLowerCase() === 'true';
+// Health endpoints enabled by default for K8s probes - set HEALTH_ENDPOINTS_ENABLED=false to disable
+const healthEndpointsEnabled = () => (process.env.HEALTH_ENDPOINTS_ENABLED ?? 'true').toLowerCase() === 'true';
 
 const baseStatus = () => ({
   timestamp: new Date().toISOString(),
