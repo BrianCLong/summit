@@ -1,0 +1,24 @@
+version: 1
+allow:
+  stepTypes:
+    - graph.query
+    - enrich.http
+    - score.model
+    - notify.slack
+    - export.csv
+  exportDestinations:
+    csv:
+      - internal://evidence
+      - internal://reports
+  httpDomains:
+    - api.ipify.org
+    - enrich.summit.local
+    - threat.summit.local
+budgets:
+  maxSteps: 50
+  maxQueryFanout: 1000
+  maxHttpDomains: 10
+rules:
+  forbidAdjacency:
+    - from: enrich.http
+      to: export.csv
