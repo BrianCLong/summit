@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-# Required Checks Todo
-
-- [ ] Rename CI job to `ci/golden-path-e2e` once finalized.
-=======
 # Required Checks (Todo)
 
 This file tracks the CI checks that need to be made "required" in GitHub repository settings.
@@ -15,4 +10,3 @@ This file tracks the CI checks that need to be made "required" in GitHub reposit
 ## Status
 
 Pending implementation of the golden path workflow.
->>>>>>> 50f8d7925a (feat: add golden path E2E test harness for consolidated frontend)

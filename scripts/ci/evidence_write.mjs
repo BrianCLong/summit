@@ -34,8 +34,5 @@ writeJson(path.join(base, "evidence/index.json"), {
   evidence_id: "EVD-GOLDENPATH-FRONTEND-004",
   files: ["report.json", "metrics.json", "stamp.json"],
 });
-<<<<<<< HEAD
-=======
 
 console.log(`Evidence written to ${base}`);
->>>>>>> 50f8d7925a (feat: add golden path E2E test harness for consolidated frontend)
