@@ -171,7 +171,7 @@ jobs:
       - name: Build and push image
         if: steps.dockerfile-check.outputs.exists == 'true'
         id: build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v4
         with:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}

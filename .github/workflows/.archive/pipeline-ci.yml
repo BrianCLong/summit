@@ -157,7 +157,7 @@ jobs:
 
       # Build Server
       - name: Build and push Server
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v4
         with:
           context: ./server
           file: ./server/Dockerfile.dev
@@ -169,7 +169,7 @@ jobs:
 
       # Build Client
       - name: Build and push Client
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v4
         with:
           context: ./client
           file: ./client/Dockerfile.dev

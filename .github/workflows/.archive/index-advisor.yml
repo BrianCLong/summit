@@ -23,7 +23,7 @@ jobs:
         run: |
           python .ci/scripts/db/slow_query_lint.py --advisor --output /tmp/index_suggestions.yaml
       - name: Open PR
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v4
         with:
           commit-message: "chore: weekly index advisor suggestions"
           title: "chore: weekly index advisor suggestions"
