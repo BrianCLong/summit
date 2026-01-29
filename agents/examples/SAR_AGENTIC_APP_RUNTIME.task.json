@@ -1,0 +1,40 @@
+{
+  "task_id": "SAR_AGENTIC_APP_RUNTIME",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "sar-agentic-app-runtime",
+    "version": "v1",
+    "sha256": "0c2ea2abded4bee786ab44a93066948cac8bff1dc60d94cb3cd56faa15c367d8",
+    "path": "prompts/architecture/sar-agentic-app-runtime@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/architecture/sar-agentic-app-runtime.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/SAR_AGENTIC_APP_RUNTIME.task.json",
+      "prompts/architecture/sar-agentic-app-runtime@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["architecture", "governance", "security", "product"],
+    "exclusions": ["server/", "packages/"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/architecture/sar-agentic-app-runtime.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Deliverables captured in docs/architecture/sar-agentic-app-runtime.md with acceptance criteria",
+    "Prompt hash registered in prompts/registry.yaml",
+    "Roadmap status updated in docs/roadmap/STATUS.json"
+  ],
+  "stop_conditions": [
+    "Conflict with Constitution or Meta-Governance",
+    "Documentation contradicts code-defined behavior",
+    "Unauthorized scope expansion beyond declared paths"
+  ]
+}

@@ -113,3 +113,6 @@ export interface PublicRecord {
   entities?: string[];
   metadata?: Record<string, unknown>;
 }
+
+export * from './telemetry.js';
+export * from './evidence.js';

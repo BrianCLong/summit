@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/graphrag",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Semantic RAG Knowledge Graph Service - Evidence-first retrieval with graph reasoning",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

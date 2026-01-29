@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/spar",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "private": true,
   "description": "Secure Prompt/Output Artifact Registry (SPAR)",
   "main": "dist/index.js",

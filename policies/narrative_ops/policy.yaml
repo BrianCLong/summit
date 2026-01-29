@@ -1,0 +1,13 @@
+version: 1
+rules:
+  - id: no_real_person_attribution
+    description: "Disallow attribution to specific real persons/entities; operation-level only."
+    deny_phrases:
+      - "definitely did this"
+      - "is the perpetrator"
+      - "named individual"
+  - id: require_uncertainty_language
+    description: "Require bounded language when discussing actors."
+    require_phrases:
+      - "appears coordinated"
+      - "likely amplification"

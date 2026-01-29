@@ -1,0 +1,38 @@
+apiVersion: summit.io/v1
+kind: AgentTemplate
+metadata:
+  name: project-sync-agent
+  description: "Synchronizes project management tickets with documentation status."
+spec:
+  role: "Project Coordinator"
+  capabilities:
+    - read_tickets
+    - write_docs
+  mcp_servers:
+    - name: "jira-mcp"
+      required: true
+    - name: "confluence-mcp"
+      required: false
+    - name: "fs-mcp"
+      required: true
+
+  context:
+    inputs:
+      - name: "project_key"
+        type: "string"
+        description: "Key of the project to sync."
+      - name: "doc_root"
+        type: "string"
+        description: "Root directory for documentation."
+    outputs:
+      - name: "synced_items"
+        type: "array"
+        description: "List of tickets updated."
+
+  determinism:
+    require_stable_order: false
+    exclude_timestamps: false
+
+  failure_modes:
+    - condition: "Conflict detected"
+      action: "Create a warning flag in the document header."

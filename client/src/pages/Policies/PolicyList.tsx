@@ -40,6 +40,7 @@ import {
   CircularProgress,
   Menu,
 } from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material';
 import {
   Search as SearchIcon,
   Add as AddIcon,
@@ -146,12 +147,14 @@ const PolicyList: React.FC = () => {
     updateFilters({ search: event.target.value, page: 1 });
   }, [updateFilters]);
 
-  const handleStatusFilter = useCallback((event: any) => {
-    updateFilters({ status: event.target.value || undefined, page: 1 });
+  const handleStatusFilter = useCallback((event: SelectChangeEvent<string>) => {
+    const value = event.target.value as ManagedPolicy['status'] | '';
+    updateFilters({ status: value || undefined, page: 1 });
   }, [updateFilters]);
 
-  const handleCategoryFilter = useCallback((event: any) => {
-    updateFilters({ category: event.target.value || undefined, page: 1 });
+  const handleCategoryFilter = useCallback((event: SelectChangeEvent<string>) => {
+    const value = event.target.value as ManagedPolicy['category'] | '';
+    updateFilters({ category: value || undefined, page: 1 });
   }, [updateFilters]);
 
   const handleChangePage = useCallback((_: unknown, newPage: number) => {

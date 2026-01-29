@@ -1,5 +1,5 @@
 Owner: Governance
-Last-Reviewed: 2026-01-14
+Last-Reviewed: 2026-01-20
 Evidence-IDs: none
 Status: active
 
@@ -43,3 +43,9 @@ The following actions will cause CI failure:
 
 - **CI/CD:** GitHub Actions enforce unit tests, linting, and security scans on every PR.
 - **Compliance Drift:** The `verify-compliance-drift` job runs on schedule to ensure evidence artifacts still exist.
+- **Governance Drift:** The `check-drift` job runs daily to detect unauthorized policy changes.
+- **Evidence Freshness:** The `fresh-evidence-rate` job continuously monitors the age of evidence artifacts.
+
+## 5. Reporting
+
+- **Weekly GA Ops Snapshot:** A required weekly report capturing the state of governance drift, evidence freshness, and operational health. This snapshot serves as the primary artifact for executive review.

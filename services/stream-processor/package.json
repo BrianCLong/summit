@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/stream-processor",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Stream processor service with sinks, enrichment, and real-time processing",
   "main": "dist/server.js",
   "scripts": {

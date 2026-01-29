@@ -27,16 +27,20 @@ For details on how we handle security incidents, please refer to the [Incident R
 
 For compliance evidence regarding vulnerability management, see [Evidence Index](docs/compliance/EVIDENCE_INDEX.md).
 
-## Threat Model (High Level)
+## Threat Model (MAESTRO Aligned)
+
+We utilize the **MAESTRO Threat Modeling Framework** to secure our agentic AI environment. See [Summit MAESTRO Framework](docs/security/threat-modeling-framework.md) for the detailed methodology.
 
 ### Assets
 
 *   **Customer Data:** PII, usage metrics, and proprietary graph data stored in **Neo4j** and **PostgreSQL**.
 *   **Intellectual Property:** Source code, ML models (PyTorch/ONNX), and proprietary algorithms (Rust crates for graph processing).
 *   **Availability:** The ability for the platform to serve requests via the **IntelGraph API**.
+*   **Agent Integrity:** The alignment and correct behavior of autonomous agents (Jules, Maestro).
 
 ### Threats
 
+*   **Adversarial AI:** Prompt injection, goal hijacking, model abuse, and data poisoning.
 *   **Unauthorized Access:** External attackers gaining access to data or systems.
 *   **Insider Threat:** Malicious or negligent employees compromising security.
 *   **Supply Chain Attack:** Compromise of third-party dependencies (Rust crates, NPM packages, Python libs) or build tools.
@@ -44,6 +48,7 @@ For compliance evidence regarding vulnerability management, see [Evidence Index]
 
 ### Mitigations
 
+*   **AI Guardrails:** Input/Output validation, deterministic safety checks, and adversarial testing.
 *   **Identity & Access Management:** Strong authentication (MFA), least privilege (RBAC) enforced via API Gateway.
 *   **Encryption:** Data encrypted at rest (AES-256 via **HashiCorp Vault/KMS**) and in transit (TLS 1.2+).
 *   **Vulnerability Management:** Regular scanning of code and dependencies (**Trivy**, **Dependabot**).

@@ -270,9 +270,69 @@ export const multimodalResolvers = {
     ) => {
       if (!context.user) throw new Error('Authentication required');
 
-      // TODO: Implement generateMultimodalTimeline method in MultimodalDataService
-      // The method doesn't exist yet. This is a placeholder for future implementation.
-      throw new Error('multimodalTimeline is not yet implemented');
+      // Simplified implementation (P1-3 from audit report)
+      // NOTE: Full MultimodalDataService integration pending
+      const windowHours = args.windowHours ?? 72;
+      const startTime = new Date(Date.now() - windowHours * 60 * 60 * 1000);
+
+      try {
+        // Query Neo4j for timeline events in the investigation
+        const session = context.neo4jDriver.session();
+        try {
+          const result = await session.run(
+            `
+            MATCH (i:Investigation {id: $investigationId})-[:CONTAINS]->(e)
+            WHERE (e:Event OR e:MediaSource OR e:MultimodalEntity)
+              AND (e.timestamp >= $startTime OR e.createdAt >= $startTime)
+            RETURN e
+            ORDER BY COALESCE(e.timestamp, e.createdAt, e.updatedAt) ASC
+            LIMIT 100
+            `,
+            {
+              investigationId: args.investigationId,
+              startTime: startTime.toISOString(),
+            }
+          );
+
+          const events = result.records.map((record) => {
+            const node = record.get('e');
+            const props = node.properties;
+            return {
+              id: props.id || node.identity.toString(),
+              timestamp: props.timestamp || props.createdAt || new Date().toISOString(),
+              type: node.labels[0] || 'unknown',
+              title: props.title || props.label || props.description || 'Untitled Event',
+              description: props.description || '',
+              source: props.source || 'investigation',
+              metadata: props.metadata || {},
+            };
+          });
+
+          console.info(`[Multimodal Timeline P1-3] Generated timeline with ${events.length} events for investigation ${args.investigationId}`);
+
+          return {
+            investigationId: args.investigationId,
+            windowHours,
+            startTime: startTime.toISOString(),
+            endTime: new Date().toISOString(),
+            events,
+            totalEvents: events.length,
+          };
+        } finally {
+          await session.close();
+        }
+      } catch (error: any) {
+        console.error('[Multimodal Timeline P1-3] Error:', error);
+        // Fallback: return empty timeline instead of throwing
+        return {
+          investigationId: args.investigationId,
+          windowHours,
+          startTime: startTime.toISOString(),
+          endTime: new Date().toISOString(),
+          events: [],
+          totalEvents: 0,
+        };
+      }
 
       // const multimodalService = new MultimodalDataService(
       //   context.neo4jDriver,

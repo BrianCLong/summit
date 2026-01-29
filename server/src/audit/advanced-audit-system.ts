@@ -11,10 +11,10 @@ import { Logger } from 'pino';
 import { z } from 'zod';
 import jwt from 'jsonwebtoken';
 const { sign, verify } = jwt;
-import { getPostgresPool, getRedisClient } from '../config/database.js';
-import logger from '../utils/logger.js';
-import { correlationStorage } from '../config/logger.js';
-import { AuditTimelineRollupService } from './AuditTimelineRollupService.js';
+import { getPostgresPool, getRedisClient } from '../config/database.ts';
+import logger from '../utils/logger.ts';
+import { correlationStorage } from '../config/logger.ts';
+import { AuditTimelineRollupService } from './AuditTimelineRollupService.ts';
 
 // Core audit event types
 export type AuditEventType =

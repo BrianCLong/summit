@@ -26,8 +26,47 @@ export interface ReplanTrigger {
   timestamp: Date;
 }
 
+export interface TaskExecutor {
+  execute(connectorId: string, action: string, params: Record<string, unknown>, context: any): Promise<any>;
+}
+
 export class PlannerOrchestrator {
   constructor(private graphStore: GraphStore) {}
+
+  async executePlan(plan: PlanSynthesisResult, executor: TaskExecutor, context: any): Promise<void> {
+    // Topologically sort tickets (simple approximation: just run in order for now as edges define dep)
+    // For MVP, we iterate through plan.tickets
+    for (const ticket of plan.tickets) {
+      if (ticket.status === 'done') continue;
+
+      try {
+        await this.graphStore.updateNode(ticket.id, { status: 'in_progress' });
+
+        const toolCall = ticket.metadata?.toolCall as {
+          connectorId: string;
+          action: string;
+          params: Record<string, unknown>;
+        } | undefined;
+
+        if (toolCall) {
+          await executor.execute(toolCall.connectorId, toolCall.action, toolCall.params, context);
+        } else {
+            // Simulate work
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        await this.graphStore.updateNode(ticket.id, { status: 'done', completedAt: new Date() });
+      } catch (error) {
+        await this.graphStore.updateNode(ticket.id, {
+            status: 'blocked',
+            blockedReason: String(error)
+        });
+        // Trigger replan?
+        // For now just stop or log
+        throw error;
+      }
+    }
+  }
 
   async synthesizePlan(intent: Intent, options?: { maxTickets?: number; targetDate?: Date }): Promise<PlanSynthesisResult> {
     const tickets: Ticket[] = [];
@@ -45,10 +84,23 @@ export class PlannerOrchestrator {
       });
 
       for (let j = 0; j < ticketsPerEpic; j++) {
+        // Mock a tool call for demonstration if description mentions "search" or "lookup"
+        let metadata = {};
+        if (intent.description.toLowerCase().includes('search') && j === 0) {
+            metadata = {
+                toolCall: {
+                    connectorId: 'search-connector',
+                    action: 'search',
+                    params: { query: intent.title }
+                }
+            };
+        }
+
         const ticket: Ticket = await this.graphStore.createNode({
           id: crypto.randomUUID(), type: 'ticket', createdAt: new Date(), updatedAt: new Date(),
           createdBy: 'planner', title: epic.title + ' - Task ' + (j + 1), description: 'Auto-generated',
           status: 'backlog', priority: 'P2', ticketType: 'feature', labels: ['auto-generated'], agentEligible: true, complexity: 'medium', estimate: 3,
+          metadata
         });
         tickets.push(ticket);
         edges.push(await this.graphStore.createEdge({

@@ -1,0 +1,43 @@
+apiVersion: summit.io/v1
+kind: AgentTemplate
+metadata:
+  name: evidence-agent
+  description: "Collects and cryptographically signs release evidence."
+spec:
+  role: "Evidence Collector"
+  capabilities:
+    - file_system_read
+    - crypto_sign
+    - database_read
+  mcp_servers:
+    - name: "evidence-store"
+      required: true
+    - name: "crypto-service"
+      required: true
+
+  context:
+    inputs:
+      - name: "release_tag"
+        type: "string"
+        description: "The Git tag to collect evidence for."
+      - name: "build_id"
+        type: "string"
+        description: "CI build identifier."
+    outputs:
+      - name: "evidence_bundle_hash"
+        type: "string"
+        description: "SHA-256 hash of the collected bundle."
+      - name: "signature"
+        type: "string"
+        description: "Digital signature of the hash."
+
+  determinism:
+    require_stable_order: true
+    exclude_timestamps: true
+    strict_mode: true
+
+  failure_modes:
+    - condition: "Hash mismatch"
+      action: "Abort operation immediately."
+    - condition: "Missing artifact"
+      action: "Flag as incomplete, do not sign."

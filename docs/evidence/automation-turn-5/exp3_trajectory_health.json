@@ -1,0 +1,7 @@
+{
+  "convergenceTimeMs": 4000,
+  "oscillationRate": 0.5,
+  "recoveryRate": 1,
+  "escalationDensity": 0,
+  "overallHealthScore": 0.75
+}

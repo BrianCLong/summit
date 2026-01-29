@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/zk-deconfliction",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "Zero-Knowledge deconfliction for selector overlap detection",
   "type": "module",
   "main": "dist/index.js",

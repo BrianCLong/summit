@@ -1,0 +1,130 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Summit SkillSpec V2",
+  "type": "object",
+  "required": ["schema_version", "metadata", "steps"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": ["v2"]
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["name", "version", "description"],
+      "properties": {
+        "name": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+        "description": { "type": "string" },
+        "author": { "type": "string" },
+        "license": { "type": "string" }
+      }
+    },
+    "triggers": {
+      "type": "object",
+      "properties": {
+        "intents": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "keywords": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "file_patterns": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "inputs": {
+      "type": "object",
+      "properties": {
+        "properties": { "type": "object" },
+        "required": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "required_env": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["type", "command"],
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "const": "exec" },
+              "command": { "type": "string" },
+              "cwd": { "type": "string" },
+              "env": { "type": "object" }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["type", "file"],
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "const": "edit" },
+              "file": { "type": "string" },
+              "merge_diff": { "type": "string" },
+              "content": { "type": "string" }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["type", "check"],
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "const": "verify" },
+              "check": { "type": "string" },
+              "name": { "type": "string" },
+              "on_fail": { "enum": ["abort", "warn"] }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["type", "source"],
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "const": "cite" },
+              "source": { "type": "string" },
+              "excerpt": { "type": "string" }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["type", "prompt"],
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "const": "ask_user" },
+              "prompt": { "type": "string" },
+              "schema": { "type": "object" }
+            }
+          }
+        ]
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "properties": {
+        "properties": { "type": "object" }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "properties": {
+        "risk_level": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "evidence_requirements": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

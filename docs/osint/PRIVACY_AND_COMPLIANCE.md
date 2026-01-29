@@ -1,3 +1,10 @@
+**Owner**: @intelgraph/osint-team
+**Last-Reviewed**: 2026-01-27
+**Evidence-IDs**: EVID-OSINT-LEGACY
+**Status**: active
+**ILSA-Level**: 3
+**IBOM-Verified**: true
+
 # OSINT Platform - Privacy, Ethics, and Compliance Guide
 
 ## Overview

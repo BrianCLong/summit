@@ -1,0 +1,17 @@
+{
+  "claims": [
+    {
+      "backing": "ITEM:CLAIM-01",
+      "claim_id": "ITEM:CLAIM-01"
+    }
+  ],
+  "decisions": [
+    "Eval smoke run completed."
+  ],
+  "evidence_id": "EVD-NAROPS-EVAL-001",
+  "generated_by": "scripts/evals/run_narrative_ops_smoke.mjs",
+  "item_slug": "narrative-ops-detection-2026-01-28",
+  "notes": [
+    "processed 3 events"
+  ]
+}

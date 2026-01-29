@@ -85,6 +85,50 @@ Co-authored-by: Alice Smith <alice@example.com>
 
 Major architectural changes are reviewed by our internal "Council of Solvers" (a set of specialized AI agents). If your PR receives automated feedback from "Jules" or "Amp", treat it as you would a human code review.
 
+## 🔐 Secrets Handling & Shell Hygiene
+
+Summit treats secret handling as a production safety requirement. Before contributing, review the
+[Summit Readiness Assertion](docs/SUMMIT_READINESS_ASSERTION.md) and keep all credentials out of
+commands, history files, and logs.
+
+### Non-Negotiables
+
+1. **Never put secrets in commands.** Use env files, keyrings, or credential helpers.
+2. **Prefer `.env` + process env:** load with a tool, not inline.
+3. **Use secret managers:** 1Password CLI, Bitwarden CLI, AWS Secrets Manager, GCP Secret Manager,
+   Azure Key Vault, Doppler, etc.
+4. **For Git remotes/registries:** use token helpers (e.g., `gh auth login`, `npm login --auth-type=web`,
+   `docker login` with a credential store).
+
+### Bash History Hardening
+
+Add the following to `~/.bashrc` (or `~/.bash_profile` on macOS):
+
+```bash
+# Don't save commands that start with a space
+export HISTCONTROL=ignorespace:erasedups
+
+# Avoid recording commands likely to contain secrets
+export HISTCONTROL=$HISTCONTROL:ignoreboth
+export HISTIGNORE='*sudo -S*:*password*:*token*:*secret*'
+
+# Reduce history retention
+export HISTSIZE=2000
+export HISTFILESIZE=4000
+```
+
+Reload your shell with:
+
+```bash
+source ~/.bashrc
+```
+
+### Cleanup Checklist
+
+- Search shell history for leaks and delete them.
+- Rotate any secret you discover in history or logs.
+- Keep `.env` files out of version control and set strict permissions.
+
 ## 📦 Release Cadence & CI/CD
 
 - **Release Cadence**: Weekly cut to staging each Tuesday 18:00 UTC; production releases every other Thursday after a 48-hour soak and green merge-train. Emergencies use the hotfix path below.

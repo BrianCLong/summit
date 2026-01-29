@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/graph-predictive-orchestration",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Graph-Native Predictive Orchestration - Bind predictions to graph nodes and trigger autonomous workflows",
   "type": "module",
   "main": "dist/index.js",

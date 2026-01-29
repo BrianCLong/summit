@@ -1,0 +1,17 @@
+# Canonical SLO Policy
+# This file defines the Service Level Objectives (SLOs) for the ecosystem.
+
+version: 1
+
+slos:
+  - id: api-availability
+    description: "API Availability"
+    metric: "uptime"
+    target: 99.9 # 99.9% uptime
+    window: "30d"
+
+  - id: api-latency
+    description: "API Latency"
+    metric: "p95_latency"
+    target: 200 # 200ms p95 latency
+    window: "30d"

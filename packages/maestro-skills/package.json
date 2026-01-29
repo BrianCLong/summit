@@ -1,0 +1,14 @@
+{
+  "name": "@maestro/skills-tooling",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Tooling and validation for Summit Skills",
+  "scripts": {
+    "validate": "tsx scripts/validate_skill.ts"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "js-yaml": "^4.1.1",
+    "tsx": "^4.21.0"
+  }
+}

@@ -1,6 +1,6 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { SSOService } from '../SSOService.js';
-import { OIDCProvider } from '../SSOProvider.js';
+import { SSOService } from '../SSOService.ts';
+import { OIDCProvider } from '../SSOProvider.ts';
 import axios from 'axios';
 
 // Mock dependencies
@@ -14,11 +14,11 @@ const mockClient = {
   release: jest.fn()
 };
 
-jest.mock('../../config/database.js', () => ({
+jest.mock('../../config/database.ts', () => ({
   getPostgresPool: () => mockPool
 }));
 
-jest.mock('../../services/AuthService.js', () => ({
+jest.mock('../../services/AuthService.ts', () => ({
   AuthService: jest.fn().mockImplementation(() => ({
     generateTokens: jest.fn<any>().mockResolvedValue({ token: 'mock-jwt', refreshToken: 'mock-refresh' })
   }))

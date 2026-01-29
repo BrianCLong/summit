@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/copilot",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "AI Copilot Service for NL to Cypher/SQL with Guardrails",
   "main": "dist/server.js",
   "type": "module",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/unified-audit",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Centralized audit log aggregator for CompanyOS, Switchboard, and Summit",
   "type": "module",
   "main": "dist/index.js",

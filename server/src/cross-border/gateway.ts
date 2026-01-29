@@ -467,5 +467,3 @@ export function getCrossBorderGateway(
   }
   return gatewayInstance;
 }
-
-export { CrossBorderGateway };

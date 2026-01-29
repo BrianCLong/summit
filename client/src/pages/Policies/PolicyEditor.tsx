@@ -20,7 +20,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  FormHelperText,
   Box,
   Typography,
   Chip,
@@ -34,6 +33,7 @@ import {
   CircularProgress,
   Autocomplete,
 } from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material';
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
@@ -203,6 +203,18 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
       setErrors((prev) => ({ ...prev, [field]: '' }));
     }
   }, [errors, isEditing]);
+
+  const handleSelectChange = useCallback((field: 'category' | 'action') => (
+    event: SelectChangeEvent<string>
+  ) => {
+    const value = event.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      [field]: field === 'category'
+        ? (value as ManagedPolicy['category'])
+        : (value as ManagedPolicy['action']),
+    }));
+  }, []);
 
   const handleStagesChange = useCallback((_: unknown, value: PolicyScope['stages'][number][]) => {
     setFormData((prev) => ({ ...prev, stages: value }));
@@ -402,7 +414,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
               <InputLabel>Category</InputLabel>
               <Select
                 value={formData.category}
-                onChange={handleChange('category') as any}
+                onChange={handleSelectChange('category')}
                 label="Category"
               >
                 {CATEGORIES.map((cat) => (
@@ -418,7 +430,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
               <InputLabel>Action</InputLabel>
               <Select
                 value={formData.action}
-                onChange={handleChange('action') as any}
+                onChange={handleSelectChange('action')}
                 label="Action"
               >
                 {ACTIONS.map((action) => (

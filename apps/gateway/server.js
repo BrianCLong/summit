@@ -2,6 +2,17 @@
 const path = require('path');
 const fs = require('fs');
 
+// Load instrumentation before everything else
+const distInstrumentation = path.join(__dirname, 'dist', 'instrumentation.js');
+if (fs.existsSync(distInstrumentation)) {
+  try {
+    console.log('Loading OTel instrumentation...');
+    require(distInstrumentation);
+  } catch (err) {
+    console.error('Failed to load instrumentation:', err);
+  }
+}
+
 const distPath = path.join(__dirname, 'dist', 'server.js');
 const port = process.env.PORT || 8080;
 

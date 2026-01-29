@@ -1,7 +1,7 @@
 import { Stack, Typography, Chip } from '@mui/material';
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
-import type { RootState } from '../store';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, selectNode, setTimeRange } from '../store';
 
 function formatRange(range: [number, number] | null) {
   if (!range) return 'Unbounded';
@@ -16,6 +16,7 @@ function formatRange(range: [number, number] | null) {
 }
 
 export function SelectionSummary() {
+  const dispatch = useDispatch();
   const { selectedNodeId, timeRange } = useSelector(
     (state: RootState) => state.selection,
   );
@@ -37,6 +38,9 @@ export function SelectionSummary() {
           size="small"
           variant={selectedNodeId ? 'filled' : 'outlined'}
           data-testid="selected-node-label"
+          onDelete={
+            selectedNodeId ? () => dispatch(selectNode(null)) : undefined
+          }
         />
       </Typography>
       <Typography variant="body2">
@@ -46,6 +50,7 @@ export function SelectionSummary() {
           size="small"
           variant="outlined"
           data-testid="time-range-label"
+          onDelete={timeRange ? () => dispatch(setTimeRange(null)) : undefined}
         />
       </Typography>
     </Stack>

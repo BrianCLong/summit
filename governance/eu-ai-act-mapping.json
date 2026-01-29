@@ -1,0 +1,26 @@
+{
+  "framework": "EU AI Act",
+  "version": "2024-Final",
+  "mappings": {
+    "Article 9": {
+      "title": "Risk Management System",
+      "internal_controls": ["governance/taxonomy.v1.json#RiskClass", "server/src/governance/execution-trace.ts"]
+    },
+    "Article 10": {
+      "title": "Data and Governance",
+      "internal_controls": ["governance/registry.json", "server/src/governance/fairness.ts"]
+    },
+    "Article 12": {
+      "title": "Record-Keeping (Logging)",
+      "internal_controls": ["server/src/governance/execution-trace.ts", "evidence/traces/"]
+    },
+    "Article 14": {
+      "title": "Human Oversight",
+      "internal_controls": ["server/src/autonomous/orchestrator.enhanced.ts#checkApproval"]
+    },
+    "Article 15": {
+      "title": "Accuracy, Robustness, Cybersecurity",
+      "internal_controls": ["server/src/governance/drift.ts", "policy/supply_chain.rego"]
+    }
+  }
+}

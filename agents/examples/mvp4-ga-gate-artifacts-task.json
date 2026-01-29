@@ -1,0 +1,41 @@
+{
+  "task_id": "MVP4_GA_GATE_ARTIFACTS",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "mvp4-ga-gate-artifacts",
+    "version": "v1",
+    "sha256": "2559438794396206479faeb3e06af19df340be2241d70e0e019f97cac76fef6d",
+    "path": "prompts/docs/mvp4-ga-gate-artifacts@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ga/",
+      "scripts/ga/",
+      "agent-contract.json",
+      "prompts/docs/mvp4-ga-gate-artifacts@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/"
+    ],
+    "domains": ["governance", "ga-hardening", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["make ga-verify", "docs/ga/MVP4_GA_GATE_ARTIFACTS.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Gate artifact closure runbook is published under docs/ga.",
+    "Verification map and guardrails include the GA gate artifact surface.",
+    "Tier C verification passes via make ga-verify."
+  ],
+  "stop_conditions": [
+    "Tooling instability that blocks deterministic verification",
+    "Requests to bypass Legacy Mode guardrails",
+    "Attempts to change Jest or pnpm global configuration",
+    "Detection of PII in PR diffs"
+  ]
+}

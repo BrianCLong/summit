@@ -1,0 +1,21 @@
+{
+  "id": "no-high-risk-autonomy",
+  "version": "1.0.0",
+  "description": "Prevents high autonomy (Level 4+) actions in high risk environments without explicit human approval override",
+  "conditions": {
+    "all": [
+      {
+        "fact": "action.autonomy",
+        "operator": "greaterThan",
+        "value": 3
+      },
+      {
+        "fact": "resource.sensitivity",
+        "operator": "equal",
+        "value": "critical"
+      }
+    ]
+  },
+  "effect": "deny",
+  "reason": "High autonomy actions on critical resources are prohibited by policy no-high-risk-autonomy"
+}

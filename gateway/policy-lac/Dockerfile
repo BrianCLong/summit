@@ -1,8 +1,9 @@
 FROM node:18-alpine
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
+RUN npm install -g pnpm
+COPY package.json pnpm-lock.yaml* ./
+RUN pnpm install --no-frozen-lockfile
 COPY . .
-RUN npm run build || true
+RUN pnpm run build || true
 EXPOSE 4000
 CMD ["node","dist/index.js"]

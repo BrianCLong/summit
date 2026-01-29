@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.io/schemas/threats/ai-swarm.graph.json",
+  "title": "AI Swarm Graph Threat Ontology",
+  "description": "Graph-native schema for representing AI swarm behaviors, actor classes, and interaction patterns.",
+  "type": "object",
+  "properties": {
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["Actor", "Content", "Narrative", "Infrastructure", "Signal"]
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SleeperIdentity",
+                "NarrativeShepherd",
+                "ConsensusForger",
+                "TrainingDataPoisoner",
+                "SyntheticContent",
+                "BenignContent",
+                "ProbeRequest"
+              ]
+            }
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "trustScore": { "type": "number", "minimum": 0, "maximum": 1 },
+              "identityAgeDays": { "type": "integer" },
+              "platform": { "type": "string" },
+              "semanticHash": { "type": "string" },
+              "entropyScore": { "type": "number" }
+            }
+          }
+        },
+        "required": ["id", "type", "labels"]
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source": { "type": "string" },
+          "target": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": [
+              "COORDINATED_WITH",
+              "AMPLIFIED",
+              "AUTHORED",
+              "MUTATED_FROM",
+              "CONTROLLED_BY",
+              "TARGETED",
+              "CITED"
+            ]
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "timestamp": { "type": "string", "format": "date-time" },
+              "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+              "latencyMs": { "type": "integer" },
+              "coordinationMethod": { "type": "string" }
+            }
+          }
+        },
+        "required": ["source", "target", "type"]
+      }
+    },
+    "patterns": {
+      "type": "array",
+      "description": "Detected topological patterns indicative of swarm activity.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "patternType": {
+            "type": "string",
+            "enum": ["Clique", "HubSpoke", "Chain", "Bridge", "Sawtooth"]
+          },
+          "riskScore": { "type": "number" },
+          "evidenceIds": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  },
+  "required": ["nodes", "edges"]
+}

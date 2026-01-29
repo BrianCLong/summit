@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/intent/ui-action.schema.json",
+  "title": "UIAction",
+  "type": "object",
+  "required": ["id", "type", "timestamp"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "type": {
+      "type": "string",
+      "enum": [
+        "tap",
+        "scroll",
+        "type",
+        "back",
+        "navigate",
+        "submit",
+        "hover",
+        "drag",
+        "drop",
+        "select",
+        "keypress"
+      ]
+    },
+    "targetElementId": { "type": "string" },
+    "coordinates": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    },
+    "valueTyped": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    }
+  }
+}

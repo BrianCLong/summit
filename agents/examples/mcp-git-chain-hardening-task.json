@@ -1,0 +1,38 @@
+{
+  "task_id": "MCP_GIT_CHAIN_HARDENING_20260128",
+  "agent_id": "codex-agent",
+  "prompt_ref": {
+    "id": "mcp-git-chain-hardening",
+    "version": "v1",
+    "sha256": "cd4b567258aa3fc30492b51228012212e2719c809e390bfc37dc6040a3f85109",
+    "path": "prompts/security/mcp-git-chain-hardening@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/security/mcp-git-server-chain-hardening.md",
+      "docs/roadmap/STATUS.json",
+      "packages/decision-ledger/decision_ledger.json",
+      "prompts/security/mcp-git-chain-hardening@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/mcp-git-chain-hardening-task.json"
+    ],
+    "domains": ["security", "governance", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["doc-review"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Exploit-chain hardening memo produced with control mappings and enforcement plan.",
+    "Roadmap status updated to reflect hardening extraction."
+  ],
+  "stop_conditions": [
+    "Any requirement to modify runtime enforcement code beyond documentation scope."
+  ],
+  "dependencies": ["prompts/registry.yaml entry for mcp-git-chain-hardening"]
+}

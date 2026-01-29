@@ -1,0 +1,32 @@
+sprint:
+  id: 2026-01-28-a
+  goal: "Implement X safely"
+  mode: normal # normal|safe_mode|pause|freeze_merge
+
+tasks:
+  - id: T1
+    title: "Add hello CLI"
+    state: APPROVAL_PENDING
+    depends_on: []
+    assignee: null
+    attempts: { coder_failures: 0, total: 0 }
+    done_when:
+      - "python -m hello --name Alice prints 'Hello, Alice!' and exits 0"
+    artifacts:
+      spec_refs: ["specs/hello.md"]
+      branch: null
+      evidence_bundle: null
+    reviewer_feedback: []
+
+leases:
+  - task_id: T1
+    role: coder
+    holder: "agent:coder-2"
+    expires_at: "2026-01-28T23:10:00Z"
+
+circuit_breakers:
+  pause_file: false
+  freeze_merge: false
+  degraded_mode:
+    enabled: false
+    enforce_tiers: [0, 1]

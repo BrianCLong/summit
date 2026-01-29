@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/model-hub-service",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Model Hub Registry and Routing Service - centralized model management, evaluation, and routing for LLMs, embeddings, and classifiers",
   "type": "module",
   "main": "dist/index.js",

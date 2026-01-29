@@ -31,6 +31,12 @@ export const ConfigSchema = (z as any).object({
     port: (z as any).coerce.number().default(6379),
     password: (z as any).string().default('devpassword'),
     db: (z as any).coerce.number().default(0),
+    useCluster: (z as any).coerce.boolean().default(false),
+    clusterNodes: (z as any).array((z as any).object({
+      host: (z as any).string(),
+      port: (z as any).coerce.number()
+    })).default([]),
+    tls: (z as any).coerce.boolean().default(false),
   }).default({}),
 
   jwt: (z as any).object({

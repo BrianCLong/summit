@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/intent/step-summary.schema.json",
+  "title": "StepSummary",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "screenContext",
+    "actions",
+    "speculationText",
+    "locale",
+    "provenance"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "screenContext": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/summaryField" }
+    },
+    "actions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/summaryField" }
+    },
+    "speculationText": { "type": "string" },
+    "locale": { "type": "string" },
+    "provenance": {
+      "type": "object",
+      "required": ["modelId", "promptHash", "promptId", "promptVersion", "window", "generatedAt"],
+      "additionalProperties": false,
+      "properties": {
+        "modelId": { "type": "string" },
+        "promptHash": { "type": "string" },
+        "promptId": { "type": "string" },
+        "promptVersion": { "type": "string" },
+        "window": {
+          "type": "object",
+          "required": ["currentFrameId"],
+          "additionalProperties": false,
+          "properties": {
+            "previousFrameId": { "type": "string" },
+            "currentFrameId": { "type": "string" },
+            "nextFrameId": { "type": "string" }
+          }
+        },
+        "generatedAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "$defs": {
+    "summaryField": {
+      "type": "object",
+      "required": ["value", "factuality", "evidencePointers", "uncertainty"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": "string" },
+        "factuality": {
+          "type": "string",
+          "enum": ["observed", "inferred"]
+        },
+        "evidencePointers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["elementId"],
+            "additionalProperties": false,
+            "properties": {
+              "elementId": { "type": "string" },
+              "description": { "type": "string" },
+              "role": { "type": "string" },
+              "bounds": {
+                "type": "object",
+                "required": ["x", "y", "width", "height"],
+                "additionalProperties": false,
+                "properties": {
+                  "x": { "type": "number" },
+                  "y": { "type": "number" },
+                  "width": { "type": "number" },
+                  "height": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
+        "uncertainty": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    }
+  }
+}

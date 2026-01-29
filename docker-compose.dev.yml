@@ -125,7 +125,8 @@ services:
       OTEL_SERVICE_NAME: summit-api
       OTEL_SERVICE_VERSION: 1.0.0
       JAEGER_ENDPOINT: http://jaeger:14268/api/traces
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://otel-collector:4318/v1/metrics
     ports:
       - '4000:4000'
     depends_on:
@@ -159,7 +160,7 @@ services:
       OTEL_SERVICE_NAME: summit-gateway
       OTEL_SERVICE_VERSION: 1.0.0
       JAEGER_ENDPOINT: http://jaeger:14268/api/traces
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
     depends_on:
       api:
         condition: service_healthy
@@ -310,6 +311,25 @@ services:
     networks:
       - summit
 
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.87.0
+    container_name: summit-otel-collector
+    command:
+      - '--config=/etc/otel-collector-config.yml'
+    volumes:
+      - ./observability/otel/collector-config-dev.yaml:/etc/otel-collector-config.yml
+    ports:
+      - '4317:4317' # OTLP gRPC receiver
+      - '4318:4318' # OTLP HTTP receiver
+      - '8888:8888' # Prometheus metrics
+      - '8889:8889' # Prometheus exporter
+      - '13133:13133' # Health check
+    networks:
+      - summit
+    depends_on:
+      - jaeger
+      - prometheus
+
   jaeger:
     image: jaegertracing/all-in-one:1.52
     container_name: summit-jaeger
@@ -319,8 +339,6 @@ services:
       SPAN_STORAGE_TYPE: memory
     ports:
       - '16686:16686' # Jaeger UI
-      - '4317:4317'   # OTLP gRPC receiver
-      - '4318:4318'   # OTLP HTTP receiver
       - '14268:14268' # Jaeger collector HTTP
     networks:
       - summit

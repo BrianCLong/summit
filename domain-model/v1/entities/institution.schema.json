@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./institution.schema.json",
+  "title": "Institution (Canonical v1)",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "schemaVersion": { "const": "v1" },
+    "entityType": { "const": "Institution" },
+    "name": { "type": "string" },
+    "category": {
+      "type": "string",
+      "enum": ["judiciary", "legislature", "media", "alliance", "platform", "other"]
+    },
+    "resilienceScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "A score from 0 to 1 representing the institution's resilience to degradation."
+    },
+    "functions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Key functions performed by this institution (e.g., 'vote counting', 'dispute resolution')."
+    },
+    "jurisdiction": { "type": "string" },
+    "metadata": { "$ref": "../base.schema.json#/$defs/EntityMetadata" },
+    "external": {
+      "type": "array",
+      "items": { "$ref": "../base.schema.json#/$defs/ExternalReference" }
+    }
+  },
+  "required": ["id", "schemaVersion", "entityType", "name"],
+  "additionalProperties": false
+}

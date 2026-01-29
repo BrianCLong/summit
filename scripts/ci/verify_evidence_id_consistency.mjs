@@ -209,8 +209,14 @@ async function loadEvidenceMap(mapPath) {
     const cleanedContent = removeBOM(content);
     const parsed = yaml.load(cleanedContent) || {};
 
-    // Convert to Map for faster lookup
-    const map = new Map(Object.entries(parsed));
+    // Convert to Map for faster lookup - handle both flat and structured YAML
+    let map;
+    if (parsed.evidence && Array.isArray(parsed.evidence)) {
+      map = new Map(parsed.evidence.filter(item => item && item.id).map(item => [item.id, item]));
+    } else {
+      map = new Map(Object.entries(parsed));
+    }
+
     debugLog(`Parsed evidence map with ${map.size} entries`);
     return map;
   } catch (error) {
@@ -322,43 +328,30 @@ async function processGovernanceDocument(filePath, evidenceMap, repoRoot) {
 async function findGovernanceDocuments(rootDir, extension = '.md') {
   try {
     // First, try to use git to get a deterministic list of tracked files
-    const { spawn } = await import('child_process');
-    const gitPromise = new Promise((resolve, reject) => {
-      const gitProc = spawn('git', ['ls-files', '--', 'docs/governance/**/*' + extension], {
+    const { execSync } = await import('child_process');
+    try {
+      // Use a more robust git command that handles subdirectories correctly
+      const stdout = execSync('git ls-files "docs/governance/*.md" "docs/governance/**/*.md"', {
         cwd: rootDir,
-        stdio: ['pipe', 'pipe', 'ignore'] // stdin, stdout, stderr
+        encoding: 'utf8'
       });
 
-      let stdout = '';
-      gitProc.stdout.on('data', data => {
-        stdout += data.toString();
-      });
+      const gitFiles = stdout
+        .split('\n')
+        .filter(line => line.trim() !== '' && line.toLowerCase().endsWith(extension))
+        .map(relPath => join(rootDir, relPath));
 
-      gitProc.on('close', (code) => {
-        if (code === 0) {
-          const gitFiles = stdout
-            .split('\n')
-            .filter(line => line.trim() !== '')
-            .map(relPath => join(rootDir, relPath))
-            .filter(absPath => absPath.includes('governance') || absPath.includes('/gov/'));
+      if (gitFiles.length > 0) {
+        // Use a Set to unique files in case both patterns match same files
+        const uniqueFiles = [...new Set(gitFiles)];
+        debugLog(`Found ${uniqueFiles.length} governance documents via git`);
+        return uniqueFiles.sort();
+      }
+    } catch (e) {
+      debugLog(`Git command failed: ${e.message}`);
+    }
 
-          if (gitFiles.length > 0) {
-            debugLog(`Found ${gitFiles.length} governance documents via git`);
-            resolve(gitFiles.sort());  // Sort for deterministic order
-          } else {
-            reject(new Error('No governance files found via git'));
-          }
-        } else {
-          reject(new Error(`Git command failed with code ${code}`));
-        }
-      });
-
-      gitProc.on('error', (err) => {
-        reject(err);
-      });
-    });
-
-    return await gitPromise;
+    throw new Error('No governance files found via git or git failed');
   } catch (gitError) {
     debugLog(`Git-based file discovery failed: ${gitError.message}, falling back to filesystem scan`);
 
@@ -465,6 +458,7 @@ function buildConsistencyReport({ sha, policyHash, results, config, evidenceMap 
       }
     }
   }
+  orphanedEvidenceIds.sort(compareStringsCodepoint);
 
   // Add violations for orphaned evidence IDs if any are found
   const allViolations = [...normalizedResults.flatMap(result => result.violations)];
@@ -527,13 +521,22 @@ async function writeReports(report, outputPath) {
   const jsonPath = join(outputPath, 'report.json');
   const mdPath = join(outputPath, 'report.md');
   const stampPath = join(outputPath, 'stamp.json');  // For workflow tracking
+
+  const normalizeOutput = (content) =>
+    content.endsWith('\n') ? content : `${content}\n`;
+
+  const writeFileAtomic = async (filePath, content) => {
+    const tempPath = `${filePath}.tmp`;
+    await fs.writeFile(tempPath, content, 'utf8');
+    await fs.rename(tempPath, filePath);
+  };
   
   // Ensure output directory exists
   await fs.mkdir(outputPath, { recursive: true });
   
   // Write JSON report with canonical serialization for deterministic output
   const canonicalReport = canonicalJsonStringify(report);
-  await fs.writeFile(jsonPath, canonicalReport, 'utf8');
+  await writeFileAtomic(jsonPath, normalizeOutput(canonicalReport));
   
   // Write Markdown report
   let mdContent = `# Evidence ID Consistency Report\n\n`;
@@ -592,7 +595,7 @@ async function writeReports(report, outputPath) {
     mdContent += `✅ No issues detected!\n`;
   }
   
-  await fs.writeFile(mdPath, mdContent, 'utf8');
+  await writeFileAtomic(mdPath, normalizeOutput(mdContent));
   
   // Write stamp file for tracking with performance metrics
   const stamp = {
@@ -605,7 +608,7 @@ async function writeReports(report, outputPath) {
 
   // Use canonical serialization for stamp.json too, but allow timestamps since it's runtime metadata
   const canonicalStamp = canonicalJsonStringify(stamp);
-  await fs.writeFile(stampPath, canonicalStamp, 'utf8');
+  await writeFileAtomic(stampPath, normalizeOutput(canonicalStamp));
 }
 
 /**
@@ -713,7 +716,9 @@ async function main() {
     const hashStartTime = Date.now();
     const policyConfig = {
       evidence_map_size: evidenceMap.size,
-      evidence_map_entries: Array.from(evidenceMap.entries()).sort((a, b) => a[0].localeCompare(b[0])),
+      evidence_map_entries: Array.from(evidenceMap.entries()).sort((a, b) =>
+        compareStringsCodepoint(a[0], b[0])
+      ),
       config_governance_dir: config.governanceDir,
       max_evidence_ids_per_doc: MAX_EVIDENCE_IDS_PER_DOC,
       max_file_size_bytes: MAX_FILE_SIZE_BYTES,
@@ -953,14 +958,6 @@ async function processGovernanceDocumentWithAI(filePath, evidenceMap, repoRoot, 
   return result;
 }
 
-// Run if called directly
-if (process.argv[1] === __filename) {
-  main().catch(error => {
-    console.error('Uncaught exception:', error);
-    process.exit(1);
-  });
-}
-
 export {
   buildConsistencyReport,
   findGovernanceDocuments,
@@ -974,4 +971,3 @@ export {
   validateFilePathSafety,
   writeReports
 };
-

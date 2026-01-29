@@ -36,6 +36,7 @@ import {
 } from './retrieval.js';
 import { applyPolicyToContext, canAccessCase } from './policy-guard.js';
 import { createAuditRecord } from './audit-log.js';
+import { CypherGenerator } from './cypher-generator.js';
 
 // Default retrieval parameters
 const DEFAULT_RETRIEVAL_PARAMS: RetrievalParams = {
@@ -59,6 +60,7 @@ export class EvidenceFirstGraphRagService implements IGraphRagService {
   private readonly llmAdapter: GraphRagLlmAdapter;
   private readonly auditLog: GraphRagAuditLog;
   private readonly retrievalParams: RetrievalParams;
+  private readonly cypherGenerator?: CypherGenerator;
 
   constructor(deps: {
     caseGraphRepo: CaseGraphRepository;
@@ -67,6 +69,7 @@ export class EvidenceFirstGraphRagService implements IGraphRagService {
     llmAdapter: GraphRagLlmAdapter;
     auditLog: GraphRagAuditLog;
     retrievalParams?: Partial<RetrievalParams>;
+    cypherGenerator?: CypherGenerator;
   }) {
     this.caseGraphRepo = deps.caseGraphRepo;
     this.evidenceRepo = deps.evidenceRepo;
@@ -77,6 +80,7 @@ export class EvidenceFirstGraphRagService implements IGraphRagService {
       ...DEFAULT_RETRIEVAL_PARAMS,
       ...deps.retrievalParams,
     };
+    this.cypherGenerator = deps.cypherGenerator;
   }
 
   async answer(
@@ -103,13 +107,68 @@ export class EvidenceFirstGraphRagService implements IGraphRagService {
         });
       }
 
-      // 2. Retrieve graph context
-      const retrievalResult = await retrieveGraphContext(
-        req,
-        this.retrievalParams,
-        this.caseGraphRepo,
-        this.evidenceRepo,
-      );
+      // 2. Retrieve graph context (Cypher-First or Blast Radius)
+      let retrievalResult;
+      let cypherUsed = false;
+
+      // Attempt Cypher-First Retrieval if generator is available
+      if (this.cypherGenerator) {
+        try {
+            // Simplified Schema Context for now (in production this comes from SchemaService)
+            const schema = {
+                nodeTypes: ['Person', 'Organization', 'Location', 'Event', 'Vehicle'],
+                edgeTypes: ['KNOWS', 'LOCATED_AT', 'PARTICIPATED_IN', 'OWNED_BY'],
+                schemaSummary: 'Intelligence graph with Persons, Organizations, and Events.'
+            };
+
+            const generated = await this.cypherGenerator.generate(req.question, schema);
+
+            if (generated) {
+                logger.info({
+                    message: 'Cypher-First Retrieval Strategy Selected',
+                    mode: generated.mode,
+                    confidence: generated.confidence,
+                    requestId
+                });
+
+                const { nodes, edges } = await this.caseGraphRepo.getSubgraphByCypher(
+                    req.caseId,
+                    generated.cypher,
+                    generated.params
+                );
+
+                if (nodes.length > 0) {
+                    // Parallel: Get evidence snippets standard way (hybrid approach)
+                    const evidenceSnippets = await this.evidenceRepo.searchEvidenceSnippets({
+                        caseId: req.caseId,
+                        query: req.question,
+                        maxSnippets: this.retrievalParams.maxEvidenceSnippets,
+                    });
+
+                    retrievalResult = {
+                        context: { nodes, edges, evidenceSnippets }
+                    };
+                    cypherUsed = true;
+                }
+            }
+        } catch (cypherError) {
+            logger.warn({
+                message: 'Cypher-First Retrieval Failed - Fallback to Standard',
+                error: cypherError instanceof Error ? cypherError.message : String(cypherError),
+                requestId
+            });
+        }
+      }
+
+      // Fallback to standard retrieval if Cypher failed or returned no results
+      if (!retrievalResult) {
+          retrievalResult = await retrieveGraphContext(
+            req,
+            this.retrievalParams,
+            this.caseGraphRepo,
+            this.evidenceRepo,
+          );
+      }
 
       // 3. Apply policy filtering to evidence
       const { filteredContext, policyDecisions } = applyPolicyToContext(
@@ -364,6 +423,7 @@ export function createGraphRagService(deps: {
   llmAdapter: GraphRagLlmAdapter;
   auditLog: GraphRagAuditLog;
   retrievalParams?: Partial<RetrievalParams>;
+  cypherGenerator?: CypherGenerator;
 }): IGraphRagService {
   return new EvidenceFirstGraphRagService(deps);
 }

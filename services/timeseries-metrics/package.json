@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/timeseries-metrics",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Time-Series Metrics Storage & Observability Data Platform for CompanyOS",
   "type": "module",
   "main": "dist/index.js",

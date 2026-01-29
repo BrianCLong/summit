@@ -1,0 +1,11 @@
+id: "reliability-agent-01"
+role: "reliability"
+objective: "Minimize downtime and latency"
+constraints:
+  - "uptime > 99.99%"
+  - "latency < 200ms"
+utility_function:
+  - metric: "stability"
+    weight: 0.8
+  - metric: "change_velocity"
+    weight: -0.2

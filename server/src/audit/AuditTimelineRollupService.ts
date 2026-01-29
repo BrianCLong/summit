@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Pool, type PoolClient } from 'pg';
-import { getPostgresPool } from '../config/database.js';
-import logger from '../utils/logger.js';
+import { getPostgresPool } from '../config/database.ts';
+import logger from '../utils/logger.ts';
 
 export type TimelineGranularity = 'day' | 'week';
 

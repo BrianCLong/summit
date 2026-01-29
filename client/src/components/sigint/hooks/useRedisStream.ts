@@ -46,7 +46,7 @@ export function useRedisStream(options: RedisStreamOptions): RedisStreamState & 
     droppedFrames: 0,
   });
   const frameCountRef = useRef(0);
-  const lastFrameTimeRef = useRef(performance.now());
+  const lastFrameTimeRef = useRef(Date.now());
 
   const [state, setState] = useState<RedisStreamState>({
     samples: [],
@@ -60,7 +60,7 @@ export function useRedisStream(options: RedisStreamOptions): RedisStreamState & 
 
   // Calculate FPS and update metrics
   const updateMetrics = useCallback(() => {
-    const now = performance.now();
+    const now = Date.now();
     const elapsed = now - lastFrameTimeRef.current;
 
     if (elapsed >= 1000) {

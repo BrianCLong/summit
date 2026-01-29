@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/business-rules",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Business Rules Engine with DMN support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,7 +11,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

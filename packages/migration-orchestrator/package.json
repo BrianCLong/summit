@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/migration-orchestrator",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Execution engine for customer migration program with identity mapping, entitlements, backfill, parity, and dashboards",
   "type": "module",
   "main": "dist/index.js",

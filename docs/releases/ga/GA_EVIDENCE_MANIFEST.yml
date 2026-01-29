@@ -1,0 +1,254 @@
+# GA Evidence Bundle Manifest
+# Deterministic evidence collection specification for GA release v5.0.0
+
+version: "1.0.0"
+manifest_schema: "summit-ga-evidence-v1"
+
+# Anchor commit for this GA release
+anchor:
+  commit_sha: "a1f20771eeadcc55fef9f83727edeee0d2c2dbc2"
+  commit_message: "🎨 Palette: Maintain focus on quick prompt selection (#16622)"
+  branch: "main"
+  previous_tag: "v1.7.0-complete"
+  proposed_tag: "v5.0.0-ga"
+
+# Required checks that must pass for GA release
+required_checks:
+  canonical_names:
+    - "CI Core (Primary Gate)"
+    - "CI / config-guard"
+    - "CI / unit-tests"
+    - "GA Gate"
+    - "Release Readiness Gate"
+    - "SOC Controls"
+    - "Unit Tests & Coverage"
+    - "ga / gate"
+
+  policy_source: "docs/ci/REQUIRED_CHECKS_POLICY.yml"
+  policy_version: "2.0.0"
+  extraction_script: "scripts/release/extract_required_checks_from_policy.sh"
+
+# Evidence artifacts and regeneration instructions
+evidence_artifacts:
+
+  # CI Evidence
+  ci_evidence:
+    category: "ci"
+    deterministic: true
+    artifacts:
+      - name: "typescript_build_server"
+        path: "artifacts/evidence/ci/typescript-build-server.log"
+        regenerate_command: "pnpm --filter intelgraph-server typecheck"
+        determinism_level: "deterministic"
+        description: "Server-side TypeScript compilation and type checking"
+
+      - name: "typescript_build_client"
+        path: "artifacts/evidence/ci/typescript-build-client.log"
+        regenerate_command: "pnpm --filter intelgraph-client typecheck"
+        determinism_level: "deterministic"
+        description: "Client-side TypeScript compilation and type checking"
+
+      - name: "unit_tests"
+        path: "artifacts/evidence/ci/unit-tests.log"
+        regenerate_command: "pnpm test:unit --passWithNoTests"
+        determinism_level: "runtime-nondeterministic"
+        description: "Unit test suite execution"
+        notes: "Test timing and some output may vary, but pass/fail is deterministic"
+
+      - name: "lint_check"
+        path: "artifacts/evidence/ci/lint.log"
+        regenerate_command: "pnpm lint"
+        determinism_level: "deterministic"
+        description: "ESLint and prettier code quality checks"
+
+  # Security Evidence
+  security_evidence:
+    category: "security"
+    deterministic: "partial"
+    artifacts:
+      - name: "dependency_audit"
+        path: "artifacts/evidence/security/dependency-audit.json"
+        regenerate_command: "pnpm audit --json"
+        determinism_level: "network-dependent"
+        description: "npm/pnpm dependency vulnerability scan"
+        notes: "Vulnerability database may update between runs"
+
+      - name: "secret_scan"
+        path: "artifacts/evidence/security/secret-scan.json"
+        regenerate_command: "gitleaks detect --source . --no-git --report-format json"
+        determinism_level: "deterministic"
+        description: "Secret and credential scanning with gitleaks"
+
+      - name: "sbom_generation"
+        path: "artifacts/evidence/security/sbom.json"
+        regenerate_command: "./scripts/release/generate_sbom.sh"
+        determinism_level: "deterministic"
+        description: "Software Bill of Materials (SBOM) generation"
+
+  # Governance Evidence
+  governance_evidence:
+    category: "governance"
+    deterministic: true
+    artifacts:
+      - name: "type_safety_state"
+        path: "docs/releases/_state/type_safety_state.json"
+        regenerate_command: "./scripts/release/type_safety_audit.sh --report"
+        determinism_level: "deterministic"
+        description: "TypeScript type safety audit state"
+
+      - name: "determinism_state"
+        path: "docs/releases/_state/determinism_state.json"
+        regenerate_command: "./scripts/ci/api_determinism_check.sh"
+        determinism_level: "deterministic"
+        description: "API determinism verification state"
+
+      - name: "health_check_state"
+        path: "docs/releases/_state/health_check_state.json"
+        regenerate_command: "./scripts/release/pre_release_health_check.sh --json"
+        determinism_level: "deterministic"
+        description: "Pre-release health check state"
+
+      - name: "governance_lockfile"
+        path: "docs/releases/_state/governance_lockfile.json"
+        regenerate_command: "./scripts/release/generate_governance_lockfile.sh"
+        determinism_level: "deterministic"
+        description: "Cryptographically signed governance state lockfile"
+        verification_command: "./scripts/release/verify_governance_lockfile.sh"
+
+  # Audit Evidence
+  audit_evidence:
+    category: "audits"
+    deterministic: true
+    artifacts:
+      - name: "dependency_audit_report"
+        path: "artifacts/evidence/audits/dependency-audit-report.log"
+        regenerate_command: "./scripts/release/dependency_audit.sh --report"
+        determinism_level: "deterministic"
+        description: "Comprehensive dependency security audit"
+
+      - name: "type_safety_audit_report"
+        path: "artifacts/evidence/audits/type-audit-report.log"
+        regenerate_command: "./scripts/release/type_safety_audit.sh --report"
+        determinism_level: "deterministic"
+        description: "TypeScript type safety comprehensive audit"
+
+  # Release Blockers
+  release_blockers:
+    category: "governance"
+    deterministic: false
+    artifacts:
+      - name: "release_blockers_list"
+        path: "artifacts/evidence/governance/release-blockers.json"
+        regenerate_command: "gh issue list --label release-blocker --state all --json number,title,state,createdAt --limit 50"
+        determinism_level: "runtime-nondeterministic"
+        description: "GitHub issues marked as release blockers"
+        notes: "Requires GITHUB_TOKEN environment variable"
+
+# Evidence bundle generation
+bundle_generation:
+  master_script: "./scripts/release/generate_evidence_bundle.sh"
+  usage: |
+    # Generate all evidence
+    ./scripts/release/generate_evidence_bundle.sh --category all --update-index
+
+    # Generate specific category
+    ./scripts/release/generate_evidence_bundle.sh --category ci
+    ./scripts/release/generate_evidence_bundle.sh --category security
+    ./scripts/release/generate_evidence_bundle.sh --category governance
+    ./scripts/release/generate_evidence_bundle.sh --category audits
+
+    # Dry run (show what would happen)
+    ./scripts/release/generate_evidence_bundle.sh --category all --dry-run
+
+  output_directory: "artifacts/evidence"
+  summary_format: "markdown"
+  state_file: "docs/releases/_state/evidence_state.json"
+
+# Determinism expectations
+determinism_policy:
+  description: |
+    Evidence artifacts are classified by determinism level:
+    - deterministic: Same input always produces identical output
+    - runtime-nondeterministic: Output may vary (timing, IDs) but semantic result is deterministic
+    - network-dependent: Relies on external services; output may change between runs
+
+  deterministic_artifacts:
+    - "typescript_build_server"
+    - "typescript_build_client"
+    - "lint_check"
+    - "secret_scan"
+    - "type_safety_state"
+    - "determinism_state"
+    - "health_check_state"
+    - "governance_lockfile"
+    - "dependency_audit_report"
+    - "type_safety_audit_report"
+    - "sbom_generation"
+
+  runtime_nondeterministic:
+    - "unit_tests"
+    - "release_blockers_list"
+
+  network_dependent:
+    - "dependency_audit"
+
+# Verification workflow
+verification:
+  entry_point: "./scripts/release/ga_verify.mjs"
+  description: "Master verification script that runs all checks and generates report"
+  generates: "artifacts/ga-verify/ga_verify_report.md"
+
+  workflow:
+    - step: "check_git_status"
+      description: "Ensure working tree is clean and on main branch"
+    - step: "verify_required_checks"
+      description: "Confirm all required CI checks pass on main"
+    - step: "run_evidence_collection"
+      description: "Execute evidence bundle generation"
+    - step: "verify_determinism"
+      description: "Validate deterministic artifacts produce consistent output"
+    - step: "check_governance_lockfile"
+      description: "Verify governance lockfile signature"
+    - step: "scan_release_blockers"
+      description: "Check for open release blocker issues"
+    - step: "generate_report"
+      description: "Produce verification report with pass/fail status"
+
+# Existing evidence tooling references
+existing_tooling:
+  scripts:
+    - "scripts/release/generate_evidence_bundle.sh"
+    - "scripts/release/generate_governance_lockfile.sh"
+    - "scripts/release/verify_governance_lockfile.sh"
+    - "scripts/release/generate_provenance_manifest.sh"
+    - "scripts/release/type_safety_audit.sh"
+    - "scripts/release/dependency_audit.sh"
+    - "scripts/release/pre_release_health_check.sh"
+    - "scripts/ci/api_determinism_check.sh"
+    - "scripts/release/generate_sbom.sh"
+    - "scripts/release/verify_release_bundle.sh"
+
+  workflows:
+    - ".github/workflows/_reusable-governance-gate.yml"
+    - ".github/workflows/_reusable-release.yml"
+    - ".github/workflows/_reusable-slsa-build.yml"
+    - ".github/workflows/api-determinism-check.yml"
+
+# Compliance & Standards
+compliance:
+  standards:
+    - "SLSA Level 3"
+    - "SOC 2 Type II Controls"
+    - "Supply Chain Security (SSDF)"
+
+  provenance:
+    format: "in-toto"
+    generator: "scripts/release/generate_provenance_manifest.sh"
+    signature_method: "cosign"
+
+# Metadata
+metadata:
+  created_by: "Release Captain"
+  created_at: "2026-01-23"
+  session: "https://claude.ai/code/session_01B7URNgsB5Fj8X9B1WqiPgY"
+  manifest_purpose: "Define deterministic evidence requirements and regeneration procedures for GA release"

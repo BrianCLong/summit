@@ -395,10 +395,24 @@ export class ElasticsearchService {
     return indices;
   }
 
+  private singularize(word: string): string {
+    if (word.endsWith('ies') && word.length > 3) {
+      return word.slice(0, -3) + 'y';
+    }
+    // Only remove 'es' for words like buses, boxes, fizzes (double consonant or x/z before es)
+    if (word.endsWith('sses') || word.endsWith('xes') || word.endsWith('zes')) {
+      return word.slice(0, -2);
+    }
+    if (word.endsWith('s') && !word.endsWith('ss')) {
+      return word.slice(0, -1);
+    }
+    return word;
+  }
+
   private transformHits(hits: any[]): SearchResult[] {
     return hits.map((hit) => ({
       id: hit._id,
-      type: hit._index.slice(0, -1) as any,
+      type: this.singularize(hit._index) as any,
       score: hit._score,
       source: hit._source,
       highlight: hit.highlight,

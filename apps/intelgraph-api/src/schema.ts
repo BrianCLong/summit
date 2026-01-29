@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createHash } from 'crypto';
 import { GraphQLScalarType, Kind } from 'graphql';
-import { gql } from 'apollo-server-express';
+import gql from 'graphql-tag';
 import base from '../schema/base.graphql?raw';
 import {
   validateAssignRoleInput,

@@ -8,6 +8,7 @@ Status: active
 ## Evidence Locations
 
 - Docs integrity: `artifacts/governance/docs-integrity/<sha>/`
+- SLSA Provenance Verification: `reports/provenance/status.txt`
 - Branch protection drift: `artifacts/governance/branch-protection-drift/`
 - SOC control verification: `soc-compliance-reports/`
 - Release evidence bundles: `evidence-bundles/`
@@ -17,6 +18,7 @@ Status: active
 ## Evidence Collection
 
 - Run `pnpm ci:docs-governance` to emit docs integrity artifacts.
+- Run `gsv attest-verify` (via CI) to emit provenance verification artifacts.
 - Run `pnpm ci:branch-protection:check` to emit drift artifacts.
 - Run `bash scripts/test-soc-controls.sh soc-compliance-reports` for SOC reports.
 - Run `make ga-report` to emit SOC Evidence Report artifacts.

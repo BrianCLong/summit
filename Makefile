@@ -5,7 +5,7 @@ include Makefile.merge-train
 
 .PHONY: up down restart logs shell clean
 .PHONY: dev test lint build format ci
-.PHONY: db-migrate db-seed sbom k6
+.PHONY: db-migrate db-seed sbom k6 supply-chain/sbom supply-chain/sign
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
 .PHONY: bootstrap
 .PHONY: dev-prereqs dev-up dev-down dev-smoke
@@ -92,7 +92,7 @@ lint:   ## Lint js/ts + python
 
 format: ## Format code
 	pnpm -w exec prettier -w . || true
-	$(VVENV_BIN)/ruff format .
+	$(VENV_BIN)/ruff format .
 
 build:  ## Build all images
 	docker compose -f $(COMPOSE_DEV_FILE) build
@@ -124,8 +124,15 @@ validate-ops: ## Validate observability assets (dashboards, alerts, runbooks)
 rollback-drill: ## Run simulated rollback drill
 	@node scripts/ops/rollback_drill.js
 
-sbom:   ## Generate CycloneDX SBOM
-	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
+sbom:   ## Generate CycloneDX SBOM (Legacy target, calls scripts/generate-sbom.sh)
+	@bash scripts/generate-sbom.sh
+
+supply-chain/sbom: ## Generate modern SBOMs (CycloneDX 1.7 + SPDX 3.0.1)
+	@bash scripts/generate-sbom.sh "summit-platform" "latest" "./artifacts/sbom"
+
+supply-chain/sign: ## Sign artifacts and SBOMs using Cosign
+	@if [ -z "$(ARTIFACT)" ]; then echo "Usage: make supply-chain/sign ARTIFACT=<image|blob> [SBOM=<path>] [TYPE=image|blob]"; exit 1; fi
+	@bash scripts/supply-chain/sign-and-attest.sh "$(ARTIFACT)" "$(SBOM)" "$(TYPE)"
 
 smoke: bootstrap up ## Fresh clone smoke test: bootstrap -> up -> health check
 	@echo "Waiting for services to start..."
@@ -194,7 +201,8 @@ pr-release:
 	  --node "$(NODE_VERSION)"
 
 provenance:
-	@node .ci/gen-provenance.js > provenance.json && node .ci/verify-provenance.js provenance.json
+	@npm run generate:provenance
+	@echo "Provenance generated at .evidence/provenance.json"
 
 ci-check:
 	@pnpm install --frozen-lockfile
@@ -406,3 +414,23 @@ pipelines-list: ## List registered pipelines
 
 pipelines-validate: ## Validate pipeline manifests
 	@python3 pipelines/cli.py validate
+
+test-security: ## Run security verifications
+	@echo "Running Security Tests..."
+	@npx tsx --test server/src/utils/__tests__/security.test.ts
+	@bash scripts/ci/scan_secrets.sh --dry-run || true
+
+test-compliance: ## Run compliance controls as tests
+	@echo "Running Compliance Tests..."
+	@node --test compliance/soc/*.test.mjs
+
+# Eval Skills
+.PHONY: eval-skill eval-skills-changed eval-skills-all
+eval-skill: ## Run a single eval skill (SKILL=...)
+	@npx tsx evals/runner/run_skill_eval.ts --skill $(SKILL)
+
+eval-skills-changed: ## Run eval skills changed in the current diff
+	@npx tsx evals/runner/run_skills_changed.ts
+
+eval-skills-all: ## Run the full eval skills suite
+	@npx tsx evals/runner/run_skill_suite.ts

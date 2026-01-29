@@ -1,41 +1,66 @@
 # Preview environment overrides
-components:
-  api:
-    replicas: 1
+# Matches structure of values.yaml
+
+global:
+  ingress:
+    className: internal
+    # Host is set dynamically by deploy.sh
+
+# Reduce resource consumption for preview environments
+common:
+  replicaCount: 1
+  resources:
     requests:
-      cpu: 300m
-      memory: 512Mi
-    limits:
-      cpu: 700m
-      memory: 1Gi
-  web:
-    replicas: 1
-    requests:
-      cpu: 150m
+      cpu: 100m
       memory: 256Mi
     limits:
-      cpu: 300m
+      cpu: 500m
       memory: 512Mi
-  worker:
-    replicas: 0
-    requests:
-      cpu: 50m
-      memory: 128Mi
-    limits:
-      cpu: 200m
-      memory: 256Mi
 
-storage:
-  pvc_gib: 5
+services:
+  apiGateway:
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
 
-networking:
-  load_balancers: 1
+  mobile:
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 300m
+        memory: 512Mi
 
-preview:
-  public: false
-  idle_minutes: 30
-  ingressClass: internal
-  annotations:
-    owner: "${OWNER}"
-    branch: "${BRANCH}"
-    repo: "${REPO}"
+  # Scale down background workers to save costs
+  workflowEngine:
+    replicaCount: 0
+
+  feedProcessor:
+    replicaCount: 0
+
+  analytics:
+    replicaCount: 0
+
+  mlEngine:
+    replicaCount: 0 # ML likely too heavy for preview
+
+  graphAnalytics:
+    replicaCount: 0
+
+  searchEngine:
+    replicaCount: 0
+
+# Disable expensive external dependencies if possible or use smaller ones
+# (Assuming postgres/redis/neo4j are required)
+
+namespaceLimits:
+  enabled: true
+  quota:
+    pods: 20

@@ -1,5 +1,83 @@
 version: 1
 prompts:
+  - id: integrations-backlog-sync
+    version: v1
+    path: prompts/integrations/backlog-sync.md
+    sha256: e196bfe98de03f7f4ef7a63414c4fad60b171f9282989b719f2bdda25d6668dc
+    description: Align Jira/Linear/GitHub Projects backlog metadata for priority lanes.
+    scope:
+      paths:
+        - docs/integrations/
+        - scripts/verify-integrations.ts
+        - docs/roadmap/STATUS.json
+        - prompts/integrations/
+      domains:
+        - integrations
+        - program-management
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: eval-baseline-ratchet
+    version: v1
+    path: prompts/eval/establish-eval-baselines@v1.md
+    sha256: 83812cd2cffecec04a8e3205951fe85a553f43e16ecde45aa23f7c8950ee8d63
+    description: Establish eval baseline gates and ratchet guidance for CI readiness.
+    scope:
+      paths:
+        - eval/
+        - tests/eval/
+        - packages/decision-ledger/decision_ledger.json
+        - docs/roadmap/STATUS.json
+        - prompts/eval/establish-eval-baselines@v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - eval
+        - ci
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: notion-issue-migration-fix
+    version: v1
+    path: prompts/integrations/notion-issue-migration-fix.md
+    sha256: 51aa613e22286ce28308f0b67ade969829803d3681045b8be335ea5bb817c50c
+    description: Wire Notion issue migration verification and setup guidance.
+    scope:
+      paths:
+        - docs/integrations/
+        - scripts/verify-integrations.ts
+        - docs/roadmap/STATUS.json
+        - prompts/integrations/
+        - prompts/registry.yaml
+        - agents/examples/
+        - .env.example
+      domains:
+        - integrations
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: agent-native-loop-n4
     version: v1
     path: prompts/governance/agent-native-loop-n4.md
@@ -30,6 +108,34 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: antigravity-moat-augmentation
+    version: v1
+    path: prompts/governance/antigravity-moat-augmentation@v1.md
+    sha256: 42d5cc33eafe54f7ab8eef7c16f9bbdc3a25a6f35a5790685e105c5b7d17a865
+    description: Establish Antigravity outcome ownership, policy-encoded judgment, and tradeoff ledger scaffolding.
+    scope:
+      paths:
+        - antigravity/
+        - decision_policy/
+        - tradeoff_ledger.jsonl
+        - docs/antigravity/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/governance/antigravity-moat-augmentation@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - policy
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md
@@ -46,6 +152,55 @@ prompts:
         - documentation
         - operations
         - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: competitive-osint-platform-developments-turn-3
+    version: v1
+    path: prompts/competitive/osint-platform-developments-turn-3.md
+    sha256: 0c35018c60506de46d105a5a21896c259766956c4ccf5887f57d7ee5092bbb48
+    description: Capture automation turn 3 OSINT platform developments and update roadmap status.
+    scope:
+      paths:
+        - competitive/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/competitive/
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - competitive-intel
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: universal-supremacy-prompt
+    version: v1
+    path: prompts/competitive/universal-supremacy-prompt@v1.md
+    sha256: eb9a6f548bef01188302983aff947c6701f6c72538b400ca0dd5b8d6dfb77603
+    description: Drop-in prompt to structure competitive subsumption, moat, gating, and irreversibility analysis.
+    scope:
+      paths:
+        - prompts/competitive/
+        - docs/roadmap/STATUS.json
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - competitive-intel
+        - governance
+        - product-strategy
     verification:
       tiers_required:
         - C
@@ -104,6 +259,196 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ssdf-v1.2-posture-assessment
+    version: v1
+    path: prompts/compliance/ssdf-v1.2-posture-assessment@v1.md
+    sha256: 1e0d1ea37cc4f6d359a90868d58b40c72941ce5b4575bbf43291cc9c11edae3f
+    description: Assess SSDF v1.2 posture, map controls, and draft NIST public comment artifacts.
+    scope:
+      paths:
+        - docs/compliance/
+        - docs/architecture/
+        - docs/standards/
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/compliance/
+        - prompts/registry.yaml
+      domains:
+        - compliance
+        - governance
+        - security
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: pr-lifecycle-report
+    version: v1
+    path: prompts/governance/pr-lifecycle-report.md
+    sha256: 7a8bdc4132e9aa65afaa4686b3a4fe467ff44efc29137d3d2d079c1bed60c2a9
+    description: Generate PR lifecycle report for security, integration chain, and OSINT categories.
+    scope:
+      paths:
+        - docs/pr-lifecycle-report.md
+        - scripts/pr-lifecycle-report.mjs
+        - prompts/governance/pr-lifecycle-report.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - program-management
+        - compliance
+  - id: narrative-analysis-update-20260124
+    version: v1
+    path: prompts/research/narrative-analysis-update-20260124.md
+    sha256: 1ebc24bda683cb0b153b0bed8f93ac8a39334c1bea75ee9b896831802c63fb8b
+    description: Daily narrative analysis and information operations research update for 2026-01-24.
+    scope:
+      paths:
+        - docs/research/
+        - docs/roadmap/STATUS.json
+        - prompts/research/
+        - agents/examples/
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - research
+  - id: siteimprove-agentic-content-intel
+    version: v1
+    path: prompts/competitive/siteimprove-agentic-content-intelligence.md
+    sha256: 81ddc325cbc19253c9d306cfa49801fecd09aea632e7c1ff133bf3e73ec761df
+    description: Competitive brief on Siteimprove's agentic content intelligence and Summit response actions.
+    scope:
+      paths:
+        - docs/competitive/
+        - docs/roadmap/STATUS.json
+        - prompts/competitive/
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - competitive-intel
+        - product-strategy
+        - governance
+  - id: sar-agentic-app-runtime
+    version: v1
+    path: prompts/architecture/sar-agentic-app-runtime@v1.md
+    sha256: 0c2ea2abded4bee786ab44a93066948cac8bff1dc60d94cb3cd56faa15c367d8
+    description: Summit App Runtime architecture, governance, and compatibility plan with SAR deliverables.
+    scope:
+      paths:
+        - docs/architecture/sar-agentic-app-runtime.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/architecture/sar-agentic-app-runtime@v1.md
+        - prompts/registry.yaml
+      domains:
+        - architecture
+        - governance
+        - security
+        - product
+  - id: secrets-handling-guidance
+    version: v1
+    path: prompts/docs/secrets-handling-guidance@v1.md
+    sha256: 47905844651ae4302a43cb54cc1ae0bcccffadffba5285b7f5fd266bbd03c2eb
+    description: Update contributor guidance with secrets handling and shell history hardening.
+    scope:
+      paths:
+        - CONTRIBUTING.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/docs/secrets-handling-guidance@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - security
+        - governance
+  - id: mcp-git-chain-hardening
+    version: v1
+    path: prompts/security/mcp-git-chain-hardening@v1.md
+    sha256: cd4b567258aa3fc30492b51228012212e2719c809e390bfc37dc6040a3f85109
+    description: Extract MCP Git server exploit chains and map Summit hardening controls.
+    scope:
+      paths:
+        - docs/security/
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - agents/examples/
+        - prompts/security/mcp-git-chain-hardening@v1.md
+        - prompts/registry.yaml
+      domains:
+        - security
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: mvp4-ga-gate-artifacts
+    version: v1
+    path: prompts/docs/mvp4-ga-gate-artifacts@v1.md
+    sha256: 2559438794396206479faeb3e06af19df340be2241d70e0e019f97cac76fef6d
+    description: Document and map MVP-4 GA gate artifact closure steps and verification surfaces.
+    scope:
+      paths:
+        - docs/ga/
+        - scripts/ga/
+        - agent-contract.json
+        - prompts/docs/mvp4-ga-gate-artifacts@v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - governance
+        - ga-hardening
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: genui-plan-scaffold
+    version: v1
+    path: prompts/genui/genui-plan-scaffold@v1.md
+    sha256: 204eaff65c2739b657e996c6b551d47ae1ecdf8ce3b85be654c9372d71016e9b
+    description: Ship the Summit-native GenUI plan scaffold, GA docs, and verification updates.
+    scope:
+      paths:
+        - packages/genui/
+        - docs/ga/genui/
+        - docs/ga/MVP-4-GA-VERIFICATION.md
+        - docs/ga/verification-map.json
+        - scripts/ga/verify-ga-surface.mjs
+        - agent-contract.json
+        - docs/roadmap/STATUS.json
+        - AGENT_ACTIVITY.md
+        - prompts/genui/genui-plan-scaffold@v1.md
+        - prompts/registry.yaml
+      domains:
+        - genui
+        - governance
+        - documentation
+        - verification
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: governance-docs-soc-controls
     version: v1
     path: prompts/governance/governance-docs-soc-controls@v1.md
@@ -114,6 +459,7 @@ prompts:
         - docs/governance/
         - docs/ci/REQUIRED_CHECKS_POLICY.yml
         - docs/SOC_CONTROL_UNIT_TESTS_PLAN.md
+        - docs/roadmap/STATUS.json
         - scripts/ci/
         - .github/workflows/
         - server/tests/
@@ -135,6 +481,30 @@ prompts:
       debt_budget:
         permitted: 0
         retirement_target: 1
+    allowed_operations:
+      - create
+      - edit
+  - id: daily-disinfo-research-summary
+    version: v1
+    path: prompts/research/daily-disinfo-research-summary@v1.md
+    sha256: 575646f52234f5fc454ee92cad5ad78aba839e2ab3620810beb6212e6cf268bd
+    description: Daily research summary update for disinformation and information operations.
+    scope:
+      paths:
+        - docs/research/
+        - docs/roadmap/STATUS.json
+        - prompts/research/daily-disinfo-research-summary@v1.md
+        - prompts/registry.yaml
+      domains:
+        - research
+        - documentation
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
     allowed_operations:
       - create
       - edit

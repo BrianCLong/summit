@@ -3,16 +3,16 @@ import pino from 'pino';
 import path from 'path';
 import { createReadStream, promises as fsPromises } from 'fs';
 import { spawn } from 'child_process';
-import { OCREngine } from './engines/OCREngine.js';
-import { ObjectDetectionEngine } from './engines/ObjectDetectionEngine.js';
-import { SpeechToTextEngine } from './engines/SpeechToTextEngine.js';
-import { FaceDetectionEngine } from './engines/FaceDetectionEngine.js';
-import { TextAnalysisEngine } from './engines/TextAnalysisEngine.js';
-import { EmbeddingService } from './services/EmbeddingService.js';
-import { MediaType } from '../services/MediaUploadService.js';
+import { OCREngine } from './engines/OCREngine.ts';
+import { ObjectDetectionEngine } from './engines/ObjectDetectionEngine.ts';
+import { SpeechToTextEngine } from './engines/SpeechToTextEngine.ts';
+import { FaceDetectionEngine } from './engines/FaceDetectionEngine.ts';
+import { TextAnalysisEngine } from './engines/TextAnalysisEngine.ts';
+import { EmbeddingService } from './services/EmbeddingService.ts';
+import { MediaType } from '../services/MediaUploadService.ts';
 import {
   VideoFrameExtractor,
-} from './engines/VideoFrameExtractor.js'; // WAR-GAMED SIMULATION - Import VideoFrameExtractor
+} from './engines/VideoFrameExtractor.ts'; // WAR-GAMED SIMULATION - Import VideoFrameExtractor
 import ffmpegStatic from 'ffmpeg-static'; // WAR-GAMED SIMULATION - Import ffmpeg-static
 import ffprobeStatic from 'ffprobe-static'; // WAR-GAMED SIMULATION - Import ffprobe-static
 import fs from 'fs/promises'; // WAR-GAMED SIMULATION - For file system operations
@@ -24,7 +24,7 @@ import {
   BoundingBox,
   TemporalRange,
   ExtractionMetrics,
-} from './types.js';
+} from './types.ts';
 
 const logger = (pino as any)({ name: 'ExtractionEngine' });
 

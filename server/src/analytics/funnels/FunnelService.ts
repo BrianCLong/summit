@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { Funnel, FunnelReport, FunnelStep } from './types.js';
-import { TelemetryEvent } from '../telemetry/types.js';
+import { Funnel, FunnelReport, FunnelStep } from './types.ts';
+import { TelemetryEvent } from '../telemetry/types.ts';
 
 export class FunnelService {
     private logDir: string;
@@ -124,7 +124,7 @@ export class FunnelService {
         const map = new Map<string, TelemetryEvent[]>();
         if (!fs.existsSync(this.logDir)) return map;
 
-        const files = fs.readdirSync(this.logDir).filter((f: string) => f.endsWith('.jsonl'));
+        const files = fs.readdirSync(this.logDir).filter((f: string) => f.endsWith('.tsonl'));
         for (const file of files) {
             const content = fs.readFileSync(path.join(this.logDir, file), 'utf-8');
             const lines = content.split('\n');

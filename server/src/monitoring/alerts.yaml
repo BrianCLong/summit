@@ -94,3 +94,42 @@ groups:
         annotations:
           summary: "Potential Brute Force Attack"
           description: "High rate of authentication errors detected."
+
+      # AI Service Alerts
+      - alert: LLMErrorRateHigh
+        expr: sum(rate(llm_requests_total{status="error"}[5m])) / sum(rate(llm_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High LLM Error Rate"
+          description: "LLM error rate is above 5% for the last 5 minutes."
+
+      - alert: LLMLatencyHigh
+        expr: histogram_quantile(0.95, rate(llm_request_duration_seconds_bucket[5m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High LLM Latency"
+          description: "P95 LLM request latency is above 10 seconds."
+
+      # GraphRAG Alerts
+      - alert: GraphRAGFailureRateHigh
+        expr: sum(rate(intelgraph_graphrag_query_total{status="failed"}[10m])) / sum(rate(intelgraph_graphrag_query_total[10m])) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High GraphRAG Failure Rate"
+          description: "GraphRAG failure rate is above 5% for the last 10 minutes."
+
+      # Docling Alerts
+      - alert: DoclingSlowInference
+        expr: histogram_quantile(0.95, rate(docling_inference_duration_seconds_bucket[5m])) > 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Docling Inference Slow"
+          description: "Docling inference P95 latency is above 30 seconds."

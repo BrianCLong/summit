@@ -5,7 +5,7 @@
  * Represents a vehicle (land, air, sea)
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
 
 export interface CanonicalVehicle extends BaseCanonicalEntity, CanonicalEntityMetadata {
   entityType: 'Vehicle';

@@ -20,7 +20,7 @@ export {
   type PolicyCoverageGap,
   type OptimizationEngineConfig,
   type OptimizationStats,
-} from './PolicyOptimizationEngine.js';
+} from './PolicyOptimizationEngine.ts';
 
 export {
   PolicySimulator,
@@ -38,7 +38,7 @@ export {
   type ComplianceImpact,
   type RiskAssessment,
   type RiskFactor,
-} from './PolicySimulator.js';
+} from './PolicySimulator.ts';
 
 export {
   PolicyRecommendationService,
@@ -55,7 +55,7 @@ export {
   type HighRiskAccess,
   type RecommendationConfig,
   type RecommendationStats,
-} from './PolicyRecommendationService.js';
+} from './PolicyRecommendationService.ts';
 
 export {
   PolicyImpactAnalyzer,
@@ -69,4 +69,4 @@ export {
   type ComplianceStatusSummary,
   type OperationalImpact,
   type ImpactAnalyzerConfig,
-} from './PolicyImpactAnalyzer.js';
+} from './PolicyImpactAnalyzer.ts';

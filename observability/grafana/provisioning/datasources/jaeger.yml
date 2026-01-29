@@ -5,7 +5,7 @@ datasources:
     type: jaeger
     uid: jaeger
     access: proxy
-    url: http://jaeger:16686
+    url: http://jaeger-query:16686
     editable: true
     jsonData:
       tracesToLogsV2:

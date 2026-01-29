@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/ingest-worker",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Ingest worker library with backpressure, retry, circuit breaker, and idempotency",
   "type": "module",
   "main": "dist/index.js",

@@ -1,0 +1,92 @@
+version: "1.0"
+last_updated: "2025-10-27"
+status: "active"
+
+frameworks:
+  nist_ai_rmf:
+    govern:
+      culture:
+        summit_control: "gov-culture-enforcement"
+        module: "AGENTS.md"
+        evidence_id: "governance_culture"
+      roles:
+        summit_control: "gov-role-separation"
+        module: "docs/governance/OWNERSHIP.md"
+        evidence_id: "role_assignments"
+    map:
+      inventory:
+        summit_control: "sys-inventory-auto"
+        module: "artifacts/evidence/governance/ai-inventory.json"
+        evidence_id: "system_inventory"
+      context:
+        summit_control: "risk-context-mapping"
+        module: "compliance/assessments/"
+        evidence_id: "risk_assessment"
+    measure:
+      metrics:
+        summit_control: "model-eval-auto"
+        module: "scripts/ci/test-reports/"
+        evidence_id: "evaluation_metrics"
+    manage:
+      intervention:
+        summit_control: "rt-circuit-breaker"
+        module: "server/src/autonomous/policy-engine.ts"
+        evidence_id: "intervention_logs"
+      incident_response:
+        summit_control: "ops-incident-playbook"
+        module: "docs/runbooks/"
+        evidence_id: "incident_drill_logs"
+
+  eu_ai_act:
+    art_5_prohibited:
+      summit_control: "pol-ethical-ban"
+      module: "compliance/regulatory-lenses.yml"
+      evidence_id: "policy_verification"
+    art_9_risk_mgmt:
+      summit_control: "risk-continuous-assess"
+      module: "compliance/assessments/"
+      evidence_id: "risk_ledger"
+    art_10_data_gov:
+      summit_control: "dat-provenance-ledger"
+      module: "provenance/ledger-service"
+      evidence_id: "provenance_trace"
+    art_13_transparency:
+      summit_control: "doc-model-cards"
+      module: "docs/models/"
+      evidence_id: "model_cards"
+    art_14_human_oversight:
+      summit_control: "ux-human-review"
+      module: "apps/web/src/components/ReviewQueue.tsx"
+      evidence_id: "human_review_logs"
+    art_15_accuracy:
+      summit_control: "sec-adversarial-test"
+      module: "tests/adversarial/"
+      evidence_id: "security_scan_results"
+
+  zero_trust_data:
+    data_inventory:
+      summit_control: "dat-inventory-dynamic"
+      gap: true
+      proposed_control: "DT-001"
+    provenance_enforcement:
+      summit_control: "dat-provenance-enforce"
+      module: "server/src/governance/execution-trace.ts"
+      evidence_id: "execution_trace"
+    metadata_governance:
+      summit_control: "dat-metadata-strict"
+      gap: true
+      proposed_control: "DT-001"
+
+  grc_operational:
+    runtime_monitoring:
+      summit_control: "rt-monitor-drift"
+      gap: true
+      proposed_control: "RT-001"
+    audit_trail:
+      summit_control: "ops-audit-immutable"
+      module: "server/src/governance/execution-trace.ts"
+      evidence_id: "audit_logs"
+    governance_oversight:
+      summit_control: "gov-council-review"
+      gap: true
+      proposed_control: "OP-001"

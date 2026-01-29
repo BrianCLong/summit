@@ -3,6 +3,8 @@
   "compilerOptions": {
     "outDir": "dist",
     "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
     "noImplicitAny": false,
     "strictNullChecks": false,
     "useUnknownInCatchVariables": false,

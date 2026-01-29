@@ -1,6 +1,6 @@
 {
   "name": "@chronos/intent-engine",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Chronos Aeternum intent compiler that translates YAML workflows into canonical DAG IRs.",
   "type": "commonjs",
   "main": "dist/index.js",

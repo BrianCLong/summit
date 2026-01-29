@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/unified-analytics",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Unified analytics engine for lakehouse queries",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

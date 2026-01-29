@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-SSDF12-BASE-001",
+  "generated_at": "2025-01-29T00:00:00Z",
+  "tool_versions": {
+    "node": "20.0.0"
+  },
+  "git": {}
+}

@@ -1,0 +1,14 @@
+version: "1.0"
+environment: "production"
+required_vars:
+  - DATABASE_URL
+  - NEO4J_URI
+  - JWT_SECRET
+  - REDIS_URL
+  - NODE_ENV
+limits:
+  max_memory_mb: 2048
+  min_replicas: 2
+flags:
+  GA_MODE: "true"
+  LEGACY_BAGGAGE: "false"

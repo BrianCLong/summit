@@ -1,0 +1,40 @@
+{
+  "task_id": "INTELLIGENCE_FOUNDRY_DOCS_001",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "intelligence-foundry-docs",
+    "version": "v1",
+    "sha256": "7104841f9219f66a31d8ef8e650e129791aae50ef3f9f8dd44c5b72c10348b23",
+    "path": "prompts/docs/intelligence-foundry-docs@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/architecture/intelligence-foundry/",
+      "docs/architecture/comparisons/",
+      "docs/architecture/narratives/",
+      "docs/adr/ADR-021-intelligence-foundry.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/docs/intelligence-foundry-docs@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["documentation", "architecture", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/roadmap/STATUS.json"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Intelligence Foundry architecture documentation bundle is present and complete.",
+    "Roadmap status updated with documentation bundle revision note.",
+    "Prompt registration and task spec are recorded for governance compliance."
+  ],
+  "stop_conditions": [
+    "Prompt hash mismatch in prompts/registry.yaml.",
+    "Changes outside declared scope are required."
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "id": "690354db-fe04-4732-9fad-827780246ada",
+  "resource_id": "eb2211f6-a42b-4643-9e5b-7cb8124cad57",
+  "timestamp": "2026-01-28T17:50:51.117Z",
+  "primaryArtifact": {
+    "id": "eb2211f6-a42b-4643-9e5b-7cb8124cad57",
+    "name": "LangChain",
+    "type": "Framework",
+    "url": "https://github.com/langchain-ai/langchain",
+    "description": "Building applications with LLMs through composability.",
+    "tags": [],
+    "maturity": "Production",
+    "capabilities": {
+      "tool_use": true,
+      "memory": true,
+      "planning": false,
+      "orchestration": true,
+      "evals": false,
+      "safety": false,
+      "observability": true,
+      "multi_agent": false,
+      "sandboxing": false
+    },
+    "signals": {
+      "github_stars": 80000,
+      "license": "MIT",
+      "active_community": true
+    }
+  },
+  "provenance": {
+    "source": "initial_ecosystem.yaml",
+    "method": "seed",
+    "actor": "summit-agent-indexer"
+  },
+  "verification": {
+    "status": "unverified",
+    "tests_run": [],
+    "results": {}
+  },
+  "claims": []
+}

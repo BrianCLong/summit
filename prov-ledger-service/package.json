@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/prov-ledger-service",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Provenance and Claim Ledger service",
   "main": "dist/server.js",
   "bin": {

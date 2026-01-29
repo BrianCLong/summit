@@ -1,0 +1,10 @@
+version: 1
+item: automation-turn-6
+deferred:
+  - title: "Ingest real ITEM claims + APIs"
+    owner: "Agent A"
+    estimate: "4h"
+    dependency: "ITEM excerpts"
+    reason_deferred: "Foundation phase focus"
+    claim_ids: []
+    required_gates_later: ["subsumption-bundle-verify", "subsumption-bundle-evals"]

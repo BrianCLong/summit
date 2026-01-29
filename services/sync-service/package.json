@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/sync-service",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Air-gapped sync service for data transfer between core and edge deployments",
   "type": "module",
   "main": "dist/index.js",

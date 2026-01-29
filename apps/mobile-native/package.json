@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/mobile-native",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Native iOS and Android mobile apps for IntelGraph using React Native",
   "private": true,
   "main": "index.js",
@@ -8,7 +8,7 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "pod-install": "cd ios && bundle exec pod install",

@@ -55,6 +55,7 @@ import {
   MenuItem as MuiMenuItem,
   Select as MuiSelect,
 } from '@mui/material';
+import { getGraphqlHttpUrl } from '../config/urls';
 
 // ---- Types ----
 type GraphNode = {
@@ -265,6 +266,11 @@ export function IntelGraphWorkbench() {
   // --- NEW: Loading and Error states for GraphQL fetching ---
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [hoverInfo, setHoverInfo] = useState<{
+    x: number;
+    y: number;
+    label: string;
+  } | null>(null);
 
   // --- NEW: GraphQL Query Placeholder ---
   // This is a basic example. You'll need to adjust it based on your actual GraphQL schema.
@@ -298,7 +304,7 @@ export function IntelGraphWorkbench() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('http://localhost:4000/graphql', {
+      const response = await fetch(getGraphqlHttpUrl(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -376,21 +382,72 @@ export function IntelGraphWorkbench() {
     setMaxTimestamp(value[1]);
   }, []);
 
+  const applyLayout = useCallback((layout: LayoutOption) => {
+    setGraphData((prev) => {
+      const count = prev.nodes.length || 1;
+      if (layout === 'force') {
+        return {
+          ...prev,
+          nodes: prev.nodes.map((node) => ({ ...node, fx: undefined, fy: undefined })),
+        };
+      }
+
+      if (layout === 'radial') {
+        const radius = 200;
+        return {
+          ...prev,
+          nodes: prev.nodes.map((node, index) => {
+            const angle = (index / count) * Math.PI * 2;
+            return {
+              ...node,
+              fx: Math.cos(angle) * radius,
+              fy: Math.sin(angle) * radius,
+            };
+          }),
+        };
+      }
+
+      const perRow = Math.max(1, Math.ceil(Math.sqrt(count)));
+      const spacing = 140;
+      return {
+        ...prev,
+        nodes: prev.nodes.map((node, index) => {
+          const row = Math.floor(index / perRow);
+          const col = index % perRow;
+          return {
+            ...node,
+            fx: col * spacing,
+            fy: row * spacing,
+          };
+        }),
+      };
+    });
+
+    if (layout === 'force' && fgRef.current) {
+      fgRef.current.d3ReheatSimulation();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (graphData.nodes.length === 0) return;
+    applyLayout(layoutType);
+  }, [applyLayout, graphData.nodes.length, layoutType]);
+
   const handleLayoutChange = useCallback(
     (value: LayoutOption) => {
       setLayoutType(value);
-      // TODO: Implement layout logic here (dagre, radial)
-      // For now, just reset force layout
-      if (fgRef.current) {
-        fgRef.current.d3ReheatSimulation();
-      }
+      applyLayout(value);
     },
-    [],
+    [applyLayout],
   );
 
   const handleToggleMap = useCallback(() => {
     setShowMap((prev) => !prev);
   }, []);
+
+  useEffect(() => {
+    if (!showMap) setHoverInfo(null);
+  }, [showMap]);
 
   const formatLinkEndpoint = (
     endpoint: GraphLink['source'] | GraphLink['target'],
@@ -712,10 +769,9 @@ export function IntelGraphWorkbench() {
                     data: filteredGraphData.nodes.filter(
                       (n) => n.lat !== undefined && n.lon !== undefined,
                     ),
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    getPosition: (d: any) => [d.lon ?? 0, d.lat ?? 0] as [number, number],
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    getFillColor: (d: any) => {
+                    getPosition: (d: GraphNode) =>
+                      [d.lon ?? 0, d.lat ?? 0] as [number, number],
+                    getFillColor: (d: GraphNode) => {
                       const color = nodeColors[d.id];
                       return color
                         ? [
@@ -728,12 +784,26 @@ export function IntelGraphWorkbench() {
                     },
                     getRadius: 10000, // Adjust radius based on zoom level
                     pickable: true,
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-                    onHover: ({ object, x, y }: any) => {
-                      // TODO: Show tooltip on hover
+                    onHover: ({
+                      object,
+                      x,
+                      y,
+                    }: {
+                      object: GraphNode | null;
+                      x: number;
+                      y: number;
+                    }) => {
+                      if (!object) {
+                        setHoverInfo(null);
+                        return;
+                      }
+                      setHoverInfo({
+                        x,
+                        y,
+                        label: object.label || object.id || 'Node',
+                      });
                     },
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onClick: ({ object }: any) => {
+                    onClick: ({ object }: { object: GraphNode | null }) => {
                       if (object) handleNodeClick(object as GraphNode);
                     },
                   }),
@@ -761,8 +831,7 @@ export function IntelGraphWorkbench() {
                         targetNode?.lon !== undefined
                       );
                     }),
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    getSourcePosition: (d: any) => {
+                    getSourcePosition: (d: GraphLink) => {
                       const sourceNode = filteredGraphData.nodes.find(
                         (n) =>
                           n.id ===
@@ -774,8 +843,7 @@ export function IntelGraphWorkbench() {
                         ? ([sourceNode.lon ?? 0, sourceNode.lat ?? 0] as [number, number])
                         : ([0, 0] as [number, number]);
                     },
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    getTargetPosition: (d: any) => {
+                    getTargetPosition: (d: GraphLink) => {
                       const targetNode = filteredGraphData.nodes.find(
                         (n) =>
                           n.id ===
@@ -791,18 +859,48 @@ export function IntelGraphWorkbench() {
                     getTargetColor: [255, 0, 128, 160],
                     getWidth: 2,
                     pickable: true,
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-                    onHover: ({ object, x, y }: any) => {
-                      // TODO: Show tooltip on hover
+                    onHover: ({
+                      object,
+                      x,
+                      y,
+                    }: {
+                      object: GraphLink | null;
+                      x: number;
+                      y: number;
+                    }) => {
+                      if (!object) {
+                        setHoverInfo(null);
+                        return;
+                      }
+                      const label = `${formatLinkEndpoint(object.source)} -> ${formatLinkEndpoint(object.target)}`;
+                      setHoverInfo({ x, y, label });
                     },
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onClick: ({ object }: any) => {
+                    onClick: ({ object }: { object: GraphLink | null }) => {
                       if (object) handleLinkClick(object as GraphLink);
                     },
                   }),
                 ]}
               />
             </Map>
+            {hoverInfo && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: hoverInfo.x,
+                  top: hoverInfo.y,
+                  transform: 'translate(8px, 8px)',
+                  background: 'rgba(0, 0, 0, 0.75)',
+                  color: '#fff',
+                  padding: '4px 8px',
+                  borderRadius: 4,
+                  fontSize: 12,
+                  pointerEvents: 'none',
+                  maxWidth: 240,
+                }}
+              >
+                {hoverInfo.label}
+              </div>
+            )}
           </div>
         )}
 

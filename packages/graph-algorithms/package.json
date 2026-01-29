@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/graph-algorithms",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Advanced graph algorithms library for network analysis",
   "type": "module",
   "main": "dist/index.js",

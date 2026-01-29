@@ -1,27 +1,40 @@
-// @ts-nocheck
 /**
  * OpenTelemetry Distributed Tracing for IntelGraph Server
  * Provides end-to-end visibility across all service operations
  */
 
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { Resource } from '@opentelemetry/resources';
-import { SEMRESATTRS_SERVICE_NAME, SEMRESATTRS_SERVICE_VERSION, SEMRESATTRS_DEPLOYMENT_ENVIRONMENT, SEMRESATTRS_SERVICE_NAMESPACE } from '@opentelemetry/semantic-conventions';
+import * as opentelemetrySdkNode from '@opentelemetry/sdk-node';
+import * as opentelemetryResources from '@opentelemetry/resources';
+import * as semanticConventions from '@opentelemetry/semantic-conventions';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
-import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import * as traceExporter from '@opentelemetry/exporter-trace-otlp-http';
+import * as metricsExporter from '@opentelemetry/exporter-metrics-otlp-http';
+import * as sdkMetrics from '@opentelemetry/sdk-metrics';
+import * as autoInstrumentations from '@opentelemetry/auto-instrumentations-node';
 import {
   trace,
   context,
-  propagation,
   SpanStatusCode,
   SpanKind,
-  Span,
-  Context,
+  type Span,
 } from '@opentelemetry/api';
-import type { Attributes } from '@opentelemetry/api';
+type Attributes = Record<string, any>;
+type OtelContext = ReturnType<typeof context.active>;
+
+// Re-export with fallbacks for API compatibility
+const NodeSDK = (opentelemetrySdkNode as any).NodeSDK || opentelemetrySdkNode;
+const Resource = (opentelemetryResources as any).Resource || opentelemetryResources;
+const SEMRESATTRS_SERVICE_NAME = (semanticConventions as any).SEMRESATTRS_SERVICE_NAME || 'service.name';
+const SEMRESATTRS_SERVICE_VERSION = (semanticConventions as any).SEMRESATTRS_SERVICE_VERSION || 'service.version';
+const SEMRESATTRS_DEPLOYMENT_ENVIRONMENT = (semanticConventions as any).SEMRESATTRS_DEPLOYMENT_ENVIRONMENT || 'deployment.environment';
+const SEMRESATTRS_SERVICE_NAMESPACE = (semanticConventions as any).SEMRESATTRS_SERVICE_NAMESPACE || 'service.namespace';
+const OTLPTraceExporter = (traceExporter as any).OTLPTraceExporter || traceExporter;
+const OTLPMetricExporter = (metricsExporter as any).OTLPMetricExporter || metricsExporter;
+const PeriodicExportingMetricReader = (sdkMetrics as any).PeriodicExportingMetricReader || sdkMetrics;
+const getNodeAutoInstrumentations = (autoInstrumentations as any).getNodeAutoInstrumentations || (() => []);
+import * as otelApi from '@opentelemetry/api';
+const propagation = (otelApi as any).propagation || { inject: () => {}, extract: () => context.active() };
+type Context = OtelContext;
 import { cfg } from '../config.js';
 import pino from 'pino';
 
@@ -39,7 +52,7 @@ export interface TracingConfig {
 }
 
 export class IntelGraphTracer {
-  private sdk: NodeSDK | null = null;
+  private sdk: InstanceType<typeof NodeSDK> | null = null;
   private tracer: ReturnType<typeof trace.getTracer>;
   private initialized = false;
 
@@ -105,9 +118,9 @@ export class IntelGraphTracer {
                 },
                 '@opentelemetry/instrumentation-http': {
                   enabled: true,
-                  requestHook: (span, request) => {
+                  requestHook: (span: any, request: any) => {
                     // Add custom HTTP span attributes
-                    span.setAttribute('http.client_ip', request.socket.remoteAddress || 'unknown');
+                    span.setAttribute('http.client_ip', request.socket?.remoteAddress || 'unknown');
                   },
                 },
                 '@opentelemetry/instrumentation-express': {
@@ -142,7 +155,7 @@ export class IntelGraphTracer {
   startSpan(
     name: string,
     options?: {
-      kind?: SpanKind;
+      kind?: typeof SpanKind[keyof typeof SpanKind];
       attributes?: Attributes;
       parent?: Span | Context;
     },
@@ -170,7 +183,7 @@ export class IntelGraphTracer {
     name: string,
     fn: (span: Span) => Promise<T>,
     options?: {
-      kind?: SpanKind;
+      kind?: typeof SpanKind[keyof typeof SpanKind];
       attributes?: Attributes;
     },
   ): Promise<T> {

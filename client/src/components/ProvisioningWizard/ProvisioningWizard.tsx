@@ -30,6 +30,11 @@ const steps = [
   'Summary & Completion',
 ];
 
+const getRedirectUri = () => {
+  if (typeof window === 'undefined') return '/auth/callback';
+  return `${window.location.origin}/auth/callback`;
+};
+
 function getStepContent(step: number) {
   switch (step) {
     case 0:
@@ -160,7 +165,7 @@ AllowedIPs = 0.0.0.0/0, ::/0`}
             label="Redirect URI"
             fullWidth
             margin="normal"
-            value="http://localhost:3000/auth/callback" // Default for local dev
+            value={getRedirectUri()}
             InputProps={{ readOnly: true }}
           />
           <Button

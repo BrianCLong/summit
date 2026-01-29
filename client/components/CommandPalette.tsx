@@ -5,7 +5,22 @@ type Item = { id: string; label: string; action: () => void };
 export default function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [q, open]);
+
+  useEffect(() => {
+    if (open && listRef.current) {
+      const el = listRef.current.children[selectedIndex] as HTMLElement;
+      if (el) {
+        el.scrollIntoView({ block: 'nearest' });
+      }
+    }
+  }, [selectedIndex, open]);
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
@@ -64,6 +79,22 @@ export default function CommandPalette() {
     i.label.toLowerCase().includes(q.toLowerCase()),
   );
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (filtered.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev + 1) % filtered.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev - 1 + filtered.length) % filtered.length);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (filtered[selectedIndex]) {
+        filtered[selectedIndex].action();
+      }
+    }
+  };
+
   if (!open) return null;
   return (
     <div
@@ -90,7 +121,13 @@ export default function CommandPalette() {
             ref={inputRef}
             value={q}
             onChange={(e) => setQ(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Type a command (Open Copilot)…"
+            aria-activedescendant={filtered[selectedIndex]?.id}
+            aria-controls="command-palette-list"
+            aria-autocomplete="list"
+            role="combobox"
+            aria-expanded={true}
             style={{
               width: '100%',
               fontSize: 16,
@@ -101,6 +138,9 @@ export default function CommandPalette() {
           />
         </div>
         <ul
+          ref={listRef}
+          id="command-palette-list"
+          role="listbox"
           style={{
             listStyle: 'none',
             margin: 0,
@@ -109,13 +149,17 @@ export default function CommandPalette() {
             overflowY: 'auto',
           }}
         >
-          {filtered.map((it) => (
+          {filtered.map((it, index) => (
             <li
               key={it.id}
+              id={it.id}
+              role="option"
+              aria-selected={index === selectedIndex}
               style={{
                 padding: '10px 12px',
                 borderTop: '1px solid #f4f4f4',
                 cursor: 'pointer',
+                background: index === selectedIndex ? '#f0f0f0' : 'transparent',
               }}
               onClick={it.action}
             >

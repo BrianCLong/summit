@@ -1,0 +1,223 @@
+{
+  "name": "Linear to Airtable Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "linear-webhook",
+        "options": {}
+      },
+      "name": "Linear Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "{{LINEAR_WEBHOOK_ID}}",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "resource": "issue",
+        "operation": "get",
+        "issueId": "={{$json[\"data\"][\"id\"]}}"
+      },
+      "name": "Get Issue Details",
+      "type": "n8n-nodes-base.linearApi",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "linearApi": {
+          "id": "{{LINEAR_API_CREDENTIAL_ID}}",
+          "name": "Linear API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "base": "={{$env.AIRTABLE_BASE_ID}}",
+        "table": "Issues",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "platform": "Linear",
+            "platform_id": "={{$json[\"id\"]}}",
+            "title": "={{$json[\"title\"]}}",
+            "description": "={{$json[\"description\"]}}",
+            "status": "={{$json[\"state\"][\"name\"]}}",
+            "assignee": "={{$json[\"assignee\"] ? $json[\"assignee\"][\"name\"] : null}}",
+            "priority": "={{$json[\"priority\"]}}",
+            "project": "={{$json[\"project\"] ? $json[\"project\"][\"name\"] : null}}",
+            "url": "={{$json[\"url\"]}}",
+            "created_at": "={{$json[\"createdAt\"]}}",
+            "updated_at": "={{$json[\"updatedAt\"]}}",
+            "labels": "={{$json[\"labels\"] ? $json[\"labels\"].map(l => l.name).join(', ') : null}}",
+            "sync_timestamp": "={{$now}}"
+          }
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "name": "Create or Update in Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [650, 300],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "{{AIRTABLE_CREDENTIAL_ID}}",
+          "name": "Airtable Personal Access Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": "={{$env.AIRTABLE_BASE_ID}}",
+        "table": "Issues",
+        "filterByFormula": "={platform_id}='{{$json[\"id\"]}}'",
+        "options": {}
+      },
+      "name": "Check if Issue Exists",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [850, 300],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "{{AIRTABLE_CREDENTIAL_ID}}",
+          "name": "Airtable Personal Access Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"type\"]}}",
+              "operation": "equals",
+              "value2": "Issue"
+            }
+          ]
+        }
+      },
+      "name": "Is Issue Event",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 500]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": "={{$env.AIRTABLE_BASE_ID}}",
+        "table": "Sync_Log",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "platform": "Linear",
+            "entity_type": "Issue",
+            "entity_id": "={{$json[\"id\"]}}",
+            "action": "={{$json[\"action\"]}}",
+            "status": "success",
+            "timestamp": "={{$now}}",
+            "payload": "={{JSON.stringify($json)}}"
+          }
+        }
+      },
+      "name": "Log Sync Activity",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [850, 500],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "{{AIRTABLE_CREDENTIAL_ID}}",
+          "name": "Airtable Personal Access Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.SLACK_WEBHOOK_URL}}",
+        "options": {},
+        "bodyParametersJson": "={\n  \"text\": \"Linear issue synced: {{$json[\"title\"]}}\"\n}"
+      },
+      "name": "Notify Slack (Optional)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1050, 300],
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Linear Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Issue Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Issue Details": {
+      "main": [
+        [
+          {
+            "node": "Create or Update in Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or Update in Airtable": {
+      "main": [
+        [
+          {
+            "node": "Log Sync Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Sync Activity": {
+      "main": [
+        [
+          {
+            "node": "Notify Slack (Optional)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "{{ERROR_WORKFLOW_ID}}"
+  },
+  "staticData": null,
+  "meta": {
+    "instanceId": "summit-integration-platform"
+  },
+  "tags": [
+    {
+      "name": "integration",
+      "id": "1"
+    },
+    {
+      "name": "linear",
+      "id": "2"
+    },
+    {
+      "name": "sync",
+      "id": "3"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+  "versionId": "1"
+}

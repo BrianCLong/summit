@@ -6,7 +6,7 @@
       "type": "cost",
       "status": "active",
       "lastDecision": "Shifted 20% traffic to Haiku for non-critical tasks",
-      "lastRun": "2026-01-15T06:10:41.319Z",
+      "lastRun": "2026-01-26T22:12:52.052Z",
       "config": {
         "threshold": 0.8,
         "interval": "15m"
@@ -18,7 +18,7 @@
       "type": "reliability",
       "status": "active",
       "lastDecision": "Quarantined node agent-worker-3 due to high error rate",
-      "lastRun": "2026-01-15T06:10:41.319Z",
+      "lastRun": "2026-01-26T22:12:52.052Z",
       "config": {
         "maxRetries": 3
       }
@@ -29,7 +29,7 @@
       "type": "safety",
       "status": "active",
       "lastDecision": "Blocked 2 prompts for PII violation",
-      "lastRun": "2026-01-15T06:10:41.319Z",
+      "lastRun": "2026-01-26T22:12:52.052Z",
       "config": {
         "strictMode": true
       }
@@ -41,15 +41,12 @@
       "name": "Planner Agent V2",
       "hypothesis": "New prompt structure reduces planning latency by 15%",
       "status": "running",
-      "variants": [
-        "control",
-        "v2-prompt"
-      ],
+      "variants": ["control", "v2-prompt"],
       "metrics": {
         "latency": -12,
         "successRate": 2
       },
-      "startDate": "2026-01-13T06:10:41.319Z"
+      "startDate": "2026-01-24T22:12:52.052Z"
     }
   ],
   "playbooks": [
@@ -57,112 +54,108 @@
       "id": "pb-restart-pods",
       "name": "Restart Stuck Pods",
       "description": "Automatically restarts pods that are in CrashLoopBackOff for > 10m",
-      "triggers": [
-        "pod_crash_loop"
-      ],
-      "actions": [
-        "k8s.delete_pod"
-      ],
+      "triggers": ["pod_crash_loop"],
+      "actions": ["k8s.delete_pod"],
       "isEnabled": true
     }
   ],
   "auditLog": [
     {
-      "id": "skq2r8",
-      "timestamp": "2026-01-15T06:10:41.536Z",
+      "id": "vdlsoqp",
+      "timestamp": "2026-01-26T22:12:52.863Z",
       "actor": "agent-1",
       "action": "coordination_start",
-      "resource": "1e329173-a09e-4d87-bddc-a06a384d0f06",
+      "resource": "2267f184-935a-4a0f-b146-0b76ec57cea9",
       "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
       "status": "allowed"
     },
     {
-      "id": "6acg5a",
-      "timestamp": "2026-01-15T06:10:41.536Z",
-      "actor": "agent-1",
-      "action": "coordination_start",
-      "resource": "be4a9d18-e819-4a49-be4c-a010c2aa61c7",
-      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
-      "status": "allowed"
-    },
-    {
-      "id": "t4mqd",
-      "timestamp": "2026-01-15T06:10:41.536Z",
-      "actor": "agent-1",
-      "action": "coordination_start",
-      "resource": "15f2cc78-c3ad-4fd4-b267-5f28ada812d6",
-      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
-      "status": "allowed"
-    },
-    {
-      "id": "m9lxca",
-      "timestamp": "2026-01-15T06:10:41.536Z",
+      "id": "n2bqtd",
+      "timestamp": "2026-01-26T22:12:52.863Z",
       "actor": "system",
       "action": "coordination_kill",
-      "resource": "fbd053b2-5609-41e2-8de4-697d2e802665",
-      "details": "Coordination terminated: Token limit exceeded",
-      "status": "allowed"
-    },
-    {
-      "id": "dgplgs",
-      "timestamp": "2026-01-15T06:10:41.536Z",
-      "actor": "agent-1",
-      "action": "coordination_start",
-      "resource": "b2fc5b98-19f3-4423-8077-14f40af104d4",
-      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
-      "status": "allowed"
-    },
-    {
-      "id": "wyazwa",
-      "timestamp": "2026-01-15T06:10:41.536Z",
-      "actor": "system",
-      "action": "coordination_kill",
-      "resource": "be4a9d18-e819-4a49-be4c-a010c2aa61c7",
+      "resource": "20a1c9d7-9c02-4fc5-9f9b-964f8e968e2a",
       "details": "Coordination terminated: Step limit exceeded",
       "status": "allowed"
     },
     {
-      "id": "rnbfa",
-      "timestamp": "2026-01-15T06:10:41.536Z",
+      "id": "eiix9y",
+      "timestamp": "2026-01-26T22:12:52.863Z",
+      "actor": "agent-1",
+      "action": "coordination_start",
+      "resource": "13b67f24-3795-4015-8a50-b3b3365e7bce",
+      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
+      "status": "allowed"
+    },
+    {
+      "id": "lq0mpl",
+      "timestamp": "2026-01-26T22:12:52.863Z",
+      "actor": "agent-1",
+      "action": "coordination_start",
+      "resource": "c42c194f-fac0-4604-a840-b0255a5b692b",
+      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
+      "status": "allowed"
+    },
+    {
+      "id": "75sxvw",
+      "timestamp": "2026-01-26T22:12:52.863Z",
       "actor": "system",
       "action": "coordination_kill",
-      "resource": "15f2cc78-c3ad-4fd4-b267-5f28ada812d6",
+      "resource": "ec887e90-9b5a-4daf-8b3c-c9710a029e6b",
       "details": "Coordination terminated: Manual Stop",
       "status": "allowed"
     },
     {
-      "id": "dej6x5",
-      "timestamp": "2026-01-15T06:10:41.536Z",
-      "actor": "agent-1",
-      "action": "coordination_start",
-      "resource": "af5d9883-b314-40fa-a528-df6f257d0d58",
-      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
-      "status": "allowed"
-    },
-    {
-      "id": "t45lck",
-      "timestamp": "2026-01-15T06:10:41.536Z",
-      "actor": "agent-1",
-      "action": "coordination_start",
-      "resource": "fbd053b2-5609-41e2-8de4-697d2e802665",
-      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
-      "status": "allowed"
-    },
-    {
-      "id": "23l6ep",
-      "timestamp": "2026-01-15T06:10:41.536Z",
+      "id": "frd23k",
+      "timestamp": "2026-01-26T22:12:52.863Z",
       "actor": "system",
       "action": "coordination_kill",
-      "resource": "b2fc5b98-19f3-4423-8077-14f40af104d4",
+      "resource": "2267f184-935a-4a0f-b146-0b76ec57cea9",
+      "details": "Coordination terminated: Token limit exceeded",
+      "status": "allowed"
+    },
+    {
+      "id": "u7kbak",
+      "timestamp": "2026-01-26T22:12:52.863Z",
+      "actor": "agent-1",
+      "action": "coordination_start",
+      "resource": "cd7f12f4-b909-4d2b-9999-332d6ea3a235",
+      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
+      "status": "allowed"
+    },
+    {
+      "id": "u0sdww",
+      "timestamp": "2026-01-26T22:12:52.863Z",
+      "actor": "agent-1",
+      "action": "coordination_start",
+      "resource": "069c39ec-989c-44f1-975f-f79dc9ac4a2c",
+      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
+      "status": "allowed"
+    },
+    {
+      "id": "2sc6g",
+      "timestamp": "2026-01-26T22:12:52.863Z",
+      "actor": "system",
+      "action": "coordination_kill",
+      "resource": "13b67f24-3795-4015-8a50-b3b3365e7bce",
       "details": "Coordination terminated: Step limit exceeded",
       "status": "allowed"
     },
     {
-      "id": "neygpr",
-      "timestamp": "2026-01-15T06:10:41.536Z",
+      "id": "kpupe",
+      "timestamp": "2026-01-26T22:12:52.863Z",
       "actor": "agent-1",
       "action": "coordination_start",
-      "resource": "5a468ee6-89b5-4b15-af74-edcb8b48c939",
+      "resource": "20a1c9d7-9c02-4fc5-9f9b-964f8e968e2a",
+      "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
+      "status": "allowed"
+    },
+    {
+      "id": "xumke",
+      "timestamp": "2026-01-26T22:12:52.863Z",
+      "actor": "agent-1",
+      "action": "coordination_start",
+      "resource": "ec887e90-9b5a-4daf-8b3c-c9710a029e6b",
       "details": "Started coordination with schema 1.0 and budget {\"totalSteps\":5,\"totalTokens\":1000,\"wallClockTimeMs\":10000}",
       "status": "allowed"
     }

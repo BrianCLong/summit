@@ -1,7 +1,7 @@
 import { CronJob } from 'cron';
-import baseLogger from '../config/logger.js';
-import { billingService } from './BillingService.js';
-import { getPostgresPool } from '../config/database.js';
+import baseLogger from '../config/logger.ts';
+import { billingService } from './BillingService.ts';
+import { getPostgresPool } from '../config/database.ts';
 
 type BillingJobDependencies = {
   pool?: ReturnType<typeof getPostgresPool>;

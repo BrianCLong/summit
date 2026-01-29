@@ -1,0 +1,18 @@
+skill: add-opa-policy
+description: Add OPA policy-as-code rule with tests.
+command:
+  - node
+  - evals/skills/add-opa-policy/simulate-skill.mjs
+timeout_ms: 60000
+allowed_tools:
+  - shell
+  - filesystem
+forbidden_paths:
+  - server/
+  - client/
+  - apps/web/
+deterministic_grader: evals/skills/add-opa-policy/graders/deterministic.ts
+rubric:
+  schema: evals/skills/add-opa-policy/graders/rubric.schema.json
+  prompt: evals/skills/add-opa-policy/graders/rubric_prompt.txt
+  grader: evals/skills/add-opa-policy/graders/rubric.ts

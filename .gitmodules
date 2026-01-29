@@ -1,3 +1,6 @@
 [submodule "skills/vendor/agent-skills-context-engineering"]
 path = skills/vendor/agent-skills-context-engineering
 url = https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering.git
+[submodule "skills/vendor/vercel-labs-agent-skills"]
+	path = skills/vendor/vercel-labs-agent-skills
+	url = https://github.com/vercel-labs/agent-skills.git

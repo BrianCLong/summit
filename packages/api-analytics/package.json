@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/api-analytics",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "API monitoring, analytics, and performance tracking",
   "type": "module",
   "main": "dist/index.js",

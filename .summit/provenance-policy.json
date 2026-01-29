@@ -1,0 +1,9 @@
+{
+  "builderId": "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0",
+  "sourceRepository": "https://github.com/BrianCLong/summit",
+  "minimumSlsaLevel": 3,
+  "allowedRefs": [
+    "refs/heads/main",
+    "refs/tags/v*"
+  ]
+}

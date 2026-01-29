@@ -1,6 +1,6 @@
 {
   "name": "device-trust-policy",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "Node.js policy and claims service for the Device Trust Posture Engine",
   "main": "src/server.js",
   "type": "module",

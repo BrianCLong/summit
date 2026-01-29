@@ -1,8 +1,8 @@
 // @ts-nocheck
-import { getPostgresPool } from '../config/database.js';
-import logger from '../utils/logger.js';
-import { AuthSSOProvider, OIDCProvider, SAMLProviderStub, SSOConfig, SSOUserClaims } from './SSOProvider.js';
-import { AuthService } from '../services/AuthService.js';
+import { getPostgresPool } from '../config/database.ts';
+import logger from '../utils/logger.ts';
+import { AuthSSOProvider, OIDCProvider, SAMLProviderStub, SSOConfig, SSOUserClaims } from './SSOProvider.ts';
+import { AuthService } from '../services/AuthService.ts';
 import { randomUUID } from 'node:crypto';
 import { Pool, PoolClient } from 'pg';
 

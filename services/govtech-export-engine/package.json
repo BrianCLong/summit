@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/govtech-export-engine",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "GovTech Export Accelerator - Analyze, adapt, and export digital government solutions globally",
   "main": "dist/index.js",
   "scripts": {

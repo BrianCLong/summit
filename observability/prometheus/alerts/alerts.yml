@@ -1,0 +1,31 @@
+groups:
+  - name: build-platform.rules
+    rules:
+      - alert: HighErrorRate
+        expr: sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.01
+        for: 5m
+        labels: { severity: page }
+        annotations:
+          summary: High 5xx error rate
+          description: Error rate >1% for 5m.
+
+      - alert: LatencyP95Regression
+        expr: histogram_quantile(0.95, sum(rate(http_server_duration_seconds_bucket[5m])) by (le)) > 0.7
+        for: 10m
+        labels: { severity: warn }
+        annotations:
+          summary: p95 > 700ms
+
+      - alert: GatekeeperViolations
+        expr: gatekeeper_violations{enforcement_action="deny"} > 0
+        for: 2m
+        labels: { severity: page }
+        annotations:
+          summary: Gatekeeper policy violations detected
+
+      - alert: UnsignedImageDetected
+        expr: kube_pod_labels{label_cosign_verified!="true"} == 1
+        for: 2m
+        labels: { severity: page }
+        annotations:
+          summary: Pod running image without cosign verification label

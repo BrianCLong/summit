@@ -1,0 +1,26 @@
+agent_id: osint-reasoner
+version: 1.0.0
+governance:
+  owner: "@intelgraph/osint-team"
+  classification: confidential
+  policy_set: "policies/osint/reasoning.rego"
+  risk_level: medium
+runtime:
+  model:
+    provider: anthropic
+    name: claude-3-5-opus-20240229
+    parameters:
+      temperature: 0.3
+      max_tokens: 8192
+  instructions:
+    source: agents/osint/instructions/reasoning.txt
+    sha256: ff00f60b87d203a25013d7c3edd4f0d1aaf0e086e573230858ded75ecb1bb970
+  tools:
+    - name: "graph:query"
+      permission: read-only
+    - name: "graph:rag_retrieve"
+      permission: read-only
+evidence:
+  log_level: audit
+  required_artifacts: ["trace", "decision_log", "policy_eval"]
+  replay_mode: deterministic

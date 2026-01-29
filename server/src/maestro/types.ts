@@ -1,4 +1,9 @@
-export type TaskStatus = 'queued' | 'running' | 'succeeded' | 'failed';
+import type {
+  ReasoningBudgetContract,
+  ReasoningBudgetEvidence,
+} from './budget';
+
+export type TaskStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'pending_approval';
 
 export interface UserRef {
   id: string;
@@ -17,6 +22,9 @@ export interface Run {
   user: UserRef;
   createdAt: string;
   requestText: string;
+  tenantId?: string;
+  reasoningBudget?: ReasoningBudgetContract;
+  reasoningBudgetEvidence?: ReasoningBudgetEvidence;
 }
 
 export interface Task {

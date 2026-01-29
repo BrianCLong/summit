@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/data-monetization-engine",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Full-Spectrum Automated Data Monetization Engine - AI-powered data asset discovery, compliance, and marketplace",
   "license": "MIT",
   "type": "module",

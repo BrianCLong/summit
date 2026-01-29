@@ -1,0 +1,21 @@
+{
+  "name": "@summit/behavior-merge-engine",
+  "version": "0.1.0",
+  "description": "Behavior Knowledge Merge Engine for Summit Agents",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "vitest": "^4.0.16",
+    "@types/node": "^20.19.27"
+  }
+}

@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
 import cytoscape from 'cytoscape';
-import $ from 'jquery';
 import { useDispatch } from 'react-redux';
 import { fetchGraph } from '../data/mockGraph';
 import { selectNode } from '../store';
+import { trackGoldenPathStep } from '../telemetry';
 
 export function GraphPane() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -11,6 +11,8 @@ export function GraphPane() {
 
   useEffect(() => {
     fetchGraph().then((data) => {
+      if (!containerRef.current) return;
+
       const cy = cytoscape({
         container: containerRef.current!,
         elements: [
@@ -26,17 +28,25 @@ export function GraphPane() {
       cy.on('select', (evt) => dispatch(selectNode(evt.target.id())));
       cy.on('unselect', () => dispatch(selectNode(null)));
 
-      // jQuery drag stub
-      $(cy.container() as HTMLElement).on('mousedown', () => {
-        $(document).on('mouseup.graphDrag', () => {
-          $(document).off('.graphDrag');
-        });
-      });
+      const container = cy.container() as HTMLElement;
 
-      // jQuery context menu stub
-      $(cy.container() as HTMLElement).on('contextmenu', (e: JQuery.Event) => {
+      // Native drag stub
+      const onMouseUp = () => {
+        document.removeEventListener('mouseup', onMouseUp);
+      };
+
+      const onMouseDown = () => {
+        document.addEventListener('mouseup', onMouseUp);
+      };
+
+      container.addEventListener('mousedown', onMouseDown);
+
+      // Native context menu stub
+      const onContextMenu = (e: MouseEvent) => {
         e.preventDefault();
-      });
+      };
+      container.addEventListener('contextmenu', onContextMenu);
+      trackGoldenPathStep('graph_pane_loaded', 'success');
     });
   }, [dispatch]);
 

@@ -41,7 +41,7 @@ import {
   Schedule as ScheduleIcon,
 } from '@mui/icons-material';
 import { useAdminRoles } from '../../../hooks/useAdminRoles';
-import { ManagedUser, RoleAssignment as RoleAssignmentType } from '../../../services/admin-api';
+import { ManagedUser } from '../../../services/admin-api';
 
 interface RoleAssignmentProps {
   open: boolean;

@@ -9,6 +9,7 @@ import AdminPanel from './components/AdminPanel';
 import HealthScore from './components/HealthScore/HealthScore';
 import TimelineView from './features/timeline/TimelineView';
 import { useFeatureFlag, useFeatureVariant } from './hooks/useFeatureFlag';
+import { useGraphPersistence } from './hooks/useGraphPersistence';
 import DemoIndicator from './components/common/DemoIndicator';
 import {
   ApolloClient,
@@ -16,10 +17,11 @@ import {
   ApolloProvider,
   HttpLink,
 } from '@apollo/client';
+import { getGraphqlHttpUrl } from './config/urls';
 
 // Initialize Apollo Client
 const httpLink = new HttpLink({
-  uri: 'http://localhost:4000/graphql', // Assuming your GraphQL server runs on port 4000
+  uri: getGraphqlHttpUrl(),
 });
 
 const client = new ApolloClient({
@@ -44,26 +46,7 @@ function TestApp() {
 
   // Persist relevant graph state to localStorage
   const graphState = useSelector((state) => state.graph);
-  useEffect(() => {
-    localStorage.setItem('graphLayout', graphState.layout);
-    localStorage.setItem(
-      'graphLayoutOptions',
-      JSON.stringify(graphState.layoutOptions),
-    );
-    localStorage.setItem(
-      'graphFeatureToggles',
-      JSON.stringify(graphState.featureToggles),
-    );
-    localStorage.setItem(
-      'graphNodeTypeColors',
-      JSON.stringify(graphState.nodeTypeColors),
-    );
-  }, [
-    graphState.layout,
-    graphState.layoutOptions,
-    graphState.featureToggles,
-    graphState.nodeTypeColors,
-  ]);
+  useGraphPersistence(graphState);
 
   return (
     <ApolloProvider client={client}>

@@ -1,0 +1,69 @@
+version: 1.0
+last_updated: 2026-01-23
+authority_files:
+  - docs/SUMMIT_READINESS_ASSERTION.md
+  - docs/governance/CONSTITUTION.md
+  - docs/governance/META_GOVERNANCE.md
+  - agent-contract.json
+scope:
+  product: Summit/IntelGraph
+  agent: Antigravity
+  mandate: Outcome-bound autonomy with governed exceptions only
+readiness_assertion:
+  reference: docs/SUMMIT_READINESS_ASSERTION.md
+  posture: Absolute readiness enforced
+slo_ownership:
+  - id: ci-stability
+    description: CI stability across golden-path workflows
+    target: 99.5%
+    measurement_window_days: 30
+  - id: ga-readiness-score
+    description: GA readiness score across GA gates
+    target: >= 95
+    measurement_window_days: 30
+  - id: infra-cost-envelope
+    description: Monthly infra cost envelope adherence
+    target: <= baseline + 3%
+    measurement_window_days: 30
+accountability_windows_days: [7, 14, 30]
+regression_response:
+  trigger: SLO regression detected
+  action: Self-initiated corrective PR with rollback plan
+  governed_exception_label: governed-exception
+  escalation_channel: security-council
+decision_policy:
+  engine: OPA
+  policy_dir: decision_policy
+  required_outputs:
+    - decision_rationale
+    - confidence_score
+    - rollback_conditions
+  exception_handling: Governed exceptions only
+tradeoff_ledger:
+  file: tradeoff_ledger.jsonl
+  required_fields:
+    - decision_id
+    - timestamp
+    - spend_delta
+    - reliability_delta
+    - velocity_gain
+    - governance_impact
+    - evidence_id
+    - decision_rationale
+    - rollback_conditions
+human_attention_shield:
+  auto_approve:
+    - low-risk PRs with evidence_id and passing CI
+    - dependency bumps within policy thresholds
+    - evidence regeneration tasks
+  batching_cadence: weekly
+release_authority:
+  release_captain_of_record: Antigravity
+  artifacts:
+    - release_manifest
+    - provenance_attestation
+    - ga_readiness_declaration
+  countersign_required_at_trust_boundaries: true
+logging_and_audit:
+  log_decisions_requiring_compliance_review: true
+  log_decisions_requiring_ethics_review: true

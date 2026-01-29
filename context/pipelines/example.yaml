@@ -1,0 +1,10 @@
+pipeline: intelgraph_case_context
+budget_tokens: 12000
+sources:
+  - intelgraph.case
+  - evidence.bundle
+transforms:
+  - dedupe
+  - rank_by_relevance
+hash:
+  algorithm: sha256

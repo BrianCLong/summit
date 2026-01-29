@@ -1,0 +1,8 @@
+# Claims: What did you change and what should happen?
+changes:
+  - "Description of change 1"
+  - "Description of change 2"
+
+behavior:
+  - "Expected behavior 1"
+  - "Expected behavior 2"

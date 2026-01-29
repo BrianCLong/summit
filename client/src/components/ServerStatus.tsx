@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
+import { getApiBaseUrl } from '../config/urls';
 
 const SERVER_STATUS_QUERY = gql`
   query ServerStatus {
@@ -19,7 +20,8 @@ function ServerStatus() {
 
   useEffect(() => {
     // Test health endpoint
-    fetch('http://localhost:4000/healthz')
+    const healthUrl = `${getApiBaseUrl()}/healthz`;
+    fetch(healthUrl)
       .then((response) =>
         response.ok ? setHealthStatus('healthy') : setHealthStatus('error'),
       )

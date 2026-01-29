@@ -14,7 +14,7 @@ import { PolicyEngine } from './policy/engine.js';
 import { PortfolioSimulator } from './portfolio/simulator.js';
 import { MetricsDashboard } from './metrics/dashboard.js';
 import { AutoTriageEngine } from './triage/auto-triage.js';
-import type { Intent, Ticket, Agent, Commitment, Epic, Sprint } from './schema/nodes.js';
+import type { Intent, Ticket, Agent, Commitment, Epic, Sprint, Board, Roadmap, Milestone } from './schema/nodes.js';
 
 const PORT = process.env.PORT || 4000;
 
@@ -226,14 +226,174 @@ async function seedData(graphStore: InMemoryGraphStore) {
     });
   }
 
+  // Create Boards
+  const productBacklog = await graphStore.createNode<Board>({
+    id: crypto.randomUUID(),
+    type: 'board',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: 'system',
+    name: 'Product Backlog',
+    boardType: 'kanban',
+    columns: [
+      { id: '1', name: 'Icebox', position: 0 },
+      { id: '2', name: 'Backlog', position: 1 },
+      { id: '3', name: 'Ready', position: 2, wipLimit: 10 },
+      { id: '4', name: 'In Progress', position: 3, wipLimit: 5 },
+      { id: '5', name: 'Review', position: 4, wipLimit: 3 },
+      { id: '6', name: 'Done', position: 5 },
+    ],
+    isDefault: true,
+    archived: false,
+    itemCount: tickets.length,
+  });
+
+  const sprintBoard = await graphStore.createNode<Board>({
+    id: crypto.randomUUID(),
+    type: 'board',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: 'system',
+    name: 'Sprint 47 Board',
+    boardType: 'scrum',
+    columns: [
+      { id: '1', name: 'To Do', position: 0 },
+      { id: '2', name: 'Doing', position: 1, wipLimit: 3 },
+      { id: '3', name: 'Testing', position: 2 },
+      { id: '4', name: 'Done', position: 3 },
+    ],
+    team: 'Platform Team',
+    isDefault: false,
+    archived: false,
+    itemCount: 8,
+  });
+
+  // Link tickets to board
+  for (const ticket of tickets) {
+    await graphStore.createEdge({
+      id: crypto.randomUUID(),
+      type: 'displayed_on',
+      sourceId: ticket.id,
+      targetId: productBacklog.id,
+      createdAt: new Date(),
+      createdBy: 'system',
+      weight: 1,
+    });
+  }
+
+  // Create Roadmap
+  const roadmap2026 = await graphStore.createNode<Roadmap>({
+    id: crypto.randomUUID(),
+    type: 'roadmap',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: 'product-team',
+    name: 'Summit 2026 Roadmap',
+    description: 'Product roadmap for 2026',
+    timeframe: {
+      start: new Date('2026-01-01'),
+      end: new Date('2026-12-31'),
+      granularity: 'quarter',
+    },
+    swimlanes: [
+      { id: 'platform', name: 'Platform', position: 0, color: '#3B82F6' },
+      { id: 'security', name: 'Security', position: 1, color: '#EF4444' },
+      { id: 'features', name: 'Features', position: 2, color: '#10B981' },
+      { id: 'operations', name: 'Operations', position: 3, color: '#F59E0B' },
+    ],
+    status: 'active',
+    visibility: 'team',
+  });
+
+  // Link epics to roadmap
+  for (const epic of epics) {
+    await graphStore.createEdge({
+      id: crypto.randomUUID(),
+      type: 'scheduled_on',
+      sourceId: epic.id,
+      targetId: roadmap2026.id,
+      createdAt: new Date(),
+      createdBy: 'system',
+      weight: 1,
+    });
+  }
+
+  // Create Milestones
+  const milestones: Milestone[] = [];
+  const milestoneDefs = [
+    { name: 'MVP 4 GA', targetDate: new Date('2026-02-28'), milestoneType: 'release' as const, progress: 65 },
+    { name: 'Security Audit Complete', targetDate: new Date('2026-03-15'), milestoneType: 'checkpoint' as const, progress: 30 },
+    { name: 'Q1 Demo Day', targetDate: new Date('2026-03-31'), milestoneType: 'event' as const, progress: 0 },
+    { name: 'Performance Targets Met', targetDate: new Date('2026-04-30'), milestoneType: 'checkpoint' as const, progress: 15 },
+  ];
+
+  for (const def of milestoneDefs) {
+    const milestone = await graphStore.createNode<Milestone>({
+      id: crypto.randomUUID(),
+      type: 'milestone',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      createdBy: 'product-team',
+      name: def.name,
+      targetDate: def.targetDate,
+      milestoneType: def.milestoneType,
+      status: def.progress > 50 ? 'on_track' : 'planned',
+      progress: def.progress,
+      successCriteria: [
+        { id: crypto.randomUUID(), description: 'All critical bugs fixed', met: def.progress > 50 },
+        { id: crypto.randomUUID(), description: 'Documentation complete', met: false },
+      ],
+      stakeholders: ['product-team', 'engineering'],
+      linkedRoadmapId: roadmap2026.id,
+    });
+    milestones.push(milestone);
+
+    // Link milestone to roadmap
+    await graphStore.createEdge({
+      id: crypto.randomUUID(),
+      type: 'milestone_for',
+      sourceId: milestone.id,
+      targetId: roadmap2026.id,
+      createdAt: new Date(),
+      createdBy: 'system',
+      weight: 1,
+    });
+  }
+
+  // Link some tickets to milestones
+  for (let i = 0; i < 4; i++) {
+    await graphStore.createEdge({
+      id: crypto.randomUUID(),
+      type: 'targets',
+      sourceId: tickets[i].id,
+      targetId: milestones[0].id,
+      createdAt: new Date(),
+      createdBy: 'system',
+      weight: 1,
+    });
+  }
+
   console.log(`   ✓ Created ${agents.length} agents`);
+  console.log(`   ✓ Created 2 boards`);
+  console.log(`   ✓ Created 1 roadmap`);
+  console.log(`   ✓ Created ${milestones.length} milestones`);
   console.log(`   ✓ Created ${intents.length} intents`);
   console.log(`   ✓ Created ${epics.length} epics`);
   console.log(`   ✓ Created ${tickets.length} tickets`);
   console.log(`   ✓ Created ${commitments.length} commitments`);
   console.log(`   ✓ Created 1 active sprint`);
 
-  return { agents, intents, epics, tickets, commitments, currentSprint };
+  return {
+    agents,
+    intents,
+    epics,
+    tickets,
+    commitments,
+    currentSprint,
+    boards: [productBacklog, sprintBoard],
+    roadmaps: [roadmap2026],
+    milestones,
+  };
 }
 
 async function main() {
@@ -245,7 +405,7 @@ async function main() {
 
   // Initialize services
   const planner = new PlannerOrchestrator(graphStore);
-  const market = new WorkMarket(graphStore, eventBus);
+  const market = new WorkMarket(graphStore);
   const policyEngine = new PolicyEngine(graphStore);
   const simulator = new PortfolioSimulator(graphStore);
   const metrics = new MetricsDashboard(graphStore);

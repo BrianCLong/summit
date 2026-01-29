@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "name": { "type": "string" },
+    "status": { "type": "string" },
+    "links": { "type": "array" }
+  },
+  "required": ["evidence_id", "name", "status"]
+}

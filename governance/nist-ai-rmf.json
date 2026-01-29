@@ -1,0 +1,22 @@
+{
+  "framework": "NIST AI RMF",
+  "version": "1.0",
+  "mappings": {
+    "GOVERN-1": {
+      "title": "Policies, processes, and procedures are in place",
+      "internal_controls": ["governance/state-transitions.json", "governance/taxonomy.v1.json"]
+    },
+    "MAP-1": {
+      "title": "Context is established and understood",
+      "internal_controls": ["server/src/autonomous/orchestrator.enhanced.ts#RunConfig"]
+    },
+    "MEASURE-1": {
+      "title": "AI system performance is measured",
+      "internal_controls": ["server/src/governance/execution-trace.ts", "server/src/governance/drift.ts"]
+    },
+    "MANAGE-1": {
+      "title": "AI system risks are prioritized and acted upon",
+      "internal_controls": ["server/src/autonomous/policy-engine.ts"]
+    }
+  }
+}

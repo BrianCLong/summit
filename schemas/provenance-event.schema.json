@@ -111,7 +111,38 @@
         }
       },
       "additionalProperties": false
+    },
+    "change_reason": {
+      "type": "string"
+    },
+    "change_artifact_id": {
+      "type": "string"
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "enum": [
+              "create",
+              "update",
+              "delete",
+              "deploy"
+            ]
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "then": {
+        "required": [
+          "change_reason",
+          "change_artifact_id"
+        ]
+      }
+    }
+  ],
   "additionalProperties": false
 }

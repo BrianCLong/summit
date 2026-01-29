@@ -1,0 +1,18 @@
+skill: create-app-module
+description: Scaffold a new app/module using Summit conventions.
+command:
+  - node
+  - evals/skills/create-app-module/simulate-skill.mjs
+timeout_ms: 60000
+allowed_tools:
+  - shell
+  - filesystem
+forbidden_paths:
+  - server/
+  - client/
+  - apps/web/
+deterministic_grader: evals/skills/create-app-module/graders/deterministic.ts
+rubric:
+  schema: evals/skills/create-app-module/graders/rubric.schema.json
+  prompt: evals/skills/create-app-module/graders/rubric_prompt.txt
+  grader: evals/skills/create-app-module/graders/rubric.ts

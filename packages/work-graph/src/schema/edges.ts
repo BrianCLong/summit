@@ -41,6 +41,7 @@ export const CausalEdgeTypes = [
   'blocks', // Ticket blocks Ticket
   'depends_on', // Ticket depends on Ticket
   'caused_by', // Incident caused by PR/Deployment
+  'supersedes', // Task supersedes Task
 ] as const;
 
 // Evidential Edges - Trust relationships
@@ -98,6 +99,21 @@ export const ProvenanceEdgeTypes = [
   'imported_from', // Node imported from system
 ] as const;
 
+// Containment Edges - Board/Roadmap relationships
+export const ContainmentEdgeTypes = [
+  'contains', // Board/Roadmap contains Ticket/Epic
+  'displayed_on', // Ticket displayed on Board
+  'scheduled_on', // Epic scheduled on Roadmap
+  'part_of', // Ticket part of Sprint
+] as const;
+
+// Milestone Edges - Timeline relationships
+export const MilestoneEdgeTypes = [
+  'milestone_for', // Milestone marks Roadmap progress
+  'targets', // Ticket/Epic targets Milestone
+  'achieved_by', // Milestone achieved by completing work
+] as const;
+
 // ============================================
 // All Edge Types
 // ============================================
@@ -111,6 +127,8 @@ export const AllEdgeTypes = [
   ...ArtifactEdgeTypes,
   ...CustomerEdgeTypes,
   ...ProvenanceEdgeTypes,
+  ...ContainmentEdgeTypes,
+  ...MilestoneEdgeTypes,
 ] as const;
 
 export type EdgeType = (typeof AllEdgeTypes)[number];
@@ -143,14 +161,15 @@ export const EdgeValidationRules: EdgeValidationRule[] = [
   { edgeType: 'drives', validSourceTypes: ['intent'], validTargetTypes: ['commitment'] },
   { edgeType: 'realizes', validSourceTypes: ['epic'], validTargetTypes: ['intent'] },
   { edgeType: 'implements', validSourceTypes: ['ticket', 'pr'], validTargetTypes: ['epic', 'ticket'] },
-  { edgeType: 'validates', validSourceTypes: ['test'], validTargetTypes: ['hypothesis'] },
+  { edgeType: 'validates', validSourceTypes: ['test'], validTargetTypes: ['hypothesis', 'task'] },
   { edgeType: 'supports', validSourceTypes: ['*'], validTargetTypes: ['hypothesis'] },
-  { edgeType: 'blocks', validSourceTypes: ['ticket'], validTargetTypes: ['ticket'] },
-  { edgeType: 'depends_on', validSourceTypes: ['ticket'], validTargetTypes: ['ticket'] },
+  { edgeType: 'blocks', validSourceTypes: ['ticket', 'task'], validTargetTypes: ['ticket', 'task'] },
+  { edgeType: 'depends_on', validSourceTypes: ['ticket', 'task'], validTargetTypes: ['ticket', 'task'] },
   { edgeType: 'caused_by', validSourceTypes: ['incident'], validTargetTypes: ['pr', 'environment'] },
+  { edgeType: 'supersedes', validSourceTypes: ['task'], validTargetTypes: ['task'] },
 
   // Evidential
-  { edgeType: 'proves', validSourceTypes: ['test', 'scan'], validTargetTypes: ['pr', 'ticket'] },
+  { edgeType: 'proves', validSourceTypes: ['test', 'scan'], validTargetTypes: ['pr', 'ticket', 'task'] },
   { edgeType: 'disproves', validSourceTypes: ['test'], validTargetTypes: ['hypothesis'] },
   { edgeType: 'correlates', validSourceTypes: ['*'], validTargetTypes: ['*'] },
   { edgeType: 'indicates', validSourceTypes: ['*'], validTargetTypes: ['*'] },
@@ -169,13 +188,13 @@ export const EdgeValidationRules: EdgeValidationRule[] = [
   { edgeType: 'waived', validSourceTypes: ['*'], validTargetTypes: ['policy'] },
 
   // Assignment
-  { edgeType: 'assigned_to', validSourceTypes: ['ticket'], validTargetTypes: ['agent'], maxOutgoing: 1 },
+  { edgeType: 'assigned_to', validSourceTypes: ['ticket', 'task'], validTargetTypes: ['agent'], maxOutgoing: 1 },
   { edgeType: 'claimed_by', validSourceTypes: ['ticket'], validTargetTypes: ['agent'], maxOutgoing: 1 },
-  { edgeType: 'completed_by', validSourceTypes: ['ticket'], validTargetTypes: ['agent'] },
+  { edgeType: 'completed_by', validSourceTypes: ['ticket', 'task'], validTargetTypes: ['agent'] },
   { edgeType: 'escalated_to', validSourceTypes: ['ticket', 'incident'], validTargetTypes: ['agent'] },
 
   // Artifact
-  { edgeType: 'produced', validSourceTypes: ['agent'], validTargetTypes: ['pr', 'ticket'] },
+  { edgeType: 'produced', validSourceTypes: ['agent', 'task'], validTargetTypes: ['pr', 'ticket', 'artifact'] },
   { edgeType: 'modified', validSourceTypes: ['pr'], validTargetTypes: ['*'] },
   { edgeType: 'tested_by', validSourceTypes: ['pr'], validTargetTypes: ['test'] },
   { edgeType: 'scanned_by', validSourceTypes: ['pr'], validTargetTypes: ['scan'] },
@@ -189,6 +208,17 @@ export const EdgeValidationRules: EdgeValidationRule[] = [
   { edgeType: 'derived_from', validSourceTypes: ['*'], validTargetTypes: ['*'] },
   { edgeType: 'synced_from', validSourceTypes: ['ticket', 'epic'], validTargetTypes: ['*'] },
   { edgeType: 'imported_from', validSourceTypes: ['*'], validTargetTypes: ['*'] },
+
+  // Containment
+  { edgeType: 'contains', validSourceTypes: ['board', 'roadmap', 'sprint'], validTargetTypes: ['ticket', 'epic'] },
+  { edgeType: 'displayed_on', validSourceTypes: ['ticket', 'epic'], validTargetTypes: ['board'] },
+  { edgeType: 'scheduled_on', validSourceTypes: ['epic', 'ticket'], validTargetTypes: ['roadmap'] },
+  { edgeType: 'part_of', validSourceTypes: ['ticket'], validTargetTypes: ['sprint'] },
+
+  // Milestone
+  { edgeType: 'milestone_for', validSourceTypes: ['milestone'], validTargetTypes: ['roadmap'] },
+  { edgeType: 'targets', validSourceTypes: ['ticket', 'epic'], validTargetTypes: ['milestone'] },
+  { edgeType: 'achieved_by', validSourceTypes: ['milestone'], validTargetTypes: ['ticket', 'epic', 'pr'] },
 ];
 
 // ============================================

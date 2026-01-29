@@ -1,6 +1,6 @@
 {
   "name": "debt-detector",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Scans the repo for missing features and generates implementation stubs",
   "main": "src/index.ts",
   "scripts": {

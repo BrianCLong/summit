@@ -1,0 +1,44 @@
+{
+  "task_id": "NOTION_INTEGRATION_FIX_20260126",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "notion-issue-migration-fix",
+    "version": "v1",
+    "sha256": "51aa613e22286ce28308f0b67ade969829803d3681045b8be335ea5bb817c50c",
+    "path": "prompts/integrations/notion-issue-migration-fix.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/integrations/",
+      "scripts/verify-integrations.ts",
+      "docs/roadmap/STATUS.json",
+      ".env.example",
+      "prompts/integrations/",
+      "prompts/registry.yaml",
+      "agents/examples/"
+    ],
+    "domains": ["integrations", "documentation", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "scripts/verify-integrations.ts notion verifier",
+      "docs/integrations/SETUP_NOTION.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Notion verification reads database metadata and validates required properties.",
+    "Notion setup guide documents required env vars and schema alignment.",
+    "Roadmap status file reflects the integration readiness update."
+  ],
+  "stop_conditions": [
+    "Secrets or credentials detected in tracked files.",
+    "Scope boundary violation outside declared paths.",
+    "Conflict with governance or readiness assertions."
+  ]
+}

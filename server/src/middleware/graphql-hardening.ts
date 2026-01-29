@@ -12,7 +12,7 @@ import {
   specifiedRules,
   visit,
 } from 'graphql';
-import { depthLimit } from 'graphql-depth-limit';
+import depthLimit from 'graphql-depth-limit';
 import rateLimit from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
 import Redis from 'ioredis';

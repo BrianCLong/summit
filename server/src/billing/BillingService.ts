@@ -1,9 +1,9 @@
 import crypto from 'crypto';
-import { BillingAdapter, UsageReport } from './types.js';
-import { tenantCostService } from '../services/TenantCostService.js';
-import { logger } from '../config/logger.js';
-import { DatabaseService } from '../services/DatabaseService.js';
-import { fraudService } from '../services/FraudService.js';
+import { BillingAdapter, UsageReport } from './types.ts';
+import { tenantCostService } from '../services/TenantCostService.ts';
+import { logger } from '../config/logger.ts';
+import { DatabaseService } from '../services/DatabaseService.ts';
+import { fraudService } from '../services/FraudService.ts';
 
 export class BillingService {
   private adapter: BillingAdapter;
@@ -107,5 +107,5 @@ export class BillingService {
 }
 
 // Singleton export
-import { FileBillingAdapter } from './adapters/FileBillingAdapter.js';
+import { FileBillingAdapter } from './adapters/FileBillingAdapter.ts';
 export const billingService = new BillingService(new FileBillingAdapter());

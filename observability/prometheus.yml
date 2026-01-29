@@ -11,6 +11,8 @@ global:
 # Load and evaluate rules
 rule_files:
   - 'alert-rules.yml'
+  - 'summit-alerts.yml'
+  - 'alerts/maestro-alerts.yml'
 
 # Alert manager configuration
 alerting:
@@ -28,7 +30,7 @@ scrape_configs:
     scrape_interval: 30s
     metrics_path: /metrics
 
-  # IntelGraph main server (includes conductor metrics)
+  # IntelGraph main server
   - job_name: 'intelgraph-server'
     static_configs:
       - targets: ['server:4000']
@@ -37,20 +39,11 @@ scrape_configs:
     scrape_timeout: 10s
     honor_labels: true
 
-  # Conductor-specific metrics endpoint (if separate)
-  - job_name: 'conductor'
+  # OpenTelemetry Collector
+  - job_name: 'otel-collector'
     static_configs:
-      - targets: ['server:4000']
+      - targets: ['otel-collector:8889']
     scrape_interval: 10s
-    metrics_path: /metrics/conductor
-    scrape_timeout: 5s
-    honor_labels: true
-    metric_relabel_configs:
-      # Ensure conductor metrics have proper labels
-      - source_labels: [__name__]
-        regex: 'conductor_.*'
-        target_label: service
-        replacement: 'conductor'
 
   # MCP GraphOps server
   - job_name: 'mcp-graphops'
@@ -104,19 +97,6 @@ scrape_configs:
     metrics_path: /metrics
     scrape_timeout: 5s
 
-  # Node.js application metrics (if using prom-client)
-  - job_name: 'node-app'
-    static_configs:
-      - targets: ['server:4000']
-    scrape_interval: 15s
-    metrics_path: /metrics/nodejs
-    scrape_timeout: 5s
-    metric_relabel_configs:
-      - source_labels: [__name__]
-        regex: 'nodejs_.*'
-        target_label: component
-        replacement: 'nodejs'
-
   # Predictive Threat Suite - Forecasting & Simulation
   - job_name: 'predictive-suite'
     static_configs:
@@ -132,16 +112,6 @@ scrape_configs:
       - source_labels: [__address__]
         target_label: instance
         replacement: 'predictive-suite'
-    # Alternative targets for different deployment scenarios
-    # If running standalone: ['localhost:8091']
-    # If in Kubernetes: ['predictive-forecasting.predictive-suite.svc.cluster.local:8091']
-
-# Remote write configuration (for production)
-# remote_write:
-#   - url: "https://your-prometheus-remote-write-endpoint"
-#     basic_auth:
-#       username: "your-username"
-#       password: "your-password"
 
 # Recording rules for pre-computed metrics
 recording_rules:

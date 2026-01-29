@@ -1,0 +1,28 @@
+agent_id: osint-collector
+version: 1.0.0
+governance:
+  owner: "@intelgraph/osint-team"
+  classification: restricted
+  policy_set: "policies/osint/collection.rego"
+  risk_level: high
+runtime:
+  model:
+    provider: anthropic
+    name: claude-3-5-sonnet-20241022
+    parameters:
+      temperature: 0.1
+      max_tokens: 4096
+  instructions:
+    source: agents/osint/instructions/collector.txt
+    sha256: 6f715a790f0ed0acc7ad262b0204ecf6535493c14723636a7715c5a9a8daaec8
+  tools:
+    - name: "osint:social_search"
+      permission: sandbox-only
+    - name: "osint:darkweb_ingest"
+      permission: sandbox-only
+    - name: "osint:evidence_capture"
+      permission: read-write
+evidence:
+  log_level: audit
+  required_artifacts: ["trace", "decision_log", "tool_output", "policy_eval"]
+  replay_mode: deterministic

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/safe-analytics-workbench",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "Safe Analytics Workbench - Governed environments for data exploration and analysis",
   "type": "module",
   "main": "dist/index.js",

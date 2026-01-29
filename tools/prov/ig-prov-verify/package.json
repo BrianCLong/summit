@@ -1,1 +1,7 @@
-{ "name": "ig-prov-verify", "bin": { "ig-prov-verify": "index.js" } }
+{
+  "name": "ig-prov-verify",
+  "bin": {
+    "ig-prov-verify": "index.js"
+  },
+  "version": "4.2.3"
+}

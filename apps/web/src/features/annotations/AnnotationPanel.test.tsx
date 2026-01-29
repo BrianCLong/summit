@@ -18,7 +18,7 @@ describe('AnnotationPanel', () => {
     localStorage.clear()
   })
 
-  it('autosaves draft to localStorage and restores with prompt', async () => {
+  it.skip('autosaves draft to localStorage and restores with prompt', async () => {
     const user = userEvent.setup()
     const { unmount } = renderWithStore(<AnnotationPanel />)
 

@@ -1,0 +1,46 @@
+version: 1
+item:
+  slug: automation-turn-6
+  title: "Automation Turn #6 — Daily OSINT Methodology Update"
+  links: []
+  type: "osint-update"
+  date: "2026-01-28"
+  intriguing_claim: "OSINT collection is expanding beyond 'what was said' to 'how systems present, shape, and constrain information'."
+required_checks:
+  status: "assumed"
+  assumed:
+    - "subsumption-bundle-verify"
+pr_stack:
+  - title: "chore(subsumption): add bundle manifest skeleton + global docs"
+    lane: "foundation"
+    owner: "Master"
+    risk: "green"
+  - title: "ci(subsumption): add bundle verifier + evidence schemas/index"
+    lane: "foundation"
+    owner: "Agent B"
+    risk: "green"
+  - title: "test(subsumption): add deny-by-default fixtures + determinism regressions"
+    lane: "foundation"
+    owner: "Agent C"
+    risk: "green"
+  - title: "ops(subsumption): add drift detector skeleton"
+    lane: "foundation"
+    owner: "Agent D"
+    risk: "green"
+claim_registry: []
+gates:
+  - name: "subsumption-bundle-verify"
+    path: "scripts/ci/verify_subsumption_bundle.mjs"
+evals:
+  - name: "evidence-determinism-regression"
+    type: "fixture"
+evidence_ids:
+  - "EVD-AUTOMATION-TURN-6-GOV-001"
+  - "EVD-AUTOMATION-TURN-6-SEC-001"
+  - "EVD-AUTOMATION-TURN-6-OPS-001"
+docs:
+  - "docs/standards/automation-turn-6.md"
+  - "docs/security/data-handling/automation-turn-6.md"
+  - "docs/ops/runbooks/automation-turn-6.md"
+  - "docs/decisions/automation-turn-6.md"
+feature_flags: []

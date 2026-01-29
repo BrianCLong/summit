@@ -1,0 +1,15 @@
+{
+  "items": [
+    {
+      "allowed_tools": null,
+      "compatibility": null,
+      "description": "Create a modern Angular component using standalone, signals, and inject.",
+      "license": "MIT",
+      "metadata": {},
+      "name": "angular-component",
+      "path": "third_party/skills/angular-skills/SKILL.md",
+      "sha256": "467ef10c37d48efbacb9ee03026a125c58b04dbd09aa80597d40500f7e1f3dac"
+    }
+  ],
+  "version": 1
+}

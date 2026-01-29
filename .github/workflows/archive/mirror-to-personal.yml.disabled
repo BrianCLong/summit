@@ -1,0 +1,63 @@
+name: Mirror to BrianCLong/summit
+
+# Disabled: This workflow requires PERSONAL_MIRROR_TOKEN secret
+# and is only needed when mirroring from TopicalityLLC/Summit
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Reason for manual run"
+        required: false
+        type: string
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    # Prevent infinite loop by checking if the push came from GitHub Actions
+    if: github.event.head_commit.author.name != 'BrianCLong Mirror Bot'
+
+    steps:
+      - name: Checkout TopicalityLLC/Summit
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PERSONAL_MIRROR_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "TopicalityLLC Mirror Bot"
+          git config user.email "bot@topicalityllc.com"
+
+      - name: Add Personal Repo Remote
+        run: |
+          git remote add personal https://x-access-token:${{ secrets.PERSONAL_MIRROR_TOKEN }}@github.com/BrianCLong/summit.git
+
+      - name: Push to BrianCLong/summit
+        run: |
+          git push personal main --force
+
+      - name: Sync Release Branches
+        if: success()
+        continue-on-error: true
+        run: |
+          for branch in $(git branch -r | grep 'origin/release/' | sed 's|origin/||'); do
+            echo "Syncing branch: $branch"
+            git checkout -b $branch origin/$branch 2>/dev/null || git checkout $branch
+            git push personal $branch --force
+          done
+
+      - name: Sync Tags
+        if: success()
+        continue-on-error: true
+        run: |
+          git push personal --tags --force
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ Successfully mirrored to BrianCLong/summit"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Failed to mirror to BrianCLong/summit"

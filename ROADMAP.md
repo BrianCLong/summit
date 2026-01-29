@@ -13,6 +13,9 @@
 
 ---
 
+## STRATEGIC INITIATIVES
+*   **Narrative Operations 2.0** – A 90-day plan to evolve Summit into a full cognitive warfare stack. See [Narrative Operations 2.0 Plan](docs/NARRATIVE_OPS_2_0_PLAN.md).
+
 ## ROADMAP OVERVIEW
 
 ### H1 (0–6 weeks): Governance & Human Oversight

@@ -5,7 +5,7 @@ pydantic==2.5.2
 pydantic-settings==2.1.0
 
 # ML frameworks
-torch==2.8.0
+torch==2.10.0
 torchvision==0.16.1
 torchaudio==2.1.1
 tensorflow==2.15.0
@@ -43,7 +43,7 @@ opentelemetry-sdk==1.21.0
 opentelemetry-instrumentation-fastapi==0.42b0
 
 # Utilities
-python-multipart==0.0.18
+python-multipart==0.0.22
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 python-dotenv==1.0.0
@@ -56,7 +56,7 @@ pytest-cov==4.1.0
 httpx==0.25.2
 
 # Development
-black==24.3.0
+black==26.1.0
 flake8==6.1.0
 mypy==1.7.1
 isort==5.13.2

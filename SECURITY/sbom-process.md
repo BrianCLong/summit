@@ -8,26 +8,26 @@ This document describes the Software Bill of Materials (SBOM) generation, manage
 
 ### Supported Formats
 
-1. **SPDX (Software Package Data Exchange)**
+1. **SPDX (Software Package Data Exchange) 3.0.1**
    - Industry standard for SBOM data exchange
    - JSON format for machine readability
    - Used for compliance and automation
 
-2. **CycloneDX**
+2. **CycloneDX 1.7**
    - OWASP standard for dependency analysis
    - Supports vulnerability correlation
    - Rich metadata for security analysis
 
 ### SBOM Generation Tools
 
-#### Primary: Syft
+#### Primary: Syft (with modern standards)
 
 ```bash
-# Generate SPDX format SBOM
-syft packages docker:ghcr.io/brianclong/intelgraph/web:latest -o spdx-json
+# Generate SPDX 3.0.1 format SBOM
+syft packages docker:ghcr.io/brianclong/intelgraph/web:latest -o spdx-json@3.0.1
 
-# Generate CycloneDX format SBOM
-syft packages docker:ghcr.io/brianclong/intelgraph/web:latest -o cyclonedx-json
+# Generate CycloneDX 1.7 format SBOM
+syft packages docker:ghcr.io/brianclong/intelgraph/web:latest -o cyclonedx-json@1.7
 ```
 
 #### Secondary: Docker Scout
@@ -41,22 +41,21 @@ docker scout sbom ghcr.io/brianclong/intelgraph/web:latest
 
 ### CI/CD Integration
 
-```yaml
-# .github/workflows/build-images.yml excerpt
-- name: Generate SBOM with Syft
-  run: |
-    syft ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}:latest \
-      -o spdx-json=sbom-${{ matrix.component.name }}.spdx.json
-    syft ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}:latest \
-      -o cyclonedx-json=sbom-${{ matrix.component.name }}.cyclonedx.json
+IntelGraph uses a unified supply chain workflow that leverages `scripts/generate-sbom.sh` and `scripts/supply-chain/sign-and-attest.sh`.
 
-- name: Upload SBOM artifacts
-  uses: actions/upload-artifact@v4
-  with:
-    name: sbom-${{ matrix.component.name }}
-    path: |
-      sbom-${{ matrix.component.name }}.spdx.json
-      sbom-${{ matrix.component.name }}.cyclonedx.json
+```yaml
+# .github/workflows/supply-chain-attest.yml excerpt
+- name: Generate standardized SBOMs
+  run: make supply-chain/sbom
+
+- name: Sign and Attest build artifact (Keyless)
+  run: |
+    make supply-chain/sign \
+      ARTIFACT=artifacts/build.tar.gz \
+      SBOM=artifacts/sbom/summit-platform-main-latest.spdx.json \
+      TYPE=blob
+  env:
+    USE_KEYLESS: "true"
 ```
 
 ### Generated Components

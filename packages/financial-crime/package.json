@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/financial-crime",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Financial crime detection and money laundering intelligence",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

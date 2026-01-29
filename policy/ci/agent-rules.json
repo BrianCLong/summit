@@ -15,10 +15,7 @@
     {
       "id": "enforce-zone-containment",
       "description": "Agents must stay within their assigned zones.",
-      "files": [
-        "policy/**",
-        "docs/governance/**"
-      ]
+      "files": ["policy/**", "docs/governance/**"]
     },
     {
       "id": "no-ci-silencing",
@@ -30,10 +27,13 @@
       "id": "no-todos-in-critical-paths",
       "description": "Agents cannot add TODOs in critical paths.",
       "pattern": "TODO",
-      "files": [
-        "server/src/auth/**",
-        "server/src/security/**"
-      ]
+      "files": ["server/src/auth/**", "server/src/security/**"]
+    },
+    {
+      "id": "enforce-anchored-regex",
+      "description": "CI/CD filters must be strictly anchored with ^ and $.",
+      "pattern": " =~ [^^].*[^$] ",
+      "files": [".github/workflows/**", "scripts/ci/**"]
     }
   ]
 }

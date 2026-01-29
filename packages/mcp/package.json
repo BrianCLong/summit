@@ -1,0 +1,12 @@
+{
+  "name": "@intelgraph/mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Model Context Protocol (MCP) canonical library for Summit",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

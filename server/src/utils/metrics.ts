@@ -134,12 +134,22 @@ export class PrometheusMetrics {
   }
 
   private metricKey(name: string, labels: MetricLabels): string {
-    const labelEntries = Object.entries(labels)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([key, value]) => `${key}=${value}`)
-      .join('|');
-    return labelEntries
-      ? `${this.namespace}:${name}:{${labelEntries}}`
-      : `${this.namespace}:${name}`;
+    const keys = Object.keys(labels);
+    if (keys.length === 0) {
+      return `${this.namespace}:${name}`;
+    }
+
+    // Sort keys to ensure deterministic order (needed for cache key consistency)
+    // Using keys array is lighter than Object.entries
+    keys.sort();
+
+    let labelString = '';
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      if (i > 0) labelString += '|';
+      labelString += `${key}=${labels[key]}`;
+    }
+
+    return `${this.namespace}:${name}:{${labelString}}`;
   }
 }

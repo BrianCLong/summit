@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/evals/trace-event.schema.json",
+  "title": "Eval Skill Trace Event",
+  "type": "object",
+  "required": ["ts", "event_type", "run_id", "skill", "data"],
+  "additionalProperties": false,
+  "properties": {
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "run_start",
+        "run_end",
+        "case_start",
+        "case_end",
+        "command_start",
+        "command_end",
+        "file_changes",
+        "artifact_written",
+        "metric"
+      ]
+    },
+    "run_id": { "type": "string" },
+    "skill": { "type": "string" },
+    "prompt_id": { "type": "string" },
+    "data": { "type": "object" }
+  }
+}

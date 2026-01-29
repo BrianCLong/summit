@@ -6,6 +6,8 @@ import {
   getTrustScore,
   upsertTrustScore,
 } from '../../db/repositories/trustRiskRepo.js';
+import { lineageGraph } from '../../provenance/lineage.js';
+import { convertLineageToProv } from '../../provenance/provExporter.js';
 
 export const provenanceResolvers = {
   Query: {
@@ -27,6 +29,25 @@ export const provenanceResolvers = {
       }
       const latest = await getLatestEvidence(service, releaseId);
       return latest ? [latest] : [];
+    },
+    async exportProvenance(_: any, { tenantId, format }: { tenantId: string; format?: string }) {
+      const graph = await lineageGraph.buildGraph(tenantId);
+
+      let content;
+      if (format === 'PROV-JSON' || !format) {
+         content = convertLineageToProv(graph);
+      } else if (format === 'JSON') {
+         content = graph;
+      } else {
+         throw new Error(`Unsupported format: ${format}`);
+      }
+
+      return {
+        format: format || 'PROV-JSON',
+        content,
+        exportedAt: new Date().toISOString(),
+        tenantId
+      };
     },
   },
   Mutation: {

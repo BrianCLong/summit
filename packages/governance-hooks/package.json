@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/governance-hooks",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Pre-built governance hooks for Summit platform services",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

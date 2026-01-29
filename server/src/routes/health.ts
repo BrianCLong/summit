@@ -8,7 +8,9 @@ import { auditTrailService } from '../services/audit/AuditTrailService.js';
 
 const router = Router();
 
-const healthEndpointsEnabled = () => (process.env.HEALTH_ENDPOINTS_ENABLED ?? 'false').toLowerCase() === 'true';
+// Health endpoints are enabled by default for production K8s probes
+// Set HEALTH_ENDPOINTS_ENABLED=false only if you want to explicitly disable them
+const healthEndpointsEnabled = () => (process.env.HEALTH_ENDPOINTS_ENABLED ?? 'true').toLowerCase() === 'true';
 
 const baseStatus = () => ({
   timestamp: new Date().toISOString(),
@@ -285,10 +287,6 @@ router.get('/health/detailed', async (req: Request, res: Response) => {
  *                 status:
  *                   type: string
  *                   example: ready
- *     description: Kubernetes readiness probe
- *     responses:
- *       200:
- *         description: Service is ready
  *       503:
  *         description: Service is not ready
  */
@@ -355,10 +353,6 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
  *                 status:
  *                   type: string
  *                   example: alive
- *     description: Kubernetes liveness probe
- *     responses:
- *       200:
- *         description: Service is alive
  */
 router.get('/health/live', (_req: Request, res: Response) => {
   res.status(200).json({ status: 'alive' });

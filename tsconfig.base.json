@@ -15,7 +15,9 @@
       "@intelgraph/maestro-sdk/*": ["packages/maestro-sdk/src/*"],
       "@summitsec/vcr-kit/*": ["packages/vcr-kit/src/*"],
       "@intelgraph/flags/*": ["libs/flags/node/*"],
-      "@intelgraph/audit/*": ["libs/audit/node/*"]
+      "@intelgraph/audit/*": ["libs/audit/node/*"],
+      "@summit/agent-gym": ["packages/agent-gym/src/index.ts"],
+      "@summit/agent-gym-metrics": ["packages/agent-gym-metrics/src/index.ts"]
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/flow-governance",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Flow, toil, and decision guardrails enforcing throughput playbook",
   "type": "module",
   "main": "dist/index.js",

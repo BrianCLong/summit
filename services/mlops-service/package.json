@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/mlops-service",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "type": "module",
   "main": "dist/server.js",
   "description": "MLOps service with REST API for model lifecycle management",

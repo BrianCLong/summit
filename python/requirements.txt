@@ -24,3 +24,9 @@ opentelemetry-sdk
 neo4j>=5.20
 sentencepiece
 protobuf
+openlineage-python
+prov
+lxml
+rdflib
+pillow
+opencv-python-headless

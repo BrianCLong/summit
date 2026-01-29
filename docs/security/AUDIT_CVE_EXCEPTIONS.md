@@ -119,53 +119,81 @@ The deprecated `request` package allows SSRF bypass via attacker-controlled cros
 
 ---
 
-## CVE-2024-22363: [Component TBD]
+## CVE-2024-22363: SheetJS ReDoS Vulnerability
 
-**Package:** TBD
-**Severity:** TBD
+**Package:** `xlsx@<=0.20.1`
+**Severity:** HIGH (CVSS 7.5)
+**CWE:** CWE-1333 (Inefficient Regular Expression Complexity)
 
 ### Status
 
-⚠️ **DOCUMENTATION PENDING**
+✅ **RESOLVED** - Upgraded to version 0.20.3
 
-### Action Required
+### Vulnerability Description
 
-**TODO:** Document why this CVE is ignored:
+SheetJS Community Edition through version 0.20.1 is vulnerable to Regular Expression Denial of Service (ReDoS). The vulnerability affects cell reference parsing functions like `decode_range/decode_cell` which use inefficient regex patterns when processing untrusted spreadsheet content.
 
-- What is the vulnerable package?
-- What is the severity and impact?
-- What mitigation strategy is in place?
-- When will it be reviewed?
+### Resolution
 
-### Review Schedule
+**Current Version:** `xlsx@0.20.3` (via https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz)
+**Fixed In:** Version 0.20.2+
+**Status:** ✅ Vulnerability patched in current version
 
-- **Next Review:** 2026-01-15 (URGENT)
-- **Owner:** Security Team
+### Investigation Summary
+
+- **Investigated:** 2026-01-20
+- **Finding:** Project uses xlsx v0.20.3, which is newer than the vulnerable version (<=0.20.1)
+- **Action:** Remove from ignoreCves list - no longer needed
+
+### Recommendation
+
+**Remove CVE-2024-22363 from package.json `pnpm.auditConfig.ignoreCves` array.**
+
+### References
+
+- [CVE-2024-22363 Details](https://nvd.nist.gov/vuln/detail/CVE-2024-22363)
+- [GitHub Advisory GHSA-5pgg-2g8v-p4x9](https://github.com/advisories/GHSA-5pgg-2g8v-p4x9)
+- [SheetJS Advisory](https://cdn.sheetjs.com/advisories/CVE-2024-22363)
 
 ---
 
-## CVE-2023-30533: [Component TBD]
+## CVE-2023-30533: SheetJS Prototype Pollution
 
-**Package:** TBD
-**Severity:** TBD
+**Package:** `xlsx@<=0.19.2`
+**Severity:** HIGH (CVSS 7.8)
+**CWE:** CWE-1321 (Improperly Controlled Modification of Object Prototype Attributes)
 
 ### Status
 
-⚠️ **DOCUMENTATION PENDING**
+✅ **RESOLVED** - Upgraded to version 0.20.3
 
-### Action Required
+### Vulnerability Description
 
-**TODO:** Document why this CVE is ignored:
+SheetJS Community Edition through version 0.19.2 allows Prototype Pollution via a crafted file. When reading specially crafted spreadsheet files, attackers could pollute JavaScript object prototypes, potentially leading to arbitrary code execution or data manipulation.
 
-- What is the vulnerable package?
-- What is the severity and impact?
-- What mitigation strategy is in place?
-- When will it be reviewed?
+**Impact:** Workflows that do not read arbitrary files (e.g., only exporting data) are unaffected. However, workflows that read user-supplied spreadsheet files are at risk.
 
-### Review Schedule
+### Resolution
 
-- **Next Review:** 2026-01-15 (URGENT)
-- **Owner:** Security Team
+**Current Version:** `xlsx@0.20.3` (via https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz)
+**Fixed In:** Version 0.19.3+
+**Status:** ✅ Vulnerability patched in current version
+
+### Investigation Summary
+
+- **Investigated:** 2026-01-20
+- **Finding:** Project uses xlsx v0.20.3, which is significantly newer than the vulnerable version (<=0.19.2)
+- **Action:** Remove from ignoreCves list - no longer needed
+
+### Recommendation
+
+**Remove CVE-2023-30533 from package.json `pnpm.auditConfig.ignoreCves` array.**
+
+### References
+
+- [CVE-2023-30533 Details](https://nvd.nist.gov/vuln/detail/CVE-2023-30533)
+- [GitHub Advisory GHSA-4r6h-8v6p-xvw6](https://github.com/advisories/GHSA-4r6h-8v6p-xvw6)
+- [SheetJS Advisory](https://cdn.sheetjs.com/advisories/CVE-2023-30533)
 
 ---
 
@@ -195,21 +223,20 @@ Remove CVE from ignore list and escalate if:
 ## Metrics
 
 **Total Ignored CVEs:** 4
-**Documented:** 2 (50%)
-**Pending Documentation:** 2 (50%)
+**Documented:** 4 (100%)
+**Resolved (Can Be Removed):** 2 (CVE-2024-22363, CVE-2023-30533)
 
 **By Severity:**
 
 - CRITICAL: 0
-- HIGH: 1 (CVE-2022-24434)
+- HIGH: 3 (CVE-2022-24434, CVE-2024-22363 [RESOLVED], CVE-2023-30533 [RESOLVED])
 - MODERATE: 1 (CVE-2023-28155)
 - LOW: 0
-- UNKNOWN: 2 (pending documentation)
 
-**Action Required:** Document CVE-2024-22363 and CVE-2023-30533 by 2026-01-15
+**Action Required:** Remove CVE-2024-22363 and CVE-2023-30533 from package.json ignoreCves list (vulnerabilities resolved in current xlsx@0.20.3)
 
 ---
 
-**Last Updated:** 2026-01-02
+**Last Updated:** 2026-01-20
 **Next Audit:** 2026-02-01
 **Owner:** Security Remediation Team

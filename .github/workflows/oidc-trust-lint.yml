@@ -1,0 +1,18 @@
+name: OIDC Trust Lint
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Run OIDC Trust Lint
+        run: python3 scripts/security/oidc_trust_lint.py

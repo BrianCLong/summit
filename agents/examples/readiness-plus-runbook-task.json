@@ -1,0 +1,39 @@
+{
+  "task_id": "READINESS_PLUS_RUNBOOK_2026_01_27",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "runbooks-docs-update",
+    "version": "v1",
+    "sha256": "d8fa2fa89f5bb30b954a8fc1735794033cd55be52bc8aedce76dcb57948fac11",
+    "path": "prompts/docs/runbooks-update@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/runbooks/agent-readiness-plus.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/readiness-plus-runbook-task.json"
+    ],
+    "domains": ["documentation", "governance", "operations"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/runbooks/agent-readiness-plus.md",
+      "docs/roadmap/STATUS.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Publish Readiness++ runbook with rubric, remediation plan, and MAESTRO alignment.",
+    "Update docs/roadmap/STATUS.json with a revision note referencing the runbook update.",
+    "Keep changes within the runbooks-docs-update scope."
+  ],
+  "stop_conditions": [
+    "Scope expands beyond docs/runbooks or docs/roadmap without updated prompt registration.",
+    "CI indicates prompt hash mismatch or missing PR metadata."
+  ]
+}

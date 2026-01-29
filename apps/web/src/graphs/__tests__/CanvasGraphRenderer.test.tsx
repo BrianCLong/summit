@@ -1,8 +1,23 @@
 import React from 'react'
 import { render } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest'
 import { CanvasGraphRenderer } from '../CanvasGraphRenderer'
 import type { Entity, Relationship, GraphLayout } from '@/types'
+
+// Mock Worker API for jsdom environment
+class MockWorker {
+  onmessage: ((event: MessageEvent) => void) | null = null
+  postMessage = vi.fn()
+  terminate = vi.fn()
+}
+
+const originalWorker = globalThis.Worker
+beforeAll(() => {
+  globalThis.Worker = MockWorker as unknown as typeof Worker
+})
+afterAll(() => {
+  globalThis.Worker = originalWorker
+})
 
 // Mock Entity and Relationship data
 const MOCK_ENTITIES: Entity[] = [

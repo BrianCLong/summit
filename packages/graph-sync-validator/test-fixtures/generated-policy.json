@@ -1,0 +1,9 @@
+{
+  "builderId": "test-builder",
+  "sourceRepository": "https://github.com/BrianCLong/summit",
+  "minimumSlsaLevel": 3,
+  "allowedRefs": [
+    "refs/heads/main",
+    "refs/tags/*"
+  ]
+}

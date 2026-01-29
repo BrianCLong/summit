@@ -226,7 +226,7 @@ If metrics appear outdated:
 ./scripts/release/pre_release_health_check.sh
 
 # Collect evidence
-./scripts/release/collect_evidence.sh
+./scripts/release/generate_evidence_bundle.sh
 
 # Regenerate report
 ./scripts/release/generate_stabilization_report.sh

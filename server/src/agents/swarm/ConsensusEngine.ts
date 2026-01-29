@@ -1,6 +1,6 @@
-import { GossipProtocol } from './GossipProtocol.js';
-import { Proposal, SwarmMessage } from './types.js';
-import logger from '../../utils/logger.js';
+import { GossipProtocol } from './GossipProtocol.ts';
+import { Proposal, SwarmMessage } from './types.ts';
+import logger from '../../utils/logger.ts';
 import { createHmac } from 'crypto';
 
 // Simple BFT parameters

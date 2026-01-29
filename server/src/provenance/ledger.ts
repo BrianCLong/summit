@@ -196,7 +196,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
     entry: Omit<
       ProvenanceEntry,
       'id' | 'sequenceNumber' | 'previousHash' | 'currentHash' | 'witness'
-    >,
+    > & { id?: string },
   ): Promise<ProvenanceEntry> {
     return tracer.startActiveSpan(
       'provenance_ledger.append_entry',
@@ -206,7 +206,17 @@ export class ProvenanceLedgerV2 extends EventEmitter {
           action_type: entry.actionType,
           resource_type: entry.resourceType,
           actor_type: entry.actorType,
+          provided_id: entry.id,
         });
+
+        // Idempotency Check: If ID is provided and exists, return immediately
+        if (entry.id) {
+          const existing = await this.getEntryById(entry.id);
+          if (existing) {
+             span.setAttributes?.({ idempotent_skip: true });
+             return existing;
+          }
+        }
 
         // Use standard crypto if node:crypto fails or lazy load
         const { createHash } = await import('crypto');
@@ -239,8 +249,8 @@ export class ProvenanceLedgerV2 extends EventEmitter {
               ? previousEntry.sequenceNumber + 1n
               : 1n;
 
-            // Generate unique ID
-            const id = `prov_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+            // Generate unique ID if not provided
+            const id = entry.id || `prov_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
             // Create the entry object first to compute hash (including witness)
             // Note: entry.payload is now strongly typed as MutationPayload
@@ -289,6 +299,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
               timestamp, action_type, resource_type, resource_id,
               actor_id, actor_type, payload, metadata, signature, attestation
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+            ON CONFLICT (id) DO NOTHING
             RETURNING *
           `;
 
@@ -311,6 +322,16 @@ export class ProvenanceLedgerV2 extends EventEmitter {
                 ? JSON.stringify(completeEntry.attestation)
                 : null,
             ]);
+
+            // Handle race condition where ON CONFLICT ignored insert
+            if (result.rows.length === 0) {
+               await client.query('ROLLBACK');
+               const existing = await client.query('SELECT * FROM provenance_ledger_v2 WHERE id = $1', [id]);
+               if (existing.rows.length > 0) {
+                 return this.mapRowToEntry(existing.rows[0]);
+               }
+               throw new Error(`Failed to insert provenance entry ${id} and it was not found`);
+            }
 
             await client.query('COMMIT');
 

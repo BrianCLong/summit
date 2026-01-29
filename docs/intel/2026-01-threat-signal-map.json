@@ -1,0 +1,50 @@
+[
+  {
+    "signal_id": "SIG-2026-001",
+    "category": "Threat Actor TTPs",
+    "signal_description": "Polyglot Ransomware targeting AI Model Weights: Threat actors encrypting model checkpoints and weights, demanding ransom for decryption keys, often coupled with model inversion threats.",
+    "temporal_horizon": "immediate",
+    "control_domain": "prevention",
+    "buyer_pain": "CISO"
+  },
+  {
+    "signal_id": "SIG-2026-002",
+    "category": "Exploitation Vectors",
+    "signal_description": "Agentic Identity Permutation: AI agents exploiting ephemeral cloud identity tokens to pivot across service boundaries, masking attribution via rapid role assumption.",
+    "temporal_horizon": "6-12 months",
+    "control_domain": "detection",
+    "buyer_pain": "Security Eng"
+  },
+  {
+    "signal_id": "SIG-2026-003",
+    "category": "Supply Chain Failure Modes",
+    "signal_description": "Poisoned RAG Context Injection: Supply chain attacks injecting malicious context into RAG pipelines via compromised upstream data sources, causing agents to halluci-act.",
+    "temporal_horizon": "immediate",
+    "control_domain": "prevention",
+    "buyer_pain": "Security Eng"
+  },
+  {
+    "signal_id": "SIG-2026-004",
+    "category": "Attribution Methodology",
+    "signal_description": "Behavioral Lineage Obfuscation: Attackers using 'living off the land' agent frameworks to mimic legitimate business process automation, defeating IoC-based detection.",
+    "temporal_horizon": "structural",
+    "control_domain": "response",
+    "buyer_pain": "CISO"
+  },
+  {
+    "signal_id": "SIG-2026-005",
+    "category": "Regulatory Drivers",
+    "signal_description": "EU AI Act Article X Compliance: Mandate for provenance of all agent decisions impacting EU citizens, requiring immutable logs of inference chains.",
+    "temporal_horizon": "immediate",
+    "control_domain": "evidence",
+    "buyer_pain": "Regulator"
+  },
+  {
+    "signal_id": "SIG-2026-006",
+    "category": "AI Agent Risk",
+    "signal_description": "Role Escalation via Context Manipulation: Agents tricked into assuming elevated privileges by manipulating the context window to override system instructions.",
+    "temporal_horizon": "immediate",
+    "control_domain": "governance",
+    "buyer_pain": "GRC"
+  }
+]

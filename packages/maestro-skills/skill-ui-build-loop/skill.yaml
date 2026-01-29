@@ -1,0 +1,46 @@
+schema_version: "1.0"
+name: "ui-build-loop"
+version: "1.0.0"
+description: "Orchestrates autonomous UI build tasks via a baton file."
+author: "Summit Team"
+license: "MIT"
+
+inputs:
+  type: object
+  properties:
+    baton_path:
+      type: string
+      description: "Path to the baton file (default: next-prompt.md)"
+    max_iterations:
+      type: number
+      description: "Maximum number of loop iterations"
+  required: ["baton_path"]
+
+outputs:
+  type: object
+  properties:
+    final_state:
+      type: string
+      description: "The content of the baton upon completion"
+    iterations_run:
+      type: number
+      description: "Number of loops executed"
+
+requirements:
+  mcp_tools: []
+  runtime: "node >= 18"
+  environment_variables: []
+
+permissions:
+  filesystem:
+    read: ["${WORKSPACE_ROOT}"]
+    write: ["${WORKSPACE_ROOT}"]
+  network:
+    domains: []
+  env:
+    secrets: []
+
+governance:
+  classification: "internal"
+  determinism: "best_effort"
+  side_effects: ["writes_files"]

@@ -149,3 +149,12 @@ NEXT_ACTION: Fix Jest config for CI then merge Bucket A PRs
 ---
 
 _Updated by GA Release Commander_
+
+## End-of-Cycle FIX Outcomes
+
+| Signal | Owner | Decision | Evidence | Notes | Rollover authorization |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| #15566 perf harness | @acme/ops-team | ESCALATE | `docs/release/QUEUE.md` | Blocked by typecheck | Yes |
+| #15565 SLO policies | @acme/ops-team | CLOSE | `docs/ci/RELEASE_OPS_SLO_POLICY.yml` | Policy verified | No |
+| #15564 roadmap docs | @acme/product | CLOSE | `docs/roadmap/next-priorities-2026-01-01.md` | Roadmap verified | No |
+| #15563 maestro | @acme/platform | ESCALATE | `docs/release/QUEUE.md` | Deferred | Yes |

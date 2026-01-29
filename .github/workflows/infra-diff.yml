@@ -1,0 +1,116 @@
+name: Infra Diff Check
+
+on:
+  pull_request:
+    paths:
+      - 'terraform/**'
+
+env:
+  DIFF_BUDGET: 20 # Maximum number of resource changes allowed without special approval
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  plan-and-check:
+    name: "Infrastructure Diff Check"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        working-directory: terraform/environments/prod
+        run: terraform init -backend=false
+
+      - name: Terraform Plan
+        working-directory: terraform/environments/prod
+        id: plan
+        # We use -detailed-exitcode but ignore it here to process output manually
+        run: |
+          terraform plan -no-color -out=tfplan > plan.txt 2>&1 || true
+          cat plan.txt
+
+      - name: Calculate Diff Budget
+        working-directory: terraform/environments/prod
+        id: budget
+        run: |
+          # Extract the summary line like "Plan: X to add, Y to change, Z to destroy."
+          SUMMARY=$(grep "Plan:" plan.txt || echo "Plan: 0 to add, 0 to change, 0 to destroy.")
+          echo "Summary found: $SUMMARY"
+
+          ADD=$(echo $SUMMARY | awk -F'[, ]' '{for(i=1;i<=NF;i++) if($i=="add") print $(i-2)}')
+          CHANGE=$(echo $SUMMARY | awk -F'[, ]' '{for(i=1;i<=NF;i++) if($i=="change") print $(i-2)}')
+          DESTROY=$(echo $SUMMARY | awk -F'[, ]' '{for(i=1;i<=NF;i++) if($i=="destroy") print $(i-2)}')
+
+          ADD=${ADD:-0}
+          CHANGE=${CHANGE:-0}
+          DESTROY=${DESTROY:-0}
+
+          TOTAL=$((ADD + CHANGE + DESTROY))
+          echo "Total changes: $TOTAL"
+          echo "total_changes=$TOTAL" >> $GITHUB_OUTPUT
+
+          if [ "$TOTAL" -gt "$DIFF_BUDGET" ]; then
+            echo "❌ Diff budget exceeded! ($TOTAL > $DIFF_BUDGET)"
+            echo "budget_exceeded=true" >> $GITHUB_OUTPUT
+            # We don't exit 1 yet, we want to post comment first
+          else
+            echo "✅ Diff budget within limits."
+            echo "budget_exceeded=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Post Diff Summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'terraform/environments/prod/plan.txt';
+            let planOutput = '';
+            try {
+              planOutput = fs.readFileSync(path, 'utf8');
+            } catch (e) {
+              planOutput = 'Plan output not found.';
+            }
+
+            // Truncate if too long
+            if (planOutput.length > 60000) {
+              planOutput = planOutput.substring(0, 60000) + '... (truncated)';
+            }
+
+            const totalChanges = ${{ steps.budget.outputs.total_changes }};
+            const budgetExceeded = ${{ steps.budget.outputs.budget_exceeded }};
+            const budget = ${{ env.DIFF_BUDGET }};
+
+            let message = `### 🏗️ Infrastructure Diff Summary\n\n`;
+            message += `**Total Changes:** ${totalChanges}\n`;
+            message += `**Budget:** ${budget}\n\n`;
+
+            if (budgetExceeded) {
+              message += `### ❌ DIFF BUDGET EXCEEDED\n`;
+              message += `This PR introduces ${totalChanges} infra changes, which exceeds the safety budget of ${budget}.\n`;
+              message += `Explicit approval from Infrastructure Engineering is required.\n\n`;
+            } else {
+              message += `### ✅ Within Budget\n\n`;
+            }
+
+            message += `<details><summary>Show Plan Output</summary>\n\n\`\`\`terraform\n${planOutput}\n\`\`\`\n</details>`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
+
+      - name: Fail if Budget Exceeded
+        if: steps.budget.outputs.budget_exceeded == 'true'
+        run: |
+          echo "Infrastructure change budget exceeded. Failing build to block auto-merge."
+          exit 1

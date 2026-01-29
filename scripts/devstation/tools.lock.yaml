@@ -1,0 +1,13 @@
+schema: summit.tools.lock/v1
+generated_at: "2026-01-26"
+notes:
+  - "Pin versions here for deterministic devstations and reproducible CI toolchains."
+  - "If version is blank, installer uses latest release (non-deterministic)."
+
+tools:
+  kubectl:
+    version: "stable"   # or v1.29.1
+  just:
+    version: ""         # e.g. "1.40.0"
+  task:
+    version: ""         # e.g. "3.39.2"

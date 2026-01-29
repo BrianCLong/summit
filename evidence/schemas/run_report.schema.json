@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit Evidence Run Report",
+  "type": "object",
+  "required": ["run_id", "item", "precision_flow", "evidence_ids"],
+  "properties": {
+    "run_id": {"type": "string"},
+    "item": {"type": "string"},
+    "precision_flow": {"type": "object"},
+    "evidence_ids": {"type": "array", "items": {"type": "string"}}
+  }
+}

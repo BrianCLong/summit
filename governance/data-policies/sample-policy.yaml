@@ -1,0 +1,35 @@
+# Zero-Trust Data Policy: Registry Governance
+# Enforced by: PolicyEngine
+# Version: 1.0.0
+
+policy_id: "ZD-001"
+resource_type: "data_asset"
+target_resource_id: "governance/registry.json"
+
+sensitivity_level: "critical"
+
+rules:
+  - name: "public-read-internal"
+    action: "read"
+    effect: "allow"
+    conditions:
+      - "user.tenantId == resource.tenantId"
+
+  - name: "restricted-write"
+    action: "write"
+    effect: "deny" # Default deny
+    overrides:
+      - condition: "user.roles contains 'admin' AND device.is_verified == true"
+        effect: "allow"
+      - condition: "user.id == 'ci-runner' AND context.pipeline_verified == true"
+        effect: "allow"
+
+  - name: "immutable-history"
+    action: "delete"
+    effect: "deny"
+    reason: "Registry is append-only ledger"
+
+requirements:
+  metadata:
+    - "change_reason"
+    - "ticket_id"

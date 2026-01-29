@@ -51,7 +51,7 @@ interface InternalJob extends DisclosureExportJob {
   request: DisclosureExportRequest;
   workingDir: string;
   bundlePath?: string;
-  attestations: any[];
+  attestations: Record<string, unknown>[];
   artifactDigests: Record<string, string>;
 }
 
@@ -67,8 +67,8 @@ const DEFAULT_ARTIFACTS: ExportArtifact[] = [
 
 const requestSchema = z.object({
   tenantId: z.string().min(1),
-  startTime: z.string().transform((value: any) => new Date(value)),
-  endTime: z.string().transform((value: any) => new Date(value)),
+  startTime: z.string().transform((value: unknown) => new Date(value as string)),
+  endTime: z.string().transform((value: unknown) => new Date(value as string)),
   artifacts: z
     .array(z.enum(['audit-trail', 'sbom', 'attestations', 'policy-reports']))
     .optional(),
@@ -83,7 +83,7 @@ async function hashFile(filePath: string): Promise<string> {
   const hash = createHash('sha256');
   const stream = createReadStream(filePath);
   stream.on('data', (chunk) => hash.update(chunk));
-  await finished(stream as any);
+  await finished(stream as unknown as NodeJS.ReadableStream);
   return hash.digest('hex');
 }
 
@@ -172,8 +172,8 @@ export class DisclosureExportService {
 
   listJobsForTenant(tenantId: string): DisclosureExportJob[] {
     return Array.from(this.jobs.values())
-      .filter((job: any) => job.tenantId === tenantId)
-      .map((job: any) => this.publicJob(job));
+      .filter((job) => job.tenantId === tenantId)
+      .map((job) => this.publicJob(job));
   }
 
   getJob(jobId: string): DisclosureExportJob | undefined {
@@ -324,9 +324,9 @@ export class DisclosureExportService {
           console.error('Disclosure webhook failed', error);
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       job.status = 'failed';
-      job.error = error?.message || 'export_failed';
+      job.error = (error instanceof Error ? error.message : String(error)) || 'export_failed';
       job.completedAt = new Date().toISOString();
       job.warnings = warnings;
       disclosureMetrics.exportFailed(job.tenantId);
@@ -416,13 +416,13 @@ export class DisclosureExportService {
 
     const truncated = rows.length > MAX_EVENTS;
     const selected = truncated ? rows.slice(0, MAX_EVENTS) : rows;
-    const sanitized: any[] = [];
+    const sanitized: Record<string, unknown>[] = [];
     for (const row of selected) {
       const clean = await this.redaction.redactObject(
-        row,
+        row as Record<string, unknown>,
         {
           rules: ['pii', 'sensitive', 'financial'],
-        },
+        } as any,
         job.tenantId,
         { jobId: job.id },
       );
@@ -516,13 +516,13 @@ export class DisclosureExportService {
       return null;
     }
 
-    const sanitized: any[] = [];
+    const sanitized: Record<string, unknown>[] = [];
     for (const row of rows) {
       const clean = await this.redaction.redactObject(
-        row,
+        row as Record<string, unknown>,
         {
           rules: ['pii', 'sensitive'],
-        },
+        } as any,
         job.tenantId,
         { jobId: job.id, artifact: 'policy' },
       );
@@ -599,7 +599,7 @@ export class DisclosureExportService {
   }
 
   private verifyAttestationSubjects(
-    attestations: any[],
+    attestations: Record<string, any>[],
     job: InternalJob,
   ): string[] {
     const mismatches: string[] = [];

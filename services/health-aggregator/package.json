@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/health-aggregator",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Cross-system health checks and status reporting for CompanyOS, Switchboard, and Summit",
   "type": "module",
   "main": "dist/index.js",

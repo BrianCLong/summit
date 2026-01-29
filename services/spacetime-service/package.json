@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/spacetime-service",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Temporal-geospatial indexing and query engine for IntelGraph intelligence platform",
   "type": "module",
   "main": "dist/index.js",

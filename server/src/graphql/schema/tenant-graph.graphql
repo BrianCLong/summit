@@ -57,6 +57,66 @@ type Organization implements Entity {
 }
 
 """
+Institution entity type
+"""
+type Institution implements Entity {
+  id: ID!
+  tenantId: ID!
+  labels: [String!]!
+  score: Float
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  # Institution-specific fields
+  name: String!
+  category: String
+  resilienceScore: Float
+  functions: [String!]
+  jurisdiction: String
+}
+
+"""
+Infrastructure entity type
+"""
+type Infrastructure implements Entity {
+  id: ID!
+  tenantId: ID!
+  labels: [String!]!
+  score: Float
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  # Infrastructure-specific fields
+  name: String!
+  type: String!
+  capacity: Float
+  integrity: Float
+  location: Location
+}
+
+"""
+Norm entity type
+"""
+type Norm implements Entity {
+  id: ID!
+  tenantId: ID!
+  labels: [String!]!
+  score: Float
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  # Norm-specific fields
+  name: String!
+  description: String
+  legitimacyScore: Float
+  adherence: Float
+  societalContext: String
+}
+
+"""
 Asset entity type
 """
 type Asset implements Entity {

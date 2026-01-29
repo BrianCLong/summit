@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/i18n-service",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Backend i18n service for language detection and policy-aware translation",
   "type": "module",
   "main": "./dist/index.js",

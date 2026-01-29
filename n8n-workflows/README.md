@@ -4,6 +4,9 @@
 
 **Complete automation suite for GitHub Enterprise + Groq AI + n8n**
 
+> [!CAUTION]
+> **SECURITY ADVISORY (CVE-2026-21858):** If you are self-hosting n8n, ensure you are running version **1.121.0** or later. Versions 1.65.0 to 1.120.x are vulnerable to a critical unauthenticated Remote Code Execution (RCE) flaw ("Ni8mare"). See [Security Advisory](../docs/security/ADVISORY-CVE-2026-21858-N8N.md).
+
 This collection contains 10 advanced workflows that multiply your development velocity by 23x through:
 - **AI-powered code generation**
 - **Automated code review**

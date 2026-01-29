@@ -1,0 +1,33 @@
+name: CI — intelgraph-server
+
+on:
+  pull_request:
+    paths:
+      - "server/**"
+      - "packages/**"
+      - ".github/workflows/**"
+      - "scripts/ci/**"
+  push:
+    branches: [main]
+    paths:
+      - "server/**"
+      - "scripts/ci/**"
+
+concurrency:
+  group: intelgraph-server-${{ github.ref || github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    uses: ./.github/workflows/_reusable-ci.yml
+    with:
+      node-version: "20"
+      package-manager: "pnpm"
+      workspace-filter: "intelgraph-server"
+      run-lint: true
+      run-typecheck: true
+      run-tests: true
+      run-evidence: true
+      evidence-artifact-name: "ci-evidence-intelgraph-server-${{ github.run_id }}"
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

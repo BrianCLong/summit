@@ -2,7 +2,7 @@
   "name": "ultra-maximal-dev-agent",
   "displayName": "Ultra-Maximal Dev Agent",
   "description": "Autonomous development agent for VS Code",
-  "version": "0.0.1",
+  "version": "4.2.3",
   "engines": {
     "vscode": "^1.80.0"
   },

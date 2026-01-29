@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "totals": {
+      "type": "object",
+      "properties": {
+        "pg": { "type": "object", "properties": { "nodes": { "type": "integer" }, "edges": { "type": "integer" } } },
+        "neo": { "type": "object", "properties": { "nodes": { "type": "integer" }, "edges": { "type": "integer" } } }
+      }
+    },
+    "lagRate": { "type": "number" },
+    "violation": { "type": "boolean" },
+    "missingInNeoCount": { "type": "integer" },
+    "missingInPgCount": { "type": "integer" },
+    "orphansPG": { "type": "array" },
+    "nodeDelta": { "type": "integer" },
+    "edgeDelta": { "type": "integer" },
+    "timestamp": { "type": "string" }
+  },
+  "required": ["totals", "lagRate", "violation"]
+}

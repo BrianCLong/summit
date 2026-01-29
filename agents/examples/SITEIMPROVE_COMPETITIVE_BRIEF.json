@@ -1,0 +1,42 @@
+{
+  "task_id": "SITEIMPROVE_COMPETITIVE_BRIEF",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "siteimprove-agentic-content-intel",
+    "version": "v1",
+    "sha256": "81ddc325cbc19253c9d306cfa49801fecd09aea632e7c1ff133bf3e73ec761df",
+    "path": "prompts/competitive/siteimprove-agentic-content-intelligence.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/competitive/",
+      "docs/roadmap/STATUS.json",
+      "prompts/competitive/",
+      "prompts/registry.yaml",
+      "agents/examples/"
+    ],
+    "domains": ["competitive-intel", "product-strategy", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/competitive/siteimprove-agentic-content-intelligence.md",
+      "docs/roadmap/STATUS.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Publish a competitive brief with Summit response actions and backlog",
+    "Align roadmap status update with the new competitive intelligence artifacts"
+  ],
+  "stop_conditions": [
+    "CI failure in main",
+    "Detection of PII in output",
+    "Sandbox violation alert",
+    "Documentation contradicts code (drift check)"
+  ]
+}

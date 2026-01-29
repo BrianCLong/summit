@@ -158,7 +158,7 @@ module "aurora" {
 
   # --- Data Safety (PITR) ---
 
-  backup_retention_period = 7
+  backup_retention_period = 30
 
   preferred_backup_window = "02:00-04:00"
 
@@ -173,16 +173,88 @@ resource "aws_elasticache_replication_group" "redis" {
   replication_group_id       = "summit-prod-redis"
   description                = "Redis cluster for Summit Prod"
   node_type                  = "cache.t4g.micro"
-  num_cache_clusters         = 2
-  parameter_group_name       = "default.redis7"
   port                       = 6379
+  parameter_group_name       = "default.redis7.cluster.on"
   subnet_group_name          = aws_elasticache_subnet_group.redis.name
   automatic_failover_enabled = true
+  multi_az_enabled           = true
+
+  num_node_groups         = 2
+  replicas_per_node_group = 1
+
+  at_rest_encryption_enabled = true
+  transit_encryption_enabled = true
+
+  snapshot_retention_limit = 7
+  snapshot_window          = "03:00-04:00"
 }
 
 resource "aws_elasticache_subnet_group" "redis" {
   name       = "summit-prod-redis-subnet"
   subnet_ids = module.vpc.private_subnets
+}
+
+# --- Backup & DR (AWS Backup) ---
+resource "aws_backup_vault" "prod_vault" {
+  name = "summit-prod-backup-vault"
+}
+
+resource "aws_backup_plan" "prod_backup_plan" {
+  name = "summit-prod-backup-plan"
+
+  rule {
+    rule_name         = "DailyBackups"
+    target_vault_name = aws_backup_vault.prod_vault.name
+    schedule          = "cron(0 5 * * ? *)"
+
+    lifecycle {
+      delete_after = 30
+    }
+  }
+
+  rule {
+    rule_name         = "MonthlyBackups"
+    target_vault_name = aws_backup_vault.prod_vault.name
+    schedule          = "cron(0 5 1 * ? *)"
+
+    lifecycle {
+      delete_after = 365
+      cold_storage_after = 30
+    }
+  }
+}
+
+resource "aws_backup_selection" "prod_backup_selection" {
+  iam_role_arn = aws_iam_role.backup_role.arn
+  name         = "summit-prod-backup-selection"
+  plan_id      = aws_backup_plan.prod_backup_plan.id
+
+  resources = [
+    module.aurora.cluster_arn
+  ]
+}
+
+resource "aws_iam_role" "backup_role" {
+  name               = "summit-prod-backup-role"
+  assume_role_policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": ["sts:AssumeRole"],
+      "Effect": "allow",
+      "Principal": {
+        "Service": ["backup.amazonaws.com"]
+      }
+    }
+  ]
+}
+POLICY
+}
+
+resource "aws_iam_role_policy_attachment" "backup_role_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup"
+  role       = aws_iam_role.backup_role.name
 }
 
 # --- Outputs ---

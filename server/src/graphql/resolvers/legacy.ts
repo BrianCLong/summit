@@ -6,7 +6,7 @@ import { getNeo4jDriver } from '../../db/neo4j.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import logger from '../../utils/logger.js';
 import crypto from 'crypto';
-import relationshipResolvers from './resolvers/relationship.js';
+import relationshipResolvers from './relationship.js';
 
 interface User {
   id: string;

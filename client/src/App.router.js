@@ -53,6 +53,7 @@ import { useSelector } from 'react-redux';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
+import { getGraphqlHttpUrl } from './config/urls';
 
 // Lazy-loaded page components for better initial load performance
 // These heavy components are only loaded when their routes are accessed
@@ -81,6 +82,14 @@ const ExecutiveDashboard = React.lazy(() =>
 const AccessIntelPage = React.lazy(() =>
   import('./features/rbac/AccessIntelPage.jsx')
 );
+const IOCList = React.lazy(() => import('./pages/IOC/IOCList'));
+const IOCDetail = React.lazy(() => import('./pages/IOC/IOCDetail'));
+const HuntList = React.lazy(() => import('./pages/Hunting/HuntList'));
+const HuntDetail = React.lazy(() => import('./pages/Hunting/HuntDetail'));
+const SearchHome = React.lazy(() => import('./pages/Search/SearchHome'));
+const SearchResultDetail = React.lazy(() =>
+  import('./pages/Search/SearchResultDetail')
+);
 
 // Loading fallback component for lazy-loaded routes
 function PageLoadingFallback() {
@@ -106,6 +115,9 @@ function PageLoadingFallback() {
 // Navigation items
 const navigationItems = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
+  { path: '/search', label: 'Search', icon: <Search /> },
+  { path: '/hunts', label: 'Hunts', icon: <Security /> },
+  { path: '/ioc', label: 'IOCs', icon: <Timeline /> },
   { path: '/investigations', label: 'Timeline', icon: <Search /> },
   { path: '/graph', label: 'Graph Explorer', icon: <Timeline /> },
   { path: '/copilot', label: 'AI Copilot', icon: <Psychology /> },
@@ -137,7 +149,7 @@ function ConnectionStatus() {
   React.useEffect(() => {
     const checkBackend = async () => {
       try {
-        const response = await fetch('http://localhost:4000/graphql', {
+        const response = await fetch(getGraphqlHttpUrl(), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ query: '{ __typename }' }),
@@ -661,6 +673,15 @@ function MainLayout() {
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/search" element={<SearchHome />} />
+            <Route
+              path="/search/results/:id"
+              element={<SearchResultDetail />}
+            />
+            <Route path="/hunts" element={<HuntList />} />
+            <Route path="/hunts/:id" element={<HuntDetail />} />
+            <Route path="/ioc" element={<IOCList />} />
+            <Route path="/ioc/:id" element={<IOCDetail />} />
             <Route path="/investigations" element={<InvestigationsPage />} />
             <Route path="/graph" element={<GraphExplorerPage />} />
             <Route path="/copilot" element={<CopilotPage />} />

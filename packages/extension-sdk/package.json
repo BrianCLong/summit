@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/extension-sdk",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "IntelGraph Extension SDK",
   "main": "dist/manifest.js",
   "types": "dist/manifest.d.ts",

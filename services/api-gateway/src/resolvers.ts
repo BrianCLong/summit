@@ -32,7 +32,10 @@ export const resolvers = {
   JSON: JSONScalar,
 
   Query: {
-    health: () => 'OK',
+    health: () => ({
+      ok: true,
+      timestamp: new Date(),
+    }),
 
     // Entity resolvers (delegated to graph service)
     entity: async (parent: any, args: any, context: any) => {
@@ -264,6 +267,14 @@ export const resolvers = {
       }
 
       return response.json();
+    },
+
+    ping: (parent: any, args: any) => {
+      return {
+        ok: true,
+        timestamp: new Date(),
+        message: args.input.message,
+      };
     },
   },
 };

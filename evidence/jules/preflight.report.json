@@ -1,0 +1,10 @@
+{
+  "status": "ready",
+  "phase": "0",
+  "checks": {
+    "clean_worktree": true,
+    "parallel_agents_halted": true,
+    "conflicts": false
+  },
+  "timestamp": "2025-05-15T12:00:00Z"
+}

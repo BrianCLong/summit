@@ -10,17 +10,23 @@
  * - Query editing and re-execution support
  */
 
-import type { Pool } from 'pg';
-import type { Redis } from 'ioredis';
-import type { Driver } from 'neo4j-driver';
-import { logger } from '../utils/logger.js';
-import { metrics } from '../observability/metrics.js';
-import { GraphRAGService, type GraphRAGRequest, type GraphRAGResponse } from './GraphRAGService.js';
-import { QueryPreviewService, type CreatePreviewInput, type QueryPreview, type ExecutePreviewResult } from './QueryPreviewService.js';
-import { GlassBoxRunService, type GlassBoxRun } from './GlassBoxRunService.js';
-import { NlToCypherService } from '../ai/nl-to-cypher/nl-to-cypher.service.js';
-import { meteringEmitter } from '../metering/emitter.js';
-import { promptRegistry } from '../prompts/registry.js';
+import type { Pool } from "pg";
+import type { Redis } from "ioredis";
+import type { Driver } from "neo4j-driver";
+import { logger } from "../utils/logger.js";
+import { metrics } from "../observability/metrics.js";
+import { GraphRAGService, type GraphRAGRequest, type GraphRAGResponse } from "./GraphRAGService.js";
+import {
+  QueryPreviewService,
+  type CreatePreviewInput,
+  type QueryPreview,
+  type ExecutePreviewResult,
+} from "./QueryPreviewService.js";
+import { GlassBoxRunService, type GlassBoxRun } from "./GlassBoxRunService.js";
+import { NlToCypherService } from "../ai/nl-to-cypher/nl-to-cypher.service.js";
+import { meteringEmitter } from "../metering/emitter.js";
+import { promptRegistry } from "../prompts/registry.js";
+import { tracer } from "../observability/tracing.js";
 
 export type GraphRAGQueryRequest = {
   investigationId: string;
@@ -51,7 +57,7 @@ export type GraphRAGQueryResponse = {
   answer: string;
   confidence: number;
   citations: EnrichedCitation[];
-  why_paths?: GraphRAGResponse['why_paths'];
+  why_paths?: GraphRAGResponse["why_paths"];
   // Preview info (if preview was generated)
   preview?: {
     id: string;
@@ -115,259 +121,272 @@ export class GraphRAGQueryService {
    * Main query method - handles the full flow from NL query to answer with citations
    */
   async query(request: GraphRAGQueryRequest): Promise<GraphRAGQueryResponse> {
-    const startTime = Date.now();
+    return tracer.trace("graphrag.query", async (span) => {
+      span.setAttribute("graphrag.investigation_id", request.investigationId);
+      span.setAttribute("graphrag.tenant_id", request.tenantId);
+      span.setAttribute("graphrag.question_length", request.question.length);
 
-    metrics.featureUsageTotal.inc({ tenant_id: request.tenantId, feature_name: 'graphrag_query' });
+      const startTime = Date.now();
 
-    logger.info({
-      investigationId: request.investigationId,
-      question: request.question,
-      generatePreview: request.generateQueryPreview,
-      autoExecute: request.autoExecute,
-    }, 'Starting GraphRAG query');
+      metrics.featureUsageTotal.inc({
+        tenant_id: request.tenantId,
+        feature_name: "graphrag_query",
+      });
 
-    // Load the system prompt contract to link it in audit metadata
-    let systemPromptId = 'core.jules-copilot@v4';
-    let systemPromptOwner = 'jules';
-    try {
-      const promptConfig = promptRegistry.getPrompt(systemPromptId);
-      if (promptConfig) {
-        systemPromptOwner = promptConfig.meta.owner;
-      }
-    } catch (e: any) {
-      logger.warn({ error: e }, 'Failed to load system prompt config for audit metadata');
-    }
-
-    // Create glass-box run for observability
-    const run = await this.glassBoxService.createRun({
-      investigationId: request.investigationId,
-      tenantId: request.tenantId,
-      userId: request.userId,
-      type: 'graphrag_query',
-      prompt: request.question,
-      parameters: {
-        focusEntityIds: request.focusEntityIds,
-        maxHops: request.maxHops,
-        generatePreview: request.generateQueryPreview,
-        autoExecute: request.autoExecute,
-        systemPromptId,
-        systemPromptOwner,
-      },
-    });
-
-    try {
-      await this.glassBoxService.updateStatus(run.id, 'running');
-
-      let preview: QueryPreview | undefined;
-
-      // Step 1: Generate query preview if requested
-      if (request.generateQueryPreview) {
-        const previewStepId = await this.captureStep(
-          run.id,
-          'Generate query preview from natural language'
-        );
-
-        preview = await this.queryPreviewService.createPreview({
+      logger.info(
+        {
           investigationId: request.investigationId,
-          tenantId: request.tenantId,
-          userId: request.userId,
-          naturalLanguageQuery: request.question,
-          language: 'cypher',
-          parameters: {
-            focusEntityIds: request.focusEntityIds,
-            maxHops: request.maxHops,
-          },
+          question: request.question,
+          generatePreview: request.generateQueryPreview,
+          autoExecute: request.autoExecute,
+        },
+        "Starting GraphRAG query"
+      );
+
+      // Load the system prompt contract to link it in audit metadata
+      let systemPromptId = "core.jules-copilot@v4";
+      let systemPromptOwner = "jules";
+      try {
+        const promptConfig = promptRegistry.getPrompt(systemPromptId);
+        if (promptConfig) {
+          systemPromptOwner = promptConfig.meta.owner;
+        }
+      } catch (e: any) {
+        logger.warn({ error: e }, "Failed to load system prompt config for audit metadata");
+      }
+
+      // Create glass-box run for observability
+      const run = await this.glassBoxService.createRun({
+        investigationId: request.investigationId,
+        tenantId: request.tenantId,
+        userId: request.userId,
+        type: "graphrag_query",
+        prompt: request.question,
+        parameters: {
           focusEntityIds: request.focusEntityIds,
           maxHops: request.maxHops,
-        });
+          generatePreview: request.generateQueryPreview,
+          autoExecute: request.autoExecute,
+          systemPromptId,
+          systemPromptOwner,
+        },
+      });
 
-        await this.glassBoxService.completeStep(run.id, previewStepId, {
-          previewId: preview.id,
-          costLevel: preview.costEstimate.level,
-          riskLevel: preview.riskAssessment.level,
-          canExecute: preview.canExecute,
-        });
+      try {
+        await this.glassBoxService.updateStatus(run.id, "running");
 
-        // If not auto-executing, return preview for user review
-        if (!request.autoExecute) {
-          await this.glassBoxService.updateStatus(run.id, 'completed', {
-            previewGenerated: true,
-            requiresExplicitExecution: true,
+        let preview: QueryPreview | undefined;
+
+        // Step 1: Generate query preview if requested
+        if (request.generateQueryPreview) {
+          const previewStepId = await this.captureStep(
+            run.id,
+            "Generate query preview from natural language"
+          );
+
+          preview = await this.queryPreviewService.createPreview({
+            investigationId: request.investigationId,
+            tenantId: request.tenantId,
+            userId: request.userId,
+            naturalLanguageQuery: request.question,
+            language: "cypher",
+            parameters: {
+              focusEntityIds: request.focusEntityIds,
+              maxHops: request.maxHops,
+            },
+            focusEntityIds: request.focusEntityIds,
+            maxHops: request.maxHops,
           });
 
-          return {
-            answer: '',
-            confidence: 0,
-            citations: [],
-            preview: {
-              id: preview.id,
-              generatedQuery: preview.generatedQuery,
-              queryExplanation: preview.queryExplanation,
-              costLevel: preview.costEstimate.level,
-              riskLevel: preview.riskAssessment.level,
-              canExecute: preview.canExecute,
-              requiresApproval: preview.requiresApproval,
-            },
-            runId: run.id,
-            executionTimeMs: Date.now() - startTime,
-          };
-        }
-
-        // Check if we can execute
-        if (!preview.canExecute) {
-          throw new Error(
-            `Query cannot be executed: ${preview.validationErrors.join(', ')}`
-          );
-        }
-
-        if (preview.requiresApproval) {
-          logger.warn({
+          await this.glassBoxService.completeStep(run.id, previewStepId, {
             previewId: preview.id,
             costLevel: preview.costEstimate.level,
             riskLevel: preview.riskAssessment.level,
-          }, 'Query requires approval but auto-execute is true');
+            canExecute: preview.canExecute,
+          });
+
+          // If not auto-executing, return preview for user review
+          if (!request.autoExecute) {
+            await this.glassBoxService.updateStatus(run.id, "completed", {
+              previewGenerated: true,
+              requiresExplicitExecution: true,
+            });
+
+            return {
+              answer: "",
+              confidence: 0,
+              citations: [],
+              preview: {
+                id: preview.id,
+                generatedQuery: preview.generatedQuery,
+                queryExplanation: preview.queryExplanation,
+                costLevel: preview.costEstimate.level,
+                riskLevel: preview.riskAssessment.level,
+                canExecute: preview.canExecute,
+                requiresApproval: preview.requiresApproval,
+              },
+              runId: run.id,
+              executionTimeMs: Date.now() - startTime,
+            };
+          }
+
+          // Check if we can execute
+          if (!preview.canExecute) {
+            throw new Error(`Query cannot be executed: ${preview.validationErrors.join(", ")}`);
+          }
+
+          if (preview.requiresApproval) {
+            logger.warn(
+              {
+                previewId: preview.id,
+                costLevel: preview.costEstimate.level,
+                riskLevel: preview.riskAssessment.level,
+              },
+              "Query requires approval but auto-execute is true"
+            );
+          }
         }
-      }
 
-      // Step 2: Execute GraphRAG query
-      const ragStepId = await this.captureStep(
-        run.id,
-        'Execute GraphRAG retrieval and generation'
-      );
-
-      const ragRequest: GraphRAGRequest = {
-        investigationId: request.investigationId,
-        tenantId: request.tenantId,
-        question: request.question,
-        focusEntityIds: request.focusEntityIds,
-        maxHops: request.maxHops || 2,
-      };
-
-      const ragResponse = await this.graphRAGService.answer(ragRequest);
-
-      await this.glassBoxService.completeStep(run.id, ragStepId, {
-        confidence: ragResponse.confidence,
-        citationCount: ragResponse.citations.entityIds.length,
-        pathCount: ragResponse.why_paths?.length,
-      });
-
-      // Step 3: Enrich citations with entity details
-      const enrichStepId = await this.captureStep(
-        run.id,
-        'Enrich citations with entity details'
-      );
-
-      const enrichedCitations = await this.enrichCitations(
-        ragResponse.citations.entityIds,
-        request.investigationId,
-        request.tenantId
-      );
-
-      await this.glassBoxService.completeStep(run.id, enrichStepId, {
-        enrichedCount: enrichedCitations.length,
-      });
-
-      // Enforce Prompt Contract: Block publication if claims lack provenance (missing citations)
-      if (enrichedCitations.length === 0 && ragResponse.answer.length > 50) {
-        const errorMsg = 'Publication blocked: Answer generated but lacks required citations.';
-        logger.warn({ runId: run.id }, errorMsg);
-
-        // We log it as a failed step or warning, but per strict prompt contract, we should probably fail or redact.
-        // For MVP-4 GA, we'll mark the run as having a policy violation but return what we have with a warning,
-        // OR strictly fail. The prompt says "block publication if any claim lacks provenance".
-        // Let's implement a strict block for high-stakes compliance.
-        throw new Error(errorMsg);
-      }
-
-      // Step 4: Get subgraph size for metadata
-      const subgraphSize = await this.getSubgraphSize(
-        request.investigationId,
-        request.focusEntityIds
-      );
-
-      const executionTimeMs = Date.now() - startTime;
-
-      const response: GraphRAGQueryResponse = {
-        answer: ragResponse.answer,
-        confidence: ragResponse.confidence,
-        citations: enrichedCitations,
-        why_paths: ragResponse.why_paths,
-        preview: preview
-          ? {
-              id: preview.id,
-              generatedQuery: preview.generatedQuery,
-              queryExplanation: preview.queryExplanation,
-              costLevel: preview.costEstimate.level,
-              riskLevel: preview.riskAssessment.level,
-              canExecute: preview.canExecute,
-              requiresApproval: preview.requiresApproval,
-            }
-          : undefined,
-        runId: run.id,
-        executionTimeMs,
-        subgraphSize,
-      };
-
-      await this.glassBoxService.updateStatus(run.id, 'completed', response);
-
-      metrics.graphragQueryTotal.inc({
-        status: 'success',
-        hasPreview: preview ? 'true' : 'false',
-        redactionEnabled: 'false',
-        provenanceEnabled: 'false',
-      });
-      metrics.graphragQueryDurationMs.observe(
-        { hasPreview: preview ? 'true' : 'false' },
-        executionTimeMs
-      );
-
-      logger.info({
-        runId: run.id,
-        investigationId: request.investigationId,
-        confidence: ragResponse.confidence,
-        citationCount: enrichedCitations.length,
-        executionTimeMs,
-        hasPreview: !!preview,
-      }, 'Completed GraphRAG query');
-
-      try {
-        await meteringEmitter.emitQueryCredits({
-          tenantId: request.tenantId,
-          credits: 1,
-          source: 'graphrag-query-service',
-          correlationId: run.id,
-          idempotencyKey: run.id,
-          metadata: {
-            investigationId: request.investigationId,
-            autoExecute: request.autoExecute ?? true,
-          },
-        });
-      } catch (meterError) {
-        logger.warn(
-          { meterError, runId: run.id },
-          'Failed to emit query metering event',
+        // Step 2: Execute GraphRAG query
+        const ragStepId = await this.captureStep(
+          run.id,
+          "Execute GraphRAG retrieval and generation"
         );
+
+        const ragRequest: GraphRAGRequest = {
+          investigationId: request.investigationId,
+          tenantId: request.tenantId,
+          question: request.question,
+          focusEntityIds: request.focusEntityIds,
+          maxHops: request.maxHops || 2,
+        };
+
+        const ragResponse = await this.graphRAGService.answer(ragRequest);
+
+        await this.glassBoxService.completeStep(run.id, ragStepId, {
+          confidence: ragResponse.confidence,
+          citationCount: ragResponse.citations.entityIds.length,
+          pathCount: ragResponse.why_paths?.length,
+        });
+
+        // Step 3: Enrich citations with entity details
+        const enrichStepId = await this.captureStep(run.id, "Enrich citations with entity details");
+
+        const enrichedCitations = await this.enrichCitations(
+          ragResponse.citations.entityIds,
+          request.investigationId,
+          request.tenantId
+        );
+
+        await this.glassBoxService.completeStep(run.id, enrichStepId, {
+          enrichedCount: enrichedCitations.length,
+        });
+
+        // Enforce Prompt Contract: Block publication if claims lack provenance (missing citations)
+        if (enrichedCitations.length === 0 && ragResponse.answer.length > 50) {
+          const errorMsg = "Publication blocked: Answer generated but lacks required citations.";
+          logger.warn({ runId: run.id }, errorMsg);
+
+          // We log it as a failed step or warning, but per strict prompt contract, we should probably fail or redact.
+          // For MVP-4 GA, we'll mark the run as having a policy violation but return what we have with a warning,
+          // OR strictly fail. The prompt says "block publication if any claim lacks provenance".
+          // Let's implement a strict block for high-stakes compliance.
+          throw new Error(errorMsg);
+        }
+
+        // Step 4: Get subgraph size for metadata
+        const subgraphSize = await this.getSubgraphSize(
+          request.investigationId,
+          request.focusEntityIds
+        );
+
+        const executionTimeMs = Date.now() - startTime;
+
+        const response: GraphRAGQueryResponse = {
+          answer: ragResponse.answer,
+          confidence: ragResponse.confidence,
+          citations: enrichedCitations,
+          why_paths: ragResponse.why_paths,
+          preview: preview
+            ? {
+                id: preview.id,
+                generatedQuery: preview.generatedQuery,
+                queryExplanation: preview.queryExplanation,
+                costLevel: preview.costEstimate.level,
+                riskLevel: preview.riskAssessment.level,
+                canExecute: preview.canExecute,
+                requiresApproval: preview.requiresApproval,
+              }
+            : undefined,
+          runId: run.id,
+          executionTimeMs,
+          subgraphSize,
+        };
+
+        await this.glassBoxService.updateStatus(run.id, "completed", response);
+
+        metrics.graphragQueryTotal.inc({
+          status: "success",
+          hasPreview: preview ? "true" : "false",
+          redactionEnabled: "false",
+          provenanceEnabled: "false",
+        });
+        metrics.graphragQueryDurationMs.observe(
+          { hasPreview: preview ? "true" : "false" },
+          executionTimeMs
+        );
+
+        logger.info(
+          {
+            runId: run.id,
+            investigationId: request.investigationId,
+            confidence: ragResponse.confidence,
+            citationCount: enrichedCitations.length,
+            executionTimeMs,
+            hasPreview: !!preview,
+          },
+          "Completed GraphRAG query"
+        );
+
+        try {
+          await meteringEmitter.emitQueryCredits({
+            tenantId: request.tenantId,
+            credits: 1,
+            source: "graphrag-query-service",
+            correlationId: run.id,
+            idempotencyKey: run.id,
+            metadata: {
+              investigationId: request.investigationId,
+              autoExecute: request.autoExecute ?? true,
+            },
+          });
+        } catch (meterError) {
+          logger.warn({ meterError, runId: run.id }, "Failed to emit query metering event");
+        }
+
+        return response;
+      } catch (error: any) {
+        await this.glassBoxService.updateStatus(run.id, "failed", undefined, String(error));
+
+        metrics.graphragQueryTotal.inc({
+          status: "failed",
+          hasPreview: "false",
+          redactionEnabled: "false",
+          provenanceEnabled: "false",
+        });
+
+        logger.error(
+          {
+            error,
+            runId: run.id,
+            request,
+          },
+          "Failed to execute GraphRAG query"
+        );
+
+        throw error;
       }
-
-      return response;
-    } catch (error: any) {
-      await this.glassBoxService.updateStatus(run.id, 'failed', undefined, String(error));
-
-      metrics.graphragQueryTotal.inc({
-        status: 'failed',
-        hasPreview: 'false',
-        redactionEnabled: 'false',
-        provenanceEnabled: 'false',
-      });
-
-      logger.error({
-        error,
-        runId: run.id,
-        request,
-      }, 'Failed to execute GraphRAG query');
-
-      throw error;
-    }
+    });
   }
 
   /**
@@ -381,12 +400,15 @@ export class GraphRAGQueryService {
       throw new Error(`Preview ${request.previewId} not found`);
     }
 
-    logger.info({
-      previewId: request.previewId,
-      investigationId: preview.investigationId,
-      useEditedQuery: request.useEditedQuery,
-      dryRun: request.dryRun,
-    }, 'Executing preview');
+    logger.info(
+      {
+        previewId: request.previewId,
+        investigationId: preview.investigationId,
+        useEditedQuery: request.useEditedQuery,
+        dryRun: request.dryRun,
+      },
+      "Executing preview"
+    );
 
     // Execute the preview (this creates its own glass-box run internally)
     const execResult = await this.queryPreviewService.executePreview({
@@ -404,7 +426,7 @@ export class GraphRAGQueryService {
     // If dry run, return empty response
     if (request.dryRun) {
       return {
-        answer: 'Dry run - query validated but not executed',
+        answer: "Dry run - query validated but not executed",
         confidence: 0,
         citations: [],
         runId: execResult.runId,
@@ -437,9 +459,10 @@ export class GraphRAGQueryService {
       why_paths: ragResponse.why_paths,
       preview: {
         id: preview.id,
-        generatedQuery: request.useEditedQuery && preview.editedQuery
-          ? preview.editedQuery
-          : preview.generatedQuery,
+        generatedQuery:
+          request.useEditedQuery && preview.editedQuery
+            ? preview.editedQuery
+            : preview.generatedQuery,
         queryExplanation: preview.queryExplanation,
         costLevel: preview.costEstimate.level,
         riskLevel: preview.riskAssessment.level,
@@ -457,12 +480,15 @@ export class GraphRAGQueryService {
       executionTimeMs: Date.now() - startTime,
     };
 
-    logger.info({
-      previewId: request.previewId,
-      runId: execResult.runId,
-      citationCount: enrichedCitations.length,
-      executionTimeMs: response.executionTimeMs,
-    }, 'Executed preview successfully');
+    logger.info(
+      {
+        previewId: request.previewId,
+        runId: execResult.runId,
+        citationCount: enrichedCitations.length,
+        executionTimeMs: response.executionTimeMs,
+      },
+      "Executed preview successfully"
+    );
 
     return response;
   }
@@ -491,11 +517,14 @@ export class GraphRAGQueryService {
       throw new Error(`Run ${runId} not found`);
     }
 
-    logger.info({
-      originalRunId: runId,
-      userId,
-      hasModifications: !!(options?.modifiedQuestion || options?.modifiedParameters),
-    }, 'Replaying run');
+    logger.info(
+      {
+        originalRunId: runId,
+        userId,
+        hasModifications: !!(options?.modifiedQuestion || options?.modifiedParameters),
+      },
+      "Replaying run"
+    );
 
     // Create replay run
     const replayRun = await this.glassBoxService.replayRun(runId, userId, {
@@ -510,10 +539,12 @@ export class GraphRAGQueryService {
       tenantId: originalRun.tenantId,
       userId,
       question: options?.modifiedQuestion || originalRun.prompt,
-      focusEntityIds: options?.modifiedParameters?.focusEntityIds as string[] | undefined
-        || originalRun.parameters.focusEntityIds as string[] | undefined,
-      maxHops: options?.modifiedParameters?.maxHops as number | undefined
-        || originalRun.parameters.maxHops as number | undefined,
+      focusEntityIds:
+        (options?.modifiedParameters?.focusEntityIds as string[] | undefined) ||
+        (originalRun.parameters.focusEntityIds as string[] | undefined),
+      maxHops:
+        (options?.modifiedParameters?.maxHops as number | undefined) ||
+        (originalRun.parameters.maxHops as number | undefined),
       generateQueryPreview: originalRun.parameters.generatePreview as boolean | undefined,
       autoExecute: true,
     };
@@ -529,11 +560,11 @@ export class GraphRAGQueryService {
     options?: {
       limit?: number;
       offset?: number;
-      status?: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+      status?: "pending" | "running" | "completed" | "failed" | "cancelled";
     }
   ): Promise<{ runs: GlassBoxRun[]; total: number }> {
     return this.glassBoxService.listRuns(investigationId, {
-      type: 'graphrag_query',
+      type: "graphrag_query",
       ...options,
     });
   }
@@ -558,7 +589,7 @@ export class GraphRAGQueryService {
     }
 
     // Ensure we enforce tenant isolation if tenantId is provided
-    const tenantFilter = tenantId ? 'AND e.tenant_id = $3' : '';
+    const tenantFilter = tenantId ? "AND e.tenant_id = $3" : "";
     const query = `
       SELECT
         e.id,
@@ -581,26 +612,27 @@ export class GraphRAGQueryService {
 
       const result = await this.pool.query(query, params);
 
-      return result.rows.map(row => ({
+      return result.rows.map((row) => ({
         entityId: row.id,
         entityKind: row.kind,
         entityLabels: row.labels || [],
         entityName: row.name || row.id,
-        snippetText: row.description
-          ? this.truncateText(row.description, 200)
-          : undefined,
+        snippetText: row.description ? this.truncateText(row.description, 200) : undefined,
         confidence: row.confidence ? parseFloat(row.confidence) : undefined,
         sourceUrl: row.source_url,
       }));
     } catch (error: any) {
-      logger.error({
-        error,
-        entityIds,
-        investigationId,
-      }, 'Failed to enrich citations');
+      logger.error(
+        {
+          error,
+          entityIds,
+          investigationId,
+        },
+        "Failed to enrich citations"
+      );
 
       // Return basic citations on error
-      return entityIds.map(id => ({
+      return entityIds.map((id) => ({
         entityId: id,
       }));
     }
@@ -649,17 +681,20 @@ export class GraphRAGQueryService {
 
       if (result.records.length > 0) {
         return {
-          nodeCount: result.records[0].get('nodeCount').toNumber(),
-          edgeCount: result.records[0].get('edgeCount').toNumber(),
+          nodeCount: result.records[0].get("nodeCount").toNumber(),
+          edgeCount: result.records[0].get("edgeCount").toNumber(),
         };
       }
 
       return undefined;
     } catch (error: any) {
-      logger.error({
-        error,
-        investigationId,
-      }, 'Failed to get subgraph size');
+      logger.error(
+        {
+          error,
+          investigationId,
+        },
+        "Failed to get subgraph size"
+      );
       return undefined;
     } finally {
       await session.close();
@@ -670,9 +705,9 @@ export class GraphRAGQueryService {
    * Capture a step in the glass-box run
    */
   private async captureStep(runId: string, description: string): Promise<string> {
-    const stepId = require('uuid').v4();
+    const stepId = require("uuid").v4();
     await this.glassBoxService.addStep(runId, {
-      type: 'tool_call',
+      type: "tool_call",
       description,
     });
     return stepId;
@@ -685,6 +720,6 @@ export class GraphRAGQueryService {
     if (text.length <= maxLength) {
       return text;
     }
-    return text.substring(0, maxLength - 3) + '...';
+    return text.substring(0, maxLength - 3) + "...";
   }
 }

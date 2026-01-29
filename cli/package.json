@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/cli",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Cross-platform CLI for IntelGraph graph queries, agent spins, and air-gapped exports",
   "type": "module",
   "main": "dist/index.js",

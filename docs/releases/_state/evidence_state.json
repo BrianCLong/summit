@@ -1,6 +1,30 @@
 {
   "version": "1.0.0",
-  "last_collection": null,
-  "last_result": null,
-  "collection_history": []
+  "last_collection": "2026-01-23T08:57:27Z",
+  "last_result": {
+    "run_id": "20260123-085727",
+    "category": "governance",
+    "total": 6,
+    "passed": 6,
+    "failed": 0,
+    "output_dir": "artifacts/evidence"
+  },
+  "collection_history": [
+    {
+      "timestamp": "2026-01-23T08:57:27Z",
+      "run_id": "20260123-085727",
+      "category": "governance",
+      "total": 6,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "timestamp": "2026-01-23T08:56:28Z",
+      "run_id": "20260123-085628",
+      "category": "governance",
+      "total": 6,
+      "passed": 6,
+      "failed": 0
+    }
+  ]
 }
