@@ -2,21 +2,40 @@
   "version": "1.0",
   "items": [
     {
-      "item_slug": "ai-influence-ops",
-      "area": "security",
-      "evidence_ids": [
-        "EVD-ai-influence-ops-EVIDENCE-001",
-        "EVD-ai-influence-ops-POLICY-002",
-        "EVD-ai-influence-ops-EVAL-003",
-        "EVD-ai-influence-ops-MICRO-004",
-        "EVD-ai-influence-ops-CAMPAIGN-005",
-        "EVD-ai-influence-ops-DATA-006"
-      ],
-      "artifacts": {
-        "report": "evidence/ai-influence-ops/report.json",
-        "metrics": "evidence/ai-influence-ops/metrics.json",
-        "stamp": "evidence/ai-influence-ops/stamp.json"
-      }
+      "id": "EVD-angular-skills-REG-001",
+      "path": "skills/index.json"
+    },
+    {
+      "id": "EVD-angular-skills-GOV-001",
+      "path": "evidence/report.json"
+    },
+    {
+      "id": "EVD-angular-skills-EVAL-001",
+      "path": "evidence/metrics.json"
+    },
+    {
+      "id": "EVD-angular-skills-INT-001",
+      "path": "evidence/report.json"
+    },
+    {
+      "id": "EVD-angular-skills-NEG-001",
+      "path": "evidence/report.json"
+    },
+    {
+      "id": "EVD-LIMY-AGENTICWEB-SCHEMA-001",
+      "path": "evidence/EVD-LIMY-AGENTICWEB-SCHEMA-001"
+    },
+    {
+      "id": "EVD-LIMY-AGENTICWEB-PRIVACY-002",
+      "path": "evidence/EVD-LIMY-AGENTICWEB-PRIVACY-002"
+    },
+    {
+      "id": "EVD-LIMY-AGENTICWEB-COLLECT-003",
+      "path": "evidence/EVD-LIMY-AGENTICWEB-COLLECT-003"
+    },
+    {
+      "id": "EVD-LIMY-AGENTICWEB-METRICS-004",
+      "path": "evidence/EVD-LIMY-AGENTICWEB-METRICS-004"
     }
   ]
 }
