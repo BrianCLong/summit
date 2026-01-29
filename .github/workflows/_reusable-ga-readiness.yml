@@ -20,6 +20,12 @@ on:
       ready:
         description: "True if all readiness gates passed"
         value: ${{ jobs.ga-readiness.outputs.ready }}
+      sha:
+        description: "The commit SHA that was verified"
+        value: ${{ jobs.ga-readiness.outputs.sha }}
+      verify_status:
+        description: "Verification status (passed/failed)"
+        value: ${{ jobs.ga-readiness.outputs.verify_status }}
 
 jobs:
   ga-readiness:
@@ -28,6 +34,8 @@ jobs:
     timeout-minutes: 30
     outputs:
       ready: ${{ steps.summary.outputs.ready }}
+      sha: ${{ steps.capture-sha.outputs.sha }}
+      verify_status: ${{ steps.summary.outputs.verify_status }}
 
     permissions:
       contents: read
@@ -41,6 +49,10 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
+
+      - name: Capture SHA
+        id: capture-sha
+        run: echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
       - name: Setup Node.js
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4
@@ -140,6 +152,14 @@ jobs:
         id: summary
         if: always()
         run: |
-          echo "ready=true" >> $GITHUB_OUTPUT
-          echo "### ✅ GA Readiness Verified" >> $GITHUB_STEP_SUMMARY
-          echo "Governance, Security, and Performance gates passed." >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "ready=true" >> $GITHUB_OUTPUT
+            echo "verify_status=passed" >> $GITHUB_OUTPUT
+            echo "### ✅ GA Readiness Verified" >> $GITHUB_STEP_SUMMARY
+            echo "Governance, Security, and Performance gates passed." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ready=false" >> $GITHUB_OUTPUT
+            echo "verify_status=failed" >> $GITHUB_OUTPUT
+            echo "### ❌ GA Readiness Failed" >> $GITHUB_STEP_SUMMARY
+            echo "One or more gates failed. Check job logs for details." >> $GITHUB_STEP_SUMMARY
+          fi
