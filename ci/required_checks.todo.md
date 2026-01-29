@@ -22,3 +22,10 @@ Until discovered, gates are referenced as:
 
 ## Rename plan
 Once the real names are known, update `ci/verifier_spec.md` and add a PR to map old→new for continuity.
+
+## New Checks (Skills)
+- skillpack_unit_tests
+- skill_content_policy
+- skill_exec_policy
+- dep_delta_gate
+- evidence_gate
