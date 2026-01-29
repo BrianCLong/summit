@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-29T20:29:00Z",
-  "revision_note": "Logged competitive intelligence update for graph analytics & enterprise knowledge graph platforms (2026-01-29).",
+  "last_updated": "2026-01-29T12:00:00Z",
+  "revision_note": "Added subagent authoring documentation and baseline built-in agent definitions.",
   "initiatives": [
     {
       "id": "A",
