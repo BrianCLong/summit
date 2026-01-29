@@ -99,6 +99,13 @@ jobs:
           SHA=$(git rev-parse HEAD)
           pnpm release:go-live:notes "artifacts/evidence/go-live/${SHA}"
 
+      - name: Sign Evidence Bundle
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+        run: |
+          SHA=$(git rev-parse HEAD)
+          pnpm release:go-live:sign "artifacts/evidence/go-live/${SHA}" || echo "Signing failed (non-fatal for dry-run)"
+
       - name: Verify Evidence Bundle
         id: verify
         run: |
