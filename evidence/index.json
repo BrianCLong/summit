@@ -1,4 +1,6 @@
 {
-  "version": 1,
-  "items": []
+  "item": "APT2025ESP",
+  "evidence": {
+    "EVD-APT2025ESP-GATES-001": ["evidence/report.json", "evidence/metrics.json"]
+  }
 }

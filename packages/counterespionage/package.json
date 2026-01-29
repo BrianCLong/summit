@@ -1,11 +1,8 @@
 {
-  "name": "@summit/evidence",
+  "name": "@summit/counterespionage",
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "bin": {
-    "summit-evidence-verify": "dist/verify.js"
-  },
   "main": "src/index.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json"
