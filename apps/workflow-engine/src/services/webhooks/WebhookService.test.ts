@@ -1,3 +1,12 @@
+// Mock crypto module
+jest.mock('crypto', () => ({
+  ...jest.requireActual('crypto'),
+  timingSafeEqual: jest.fn((a: Buffer, b: Buffer) => {
+    if (a.length !== b.length) return false;
+    return a.equals(b);
+  }),
+}));
+
 import { newDb } from 'pg-mem';
 import { WebhookRepository } from './WebhookRepository';
 import { WebhookDeliveryWorker } from './WebhookDeliveryWorker';
