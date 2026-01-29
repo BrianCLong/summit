@@ -1,9 +1,0 @@
-SLO Check Results (Wed Sep  3 09:43:24 MDT 2025)
-Target SLO: 99.9%
-Current Availability: 99.95%
-Error Budget Remaining: 85%
-Burn Rate (1h): 0.2 (target: <1.0)
-Burn Rate (6h): 0.1 (target: <0.5)  
-Burn Rate (24h): 0.05 (target: <0.2)
-
-STATUS: ✅ PASS - All burn rates within policy

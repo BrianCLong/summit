@@ -1,2 +1,0 @@
-docs/README.md
-docs/api/endpoints.md

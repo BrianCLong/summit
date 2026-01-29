@@ -1,7 +1,0 @@
-apache-airflow
-neo4j
-pandas
-pydantic
-apache-airflow-providers-amazon
-kafka-python
-apache-airflow-providers-openlineage

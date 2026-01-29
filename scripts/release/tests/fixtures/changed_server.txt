@@ -1,2 +1,0 @@
-server/src/routes/health.ts
-server/tests/health.test.ts
