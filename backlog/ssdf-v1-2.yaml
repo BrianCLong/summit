@@ -1,0 +1,13 @@
+items:
+  - id: SSDF12-TODO-001
+    title: "Complete SSDF v1.2 Practice Mapping"
+    status: todo
+    description: "Map all SSDF practices to Summit controls."
+  - id: SSDF12-TODO-002
+    title: "Implement PO.6 Continuous Improvement Automation"
+    status: todo
+    description: "Automate generation of improvement plans from metrics."
+  - id: SSDF12-TODO-003
+    title: "Create Compliance Dashboard"
+    status: todo
+    description: "Visualize SSDF coverage and evidence status."
