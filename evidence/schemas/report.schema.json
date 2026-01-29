@@ -4,18 +4,12 @@
   "type": "object",
   "required": ["evidence_id", "summary", "artifacts"],
   "properties": {
-    "evidence_id": {
-      "type": "string",
-      "pattern": "^EVD-[A-Z0-9]+-[A-Z0-9]+-\\d{3}$"
-    },
-    "summary": { "type": "string" },
+    "evidence_id": {"type": "string", "pattern": "^EVD-[A-Z0-9_]+-[A-Z]+-[0-9]{3}$"},
+    "summary": {"type": "string"},
     "artifacts": {
       "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["path"],
-        "properties": { "path": { "type": "string" } }
-      }
+      "items": {"type": "string"}
     }
-  }
+  },
+  "additionalProperties": true
 }
