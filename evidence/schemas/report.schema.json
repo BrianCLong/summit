@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit Evidence Report",
+  "type": "object",
+  "required": ["evidence_id", "item_slug", "decisions", "checks", "claim_registry"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "item_slug": { "type": "string" },
+    "decisions": { "type": "array", "items": { "type": "object" } },
+    "checks": { "type": "array", "items": { "type": "object" } },
+    "claim_registry": { "type": "array", "items": { "type": "object" } }
+  },
+  "additionalProperties": true
+}
