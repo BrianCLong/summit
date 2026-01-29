@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-30T00:00:00Z",
-  "revision_note": "Added Arcee Trinity evidence validation scaffolding (schemas, validator, CI hook).",
+  "last_updated": "2026-01-29T19:00:00Z",
+  "revision_note": "Added Automation Turn #3 subsumption bundle artifacts (manifest, evidence triad, docs, fixtures).",
   "initiatives": [
     {
       "id": "A",
@@ -92,6 +92,13 @@
             "Execution budget and observability controls not implemented"
           ],
           "target_completion": "Sprint N+2"
+        },
+        {
+          "id": "C4",
+          "name": "Subsumption Bundle Intake (Automation Turn #3)",
+          "status": "in-progress",
+          "owner": "Codex",
+          "evidence": "Added automation-turn-3 manifest, evidence triad, docs, fixtures, and evidence index entry."
         }
       ]
     },
@@ -234,7 +241,7 @@
     "partial": 1,
     "incomplete": 0,
     "not_started": 15,
-    "total": 23,
+    "total": 24,
     "ga_blockers": [
       "OSINT integration merges blocked until required checks policy is enforceable, CI stability is proven, and provenance/evidence schemas validate end-to-end."
     ]

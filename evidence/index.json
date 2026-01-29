@@ -38,10 +38,10 @@
       "stamp": "evidence/runs/initial/stamp.json"
     },
     {
-      "evidence_id": "EVD-ARCEE-TRINITY-LICENSE-001",
-      "report": "evidence/arcee-trinity/EVD-ARCEE-TRINITY-LICENSE-001/report.json",
-      "metrics": "evidence/arcee-trinity/EVD-ARCEE-TRINITY-LICENSE-001/metrics.json",
-      "stamp": "evidence/arcee-trinity/EVD-ARCEE-TRINITY-LICENSE-001/stamp.json"
+      "evidence_id": "EVD-AUTOMATION-TURN-3-GOV-001",
+      "report": "subsumption/automation-turn-3/evidence/report.json",
+      "metrics": "subsumption/automation-turn-3/evidence/metrics.json",
+      "stamp": "subsumption/automation-turn-3/evidence/stamp.json"
     }
   ]
 }
