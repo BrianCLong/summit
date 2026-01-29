@@ -16,7 +16,13 @@ permissions:
   contents: read
 
 jobs:
+  pre-deploy-gate:
+    uses: ./.github/workflows/gate.yml
+    with:
+      region: us-east-1
+
   build-and-push:
+    needs: pre-deploy-gate
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -79,7 +85,7 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
   deploy-infra:
-    needs: build-and-push
+    needs: [build-and-push, pre-deploy-gate]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
