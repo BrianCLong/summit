@@ -79,14 +79,19 @@ def main():
         s = f['csv_severity']
 
         # Priority Mapping
-        if p == 'P0': f['priority'] = 'P0'
-        elif p == 'P1': f['priority'] = 'P1'
-        else: f['priority'] = 'P2'
+        if p == 'P0':
+            f['priority'] = 'P0'
+        elif p == 'P1':
+            f['priority'] = 'P1'
+        else:
+            f['priority'] = 'P2'
 
         # Severity Mapping
         if s == 'High':
-            if f['priority'] == 'P0': f['severity'] = 'S0'
-            else: f['severity'] = 'S1'
+            if f['priority'] == 'P0':
+                f['severity'] = 'S0'
+            else:
+                f['severity'] = 'S1'
         elif s == 'Medium':
             f['severity'] = 'S2'
         else:
