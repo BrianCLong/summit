@@ -1,16 +1,23 @@
-# Repo Assumptions — MCP Apps Subsumption Bundle
+# repo_assumptions.md
 
-## Verified (from prior project context)
-- Deterministic evidence artifacts are required: report.json, metrics.json, stamp.json separated.
-- CI has existing scripts/ci verifiers and governance enforcement.
+## Verified
 
-## Assumed (validate)
-- Node.js 20+ available in CI.
-- scripts/ci/*.mjs can run with `node`.
-- CI supports adding a new required check job.
-- Test runner exists (Jest). If not, we will use node-based fixture tests.
+- This subsumption bundle is generated without live repo inspection in this session.
 
-## Must-not-touch (blast radius)
-- No refactors across packages/.
-- No public API changes.
-- Only additive changes under subsumption/, scripts/ci/, docs/, evidence/.
+## Assumed (validate ASAP)
+
+- Node.js toolchain exists (pnpm/npm), scripts under `scripts/**`.
+- CI runs GitHub Actions; required checks exist but names are unknown.
+- Summit prefers deterministic evidence: separate report/metrics/stamp artifacts.
+
+## Must-not-touch (until validated)
+
+- Public API surfaces in `packages/**` (no breaking changes).
+- Existing GA gates / branch protection requirements.
+- Deployment configs / secrets / infra definitions.
+
+## Validation plan
+
+- Run `git ls-files` and confirm presence of `scripts/ci/**`, `docs/**`, `evidence/**`.
+- Enumerate required checks via GitHub branch protection UI/API.
+- Confirm test runner (jest/vitest) and lint tooling.

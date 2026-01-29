@@ -1,41 +1,70 @@
 {
   "version": 1,
-  "items": [
-    {
-      "evidence_id": "EVD-vfgnn-SPEC-001",
+  "items": {
+    "EVD-vfgnn-SPEC-001": {
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
     },
-    {
-      "evidence_id": "EVD-vfgnn-GOV-001",
+    "EVD-vfgnn-GOV-001": {
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
     },
-    {
-      "evidence_id": "EVD-vfgnn-ROB-001",
+    "EVD-vfgnn-ROB-001": {
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
     },
-    {
-      "evidence_id": "EVD-vfgnn-ATT-001",
+    "EVD-vfgnn-ATT-001": {
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
     },
-    {
-      "evidence_id": "EVD-vfgnn-NEG-001",
+    "EVD-vfgnn-NEG-001": {
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
     },
-    {
-      "evidence_id": "EVD-AIPERS-BASE-001",
-      "report": "evidence/runs/initial/report.json",
-      "metrics": "evidence/runs/initial/metrics.json",
-      "stamp": "evidence/runs/initial/stamp.json"
+    "EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001": {
+      "report": "evidence/EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001/report.json",
+      "metrics": "evidence/EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001/metrics.json",
+      "stamp": "evidence/EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001/stamp.json"
+    },
+    "EVD-GRAPH-HYBRID-GOV-001": {
+      "report": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-GOV-001/report.json",
+      "metrics": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-GOV-001/metrics.json",
+      "stamp": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-GOV-001/stamp.json"
+    },
+    "EVD-GRAPH-HYBRID-GOV-002": {
+      "report": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-GOV-002/report.json",
+      "metrics": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-GOV-002/metrics.json",
+      "stamp": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-GOV-002/stamp.json"
+    },
+    "EVD-GRAPH-HYBRID-SEC-001": {
+      "report": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-SEC-001/report.json",
+      "metrics": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-SEC-001/metrics.json",
+      "stamp": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-SEC-001/stamp.json"
+    },
+    "EVD-GRAPH-HYBRID-SEC-002": {
+      "report": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-SEC-002/report.json",
+      "metrics": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-SEC-002/metrics.json",
+      "stamp": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-SEC-002/stamp.json"
+    },
+    "EVD-GRAPH-HYBRID-PERF-001": {
+      "report": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-PERF-001/report.json",
+      "metrics": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-PERF-001/metrics.json",
+      "stamp": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-PERF-001/stamp.json"
+    },
+    "EVD-GRAPH-HYBRID-ARCH-001": {
+      "report": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-ARCH-001/report.json",
+      "metrics": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-ARCH-001/metrics.json",
+      "stamp": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-ARCH-001/stamp.json"
+    },
+    "EVD-GRAPH-HYBRID-PROD-001": {
+      "report": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-PROD-001/report.json",
+      "metrics": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-PROD-001/metrics.json",
+      "stamp": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-PROD-001/stamp.json"
     }
-  ]
+  }
 }

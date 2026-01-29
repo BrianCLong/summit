@@ -1,0 +1,4 @@
+{
+  "query": "unscoped lookup",
+  "maxHops": 1
+}
